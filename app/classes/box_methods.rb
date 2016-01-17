@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 module BoxMethods
-
   def is_location?
     true
   end
@@ -32,7 +31,9 @@ module BoxMethods
 
   # Return center latitude.
   def lat
-    (north + south) / 2.0 rescue nil
+    (north + south) / 2.0
+  rescue
+    nil
   end
 
   # Return center longitude.
@@ -74,8 +75,8 @@ module BoxMethods
       return false if long > east + delta_long
       return false if long < west - delta_long
     else
-      return false if long < west + delta_long and long > east - delta_long
+      return false if long < west + delta_long && long > east - delta_long
     end
-    return true
+    true
   end
 end

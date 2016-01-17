@@ -52,10 +52,10 @@ class CleanRssLogs < ActiveRecord::Migration
         time = Time.utc(*match.values_at(7, 1, 2, 3, 4, 5))
         case zone = match[6]
         when /-(\d\d)00/
-          time += $1.to_i.hours
-        when 'PDT'
+          time += Regexp.last_match(1).to_i.hours
+        when "PDT"
           time += 7.hours
-        when 'PST'
+        when "PST"
           time += 8.hours
         end
         last_time ||= time
@@ -66,9 +66,9 @@ class CleanRssLogs < ActiveRecord::Migration
         else
           # Only keep the old "new" format.
           if str.match(/^([\w\%]+)\((.*)\)$/)
-            tag = $1
+            tag = Regexp.last_match(1)
             args = {}
-            for keyval in $2.split(',')
+            for keyval in Regexp.last_match(2).split(",")
               if keyval.match(/=/)
                 k = $`
                 v = $'
@@ -94,7 +94,7 @@ class CleanRssLogs < ActiveRecord::Migration
         break
       end
     end
-    return [result.join("\n"), last_time]
+    [result.join("\n"), last_time]
   end
 
   # The new format only escapes whitespace and percent signs.
@@ -145,4 +145,3 @@ end
 #   key = :log_ancient
 #   args = { :string => str }
 # end
-

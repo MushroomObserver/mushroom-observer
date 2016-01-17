@@ -47,9 +47,7 @@
 #
 ################################################################################
 
-
 module ControllerExtensions
-
   ##############################################################################
   #
   #  :section: Request helpers
@@ -75,7 +73,7 @@ module ControllerExtensions
   end
 
   # Log a user in (affects session only).
-  def login(user="rolf", password="testpassword")
+  def login(user = "rolf", password = "testpassword")
     user = User.authenticate(user, password)
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
@@ -91,14 +89,14 @@ module ControllerExtensions
   end
 
   # Make the logged-in user admin and turn on admin mode.
-  def make_admin(user="rolf", password="testpassword")
+  def make_admin(user = "rolf", password = "testpassword")
     user = login(user, password)
     @request.session[:admin] = true
-    if !user.admin
+    unless user.admin
       user.admin = 1
       user.save
     end
-    return user
+    user
   end
 
   # Send a GET request, and save the result in a file for w3c validation.
@@ -109,7 +107,7 @@ module ControllerExtensions
   #   # Send request, and save response in ../html/action_0.html.
   #   get_with_dump(:action, params)
   #
-  def get_with_dump(page, params={})
+  def get_with_dump(page, params = {})
     get(page, params)
     html_dump(page, @response.body, params)
   end
@@ -122,7 +120,7 @@ module ControllerExtensions
   #   # Send request, and save response in ../html/action_0.html.
   #   post_with_dump(:action, params)
   #
-  def post_with_dump(page, params={})
+  def post_with_dump(page, params = {})
     post(page, params)
     html_dump(page, @response.body, params)
   end
@@ -209,8 +207,8 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params={},
-                             username="rolf", password="testpassword")
+  def either_requires_either(method, page, altpage, params = {},
+                             username = "rolf", password = "testpassword")
     assert_request(
       method: method,
       action: page,
@@ -235,16 +233,16 @@ module ControllerExtensions
   #   show_user_2.html
   #   etc.
   #
-  def html_dump(label, html, params)
-    html_dir = '../html'
-    if File.directory?(html_dir) and html[0..11] != '<html><body>'
+  def html_dump(label, html, _params)
+    html_dir = "../html"
+    if File.directory?(html_dir) && html[0..11] != "<html><body>"
       file_name = "#{html_dir}/#{label}.html"
       count = 0
-      while File.exists?(file_name)
+      while File.exist?(file_name)
         file_name = "#{html_dir}/#{label}_#{count}.html"
         count += 1
         if count > 100
-          raise(RangeError, "More than 100 files found " \
+          fail(RangeError, "More than 100 files found " \
                             "with a label of '#{label}'")
         end
       end
@@ -259,16 +257,16 @@ module ControllerExtensions
   # Add the hash of parameters to the dump file for diagnostics.
   def show_params(file, hash, prefix)
     if hash.is_a?(Hash)
-      hash.each {|k,v| show_params(file, v, "#{prefix}[#{k.to_s}]")}
+      hash.each { |k, v| show_params(file, v, "#{prefix}[#{k}]") }
     else
-      file.write("#{prefix} = [#{hash.to_s}]<br>\n")
+      file.write("#{prefix} = [#{hash}]<br>\n")
     end
   end
 
   # This writes @response.body to the given file
   # (relative to <tt>::Rails.root.to_s</tt>).
-  def save_response(file='public/test.html')
-    File.open("#{::Rails.root.to_s}/#{file}", 'w:utf-8') do |fh|
+  def save_response(file = "public/test.html")
+    File.open("#{::Rails.root}/#{file}", "w:utf-8") do |fh|
       fh.write(@response.body)
     end
   end
@@ -280,10 +278,10 @@ module ControllerExtensions
   ##############################################################################
 
   # Return URL for +link_to+ style Hash of parameters.
-  def url_for(args={})
+  def url_for(args = {})
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
-    args[:only_path] = true if !args.has_key?(:only_path)
+    args[:only_path] = true unless args.key?(:only_path)
     URI.unescape(@controller.url_for(args))
   end
 
@@ -292,18 +290,18 @@ module ControllerExtensions
   # just in case, here it is...
   def extract_error_from_body
     str = @response.body
-    str.gsub!(/<pre>.*?<.pre>/m) {|x| x.gsub(/\s*\n/, "<br>")}
-    str.sub!(/^.*?<p>/m, '')
-    str.sub!(/<.div>.*/m, '')
-    str.sub!(/<div.*<div.*?>/m, '')
-    str.sub!(/<p><code>RAILS.*?<.p>/, '')
-    str.gsub!(/<p><.p>/m, '')
-    str.gsub!(/\s+/m, ' ')
-    str.gsub!('<br>', "\n")
-    str.gsub!('</p>', "\n\n")
-    str.gsub!(': <pre>', "\n")
-    str.gsub!(/<.*?>/, '')
-    str.gsub!(/^ */, '')
+    str.gsub!(/<pre>.*?<.pre>/m) { |x| x.gsub(/\s*\n/, "<br>") }
+    str.sub!(/^.*?<p>/m, "")
+    str.sub!(/<.div>.*/m, "")
+    str.sub!(/<div.*<div.*?>/m, "")
+    str.sub!(/<p><code>RAILS.*?<.p>/, "")
+    str.gsub!(/<p><.p>/m, "")
+    str.gsub!(/\s+/m, " ")
+    str.gsub!("<br>", "\n")
+    str.gsub!("</p>", "\n\n")
+    str.gsub!(": <pre>", "\n")
+    str.gsub!(/<.*?>/, "")
+    str.gsub!(/^ */, "")
     str.gsub!(/\n\n+/, "\n\n")
     str.sub!(/\A\s*/, "\n")
     str.sub!(/\s*\Z/, "\n")
@@ -327,31 +325,32 @@ module ControllerExtensions
 
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
-  def assert_link_in_html(label, url_opts, msg=nil)
+  def assert_link_in_html(label, url_opts, _msg = nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts)
-    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, content: label)
+    assert_select("a[href='#{url}']", text: label)
   end
 
-  def assert_image_link_in_html(img_src, url_opts, msg=nil)
+  def assert_image_link_in_html(img_src, url_opts, _msg = nil)
     revised_opts = raise_params(url_opts)
-    url = url_for(revised_opts);
-    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, :child => {tag: "img",
-                                                                          attributes: {src: img_src}} )
+    url = url_for(revised_opts)
+    assert_select("a[href = '#{url}']>img") do
+      assert_select(":match('src', ?)", img_src)
+    end
   end
 
   # Assert that a form exists which posts to the given url.
-  def assert_form_action(url_opts, msg=nil)
+  def assert_form_action(url_opts, msg = nil)
     url_opts[:only_path] = true if url_opts[:only_path].nil?
     url = @controller.url_for(url_opts)
-    url.force_encoding('UTF-8') if url.respond_to?(:force_encoding)
+    url.force_encoding("UTF-8") if url.respond_to?(:force_encoding)
     url = URI.unescape(url)
     # Find each occurrance of <form action="blah" method="post">.
     found_it = false
     found = {}
     @response.body.split(/<form [^<>]*action/).each do |str|
       if str =~ /^="([^"]*)" [^>]*method="post"/
-        url2 = URI.unescape($1).gsub('&amp;', '&')
+        url2 = URI.unescape(Regexp.last_match(1)).gsub("&amp;", "&")
         if url == url2
           found_it = true
           break
@@ -362,7 +361,7 @@ module ControllerExtensions
     return pass if found_it
     if found.keys
       flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
-            "but only found these: <#{found.keys.sort.join('>, <')}>."))
+            "but only found these: <#{found.keys.sort.join(">, <")}>."))
     else
       flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
             "but found nothing at all."))
@@ -378,15 +377,15 @@ module ControllerExtensions
   #     str.strip_squeeze.downcase
   #   end
   #
-  def assert_response_equal_file(*files, &block)
+  def assert_response_equal_file(*_files, &_block)
     body = @response.body.clone # Rails 3
-  # in Rails 4, it appears that above strips the '\n's added to the body when
-  # the csv converter adds separate rows.
-  # I originally manually replaced the '\n's with the following lines.
-  # But this is a bad, e.g., it could cause problems if a different separator is
-  # used.  But I cannot figure out how to access the raw body.
-  #  body = @response.body_parts.join("\n").clone
-  #  assert_string_equal_file(body, *files, &block)
+    # in Rails 4, it appears that above strips the '\n's added to the body when
+    # the csv converter adds separate rows.
+    # I originally manually replaced the '\n's with the following lines.
+    # But this is a bad, e.g., it could cause problems if a different separator is
+    # used.  But I cannot figure out how to access the raw body.
+    #  body = @response.body_parts.join("\n").clone
+    #  assert_string_equal_file(body, *files, &block)
   end
 
   # Send a general request of any type.  Check login_required and check_user
@@ -420,12 +419,12 @@ module ControllerExtensions
   #   post_requires_login(:edit_name, id: 1)
   #
   def assert_request(args)
-    method       = args[:method]       || :get
-    action       = args[:action]       || raise("Missing action!")
-    params       = args[:params]       || {}
-    user         = args[:user]         || "rolf"
-    password     = args[:password]     || "testpassword"
-    alt_user     = args[:alt_user]     || (user == "mary" ? "rolf" : "mary")
+    method       = args[:method] || :get
+    action       = args[:action] || fail("Missing action!")
+    params       = args[:params] || {}
+    user         = args[:user] || "rolf"
+    password     = args[:password] || "testpassword"
+    alt_user     = args[:alt_user] || (user == "mary" ? "rolf" : "mary")
     alt_password = args[:alt_password] || "testpassword"
 
     logout
@@ -478,7 +477,7 @@ module ControllerExtensions
   #   # Lastly, expect redirect to full explicit URL.
   #   assert_response("http://bogus.com")
   #
-  def assert_response(arg, msg="")
+  def assert_response(arg, msg = "")
     if arg
       if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
         super
@@ -491,7 +490,7 @@ module ControllerExtensions
         elsif @response.missing?
           got = ", got #{code} missing (?)"
         elsif @response.redirect?
-          url = @response.redirect_url.sub(/^http:..test.host/, '')
+          url = @response.redirect_url.sub(/^http:..test.host/, "")
           got = ", got #{code} redirect to <#{url}>."
         else
           got = ", got #{code} body is <#{extract_error_from_body}>."
@@ -544,7 +543,7 @@ module ControllerExtensions
           msg += "Expected redirect to <account/welcome>" + got
           assert_redirected_to({ controller: "account", action: "login" }, msg)
         else
-          raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
+          fail "Invalid response type expected: [#{arg.class}: #{arg}]\n"
         end
       end
     end
@@ -568,7 +567,7 @@ module ControllerExtensions
     end
   end
 
-  def assert_redirect_match(partial, response, controller, msg)
+  def assert_redirect_match(partial, response, controller, _msg)
     mismatches = find_mismatches(partial, response.redirect_url)
     if mismatches[:controller].to_s == controller.controller_name.to_s
       mismatches.delete(:controller)
@@ -583,12 +582,8 @@ module ControllerExtensions
     mismatches = {}
     partial.each do |k, v|
       f = full[k] || full[k.to_s]
-      if f.nil? and k.respond_to?(:to_sym)
-        f = full[k.to_sym]
-      end
-      if f.to_s != v.to_s
-        mismatches[k] = v
-      end
+      f = full[k.to_sym] if f.nil? && k.respond_to?(:to_sym)
+      mismatches[k] = v if f.to_s != v.to_s
     end
     mismatches
   end
@@ -601,7 +596,7 @@ module ControllerExtensions
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
         match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
-        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
+        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
         if actual_val != expect_val.to_s
           message = "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
@@ -663,7 +658,7 @@ module ControllerExtensions
     when :no_field
       assert_select("input##{id}", 0)
     else
-      raise "Invalid state in check_project_checks: #{state.inspect}"
+      fail "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
 end

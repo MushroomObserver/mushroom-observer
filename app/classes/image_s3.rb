@@ -2,7 +2,6 @@
 require "aws-sdk"
 
 class ImageS3
-
   # Initialize connection:
   #
   #   s3 = ImageS3.new(
@@ -37,6 +36,7 @@ class ImageS3
     def initialize(pager)
       @pager = pager
     end
+
     def each(&block)
       @pager.each do |response|
         response.contents.each(&block)
@@ -53,13 +53,13 @@ class ImageS3
   #    content_md5: md5sum(file)
   #  )
   #
-  def upload(key, file, opts={})
+  def upload(key, file, opts = {})
     io = File.open(file, "r") unless file.is_a?(IO)
     client.put_object(opts.merge(
-      bucket: @bucket,
-      key: key,
-      acl: "public-read",
-      body: io
+                        bucket: @bucket,
+                        key: key,
+                        acl: "public-read",
+                        body: io
     )).data
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
@@ -101,7 +101,7 @@ class ImageS3
     raise "Unable to delete image #{key} from S3 bucket #{@bucket} at #{@server}: #{e}"
   end
 
-private
+  private
 
   def client
     @s3 ||= Aws::S3::Client.new(

@@ -32,15 +32,10 @@ MushroomObserver::Application.configure do
     cdmr: {
       test: :transferred_flag,
       read: "http://images.mushroomobserver.org"
-    },
-    cdmr_s3: {
-      test: :transferred_flag,
-      read: "http://mo-images.digitalmycology.com"
     }
   }
   config.image_precedence = {
-    default:   [:local, :cdmr],
-    full_size: [:local, :cdmr_s3]
+    default: [:local, :cdmr]
   }
   config.image_fallback_source = :cdmr
 
@@ -77,7 +72,7 @@ MushroomObserver::Application.configure do
   config.active_record.migration_error = :page_load
 
   # Serve assets in rails.
-  config.serve_static_assets = true
+  config.serve_static_files = true
 
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
@@ -90,8 +85,33 @@ MushroomObserver::Application.configure do
 
   config.assets.digest = false
 
+  config.assets.precompile += %w(
+
+    api_key.js
+    edit_location.js
+    image_slider.js
+    multi_image_upload.js
+    name_lister.js
+    pivotal.js
+    rss_feed_select_helper.js
+    single_image_uploader.js
+    translations.js
+    vote_popup.js
+
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
+
+  ) if config.assets && config.assets.precompile
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Enable web console for MushroomObserver VM
+  config.web_console.whitelisted_ips = "10.0.2.2"
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

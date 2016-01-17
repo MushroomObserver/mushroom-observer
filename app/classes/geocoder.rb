@@ -6,11 +6,10 @@
 #
 ################################################################################
 
-require 'net/http'
-require 'rexml/document'
+require "net/http"
+require "rexml/document"
 
 class Geocoder < BlankSlate
-
   attr_reader :north
   attr_reader :south
   attr_reader :east
@@ -28,18 +27,18 @@ class Geocoder < BlankSlate
 
   def set_rectangle_from_content(content)
     xml = REXML::Document.new(content)
-    xml.elements.each('GeocodeResponse/result/geometry') do |geom|
-      rect = geom.elements['bounds'] || geom.elements['viewport']
+    xml.elements.each("GeocodeResponse/result/geometry") do |geom|
+      rect = geom.elements["bounds"] || geom.elements["viewport"]
       if rect
-        sw = rect.elements['southwest']
-        ne = rect.elements['northeast']
-        set_extents(ne.elements['lat'].text, sw.elements['lat'].text, ne.elements['lng'].text, sw.elements['lng'].text)
+        sw = rect.elements["southwest"]
+        ne = rect.elements["northeast"]
+        set_extents(ne.elements["lat"].text, sw.elements["lat"].text, ne.elements["lng"].text, sw.elements["lng"].text)
         @valid = true
       else
-        loc = geom.elements['location']
+        loc = geom.elements["location"]
         if loc
-          lat = loc.elements['lat'].text
-          lng = loc.elements['lng'].text
+          lat = loc.elements["lat"].text
+          lng = loc.elements["lng"].text
           set_extents(lat, lat, lng, lng)
           @valid = true
         end
@@ -59,16 +58,16 @@ class Geocoder < BlankSlate
   end
 
   def request_url(place_name)
-    str = u(place_name.gsub('Co.', 'County'))
+    str = u(place_name.gsub("Co.", "County"))
     "/maps/api/geocode/xml?address=#{str}&sensor=false"
   end
 
   def content_from_place_name(place_name)
-    if ::Rails.env == 'test'
+    if ::Rails.env == "test"
       content = test_place_name(place_name)
     else
       content = nil
-      Net::HTTP.start('maps.google.com') do |http|
+      Net::HTTP.start("maps.google.com") do |http|
         response = http.get(request_url(place_name))
         content = response.body
       end
@@ -87,23 +86,23 @@ class Geocoder < BlankSlate
 
   unless defined? TEST_EXPECTED_LOCATIONS
     TEST_EXPECTED_LOCATIONS = {
-      'North Falmouth, Massachusetts, USA' => {
-          south: 41.6169329,
-          west: -70.6603389,
-          north: 41.6592100,
-          east: -70.6022670
+      "North Falmouth, Massachusetts, USA" => {
+        south: 41.6169329,
+        west: -70.6603389,
+        north: 41.6592100,
+        east: -70.6022670
       },
-      'North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA' => {
-          north: 39.3043,
-          west: -82.1067,
-          east: -82.002,
-          south: 39.0299
+      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA" => {
+        north: 39.3043,
+        west: -82.1067,
+        east: -82.002,
+        south: 39.0299
       },
-      'Pasadena, California, USA' => {
-          north: 34.251905,
-          west: -118.198139,
-          east: -118.065479,
-          south: 34.1192
+      "Pasadena, California, USA" => {
+        north: 34.251905,
+        west: -118.198139,
+        east: -118.065479,
+        south: 34.1192
       }
     }
   end
@@ -134,5 +133,4 @@ class Geocoder < BlankSlate
        </result>
       </GeocodeResponse>"
   end
-
 end

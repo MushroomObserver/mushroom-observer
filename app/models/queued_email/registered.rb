@@ -2,17 +2,19 @@
 
 # Conference Event Registration Email
 class QueuedEmail::Registered < QueuedEmail
-  def registration; get_object(:registration, ::ConferenceRegistration); end
+  def registration
+    get_object(:registration, ::ConferenceRegistration)
+  end
 
   def self.create_email(receiver, registration)
     result = create(nil, receiver)
-    raise "Missing regisration!" if !registration
+    fail "Missing regisration!" unless registration
     result.add_integer(:registration, registration.id)
     result.finish
-    return result
+    result
   end
-  
+
   def deliver_email
-    RegistrationEmail.build(to_user, registration).deliver
+    RegistrationEmail.build(to_user, registration).deliver_now
   end
 end

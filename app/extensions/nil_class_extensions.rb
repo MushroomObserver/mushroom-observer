@@ -10,6 +10,11 @@
 ################################################################################
 
 class NilClass
-  def any?(*args); return false; end
-  def empty?;      return true;  end
+  def any?(*_args)
+    false
+  end
+
+  def empty?
+    true
+  end
 end

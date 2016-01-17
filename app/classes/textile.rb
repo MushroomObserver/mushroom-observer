@@ -23,8 +23,8 @@
 #
 ################################################################################
 
-require 'cgi'
-require 'redcloth'
+require "cgi"
+require "redcloth"
 
 class Textile < String
   @@name_lookup     = {}
@@ -32,23 +32,21 @@ class Textile < String
   @@last_subspecies = nil
   @@last_variety    = nil
 
-  if !defined?(URI_TRUNCATION_LENGTH)
-    URL_TRUNCATION_LENGTH = 60
-  end
+  URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
 
   # Convenience wrapper on the instance method Textile#textilize_without_paragraph.
-  def self.textilize_without_paragraph(str, do_object_links=false, sanitize=true)
+  def self.textilize_without_paragraph(str, do_object_links = false, sanitize = true)
     new(str).textilize_without_paragraph(do_object_links, sanitize)
   end
 
   # Convenience wrapper on the instance method Textile#textilize.
-  def self.textilize(str, do_object_links=false, sanitize=true)
+  def self.textilize(str, do_object_links = false, sanitize = true)
     new(str).textilize(do_object_links, sanitize)
   end
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
-  def textilize_without_paragraph(do_object_links=false, sanitize=true)
+  def textilize_without_paragraph(do_object_links = false, sanitize = true)
     textilize(do_object_links, sanitize).sub(/\A<p[^>]*>(.*?)<\/p>.*/m, '\\1')
   end
 
@@ -71,8 +69,7 @@ class Textile < String
   # tl::   Do 't' and check for links.
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
-  def textilize(do_object_links=false, sanitize=true)
-
+  def textilize(do_object_links = false, sanitize = true)
     # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
     # (The "x"s prevent Textile from interpreting the curlies as style info.)
     if do_object_links
@@ -101,20 +98,20 @@ class Textile < String
     # Now turn bare urls into links.
     gsub!(/([a-z]+:\/\/([^\s<>]|<span class="caps">[A-Z]+<\/span>)+)/) do |url|
       url1  = url.gsub(/<span class="caps">([A-Z]+)<\/span>/, '\\1')
-      extra = url1.sub!(/([^\w\/]+$)/, '') ? $1 : ''
-      url2  = ''
-      if url1.length > URL_TRUNCATION_LENGTH and not url1.starts_with?(MO.http_domain)
+      extra = url1.sub!(/([^\w\/]+$)/, "") ? Regexp.last_match(1) : ""
+      url2  = ""
+      if url1.length > URL_TRUNCATION_LENGTH && !url1.starts_with?(MO.http_domain)
         if url1.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
-          url2 = $1 + '/...'
+          url2 = Regexp.last_match(1) + "/..."
         else
-          url2 = url1[0..URL_TRUNCATION_LENGTH] + '...'
+          url2 = url1[0..URL_TRUNCATION_LENGTH] + "..."
         end
       else
         url2 = url1
       end
       # Leave as much untouched as possible, but some characters will cause the HTML
       # to be badly formed, so we need to at least protect those.
-      url1.gsub!(/([<>"\\]+)/) { CGI.escape($1) }
+      url1.gsub!(/([<>"\\]+)/) { CGI.escape(Regexp.last_match(1)) }
       "<a href=\"#{url1}\">#{url2}</a>" + extra
     end
 
@@ -122,8 +119,10 @@ class Textile < String
     if do_object_links
       gsub!(/
         x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
-      /x) do |orig|
-        type, label, id = $1, $2, $3
+      /x) do |_orig|
+        type = Regexp.last_match(1)
+        label = Regexp.last_match(2)
+        id = Regexp.last_match(3)
         id.gsub!(/&#822[01];/, '"')
         id = CGI.unescapeHTML(id)
         id = CGI.escape(id)
@@ -137,10 +136,10 @@ class Textile < String
 
     # Put pre-existing links back in (removing the _object_ tag wrappers).
     gsub!(/<XXX(\d+)>/) do
-      hrefs[$1.to_i].to_s.gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
+      hrefs[Regexp.last_match(1).to_i].to_s.gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
     end
 
-    return self
+    self
   end
 
   # Register one or more names (instances) so that subsequent textile strings
@@ -155,29 +154,38 @@ class Textile < String
 
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
-    if name.match(/([A-Z])/)
-      @@name_lookup[$1] = name.split.first
-    end
+    @@name_lookup[Regexp.last_match(1)] = name.split.first if name.match(/([A-Z])/)
     if rank == :Species
       @@last_species    = name
       @@last_subspecies = nil
       @@last_variety    = nil
     elsif rank == :Subspecies
-      @@last_species    = name.sub(/ ssp\. .*/, '')
+      @@last_species    = name.sub(/ ssp\. .*/, "")
       @@last_subspecies = name
       @@last_variety    = nil
     elsif rank == :Variety
-      @@last_species    = name.sub(/ (ssp|var)\. .*/, '')
-      @@last_subspecies = name.sub(/ var\. .*/, '')
+      @@last_species    = name.sub(/ (ssp|var)\. .*/, "")
+      @@last_subspecies = name.sub(/ var\. .*/, "")
       @@last_variety    = name
     end
   end
 
   # Give unit test access to these internals.
-  def self.name_lookup;     @@name_lookup;     end
-  def self.last_species;    @@last_species;    end
-  def self.last_subspecies; @@last_subspecies; end
-  def self.last_variety;    @@last_variety;    end
+  def self.name_lookup
+    @@name_lookup
+  end
+
+  def self.last_species
+    @@last_species
+  end
+
+  def self.last_subspecies
+    @@last_subspecies
+  end
+
+  def self.last_variety
+    @@last_variety
+  end
 
   # Report the current size of the name lookup cache.
   def self.textile_name_size
@@ -193,9 +201,9 @@ class Textile < String
     @@last_variety    = nil
   end
 
-##############################################################################
+  ##############################################################################
 
-private
+  private
 
   NAME_LINK_PATTERN = / (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) ) /x
   OTHER_LINK_PATTERN = / (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w) /x
@@ -208,17 +216,17 @@ private
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     self.gsub!(NAME_LINK_PATTERN) do |orig_str|
-      prefix = $1
-      label = remove_formatting($2)
+      prefix = Regexp.last_match(1)
+      label = remove_formatting(Regexp.last_match(2))
       name = expand_genus_abbreviation(label)
       name = supply_implicit_species(name)
       name = strip_out_sp_cfr_and_sensu(name)
       if (parse = Name.parse_name(name)) &&
-        # Allowing arbitrary authors on Genera and higher makes it impossible to
-        # distinguish between publication titles and taxa, e.g., "Lichen Flora
-        # of the Greater Sonoran Region".  I'm sure it can still break with species
-        # but it should be very infrequent (I don't see it in current tests). -JPH
-        (parse.author.blank? || parse.rank != :Genus)
+         # Allowing arbitrary authors on Genera and higher makes it impossible to
+         # distinguish between publication titles and taxa, e.g., "Lichen Flora
+         # of the Greater Sonoran Region".  I'm sure it can still break with species
+         # but it should be very infrequent (I don't see it in current tests). -JPH
+         (parse.author.blank? || parse.rank != :Genus)
         Textile.private_register_name(parse.real_text_name, parse.rank)
         prefix + "x{NAME __#{label}__ }{ #{name} }x"
       else
@@ -229,14 +237,14 @@ private
 
   # Remove any formatting. This will be the "label" of the link.
   def remove_formatting(str)
-    Name.clean_incoming_string(str.gsub(/[_*]/, ''))
+    Name.clean_incoming_string(str.gsub(/[_*]/, ""))
   end
 
   # Expand abbreviated genus (but only if followed by species epithet!).
   # This will be sent to lookup_name.
   def expand_genus_abbreviation(str)
     str.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-      (n = @@name_lookup[$1]) ? n + ' ' : x
+      (n = @@name_lookup[Regexp.last_match(1)]) ? n + " " : x
     end
   end
 
@@ -244,15 +252,15 @@ private
   #   _var alba_  -->  Amanita muscaria var. alba
   # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
   def supply_implicit_species(str)
-    if str.sub!(/^(subsp|ssp)\.? +/, '')
-      @@last_species    ? @@last_species  + ' subsp. ' + str : ''
-    elsif str.sub!(/^(var|v)\.? +/, '')
-      @@last_subspecies ? @@last_subspecies + ' var. ' + str :
-      @@last_species    ? @@last_species    + ' var. ' + str : ''
-    elsif str.sub!(/^(forma?|f)\.? +/, '')
-      @@last_variety    ? @@last_variety    + ' f. ' + str :
-      @@last_subspecies ? @@last_subspecies + ' f. ' + str :
-      @@last_species    ? @@last_species    + ' f. ' + str : ''
+    if str.sub!(/^(subsp|ssp)\.? +/, "")
+      @@last_species ? @@last_species + " subsp. " + str : ""
+    elsif str.sub!(/^(var|v)\.? +/, "")
+      @@last_subspecies ? @@last_subspecies + " var. " + str :
+      @@last_species ? @@last_species + " var. " + str : ""
+    elsif str.sub!(/^(forma?|f)\.? +/, "")
+      @@last_variety ? @@last_variety + " f. " + str :
+      @@last_subspecies ? @@last_subspecies + " f. " + str :
+      @@last_species ? @@last_species + " f. " + str : ""
     else
       str
     end
@@ -263,26 +271,28 @@ private
   #   _Laccaria cf. laccata_     -->  Laccaria laccata
   #   _Parmelia s. lat/str._     -->  Parmelia
   def strip_out_sp_cfr_and_sensu(str)
-    str.sub(/ cfr?\.? /, ' ').
-        sub(/ ((s|sensu)\.? ?(l|lato|s|str|stricto)\.?)$/, '').
-        sub(/ sp\.$/, '')
+    str.sub(/ cfr?\.? /, " ").
+      sub(/ ((s|sensu)\.? ?(l|lato|s|str|stricto)\.?)$/, "").
+      sub(/ sp\.$/, "")
   end
 
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
     self.gsub!(OTHER_LINK_PATTERN) do |orig|
       result = orig
-      prefix, type, id = $1, $2, $3
+      prefix = Regexp.last_match(1)
+      type = Regexp.last_match(2)
+      id = Regexp.last_match(3)
       matches = [
-        ['comment'],
-        ['image', 'img'],
-        ['location', 'loc'],
-        ['name'],
-        ['observation', 'obs', 'ob'],
-        ['project', 'proj'],
-        ['species_list', 'spl'],
-        ['user']
-      ].select {|x| x[0] == type.downcase || x[1] == type.downcase}
+        ["comment"],
+        %w(image img),
+        %w(location loc),
+        ["name"],
+        %w(observation obs ob),
+        %w(project proj),
+        %w(species_list spl),
+        ["user"]
+      ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
       if matches.length == 1
         if id.match(/^\d+$/)
           label = "#{type} #{id}"

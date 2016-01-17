@@ -81,59 +81,48 @@ class String
       "\xE2\x80\xA1" => "++",   # ‡
       "\xCB\x86"     => "^",    # ˆ
       "\xE2\x80\xB0" => "%",    # ‰
-      "\xC5\xA0"     => "S",    # Š
       "\xE2\x80\xB9" => "<",    # ‹
-      "\xC5\x92"     => "OE",   # Œ
-      "\xEF\xBF\xBD" => "?",    # �
-      "\xC5\xBD"     => "Z",    # Ž
-      "\xEF\xBF\xBD" => "?",    # �
-      "\xEF\xBF\xBD" => "?",    # �
       "\xE2\x80\x98" => "'",    # ‘
       "\xE2\x80\x99" => "'",    # ’
       "\xE2\x80\x9C" => '"',    # “
       "\xE2\x80\x9D" => '"',    # ”
-      "\xE2\x80\xA2" => '.',    # •
-      "\xE2\x80\x93" => '-',    # –
-      "\xE2\x80\x94" => '-',    # —
-      "\xCB\x9C"     => '~',    # ˜
-      "\xE2\x84\xA2" => '(TM)', # ™
-      "\xC5\xA1"     => "S",    # š
-      "\xE2\x80\xBA" => '>',    # ›
-      "\xC5\x93"     => "oe",   # œ
-      "\xEF\xBF\xBD" => '?',    # �
-      "\xC5\xBE"     => "Z",    # ž
-      "\xC5\xB8"     => "Y",    # Ÿ
-      "\xC2\xA1"     => '!',    # ¡
-      "\xC2\xA2"     => '$',    # ¢
-      "\xC2\xA3"     => '$',    # £
-      "\xC2\xA4"     => '$',    # ¤
-      "\xC2\xA5"     => '$',    # ¥
-      "\xC2\xA6"     => '|',    # ¦
-      "\xC2\xA7"     => '?',    # §
-      "\xC2\xA8"     => '?',    # ¨
-      "\xC2\xA9"     => '(C)',  # ©
+      "\xE2\x80\xA2" => ".",    # •
+      "\xE2\x80\x93" => "-",    # –
+      "\xE2\x80\x94" => "-",    # —
+      "\xCB\x9C"     => "~",    # ˜
+      "\xE2\x84\xA2" => "(TM)", # ™
+      "\xE2\x80\xBA" => ">",    # ›
+      "\xC2\xA1"     => "!",    # ¡
+      "\xC2\xA2"     => "$",    # ¢
+      "\xC2\xA3"     => "$",    # £
+      "\xC2\xA4"     => "$",    # ¤
+      "\xC2\xA5"     => "$",    # ¥
+      "\xC2\xA6"     => "|",    # ¦
+      "\xC2\xA7"     => "?",    # §
+      "\xC2\xA8"     => "?",    # ¨
+      "\xC2\xA9"     => "(C)",  # ©
       "\xC2\xAA"     => "a",    # ª
-      "\xC2\xAB"     => '<<',   # «
-      "\xC2\xAC"     => '-',    # ¬
-      "\xC2\xAD"     => '-',    # ­
-      "\xC2\xAE"     => '(R)',  # ®
-      "\xC2\xAF"     => '-',    # ¯
-      "\xC2\xB0"     => '(o)',  # °
-      "\xC2\xB1"     => '+/-',  # ±
-      "\xC2\xB2"     => '(2)',  # ²
-      "\xC2\xB3"     => '(3)',  # ³
+      "\xC2\xAB"     => "<<",   # «
+      "\xC2\xAC"     => "-",    # ¬
+      "\xC2\xAD"     => "-",    # ­
+      "\xC2\xAE"     => "(R)",  # ®
+      "\xC2\xAF"     => "-",    # ¯
+      "\xC2\xB0"     => "(o)",  # °
+      "\xC2\xB1"     => "+/-",  # ±
+      "\xC2\xB2"     => "(2)",  # ²
+      "\xC2\xB3"     => "(3)",  # ³
       "\xC2\xB4"     => "'",    # ´
       "\xC2\xB5"     => "u",    # µ
-      "\xC2\xB6"     => '?',    # ¶
-      "\xC2\xB7"     => '.',    # ·
-      "\xC2\xB8"     => '.',    # ¸
-      "\xC2\xB9"     => '(1)',  # ¹
-      "\xC2\xBA"     => '(0)',  # º
-      "\xC2\xBB"     => '>>',   # »
-      "\xC2\xBC"     => '1/4',  # ¼
-      "\xC2\xBD"     => '1/2',  # ½
-      "\xC2\xBE"     => '3/4',  # ¾
-      "\xC2\xBF"     => '?',    # ¿
+      "\xC2\xB6"     => "?",    # ¶
+      "\xC2\xB7"     => ".",    # ·
+      "\xC2\xB8"     => ".",    # ¸
+      "\xC2\xB9"     => "(1)",  # ¹
+      "\xC2\xBA"     => "(0)",  # º
+      "\xC2\xBB"     => ">>",   # »
+      "\xC2\xBC"     => "1/4",  # ¼
+      "\xC2\xBD"     => "1/2",  # ½
+      "\xC2\xBE"     => "3/4",  # ¾
+      "\xC2\xBF"     => "?",    # ¿
       "\xC3\x80"     => "A",    # À
       "\xC3\x81"     => "A",    # Á
       "\xC3\x82"     => "A",    # Â
@@ -157,7 +146,7 @@ class String
       "\xC3\x94"     => "O",    # Ô
       "\xC3\x95"     => "O",    # Õ
       "\xC3\x96"     => "O",    # Ö
-      "\xC3\x97"     => ' x ',  # ×
+      "\xC3\x97"     => " x ",  # ×
       "\xC3\x98"     => "O",    # Ø
       "\xC3\x99"     => "U",    # Ù
       "\xC3\x9A"     => "U",    # Ú
@@ -189,7 +178,7 @@ class String
       "\xC3\xB4"     => "o",    # ô
       "\xC3\xB5"     => "o",    # õ
       "\xC3\xB6"     => "o",    # ö
-      "\xC3\xB7"     => '/',    # ÷
+      "\xC3\xB7"     => "/",    # ÷
       "\xC3\xB8"     => "o",    # ø
       "\xC3\xB9"     => "u",    # ù
       "\xC3\xBA"     => "u",    # ú
@@ -368,7 +357,7 @@ class String
       "#8217" => "'",
       "#8220" => '"',
       "#8221" => '"',
-      "#8230" => '...',
+      "#8230" => "...",
       "#8242" => "'",
       "#8243" => '"',
       "#8482" => "(tm)",
@@ -382,23 +371,23 @@ class String
   # an HTML tag.
   HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
 
-  def t(sanitize=true)
+  def t(sanitize = true)
     Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
 
-  def tl(sanitize=true)
+  def tl(sanitize = true)
     Textile.textilize_without_paragraph(self, true, sanitize).html_safe
   end
 
   # TODO: Move somewhere that content_tag is defined
-  def tp(sanitize  =true)
-    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + '</div>'.html_safe
+  def tp(sanitize = true)
+    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + "</div>".html_safe
   end
 
-  def tpl(sanitize  =true)
+  def tpl(sanitize = true)
     '<div class="textile">'.html_safe +
       Textile.textilize(self, true, sanitize).html_safe +
-      '</div>'.html_safe
+      "</div>".html_safe
   end
 
   def tp_nodiv(sanitize = true)
@@ -419,7 +408,7 @@ class String
   # Convert string (assumed to be in UTF-8) to any other charset.  All invalid
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
-    encode(charset, :fallback => lambda do |c|
+    encode(charset, fallback: lambda do |c|
       UTF8_TO_ASCII[c] || "?"
     end)
   end
@@ -428,7 +417,7 @@ class String
   # TODO: Use the rails method "j" for this
   def escape_js_string
     gsub(/(["\\])/, '\\\1').
-    gsub(/\n/, '\\n')
+      gsub(/\n/, '\\n')
   end
 
   # Remove HTML tags (not entities) from string.  Used to make sure title is
@@ -457,7 +446,7 @@ class String
       # Opening tag.
       elsif str.sub!(/^<(\w+)[^<>]*>/, "")
         result += $&
-        opens << $1
+        opens << Regexp.last_match(1)
       # Closing tag -- just assume tags are nested properly.
       elsif str.sub!(/^< *\/ *(\w+)[^<>]*>/, "")
         result += $&
@@ -466,7 +455,7 @@ class String
       elsif str.sub!(/^[^<>]+/, "")
         part = $&
         if part.length > max
-          result += part[0,max-1].to_s + '...'
+          result += part[0, max - 1].to_s + "..."
           break
         elsif part
           max -= part.length
@@ -477,7 +466,7 @@ class String
         break
       end
     end
-    result += opens.reverse.map {|x| "<\/#{x}>"}.join("")
+    result += opens.reverse.map { |x| "<\/#{x}>" }.join("")
     result.html_safe
   end
 
@@ -486,19 +475,19 @@ class String
   # problem, but this seems to work pretty well on the output of RedCloth at
   # least.
   def html_to_ascii
-    self.gsub(/\s*\n\s*/, ' ').         # remove all newlines first
-         gsub(/<\/?div[^>]*>/, "").     # divs are messing things up, too
-         gsub(/<br *\/> */, "\n").      # put \n after every line break
-         gsub(/<\/li> */, "\n").        # put \n after every list item
-         gsub(/<\/tr> */, "\n").        # put \n after every table row
-         gsub(/<\/(p|h\d)> */, "\n\n"). # put two \n between paragraphs
-         gsub(/<\/td> */, "\t").        # put tabs between table columns
-         gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
-         gsub(/\n+\Z/, "").             # remove superfluous newlines at end
-         gsub(HTML_TAG_PATTERN, "").    # remove all <tags>
-         gsub(/^ +|[ \t]+$/, "").       # remove leading/trailing space on each line
-         gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }.
-         html_safe                      # convert &xxx; and &#nnn; to ascii
+    gsub(/\s*\n\s*/, " "). # remove all newlines first
+      gsub(/<\/?div[^>]*>/, "").     # divs are messing things up, too
+      gsub(/<br *\/> */, "\n").      # put \n after every line break
+      gsub(/<\/li> */, "\n").        # put \n after every list item
+      gsub(/<\/tr> */, "\n").        # put \n after every table row
+      gsub(/<\/(p|h\d)> */, "\n\n"). # put two \n between paragraphs
+      gsub(/<\/td> */, "\t").        # put tabs between table columns
+      gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
+      gsub(/\n+\Z/, "").             # remove superfluous newlines at end
+      gsub(HTML_TAG_PATTERN, "").    # remove all <tags>
+      gsub(/^ +|[ \t]+$/, "").       # remove leading/trailing space on each line
+      gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
+      html_safe                      # convert &xxx; and &#nnn; to ascii
   end
 
   def print_thing(thing)
@@ -508,7 +497,7 @@ class String
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
-    '<span style="white-space:nowrap">'.html_safe + self + '</span>'.html_safe
+    '<span style="white-space:nowrap">'.html_safe + self + "</span>".html_safe
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
@@ -550,7 +539,7 @@ class String
   #   char = "jabberwocky".rand_char
   #
   def rand_char
-    self[Kernel.rand(length),1]
+    self[Kernel.rand(length), 1]
   end
 
   # Reverse Fixnum#alphabetize.
@@ -567,7 +556,7 @@ class String
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  def dealphabetize(alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+  def dealphabetize(alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
     str      = to_s
     alphabet = alphabet.to_s
     len      = alphabet.length
@@ -614,32 +603,33 @@ class String
 
   # Returns number of character edits required to transform +self+ into +other+.
   # http://en.wikipedia.org/wiki/Levenshtein_distance
-  def levenshtein_distance_to(other, add=1, del=1, chg=1)
-    s, t = self, other.to_s
+  def levenshtein_distance_to(other, add = 1, del = 1, chg = 1)
+    s = self
+    t = other.to_s
     m = s.length + 1
     n = t.length + 1
-    return del * (m-1) if n == 1
-    return add * (n-1) if m == 1
+    return del * (m - 1) if n == 1
+    return add * (n - 1) if m == 1
     d = []
-    for i in 0..m-1
+    for i in 0..m - 1
       d[i] = [del * i]
     end
-    for j in 0..n-1
+    for j in 0..n - 1
       d[0][j] = add * j
     end
-    for j in 1..n-1
-      for i in 1..m-1
-        if s[i-1] == t[j-1]
-          d[i][j] = d[i-1][j-1]
+    for j in 1..n - 1
+      for i in 1..m - 1
+        if s[i - 1] == t[j - 1]
+          d[i][j] = d[i - 1][j - 1]
         else
-          x = d[i-1][j-0] + del
-          y = d[i-0][j-1] + add
-          z = d[i-1][j-1] + chg
+          x = d[i - 1][j - 0] + del
+          y = d[i - 0][j - 1] + add
+          z = d[i - 1][j - 1] + chg
           d[i][j] = x < y ? (x < z ? x : z) : (y < z ? y : z)
         end
       end
     end
-    return d[m-1][n-1]
+    d[m - 1][n - 1]
   end
 
   # Returns percentage match between +self+ and +other+, where 1.0 means the two

@@ -28,7 +28,7 @@
 
     <p><label for="image_<%= index %>_when_1i"><%= :form_images_when_taken.t %>:</label>
 
-    <%= date_select(:image, :when, {index: index, start_year: 1980, end_year: Time.now.year,
+    <%= date_select(:image, :when, {index: index, start_year: long_ago.year, end_year: Time.now.year,
                                     order: [:day, :month, :year]},
                     {onchange: "changed_date(#{index})"}) %></p>
 

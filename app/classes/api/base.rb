@@ -27,7 +27,7 @@ class API
     api.process_request
     return api
   rescue API::Error => e
-    api ||= self.new(params)
+    api ||= new(params)
     api.errors << e
     e.fatal = true
     return api
@@ -43,10 +43,10 @@ class API
   end
 
   # :stopdoc:
-  def initialize(params={})
+  def initialize(params = {})
     self.params = params
     self.errors = []
-    initializers.each {|x| instance_exec(&x)}
+    initializers.each { |x| instance_exec(&x) }
   end
 
   def handle_version
@@ -54,7 +54,7 @@ class API
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
-      raise BadVersion.new(version)
+      fail BadVersion.new(version)
     else
       self.version = version.to_f
     end
@@ -63,14 +63,14 @@ class API
   def authenticate_user
     key_str = parse_string(:api_key)
     key = ApiKey.find_by_key(key_str)
-    if not key_str
+    if !key_str
       User.current = self.user = nil
-    elsif not key
-      raise BadApiKey.new(key_str)
-    elsif not key.verified
-      raise ApiKeyNotVerified.new(key)
-    elsif not key.user.verified
-      raise UserNotVerified.new(key.user)
+    elsif !key
+      fail BadApiKey.new(key_str)
+    elsif !key.verified
+      fail ApiKeyNotVerified.new(key)
+    elsif !key.user.verified
+      fail UserNotVerified.new(key.user)
     else
       User.current = self.user = key.user
       key.touch!
@@ -81,21 +81,21 @@ class API
   def process_request
     tmp_method = parse_string(:method)
     self.method = tmp_method.downcase.to_sym
-    print "The API method, #{tmp_method}, is better behaved now" if tmp_method == self.method
+    print "The API method, #{tmp_method}, is better behaved now" if tmp_method == method
     if !method
-      raise MissingMethod.new
+      fail MissingMethod.new
     elsif respond_to?(method)
       send(method)
     else
-      raise BadMethod.new(method)
+      fail BadMethod.new(method)
     end
   end
 
   def abort_if_any_errors!
-    raise AbortDueToErrors.new() if errors.any?
+    fail AbortDueToErrors.new if errors.any?
   end
 
   def must_authenticate!
-    raise MustAuthenticate.new() unless user
+    fail MustAuthenticate.new unless user
   end
 end

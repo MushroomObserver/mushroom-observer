@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class RobotsTest < UnitTestCase
   def test_parse_robots_dot_text

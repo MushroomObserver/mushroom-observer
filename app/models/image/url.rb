@@ -1,28 +1,28 @@
 class Image
   class Url
     SUBDIRECTORIES = {
-        full_size: 'orig',
-        huge: '1280',
-        large: '960',
-        medium: '640',
-        small: '320',
-        thumbnail: 'thumb'
+      full_size: "orig",
+      huge: "1280",
+      large: "960",
+      medium: "640",
+      small: "320",
+      thumbnail: "thumb"
     }
 
     SUBDIRECTORY_TO_SIZE = {
-      'orig'  => :full_size,
-      '1280'  => :huge,
-      '960'   => :large,
-      '640'   => :medium,
-      '320'   => :small,
-      'thumb' => :thumbnail
+      "orig"  => :full_size,
+      "1280"  => :huge,
+      "960"   => :large,
+      "640"   => :medium,
+      "320"   => :small,
+      "thumb" => :thumbnail
     }
 
     attr_accessor :size, :id, :transferred, :extension
 
     def initialize(args)
       size = args[:size]
-      size = SUBDIRECTORY_TO_SIZE[size] if !size.is_a?(Symbol)
+      size = SUBDIRECTORY_TO_SIZE[size] unless size.is_a?(Symbol)
       size = :full_size if size == :original
       self.size        = size
       self.id          = args[:id]
@@ -34,7 +34,7 @@ class Image
       for source in source_order
         return source_url(source) if source_exists?(source)
       end
-      return source_url(fallback_source)
+      source_url(fallback_source)
     end
 
     def source_exists?(source)
@@ -46,14 +46,14 @@ class Image
         path = spec[7..-1]
         local_file_exists?(path)
       when /^http:/
-        remote_file_exists?(url=spec)
+        remote_file_exists?(url = spec)
       else
-        raise "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
+        fail "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
       end
     end
 
     def local_file_exists?(path)
-      File.exists?(file_name(path))
+      File.exist?(file_name(path))
     end
 
     def remote_file_exists?(url)
@@ -72,7 +72,7 @@ class Image
     end
 
     def subdirectory
-      SUBDIRECTORIES[size] or raise "Invalid size: #{size.inspect}"
+      SUBDIRECTORIES[size] || fail("Invalid size: #{size.inspect}")
     end
 
     def source_order
@@ -84,7 +84,7 @@ class Image
     end
 
     def specs(source)
-      MO.image_sources[source] or raise "Missing image source: #{source.inspect}"
+      MO.image_sources[source] || fail("Missing image source: #{source.inspect}")
     end
   end
 end

@@ -1,11 +1,12 @@
 source "https://rubygems.org"
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", "~> 4.0.0"
+gem "rails", "~> 4.2.0"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
-gem "mysql2"
+gem "mysql2", "~> 0.3.18"
+
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
 
@@ -74,6 +75,9 @@ gem "byebug", group: [:development, :test]
 # Fake web responses in test mode
 gem "fakeweb", "~> 1.3", group: :test
 
+# Use capybara to simulate user-browser interaction
+gem "capybara"
+
 # Performance tests for Rails >= 4.0
 # See https://github.com/rails/rails-perftest
 # gem "rails-perftest", group: :test
@@ -91,13 +95,15 @@ gem "brakeman", require: false
 # Amazon S3 SDK, for access to images on dreamhost S3
 gem "aws-sdk", "~> 2"
 
-#Slick Slider for Image Carousel
+# Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
-gem "jquery-slick-rails",  "~> 1.5.0.1"
+gem "jquery-slick-rails", "~> 1.5.0.1"
 
-#allows for test results to be reported back to test runner IDE's
+# allows for test results to be reported back to test runner IDE's
 group :test do
   gem "minitest"
-  gem 'minitest-reporters', '>= 0.5.0'
+  gem "minitest-reporters", ">= 0.5.0"
 end
+
+gem "web-console", "~> 2.0", group: :development

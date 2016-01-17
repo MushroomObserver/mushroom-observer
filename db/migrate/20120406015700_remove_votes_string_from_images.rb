@@ -7,4 +7,3 @@ class RemoveVotesStringFromImages < ActiveRecord::Migration
     add_column :images, :votes, :string
   end
 end
-

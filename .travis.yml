@@ -1,6 +1,6 @@
 language: ruby
 rvm:
-  - "2.1.5"
+  - "2.2.3"
 
 # make Travis use its legacy infrastructure
 sudo: true
@@ -14,5 +14,3 @@ before_script:
   - rake db:schema:load
   - rake db:fixtures:load
   - rake lang:update
-  - ls config/locales
-  - grep validate_observation_user_missing config/locales/*

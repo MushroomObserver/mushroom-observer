@@ -3,20 +3,19 @@ require "test_helper"
 require "json"
 
 class AjaxControllerTest < FunctionalTestCase
-
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    if not FileTest.exist?(MO.local_image_files)
+    unless FileTest.exist?(MO.local_image_files)
       setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
       FileUtils.cp_r(setup_images, MO.local_image_files)
     end
   end
 
-  def good_ajax_request(action, params={})
+  def good_ajax_request(action, params = {})
     ajax_request(action, params, 200)
   end
 
-  def bad_ajax_request(action, params={})
+  def bad_ajax_request(action, params = {})
     ajax_request(action, params, 500)
   end
 
@@ -39,15 +38,13 @@ class AjaxControllerTest < FunctionalTestCase
     url += "/#{params[:id]}"   if params[:id]
     args = []
     for var, val in params
-      if var != :type and var != :id
-        args << "#{var}=#{val}"
-      end
+      args << "#{var}=#{val}" if var != :type && var != :id
     end
     url += "?" + args.join("&") if args.any?
-    return url
+    url
   end
 
-################################################################################
+  ################################################################################
 
   # This is a good place to test this stuff, since the filters are simplified.
   def test_filters
@@ -57,7 +54,7 @@ class AjaxControllerTest < FunctionalTestCase
     assert_nil(User.current)
     assert_equal(:pt, I18n.locale)
     assert_equal(0, cookies.count)
-    assert_equal({"locale"=>"pt"}, session.to_hash)
+    assert_equal({ "locale" => "pt" }, session.to_hash)
     session.delete("locale")
 
     @request.env["HTTP_ACCEPT_LANGUAGE"] = "pt-pt,xx-xx;q=0.5"
@@ -97,7 +94,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     login("katrina")
     bad_ajax_request(:api_key, type: :activate)
-    bad_ajax_request(:api_key, type: :activate, id: 12345)
+    bad_ajax_request(:api_key, type: :activate, id: 12_345)
     good_ajax_request(:api_key, type: :activate, id: key.id)
     assert_equal("", @response.body)
     assert_not_nil(key.reload.verified)
@@ -121,7 +118,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     login("katrina")
     bad_ajax_request(:api_key, type: :edit)
-    bad_ajax_request(:api_key, type: :edit, id: 12345)
+    bad_ajax_request(:api_key, type: :edit, id: 12_345)
     bad_ajax_request(:api_key, type: :edit, id: key.id)
     assert_equal("testing", key.reload.notes)
     good_ajax_request(:api_key, type: :edit, id: key.id, value: " new notes ")
@@ -138,7 +135,7 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
-    expect = [mitrula, reyes, pipi].map {|x| Location.reverse_name(x)}.sort
+    expect = [mitrula, reyes, pipi].map { |x| Location.reverse_name(x) }.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto", format: "scientific")
     assert_equal(expect, @response.body.split("\n"))
@@ -149,9 +146,9 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_name
     expect = Name.all.reject(&:correct_spelling).
-                  map(&:text_name).uniq.select {|n| n[0] == "A"}.sort
-    expect_genera = expect.reject {|n| n.include?(" ")}
-    expect_species = expect.select {|n| n.include?(" ")}
+             map(&:text_name).uniq.select { |n| n[0] == "A" }.sort
+    expect_genera = expect.reject { |n| n.include?(" ") }
+    expect_species = expect.select { |n| n.include?(" ") }
     expect = ["A"] + expect_genera + expect_species
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
     assert_equal(expect, @response.body.split("\n"))
@@ -177,8 +174,8 @@ class AjaxControllerTest < FunctionalTestCase
   def test_auto_complete_species_list
     list1, list2, list3 = SpeciesList.all.map(&:title)
     assert_equal("A Species List", list1)
-    assert_equal('Another Species List', list2)
-    assert_equal('List of mysteries', list3)
+    assert_equal("Another Species List", list2)
+    assert_equal("List of mysteries", list3)
 
     good_ajax_request(:auto_complete, type: :species_list, id: "List")
     assert_equal(["L", list1, list2, list3], @response.body.split("\n"))
@@ -192,14 +189,14 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_user
     good_ajax_request(:auto_complete, type: :user, id: "Rover")
-    assert_equal(["R", 'rolf <Rolf Singer>', 'roy <Roy Halling>'],
+    assert_equal(["R", "rolf <Rolf Singer>", "roy <Roy Halling>"],
                  @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Dodo")
-    assert_equal(["D", 'dick <Tricky Dick>'], @response.body.split("\n"))
+    assert_equal(["D", "dick <Tricky Dick>"], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
-    assert_equal(["K", 'katrina <Katrina>'], @response.body.split("\n"))
+    assert_equal(["K", "katrina <Katrina>"], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
@@ -301,48 +298,40 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_image_vote_renders_partial
-    ##Arrange
+    # #Arrange
     login("dick")
 
-    #Act
+    # Act
     good_ajax_request(:vote, type: :image, id: 1, value: 3)
 
-    #Assert
+    # Assert
     assert_template layout: nil
     assert_template layout: false
-    assert_template partial: 'image/_image_vote_links'
+    assert_template partial: "image/_image_vote_links"
   end
 
   def test_image_vote_renders_correct_links
-    ##Arrange
+    # #Arrange
     login("dick")
 
-    #Act
+    # Act
     good_ajax_request(:vote, type: :image, id: 1, value: 3)
 
-    assert_tag "a", attributes: {
-                      href: "/image/show_image/1?vote=0"
-                  }
-    assert_tag "a", attributes: {
-                      href: "/image/show_image/1?vote=1"
-                  }
-    assert_tag "a", attributes: {
-                      href: "/image/show_image/1?vote=2"
-                  }
-    assert_tag "a", attributes: {
-                      href: "/image/show_image/1?vote=4"
-                  }
+    assert_select("a[href='/image/show_image/1?vote=0']")
+    assert_select("a[href='/image/show_image/1?vote=1']")
+    assert_select("a[href='/image/show_image/1?vote=2']")
+    assert_select("a[href='/image/show_image/1?vote=4']")
   end
 
   def test_image_vote_renders_correct_data_attributes
-    ##Arrange
+    # #Arrange
     login("dick")
 
-    #Act
+    # Act
     good_ajax_request(:vote, type: :image, id: 1, value: 3)
 
-    assert_select("[data-role='image_vote']", 4)  ##should show four vote links as dick already voted
-    assert_select("[data-val]", 4)  ##should show four vote links as dick already voted
+    assert_select("[data-role='image_vote']", 4) # #should show four vote links as dick already voted
+    assert_select("[data-val]", 4) # #should show four vote links as dick already voted
   end
 
   def test_old_translation
@@ -353,28 +342,28 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_upload_image
-    #Arrange
+    # Arrange
     setup_image_dirs
     login("dick")
     file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg",
-    "image/jpeg")
+                                        "image/jpeg")
     copyright_holder = "Douglas Smith"
     notes = "Some notes."
 
     params = {
-        image: {
-            when: {"3i"=> "27", "2i"=> "11", "1i"=> "2014"},
-            copyright_holder: copyright_holder,
-            notes: notes,
-            upload: file
-        }
+      image: {
+        when: { "3i" => "27", "2i" => "11", "1i" => "2014" },
+        copyright_holder: copyright_holder,
+        notes: notes,
+        upload: file
+      }
     }
 
-    #Act
+    # Act
     post(:create_image_object, params)
     @json_response = JSON.parse(@response.body)
 
-    #Assert
+    # Assert
     assert_response(:success)
     refute_equal(0, @json_response["id"])
     assert_equal(copyright_holder, @json_response["copyright_holder"])

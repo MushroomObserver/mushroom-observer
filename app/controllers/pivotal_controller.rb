@@ -25,7 +25,7 @@
 ################################################################################
 
 class PivotalController < ApplicationController
-  require_dependency 'pivotal'
+  require_dependency "pivotal"
 
   def index
     if MO.pivotal_enabled

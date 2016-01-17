@@ -2,9 +2,9 @@
 
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
-  before_filter :login_required
+  before_action :login_required
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :create,
     :edit]
 
@@ -102,8 +102,8 @@ class NamingController < ApplicationController
 
   def edit_post
     if validate_name &&
-        (@params.naming_is_name? ||
-         unproposed_name(:runtime_edit_naming_someone_else))
+       (@params.naming_is_name? ||
+        unproposed_name(:runtime_edit_naming_someone_else))
       @params.need_new_naming? ? create_new_naming : change_naming
       default_redirect(@params.observation)
     else
@@ -125,7 +125,7 @@ class NamingController < ApplicationController
     return unless @params.update_name(@user, params[:reason],
                                       params[:was_js_on] == "yes")
     flash_notice(:runtime_naming_updated_at.t)
-    @params.change_vote(param_lookup([:vote, :value]) { |r| r.to_i })
+    @params.change_vote(param_lookup([:vote, :value], &:to_i))
   end
 
   def save_changes

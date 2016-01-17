@@ -41,13 +41,13 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def create_herbarium_params
     { herbarium: {
-        name: "Rolf's Personal Herbarium",
-        description: "Rolf wants Melanolucas!!!",
-        email: rolf.email,
-        mailing_address: "",
-        place_name: "",
-        code: "RPH"
-      }
+      name: "Rolf's Personal Herbarium",
+      description: "Rolf wants Melanolucas!!!",
+      email: rolf.email,
+      mailing_address: "",
+      place_name: "",
+      code: "RPH"
+    }
     }
   end
 
@@ -75,8 +75,8 @@ class HerbariumControllerTest < FunctionalTestCase
     herbarium = Herbarium.order(created_at: :desc).first
     assert_not_equal(params[:herbarium][:description],
                      herbarium.description)
-     # Really means we go back to create_herbarium without having created one.
-     assert_response(:success)
+    # Really means we go back to create_herbarium without having created one.
+    assert_response(:success)
   end
 
   def test_create_herbarium_post_no_email

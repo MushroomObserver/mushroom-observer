@@ -31,20 +31,19 @@
 ################################################################################
 
 class ProjectController < ApplicationController
-
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index_project,
     :list_projects,
     :next_project,
     :prev_project,
     :project_search,
-    :show_project,
+    :show_project
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :admin_request,
     :edit_project,
-    :show_project,
+    :show_project
   ]
 
   ##############################################################################
@@ -68,9 +67,9 @@ class ProjectController < ApplicationController
   # Display list of Project's whose title or notes match a string pattern.
   def project_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (project = Project.safe_find(pattern))
-         redirect_to(action: "show_project", id: project.id)
+      redirect_to(action: "show_project", id: project.id)
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
@@ -78,11 +77,11 @@ class ProjectController < ApplicationController
   end
 
   # Show selected list of projects.
-  def show_selected_projects(query, args={})
+  def show_selected_projects(query, args = {})
     args = {
       action: :list_projects,
       letters: "projects.title",
-      num_per_page: 50,
+      num_per_page: 50
     }.merge(args)
 
     @links ||= []
@@ -91,7 +90,7 @@ class ProjectController < ApplicationController
     args[:sorting_links] = [
       ["name",        :sort_by_title.t],
       ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
+      ["updated_at",  :sort_by_updated_at.t]
     ]
 
     show_index_of_objects(query, args)
@@ -275,7 +274,7 @@ class ProjectController < ApplicationController
         content = params[:email][:content]
         for receiver in @project.admin_group.users
           AdminEmail.build(sender, receiver, @project,
-                           subject, content).deliver
+                           subject, content).deliver_now
         end
         flash_notice(:admin_request_success.t(title: @project.title))
         redirect_with_query(action: :show_project, id: @project.id)
@@ -341,7 +340,7 @@ class ProjectController < ApplicationController
   def set_status(project, type, user, mode)
     group = project.send(type == :member ? :user_group : :admin_group)
     if mode == :add
-      if !group.users.include?(user)
+      unless group.users.include?(user)
         group.users << user unless group.users.member?(user)
         project.send("log_add_#{type}", user)
       end

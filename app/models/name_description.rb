@@ -64,79 +64,79 @@
 ############################################################################
 
 class NameDescription < Description
-  require 'acts_as_versioned'
+  require "acts_as_versioned"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:review_status,
-           { unreviewed: 1,
-             unvetted: 2,
-             vetted: 3,
-             inaccurate: 4
-           },
-           source: :review_status,
-           with: [],
-           accessor: :whiny
+          { unreviewed: 1,
+            unvetted: 2,
+            vetted: 3,
+            inaccurate: 4
+          },
+          source: :review_status,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:source_type,
-           { public: 1,
-             foreign: 2,
-             project: 3,
-             source: 4,
-             user: 5
-           },
-           source: :source_type,
-           with: [],
-           accessor: :whiny
+          { public: 1,
+            foreign: 2,
+            project: 3,
+            source: 4,
+            user: 5
+          },
+          source: :source_type,
+          with: [],
+          accessor: :whiny
          )
 
   belongs_to :license
   belongs_to :name
   belongs_to :project
-  belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
+  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
   belongs_to :user
 
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :admin_groups,  :class_name => "UserGroup", :join_table => "name_descriptions_admins"
-  has_and_belongs_to_many :writer_groups, :class_name => "UserGroup", :join_table => "name_descriptions_writers"
-  has_and_belongs_to_many :reader_groups, :class_name => "UserGroup", :join_table => "name_descriptions_readers"
-  has_and_belongs_to_many :authors,       :class_name => "User",      :join_table => "name_descriptions_authors"
-  has_and_belongs_to_many :editors,       :class_name => "User",      :join_table => "name_descriptions_editors"
+  has_and_belongs_to_many :admin_groups,  class_name: "UserGroup", join_table: "name_descriptions_admins"
+  has_and_belongs_to_many :writer_groups, class_name: "UserGroup", join_table: "name_descriptions_writers"
+  has_and_belongs_to_many :reader_groups, class_name: "UserGroup", join_table: "name_descriptions_readers"
+  has_and_belongs_to_many :authors,       class_name: "User",      join_table: "name_descriptions_authors"
+  has_and_belongs_to_many :editors,       class_name: "User",      join_table: "name_descriptions_editors"
 
   EOL_NOTE_FIELDS = [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
   ALL_NOTE_FIELDS = [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
 
   acts_as_versioned(
-    :table_name => 'name_descriptions_versions',
-    :if_changed => ALL_NOTE_FIELDS,
-    :association_options => {dependent: :nullify}
+    table_name: "name_descriptions_versions",
+    if_changed: ALL_NOTE_FIELDS,
+    association_options: { dependent: :nullify }
   )
   non_versioned_columns.push(
-    'created_at',
-    'updated_at',
-    'name_id',
-    'review_status',
-    'last_review',
-    'reviewer_id',
-    'ok_for_export',
-    'num_views',
-    'last_view',
-    'source_type',
-    'source_name',
-    'project_id',
-    'public',
-    'locale'
+    "created_at",
+    "updated_at",
+    "name_id",
+    "review_status",
+    "last_review",
+    "reviewer_id",
+    "ok_for_export",
+    "num_views",
+    "last_view",
+    "source_type",
+    "source_name",
+    "project_id",
+    "public",
+    "locale"
   )
 
-  versioned_class.before_save {|x| x.user_id = User.current_id}
+  versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
   after_save :update_classification_cache
 
   # Override the default show_controller
   def self.show_controller
-    'name'
+    "name"
   end
 
   # Don't add any authors until someone has written something "useful".
@@ -191,7 +191,7 @@ class NameDescription < Description
   #
   def update_review_status(value)
     user = User.current
-    if not user.in_group?('reviewers')
+    if !user.in_group?("reviewers")
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
@@ -205,11 +205,9 @@ class NameDescription < Description
     self.last_review   = Time.now
 
     # Save unless there are substantive changes pending.
-    if !save_version?
+    unless save_version?
       save_without_our_callbacks
-      if errors.size > 0
-        raise "update_review_status failed: [#{dump_errors}]"
-      end
+      fail "update_review_status failed: [#{dump_errors}]" if errors.size > 0
     end
   end
 
@@ -221,7 +219,7 @@ class NameDescription < Description
 
   # Make sure the classification cached in Name is kept up to date.
   def update_classification_cache
-    if (name.description_id == id) and
+    if (name.description_id == id) &&
        (name.classification != classification)
       name.classification = classification
       name.save
@@ -231,7 +229,6 @@ class NameDescription < Description
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
-
     # Even though
     # changing review_status doesn't cause a new version to be created, I want
     # to notify authors of that change.  (review_status_changed? is an implicit
@@ -241,25 +238,23 @@ class NameDescription < Description
       recipients = []
 
       # Tell admins of the change.
-      for user in self.admins
+      for user in admins
         recipients.push(user) if user.email_names_admin
       end
 
       # Tell authors of the change.
-      for user in self.authors
+      for user in authors
         recipients.push(user) if user.email_names_author
       end
 
       # Tell editors of the change.
-      for user in self.editors
+      for user in editors
         recipients.push(user) if user.email_names_editor
       end
 
       # Tell reviewer of the change.
       reviewer = self.reviewer || @old_reviewer
-      if reviewer && reviewer.email_names_reviewer
-        recipients.push(reviewer)
-      end
+      recipients.push(reviewer) if reviewer && reviewer.email_names_reviewer
 
       # Tell masochists who want to know about all name changes.
       for user in User.where(email_names_all: true)
@@ -289,16 +284,14 @@ class NameDescription < Description
     @old_reviewer = nil
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    begin
-      self.classification = Name.validate_classification(parent.rank, self.classification)
-    rescue => e
-      errors.add(:classification, e.to_s)
-    end
+    self.classification = Name.validate_classification(parent.rank, classification)
+  rescue => e
+    errors.add(:classification, e.to_s)
   end
 end

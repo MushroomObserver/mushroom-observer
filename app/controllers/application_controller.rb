@@ -89,45 +89,44 @@
 ################################################################################
 
 class ApplicationController < ActionController::Base
-  require 'extensions'
-  require 'login_system'
+  require "extensions"
+  require "login_system"
   require "csv"
   include LoginSystem
 
-# Prevent CSRF attacks by raising an exception.
-# For APIs, you may want to use :null_session instead.
+  # Prevent CSRF attacks by raising an exception.
+  # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  around_filter :catch_errors # if Rails.env == "test"
-  before_filter :block_ip_addresses
-  before_filter :kick_out_robots
-  before_filter :create_view_instance_variable
-  before_filter :verify_authenticity_token
-  before_filter :fix_bad_domains
-  before_filter :autologin
-  before_filter :set_locale
-  before_filter :set_timezone
-  before_filter :refresh_translations
-  before_filter :track_translations
-  before_filter :check_user_alert
-  # before_filter :extra_gc
-  # after_filter  :extra_gc
-  # after_filter  :log_memory_usage
+  around_action :catch_errors # if Rails.env == "test"
+  before_action :kick_out_robots
+  before_action :create_view_instance_variable
+  before_action :verify_authenticity_token
+  before_action :fix_bad_domains
+  before_action :autologin
+  before_action :set_locale
+  before_action :set_timezone
+  before_action :refresh_translations
+  before_action :track_translations
+  before_action :check_user_alert
+  # before_action :extra_gc
+  # after_action  :extra_gc
+  # after_action  :log_memory_usage
 
-  # Disable all filters except set_locale and block_ip_addresses.
+  # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_filter   :verify_authenticity_token
-    skip_filter   :fix_bad_domains
-    skip_filter   :autologin
-    skip_filter   :set_timezone
-    skip_filter   :refresh_translations
-    skip_filter   :track_translations
-    skip_filter   :check_user_alert
-    # skip_filter   :extra_gc
-    # skip_filter   :log_memory_usage
-    before_filter :disable_link_prefetching
-    before_filter { User.current = nil }
+    skip_action_callback :verify_authenticity_token
+    skip_action_callback :fix_bad_domains
+    skip_action_callback :autologin
+    skip_action_callback :set_timezone
+    skip_action_callback :refresh_translations
+    skip_action_callback :track_translations
+    skip_action_callback :check_user_alert
+    # skip_action_callback   :extra_gc
+    # skip_action_callback   :log_memory_usage
+    before_action :disable_link_prefetching
+    before_action { User.current = nil }
   end
 
   ## @view can be used by classes to access some view specific features like render
@@ -159,29 +158,22 @@ class ApplicationController < ActionController::Base
       ip:         request.remote_ip
     )
     render(text: "Robots are not allowed on this page.", status: 403, layout: false)
-    return false
-  end
-
-  # Filter to run before anything else to protect against denial-of-service attacks.
-  def block_ip_addresses
-    return true unless MO.blocked_ip_addresses.include?(request.remote_ip.to_s)
-    render(text: "You have been blocked from this site. Please contact the webmaster for more information.", status: 403, layout: false)
-    return false
+    false
   end
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    return true if @user and @user.is_successful_contributor?
+    return true if @user && @user.is_successful_contributor?
     flash_warning(:unsuccessful_contributor_warning.t)
     redirect_back_or_default(controller: :observer, action: :index)
-    return false
+    false
   end
 
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
     change = params[:user_theme].to_s
-    if !change.blank?
+    unless change.blank?
       if MO.themes.member?(change)
         if @user
           @user.theme = change
@@ -194,8 +186,8 @@ class ApplicationController < ActionController::Base
       end
     end
     layout = session[:layout].to_s
-    layout = 'application' if layout.blank?
-    return layout
+    layout = "application" if layout.blank?
+    layout
   end
 
   # Catch errors for integration tests, and report stats about completed request.
@@ -204,11 +196,23 @@ class ApplicationController < ActionController::Base
     controller = params[:controller]
     action     = params[:action]
     robot      = browser.bot? ? "robot" : "user"
-    ip         = request.remote_ip rescue "unknown"
-    url        = request.url       rescue "unknown"
-    ua         = browser.ua        rescue "unknown"
+    ip         = begin
+                   request.remote_ip
+                 rescue
+                   "unknown"
+                 end
+    url        = begin
+                   request.url
+                 rescue
+                   "unknown"
+                 end
+    ua         = begin
+                   browser.ua
+                 rescue
+                   "unknown"
+                 end
     yield
-    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
+    logger.warn("TIME: #{Time.now - start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
     @error = e
     raise e
@@ -222,8 +226,8 @@ class ApplicationController < ActionController::Base
   # Keep track of localization strings so that users can edit them (sort of) in situ.
   def track_translations
     @language = Language.find_by_locale(I18n.locale)
-    if @user and @language and
-       (!@language.official or is_reviewer?)
+    if @user && @language &&
+       (!@language.official || is_reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
     else
       Language.ignore_usage
@@ -232,9 +236,7 @@ class ApplicationController < ActionController::Base
 
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
-    if Language.tracking_usage
-      flash[:tags_on_last_page] = Language.save_tags
-    end
+    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
     super
   end
 
@@ -256,8 +258,8 @@ class ApplicationController < ActionController::Base
   # when you click on these embedded links.
   #
   def fix_bad_domains
-    if (request.method == "GET") and
-       MO.bad_domains.include?(request.env['HTTP_HOST'])
+    if (request.method == "GET") &&
+       MO.bad_domains.include?(request.env["HTTP_HOST"])
       redirect_to("#{MO.http_domain}#{request.fullpath}")
     end
   end
@@ -305,7 +307,7 @@ class ApplicationController < ActionController::Base
       @user.reload
 
     # Log in if cookie is valid, and autologin is enabled.
-    elsif (cookie = cookies["mo_user"])  &&
+    elsif (cookie = cookies["mo_user"]) &&
           (split = cookie.split(" ")) &&
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
@@ -327,19 +329,19 @@ class ApplicationController < ActionController::Base
 
     # Make currently logged-in user available to everyone.
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
+    logger.warn("user=#{@user ? @user.id : "0"} robot=#{browser.bot? ? "Y" : "N"}")
 
     # Keep track of last time user requested a page, but only update at most once an hour.
-    if @user and (
-      !@user.last_activity or
-      @user.last_activity.to_s('%Y%m%d%H') != Time.now.to_s('%Y%m%d%H')
+    if @user && (
+      !@user.last_activity ||
+      @user.last_activity.to_s("%Y%m%d%H") != Time.now.to_s("%Y%m%d%H")
     )
       @user.last_activity = Time.now
       @user.save
     end
 
     # Tell Rails to continue to process.
-    return true
+    true
   end
 
   # ----------------------------
@@ -357,17 +359,17 @@ class ApplicationController < ActionController::Base
     result = false
     if is_in_admin_mode?
       result = true
-    elsif obj.respond_to?(:user_id) and
+    elsif obj.respond_to?(:user_id) &&
           User.current_id == obj.user_id
       result = true
-    elsif obj.respond_to?(:has_edit_permission?) and
+    elsif obj.respond_to?(:has_edit_permission?) &&
           obj.has_edit_permission?(User.current)
       result = true
-    elsif (obj.is_a?(String) or obj.is_a?(Fixnum)) and
+    elsif (obj.is_a?(String) || obj.is_a?(Fixnum)) &&
           obj.to_i == User.current_id
       result = true
     end
-    return result
+    result
   end
   helper_method :check_permission
 
@@ -387,20 +389,18 @@ class ApplicationController < ActionController::Base
     unless result = check_permission(obj)
       flash_error :permission_denied.t
     end
-    return result
+    result
   end
-  alias check_user_id check_permission!
+  alias_method :check_user_id, :check_permission!
 
   # Is the current User a reviewer?  Returns true or false.  (*NOTE*: this is
   # available to views.)
   def is_reviewer?
     result = false
-    if @user
-      result = @user.in_group?('reviewers')
-    end
+    result = @user.in_group?("reviewers") if @user
     result
   end
-  alias is_reviewer is_reviewer?
+  alias_method :is_reviewer, :is_reviewer?
   helper_method :is_reviewer
   helper_method :is_reviewer?
 
@@ -417,14 +417,14 @@ class ApplicationController < ActionController::Base
   # This only applies to emails that are associated with Notification's for
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  def has_unshown_notifications?(user, flavor=:naming)
+  def has_unshown_notifications?(user, flavor = :naming)
     result = false
-  # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
     for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
-      ints = q.get_integers(["shown", "notification"], true)
+      ints = q.get_integers(%w(shown notification), true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
-        if notification and notification.note_template
+        if notification && notification.note_template
           result = true
           break
         end
@@ -442,17 +442,17 @@ class ApplicationController < ActionController::Base
   def check_user_alert
     if @user && @user.alert && @user.alert_next_showing < Time.now &&
        # Careful not to start infinite redirect-loop!
-       action_name != 'show_alert'
-      redirect_to(:controller => :account, :action => :show_alert)
+       action_name != "show_alert"
+      redirect_to(controller: :account, action: :show_alert)
     end
-    return true
+    true
   end
 
   # Create/update the auto-login cookie.
   def set_autologin_cookie(user)
     cookies["mo_user"] = {
-        value: "#{user.id} #{user.auth_code}",
-        expires: 1.month.from_now
+      value: "#{user.id} #{user.auth_code}",
+      expires: 1.month.from_now
     }
   end
 
@@ -464,7 +464,7 @@ class ApplicationController < ActionController::Base
   # Store User in session (id only).
   def set_session_user(user)
     session[:user_id] = user ? user.id : nil
-    return user
+    user
   end
 
   # Retrieve the User from session.  Returns User object or nil.  (Does not
@@ -481,7 +481,7 @@ class ApplicationController < ActionController::Base
 
   # Get sorted list of locale codes (String's) that we have translations for.
   def all_locales
-    Dir.glob(::Rails.root.to_s + '/config/locales/*.yml').sort.map do |file|
+    Dir.glob(::Rails.root.to_s + "/config/locales/*.yml").sort.map do |file|
       file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
   end
@@ -498,25 +498,25 @@ class ApplicationController < ActionController::Base
   #
   def set_locale
     code = if params[:user_locale]
-      logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
-      params[:user_locale]
-    elsif @user && !@user.locale.blank? && params[:controller] != "ajax"
-      logger.debug "[I18n] loading locale: #{@user.locale} from @user"
-      @user.locale
-    elsif session[:locale]
-      logger.debug "[I18n] loading locale: #{session[:locale]} from session"
-      session[:locale]
-    elsif locale = get_valid_locale_from_request_header
-      logger.debug "[I18n] loading locale: #{locale} from request header"
-      locale
-    else
-      MO.default_locale
+             logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
+             params[:user_locale]
+           elsif @user && !@user.locale.blank? && params[:controller] != "ajax"
+             logger.debug "[I18n] loading locale: #{@user.locale} from @user"
+             @user.locale
+           elsif session[:locale]
+             logger.debug "[I18n] loading locale: #{session[:locale]} from session"
+             session[:locale]
+           elsif locale = get_valid_locale_from_request_header
+             logger.debug "[I18n] loading locale: #{locale} from request header"
+             locale
+           else
+             MO.default_locale
     end
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    code = code.split('-')[0]
+    code = code.split("-")[0]
     if I18n.locale.to_s != code
       I18n.locale = code
       session[:locale] = code
@@ -524,13 +524,13 @@ class ApplicationController < ActionController::Base
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update(:locale => I18n.locale.to_s)
+      @user.update(locale: I18n.locale.to_s)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
 
     # Tell Rails to continue to process request.
-    return true
+    true
   end
 
   # Before filter: Set timezone based on cookie set in application layout.
@@ -557,33 +557,36 @@ class ApplicationController < ActionController::Base
   #
   def get_sorted_locales_from_request_header
     result = []
-    if accepted_locales = request.env['HTTP_ACCEPT_LANGUAGE']
+    if accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
 
       # Extract locales and weights, creating map from locale to weight.
       locale_weights = {}
-      accepted_locales.split(',').each do |term|
-        if (term + ';q=1') =~ /^(.+?);q=([^;]+)/
-          locale_weights[$1] = ($2.to_f rescue -1.0)
+      accepted_locales.split(",").each do |term|
+        if (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+          locale_weights[Regexp.last_match(1)] = (begin
+                                                    Regexp.last_match(2).to_f
+                                                  rescue
+                                                    -1.0
+                                                  end)
         end
       end
 
       # Now sort by decreasing weights.
-      result = locale_weights.sort {|a,b| b[1] <=> a[1]}.map {|a| a[0]}
+      result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     end
 
-    logger.debug "[globalite] client accepted locales: #{result.join(', ')}"
-    return result
+    logger.debug "[globalite] client accepted locales: #{result.join(", ")}"
+    result
   end
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
   def get_valid_locale_from_request_header
-
     # Get list of languages browser requested, sorted in the order it prefers
     # them.
     requested_locales = get_sorted_locales_from_request_header.map do |locale|
       if locale.match(/^(\w\w)-(\w+)$/)
-        locale = $1.downcase
+        locale = Regexp.last_match(1).downcase
       else
         locale = locale.downcase
       end
@@ -596,10 +599,10 @@ class ApplicationController < ActionController::Base
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
   def lookup_valid_locale(requested_locales)
-    match = 'en'
+    match = "en"
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
-      language, region = locale.split('-')
+      language, region = locale.split("-")
 
       if I18n.available_locales.include?(language.to_sym)
         match = language
@@ -654,8 +657,8 @@ class ApplicationController < ActionController::Base
 
   # Get current notice level. (0 = notice, 1 = warning, 2 = error)
   def flash_notice_level
-    level = session[:notice].to_s[0,1]
-    level == '' ? nil : level.to_i
+    level = session[:notice].to_s[0, 1]
+    level == "" ? nil : level.to_i
   end
   helper_method :flash_notice_level
 
@@ -671,9 +674,9 @@ class ApplicationController < ActionController::Base
   # Report an informational message that will be displayed (in green) at the
   # top of the next page the User sees.
   def flash_notice(*strs)
-    session[:notice] += '<br/>' if session[:notice]
-    session[:notice] ||= '0'
-    session[:notice] += strs.map(&:to_s).join('<br/>')
+    session[:notice] += "<br/>" if session[:notice]
+    session[:notice] ||= "0"
+    session[:notice] += strs.map(&:to_s).join("<br/>")
   end
   helper_method :flash_notice
 
@@ -681,7 +684,7 @@ class ApplicationController < ActionController::Base
   # the next page the User sees.
   def flash_warning(*strs)
     flash_notice(*strs)
-    session[:notice][0,1] = '1' if session[:notice][0,1] == '0'
+    session[:notice][0, 1] = "1" if session[:notice][0, 1] == "0"
     false
   end
   helper_method :flash_warning
@@ -690,7 +693,7 @@ class ApplicationController < ActionController::Base
   # next page the User sees.
   def flash_error(*strs)
     flash_notice(*strs)
-    session[:notice][0,1] = '2' if session[:notice][0,1] != '2'
+    session[:notice][0, 1] = "2" if session[:notice][0, 1] != "2"
     false
   end
   helper_method :flash_error
@@ -746,13 +749,13 @@ class ApplicationController < ActionController::Base
   #   blah blah [comment]
   #   (this is described better in views/observer/bulk_name_edit.rhtml)
   #
-  def construct_approved_names(name_list, approved_names, deprecate=false)
+  def construct_approved_names(name_list, approved_names, deprecate = false)
     if approved_names
       if approved_names.is_a?(String)
         approved_names = approved_names.split(/\r?\n/)
       end
       for ns in name_list.split("\n")
-        if !ns.blank?
+        unless ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
         end
@@ -763,7 +766,6 @@ class ApplicationController < ActionController::Base
   # Processes a single line from the list above.
   # Used only by construct_approved_names().
   def construct_approved_name(name_parse, approved_names, deprecate)
-
     # Don't do anything if the given names are not approved
     if approved_names.member?(name_parse.name)
 
@@ -772,8 +774,8 @@ class ApplicationController < ActionController::Base
 
       # Parse must have failed.
       if names.last.nil?
-        flash_error :runtime_no_create_name.t(:type => :name,
-                                              :value => name_parse.name)
+        flash_error :runtime_no_create_name.t(type: :name,
+                                              value: name_parse.name)
 
       # Was successful.
       else
@@ -784,13 +786,13 @@ class ApplicationController < ActionController::Base
         if comment = name_parse.comment
           # Okay to add citation to any record without an existing citation.
           if comment.match(/^citation: *(.*)/)
-            citation = $1
+            citation = Regexp.last_match(1)
             name.citation = citation if name.citation.blank?
           # Only save comment if name didn't exist
           elsif name.new_record?
             name.notes = comment
           else
-            flash_warning("Didn't save comment for #{name.real_search_name}, " +
+            flash_warning("Didn't save comment for #{name.real_search_name}, " \
                           "name already exists. (comment = \"#{comment}\")")
           end
         end
@@ -807,7 +809,7 @@ class ApplicationController < ActionController::Base
     end
 
     # Do the same thing for synonym (found the Approved = Synonym syntax).
-    if name_parse.has_synonym and
+    if name_parse.has_synonym &&
        approved_names.member?(name_parse.synonym)
 
       # Create the synonym.
@@ -815,8 +817,8 @@ class ApplicationController < ActionController::Base
 
       # Parse must have failed.
       if synonyms.last.nil?
-        flash_error :runtime_no_create_name.t(:type => :name,
-                                              :value => name_parse.synonym)
+        flash_error :runtime_no_create_name.t(type: :name,
+                                              value: name_parse.synonym)
 
       # Was successful.
       else
@@ -829,14 +831,14 @@ class ApplicationController < ActionController::Base
           if synonym.new_record?
             synonym.notes = comment
           else
-            flash_warning("Didn't save comment for #{synonym.real_search_name}, " +
+            flash_warning("Didn't save comment for #{synonym.real_search_name}, " \
                           "name already exists. (comment = \"#{comment}\")")
           end
         end
 
         # Deprecate and save.
         synonym.change_deprecated(true)
-        synonym.save_with_log(:log_deprecated_by, :touch => true)
+        synonym.save_with_log(:log_deprecated_by, touch: true)
         Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end
@@ -870,7 +872,7 @@ class ApplicationController < ActionController::Base
   # This stores the latest search/index used for use by create_species_list.
   # (Stores the Query id in <tt>session[:checklist_source]</tt>.)
   def store_query_in_session(query)
-    query.save if !query.id
+    query.save unless query.id
     session[:checklist_source] = query.id
   end
 
@@ -878,30 +880,28 @@ class ApplicationController < ActionController::Base
   def get_query_from_session
     if id = session[:checklist_source]
       Query.safe_find(id)
-    else
-      nil
     end
   end
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
-  def query_params(query=nil)
+  def query_params(query = nil)
     if browser.bot?
       {}
     elsif query
-      query.save if !query.id
-      {q: query.id.alphabetize}
+      query.save unless query.id
+      { q: query.id.alphabetize }
     else
       @query_params || {}
     end
   end
   helper_method :query_params
 
-  def add_query_param(params, query=nil)
+  def add_query_param(params, query = nil)
     if browser.bot?
       # do nothing
     elsif query
-      query.save if !query.id
+      query.save unless query.id
       params[:q] = query.id.alphabetize
     elsif @query_params
       params[:q] = @query_params[:q]
@@ -921,18 +921,18 @@ class ApplicationController < ActionController::Base
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
-    @query_params[:q] = params[:q] if !params[:q].blank?
+    @query_params[:q] = params[:q] unless params[:q].blank?
     @query_params
   end
 
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
-  def set_query_params(query=nil)
+  def set_query_params(query = nil)
     @query_params = {}
     if browser.bot?
       # do nothing
     elsif query
-      query.save if !query.id
+      query.save unless query.id
       @query_params[:q] = query.id.alphabetize
     end
     @query_params
@@ -942,7 +942,7 @@ class ApplicationController < ActionController::Base
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model_symbol, args={})
+  def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
     if result = find_query(model, false)
@@ -971,7 +971,7 @@ class ApplicationController < ActionController::Base
       result.access_count += 1
       result.save
     end
-    return result
+    result
   end
 
   BY_MAP = {
@@ -980,19 +980,21 @@ class ApplicationController < ActionController::Base
   }
 
   def map_past_bys(args)
-    if args.member?(:by)
-      args[:by] = (BY_MAP[args[:by].to_s] or args[:by])
-    end
+    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model=nil, update=!browser.bot?)
+  def find_query(model = nil, update = !browser.bot?)
     model = model.to_s if model
     result = nil
-    q = params[:q].dealphabetize rescue nil
+    q = begin
+          params[:q].dealphabetize
+        rescue
+          nil
+        end
     if q && (query = Query.safe_find(q))
       # This is right kind of query.
-      if !model or (query.model_string == model)
+      if !model || (query.model_string == model)
         result = query
       # If not, try coercing it.
       elsif query2 = query.coerce(model)
@@ -1010,13 +1012,13 @@ class ApplicationController < ActionController::Base
         result.save
       end
     end
-    return result
+    result
   end
 
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
-  def create_query(model_symbol, flavor=:default, args={})
+  def create_query(model_symbol, flavor = :default, args = {})
     Query.lookup(model_symbol, flavor, args)
   end
 
@@ -1026,20 +1028,20 @@ class ApplicationController < ActionController::Base
       query
     else
       Query.lookup(query.model_symbol, query.flavor, query.params.merge(
-        :north => tweak_up(params[:north], 0.001, 90),
-        :south => tweak_down(params[:south], 0.001, -90),
-        :east => tweak_up(params[:east], 0.001, 180),
-        :west => tweak_down(params[:west], 0.001, -180)
+                                                       north: tweak_up(params[:north], 0.001, 90),
+                                                       south: tweak_down(params[:south], 0.001, -90),
+                                                       east: tweak_up(params[:east], 0.001, 180),
+                                                       west: tweak_down(params[:west], 0.001, -180)
       ))
     end
   end
 
   def tweak_up(v, amount, max)
-    [max, v.to_f+amount].min
+    [max, v.to_f + amount].min
   end
 
   def tweak_down(v, amount, min)
-    [min, v.to_f-amount].max
+    [min, v.to_f - amount].max
   end
 
   # This is the common code for all the 'prev/next_object' actions.  Pass in
@@ -1057,15 +1059,23 @@ class ApplicationController < ActionController::Base
       # Special exception for prev/next in RssLog query: If go to "next" in
       # show_observation, for example, inside an RssLog query, go to the next
       # object, even if it's not an observation.    If...
-      if params[:q] and                             # ... query parameter given
-         (q = params[:q].dealphabetize rescue nil) and
-         (query = Query.safe_find(q)) and           # ... and query exists
-         (query.model_symbol == :RssLog) and        # ... and it's a RssLog query
-         (rss_log = object.rss_log rescue nil) and  # ... and current rss_log exists
-         query.index(rss_log) and                   # ... and it's in query results
-         (query.current = object.rss_log) and       # ... and can set current index in query results
-         (new_query = query.send(method)) and       # ... and next/prev doesn't return nil (at end)
-         (rss_log = new_query.current)              # ... and can get new rss_log object
+      if params[:q] && # ... query parameter given
+         (q = begin
+                params[:q].dealphabetize
+              rescue
+                nil
+              end) &&
+         (query = Query.safe_find(q)) && # ... and query exists
+         (query.model_symbol == :RssLog) && # ... and it's a RssLog query
+         (rss_log = begin
+                      object.rss_log
+                    rescue
+                      nil
+                    end) && # ... and current rss_log exists
+         query.index(rss_log) && # ... and it's in query results
+         (query.current = object.rss_log) && # ... and can set current index in query results
+         (new_query = query.send(method)) && # ... and next/prev doesn't return nil (at end)
+         (rss_log = new_query.current) # ... and can get new rss_log object
         query  = new_query
         object = rss_log.target || rss_log
         id = object.id
@@ -1080,22 +1090,22 @@ class ApplicationController < ActionController::Base
         query.current = object
         if !query.index(object)
           type = object.type_tag
-          flash_error(:runtime_object_not_in_index.t(:id => object.id, :type => type))
+          flash_error(:runtime_object_not_in_index.t(id: object.id, type: type))
         elsif new_query = query.send(method)
           query = new_query
           id = query.current_id
         else
           type = object.type_tag
-          flash_error(:runtime_no_more_search_objects.t(:type => type))
+          flash_error(:runtime_no_more_search_objects.t(type: type))
         end
       end
 
       # Redirect to the show_object page appropriate for the new object.
       redirect_to(add_query_param({
-                                      controller: object.show_controller,
-                                      action: object.show_action,
-                                      id: id
-        }, query))
+                                    controller: object.show_controller,
+                                    action: object.show_action,
+                                    id: id
+                                  }, query))
     end
   end
 
@@ -1135,11 +1145,11 @@ class ApplicationController < ActionController::Base
   # clear_query_in_session::  Clears the query from the "clipboard" (if you didn't just store this query on it!).
   # set_query_params::        Tells +query_params+ to pass this query on in links on this page.
   #
-  def show_index_of_objects(query, args={})
-    letter_arg   = args[:letter_arg]   || :letter
-    number_arg   = args[:number_arg]   || :page
+  def show_index_of_objects(query, args = {})
+    letter_arg   = args[:letter_arg] || :letter
+    number_arg   = args[:number_arg] || :page
     num_per_page = args[:num_per_page] || 50
-    include      = args[:include]      || nil
+    include      = args[:include] || nil
     type = query.model_class.type_tag
 
     # Tell site to come back here on +redirect_back_or_default+.
@@ -1147,9 +1157,7 @@ class ApplicationController < ActionController::Base
 
     # Clear out old query from session.  (Don't do it if caller just finished
     # storing *this* query in there, though!!)
-    if session[:checklist_source] != query.id
-      clear_query_in_session
-    end
+    clear_query_in_session if session[:checklist_source] != query.id
 
     # Pass this query on when clicking on results.
     set_query_params(query)
@@ -1160,65 +1168,65 @@ class ApplicationController < ActionController::Base
     # Supply default error message to display if no results found.
     if (query.params.keys - query.required_parameters - [:by]).empty?
       @error ||= case query.flavor
-      when :all
-        :runtime_no_objects.t(:type => type)
-      when :at_location
-        loc = query.find_cached_parameter_instance(Location, :location)
-        :runtime_index_no_at_location.t(:type => type,
-                                        :location => loc.display_name)
-      when :at_where
-        :runtime_index_no_at_location.t(:type => type,
-                                        :location => query.params[:location])
-      when :by_author
-        user = query.find_cached_parameter_instance(User, :user)
-        :runtime_user_hasnt_authored.t(:type => type, :user => user.legal_name)
-      when :by_editor
-        user = query.find_cached_parameter_instance(User, :user)
-        :runtime_user_hasnt_edited.t(:type => type, :user => user.legal_name)
-      when :by_rss_log
-        :runtime_index_no_by_rss_log.t(:type => type)
-      when :by_user
-        user = query.find_cached_parameter_instance(User, :user)
-        :runtime_user_hasnt_created.t(:type => type, :user => user.legal_name)
-      when :for_target
-        :runtime_index_no_for_object.t(:type => type)
-      when :for_user
-        user = query.find_cached_parameter_instance(User, :user)
-        :runtime_index_no_for_user.t(:type => type, :user => user.legal_name)
-      when :in_species_list
-        spl = query.find_cached_parameter_instance(SpeciesList, :species_list)
-        :runtime_index_no_in_species_list.t(:type => type, :name => spl.title)
-      when :inside_observation
-        id = query.params[:observation]
-        :runtime_index_no_inside_observation.t(:type => type, :id => id)
-      when :of_children
-        name = query.find_cached_parameter_instance(Name, :name)
-        :runtime_index_no_of_children.t(:type => type,
-                                        :name => name.display_name)
-      when :of_name
-        name = query.find_cached_parameter_instance(Name, :name)
-        :runtime_index_no_of_name.t(:type => type, :name => name.display_name)
-      when :of_parents
-        name = query.find_cached_parameter_instance(Name, :name)
-        :runtime_index_no_of_parents.t(:type => type,
-                                       :name => name.display_name)
-      when :pattern_search
-        :runtime_no_matches_pattern.t(:type => type,
-                                      :value => query.params[:pattern].to_s).html_safe
-      when :regexp_search
-        :runtime_no_matches_regexp.t(:type => type,
-                                     :value => query.params[:regexp].to_s)
-      when :with_descriptions
-        :runtime_index_no_with.t(:type => type, :attachment => :description)
-      when :with_observations
-        :runtime_index_no_with.t(:type => type, :attachment => :observation)
+                 when :all
+                   :runtime_no_objects.t(type: type)
+                 when :at_location
+                   loc = query.find_cached_parameter_instance(Location, :location)
+                   :runtime_index_no_at_location.t(type: type,
+                                                   location: loc.display_name)
+                 when :at_where
+                   :runtime_index_no_at_location.t(type: type,
+                                                   location: query.params[:location])
+                 when :by_author
+                   user = query.find_cached_parameter_instance(User, :user)
+                   :runtime_user_hasnt_authored.t(type: type, user: user.legal_name)
+                 when :by_editor
+                   user = query.find_cached_parameter_instance(User, :user)
+                   :runtime_user_hasnt_edited.t(type: type, user: user.legal_name)
+                 when :by_rss_log
+                   :runtime_index_no_by_rss_log.t(type: type)
+                 when :by_user
+                   user = query.find_cached_parameter_instance(User, :user)
+                   :runtime_user_hasnt_created.t(type: type, user: user.legal_name)
+                 when :for_target
+                   :runtime_index_no_for_object.t(type: type)
+                 when :for_user
+                   user = query.find_cached_parameter_instance(User, :user)
+                   :runtime_index_no_for_user.t(type: type, user: user.legal_name)
+                 when :in_species_list
+                   spl = query.find_cached_parameter_instance(SpeciesList, :species_list)
+                   :runtime_index_no_in_species_list.t(type: type, name: spl.title)
+                 when :inside_observation
+                   id = query.params[:observation]
+                   :runtime_index_no_inside_observation.t(type: type, id: id)
+                 when :of_children
+                   name = query.find_cached_parameter_instance(Name, :name)
+                   :runtime_index_no_of_children.t(type: type,
+                                                   name: name.display_name)
+                 when :of_name
+                   name = query.find_cached_parameter_instance(Name, :name)
+                   :runtime_index_no_of_name.t(type: type, name: name.display_name)
+                 when :of_parents
+                   name = query.find_cached_parameter_instance(Name, :name)
+                   :runtime_index_no_of_parents.t(type: type,
+                                                  name: name.display_name)
+                 when :pattern_search
+                   :runtime_no_matches_pattern.t(type: type,
+                                                 value: query.params[:pattern].to_s).html_safe
+                 when :regexp_search
+                   :runtime_no_matches_regexp.t(type: type,
+                                                value: query.params[:regexp].to_s)
+                 when :with_descriptions
+                   :runtime_index_no_with.t(type: type, attachment: :description)
+                 when :with_observations
+                   :runtime_index_no_with.t(type: type, attachment: :observation)
       end
     end
-    @error ||= :runtime_no_matches.t(:type => type)
+    @error ||= :runtime_no_matches.t(type: type)
 
     # Add magic links for sorting.
-    if (sorts = args[:sorting_links]) and
-       (sorts.length > 1) and
+    if (sorts = args[:sorting_links]) &&
+       (sorts.length > 1) &&
        !browser.bot?
       @sorts = add_sorting_links(query, sorts, args[:link_all_sorts])
     else
@@ -1229,13 +1237,11 @@ class ApplicationController < ActionController::Base
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
-      num_per_page = @layout['count']
+      num_per_page = @layout["count"]
     end
 
     # Inform the query that we'll need the first letters as well as ids.
-    if args[:letters]
-      query.need_letters = args[:letters]
-    end
+    query.need_letters = args[:letters] if args[:letters]
 
     # Get number of results first so we know how to paginate.
     @timer_start = Time.now
@@ -1243,23 +1249,23 @@ class ApplicationController < ActionController::Base
     @timer_end = Time.now
 
     # If only one result (before pagination), redirect to 'show' action.
-    if (query.num_results == 1) and
+    if (query.num_results == 1) &&
        !args[:always_index]
-      redirect_with_query(:controller => query.model_class.show_controller,
-        :action => query.model_class.show_action,
-        :id => query.result_ids.first)
+      redirect_with_query(controller: query.model_class.show_controller,
+                          action: query.model_class.show_action,
+                          id: query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
     else
       @pages = if args[:letters]
-        paginate_letters(letter_arg, number_arg, num_per_page)
-      else
-        paginate_numbers(number_arg, num_per_page)
+                 paginate_letters(letter_arg, number_arg, num_per_page)
+               else
+                 paginate_numbers(number_arg, num_per_page)
       end
 
       # Skip to correct place if coming back in to index from show_object.
-      if !args[:id].blank? and
-         params[@pages.letter_arg].blank? and
+      if !args[:id].blank? &&
+         params[@pages.letter_arg].blank? &&
          params[@pages.number_arg].blank?
         @pages.show_index(query.index(args[:id]))
       end
@@ -1267,43 +1273,41 @@ class ApplicationController < ActionController::Base
       # Instantiate correct subset.
       logger.warn("QUERY starting: #{query.query.inspect}")
       @timer_start = Time.now
-      @objects = query.paginate(@pages, :include => include)
+      @objects = query.paginate(@pages, include: include)
       @timer_end = Time.now
-      logger.warn("QUERY finished: model=#{query.model_string}, " +
-                  "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
-                  "time=#{(@timer_end-@timer_start).to_f}")
+      logger.warn("QUERY finished: model=#{query.model_string}, " \
+                  "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
+                  "time=#{(@timer_end - @timer_start).to_f}")
 
       # Give the caller the opportunity to add extra columns.
       if block_given?
-        @extra_data = @objects.inject({}) do |data,object|
+        @extra_data = @objects.inject({}) do |data, object|
           row = yield(object)
-          row = [row] if !row.is_a?(Array)
+          row = [row] unless row.is_a?(Array)
           data[object.id] = row
           data
         end
       end
 
       # Render the list if given template.
-      if args[:action]
-        render(:action => args[:action])
-      end
+      render(action: args[:action]) if args[:action]
     end
   end
 
   # Create sorting links for index pages, "graying-out" the current order.
-  def add_sorting_links(query, links, link_all=false)
+  def add_sorting_links(query, links, link_all = false)
     results = []
     this_by = query.params[:by] || query.default_order
-    this_by = this_by.to_s.sub(/^reverse_/, '')
+    this_by = this_by.to_s.sub(/^reverse_/, "")
 
     for by, label in links
       str = label.t
-      if !link_all and (by.to_s == this_by)
+      if !link_all && (by.to_s == this_by)
         results << str
       else
-        results << [str, {controller: query.model_class.show_controller,
-                          action: query.model_class.index_action,
-                          by: by}.merge(query_params)]
+        results << [str, { controller: query.model_class.show_controller,
+                           action: query.model_class.index_action,
+                           by: by }.merge(query_params)]
       end
     end
 
@@ -1314,51 +1318,51 @@ class ApplicationController < ActionController::Base
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, {controller: query.model_class.show_controller,
-                      action: query.model_class.index_action,
-                      by: reverse_by}.merge(query_params)]
+    results << [str, { controller: query.model_class.show_controller,
+                       action: query.model_class.index_action,
+                       by: reverse_by }.merge(query_params)]
 
-    return results
+    results
   end
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
     result = model.safe_find(id)
-    if !result
+    unless result
       flash_error(:runtime_object_not_found.t(id: id || "0",
                                               type: model.type_tag))
       redirect_with_query(controller: model.show_controller,
                           action: model.index_action)
     end
-    return result
+    result
   end
 
   # Redirects to an appropriate fallback index in case of unrecoverable error.
   # Most such errors are dealt with on a case-by-case basis in the controllers,
   # however a few generic actions don't necessarily know where to send users
   # when things go south.  This makes a good stab at guessing, at least.
-  def goto_index(redirect=nil)
+  def goto_index(redirect = nil)
     pass_query_params
     redirect = redirect.name.underscore if redirect.is_a?(Class)
     model = case (redirect || controller.name).to_s
-      when 'account'      ; RssLog
-      when 'comment'      ; Comment
-      when 'image'        ; Image
-      when 'location'     ; Location
-      when 'name'         ; Name
-      when 'naming'       ; Observation
-      when 'observation'  ; Observation
-      when 'observer'     ; RssLog
-      when 'project'      ; Project
-      when 'rss_log'      ; RssLog
-      when 'species_list' ; SpeciesList
-      when 'user'         ; RssLog
-      when 'vote'         ; Observation
+            when "account" then RssLog
+            when "comment" then Comment
+            when "image" then Image
+            when "location" then Location
+            when "name" then Name
+            when "naming" then Observation
+            when "observation" then Observation
+            when "observer" then RssLog
+            when "project" then Project
+            when "rss_log" then RssLog
+            when "species_list" then SpeciesList
+            when "user" then RssLog
+            when "vote" then Observation
     end
-    raise "Not sure where to go from #{redirect || controller.name}." if !model
-    redirect_with_query(:controller => model.show_controller,
-      :action => model.index_action)
+    fail "Not sure where to go from #{redirect || controller.name}." unless model
+    redirect_with_query(controller: model.show_controller,
+                        action: model.index_action)
   end
 
   # Initialize Paginator object.  This now does very little thanks to the new
@@ -1375,13 +1379,17 @@ class ApplicationController < ActionController::Base
   #   <%= pagination_letters(@pages) %>
   #   <%= pagination_numbers(@pages) %>
   #
-  def paginate_letters(letter_arg=:letter, number_arg=:page, num_per_page=50)
+  def paginate_letters(letter_arg = :letter, number_arg = :page, num_per_page = 50)
     MOPaginator.new(
-      :letter_arg   => letter_arg,
-      :number_arg   => number_arg,
-      :letter       => (params[letter_arg].to_s.match(/^([A-Z])$/i) ? $1.upcase : nil),
-      :number       => (params[number_arg].to_s.to_i rescue 1),
-      :num_per_page => num_per_page
+      letter_arg: letter_arg,
+      number_arg: number_arg,
+      letter: (params[letter_arg].to_s.match(/^([A-Z])$/i) ? Regexp.last_match(1).upcase : nil),
+      number: (begin
+                 params[number_arg].to_s.to_i
+               rescue
+                 1
+               end),
+      num_per_page: num_per_page
     )
   end
 
@@ -1398,11 +1406,15 @@ class ApplicationController < ActionController::Base
   #   # In view:
   #   <%= pagination_numbers(@numbers) %>
   #
-  def paginate_numbers(arg=:page, num_per_page=50)
+  def paginate_numbers(arg = :page, num_per_page = 50)
     MOPaginator.new(
-      :number_arg   => arg,
-      :number       => (params[arg].to_s.to_i rescue 1),
-      :num_per_page => num_per_page
+      number_arg: arg,
+      number: (begin
+                 params[arg].to_s.to_i
+               rescue
+                 1
+               end),
+      num_per_page: num_per_page
     )
   end
 
@@ -1413,7 +1425,7 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   def count_objects
-    ObjectSpace.each_object do |o| end
+    ObjectSpace.each_object { |_o| }
   end
 
   def extra_gc
@@ -1422,18 +1434,18 @@ class ApplicationController < ActionController::Base
 
   def log_memory_usage
     sd = sc = pd = pc = 0
-    File.new("/proc/#{$$}/smaps").each_line do |line|
+    File.new("/proc/#{$PROCESS_ID}/smaps").each_line do |line|
       if line.match(/\d+/)
         val = $&.to_i
-        line.match(/^Shared_Dirty/)  ? (sd += val) :
-        line.match(/^Shared_Clean/)  ? (sc += val) :
+        line.match(/^Shared_Dirty/) ? (sd += val) :
+        line.match(/^Shared_Clean/) ? (sc += val) :
         line.match(/^Private_Dirty/) ? (pd += val) :
         line.match(/^Private_Clean/) ? (pc += val) : 1
       end
     end
     uid = session[:user_id].to_i
     logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
-        [pd, pc, sd, sc, $$, uid, request.fullpath]
+      [pd, pc, sd, sc, $PROCESS_ID, uid, request.fullpath]
   end
 
   ################################################################################
@@ -1459,7 +1471,7 @@ class ApplicationController < ActionController::Base
   def disable_link_prefetching
     if request.env["HTTP_X_MOZ"] == "prefetch"
       logger.debug "prefetch detected: sending 403 Forbidden"
-      render(:text => '', :status => 403)
+      render(text: "", status: 403)
       return false
     end
   end
@@ -1503,17 +1515,17 @@ class ApplicationController < ActionController::Base
   end
 
   def has_permission?(obj, error_message)
-    result = (is_in_admin_mode? or obj.can_edit?(@user))
-    flash_error(error_message) if not result
+    result = (is_in_admin_mode? || obj.can_edit?(@user))
+    flash_error(error_message) unless result
     result
   end
 
   def can_delete?(obj)
-    has_permission?(obj, :runtime_no_destroy.l(:type => obj.type_tag))
+    has_permission?(obj, :runtime_no_destroy.l(type: obj.type_tag))
   end
 
   def can_edit?(obj)
-    has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
+    has_permission?(obj, :runtime_no_update.l(type: obj.type_tag))
   end
 
   def render_xml(args)
@@ -1530,5 +1542,4 @@ class ApplicationController < ActionController::Base
   def whitelisted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end
-
 end

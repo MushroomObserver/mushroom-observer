@@ -50,20 +50,20 @@
 ############################################################################
 
 class LocationDescription < Description
-  require 'acts_as_versioned'
+  require "acts_as_versioned"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:source_type,
-           { public: 1,
-             foreign: 2,
-             project: 3,
-             source: 4,
-             user: 5
-           },
-           source: :source_type,
-           with: [],
-           accessor: :whiny
+          { public: 1,
+            foreign: 2,
+            project: 3,
+            source: 4,
+            user: 5
+          },
+          source: :source_type,
+          with: [],
+          accessor: :whiny
          )
 
   belongs_to :license
@@ -71,37 +71,37 @@ class LocationDescription < Description
   belongs_to :project
   belongs_to :user
 
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :admin_groups,  :class_name => "UserGroup", :join_table => "location_descriptions_admins"
-  has_and_belongs_to_many :writer_groups, :class_name => "UserGroup", :join_table => "location_descriptions_writers"
-  has_and_belongs_to_many :reader_groups, :class_name => "UserGroup", :join_table => "location_descriptions_readers"
-  has_and_belongs_to_many :authors,       :class_name => "User",      :join_table => "location_descriptions_authors"
-  has_and_belongs_to_many :editors,       :class_name => "User",      :join_table => "location_descriptions_editors"
+  has_and_belongs_to_many :admin_groups,  class_name: "UserGroup", join_table: "location_descriptions_admins"
+  has_and_belongs_to_many :writer_groups, class_name: "UserGroup", join_table: "location_descriptions_writers"
+  has_and_belongs_to_many :reader_groups, class_name: "UserGroup", join_table: "location_descriptions_readers"
+  has_and_belongs_to_many :authors,       class_name: "User",      join_table: "location_descriptions_authors"
+  has_and_belongs_to_many :editors,       class_name: "User",      join_table: "location_descriptions_editors"
 
-  ALL_NOTE_FIELDS = [ :gen_desc, :ecology, :species, :notes, :refs ]
+  ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs]
 
   acts_as_versioned(
-    :table_name => 'location_descriptions_versions',
-    :if_changed => ALL_NOTE_FIELDS,
-    :association_options => {dependent: :nullify}
+    table_name: "location_descriptions_versions",
+    if_changed: ALL_NOTE_FIELDS,
+    association_options: { dependent: :nullify }
   )
   non_versioned_columns.push(
-    'created_at',
-    'updated_at',
-    'location_id',
-    'num_views',
-    'last_view',
-    'ok_for_export',
-    'source_type',
-    'source_name',
-    'project_id',
-    'public',
-    'locale'
+    "created_at",
+    "updated_at",
+    "location_id",
+    "num_views",
+    "last_view",
+    "ok_for_export",
+    "source_type",
+    "source_name",
+    "project_id",
+    "public",
+    "locale"
   )
 
-  versioned_class.before_save {|x| x.user_id = User.current_id}
+  versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
 
   ################################################################################
@@ -112,7 +112,7 @@ class LocationDescription < Description
 
   # Override the default show_controller
   def self.show_controller
-    'location'
+    "location"
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).
@@ -128,17 +128,17 @@ class LocationDescription < Description
       recipients = []
 
       # Tell admins of the change.
-      for user in self.admins
+      for user in admins
         recipients.push(user) if user.email_locations_admin
       end
 
       # Tell authors of the change.
-      for user in self.authors
+      for user in authors
         recipients.push(user) if user.email_locations_author
       end
 
       # Tell editors of the change.
-      for user in self.editors
+      for user in editors
         recipients.push(user) if user.email_locations_editor
       end
 

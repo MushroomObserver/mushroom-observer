@@ -11,7 +11,7 @@ class EolDataTest < UnitTestCase
            "got #{obj.image_count(name_id)}")
     assert_equal(name.user.legal_name, obj.legal_name(name.user.id))
     assert_equal(name.real_search_name,
-      obj.image_to_names(obj.images(name_id)[0].id))
+                 obj.image_to_names(obj.images(name_id)[0].id))
   end
 
   def test_create

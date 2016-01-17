@@ -22,7 +22,9 @@
     <div class="form-group push-down">
       <%= label_tag(:new_user_email, :signup_email_address.t + ":") %>
       <%= text_field(:new_user, :email, class: "form-control") %>
-      <div class="HelpNote"><%= :signup_email_help.tp %></div>
+      <div class="HelpNote">
+        <%= :signup_email_help.tp + :email_spam_notice.tp %>
+      </div>
     </div>
 
     <div class="form-group push-down">

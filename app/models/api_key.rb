@@ -21,39 +21,35 @@ class ApiKey < AbstractModel
     self.num_uses ||= 0
     self.user_id ||= User.current_id
     self.key ||= self.class.new_key
-    self.notes ||= ''
+    self.notes ||= ""
   end
 
   def touch!
     update!(
-      :last_used => Time.now,
-      :num_uses => num_uses + 1
+      last_used: Time.now,
+      num_uses: num_uses + 1
     )
-  end 
+  end
 
   def verify!
     update!(
-      :verified => Time.now
+      verified: Time.now
     )
   end
 
   def self.new_key
-    result = String.random(KEY_LENGTH) 
-    while find_by_key(result)
-      key = String.random(KEY_LENGTH) 
-    end
-    return result
+    result = String.random(KEY_LENGTH)
+    key = String.random(KEY_LENGTH) while find_by_key(result)
+    result
   end
 
   validate :check_key
   def check_key
     other = self.class.find_by_key(key)
-    if other and other.id != self.id
+    if other && other.id != id
       # This should never happen.
-      errors.add(:key, 'api keys must be unique')
+      errors.add(:key, "api keys must be unique")
     end
-    if notes.blank?
-      errors.add(:notes, :account_api_keys_no_notes.t)
-    end
+    errors.add(:notes, :account_api_keys_no_notes.t) if notes.blank?
   end
 end

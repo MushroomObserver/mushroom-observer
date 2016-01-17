@@ -1,7 +1,6 @@
 require "test_helper"
 
 class PublicationsControllerTest < FunctionalTestCase
-
   def test_should_get_index
     get :index
     assert_response :success
@@ -14,15 +13,7 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response :success
     assert_not_nil assigns(:publications)
     assert_link_in_html("Edit", action: :edit, id: 1)
-    # assert_link_in_html("Destroy", action: :destroy, id: 1)
-    # Above assertion didn't work in Rails 4,
-    # although manual inspection of the response shows the link exists.
-    # Instead, use Rails assert_select assertion.
-    # Assert there's anchor with href matching the regex,
-    #   that its text matches the quoted text,
-    #   and that there's only one such anchor.
-    assert_select("a[href=?]", /\/publications\/1\/destroy/,
-                  { text: "Destroy", count: 1 } )
+    assert_link_in_html("Destroy", action: :destroy, id: 1)
   end
 
   def test_should_get_new
@@ -37,7 +28,7 @@ class PublicationsControllerTest < FunctionalTestCase
     ref  = "Author, J.R. 2014. Mushroom Observer Rocks! Some Journal 1(2): 3-4."
     link = "http://some_journal.com/mo_rocks.html"
     help = "it exists"
-    assert_difference("Publication.count", +1) do
+    assert_difference("Publication.count",+1) do
       post :create, publication: {
         full: ref,
         link: link,
@@ -59,14 +50,14 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_not_create_publication_if_user_not_successful
     login "spamspamspam"
     assert_no_difference("Publication.count") do
-      post :create, publication: { }
+      post :create, publication: {}
     end
   end
 
   def test_should_not_create_publication_if_form_empty
     login
     assert_no_difference("Publication.count") do
-      post :create, publication: { }
+      post :create, publication: {}
     end
   end
 
@@ -86,7 +77,7 @@ class PublicationsControllerTest < FunctionalTestCase
 
   def test_should_update_publication
     login
-    put :update, id: publications(:one).id, publication: { }
+    put :update, id: publications(:one).id, publication: {}
     assert_redirected_to publication_path(assigns(:publication))
   end
 

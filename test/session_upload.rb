@@ -12,6 +12,6 @@ end
 
 class JpegUpload < FileUpload
   def initialize(filename)
-    super(filename, 'image/jpeg')
+    super(filename, "image/jpeg")
   end
 end

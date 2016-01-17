@@ -17,9 +17,8 @@ class FunctionalTestCase < ActionController::TestCase
   include ControllerExtensions
   include CheckForUnsafeHtml
 
-
-# temporarily silence deprecation warnings
-# ActiveSupport::Deprecation.silenced = true
+  # temporarily silence deprecation warnings
+  # ActiveSupport::Deprecation.silenced = true
 
   def get(*args, &block)
     super(*args, &block)

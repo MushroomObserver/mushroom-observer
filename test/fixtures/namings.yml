@@ -73,3 +73,51 @@ coprinus_comatus_other_naming:
   observation_id: 3
   reasons: "---\n1: \"\"\n2: I asked *Uncle Herb*\n"
 
+boletus_edulis_naming:
+  id: 10
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4
+  name_id: 39
+  observation_id: 17
+
+tremella_naming:
+  id: 11
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 3
+  name_id: 46
+  observation_id: 18
+
+tremella_mesenterica_naming:
+  id: 12
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4  # dick
+  name_id: 45 # Tremella mesenterica
+  observation_id: 18
+
+owner_multiple_favorites_first_naming:
+  id: 13
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4  # dick
+  name_id: 46 # Tremella
+  observation_id: 19
+
+owner_multiple_favorites_second_naming:
+  id: 14
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4  # dick
+  name_id: 45 # Tremella mesenterica
+  observation_id: 19
+
+owner_uncertain_favorite_naming:
+  id: 15
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4  # dick
+  name_id: 45 # Tremella mesenterica
+  observation_id: 20
+

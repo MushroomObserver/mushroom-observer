@@ -37,7 +37,6 @@
 ################################################################################
 
 module SessionExtensions
-
   ##############################################################################
   #
   #  :section: Debugging
@@ -46,17 +45,17 @@ module SessionExtensions
 
   # Dump out a list of all the links on the last page rendered.
   def dump_links
-    assert_select('a[href]') do |links|
+    assert_select("a[href]") do |links|
       for link in links
-        puts "link: #{link.attributes['href']}"
+        puts "link: #{link.attributes["href"]}"
       end
     end
   end
 
   # Save response from last request so you can look at it in a browser.
-  def save_page(file=nil)
-    file ||= "#{::Rails.root.to_s}/public/test.html"
-    File.open(file, 'w') do |fh|
+  def save_page(file = nil)
+    file ||= "#{::Rails.root}/public/test.html"
+    File.open(file, "w") do |fh|
       fh.write(response.body)
     end
   end
@@ -68,10 +67,10 @@ module SessionExtensions
     Symbol.missing_tags = []
     send("#{method.downcase}_via_redirect", url, *args)
     if status == 500
-      if error = controller.instance_variable_get('@error')
+      if error = controller.instance_variable_get("@error")
         msg = "#{error}\n#{error.backtrace.join("\n")}"
       else
-        msg = "Got unknown 500 error from outside our application?!\n" +
+        msg = "Got unknown 500 error from outside our application?!\n" \
               "This usually means that a file failed to parse.\n"
       end
       flunk msg
@@ -124,10 +123,10 @@ module SessionExtensions
 
   # Get string representing (our) query from the given URL.  Defaults to the
   # current page's URL.  (In practice, for now, this is just the Query id.)
-  def parse_query_params(url=path)
-    path, query = url.split('?')
+  def parse_query_params(url = path)
+    path, query = url.split("?")
     params = CGI.parse(query)
-    params['q']
+    params["q"]
   end
 
   # Get an Array of URLs for the given links.
@@ -138,9 +137,9 @@ module SessionExtensions
   def get_links(*args)
     results = []
     assert_select(*args) do |links|
-      results = links.map {|l| l.attributes['href']}
+      results = links.map { |l| l.attributes["href"] }
     end
-    return results
+    results
   end
 
   ################################################################################
@@ -152,7 +151,13 @@ module SessionExtensions
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
       for key, value in expected_values
-        form.assert_value(key, value)
+        if value == true
+          form.assert_checked(key)
+        elsif value == false
+          form.assert_checked(key, false)
+        else
+          form.assert_value(key, value)
+        end
       end
     end
   end
@@ -173,19 +178,19 @@ module SessionExtensions
   def open_form(*args)
     form = nil
     if args == []
-      action = path.sub(/\?.*/, '')
-      args << "form[action^=#{action}]"
+      action = path.sub(/\?.*/, "")
+      args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,
                    "Found multiple forms matching #{args.inspect}.")
       elem = elems.first
-      assert_equal('form', elem.name,
+      assert_equal("form", elem.name,
                    "Expected #{args.inspect} to find a form!")
       form = Form.new(self, elem)
       yield(form) if block_given?
     end
-    return form
+    form
   end
 
   ##############################################################################
@@ -195,28 +200,24 @@ module SessionExtensions
   ##############################################################################
 
   # Save response from last query on the page stack.
-  def push_page(name='')
+  def push_page(name = "")
     @page_stack ||= []
-    @page_stack.push({ name: name, body: response.body })
+    @page_stack.push(name: name, body: response.body)
   end
 
   # Go back one or more times and restore a previous query result.  If called
   # with no argument, it just restores the previous page and doesn't affect the
   # stack.  If called with 2, it pops one page off the stack then restores the
   # page before that.  And so on.
-  def go_back(arg=1)
+  def go_back(arg = 1)
     if arg.is_a?(Fixnum)
       while arg > 1
         @page_stack.pop
         arg -= 1
       end
     else
-      while @page_stack.any? and (@page_stack.last[:name] != arg)
-        @page_stack.pop
-      end
-      if @page_stack.empty?
-        raise("Missing page called #{name.inspect}!")
-      end
+      @page_stack.pop while @page_stack.any? && (@page_stack.last[:name] != arg)
+      fail("Missing page called #{name.inspect}!") if @page_stack.empty?
     end
     response.body = @page_stack.last[:body]
     @html_document = HTML::Document.new(response.body)
@@ -227,21 +228,17 @@ module SessionExtensions
   # label:: Label contains a String or matches a Regexp.
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
-  def click(args={})
-    select = 'a[href]'
+  def click(args = {})
+    select = "a[href]"
     sargs  = []
 
     # Filter links based on URL.
     if arg = args[:href]
       if arg.is_a?(Regexp)
-        if arg.to_s.match(/^..-mix:\^/)
-          select = "a[href^=?]"
-        else
-          select = "a[href*=?]"
-        end
+        select = "a:match('href',?)"
         sargs << arg
       else
-        select = "a[href^=#{arg}]"
+        select = "a[href^='#{arg}']"
       end
     end
 
@@ -250,13 +247,13 @@ module SessionExtensions
       if arg == :left_tabs
         arg = 'div#left_tabs'
       elsif arg == :right_tabs
-          arg = 'div#right_tabs'
+        arg = 'div#right_tabs'
       elsif arg == :sort_tabs
-            arg = 'div#sorts'
+        arg = 'div#sorts'
       elsif arg == :left_panel
         arg = 'div#navigation'
       elsif arg == :results
-        arg = 'div.results'
+        arg = "div.results"
       elsif arg == :title
         arg = 'div#title'
       end
@@ -265,24 +262,23 @@ module SessionExtensions
 
     done = false
     assert_select(select, *sargs) do |links|
-
       for link in links
         match = true
 
         # Filter based on link "label" (can be an image too, for example).
         if arg = args[:label]
           if arg == :image
-            match = false if !link.to_s.match(/img /)
+            match = false unless link.to_s.match(/img /)
           elsif arg.is_a?(Regexp)
-            match = false if !link.to_s.match(arg)
+            match = false unless link.to_s.match(arg)
           else
-            match = false if !link.to_s.index(arg)
+            match = false unless link.to_s.index(arg)
           end
         end
 
         # Click on first link that matches everything.
         if match
-          url = CGI.unescapeHTML(link.attributes['href'])
+          url = CGI.unescapeHTML(link.attributes["href"])
           get(url)
           done = true
           break
@@ -300,34 +296,34 @@ module SessionExtensions
   ################################################################################
 
   def assert_link_exists(url)
-    assert_link_exists_general_case(url, '')
+    assert_link_exists_general_case(url, "")
   end
 
   def assert_no_link_exists(url)
-    assert_no_link_exists_general_case(url, '')
+    assert_no_link_exists_general_case(url, "")
   end
 
   def assert_link_exists_containing(url)
-    assert_link_exists_general_case(url, '*')
+    assert_link_exists_general_case(url, "*")
   end
 
   def assert_no_link_exists_containing(url)
-    assert_no_link_exists_general_case(url, '*')
+    assert_no_link_exists_general_case(url, "*")
   end
 
   def assert_link_exists_beginning_with(url)
-    assert_link_exists_general_case(url, '^')
+    assert_link_exists_general_case(url, "^")
   end
 
   def assert_no_link_exists_beginning_with(url)
-    assert_no_link_exists_general_case(url, '^')
+    assert_no_link_exists_general_case(url, "^")
   end
 
   def assert_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { minimum: 1 }, "Expected to find link to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { minimum: 1 }, "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { count: 0 }, "Shouldn't be any links to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { count: 0 }, "Shouldn't be any links to #{url}")
   end
 end

@@ -21,6 +21,6 @@ class RemoveTransactions < ActiveRecord::Migration
   end
 
   def self.down
-    raise "This migration cannot be reversed!"
+    fail "This migration cannot be reversed!"
   end
 end

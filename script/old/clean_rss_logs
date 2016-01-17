@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 cutoff = 1.year.ago + 1.week
 
@@ -23,7 +23,7 @@ for log in RssLog.all
   if log.updated_at > cutoff
     new_notes = old_notes.split(/\r?\n/).select do |line|
       if line.match(/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/)
-        time = Time.utc($1, $2, $3, $4, $5, $6)
+        time = Time.utc(Regexp.last_match(1), Regexp.last_match(2), Regexp.last_match(3), Regexp.last_match(4), Regexp.last_match(5), Regexp.last_match(6))
         last_time ||= time
         time >= cutoff
       else

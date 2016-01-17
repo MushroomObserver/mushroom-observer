@@ -1,15 +1,15 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class PivotalTest < UnitTestCase
   def test_get_stories
     if MO.pivotal_enabled
       stories = Pivotal.get_stories
       assert(stories.length > 10)
-      test_story = stories.select {|s| s.id == MO.pivotal_test_id}.first
+      test_story = stories.find { |s| s.id == MO.pivotal_test_id }
       assert_not_nil(test_story)
       assert_true(test_story.active?)
-      assert_equal('test', test_story.name)
+      assert_equal("test", test_story.name)
       assert_match(/test story/, test_story.description)
       refute_match(/USER|VOTE/, test_story.description)
       assert_equal(1, test_story.comments.length)
@@ -19,7 +19,7 @@ class PivotalTest < UnitTestCase
       assert_equal(1, test_story.user_vote(junk))
       assert_equal(-1, test_story.user_vote(dick))
       assert_equal(1, test_story.score)
-      assert_equal(['code'], test_story.labels)
+      assert_equal(["code"], test_story.labels)
       assert_match(/test comment/, test_story.comments.first.text)
       assert_equal(mary.id, test_story.comments.first.user.id)
     end
@@ -29,7 +29,7 @@ class PivotalTest < UnitTestCase
     if MO.pivotal_enabled
       story = Pivotal.get_story(MO.pivotal_test_id)
       assert_not_nil(story)
-      assert_equal('test', story.name)
+      assert_equal("test", story.name)
       assert_equal(1, story.comments.length)
       assert_equal(3, story.votes.length)
       assert_equal(1, story.score)
@@ -40,24 +40,24 @@ class PivotalTest < UnitTestCase
   # Instead of doing a teardown, I'm just going to throw all tests that
   # involve modifying the live(!) Pivotal server in a single test.
   def test_modifications
-    if MO.pivotal_enabled and false
+    if MO.pivotal_enabled && false
 
       # Clean up after failed previous tests.
       stories = Pivotal.get_stories
-      for story in stories.select {|s| s.name == 'temp'}
+      for story in stories.select { |s| s.name == "temp" }
         puts "Cleaning up story ##{story.id}"
         Pivotal.delete_story(story.id)
       end
 
       puts "Creating temp story..."
-      story = Pivotal.create_story('temp', 'this is a test', mary)
+      story = Pivotal.create_story("temp", "this is a test", mary)
       assert_not_nil(story)
-      assert_equal('feature', story.type)
-      assert_equal('unscheduled', story.state)
+      assert_equal("feature", story.type)
+      assert_equal("unscheduled", story.state)
       assert_equal(mary.id, story.user.id)
-      assert_equal('temp', story.name)
+      assert_equal("temp", story.name)
       assert_equal("this is a test\n", story.description)
-      assert_equal(['other'], story.labels)
+      assert_equal(["other"], story.labels)
       assert_equal([], story.comments)
       assert_equal([], story.votes)
 
@@ -82,7 +82,7 @@ class PivotalTest < UnitTestCase
       assert_equal(-1, result.score)
 
       puts "Posting comment..."
-      result = Pivotal.post_comment(story.id, mary, 'test comment')
+      result = Pivotal.post_comment(story.id, mary, "test comment")
       assert_kind_of(Pivotal::Comment, result)
       assert_equal("test comment\n", result.text)
       assert_equal(mary.id, result.user.id)

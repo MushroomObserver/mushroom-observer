@@ -5,11 +5,11 @@
 #  Model describing a User.
 #
 #  Login is handled by lib/login_system.rb, a third-party package that we've
-#  updated slightly.  It is enforced by adding <tt>before_filter
+#  updated slightly.  It is enforced by adding <tt>before_action
 #  :login_required</tt> filters to the controllers.
 #
 #  We now support autologin or "remember me" login via a simple cookie and the
-#  application-wide <tt>before_filter :autologin</tt> filter in
+#  application-wide <tt>before_action :autologin</tt> filter in
 #  ApplicationController.
 #
 #  == Signup / Login Process
@@ -253,64 +253,64 @@
 ################################################################################
 
 class User < AbstractModel
-  require 'digest/sha1'
+  require "digest/sha1"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
   as_enum(:thumbnail_size,
-           { thumbnail: 1,
-             small: 2
-           },
-           source: :thumbnail_size,
-           with: [],
-           accessor: :whiny
+          { thumbnail: 1,
+            small: 2
+          },
+          source: :thumbnail_size,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:image_size,
-           { thumbnail: 1,
-             small: 2,
-             medium: 3,
-             large: 4,
-             huge: 5,
-             full_size: 6
-           },
-           source: :image_size,
-           with: [],
-           accessor: :whiny
+          { thumbnail: 1,
+            small: 2,
+            medium: 3,
+            large: 4,
+            huge: 5,
+            full_size: 6
+          },
+          source: :image_size,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:votes_anonymous,
-           { no: 1,
-             yes: 2,
-             old: 3
-           },
-           source: :votes_anonymous,
-           with: [],
-           accessor: :whiny
+          { no: 1,
+            yes: 2,
+            old: 3
+          },
+          source: :votes_anonymous,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:location_format,
-           { postal: 1,
-             scientific: 2
-           },
-           source: :location_format,
-           with: [],
-           accessor: :whiny
+          { postal: 1,
+            scientific: 2
+          },
+          source: :location_format,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:hide_authors,
-           { none: 1,
-             above_species: 2
-           },
-           source: :hide_authors,
-           with: [],
-           accessor: :whiny
+          { none: 1,
+            above_species: 2
+          },
+          source: :hide_authors,
+          with: [],
+          accessor: :whiny
          )
   as_enum(:keep_filenames,
-           { toss: 1,
-             keep_but_hide: 2,
-             keep_and_show: 3
-           },
-           source: :keep_filenames,
-           with: [],
-           accessor: :whiny
+          { toss: 1,
+            keep_but_hide: 2,
+            keep_and_show: 3
+          },
+          source: :keep_filenames,
+          with: [],
+          accessor: :whiny
          )
 
   has_many :api_keys, dependent: :destroy
@@ -335,27 +335,27 @@ class User < AbstractModel
 
   has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
   has_many :reviewed_name_descriptions, class_name: "NameDescription",
-             foreign_key: "reviewer_id"
+                                        foreign_key: "reviewer_id"
   has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
   has_and_belongs_to_many :user_groups,
-    class_name: "UserGroup",
-    join_table: "user_groups_users"
+                          class_name: "UserGroup",
+                          join_table: "user_groups_users"
   has_and_belongs_to_many :authored_names,
-    class_name: "NameDescription",
-    join_table: "name_descriptions_authors"
+                          class_name: "NameDescription",
+                          join_table: "name_descriptions_authors"
   has_and_belongs_to_many :edited_names,
-    class_name: "NameDescription",
-    join_table: "name_descriptions_editors"
+                          class_name: "NameDescription",
+                          join_table: "name_descriptions_editors"
   has_and_belongs_to_many :authored_locations,
-    class_name: "LocationDescription",
-    join_table: "location_descriptions_authors"
+                          class_name: "LocationDescription",
+                          join_table: "location_descriptions_authors"
   has_and_belongs_to_many :edited_locations,
-    class_name: "LocationDescription",
-    join_table: "location_descriptions_editors"
+                          class_name: "LocationDescription",
+                          join_table: "location_descriptions_editors"
   has_and_belongs_to_many :curated_herbaria,
-    class_name: "Herbarium",
-    join_table: "herbaria_curators"
+                          class_name: "Herbarium",
+                          join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -407,8 +407,8 @@ class User < AbstractModel
   #   user = User.current
   #
   def self.current
-    @@user = nil if !defined?(@@user)
-    return @@user
+    @@user = nil unless defined?(@@user)
+    @@user
   end
 
   # Report which User is currently logged in. Returns id, or +nil+ if none.
@@ -416,8 +416,8 @@ class User < AbstractModel
   #   user_id = User.current_id
   #
   def self.current_id
-    @@user = nil if !defined?(@@user)
-    return @@user && @@user.id
+    @@user = nil unless defined?(@@user)
+    @@user && @@user.id
   end
 
   # Report current user's preferred location_format
@@ -425,7 +425,7 @@ class User < AbstractModel
   # location_format = User.current_location_format
   #
   def self.current_location_format
-    if !defined?(@@user) or @@user.nil?
+    if !defined?(@@user) || @@user.nil?
       :postal
     else
       @@user.location_format
@@ -436,6 +436,11 @@ class User < AbstractModel
   # by the +autologin+ filter.
   def self.current=(x)
     @@user = x
+  end
+
+  # Did current user opt to view owner_id's?
+  def self.view_owner_id_on?
+    try(:current).try(:view_owner_id)
   end
 
   # Clear cached data structures when reload.
@@ -487,7 +492,7 @@ class User < AbstractModel
   end
 
   def format_name
-    self.unique_text_name
+    unique_text_name
   end
 
   # Return User's full name if present, else return login.
@@ -496,10 +501,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def legal_name
-    if self.name.to_s != ''
-      self.name
+    if name.to_s != ""
+      name
     else
-      self.login
+      login
     end
   end
 
@@ -508,8 +513,16 @@ class User < AbstractModel
   end
 
   def legal_name_change
-    old_name  = name_change[0]  rescue name
-    old_login = login_change[0] rescue login
+    old_name  = begin
+                  name_change[0]
+                rescue
+                  name
+                end
+    old_login = begin
+                  login_change[0]
+                rescue
+                  login
+                end
     old_legal_name = old_name.blank? ? old_login : old_name
     new_legal_name = legal_name
     if old_legal_name != new_legal_name
@@ -535,7 +548,7 @@ class User < AbstractModel
   def self.authenticate(login, pass)
     where("(login = ? OR name = ? OR email = ?) AND password = ? AND
            password != '' ",
-           login, login, login, sha1(pass) ).first
+          login, login, login, sha1(pass)).first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -544,9 +557,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    if !pass.blank?
-      update_attribute "password", self.class.sha1(pass)
-    end
+    update_attribute "password", self.class.sha1(pass) unless pass.blank?
   end
 
   # Mark a User account as "verified".
@@ -555,7 +566,7 @@ class User < AbstractModel
     self.verified = now
     self.last_login = now
     self.last_activity = now
-    self.save
+    save
   end
 
   ##############################################################################
@@ -573,7 +584,7 @@ class User < AbstractModel
     if group.is_a?(UserGroup)
       user_groups.include?(group)
     else
-      user_groups.any? {|g| g.name == group.to_s}
+      user_groups.any? { |g| g.name == group.to_s }
     end
   end
 
@@ -596,7 +607,9 @@ class User < AbstractModel
   end
 
   def preferred_herbarium_name
-    preferred_herbarium.name rescue personal_herbarium_name
+    preferred_herbarium.name
+  rescue
+    personal_herbarium_name
   end
 
   # Return the name of this user's "favorite" herbarium
@@ -606,19 +619,19 @@ class User < AbstractModel
     herbarium_id = Herbarium.connection.select_value(%(
       SELECT herbarium_id, count(id) FROM specimens WHERE user_id=#{id}
       GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
-    ));
+    ))
     herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
   end
 
   def personal_herbarium_name
     Herbarium.connection.select_value(%(
-      SELECT name FROM herbaria WHERE personal_user_id = #{self.id} LIMIT 1
-    )) || :user_personal_herbarium.l(:name => self.unique_text_name)
+      SELECT name FROM herbaria WHERE personal_user_id = #{id} LIMIT 1
+    )) || :user_personal_herbarium.l(name: unique_text_name)
   end
 
   def personal_herbarium
-  # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
-    Herbarium.where(personal_user_id: self.id).first
+    # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
+    Herbarium.where(personal_user_id: id).first
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
@@ -627,7 +640,7 @@ class User < AbstractModel
     @all_editable_species_lists ||= begin
       results = species_lists
       if projects_member.any?
-        project_ids = projects_member.map(&:id).join(',')
+        project_ids = projects_member.map(&:id).join(",")
         results += SpeciesList.find_by_sql %(
           SELECT species_lists.* FROM species_lists, projects_species_lists
           WHERE species_lists.user_id != #{id}
@@ -663,7 +676,7 @@ class User < AbstractModel
           AND target_id = #{object.id}
         LIMIT 1
       )).to_s
-      state == '1' ? :watching : state == '0' ? :ignoring : nil
+      state == "1" ? :watching : state == "0" ? :ignoring : nil
     end
   end
 
@@ -698,15 +711,9 @@ class User < AbstractModel
   def percent_complete
     max = 3
     result = 0
-    if self.notes && self.notes != ""
-      result += 1
-    end
-    if self.location_id
-      result += 1
-    end
-    if self.image_id
-      result += 1
-    end
+    result += 1 if notes && notes != ""
+    result += 1 if location_id
+    result += 1 if image_id
     result * 100 / max
   end
 
@@ -715,12 +722,12 @@ class User < AbstractModel
   #   contribution += user.sum_bonuses
   #
   def sum_bonuses
-    if bonuses
-      bonuses.inject(0) {|sum, pair| sum + pair[0]}
-    end
+    bonuses.inject(0) { |sum, pair| sum + pair[0] } if bonuses
   end
 
-  def is_successful_contributor?; observations.length > 0; end
+  def is_successful_contributor?
+    observations.length > 0
+  end
 
   ##############################################################################
   #
@@ -746,6 +753,7 @@ class User < AbstractModel
   def alert_created_at
     get_alert[:created_at]
   end
+
   def alert_created_at=(x)
     get_alert[:created_at] = x
   end
@@ -754,6 +762,7 @@ class User < AbstractModel
   def alert_user_id
     get_alert[:user_id]
   end
+
   def alert_user_id=(x)
     get_alert[:user_id] = x
   end
@@ -762,6 +771,7 @@ class User < AbstractModel
   def alert_user
     User.find(alert_user_id)
   end
+
   def alert_user=(x)
     get_alert[:user_id] = x ? x.id : nil
   end
@@ -770,6 +780,7 @@ class User < AbstractModel
   def alert_next_showing
     get_alert[:next_showing]
   end
+
   def alert_next_showing=(x)
     get_alert[:next_showing] = x
   end
@@ -778,6 +789,7 @@ class User < AbstractModel
   def alert_type
     get_alert[:type]
   end
+
   def alert_type=(x)
     get_alert[:type] = x
   end
@@ -786,6 +798,7 @@ class User < AbstractModel
   def alert_notes
     get_alert[:notes]
   end
+
   def alert_notes=(x)
     get_alert[:notes] = x
   end
@@ -810,12 +823,12 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     result = []
-    if !File.exists?(MO.user_primer_cache_file) ||
+    if !File.exist?(MO.user_primer_cache_file) ||
        File.mtime(MO.user_primer_cache_file) < Time.now - 1.day
 
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
-      result = self.connection.select_values(%(
+      result = connection.select_values(%(
         SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
         FROM users
         ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH, last_login, NULL) DESC,
@@ -823,11 +836,11 @@ class User < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      File.open(MO.user_primer_cache_file, 'w:utf-8').write(result.join("\n") + "\n")
+      File.open(MO.user_primer_cache_file, "w:utf-8").write(result.join("\n") + "\n")
     else
       result = File.open(MO.user_primer_cache_file, "r:UTF-8").readlines.map(&:chomp)
     end
-    return result
+    result
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -835,7 +848,6 @@ class User < AbstractModel
   # 2) Image votes.
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
-
     # Blank out any references in public records.
     for table, col in [
       [:location_descriptions,          :user_id],
@@ -851,7 +863,7 @@ class User < AbstractModel
       [:projects,                       :user_id],
       # Leave votes and namings, because I don't want to recalc consensuses.
       [:namings,                        :user_id],
-      [:votes,                          :user_id],
+      [:votes,                          :user_id]
     ]
       User.connection.update %(
         UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
@@ -869,7 +881,7 @@ class User < AbstractModel
         [:name_descriptions_admins,      :user_group_id],
         [:name_descriptions_readers,     :user_group_id],
         [:name_descriptions_writers,     :user_group_id],
-        [:user_groups,                   :id],
+        [:user_groups,                   :id]
       ]
         User.connection.delete %(
           DELETE FROM #{table} WHERE `#{col}` = #{group_id}
@@ -882,14 +894,14 @@ class User < AbstractModel
       SELECT id FROM observations WHERE user_id = #{id}
     )).map(&:to_s)
     if ids.any?
-      ids = ids.join(',')
+      ids = ids.join(",")
       for table, id_col, type_col in [
         [:comments,            :target_id, :target_type],
         [:images_observations, :observation_id],
         [:interests,           :target_id, :target_type],
         [:namings,             :observation_id],
         [:rss_logs,            :observation_id],
-        [:votes,               :observation_id],
+        [:votes,               :observation_id]
       ]
         if type_col
           User.connection.delete %(
@@ -920,7 +932,7 @@ class User < AbstractModel
       [:publications,                  :user_id],
       [:species_lists,                 :user_id],
       [:user_groups_users,             :user_id],
-      [:users,                         :id],
+      [:users,                         :id]
     ]
       User.connection.delete %(
         DELETE FROM #{table} WHERE `#{col}` = #{id}
@@ -931,15 +943,14 @@ class User < AbstractModel
   # Does user have any unshown naming notifications?
   # (I'm thoroughly confused about what role the observation plays in this
   # complicated set of pages. -JPH)
-  def has_unshown_naming_notifications?(observation=nil)
+  def has_unshown_naming_notifications?(_observation = nil)
     result = false
-    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
     for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                               user_id: self.id)
+                               user_id: id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
         notification = Notification.find(notification_id)
-        if notification and notification.note_template
+        if notification && notification.note_template
           result = true
           break
         end
@@ -955,9 +966,9 @@ class User < AbstractModel
     end
   end
 
-################################################################################
+  ################################################################################
 
-protected
+  protected
 
   # Encrypt a password.
   def self.sha1(pass) # :nodoc:
@@ -984,7 +995,7 @@ protected
   def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif login.length < 3 or login.bytesize > 40
+    elsif login.length < 3 || login.bytesize > 40
       errors.add(:login, :validate_user_login_too_long.t)
     elsif (other = User.find_by_login(login)) && (other.id != id)
       errors.add(:login, :validate_user_login_taken.t)
@@ -992,7 +1003,7 @@ protected
 
     if password.to_s.blank?
       # errors.add(:password, :validate_user_password_missing.t)
-    elsif password.length < 5 or password.bytesize > 40
+    elsif password.length < 5 || password.bytesize > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
@@ -1005,12 +1016,10 @@ protected
     if theme.to_s.bytesize > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    if name.to_s.bytesize > 80
-      errors.add(:name, :validate_user_name_too_long.t)
-    end
+    errors.add(:name, :validate_user_name_too_long.t) if name.to_s.bytesize > 80
   end
 
-  validate(:check_password, :on => :create)
+  validate(:check_password, on: :create)
   def check_password # :nodoc:
     unless password.blank?
       if password_confirmation.to_s.blank?

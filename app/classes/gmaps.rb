@@ -43,16 +43,15 @@
 ##############################################################################
 
 module GM
-  GMAPS_API_URL = 'https://maps.googleapis.com/maps/api/js'
-  GMAPS_CONFIG_FILE = 'config/gmaps_api_key.yml'
-  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + '/' + GMAPS_CONFIG_FILE)
+  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js"
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
+  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   class GMap
-
     # Escape carrier returns and single and double quotes for JavaScript segments.
     # Lifted from ActionView::Helpers::JavascriptHelper (2.1.1) -JPH
     def self.escape_javascript(javascript)
-      (javascript || '').gsub('\\','\0\0').gsub('</','<\/').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
+      (javascript || "").gsub('\\', '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
     end
 
     def self.header(args)
@@ -142,13 +141,13 @@ module GM
       east1 = west1 = nil  # east edge and west edge assuming not straddling date line
       east2 = west2 = nil  # east edge and west edge assuming it DOES straddle date line
       for lat, long in points
-        north = lat  if north.nil? or lat  > north
-        south = lat  if south.nil? or lat  < south
-        east1 = long if east1.nil? or long > east1
-        west1 = long if west1.nil? or long < west1
+        north = lat  if north.nil? || lat > north
+        south = lat  if south.nil? || lat < south
+        east1 = long if east1.nil? || long > east1
+        west1 = long if west1.nil? || long < west1
         long += 360 if long < 0
-        east2 = long if east2.nil? or long > east2
-        west2 = long if west2.nil? or long < west2
+        east2 = long if east2.nil? || long > east2
+        west2 = long if west2.nil? || long < west2
       end
       self.north = north
       self.south = south
@@ -186,25 +185,21 @@ module GM
         elsif key == :height
           height = val
         else
-          raise "Unexpected option \"#{key}\" for GMap#div."
+          fail "Unexpected option \"#{key}\" for GMap#div."
         end
       end
-      if (height.is_a?(Fixnum))
-          height = height.to_s + "px";
-      end
-      if (width.is_a?(Fixnum))
-        width = width.to_s + "px";
-      end
+      height = height.to_s + "px" if height.is_a?(Fixnum)
+      width = width.to_s + "px" if width.is_a?(Fixnum)
       "<div id='#{name}' style='width:#{width};height:#{height}'></div>"
     end
 
-    def to_html(args)
-      "#{global_declarations_code}\n" +
-      "G.event.addDomListener(window, 'load', function() {\n" + 
-        "var M = #{name} = new G.Map(E('#{name}'), { #{map_options_code.join(', ')} });\n" +
-        "#{center_map_code}\n" +
-        "#{overlays_code}\n" +
-        "#{events_code}\n" +
+    def to_html(_args)
+      "#{global_declarations_code}\n" \
+      "G.event.addDomListener(window, 'load', function() {\n" \
+        "var M = #{name} = new G.Map(E('#{name}'), { #{map_options_code.join(", ")} });\n" \
+        "#{center_map_code}\n" \
+        "#{overlays_code}\n" \
+        "#{events_code}\n" \
       "});"
     end
 
@@ -213,19 +208,19 @@ module GM
       for obj in overlays
         result += "\nvar #{obj.var};" if obj.var
       end
-      return result
+      result
     end
 
     def map_options_code
       [
-        "mapTypeControl:#{large ? 'true' : 'false'}",
-        "mapTypeId:G.MapTypeId.#{large ? 'TERRAIN' : 'ROADMAP'}"
+        "mapTypeControl:#{large ? "true" : "false"}",
+        "mapTypeId:G.MapTypeId.#{large ? "TERRAIN" : "ROADMAP"}"
       ]
     end
 
     def center_map_code
       if zoom
-        "M.setCenter(L(#{lat}, #{long}));\n" +
+        "M.setCenter(L(#{lat}, #{long}));\n" \
         "M.setZoom(#{zoom});"
       else
         "M.fitBounds(new G.LatLngBounds( L(#{south},#{west}), L(#{north},#{east}) ));"
@@ -233,21 +228,21 @@ module GM
     end
 
     def overlays_code
-      result = ''
+      result = ""
       for obj in overlays
         result += obj.create_and_initialize_code + ";\n"
       end
-      result.sub!(/\n\Z/, '')
-      return result
+      result.sub!(/\n\Z/, "")
+      result
     end
 
     def events_code
-      result = ''
+      result = ""
       for obj, event, code in events
         result += "G.event.addListener(#{obj.var}, '#{event}', #{code});\n"
       end
-      result.sub!(/\n\Z/, '')
-      return result
+      result.sub!(/\n\Z/, "")
+      result
     end
   end
 
@@ -272,20 +267,20 @@ module GM
         elsif key == :title
           self.title = opts[key].to_s
         else
-          raise "Unexpected option \"#{key}\" for GMarker."
+          fail "Unexpected option \"#{key}\" for GMarker."
         end
       end
     end
 
     def create_and_initialize_code
-      assign = var ? "#{var}=" : ''
+      assign = var ? "#{var}=" : ""
       args = [
-        'M', lat, long,
-        (draggable ? '1' : '0'),
-        (title ? "'#{GMap::escape_javascript(title)}'" : '0'),
-        (info_window ? "'#{GMap::escape_javascript(info_window)}'" : '0')
-      ];
-      "#{assign}P(#{args.join(',')})"
+        "M", lat, long,
+        (draggable ? "1" : "0"),
+        (title ? "'#{GMap.escape_javascript(title)}'" : "0"),
+        (info_window ? "'#{GMap.escape_javascript(info_window)}'" : "0")
+      ]
+      "#{assign}P(#{args.join(",")})"
     end
   end
 
@@ -305,15 +300,15 @@ module GM
     end
 
     def create_and_initialize_code
-      assign = var ? "#{var}=" : ''
+      assign = var ? "#{var}=" : ""
       opts   = [
-        'map:M',
-        "path:[#{points.map {|y,x| "L(#{y},#{x})" }.join(',')}]",
-        "strokeColor:'#{GMap::escape_javascript(color)}'",
+        "map:M",
+        "path:[#{points.map { |y, x| "L(#{y},#{x})" }.join(",")}]",
+        "strokeColor:'#{GMap.escape_javascript(color)}'",
         "strokeOpacity:#{opacity}",
         "strokeWeight:#{weight}"
       ]
-      "#{assign}new G.Polyline({#{opts.join(',')}})"
+      "#{assign}new G.Polyline({#{opts.join(",")}})"
     end
   end
 end

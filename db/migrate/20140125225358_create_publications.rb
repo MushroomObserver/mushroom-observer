@@ -1,6 +1,6 @@
 class CreatePublications < ActiveRecord::Migration
   def self.up
-    create_table :publications, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
+    create_table :publications, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
       t.integer :user_id
       t.text :full
       t.string :link

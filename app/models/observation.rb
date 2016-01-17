@@ -116,8 +116,8 @@
 ################################################################################
 
 class Observation < AbstractModel
-  belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
-  belongs_to :name      # (used to cache consensus name)
+  belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
+  belongs_to :name # (used to cache consensus name)
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -127,8 +127,8 @@ class Observation < AbstractModel
   before_destroy :notify_users_before_destroy
 
   has_many :votes
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!
@@ -136,31 +136,41 @@ class Observation < AbstractModel
 
   has_and_belongs_to_many :images
   has_and_belongs_to_many :projects
-  has_and_belongs_to_many :species_lists, :after_add => :add_spl_callback,
-                                          :before_remove => :remove_spl_callback
+  has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
+                                          before_remove: :remove_spl_callback
   has_and_belongs_to_many :specimens
 
-  after_update   :notify_users_after_change
+  after_update :notify_users_after_change
   before_destroy :notify_species_lists
-  after_destroy  :destroy_dependents
+  after_destroy :destroy_dependents
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
   # Override the default show_controller
-  def self.show_controller; 'observer'; end
-  def is_location?; false; end
-  def is_observation?; true; end
+  def self.show_controller
+    "observer"
+  end
+
+  def is_location?
+    false
+  end
+
+  def is_observation?
+    true
+  end
 
   # Always returns empty string.  (Used by
   # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr; ''; end
+  def idstr
+    ""
+  end
 
   # Adds error if couldn't find image with the given id.  (Used by
   # <tt>observer/reuse_image.rhtml</tt>.)
   def idstr=(id_field)
     id = id_field.to_i
-    img = Image.find(:id => id)
+    img = Image.find(id: id)
     unless img
       errors.add(:thumb_image_id, :validate_observation_thumb_image_id_invalid.t)
     end
@@ -170,7 +180,7 @@ class Observation < AbstractModel
     if location
       location.name
     else
-      self.where
+      where
     end
   end
 
@@ -181,9 +191,9 @@ class Observation < AbstractModel
     if location
       location.display_name
     elsif User.current_location_format == :scientific
-      Location.reverse_name(self.where)
+      Location.reverse_name(where)
     else
-      self.where
+      where
     end
   end
 
@@ -193,9 +203,9 @@ class Observation < AbstractModel
   def place_name=(place_name)
     place_name = place_name.strip_squeeze
     where = if User.current_location_format == :scientific
-      Location.reverse_name(place_name)
-    else
-      place_name
+              Location.reverse_name(place_name)
+            else
+              place_name
     end
     if loc = Location.find_by_name(where)
       self.where = nil
@@ -217,36 +227,37 @@ class Observation < AbstractModel
     if @when_str
       @when_str
     else
-      self.when.strftime('%Y-%m-%d')
+      self.when.strftime("%Y-%m-%d")
     end
   end
+
   def when_str=(x)
     @when_str = x
     self.when = x if Date.parse(x)
-    return x
+    x
   end
 
   def lat=(x)
     val = Location.parse_latitude(x)
-    val = x if val.nil? and !x.blank?
+    val = x if val.nil? && !x.blank?
     write_attribute(:lat, val)
   end
 
   def long=(x)
     val = Location.parse_longitude(x)
-    val = x if val.nil? and !x.blank?
+    val = x if val.nil? && !x.blank?
     write_attribute(:long, val)
   end
 
   def alt=(x)
     val = Location.parse_altitude(x)
-    val = x if val.nil? and !x.blank?
+    val = x if val.nil? && !x.blank?
     write_attribute(:alt, val)
   end
 
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
-    lat and location and not location.lat_long_close?(lat, long)
+    lat && location && !location.lat_long_close?(lat, long)
   end
 
   ##############################################################################
@@ -262,7 +273,7 @@ class Observation < AbstractModel
 
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name
-    name.real_search_name + " (#{id || '?'})"
+    string_with_id(name.real_search_name)
   end
 
   # Textile-marked-up name, never nil.
@@ -272,7 +283,9 @@ class Observation < AbstractModel
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    name.observation_name + " (#{id || '?'})" rescue ""
+    string_with_id(name.observation_name)
+  rescue
+    ""
   end
 
   def default_specimen_label
@@ -283,8 +296,8 @@ class Observation < AbstractModel
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
   def lookup_naming(naming)
-    namings.select {|n| n == naming}.first or
-      raise ActiveRecord::RecordNotFound, "Observation doesn't have naming with ID=#{naming.id}"
+    namings.find { |n| n == naming } ||
+      fail(ActiveRecord::RecordNotFound, "Observation doesn't have naming with ID=#{naming.id}")
   end
 
   # Dump out the sitatuation as the observation sees it.  Useful for debugging
@@ -292,15 +305,15 @@ class Observation < AbstractModel
   def dump_votes
     namings.map do |n|
       "#{n.id} #{n.name.real_search_name}: " +
-      (n.votes.empty? ? "no votes" : n.votes.map do |v|
-        "#{v.user.login}=#{v.value}" + (v.favorite ? '(*)' : '')
-      end.join(', '))
+        (n.votes.empty? ? "no votes" : n.votes.map do |v|
+          "#{v.user.login}=#{v.value}" + (v.favorite ? "(*)" : "")
+        end.join(", "))
     end.join("\n")
   end
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.select {|n| n.name == name}.length > 0
+    namings.select { |n| n.name == name }.count > 0
   end
 
   # Has the owner voted on a given Naming?
@@ -337,20 +350,58 @@ class Observation < AbstractModel
     lookup_naming(naming).is_users_favorite?(user)
   end
 
-  # Get a list of the owner's Votes for this Observation.
   def owners_votes
     users_votes(user)
   end
 
-  # Get a list of this User's Votes for this Observation.
   def users_votes(user)
     result = []
-    for n in namings
+    namings.each do |n|
       if v = n.users_vote(user)
         result << v
       end
     end
-    return result
+    result
+  end
+
+  def owner_favorite_or_explanation
+    if showable_owner_id?
+      owners_only_favorite_name.format_name
+    else
+      :show_observation_no_clear_preference
+    end
+  end
+
+  def owners_only_favorite_name
+    favs = owner_favorite_votes
+    favs[0].naming.name if favs.count == 1
+  end
+
+  def owner_favorite_vote
+    owner_favorite_votes.first
+  end
+
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
+  # show Observer ID? (observer's identification of Observation)
+  # (in code, Observer ID is "owner_id")
+  def show_owner_id?
+    User.view_owner_id_on?
+  end
+
+  def showable_owner_id?
+    owner_sure_enough? && owner_id_known?
+  end
+
+  def owner_sure_enough?
+    return unless owner_favorite_vote
+    owner_favorite_vote.value >= Vote.owner_id_min_confidence
+  end
+
+  def owner_id_known?
+    owners_only_favorite_name.try(:known?)
   end
 
   # Convert cached Vote score to percentage.
@@ -361,7 +412,7 @@ class Observation < AbstractModel
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
-  def change_vote(naming, value, user=User.current)
+  def change_vote(naming, value, user = User.current)
     result = false
     naming = lookup_naming(naming)
     vote  = naming.users_vote(user)
@@ -379,15 +430,13 @@ class Observation < AbstractModel
           # Get the max positive vote.
           max = 0
           for v in users_votes(user)
-            if v.value > max
-              max = v.value
-            end
+            max = v.value if v.value > max
           end
 
           # If any, mark all votes at that level "favorite".
           if max > 0
             for v in users_votes(user)
-              if (v.value == max) and
+              if (v.value == max) &&
                  !v.favorite
                 v.favorite = true
                 v.save
@@ -422,7 +471,7 @@ class Observation < AbstractModel
             favorite = false
             break
           # If any other votes are lower, those will not be favorite.
-          elsif (v.value < value) and
+          elsif (v.value < value) &&
                 v.favorite
             v.favorite = false
             v.save
@@ -433,10 +482,10 @@ class Observation < AbstractModel
       # Create vote if none exists.
       if !vote
         naming.votes.create!(
-          :user        => user,
-          :observation => self,
-          :value       => value,
-          :favorite    => favorite
+          user: user,
+          observation: self,
+          value: value,
+          favorite: favorite
         )
 
       # Change vote if it exists.
@@ -450,7 +499,7 @@ class Observation < AbstractModel
     # Update consensus if anything changed.
     calc_consensus if result
 
-    return result
+    result
   end
 
   def logged_change_vote(naming, vote)
@@ -466,13 +515,13 @@ class Observation < AbstractModel
     result = nil
 
     # First, get the Naming(s) for this Name, if any exists.
-    matches = namings.select {|n| n.name_id == name_id}
+    matches = namings.select { |n| n.name_id == name_id }
 
     # If not, it means that a deprecated Synonym won.  Look up all Namings
     # for Synonyms of the consensus Name.
     if matches == [] && name && name.synonym
       synonyms = name.synonyms
-      matches = namings.select {|n| synonyms.include?(n.name)}
+      matches = namings.select { |n| synonyms.include?(n.name) }
     end
 
     # Only one match -- easy!
@@ -491,7 +540,7 @@ class Observation < AbstractModel
       result = best_naming
     end
 
-    return result
+    result
   end
 
   # Get the community consensus on what the name should be.  It just adds up
@@ -502,9 +551,9 @@ class Observation < AbstractModel
   # only when there are multiple "accepted" names for the winning taxon.
   #
   # Returns Naming instance or nil.  Refreshes vote_cache as a side-effect.
-  def calc_consensus(debug=false)
+  def calc_consensus(debug = false)
     reload
-result = "" if debug
+    result = "" if debug
 
     # Gather votes for names and synonyms.  Note that this is trickier than one
     # would expect since it is possible to propose several synonyms for a
@@ -529,9 +578,7 @@ result = "" if debug
         user_id = vote.user_id
         val = vote.value
         wgt = user_wgts[user_id]
-        if wgt.nil?
-          wgt = user_wgts[user_id] = vote.user_weight
-        end
+        wgt = user_wgts[user_id] = vote.user_weight if wgt.nil?
         # It may be possible in the future for us to weight some "special"
         # users zero, who knows...  (It can cause a division by zero below if
         # we ignore zero weights.)
@@ -542,9 +589,9 @@ result = "" if debug
           # Record best vote for this user for this name.  This will be used
           # later to determine which name wins in the case of the winning taxon
           # (see below) having multiple accepted names.
-          name_votes[name_id] = {} if !name_votes[name_id]
+          name_votes[name_id] = {} unless name_votes[name_id]
           if !name_votes[name_id][user_id] ||
-              name_votes[name_id][user_id][0] < val
+             name_votes[name_id][user_id][0] < val
             name_votes[name_id][user_id] = [val, wgt]
           end
           # Record best vote for this user for this group of synonyms.  (Since
@@ -553,10 +600,10 @@ result = "" if debug
           # keeps them separate.)
           taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
           taxon_ages[taxon_id] = naming.created_at if !taxon_ages[taxon_id] || naming.created_at < taxon_ages[taxon_id]
-          taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
-result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
+          taxon_votes[taxon_id] = {} unless taxon_votes[taxon_id]
+          result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
           if !taxon_votes[taxon_id][user_id] ||
-              taxon_votes[taxon_id][user_id][0] < val
+             taxon_votes[taxon_id][user_id][0] < val
             taxon_votes[taxon_id][user_id] = [val, wgt]
           end
         end
@@ -580,7 +627,7 @@ result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id
         wgt = user_vote[1]
         vote[0] += val * wgt
         vote[1] += wgt
-result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
+        result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
       end
     end
 
@@ -595,19 +642,19 @@ result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt
       wgt = votes[taxon_id][1]
       val = votes[taxon_id][0].to_f / (wgt + 1.0)
       age = taxon_ages[taxon_id]
-result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
+      result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
       if best_val.nil? ||
          val > best_val || val == best_val && (
          wgt > best_wgt || wgt == best_wgt && (
          age < best_age
-        ))
+         ))
         best_val = val
         best_wgt = wgt
         best_age = age
         best_id  = taxon_id
       end
     end
-result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>" if debug
+    result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>" if debug
 
     # Reverse our kludge that mashed names-without-synonyms and synonym-groups
     # together.  In the end we just want a name.
@@ -627,7 +674,7 @@ result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age
         best = Name.find(match[2].to_i)
       end
     end
-result += "unmash: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
+    result += "unmash: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
@@ -640,7 +687,7 @@ result += "unmash: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
       if names.length == 1
         best = names.first
       elsif names.length > 1
-result += "Multiple synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
+        result += "Multiple synonyms: #{names.map(&:id).join(", ")}<br>" if debug
 
         # First combine votes for each name; exactly analagous to what we did
         # with taxa above.
@@ -653,7 +700,7 @@ result += "Multiple synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
             wgt = user_vote[1]
             vote[0] += val * wgt
             vote[1] += wgt
-result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
+            result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
           end
         end
 
@@ -676,12 +723,12 @@ result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<
             wgt = vote[1]
             val = vote[0].to_f / (wgt + 1.0)
             age = name_ages[name_id]
-result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
+            result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
             if best_val2.nil? ||
                val > best_val2 || val == best_val2 && (
                wgt > best_wgt2 || wgt == best_wgt2 && (
                age < best_age2
-              ))
+               ))
               best_val2 = val
               best_wgt2 = wgt
               best_age2 = age
@@ -689,11 +736,11 @@ result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
             end
           end
         end
-result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_age2}<br/>" if debug
+        result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_age2}<br/>" if debug
         best = best_id2 ? Name.find(best_id2) : names.first
       end
     end
-result += "unsynonymize: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
+    result += "unsynonymize: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
 
     # This should only occur for observations created by
     # species_list.construct_observation(), which doesn't necessarily create
@@ -702,24 +749,22 @@ result += "unsynonymize: best=#{best ? best.real_text_name : "nil"}<br/>" if deb
     # using first.  (I think it can also happen if zero-weighted users are
     # voting.)
     best = namings.first.name if !best && namings && namings.length > 0
-    best = Name.unknown if !best
-result += "fallback: best=#{best ? best.real_text_name : 'nil'}" if debug
+    best = Name.unknown unless best
+    result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
 
     # Make changes permanent.
     old = self.name
-    if (self.name != best) or
-       (self.vote_cache != best_val)
+    if (self.name != best) ||
+       (vote_cache != best_val)
       self.name = best
       self.vote_cache = best_val
-      self.save
+      save
     end
 
     # Log change if actually is a change.
-    if best != old
-      announce_consensus_change(old, best)
-    end
+    announce_consensus_change(old, best) if best != old
 
-return result if debug
+    return result if debug
   end
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
@@ -744,7 +789,6 @@ return result if debug
   # highest Vote (if they voted for multiple Synonym's).
   #
   def review_status
-
     # Get list of Name ids we care about.
     name_ids = [name_id]
     if name.synonym_id
@@ -754,7 +798,7 @@ return result if debug
     end
 
     # Get list of User ids for reviewers.
-    group = UserGroup.find_by_name('reviewers')
+    group = UserGroup.find_by_name("reviewers")
     user_ids = User.connection.select_values %(
       SELECT `user_id` FROM `user_groups_users`
       WHERE `user_group_id` = #{group.id}
@@ -767,8 +811,8 @@ return result if debug
       FROM `votes`, `namings`
       WHERE votes.observation_id = #{id} AND
             votes.naming_id = namings.id AND
-            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(',')}) AND
-            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(',')})
+            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(",")}) AND
+            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(",")})
     )
 
     # Get highest vote for each User.
@@ -798,27 +842,27 @@ return result if debug
       end
     end
 
-    return status
+    status
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Images
   #
-  ################################################################################
+  ##############################################################################
 
   # Add Image to this Observation, making it the thumbnail if none set already.
   # Saves changes.  Returns Image.
   def add_image(img)
-    if !images.include?(img)
-      self.images << img
+    unless images.include?(img)
+      images << img
       self.thumb_image = img unless thumb_image
       self.updated_at = Time.now
-      self.save
-      self.notify_users(:added_image)
-      self.reload
+      save
+      notify_users(:added_image)
+      reload
     end
-    return img
+    img
   end
 
   # Removes an Image from this Observation.  If it's the thumbnail, changes
@@ -833,38 +877,48 @@ return result if debug
         else
           self.thumb_image = nil
         end
-        self.save
+        save
       end
       notify_users(:removed_image)
     end
-    return img
+    img
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Projects
   #
-  ################################################################################
+  ##############################################################################
 
-  def has_edit_permission?(user=User.current)
+  def observer_takes_email_questions_from?(viewer)
+    user.email_general_question && user != viewer
+  end
+
+  ##############################################################################
+  #
+  #  :section: Projects
+  #
+  ##############################################################################
+
+  def has_edit_permission?(user = User.current)
     Project.has_edit_permission?(self, user)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Callbacks
   #
-  ################################################################################
+  ##############################################################################
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
-  def add_spl_callback(o)
+  def add_spl_callback(_o)
     SiteData.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
-  def remove_spl_callback(o)
+  def remove_spl_callback(_o)
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
 
@@ -874,8 +928,8 @@ return result if debug
   def notify_species_lists
     # Tell all the species lists it belonged to.
     for spl in species_lists
-      spl.log(:log_observation_destroyed2, :name => unique_format_name,
-              :touch => false)
+      spl.log(:log_observation_destroyed2, name: unique_format_name,
+                                           touch: false)
     end
 
     # Save namings so we can delete them after it's dead.
@@ -927,9 +981,7 @@ return result if debug
 
     # Send to people who have registered interest.
     for interest in interests
-      if interest.state
-        recipients.push(interest.user)
-      end
+      recipients.push(interest.user) if interest.state
     end
 
     # Tell masochists who want to know about all observation changes.
@@ -959,14 +1011,14 @@ return result if debug
   #
   def announce_consensus_change(old_name, new_name)
     if old_name
-      log(:log_consensus_changed, :old => old_name.display_name,
-                                  :new => new_name.display_name)
+      log(:log_consensus_changed, old: old_name.display_name,
+                                  new: new_name.display_name)
     else
-      log(:log_consensus_created_at, :name => new_name.display_name)
+      log(:log_consensus_created_at, name: new_name.display_name)
     end
 
     # Change can trigger emails.
-    owner  = self.user
+    owner  = user
     sender = User.current
     recipients = []
 
@@ -1000,15 +1052,15 @@ return result if debug
     ))
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
     # Clean off leading/trailing whitespace from +where+.
-    self.where = self.where.strip_squeeze if self.where
-    self.where = nil if self.where == ''
+    self.where = where.strip_squeeze if where
+    self.where = nil if where == ""
 
     if !self.when
       self.when ||= Time.now
@@ -1017,33 +1069,33 @@ return result if debug
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Date.today=#{Date.today}")
       errors.add(:when, :validate_observation_future_time.t)
     elsif self.when.is_a?(Time) && self.when > Time.now + 1.day
-      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now+6.hours}")
+      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now + 6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
     end
     if !user && !User.current
       errors.add(:user, :validate_observation_user_missing.t)
     end
 
-    if self.where.to_s.blank? && !location_id
+    if where.to_s.blank? && !location_id
       self.location = Location.unknown
       # errors.add(:where, :validate_observation_where_missing.t)
-    elsif self.where.to_s.bytesize > 1024
+    elsif where.to_s.bytesize > 1024
       errors.add(:where, :validate_observation_where_too_long.t)
     end
 
-    if lat.blank? and !long.blank? or
+    if lat.blank? && !long.blank? ||
        !lat.blank? and !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
-    if !lat.blank? and long.blank? or
+    if !lat.blank? && long.blank? ||
        !long.blank? and !Location.parse_longitude(long)
       errors.add(:long, :runtime_lat_long_error.t)
     end
-    if !alt.blank? and !Location.parse_altitude(alt)
+    if !alt.blank? && !Location.parse_altitude(alt)
       errors.add(:alt, :runtime_altitude_error.t)
     end
 
-    if @when_str and !Date.parse(@when_str)
+    if @when_str && !Date.parse(@when_str)
       errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
     end
   end

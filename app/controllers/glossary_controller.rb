@@ -1,6 +1,6 @@
 # create and edit Glossary terms
 class GlossaryController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index,
     :show_past_glossary_term,
     :show_glossary_term
@@ -22,8 +22,8 @@ class GlossaryController < ApplicationController
   def create_glossary_term # :norobots:
     if request.method == "POST"
       glossary_term = GlossaryTerm.
-        new(user: @user, name: params[:glossary_term][:name],
-            description: params[:glossary_term][:description])
+                      new(user: @user, name: params[:glossary_term][:name],
+                          description: params[:glossary_term][:description])
       image_args = {
         copyright_holder: params[:copyright_holder],
         when: Time.local(params[:date][:copyright_year]),
@@ -65,7 +65,7 @@ class GlossaryController < ApplicationController
         flash_notice(:runtime_image_uploaded_image.t(name: name))
       end
     end
-   image
+    image
   end
 
   def edit_glossary_term # :norobots:
@@ -74,7 +74,7 @@ class GlossaryController < ApplicationController
     if request.method == "POST"
       glossary_term = GlossaryTerm.find(params[:id].to_s)
       glossary_term.attributes = params[:glossary_term].
-                                 permit(:name, :description)
+        permit(:name, :description)
       glossary_term.user = @user
       glossary_term.save
       redirect_to(action: "show_glossary_term", id: glossary_term.id)
@@ -82,7 +82,6 @@ class GlossaryController < ApplicationController
       @glossary_term = GlossaryTerm.find(params[:id].to_s)
     end
   end
-
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
@@ -98,5 +97,4 @@ class GlossaryController < ApplicationController
       end
     end
   end
-
 end

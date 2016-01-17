@@ -5,10 +5,10 @@ class API
     attr_accessor :tag, :args, :fatal, :trace
 
     def initialize
-      self.tag = self.class.name.underscore.gsub('/','_').to_sym
+      self.tag = self.class.name.underscore.tr("/", "_").to_sym
       self.args = {}
       self.fatal = false
-      self.trace = caller()
+      self.trace = caller
     end
 
     def inspect
@@ -42,7 +42,7 @@ class API
     end
   end
 
-################################################################################
+  ################################################################################
 
   class MissingMethod < Error
   end
@@ -104,7 +104,7 @@ class API
     end
   end
 
-################################################################################
+  ################################################################################
 
   class MissingParameter < Error
     def initialize(arg)
@@ -142,7 +142,7 @@ class API
     def initialize(name, others)
       super()
       args.merge!(name: name.to_s,
-            others: others.map(&:real_search_name).join(' / '))
+                  others: others.map(&:real_search_name).join(" / "))
     end
   end
 
@@ -153,7 +153,7 @@ class API
     end
   end
 
-################################################################################
+  ################################################################################
 
   class AbortDueToErrors < Error
   end
@@ -161,7 +161,7 @@ class API
   class UnusedParameters < Error
     def initialize(params)
       super()
-      args.merge!(params: params.map(&:to_s).sort.join(', '))
+      args.merge!(params: params.map(&:to_s).sort.join(", "))
     end
   end
 
@@ -178,7 +178,7 @@ class API
     end
   end
 
-################################################################################
+  ################################################################################
 
   class MustAuthenticate < Error
   end
@@ -199,7 +199,7 @@ class API
   class MustBeMember < ObjectError
   end
 
-################################################################################
+  ################################################################################
 
   class MissingUpload < Error
   end
@@ -228,12 +228,12 @@ class API
     end
   end
 
-################################################################################
+  ################################################################################
 
   class CreateFailed < ObjectError
     def initialize(obj)
       super(obj)
-      args.merge!(error: obj.formatted_errors.map(&:to_s).join('; '))
+      args.merge!(error: obj.formatted_errors.map(&:to_s).join("; "))
     end
   end
 
@@ -315,7 +315,7 @@ class API
   class CanOnlyUseOneOfTheseFields < Error
     def initialize(*fields)
       super()
-      args.merge!(fields: fields.join(', '))
+      args.merge!(fields: fields.join(", "))
     end
   end
 end

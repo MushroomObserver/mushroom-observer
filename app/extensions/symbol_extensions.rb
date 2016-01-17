@@ -51,8 +51,8 @@ class Symbol
   def has_translation?
     (I18n.t("#{MO.locale_namespace}.#{self}", default: "BOGUS_DEFAULT") !=
       "BOGUS_DEFAULT") ||
-    (I18n.t("#{MO.locale_namespace}.#{downcase}", default: "BOGUS_DEFAULT") !=
-      "BOGUS_DEFAULT")
+      (I18n.t("#{MO.locale_namespace}.#{downcase}", default: "BOGUS_DEFAULT") !=
+        "BOGUS_DEFAULT")
   end
 
   # Wrapper on the old +localize+ method that:
@@ -123,7 +123,7 @@ class Symbol
   # *NOTE*: Square brackets are NOT allowed in the literals, even if quoted!
   # That would make the parsing non-trivial and potentially slow.
   #
-  def localize(args={}, level=[])
+  def localize(args = {}, level = [])
     result = nil
     Language.note_usage_of_tag(self)
     if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: "")) != ""
@@ -137,21 +137,21 @@ class Symbol
         for k, v in args
           pairs << "#{k}=#{v.inspect}"
         end
-        args_str = "(#{pairs.join(',')})"
+        args_str = "(#{pairs.join(",")})"
       else
         args_str = ""
       end
       result = "[:#{self}#{args_str}]"
     end
-    return result.html_safe
+    result.html_safe
   end
 
   # Run +localize+ in test mode.
-  def self.test_localize(val, args={}, level=[]) # :nodoc:
+  def self.test_localize(val, args = {}, level = []) # :nodoc:
     :test.localize_postprocessing(val, args, level)
   end
 
-  def localize_postprocessing(val, args, level, capitalize_result=false) # :nodoc:
+  def localize_postprocessing(val, args, level, capitalize_result = false) # :nodoc:
     result = val
     if result.is_a?(String)
       result = result.gsub(/ *\\n */, "\n")
@@ -164,40 +164,40 @@ class Symbol
     end
     if result.is_a?(String)
       # Allow literal square brackets by doubling them.
-      result = result.gsub(/\[\[/,'[').gsub(/\]\]/,']')
+      result = result.gsub(/\[\[/, "[").gsub(/\]\]/, "]")
     end
     if capitalize_result
       # Make token attempt to capitalize result if requested [:TAG] for :tag.
       result = result.capitalize_first
     end
-    return result
+    result
   end
 
-  def localize_expand_arguments(val, args, level) # :nodoc:
+  def localize_expand_arguments(val, args, _level) # :nodoc:
     val.gsub(/\[(\[?\w+?)\]/) do
-      orig = x = y = $1
+      orig = x = y = Regexp.last_match(1)
 
       # Ignore double-brackets.
-      if x[0,1] == '['
+      if x[0, 1] == "["
         x
 
       # Want :type, given :type.
-      elsif args.has_key?(arg = x.to_sym)
+      elsif args.key?(arg = x.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           val.l :
           val.to_s.strip_html
 
       # Want :types, given :type.
-      elsif (y = x.sub(/s$/i,"")) and
-            args.has_key?(arg = y.to_sym)
+      elsif (y = x.sub(/s$/i, "")) &&
+            args.key?(arg = y.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val}s".to_sym.l :
           val.to_s.strip_html
 
       # Want :TYPE, given :type.
-      elsif args.has_key?(arg = x.downcase.to_sym) and
+      elsif args.key?(arg = x.downcase.to_sym) &&
             (x == x.upcase)
         val = args[arg]
         val.is_a?(Symbol) ?
@@ -205,7 +205,7 @@ class Symbol
           val.to_s.strip_html.capitalize_first
 
       # Want :TYPES, given :type.
-      elsif args.has_key?(arg = y.downcase.to_sym) and
+      elsif args.key?(arg = y.downcase.to_sym) &&
             (y == y.upcase)
         val = args[arg]
         val.is_a?(Symbol) ?
@@ -213,14 +213,14 @@ class Symbol
           val.to_s.strip_html.capitalize_first
 
       # Want :Type, given :type.
-      elsif args.has_key?(arg = x.downcase.to_sym)
+      elsif args.key?(arg = x.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           val.l.capitalize_first :
           val.to_s.strip_html.capitalize_first
 
       # Want :Types, given :type.
-      elsif args.has_key?(arg = y.downcase.to_sym)
+      elsif args.key?(arg = y.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val}s".to_sym.l.capitalize_first :
@@ -234,52 +234,62 @@ class Symbol
 
   def localize_recursive_expansion(val, args, level) # :nodoc:
     val.gsub(/ \[ :(\w+?) (?:\( ([^\(\)\[\]]+) \))? \] /x) do
-      tag = $1.to_sym
-      args2 = $2.to_s
+      tag = Regexp.last_match(1).to_sym
+      args2 = Regexp.last_match(2).to_s
       hash = args.dup
-      if !args2.blank?
-        args2.split(',').each do |pair|
+      unless args2.blank?
+        args2.split(",").each do |pair|
           if pair.match(/^:?([a-z]+)=(.*)$/)
-            key = $1.to_sym
-            val = $2.to_s
+            key = Regexp.last_match(1).to_sym
+            val = Regexp.last_match(2).to_s
             if val.match(/^:(\w+)$/)
-              val = $1.to_sym
+              val = Regexp.last_match(1).to_sym
             elsif val.match(/^"(.*)"$/) ||
                   val.match(/^'(.*)'$/) ||
                   val.match(/^(-?\d+(\.\d+)?)$/)
-              val = $1
+              val = Regexp.last_match(1)
             elsif !val.match(/^([a-z][a-z_]*\d*)$/)
-              raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
+              fail(ArgumentError, "Invalid argument value \":#{val}\" in " \
                 "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
-            elsif !args.has_key?(val.to_sym)
-              raise(ArgumentError, "Forgot to pass :#{val} into " +
+                ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
+            elsif !args.key?(val.to_sym)
+              fail(ArgumentError, "Forgot to pass :#{val} into " \
                 "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
+                ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
             else
               val = args[val.to_sym]
             end
             hash[key] = val
           else
-            raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
+            fail(ArgumentError, "Invalid syntax at \"#{pair}\" in " \
               "arguments for #{I18n.locale} tag :#{tag} embedded in " +
-              ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
+              ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
           end
         end
       end
-      tag.l(hash, level+[self])
+      tag.l(hash, level + [self])
     end
   end
 
-  alias l localize
+  alias_method :l, :localize
 
-  def t(*args); localize(*args).t(false); end
+  def t(*args)
+    localize(*args).t(false)
+  end
 
-  def tl(*args); localize(*args).tl(false); end
+  def tl(*args)
+    localize(*args).tl(false)
+  end
 
-  def tp(*args); localize(*args).tp(false); end
+  def tp(*args)
+    localize(*args).tp(false)
+  end
 
-  def tpl(*args); localize(*args).tpl(false); end
+  def tpl(*args)
+    localize(*args).tpl(false)
+  end
 
-  def strip_html(*args); localize(*args).strip_html; end
+  def strip_html(*args)
+    localize(*args).strip_html
+  end
 end

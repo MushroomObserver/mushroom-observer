@@ -24,7 +24,7 @@ module MushroomObserver
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join("my", "locales", "*.{rb,yml}").to_s]
     # config.i18n.default_locale = :de
-    config.i18n.enforce_available_locales = false
+    config.i18n.enforce_available_locales = true
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
@@ -38,7 +38,7 @@ module MushroomObserver
     # because that throws the layout off.  Just changing the border, while less
     # conspicuous, has no effect on the layout.  This is not a hack, this is
     # just a standard configuration many rails apps take advantage of.
-    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+    config.action_view.field_error_proc = proc { |html_tag, _instance|
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
   end

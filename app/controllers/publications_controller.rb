@@ -1,10 +1,10 @@
 class PublicationsController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index,
     :show
   ]
 
-  before_filter :require_successful_user, only: [
+  before_action :require_successful_user, only: [
     :create
   ]
 
@@ -15,8 +15,8 @@ class PublicationsController < ApplicationController
     # @publications = Publication.find(:all, order: 'full') # Rails 3
     @publications = Publication.all.order("full")
     @full_count = @publications.length
-    @peer_count = @publications.select(&:peer_reviewed).length
-    @mo_count   = @publications.select(&:mo_mentioned).length
+    @peer_count = @publications.count(&:peer_reviewed)
+    @mo_count   = @publications.count(&:mo_mentioned)
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render xml: @publications }
@@ -54,19 +54,23 @@ class PublicationsController < ApplicationController
   # POST /publications.xml
   def create
     @publication = Publication.new(whitelisted_publication_params.merge(
-      user: User.current
+                                     user: User.current
     ))
     respond_to do |format|
       if @publication.save
         flash_notice(:runtime_created_at.t(type: :publication))
         format.html { redirect_to(@publication) }
-        format.xml  { render xml: @publication, status: :created,
-                      location: @publication }
+        format.xml  do
+          render xml: @publication, status: :created,
+                 location: @publication
+        end
       else
         flash_object_errors(@publication)
         format.html { render action: :new }
-        format.xml  { render xml: @publication.errors,
-                      status: :unprocessable_entity }
+        format.xml  do
+          render xml: @publication.errors,
+                 status: :unprocessable_entity
+        end
       end
     end
   end
@@ -86,8 +90,10 @@ class PublicationsController < ApplicationController
       else
         flash_object_errors(@publication)
         format.html { render action: :edit }
-        format.xml  { render xml: @publication.errors,
-                      status: :unprocessable_entity }
+        format.xml  do
+          render xml: @publication.errors,
+                 status: :unprocessable_entity
+        end
       end
     end
   end
@@ -103,8 +109,10 @@ class PublicationsController < ApplicationController
         format.xml  { head :ok }
       else
         format.html { redirect_to(publications_url) }
-        format.xml  { render xml: "can't delete",
-                      status: :unprocessable_entity }
+        format.xml  do
+          render xml: "can't delete",
+                 status: :unprocessable_entity
+        end
       end
     end
   end

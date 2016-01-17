@@ -5,7 +5,7 @@ require "fakeweb"
 
 class Hash
   def remove(*keys)
-    reject do |key, val|
+    reject do |key, _val|
       keys.include?(key)
     end
   end
@@ -14,20 +14,21 @@ end
 class ApiTest < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
+    super
   end
 
-  def assert_no_errors(api, msg="API errors")
+  def assert_no_errors(api, msg = "API errors")
     assert(api.errors.empty?,
            "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>")
     api
   end
 
-# TODO review following
-# should it return nil or API.execute(params)
+  # TODO: review following
+  # should it return nil or API.execute(params)
   def assert_api_fail(params)
     api = nil
     assert(api_errors(params),
-          "API request should have failed, params: #{params.inspect}")
+           "API request should have failed, params: #{params.inspect}")
     api
   end
 
@@ -54,10 +55,10 @@ class ApiTest < UnitTestCase
     end
     msg = "Expected: <#{show_val(expect)}>\n" \
           "Got: <#{show_val(actual)}>\n"
-    if expect.is_a?(Class) and expect <= API::Error
-        expected_class = actual.is_a?(expect)
-      else
-        expected_class = (actual == expect)
+    if expect.is_a?(Class) && expect <= API::Error
+      expected_class = actual.is_a?(expect)
+    else
+      expected_class = (actual == expect)
       end
     assert(expected_class, msg)
   end
@@ -67,9 +68,9 @@ class ApiTest < UnitTestCase
     when NilClass, TrueClass, FalseClass, String, Symbol, Fixnum, Float
       val.inspect
     when Array
-      '[' + val.map {|v| show_val(v)}.join(', ') + ']'
+      "[" + val.map { |v| show_val(v) }.join(", ") + "]"
     when Hash
-      '{' + val.map {|k,v| show_val(k) + ': ' + show_val(v)}.join(', ') + '}'
+      "{" + val.map { |k, v| show_val(k) + ": " + show_val(v) }.join(", ") + "}"
     else
       "#{val.class}: #{val}"
     end
@@ -142,7 +143,7 @@ class ApiTest < UnitTestCase
     assert_users_equal(@user, img.user)
     assert_in_delta(Time.now, img.created_at, 1.minute)
     assert_in_delta(Time.now, img.updated_at, 1.minute)
-    assert_equal('image/jpeg', img.content_type)
+    assert_equal("image/jpeg", img.content_type)
     assert_equal(@date, img.when)
     assert_equal(@notes.strip, img.notes)
     assert_equal(@copy.strip, img.copyright_holder)
@@ -204,11 +205,11 @@ class ApiTest < UnitTestCase
     assert_users_equal(@for_user, api_key.user)
   end
 
-################################################################################
+  ################################################################################
 
   def test_basic_gets
-    for model in [ Comment, Image, Location, Name, Observation, Project,
-                         SpeciesList, User ]
+    for model in [Comment, Image, Location, Name, Observation, Project,
+                  SpeciesList, User]
       expected_object = model.find(1)
 
       api = API.execute(method: :get, action: model.type_tag, id: 1)
@@ -220,7 +221,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_getting_observations_from_august
-    api = API.execute(method: :get, action: :observation, date: 20140824)
+    api = API.execute(method: :get, action: :observation, date: 20_140_824)
     query = api.query.query
     assert_no_errors(api)
   end
@@ -255,7 +256,7 @@ class ApiTest < UnitTestCase
       location: "Anywhere"
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
     assert_api_fail(params.remove(:location))
@@ -283,35 +284,35 @@ class ApiTest < UnitTestCase
       api_key:       @api_key.key,
       date:          "20120626",
       notes:         @notes,
-      location:      'USA, California, Albion',
-      latitude:      '39.229°N',
-      longitude:     '123.770°W',
+      location:      "USA, California, Albion",
+      latitude:      "39.229°N",
+      longitude:     "123.770°W",
       altitude:      "50m",
       has_specimen:  "yes",
-      name:          'Coprinus comatus',
+      name:          "Coprinus comatus",
       vote:          "2",
       projects:      @proj.id,
       species_lists: @spl.id,
       thumbnail:     @img2.id,
-      images:        "#{@img1.id},#{@img2.id}",
+      images:        "#{@img1.id},#{@img2.id}"
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
     assert_last_naming_correct
     assert_last_vote_correct
     assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.merge(api_key: 'this should fail'))
+    assert_api_fail(params.merge(api_key: "this should fail"))
     assert_api_fail(params.merge(date: "yesterday"))
-    assert_api_pass(params.merge(location: 'This is a bogus location')) # ???
-    assert_api_pass(params.merge(location: 'New Place, Oregon, USA')) # ???
+    assert_api_pass(params.merge(location: "This is a bogus location")) # ???
+    assert_api_pass(params.merge(location: "New Place, Oregon, USA")) # ???
     assert_api_fail(params.remove(:latitude)) # need to supply both or neither
     assert_api_fail(params.merge(longitude: "bogus"))
     assert_api_fail(params.merge(altitude: "bogus"))
     assert_api_fail(params.merge(has_specimen: "bogus"))
-    assert_api_fail(params.merge(name: 'Unknown name'))
-    assert_api_fail(params.merge(vote: 'take that'))
+    assert_api_fail(params.merge(name: "Unknown name"))
+    assert_api_fail(params.merge(vote: "take that"))
     assert_api_fail(params.merge(extra: "argument"))
     assert_api_fail(params.merge(thumbnail: "1234567"))
     assert_api_fail(params.merge(images: "1234567"))
@@ -327,11 +328,11 @@ class ApiTest < UnitTestCase
       action:   :observation,
       api_key:  @api_key.key,
       location: "Anywhere",
-      name:     'Agaricus campestris',
-      log:      "no",
+      name:     "Agaricus campestris",
+      log:      "no"
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.rss_log_id)
   end
@@ -340,21 +341,21 @@ class ApiTest < UnitTestCase
     params = {
       method:   :post,
       action:   :observation,
-      api_key:  @api_key.key,
+      api_key:  @api_key.key
     }
 
     assert_equal(:postal, rolf.location_format)
 
-    params[:location] = 'New Place, California, USA'
+    params[:location] = "New Place, California, USA"
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.location_id)
-    assert_equal('New Place, California, USA', obs.where)
+    assert_equal("New Place, California, USA", obs.where)
 
-    params[:location] = 'Burbank, California, USA'
+    params[:location] = "Burbank, California, USA"
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
@@ -362,16 +363,16 @@ class ApiTest < UnitTestCase
     rolf.update_attribute(:location_format, :scientific)
     assert_equal(:scientific, rolf.reload.location_format)
 
-    params[:location] = 'USA, California, Somewhere Else'
+    params[:location] = "USA, California, Somewhere Else"
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.location_id)
-    assert_equal('Somewhere Else, California, USA', obs.where)
+    assert_equal("Somewhere Else, California, USA", obs.where)
 
-    params[:location] = 'Burbank, California, USA'
+    params[:location] = "Burbank, California, USA"
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting observation')
+    assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
@@ -425,10 +426,10 @@ class ApiTest < UnitTestCase
       method:      :post,
       action:      :image,
       api_key:     @api_key.key,
-      upload_file: "#{::Rails.root.to_s}/test/images/sticky.jpg",
+      upload_file: "#{::Rails.root}/test/images/sticky.jpg"
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([Image.last], api.results)
     assert_last_image_correct
   end
@@ -438,9 +439,9 @@ class ApiTest < UnitTestCase
     @user = rolf
     @proj = projects(:eol_project)
     @date = Date.parse("20120626")
-    @copy = 'My Friend'
+    @copy = "My Friend"
     @notes = "These are notes.\nThey look like this.\n"
-    @orig = 'sticky.png'
+    @orig = "sticky.png"
     @width = 407
     @height = 500
     @vote = 3
@@ -456,17 +457,17 @@ class ApiTest < UnitTestCase
       vote:             "3",
       observations:     @obs.id,
       projects:         @proj.id,
-      upload_file:      "#{::Rails.root.to_s}/test/images/sticky.jpg",
+      upload_file:      "#{::Rails.root}/test/images/sticky.jpg",
       original_name:    @orig
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([Image.last], api.results)
     assert_last_image_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:upload_file))
-    assert_api_fail(params.merge(original_name: "x"*1000))
-    assert_api_fail(params.merge(vote: '-5'))
+    assert_api_fail(params.merge(original_name: "x" * 1000))
+    assert_api_fail(params.merge(vote: "-5"))
     assert_api_fail(params.merge(observations: "11")) # Katrina owns this observation
     assert_api_fail(params.merge(projects: "2")) # Rolf is not a member of this project
   end
@@ -483,7 +484,7 @@ class ApiTest < UnitTestCase
       upload_url: url
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     img = Image.last
     assert_obj_list_equal([img], api.results)
     actual = File.read(img.local_file_name(:full_size))
@@ -494,8 +495,8 @@ class ApiTest < UnitTestCase
   def test_posting_minimal_user
     @login = "stephane"
     @name = ""
-    @email = 'stephane@grappelli.com'
-    @locale = 'en-US'
+    @email = "stephane@grappelli.com"
+    @locale = "en-US"
     @notes = ""
     @license = License.preferred
     @location = nil
@@ -507,10 +508,10 @@ class ApiTest < UnitTestCase
       action:  :user,
       api_key: @api_key.key,
       login:   @login,
-      email:   @email,
+      email:   @email
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
@@ -518,22 +519,22 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:login))
     assert_api_fail(params.remove(:email))
-    assert_api_fail(params.merge(login: "x"*1000))
-    assert_api_fail(params.merge(email: "x"*1000))
-    assert_api_fail(params.merge(email: 'bogus address @ somewhere dot com'))
+    assert_api_fail(params.merge(login: "x" * 1000))
+    assert_api_fail(params.merge(email: "x" * 1000))
+    assert_api_fail(params.merge(email: "bogus address @ somewhere dot com"))
   end
 
   def test_posting_maximal_user
     @login = "stephane"
-    @name = 'Stephane Grappelli'
-    @email = 'stephane@grappelli.com'
-    @locale = 'el-GR'
+    @name = "Stephane Grappelli"
+    @email = "stephane@grappelli.com"
+    @locale = "el-GR"
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
     @location = Location.last
     @image = Image.last
-    @address = ' I live here '
-    @new_key = '  Blah  Blah  Blah  '
+    @address = " I live here "
+    @new_key = "  Blah  Blah  Blah  "
     params = {
       method:   :post,
       action:   :user,
@@ -547,15 +548,15 @@ class ApiTest < UnitTestCase
       location: @location.id,
       image:    @image.id,
       mailing_address:  @address,
-      create_key: @new_key,
+      create_key: @new_key
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     params.merge!(login: "miles")
-    assert_api_fail(params.merge(name: "x"*1000))
-    assert_api_fail(params.merge(locale: 'xx-XX'))
+    assert_api_fail(params.merge(name: "x" * 1000))
+    assert_api_fail(params.merge(locale: "xx-XX"))
     assert_api_fail(params.merge(license: "123456"))
     assert_api_fail(params.merge(location: "123456"))
     assert_api_fail(params.merge(image: "123456"))
@@ -564,16 +565,16 @@ class ApiTest < UnitTestCase
   def test_posting_api_key_for_yourself
     email_count = ActionMailer::Base.deliveries.size
     @for_user = rolf
-    @app = '  Mushroom  Mapper  '
+    @app = "  Mushroom  Mapper  "
     @verified = true
     params = {
       method:  :post,
       action:  :api_key,
       api_key: @api_key.key,
-      app:     @app,
+      app:     @app
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
@@ -584,23 +585,23 @@ class ApiTest < UnitTestCase
   def test_posting_api_key_for_another_user
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
-    @app = '  Mushroom  Mapper  '
+    @app = "  Mushroom  Mapper  "
     @verified = false
     params = {
       method:   :post,
       action:   :api_key,
       api_key:  @api_key.key,
       app:      @app,
-      for_user: @for_user.id,
+      for_user: @for_user.id
     }
     api = API.execute(params)
-    assert_no_errors(api, 'Errors while posting image')
+    assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([ApiKey.last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:app))
     assert_api_fail(params.merge(app: ""))
-    assert_api_fail(params.merge(for_user: 123456))
+    assert_api_fail(params.merge(for_user: 123_456))
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
   end
 
@@ -609,7 +610,7 @@ class ApiTest < UnitTestCase
       method:   :post,
       action:   :observation,
       api_key:  @api_key.key,
-      location: "Anywhere",
+      location: "Anywhere"
     }
     rolf.update_attribute(:verified, nil)
     assert_api_fail(params)
@@ -622,7 +623,7 @@ class ApiTest < UnitTestCase
       method:   :post,
       action:   :observation,
       api_key:  @api_key.key,
-      location: "Anywhere",
+      location: "Anywhere"
     }
     @api_key.update_attribute(:verified, nil)
     assert_api_fail(params)
@@ -650,7 +651,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_booleans, nil, nil)
     assert_parse(:parse_booleans, [], nil, default: [])
     assert_parse(:parse_booleans, [true], "1")
-    assert_parse(:parse_booleans, [true,false], '1,0')
+    assert_parse(:parse_booleans, [true, false], "1,0")
   end
 
   def test_parse_enum
@@ -663,10 +664,10 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_enum, API::BadLimitedParameterValue, "Ten", limit: limit)
     assert_parse(:parse_enums, nil, nil, limit: limit)
     assert_parse(:parse_enums, [:one], "one", limit: limit)
-    assert_parse(:parse_enums, [:one,:two,:three], 'one,two,three', limit: limit)
+    assert_parse(:parse_enums, [:one, :two, :three], "one,two,three", limit: limit)
     assert_parse(:parse_enum_range, nil, nil, limit: limit)
     assert_parse(:parse_enum_range, :four, "four", limit: limit)
-    assert_parse(:parse_enum_range, API::Range.new(:one, :four), 'four-one', limit: limit)
+    assert_parse(:parse_enum_range, API::OrderedRange.new(:one, :four), "four-one", limit: limit)
   end
 
   def test_parse_string
@@ -679,29 +680,29 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_string, API::StringTooLong, "abcde", limit: 4)
     assert_parse(:parse_strings, nil, nil)
     assert_parse(:parse_strings, ["foo"], "foo")
-    assert_parse(:parse_strings, ["foo","bar"], 'foo,bar', limit: 4)
-    assert_parse(:parse_strings, API::StringTooLong, 'foo,abcde', limit: 4)
+    assert_parse(:parse_strings, %w(foo bar), "foo,bar", limit: 4)
+    assert_parse(:parse_strings, API::StringTooLong, "foo,abcde", limit: 4)
   end
 
   def test_parse_integer
     assert_parse(:parse_integer, nil, nil)
     assert_parse(:parse_integer, 42, nil, default: 42)
     assert_parse(:parse_integer, 1, "1")
-    assert_parse(:parse_integer, 0, ' 0 ')
-    assert_parse(:parse_integer, -13, '-13')
+    assert_parse(:parse_integer, 0, " 0 ")
+    assert_parse(:parse_integer, -13, "-13")
     assert_parse(:parse_integers, nil, nil)
     assert_parse(:parse_integers, [1], "1")
-    assert_parse(:parse_integers, [3,-1,4,-159], '3,-1,4,-159')
-    assert_parse(:parse_integers, [1,13], '1,13', limit: 1..13)
-    assert_parse(:parse_integers, API::BadLimitedParameterValue, '0,13', limit: 1..13)
-    assert_parse(:parse_integers, API::BadLimitedParameterValue, '1,14', limit: 1..13)
-    assert_parse(:parse_integer_range, API::Range.new(1,13), '1-13', limit: 1..13)
-    assert_parse(:parse_integer_range, API::Range.new(1,13), '13-1', limit: 1..13)
-    assert_parse(:parse_integer_range, API::BadLimitedParameterValue, '0-13', limit: 1..13)
-    assert_parse(:parse_integer_range, API::BadLimitedParameterValue, '1-14', limit: 1..13)
+    assert_parse(:parse_integers, [3, -1, 4, -159], "3,-1,4,-159")
+    assert_parse(:parse_integers, [1, 13], "1,13", limit: 1..13)
+    assert_parse(:parse_integers, API::BadLimitedParameterValue, "0,13", limit: 1..13)
+    assert_parse(:parse_integers, API::BadLimitedParameterValue, "1,14", limit: 1..13)
+    assert_parse(:parse_integer_range, API::OrderedRange.new(1, 13), "1-13", limit: 1..13)
+    assert_parse(:parse_integer_range, API::OrderedRange.new(1, 13), "13-1", limit: 1..13)
+    assert_parse(:parse_integer_range, API::BadLimitedParameterValue, "0-13", limit: 1..13)
+    assert_parse(:parse_integer_range, API::BadLimitedParameterValue, "1-14", limit: 1..13)
     assert_parse(:parse_integer_ranges, nil, nil, limit: 1..13)
-    assert_parse(:parse_integer_ranges, [API::Range.new(1,4), API::Range.new(6,9)], '1-4,6-9', limit: 1..13)
-    assert_parse(:parse_integer_ranges, [1, 4, API::Range.new(6,9)], '1,4,6-9', limit: 1..13)
+    assert_parse(:parse_integer_ranges, [API::OrderedRange.new(1, 4), API::OrderedRange.new(6, 9)], "1-4,6-9", limit: 1..13)
+    assert_parse(:parse_integer_ranges, [1, 4, API::OrderedRange.new(6, 9)], "1,4,6-9", limit: 1..13)
   end
 
   def test_parse_float
@@ -709,174 +710,174 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_float, -2.71828, nil, default: -2.71828)
     assert_parse(:parse_float, 0, "0", default: -2.71828)
     assert_parse(:parse_float, 4, "4")
-    assert_parse(:parse_float, -4, '-4')
-    assert_parse(:parse_float, 4, '4.0')
-    assert_parse(:parse_float, -4, '-4.0')
-    assert_parse(:parse_float, 0, '.0')
-    assert_parse(:parse_float, 0.123, '.123')
-    assert_parse(:parse_float, -0.123, '-.123')
-    assert_parse(:parse_float, 123.123, '123.123')
-    assert_parse(:parse_float, -123.123, '-123.123')
+    assert_parse(:parse_float, -4, "-4")
+    assert_parse(:parse_float, 4, "4.0")
+    assert_parse(:parse_float, -4, "-4.0")
+    assert_parse(:parse_float, 0, ".0")
+    assert_parse(:parse_float, 0.123, ".123")
+    assert_parse(:parse_float, -0.123, "-.123")
+    assert_parse(:parse_float, 123.123, "123.123")
+    assert_parse(:parse_float, -123.123, "-123.123")
     assert_parse(:parse_floats, nil, nil)
-    assert_parse(:parse_floats, [1.2,3.4], ' 1.20, 3.40 ')
-    assert_parse(:parse_float_range, API::Range.new(-3.14,2.72), '2.72 - \\-3.14')
-    assert_parse(:parse_float_ranges, [API::Range.new(1,2), 4,5], '1-2,4,5')
+    assert_parse(:parse_floats, [1.2, 3.4], " 1.20, 3.40 ")
+    assert_parse(:parse_float_range, API::OrderedRange.new(-3.14, 2.72), '2.72 - \\-3.14')
+    assert_parse(:parse_float_ranges, [API::OrderedRange.new(1, 2), 4, 5], "1-2,4,5")
     assert_parse(:parse_float, API::BadParameterValue, "")
     assert_parse(:parse_float, API::BadParameterValue, "one")
-    assert_parse(:parse_float, API::BadParameterValue, '+1e5')
+    assert_parse(:parse_float, API::BadParameterValue, "+1e5")
   end
 
   def test_parse_date
     assert_parse(:parse_date, nil, nil)
-    assert_parse(:parse_date, Date.parse('2012-06-25'), nil, default: Date.parse('2012-06-25'))
-    assert_parse(:parse_date, Date.parse('2012-06-26'), "20120626")
-    assert_parse(:parse_date, Date.parse('2012-06-26'), '2012-06-26')
-    assert_parse(:parse_date, Date.parse('2012-06-26'), '2012/06/26')
-    assert_parse(:parse_date, Date.parse('2012-06-07'), '2012-6-7')
-    assert_parse(:parse_date, API::BadParameterValue, '2012-06/7')
-    assert_parse(:parse_date, API::BadParameterValue, '2012 6/7')
-    assert_parse(:parse_date, API::BadParameterValue, '6/26/2012')
+    assert_parse(:parse_date, Date.parse("2012-06-25"), nil, default: Date.parse("2012-06-25"))
+    assert_parse(:parse_date, Date.parse("2012-06-26"), "20120626")
+    assert_parse(:parse_date, Date.parse("2012-06-26"), "2012-06-26")
+    assert_parse(:parse_date, Date.parse("2012-06-26"), "2012/06/26")
+    assert_parse(:parse_date, Date.parse("2012-06-07"), "2012-6-7")
+    assert_parse(:parse_date, API::BadParameterValue, "2012-06/7")
+    assert_parse(:parse_date, API::BadParameterValue, "2012 6/7")
+    assert_parse(:parse_date, API::BadParameterValue, "6/26/2012")
     assert_parse(:parse_date, API::BadParameterValue, "today")
   end
 
   def test_parse_time
     assert_parse(:parse_time, nil, nil)
-    assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), nil, default: DateTime.parse('2012-06-25 12:34:56'))
-    assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), "20120625123456")
-    assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), '2012-06-25 12:34:56')
-    assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), '2012/06/25 12:34:56')
-    assert_parse(:parse_time, DateTime.parse('2012-06-05 02:04:06'), '2012/6/5 2:4:6')
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), nil, default: DateTime.parse("2012-06-25 12:34:56"))
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), "20120625123456")
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), "2012-06-25 12:34:56")
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), "2012/06/25 12:34:56")
+    assert_parse(:parse_time, DateTime.parse("2012-06-05 02:04:06"), "2012/6/5 2:4:6")
     assert_parse(:parse_time, API::BadParameterValue, "20120625")
     assert_parse(:parse_time, API::BadParameterValue, "201206251234567")
-    assert_parse(:parse_time, API::BadParameterValue, '2012/06/25 103456')
-    assert_parse(:parse_time, API::BadParameterValue, '2012-06/25 10:34:56')
-    assert_parse(:parse_time, API::BadParameterValue, '2012/06/25 10:34:56am')
+    assert_parse(:parse_time, API::BadParameterValue, "2012/06/25 103456")
+    assert_parse(:parse_time, API::BadParameterValue, "2012-06/25 10:34:56")
+    assert_parse(:parse_time, API::BadParameterValue, "2012/06/25 10:34:56am")
   end
 
   def test_parse_date_range
     assert_parse(:parse_date_range, nil, nil)
-    assert_parse(:parse_date_range, Date.parse('2012-06-25'), nil, default: Date.parse('2012-06-25'))
-    assert_parse(:parse_date_range, Date.parse('2012-06-26'), "20120626")
-    assert_parse(:parse_date_range, Date.parse('2012-06-26'), '2012-06-26')
-    assert_parse(:parse_date_range, Date.parse('2012-06-26'), '2012/06/26')
-    assert_parse(:parse_date_range, Date.parse('2012-06-07'), '2012-6-7')
-    assert_parse(:parse_date_range, API::BadParameterValue, '2012-06/7')
-    assert_parse(:parse_date_range, API::BadParameterValue, '2012 6/7')
-    assert_parse(:parse_date_range, API::BadParameterValue, '6/26/2012')
+    assert_parse(:parse_date_range, Date.parse("2012-06-25"), nil, default: Date.parse("2012-06-25"))
+    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "20120626")
+    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "2012-06-26")
+    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "2012/06/26")
+    assert_parse(:parse_date_range, Date.parse("2012-06-07"), "2012-6-7")
+    assert_parse(:parse_date_range, API::BadParameterValue, "2012-06/7")
+    assert_parse(:parse_date_range, API::BadParameterValue, "2012 6/7")
+    assert_parse(:parse_date_range, API::BadParameterValue, "6/26/2012")
     assert_parse(:parse_date_range, API::BadParameterValue, "today")
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2012-06-01'), Date.parse('2012-06-30')), "201206")
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2012-06-01'), Date.parse('2012-06-30')), '2012-6')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2012-06-01'), Date.parse('2012-06-30')), '2012/06')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2012-01-01'), Date.parse('2012-12-31')), "2012")
-    assert_parse(:parse_date_range, API::Range.new(6,6), "6")
-    assert_parse(:parse_date_range, API::Range.new(613,613), '6/13')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-13'), Date.parse('2012-06-15')), '20110513-20120615')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-13'), Date.parse('2012-06-15')), '2011-05-13-2012-06-15')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-13'), Date.parse('2012-06-15')), '2011-5-13-2012-6-15')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-13'), Date.parse('2012-06-15')), '2011/05/13 - 2012/06/15')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-01'), Date.parse('2012-06-30')), '201105-201206')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-01'), Date.parse('2012-06-30')), '2011-5-2012-6')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-05-01'), Date.parse('2012-06-30')), '2012/06 - 2011/05')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-01-01'), Date.parse('2012-12-31')), '2011-2012')
-    assert_parse(:parse_date_range, API::Range.new(Date.parse('2011-01-01'), Date.parse('2012-12-31')), '2012-2011')
-    assert_parse(:parse_date_range, API::Range.new(2,5), '2-5')
-    assert_parse(:parse_date_range, API::Range.new(10,3, :leave_order), '10-3')
-    assert_parse(:parse_date_range, API::Range.new(612,623), '0612-0623')
-    assert_parse(:parse_date_range, API::Range.new(1225,101, :leave_order), '12-25-1-1')
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")), "201206")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")), "2012-6")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")), "2012/06")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2012-01-01"), Date.parse("2012-12-31")), "2012")
+    assert_parse(:parse_date_range, API::OrderedRange.new(6, 6), "6")
+    assert_parse(:parse_date_range, API::OrderedRange.new(613, 613), "6/13")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")), "20110513-20120615")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")), "2011-05-13-2012-06-15")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")), "2011-5-13-2012-6-15")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")), "2011/05/13 - 2012/06/15")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")), "201105-201206")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")), "2011-5-2012-6")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")), "2012/06 - 2011/05")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-01-01"), Date.parse("2012-12-31")), "2011-2012")
+    assert_parse(:parse_date_range, API::OrderedRange.new(Date.parse("2011-01-01"), Date.parse("2012-12-31")), "2012-2011")
+    assert_parse(:parse_date_range, API::OrderedRange.new(2, 5), "2-5")
+    assert_parse(:parse_date_range, API::OrderedRange.new(10, 3, :leave_order), "10-3")
+    assert_parse(:parse_date_range, API::OrderedRange.new(612, 623), "0612-0623")
+    assert_parse(:parse_date_range, API::OrderedRange.new(1225, 101, :leave_order), "12-25-1-1")
   end
 
   def test_parse_time_range
     assert_parse(:parse_time_range, nil, nil)
-    assert_parse(:parse_time_range, DateTime.parse('2012-06-25 12:34:56'), "20120625123456")
-    assert_parse(:parse_time_range, DateTime.parse('2012-06-25 12:34:56'), '2012-06-25 12:34:56')
-    assert_parse(:parse_time_range, DateTime.parse('2012-06-25 12:34:56'), '2012/06/25 12:34:56')
-    assert_parse(:parse_time_range, DateTime.parse('2012-06-05 02:04:06'), '2012/6/5 2:4:6')
+    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"), "20120625123456")
+    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"), "2012-06-25 12:34:56")
+    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"), "2012/06/25 12:34:56")
+    assert_parse(:parse_time_range, DateTime.parse("2012-06-05 02:04:06"), "2012/6/5 2:4:6")
     assert_parse(:parse_time_range, API::BadParameterValue, "201206251234567")
-    assert_parse(:parse_time_range, API::BadParameterValue, '2012/06/25 103456')
-    assert_parse(:parse_time_range, API::BadParameterValue, '2012-06/25 10:34:56')
-    assert_parse(:parse_time_range, API::BadParameterValue, '2012/06/25 10:34:56am')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:03:01'), DateTime.parse('2011-02-24 02:03:59')), "201102240203")
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:03:01'), DateTime.parse('2011-02-24 02:03:59')), '2011-2-24 2:3')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:03:01'), DateTime.parse('2011-02-24 02:03:59')), '2011/02/24 02:03')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:01:01'), DateTime.parse('2011-02-24 02:59:59')), "2011022402")
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:01:01'), DateTime.parse('2011-02-24 02:59:59')), '2011-2-24 2')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 02:01:01'), DateTime.parse('2011-02-24 02:59:59')), '2011/02/24 02')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 01:01:01'), DateTime.parse('2011-02-24 23:59:59')), "20110224")
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 01:01:01'), DateTime.parse('2011-02-24 23:59:59')), '2011-2-24')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-24 01:01:01'), DateTime.parse('2011-02-24 23:59:59')), '2011/02/24')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-01 01:01:01'), DateTime.parse('2011-02-28 23:59:59')), "201102")
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-01 01:01:01'), DateTime.parse('2011-02-28 23:59:59')), '2011-2')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-02-01 01:01:01'), DateTime.parse('2011-02-28 23:59:59')), '2011/02')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-01-01 01:01:01'), DateTime.parse('2011-12-31 23:59:59')), "2011")
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:04'), DateTime.parse('2012-06-25 03:04:05')), '20110524020304-20120625030405')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:04'), DateTime.parse('2012-06-25 03:04:05')), '2011-5-24 2:3:4-2012-6-25 3:4:5')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:04'), DateTime.parse('2012-06-25 03:04:05')), '2011/05/24 02:03:04 - 2012/06/25 03:04:05')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:01'), DateTime.parse('2012-06-25 03:04:59')), '201206250304-201105240203')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:01'), DateTime.parse('2012-06-25 03:04:59')), '2012-6-25 3:4-2011-5-24 2:3')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:03:01'), DateTime.parse('2012-06-25 03:04:59')), '2012/06/25 03:04 - 2011/05/24 02:03')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:01:01'), DateTime.parse('2012-06-25 03:59:59')), '2012062503-2011052402')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:01:01'), DateTime.parse('2012-06-25 03:59:59')), '2012-6-25 3-2011-5-24 2')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 02:01:01'), DateTime.parse('2012-06-25 03:59:59')), '2012/06/25 03 - 2011/05/24 02')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 01:01:01'), DateTime.parse('2012-06-25 23:59:59')), '20120625-20110524')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 01:01:01'), DateTime.parse('2012-06-25 23:59:59')), '2012-6-25-2011-5-24')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-24 01:01:01'), DateTime.parse('2012-06-25 23:59:59')), '2012/06/25 - 2011/05/24')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-01 01:01:01'), DateTime.parse('2012-06-30 23:59:59')), '201206-201105')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-01 01:01:01'), DateTime.parse('2012-06-30 23:59:59')), '2012-6-2011-5')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-05-01 01:01:01'), DateTime.parse('2012-06-30 23:59:59')), '2012/06 - 2011/05')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-01-01 01:01:01'), DateTime.parse('2012-12-31 23:59:59')), '2012-2011')
-    assert_parse(:parse_time_range, API::Range.new(DateTime.parse('2011-01-01 01:01:01'), DateTime.parse('2012-12-31 23:59:59')), '2011 - 2012')
+    assert_parse(:parse_time_range, API::BadParameterValue, "2012/06/25 103456")
+    assert_parse(:parse_time_range, API::BadParameterValue, "2012-06/25 10:34:56")
+    assert_parse(:parse_time_range, API::BadParameterValue, "2012/06/25 10:34:56am")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"), DateTime.parse("2011-02-24 02:03:59")), "201102240203")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"), DateTime.parse("2011-02-24 02:03:59")), "2011-2-24 2:3")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"), DateTime.parse("2011-02-24 02:03:59")), "2011/02/24 02:03")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"), DateTime.parse("2011-02-24 02:59:59")), "2011022402")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"), DateTime.parse("2011-02-24 02:59:59")), "2011-2-24 2")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"), DateTime.parse("2011-02-24 02:59:59")), "2011/02/24 02")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"), DateTime.parse("2011-02-24 23:59:59")), "20110224")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"), DateTime.parse("2011-02-24 23:59:59")), "2011-2-24")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"), DateTime.parse("2011-02-24 23:59:59")), "2011/02/24")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"), DateTime.parse("2011-02-28 23:59:59")), "201102")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"), DateTime.parse("2011-02-28 23:59:59")), "2011-2")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"), DateTime.parse("2011-02-28 23:59:59")), "2011/02")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"), DateTime.parse("2011-12-31 23:59:59")), "2011")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"), DateTime.parse("2012-06-25 03:04:05")), "20110524020304-20120625030405")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"), DateTime.parse("2012-06-25 03:04:05")), "2011-5-24 2:3:4-2012-6-25 3:4:5")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"), DateTime.parse("2012-06-25 03:04:05")), "2011/05/24 02:03:04 - 2012/06/25 03:04:05")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"), DateTime.parse("2012-06-25 03:04:59")), "201206250304-201105240203")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"), DateTime.parse("2012-06-25 03:04:59")), "2012-6-25 3:4-2011-5-24 2:3")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"), DateTime.parse("2012-06-25 03:04:59")), "2012/06/25 03:04 - 2011/05/24 02:03")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"), DateTime.parse("2012-06-25 03:59:59")), "2012062503-2011052402")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"), DateTime.parse("2012-06-25 03:59:59")), "2012-6-25 3-2011-5-24 2")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"), DateTime.parse("2012-06-25 03:59:59")), "2012/06/25 03 - 2011/05/24 02")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"), DateTime.parse("2012-06-25 23:59:59")), "20120625-20110524")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"), DateTime.parse("2012-06-25 23:59:59")), "2012-6-25-2011-5-24")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"), DateTime.parse("2012-06-25 23:59:59")), "2012/06/25 - 2011/05/24")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"), DateTime.parse("2012-06-30 23:59:59")), "201206-201105")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"), DateTime.parse("2012-06-30 23:59:59")), "2012-6-2011-5")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"), DateTime.parse("2012-06-30 23:59:59")), "2012/06 - 2011/05")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"), DateTime.parse("2012-12-31 23:59:59")), "2012-2011")
+    assert_parse(:parse_time_range, API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"), DateTime.parse("2012-12-31 23:59:59")), "2011 - 2012")
   end
 
   def test_parse_latitude
     assert_parse(:parse_latitude, nil, nil)
     assert_parse(:parse_latitude, 45, nil, default: 45)
     assert_parse(:parse_latitude, 4, "4")
-    assert_parse(:parse_latitude, -4, '-4')
-    assert_parse(:parse_latitude, 4.1235, '4.1234567')
-    assert_parse(:parse_latitude, -4.1235, '-4.1234567')
-    assert_parse(:parse_latitude, -4.1235, '4.1234567S')
+    assert_parse(:parse_latitude, -4, "-4")
+    assert_parse(:parse_latitude, 4.1235, "4.1234567")
+    assert_parse(:parse_latitude, -4.1235, "-4.1234567")
+    assert_parse(:parse_latitude, -4.1235, "4.1234567S")
     assert_parse(:parse_latitude, 12.5822, '12°34\'56"N')
-    assert_parse(:parse_latitude, 12.5760, '12 34.56 N')
-    assert_parse(:parse_latitude, -12.0094, '12deg 34sec S')
-    assert_parse(:parse_latitude, API::BadParameterValue, '12 34.56 E')
-    assert_parse(:parse_latitude, API::BadParameterValue, '12 degrees 34.56 minutes')
-    assert_parse(:parse_latitude, API::BadParameterValue, '12.56s')
-    assert_parse(:parse_latitude, 90.0000, '90d 0s N')
-    assert_parse(:parse_latitude, -90.0000, '90d 0s S')
-    assert_parse(:parse_latitude, API::BadParameterValue, '90d 1s N')
-    assert_parse(:parse_latitude, API::BadParameterValue, '90d 1s S')
+    assert_parse(:parse_latitude, 12.5760, "12 34.56 N")
+    assert_parse(:parse_latitude, -12.0094, "12deg 34sec S")
+    assert_parse(:parse_latitude, API::BadParameterValue, "12 34.56 E")
+    assert_parse(:parse_latitude, API::BadParameterValue, "12 degrees 34.56 minutes")
+    assert_parse(:parse_latitude, API::BadParameterValue, "12.56s")
+    assert_parse(:parse_latitude, 90.0000, "90d 0s N")
+    assert_parse(:parse_latitude, -90.0000, "90d 0s S")
+    assert_parse(:parse_latitude, API::BadParameterValue, "90d 1s N")
+    assert_parse(:parse_latitude, API::BadParameterValue, "90d 1s S")
     assert_parse(:parse_latitudes, nil, nil)
-    assert_parse(:parse_latitudes, [1.2, 3.4], '1.2,3.4')
+    assert_parse(:parse_latitudes, [1.2, 3.4], "1.2,3.4")
     assert_parse(:parse_latitude_range, nil, nil)
-    assert_parse(:parse_latitude_range, API::Range.new(-12,34), '12S-34N')
-    assert_parse(:parse_latitude_range, API::Range.new(-34,12), '12N-34S')
-    assert_parse(:parse_latitude_ranges, [API::Range.new(-34,12), 6,7], '12N-34S,6,7')
+    assert_parse(:parse_latitude_range, API::OrderedRange.new(-12, 34), "12S-34N")
+    assert_parse(:parse_latitude_range, API::OrderedRange.new(-34, 12), "12N-34S")
+    assert_parse(:parse_latitude_ranges, [API::OrderedRange.new(-34, 12), 6, 7], "12N-34S,6,7")
   end
 
   def test_parse_longitude
     assert_parse(:parse_longitude, nil, nil)
     assert_parse(:parse_longitude, 45, nil, default: 45)
     assert_parse(:parse_longitude, 4, "4")
-    assert_parse(:parse_longitude, -4, '-4')
-    assert_parse(:parse_longitude, 4.1235, '4.1234567')
-    assert_parse(:parse_longitude, -4.1235, '-4.1234567')
-    assert_parse(:parse_longitude, -4.1235, '4.1234567W')
+    assert_parse(:parse_longitude, -4, "-4")
+    assert_parse(:parse_longitude, 4.1235, "4.1234567")
+    assert_parse(:parse_longitude, -4.1235, "-4.1234567")
+    assert_parse(:parse_longitude, -4.1235, "4.1234567W")
     assert_parse(:parse_longitude, 12.5822, '12°34\'56"E')
-    assert_parse(:parse_longitude, 12.5760, '12 34.56 E')
-    assert_parse(:parse_longitude, -12.0094, '12deg 34sec W')
-    assert_parse(:parse_longitude, API::BadParameterValue, '12 34.56 S')
-    assert_parse(:parse_longitude, API::BadParameterValue, '12 degrees 34.56 minutes')
-    assert_parse(:parse_longitude, API::BadParameterValue, '12.56e')
-    assert_parse(:parse_longitude, 180.0000, '180d 0s E')
-    assert_parse(:parse_longitude, -180.0000, '180d 0s W')
-    assert_parse(:parse_longitude, API::BadParameterValue, '180d 1s E')
-    assert_parse(:parse_longitude, API::BadParameterValue, '180d 1s W')
+    assert_parse(:parse_longitude, 12.5760, "12 34.56 E")
+    assert_parse(:parse_longitude, -12.0094, "12deg 34sec W")
+    assert_parse(:parse_longitude, API::BadParameterValue, "12 34.56 S")
+    assert_parse(:parse_longitude, API::BadParameterValue, "12 degrees 34.56 minutes")
+    assert_parse(:parse_longitude, API::BadParameterValue, "12.56e")
+    assert_parse(:parse_longitude, 180.0000, "180d 0s E")
+    assert_parse(:parse_longitude, -180.0000, "180d 0s W")
+    assert_parse(:parse_longitude, API::BadParameterValue, "180d 1s E")
+    assert_parse(:parse_longitude, API::BadParameterValue, "180d 1s W")
     assert_parse(:parse_longitudes, nil, nil)
-    assert_parse(:parse_longitudes, [1.2, 3.4], '1.2,3.4')
+    assert_parse(:parse_longitudes, [1.2, 3.4], "1.2,3.4")
     assert_parse(:parse_longitude_range, nil, nil)
-    assert_parse(:parse_longitude_range, API::Range.new(-12,34), '12W-34E')
-    assert_parse(:parse_longitude_range, API::Range.new(12,-34,:leave_order), '12E-34W')
-    assert_parse(:parse_longitude_ranges, [API::Range.new(-12,34), 6,7], '12W-34E,6,7')
+    assert_parse(:parse_longitude_range, API::OrderedRange.new(-12, 34), "12W-34E")
+    assert_parse(:parse_longitude_range, API::OrderedRange.new(12, -34, :leave_order), "12E-34W")
+    assert_parse(:parse_longitude_ranges, [API::OrderedRange.new(-12, 34), 6, 7], "12W-34E,6,7")
   end
 
   def test_parse_altitude
@@ -890,12 +891,12 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_altitude, API::BadParameterValue, "123 FT")
     assert_parse(:parse_altitudes, nil, nil)
     assert_parse(:parse_altitudes, [123], "123")
-    assert_parse(:parse_altitudes, [123,456], '123,456m')
+    assert_parse(:parse_altitudes, [123, 456], "123,456m")
     assert_parse(:parse_altitude_range, nil, nil)
-    assert_parse(:parse_altitude_range, API::Range.new(12,34), '12-34')
-    assert_parse(:parse_altitude_range, API::Range.new(54,76), '76-54')
+    assert_parse(:parse_altitude_range, API::OrderedRange.new(12, 34), "12-34")
+    assert_parse(:parse_altitude_range, API::OrderedRange.new(54, 76), "76-54")
     assert_parse(:parse_altitude_ranges, nil, nil)
-    assert_parse(:parse_altitude_ranges, [API::Range.new(54,76),3,2], '76-54,3,2')
+    assert_parse(:parse_altitude_ranges, [API::OrderedRange.new(54, 76), 3, 2], "76-54,3,2")
   end
 
   def test_parse_image
@@ -904,8 +905,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_image, nil, nil)
     assert_parse(:parse_image, img1, nil, default: img1)
     assert_parse(:parse_image, img1, "1")
-    assert_parse(:parse_images, [img2,img1], '2,1')
-    assert_parse(:parse_image_range, API::Range.new(img1, img2), '2-1')
+    assert_parse(:parse_images, [img2, img1], "2,1")
+    assert_parse(:parse_image_range, API::OrderedRange.new(img1, img2), "2-1")
     assert_parse(:parse_image, API::BadParameterValue, "")
     assert_parse(:parse_image, API::BadParameterValue, "name")
     assert_parse(:parse_image, API::ObjectNotFoundById, "12345")
@@ -917,8 +918,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_license, nil, nil)
     assert_parse(:parse_license, lic2, nil, default: lic2)
     assert_parse(:parse_license, lic2, "2")
-    assert_parse(:parse_licenses, [lic2,lic1], '2,1')
-    assert_parse(:parse_license_range, API::Range.new(lic1,lic2), '2-1')
+    assert_parse(:parse_licenses, [lic2, lic1], "2,1")
+    assert_parse(:parse_license_range, API::OrderedRange.new(lic1, lic2), "2-1")
     assert_parse(:parse_license, API::BadParameterValue, "")
     assert_parse(:parse_license, API::BadParameterValue, "name")
     assert_parse(:parse_license, API::ObjectNotFoundById, "12345")
@@ -930,8 +931,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_location, nil, nil)
     assert_parse(:parse_location, loc5, nil, default: loc5)
     assert_parse(:parse_location, loc5, "5")
-    assert_parse(:parse_locations, [loc5,loc2], '5,2')
-    assert_parse(:parse_location_range, API::Range.new(loc2,loc5), '5-2')
+    assert_parse(:parse_locations, [loc5, loc2], "5,2")
+    assert_parse(:parse_location_range, API::OrderedRange.new(loc2, loc5), "5-2")
     assert_parse(:parse_location, API::BadParameterValue, "")
     assert_parse(:parse_location, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_location, API::ObjectNotFoundById, "12345")
@@ -960,13 +961,13 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_name, name20, "20")
     assert_parse(:parse_name, API::BadParameterValue, "")
     assert_parse(:parse_name, API::ObjectNotFoundById, "12345")
-    assert_parse(:parse_name, API::ObjectNotFoundByString, 'Bogus name')
-    assert_parse(:parse_name, API::NameDoesntParse, 'yellow mushroom')
-    assert_parse(:parse_name, API::AmbiguousName, 'Amanita baccata')
-    assert_parse(:parse_name, name10, 'Macrolepiota rhacodes')
-    assert_parse(:parse_name, name10, 'Macrolepiota rhacodes (Vittad.) Singer')
-    assert_parse(:parse_names, [name20,name10], '20,10')
-    assert_parse(:parse_name_range, API::Range.new(name10,name20), '20-10')
+    assert_parse(:parse_name, API::ObjectNotFoundByString, "Bogus name")
+    assert_parse(:parse_name, API::NameDoesntParse, "yellow mushroom")
+    assert_parse(:parse_name, API::AmbiguousName, "Amanita baccata")
+    assert_parse(:parse_name, name10, "Macrolepiota rhacodes")
+    assert_parse(:parse_name, name10, "Macrolepiota rhacodes (Vittad.) Singer")
+    assert_parse(:parse_names, [name20, name10], "20,10")
+    assert_parse(:parse_name_range, API::OrderedRange.new(name10, name20), "20-10")
   end
 
   def test_parse_observation
@@ -975,8 +976,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_observation, nil, nil)
     assert_parse(:parse_observation, obs5, nil, default: obs5)
     assert_parse(:parse_observation, obs5, "5")
-    assert_parse(:parse_observations, [obs10,obs5], '10,5')
-    assert_parse(:parse_observation_range, API::Range.new(obs5, obs10), '10-5')
+    assert_parse(:parse_observations, [obs10, obs5], "10,5")
+    assert_parse(:parse_observation_range, API::OrderedRange.new(obs5, obs10), "10-5")
     assert_parse(:parse_observation, API::BadParameterValue, "")
     assert_parse(:parse_observation, API::BadParameterValue, "name")
     assert_parse(:parse_observation, API::ObjectNotFoundById, "12345")
@@ -988,8 +989,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_project, nil, nil)
     assert_parse(:parse_project, proj2, nil, default: proj2)
     assert_parse(:parse_project, proj2, "2")
-    assert_parse(:parse_projects, [proj2,proj1], '2,1')
-    assert_parse(:parse_project_range, API::Range.new(proj1,proj2), '2-1')
+    assert_parse(:parse_projects, [proj2, proj1], "2,1")
+    assert_parse(:parse_project_range, API::OrderedRange.new(proj1, proj2), "2-1")
     assert_parse(:parse_project, API::BadParameterValue, "")
     assert_parse(:parse_project, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_project, API::ObjectNotFoundById, "12345")
@@ -1002,8 +1003,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_species_list, nil, nil)
     assert_parse(:parse_species_list, spl2, nil, default: spl2)
     assert_parse(:parse_species_list, spl2, "2")
-    assert_parse(:parse_species_lists, [spl2,spl1], '2,1')
-    assert_parse(:parse_species_list_range, API::Range.new(spl1,spl2), '2-1')
+    assert_parse(:parse_species_lists, [spl2, spl1], "2,1")
+    assert_parse(:parse_species_list_range, API::OrderedRange.new(spl1, spl2), "2-1")
     assert_parse(:parse_species_list, API::BadParameterValue, "")
     assert_parse(:parse_species_list, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_species_list, API::ObjectNotFoundById, "12345")
@@ -1016,8 +1017,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_user, nil, nil)
     assert_parse(:parse_user, user2, nil, default: user2)
     assert_parse(:parse_user, user2, "2")
-    assert_parse(:parse_users, [user2,user1], '2,1')
-    assert_parse(:parse_user_range, API::Range.new(user1,user2), '2-1')
+    assert_parse(:parse_users, [user2, user1], "2,1")
+    assert_parse(:parse_user_range, API::OrderedRange.new(user1, user2), "2-1")
     assert_parse(:parse_user, API::BadParameterValue, "")
     assert_parse(:parse_user, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_user, API::ObjectNotFoundById, "12345")
@@ -1032,18 +1033,18 @@ class ApiTest < UnitTestCase
     spl2 = SpeciesList.find(2)
     assert_parse(:parse_object, nil, nil, limit: limit)
     assert_parse(:parse_object, obs10, nil, default: obs10, limit: limit)
-    assert_parse(:parse_object, obs10, 'observation 10', limit: limit)
-    assert_parse(:parse_object, name20, 'name 20', limit: limit)
-    assert_parse(:parse_object, spl2, 'species list 2', limit: limit)
-    assert_parse(:parse_object, spl2, 'species_list 2', limit: limit)
-    assert_parse(:parse_object, spl2, 'Species List 2', limit: limit)
+    assert_parse(:parse_object, obs10, "observation 10", limit: limit)
+    assert_parse(:parse_object, name20, "name 20", limit: limit)
+    assert_parse(:parse_object, spl2, "species list 2", limit: limit)
+    assert_parse(:parse_object, spl2, "species_list 2", limit: limit)
+    assert_parse(:parse_object, spl2, "Species List 2", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "1", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "bogus", limit: limit)
-    assert_parse(:parse_object, API::BadLimitedParameterValue, 'bogus 1', limit: limit)
-    assert_parse(:parse_object, API::BadLimitedParameterValue, 'license 1', limit: limit)
-    assert_parse(:parse_object, API::ObjectNotFoundById, 'name 12345', limit: limit)
-    assert_parse(:parse_objects, [obs10, name20], 'observation 10, name 20', limit: limit)
+    assert_parse(:parse_object, API::BadLimitedParameterValue, "bogus 1", limit: limit)
+    assert_parse(:parse_object, API::BadLimitedParameterValue, "license 1", limit: limit)
+    assert_parse(:parse_object, API::ObjectNotFoundById, "name 12345", limit: limit)
+    assert_parse(:parse_objects, [obs10, name20], "observation 10, name 20", limit: limit)
   end
 
   def test_check_edit_permission
@@ -1075,14 +1076,14 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_object, spl_good, "species list #{spl_good.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, "species list #{spl_bad.id}", args)
     assert_parse(:parse_object, dick, "user #{dick.id}", args)
-    assert_parse(:parse_object, API::MustHaveEditPermission, 'user 1', args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, "user 1", args)
   end
 
   def test_check_project_membership
     @api = API.new
     proj = projects(:eol_project)
-    assert_not_nil(admin = proj.admin_group.users.first )
-    assert_not_nil(member = (proj.user_group.users - proj.admin_group.users).first )
+    assert_not_nil(admin = proj.admin_group.users.first)
+    assert_not_nil(member = (proj.user_group.users - proj.admin_group.users).first)
     assert_not_nil(other = (User.all - proj.admin_group.users - proj.user_group.users).first)
 
     @api.user = admin

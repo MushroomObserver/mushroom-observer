@@ -37,7 +37,6 @@
 ################################################################################
 
 class SiteData
-
   ##############################################################################
   #
   #  :section: Category Definitions
@@ -80,12 +79,12 @@ class SiteData
     :species_lists,
     :species_list_entries,
     :observations,
-#     :observations_with_voucher,
-#     :observations_without_voucher,
+    #     :observations_with_voucher,
+    #     :observations_without_voucher,
     :comments,
     :namings,
     :votes,
-    :users,
+    :users
   ]
 
   # Relative score for each category.
@@ -102,8 +101,8 @@ class SiteData
     names_versions:                10,
     namings:                       1,
     observations:                  1,
-#     observations_with_voucher:     10,
-#     observations_without_voucher:  1,
+    #     observations_with_voucher:     10,
+    #     observations_without_voucher:  1,
     species_list_entries:          1,
     species_lists:                 5,
     users:                         0,
@@ -113,26 +112,26 @@ class SiteData
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
-    observations_with_voucher: 'observations',
-    observations_without_voucher: 'observations',
-    species_list_entries: 'observations_species_lists'
+    observations_with_voucher: "observations",
+    observations_without_voucher: "observations",
+    species_list_entries: "observations_species_lists"
   }
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    observations_with_voucher: 'specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL',
-    observations_without_voucher: 'NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )',
-    users: '`verified` IS NOT NULL',
+    observations_with_voucher: "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
+    observations_without_voucher: "NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )",
+    users: "`verified` IS NOT NULL"
   }
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
-      observations_with_voucher: lambda do |obs|
-        obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
-      end,
-      observations_without_voucher: lambda do |obs|
-        not (obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0)
-      end,
+    observations_with_voucher: lambda do |obs|
+      obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0
+    end,
+    observations_without_voucher: lambda do |obs|
+      !(obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0)
+    end
   }
 
   # -----------------------------
@@ -145,13 +144,16 @@ class SiteData
   # approximate.  There are now nontrivial calculations, such as awarding extra
   # points for observations with vouchers, which won't be done right until
   # someone looks at that user's summary page.
-  def self.update_contribution(mode, obj, user_id=nil)
-
+  def self.update_contribution(mode, obj, user_id = nil)
     # Two modes: 1) pass in object, 2) pass in field name
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
       weight = FIELD_WEIGHTS[field]
-      user_id ||= obj.user_id rescue nil
+      user_id ||= begin
+                    obj.user_id
+                  rescue
+                    nil
+                  end
     else
       field = obj
       weight = FIELD_WEIGHTS[field]
@@ -177,19 +179,19 @@ class SiteData
   def self.get_applicable_field(obj)
     table = obj.class.to_s.tableize
     field = table.to_sym
-    if not FIELD_WEIGHTS[field]
+    unless FIELD_WEIGHTS[field]
       field = nil
       for field2, table2 in FIELD_TABLES
         if table2 == table
           proc = FIELD_STATE_PROCS[field2]
-          if proc and proc.call(obj)
+          if proc && proc.call(obj)
             field = field2
             break
           end
         end
       end
     end
-    return field
+    field
   end
 
   def self.get_weight_change(obj, new_field)
@@ -201,7 +203,7 @@ class SiteData
       end
       old_field = get_applicable_field(obj_copy)
     end
-    return FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
+    FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
   end
 
   # Return stats for entire site.  Returns simple hash mapping category to
@@ -246,7 +248,7 @@ class SiteData
   #  :section: Private Helpers
   # ----------------------------
 
-private
+  private
 
   # Calculate score for a set of results:
   #
@@ -264,9 +266,7 @@ private
       for field in ALL_FIELDS
         if data[field]
           # This fixes the double-counting of created records.
-          if field.to_s.match(/^(\w+)_versions$/)
-            data[field] -= data[$1] || 0
-          end
+          data[field] -= data[Regexp.last_match(1)] || 0 if field.to_s.match(/^(\w+)_versions$/)
           metric += FIELD_WEIGHTS[field] * data[field]
         end
       end
@@ -274,7 +274,7 @@ private
       metric += data[:bonuses].to_i
       data[:metric] = metric
     end
-    return metric
+    metric
   end
 
   # Do a query for the number of records in a given category for the entire
@@ -289,7 +289,7 @@ private
   def get_field_count(field) # :doc:
     table = FIELD_TABLES[field] || field.to_s
     query = []
-    query << 'SELECT COUNT(*)'
+    query << "SELECT COUNT(*)"
     query << "FROM `#{table}`"
     if cond = FIELD_CONDITIONS[field]
       query << "WHERE #{cond}"
@@ -319,8 +319,8 @@ private
   #     num_images = @user_data[user_id][:images]
   #   end
   #
-  def load_field_counts(field, user_id=nil) # :doc:
-    count  = '*'
+  def load_field_counts(field, user_id = nil) # :doc:
+    count  = "*"
     table  = FIELD_TABLES[field] || field.to_s
     tables = "#{table} t"
     conditions = "t.user_id " + (user_id ? "= #{user_id}" : "> 0")
@@ -333,7 +333,7 @@ private
 
     # Exception for past versions.
     if table.match(/^(\w+)s_versions/)
-      parent = $1
+      parent = Regexp.last_match(1)
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"
       conditions += " AND t.#{parent}_id = p.id"
@@ -373,7 +373,7 @@ private
   #   load_user_data(user.id)
   #   user.contribution = @user_data[user.id][:metric]
   #
-  def load_user_data(id=nil) # :doc:
+  def load_user_data(id = nil) # :doc:
     if !id
       @user_id = nil
       users = User.all
@@ -388,7 +388,7 @@ private
       @user_data[user.id] = {
         id:      user.id,
         name:    user.unique_text_name,
-        bonuses: user.sum_bonuses,
+        bonuses: user.sum_bonuses
       }
       add_language_contributions(user)
     end
@@ -417,7 +417,7 @@ private
       score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
       sum += score
       [lang, score]
-    end.select {|lang, score| score > 0}
+    end.select { |_lang, score| score > 0 }
     @user_data[user.id][:languages] = sum
     @user_data[user.id][:languages_itemized] = list
   end

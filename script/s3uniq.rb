@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
+abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
 
   USAGE::
 
@@ -15,7 +15,7 @@ EOB
 
 abort("Unexpected parameters: #{ARGV.inspect}") if ARGV.length > 0
 
-data = Hash.new
+data = {}
 $stdin.each_line do |line|
   key, val = line.split("\t", 2)
   data[key] = val

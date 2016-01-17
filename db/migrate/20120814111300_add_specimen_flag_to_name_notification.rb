@@ -2,7 +2,9 @@
 
 class AddSpecimenFlagToNameNotification < ActiveRecord::Migration
   def self.up
-    add_column(:notifications, :require_specimen, :boolean, :default => false, :null => false) rescue nil
+    add_column(:notifications, :require_specimen, :boolean, default: false, null: false)
+  rescue
+    nil
   end
 
   def self.down

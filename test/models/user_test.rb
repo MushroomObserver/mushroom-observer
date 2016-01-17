@@ -1,20 +1,19 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class UserTest < UnitTestCase
-
   def test_auth
     assert_equal rolf, User.authenticate("rolf", "testpassword")
-    assert_nil   User.authenticate("nonrolf", "testpassword")
+    assert_nil User.authenticate("nonrolf", "testpassword")
   end
 
   def test_password_change
     mary.change_password("marypasswd")
     assert_equal mary, User.authenticate("mary", "marypasswd")
-    assert_nil   User.authenticate("mary", "longtest")
+    assert_nil User.authenticate("mary", "longtest")
     mary.change_password("longtest")
     assert_equal mary, User.authenticate("mary", "longtest")
-    assert_nil   User.authenticate("mary", "marypasswd")
+    assert_nil User.authenticate("mary", "marypasswd")
   end
 
   def test_disallowed_passwords
@@ -100,7 +99,7 @@ class UserTest < UnitTestCase
     u.notes = ""
     u.mailing_address = ""
     assert u.save
-    assert_equal '74996ba5c4aa1d583563078d8671fef076e2b466', u.password
+    assert_equal "74996ba5c4aa1d583563078d8671fef076e2b466", u.password
   end
 
   def test_meta_groups
@@ -109,13 +108,13 @@ class UserTest < UnitTestCase
     assert_user_list_equal(all, group1.users)
 
     user = User.create!(
-      :password              => 'blah!',
-      :password_confirmation => 'blah!',
-      :login                 => 'bobby',
-      :email                 => 'bob@bigboy.com',
-      :theme                 => nil,
-      :notes                 => '',
-      :mailing_address       => ''
+      password: "blah!",
+      password_confirmation: "blah!",
+      login: "bobby",
+      email: "bob@bigboy.com",
+      theme: nil,
+      notes: "",
+      mailing_address: ""
     )
     UserGroup.create_user(user)
 

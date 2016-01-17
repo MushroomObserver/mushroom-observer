@@ -18,26 +18,26 @@ class EolData
   attr_accessor :names
 
   def initialize
-    self.names = prune_synonyms(image_names() +
-                                description_names() +
-                                glossary_term_names())
-    @id_to_image = id_to_image()
-    @name_id_to_images = name_id_to_images()
-    @id_to_description = id_to_description()
-    @name_id_to_descriptions = name_id_to_descriptions()
-    @license_id_to_url = license_id_to_url()
-    @user_id_to_legal_name = user_id_to_legal_name()
-    @description_id_to_authors = description_id_to_authors()
-    @image_id_to_names = image_id_to_names()
+    self.names = prune_synonyms(image_names +
+                                description_names +
+                                glossary_term_names)
+    @id_to_image = id_to_image
+    @name_id_to_images = name_id_to_images
+    @id_to_description = id_to_description
+    @name_id_to_descriptions = name_id_to_descriptions
+    @license_id_to_url = license_id_to_url
+    @user_id_to_legal_name = user_id_to_legal_name
+    @description_id_to_authors = description_id_to_authors
+    @image_id_to_names = image_id_to_names
     refresh_links_to_eol
   end
 
   def image_to_names(id)
-    @image_id_to_names[id].map {|n| n.real_search_name }.join(' & ')
+    @image_id_to_names[id].map(&:real_search_name).join(" & ")
   end
 
   def name_count
-    self.names.count
+    names.count
   end
 
   def total_image_count
@@ -98,7 +98,7 @@ class EolData
 
   def rights_holder(image)
     result = image.copyright_holder
-    if result.nil? or result.strip == ""
+    if result.nil? || result.strip == ""
       legal_name(image.user_id)
     else
       result
@@ -106,21 +106,20 @@ class EolData
   end
 
   def authors(id)
-    @description_id_to_authors[id].join(', ')
+    @description_id_to_authors[id].join(", ")
   end
 
   def refresh_links_to_eol
-    refresh_predicate(self.names, Name.eol_predicate)
-    refresh_predicate(self.all_images, Image.eol_predicate)
+    refresh_predicate(names, Name.eol_predicate)
+    refresh_predicate(all_images, Image.eol_predicate)
   end
 
-private
+  private
+
   def prune_synonyms(names)
-    synonyms = Hash.new{|h, k| h[k] = []}
+    synonyms = Hash.new { |h, k| h[k] = [] }
     for name in names
-      if name.synonym_id
-        synonyms[name.synonym_id] << name
-      end
+      synonyms[name.synonym_id] << name if name.synonym_id
     end
     names_to_keep = {}
     for synonym_id, name_list in synonyms
@@ -128,7 +127,7 @@ private
       names_to_keep[name.id] = true
     end
     names.delete_if do |name|
-      name.synonym_id and not names_to_keep.has_key?(name.id)
+      name.synonym_id && !names_to_keep.key?(name.id)
     end
     names
   end
@@ -151,18 +150,18 @@ private
   )
 
   def description_names
-    return get_sorted_names(DESCRIPTION_CONDITIONS)
+    get_sorted_names(DESCRIPTION_CONDITIONS)
   end
 
   def name_id_to_descriptions
     descriptions = @id_to_description
-    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, name_descriptions.id did #{DESCRIPTION_CONDITIONS}").to_a.map{
-      |row| [row['nid'], descriptions[row['did']]]
-    })
+    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, name_descriptions.id did #{DESCRIPTION_CONDITIONS}").to_a.map do |row|
+      [row["nid"], descriptions[row["did"]]]
+    end)
   end
 
   def id_to_description
-    return make_id_hash(NameDescription.find_by_sql("SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"))
+    make_id_hash(NameDescription.find_by_sql("SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"))
   end
 
   IMAGE_CONDITIONS = %(FROM observations, images_observations, images, names
@@ -174,7 +173,7 @@ private
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN (#{Name.ranks.values_at(:Form, :Variety, :Subspecies, :Species, :Genus).join(',')})
+    AND names.rank IN (#{Name.ranks.values_at(:Form, :Variety, :Subspecies, :Species, :Genus).join(",")})
   )
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
@@ -214,9 +213,9 @@ private
   end
 
   def name_id_to_images
-    make_list_hash_from_pairs(get_all_name_rows.map{
-      |row| [row['nid'], @id_to_image[row['iid']]]
-    })
+    make_list_hash_from_pairs(get_all_name_rows.map do |row|
+      [row["nid"], @id_to_image[row["iid"]]]
+    end)
   end
 
   def get_images(conditions)
@@ -232,19 +231,21 @@ private
   end
 
   def image_id_to_names
-    make_list_hash_from_pairs(names.map {
-      |n| @name_id_to_images[n.id].map { |i| [i.id, n] } }.reduce {
-      |a,b| a+b })
+    make_list_hash_from_pairs(names.map do |n|
+      @name_id_to_images[n.id].map { |i| [i.id, n] }
+    end.reduce do |a, b|
+      a + b
+    end)
   end
 
-  def license_id_to_url()
+  def license_id_to_url
     # There are only three licenses at the moment. Just grabbing them all.
     result = {}
-    License.find_each {|l| result[l.id] = l.url}
+    License.find_each { |l| result[l.id] = l.url }
     result
   end
 
-  def user_id_to_legal_name()
+  def user_id_to_legal_name
     # Just grab the ones with contribution > 0 (1621)
     # since we're going to use at least 400 of them
     result = {}
@@ -258,22 +259,22 @@ private
     result
   end
 
-  def description_id_to_authors()
+  def description_id_to_authors
     data = Name.connection.select_rows %(
       SELECT name_description_id, user_id FROM name_descriptions_authors
     )
     pairs = data.map do |name_description_id, user_id|
-      [ name_description_id.to_i, @user_id_to_legal_name[user_id.to_i] ]
+      [name_description_id.to_i, @user_id_to_legal_name[user_id.to_i]]
     end
     result = make_list_hash_from_pairs(pairs)
     all_descriptions.each do |d|
-      result[d.id] = [@user_id_to_legal_name[d.user_id]] if !result.member?(d.id)
+      result[d.id] = [@user_id_to_legal_name[d.user_id]] unless result.member?(d.id)
     end
     result
   end
 
   def make_list_hash_from_pairs(pairs)
-    result = Hash.new{|h, k| h[k] = []}
+    result = Hash.new { |h, k| h[k] = [] }
     for x, y in pairs
       result[x].push(y)
     end
@@ -282,7 +283,7 @@ private
 
   def make_id_hash(obj_list)
     result = {}
-    obj_list.each {|o| result[o.id] = o}
+    obj_list.each { |o| result[o.id] = o }
     result
   end
 
@@ -293,16 +294,16 @@ private
 
   def create_triples(subjects, p)
     for s in subjects
-      Triple.new({subject: s.show_url, predicate: p,
-                  object: eol_search_url(s.class.name, s)}).save
+      Triple.new(subject: s.show_url, predicate: p,
+                 object: eol_search_url(s.class.name, s)).save
     end
   end
 
   def eol_search_url(class_name, subject)
     if class_name == "Image"
-      "http://eol.org/search?q=#{image_to_names(subject.id).gsub(' ', '+')}&type%5B%5D=Image"
+      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}&type%5B%5D=Image"
     elsif class_name == "Name"
-      "http://eol.org/search?q=#{subject.text_name.gsub(' ', '+')}&type%5B%5D=TaxonConcept"
+      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}&type%5B%5D=TaxonConcept"
     else
       "http://eol.org"
     end

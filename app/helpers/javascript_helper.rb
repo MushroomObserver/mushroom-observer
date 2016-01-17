@@ -1,6 +1,5 @@
 # encoding: utf-8
 module JavascriptHelper
-
   # For now, just use Browser gem's "modern?" criteria.
   # (Webkit, Firefox 17+, IE 9+ and Opera 12+)
   def can_do_ajax?
@@ -23,8 +22,8 @@ module JavascriptHelper
   #   # Example usage in view template:
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
-    if args.select {|arg| arg.class != String} != []
-      raise(ArgumentError, "javascript_include doesn't take symbols like :default, etc.")
+    if args.select { |arg| arg.class != String } != []
+      fail(ArgumentError, "javascript_include doesn't take symbols like :default, etc.")
     end
     @javascript_files ||= []
     @javascript_files += args

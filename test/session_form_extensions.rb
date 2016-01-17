@@ -41,7 +41,7 @@
 
 module SessionExtensions
   class Form
-    require 'session_upload'
+    require "session_upload"
 
     # Instance of the session that this form came from.
     attr_accessor :context
@@ -90,8 +90,8 @@ module SessionExtensions
       # Is this field modifiable?
       attr_accessor :disabled
 
-      def initialize(args={})
-        args.each {|k,v| send("#{k}=", v)}
+      def initialize(args = {})
+        args.each { |k, v| send("#{k}=", v) }
       end
 
       # Tiny class used to represent option in select field.
@@ -105,75 +105,80 @@ module SessionExtensions
     def initialize(context, form)
       self.context = context
       self.form    = form
-      self.url     = CGI.unescapeHTML(form.attributes['action'])
+      self.url     = CGI.unescapeHTML(form.attributes["action"])
       self.inputs  = []
       self.submits = []
       fill_in_initial_values!
+    end
+
+    def find_value(elem, attr)
+      result = CGI.unescapeHTML(elem.attributes[attr] || "")
+      result.is_a?(Nokogiri::XML::Attr) ? result.value : result
     end
 
     # Parse the default or initial values from the HTML and populate the
     # +inputs+ and +submits+ Arrays with the results.  Called automatically
     # by the constructor.
     def fill_in_initial_values!
-      context.assert_select(form, 'input, textarea, select') do |elems|
+      context.assert_select(form, "input, textarea, select") do |elems|
         for elem in elems
-          id   = CGI.unescapeHTML(elem.attributes['id'] || '')
-          name = CGI.unescapeHTML(elem.attributes['name'] || '')
-          val  = CGI.unescapeHTML(elem.attributes['value'] || '')
-          type = (elem.name == 'input') ? elem.attributes['type'] : elem.name
-          disabled = elem.attributes['disabled'] == 'disabled'
+          id   = find_value(elem, "id")
+          name = find_value(elem, "name")
+          val  = find_value(elem, "value")
+          type = (elem.name == "input") ? find_value(elem, "type") : elem.name
+          disabled = find_value(elem, "disabled") == "disabled"
 
           field = Field.new(
-            :node     => elem,
-            :type     => type.to_sym,
-            :name     => name,
-            :id       => id,
-            :default  => val,
-            :value    => val,
-            :disabled => disabled
+            node: elem,
+            type: type.to_sym,
+            name: name,
+            id: id,
+            default: val,
+            value: val,
+            disabled: disabled
           )
 
           case type
-          when 'submit'
+          when "submit"
             submits << field
 
-          when 'text', 'password'
+          when "text", "password"
             inputs << field
 
-          when 'textarea'
-            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(''))
+          when "textarea"
+            field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
             inputs << field
 
-          when 'file'
+          when "file"
             field.value = nil
             inputs << field
 
-          when 'checkbox', 'radio'
+          when "checkbox", "radio"
             field.on_value = val
-            field.value = (elem.attributes['checked'] == 'checked')
+            field.value = (elem.attributes["checked"] == "checked")
             inputs << field
 
-          when 'select'
+          when "select"
             val = nil
             field.options = opts = []
-            context.assert_select(elem, 'option') do |elems|
+            context.assert_select(elem, "option") do |elems|
               for elem in elems
                 opt = Field::Option.new
-                opt.value = CGI.unescapeHTML(elem.attributes['value'])
-                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(''))
+                opt.value = CGI.unescapeHTML(elem.attributes["value"])
+                opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
                 opts << opt
-                val = opt.value if elem.attributes['selected'] == 'selected'
+                val = opt.value if elem.attributes["selected"] == "selected"
               end
             end
-            val = opts.first.value if !val
+            val = opts.first.value unless val
             field.value = val
             inputs << field
 
-          when 'hidden'
+          when "hidden"
             # Work-around for the check-box work-around: Rails adds an extra
             # hidden field imediately after every check-box for the benefit of
             # browsers that fail to post check-boxes which aren't checked.
-            unless (id == '') and inputs.last and (inputs.last.name == name)
+            unless (id == "") && inputs.last && (inputs.last.name == name)
               inputs << field
             end
           end
@@ -183,12 +188,12 @@ module SessionExtensions
 
     # Find the field whose ID ends in the given String or matches the given
     # Regexp.  Returns an instance of IntegrationSession::Form::Field or +nil+.
-    def get_field(id, strict=false)
+    def get_field(id, strict = false)
       results = []
       for field in inputs
         id2 = field.id
         if id.is_a?(Regexp) ? id2.match(id) :
-           ((i = id2.rindex(id)) and (i + id.length == id2.length))
+           ((i = id2.rindex(id)) && (i + id.length == id2.length))
           results << field
         end
       end
@@ -203,7 +208,7 @@ module SessionExtensions
                        "#{id.inspect}: #{results.map(&:id).inspect}")
       end
 
-      return results.first
+      results.first
     end
 
     # Call get_field and flunk an assertion if field not found.
@@ -211,22 +216,41 @@ module SessionExtensions
       get_field(id, :strict)
     end
 
+    def string_value(field)
+      return field unless field.respond_to?(:value)
+      string_value(field.value)
+    end
+
     # Find the field whose ID ends in the given String or matches the given
     # Regexp.  Returns its value as a String if found, else +nil+.
     def get_value(id)
-      get_field(id).value.strip
+      string_value(get_field(id)).strip
     end
 
     # Call get_value and flunk an assertion if field not found.
     def get_value!(id)
-      get_field(id, :strict).value.strip
+      string_value(get_field(id, :strict)).strip
     end
 
     # Make sure the form does _not_ have a given field.
-    def assert_no_field(id, msg=nil)
+    def assert_no_field(id, msg = nil)
       field = get_field(id)
       msg ||= "Expected form NOT to have field #{id.inspect}."
       context.assert(!field || (field.type == :hidden), msg)
+    end
+
+    def selected_value(field)
+      selected = field.node.children.select {|x| x["selected"]}
+      return "" if selected == []
+      selected[0]["value"]
+    end
+
+    def field_value(field)
+      if field.type == :select
+        value = selected_value(field)
+        return value if value != ""
+      end
+      field.value.to_s.strip
     end
 
     # Assert the value of a given input field.  Change the value of the given
@@ -234,9 +258,9 @@ module SessionExtensions
     # Converts everything to String since +nil+ isn't distinguished from
     # <tt>""</tt> by HTML forms.  Pass in either a String or a Regexp for the
     # expected value.
-    def assert_value(id, val, msg=nil)
+    def assert_value(id, val, msg = nil)
       field = get_field!(id)
-      val2 = field.value.to_s.strip
+      val2 = field_value(field)
       msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
       if val.is_a?(Regexp)
         context.assert_match(val, val2.to_s, msg)
@@ -245,28 +269,40 @@ module SessionExtensions
       end
     end
 
+    def assert_checked(id, checked=true, msg = nil)
+      field = get_field!(id)
+      val = field.node["checked"]
+      if checked
+        msg ||= "Expected value of form checkbox #{id.inspect} to be checked."
+        context.assert_equal("checked", val, msg)
+      else
+        msg ||= "Expected value of form checkbox #{id.inspect} to be unchecked."
+        context.assert_nil(val, msg)
+      end
+    end
+
     # Make sure a given field is enabled for editing.
-    def assert_enabled(id, msg=nil)
+    def assert_enabled(id, msg = nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be enabled."
       context.refute(field.disabled, msg)
-      return field
+      field
     end
 
     # Make sure a given field is disabled.
-    def assert_disabled(id, msg=nil)
+    def assert_disabled(id, msg = nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be disabled."
       context.assert(field.disabled, msg)
-      return field
+      field
     end
 
     # Make sure a given field is there but hidden.
-    def assert_hidden(id, msg=nil)
+    def assert_hidden(id, msg = nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be hidden."
       context.assert(field.type == :hidden, msg)
-      return field
+      field
     end
 
     # Allow user to make further HTML assertions on the form.
@@ -290,7 +326,7 @@ module SessionExtensions
       # Uncheck all the other radio-boxes in this group.
       if field.type == :radio
         for field2 in inputs
-          if (field2 != field) and (field2.name == field.name)
+          if (field2 != field) && (field2.name == field.name)
             field2.value = false
           end
         end
@@ -336,12 +372,12 @@ module SessionExtensions
     # Submit the form using the given button.  Button can be specified by a
     # String (full exact match), Regexp, or +nil+ (meaning use the first one).
     # Post is processed on the session that owns this form.
-    def submit(button=nil)
+    def submit(button = nil)
       found = false
       hash = {}
       for field in inputs
         if field.type == :checkbox
-          hash[field.name] = field.value ? field.on_value : '0'
+          hash[field.name] = field.value ? field.on_value : "0"
         elsif field.type == :radio
           hash[field.name] = field.on_value if field.value
         elsif field.type == :file
@@ -357,7 +393,7 @@ module SessionExtensions
         end
       end
       for field in submits
-        if button.is_a?(Regexp) and field.value.match(button) or
+        if button.is_a?(Regexp) && field.value.match(button) ||
            button.is_a?(String) and (field.value == button) or
            button.nil?
           context.refute(field.disabled,

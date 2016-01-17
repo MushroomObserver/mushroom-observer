@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 namespace :location do
-
   APPROVED_LOCATIONS = Set.new([
     "0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
     "1 hour northwest by car of Denver, Colorado, USA",
@@ -3912,15 +3911,15 @@ namespace :location do
     "Ångermanland, Sweden",
     "Öland, Sweden",
     "Ünye, Turkey",
-    "İstanbul, Turkey",
-    ])
+    "İstanbul, Turkey"
+  ])
 
   LOCATION_FIXES = {
   }
 
   def report_on_name(name)
     result = false
-    if not APPROVED_LOCATIONS.member?(name)
+    unless APPROVED_LOCATIONS.member?(name)
       fixed_name = LOCATION_FIXES[name]
       if fixed_name
         reasons = Location.dubious_name?(fixed_name, true, false)
@@ -3930,17 +3929,17 @@ namespace :location do
       end
       if reasons.length != 0
         result = true
-        print("\n    \"#{name}\" => \"#{fixed_name or name}\",\n")
+        print("\n    \"#{name}\" => \"#{fixed_name || name}\",\n")
         for r in reasons
           print("    \# #{r}\n")
         end
       end
     end
-    return result
+    result
   end
 
   desc "List dubious fixes"
-  task(:dubious => :environment) do
+  task(dubious: :environment) do
     # for v in APPROVED_LOCATIONS.sort
     for v in LOCATION_FIXES.values.sort
       reasons = Location.dubious_name?(v, true)
@@ -3956,25 +3955,25 @@ namespace :location do
   def fix_funny_chars(w)
     chars = {
       [101, 204, 128] => "è",
-      [101, 204, 129] => "é"}
+      [101, 204, 129] => "é" }
     c = "123"
-    chars.map {|k,v|
+    chars.map do|k, v|
       c[0] = k[0]
       c[1] = k[1]
       c[2] = k[2]
       w.gsub(c, v)
-    }
+    end
     w
   end
 
   desc "List new locations"
-  task(:list => :environment) do
-    RunLevel.silent()
+  task(list: :environment) do
+    RunLevel.silent
     new_locs = Set.new
     # for l in Location.find(:all) # Rails 3
     for l in Location.all
-     w = fix_funny_chars(l.name)
-      if not (APPROVED_LOCATIONS.member?(w) or LOCATION_FIXES.member?(w))
+      w = fix_funny_chars(l.name)
+      unless APPROVED_LOCATIONS.member?(w) || LOCATION_FIXES.member?(w)
         new_locs.add(w.gsub("\"", "\\\""))
       end
     end
@@ -3985,7 +3984,7 @@ namespace :location do
     )
     for where in wheres
       w = fix_funny_chars(where)
-      if not (APPROVED_LOCATIONS.member?(w) or LOCATION_FIXES.member?(w))
+      unless APPROVED_LOCATIONS.member?(w) || LOCATION_FIXES.member?(w)
         new_locs.add(w.gsub("\"", "\\\""))
       end
     end
@@ -4001,7 +4000,7 @@ namespace :location do
   end
 
   def check_save(o)
-    if not o.save
+    unless o.save
       print("Save failed for #{o.class}, #{o.id}\n")
       for e in o.errors
         print("\t#{e[1]}\n")
@@ -4026,7 +4025,7 @@ namespace :location do
           # Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE `where` = '#{current_sql_safe}'")
           print("Moved #{obs.size} observations from non-location: #{current_name} to location: #{target_name}\n")
         end
-        if current_location and (current_location != target_location)
+        if current_location && (current_location != target_location)
           obs = Observation.where(location_id: current_location.id)
           if obs.size > 0
             for o in obs
@@ -4077,8 +4076,8 @@ namespace :location do
   end
 
   desc "Fix dubious locations"
-  task(:fix => :environment) do
-    RunLevel.silent()
+  task(fix: :environment) do
+    RunLevel.silent
     User.current = User.find(1) # nathan
     # for l in Location.find(:all) # Rails 3
     for l in Location.all
@@ -4100,7 +4099,7 @@ namespace :location do
       @pat[0] = pattern[0].to_s
       @pat[1] = pattern[1].to_s
       @map = {}
-      for k in map.keys()
+      for k in map.keys
         @map[k + @pat] = map[k]
       end
     end
@@ -4108,7 +4107,7 @@ namespace :location do
     def fix(str)
       if str.index(@pat)
         result = str.clone
-        @map.each {|k,v| result.gsub!(k, v) }
+        @map.each { |k, v| result.gsub!(k, v) }
         result
       else
         str
@@ -4116,7 +4115,7 @@ namespace :location do
     end
   end
 
-  FIXERS = [AccentFixer.new([204, 128], {"e" => "è", "E" => "È"}), AccentFixer.new([204, 129], {"e" => "é", "E" => "É"})]
+  FIXERS = [AccentFixer.new([204, 128], "e" => "è", "E" => "È"), AccentFixer.new([204, 129], "e" => "é", "E" => "É")]
 
   def accent_fix(w)
     for f in FIXERS
@@ -4129,8 +4128,8 @@ namespace :location do
   # or as a character in it's own right.  Unfortunately the two strings
   # are not considered equal
   desc "Fix accents"
-  task(:accents => :environment) do
-    RunLevel.silent()
+  task(accents: :environment) do
+    RunLevel.silent
     User.current = User.find(1) # nathan
     # for l in Location.find(:all) # Rails 3
     for l in Location.all
@@ -4155,30 +4154,28 @@ namespace :location do
   end
 
   desc "Location names that contain counties and should be reviewed"
-  task(:counties => :environment) do
+  task(counties: :environment) do
     candidates = {}
     for v in LOCATION_FIXES.values
       c = Location.no_dubious_county(v)
-      if c and c != v
-        candidates[v] = 'Fix'
-      end
+      candidates[v] = "Fix" if c && c != v
     end
     for k in candidates.keys.sort
       print("#{k}: #{candidates[k]}\n")
     end
   end
 
-  def escapeString (s)
+  def escapeString(s)
     "\"#{s.gsub("\"", "\\\"")}\""
   end
 
   desc "List the fixes"
-  task(:new => :environment) do
-    print("    " + (LOCATION_FIXES.values.sort.map {|l| escapeString(l)}.join(",\n    ")) + "\n")
+  task(new: :environment) do
+    print("    " + (LOCATION_FIXES.values.sort.map { |l| escapeString(l) }.join(",\n    ")) + "\n")
   end
 
   desc "Random test task"
-  task(:test => :environment) do
+  task(test: :environment) do
     print("This should be 'comment' not '[:comment]': #{:comment.t}\n")
   end
 end

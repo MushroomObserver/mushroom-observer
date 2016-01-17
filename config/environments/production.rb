@@ -48,16 +48,16 @@ MushroomObserver::Application.configure do
   # Serve new images locally until transferred to image server
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {
-      local: {
-          test: "file://#{config.local_image_files}",
-          read: "/local_images",
-      },
-      cdmr: {
-          test: :transferred_flag,
-          read: "/images",
-          # Safer to keep this disabled until truly going live.
-          # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
-      }
+    local: {
+      test: "file://#{config.local_image_files}",
+      read: "/local_images"
+    },
+    cdmr: {
+      test: :transferred_flag,
+      read: "/images",
+      # Safer to keep this disabled until truly going live.
+      # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
+    }
     # For use when testing live server in parallel with production server.
     # :mo = {
     #   :test  => "http://mushroomobserver.org/local_images",
@@ -67,12 +67,12 @@ MushroomObserver::Application.configure do
     # }
   }
   config.image_precedence = {
-      default: [:cdmr, :local]
+    default: [:cdmr, :local]
     # For use when testing live server in parallel with production server.
     # :default   => [:cdmr, :local, :mo]
   }
   config.image_fallback_source = :cdmr
-  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+  config.keep_these_image_sizes_local = [:thumbnail, :small]
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
@@ -102,7 +102,7 @@ MushroomObserver::Application.configure do
 
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this
-  config.serve_static_assets = false
+  config.serve_static_files = false
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
@@ -144,8 +144,9 @@ MushroomObserver::Application.configure do
   # config.action_controller.asset_host = "http://assets.example.com"
 
   # Precompile additional assets.
-  # application.js, application.css, and all non-JS/CSS in app/assets folder are
-  # already added.
+  # application.js, application.css, and all non-JS/CSS in app/assets
+  # folder are already added.
+
   # Precompile stuff aside from application.js, application.css, all images.
   config.assets.precompile += %w(
 
@@ -160,12 +161,12 @@ MushroomObserver::Application.configure do
     translations.js
     vote_popup.js
 
-    Admin.css      
-    Agaricus.css   
-    Amanita.css    
-    BlackOnWhite.css      
-    Cantharellaceae.css   
-    Hygrocybe.css         
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
 
   ) if config.assets && config.assets.precompile
 

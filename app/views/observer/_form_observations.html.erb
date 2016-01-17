@@ -7,7 +7,12 @@
   <div class="col-xs-12 max-width-text">
     <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
     <div class="form-group form-inline">
-      <%= date_select("observation", "when", {order: [:day, :month, :year], start_year: 1980, end_year: Time.now.year}, {class: "form-control", style: "margin-bottom: 5px;"}) %>
+      <%= date_select("observation",
+	  "when",
+	  {order: [:day, :month, :year],
+	  start_year: long_ago.year,
+	  end_year: Time.now.year},
+	  {class: "form-control", style: "margin-bottom: 5px;"}) %>
     </div>
   </div>
 </div>
@@ -244,20 +249,20 @@ jQuery(document).ready(function() {
                     </tr>
                     <tr>
                       <td>
-                        <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %></td>
+                        <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %>
                       </td>
                       <td>
-                        <%= text_field(:good_image, :copyright_holder, value: image.copyright_holder, index: image.id, class: "form-control form-control-sm") %></td>
+                        <%= text_field(:good_image, :copyright_holder, value: image.copyright_holder, index: image.id, class: "form-control form-control-sm") %>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <%= label_tag("image_#{image.id}_when_1i", :form_images_when_taken.t + ":") %></td>
+                        <%= label_tag("image_#{image.id}_when_1i", :form_images_when_taken.t + ":") %>
                       </td>
                       <td>
                         <div class="form-inline">
                           <%= date_select(:good_image, :when, {object: image, index: image.id,
-                                          start_year: 1980, end_year: Time.now.year,
+                                          start_year: long_ago.year, end_year: Time.now.year,
                                           order: [:day, :month, :year]}, {class: "form-control form-control-sm",
                                           onchange: "CHANGED_DATES[#{image.id}] = true"}) %>
                         </div>

@@ -1,10 +1,8 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class SpeciesListTest < UnitTestCase
-
   def test_project_ownership
-
     # NOT owned by Bolete project, but owned by Rolf
     spl = species_lists(:first_species_list)
     assert_true(spl.has_edit_permission?(rolf))
@@ -31,7 +29,7 @@ class SpeciesListTest < UnitTestCase
     assert_obj_list_equal([obs1], spl.observations)
 
     spl.add_observation(obs2)
-    assert_obj_list_equal([obs1,obs2], spl.observations.sort_by(&:id))
+    assert_obj_list_equal([obs1, obs2], spl.observations.sort_by(&:id))
 
     spl.remove_observation(obs1)
     assert_obj_list_equal([obs2], spl.observations)
@@ -69,7 +67,7 @@ class SpeciesListTest < UnitTestCase
     assert_equal(spl.when, o.when)
     assert_equal(spl.where, o.where)
     assert_equal(spl.location, o.location)
-    assert_equal('', o.notes)
+    assert_equal("", o.notes)
     assert_nil(o.alt)
     assert_nil(o.long)
     assert_nil(o.alt)
@@ -89,28 +87,28 @@ class SpeciesListTest < UnitTestCase
 
     # Now override everything.
     spl.construct_observation(name,
-      :user                   => mary,
-      :projects               => [],
-      :when                   => '2012-01-13',
-      :where                  => 'Undefined Location',
-      :notes                  => 'notes',
-      :lat                    => ' 12deg 34min N ',
-      :long                   => ' 123 45 W ',
-      :alt                    => ' 123.45 ft ',
-      :is_collection_location => false,
-      :specimen               => true,
-      :vote                   => Vote.next_best_vote
-    )
+                              user: mary,
+                              projects: [],
+                              when: "2012-01-13",
+                              where: "Undefined Location",
+                              notes: "notes",
+                              lat: " 12deg 34min N ",
+                              long: " 123 45 W ",
+                              alt: " 123.45 ft ",
+                              is_collection_location: false,
+                              specimen: true,
+                              vote: Vote.next_best_vote
+                             )
     o = Observation.last
     n = Naming.last
     v = Vote.last
     assert_objs_equal(o, spl.observations.last)
     assert_users_equal(mary, o.user)
     assert_obj_list_equal([], o.projects)
-    assert_equal('2012-01-13', o.when.web_date)
-    assert_equal('Undefined Location', o.where)
+    assert_equal("2012-01-13", o.when.web_date)
+    assert_equal("Undefined Location", o.where)
     assert_equal(nil, o.location)
-    assert_equal('notes', o.notes)
+    assert_equal("notes", o.notes)
     assert_equal(12.5667, o.lat.round(4))
     assert_equal(-123.75, o.long.round(4))
     assert_equal(38, o.alt.round(4))

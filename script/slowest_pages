@@ -17,7 +17,7 @@
 #
 ################################################################################
 
-FILE = ARGV[0] || File.expand_path('../../log/production.log', __FILE__)
+FILE = ARGV[0] || File.expand_path("../../log/production.log", __FILE__)
 NUM  = ARGV[1].to_i || 10
 
 data = {}
@@ -27,9 +27,9 @@ File.open(FILE).readlines.each do |line|
     next if status != "200"
     time = time.to_f
     path = "/#{controller}/#{action}"
-    rec = data[path] ||= [0,0,0,0]
+    rec = data[path] ||= [0, 0, 0, 0]
     rec[0] += time
-    rec[1] += time*time
+    rec[1] += time * time
     rec[2] += 1
     rec[3] += 1 if robot
   end
@@ -38,14 +38,14 @@ end
 for path, rec in data
   sum, ssq, num = *rec
   rec[0] = avg = sum / num
-  rec[1] = sig = Math.sqrt(ssq/num - avg*avg)
+  rec[1] = sig = Math.sqrt(ssq / num - avg * avg)
 end
 
 n = 0
-puts "%-40s %6s %6s %6s %6s" % ["path", "mean", "sigma", "num", "robot"]
-for path in data.keys.sort {|a,b| data[b][0] <=> data[a][0]}
+puts "%-40s %6s %6s %6s %6s" % %w(path mean sigma num robot)
+for path in data.keys.sort { |a, b| data[b][0] <=> data[a][0] }
   avg, sig, num, robots = data[path]
-  puts "%-40s %6.3f %6.3f %6d %5d%%" % [path, avg, sig, num, 100.0*robots/num]
+  puts "%-40s %6.3f %6.3f %6d %5d%%" % [path, avg, sig, num, 100.0 * robots / num]
   n += 1
   break if n >= NUM
 end

@@ -21,7 +21,7 @@ MushroomObserver::Application.configure do
   config.image_sources = {
     local: {
       test: "file://#{config.local_image_files}",
-      read: "/local_images",
+      read: "/local_images"
     },
     remote1: {
       test: :transferred_flag,
@@ -32,14 +32,14 @@ MushroomObserver::Application.configure do
       write: "file://#{config.root}/public/test_server2",
       # Having trouble getting this to work on vagrant machine...
       # write: "ssh://vagrant@localhost:#{config.root}/public/test_server2",
-      sizes: [ :thumbnail, :small, :medium ]
+      sizes: [:thumbnail, :small, :medium]
     }
   }
   config.image_precedence = {
-    default: [:local, :remote1 ]
+    default: [:local, :remote1]
   }
   config.image_fallback_source = :remote1
-  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+  config.keep_these_image_sizes_local = [:thumbnail, :small]
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
 
@@ -62,7 +62,7 @@ MushroomObserver::Application.configure do
   config.eager_load = false
 
   # Configure static asset server for tests with Cache-Control for performance.
-  config.serve_static_assets  = true
+  config.serve_static_files  = true
   config.static_cache_control = "public, max-age=3600"
 
   # Show full error reports and disable caching
@@ -97,10 +97,33 @@ MushroomObserver::Application.configure do
   config.assets.debug = false
   config.assets.digest = false
 
+  config.assets.precompile += %w(
+
+    api_key.js
+    edit_location.js
+    image_slider.js
+    multi_image_upload.js
+    name_lister.js
+    pivotal.js
+    rss_feed_select_helper.js
+    single_image_uploader.js
+    translations.js
+    vote_popup.js
+
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
+
+  ) if config.assets && config.assets.precompile
+
   # To control the debugger turing testing
   config.activate_debugger = false
+
+  config.active_support.test_order = :random
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
 require file if File.exist?(file)
-

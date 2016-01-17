@@ -1,13 +1,13 @@
 # encoding: utf-8
 class Pivotal
-  require 'fileutils'
-  require 'net/http'
-  require 'net/https'
-  require 'json'
-  require 'time'
+  require "fileutils"
+  require "net/http"
+  require "net/https"
+  require "json"
+  require "time"
 
   class << self
-    def get_stories(verbose=false)
+    def get_stories(_verbose = false)
       json = get_request("stories?limit=10000&#{story_fields}")
       stories = []
       JSON.parse(json).each do |obj|
@@ -19,12 +19,12 @@ class Pivotal
           stories << story
         end
       end
-      return stories
+      stories
     end
 
     def get_story(id)
       json = get_request("stories/#{id}?#{story_fields}")
-      return Pivotal::Story.new(json)
+      Pivotal::Story.new(json)
     end
 
     def create_story(name, description, user)
@@ -34,7 +34,7 @@ class Pivotal
         "description" => prepare_text(description, user)
       }
       json = post_request("stories", data)
-      return Pivotal::Story.new(json)
+      Pivotal::Story.new(json)
     end
 
     # Just used by unit tests to clean up temp story created during test.
@@ -43,29 +43,27 @@ class Pivotal
     end
 
     def post_comment(story_id, user, text)
-      data = {"text" => prepare_text(text, user)}
+      data = { "text" => prepare_text(text, user) }
       json = post_request("stories/#{story_id}/comments", data)
-      return Pivotal::Comment.new(json)
+      Pivotal::Comment.new(json)
     end
 
     def cast_vote(story_id, user, value)
       story = get_story(story_id)
       story.change_vote(user, value)
       new_desc = prepare_text(story.description, story.user, story.votes)
-      data = {"description" => new_desc}
+      data = { "description" => new_desc }
       put_request("stories/#{story_id}", data)
-      return story
+      story
     end
 
-    def prepare_text(text, user=nil, votes=[])
+    def prepare_text(text, user = nil, votes = [])
       text = text.sub(/\A\s+/, "").sub(/\s*\Z/, "\n\n")
-      if user
-        text += "USER: #{user.id} (#{user.name})\n"
-      end
+      text += "USER: #{user.id} (#{user.name})\n" if user
       votes.each do |vote|
         text += "VOTE: #{vote.id} #{vote.value}\n"
       end
-      return text
+      text
     end
 
     def story_fields
@@ -76,13 +74,13 @@ class Pivotal
       "fields=created_at,text"
     end
 
-  private
+    private
 
     # ----------------------------
     #  HTTP methods.
     # ----------------------------
 
-    def do_request(method, end_path, data=nil)
+    def do_request(method, end_path, data = nil)
       # Use same HTTP connection for duration of this MO request.
       @https ||= Net::HTTP.new(MO.pivotal_url, 443)
       @https.use_ssl = true
@@ -104,7 +102,7 @@ class Pivotal
       when "DELETE"
         req = Net::HTTP::Delete.new(path, headers)
       end
-      return @https.request(req).body
+      @https.request(req).body
     end
 
     def get_request(path)

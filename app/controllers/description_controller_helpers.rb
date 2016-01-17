@@ -33,7 +33,6 @@
 ################################################################################
 
 module DescriptionControllerHelpers
-
   ################################################################################
   #
   #  :section Actions
@@ -48,12 +47,12 @@ module DescriptionControllerHelpers
         flash_error(:runtime_description_make_default_only_public.t)
       else
         desc.parent.description_id = desc.id
-        desc.parent.log(:log_changed_default_description, :user => @user.login,
-                        :name => desc.unique_partial_format_name,
-                        :touch => true)
+        desc.parent.log(:log_changed_default_description, user: @user.login,
+                                                          name: desc.unique_partial_format_name,
+                                                          touch: true)
         desc.parent.save
       end
-      redirect_with_query(:action => desc.show_action, :id => desc.id)
+      redirect_with_query(action: desc.show_action, id: desc.id)
     end
   end
 
@@ -70,25 +69,25 @@ module DescriptionControllerHelpers
       # Doesn't have permission to see source.
       if !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
-        redirect_with_query(:action => src.parent.show_action, :id => src.parent_id)
+        redirect_with_query(action: src.parent.show_action, id: src.parent_id)
 
       # POST method
       elsif request.method == "POST"
-        delete_after = (params[:delete] == '1')
+        delete_after = (params[:delete] == "1")
         target = params[:target].to_s
         if target.match(/^parent_(\d+)$/)
-          target_id = $1
+          target_id = Regexp.last_match(1)
           if dest = find_or_goto_index(src.parent.class, target_id)
             do_move_description(src, dest, delete_after)
           end
         elsif target.match(/^desc_(\d+)$/)
-          target_id = $1
+          target_id = Regexp.last_match(1)
           if dest = find_description(target_id)
             do_merge_description(src, dest, delete_after)
           end
         else
-          flash_error(:runtime_invalid.t(:type => '"target"',
-                                         :value => target))
+          flash_error(:runtime_invalid.t(type: '"target"',
+                                         value: target))
         end
       end
     end
@@ -113,16 +112,16 @@ module DescriptionControllerHelpers
       @merge = true
       @old_desc_id = src.id
       @delete_after = delete_after
-      render(:action => "edit_#{src.parent.type_tag}_description")
+      render(action: "edit_#{src.parent.type_tag}_description")
 
     # Merged successfully.
     else
-      desc.parent.log(:log_object_merged_by_user, :user => @user.login,
-                      :touch => true, :from => src_name,
-                      :to => dest.unique_partial_format_name)
+      desc.parent.log(:log_object_merged_by_user, user: @user.login,
+                                                  touch: true, from: src_name,
+                                                  to: dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
-                   t(:old => src_title, :new => dest.format_name))
-      redirect_with_query(:action => dest.show_action, :id => dest.id)
+                   t(old: src_title, new: dest.format_name))
+      redirect_with_query(action: dest.show_action, id: dest.id)
     end
   end
 
@@ -137,35 +136,35 @@ module DescriptionControllerHelpers
       if src.parent.description_id == src.id
         src.parent.description_id = nil
         src.parent.save
-        src.parent.log(:log_changed_default_description, :user => @user.login,
-                       :name => :none, :touch => true)
+        src.parent.log(:log_changed_default_description, user: @user.login,
+                                                         name: :none, touch: true)
       end
       src.parent = dest
       src.save
-      src.parent.log(:log_object_moved_by_user, :user => @user.login,
-                     :from => src_name, :to => dest.unique_format_name,
-                     :touch => true)
+      src.parent.log(:log_object_moved_by_user, user: @user.login,
+                                                from: src_name, to: dest.unique_format_name,
+                                                touch: true)
       if make_dest_default && src.public
         dest.description_id = src
         dest.save
-        dest.log(:log_changed_default_description, :user => @user.login,
-                 :name => src.unique_partial_format_name, :touch => true)
+        dest.log(:log_changed_default_description, user: @user.login,
+                                                   name: src.unique_partial_format_name, touch: true)
       end
       flash_notice(:runtime_description_move_success.
-                   t(:old => src_title, :new => dest.format_name))
-      redirect_with_query(:action => src.show_action, :id => src.id)
+                   t(old: src_title, new: dest.format_name))
+      redirect_with_query(action: src.show_action, id: src.id)
 
     # Create a clone in the destination name/location.
     else
       desc = src.class.new(
-        :parent      => dest,
-        :source_type => src.source_type,
-        :source_name => src.source_name,
-        :project_id  => src.project_id,
-        :locale      => src.locale,
-        :public      => src.public,
-        :license     => src.license,
-        :all_notes   => src.all_notes
+        parent: dest,
+        source_type: src.source_type,
+        source_name: src.source_name,
+        project_id: src.project_id,
+        locale: src.locale,
+        public: src.public,
+        license: src.license,
+        all_notes: src.all_notes
       )
 
       # I think a reviewer should be required to pass off on this before it
@@ -185,7 +184,7 @@ module DescriptionControllerHelpers
         rescue => e
           flash_error(:runtime_description_move_invalid_classification.t)
           flash_error(e.to_s)
-          desc.classification = ''
+          desc.classification = ""
         end
       end
 
@@ -193,11 +192,11 @@ module DescriptionControllerHelpers
       if !desc.save
         flash_object_errors(desc)
       else
-        dest.log(:log_description_created_at, :user => @user.login,
-                 :name => desc.unique_partial_format_name, :touch => true)
+        dest.log(:log_description_created_at, user: @user.login,
+                                              name: desc.unique_partial_format_name, touch: true)
         flash_notice(:runtime_description_copy_success.
-                     t(:old => src_title, :new => desc.format_name))
-        redirect_with_query(:action => desc.show_action, :id => desc.id)
+                     t(old: src_title, new: desc.format_name))
+        redirect_with_query(action: desc.show_action, id: desc.id)
       end
     end
   end
@@ -219,18 +218,18 @@ module DescriptionControllerHelpers
       # to delete the draft after publishing it.)
       if !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
-        redirect_with_query(:action => parent.show_action, :id => parent.id)
+        redirect_with_query(action: parent.show_action, id: parent.id)
 
       # Can't merge it into itself!
       elsif old == draft
         flash_error(:runtime_description_already_default.t)
-        redirect_with_query(:action => draft.show_action, :id => draft.id)
+        redirect_with_query(action: draft.show_action, id: draft.id)
 
       # I've temporarily decided to always just turn it into a public desc.
       # User can then merge by hand if public desc already exists.
       else
         draft.source_type = :public
-        draft.source_name = ''
+        draft.source_name = ""
         draft.project     = nil
         draft.admin_groups.clear
         draft.admin_groups << UserGroup.reviewers
@@ -239,11 +238,11 @@ module DescriptionControllerHelpers
         draft.reader_groups.clear
         draft.reader_groups << UserGroup.all_users
         draft.save
-        parent.log(:log_published_description, :user => @user.login,
-                   :name => draft.unique_partial_format_name, :touch => true)
+        parent.log(:log_published_description, user: @user.login,
+                                               name: draft.unique_partial_format_name, touch: true)
         parent.description = draft
         parent.save
-        redirect_with_query(:action => parent.show_action, :id => parent.id)
+        redirect_with_query(action: parent.show_action, id: parent.id)
       end
     end
   end
@@ -255,12 +254,12 @@ module DescriptionControllerHelpers
       done = false
 
       # Doesn't have permission.
-      if !@description.is_admin?(@user) and !is_in_admin_mode?
+      if !@description.is_admin?(@user) && !is_in_admin_mode?
         flash_error(:runtime_description_adjust_permissions_denied.t)
         done = true
 
       # These types have fixed permissions.
-      elsif [:public, :foreign].include?(@description.source_type) and
+      elsif [:public, :foreign].include?(@description.source_type) &&
             !is_in_admin_mode?
         flash_error(:runtime_description_permissions_fixed.t)
         done = true
@@ -284,15 +283,31 @@ module DescriptionControllerHelpers
         @data = [nil]
         done = true
         for n in params[:writein_name].keys.sort
-          name   = params[:writein_name][n].to_s     rescue ''
-          reader = params[:writein_reader][n] == '1' rescue false
-          writer = params[:writein_writer][n] == '1' rescue false
-          admin  = params[:writein_admin][n]  == '1' rescue false
-          if !name.blank? and
+          name   = begin
+                     params[:writein_name][n].to_s
+                   rescue
+                     ""
+                   end
+          reader = begin
+                     params[:writein_reader][n] == "1"
+                   rescue
+                     false
+                   end
+          writer = begin
+                     params[:writein_writer][n] == "1"
+                   rescue
+                     false
+                   end
+          admin  = begin
+                     params[:writein_admin][n] == "1"
+                   rescue
+                     false
+                   end
+          if !name.blank? &&
              !update_writein(@description, name, reader, writer, admin)
-            @data << {name: name, reader: reader, writer: writer,
-                      admin: admin}
-            flash_error(:runtime_description_user_not_found.t(:name => name))
+            @data << { name: name, reader: reader, writer: writer,
+                       admin: admin }
+            flash_error(:runtime_description_user_not_found.t(name: name))
             done = false
           end
         end
@@ -301,9 +316,9 @@ module DescriptionControllerHelpers
         new_readers = @description.reader_groups.sort_by(&:id)
         new_writers = @description.writer_groups.sort_by(&:id)
         new_admins  = @description.admin_groups.sort_by(&:id)
-        if (old_readers != new_readers) or
-           (old_writers != new_writers) or
-           (old_admins  != new_admins)
+        if (old_readers != new_readers) ||
+           (old_writers != new_writers) ||
+           (old_admins != new_admins)
 
           # Give feedback to assure user that their changes were made.
           flash_description_changes(old_readers, new_readers, :reader)
@@ -318,16 +333,16 @@ module DescriptionControllerHelpers
           end
 
           @description.parent.log(:log_changed_permissions,
-                              :user => @user.login, :touch => false,
-                              :name => @description.unique_partial_format_name)
+                                  user: @user.login, touch: false,
+                                  name: @description.unique_partial_format_name)
         else
           flash_notice(:runtime_description_adjust_permissions_no_changes.t)
         end
       end
 
       if done
-        redirect_with_query(:action => @description.show_action,
-          :id => @description.id)
+        redirect_with_query(action: @description.show_action,
+                            id: @description.id)
 
       # Gather list of all the groups, authors, editors and owner.
       # If the user wants more they can write them in.
@@ -343,10 +358,10 @@ module DescriptionControllerHelpers
           @description.authors.sort_by(&:login) +
           @description.editors.sort_by(&:login) +
           [@user]
-        ).map {|user| UserGroup.one_user(user)}
+        ).map { |user| UserGroup.one_user(user) }
         @groups.uniq!
-        @groups = @groups.reject {|g| g.name.match(/^user \d+$/)} +
-                  @groups.select {|g| g.name.match(/^user \d+$/)}
+        @groups = @groups.reject { |g| g.name.match(/^user \d+$/) } +
+                  @groups.select { |g| g.name.match(/^user \d+$/) }
       end
     end
   end
@@ -360,7 +375,7 @@ module DescriptionControllerHelpers
   # Look up a name or location description by id, using the controller name
   # to decide which kind.
   def find_description(id)
-    if self.class.name == 'NameController'
+    if self.class.name == "NameController"
       find_or_goto_index(NameDescription, id)
     else
       find_or_goto_index(LocationDescription, id)
@@ -398,9 +413,9 @@ module DescriptionControllerHelpers
         desc.public_write = false
       else
         flash_error(:runtime_create_draft_create_denied.
-                      t(:title => project.title))
-        redirect_to(:controller => 'project', :action => 'show_project',
-                    :id => project.id)
+                      t(title: project.title))
+        redirect_to(controller: "project", action: "show_project",
+                    id: project.id)
       end
 
     # Cloning an existing description.
@@ -409,19 +424,19 @@ module DescriptionControllerHelpers
       if clone.is_reader?(@user)
         desc.all_notes = clone.all_notes
         desc.source_type  = :user
-        desc.source_name  = ''
+        desc.source_name  = ""
         desc.project_id   = nil
         desc.public       = false
         desc.public_write = false
       else
         flash_error(:runtime_description_private.t)
-        redirect_to(:action => 'show_name', :id => desc.parent_id)
+        redirect_to(action: "show_name", id: desc.parent_id)
       end
 
     # Otherwise default to :public description.
     else
       desc.source_type  = :public
-      desc.source_name  = ''
+      desc.source_name  = ""
       desc.project_id   = nil
       desc.public       = true
       desc.public_write = true
@@ -432,16 +447,16 @@ module DescriptionControllerHelpers
   # read and write permissions for a new description.
   def initialize_description_permissions(desc)
     read  = desc.public
-    write = (desc.public_write == '1')
+    write = (desc.public_write == "1")
     case desc.source_type
 
     # Creating standard "public" description.
     when :public
-      flash_warning(:runtime_description_public_read_wrong.t)  if !read
-      flash_warning(:runtime_description_public_write_wrong.t) if !write
+      flash_warning(:runtime_description_public_read_wrong.t)  unless read
+      flash_warning(:runtime_description_public_write_wrong.t) unless write
       desc.reader_groups << UserGroup.all_users
       desc.writer_groups << UserGroup.all_users
-      desc.admin_groups  << UserGroup.reviewers
+      desc.admin_groups << UserGroup.reviewers
       desc.public = true
       desc.save
 
@@ -478,7 +493,7 @@ module DescriptionControllerHelpers
       desc.admin_groups << UserGroup.one_user(@user)
 
     else
-      raise :runtime_invalid_source_type.t(:value => desc.source_type.inspect)
+      fail :runtime_invalid_source_type.t(value: desc.source_type.inspect)
     end
   end
 
@@ -487,12 +502,12 @@ module DescriptionControllerHelpers
     okay = true
 
     # Fail completely if they don't even have write permission.
-    if !desc.is_writer?(@user)
+    unless desc.is_writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       if desc.is_reader?(@user)
-        redirect_to(:action => desc.show_action, :id => desc.id)
+        redirect_to(action: desc.show_action, id: desc.id)
       else
-        redirect_to(:action => desc.parent.show_action, :id => desc.parent_id)
+        redirect_to(action: desc.parent.show_action, id: desc.parent_id)
       end
       okay = false
     end
@@ -505,12 +520,12 @@ module DescriptionControllerHelpers
       author = desc.is_author?(@user)
 
       params.delete(:source_type) unless root
-      params.delete(:source_name) unless root or ((admin || author) and
+      params.delete(:source_name) unless root || ((admin || author) &&
         (desc.source_type != :project && desc.source_type != :project))
-      params.delete(:license_id) unless root or admin or author
+      params.delete(:license_id) unless root || admin || author
     end
 
-    return okay
+    okay
   end
 
   # Modify permissions on an existing Description based on two over-simplified
@@ -521,17 +536,17 @@ module DescriptionControllerHelpers
     old_read = desc.public_was
     new_read = desc.public
     old_write = desc.public_write_was
-    new_write = (desc.public_write == '1')
+    new_write = (desc.public_write == "1")
 
     # Ensure these special types don't change,
     case desc.source_type
     when :public
-      flash_warning(:runtime_description_public_read_wrong.t)  if !new_read
-      flash_warning(:runtime_description_public_write_wrong.t) if !new_write
+      flash_warning(:runtime_description_public_read_wrong.t)  unless new_read
+      flash_warning(:runtime_description_public_write_wrong.t) unless new_write
       new_read  = true
       new_write = true
     when :foreign
-      flash_warning(:runtime_description_foreign_read_wrong.t)  if !new_read
+      flash_warning(:runtime_description_foreign_read_wrong.t)  unless new_read
       flash_warning(:runtime_description_foreign_write_wrong.t) if new_write
       new_read  = true
       new_write = false
@@ -545,20 +560,14 @@ module DescriptionControllerHelpers
       new_readers << UserGroup.all_users
       desc.public = true
     end
-    if !old_write && new_write
-      new_writers << UserGroup.all_users
-    end
+    new_writers << UserGroup.all_users if !old_write && new_write
 
     # "Not Public" means only the owner...
-    if old_read && !new_read
-      new_readers << UserGroup.one_user(desc.user)
-    end
-    if old_write && !new_write
-      new_writers << UserGroup.one_user(desc.user)
-    end
+    new_readers << UserGroup.one_user(desc.user) if old_read && !new_read
+    new_writers << UserGroup.one_user(desc.user) if old_write && !new_write
 
     # ...except in the case of projects.
-    if (desc.source_type == :project) and
+    if (desc.source_type == :project) &&
        (project = desc.project)
       if old_read && !new_read
         # Add project members to readers.
@@ -575,14 +584,12 @@ module DescriptionControllerHelpers
   def update_writein(desc, name, reader, writer, admin)
     result = true
     if name.match(/^(.*\S) +<.*>$/)
-      group = User.find_by_login($1)
+      group = User.find_by_login(Regexp.last_match(1))
     else
       group = User.find_by_login(name) ||
               UserGroup.find_by_name(name)
     end
-    if group.is_a?(User)
-      group = UserGroup.one_user(group)
-    end
+    group = UserGroup.one_user(group) if group.is_a?(User)
     if group
       update_group(desc, :readers, group, reader)
       update_group(desc, :writers, group, writer)
@@ -590,7 +597,7 @@ module DescriptionControllerHelpers
     else
       result = false
     end
-    return result
+    result
   end
 
   # Update the permissions of a given type for the list of pre-filled-in
@@ -598,16 +605,16 @@ module DescriptionControllerHelpers
   def update_groups(desc, type, groups)
     for id, val in groups
       if group = UserGroup.safe_find(id)
-        update_group(desc, type, group, (val == '1'))
+        update_group(desc, type, group, (val == "1"))
       else
-        flash_error(:runtime_description_user_not_found.t(:name => id))
+        flash_error(:runtime_description_user_not_found.t(name: id))
       end
     end
   end
 
   # Update one group's permissions of a given type.
   def update_group(desc, type, group, value)
-    method = type.to_s.sub(/s$/, '_groups')
+    method = type.to_s.sub(/s$/, "_groups")
     old_value = desc.send(method).include?(group)
     if old_value && !value
       desc.send(method).delete(group)
@@ -621,19 +628,19 @@ module DescriptionControllerHelpers
   def flash_description_changes(old_groups, new_groups, type)
     for group in new_groups - old_groups
       name = group_name(group)
-      flash_notice(:"runtime_description_added_#{type}".t(:name => name))
+      flash_notice(:"runtime_description_added_#{type}".t(name: name))
     end
     for group in old_groups - new_groups
       name = group_name(group)
-      flash_notice(:"runtime_description_removed_#{type}".t(:name => name))
+      flash_notice(:"runtime_description_removed_#{type}".t(name: name))
     end
   end
 
   # Return name of group or user if it's a one-user group.
   def group_name(group)
-    if group.name == 'all users'
+    if group.name == "all users"
       :adjust_permissions_all_users.t
-    elsif group.name == 'reviewers'
+    elsif group.name == "reviewers"
       :REVIEWERS.t
     elsif group.name.match(/^user \d+$/)
       group.users.first.legal_name
@@ -652,25 +659,27 @@ module DescriptionControllerHelpers
 
     # Mergeable if there are no fields which are non-blank in both descriptions.
     if src.class.all_note_fields.none? \
-         {|f| !src_notes[f].blank? and !dest_notes[f].blank?}
+         { |f| !src_notes[f].blank? && !dest_notes[f].blank? }
       result = true
 
       # Copy over all non-blank descriptive fields.
       for f, val in src_notes
-        if !val.blank?
-          dest.send("#{f}=", val)
-        end
+        dest.send("#{f}=", val) unless val.blank?
       end
 
       # Store where merge came from in new version of destination.
-      dest.merge_source_id = src.versions.latest.id rescue nil
+      dest.merge_source_id = begin
+                               src.versions.latest.id
+                             rescue
+                               nil
+                             end
 
       # Save changes to destination.
       dest.save
 
       # Copy over authors and editors.
-      src.authors.each {|user| dest.add_author(user)}
-      src.editors.each {|user| dest.add_editor(user)}
+      src.authors.each { |user| dest.add_author(user) }
+      src.editors.each { |user| dest.add_editor(user) }
 
       # Delete old description if requested.
       if delete_after
@@ -679,7 +688,7 @@ module DescriptionControllerHelpers
         else
           src_was_default = (src.parent.description_id == src.id)
           flash_notice(:runtime_description_merge_deleted.
-                         t(:old => src.unique_partial_format_name))
+                         t(old: src.unique_partial_format_name))
           src.destroy
 
           # Make destination the default if source used to be the default.
@@ -691,6 +700,6 @@ module DescriptionControllerHelpers
       end
 
     end
-    return result
+    result
   end
 end

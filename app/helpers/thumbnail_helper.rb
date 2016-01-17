@@ -1,6 +1,5 @@
 # encoding: utf-8
 module ThumbnailHelper
-
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   #
   #   link::             Hash of { controller: xxx, action: xxx, etc. }
@@ -12,7 +11,7 @@ module ThumbnailHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  def thumbnail(image, args={})
+  def thumbnail(image, args = {})
     image_id = image.is_a?(Fixnum) ? image : image.id
     locals = {
       image:            image,
@@ -30,12 +29,11 @@ module ThumbnailHelper
 
   def show_best_image(obs)
     if obs && obs.thumb_image
-      thumbnail(obs.thumb_image, {
-        link: obs.show_link_args,
-        size: :thumbnail,
-        votes: true,
-        responsive: false}
-      ) + image_copyright(obs.thumb_image)
+      thumbnail(obs.thumb_image,         link: obs.show_link_args,
+                                         size: :thumbnail,
+                                         votes: true,
+                                         responsive: false
+               ) + image_copyright(obs.thumb_image)
     end
   end
 
@@ -51,8 +49,8 @@ module ThumbnailHelper
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
-    link = link_to(vote_text, {controller: :image, action: :show_image, id: image.id, vote: vote},
-                   title: image_vote_as_help_string(vote), data:{role: "image_vote", id: image.id, val: vote })  ##return a link if the user has NOT voted this way
+    link = link_to(vote_text, { controller: :image, action: :show_image, id: image.id, vote: vote },
+                   title: image_vote_as_help_string(vote), data: { role: "image_vote", id: image.id, val: vote }) # #return a link if the user has NOT voted this way
     if current_vote == vote
       link = content_tag(:span, image_vote_as_short_string(vote))
     end

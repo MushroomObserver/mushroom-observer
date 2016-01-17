@@ -13,10 +13,10 @@ module PatternSearch
     def initialize(string)
       self.errors = []
       self.parser = PatternSearch::Parser.new(string)
-      self.build_query
+      build_query
       self.query = Query.lookup(model, flavor, args)
     rescue Error => e
-      self.errors << e
+      errors << e
     end
   end
 end

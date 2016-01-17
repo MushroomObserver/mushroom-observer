@@ -1,8 +1,7 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class LanguageTest < UnitTestCase
-
   def test_official
     english = languages(:english)
     all_but_english = Language.all - [english]
@@ -16,29 +15,30 @@ class LanguageTest < UnitTestCase
     greek = languages(:greek)
     assert_equal([], english.top_contributors)
     french_contributors = Set.new(french.top_contributors)
-    assert_equal(Set.new([[2, 'mary'], [1, 'rolf']]), french_contributors)
-    assert(french_contributors.member?([2, 'mary']))
-    assert_equal([[4, 'dick']], greek.top_contributors)
+    assert_equal(Set.new([[2, "mary"], [1, "rolf"]]), french_contributors)
+    assert(french_contributors.member?([2, "mary"]))
+    assert_equal([[4, "dick"]], greek.top_contributors)
   end
 
   def read_from_yaml(lang, symbol)
     file = lang.localization_file
-    data = File.open(file, 'r:utf-8') do |fh|
-      YAML::load(fh)
+    data = File.open(file, "r:utf-8") do |fh|
+      YAML.load(fh)
     end
     data[lang.locale.to_s]["mo"][symbol.to_s]
   end
-  
+
   def test_update_localization
     # TODO: While this seems to work, it doesn't really.  If you
     # put a str.language.update_localization_file before the
     # update_attributes! it will fail to correctly rewrite the
     # lang file.
-    use_test_locales {
+    use_test_locales do
       str = translation_strings(:english_one)
+      orig_text = str.text
       en_text = "shazam"
       assert_not_equal(str.text, en_text)
-      str.update!(:text => en_text)
+      str.update!(text: en_text)
       str.update_localization
       str.language.update_localization_file
       assert_equal(en_text, read_from_yaml(str.language, str.tag))
@@ -47,7 +47,11 @@ class LanguageTest < UnitTestCase
       fr_str.language.update_localization_file
       assert_not_equal(en_text, read_from_yaml(fr_str.language, fr_str.tag))
       assert_equal(en_text, read_from_yaml(str.language, fr_str.tag))
-    }
+
+      str.update!(text: orig_text)
+      str.update_localization
+      str.language.update_localization_file
+    end
   end
 
   def set_text(str, new_string)
@@ -55,14 +59,14 @@ class LanguageTest < UnitTestCase
     str.save
     str.reload
   end
-  
+
   def test_versioning_twice
     str = translation_strings(:version_wizard)
     yesterday = Time.now - 1.day
     assert(str.updated_at < yesterday)
     expected_version = str.version + 1
     User.current = str.user
-    set_text(str, 'Gandalf the Gray')
+    set_text(str, "Gandalf the Gray")
     assert(str.updated_at > yesterday)
     assert_equal(expected_version, str.version)
     set_text(str, "Gandalf the White")
@@ -72,17 +76,17 @@ class LanguageTest < UnitTestCase
   def test_versioning_someone_else
     str = translation_strings(:version_wizard)
     User.current = str.user
-    set_text(str, 'Gandalf the Gray')
+    set_text(str, "Gandalf the Gray")
     expected_version = str.version + 1
     User.current = users(:katrina)
     assert_not_equal(str.user_id, User.current_id)
     set_text(str, "Mithrandir")
     assert_equal(expected_version, str.version)
   end
-  
+
   def test_update_recent_translations
     one = translation_strings(:english_waiting_for_update)
-    one.text = 'new'
+    one.text = "new"
     one.save
     old_val = one.tag.to_sym.l
     new_val = one.text
@@ -97,10 +101,10 @@ class LanguageTest < UnitTestCase
 
   def test_score_lines
     len = Language::CHARACTERS_PER_LINE
-    assert_equal(0, Language.score_lines(''))
-    assert_equal(1, Language.score_lines('x'))
-    assert_equal(1, Language.score_lines('x'*(len-1)))
-    assert_equal(2, Language.score_lines('x'*len))
+    assert_equal(0, Language.score_lines(""))
+    assert_equal(1, Language.score_lines("x"))
+    assert_equal(1, Language.score_lines("x" * (len - 1)))
+    assert_equal(2, Language.score_lines("x" * len))
     assert_equal(1, Language.score_lines("x\nx\nx"))
     assert_equal(3, Language.score_lines("x\ny\nz"))
     assert_equal(2, Language.score_lines("x\n\ny\n\nx"))

@@ -3,13 +3,13 @@
 #  = Tracking Usage of Translations
 #
 #  Simple global mechanism for tracking which localization strings get used on
-#  a given page.  You would enable it in a +before_filter+ in your controller,
+#  a given page.  You would enable it in a +before_action+ in your controller,
 #  then Symbol#localize will have it make note of each tag that gets used
 #  throughout the process of rendering that page.  You can save this list of
 #  tags to a temporary file, and load it again later for use in a form, for
 #  example.  It will periodically clean up old temp files.
 #
-#    before_filter { Language.track_usage }
+#    before_action { Language.track_usage }
 #
 #    <%= if Language.tracking_usage
 #      handle = Language.save_tags
@@ -29,7 +29,7 @@
 ################################################################################
 
 module LanguageTracking
-  require 'fileutils'
+  require "fileutils"
 
   @@tags_used = nil
   @@last_clean = nil
@@ -38,7 +38,7 @@ module LanguageTracking
   # list of tags with those from the other page.  Use this if redirecting
   # one or more times: track for page1, redirect and pass tags on to page2,
   # and so on, until done redirecting.
-  def track_usage(last_page=nil)
+  def track_usage(last_page = nil)
     @@tags_used = {}
     if seed_tags = load_tags(last_page)
       for tag in seed_tags
@@ -66,19 +66,19 @@ module LanguageTracking
   def save_tags
     name = String.random(16)
     file = tag_file(name)
-    File.open(file, 'w:utf-8') do |fh|
+    File.open(file, "w:utf-8") do |fh|
       for tag in tags_used
         fh.puts(tag)
       end
     end
     periodically_clean_up
-    return name
+    name
   end
 
   def load_tags(name)
     file = tag_file(name)
     tags = []
-    File.open(file, 'r:utf-8') do |fh|
+    File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
         tags << line.chomp
       end
@@ -89,18 +89,19 @@ module LanguageTracking
     return nil
   end
 
-private
+  private
+
   def tag_file(name)
-    path = "#{::Rails.root.to_s}/tmp/language_tracking"
-    Dir.mkdir(path) unless File.exists?(path)
-    return "#{path}/#{name}.txt"
+    path = "#{::Rails.root}/tmp/language_tracking"
+    FileUtils.mkpath(path) unless File.exist?(path)
+    "#{path}/#{name}.txt"
   end
 
   def periodically_clean_up
     cutoff = 10.minutes.ago
-    if !@@last_clean or @@last_clean < cutoff
+    if !@@last_clean || @@last_clean < cutoff
       @@last_clean = Time.now
-      glob = tag_file('*')
+      glob = tag_file("*")
       for file in Dir.glob(glob)
         begin
           File.delete(file) if File.mtime(file) < cutoff

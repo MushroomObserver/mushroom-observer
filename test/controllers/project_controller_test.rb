@@ -2,7 +2,7 @@
 require "test_helper"
 
 class ProjectControllerTest < FunctionalTestCase
-##### Helpers (which also assert) ##############################################
+  ##### Helpers (which also assert) ##############################################
   def add_project_helper(title, summary)
     params = {
       project: {
@@ -61,7 +61,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(user_after, target_user.in_group?(eol_project.user_group.name))
   end
 
-################################################################################
+  ################################################################################
 
   def test_add_project_existing
     add_project_helper(projects(:eol_project).title,
@@ -71,22 +71,21 @@ class ProjectControllerTest < FunctionalTestCase
   def test_show_project
     get_with_dump(:show_project, id: 1)
     assert_template("show_project")
-    assert_select("a[href*=admin_request/1]")
-    assert_select("a[href*=edit_project/1]", count: 0)
-    assert_select("a[href*=add_members/1]", count: 0)
-    assert_select("a[href*=destroy_project/1]", count: 0)
+    assert_select("a[href*='admin_request/1']")
+    assert_select("a[href*='edit_project/1']", count: 0)
+    assert_select("a[href*='add_members/1']", count: 0)
+    assert_select("a[href*='destroy_project/1']", count: 0)
   end
 
   def test_show_project_logged_in
     requires_login(:add_project)
     get_with_dump(:show_project, id: 1)
     assert_template("show_project")
-    assert_select("a[href*=admin_request/1]")
-    assert_select("a[href*=edit_project/1]")
-    assert_select("a[href*=add_members/1]")
-    assert_select("a[href*=destroy_project/1]")
+    assert_select("a[href*='admin_request/1']")
+    assert_select("a[href*='edit_project/1']")
+    assert_select("a[href*='add_members/1']")
+    assert_select("a[href*='destroy_project/1']")
   end
-
 
   def test_list_projects
     get_with_dump(:list_projects)
@@ -211,7 +210,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set read permissions.")
     for draft in drafts
       refute_equal(:project, draft.reload.source_type,
-        "Project destruction failed to reset NameDescription's source_type")
+                   "Project destruction failed to reset NameDescription's source_type")
     end
   end
 
@@ -258,71 +257,71 @@ class ProjectControllerTest < FunctionalTestCase
   # non-admin member -> non-admin member (should be a no-op)
   def test_change_member_status_member_make_member
     change_member_status_helper(rolf, katrina,
-      :change_member_status_make_member, false, true, false, true)
+                                :change_member_status_make_member, false, true, false, true)
   end
 
   # non-admin member -> admin member
   def test_change_member_status_member_make_admin
     change_member_status_helper(mary, katrina,
-      :change_member_status_make_admin, false, true, true, true)
+                                :change_member_status_make_admin, false, true, true, true)
   end
 
   # non-admin member -> non-member
   def test_change_member_status_member_remove_member
     change_member_status_helper(rolf, katrina,
-      :change_member_status_remove_member, false, true, false, false)
+                                :change_member_status_remove_member, false, true, false, false)
   end
 
   # admin member -> non-admin member
   def test_change_member_status_admin_make_member
     change_member_status_helper(mary, mary,
-      :change_member_status_make_member, true, true, false, true)
+                                :change_member_status_make_member, true, true, false, true)
   end
 
   # admin member -> admin member (should be a no-op)
   def test_change_member_status_admin_make_admin
     change_member_status_helper(rolf, mary,
-      :change_member_status_make_admin, true, true, true, true)
+                                :change_member_status_make_admin, true, true, true, true)
   end
 
   # admin member -> non-member
   def test_change_member_status_admin_remove_member
     change_member_status_helper(mary, mary,
-      :change_member_status_remove_member, true, true, false, false)
+                                :change_member_status_remove_member, true, true, false, false)
   end
 
   # non-member -> non-admin member
   def test_change_member_status_non_member_make_member
     change_member_status_helper(rolf, dick,
-      :change_member_status_make_member, false, false, false, true)
+                                :change_member_status_make_member, false, false, false, true)
   end
 
   # non-member -> admin member
   def test_change_member_status_non_member_make_admin
     change_member_status_helper(mary, dick,
-      :change_member_status_make_admin, false, false, true, true)
+                                :change_member_status_make_admin, false, false, true, true)
   end
 
   # non-member -> non-member (should be a no-op)
   def test_change_member_status_non_member_remove_member
     change_member_status_helper(rolf, dick,
-      :change_member_status_remove_member, false, false, false, false)
+                                :change_member_status_remove_member, false, false, false, false)
   end
 
   # The following should all be no-ops
   def test_change_member_status_by_member_make_member
     change_member_status_helper(katrina, dick,
-      :change_member_status_make_member, false, false, false, false)
+                                :change_member_status_make_member, false, false, false, false)
   end
 
   def test_change_member_status_by_non_member_make_admin
     change_member_status_helper(dick, katrina,
-      :change_member_status_make_admin, false, true, false, true)
+                                :change_member_status_make_admin, false, true, false, true)
   end
 
   def test_change_member_status_by_member_remove_member
     change_member_status_helper(katrina, katrina,
-      :change_member_status_remove_member, false, true, false, true)
+                                :change_member_status_remove_member, false, true, false, true)
   end
 
   # There are many other combinations that shouldn't work
@@ -376,7 +375,7 @@ class ProjectControllerTest < FunctionalTestCase
 
   def test_changing_project_name
     login("rolf")
-    post(:edit_project, id: 1, project: {title: "New Project", summary: "New Summary"})
+    post(:edit_project, id: 1, project: { title: "New Project", summary: "New Summary" })
     assert_flash_success
     project = Project.find(1)
     assert_equal("New Project", project.title)

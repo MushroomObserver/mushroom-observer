@@ -56,7 +56,7 @@
 class NameController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_filter :login_required, :except => [
+  before_action :login_required, except: [
     :advanced_search,
     :authored_names,
     :eol,
@@ -81,10 +81,10 @@ class NameController < ApplicationController
     :show_name_description,
     :show_past_name,
     :show_past_name_description,
-    :test_index,
+    :test_index
   ]
 
-  before_filter :disable_link_prefetching, :except => [
+  before_action :disable_link_prefetching, except: [
     :approve_name,
     :bulk_name_edit,
     :change_synonyms,
@@ -96,7 +96,7 @@ class NameController < ApplicationController
     :show_name,
     :show_name_description,
     :show_past_name,
-    :show_past_name_description,
+    :show_past_name_description
   ]
 
   ##############################################################################
@@ -107,13 +107,13 @@ class NameController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name # :nologin: :norobots:
-    query = find_or_create_query(:Name, :by => params[:by])
-    show_selected_names(query, :id => params[:id].to_s, :always_index => true)
+    query = find_or_create_query(:Name, by: params[:by])
+    show_selected_names(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
   def list_names # :nologin:
-    query = create_query(:Name, :all, :by => :name)
+    query = create_query(:Name, :all, by: :name)
     show_selected_names(query)
   end
 
@@ -132,18 +132,18 @@ class NameController < ApplicationController
   # Display list of names that a given user is author on.
   def names_by_user # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Name, :by_user, :user => user)
+      query = create_query(:Name, :by_user, user: user)
       show_selected_names(query)
     end
   end
 
   # This no longer makes sense, but is being requested by robots.
-  alias names_by_author names_by_user
+  alias_method :names_by_author, :names_by_user
 
   # Display list of names that a given user is editor on.
   def names_by_editor # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Name, :by_editor, :user => user)
+      query = create_query(:Name, :by_editor, user: user)
       show_selected_names(query)
     end
   end
@@ -165,12 +165,12 @@ class NameController < ApplicationController
       LIMIT 100
     )
     @help = :needed_descriptions_help
-    query = create_query(:Name, :in_set, :ids => data.map(&:first),
-                         :title => :needed_descriptions_title.l)
-    show_selected_names(query, :num_per_page => 100) do |name|
+    query = create_query(:Name, :in_set, ids: data.map(&:first),
+                                         title: :needed_descriptions_title.l)
+    show_selected_names(query, num_per_page: 100) do |name|
       # Add number of observations (parenthetically).
-      row = data.select {|id,count| id == name.id}.first
-      row ? "(#{count} #{:observations.t})" : ''
+      row = data.find { |id, _count| id == name.id }
+      row ? "(#{count} #{:observations.t})" : ""
     end
   end
 
@@ -179,9 +179,9 @@ class NameController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (name = Name.safe_find(pattern))
-      redirect_to(:action => 'show_name', :id => name.id)
+      redirect_to(action: "show_name", id: name.id)
     else
-      query = create_query(:Name, :pattern_search, :pattern => pattern)
+      query = create_query(:Name, :pattern_search, pattern: pattern)
       @suggest_alternate_spellings = pattern
       show_selected_names(query)
     end
@@ -189,72 +189,70 @@ class NameController < ApplicationController
 
   # Displays list of advanced search results.
   def advanced_search # :nologin: :norobots:
-    begin
-      query = find_query(:Name)
-      show_selected_names(query)
-    rescue => err
-      flash_error(err.to_s) if !err.blank?
-      redirect_to(:controller => 'observer', :action => 'advanced_search_form')
-    end
+    query = find_query(:Name)
+    show_selected_names(query)
+  rescue => err
+    flash_error(err.to_s) unless err.blank?
+    redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
   # Used to test pagination.
   def test_index # :nologin: :norobots:
-    query = find_query(:Name) or raise "Missing query: #{params[:q]}"
+    query = find_query(:Name) or fail "Missing query: #{params[:q]}"
     if params[:test_anchor]
-      @test_pagination_args = {anchor: params[:test_anchor]}
+      @test_pagination_args = { anchor: params[:test_anchor] }
     end
-    show_selected_names(query, :num_per_page => params[:num_per_page].to_i)
+    show_selected_names(query, num_per_page: params[:num_per_page].to_i)
   end
 
   # Show selected search results as a list with 'list_names' template.
-  def show_selected_names(query, args={})
+  def show_selected_names(query, args = {})
     store_query_in_session(query)
     @links ||= []
     args = {
-        action: 'list_names',
-        letters: 'names.sort_name',
-        num_per_page: (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
+      action: "list_names",
+      letters: "names.sort_name",
+      num_per_page: (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50)
     }.merge(args)
 
     # Tired of not having an easy link to list_names.
     if query.flavor == :with_observations
-      @links << [:all_objects.t(:type => :name), {action: 'list_names'}]
+      @links << [:all_objects.t(type: :name), { action: "list_names" }]
     end
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',        :sort_by_name.t],
-      ['created_at',  :sort_by_created_at.t],
-      [(query.flavor == :by_rss_log ? 'rss_log' : 'updated_at'),
-                      :sort_by_updated_at.t],
-      ['num_views',   :sort_by_num_views.t],
+      ["name",        :sort_by_name.t],
+      ["created_at",  :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
+       :sort_by_updated_at.t],
+      ["num_views", :sort_by_num_views.t]
     ]
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation),
-        add_query_param({
-                            controller: 'observer', action: 'index_observation'
-          }, query)]
+      @links << [:show_objects.t(type: :observation),
+                 add_query_param({
+                                   controller: "observer", action: "index_observation"
+                                 }, query)]
     end
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
     if query.is_coercable?(:NameDescription)
-      @links << [:show_objects.t(:type => :description),
-        add_query_param({action: 'index_name_description'},
-          query)]
+      @links << [:show_objects.t(type: :description),
+                 add_query_param({ action: "index_name_description" },
+                                 query)]
     end
 
     # Add some extra fields to the index for authored_names.
     if query.flavor == :with_descriptions
       show_index_of_objects(query, args) do |name|
         if desc = name.description
-          [ desc.authors.map(&:login).join(', '),
-            desc.note_status.map(&:to_s).join('/'),
-            :"review_#{desc.review_status}".t ]
+          [desc.authors.map(&:login).join(", "),
+           desc.note_status.map(&:to_s).join("/"),
+           :"review_#{desc.review_status}".t]
         else
           []
         end
@@ -272,21 +270,21 @@ class NameController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name_description # :nologin: :norobots:
-    query = find_or_create_query(:NameDescription, :by => params[:by])
-    show_selected_name_descriptions(query, :id => params[:id].to_s,
-                                    :always_index => true)
+    query = find_or_create_query(:NameDescription, by: params[:by])
+    show_selected_name_descriptions(query, id: params[:id].to_s,
+                                           always_index: true)
   end
 
   # Display list of all (correctly-spelled) name_descriptions in the database.
   def list_name_descriptions # :nologin:
-    query = create_query(:NameDescription, :all, :by => :name)
+    query = create_query(:NameDescription, :all, by: :name)
     show_selected_name_descriptions(query)
   end
 
   # Display list of name_descriptions that a given user is author on.
   def name_descriptions_by_author # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:NameDescription, :by_author, :user => user)
+      query = create_query(:NameDescription, :by_author, user: user)
       show_selected_name_descriptions(query)
     end
   end
@@ -294,33 +292,33 @@ class NameController < ApplicationController
   # Display list of name_descriptions that a given user is editor on.
   def name_descriptions_by_editor # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:NameDescription, :by_editor, :user => user)
+      query = create_query(:NameDescription, :by_editor, user: user)
       show_selected_name_descriptions(query)
     end
   end
 
   # Show selected search results as a list with 'list_names' template.
-  def show_selected_name_descriptions(query, args={})
+  def show_selected_name_descriptions(query, args = {})
     store_query_in_session(query)
     @links ||= []
     args = {
-        action: 'list_name_descriptions',
-        num_per_page: 50
+      action: "list_name_descriptions",
+      num_per_page: 50
     }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',        :sort_by_name.t],
-      ['created_at',  :sort_by_created_at.t],
-      ['updated_at',  :sort_by_updated_at.t],
-      ['num_views',   :sort_by_num_views.t],
+      ["name",        :sort_by_name.t],
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["num_views",   :sort_by_num_views.t]
     ]
 
     # Add "show names" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Name)
-      @links << [:show_objects.t(:type => :name),
-        add_query_param({action: 'index_name'}, query)]
+      @links << [:show_objects.t(type: :name),
+                 add_query_param({ action: "index_name" }, query)]
     end
 
     show_index_of_objects(query, args)
@@ -352,51 +350,49 @@ class NameController < ApplicationController
 
       # Get a list of projects the user can create drafts for.
       @projects = @user && @user.projects_member.select do |project|
-        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+        !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
       # Get classification
       @classification = @name.best_classification
       @parents = nil
-      if not @classification
+      unless @classification
         # Get list of immediate parents.
         @parents = @name.parents
       end
 
       # Create query for immediate children.
-      @children_query = create_query(:Name, :of_children, :name => @name)
+      @children_query = create_query(:Name, :of_children, name: @name)
 
       # Create search queries for observation lists.
-      @consensus_query = create_query(:Observation, :of_name, :name => @name,
-                                      :by => :confidence)
-      @consensus2_query = create_query(:Observation, :of_name, :name => @name,
-                                       :synonyms => :all,
-                                       :by => :confidence)
-      @synonym_query = create_query(:Observation, :of_name, :name => @name,
-                                    :synonyms => :exclusive,
-                                    :by => :confidence)
-      @other_query = create_query(:Observation, :of_name, :name => @name,
-                                  :synonyms => :all, :nonconsensus => :exclusive,
-                                  :by => :confidence)
-      @obs_with_images_query = create_query(:Observation, :of_name, :name => @name,
-                                      :by => :confidence, :has_images => :yes)
+      @consensus_query = create_query(:Observation, :of_name, name: @name,
+                                                              by: :confidence)
+      @consensus2_query = create_query(:Observation, :of_name, name: @name,
+                                                               synonyms: :all,
+                                                               by: :confidence)
+      @synonym_query = create_query(:Observation, :of_name, name: @name,
+                                                            synonyms: :exclusive,
+                                                            by: :confidence)
+      @other_query = create_query(:Observation, :of_name, name: @name,
+                                                          synonyms: :all, nonconsensus: :exclusive,
+                                                          by: :confidence)
+      @obs_with_images_query = create_query(:Observation, :of_name, name: @name,
+                                                                    by: :confidence, has_images: :yes)
 
       if @name.at_or_below_genus?
-        @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
-                                      :all => true, :by => :confidence)
+        @subtaxa_query = create_query(:Observation, :of_children, name: @name,
+                                                                  all: true, by: :confidence)
       end
 
       # Determine which queries actually have results and instantiate the ones we'll use
       @best_description = @name.best_brief_description
-      @first_four = @obs_with_images_query.results(:limit => 4)
-      @first_child = @children_query.results(:limit => 1)[0]
-      @first_consensus = @consensus_query.results(:limit => 1)[0]
+      @first_four = @obs_with_images_query.results(limit: 4)
+      @first_child = @children_query.results(limit: 1)[0]
+      @first_consensus = @consensus_query.results(limit: 1)[0]
       @has_consensus2 = @consensus2_query.select_count
       @has_synonym = @synonym_query.select_count
       @has_other = @other_query.select_count
-      if @subtaxa_query
-        @has_subtaxa = @subtaxa_query.select_count
-      end
+      @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
     end
   end
 
@@ -417,7 +413,7 @@ class NameController < ApplicationController
 
         # Get a list of projects the user can create drafts for.
         @projects = @user && @user.projects_member.select do |project|
-          !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+          !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
         end
 
       # User doesn't have permission to see this description.
@@ -425,14 +421,14 @@ class NameController < ApplicationController
         if @description.source_type == :project
           flash_error(:runtime_show_draft_denied.t)
           if project = @description.project
-            redirect_to(:controller => 'project', :action => 'show_project',
-                        :id => project.id)
+            redirect_to(controller: "project", action: "show_project",
+                        id: project.id)
           else
-            redirect_to(:action => 'show_name', :id => @description.name_id)
+            redirect_to(action: "show_name", id: @description.name_id)
           end
         else
           flash_error(:runtime_show_description_denied.t)
-          redirect_to(:action => 'show_name', :id => @description.name_id)
+          redirect_to(action: "show_name", id: @description.name_id)
         end
       end
     end
@@ -451,7 +447,7 @@ class NameController < ApplicationController
           SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
         )
       else
-        @correct_spelling = ''
+        @correct_spelling = ""
       end
     end
   end
@@ -470,10 +466,10 @@ class NameController < ApplicationController
         version = NameDescription::Version.find(@merge_source_id)
         @old_parent_id = version.name_description_id
         subversion = params[:version]
-        if !subversion.blank? and
+        if !subversion.blank? &&
            (version.version != subversion.to_i)
           version = NameDescription::Version.
-            find_by_version_and_name_description_id(params[:version], @old_parent_id)
+                    find_by_version_and_name_description_id(params[:version], @old_parent_id)
         end
         @description.clone_versioned_model(version, @description)
       end
@@ -506,9 +502,7 @@ class NameController < ApplicationController
     pass_query_params
     id = params[:id].to_s
     desc = NameDescription.find(id)
-    if is_reviewer?
-      desc.update_review_status(params[:value])
-    end
+    desc.update_review_status(params[:value]) if is_reviewer?
     redirect_with_query(action: :show_name, id: desc.name_id)
   end
 
@@ -545,9 +539,7 @@ class NameController < ApplicationController
         @parse = parse_name
         new_name, @parents = find_or_create_name_and_parents
         if new_name.new_record? || new_name == @name
-          unless can_make_changes? || minor_name_change?
-            email_admin_name_change
-          end
+          email_admin_name_change unless can_make_changes? || minor_name_change?
           update_correct_spelling
           any_changes = update_existing_name
           unless redirect_to_approve_or_deprecate
@@ -570,11 +562,11 @@ class NameController < ApplicationController
   def init_create_name_form
     @name = Name.new
     @name.rank = :Species
-    @name_string = ''
+    @name_string = ""
   end
 
   def reload_create_name_form_on_error(err)
-    flash_error(err.to_s) if !err.blank?
+    flash_error(err.to_s) unless err.blank?
     flash_object_errors(@name)
     init_create_name_form
     @name.rank = params[:name][:rank]
@@ -587,35 +579,33 @@ class NameController < ApplicationController
   def init_edit_name_form
     if !params[:name]
       @misspelling = @name.is_misspelling?
-      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ''
+      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ""
     else
-      @misspelling = (params[:name][:misspelling] == '1')
+      @misspelling = (params[:name][:misspelling] == "1")
       @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
     @name_string = @name.real_text_name
   end
 
   def reload_edit_name_form_on_error(err)
-    flash_error(err.to_s) if !err.blank?
+    flash_error(err.to_s) unless err.blank?
     flash_object_errors(@name)
     @name.rank = params[:name][:rank]
     @name.author = params[:name][:author]
     @name.citation = params[:name][:citation]
     @name.notes = params[:name][:notes]
-    @name.deprecated = (params[:name][:deprecated] == 'true')
+    @name.deprecated = (params[:name][:deprecated] == "true")
     @name_string = params[:name][:text_name]
   end
 
   # Only allowed to make substantive changes to name if you own all the references to it.
   def can_make_changes?
-    if not is_in_admin_mode?
+    unless is_in_admin_mode?
       for obj in @name.namings + @name.observations
-        if obj.user_id != @user.id
-          return false
-        end
+        return false if obj.user_id != @user.id
       end
     end
-    return true
+    true
   end
 
   def minor_name_change?
@@ -625,16 +615,16 @@ class NameController < ApplicationController
   end
 
   def email_admin_name_change
-    unless @name.author.blank? and @parse.real_text_name == @name.real_text_name
+    unless @name.author.blank? && @parse.real_text_name == @name.real_text_name
       content = :email_name_change.l(
-        :user => @user.login,
-        :old => @name.real_search_name,
-        :new => @parse.real_search_name,
-        :observations => @name.observations.length,
-        :namings => @name.namings.length,
-        :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
+        user: @user.login,
+        old: @name.real_search_name,
+        new: @parse.real_search_name,
+        observations: @name.observations.length,
+        namings: @name.namings.length,
+        url: "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      WebmasterEmail.build(@user.email, content).deliver
+      WebmasterEmail.build(@user.email, content).deliver_now
       NameControllerTest.report_email(content) if Rails.env == "test"
     end
   end
@@ -647,62 +637,62 @@ class NameController < ApplicationController
     in_rank = params[:name][:rank].to_sym
     old_deprecated = @name ? @name.deprecated : false
     parse = Name.parse_name(in_str, in_rank, old_deprecated)
-    if not parse or parse.rank != in_rank
+    if !parse || parse.rank != in_rank
       rank_tag = :"rank_#{in_rank.to_s.downcase}"
-      raise(:runtime_invalid_for_rank.t(:rank => rank_tag, :name => in_str))
+      fail(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
     end
-    return parse
+    parse
   end
 
   def find_or_create_name_and_parents
     parents = Name.find_or_create_parsed_name_and_parents(@parse)
     unless name = parents.pop
-      if params[:action] == 'create_name'
-        raise(:create_name_multiple_names_match.t(:str => @parse.real_search_name))
+      if params[:action] == "create_name"
+        fail(:create_name_multiple_names_match.t(str: @parse.real_search_name))
       else
         others = Name.where(text_name: @parse.text_name)
-        raise(:edit_name_multiple_names_match.t(:str => @parse.real_search_name,
-              :matches => others.map(&:search_name).join(' / ')))
+        fail(:edit_name_multiple_names_match.t(str: @parse.real_search_name,
+                                               matches: others.map(&:search_name).join(" / ")))
       end
     end
-    return name, parents
+    [name, parents]
   end
 
   def make_sure_name_doesnt_exist
     unless @name.new_record?
-      raise(:runtime_name_create_already_exists.t(:name => @name.display_name))
+      fail(:runtime_name_create_already_exists.t(name: @name.display_name))
     end
   end
 
   def create_new_name
     @name.attributes = @parse.params
-    @name.change_deprecated(true) if params[:name][:deprecated] == 'true'
+    @name.change_deprecated(true) if params[:name][:deprecated] == "true"
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     for name in @parents + [@name]
-      name.save_with_log(:log_name_created_at) if name and name.new_record?
+      name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
-    flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
+    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
   end
 
   def update_existing_name
     @name.attributes = @parse.params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
-    if not @name.changed?
+    if !@name.changed?
       any_changes = false
-    elsif not @name.save_with_log(:log_name_updated)
-      raise(:runtime_unable_to_save_changes.t)
+    elsif !@name.save_with_log(:log_name_updated)
+      fail(:runtime_unable_to_save_changes.t)
     else
-      flash_notice(:runtime_edit_name_success.t(:name => @name.real_search_name))
+      flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
       any_changes = true
     end
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
     for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      name.save_with_log(:log_name_created_at) if name and name.new_record?
+      name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
-    return any_changes
+    any_changes
   end
 
   def merge_name_into(new_name)
@@ -712,25 +702,23 @@ class NameController < ApplicationController
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     # Only change deprecation status if user explicity requested it.
-    if @name.deprecated != (params[:name][:deprecated] == 'true')
+    if @name.deprecated != (params[:name][:deprecated] == "true")
       change_deprecated = !@name.deprecated
     end
     # Automatically swap names if that's a safer merge.
-    if not @name.mergeable? and new_name.mergeable?
+    if !@name.mergeable? && new_name.mergeable?
       @name, new_name = new_name, @name
       old_display_name_for_log = @name[:display_name]
     end
     # Fill in author if other has one.
-    if new_name.author.blank? and not @parse.author.blank?
+    if new_name.author.blank? && !@parse.author.blank?
       new_name.change_author(@parse.author)
     end
-    if change_deprecated != nil
-      new_name.change_deprecated(change_deprecated)
-    end
+    new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
     @name.display_name = old_display_name_for_log
     new_name.merge(@name)
-    flash_notice(:runtime_edit_name_merge_success.t(:this => @name.real_search_name,
-                                                    :that => new_name.real_search_name))
+    flash_notice(:runtime_edit_name_merge_success.t(this: @name.real_search_name,
+                                                    that: new_name.real_search_name))
     @name = new_name
     @name.save
   end
@@ -738,23 +726,23 @@ class NameController < ApplicationController
   def send_name_merge_email(new_name)
     flash_warning(:runtime_merge_names_warning.t)
     content = :email_name_merge.l(
-                user: @user.login,
-                this: "##{@name.id}: " + @name.real_search_name,
-                that: "##{new_name.id}: " + new_name.real_search_name,
-                this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
-                that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
+      user: @user.login,
+      this: "##{@name.id}: " + @name.real_search_name,
+      that: "##{new_name.id}: " + new_name.real_search_name,
+      this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
+      that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
     )
-    WebmasterEmail.build(@user.email, content).deliver
+    WebmasterEmail.build(@user.email, content).deliver_now
     NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
   # Chain on to approve/deprecate name if changed status.
   def redirect_to_approve_or_deprecate
-    if params[:name][:deprecated].to_s == 'true' and not @name.deprecated
-      redirect_with_query(:action => :deprecate_name, :id => @name.id)
+    if params[:name][:deprecated].to_s == "true" && !@name.deprecated
+      redirect_with_query(action: :deprecate_name, id: @name.id)
       return true
-    elsif params[:name][:deprecated].to_s == 'false' and @name.deprecated
-      redirect_with_query(:action => :approve_name, :id => @name.id)
+    elsif params[:name][:deprecated].to_s == "false" && @name.deprecated
+      redirect_with_query(action: :approve_name, id: @name.id)
       return true
     else
       false
@@ -788,9 +776,9 @@ class NameController < ApplicationController
       # Set correct_spelling if one given.
       name2 = Name.find_names_filling_in_authors(@correct_spelling).first
       if !name2
-        raise(:runtime_form_names_misspelling_bad.t)
+        fail(:runtime_form_names_misspelling_bad.t)
       elsif name2.id == @name.id
-        raise(:runtime_form_names_misspelling_same.t)
+        fail(:runtime_form_names_misspelling_same.t)
       else
         @name.correct_spelling = name2
         @name.merge_synonyms(name2)
@@ -836,29 +824,29 @@ class NameController < ApplicationController
         # Make this the "default" description if there isn't one and this is
         # publicly readable.
 
-        if !@name.description and
+        if !@name.description &&
            @description.public
           @name.description = @description
         end
 
         # Keep the parent's classification cache up to date.
-        if (@name.description == @description) and
+        if (@name.description == @description) &&
            (@name.classification != @description.classification)
           @name.classification = @description.classification
         end
 
         # Log action in parent name.
         @description.name.log(:log_description_created_at,
-                 :user => @user.login, :touch => true,
-                 :name => @description.unique_partial_format_name)
+                              user: @user.login, touch: true,
+                              name: @description.unique_partial_format_name)
 
         # Save any changes to parent name.
         @name.save if @name.changed?
 
         flash_notice(:runtime_name_description_success.t(
-                     :id => @description.id))
-        redirect_to(:action => 'show_name_description',
-                    :id => @description.id)
+                       id: @description.id))
+        redirect_to(action: "show_name_description",
+                    id: @description.id)
 
       else
         flash_object_errors @description
@@ -892,7 +880,7 @@ class NameController < ApplicationController
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        redirect_to(:action => 'show_name_description', :id => @description.id)
+        redirect_to(action: "show_name_description", id: @description.id)
 
       # There were error(s).
       elsif !@description.save
@@ -901,22 +889,22 @@ class NameController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_name_description_success.t(
-                     :id => @description.id))
+                       id: @description.id))
 
         # Update name's classification cache.
         name = @description.name
-        if (name.description == @description) and
+        if (name.description == @description) &&
            (name.classification != @description.classification)
           name.classification = @description.classification
           name.save
         end
 
         # Log action to parent name.
-        name.log(:log_description_updated, :touch => true, :user => @user.login,
-                 :name => @description.unique_partial_format_name)
+        name.log(:log_description_updated, touch: true, user: @user.login,
+                                           name: @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
-        if (params[:delete_after] == 'true') and
+        if (params[:delete_after] == "true") &&
            (old_desc = NameDescription.safe_find(params[:old_desc_id]))
           v = @description.versions.latest
           v.merge_source_id = old_desc.versions.latest.id
@@ -925,17 +913,17 @@ class NameController < ApplicationController
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
-                           t(:old => old_desc.partial_format_name))
+                           t(old: old_desc.partial_format_name))
             name.log(:log_object_merged_by_user,
-                     :user => @user.login, :touch => true,
-                     :from => old_desc.unique_partial_format_name,
-                     :to => @description.unique_partial_format_name)
+                     user: @user.login, touch: true,
+                     from: old_desc.unique_partial_format_name,
+                     to: @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
 
-        redirect_to(:action => 'show_name_description',
-                    :id => @description.id)
+        redirect_to(action: "show_name_description",
+                    id: @description.id)
       end
     end
   end
@@ -946,35 +934,34 @@ class NameController < ApplicationController
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
-               :user => @user.login, :touch => true,
-               :name => @description.unique_partial_format_name)
+                            user: @user.login, touch: true,
+                            name: @description.unique_partial_format_name)
       @description.destroy
-      redirect_with_query(:action => 'show_name', :id => @description.name_id)
+      redirect_with_query(action: "show_name", id: @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_with_query(:action => 'show_name_description',
-          :id => @description.id)
+        redirect_with_query(action: "show_name_description",
+                            id: @description.id)
       else
-        redirect_with_query(:action => 'show_name', :id => @description.name_id)
+        redirect_with_query(action: "show_name", id: @description.name_id)
       end
     end
   end
 
   private
 
-  # TODO should public, public_write and source_type be removed from this list?
+  # TODO: should public, public_write and source_type be removed from this list?
   # They should be individually checked and set, since we
   # don't want them to have arbitrary values
   def whitelisted_name_description_params
     params.required(:description).
       permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
-      :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
-      :source_type, :public, :public_write)
+             :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
+             :source_type, :public, :public_write)
   end
 
   public
-
 
   ################################################################################
   #
@@ -994,7 +981,7 @@ class NameController < ApplicationController
       @deprecate_all    = true
       if request.method == "POST"
         list = params[:synonym][:members].strip_squeeze
-        @deprecate_all = (params[:deprecate][:all] == '1')
+        @deprecate_all = (params[:deprecate][:all] == "1")
 
         # Create any new names that have been approved.
         construct_approved_names(list, params[:approved_names], @deprecate_all)
@@ -1017,7 +1004,7 @@ class NameController < ApplicationController
 
           # Create synonym and add this name to it if this name not already
           # associated with a synonym.
-          if !@name.synonym_id
+          unless @name.synonym_id
             @name.synonym = Synonym.create
             @name.save
           end
@@ -1031,10 +1018,8 @@ class NameController < ApplicationController
           for n in sorter.all_synonyms
             # Synonymize all names that have been checked, or that don't have
             # checkboxes.
-            if proposed_synonyms[n.id.to_s] != '0'
-              if n.synonym_id != @name.synonym_id
-                @name.transfer_synonym(n)
-              end
+            if proposed_synonyms[n.id.to_s] != "0"
+              @name.transfer_synonym(n) if n.synonym_id != @name.synonym_id
             end
           end
 
@@ -1049,7 +1034,7 @@ class NameController < ApplicationController
           success = true
           if @deprecate_all
             for n in sorter.all_names
-              if !deprecate_synonym(n)
+              unless deprecate_synonym(n)
                 # Already flashed error message.
                 success = false
               end
@@ -1057,7 +1042,7 @@ class NameController < ApplicationController
           end
 
           if success
-            redirect_with_query(:action => 'show_name', :id => @name.id)
+            redirect_with_query(action: "show_name", id: @name.id)
           else
             flash_object_errors(@name)
             flash_object_errors(@name.synonym)
@@ -1067,7 +1052,7 @@ class NameController < ApplicationController
         @list_members     = sorter.all_line_strs.join("\r\n")
         @new_names        = sorter.new_name_strs.uniq
         @synonym_name_ids = sorter.all_synonyms.map(&:id)
-        @synonym_names    = @synonym_name_ids.map {|id| Name.safe_find(id)}.reject(&:nil?)
+        @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.reject(&:nil?)
       end
     end
   end
@@ -1078,22 +1063,30 @@ class NameController < ApplicationController
     pass_query_params
 
     # These parameters aren't always provided.
-    params[:proposed]    ||= {}
-    params[:comment]     ||= {}
+    params[:proposed] ||= {}
+    params[:comment] ||= {}
     params[:chosen_name] ||= {}
-    params[:is]          ||= {}
+    params[:is] ||= {}
 
     if @name = find_or_goto_index(Name, params[:id].to_s)
-      @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
-      @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
+      @what    = begin
+                   params[:proposed][:name].to_s.strip_squeeze
+                 rescue
+                   ""
+                 end
+      @comment = begin
+                   params[:comment][:comment].to_s.strip_squeeze
+                 rescue
+                   ""
+                 end
 
       @list_members     = nil
       @new_names        = []
       @synonym_name_ids = []
       @synonym_names    = []
-      @deprecate_all    = '1'
+      @deprecate_all    = "1"
       @names            = []
-      @misspelling      = (params[:is][:misspelling] == '1')
+      @misspelling      = (params[:is][:misspelling] == "1")
 
       if request.method == "POST"
         if @what.blank?
@@ -1101,7 +1094,7 @@ class NameController < ApplicationController
 
         else
           # Find the chosen preferred name.
-          if params[:chosen_name][:name_id] and
+          if params[:chosen_name][:name_id] &&
              name = Name.safe_find(params[:chosen_name][:name_id])
             @names = [name]
           else
@@ -1109,7 +1102,7 @@ class NameController < ApplicationController
           end
           approved_name = params[:approved_name].to_s.strip_squeeze
           if @names.empty? &&
-              (new_name = Name.create_needed_names(approved_name, @what))
+             (new_name = Name.create_needed_names(approved_name, @what))
             @names = [new_name]
           end
           target_name = @names.first
@@ -1137,11 +1130,9 @@ class NameController < ApplicationController
               @name.correct_spelling = target_name
             end
             @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
-            if !@comment.blank?
-              post_comment(:deprecate, @name, @comment)
-            end
+            post_comment(:deprecate, @name, @comment) unless @comment.blank?
 
-            redirect_with_query(:action => 'show_name', :id => @name.id)
+            redirect_with_query(action: "show_name", id: @name.id)
           end
 
         end # @what
@@ -1155,13 +1146,17 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @approved_names = @name.approved_synonyms
-      comment = params[:comment][:comment] rescue ''
+      comment = begin
+                  params[:comment][:comment]
+                rescue
+                  ""
+                end
       comment = comment.strip_squeeze
       if request.method == "POST"
 
         # Deprecate others first.
         others = []
-        if params[:deprecate][:others] == '1'
+        if params[:deprecate][:others] == "1"
           for n in @name.approved_synonyms
             n.change_deprecated(true)
             n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
@@ -1175,14 +1170,12 @@ class NameController < ApplicationController
         args = {}
         if others != []
           tag = :log_name_approved
-          args[:other] = others.join(', ')
+          args[:other] = others.join(", ")
         end
         @name.save_with_log(tag, args)
-        if !comment.blank?
-          post_comment(:approve, @name, comment)
-        end
+        post_comment(:approve, @name, comment) unless comment.blank?
 
-        redirect_with_query(:action => 'show_name', :id => @name.id)
+        redirect_with_query(action: "show_name", id: @name.id)
       end
     end
   end
@@ -1197,11 +1190,11 @@ class NameController < ApplicationController
         name.change_deprecated(true)
         result = name.save_with_log(:log_deprecated_by)
       rescue RuntimeError => err
-        flash_error(err.to_s) if !err.blank?
+        flash_error(err.to_s) unless err.blank?
         result = false
       end
     end
-    return result
+    result
   end
 
   # If changing the synonyms of a name that already has synonyms, the user is
@@ -1213,9 +1206,7 @@ class NameController < ApplicationController
     new_synonym_members = []
     # Gather all names with un-checked checkboxes.
     for n in candidates
-      if (name != n) && (checks[n.id.to_s] == '0')
-        new_synonym_members.push(n)
-      end
+      new_synonym_members.push(n) if (name != n) && (checks[n.id.to_s] == "0")
     end
     len = new_synonym_members.length
     if len > 1
@@ -1261,9 +1252,9 @@ class NameController < ApplicationController
   def post_comment(action, name, message)
     summary = :"name_#{action}_comment_summary".l
     comment = Comment.create!(
-      :target  => name,
-      :summary => summary,
-      :comment => message
+      target: name,
+      summary: summary,
+      comment: message
     )
   end
 
@@ -1276,11 +1267,10 @@ class NameController < ApplicationController
   # Send stuff to eol.
   def eol_old # :nologin: :norobots:
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @timer_start = Time.now()
+    @timer_start = Time.now
     eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
-    render_xml(:action => "eol", :layout => false)
+    render_xml(action: "eol", layout: false)
   end
-
 
   # Show the data getting sent to EOL
   def eol_preview # :nologin: :norobots:
@@ -1292,9 +1282,9 @@ class NameController < ApplicationController
   def eol_description_conditions(review_status_list)
     # name descriptions that are exportable.
     rsl = review_status_list.join("', '")
-    "review_status IN ('#{rsl}') AND " +
-                 "gen_desc IS NOT NULL AND " +
-                 "ok_for_export = 1 AND " +
+    "review_status IN ('#{rsl}') AND " \
+                 "gen_desc IS NOT NULL AND " \
+                 "ok_for_export = 1 AND " \
                  "public = 1"
   end
 
@@ -1302,7 +1292,7 @@ class NameController < ApplicationController
   def eol_need_review # :norobots:
     eol_data(NameDescription.review_statuses.values_at(unreviewed))
     @title = :eol_need_review_title.t
-    render(:action => 'eol_preview')
+    render(action: "eol_preview")
   end
 
   # Gather data for EOL feed.
@@ -1315,7 +1305,7 @@ class NameController < ApplicationController
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
     descs = NameDescription.where(
-                              eol_description_conditions(review_status_list))
+      eol_description_conditions(review_status_list))
 
     # Fill in @descs, @users, @authors, @licenses.
     for desc in descs
@@ -1330,12 +1320,12 @@ class NameController < ApplicationController
       for author in authors
         @users[author.to_i] ||= User.find(author).legal_name
       end
-      @authors[desc.id] = authors.map {|id| @users[id.to_i]}.join(', ')
+      @authors[desc.id] = authors.map { |id| @users[id.to_i] }.join(", ")
       @licenses[desc.license_id] ||= desc.license.url if desc.license_id
     end
 
     # Get corresponding names.
-    name_ids = @descs.keys.map(&:to_s).join(',')
+    name_ids = @descs.keys.map(&:to_s).join(",")
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
@@ -1355,21 +1345,21 @@ class NameController < ApplicationController
 
     # Fill in @image_data, @users, and @licenses.
     for row in image_data
-      name_id    = row['name_id'].to_i
-      user_id    = row['user_id'].to_i
-      license_id = row['license_id'].to_i
-      image_datum = row.values_at('image_id', 'observation_id', 'user_id',
-                                  'license_id', 'created_at')
+      name_id    = row["name_id"].to_i
+      user_id    = row["user_id"].to_i
+      license_id = row["license_id"].to_i
+      image_datum = row.values_at("image_id", "observation_id", "user_id",
+                                  "license_id", "created_at")
       @image_data[name_id] ||= []
       @image_data[name_id].push(image_datum)
-      @users[user_id]       ||= User.find(user_id).legal_name
+      @users[user_id] ||= User.find(user_id).legal_name
       @licenses[license_id] ||= License.find(license_id).url
     end
   end
 
   def eol_expanded_review
     @timer_start = Time.now
-    @data = EolData.new()
+    @data = EolData.new
   end
   # TODO: Add ability to preview synonyms?
   # TODO: List stuff that's almost ready.
@@ -1383,9 +1373,9 @@ class NameController < ApplicationController
   # Send stuff to eol.
   def eol # :nologin: :norobots:
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @timer_start = Time.now()
-    @data = EolData.new()
-    render_xml(:layout => false)
+    @timer_start = Time.now
+    @data = EolData.new
+    render_xml(layout: false)
   end
 
   def refresh_links_to_eol
@@ -1459,14 +1449,18 @@ class NameController < ApplicationController
     @list_members = nil
     @new_names    = nil
     if request.method == "POST"
-      list = params[:list][:members].strip_squeeze rescue ''
+      list = begin
+               params[:list][:members].strip_squeeze
+             rescue
+               ""
+             end
       construct_approved_names(list, params[:approved_names])
       sorter = NameSorter.new
       sorter.sort_names(list)
       if sorter.only_single_names
         sorter.create_new_synonyms
         flash_notice :name_bulk_success.t
-        redirect_to(:controller => 'observer', :action => 'list_rss_logs')
+        redirect_to(controller: "observer", action: "list_rss_logs")
       else
         if sorter.new_name_strs != []
           # This error message is no longer necessary.
@@ -1485,8 +1479,8 @@ class NameController < ApplicationController
   def map # :nologin: :norobots:
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
-      @query = create_query(:Observation, :of_name, :name => @name)
-      @observations = @query.results.select {|o| o.lat or o.location}
+      @query = create_query(:Observation, :of_name, name: @name)
+      @observations = @query.results.select { |o| o.lat || o.location }
     end
   end
 
@@ -1501,18 +1495,18 @@ class NameController < ApplicationController
 
       # Initialize form.
       if request.method != "POST"
-        if !@name.at_or_below_genus?
-          flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
+        unless @name.at_or_below_genus?
+          flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name, rank: @name.rank))
         end
         if @notification
           @note_template = @notification.note_template
         else
           mailing_address = @user.mailing_address.strip
-          mailing_address = ':mailing_address' if mailing_address.blank?
+          mailing_address = ":mailing_address" if mailing_address.blank?
           @note_template = :email_tracking_note_template.l(
-            :species_name => @name.real_text_name,
-            :mailing_address => mailing_address,
-            :users_name => @user.legal_name
+            species_name: @name.real_text_name,
+            mailing_address: mailing_address,
+            users_name: @user.legal_name
           )
         end
 
@@ -1523,9 +1517,9 @@ class NameController < ApplicationController
           note_template = params[:notification][:note_template]
           note_template = nil if note_template.blank?
           if @notification.nil?
-            @notification = Notification.new(:flavor => :name, :user => @user,
-                :obj_id => name_id, :note_template => note_template)
-            flash_notice(:email_tracking_now_tracking.t(:name => @name.display_name))
+            @notification = Notification.new(flavor: :name, user: @user,
+                                             obj_id: name_id, note_template: note_template)
+            flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
           else
             @notification.note_template = note_template
             flash_notice(:email_tracking_updated_messages.t)
@@ -1533,9 +1527,9 @@ class NameController < ApplicationController
           @notification.save
         when :DISABLE.l
           @notification.destroy
-          flash_notice(:email_tracking_no_longer_tracking.t(:name => @name.display_name))
+          flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
         end
-        redirect_with_query(:action => 'show_name', :id => name_id)
+        redirect_with_query(action: "show_name", id: name_id)
       end
     end
   end
@@ -1552,7 +1546,7 @@ class NameController < ApplicationController
     minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
     rank_condition = params[:include_higher_taxa].blank? ?
       "= #{Name.ranks[:Species]}" :
-      "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(',')})"
+      "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(",")})"
 
     data = Name.connection.select_rows(%(
       SELECT y.name, y.rank, SUM(y.number)
@@ -1580,8 +1574,8 @@ class NameController < ApplicationController
       LIMIT #{number_of_names}
     ))
 
-    genera = data.map do |name, rank, number|
-      name.split(' ').first
+    genera = data.map do |name, _rank, _number|
+      name.split(" ").first
     end.uniq
 
     families = {}
@@ -1599,23 +1593,23 @@ class NameController < ApplicationController
       end
     end
 
-    report = CSV.generate(:col_sep => "\t") do |csv|
-      csv << ['name', 'rank', 'number_observations', 'family']
+    report = CSV.generate(col_sep: "\t") do |csv|
+      csv << %w(name rank number_observations family)
       data.each do |name, rank, number|
-        genus = name.split(' ').first
-        family = families[genus] || ''
+        genus = name.split(" ").first
+        family = families[genus] || ""
         csv << [name, rank, number.round.to_s, family]
       end
     end
     send_data(report,
-      :type => 'text/csv',
-      :charset => 'UTF-8',
-      :header => 'present',
-      :disposition => 'attachment',
-      :filename => "#{action_name}.csv"
-    )
+              type: "text/csv",
+              charset: "UTF-8",
+              header: "present",
+              disposition: "attachment",
+              filename: "#{action_name}.csv"
+             )
 
   rescue => e
-    render(:text => e.to_s, :layout => false, :status => 500)
+    render(text: e.to_s, layout: false, status: 500)
   end
 end

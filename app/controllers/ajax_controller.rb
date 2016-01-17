@@ -26,12 +26,12 @@
 #
 ################################################################################
 
-require 'cgi'
-require_dependency 'geocoder'
+require "cgi"
+require_dependency "geocoder"
 
 class AjaxController < ApplicationController
   disable_filters
-  around_filter :catch_ajax_errors
+  around_action :catch_ajax_errors
   layout false
 
   def catch_ajax_errors
@@ -44,16 +44,16 @@ class AjaxController < ApplicationController
         msg += line + "\n"
       end
     end
-    render(:text => msg, :status => 500)
+    render(text: msg, status: 500)
   end
 
   def get_session_user!
-    User.current = get_session_user or raise "Must be logged in."
+    User.current = get_session_user or fail "Must be logged in."
   end
 
   # Used by unit tests.
   def test
-    render(:text => 'test')
+    render(text: "test")
   end
 
   # Auto-complete string as user types. Renders list of strings in plain text.
@@ -65,11 +65,11 @@ class AjaxController < ApplicationController
     type = params[:type].to_s
     string = CGI.unescape(params[:id].to_s).strip_squeeze
     if string.blank?
-      render(:text => "\n\n")
+      render(text: "\n\n")
     else
       auto = AutoComplete.subclass(type).new(string, params)
       results = auto.matching_strings.join("\n") + "\n"
-      render(:text => results)
+      render(text: results)
     end
   end
 
@@ -85,24 +85,24 @@ class AjaxController < ApplicationController
     value = params[:value].to_s
     @user = get_session_user!
     key   = ApiKey.safe_find(id)
-    if not key
-      raise :runtime_no_match_id.l(:type => :api_key, :id => id)
+    if !key
+      fail :runtime_no_match_id.l(type: :api_key, id: id)
     elsif key.user != @user
-      raise :runtime_not_owner_id.l(:type => :api_key, :id => id)
+      fail :runtime_not_owner_id.l(type: :api_key, id: id)
     else
       case type
-      when 'activate'
+      when "activate"
         key.verify!
-        render(:text => '')
-      when 'edit'
+        render(text: "")
+      when "edit"
         if value.blank?
-          raise :runtime_api_key_notes_cannot_be_blank.l
+          fail :runtime_api_key_notes_cannot_be_blank.l
         else
           key.update_attribute(:notes, value.strip_squeeze)
         end
-        render(:text => key.notes)
+        render(text: key.notes)
       else
-        raise "Invalid type for api_key: #{type.inspect}"
+        fail "Invalid type for api_key: #{type.inspect}"
       end
     end
   end
@@ -115,28 +115,28 @@ class AjaxController < ApplicationController
     type  = params[:type].to_s
     id    = params[:id].to_s
     value = params[:value].to_s
-    if value != '0' and value != '1'
-      raise "Invalid value for export: #{value.inspect}"
+    if value != "0" && value != "1"
+      fail "Invalid value for export: #{value.inspect}"
     elsif @user = get_session_user!
       case type
-      when 'image'
+      when "image"
         export_image(id, value)
       else
-        raise "Invalid type for export: #{type.inspect}"
+        fail "Invalid type for export: #{type.inspect}"
       end
     end
   end
 
   def export_image(id, value)
     @image = Image.safe_find(id)
-    if not @image
-      raise "Image not found: #{id.inspect}"
-    elsif not @user.in_group?('reviewers')
-      raise "You must be a reviewer to export images."
+    if !@image
+      fail "Image not found: #{id.inspect}"
+    elsif !@user.in_group?("reviewers")
+      fail "You must be a reviewer to export images."
     else
-      @image.ok_for_export = (value == '1')
+      @image.ok_for_export = (value == "1")
       @image.save_without_our_callbacks
-      render(:inline => '<%= image_exporter(@image.id, @image.ok_for_export) %>')
+      render(inline: "<%= image_exporter(@image.id, @image.ok_for_export) %>")
     end
   end
 
@@ -150,14 +150,14 @@ class AjaxController < ApplicationController
     elsif @user = get_session_user!
       name = Location.reverse_name(name) if @user.location_format == :scientific
     end
-    render(:inline => Geocoder.new(name).ajax_response)
+    render(inline: Geocoder.new(name).ajax_response)
   end
 
   # Return an old TranslationString by version id.
   def old_translation
     id = params[:id].to_s
     str = TranslationString::Version.find(id)
-    render(:text => str.text)
+    render(text: str.text)
   end
 
   # Deal with Pivotal stories.  Renders updated story, vote controls, etc.
@@ -169,21 +169,21 @@ class AjaxController < ApplicationController
     id    = params[:id].to_s
     value = params[:value].to_s
     case type
-    when 'story'
+    when "story"
       @story = Pivotal.get_story(id)
-      render(:inline => '<%= pivotal_story(@story) %>')
-    when 'vote'
+      render(inline: "<%= pivotal_story(@story) %>")
+    when "vote"
       @user = get_session_user!
       @story = Pivotal.cast_vote(id, @user, value)
-      render(:inline => '<%= pivotal_vote_controls(@story) %>')
-    when 'comment'
+      render(inline: "<%= pivotal_vote_controls(@story) %>")
+    when "comment"
       @user = get_session_user!
       story = Pivotal.get_story(id)
       @comment = Pivotal.post_comment(id, @user, value)
       @num = story.comments.length + 1
-      render(:inline => '<%= pivotal_comment(@comment, @num) %>')
+      render(inline: "<%= pivotal_comment(@comment, @num) %>")
     else
-      raise("Invalid type \"#{type}\" in Pivotal AJAX controller.")
+      fail("Invalid type \"#{type}\" in Pivotal AJAX controller.")
     end
   end
 
@@ -197,12 +197,12 @@ class AjaxController < ApplicationController
     value = params[:value].to_s
     if @user = get_session_user!
       case type
-      when 'naming'
+      when "naming"
         cast_naming_vote(id, value)
-      when 'image'
+      when "image"
         cast_image_vote(id, value)
       else
-        raise "Invalid type for vote: #{type.inspect}"
+        fail "Invalid type for vote: #{type.inspect}"
       end
     end
   end
@@ -210,27 +210,27 @@ class AjaxController < ApplicationController
   def cast_naming_vote(id, value_str)
     @naming = Naming.safe_find(id)
     value = Vote.validate_value(value_str)
-    if not value
-      raise "Invalid value for vote/naming: #{value_str.inspect}"
-    elsif not @naming
-      raise "Invalid id for vote/naming: #{id.inspect}"
+    if !value
+      fail "Invalid value for vote/naming: #{value_str.inspect}"
+    elsif !@naming
+      fail "Invalid id for vote/naming: #{id.inspect}"
     else
       @naming.change_vote(value, @user)
-      render(:text => '')
+      render(text: "")
     end
   end
 
   def cast_image_vote(id, value)
     image = Image.safe_find(id)
-    if value != '0' and not Image.validate_vote(value)
-      raise "Invalid value for vote/image: #{value.inspect}"
-    elsif not image
-      raise "Invalid id for vote/image: #{id.inspect}"
+    if value != "0" && !Image.validate_vote(value)
+      fail "Invalid value for vote/image: #{value.inspect}"
+    elsif !image
+      fail "Invalid id for vote/image: #{id.inspect}"
     else
-      value = value == '0' ? nil : Image.validate_vote(value)
+      value = value == "0" ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == :yes)
       image.change_vote(@user, value, anon)
-      render(partial: "image/image_vote_links", locals: {image: image})
+      render(partial: "image/image_vote_links", locals: { image: image })
     end
   end
 
@@ -254,7 +254,7 @@ class AjaxController < ApplicationController
 
     img_when = Date.new(@image[:when][("1i")].to_i, @image[:when][("2i")].to_i,
                         @image[:when][("3i")].to_i)
-    ##TODO: handle invalid date
+    # #TODO: handle invalid date
     image = Image.new(
       created_at: Time.now,
       user: user,
@@ -267,14 +267,14 @@ class AjaxController < ApplicationController
     )
 
     if !image.save || !image.process_image
-      msg = :runtime_no_upload_image.t(:name => (original_name ? "'#{original_name}'" : "##{image.id}"))
+      msg = :runtime_no_upload_image.t(name: (original_name ? "'#{original_name}'" : "##{image.id}"))
       errors = [msg] + image.formatted_errors
       logger.error("UPLOAD_FAILED: #{errors.inspect}")
       render(text: errors.join("\n").strip_html, status: 500, layout: false)
     else
       name = original_name
       name = "##{image.id}" if name.empty?
-      flash_notice(:runtime_image_uploaded.t(:name => name))
+      flash_notice(:runtime_image_uploaded.t(name: name))
       render(json: image)
     end
   end

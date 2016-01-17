@@ -1,8 +1,7 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ProjectTest < UnitTestCase
-
   def test_add_and_remove_observations
     proj = projects(:eol_project)
     obs1 = Observation.find(1)
@@ -51,10 +50,10 @@ class ProjectTest < UnitTestCase
     assert_obj_list_equal([img1], proj.images.sort_by(&:id))
 
     proj.add_image(img2)
-    assert_obj_list_equal([img1,img2], proj.images.sort_by(&:id))
+    assert_obj_list_equal([img1, img2], proj.images.sort_by(&:id))
 
     proj.add_image(img2)
-    assert_obj_list_equal([img1,img2], proj.images.sort_by(&:id))
+    assert_obj_list_equal([img1, img2], proj.images.sort_by(&:id))
 
     proj.remove_image(img1)
     assert_obj_list_equal([img2], proj.images)
@@ -73,10 +72,10 @@ class ProjectTest < UnitTestCase
     assert_obj_list_equal([spl2], proj.species_lists)
 
     proj.add_species_list(spl1)
-    assert_obj_list_equal([spl1,spl2], proj.species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl2], proj.species_lists.sort_by(&:id))
 
     proj.add_species_list(spl2)
-    assert_obj_list_equal([spl1,spl2], proj.species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl2], proj.species_lists.sort_by(&:id))
 
     proj.remove_species_list(spl2)
     assert_obj_list_equal([spl1], proj.species_lists)

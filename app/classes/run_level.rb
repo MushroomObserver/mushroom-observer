@@ -8,11 +8,11 @@ class RunLevel
   def self.normal
     @@runlevel = :normal
   end
-  
+
   def self.silent
     @@runlevel = :silent
   end
-  
+
   def self.is_normal?
     @@runlevel == :normal
   end

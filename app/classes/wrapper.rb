@@ -7,7 +7,7 @@
 #  testing purposes.
 #
 #  *NOTE*:: BlankSlate is in the "builder" vendor package in ActiveSupport --
-#  it defines a superclass with (almost) *no* methods at all. 
+#  it defines a superclass with (almost) *no* methods at all.
 #
 #  == Example
 #
@@ -32,15 +32,14 @@
 ################################################################################
 
 class Wrapper < BlankSlate
-
   # Contructor takes a Hash of attributes you want the object to have.
-  def initialize(attributes={})
+  def initialize(attributes = {})
     @attributes = attributes
   end
 
   # Display object's attributes.
   def inspect
-    @attributes.inspect.sub(/^\{/, '<Wrapper: ').sub(/\}$/, '>')
+    @attributes.inspect.sub(/^\{/, "<Wrapper: ").sub(/\}$/, ">")
   end
 
   def send(*args) # :nodoc:
@@ -49,14 +48,14 @@ class Wrapper < BlankSlate
 
   def method_missing(name, *args) # :nodoc:
     if name.to_s.match(/^(\w+)=$/)
-      @attributes[$1.to_sym] = args[0]
+      @attributes[Regexp.last_match(1).to_sym] = args[0]
     else
       @attributes[name.to_s.to_sym]
     end
   end
 
   def respond_to?(name) # :nodoc:
-    name.to_s.match(/=$/) or
-    @attributes.has_key?(name.to_s.to_sym)
+    name.to_s.match(/=$/) ||
+      @attributes.key?(name.to_s.to_sym)
   end
 end

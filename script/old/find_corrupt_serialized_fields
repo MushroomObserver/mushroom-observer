@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 def check_hash(hash)
   any = false
@@ -9,14 +9,14 @@ def check_hash(hash)
     for key, value in hash
       if value.is_a?(String)
         begin
-          value.encode('utf-8').match(/.*/)
+          value.encode("utf-8").match(/.*/)
         rescue
           any = true
         end
       end
     end
   end
-  return any
+  any
 end
 
 def check_list_of_lists(list)
@@ -27,7 +27,7 @@ def check_list_of_lists(list)
         for value in list2
           if value.is_a?(String)
             begin
-              value.encode('utf-8').match(/.*/)
+              value.encode("utf-8").match(/.*/)
             rescue
               any = true
             end
@@ -36,7 +36,7 @@ def check_list_of_lists(list)
       end
     end
   end
-  return any
+  any
 end
 
 errors = 0

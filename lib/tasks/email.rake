@@ -1,18 +1,18 @@
 namespace :email do
   desc "List queued emails"
-  task(:list => :environment) do
+  task(list: :environment) do
     print "#{MO.http_domain}, #{::Rails.env}\n"
     # for e in QueuedEmail.find(:all, :include => [ # Rails 3
     #  :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
     for e in QueuedEmail.all.includes(:queued_email_integers,
                                       :queued_email_note,
                                       :queued_email_strings, :user)
-      e.dump()
+      e.dump
     end
   end
 
   desc "Send queued emails"
-  task(:send => :environment) do
+  task(send: :environment) do
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     for e in QueuedEmail.all
@@ -31,10 +31,10 @@ namespace :email do
 
         else
           result = nil
-          File.open("#{::Rails.root.to_s}/log/email-low-level.log", 'a') do |fh|
+          File.open("#{::Rails.root}/log/email-low-level.log", "a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
-            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : 'false'}")
+            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : "false"}")
           end
 
           # Destroy if sent successfully.
@@ -46,8 +46,8 @@ namespace :email do
             end
 
           # After a few tries give up and delete it.
-          elsif e.num_attempts and (e.num_attempts >= MO.email_num_attempts - 1)
-            File.open(MO.email_log, 'a') do |fh|
+          elsif e.num_attempts && (e.num_attempts >= MO.email_num_attempts - 1)
+            File.open(MO.email_log, "a") do |fh|
               fh.puts('Failed to send email #%d at %s' % [e.id, now])
               fh.puts(e.dump)
             end
@@ -69,10 +69,10 @@ namespace :email do
   end
 
   desc "Purge the email queue without sending anything"
-  task(:purge => :environment) do
+  task(purge: :environment) do
     # for e in QueuedEmail.find(:all) # Rails 3
     for e in QueuedEmail.all
-      print "Purging #{e.id}: from => #{e.user and e.user.login}, to => #{e.to_user.login}, flavor => #{e.flavor}, queued => #{e.queued}\n"
+      print "Purging #{e.id}: from => #{e.user && e.user.login}, to => #{e.to_user.login}, flavor => #{e.flavor}, queued => #{e.queued}\n"
       e.destroy
     end
   end

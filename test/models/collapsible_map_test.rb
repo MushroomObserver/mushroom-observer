@@ -1,30 +1,19 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
-require 'map_collapsible'
-require 'map_set'
+require "map_collapsible"
+require "map_set"
 
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
   def inspect
-    str = '%f' % self
-    str.sub(/0+$/,'').  # remove trailing zeros
-        sub(/\.$/,'')
-  end
-end
-
-class TestCollapsible < CollapsibleCollectionOfMappableObjects
-  class << self
-    attr_accessor :max_objects
-  end
-
-  def max_objects
-    self.class.max_objects
+    str = "%f" % self
+    str.sub(/0+$/, ""). # remove trailing zeros
+      sub(/\.$/, "")
   end
 end
 
 class CollapsibleMapTest < UnitTestCase
-
   def assert_mapset_is_point(mapset, lat, long)
     assert_true(mapset.is_point?)
     assert_false(mapset.is_box?)
@@ -37,15 +26,19 @@ class CollapsibleMapTest < UnitTestCase
     assert_false(mapset.is_point?)
     assert_true(mapset.is_box?)
     if east >= west
-      assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
+      assert_mapset(mapset, lat, long,
+                    north, south, east, west, north - south, east - west)
     else
-      assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
+      assert_mapset(mapset, lat, long + 180,
+                    north, south, east, west, north - south, east - west + 360)
     end
   end
 
-  def assert_mapset(mapset, lat, long, north, south, east, west, north_south, east_west)
+  def assert_mapset(mapset, lat, long,
+                    north, south, east, west, north_south, east_west)
     assert_extents(mapset, north, south, east, west)
-    assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
+    assert_in_delta(lat, mapset.lat, 0.0001,
+                    "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
     assert_in_delta(long, mapset.long, 0.0001)
     assert_in_delta(lat, mapset.center[0], 0.0001)
     assert_in_delta(long, mapset.center[1], 0.0001)
@@ -63,14 +56,14 @@ class CollapsibleMapTest < UnitTestCase
 
   def assert_extents(mapset, north, south, east, west)
     errors = []
-    errors << 'north' if north.round(4) != mapset.north.round(4)
-    errors << 'south' if south.round(4) != mapset.south.round(4)
-    errors << 'east' if east.round(4) != mapset.east.round(4)
-    errors << 'west' if west.round(4) != mapset.west.round(4)
+    errors << "north" if north.round(4) != mapset.north.round(4)
+    errors << "south" if south.round(4) != mapset.south.round(4)
+    errors << "east" if east.round(4) != mapset.east.round(4)
+    errors << "west" if west.round(4) != mapset.west.round(4)
     if errors.any?
-      expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
-      actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
-      message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
+      expect = "N=%.4f S=%.4f E=%.4f W=%.4f" % [north, south, east, west]
+      actual = "N=%.4f S=%.4f E=%.4f W=%.4f" % [mapset.north, mapset.south, mapset.east, mapset.west]
+      message = "Extents wrong: <#{errors.join(", ")}>\nExpect: <#{expect}>\nActual: <#{actual}>"
       flunk(message)
     end
   end
@@ -79,18 +72,18 @@ class CollapsibleMapTest < UnitTestCase
     expect = objs.reject(&:nil?).map do |x|
       x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
     end.map do |x|
-      '%9.4f %9.4f %9.4f %9.4f' % x
+      "%9.4f %9.4f %9.4f %9.4f" % x
     end.sort
     actual = coll.mapsets.map(&:edges).map do |x|
-      '%9.4f %9.4f %9.4f %9.4f' % x
+      "%9.4f %9.4f %9.4f %9.4f" % x
     end.sort
     messages = []
     differ = false
     for i in 0..(expect.length > actual.length ? expect.length : actual.length)
-      message = '%39.39s    %39.39s' % [expect[i], actual[i]]
+      message = "%39.39s    %39.39s" % [expect[i], actual[i]]
       if expect[i] != actual[i]
         differ = true
-        message += ' (*)'
+        message += " (*)"
       end
       messages << message
     end
@@ -188,78 +181,78 @@ class CollapsibleMapTest < UnitTestCase
 
     # Add box intersecting northwest corner.
     n = loc.north = n + 0.1
-        loc.south = s + 0.1
-        loc.east = e - 0.1
+    loc.south = s + 0.1
+    loc.east = e - 0.1
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting northeast corner.
     n = loc.north = n + 0.1
-        loc.south = s + 0.1
+    loc.south = s + 0.1
     e = loc.east = e + 0.1
-        loc.west = w + 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting southwest corner.
-        loc.north = n - 0.1
+    loc.north = n - 0.1
     s = loc.south = s - 0.1
-        loc.east = e - 0.1
+    loc.east = e - 0.1
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting southeast corner.
-        loc.north = n - 0.1
+    loc.north = n - 0.1
     s = loc.south = s - 0.1
     e = loc.east = e + 0.1
-        loc.west = w + 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting northern edge.
     n = loc.north = n + 0.1
-        loc.south = s + 0.1
-        loc.east = e - 0.1
-        loc.west = w + 0.1
+    loc.south = s + 0.1
+    loc.east = e - 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting southern edge.
-        loc.north = n - 0.1
+    loc.north = n - 0.1
     s = loc.south = s - 0.1
-        loc.east = e - 0.1
-        loc.west = w + 0.1
+    loc.east = e - 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting eastern edge.
-        loc.north = n - 0.1
-        loc.south = s + 0.1
+    loc.north = n - 0.1
+    loc.south = s + 0.1
     e = loc.east = e + 0.1
-        loc.west = w + 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box intersecting western edge.
-        loc.north = n - 0.1
-        loc.south = s + 0.1
-        loc.east = e - 0.1
+    loc.north = n - 0.1
+    loc.south = s + 0.1
+    loc.east = e - 0.1
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box covering northern half.
     n = loc.north = n + 0.1
-        loc.south = s + 0.1
+    loc.south = s + 0.1
     e = loc.east = e + 0.1
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box covering southern half.
-        loc.north = n - 0.1
+    loc.north = n - 0.1
     s = loc.south = s - 0.1
     e = loc.east = e + 0.1
     w = loc.west = w - 0.1
@@ -270,14 +263,14 @@ class CollapsibleMapTest < UnitTestCase
     n = loc.north = n + 0.1
     s = loc.south = s - 0.1
     e = loc.east = e + 0.1
-        loc.west = w + 0.1
+    loc.west = w + 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
 
     # Add box covering western half.
     n = loc.north = n + 0.1
     s = loc.south = s - 0.1
-        loc.east = e - 0.1
+    loc.east = e - 0.1
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
@@ -313,39 +306,39 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_extending_mapset_with_boxes_over_dateline
     # Neither old nor new box straddling dateline:
-    do_box_extension_test(-170,-150, 150,170, 150,-150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
-    do_box_extension_test(-50,-10, 10,50, -50,50)         # |    ▀▀▀▀▀ ▄▄▄▄▄    |
-    do_box_extension_test(-30,10, -10,30, -30,30)         # |      ▀▀███▄▄      |
-    do_box_extension_test(-10,10, -20,20, -20,20)         # |       ▄███▄       |
-    do_box_extension_test(-20,20, -10,10, -20,20)         # |       ▀███▀       |
-    do_box_extension_test(-10,30, -30,10, -30,30)         # |      ▄▄███▀▀      |
-    do_box_extension_test(10,50, -50,-10, -50,50)         # |    ▄▄▄▄▄ ▀▀▀▀▀    |
-    do_box_extension_test(150,170, -170,-150, 150,-150)   # | ▄▄▄▄▄       ▀▀▀▀▀ |
+    do_box_extension_test(-170, -150, 150, 170, 150, -150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
+    do_box_extension_test(-50, -10, 10, 50, -50, 50)         # |    ▀▀▀▀▀ ▄▄▄▄▄    |
+    do_box_extension_test(-30, 10, -10, 30, -30, 30)         # |      ▀▀███▄▄      |
+    do_box_extension_test(-10, 10, -20, 20, -20, 20)         # |       ▄███▄       |
+    do_box_extension_test(-20, 20, -10, 10, -20, 20)         # |       ▀███▀       |
+    do_box_extension_test(-10, 30, -30, 10, -30, 30)         # |      ▄▄███▀▀      |
+    do_box_extension_test(10, 50, -50, -10, -50, 50)         # |    ▄▄▄▄▄ ▀▀▀▀▀    |
+    do_box_extension_test(150, 170, -170, -150, 150, -150)   # | ▄▄▄▄▄       ▀▀▀▀▀ |
 
     # New straddling dateline, but not old:
-    do_box_extension_test(-170,-160, 150,-150, 150,-150)  # |▄█▄             ▄▄▄|
-    do_box_extension_test(-170,-120, 150,-150, 150,-120)  # |▄██▀▀           ▄▄▄|
-    do_box_extension_test(-140,-100, 150,-150, 150,-100)  # |▄▄▄ ▀▀▀▀        ▄▄▄|
-    do_box_extension_test(100,140, 150,-150, 100,-150)    # |▄▄▄        ▀▀▀▀ ▄▄▄|
-    do_box_extension_test(120,170, 150,-150, 120,-150)    # |▄▄▄           ▀▀██▄|
-    do_box_extension_test(160,170, 150,-150, 150,-150)    # |▄▄▄             ▄█▄|
+    do_box_extension_test(-170, -160, 150, -150, 150, -150)  # |▄█▄             ▄▄▄|
+    do_box_extension_test(-170, -120, 150, -150, 150, -120)  # |▄██▀▀           ▄▄▄|
+    do_box_extension_test(-140, -100, 150, -150, 150, -100)  # |▄▄▄ ▀▀▀▀        ▄▄▄|
+    do_box_extension_test(100, 140, 150, -150, 100, -150)    # |▄▄▄        ▀▀▀▀ ▄▄▄|
+    do_box_extension_test(120, 170, 150, -150, 120, -150)    # |▄▄▄           ▀▀██▄|
+    do_box_extension_test(160, 170, 150, -150, 150, -150)    # |▄▄▄             ▄█▄|
 
     # Old straddling dateline, but not new:
-    do_box_extension_test(170,-170, 80,90, 80,-170)       # |▀█▀             ▀▀▀|
-    do_box_extension_test(165,-170, 160,170, 160,-170)    # |▀██▄▄           ▀▀▀|
-    do_box_extension_test(150,-170, 160,170, 150,-170)    # |▀▀▀ ▄▄▄▄        ▀▀▀|
-    do_box_extension_test(170,-170, -80,-70, 170,-70)     # |▀▀▀        ▄▄▄▄ ▀▀▀|
-    do_box_extension_test(170,-165, -170,-160, 170,-160)  # |▀▀▀           ▄▄██▀|
-    do_box_extension_test(170,-150, -170,-160, 170,-150)  # |▀▀▀             ▀█▀|
+    do_box_extension_test(170, -170, 80, 90, 80, -170)       # |▀█▀             ▀▀▀|
+    do_box_extension_test(165, -170, 160, 170, 160, -170)    # |▀██▄▄           ▀▀▀|
+    do_box_extension_test(150, -170, 160, 170, 150, -170)    # |▀▀▀ ▄▄▄▄        ▀▀▀|
+    do_box_extension_test(170, -170, -80, -70, 170, -70)     # |▀▀▀        ▄▄▄▄ ▀▀▀|
+    do_box_extension_test(170, -165, -170, -160, 170, -160)  # |▀▀▀           ▄▄██▀|
+    do_box_extension_test(170, -150, -170, -160, 170, -150)  # |▀▀▀             ▀█▀|
 
     # Both straddling dateline:
-    do_box_extension_test(150,-170, 170,-150, 150,-150)   # |██▄             ▀██|
-    do_box_extension_test(170,-170, 150,-150, 150,-150)   # |██▄             ▄██|
-    do_box_extension_test(150,-150, 170,-170, 150,-150)   # |██▀             ▀██|
-    do_box_extension_test(170,-150, 150,-170, 150,-150)   # |██▀             ▄██|
+    do_box_extension_test(150, -170, 170, -150, 150, -150)   # |██▄             ▀██|
+    do_box_extension_test(170, -170, 150, -150, 150, -150)   # |██▄             ▄██|
+    do_box_extension_test(150, -150, 170, -170, 150, -150)   # |██▀             ▀██|
+    do_box_extension_test(170, -150, 150, -170, 150, -150)   # |██▀             ▄██|
   end
 
-  def do_box_extension_test(w1,e1, w2,e2, w3,e3)
+  def do_box_extension_test(w1, e1, w2, e2, w3, e3)
     loc = Location.new
     loc.north = 50
     loc.south = 40
@@ -361,7 +354,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_gps
     obs = observations(:amateur_observation)
     assert(obs.lat && obs.long && !obs.location)
-    coll = TestCollapsible.new(obs)
+    coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_point(mapset, obs.lat, obs.long)
@@ -374,7 +367,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_location
     obs = observations(:minimal_unknown)
     assert(!obs.lat && !obs.long && obs.location)
-    coll = TestCollapsible.new(obs)
+    coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *obs.location.edges)
@@ -386,7 +379,7 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_mapping_one_location
     loc = locations(:albion)
-    coll = TestCollapsible.new(loc)
+    coll = CollapsibleCollectionOfMappableObjects.new(loc)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *loc.edges)
@@ -410,45 +403,36 @@ class CollapsibleMapTest < UnitTestCase
       [-70, -30],     # 9 -------------
     ]
     observations = data.map do |lat, long|
-      Observation.new(:lat => lat, :long => long)
+      Observation.new(lat: lat, long: long)
     end
 
-    TestCollapsible.max_objects = 10
-    assert_equal(10, observations.length)
-    coll = TestCollapsible.new(observations)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+                                                      observations.length)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 9
-    coll = TestCollapsible.new(observations)
     data[0] = [10.1, 10.0, 10.1, 10.0]
     data[1] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 8
-    coll = TestCollapsible.new(observations)
     data[3] = [22, 20, 22, 20]
     data[6] = [-10, -12, 12, 10]
     data[4] = data[7] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 7
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 6
-    coll = TestCollapsible.new(observations)
     data[0] = [22, 10, 22, 10]
     data[2] = data[3] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 5
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 4
-    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, 22, 0]
     data[5] = data[6] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 
@@ -467,48 +451,40 @@ class CollapsibleMapTest < UnitTestCase
       [70, -145],     # 9 --------------
     ]
     observations = data.map do |lat, long|
-      Observation.new(:lat => lat, :long => long)
+      Observation.new(lat: lat, long: long)
     end
 
-    TestCollapsible.max_objects = 10
-    assert_equal(10, observations.length)
-    coll = TestCollapsible.new(observations)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+                                                      observations.length)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 9
-    coll = TestCollapsible.new(observations)
     data[0] = [10.1, 10.0, -175.0, -175.1]
     data[1] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 8
-    coll = TestCollapsible.new(observations)
     data[3] = [-10, -12, -175, -177]
     data[5] = [22, 20, -165, -167]
     data[4] = data[6] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 7
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 6
-    coll = TestCollapsible.new(observations)
     data[0] = [20, 10, -175, -175.1]
     data[2] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 5
-    coll = TestCollapsible.new(observations)
     data[0] = [20, -12, -175, -177]
     data[3] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
     # This is the tricky one: will it combine 175°E with 175°W?
-    TestCollapsible.max_objects = 4
-    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, -165, 175]
     data[5] = data[7] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 end

@@ -1,6 +1,6 @@
 # virtual herbaria
 class HerbariumController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :herbarium_search,
     :list_herbariums,
     :show_herbarium,
@@ -161,7 +161,7 @@ class HerbariumController < ApplicationController
 
   def ok_to_update(herbarium, params)
     new_name = params[:name].strip_html
-    ( (herbarium.name == new_name) || name_free?(new_name) ) &&
+    ((herbarium.name == new_name) || name_free?(new_name)) &&
       email_valid?(params[:email])
   end
 

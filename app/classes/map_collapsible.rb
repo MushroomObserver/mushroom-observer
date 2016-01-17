@@ -2,11 +2,13 @@
 #
 #  = Collapsible Map Collection Class
 #
-#  This class takes a bunch of mappable objects and collapses them into a more
-#  manageable number of points and boxes.  Resulting points and boxes each may
-#  contain one or more Observation's and Location's.
+#  This class takes a bunch of mappable objects and collapses them
+#  into a more manageable number of points and boxes.  Resulting
+#  points and boxes each may contain one or more Observation's and
+#  Location's.
 #
-#  Note: Uses the global +MO.max_map_objects+ to limit the number of objects.
+#  Note: Uses the global +MO.max_map_objects+ to limit the number of
+#  objects.
 #
 #  == Typical Usage
 #
@@ -16,10 +18,11 @@
 #      draw_mapset(gmap, mapset)
 #    end
 #
-################################################################################
+###############################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  def initialize(objects)
+  def initialize(objects, max_objects=MO.max_map_objects)
+    @max_objects = max_objects
     init_sets(objects)
     group_objects_into_sets
   end
@@ -36,14 +39,14 @@ class CollapsibleCollectionOfMappableObjects
     [extents.north_west, extents.center, extents.south_east]
   end
 
-private
+  private
 
   # Algorithm, such as it is, works by rounding to fewer and fewer places, each
   # time combining points and boxes which are the same.  In the end, it rounds
   # to nearest 90°, so it is guaranteed(?) to reach the target minimum number
-  # of objects. 
+  # of objects.
   PRECISION = [
-    10000,
+    10_000,
     5000,
     2000,
     1000,
@@ -75,27 +78,27 @@ private
   end
 
   def init_sets(objects)
-    objects = [objects] if !objects.is_a?(Array)
-    raise "Tried to create empty map!" if objects.empty?
+    objects = [objects] unless objects.is_a?(Array)
+    fail "Tried to create empty map!" if objects.empty?
     @sets = {}
     for obj in objects
       if obj.is_location?
         add_box_set(obj, [obj], MAX_PRECISION)
       elsif obj.is_observation?
-        if obj.lat and !obj.lat_long_dubious?
+        if obj.lat && !obj.lat_long_dubious?
           add_point_set(obj, [obj], MAX_PRECISION)
         elsif loc = obj.location
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
-        raise "Tried to map #{obj.class}!"
+        fail "Tried to map #{obj.class}!"
       end
     end
   end
 
   def group_objects_into_sets
     prec = next_precision(MAX_PRECISION)
-    while @sets.length > max_objects and prec >= MIN_PRECISION
+    while @sets.length > @max_objects && prec >= MIN_PRECISION
       old_sets = @sets.values
       @sets = {}
       for set in old_sets
@@ -103,11 +106,6 @@ private
       end
       prec = next_precision(prec)
     end
-  end
-
-  # Need to be able to override this in test suite.
-  def max_objects
-    MO.max_map_objects
   end
 
   def add_point_set(loc, objs, prec)
@@ -128,13 +126,10 @@ private
 
   def round_lat_long_to_precision(loc, prec)
     if prec > MIN_PRECISION
-      y = round_number(loc.lat, prec)
-      x = round_number(loc.long, prec)
-    else
-      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)
+      return [round_number(loc.lat, prec), round_number(loc.long, prec)]
     end
-    return x, y
+    [loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0,
+     loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
   end
 
   def calc_extents
@@ -142,6 +137,6 @@ private
     for mapset in mapsets
       result.update_extents_with_box(mapset)
     end
-    return result
+    result
   end
 end

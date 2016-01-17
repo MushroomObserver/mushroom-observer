@@ -54,13 +54,13 @@ class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
   belongs_to :user
-  has_many   :votes, :dependent => :destroy
+  has_many :votes, dependent: :destroy
 
   serialize :reasons
 
-  before_save   :did_name_change?
-  before_save   :enforce_default_reasons
-  after_save    :create_emails
+  before_save :did_name_change?
+  before_save :enforce_default_reasons
+  after_save :create_emails
   after_destroy :log_destruction
 
   # Override the default show_controller
@@ -120,22 +120,22 @@ class Naming < AbstractModel
 
   # Return name in plain text.
   def text_name
-    name ? name.real_search_name : ''
+    name ? name.real_search_name : ""
   end
 
   # Return name in plain text (with id tacked on to make unique).
   def unique_text_name
-    text_name + " (#{id || '?'})"
+    text_name + " (#{id || "?"})"
   end
 
   # Return name in Textile format.
   def format_name
-    name ? name.observation_name : ''
+    name ? name.observation_name : ""
   end
 
   # Return name in Textile format (with id tacked on to make unique).
   def unique_format_name
-    format_name + " (#{id || '?'})"
+    format_name + " (#{id || "?"})"
   end
 
   ##############################################################################
@@ -147,7 +147,7 @@ class Naming < AbstractModel
   # Detect name changes in namings
   def did_name_change?
     @name_changed = name_id_changed?
-    return true
+    true
   end
 
   # Send email notifications after creating or changing the Name.
@@ -156,17 +156,15 @@ class Naming < AbstractModel
       @name_changed = false
 
       # Send email to people interested in this name.
-      @initial_name_id = self.name_id
-      taxa = self.name.all_parents
-      taxa.push(self.name)
-      taxa.push(Name.find_by_text_name("Lichen")) if self.name.is_lichen?
+      @initial_name_id = name_id
+      taxa = name.all_parents
+      taxa.push(name)
+      taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
       done_user = {}
       flavor = Notification.flavors[:name]
       for taxon in taxa
         for n in Notification.where(flavor: flavor, obj_id: taxon.id)
-          if n.user.created_here   and
-             (n.user != user)      and
-             !done_user[n.user_id] and
+          if n.user.created_here && (n.user != user) && !done_user[n.user_id] &&
              (!n.require_specimen || observation.specimen)
             QueuedEmail::NameTracking.create_email(n, self)
             done_user[n.user_id] = true
@@ -175,9 +173,9 @@ class Naming < AbstractModel
       end
 
       # Send email to people interested in this observation.
-      if obs = self.observation
+      if obs = observation
         owner  = obs.user
-        sender = self.user
+        sender = user
         recipients = []
 
         # Send notification to owner if they want.
@@ -198,9 +196,7 @@ class Naming < AbstractModel
         # interest in the observation, say.)
         for taxon in taxa
           for interest in taxon.interests
-            if interest.state
-              recipients.push(interest.user)
-            end
+            recipients.push(interest.user) if interest.state
           end
         end
 
@@ -221,7 +217,7 @@ class Naming < AbstractModel
   def log_destruction
     if (user = User.current) &&
        (obs = observation)
-      obs.log(:log_naming_destroyed, :name => self.format_name)
+      obs.log(:log_naming_destroyed, name: format_name)
       obs.calc_consensus
     end
   end
@@ -241,7 +237,7 @@ class Naming < AbstractModel
         notes = x[:notes]
         # Reason is "used" if checked or notes non-empty.
         if (check == "1") ||
-            !notes.blank?
+           !notes.blank?
           reason.notes = notes
         else
           reason.delete
@@ -270,7 +266,7 @@ class Naming < AbstractModel
     for v in votes
       sum += v.value
     end
-    return sum
+    sum
   end
 
   # Convert vote_cache to a percentage.
@@ -292,23 +288,23 @@ class Naming < AbstractModel
         break
       end
     end
-    return result
+    result
   end
 
   # Is this Naming the given User's favorite Naming for this Observation?
   def is_users_favorite?(user)
     result = false
     for v in votes
-      if (v.user_id == user.id) and
+      if (v.user_id == user.id) &&
          (v.favorite)
         result = true
       end
     end
-    return result
+    result
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
-  def change_vote(value, user=User.current)
+  def change_vote(value, user = User.current)
     observation.change_vote(self, value, user)
   end
 
@@ -332,13 +328,13 @@ class Naming < AbstractModel
   def editable?
     result = true
     for v in votes
-      if (v.user_id != user_id) and
+      if (v.user_id != user_id) &&
          (v.value > 0)
         result = false
         break
       end
     end
-    return result
+    result
   end
 
   # Has anyone given this their strongest (positive) vote?  We don't want
@@ -347,14 +343,14 @@ class Naming < AbstractModel
   def deletable?
     result = true
     for v in votes
-      if (v.user_id != user_id) and
-         (v.value > 0) and
+      if (v.user_id != user_id) &&
+         (v.value > 0) &&
          (v.favorite)
         result = false
         break
       end
     end
-    return result
+    result
   end
 
   # Create a table the number of User's who cast each level of Vote.
@@ -370,15 +366,14 @@ class Naming < AbstractModel
   #   end
   #
   def calc_vote_table
-
     # Initialize table.
     table = {}
     for str, val in Vote.opinion_menu
       table[str] = {
-          num: 0,
-          wgt: 0.0,
-          value: val,
-          votes: [],
+        num: 0,
+        wgt: 0.0,
+        value: val,
+        votes: []
       }
     end
 
@@ -397,12 +392,12 @@ class Naming < AbstractModel
     val = tot_sum.to_f / (tot_wgt + 1.0)
 
     # Update vote_cache if it's wrong.
-    if self.vote_cache != val
+    if vote_cache != val
       self.vote_cache = val
-      self.save
+      save
     end
 
-    return table
+    table
   end
 
   ##############################################################################
@@ -441,13 +436,13 @@ class Naming < AbstractModel
     for reason in get_reasons
       result[reason.num] = reason
     end
-    return result
+    result
   end
 
   # Update reasons given Hash of notes values.
   def set_reasons(hash)
     for reason in get_reasons
-      if hash.has_key?(reason.num)
+      if hash.key?(reason.num)
         reason.notes = hash[reason.num].to_s
       else
         reason.delete
@@ -460,13 +455,13 @@ class Naming < AbstractModel
     self.reasons ||= {}
     if reasons.keys.empty?
       for num in DEFAULT_REASONS
-        reasons[num] = ''
+        reasons[num] = ""
       end
     end
 
     # Might as well make it nil if empty.
     self.reasons = nil if reasons == {}
-    return true
+    true
   end
 
   # = Wrapper on Naming reasons.
@@ -509,7 +504,7 @@ class Naming < AbstractModel
     # Get localization string for this reason.  For example:
     #   reason.label.l  -->  "Recognized by sight"
     def label
-      REASON_LABELS[@num-1]
+      REASON_LABELS[@num - 1]
     end
 
     # Return order for sorting:
@@ -525,7 +520,7 @@ class Naming < AbstractModel
 
     # Is this Reason being used by the parent Naming?
     def used?
-      @reasons.has_key?(@num)
+      @reasons.key?(@num)
     end
 
     # Get notes, or +nil+ if Reason not used.
@@ -544,20 +539,16 @@ class Naming < AbstractModel
     end
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.observation
+    unless observation
       errors.add(:observation, :validate_naming_observation_missing.t)
     end
-    if !self.name
-      errors.add(:name, :validate_naming_name_missing.t)
-    end
-    if !self.user && !User.current
-      errors.add(:user, :validate_naming_user_missing.t)
-    end
+    errors.add(:name, :validate_naming_name_missing.t) unless name
+    errors.add(:user, :validate_naming_user_missing.t) if !user && !User.current
   end
 end

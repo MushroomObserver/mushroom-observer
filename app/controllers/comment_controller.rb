@@ -29,7 +29,7 @@
 ################################################################################
 
 class CommentController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :comment_search,
     :index_comment,
     :list_comments,
@@ -38,13 +38,13 @@ class CommentController < ApplicationController
     :show_comment,
     :show_comments_by_user,
     :show_comments_for_target,
-    :show_comments_for_user,
+    :show_comments_for_user
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :add_comment,
     :edit_comment,
-    :show_comment,
+    :show_comment
   ]
 
   ##############################################################################
@@ -87,14 +87,18 @@ class CommentController < ApplicationController
   # Shows comments for a given object, most recent first.  (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_target # :nologin: :norobots:
-    model = params[:type].to_s.constantize rescue nil
+    model = begin
+              params[:type].to_s.constantize
+            rescue
+              nil
+            end
     if !model || !model.acts_like?(:model)
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(action: :list_comments)
     elsif target = find_or_goto_index(model, params[:id].to_s)
       query = create_query(:Comment, :for_target, target: target.id,
-                           type: target.class.name)
+                                                  type: target.class.name)
       show_selected_comments(query)
     end
   end
@@ -102,7 +106,7 @@ class CommentController < ApplicationController
   # Display list of Comment's whose text matches a string pattern.
   def comment_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
       redirect_to(action: "show_comment", id: comment.id)
     else
@@ -112,14 +116,13 @@ class CommentController < ApplicationController
   end
 
   # Show selected list of comments.
-  def show_selected_comments(query, args={})
-
+  def show_selected_comments(query, args = {})
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
     args = {
       action: :list_comments,
       num_per_page: 25,
-      include: [:target, :user],
+      include: [:target, :user]
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -127,17 +130,17 @@ class CommentController < ApplicationController
       # ["summary",  :sort_by_summary.t],
       ["user", :sort_by_user.t],
       ["created_at", :sort_by_posted.t],
-      ["updated_at", :sort_by_updated_at.t],
+      ["updated_at", :sort_by_updated_at.t]
     ]
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") or
+    if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
-      args[:letters] = 'users.login'
-    # Paginate by letter if sorting by summary.
-    # elsif (query.params[:by] == "summary") or
-    #    (query.params[:by] == "reverse_summary")
-    #   args[:letters] = 'comments.summary'
+      args[:letters] = "users.login"
+      # Paginate by letter if sorting by summary.
+      # elsif (query.params[:by] == "summary") or
+      #    (query.params[:by] == "reverse_summary")
+      #   args[:letters] = 'comments.summary'
     end
 
     @full_detail = (query.flavor == :for_target)
@@ -229,7 +232,7 @@ class CommentController < ApplicationController
         # redirected already
       elsif !check_permission!(@comment)
         redirect_with_query(controller: @target.show_controller,
-          action: @target.show_action, id: @target.id)
+                            action: @target.show_action, id: @target.id)
       elsif request.method == "POST"
         @comment.attributes = whitelisted_comment_params if params[:comment]
         if !@comment.changed?
@@ -244,7 +247,7 @@ class CommentController < ApplicationController
         end
         if done
           redirect_with_query(controller: @target.show_controller,
-            action: @target.show_action, id: @target.id)
+                              action: @target.show_action, id: @target.id)
         end
       end
     end
@@ -269,7 +272,7 @@ class CommentController < ApplicationController
         flash_notice(:runtime_form_comments_destroy_success.t(id: id))
       end
       redirect_with_query(controller: @target.show_controller,
-        action: @target.show_action, id: @target.id)
+                          action: @target.show_action, id: @target.id)
     end
   end
 
@@ -287,7 +290,8 @@ class CommentController < ApplicationController
     end
   end
 
-################################################################################
+  ################################################################################
+
   private
 
   def whitelisted_comment_params
