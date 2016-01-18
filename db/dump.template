@@ -1,5 +1,0 @@
-#!/bin/bash
-
-ls ../public/images/thumb | sort -n | tail -1
-mysqldump -u root -pXXXXXXXX observer_production | gzip -c - > checkpoint.gz
-ls ../public/images/thumb | sort -n | tail -1

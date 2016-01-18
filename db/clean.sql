@@ -74,8 +74,6 @@ delete from queued_email_notes;
 delete from queued_email_strings;
 delete from queued_emails;
 
-delete from transactions;
-
 update users set email = 'webmaster@mushroomobserver.org';
 update users set password = 'ae98587c6f1599fbdcc800e66db6874a8fa0e713';
 
