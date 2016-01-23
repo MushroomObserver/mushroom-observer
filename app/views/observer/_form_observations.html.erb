@@ -16,14 +16,15 @@
       <%= text_field_tag(:observation_when_1j, @observation.when.try(&:year) || Time.now.year,
                          class: "form-control hidden", size: 4) %>
       <% inject_javascript_at_end %(
-        jQuery("#observation_when_1i").addClass("hidden");
-        jQuery("#observation_when_1j").removeClass("hidden");
-        function copy_year(v) { jQuery("#observation_when_1i").val(v) }
+        jQuery("#observation_when_1i").remove();
+        jQuery("#observation_when_1j").removeClass("hidden").attr({
+          id:   "observation_when_1i",
+          name: "observation[when(1i)]"
+        });
       ) %>
-      <% turn_into_menu_auto_completer(:observation_when_1j,
+      <% turn_into_menu_auto_completer(:observation_when_1i,
               primer: (19.years.ago.year..Time.now.year).to_a,
-              pulldown_size: 20, act_like_select: true,
-              on_change: "copy_year") %>
+              pulldown_size: 20, act_like_select: true) %>
     </div>
   </div>
 </div>
