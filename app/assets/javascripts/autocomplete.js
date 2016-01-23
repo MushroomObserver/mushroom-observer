@@ -61,7 +61,8 @@ var MOAutocompleter = function(opts) {
     pulldown_size:        10,              // maximum number of options shown at a time
     page_size:            10,              // amount to move cursor on page up and down
     max_request_length:   50,              // max length of string to send via AJAX
-    show_errors:          false            // show error messages returned via AJAX?
+    show_errors:          false,           // show error messages returned via AJAX?
+    act_like_select:      false            // include pulldown-icon on right, and always show all options
   });
   jQuery.extend(this, opts);
 
@@ -154,6 +155,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
       elem.focus(function(event) { return this2.switch_inputs(event, elem) });
+      elem.click(function(event) { return this2.our_click(event) });
       elem.blur(function(event) { return this2.our_blur(event) });
       elem.keydown(function(event) { return this2.our_keydown(event) });
       elem.keyup(function(event) { return this2.our_keyup(event) });
@@ -207,11 +209,15 @@ jQuery.extend(MOAutocompleter.prototype, {
         this.page_down();
         this.schedule_key(this.page_down);
         break;
+      default:
+        this.current_row = -1;
+        break;
       }
     }
     if (this.on_keydown)
       this.on_keydown(event);
-    if (this.menu_up && this.is_hot_key(key))
+    if (this.menu_up && this.is_hot_key(key) &&
+        !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
     return true;
   },
@@ -222,7 +228,8 @@ jQuery.extend(MOAutocompleter.prototype, {
     // jQuery("#log").append("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")<br/>");
     if (this.on_keypress)
       this.on_keypress(event);
-    if (this.menu_up && this.is_hot_key(key))
+    if (this.menu_up && this.is_hot_key(key) &&
+        !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
     return true;
   },
@@ -249,6 +256,13 @@ jQuery.extend(MOAutocompleter.prototype, {
       if (this.on_change)
         this.on_change(new_val);
     }
+  },
+
+  // User clicked into text field.
+  our_click: function(event) {
+    if (this.act_like_select)
+      this.schedule_refresh();
+    return false;
   },
 
   // User entered text field.
@@ -283,15 +297,15 @@ jQuery.extend(MOAutocompleter.prototype, {
   // Prevent these keys from propagating to the input field.
   is_hot_key: function(key) {
     switch(key) {
-    case EVENT_KEY_ESC:      
-    case EVENT_KEY_RETURN:   
-    case EVENT_KEY_TAB:      
-    case EVENT_KEY_UP:       
-    case EVENT_KEY_DOWN:     
-    case EVENT_KEY_PAGEUP:   
-    case EVENT_KEY_PAGEDOWN: 
-    case EVENT_KEY_HOME:     
-    case EVENT_KEY_END:      
+    case EVENT_KEY_ESC:
+    case EVENT_KEY_RETURN:
+    case EVENT_KEY_TAB:
+    case EVENT_KEY_UP:
+    case EVENT_KEY_DOWN:
+    case EVENT_KEY_PAGEUP:
+    case EVENT_KEY_PAGEDOWN:
+    case EVENT_KEY_HOME:
+    case EVENT_KEY_END:
       return true;
     }
     return false;
@@ -688,7 +702,9 @@ jQuery.extend(MOAutocompleter.prototype, {
     var last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
-    if (this.collapse > 0)
+    if (this.act_like_select)
+      this.update_select();
+    else if (this.collapse > 0)
       this.update_collapsed();
     else if (this.unordered)
       this.update_unordered();
@@ -703,6 +719,12 @@ jQuery.extend(MOAutocompleter.prototype, {
 
     // Reset width each time we change the options.
     this.current_width = this.input_elem.width();
+  },
+
+  // When "acting like a select" make it display all options in the
+  // order given right from the moment they enter the field.
+  update_select: function() {
+    this.matches = this.primer.split("\n");
   },
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -828,7 +850,7 @@ jQuery.extend(MOAutocompleter.prototype, {
           part = i;
       }
     }
-    new_row = exact >= 0 ? exact : part >= 0 ? part : matches.length > 0 ? 0 : -1;
+    new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
     new_scr = this.scroll_offset;
     if (new_scr > new_row)
       new_scr = new_row;
