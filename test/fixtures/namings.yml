@@ -6,7 +6,7 @@ minimal_unknown_naming:
   # id: 1
   user: mary
   name: fungi
-  observation: $LABEL.sub("naming", "obs")
+  observation: minimal_unknown_obs
 
 detailed_unknown_naming:
   # id: 2
@@ -14,15 +14,15 @@ detailed_unknown_naming:
   updated_at: 2006-05-12 17:21:00
   user: mary
   name: fungi
-  observation: $LABEL.sub("naming", "obs")
+  observation: detailed_unknown_obs
 
 coprinus_comatus_naming:
   # id: 3
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: coprinus_comatus
+  observation: coprinus_comatus_obs
   vote_cache: 1
   reasons: "---\n1: Isn't it obvious?\n"
 
@@ -31,40 +31,40 @@ agaricus_campestris_naming:
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: agaricus_campestris
+  observation: agaricus_campestris_obs
 
 agaricus_campestrus_naming:
   # id: 5
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: agaricus_campestrus
+  observation: agaricus_campestrus_obs
 
 agaricus_campestras_naming:
   # id: 6
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: agaricus_campestras
+  observation: agaricus_campestras_obs
 
 agaricus_campestros_naming:
   # id: 7
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: agaricus_campestros
+  observation: agaricus_campestros_obs
 
 strobilurus_diminutivus_naming:
   # id: 8
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
   user: rolf
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: strobilurus_diminutivus
+  observation: strobilurus_diminutivus_obs
   vote_cache: 0
 
 coprinus_comatus_other_naming:
@@ -81,24 +81,24 @@ boletus_edulis_naming:
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   user: dick
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: boletus_edulis
+  observation: boletus_edulis_obs
 
 tremella_naming:
   # id: 11
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   user: junk
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  name: tremella
+  observation: tremella_obs
 
 tremella_mesenterica_naming:
   # id: 12
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
-  user: dick  # dick
-  name: $LABEL.chomp("_naming")
-  observation: $LABEL.sub("naming", "obs")
+  user: dick
+  name: tremella_mesenterica
+  observation: tremella_mesenterica_obs
 
 owner_multiple_favorites_first_naming:
   # id: 13

@@ -6,7 +6,7 @@
 # Name with notes (not mergeable)
 agaricus_campestras_desc:
 #  id: 1
-  name: $LABEL.chomp("_desc")
+  name: agaricus_campestras
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user: rolf
@@ -22,7 +22,7 @@ agaricus_campestras_desc:
 # Another name with notes (not mergeable)
 agaricus_campestros_desc:
 #  id: 2
-  name: $LABEL.chomp("_desc")
+  name: agaricus_campestros
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user: rolf
@@ -37,7 +37,7 @@ agaricus_campestros_desc:
 
 russula_brevipes_author_notes_desc:
 #  id: 3
-  name: $LABEL.chomp("_desc")
+  name: russula_brevipes_author_notes
   created_at: 2008-03-10 22:33:00
   updated_at: 2008-03-10 22:33:05
   user: rolf
@@ -52,7 +52,7 @@ russula_brevipes_author_notes_desc:
 
 russula_cremoricolor_no_author_notes_desc:
 #  id: 4
-  name: $LABEL.chomp("_desc")
+  name: russula_cremoricolor_no_author_notes
   created_at: 2008-03-12 20:53:08
   updated_at: 2008-03-12 20:53:18
   user: rolf
@@ -67,7 +67,7 @@ russula_cremoricolor_no_author_notes_desc:
 
 russula_cremoricolor_author_notes_desc:
 #  id: 5
-  name: $LABEL.chomp("_desc")
+  name: russula_cremoricolor_author_notes
   created_at: 2008-03-12 20:53:36
   updated_at: 2008-03-12 20:53:40
   user: rolf
@@ -82,7 +82,7 @@ russula_cremoricolor_author_notes_desc:
 
 peltigera_desc:
 #  id: 6
-  name: $LABEL.chomp("_desc")
+  name: peltigera
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
   user: dick
@@ -108,7 +108,7 @@ peltigera_desc:
 
 suillus_desc:
 #  id: 7
-  name: $LABEL.chomp("_desc")
+  name: suillus
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user: dick
@@ -249,7 +249,7 @@ peltigera_source_desc:
 
 coprinus_comatus_desc:
 #  id: 15
-  name: $LABEL.chomp("_desc")
+  name: coprinus_comatus
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user: rolf

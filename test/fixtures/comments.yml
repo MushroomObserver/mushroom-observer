@@ -2,23 +2,23 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-minimal_comment: # 1
+minimal_unknown_obs_comment_1: # 1
   created_at: 2006-03-02 21:14:00
   updated_at: 2006-03-02 21:14:00
   user: rolf
   summary: A comment on minimal unknown
   comment: Wow!  That's really cool
   target_type: Observation
-  target_id: 1
+  target_id: <%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
 
-another_comment: # 2
+minimal_unknown_obs_comment_2: # 2
   created_at: 2006-03-02 21:16:00
   updated_at: 2006-03-02 21:16:00
   user: dick
   summary: Let's _try_ a more "complicated" comment.
   comment: "With _Agaricus campestris_ links and *boldface* and\n4x4 other weird(tm) !image 2! stuff.\n\nJust to test html_to_ascii...  -A&P"
   target_type: Observation
-  target_id: 1
+  target_id: <%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
 
 detailed_unknown_obs_comment: # 3
   created_at: 2007-03-02 21:16:00
@@ -27,4 +27,4 @@ detailed_unknown_obs_comment: # 3
   summary: Let's give detailed_unknown_obs a little of everything.
   comment: ''
   target_type: Observation
-  target_id: 2
+  target_id: <%= ActiveRecord::FixtureSet.identify(:detailed_unknown_obs) %>

@@ -36,7 +36,7 @@ coprinus_comatus_obs:
   updated_at: 2007-02-27 20:21:00
   when: 2007-02-27
   user: rolf
-  name: $LABEL.chomp("_obs")
+  name: coprinus_comatus
   where: Glendale, California
   specimen: 1
   notes: Second fruiting in bark chips
@@ -52,7 +52,7 @@ agaricus_campestris_obs:
   when: 2007-03-19
   user: rolf
   location: burbank
-  name: $LABEL.chomp("_obs")
+  name: agaricus_campestris
   specimen: 0
   notes: From the lawn next door
   images: agaricus_campestris_image
@@ -65,7 +65,7 @@ agaricus_campestrus_obs:
   when: 2007-06-23
   user: rolf
   location: burbank
-  name: $LABEL.chomp("_obs")
+  name: agaricus_campestru
   specimen: 0
   notes: From somewhere else
 
@@ -76,7 +76,7 @@ agaricus_campestras_obs:
   when: 2007-06-24
   user: rolf
   location: burbank
-  name: $LABEL.chomp("_obs")
+  name: agaricus_campestras
   specimen: 0
   notes: From somewhere else
 
@@ -87,7 +87,7 @@ agaricus_campestros_obs:
   when: 2007-06-24
   user: rolf
   location: burbank
-  name: $LABEL.chomp("_obs")
+  name: agaricus_campestros
   specimen: 0
   notes: From somewhere else
 
@@ -97,7 +97,7 @@ strobilurus_diminutivus_obs:
   updated_at: 2007-07-20 20:54:45
   when: 2007-07-20
   user: rolf
-  name: $LABEL.chomp("_obs")
+  name: strobilurus_diminutivus
   where: Pipi Valley, Sierra Mountains, CA
   specimen: 0
   notes: From somewhere else
@@ -145,7 +145,7 @@ peltigera_obs:
   user: rolf
   where: 'Briceland, California, USA'
   is_collection_location: 1
-  name: $LABEL.chomp("_obs")
+  name: peltigera
   specimen: 1
   notes: 'Growing on a hardwood'
   vote_cache: 3
@@ -173,11 +173,10 @@ fungi_obs:
   user: rolf
   where: 'Briceland, California, USA'
   is_collection_location: 0
-  name: $LABEL.chomp("_obs")
+  name: name
   specimen: 0
   notes: 'Observation for plane pileus'
   vote_cache: 3
-  # Associations
   images: conic_image, plane_image_example
 
 boletus_edulis_obs:
@@ -188,7 +187,7 @@ boletus_edulis_obs:
   user: dick
   where: 'New York, New York, USA'
   is_collection_location: 0
-  name: $LABEL.chomp("_obs")
+  name: boletus_edulis
   specimen: 0
   notes: 'A tasty bolete!'
   vote_cache: 3
