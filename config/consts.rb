@@ -166,6 +166,7 @@ MushroomObserver::Application.configure do
   # therefore need to be precompiled explicitly.
   config.assets.precompile += %w(
     api_key.js
+    date_select.js
     edit_location.js
     image_slider.js
     multi_image_upload.js

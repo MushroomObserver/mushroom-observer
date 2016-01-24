@@ -57,9 +57,7 @@
               <label><%= :form_images_when_taken.t %>:</label>
             </div>
             <div class="col-sm-8 form-inline">
-              <%= date_select(:temp_image, :when,
-                              {start_year: long_ago.year, end_year: Time.now.year,
-                              order: [:day, :month, :year]},
+              <%= date_select(:temp_image, :when, date_select_opts(@temp_image),
                               class: "form-control form-control-sm") %>
               <div>
                 <small><%= :form_images_camera_date.t %>:</small>

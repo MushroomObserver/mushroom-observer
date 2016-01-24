@@ -320,6 +320,8 @@ function MultiImageUploader(localized_text) {
             dateUpdater.refreshBox();
         });
 
+        replace_date_select_with_text_field(jQuery(this.dom_element.find('input')[2]));
+
         _this.getExifData();  //extract the EXIF data (async) and then load it
         _this.loadImageAsFileUrl(); //load image as base64 async
     };
@@ -410,7 +412,7 @@ function MultiImageUploader(localized_text) {
         var _this = this,
         _$day = jQuery(_this.dom_element.find('select')[0]),
         _$month = jQuery(_this.dom_element.find('select')[1]),
-        _$year = jQuery(_this.dom_element.find('select')[2]);
+        _$year = jQuery(_this.dom_element.find('input')[2]);
         if (simpleDate) {
             _$day.val(simpleDate.day);
             _$month.val(simpleDate.month);
@@ -423,8 +425,8 @@ function MultiImageUploader(localized_text) {
         return {
             day: jQuery(this.dom_element.find('select')[0]).val(),
             month: jQuery(this.dom_element.find('select')[1]).val(),
-            year: jQuery(this.dom_element.find('select')[2]).val(),
-            license: jQuery(this.dom_element.find('select')[3]).val(),
+            year: jQuery(this.dom_element.find('input')[2]).val(),
+            license: jQuery(this.dom_element.find('select')[2]).val(),
             notes: jQuery(this.dom_element.find('textarea')[0]).val(),
             copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
         };

@@ -41,7 +41,8 @@ var MOAutocompleter = function(opts) {
 
   // These are potentially useful parameters the user might want to tweak.
   jQuery.extend(this, {
-    input_id:             null,            // id of text field
+    input_id:             null,            // id of text field (after initialization becomes a unique identifier)
+    input_elem:           null,            // jQuery element of text field
     pulldown_class:       'auto_complete', // class of pulldown div
     hot_class:            'selected',      // class of <li> when highlighted
     unordered:            false,           // ignore order of words when matching
@@ -68,10 +69,10 @@ var MOAutocompleter = function(opts) {
 
   // These are internal state variables the user should leave alone.
   jQuery.extend(this, {
-    input_elem:           null,            // DOM element of text field
-    datalist_elem:        null,            // DOM element of datalist
-    pulldown_elem:        null,            // DOM element of pulldown div
-    list_elem:            null,            // DOM element of pulldown ul
+    uuid:                 null,            // unique id for this object
+    datalist_elem:        null,            // jQuery element of datalist
+    pulldown_elem:        null,            // jQuery element of pulldown div
+    list_elem:            null,            // jQuery element of pulldown ul
     focused:              false,           // is user in text field?
     menu_up:              false,           // is pulldown visible?
     old_value:            {},              // previous value of input field
@@ -105,6 +106,10 @@ var MOAutocompleter = function(opts) {
   if (!this.input_elem)
     alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
+  // Create a unique ID for this instance.
+  this.uuid = Object.keys(AUTOCOMPLETERS).length;
+  this.input_elem.data("uuid", this.uuid);
+
   // Figure out a few browser-dependent dimensions.
   this.scrollbar_width = this.input_elem.getScrollBarWidth();
 
@@ -122,21 +127,22 @@ var MOAutocompleter = function(opts) {
   this.prepare_input_element(this.input_elem);
 
   // Keep catalog of autocompleter objects so we can reuse them as needed.
-  AUTOCOMPLETERS[this.input_id] = this;
+  AUTOCOMPLETERS[this.uuid] = this;
 }
 
 jQuery.extend(MOAutocompleter.prototype, {
 
   // Prepare another input element to share an existing autocompleter instance.
-  reuse: function(other_id) {
-    var other_elem = jQuery("#" + other_id);
+  reuse: function(other_elem) {
+    if (typeof other_elem == "string")
+      other_elem = jQuery("#" + other_elem);
     this.prepare_input_element(other_elem);
   },
 
   // Move/attach this autocompleter to a new field.
   switch_inputs: function(event, elem) {
-    if (this.input_id != elem.attr("id")) {
-      this.input_id   = elem.attr("id");
+    if (!this.input_elem.is(elem)) {
+      this.uuid       = elem.data("uuid");
       this.input_elem = elem;
       this.input_elem.parent().append(this.pulldown_elem);
     }
@@ -246,11 +252,11 @@ jQuery.extend(MOAutocompleter.prototype, {
 
   // Input field has changed.
   our_change: function(do_refresh) {
-    var old_val = this.old_value[this.input_id];
+    var old_val = this.old_value[this.uuid];
     var new_val = this.input_elem.val();
     // jQuery("#log").append("our_change(" + this.input_elem.val() + ")<br/>");
     if (new_val != old_val) {
-      this.old_value[this.input_id] = new_val;
+      this.old_value[this.uuid] = new_val;
       if (do_refresh)
         this.schedule_refresh();
       if (this.on_change)
@@ -320,7 +326,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     this.refresh_timer = setTimeout((function() {
       this.verbose("doing_refresh()");
       // jQuery("#log").append("refresh_timer(" + this.input_elem.val() + ")<br/>");
-      this.old_value[this.input_id] = this.input_elem.val();
+      this.old_value[this.uuid] = this.input_elem.val();
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();

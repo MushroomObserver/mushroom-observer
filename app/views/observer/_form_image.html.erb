@@ -28,9 +28,9 @@
 
     <p><label for="image_<%= index %>_when_1i"><%= :form_images_when_taken.t %>:</label>
 
-    <%= date_select(:image, :when, {index: index, start_year: long_ago.year, end_year: Time.now.year,
-                                    order: [:day, :month, :year]},
+    <%= date_select(:image, :when, date_select_opts(@image).merge(index: index),
                     {onchange: "changed_date(#{index})"}) %></p>
+    <% turn_into_year_auto_completer(:species_list_when_1i) %>
 
     <p><label for="image_<%= index %>_license_id"><%= :form_images_select_license.t %>:</label>
     <%= select(:image, :license_id, @licenses, {value: @image.license_id},

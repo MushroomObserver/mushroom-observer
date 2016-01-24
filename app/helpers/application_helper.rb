@@ -225,7 +225,16 @@ module ApplicationHelper
       content_tag(:span, :no_file_selected.t)
   end
 
-  def long_ago
-    Time.new(Time.now.year - 20)
+  def date_select_opts(obj=nil)
+    start_year = 20.years.ago.year
+    init_value = obj.try(&:when).try(&:year)
+    if init_value && init_value < start_year
+      start_year = init_value
+    end
+    return {
+      start_year: start_year,
+      end_year: Time.now.year,
+      order: [:day, :month, :year]
+    }
   end
 end
