@@ -1773,7 +1773,7 @@ class Name < AbstractModel
     [name, author, rank]
   end
 
-  class RankMessedUp < Exception
+  class RankMessedUp < ::StandardError
   end
 
   def self.make_sure_ranks_ordered_right!(prev_rank, next_rank)

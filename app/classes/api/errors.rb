@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 class API
-  class Error < Exception
+  class Error < ::StandardError
     attr_accessor :tag, :args, :fatal, :trace
 
     def initialize

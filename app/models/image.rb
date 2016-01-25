@@ -447,6 +447,12 @@ class Image < AbstractModel
   # MD5 sum (if available).
   attr_accessor :upload_md5sum
 
+  # Proc to call after #process_image has been called.
+  attr_accessor :clean_up_proc
+  def clean_up
+    clean_up_proc.try(&:call)
+  end
+
   # Initialize the upload process.  Pass in the value of the file upload filed
   # from the CGI +params+ struct, or any other I/O stream.  You will have the
   # opportunity to provide extra information, such as the original file name,
@@ -481,6 +487,15 @@ class Image < AbstractModel
       self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
         if file.respond_to?(:original_filename)
     end
+  end
+
+  def upload_from_url(url)
+    upload = API::UploadFromURL.new(url)
+    self.image         = upload.content
+    self.upload_length = upload.content_length
+    self.upload_type   = upload.content_type
+    self.upload_md5sum = upload.content_md5
+    self.clean_up_proc = lambda { upload.clean_up }
   end
 
   # Perform what checks we can on the prospective upload before actually
