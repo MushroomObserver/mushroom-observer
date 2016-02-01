@@ -703,8 +703,10 @@ function MultiImageUploader(localized_text) {
             var dataTransfer = e.originalEvent.dataTransfer;            
             if (dataTransfer.files.length > 0)
                 fileStore.addFiles(dataTransfer.files);
-            else
-                fileStore.addUrl(dataTransfer.getData('Text'));
+            // There are issues to work out concerning dragging and dropping
+            // images from other websites into the observation form.
+            // else
+            //     fileStore.addUrl(dataTransfer.getData('Text'));
         });
 
         // Detect when files are added from browser
