@@ -73,11 +73,11 @@ fi
 
 # Image processing theory says that reducing images by 50% at a time is optimal.
 wait_for "(convert|jpegresize)"
-log_cmd jpegresize 1280x1280 -q 70 --max-size $full_file $huge_file
-log_cmd jpegresize 960x960   -q 70 --max-size $huge_file $large_file
-log_cmd jpegresize 640x640   -q 70 --max-size $huge_file $medium_file
-log_cmd jpegresize 320x320   -q 80 --max-size $medium_file $small_file
-log_cmd jpegresize 160x160   -q 90 --max-size $small_file $thumb_file
+log_cmd jpegresize 1280x1280 -q 93 --max-size $full_file $huge_file
+log_cmd jpegresize 960x960   -q 94 --max-size $full_file $large_file
+log_cmd jpegresize 640x640   -q 95 --max-size $huge_file $medium_file
+log_cmd jpegresize 320x320   -q 95 --max-size $medium_file $small_file
+log_cmd jpegresize 160x160   -q 95 --max-size $small_file $thumb_file
 
 # ImageMagick slurps the entire image into memory all at once.
 # Our jpegresize is much more memory-efficient but otherwise equivalent.
