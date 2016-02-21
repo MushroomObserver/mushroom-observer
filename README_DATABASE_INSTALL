@@ -4,8 +4,8 @@
 #  $USER             jason
 #  $DB_PASSWORD      xxxxxxxx
 #  $IP_ADDR          xxx.xxx.xxx.xxx
-#  $WEB_SERVER       web.mushroomobserver.org
-#  $SNAPSHOT_PATH    user@mushroomobserver.org:/var/web/mo/db
+#  $WEB_SERVER       mushroomobserver.org
+#  $SNAPSHOT_PATH    $USER@mushroomobserver.org:/var/web/mo/db
 #
 ################################################################################
 
@@ -86,12 +86,25 @@ root> mysql -u root -p
 root> service mysql restart
 
 # Configure on remote machine:
-remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
+remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=$DB_HOST ping
 remote> vi /var/web/mo/config/database.yml
   production:
+    adapter:  mysql2
     database: mo_production
-    host:     db.mushroomobserver.org
+    host:     $DB_HOST
     username: mo
     password: $DB_PASSWORD
+    socket:   /var/run/mysqld/mysqld.sock
+    encoding: utf8
+
 remote> rake db:version   # (just a simple test)
 
+# Update cron config file
+remote> vi /var/web/mo/config/mysql-production.cnf
+[client]
+host=$DB_HOST
+user=mo
+password="$DB_PASSWORD"
+
+[mysql]
+database=mo_production
