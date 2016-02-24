@@ -108,3 +108,24 @@ password="$DB_PASSWORD"
 
 [mysql]
 database=mo_production
+
+# Enable MRTG load average monitoring
+user> sudo su
+root> adduser mrtg
+root> mkdir ~mrtg/.ssh
+root> chown mrtg ~mrtg/.ssh
+root> cat > ~mrtg/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChn6Fxzw1wGvoufyOLAwN1r+FajGUMzE9X9/HlfKpiYwIjQDRbI6+h75Tz5RlG0f2+K9nyNAPEma5q+9ARGtOy3SWkSR55Ayx1rzEGV3GFuv/DW1MKWFd1PhPoSMayRAVYoI9q/Hvd6b8Q8PZLPKgoV9TEOHVlGyNs02EaK9tuaS9QM907s0qhI24FnnKIz7kOkxrpMkjE2D7/Sf2Sb1rRo2LcSpzOmv2lMqlSgBQqCLX0wx4563UfrhtblEsWYZQvXucKbQP4j+aYpQurAXA9STzwrCB7QhDkbMbMVY5yL5aa3le2PqOwK8y015FZCY0qmrBiKfJ3pLQTUKCVuSBN mrtg@ror4
+root> cat > ~mrtg/load.sh
+#!/bin/sh
+
+# Check the 1 minute and 5 minute load averages
+# Alan Mon Dec 14 18:20:38 EST 2015
+
+cat /proc/loadavg | cut -d\  -f1 | sed s/\\\.//g
+cat /proc/loadavg | cut -d\  -f2 | sed s/\\\.//g
+
+uptime
+echo db3.mushroomobserver.org
+root> chmod 755 ~mrtg/load.sh
+# On the main MO webserver, make sure ~mrtg/mrtg.cfg has a target which SSH's into the DB server and gets the load average.
