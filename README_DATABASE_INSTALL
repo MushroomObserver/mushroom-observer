@@ -1,5 +1,5 @@
 #
-#  Installation of the database server. [JPH 20140904]
+#  Installation of the database server. [NJW 20160224]
 #
 #  $USER             jason
 #  $DB_PASSWORD      xxxxxxxx
@@ -7,7 +7,7 @@
 #  $WEB_SERVER       mushroomobserver.org
 #  $SNAPSHOT_PATH    $USER@mushroomobserver.org:/var/web/mo/db
 #
-################################################################################
+###############################################################################
 
 local> ssh root@$IP_ADDR
 root> passwd -l root
@@ -17,7 +17,7 @@ root> useradd -m -s /bin/bash -G sudo $USER
 root> passwd $USER
 root> mkdir /home/$USER/.ssh
 root> vi /home/$USER/.ssh/authorized_keys
-  # paste in your local ~/.ssh/id_rsa.pub
+  # paste in appropriate id_rsa.pub
 root> chmod 600 /home/$USER/.ssh/authorized_keys
 root> chmod 700 /home/$USER/.ssh
 root> chown -R $USER:$USER /home/$USER/.ssh
@@ -115,7 +115,7 @@ root> adduser mrtg
 root> mkdir ~mrtg/.ssh
 root> chown mrtg ~mrtg/.ssh
 root> cat > ~mrtg/.ssh/authorized_keys
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChn6Fxzw1wGvoufyOLAwN1r+FajGUMzE9X9/HlfKpiYwIjQDRbI6+h75Tz5RlG0f2+K9nyNAPEma5q+9ARGtOy3SWkSR55Ayx1rzEGV3GFuv/DW1MKWFd1PhPoSMayRAVYoI9q/Hvd6b8Q8PZLPKgoV9TEOHVlGyNs02EaK9tuaS9QM907s0qhI24FnnKIz7kOkxrpMkjE2D7/Sf2Sb1rRo2LcSpzOmv2lMqlSgBQqCLX0wx4563UfrhtblEsWYZQvXucKbQP4j+aYpQurAXA9STzwrCB7QhDkbMbMVY5yL5aa3le2PqOwK8y015FZCY0qmrBiKfJ3pLQTUKCVuSBN mrtg@ror4
+  # paste in appropriate id_rsa.pub
 root> cat > ~mrtg/load.sh
 #!/bin/sh
 
@@ -128,4 +128,5 @@ cat /proc/loadavg | cut -d\  -f2 | sed s/\\\.//g
 uptime
 echo db3.mushroomobserver.org
 root> chmod 755 ~mrtg/load.sh
-# On the main MO webserver, make sure ~mrtg/mrtg.cfg has a target which SSH's into the DB server and gets the load average.
+# On the main MO webserver, make sure ~mrtg/mrtg.cfg has a target
+# which SSH's into the DB server and gets the load average.
