@@ -79,23 +79,38 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Image, :by_user, user: :bogus) }
     assert_raises(RuntimeError) { Query.lookup(:Image, :by_user, user: "rolf") }
     assert_raises(RuntimeError) { Query.lookup(:Image, :by_user, user: @fungi) }
-    assert_equal(1, Query.lookup(:Image, :by_user, user: rolf).params[:user])
-    assert_equal(1, Query.lookup(:Image, :by_user, user: rolf.id).params[:user])
-    assert_equal(1, Query.lookup(:Image, :by_user, user: rolf.id.to_s).params[:user])
+    assert_equal(rolf.id,
+                 Query.lookup(:Image, :by_user, user: rolf).params[:user])
+    assert_equal(rolf.id,
+                 Query.lookup(:Image, :by_user, user: rolf.id).params[:user])
+    assert_equal(rolf.id,
+                 Query.lookup(:Image, :by_user, user: rolf.id.to_s).
+                   params[:user])
 
     assert_raises(RuntimeError) { Query.lookup(:User, :in_set) }
     # Oops, :in_set query is generic, doesn't know to require Name instances here.
     # assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: rolf) }
     assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "one") }
     assert_raises(RuntimeError) { Query.lookup(:Name, :in_set, ids: "1,2,3") }
-    assert_equal([],    Query.lookup(:User, :in_set, ids: []).params[:ids])
-    assert_equal([1],   Query.lookup(:User, :in_set, ids: 1).params[:ids])
-    assert_equal([1],   Query.lookup(:Name, :in_set, ids: "1").params[:ids])
-    assert_equal([1, 2], Query.lookup(:User, :in_set, ids: [1, 2]).params[:ids])
-    assert_equal([1, 2], Query.lookup(:User, :in_set, ids: %w(1 2)).params[:ids])
-    assert_equal([1], Query.lookup(:User, :in_set, ids: rolf).params[:ids])
-    assert_equal([1, 2], Query.lookup(:User, :in_set, ids: [rolf, mary]).params[:ids])
-    assert_equal([1, 2, 3], Query.lookup(:User, :in_set, ids: [rolf, 2, "3"]).params[:ids])
+    assert_equal([], Query.lookup(:User, :in_set, ids: []).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, :in_set,
+                 ids: rolf.id).params[:ids])
+    assert_equal([names(:fungi).id], Query.lookup(:Name, :in_set,
+                  ids: "#{names(:fungi).id}").params[:ids])
+    assert_equal([rolf.id, mary.id],
+                 Query.lookup(:User, :in_set,
+                 ids: [rolf.id, mary.id]).params[:ids])
+#    assert_equal([1, 2], Query.lookup(:User, :in_set, ids: %w(1 2)).params[:ids])
+    assert_equal([rolf.id,mary.id],
+                 Query.lookup(:User, :in_set, ids:
+                   ["#{rolf.id}", "#{mary.id}"]).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, :in_set,
+                 ids: rolf).params[:ids])
+    assert_equal([rolf.id, mary.id], Query.lookup(:User, :in_set, ids: [rolf, mary]).params[:ids])
+    assert_equal([rolf.id, mary.id, junk.id],
+                 Query.lookup(:User, :in_set,
+                 ids: [rolf, mary.id, "#{junk.id}"]).
+                   params[:ids])
 
     assert_raises(RuntimeError) { Query.lookup(:Name, :pattern_search) }
     assert_raises(RuntimeError) { Query.lookup(:Name, :pattern_search, pattern: true) }
@@ -458,37 +473,40 @@ class QueryTest < UnitTestCase
     num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
 
     assert_equal(num, query.select_count)
-    assert_equal(num, query.select_count(limit: 10)) # limit limits no. of counts!!
+    assert_equal(num, query.select_count(limit: 10)) # limits no. of counts!!
     assert_equal(num_agaricus,
                  query.select_count(where: 'text_name LIKE "Agaricus%"'))
 
-    assert_equal("1", query.select_value.to_s) # first id
-    assert_equal("11", query.select_value(limit: "10, 10").to_s) # tenth id
-    assert_equal(num.to_s, query.select_value(order: :reverse).to_s) # last id
-    assert_equal("Fungi", query.select_value(select: "text_name").to_s)
+    assert_equal(Name.first.id, query.select_value)
+    assert_equal(Name.offset(10).first.id,
+                 query.select_value(limit: "10, 10")) # 11th id
+    assert_equal(Name.last.id, query.select_value(order: :reverse)) # last id
+    assert_equal(Name.first.text_name,
+                 query.select_value(select: "text_name").to_s)
 
-    assert_equal((1..num).map(&:to_s), query.select_values.map(&:to_s))
-    assert_equal(%w(3 18 19 20 21),
+    assert_equal(Name.all.map {|name| name.id.to_s},
+                 query.select_values.map(&:to_s))
+    assert_equal([names(:agaricus_campestris).id.to_s,
+                  names(:agaricus).id.to_s,
+                  names(:agaricus_campestrus).id.to_s,
+                  names(:agaricus_campestras).id.to_s,
+                  names(:agaricus_campestros).id.to_s
+                  ].sort,
                  query.select_values(where: 'text_name LIKE "Agaricus%"').
-                       map(&:to_s))
+                       map(&:to_s).sort)
 
     agaricus = query.select_values(select: "text_name",
                                    where: 'text_name LIKE "Agaricus%"').
-               map(&:to_s)
+                                   map(&:to_s)
     assert_equal(num_agaricus, agaricus.uniq.length)
     assert_equal(num_agaricus,
                  agaricus.select { |x| x[0, 8] == "Agaricus" }.count)
 
-    if RUBY_VERSION < "1.9"
-      assert_equal((1..num).map { |x| [x.to_s] }, query.select_rows)
-      assert_equal((1..num).map { |x| { "id" => x.to_s } }, query.select_all)
-      assert_equal({ "id" => "1" }, query.select_one)
-    else
-      assert_equal((1..num).map { |x| [x] }, query.select_rows)
-      assert_equal((1..num).map { |x| { "id" => x } }, query.select_all)
-      assert_equal({ "id" => 1 }, query.select_one)
-    end
-    assert_equal([@fungi], query.find_by_sql(limit: 1))
+    assert_equal(Name.all.map { |x| [x.id] }, query.select_rows)
+    assert_equal(Name.all.map { |x| { "id" => x.id } }, query.select_all)
+    assert_equal({ "id" => Name.first.id }, query.select_one)
+
+    assert_equal([Name.first], query.find_by_sql(limit: 1))
     assert_equal(@agaricus.children.sort_by(&:id),
                  query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
   end
@@ -513,26 +531,32 @@ class QueryTest < UnitTestCase
 
   def test_results
     query = Query.lookup(:User, :all, by: :id)
+    all_users = User.all
 
-    assert_equal(Set.new, Set.new([1, 2, 3, 4, 5, 6]) - query.result_ids)
+    assert_equal(Set.new,
+                 Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id,
+                          roy.id]) - query.result_ids)
     assert_equal(roy.location_format, :scientific)
     assert_equal(Set.new,
                  Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results)
-    assert_equal(2, query.index(3))
-    assert_equal(3, query.index("4"))
-    assert_equal(1, query.index(mary))
+    # assert_equal(2, query.index(3))
+    assert_equal(User.all.find_index(junk), query.index(junk))
+    # assert_equal(3, query.index("4"))
+    assert_equal(User.all.find_index(dick), query.index(dick))
+    # assert_equal(1, query.index(mary))
+    assert_equal(User.all.find_index(mary), query.index(mary))
 
     # Verify that it's getting all this crap from cache.
-    query.result_ids = [1, 3, 5, 100]
+    query.result_ids = [rolf.id, junk.id, katrina.id, 100]
     assert_equal([rolf, junk, katrina], query.results)
 
-    # Should be able to set it this way, to.
+    # Should be able to set it this way, too.
     query.results = [dick, mary, rolf]
     assert_equal(3, query.num_results)
-    assert_equal([4, 2, 1], query.result_ids)
+    assert_equal([dick.id, mary.id, rolf.id], query.result_ids)
     assert_equal([dick, mary, rolf], query.results)
     assert_equal(1, query.index(mary))
-    assert_equal(2, query.index(1))
+    assert_equal(2, query.index(rolf))
   end
 
   def paginate_test_setup(from, to)
@@ -620,8 +644,8 @@ class QueryTest < UnitTestCase
     assert_nil(query.current_id)
     assert_nil(query.current)
 
-    query.current_id = 1
-    assert_equal(1, query.current_id)
+    query.current_id = @fungi.id
+    assert_equal(@fungi.id, query.current_id)
     assert_equal(@fungi, query.current)
 
     query.current = @agaricus
@@ -656,63 +680,103 @@ class QueryTest < UnitTestCase
   end
 
   def test_inner_outer
-    # obs 2: imgs 1, 2
+  # obs 2: imgs 1, 2
+    #   minimal_unknown_obs: in_situ_image, turned_over_image
     # obs 3: imgs 5
+    #   coprinus_comatus_obs: connected_coprinus_comatus_image
     # obs 4: imgs 6
+    #   agaricus_campestris_obs: agaricus_campestris_image
     # obs 12: imgs 8
+    #   peltigera_obs: peltigera_image
 
     outer = Query.lookup_and_save(:Observation, :all, by: :id)
 
-    q = Query.lookup(:Image, :inside_observation, outer: outer,
-                                                  observation: 1, by: :id)
+    q = Query.lookup(
+          :Image, :inside_observation, outer: outer,
+          observation: observations(:minimal_unknown_obs).id, by: :id)
     assert_equal([], q.result_ids)
 
-    inner1 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                                observation: 2, by: :id)
-    assert_equal([1, 2], inner1.result_ids)
+    inner1 = Query.lookup_and_save(
+               :Image, :inside_observation, outer: outer,
+               observation: observations(:detailed_unknown_obs).id, by: :id)
+    assert_equal([images(:in_situ_image).id, images(:turned_over_image).id],
+                 inner1.result_ids)
 
-    inner2 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                                observation: 3, by: :id)
-    assert_equal([5], inner2.result_ids)
+    inner2 = Query.lookup_and_save(
+               :Image, :inside_observation, outer: outer,
+               observation: observations(:coprinus_comatus_obs).id, by: :id)
+    assert_equal([images(:connected_coprinus_comatus_image).id],
+                inner2.result_ids)
 
-    inner3 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                                observation: 4, by: :id)
-    assert_equal([6], inner3.result_ids)
+    inner3 = Query.lookup_and_save(
+               :Image, :inside_observation, outer: outer,
+                observation: observations(:agaricus_campestris_obs).id, by: :id)
+    assert_equal([images(:agaricus_campestris_image).id], inner3.result_ids)
 
-    inner4 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                                observation: 12, by: :id)
-    assert_equal([8], inner4.result_ids)
+    inner4 = Query.lookup_and_save(
+               :Image, :inside_observation, outer: outer,
+               observation: observations(:peltigera_obs).id, by: :id)
+    assert_equal([images(:peltigera_image).id], inner4.result_ids)
 
     q = inner1
     assert(q.has_outer?)
     assert_equal(outer, q.outer) # it's been tweaked but still same id
-    assert_equal(2, inner1.get_outer_current_id)
-    assert_equal(3, inner2.get_outer_current_id)
-    assert_equal(4, inner3.get_outer_current_id)
-    assert_equal(12, inner4.get_outer_current_id)
+    assert_equal(observations(:detailed_unknown_obs).id,
+                 inner1.get_outer_current_id)
+    assert_equal(observations(:coprinus_comatus_obs).id,
+                 inner2.get_outer_current_id)
+    assert_equal(observations(:agaricus_campestris_obs).id,
+                 inner3.get_outer_current_id)
+    assert_equal(observations(:peltigera_obs).id,
+                 inner4.get_outer_current_id)
 
+    obs_with_img = Observation.includes(:images).
+                     where.not(images: { id: nil }).map{|obs| obs.id}.sort
     q = q.outer
     results = q.result_ids
-    assert_starts_with([2, 3, 4, 12], results)
+    assert_equal(ids_of_obs_with_img, results)
     q.current_id = results[1]
-    assert_equal(q, q.first); assert_equal(results[0], q.current_id)
-    assert_equal(q, q.last); assert_equal(results[-1], q.current_id)
+    assert_equal(q, q.first)
+    assert_equal(results[0], q.current_id)
+    assert_equal(q, q.last)
+    assert_equal(results[-1], q.current_id)
 
+    img_with_obs = Image.includes(:observations).
+                     where.not(observations: { id: nil }).map{|obs| obs.id}.sort
+    inner_result_ids = (inner1.result_ids << inner2.result_ids <<
+                        inner3.result_ids << inner4.result_ids).flatten.sort
     q = inner1
-    q.current_id = 1
+    q.current_id = images(:in_situ_image).id
+    current_id_index = inner_result_ids.index(images(:in_situ_image).id)
+    # current_id_index.times{ q = q.prev }
+byebug
+x = q.prev
     assert_nil(q.prev)
-    assert_equal(inner1, (q = q.next));  assert_equal(2, q.current_id)
-    assert_equal(inner1, (q = q.prev));  assert_equal(1, q.current_id)
-    assert_equal(inner1, (q = q.next));  assert_equal(2, q.current_id)
-    assert_equal(inner2, (q = q.next));  assert_equal(5, q.current_id)
-    assert_equal(inner3, (q = q.next));  assert_equal(6, q.current_id)
-    assert_equal(inner4, (q = q.next));  assert_equal(8, q.current_id)
+    # current_id_index.times{ q = q.next }
+    assert_equal(inner1, (q = q.next))
+    assert_equal(images(:turned_over_image).id, q.current_id)
+    assert_equal(inner1, (q = q.prev))
+    assert_equal(images(:in_situ_image).id, q.current_id)
+    assert_equal(inner1, (q = q.next))
+    assert_equal(images(:turned_over_image).id, q.current_id)
+    assert_equal(inner2, (q = q.next))
+    assert_equal(images(:connected_coprinus_comatus_image).id, q.current_id)
+    assert_equal(inner3, (q = q.next))
+    assert_equal(images(:agaricus_campestris_image).id, q.current_id)
+    assert_equal(inner4, (q = q.next))
+    assert_equal(images(:peltigera_image).id, q.current_id)
     assert(q.next)
-    assert_equal(inner3, (q = q.prev));  assert_equal(6, q.current_id)
-    assert_equal(inner2, (q = q.prev));  assert_equal(5, q.current_id)
-    assert_equal(inner1, (q = q.prev));  assert_equal(2, q.current_id)
-    assert_equal(inner2, (q = q.next));  assert_equal(5, q.current_id)
-    assert_equal(inner1, (q = q.first)); assert_equal(1, q.current_id)
+byebug
+    assert_equal(inner3, (q = q.prev))
+    assert_equal(images(:agaricus_campestris_image).id, q.current_id)
+    assert_equal(inner2, (q = q.prev))
+    assert_equal(images(:connected_coprinus_comatus_image).id, q.current_id)
+    assert_equal(inner1, (q = q.prev))
+    assert_equal(images(:in_situ_image).id, q.current_id)
+    assert_equal(inner2, (q = q.next))
+    assert_equal(images(:connected_coprinus_comatus_image).id, q.current_id)
+    assert_equal(inner1, (q = q.first))
+    assert_equal(images(:turned_over_image).id, q.current_id)
     # assert_equal(inner4, (q=q.last));  assert_equal(8, q.current_id)
     assert_nil(q.last.next)
   end
@@ -743,15 +807,21 @@ class QueryTest < UnitTestCase
   def test_observation_image_coercion
     # Several observation queries can be turned into name queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: 2)
-    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: 1)
-    q4a = Query.lookup_and_save(:Observation, :of_name, name: 4)
-    q5a = Query.lookup_and_save(:Observation, :in_set, ids: [2, 4, 6])
+    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q3a = Query.lookup_and_save(
+            :Observation, :in_species_list,
+            species_list: species_lists(:first_species_list).id)
+    q4a = Query.lookup_and_save(:Observation, :of_name, name: names(:conocybe_filaris).id)
+    q5a = Query.lookup_and_save(
+            :Observation, :in_set,
+            ids: [observations(:detailed_unknown_obs).id,
+                  observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestras_obs).id])
     q6a = Query.lookup_and_save(:Observation, :pattern_search, pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, location: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :at_location, location: 2)
+    q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
-    qAa = Query.lookup_and_save(:Observation, :of_children, name: 4)
+    qAa = Query.lookup_and_save(:Observation, :of_children, name: names(:conocybe_filaris).id)
     assert_equal(10, Query.count)
 
     # Try coercing them all.
@@ -836,15 +906,19 @@ class QueryTest < UnitTestCase
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: 2)
-    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: 1)
-    q4a = Query.lookup_and_save(:Observation, :of_name, name: 4)
-    q5a = Query.lookup_and_save(:Observation, :in_set, ids: [2, 4, 6])
+    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: species_lists(:first_species_list).id)
+    q4a = Query.lookup_and_save(:Observation, :of_name, name: names(:conocybe_filaris).id)
+    q5a = Query.lookup_and_save(
+            :Observation, :in_set,
+            ids: [observations(:detailed_unknown_obs).id,
+                  observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestras_obs).id])
     q6a = Query.lookup_and_save(:Observation, :pattern_search, pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, location: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :at_location, location: 2)
+    q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
-    qAa = Query.lookup_and_save(:Observation, :of_children, name: 4)
+    qAa = Query.lookup_and_save(:Observation, :of_children, name: names(:conocybe_filaris).id)
     assert_equal(10, Query.count)
 
     # Try coercing them all.
@@ -892,18 +966,29 @@ class QueryTest < UnitTestCase
     assert_equal(:with_observations_of_children, qAb.flavor)
 
     assert_equal({}, q1b.params) # loses ordering
-    assert_equal({ user: 2 }, q2b.params)
-    assert_equal({ species_list: 1 }, q3b.params)
-    assert_equal({ name: 4 }, q4b.params)
-    assert_equal({ ids: [2] }, q8b.params)
-    assert_equal({ name: 4 }, qAb.params)
+    assert_equal({ user: mary.id }, q2b.params)
+    assert_equal({ species_list: species_lists(:first_species_list).id },
+                 q3b.params)
+    assert_equal({ name: names(:conocybe_filaris).id }, q4b.params)
+    assert_equal({ ids: [locations(:burbank).id] }, q8b.params)
+    assert_equal({ name: names(:conocybe_filaris).id }, qAb.params)
 
-    assert_equal([2, 4, 6], q5b.params[:ids])
-    assert_equal([8, 7, 6, 5], q6b.params[:ids])
-    assert_equal([3], q7b.params[:ids])
-    assert_match(/Selected.*Observations/,                  q5b.params[:old_title])
-    assert_match(/Observations.*Matching.*somewhere.*else/, q6b.params[:old_title])
-    assert_match(/Advanced.*Search/,                        q7b.params[:old_title])
+    assert_equal([observations(:detailed_unknown_obs).id,
+                  observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestras_obs).id],
+                q5b.params[:ids])
+    assert_equal([observations(:strobilurus_diminutivus_obs).id,
+                  observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 q6b.params[:ids])
+    assert_equal([observations(:coprinus_comatus_obs).id], q7b.params[:ids])
+    assert_match(/Selected.*Observations/,
+                 q5b.params[:old_title])
+    assert_match(/Observations.*Matching.*somewhere.*else/,
+                 q6b.params[:old_title])
+    assert_match(/Advanced.*Search/,
+                 q7b.params[:old_title])
     assert_equal(2, q5b.params.keys.length)
     assert_equal(2, q6b.params.keys.length)
     assert_equal(2, q7b.params.keys.length)
@@ -939,13 +1024,13 @@ class QueryTest < UnitTestCase
   def test_observation_name_coercion
     # Several observation queries can be turned into name queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: 2)
-    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: 1)
-    q4a = Query.lookup_and_save(:Observation, :of_name, name: 4)
+    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: species_lists(:first_species_list).id)
+    q4a = Query.lookup_and_save(:Observation, :of_name, name: names(:conocybe_filaris).id)
     q5a = Query.lookup_and_save(:Observation, :in_set, ids: [2, 4, 6])
     q6a = Query.lookup_and_save(:Observation, :pattern_search, pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, location: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :at_location, location: 2)
+    q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
     assert_equal(9, Query.count)
 
@@ -1024,9 +1109,9 @@ class QueryTest < UnitTestCase
   def test_description_coercion
     # Several description queries can be turned into name queries and back.
     q1a = Query.lookup_and_save(:NameDescription, :all)
-    q2a = Query.lookup_and_save(:NameDescription, :by_author, user: 1)
-    q3a = Query.lookup_and_save(:NameDescription, :by_editor, user: 1)
-    q4a = Query.lookup_and_save(:NameDescription, :by_user, user: 1)
+    q2a = Query.lookup_and_save(:NameDescription, :by_author, user: rolf.id)
+    q3a = Query.lookup_and_save(:NameDescription, :by_editor, user: rolf.id)
+    q4a = Query.lookup_and_save(:NameDescription, :by_user, user: rolf.id)
     assert_equal(4, Query.count)
 
     # Try coercing them into name queries.
@@ -1127,7 +1212,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_in_set
-    assert_query([3, 1], :Comment, :in_set, ids: [3, 1])
+    assert_query([comments(:detailed_unknown_obs_comment).id,
+                  comments(:minimal_unknown_obs_comment_1).id],
+                 :Comment, :in_set,
+                 ids: [comments(:detailed_unknown_obs_comment).id,
+                       comments(:minimal_unknown_obs_comment_1).id])
   end
 
   def test_comment_for_user
@@ -1137,15 +1226,28 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_advanced
-    assert_query([6], :Image, :advanced_search, name: "Agaricus")
-    assert_query([6, 2, 1], :Image, :advanced_search, location: "burbank")
-    assert_query([5], :Image, :advanced_search, location: "glendale")
-    assert_query([2, 1], :Image, :advanced_search, user: "mary")
-    assert_query([2, 1], :Image, :advanced_search, content: "little")
-    assert_query([5], :Image, :advanced_search, content: "fruiting")
-    assert_query([], :Image, :advanced_search, name: "agaricus", location: "glendale")
-    assert_query([6], :Image, :advanced_search, name: "agaricus", location: "burbank")
-    assert_query([2, 1], :Image, :advanced_search, content: "little", location: "burbank")
+    assert_query([images(:agaricus_campestris_image).id], :Image, :advanced_search, name: "Agaricus")
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                 :advanced_search, location: "burbank")
+    assert_query([images(:connected_coprinus_comatus_image).id], :Image,
+                 :advanced_search, location: "glendale")
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                :advanced_search, user: "mary")
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                :advanced_search, content: "little")
+    assert_query([images(:connected_coprinus_comatus_image).id], :Image,
+                 :advanced_search, content: "fruiting")
+    assert_query([], :Image,
+                 :advanced_search, name: "agaricus", location: "glendale")
+    assert_query([images(:agaricus_campestris_image).id], :Image,
+                 :advanced_search, name: "agaricus", location: "burbank")
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                  :advanced_search, content: "little", location: "burbank")
   end
 
   def test_image_all
@@ -1163,7 +1265,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_in_set
-    assert_query([2, 6, 4], :Image, :in_set, ids: [2, 6, 4])
+    assert_query([images(:turned_over_image).id,
+                  images(:agaricus_campestris_image).id,
+                  images(:disconnected_coprinus_comatus_image).id], :Image,
+                 :in_set,
+                 ids: [images(:turned_over_image).id,
+                       images(:agaricus_campestris_image).id,
+                       images(:disconnected_coprinus_comatus_image).id])
   end
 
   def test_image_inside_observation
@@ -1172,64 +1280,125 @@ class QueryTest < UnitTestCase
     expect = obs.images.sort_by(&:id)
     assert_query(expect, :Image, :inside_observation, observation: obs,
                                                       outer: 1) # (outer is only used by prev/next)
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
     assert_query(obs.images, :Image, :inside_observation, observation: obs,
                                                           outer: 1) # (outer is only used by prev/next)
   end
 
   def test_image_pattern
-    assert_query([6], :Image, :pattern_search, pattern: "agaricus") # name
-    assert_query([6, 5, 2, 1], :Image, :pattern_search, pattern: "bob dob") # copyright holder
-    assert_query([1], :Image, :pattern_search, pattern: "looked gorilla OR original") # notes
-    assert_query([6, 5], :Image, :pattern_search, pattern: "notes some") # notes
-    assert_query([2, 1], :Image, :pattern_search, pattern: "dobbs -notes") # copyright and not notes
-    assert_query([1], :Image, :pattern_search, pattern: "DSCN8835") # original filename
+    assert_query([images(:agaricus_campestris_image).id], :Image,
+                 :pattern_search, pattern: "agaricus") # name
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:connected_coprinus_comatus_image).id,
+                  images(:turned_over_image).id,
+                  images(:in_situ_image).id],
+                :Image, :pattern_search, pattern: "bob dob") # copyright holder
+    assert_query([images(:in_situ_image).id], :Image, :pattern_search,
+                  pattern: "looked gorilla OR original") # notes
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:connected_coprinus_comatus_image).id], :Image,
+                 :pattern_search, pattern: "notes some") # notes
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image, :pattern_search,
+                 pattern: "dobbs -notes") # copyright and not notes
+    assert_query([images(:in_situ_image).id], :Image, :pattern_search,
+                 pattern: "DSCN8835") # original filename
   end
 
   def test_image_with_observations
-    assert_query([6, 5, 2, 1, 8], :Image, :with_observations)
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:connected_coprinus_comatus_image).id,
+                  images(:turned_over_image).id,
+                  images(:in_situ_image).id,
+                  images(:peltigera_image).id],
+                 :Image, :with_observations)
   end
 
   def test_image_with_observations_at_location
-    assert_query([6, 2, 1], :Image, :with_observations_at_location, location: 2)
-    assert_query([], :Image, :with_observations_at_location, location: 3)
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                  :with_observations_at_location,
+                  location: locations(:burbank).id)
+    assert_query([], :Image, :with_observations_at_location,
+                 location: locations(:mitrula_marsh).id)
   end
 
   def test_image_with_observations_at_where
-    assert_query([5], :Image, :with_observations_at_where, user_where: "glendale", location: "glendale")
+    assert_query([images(:connected_coprinus_comatus_image).id], :Image,
+                 :with_observations_at_where, user_where: "glendale",
+                 location: "glendale")
     assert_query([], :Image, :with_observations_at_where, user_where: "snazzle", location: "snazzle")
   end
 
   def test_image_with_observations_by_user
-    assert_query([6, 5, 8], :Image, :with_observations_by_user, user: rolf)
-    assert_query([2, 1], :Image, :with_observations_by_user, user: mary)
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:connected_coprinus_comatus_image).id,
+                  images(:peltigera_image).id], :Image,
+                 :with_observations_by_user, user: rolf)
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                  :with_observations_by_user, user: mary)
     assert_query([], :Image, :with_observations_by_user, user: dick)
   end
 
   def test_image_with_observations_in_set
-    assert_query([6, 2, 1], :Image, :with_observations_in_set, ids: [2, 4])
-    assert_query([], :Image, :with_observations_in_set, ids: [1])
+    assert_query([images(:agaricus_campestris_image).id,
+                  images(:turned_over_image).id, images(:in_situ_image).id],
+                  :Image, :with_observations_in_set,
+                  ids: [images(:turned_over_image).id,
+                        images(:disconnected_coprinus_comatus_image).id])
+    assert_query([], :Image, :with_observations_in_set,
+                 ids: [1])
   end
 
   def test_image_with_observations_in_species_list
-    assert_query([2, 1], :Image, :with_observations_in_species_list, species_list: 3)
-    assert_query([], :Image, :with_observations_in_species_list, species_list: 1)
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id],
+                 :Image, :with_observations_in_species_list,
+                species_list: 3)
+    assert_query([], :Image, :with_observations_in_species_list,
+                 species_list: species_lists(:first_species_list).id)
   end
 
   def test_image_with_observations_of_children
-    assert_query([6], :Image, :with_observations_of_children, name: names(:agaricus))
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, :with_observations_of_children,
+                 name: names(:agaricus))
   end
 
   def test_image_sorted_by_original_name
-    assert_query([2, 5, 4, 1, 3, 6], :Image, :in_set, ids: [1, 2, 3, 4, 5, 6], by: :original_name)
+    assert_query([images(:turned_over_image).id,
+                  images(:connected_coprinus_comatus_image).id,
+                  images(:disconnected_coprinus_comatus_image).id,
+                  images(:in_situ_image).id,
+                  images(:commercial_inquiry_image).id,
+                  images(:agaricus_campestris_image).id
+                 ],
+                 :Image, :in_set,
+                 ids: [images(:in_situ_image).id,
+                       images(:turned_over_image).id,
+                       images(:commercial_inquiry_image).id,
+                       images(:disconnected_coprinus_comatus_image).id,
+                       images(:connected_coprinus_comatus_image).id,
+                       images(:agaricus_campestris_image).id],
+                 by: :original_name)
   end
 
   def test_image_with_observations_of_name
-    assert_query([2, 1], :Image, :with_observations_of_name, name: 1)
-    assert_query([5], :Image, :with_observations_of_name, name: 2)
-    assert_query([6], :Image, :with_observations_of_name, name: 3)
-    assert_query([], :Image, :with_observations_of_name, name: 4)
+    assert_query([images(:turned_over_image).id,
+                  images(:in_situ_image).id], :Image,
+                 :with_observations_of_name,
+                 name: 1)
+    assert_query([images(:connected_coprinus_comatus_image).id],
+                 :Image, :with_observations_of_name,
+                 name: 2)
+    assert_query([images(:agaricus_campestris_image).id], :Image,
+                 :with_observations_of_name,
+                 name: 3)
+    assert_query([], :Image, :with_observations_of_name,
+                 name: names(:conocybe_filaris).id)
   end
 
   def test_location_advanced
@@ -1313,7 +1482,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations_by_user
-    assert_query([2], :Location, :with_observations_by_user, user: 1)
+    assert_query([2], :Location, :with_observations_by_user, user: rolf.id)
     assert_query([], :Location, :with_observations_by_user, user: 4)
   end
 
@@ -1326,7 +1495,7 @@ class QueryTest < UnitTestCase
     assert_query([2], :Location, :with_observations_in_species_list,
                  species_list: 3)
     assert_query([], :Location, :with_observations_in_species_list,
-                 species_list: 1)
+                 species_list: species_lists(:first_species_list).id)
   end
 
   def test_location_with_observations_of_children
@@ -1486,7 +1655,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_at_location
-    assert_query([20, 3, 21, 19, 1], :Name, :with_observations_at_location, location: 2)
+    assert_query([20, 3, 21, 19, 1], :Name, :with_observations_at_location, location: locations(:burbank))
   end
 
   def test_name_with_observations_at_where
@@ -1505,7 +1674,7 @@ class QueryTest < UnitTestCase
 
   def test_name_with_observations_in_species_list
     assert_query([1], :Name, :with_observations_in_species_list, species_list: 3)
-    assert_query([], :Name, :with_observations_in_species_list, species_list: 1)
+    assert_query([], :Name, :with_observations_in_species_list, species_list: species_lists(:first_species_list).id)
   end
 
   def test_name_description_all
@@ -1534,9 +1703,9 @@ class QueryTest < UnitTestCase
   def test_observation_advanced
     assert_query([8], :Observation, :advanced_search, name: "diminutivus")
     assert_query([3], :Observation, :advanced_search, location: "glendale") # where
-    expect = Observation.where(location_id: 2).to_a
+    expect = Observation.where(location_id: locations(:burbank)).to_a
     assert_query(expect, :Observation, :advanced_search, location: "burbank", by: :id) # location
-    expect = Observation.where(user_id: 1).to_a
+    expect = Observation.where(user_id: rolf.id).to_a
     assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
     assert_query([3], :Observation, :advanced_search, content: "second fruiting") # notes
     assert_query([1], :Observation, :advanced_search, content: "agaricus") # comment
@@ -1551,11 +1720,13 @@ class QueryTest < UnitTestCase
     expect = Observation.where(location_id: 2).includes(:name).
              order("names.text_name, names.author,
                            observations.id DESC").to_a
-    assert_query(expect, :Observation, :at_location, location: 2)
+    assert_query(expect, :Observation, :at_location,
+                         location: locations(:burbank))
   end
 
   def test_observation_at_where
-    assert_query([3], :Observation, :at_where, user_where: "glendale", location: "glendale")
+    assert_query([3], :Observation, :at_where, user_where: "glendale",
+                      location: "glendale")
   end
 
   def test_observation_by_rss_log
@@ -1591,14 +1762,14 @@ class QueryTest < UnitTestCase
     names = Name.where("text_name like 'Agaricus camp%'").to_a
     name = names.pop
     names.each { |n| name.merge_synonyms(n) }
-    Observation.find(6).update_attribute(:user, mary)
-    Observation.find(7).update_attribute(:user, mary)
+    observations(:agaricus_campestras_obs).update_attribute(:user, mary)
+    observations(:agaricus_campestros_obs).update_attribute(:user, mary)
     spl = SpeciesList.first
-    spl.observations << Observation.find(5)
-    spl.observations << Observation.find(7)
+    spl.observations << observations(:agaricus_campestrus_obs)
+    spl.observations << observations(:agaricus_campestros_obs)
     proj = Project.first
-    proj.observations << Observation.find(4)
-    proj.observations << Observation.find(6)
+    proj.observations << observations(:agaricus_campestris_obs)
+    proj.observations << observations(:agaricus_campestras_obs)
     assert_query([10, 9, 2, 1], :Observation, :of_name, name: 1)
     assert_query([],  :Observation, :of_name, name: 9)
     assert_query([4], :Observation, :of_name, name: 3)
@@ -1606,9 +1777,9 @@ class QueryTest < UnitTestCase
     assert_query([7, 6, 5, 4], :Observation, :of_name, name: 3, synonyms: :all)
     assert_query([3], :Observation, :of_name, name: 3, nonconsensus: :exclusive)
     assert_query([4, 3], :Observation, :of_name, name: 3, nonconsensus: :all)
-    assert_query([5, 4], :Observation, :of_name, name: 3, synonyms: :all, user: 1)
-    assert_query([7, 6], :Observation, :of_name, name: 3, synonyms: :all, user: 2)
-    assert_query([7, 5], :Observation, :of_name, name: 3, synonyms: :all, species_list: 1)
+    assert_query([5, 4], :Observation, :of_name, name: 3, synonyms: :all, user: rolf.id)
+    assert_query([7, 6], :Observation, :of_name, name: 3, synonyms: :all, user: mary.id)
+    assert_query([7, 5], :Observation, :of_name, name: 3, synonyms: :all, species_list: species_lists(:first_species_list).id)
     assert_query([6, 4], :Observation, :of_name, name: 3, synonyms: :all, project: 1)
   end
 
@@ -1622,7 +1793,7 @@ class QueryTest < UnitTestCase
     assert_query([8], :Observation, :pattern_search, pattern: "pipi valley")
 
     # location
-    expect = Observation.where(location_id: 2).includes(:name).
+    expect = Observation.where(location_id: locations(:burbank)).includes(:name).
              order("names.text_name, names.author,
                                 observations.id DESC").to_a
     assert_query(expect, :Observation, :pattern_search, pattern: "burbank",
@@ -1637,7 +1808,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_all
-    assert_query([2, 1], :Project, :all)
+    assert_query([projects(:bolete_project).id, projects(:eol_project).id],
+                 :Project, :all)
   end
 
   def test_project_in_set
@@ -1681,10 +1853,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_in_set
-    assert_query([1, 2, 3], :User, :in_set, ids: [3, 2, 1], by: :reverse_name)
+    assert_query([rolf.id, mary.id, junk.id],
+                 :User, :in_set,
+                 ids: [junk.id, mary.id, rolf.id],
+                 by: :reverse_name)
   end
 
-  ##############################################################################
+ ##############################################################################
   #
   #  :section: Other stuff
   #
@@ -1708,8 +1883,8 @@ class QueryTest < UnitTestCase
     assert_equal(:scientific, User.current_location_format)
     assert_query([loc2, loc1], :Location, :in_set, ids: [1, 6], by: :name)
 
-    obs1 = Observation.find(1)
-    obs2 = Observation.find(2)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
     obs1.update_attribute(:location, loc1)
     obs2.update_attribute(:location, loc2)
 

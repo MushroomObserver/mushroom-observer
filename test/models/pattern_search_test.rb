@@ -56,11 +56,20 @@ class PatternSearchTest < UnitTestCase
 
   def test_parse_list_of_users
     x = PatternSearch::Term.new(:xxx)
-    x.vals = [];              assert_raises(PatternSearch::MissingValueError) { x.parse_list_of_users }
-    x.vals = ["2"];           assert_obj_list_equal([mary], x.parse_list_of_users)
-    x.vals = ["katrina"];     assert_obj_list_equal([katrina], x.parse_list_of_users)
-    x.vals = ["Tricky Dick"]; assert_obj_list_equal([dick], x.parse_list_of_users)
-    x.vals = %w(1 2 4); assert_obj_list_equal([rolf, mary, dick], x.parse_list_of_users)
+    x.vals = []
+    assert_raises(PatternSearch::MissingValueError) { x.parse_list_of_users }
+
+    x.vals = [mary.id.to_s]
+    assert_obj_list_equal([mary], x.parse_list_of_users)
+
+    x.vals = ["katrina"]
+    assert_obj_list_equal([katrina], x.parse_list_of_users)
+
+    x.vals = ["Tricky Dick"]
+    assert_obj_list_equal([dick], x.parse_list_of_users)
+
+    x.vals = [rolf.id.to_s, mary.id.to_s, dick.id.to_s]
+    assert_obj_list_equal([rolf, mary, dick], x.parse_list_of_users)
   end
 
   def test_parse_date_range
@@ -101,6 +110,7 @@ class PatternSearchTest < UnitTestCase
   def test_observation_search
     x = PatternSearch::Observation.new("Amanita")
     assert_obj_list_equal([], x.query.results)
+
     x = PatternSearch::Observation.new("Agaricus")
     assert_obj_list_equal([
       observations(:agaricus_campestris_obs),
@@ -108,6 +118,7 @@ class PatternSearchTest < UnitTestCase
       observations(:agaricus_campestras_obs),
       observations(:agaricus_campestros_obs)
     ], x.query.results)
+
     x = PatternSearch::Observation.new("Agaricus user:dick")
     assert_obj_list_equal([], x.query.results)
     albion = locations(:albion)

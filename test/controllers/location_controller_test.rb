@@ -172,7 +172,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_list_location_descriptions
     login("mary")
-    Location.find(2).description = LocationDescription.create!(location_id: 2)
+    locations(:burbank).description = LocationDescription.create!(locations(:burbank).id)
     get_with_dump(:list_location_descriptions)
     assert_template("list_location_descriptions")
   end

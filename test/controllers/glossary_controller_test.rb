@@ -75,7 +75,8 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
     { glossary_term:
       { name: "Convex", description: "Boring" },
       copyright_holder: "Me",
-      date: { copyright_year: 2013 }, upload: { license_id: 1 }
+      date: { copyright_year: 2013 },
+      upload: { license_id: licenses(:ccnc25).id }
     }
   end
 
@@ -130,7 +131,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
     { id: conic.id,
       glossary_term: { name: "Convex", description: "Boring old convex" },
       copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
-      upload: { license_id: 1 }
+      upload: { license_id: licenses(:ccnc25).id }
      }
   end
 

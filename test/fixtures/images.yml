@@ -3,8 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-in_situ_image:
-#  id: 1
+in_situ_image: # old id: 1
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   content_type: image/jpeg
@@ -17,8 +16,7 @@ in_situ_image:
   original_name: DSCN8835.JPG
   transferred: false
 
-turned_over_image:
-#  id: 2
+turned_over_image: # old id: 2
   created_at: 2006-05-22 21:20:00
   updated_at: 2006-05-22 21:21:00
   content_type: image/jpeg
@@ -29,8 +27,7 @@ turned_over_image:
   original_name: 1.jpg
   transferred: false
 
-commercial_inquiry_image:
-#  id: 3
+commercial_inquiry_image: # old id: 3
   created_at: 2007-02-25 20:13:00
   updated_at: 2007-02-25 20:14:00
   content_type: image/jpeg
@@ -41,8 +38,7 @@ commercial_inquiry_image:
   original_name: Location 2007-02-25 b.jpg
   transferred: true
 
-disconnected_coprinus_comatus_image:
-#  id: 4
+disconnected_coprinus_comatus_image: # old id: 4
   created_at: 2007-03-07 20:13:00
   updated_at: 2007-03-07 20:14:00
   content_type: image/jpeg
@@ -53,8 +49,7 @@ disconnected_coprinus_comatus_image:
   original_name: Coprinus comatus.tiff
   transferred: true
 
-connected_coprinus_comatus_image:
-#  id: 5
+connected_coprinus_comatus_image: # old id: 5
   created_at: 2007-03-08 20:13:00
   updated_at: 2007-03-08 20:14:00
   content_type: image/jpeg
@@ -65,8 +60,7 @@ connected_coprinus_comatus_image:
   original_name: Coprinus comatus close-up.tiff
   transferred: true
 
-agaricus_campestris_image:
-#  id: 6
+agaricus_campestris_image: # old id: 6
   created_at: 2007-03-19 20:13:00
   updated_at: 2007-03-19 20:14:00
   content_type: image/jpeg
@@ -77,8 +71,7 @@ agaricus_campestris_image:
   original_name: Name with áč€εиts.gif
   transferred: true
 
-amateur_image:
-#  id: 7
+amateur_image: # old id: 7
   created_at: 2010-12-31 06:46:00
   updated_at: 2010-12-31 06:46:00
   content_type: image/jpeg
@@ -88,8 +81,7 @@ amateur_image:
   copyright_holder: Nathan Wilson
   transferred: true
 
-peltigera_image:
-#  id: 8
+peltigera_image: # old id: 8
   created_at: 2012-06-07 16:28:20
   updated_at: 2012-06-07 16:28:20
   content_type: image/jpeg
@@ -100,8 +92,7 @@ peltigera_image:
   copyright_holder: Nathan Wilson
   transferred: true
 
-conic_image:
-#  id: 9
+conic_image: # old id: 9
   created_at: 2014-08-04 07:49:12
   updated_at: 2014-08-04 07:49:12
   content_type: image/jpeg
@@ -112,8 +103,7 @@ conic_image:
   vote_cache: 3
   transferred: true
 
-convex_image:
-#  id: 10
+convex_image: # old id: 10
   created_at: 2013-08-13 17:19:55
   updated_at: 2013-08-13 17:19:55
   content_type: image/jpeg
@@ -123,8 +113,7 @@ convex_image:
   copyright_holder: Insil Choi
   transferred: true
 
-plane_image_thumb:
-#  id: 11
+plane_image_thumb: # old id: 11
   created_at: 2013-09-08 17:31:25
   updated_at: 2013-09-08 17:31:25
   content_type: image/jpeg
@@ -135,8 +124,7 @@ plane_image_thumb:
   vote_cache: 3
   transferred: true
 
-plane_image_example:
-#  id: 12
+plane_image_example: # old id: 12
   created_at: 2013-09-08 17:31:25
   updated_at: 2013-09-08 17:31:25
   content_type: image/jpeg
@@ -147,8 +135,7 @@ plane_image_example:
   vote_cache: 3
   transferred: true
 
-rolf_profile_image:
-#  id: 13
+rolf_profile_image: # old id: 13
   created_at: 2013-09-08 18:21:15
   updated_at: 2013-09-08 18:21:15
   content_type: image/jpeg

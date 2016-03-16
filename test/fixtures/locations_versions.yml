@@ -103,7 +103,7 @@ elgin_co_version_1:
 
 brett_woods_version_1:
   id: 8
-  location_id: 7
+  location_id: <%= ActiveRecord::FixtureSet.identify(:bretton_woods) %>
   updated_at: 2007-12-27 06:47:00
   location_id: <%= ActiveRecord::FixtureSet.identify(:brett_woods) %>
   version: 1

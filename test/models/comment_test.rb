@@ -7,7 +7,7 @@ class CommentTest < UnitTestCase
   end
 
   def test_oil_and_water
-    obs = Observation.find(1)
+    obs = observations(:minimal_unknown_obs)
     num = num_emails
     Comment.create!(user: rolf, summary: "1")
     assert_equal(num, num_emails)

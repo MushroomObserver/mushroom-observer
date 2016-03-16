@@ -154,7 +154,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image
-    image = Image.find(1)
+    image = images(:in_situ_image)
     num_views = image.num_views
     get_with_dump(:show_image, id: 1)
     assert_template("show_image", partial: "_form_ccbyncsa25")
@@ -238,7 +238,7 @@ class ImageControllerTest < FunctionalTestCase
     requires_login(:add_image, id: observations(:coprinus_comatus_obs).id)
     assert_form_action(action: "add_image", id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
-    get_with_dump(:add_image, id: observations(:minimal_unknown).id)
+    get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
     assert_redirected_to(controller: "observer", action: "show_observation")
   end
 
@@ -678,7 +678,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_project_checkboxes
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)
-    obs1 = observations(:minimal_unknown)
+    obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown)
     img1 = images(:in_situ)
     img2 = images(:commercial_inquiry_image)

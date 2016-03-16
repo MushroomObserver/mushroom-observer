@@ -53,7 +53,7 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_save_comment
     assert_equal(10, rolf.contribution)
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size
     params = { id: obs.id,
                type: "Observation",

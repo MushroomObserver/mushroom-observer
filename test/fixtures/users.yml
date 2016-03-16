@@ -4,8 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 #
 # Rolf is an experienced user
-rolf:
-#  id: 1
+rolf: # old id: 1
   login: rolf
   name: Rolf Singer
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -20,12 +19,10 @@ rolf:
   keep_filenames: <%= User.keep_filenames[:toss] %>
   image: rolf_profile_image
   view_owner_id: true
-  # Associations
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
-mary:
-#  id: 2
+mary: # old id: 2
   login: mary
   name: Mary Newbie
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -38,12 +35,10 @@ mary:
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
-  # Associations
   user_groups: all_users, eol_users, eol_admins, mary_only
 
 # Junk gets denied
-junk:
-#  id: 3
+junk: # old id: 3
   login: junk
   name: Junk Box
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -55,12 +50,10 @@ junk:
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  # Associations
   user_groups: all_users, junk_only
 
 # Need third for testing votes
-dick:
-#  id: 4
+dick: # old id: 4
   login: dick
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -74,12 +67,10 @@ dick:
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  # Associations
   user_groups: all_users, bolete_users, bolete_admins, dick_only
 
 # Need fourth for testing votes
-katrina:
-#  id: 5
+katrina: # old id: 5
   login: katrina
   name: Katrina
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -92,12 +83,10 @@ katrina:
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
-  # Associations
   user_groups: all_users, eol_users, katrina_only
 
 # Roy is a scientific user
-roy:
-#  id: 6
+roy: # old id: 6
   login: roy
   name: Roy Halling
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -112,11 +101,9 @@ roy:
   image_size: <%= User.image_sizes[:medium] %>
   location_format: <%= User.location_formats[:scientific] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  # Associations
   user_groups: all_users, roy_only
 
-spammer:
-#  id: 7
+spammer: # old id: 7
   login: spamspamspam
   name: Must Spam
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword

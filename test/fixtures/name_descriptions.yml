@@ -4,8 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # Name with notes (not mergeable)
-agaricus_campestras_desc:
-#  id: 1
+agaricus_campestras_desc: # old id: 1
   name: agaricus_campestras
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
@@ -20,8 +19,7 @@ agaricus_campestras_desc:
   writer_groups: all_users
 
 # Another name with notes (not mergeable)
-agaricus_campestros_desc:
-#  id: 2
+agaricus_campestros_desc: # old id: 2
   name: agaricus_campestros
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
@@ -35,8 +33,7 @@ agaricus_campestros_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-russula_brevipes_author_notes_desc:
-#  id: 3
+russula_brevipes_author_notes_desc: # old id: 3
   name: russula_brevipes_author_notes
   created_at: 2008-03-10 22:33:00
   updated_at: 2008-03-10 22:33:05
@@ -50,8 +47,7 @@ russula_brevipes_author_notes_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-russula_cremoricolor_no_author_notes_desc:
-#  id: 4
+russula_cremoricolor_no_author_notes_desc: # old id: 4
   name: russula_cremoricolor_no_author_notes
   created_at: 2008-03-12 20:53:08
   updated_at: 2008-03-12 20:53:18
@@ -65,8 +61,7 @@ russula_cremoricolor_no_author_notes_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-russula_cremoricolor_author_notes_desc:
-#  id: 5
+russula_cremoricolor_author_notes_desc: # old id: 5
   name: russula_cremoricolor_author_notes
   created_at: 2008-03-12 20:53:36
   updated_at: 2008-03-12 20:53:40
@@ -80,8 +75,7 @@ russula_cremoricolor_author_notes_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-peltigera_desc:
-#  id: 6
+peltigera_desc: # old id: 6
   name: peltigera
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
@@ -106,8 +100,7 @@ peltigera_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-suillus_desc:
-#  id: 7
+suillus_desc: # old id: 7
   name: suillus
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
@@ -122,8 +115,7 @@ suillus_desc:
   writer_groups: all_users
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
-draft_coprinus_comatus:
-#  id: 8
+draft_coprinus_comatus: # old id: 8
   name: coprinus_comatus
   user: katrina
   version: 1
@@ -141,8 +133,7 @@ draft_coprinus_comatus:
   writer_groups: eol_admins, katrina_only
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
-draft_agaricus_campestris:
-#  id: 9
+draft_agaricus_campestris: # old id: 9
   name: agaricus_campestris
   user: mary
   version: 1
@@ -159,8 +150,7 @@ draft_agaricus_campestris:
   writer_groups: eol_admins, mary_only
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
-draft_boletus_edulis:
-#  id: 10
+draft_boletus_edulis: # old id: 10
   name: boletus_edulis
   user: dick
   version: 1
@@ -177,8 +167,7 @@ draft_boletus_edulis:
   writer_groups: bolete_admins, dick_only
 
 # A draft of Lactarius alpinus with a bad classification field
-draft_lactarius_alpinus:
-#  id: 11
+draft_lactarius_alpinus: # old id: 11
   name: lactarius_alpinus
   user: katrina
   version: 1
@@ -195,8 +184,7 @@ draft_lactarius_alpinus:
   reader_groups: eol_users, katrina_only
   writer_groups: eol_admins, katrina_only
 
-peltigera_alt_desc:
-#  id: 12
+peltigera_alt_desc: # old id: 12
   name: peltigera
   created_at: 2010-01-01 01:01:01
   updated_at: 2010-01-01 01:01:01
@@ -212,8 +200,7 @@ peltigera_alt_desc:
   reader_groups: all_users
   writer_groups: all_users
 
-peltigera_user_desc:
-#  id: 13
+peltigera_user_desc: # old id: 13
   name: peltigera
   created_at: 2010-01-02 01:01:01
   updated_at: 2010-01-02 01:01:01
@@ -229,8 +216,7 @@ peltigera_user_desc:
   reader_groups: mary_only, dick_only
   writer_groups: mary_only, dick_only
 
-peltigera_source_desc:
-#  id: 14
+peltigera_source_desc: # old id: 14
   name: peltigera
   created_at: 2010-01-03 01:01:01
   updated_at: 2010-01-03 01:01:01
@@ -247,8 +233,7 @@ peltigera_source_desc:
   reader_groups: all_users
   writer_groups: katrina_only
 
-coprinus_comatus_desc:
-#  id: 15
+coprinus_comatus_desc: # old id: 15
   name: coprinus_comatus
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00

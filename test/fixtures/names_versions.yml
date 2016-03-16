@@ -604,7 +604,7 @@ petigera_version_1:
   display_name: __Petigera__
   search_name: Petigera sp.
   sort_name: Petigera sp.
-  correct_spelling_id: 40
+  correct_spelling_id: <%= ActiveRecord::FixtureSet.identify(:peltigera) %>
   deprecated: true
   citation: ''
 
@@ -648,7 +648,7 @@ suilus_version_1:
   display_name: '**__Suilus__** E.B. White'
   search_name: Suilus sp. E.B. White
   sort_name: Suilus sp. E.B. White
-  correct_spelling_id: 43
+  correct_spelling_id: <%= ActiveRecord::FixtureSet.identify(:suillus) %>
   deprecated: true
   citation: ''
 

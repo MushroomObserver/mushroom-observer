@@ -38,8 +38,8 @@ class ImageTest < UnitTestCase
   def test_copyright_logging
     User.current = mary
 
-    license_one = License.find(1)
-    license_two = License.find(3)
+    license_one = licenses(:ccnc25)
+    license_two = licenses(:ccwiki30)
     name_one = "Bobby Singer"
     name_two = "Robert H. Singer"
     date_one = Date.parse("2007-12-31")

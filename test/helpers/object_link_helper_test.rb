@@ -20,36 +20,36 @@ class ObjectLinkHelperTest < ActionView::TestCase
   end
 
   def test_mycobank_taxon
-    name = Name.find(1)   # Fungi
+    name = names(:fungi)
     assert_equal("Fungi", mycobank_taxon(name))
 
-    name = Name.find(18)  # Agaricus
+    name = names(:agaricus)
     assert_equal("Agaricus", mycobank_taxon(name))
 
-    name = Name.find(52)  # Amanita subgenus Lepidella
+    name = names(:amanita_subgenus_lepidella)
     assert_equal("Amanita", mycobank_taxon(name),
                  "MycoBank taxon name for Ranks between Genus and Species" \
                  "should == genus")
 
-    name = Name.find(2)   # Coprinus comatus
+    name = names(:coprinus_comatus)
     assert_equal("Coprinus%20comatus", mycobank_taxon(name))
 
-    name = Name.find(53)  # Amanita boudieri var. beillei
+    name = names(:amanita_boudieri_var_beillei)
     assert_equal("Amanita%20boudieri%20var.%20beillei", mycobank_taxon(name))
   end
 
   def test_link_if_object
     # link to project, name not supplied
     assert_equal('<a href="/project/show_project/2">Bolete Project</a>',
-                 link_to_object(Project.find(2))
+                 link_to_object(projects(:bolete_project))
                 )
     # link to project, name supplied
     assert_equal('<a href="/project/show_project/2">BP</a>',
-                 link_to_object(Project.find(2), "BP")
+                 link_to_object(projects(:bolete_project), "BP")
                 )
     # link to species list
     assert_equal('<a href="/species_list/show_species_list/1">A Species List</a>',
-                 link_to_object(SpeciesList.find(1))
+                 link_to_object(species_lists(:first_species_list))
                 )
     # link to non-existent object, name not supplied
     assert_nil(link_to_object(nil), "Non-existent object should lack link.")

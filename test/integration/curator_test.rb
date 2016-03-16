@@ -57,7 +57,7 @@ class CuratorTest < IntegrationTestCase
   end
 
   def test_herbarium_change_code
-    herbarium = herbaria(:nybg)
+    herbarium = herbaria(:nybg_herbarium)
     new_code = "NYBG"
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]

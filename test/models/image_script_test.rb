@@ -73,7 +73,7 @@ class ScriptTest < UnitTestCase
     assert_equal("640/1.jpg: 640 480", sizes[3], "medium-size image is wrong size")
     assert_equal("320/1.jpg: 320 240", sizes[4], "small-size image is wrong size")
     assert_equal("thumb/1.jpg: 160 120", sizes[5], "thumbnail image is wrong size")
-    img = Image.find(1)
+    img = images(:in_situ_image)
     assert_equal(2560, img.width)
     assert_equal(1920, img.height)
     assert_equal(true, img.transferred)
@@ -103,8 +103,8 @@ class ScriptTest < UnitTestCase
     # database in a transaction.  Soon as you look at the database it becomes
     # immune to external changes for the rest of the test.  So we need to be
     # careful not to even peek at the database until we've run the script.
-    # img1 = Image.find(1)
-    # img2 = Image.find(2)
+    # img1 = images(:in_situ_image)
+    # img2 = images(:turned_over_image)
     # assert_equal(false, img1.transferred)
     # assert_equal(false, img2.transferred)
     File.open("#{local_root}/orig/1.tiff", "w") { |f| f.write("A") }
@@ -123,8 +123,8 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
-    img1 = Image.find(1)
-    img2 = Image.find(2)
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
     assert_equal(true, img1.transferred)
     assert_equal(true, img2.transferred)
     assert_equal("A", File.read("#{remote_root}1/orig/1.tiff"), "orig/1.tiff wrong for server 1")
@@ -167,7 +167,7 @@ class ScriptTest < UnitTestCase
     assert(File.exist?("#{remote_root}1/thumb/1.jpg"))
     assert(!File.exist?("#{remote_root}2/orig/1.jpg"))
     assert(File.exist?("#{remote_root}2/thumb/1.jpg"))
-    img = Image.find(1)
+    img = images(:in_situ_image)
     assert_equal(500, img.width)
     assert_equal(407, img.height)
     assert_equal(true, img.transferred)

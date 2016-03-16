@@ -118,8 +118,8 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_show_species_lists_attached_to_projects
-    proj1 = Project.find(1)
-    proj2 = Project.find(2)
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
     spl = SpeciesList.first
     assert_obj_list_equal([], spl.projects)
 
@@ -220,7 +220,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_remove_observation_from_species_list
     spl = species_lists(:unknown_species_list)
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     assert(spl.observations.member?(obs))
     params = { species_list: spl.id, observation: obs.id }
     owner = spl.user.login
@@ -1202,7 +1202,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_bulk_editor
     now = Time.now
 
-    obs1 = observations(:minimal_unknown)
+    obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown)
     obs3 = observations(:coprinus_comatus_obs)
     old_vote1 = begin

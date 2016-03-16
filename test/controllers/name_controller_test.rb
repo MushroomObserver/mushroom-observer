@@ -370,9 +370,12 @@ class NameControllerTest < FunctionalTestCase
     get_with_dump(:name_search, pattern: "agaricis campestrus")
     assert_template(:list_names)
     assert_select("div.alert-warning", 1)
-    assert_select("a[href*='show_name/19']", text: Name.find(19).search_name)
-    assert_select("a[href*='show_name/20']", text: Name.find(20).search_name)
-    assert_select("a[href*='show_name/21']", text: Name.find(21).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestrus).id}']",
+                  text: names(:agaricus_campestrus).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestras).id}']",
+                  text: names(:agaricus_campestras).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestros).id}']",
+                  text: names(:agaricus_campestros).search_name)
 
     get(:name_search, pattern: "Agaricus")
     assert_template(:list_names)

@@ -4,8 +4,8 @@ require "test_helper"
 class ProjectTest < UnitTestCase
   def test_add_and_remove_observations
     proj = projects(:eol_project)
-    obs1 = Observation.find(1)
-    obs2 = Observation.find(2)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
     imgs = obs2.images.sort_by(&:id)
     assert_obj_list_equal([], proj.observations)
     assert_obj_list_equal([], proj.images)
@@ -42,8 +42,8 @@ class ProjectTest < UnitTestCase
 
   def test_add_and_remove_images
     proj = projects(:eol_project)
-    img1 = Image.find(1)
-    img2 = Image.find(2)
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
     assert_obj_list_equal([], proj.images)
 
     proj.add_image(img1)

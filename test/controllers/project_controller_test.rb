@@ -377,7 +377,7 @@ class ProjectControllerTest < FunctionalTestCase
     login("rolf")
     post(:edit_project, id: 1, project: { title: "New Project", summary: "New Summary" })
     assert_flash_success
-    project = Project.find(1)
+    project = projects(:eol_project)
     assert_equal("New Project", project.title)
     assert_equal("New Summary", project.summary)
   end

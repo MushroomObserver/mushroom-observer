@@ -6,7 +6,7 @@ class InterestControllerTest < FunctionalTestCase
   # Test list feature from left-hand column.
   def test_list_interests
     login("rolf")
-    Interest.create(target: observations(:minimal_unknown),
+    Interest.create(target: observations(:minimal_unknown_obs),
                     user: rolf, state: true)
     Interest.create(target: names(:agaricus_campestris), user: rolf,
                     state: true)
@@ -36,7 +36,7 @@ class InterestControllerTest < FunctionalTestCase
 
   def test_set_interest
     peltigera = names(:peltigera)
-    minimal_unknown = observations(:minimal_unknown)
+    minimal_unknown = observations(:minimal_unknown_obs)
     detailed_unknown = observations(:detailed_unknown)
 
     # Succeed: Turn interest on in minimal_unknown.

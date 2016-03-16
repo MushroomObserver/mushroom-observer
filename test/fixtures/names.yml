@@ -3,8 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-fungi:
-#  id: 1
+fungi: # id: 1
   # accepted_name_id: 1
   created_at: 2007-02-26 17:20:00
   updated_at: 2007-02-26 17:20:00
@@ -20,8 +19,7 @@ fungi:
   notes: C’mon, let's make sure we test at least one show_name with notes...
   rss_log: name_rss_log
 
-coprinus_comatus:
-#  id: 2
+coprinus_comatus: # id: 2
   # accepted_name_id: 2
   description: $LABEL_desc
   created_at: 2007-02-27 20:47:00
@@ -37,8 +35,7 @@ coprinus_comatus:
   citation: ''
   notes: ''
 
-agaricus_campestris:
-#  id: 3
+agaricus_campestris: # id: 3
   # accepted_name_id: 3
   created_at: 2007-03-19 17:20:00
   updated_at: 2007-03-19 17:20:00
@@ -53,8 +50,7 @@ agaricus_campestris:
   citation: ''
   notes: ''
 
-conocybe_filaris:
-#  id: 4
+conocybe_filaris: # id: 4
   # accepted_name_id: 4
   created_at: 2007-03-28 15:50:00
   updated_at: 2007-03-19 15:51:00
@@ -69,8 +65,7 @@ conocybe_filaris:
   citation: ''
   notes: ''
 
-amanita_baccata_arora:
-#  id: 5
+amanita_baccata_arora: # id: 5
   # accepted_name_id: 5
   created_at: 2007-04-08 08:53:20
   updated_at: 2007-04-09 08:53:30
@@ -85,8 +80,7 @@ amanita_baccata_arora:
   citation: ''
   notes: ''
 
-amanita_baccata_borealis:
-#  id: 6
+amanita_baccata_borealis: # id: 6
   # accepted_name_id: 6
   created_at: 2007-04-08 08:54:20
   updated_at: 2007-04-09 08:54:30
@@ -102,8 +96,7 @@ amanita_baccata_borealis:
   notes: ''
 
 # No Taxon 1
-lepiota_rachodes:
-#  id: 7
+lepiota_rachodes: # id: 7
   # accepted_name_id: 7
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -119,8 +112,7 @@ lepiota_rachodes:
   notes: ''
 
 # No Taxon 2
-lepiota_rhacodes:
-#  id: 8
+lepiota_rhacodes: # id: 8
   # accepted_name_id: 8
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -136,8 +128,7 @@ lepiota_rhacodes:
   notes: ''
 
 # Taxon 1, Name 1
-macrolepiota_rachodes:
-#  id: 9
+macrolepiota_rachodes: # id: 9
   # accepted_name_id: 9
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -154,8 +145,7 @@ macrolepiota_rachodes:
   notes: ''
 
 # Taxon 1, Name 2
-macrolepiota_rhacodes:
-#  id: 10
+macrolepiota_rhacodes: # id: 10
   # accepted_name_id: 9
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -172,8 +162,7 @@ macrolepiota_rhacodes:
   notes: ''
 
 # Taxon 2, Name 1
-chlorophyllum_rachodes:
-#  id: 11
+chlorophyllum_rachodes: # id: 11
   # accepted_name_id: 11
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -190,8 +179,7 @@ chlorophyllum_rachodes:
   notes: ''
 
 # Taxon 2, Name 2
-chlorophyllum_rhacodes:
-#  id: 12
+chlorophyllum_rhacodes: # id: 12
   # accepted_name_id: 11
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
@@ -208,8 +196,7 @@ chlorophyllum_rhacodes:
   notes: ''
 
 # Taxon 3, Name 1
-lactarius_alpinus:
-#  id: 13
+lactarius_alpinus: # id: 13
   # accepted_name_id: 13
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
@@ -226,8 +213,7 @@ lactarius_alpinus:
   notes: ''
 
 # Taxon 3, Name 2
-lactarius_alpigenes:
-#  id: 14
+lactarius_alpigenes: # id: 14
   # accepted_name_id: 13
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
@@ -245,8 +231,7 @@ lactarius_alpigenes:
   notes: ''
 
 # Taxon 3, Name 3
-lactarius_kuehneri:
-#  id: 15
+lactarius_kuehneri: # id: 15
   # accepted_name_id: 13
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
@@ -264,8 +249,7 @@ lactarius_kuehneri:
   notes: ''
 
 # Taxon 3, Name 4
-lactarius_subalpinus:
-#  id: 16
+lactarius_subalpinus: # id: 16
   # accepted_name_id: 13
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
@@ -283,8 +267,7 @@ lactarius_subalpinus:
   notes: ''
 
 # Deprecated genus
-psalliota:
-#  id: 17
+psalliota: # id: 17
   # accepted_name_id: 17
   created_at: 2007-06-09 08:06:28
   updated_at: 2007-06-09 08:06:40
@@ -300,8 +283,7 @@ psalliota:
   notes: ''
 
 # Valid genus
-agaricus:
-#  id: 18
+agaricus: # id: 18
   # accepted_name_id: 18
   created_at: 2007-06-09 08:06:28
   updated_at: 2007-06-09 08:06:40
@@ -317,8 +299,7 @@ agaricus:
   notes: ''
 
 # Misspelt name for testing merging
-agaricus_campestrus:
-#  id: 19
+agaricus_campestrus: # id: 19
   # accepted_name_id: 19
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
@@ -334,8 +315,7 @@ agaricus_campestrus:
   notes: ''
 
 # Name with notes
-agaricus_campestras:
-#  id: 20
+agaricus_campestras: # id: 20
   # accepted_name_id: 20
   description: $LABEL_desc
   created_at: 2007-06-23 20:04:00
@@ -352,8 +332,7 @@ agaricus_campestras:
   notes: ''
 
 # Another name with notes
-agaricus_campestros:
-#  id: 21
+agaricus_campestros: # id: 21
   # accepted_name_id: 21
   description: $LABEL_desc
   created_at: 2007-06-23 20:04:00
@@ -370,8 +349,7 @@ agaricus_campestros:
   notes: ''
 
 # For testing merges with existings versions
-coprinellus_micaceus:
-#  id: 22
+coprinellus_micaceus: # id: 22
   # accepted_name_id: 22
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
@@ -387,8 +365,7 @@ coprinellus_micaceus:
   notes: ''
 
 # For testing merges with existing versions
-coprinellus_micaceus_no_author:
-#  id: 23
+coprinellus_micaceus_no_author: # id: 23
   # accepted_name_id: 23
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
@@ -404,8 +381,7 @@ coprinellus_micaceus_no_author:
   notes: ''
 
 # For testing when the author is added to a name that has an observation
-strobilurus_diminutivus_no_author:
-#  id: 24
+strobilurus_diminutivus_no_author: # id: 24
   # accepted_name_id: 24
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
@@ -421,8 +397,7 @@ strobilurus_diminutivus_no_author:
   notes: ''
 
 # For testing when there are both an approved and deprecated name with the same text name
-pluteus_petasatus_approved:
-#  id: 25
+pluteus_petasatus_approved: # id: 25
   # accepted_name_id: 25
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
@@ -438,8 +413,7 @@ pluteus_petasatus_approved:
   notes: ''
 
 # For testing the where the author is added when a name has an observation
-pluteus_petasatus_deprecated:
-#  id: 26
+pluteus_petasatus_deprecated: # id: 26
   # accepted_name_id: 26
   created_at: 2007-07-20 21:12:45
   updated_at: 2007-07-20 21:12:45
@@ -456,8 +430,7 @@ pluteus_petasatus_deprecated:
   notes: ''
 
 # Valid genus
-lepiota:
-#  id: 27
+lepiota: # id: 27
   # accepted_name_id: 27
   created_at: 2007-07-30 08:06:28
   updated_at: 2007-07-30 08:06:40
@@ -473,8 +446,7 @@ lepiota:
   notes: ''
 
 # Valid genus
-chlorophyllum:
-#  id: 28
+chlorophyllum: # id: 28
   # accepted_name_id: 28
   created_at: 2007-07-30 22:06:28
   updated_at: 2007-07-30 22:06:40
@@ -490,8 +462,7 @@ chlorophyllum:
   notes: ''
 
 # Two fake names with non-alphanumerics for severe stress-testing species lists.
-bugs_bunny_one:
-#  id: 29
+bugs_bunny_one: # id: 29
   # accepted_name_id: 29
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
@@ -506,8 +477,7 @@ bugs_bunny_one:
   citation: ''
   notes: ''
 
-bugs_bunny_two:
-#  id: 30
+bugs_bunny_two: # id: 30
   # accepted_name_id: 30
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
@@ -522,8 +492,7 @@ bugs_bunny_two:
   citation: ''
   notes: ''
 
-russula_brevipes_no_author:
-#  id: 31
+russula_brevipes_no_author: # id: 31
   # accepted_name_id: 31
   created_at: 2008-03-10 22:31:25
   updated_at: 2008-03-10 22:31:27
@@ -538,8 +507,7 @@ russula_brevipes_no_author:
   citation: ''
   notes: ''
 
-russula_brevipes_author_notes:
-#  id: 32
+russula_brevipes_author_notes: # id: 32
   # accepted_name_id: 32
   description: $LABEL_desc
   created_at: 2008-03-10 22:33:00
@@ -555,8 +523,7 @@ russula_brevipes_author_notes:
   citation: 'blah'
   notes: 'blah blah blah'
 
-russula_cremoricolor_no_author_notes:
-#  id: 33
+russula_cremoricolor_no_author_notes: # id: 33
   # accepted_name_id: 33
   description: $LABEL_desc
   created_at: 2008-03-12 20:53:08
@@ -572,8 +539,7 @@ russula_cremoricolor_no_author_notes:
   citation: ''
   notes: ''
 
-russula_cremoricolor_author_notes:
-#  id: 34
+russula_cremoricolor_author_notes: # id: 34
   # accepted_name_id: 34
   description: $LABEL_desc
   created_at: 2008-03-12 20:53:36
@@ -589,8 +555,7 @@ russula_cremoricolor_author_notes:
   citation: ''
   notes: ''
 
-lentinellus_ursinus_author1:
-#  id: 35
+lentinellus_ursinus_author1: # id: 35
   # accepted_name_id: 35
   created_at: 2008-03-19 08:35:30
   updated_at: 2008-03-19 08:35:37
@@ -605,8 +570,7 @@ lentinellus_ursinus_author1:
   citation: ''
   notes: ''
 
-lentinellus_ursinus_author2:
-#  id: 36
+lentinellus_ursinus_author2: # id: 36
   # accepted_name_id: 36
   created_at: 2008-03-19 08:35:30
   updated_at: 2008-03-19 08:35:37
@@ -622,8 +586,7 @@ lentinellus_ursinus_author2:
   notes: ''
 
 # Genus with correct author
-macrocybe_pegler:
-#  id: 37
+macrocybe_pegler: # id: 37
   # accepted_name_id: 37
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
@@ -639,8 +602,7 @@ macrocybe_pegler:
   notes: ''
 
 # Genus with incorrect author
-macrocybe_titans:
-#  id: 38
+macrocybe_titans: # id: 38
   # accepted_name_id: 38
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
@@ -655,8 +617,7 @@ macrocybe_titans:
   citation: ''
   notes: ''
 
-boletus_edulis:
-#  id: 39
+boletus_edulis: # id: 39
   # accepted_name_id: 39
   created_at: 2008-10-05 16:16:50
   updated_at: 2008-10-05 16:17:08
@@ -671,8 +632,7 @@ boletus_edulis:
   citation: ''
   notes: ''
 
-peltigera:
-#  id: 40
+peltigera: # id: 40
   # accepted_name_id: 40
   description: $LABEL_desc
   created_at: 2009-01-01 01:01:01
@@ -690,8 +650,7 @@ peltigera:
   synonym: $LABEL_synonym
   notes: ''
 
-petigera:
-#  id: 41
+petigera: # id: 41
   # accepted_name_id: 40
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
@@ -709,8 +668,7 @@ petigera:
   citation: ''
   notes: ''
 
-suillus:
-#  id: 42
+suillus: # id: 42
   # accepted_name_id: 42
   description: 7
   created_at: 2009-10-12 21:30:01
@@ -726,8 +684,7 @@ suillus:
   citation: ''
   notes: ''
 
-suillus_by_white:
-#  id: 43
+suillus_by_white: # id: 43
   # accepted_name_id: 43
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
@@ -742,8 +699,7 @@ suillus_by_white:
   citation: ''
   notes: ''
 
-suilus:
-#  id: 44
+suilus: # id: 44
   # accepted_name_id: 44
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
@@ -760,8 +716,7 @@ suilus:
   citation: ''
   notes: ''
 
-tremella_mesenterica:
-#  id: 45
+tremella_mesenterica: # id: 45
   # accepted_name_id: 45
   created_at: 2011-11-06 18:07:20
   updated_at: 2011-11-06 18:07:20
@@ -776,8 +731,7 @@ tremella_mesenterica:
   citation: ''
   notes: ''
 
-tremella:
-#  id: 46
+tremella: # id: 46
   # accepted_name_id: 46
   created_at: 2011-11-06 18:09:20
   updated_at: 2011-11-06 18:09:20
@@ -792,8 +746,7 @@ tremella:
   citation: ''
   notes: ''
 
-tremella_justpublished:
-#  id: 47
+tremella_justpublished: # id: 47
   # accepted_name_id: 47
   created_at: 2011-11-06 18:07:20
   updated_at: 2011-11-06 18:07:20
@@ -808,8 +761,7 @@ tremella_justpublished:
   citation: ''
   notes: A Tremella not known to be a lichen
 
-hygrocybe_russocoriacea_bad_author:
-#  id: 48
+hygrocybe_russocoriacea_bad_author: # id: 48
   # accepted_name_id: 48
   version: 1
   created_at: 2007-01-10 05:06:08
@@ -823,8 +775,7 @@ hygrocybe_russocoriacea_bad_author:
   author: '(Berk. & T.K. Mill.) P.D. Orton & Watling'
   notes: '__Camarophyllus russocoriaceus__ is a synonym.  According to the Index Fungorum __Camarophyllus__ is now considered to be a synonym of __Hygrocybe__.'
 
-hygrocybe_russocoriacea_good_author:
-#  id: 49
+hygrocybe_russocoriacea_good_author: # id: 49
   # accepted_name_id: 49
   version: 1
   created_at: 2011-12-10 03:50:48
@@ -838,8 +789,7 @@ hygrocybe_russocoriacea_good_author:
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   notes: NULL
 
-lichen:
-#  id: 50
+lichen: # id: 50
   # accepted_name_id: 50
   created_at: 2015-02-07 11:27:00
   updated_at: 2015-02-07 11:27:00
@@ -854,8 +804,7 @@ lichen:
   citation: ''
   notes: This is a pseudoname to apply to all unknown lichenized fungi.
 
-abortiporus_biennis_for_eol:
-#  id: 51
+abortiporus_biennis_for_eol: # id: 51
   # accepted_name_id: 51
   version: 1
   created_at: 2015-07-05 21:41:10
@@ -869,8 +818,7 @@ abortiporus_biennis_for_eol:
   author: '(Bull.) Singer'
   notes: NULL
 
-amanita_subgenus_lepidella:
-#  id: 52
+amanita_subgenus_lepidella: # id: 52
   # accepted_name_id: 52
   version: 1
   created_at: 2015-07-31 15:10:10
@@ -884,8 +832,7 @@ amanita_subgenus_lepidella:
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
   notes: NULL
 
-amanita_boudieri_var._beillei:
-#  id: 53
+amanita_boudieri_var_beillei: # id: 53
   # accepted_name_id: 53
   version: 1
   created_at: 2015-07-31 17:18:10

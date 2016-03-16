@@ -20,7 +20,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_index
-    get_with_dump(:herbarium_index, id: herbaria(:nybg).id)
+    get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_specimen_index
   end
 
@@ -130,7 +130,7 @@ class SpecimenControllerTest < FunctionalTestCase
   # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
   def test_add_specimen_post_not_curator
     user = login("mary")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     assert(!nybg.curators.member?(user))
     specimen_count = Specimen.count
     herbarium_count = Herbarium.count

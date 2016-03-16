@@ -78,7 +78,7 @@ class AccountMailerTest < UnitTestCase
   end
 
   def test_comment_email
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     comment = comments(:another_comment)
     run_mail_test("comment_response", rolf) do
       email = CommentEmail.build(dick, rolf, obs, comment).deliver_now
@@ -86,7 +86,7 @@ class AccountMailerTest < UnitTestCase
   end
 
   def test_comment_email2
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     comment = comments(:minimal_comment)
     run_mail_test("comment", mary) do
       email = CommentEmail.build(rolf, mary, obs, comment).deliver_now

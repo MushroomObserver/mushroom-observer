@@ -18,8 +18,8 @@ class SpeciesListTest < UnitTestCase
 
   def test_add_and_remove_observations
     spl = species_lists(:first_species_list)
-    obs1 = Observation.find(1)
-    obs2 = Observation.find(2)
+    obs1 = observations(:minimal_unknown_obs)
+    obs2 = observations(:detailed_unknown_obs)
     assert_obj_list_equal([], spl.observations)
 
     spl.add_observation(obs1)
@@ -45,7 +45,7 @@ class SpeciesListTest < UnitTestCase
   end
 
   def test_construct_observation
-    spl = SpeciesList.first
+    spl = species_lists(:first_species_list)
     assert_users_equal(rolf, spl.user)
     proj = projects(:bolete_project)
     proj.add_species_list(spl)

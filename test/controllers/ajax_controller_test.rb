@@ -264,24 +264,24 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_naming_vote
-    naming = Naming.find(1)
+    naming = namings(:minimal_unknown_naming)
     assert_nil(naming.users_vote(dick))
-    bad_ajax_request(:vote, type: :naming, id: 1, value: 3)
+    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
 
     login("dick")
-    good_ajax_request(:vote, type: :naming, id: 1, value: 3)
+    good_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
     assert_equal(3, naming.reload.users_vote(dick).value)
 
-    good_ajax_request(:vote, type: :naming, id: 1, value: 0)
+    good_ajax_request(:vote, type: :naming, id: naming.id, value: 0)
     assert_nil(naming.reload.users_vote(dick))
 
-    bad_ajax_request(:vote, type: :naming, id: 1, value: 99)
+    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 99)
     bad_ajax_request(:vote, type: :naming, id: 99, value: 0)
-    bad_ajax_request(:vote, type: :phooey, id: 1, value: 0)
+    bad_ajax_request(:vote, type: :phooey, id: naming.id, value: 0)
   end
 
   def test_image_vote
-    image = Image.find(1)
+    image = images(:in_situ_image)
     assert_nil(image.users_vote(dick))
     bad_ajax_request(:vote, type: :image, id: 1, value: 3)
 

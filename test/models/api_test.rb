@@ -208,11 +208,12 @@ class ApiTest < UnitTestCase
   ################################################################################
 
   def test_basic_gets
-    for model in [Comment, Image, Location, Name, Observation, Project,
-                  SpeciesList, User]
-      expected_object = model.find(1)
+    [Comment, Image, Location, Name, Observation, Project, SpeciesList,
+     User].each do |model|
+      expected_object = model.first
 
-      api = API.execute(method: :get, action: model.type_tag, id: 1)
+      api = API.execute(method: :get, action: model.type_tag,
+                        id: expected_object.id)
       query = api.query.query
       assert_no_errors(api, "Errors while getting #{model} #1")
       assert_obj_list_equal([expected_object], api.results,
@@ -234,6 +235,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_minimal_observation
+  byebug
     @user = rolf
     @name = Name.unknown
     @loc = locations(:unknown_location)
@@ -266,8 +268,8 @@ class ApiTest < UnitTestCase
     @user = rolf
     @name = names(:coprinus_comatus)
     @loc = locations(:albion)
-    @img1 = Image.find(1)
-    @img2 = Image.find(2)
+    @img1 = images(:in_situ_image)
+    @img2 = images(:turned_over_image)
     @spl = species_lists(:first_species_list)
     @proj = projects(:eol_project)
     @date = Date.parse("20120626")
@@ -400,7 +402,7 @@ class ApiTest < UnitTestCase
     assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
     assert_obj_list_equal([obs], spec.observations)
 
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
                                  specimen_id: "R. Singer 12345"))
     obs = Observation.last
@@ -900,39 +902,41 @@ class ApiTest < UnitTestCase
   end
 
   def test_parse_image
-    img1 = Image.find(1)
-    img2 = Image.find(2)
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
     assert_parse(:parse_image, nil, nil)
     assert_parse(:parse_image, img1, nil, default: img1)
-    assert_parse(:parse_image, img1, "1")
-    assert_parse(:parse_images, [img2, img1], "2,1")
-    assert_parse(:parse_image_range, API::OrderedRange.new(img1, img2), "2-1")
+    assert_parse(:parse_image, img1, "#{img1.id}")
+    assert_parse(:parse_images, [img2, img1], "#{img2.id},#{img1.id}")
+    assert_parse(:parse_image_range,
+                 API::OrderedRange.new(img1, img2), "#{img2.id}-#{img1.id}")
     assert_parse(:parse_image, API::BadParameterValue, "")
     assert_parse(:parse_image, API::BadParameterValue, "name")
     assert_parse(:parse_image, API::ObjectNotFoundById, "12345")
   end
 
   def test_parse_license
-    lic1 = License.find(1)
-    lic2 = License.find(2)
+    lic1 = licenses(:ccnc25)
+    lic2 = licenses(:ccnc30)
     assert_parse(:parse_license, nil, nil)
     assert_parse(:parse_license, lic2, nil, default: lic2)
-    assert_parse(:parse_license, lic2, "2")
-    assert_parse(:parse_licenses, [lic2, lic1], "2,1")
-    assert_parse(:parse_license_range, API::OrderedRange.new(lic1, lic2), "2-1")
+    assert_parse(:parse_license, lic2, "#{lic2.id}")
+    assert_parse(:parse_licenses, [lic2, lic1], "#{lic2.id},#{lic1.id}")
+    assert_parse(:parse_license_range,
+                 API::OrderedRange.new(lic1, lic2), "#{lic2.id}-#{lic1.id}")
     assert_parse(:parse_license, API::BadParameterValue, "")
     assert_parse(:parse_license, API::BadParameterValue, "name")
     assert_parse(:parse_license, API::ObjectNotFoundById, "12345")
   end
 
   def test_parse_location
-    loc2 = Location.find(2)
-    loc5 = Location.find(5)
+    loc2 = locations(:burbank)
+    loc5 = locations(:gualala)
     assert_parse(:parse_location, nil, nil)
     assert_parse(:parse_location, loc5, nil, default: loc5)
-    assert_parse(:parse_location, loc5, "5")
-    assert_parse(:parse_locations, [loc5, loc2], "5,2")
-    assert_parse(:parse_location_range, API::OrderedRange.new(loc2, loc5), "5-2")
+    assert_parse(:parse_location, loc5, "#{loc5.id}")
+    assert_parse(:parse_locations, [loc5, loc2], "#{loc5.id},#{loc2.id}")
+    assert_parse(:parse_location_range, API::OrderedRange.new(loc2, loc5), "#{loc5.id}-#{loc2.id}")
     assert_parse(:parse_location, API::BadParameterValue, "")
     assert_parse(:parse_location, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_location, API::ObjectNotFoundById, "12345")
@@ -941,11 +945,11 @@ class ApiTest < UnitTestCase
   end
 
   def test_parse_place_name
-    loc2 = Location.find(2)
-    loc5 = Location.find(5)
+    loc2 = locations(:burbank)
+    loc5 = locations(:gualala)
     assert_parse(:parse_place_name, nil, nil)
     assert_parse(:parse_place_name, loc5.name, nil, default: loc5.name)
-    assert_parse(:parse_place_name, loc5.name, "5")
+    assert_parse(:parse_place_name, loc5.name, "#{loc5.name}")
     assert_parse(:parse_place_name, API::BadParameterValue, "")
     assert_parse(:parse_place_name, "name", "name")
     assert_parse(:parse_place_name, API::ObjectNotFoundById, "12345")
@@ -954,11 +958,11 @@ class ApiTest < UnitTestCase
   end
 
   def test_parse_name
-    name10 = Name.find(10)
-    name20 = Name.find(20)
+    name10 = names(:macrolepiota_rhacodes)
+    name20 = names(:agaricus_campestras)
     assert_parse(:parse_name, nil, nil)
     assert_parse(:parse_name, name20, nil, default: name20)
-    assert_parse(:parse_name, name20, "20")
+    assert_parse(:parse_name, name20, "#{name20.id}")
     assert_parse(:parse_name, API::BadParameterValue, "")
     assert_parse(:parse_name, API::ObjectNotFoundById, "12345")
     assert_parse(:parse_name, API::ObjectNotFoundByString, "Bogus name")
@@ -966,31 +970,34 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_name, API::AmbiguousName, "Amanita baccata")
     assert_parse(:parse_name, name10, "Macrolepiota rhacodes")
     assert_parse(:parse_name, name10, "Macrolepiota rhacodes (Vittad.) Singer")
-    assert_parse(:parse_names, [name20, name10], "20,10")
-    assert_parse(:parse_name_range, API::OrderedRange.new(name10, name20), "20-10")
+    assert_parse(:parse_names, [name20, name10], "#{name20.id},#{name10.id}")
+    assert_parse(:parse_name_range, API::OrderedRange.new(name10, name20),
+                 "#{name20.id}-#{name10.id}")
   end
 
   def test_parse_observation
-    obs5 = Observation.find(5)
-    obs10 = Observation.find(10)
+    obs5 = observations(:agaricus_campestrus_obs)
+    obs10 = observations(:unknown_with_lat_long)
     assert_parse(:parse_observation, nil, nil)
     assert_parse(:parse_observation, obs5, nil, default: obs5)
-    assert_parse(:parse_observation, obs5, "5")
-    assert_parse(:parse_observations, [obs10, obs5], "10,5")
-    assert_parse(:parse_observation_range, API::OrderedRange.new(obs5, obs10), "10-5")
+    assert_parse(:parse_observation, obs5, "#{obs5.id}")
+    assert_parse(:parse_observations, [obs10, obs5], "#{obs10.id},#{obs5.id}")
+    assert_parse(:parse_observation_range,
+                 API::OrderedRange.new(obs5, obs10), "#{obs10.id}-#{obs5.id}")
     assert_parse(:parse_observation, API::BadParameterValue, "")
     assert_parse(:parse_observation, API::BadParameterValue, "name")
     assert_parse(:parse_observation, API::ObjectNotFoundById, "12345")
   end
 
   def test_parse_project
-    proj1 = Project.find(1)
-    proj2 = Project.find(2)
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
     assert_parse(:parse_project, nil, nil)
     assert_parse(:parse_project, proj2, nil, default: proj2)
-    assert_parse(:parse_project, proj2, "2")
-    assert_parse(:parse_projects, [proj2, proj1], "2,1")
-    assert_parse(:parse_project_range, API::OrderedRange.new(proj1, proj2), "2-1")
+    assert_parse(:parse_project, proj2, "#{proj2.id}")
+    assert_parse(:parse_projects, [proj2, proj1], "#{proj2.id},#{proj1.id}")
+    assert_parse(:parse_project_range,
+                 API::OrderedRange.new(proj1, proj2), "#{proj2.id}-#{proj1.id}")
     assert_parse(:parse_project, API::BadParameterValue, "")
     assert_parse(:parse_project, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_project, API::ObjectNotFoundById, "12345")
@@ -998,13 +1005,14 @@ class ApiTest < UnitTestCase
   end
 
   def test_parse_species_list
-    spl1 = SpeciesList.find(1)
-    spl2 = SpeciesList.find(2)
+    spl1 = species_lists(:first_species_list)
+    spl2 = species_lists(:another_species_list)
     assert_parse(:parse_species_list, nil, nil)
     assert_parse(:parse_species_list, spl2, nil, default: spl2)
-    assert_parse(:parse_species_list, spl2, "2")
-    assert_parse(:parse_species_lists, [spl2, spl1], "2,1")
-    assert_parse(:parse_species_list_range, API::OrderedRange.new(spl1, spl2), "2-1")
+    assert_parse(:parse_species_list, spl2, "#{spl2.id}")
+    assert_parse(:parse_species_lists, [spl2, spl1], "#{spl2.id},#{spl1.id}")
+    assert_parse(:parse_species_list_range,
+                 API::OrderedRange.new(spl1, spl2), "#{spl2.id}-#{spl1.id}")
     assert_parse(:parse_species_list, API::BadParameterValue, "")
     assert_parse(:parse_species_list, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_species_list, API::ObjectNotFoundById, "12345")
@@ -1012,13 +1020,14 @@ class ApiTest < UnitTestCase
   end
 
   def test_parse_user
-    user1 = User.find(1)
-    user2 = User.find(2)
+    user1 = rolf
+    user2 = mary
     assert_parse(:parse_user, nil, nil)
     assert_parse(:parse_user, user2, nil, default: user2)
-    assert_parse(:parse_user, user2, "2")
-    assert_parse(:parse_users, [user2, user1], "2,1")
-    assert_parse(:parse_user_range, API::OrderedRange.new(user1, user2), "2-1")
+    assert_parse(:parse_user, user2, "#{user2.id}")
+    assert_parse(:parse_users, [user2, user1], "#{user2.id},#{user1.id}")
+    assert_parse(:parse_user_range,
+                 API::OrderedRange.new(user1, user2), "#{user2.id}-#{user1.id}")
     assert_parse(:parse_user, API::BadParameterValue, "")
     assert_parse(:parse_user, API::ObjectNotFoundByString, "name")
     assert_parse(:parse_user, API::ObjectNotFoundById, "12345")
@@ -1028,23 +1037,25 @@ class ApiTest < UnitTestCase
 
   def test_parse_object
     limit = [Name, Observation, SpeciesList]
-    obs10 = Observation.find(10)
-    name20 = Name.find(20)
-    spl2 = SpeciesList.find(2)
+    obs10 = observations(:unknown_with_lat_long)
+    name20 = names(:agaricus_campestras)
+    spl2 = species_lists(:another_species_list)
     assert_parse(:parse_object, nil, nil, limit: limit)
     assert_parse(:parse_object, obs10, nil, default: obs10, limit: limit)
-    assert_parse(:parse_object, obs10, "observation 10", limit: limit)
-    assert_parse(:parse_object, name20, "name 20", limit: limit)
-    assert_parse(:parse_object, spl2, "species list 2", limit: limit)
-    assert_parse(:parse_object, spl2, "species_list 2", limit: limit)
-    assert_parse(:parse_object, spl2, "Species List 2", limit: limit)
+    assert_parse(:parse_object, obs10, "observation #{obs10.id}", limit: limit)
+    assert_parse(:parse_object, name20, "name #{20}", limit: limit)
+    assert_parse(:parse_object, spl2, "species list #{spl2.id}", limit: limit)
+    assert_parse(:parse_object, spl2, "species_list #{spl2.id}", limit: limit)
+    assert_parse(:parse_object, spl2, "Species List #{spl2.id}", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "1", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "bogus", limit: limit)
     assert_parse(:parse_object, API::BadLimitedParameterValue, "bogus 1", limit: limit)
-    assert_parse(:parse_object, API::BadLimitedParameterValue, "license 1", limit: limit)
+    assert_parse(:parse_object, API::BadLimitedParameterValue,
+                 "license #{licenses(:ccnc25).id}", limit: limit)
     assert_parse(:parse_object, API::ObjectNotFoundById, "name 12345", limit: limit)
-    assert_parse(:parse_objects, [obs10, name20], "observation 10, name 20", limit: limit)
+    assert_parse(:parse_objects, [obs10, name20],
+                 "observation #{obs10.id}, name #{name20.id}", limit: limit)
   end
 
   def test_check_edit_permission
@@ -1076,7 +1087,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_object, spl_good, "species list #{spl_good.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, "species list #{spl_bad.id}", args)
     assert_parse(:parse_object, dick, "user #{dick.id}", args)
-    assert_parse(:parse_object, API::MustHaveEditPermission, "user 1", args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, "user #{rolf.id}", args)
   end
 
   def test_check_project_membership

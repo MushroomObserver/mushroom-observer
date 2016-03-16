@@ -2,8 +2,7 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-minimal_unknown_obs:
-#  id: 1
+minimal_unknown_obs: # old id: 1
   created_at: 2005-05-12 17:20:00
   updated_at: 2005-05-12 17:21:00
   when: 2006-05-11
@@ -14,8 +13,7 @@ minimal_unknown_obs:
   species_lists: unknown_species_list
   specimens: interesting_unknown
 
-detailed_unknown_obs:
-#  id: 2
+detailed_unknown_obs: # old id: 2
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   when: 2006-05-11
@@ -30,8 +28,7 @@ detailed_unknown_obs:
   species_lists: unknown_species_list
   specimens: interesting_unknown
 
-coprinus_comatus_obs:
-#  id: 3
+coprinus_comatus_obs: # old id: 3
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
   when: 2007-02-27
@@ -45,8 +42,7 @@ coprinus_comatus_obs:
   images: connected_coprinus_comatus_image
   specimens: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
 
-agaricus_campestris_obs:
-#  id: 4
+agaricus_campestris_obs: # old id: 4
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
@@ -58,19 +54,17 @@ agaricus_campestris_obs:
   images: agaricus_campestris_image
   specimens: agaricus_campestris_spec
 
-agaricus_campestrus_obs:
-#  id: 5
+agaricus_campestrus_obs: # old id: 5
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
   when: 2007-06-23
   user: rolf
   location: burbank
-  name: agaricus_campestru
+  name: agaricus_campestrus
   specimen: 0
   notes: From somewhere else
 
-agaricus_campestras_obs:
-#  id: 6
+agaricus_campestras_obs: # old id: 6
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
@@ -80,8 +74,7 @@ agaricus_campestras_obs:
   specimen: 0
   notes: From somewhere else
 
-agaricus_campestros_obs:
-#  id: 7
+agaricus_campestros_obs: # old id: 7
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
@@ -91,8 +84,7 @@ agaricus_campestros_obs:
   specimen: 0
   notes: From somewhere else
 
-strobilurus_diminutivus_obs:
-#  id: 8
+strobilurus_diminutivus_obs: # old id: 8
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
   when: 2007-07-20
@@ -103,16 +95,14 @@ strobilurus_diminutivus_obs:
   notes: From somewhere else
   vote_cache: 0
 
-unknown_with_no_naming:
-#  id: 9
+unknown_with_no_naming: # old id: 9
   when: 2008-09-23
   user: mary
   where: Who knows where
   name: fungi
   notes: ''
 
-unknown_with_lat_long:
-#  id: 10
+unknown_with_lat_long: # old id: 10
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
   when: 2010-07-22
@@ -123,8 +113,7 @@ unknown_with_lat_long:
   lat: 34.1622
   long: -118.3521
 
-amateur_obs:
-#  id: 11
+amateur_obs: # old id: 11
   created_at: 2010-12-31 06:46:00
   updated_at: 2010-12-31 06:46:00
   when: 2010-12-30
@@ -137,8 +126,7 @@ amateur_obs:
   lat: 34.1622
   long: -118.3521
 
-peltigera_obs:
-#  id: 12
+peltigera_obs: # old id: 12
   created_at: 2012-06-07 16:31:40
   updated_at: 2012-06-07 16:31:40
   when: 2012-06-07
@@ -151,8 +139,7 @@ peltigera_obs:
   vote_cache: 3
   images: peltigera_image
 
-peltigera_rolf_obs:
-#  id: 13
+peltigera_rolf_obs: # old id: 13
   created_at: 2013-09-14 08:37:55
   updated_at: 2013-09-14 08:37:55
   when: 2013-09-08
@@ -165,22 +152,20 @@ peltigera_rolf_obs:
   vote_cache: 3
   images: rolf_profile_image
 
-fungi_obs:
-#  id: 14
+fungi_obs: # old id: 14
   created_at: 2013-09-15 22:14:40
   updated_at: 2013-09-15 22:14:40
   when: 2013-09-15
   user: rolf
   where: 'Briceland, California, USA'
   is_collection_location: 0
-  name: name
+  name: fungi
   specimen: 0
   notes: 'Observation for plane pileus'
   vote_cache: 3
   images: conic_image, plane_image_example
 
-boletus_edulis_obs:
-#  id: 15
+boletus_edulis_obs: # old id: 15
   created_at: 2014-04-21 07:48:00
   updated_at: 2014-04-21 07:48:00
   when: 2014-04-21
@@ -192,8 +177,7 @@ boletus_edulis_obs:
   notes: 'A tasty bolete!'
   vote_cache: 3
 
-owner_only_favorite_eq_fungi:
-#  id: 16
+owner_only_favorite_eq_fungi: # old id: 16
   created_at: 2015-10-08 15:18:00
   updated_at: 2015-10-08 15:18:00
   when: 2015-10-08
@@ -202,8 +186,7 @@ owner_only_favorite_eq_fungi:
   name: boletus_edulis
   notes: ''
 
-owner_only_favorite_eq_consensus:
-#  id: 17
+owner_only_favorite_eq_consensus: # old id: 17
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
@@ -212,8 +195,7 @@ owner_only_favorite_eq_consensus:
   name: boletus_edulis
   notes: ''
 
-owner_only_favorite_ne_consensus:
-#  id: 18
+owner_only_favorite_ne_consensus: # old id: 18
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
@@ -222,8 +204,7 @@ owner_only_favorite_ne_consensus:
   name: tremella
   notes: ''
 
-owner_multiple_favorites:
-#  id: 19
+owner_multiple_favorites: # old id: 19
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
@@ -232,8 +213,7 @@ owner_multiple_favorites:
   name: boletus_edulis
   notes: ''
 
-owner_uncertain_favorite:
-#  id: 20
+owner_uncertain_favorite: # old id: 20
   created_at: 2015-10-08 15:41:00
   updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
@@ -242,8 +222,7 @@ owner_uncertain_favorite:
   name: boletus_edulis
   notes: ''
 
-owner_accepts_general_questions:
-#  id: 21
+owner_accepts_general_questions: # old id: 21
   created_at: 2015-10-18 19:27:00
   updated_at: 2015-10-18 19:27:00
   when: 2015-10-18
@@ -252,8 +231,7 @@ owner_accepts_general_questions:
   name: boletus_edulis
   notes: ''
 
-owner_refuses_general_questions:
-#  id: 22
+owner_refuses_general_questions: # old id: 22
   created_at: 2015-10-18 19:27:00
   updated_at: 2015-10-18 19:27:00
   when: 2015-10-18

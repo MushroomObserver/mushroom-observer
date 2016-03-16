@@ -693,7 +693,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_destroy_observation
-    assert(obs = observations(:minimal_unknown))
+    assert(obs = observations(:minimal_unknown_obs))
     id = obs.id
     params = { id: id.to_s }
     assert_equal("mary", obs.user.login)
@@ -756,7 +756,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_send_ask_observation_question
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     params = {
       id: obs.id,
       question: {
@@ -1025,7 +1025,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_herbarium
     generic_construct_observation({
                                     observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg).name, herbarium_id: "1234" },
+                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
                                     name: { name: "Coprinus comatus" }
                                   }, 1, 1, 0)
     obs = assigns(:observation)
@@ -1036,7 +1036,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_herbarium_duplicate_label
     generic_construct_observation({
                                     observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg).name,
+                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name,
                                                 herbarium_id: "NYBG 1234" },
                                     name: { name: "Cortinarius sp." }
                                   }, 0, 0, 0)
@@ -1049,7 +1049,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = "Coprinus comatus"
     generic_construct_observation({
                                     observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg).name, herbarium_id: "" },
+                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "" },
                                     name: { name: name }
                                   }, 1, 1, 0)
     obs = assigns(:observation)
@@ -1062,7 +1062,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation({
-                                    specimen: { herbarium_name: herbaria(:nybg).name, herbarium_id: "1234" },
+                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
                                     name: { name: "Coprinus comatus" }
                                   }, 1, 1, 0)
     obs = assigns(:observation)
@@ -1856,7 +1856,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation_with_non_image
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
       "#{Rails.root}/test/fixtures/projects.yml", "text/plain"
     )
@@ -1949,7 +1949,7 @@ class ObserverControllerTest < FunctionalTestCase
       copyright_holder: "holder_1",
       when: time1,
       notes: "notes_1",
-      user_id: 1,
+      user_id: users(:rolf).id,
       image: file1,
       content_type: "image/jpeg",
       created_at: week_ago,
@@ -1960,7 +1960,7 @@ class ObserverControllerTest < FunctionalTestCase
       copyright_holder: "holder_2",
       when: time2,
       notes: "notes_2",
-      user_id: 1,
+      user_id: users(:rolf).id,
       image: file2,
       content_type: "image/jpeg",
       created_at: week_ago,
@@ -2245,7 +2245,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_interest_in_show_observation
     login("rolf")
-    minimal_unknown = observations(:minimal_unknown)
+    minimal_unknown = observations(:minimal_unknown_obs)
 
     # No interest in this observation yet.
     #
@@ -2446,7 +2446,7 @@ class ObserverControllerTest < FunctionalTestCase
     fourth = obs[3]
     assert_equal(10, fourth.id)
     fourth.specimens << Specimen.create!(
-      herbarium: herbaria(:nybg),
+      herbarium: herbaria(:nybg_herbarium),
       when: Time.now,
       user: mary,
       herbarium_label: "Mary #1234"
