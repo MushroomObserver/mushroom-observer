@@ -1036,25 +1036,26 @@ class ApiTest < UnitTestCase
 
   def test_parse_object
     limit = [Name, Observation, SpeciesList]
-    obs10 = observations(:unknown_with_lat_long)
-    name20 = names(:agaricus_campestras)
-    spl2 = species_lists(:another_species_list)
+    obs = observations(:unknown_with_lat_long)
+    nam = names(:agaricus_campestras)
+    list = species_lists(:another_species_list)
     assert_parse(:parse_object, nil, nil, limit: limit)
-    assert_parse(:parse_object, obs10, nil, default: obs10, limit: limit)
-    assert_parse(:parse_object, obs10, "observation #{obs10.id}", limit: limit)
-    assert_parse(:parse_object, name20, "name #{20}", limit: limit)
-    assert_parse(:parse_object, spl2, "species list #{spl2.id}", limit: limit)
-    assert_parse(:parse_object, spl2, "species_list #{spl2.id}", limit: limit)
-    assert_parse(:parse_object, spl2, "Species List #{spl2.id}", limit: limit)
+    assert_parse(:parse_object, obs, nil, default: obs, limit: limit)
+    assert_parse(:parse_object, obs, "observation #{obs.id}", limit: limit)
+    assert_parse(:parse_object, nam, "name #{nam.id}", limit: limit)
+    assert_parse(:parse_object, list, "species list #{list.id}", limit: limit)
+    assert_parse(:parse_object, list, "species_list #{list.id}", limit: limit)
+    assert_parse(:parse_object, list, "Species List #{list.id}", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "1", limit: limit)
     assert_parse(:parse_object, API::BadParameterValue, "bogus", limit: limit)
     assert_parse(:parse_object, API::BadLimitedParameterValue, "bogus 1", limit: limit)
     assert_parse(:parse_object, API::BadLimitedParameterValue,
                  "license #{licenses(:ccnc25).id}", limit: limit)
-    assert_parse(:parse_object, API::ObjectNotFoundById, "name 12345", limit: limit)
-    assert_parse(:parse_objects, [obs10, name20],
-                 "observation #{obs10.id}, name #{name20.id}", limit: limit)
+    assert_parse(:parse_object, API::ObjectNotFoundById, "name 12345",
+                 limit: limit)
+    assert_parse(:parse_objects, [obs, nam],
+                 "observation #{obs.id}, name #{nam.id}", limit: limit)
   end
 
   def test_check_edit_permission
@@ -1076,7 +1077,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_species_list, spl_good, spl_good.id, args)
     assert_parse(:parse_species_list, API::MustHaveEditPermission, spl_bad.id, args)
     assert_parse(:parse_user, dick, dick.id, args)
-    assert_parse(:parse_user, API::MustHaveEditPermission, "1", args)
+    assert_parse(:parse_user, API::MustHaveEditPermission, "#{rolf.id}", args)
 
     args[:limit] = [Image, Observation, SpeciesList, User]
     assert_parse(:parse_object, img_good, "image #{img_good.id}", args)

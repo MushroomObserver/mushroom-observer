@@ -29,7 +29,6 @@ bolete_project:
   summary: Project about Boletes
   created_at: 2008-09-25 07:00:50
   updated_at: 2008-09-25 07:00:55
-  images: in_situ, turned_over
+  images: in_situ_image, turned_over_image
   observations: detailed_unknown_obs
   species_lists: unknown_species_list
-
