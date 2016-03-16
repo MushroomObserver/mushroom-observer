@@ -161,4 +161,27 @@ MushroomObserver::Application.configure do
 
   # Default number of items for an RSS page
   config.default_layout_count = 18
+
+  # Set of javascript and stylesheet files not included by default and
+  # therefore need to be precompiled explicitly.
+  config.assets.precompile += %w(
+    api_key.js
+    date_select.js
+    edit_location.js
+    image_slider.js
+    multi_image_upload.js
+    name_lister.js
+    pivotal.js
+    rss_feed_select_helper.js
+    selectize.min.js
+    single_image_uploader.js
+    translations.js
+    vote_popup.js
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
+  ) if config.assets && config.assets.precompile
 end

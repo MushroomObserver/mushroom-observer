@@ -2,7 +2,9 @@
 module AutocompleteHelper
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)
-    inject_javascript_at_end("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
+    inject_javascript_at_end %(
+      AUTOCOMPLETERS[jQuery('##{first_id}').data('uuid')].reuse('#{new_id}')
+    )
   end
 
   # Turn a text_field into an auto-completer.
@@ -10,23 +12,9 @@ module AutocompleteHelper
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts = {})
     if can_do_ajax?
-      js_args = []
-      opts[:input_id]   = id
-      opts[:row_height] = 22
-      opts.each_pair do |key, val|
-        if key.to_s == "primer"
-          list = val ? val.reject(&:blank?).map(&:to_s).uniq.join("\n") : ""
-          js_args << "primer: '" + escape_javascript(list) + "'"
-        else
-          if !key.to_s.match(/^on/) &&
-             !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
-            val = "'" + escape_javascript(val.to_s) + "'"
-          end
-          js_args << "#{key}: #{val}"
-        end
-      end
-      js_args = js_args.join(", ")
-      inject_javascript_at_end("new MOAutocompleter({ #{js_args} })")
+      opts[:input_id] = id
+      js_args = escape_js_opts(opts)
+      inject_javascript_at_end("new MOAutocompleter(#{js_args})")
     end
   end
 
@@ -89,5 +77,33 @@ module AutocompleteHelper
       ajax_url: "/ajax/auto_complete/herbarium/@?user_id=" + @user.id.to_s,
       unordered: true
     }.merge(opts)) if @user
+  end
+
+  # Convert year field of date_select into an auto-completed text field.
+  def turn_into_year_auto_completer(id, opts = {})
+    js_args = escape_js_opts(opts)
+    javascript_include("date_select.js")
+    inject_javascript_at_end %(
+      replace_date_select_with_text_field("#{id}", #{js_args})
+    )
+  end
+
+  # Convert ruby Hash into Javascript string that evaluates to a hash.
+  # escape_js_opts(:a => 1, :b => 'two') = "{ a: 1, b: 'two' }"
+  def escape_js_opts(opts)
+    js_args = []
+    opts.each_pair do |key, val|
+      if key.to_s == "primer"
+        list = val ? val.reject(&:blank?).map(&:to_s).uniq.join("\n") : ""
+        js_args << "primer: '" + escape_javascript(list) + "'"
+      else
+        if !key.to_s.match(/^on/) &&
+           !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
+          val = "'" + escape_javascript(val.to_s) + "'"
+        end
+        js_args << "#{key}: #{val}"
+      end
+    end
+    "{ " + js_args.join(", ") + " }"
   end
 end

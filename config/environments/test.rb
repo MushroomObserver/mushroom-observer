@@ -97,28 +97,6 @@ MushroomObserver::Application.configure do
   config.assets.debug = false
   config.assets.digest = false
 
-  config.assets.precompile += %w(
-
-    api_key.js
-    edit_location.js
-    image_slider.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    rss_feed_select_helper.js
-    single_image_uploader.js
-    translations.js
-    vote_popup.js
-
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-
-  ) if config.assets && config.assets.precompile
-
   # To control the debugger turing testing
   config.activate_debugger = false
 

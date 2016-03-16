@@ -247,28 +247,45 @@ class AjaxController < ApplicationController
   # Returns image as JSON object.
   def create_image_object
     user = get_session_user!
-    @image = params[:image]
+    image_args = params[:image]
 
-    original_name = @image[:original_name].to_s
+    original_name = image_args[:original_name].to_s
     original_name = "" if user && user.keep_filenames == :toss
 
-    img_when = Date.new(@image[:when][("1i")].to_i, @image[:when][("2i")].to_i,
-                        @image[:when][("3i")].to_i)
-    # #TODO: handle invalid date
-    image = Image.new(
-      created_at: Time.now,
-      user: user,
-      when: img_when,
-      license_id: @image[:license].to_i,
-      notes: @image[:notes],
-      copyright_holder: @image[:copyright_holder],
-      original_name: original_name,
-      image: @image[:upload]
-    )
+    img_when = Date.new(image_args[:when][("1i")].to_i,
+                        image_args[:when][("2i")].to_i,
+                        image_args[:when][("3i")].to_i)
 
-    if !image.save || !image.process_image
-      msg = :runtime_no_upload_image.t(name: (original_name ? "'#{original_name}'" : "##{image.id}"))
-      errors = [msg] + image.formatted_errors
+    errors = []
+    begin
+      # TODO: handle invalid date
+      image = Image.new(
+        created_at: Time.now,
+        user: user,
+        when: img_when,
+        license_id: image_args[:license].to_i,
+        notes: image_args[:notes],
+        copyright_holder: image_args[:copyright_holder],
+        original_name: original_name
+      )
+
+      if image_args[:url].blank?
+        image.image = image_args[:upload]
+      else
+        image.upload_from_url(image_args[:url])
+      end
+
+      if !image.save || !image.process_image
+        errors += image.formatted_errors
+      end
+    rescue => e
+      errors << e.to_s
+    end
+
+    if errors.any?
+      name = original_name
+      name = "##{image.id}" if name.empty?
+      errors.unshift(:runtime_no_upload_image.t(name: name))
       logger.error("UPLOAD_FAILED: #{errors.inspect}")
       render(text: errors.join("\n").strip_html, status: 500, layout: false)
     else
@@ -277,5 +294,7 @@ class AjaxController < ApplicationController
       flash_notice(:runtime_image_uploaded.t(name: name))
       render(json: image)
     end
+  ensure
+    image.try(&:clean_up)
   end
 end

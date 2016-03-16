@@ -1071,6 +1071,9 @@ class Observation < AbstractModel
     elsif self.when.is_a?(Time) && self.when > Time.now + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now + 6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
+    elsif !self.when.respond_to?(:year) || self.when.year < 1500 || self.when.year > (Time.now + 1.day).year
+      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when}")
+      errors.add(:when, :validate_observation_invalid_year.t)
     end
     if !user && !User.current
       errors.add(:user, :validate_observation_user_missing.t)

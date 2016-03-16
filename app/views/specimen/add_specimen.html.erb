@@ -28,8 +28,9 @@
 
       <div class="form-group form-inline push-down">
         <%= label_tag(:specimen_when_1i, :WHEN.t + ":") %>
-        <%= date_select(:specimen, :when, {start_year: 1980, end_year: Time.now.year,
-                        order: [:day,:month,:year]}, {class: "form-control"}) %>
+        <%= date_select(:specimen, :when, date_select_opts(@specimen),
+                        {class: "form-control"}) %>
+        <% turn_into_year_auto_completer(:specimen_when_1i) %>
       </div>
 
       <div class="form-group push-down">

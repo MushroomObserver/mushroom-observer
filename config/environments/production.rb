@@ -147,29 +147,6 @@ MushroomObserver::Application.configure do
   # application.js, application.css, and all non-JS/CSS in app/assets
   # folder are already added.
 
-  # Precompile stuff aside from application.js, application.css, all images.
-  config.assets.precompile += %w(
-
-    api_key.js
-    edit_location.js
-    image_slider.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    rss_feed_select_helper.js
-    single_image_uploader.js
-    translations.js
-    vote_popup.js
-
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-
-  ) if config.assets && config.assets.precompile
-
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery
   # to raise delivery errors.

@@ -13,10 +13,9 @@
 
 <div class="form-group form-inline">
   <%= label_tag(:image_when_1i, :WHEN.t + ":") %>
-  <%= date_select(:image, :when,
-                  { start_year: long_ago.year, end_year: Time.now.year,
-                    order: [:day, :month, :year] },
+  <%= date_select(:image, :when, date_select_opts(@image),
                   { class: "form-control" }) %>
+  <% turn_into_year_auto_completer(:image_when_1i) %>
   <%= content_tag(:p, class: "help-block") { :form_images_when_help.t } %>
 </div>
 
