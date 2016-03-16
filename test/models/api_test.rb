@@ -235,7 +235,6 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_minimal_observation
-  byebug
     @user = rolf
     @name = Name.unknown
     @loc = locations(:unknown_location)
