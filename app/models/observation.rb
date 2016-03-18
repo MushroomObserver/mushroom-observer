@@ -240,19 +240,19 @@ class Observation < AbstractModel
   def lat=(x)
     val = Location.parse_latitude(x)
     val = x if val.nil? && !x.blank?
-    self[:lat] = val
+    write_attribute(:lat, val)
   end
 
   def long=(x)
     val = Location.parse_longitude(x)
     val = x if val.nil? && !x.blank?
-    self[:long] = val
+    write_attribute(:long, val)
   end
 
   def alt=(x)
     val = Location.parse_altitude(x)
     val = x if val.nil? && !x.blank?
-    self[:alt] = val
+    write_attribute(:alt, val)
   end
 
   # Is lat/long more than 10% outside of location extents?
@@ -297,7 +297,7 @@ class Observation < AbstractModel
   # observations, we should never need to reload anything.
   def lookup_naming(naming)
     namings.find { |n| n == naming } ||
-      raise(ActiveRecord::RecordNotFound, "Observation doesn't have naming with ID=#{naming.id}")
+      fail(ActiveRecord::RecordNotFound, "Observation doesn't have naming with ID=#{naming.id}")
   end
 
   # Dump out the sitatuation as the observation sees it.  Useful for debugging
@@ -313,7 +313,7 @@ class Observation < AbstractModel
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.count { |n| n.name == name } > 0
+    namings.select { |n| n.name == name }.count > 0
   end
 
   # Has the owner voted on a given Naming?
@@ -582,29 +582,30 @@ class Observation < AbstractModel
         # It may be possible in the future for us to weight some "special"
         # users zero, who knows...  (It can cause a division by zero below if
         # we ignore zero weights.)
-        next unless wgt > 0
-        # Calculate score for naming.vote_cache.
-        sum_val += val * wgt
-        sum_wgt += wgt
-        # Record best vote for this user for this name.  This will be used
-        # later to determine which name wins in the case of the winning taxon
-        # (see below) having multiple accepted names.
-        name_votes[name_id] = {} unless name_votes[name_id]
-        if !name_votes[name_id][user_id] ||
-           name_votes[name_id][user_id][0] < val
-          name_votes[name_id][user_id] = [val, wgt]
-        end
-        # Record best vote for this user for this group of synonyms.  (Since
-        # not all taxa have synonyms, I've got to create a "fake" id that
-        # uses the synonym id if it exists, else uses the name id, but still
-        # keeps them separate.)
-        taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
-        taxon_ages[taxon_id] = naming.created_at if !taxon_ages[taxon_id] || naming.created_at < taxon_ages[taxon_id]
-        taxon_votes[taxon_id] = {} unless taxon_votes[taxon_id]
-        result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
-        if !taxon_votes[taxon_id][user_id] ||
-           taxon_votes[taxon_id][user_id][0] < val
-          taxon_votes[taxon_id][user_id] = [val, wgt]
+        if wgt > 0
+          # Calculate score for naming.vote_cache.
+          sum_val += val * wgt
+          sum_wgt += wgt
+          # Record best vote for this user for this name.  This will be used
+          # later to determine which name wins in the case of the winning taxon
+          # (see below) having multiple accepted names.
+          name_votes[name_id] = {} unless name_votes[name_id]
+          if !name_votes[name_id][user_id] ||
+             name_votes[name_id][user_id][0] < val
+            name_votes[name_id][user_id] = [val, wgt]
+          end
+          # Record best vote for this user for this group of synonyms.  (Since
+          # not all taxa have synonyms, I've got to create a "fake" id that
+          # uses the synonym id if it exists, else uses the name id, but still
+          # keeps them separate.)
+          taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
+          taxon_ages[taxon_id] = naming.created_at if !taxon_ages[taxon_id] || naming.created_at < taxon_ages[taxon_id]
+          taxon_votes[taxon_id] = {} unless taxon_votes[taxon_id]
+          result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
+          if !taxon_votes[taxon_id][user_id] ||
+             taxon_votes[taxon_id][user_id][0] < val
+            taxon_votes[taxon_id][user_id] = [val, wgt]
+          end
         end
       end
       # Note: this is used by consensus_naming(), not this method.
@@ -718,20 +719,21 @@ class Observation < AbstractModel
         for name in names
           name_id = name.id
           vote = votes[name_id]
-          next unless vote
-          wgt = vote[1]
-          val = vote[0].to_f / (wgt + 1.0)
-          age = name_ages[name_id]
-          result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
-          if best_val2.nil? ||
-             val > best_val2 || val == best_val2 && (
-             wgt > best_wgt2 || wgt == best_wgt2 && (
-             age < best_age2
-             ))
-            best_val2 = val
-            best_wgt2 = wgt
-            best_age2 = age
-            best_id2  = name_id
+          if vote
+            wgt = vote[1]
+            val = vote[0].to_f / (wgt + 1.0)
+            age = name_ages[name_id]
+            result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
+            if best_val2.nil? ||
+               val > best_val2 || val == best_val2 && (
+               wgt > best_wgt2 || wgt == best_wgt2 && (
+               age < best_age2
+               ))
+              best_val2 = val
+              best_wgt2 = wgt
+              best_age2 = age
+              best_id2  = name_id
+            end
           end
         end
         result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_age2}<br/>" if debug
@@ -989,13 +991,14 @@ class Observation < AbstractModel
 
     # Send notification to all except the person who triggered the change.
     for recipient in recipients.uniq
-      next unless recipient && recipient != sender
-      if action == :destroy
-        QueuedEmail::ObservationChange.destroy_observation(sender, recipient, self)
-      elsif action == :change
-        QueuedEmail::ObservationChange.change_observation(sender, recipient, self)
-      else
-        QueuedEmail::ObservationChange.change_images(sender, recipient, self, action)
+      if recipient && recipient != sender
+        if action == :destroy
+          QueuedEmail::ObservationChange.destroy_observation(sender, recipient, self)
+        elsif action == :change
+          QueuedEmail::ObservationChange.change_observation(sender, recipient, self)
+        else
+          QueuedEmail::ObservationChange.change_images(sender, recipient, self, action)
+        end
       end
     end
   end
