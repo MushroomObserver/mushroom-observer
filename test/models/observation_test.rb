@@ -60,13 +60,6 @@ class ObservationTest < UnitTestCase
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(@cc_nam.id) }
   end
 
-  def test_all_observations_order
-    # obs = Observation.all(:order => "id")
-    obs = Observation.order("id")
-    assert_equal(observations(:coprinus_comatus_obs).id, obs[2].id)
-    assert_equal(observations(:detailed_unknown_obs).id, obs[1].id)
-  end
-
   def test_remove_image_twice
     observations(:minimal_unknown_obs).images = [
       images(:commercial_inquiry_image),
