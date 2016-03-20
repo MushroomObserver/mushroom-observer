@@ -337,7 +337,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_delete_images
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     keep = images(:turned_over)
     remove = images(:in_situ)
     assert(obs.images.member?(keep))
@@ -679,7 +679,7 @@ class ImageControllerTest < FunctionalTestCase
     proj1 = projects(:eol_project)
     proj2 = projects(:bolete_project)
     obs1 = observations(:minimal_unknown_obs)
-    obs2 = observations(:detailed_unknown)
+    obs2 = observations(:detailed_unknown_obs)
     img1 = images(:in_situ)
     img2 = images(:commercial_inquiry_image)
     assert_users_equal(mary, obs1.user)

@@ -37,7 +37,7 @@ class InterestControllerTest < FunctionalTestCase
   def test_set_interest
     peltigera = names(:peltigera)
     minimal_unknown = observations(:minimal_unknown_obs)
-    detailed_unknown = observations(:detailed_unknown)
+    detailed_unknown = observations(:detailed_unknown_obs)
 
     # Succeed: Turn interest on in minimal_unknown.
     login("rolf")

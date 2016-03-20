@@ -244,7 +244,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl2 = species_lists(:first_species_list)
     spl3 = species_lists(:another_species_list)
     spl2.user = dick; spl2.save; spl2.reload
-    obs1 = observations(:detailed_unknown)
+    obs1 = observations(:detailed_unknown_obs)
     obs2 = observations(:coprinus_comatus_obs)
     assert_obj_list_equal([dick], proj.user_group.users)
     assert_obj_list_equal([proj], spl1.projects)
@@ -1203,7 +1203,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     now = Time.now
 
     obs1 = observations(:minimal_unknown_obs)
-    obs2 = observations(:detailed_unknown)
+    obs2 = observations(:detailed_unknown_obs)
     obs3 = observations(:coprinus_comatus_obs)
     old_vote1 = begin
                   obs1.namings.first.users_vote(obs1.user).value

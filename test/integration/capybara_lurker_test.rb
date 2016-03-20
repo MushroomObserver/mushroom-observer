@@ -83,7 +83,7 @@ class CapybarLurkerTest < IntegrationTestCase
   def test_show_observation
     # Use detailed_unknown since it has everything.
     lurker = users(:katrina)
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     owner = obs.user
     name = obs.name
 

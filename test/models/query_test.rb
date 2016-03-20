@@ -1275,7 +1275,7 @@ byebug
   end
 
   def test_image_inside_observation
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
     expect = obs.images.sort_by(&:id)
     assert_query(expect, :Image, :inside_observation, observation: obs,

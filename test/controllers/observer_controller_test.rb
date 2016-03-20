@@ -91,7 +91,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_show_observation_noteful_image
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     get_with_dump(:show_observation, id: obs.id)
   end
 
@@ -632,7 +632,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_show_observation_edit_links
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)                        # owned by mary
     assert(obs.projects.include?(proj))                       # owned by bolete project
@@ -1711,7 +1711,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
     new_notes = "blather blather blather"
@@ -1763,7 +1763,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation_no_logging
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
     params = {
@@ -1787,7 +1787,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation_bad_place_name
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
     new_notes = "blather blather blather"
@@ -1815,7 +1815,7 @@ class ObserverControllerTest < FunctionalTestCase
     img2 = images(:turned_over)
     img3 = images(:commercial_inquiry_image)
 
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     obs.images << img3
     obs.save
     obs.reload
@@ -2129,7 +2129,7 @@ class ObserverControllerTest < FunctionalTestCase
   def init_for_project_checkbox_tests
     @proj1 = projects(:eol_project)
     @proj2 = projects(:bolete_project)
-    @obs1 = observations(:detailed_unknown)
+    @obs1 = observations(:detailed_unknown_obs)
     @obs2 = observations(:coprinus_comatus_obs)
     @img1 = @obs1.images.first
     @img2 = @obs2.images.first
@@ -2224,7 +2224,7 @@ class ObserverControllerTest < FunctionalTestCase
     @spl1 = species_lists(:first_species_list)
     @spl2 = species_lists(:unknown_species_list)
     @obs1 = observations(:coprinus_comatus_obs)
-    @obs2 = observations(:detailed_unknown)
+    @obs2 = observations(:detailed_unknown_obs)
     assert_users_equal(rolf, @spl1.user)
     assert_users_equal(mary, @spl2.user)
     assert_users_equal(rolf, @obs1.user)

@@ -108,7 +108,7 @@ class AmateurTest < IntegrationTestCase
   # ----------------------------------
 
   def test_post_comment
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? { |c| c.user == katrina })
 
@@ -199,7 +199,7 @@ class AmateurTest < IntegrationTestCase
     namer_session = open_session.extend(NamerDsl)
     namer = katrina
 
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? { |c| c.user == namer })
     # (Make sure the name we are going to suggest doesn't exist yet.)

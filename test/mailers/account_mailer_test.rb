@@ -223,7 +223,7 @@ class AccountMailerTest < UnitTestCase
   end
 
   def test_observation_email
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     run_mail_test("observation_question", obs.user) do
       ObservationEmail.build(rolf, obs, "Where did you find it?").deliver_now
     end

@@ -43,7 +43,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_observation_with_one_specimen_index
-    get_with_dump(:observation_index, id: observations(:detailed_unknown).id)
+    get_with_dump(:observation_index, id: observations(:detailed_unknown_obs).id)
     assert_response(:redirect)
     assert_no_flash
   end

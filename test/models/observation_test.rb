@@ -64,7 +64,7 @@ class ObservationTest < UnitTestCase
     # obs = Observation.all(:order => "id")
     obs = Observation.order("id")
     assert_equal(observations(:coprinus_comatus_obs).id, obs[2].id)
-    assert_equal(observations(:detailed_unknown).id, obs[1].id)
+    assert_equal(observations(:detailed_unknown_obs).id, obs[1].id)
   end
 
   def test_remove_image_twice
@@ -108,8 +108,8 @@ class ObservationTest < UnitTestCase
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
-    assert(observations(:detailed_unknown).specimen)
-    assert(observations(:detailed_unknown).specimens.length > 0)
+    assert(observations(:detailed_unknown_obs).specimen)
+    assert(observations(:detailed_unknown_obs).specimens.length > 0)
   end
 
   def test_observer_accepts_general_email_questions
@@ -632,7 +632,7 @@ class ObservationTest < UnitTestCase
     assert_false(obs.has_edit_permission?(dick))
 
     # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     assert_false(obs.has_edit_permission?(rolf))
     assert_true(obs.has_edit_permission?(mary))
     assert_true(obs.has_edit_permission?(dick))
