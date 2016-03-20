@@ -74,9 +74,12 @@ class ObservationTest < UnitTestCase
   end
 
   def test_name_been_proposed
-    assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:coprinus_comatus)))
-    assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:agaricus_campestris)))
-    assert(!observations(:coprinus_comatus_obs).name_been_proposed?(names(:conocybe_filaris)))
+    assert(observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:coprinus_comatus)))
+    assert(observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:agaricus_campestris)))
+    assert(!observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:conocybe_filaris)))
   end
 
   def test_owner_id
