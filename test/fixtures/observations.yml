@@ -38,7 +38,7 @@ coprinus_comatus_obs: # old id: 3
   specimen: 1
   notes: Second fruiting in bark chips
   vote_cache: 1
-  thumb_image_id: connected_coprinus_comatus_image
+  thumb_image_id: <%= ActiveRecord::FixtureSet.identify(:connected_coprinus_comatus_image) %>
   images: connected_coprinus_comatus_image
   specimens: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
 

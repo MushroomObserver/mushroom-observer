@@ -263,7 +263,8 @@ class ObservationTest < UnitTestCase
     # so think of this as Mary changing Rolf's vote. :)
     User.current = mary
     obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
-    assert_equal(3, votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
+    assert_equal(3,
+                 votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
@@ -409,19 +410,16 @@ class ObservationTest < UnitTestCase
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)
-
     marys_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: mary,
       state: false
     )
-
     dicks_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: dick,
       state: false
     )
-
     katrinas_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: katrina,
@@ -433,7 +431,8 @@ class ObservationTest < UnitTestCase
     assert_save(marys_interest)
 
     User.current = rolf
-    observations(:coprinus_comatus_obs).notes = "I have new information on this observation."
+    observations(:coprinus_comatus_obs).
+      notes = "I have new information on this observation."
     observations(:coprinus_comatus_obs).save
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -449,9 +448,9 @@ class ObservationTest < UnitTestCase
     assert_save(marys_interest)
     dicks_interest.state = true
     assert_save(dicks_interest)
-
     User.current = rolf
     obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
+
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
                  flavor: "QueuedEmail::ObservationChange",
@@ -476,7 +475,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (3)"
+                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (#{observations(:coprinus_comatus_obs).id})"
                 )
     QueuedEmail.queue_emails(false)
   end
