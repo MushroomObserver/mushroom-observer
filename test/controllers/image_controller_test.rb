@@ -167,7 +167,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image_edit_links
-    img = images(:in_situ)
+    img = images(:in_situ_image)
     proj = projects(:bolete_project)
     assert_equal(mary.id, img.user_id) # owned by mary
     assert(img.projects.include?(proj)) # owned by bolete project
@@ -339,7 +339,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_delete_images
     obs = observations(:detailed_unknown_obs)
     keep = images(:turned_over)
-    remove = images(:in_situ)
+    remove = images(:in_situ_image)
     assert(obs.images.member?(keep))
     assert(obs.images.member?(remove))
     assert_equal(remove.id, obs.thumb_image_id)
@@ -593,7 +593,7 @@ class ImageControllerTest < FunctionalTestCase
 
   # Test setting anonymity of all image votes.
   def test_bulk_image_vote_anonymity_thingy
-    img1 = images(:in_situ)
+    img1 = images(:in_situ_image)
     img2 = images(:commercial_inquiry_image)
     img1.change_vote(mary, 1, false)
     img2.change_vote(mary, 2, true)
@@ -680,7 +680,7 @@ class ImageControllerTest < FunctionalTestCase
     proj2 = projects(:bolete_project)
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
-    img1 = images(:in_situ)
+    img1 = images(:in_situ_image)
     img2 = images(:commercial_inquiry_image)
     assert_users_equal(mary, obs1.user)
     assert_users_equal(mary, obs2.user)

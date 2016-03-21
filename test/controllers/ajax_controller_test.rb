@@ -207,7 +207,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_export_image
-    img = images(:in_situ)
+    img = images(:in_situ_image)
     assert_true(img.ok_for_export) # (default)
 
     bad_ajax_request(:export, type: :image, id: img.id, value: "0")

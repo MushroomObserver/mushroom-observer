@@ -687,7 +687,7 @@ class ObserverControllerTest < FunctionalTestCase
     requires_login(:ask_user_question, id: id)
     assert_form_action(action: :ask_user_question, id: id)
 
-    id = images(:in_situ).id
+    id = images(:in_situ_image).id
     requires_login(:commercial_inquiry, id: id)
     assert_form_action(action: :commercial_inquiry, id: id)
   end
@@ -1754,7 +1754,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(new_specimen, obs.specimen)
     assert_not_equal(updated_at, obs.rss_log.updated_at)
     assert_not_equal(0, obs.thumb_image_id)
-    img = images(:in_situ).reload
+    img = images(:in_situ_image).reload
     assert_equal("new notes", img.notes)
     assert_equal("new name", img.original_name)
     assert_equal("someone else", img.copyright_holder)
@@ -1811,7 +1811,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_edit_observation_with_another_users_image
-    img1 = images(:in_situ)
+    img1 = images(:in_situ_image)
     img2 = images(:turned_over)
     img3 = images(:commercial_inquiry_image)
 
