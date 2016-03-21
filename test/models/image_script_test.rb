@@ -47,33 +47,34 @@ class ScriptTest < UnitTestCase
   ################################################################################
 
   test "process_image" do
+    img = images(:in_situ_image)
     script = script_file("process_image")
     tempfile = Tempfile.new("test").path
     original_image = "#{::Rails.root}/test/images/pleopsidium.tiff"
-    FileUtils.cp(original_image, "#{local_root}/orig/1.tiff")
-    cmd = "#{script} 1 tiff 1 2>&1 > #{tempfile}"
+    FileUtils.cp(original_image, "#{local_root}/orig/#{img.id}.tiff")
+    cmd = "#{script} #{img.id} tiff 1 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
-      file.puts "#{local_root}/orig/1.jpg"
-      file.puts "#{local_root}/1280/1.jpg"
-      file.puts "#{local_root}/960/1.jpg"
-      file.puts "#{local_root}/640/1.jpg"
-      file.puts "#{local_root}/320/1.jpg"
-      file.puts "#{local_root}/thumb/1.jpg"
+      file.puts "#{local_root}/orig//#{img.id}.jpg"
+      file.puts "#{local_root}/1280//#{img.id}.jpg"
+      file.puts "#{local_root}/960//#{img.id}.jpg"
+      file.puts "#{local_root}/640//#{img.id}.jpg"
+      file.puts "#{local_root}/320//#{img.id}.jpg"
+      file.puts "#{local_root}/thumb//#{img.id}.jpg"
     end
     sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").map do |line|
       line[local_root.length + 1..-1].chomp
     end
-    assert_equal("orig/1.jpg: 2560 1920", sizes[0], "full-size image is wrong size")
-    assert_equal("1280/1.jpg: 1280 960", sizes[1], "huge-size image is wrong size")
-    assert_equal("960/1.jpg: 960 720", sizes[2], "large-size image is wrong size")
-    assert_equal("640/1.jpg: 640 480", sizes[3], "medium-size image is wrong size")
-    assert_equal("320/1.jpg: 320 240", sizes[4], "small-size image is wrong size")
-    assert_equal("thumb/1.jpg: 160 120", sizes[5], "thumbnail image is wrong size")
-    img = images(:in_situ_image)
+    assert_equal("orig//#{img.id}.jpg: 2560 1920", sizes[0], "full-size image is wrong size")
+    assert_equal("1280//#{img.id}.jpg: 1280 960", sizes[1], "huge-size image is wrong size")
+    assert_equal("960//#{img.id}.jpg: 960 720", sizes[2], "large-size image is wrong size")
+    assert_equal("640//#{img.id}.jpg: 640 480", sizes[3], "medium-size image is wrong size")
+    assert_equal("320//#{img.id}.jpg: 320 240", sizes[4], "small-size image is wrong size")
+    assert_equal("thumb//#{img.id}.jpg: 160 120", sizes[5], "thumbnail image is wrong size")
+
     assert_equal(2560, img.width)
     assert_equal(1920, img.height)
     assert_equal(true, img.transferred)
