@@ -50,7 +50,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} dick > #{tempfile}"
     assert system(cmd)
     expect = "id login name email verified last_use\n" \
-             "4 dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
+             "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
     actual = File.read(tempfile).gsub(/ +/, " ")
     assert_equal(expect, actual)
   end
