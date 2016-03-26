@@ -82,7 +82,7 @@ boletus_edulis_naming:
   updated_at: 2015-10-08 15:41:00
   user: dick
   name: boletus_edulis
-  observation: boletus_edulis_obs
+  observation: owner_only_favorite_eq_consensus
 
 tremella_naming:
   # id: 11
@@ -90,7 +90,7 @@ tremella_naming:
   updated_at: 2015-10-08 15:41:00
   user: junk
   name: tremella
-  observation: tremella_obs
+  observation: owner_only_favorite_ne_consensus
 
 tremella_mesenterica_naming:
   # id: 12
@@ -98,7 +98,7 @@ tremella_mesenterica_naming:
   updated_at: 2015-10-08 15:41:00
   user: dick
   name: tremella_mesenterica
-  observation: tremella_mesenterica_obs
+  observation: owner_only_favorite_ne_consensus
 
 owner_multiple_favorites_first_naming:
   # id: 13
