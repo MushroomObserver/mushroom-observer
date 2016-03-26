@@ -105,7 +105,7 @@ brett_woods_version_1:
   id: 8
   location_id: <%= ActiveRecord::FixtureSet.identify(:bretton_woods) %>
   updated_at: 2007-12-27 06:47:00
-  location_id: <%= ActiveRecord::FixtureSet.identify(:brett_woods) %>
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Brett Woods, Fairfield Co., Connecticut, USA
   scientific_name: USA, Connecticut, Fairfield Co., Brett Woods
