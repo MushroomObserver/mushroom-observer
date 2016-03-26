@@ -149,7 +149,7 @@ peltigera_source_desc_version_1:
   name_description_id: <%= ActiveRecord::FixtureSet.
    identify(:peltigera_source_desc) %>
   updated_at: 2010-01-03 01:01:01
-  user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
+  user_id: <%= ActiveRecord::FixtureSet.identify(:katrina) %>
   version: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
 
