@@ -610,7 +610,7 @@ petigera_version_1:
 
 suillus_version_1:
   id: 45
-  name_id: <%= ActiveRecord::FixtureSet.identify(:suillus_) %>
+  name_id: <%= ActiveRecord::FixtureSet.identify(:suillus) %>
   updated_at: 2009-10-12 21:30:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
   version: 1
@@ -624,7 +624,7 @@ suillus_version_1:
 
 suillus_by_white_version_1:
   id: 46
-  name_id: <%= ActiveRecord::FixtureSet.identify(:suillus) %>
+  name_id: <%= ActiveRecord::FixtureSet.identify(:suillus_by_white) %>
   updated_at: 2009-10-12 21:30:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
   version: 1
@@ -648,7 +648,7 @@ suilus_version_1:
   display_name: '**__Suilus__** E.B. White'
   search_name: Suilus sp. E.B. White
   sort_name: Suilus sp. E.B. White
-  correct_spelling_id: <%= ActiveRecord::FixtureSet.identify(:suillus) %>
+  correct_spelling_id: <%= ActiveRecord::FixtureSet.identify(:suillus_by_white) %>
   deprecated: true
   citation: ''
 

@@ -670,7 +670,7 @@ petigera: # id: 41
 
 suillus: # id: 42
   # accepted_name_id: 42
-  description: 7
+  description: suillus_desc
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user: dick
@@ -711,7 +711,7 @@ suilus: # id: 44
   display_name: '**__Suilus__** E.B. White'
   search_name: Suilus E.B. White
   sort_name: Suilus  E.B. White
-  correct_spelling: suillus
+  correct_spelling: suillus_by_white
   deprecated: true
   citation: ''
   notes: ''
