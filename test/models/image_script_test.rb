@@ -160,10 +160,8 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
-    img1 = images(:in_situ_image)
-    img2 = images(:turned_over_image)
-    assert_equal(true, img1.transferred)
-    assert_equal(true, img2.transferred)
+    assert_equal(true, images(:in_situ_image).transferred)
+    assert_equal(true, images(:turned_over_image).transferred)
 
     assert_equal("A", File.read("#{remote_root}1/orig/#{in_situ_id}.tiff"),
                  "orig/#{in_situ_id}.tiff wrong for server 1")
