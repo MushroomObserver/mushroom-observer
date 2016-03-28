@@ -1025,13 +1025,36 @@ byebug
     # Several observation queries can be turned into name queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
     q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
-    q3a = Query.lookup_and_save(:Observation, :in_species_list, species_list: species_lists(:first_species_list).id)
-    q4a = Query.lookup_and_save(:Observation, :of_name, name: names(:conocybe_filaris).id)
-    q5a = Query.lookup_and_save(:Observation, :in_set, ids: [2, 4, 6])
-    q6a = Query.lookup_and_save(:Observation, :pattern_search, pattern: '"somewhere else"')
-    q7a = Query.lookup_and_save(:Observation, :advanced_search, location: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
-    q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
+    q3a = Query.
+            lookup_and_save(:Observation,
+                            :in_species_list,
+                            species_list: species_lists(:first_species_list).id)
+    q4a = Query.
+            lookup_and_save(:Observation,
+                            :of_name,
+                            name: names(:conocybe_filaris).id)
+    q5a = Query.
+            lookup_and_save(:Observation,
+                            :in_set,
+                            ids: [observations(:detailed_unknown_obs).id,
+                                  observations(:agaricus_campestris_obs).id,
+                                  observations(:agaricus_campestras_obs).id])
+    q6a = Query.
+            lookup_and_save(:Observation,
+                            :pattern_search,
+                            pattern: '"somewhere else"')
+    q7a = Query.
+            lookup_and_save(:Observation,
+                            :advanced_search,
+                            location: "glendale")
+    q8a = Query.
+            lookup_and_save(:Observation,
+                            :at_location,
+                            location: locations(:burbank))
+    q9a = Query.
+            lookup_and_save(:Observation,
+                            :at_where,
+                            user_where: "california", location: "california")
     assert_equal(9, Query.count)
 
     # Try coercing them all.
