@@ -1589,9 +1589,9 @@ byebug
 
   def test_name_all
     expect = Name.all.order(:sort_name).to_a
-    do_test_name_all(expect)
-  rescue
-    # Having problems with "Kuhner" and "Kühner" sorting correctly in all versions.
+    # SQL does not sort 'Kuhner' and 'Kühner'
+    do_test_name_all(expect) if sql_collates_accents?
+
     pair = expect.select { |x| x.text_name == "Lentinellus ursinus" }
     a = expect.index(pair.first)
     b = expect.index(pair.last)
