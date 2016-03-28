@@ -2099,29 +2099,36 @@ byebug
   end
 
   def test_location_ordering
-    loc1 = locations(:albion)
-    loc2 = locations(:elgin_co)
+    albion = locations(:albion)
+    elgin_co = locations(:elgin_co)
 
     User.current = rolf
     assert_equal(:postal, User.current_location_format)
-    assert_query([loc1, loc2], :Location, :in_set, ids: [1, 6], by: :name)
+    assert_query([albion, elgin_co], :Location, :in_set,
+                 ids: [albion.id, elgin_co.id], by: :name)
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    assert_query([loc2, loc1], :Location, :in_set, ids: [1, 6], by: :name)
+    assert_query([elgin_co, albion], :Location,
+                 :in_set,
+                 ids: [albion.id, elgin_co.id], by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
-    obs1.update_attribute(:location, loc1)
-    obs2.update_attribute(:location, loc2)
+    obs1.update_attribute(:location, albion)
+    obs2.update_attribute(:location, elgin_co)
 
     User.current = rolf
     assert_equal(:postal, User.current_location_format)
-    assert_query([obs1, obs2], :Observation, :in_set, ids: [1, 2], by: :location)
+    assert_query([obs1, obs2], :Observation,
+                 :in_set,
+                 ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    assert_query([obs2, obs1], :Observation, :in_set, ids: [1, 2], by: :location)
+    assert_query([obs2, obs1], :Observation,
+                 :in_set,
+                 ids: [obs1.id, obs2.id], by: :location)
   end
 
   def test_filtering_content
