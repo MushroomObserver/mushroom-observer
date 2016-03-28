@@ -1445,31 +1445,43 @@ byebug
   end
 
   def test_location_by_rss_log
-    assert_query([3], :Location, :by_rss_log)
+    assert_query([locations(:mitrula_marsh).id], :Location, :by_rss_log)
   end
 
   def test_location_in_set
-    assert_query([5, 1, 2, 6], :Location, :in_set, ids: [5, 1, 2, 6])
+    assert_query([locations(:gualala).id,
+                  locations(:albion).id,
+                  locations(:burbank).id,
+                  locations(:elgin_co).id],
+                 :Location, :in_set,
+                 ids: [locations(:gualala).id,
+                       locations(:albion).id,
+                       locations(:burbank).id,
+                       locations(:elgin_co).id])
   end
 
   def test_location_pattern
     expect = Location.all.select { |l| l.display_name =~ /california/i }
-    assert_query(expect, :Location, :pattern_search, pattern: "California", by: :id)
-    assert_query([6], :Location, :pattern_search, pattern: "Canada")
+    assert_query(expect, :Location,
+                 :pattern_search, pattern: "California", by: :id)
+    assert_query([locations(:elgin_co).id], :Location,
+                 :pattern_search, pattern: "Canada")
     assert_query([], :Location, :pattern_search, pattern: "Canada -Elgin")
   end
 
   def test_location_with_descriptions
-    assert_query([1], :Location, :with_descriptions)
+    assert_query([locations(:albion).id], :Location, :with_descriptions)
   end
 
   def test_location_with_descriptions_by_user
-    assert_query([1], :Location, :with_descriptions_by_user, user: rolf)
+    assert_query([locations(:albion).id], :Location,
+                 :with_descriptions_by_user, user: rolf)
     assert_query([], :Location, :with_descriptions_by_user, user: mary)
   end
 
   def test_location_with_descriptions_by_author
-    assert_query([1], :Location, :with_descriptions_by_author, user: rolf)
+    assert_query([locations(:albion).id],
+                 :Location, :with_descriptions_by_author, user: rolf)
     assert_query([], :Location, :with_descriptions_by_author, user: mary)
   end
 
@@ -1479,39 +1491,50 @@ byebug
     desc.notes = "blah blah blah"
     desc.save
     assert_query([], :Location, :with_descriptions_by_editor, user: rolf)
-    assert_query([1], :Location, :with_descriptions_by_editor, user: mary)
+    assert_query([locations(:albion).id],
+                 :Location, :with_descriptions_by_editor, user: mary)
   end
 
   def test_location_with_observations
-    assert_query([2], :Location, :with_observations)
+    assert_query([locations(:burbank).id], :Location, :with_observations)
   end
 
   def test_location_with_observations_by_user
-    assert_query([2], :Location, :with_observations_by_user, user: rolf.id)
-    assert_query([], :Location, :with_observations_by_user, user: 4)
+    assert_query([locations(:burbank).id], :Location,
+                 :with_observations_by_user, user: rolf.id)
+    assert_query([], :Location, :with_observations_by_user, user: dick.id)
   end
 
   def test_location_with_observations_in_set
-    assert_query([2], :Location, :with_observations_in_set, ids: [1])
-    assert_query([], :Location, :with_observations_in_set, ids: [3])
+    assert_query([locations(:burbank).id], :Location,
+                 :with_observations_in_set,
+                 ids: [observations(:minimal_unknown_obs).id])
+    assert_query([], :Location,
+                 :with_observations_in_set,
+                 ids: [observations(:coprinus_comatus_obs).id])
   end
 
   def test_location_with_observations_in_species_list
-    assert_query([2], :Location, :with_observations_in_species_list,
-                 species_lists(:unknown_species_list).id)
+    assert_query([locations(:burbank).id], :Location,
+                 :with_observations_in_species_list,
+                 species_list: species_lists(:unknown_species_list).id)
     assert_query([], :Location, :with_observations_in_species_list,
                  species_list: species_lists(:first_species_list).id)
   end
 
   def test_location_with_observations_of_children
-    assert_query([2], :Location, :with_observations_of_children, name: names(:agaricus))
+    assert_query([locations(:burbank).id],
+                 :Location,
+                 :with_observations_of_children, name: names(:agaricus))
   end
 
   def test_location_with_observations_of_name
-    name = names(:agaricus_campestris)
-    assert_query([2], :Location, :with_observations_of_name, name: name.id)
-    name = names(:peltigera)
-    assert_query([], :Location, :with_observations_of_name, name: name.id)
+    assert_query([locations(:burbank).id], :Location,
+                 :with_observations_of_name,
+                 name: names(:agaricus_campestris).id)
+    assert_query([], :Location,
+                 :with_observations_of_name,
+                 name: names(:peltigera).id)
   end
 
   def test_location_description_all
