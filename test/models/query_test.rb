@@ -1407,19 +1407,38 @@ byebug
   end
 
   def test_location_advanced
-    assert_query([2], :Location, :advanced_search, name: "agaricus")
-    assert_query([],  :Location, :advanced_search, name: "coprinus")
-    assert_query([2], :Location, :advanced_search, location: "burbank")
-    assert_query([9, 4], :Location, :advanced_search, location: "park")
-    assert_query([2], :Location, :advanced_search, user: "rolf")
-    assert_query([],  :Location, :advanced_search, user: "dick")
-    assert_query([2], :Location, :advanced_search, content: '"strange place"') # obs.notes
-    assert_query([2], :Location, :advanced_search, content: '"a little of everything"') # comment
-    assert_query([],  :Location, :advanced_search, content: '"play with"') # no search loc.notes
-    assert_query([2], :Location, :advanced_search, name: "agaricus", content: '"lawn"')
-    assert_query([],  :Location, :advanced_search, name: "agaricus", content: '"play with"')
-    assert_query([2], :Location, :advanced_search, content: '"a little of everything" "strange place"') # from observation and comment for same observation
-    assert_query([],  :Location, :advanced_search, content: '"minimal unknown" "complicated"')          # from different comments, should fail
+    assert_query([locations(:burbank).id], :Location, :advanced_search,
+                 name: "agaricus")
+    assert_query([], :Location, :advanced_search, name: "coprinus")
+    assert_query([locations(:burbank).id], :Location, :advanced_search,
+                 location: "burbank")
+    assert_query([locations(:howarth_park).id,
+                  locations(:salt_point).id], :Location,
+                 :advanced_search,
+                 location: "park")
+    assert_query([locations(:burbank).id], :Location, :advanced_search,
+                 user: "rolf")
+    assert_query([], :Location, :advanced_search, user: "dick")
+    assert_query([locations(:burbank).id], :Location,
+                 :advanced_search,
+                 content: '"strange place"') # obs.notes
+    assert_query([locations(:burbank).id], :Location,
+                 :advanced_search,
+                 content: '"a little of everything"') # comment
+    assert_query([], :Location, :advanced_search,
+                 content: '"play with"') # no search loc.notes
+    assert_query([locations(:burbank).id], :Location,
+                 :advanced_search,
+                 name: "agaricus", content: '"lawn"')
+    assert_query([], :Location, :advanced_search,
+                 name: "agaricus", content: '"play with"')
+    assert_query([locations(:burbank).id], :Location,
+                 :advanced_search,
+                 # from observation and comment for same observation
+                 content: '"a little of everything" "strange place"')
+    assert_query([], :Location,
+                 :advanced_search, # from different comments, should fail
+                 content: '"minimal unknown" "complicated"')
   end
 
   def test_location_all
