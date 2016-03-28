@@ -1158,9 +1158,9 @@ byebug
     assert_equal(:with_descriptions_by_author, q2b.flavor)
     assert_equal(:with_descriptions_by_editor, q3b.flavor)
     assert_equal(:with_descriptions_by_user, q4b.flavor)
-    assert_equal(1, q2b.params[:user])
-    assert_equal(1, q3b.params[:user])
-    assert_equal(1, q4b.params[:user])
+    assert_equal(rolf.id, q2b.params[:user])
+    assert_equal(rolf.id, q3b.params[:user])
+    assert_equal(rolf.id, q4b.params[:user])
 
     # Try coercing them back.
     assert(q1c = q1b.coerce(:NameDescription))
