@@ -1543,7 +1543,8 @@ byebug
   end
 
   def test_location_description_by_user
-    assert_query([1], :LocationDescription, :by_user, user: rolf)
+    assert_query([location_descriptions(:albion_desc).id], :LocationDescription,
+                 :by_user, user: rolf)
     assert_query([], :LocationDescription, :by_user, user: dick)
   end
 
