@@ -1683,20 +1683,31 @@ byebug
   end
 
   def test_name_description_by_user
-    assert_query([9, 13], :NameDescription, :by_user, user: mary, by: :id)
-    assert_query([8, 11, 14], :NameDescription, :by_user, user: katrina, by: :id)
+    assert_query([name_descriptions(:draft_agaricus_campestris).id,
+                  name_descriptions(:peltigera_user_desc).id],
+                 :NameDescription, :by_user, user: mary, by: :id)
+    assert_query([name_descriptions(:draft_coprinus_comatus).id,
+                  name_descriptions(:draft_lactarius_alpinus).id,
+                  name_descriptions(:peltigera_source_desc).id],
+                 :NameDescription, :by_user, user: katrina, by: :id)
     assert_query([], :NameDescription, :by_user, user: junk, by: :id)
   end
 
   def test_name_description_by_author
-    assert_query([12, 15], :NameDescription, :by_author, user: rolf, by: :id)
-    assert_query([9, 13], :NameDescription, :by_author, user: mary, by: :id)
+    assert_query([name_descriptions(:peltigera_alt_desc).id,
+                  name_descriptions(:coprinus_comatus_desc).id],
+                 :NameDescription, :by_author, user: rolf, by: :id)
+    assert_query([name_descriptions(:draft_agaricus_campestris).id,
+                  name_descriptions(:peltigera_user_desc).id],
+                  :NameDescription, :by_author, user: mary, by: :id)
     assert_query([], :NameDescription, :by_author, user: junk)
   end
 
   def test_name_description_by_editor
-    assert_query([15], :NameDescription, :by_editor, user: rolf)
-    assert_query([15], :NameDescription, :by_editor, user: mary)
+    assert_query([name_descriptions(:coprinus_comatus_desc).id],
+                 :NameDescription, :by_editor, user: rolf)
+    assert_query([name_descriptions(:coprinus_comatus_desc).id],
+                 :NameDescription, :by_editor, user: mary)
     assert_query([], :NameDescription, :by_editor, user: dick)
   end
 
