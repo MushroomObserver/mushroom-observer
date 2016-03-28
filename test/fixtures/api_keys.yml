@@ -9,4 +9,24 @@ rolfs_api_key:
   num_uses: 0
   user: rolf
   key: bogus_api_key
-  notes: For testing purpose’s only.
+  notes: For testing purposes only.
+
+# The next 3 fixtures are used to test whether sql collates accented letters.
+# Has nothing to do with APIs; This is just a convenient spot to add fixtures.
+api_key_u_1:
+  id: 1
+  user_id: 1
+  key: sort_test
+  notes: u
+
+api_key_umlaut:
+  id: 2
+  user_id: 1
+  key: sort_test
+  notes: ü
+
+api_key_u_2:
+  id: 3
+  user_id: 1
+  key: sort_test
+  notes: u
