@@ -2022,7 +2022,9 @@ byebug
   end
 
   def test_rsslog_in_set
-    assert_query([2, 3], :RssLog, :in_set, ids: [2, 3])
+    rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
+                      rss_logs(:name_rss_log).id]
+    assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
   end
 
   def test_specieslist_all
@@ -2031,17 +2033,23 @@ byebug
   end
 
   def test_specieslist_by_rss_log
-    assert_query([1], :SpeciesList, :by_rss_log)
+    assert_query([species_lists(:first_species_list).id], :SpeciesList,
+                 :by_rss_log)
   end
 
   def test_specieslist_by_user
-    assert_query([1, 2], :SpeciesList, :by_user, user: rolf, by: :id)
-    assert_query([3], :SpeciesList, :by_user, user: mary, by: :id)
+    assert_query([species_lists(:first_species_list).id,
+                  species_lists(:another_species_list).id], :SpeciesList,
+                 :by_user, user: rolf, by: :id)
+    assert_query([species_lists(:unknown_species_list).id], :SpeciesList,
+                 :by_user, user: mary, by: :id)
     assert_query([], :SpeciesList, :by_user, user: dick)
   end
 
   def test_specieslist_in_set
-    assert_query([1, 3], :SpeciesList, :in_set, ids: [1, 3])
+    list_set_ids = [species_lists(:first_species_list).id,
+                    species_lists(:unknown_species_list).id]
+    assert_query(list_set_ids, :SpeciesList, :in_set, ids: list_set_ids)
   end
 
   def test_user_all
