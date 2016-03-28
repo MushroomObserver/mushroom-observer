@@ -1833,14 +1833,19 @@ byebug
   end
 
   def test_observation_advanced
-    assert_query([8], :Observation, :advanced_search, name: "diminutivus")
-    assert_query([3], :Observation, :advanced_search, location: "glendale") # where
+    assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :advanced_search, name: "diminutivus")
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :advanced_search, location: "glendale") # where
     expect = Observation.where(location_id: locations(:burbank)).to_a
-    assert_query(expect, :Observation, :advanced_search, location: "burbank", by: :id) # location
+    assert_query(expect, :Observation,
+                 :advanced_search, location: "burbank", by: :id) # location
     expect = Observation.where(user_id: rolf.id).to_a
     assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
-    assert_query([3], :Observation, :advanced_search, content: "second fruiting") # notes
-    assert_query([1], :Observation, :advanced_search, content: "agaricus") # comment
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :advanced_search, content: "second fruiting") # notes
+    assert_query([observations(:minimal_unknown_obs).id], :Observation,
+                 :advanced_search, content: "agaricus") # comment
   end
 
   def test_observation_all
@@ -1849,20 +1854,21 @@ byebug
   end
 
   def test_observation_at_location
-    expect = Observation.where(location_id: 2).includes(:name).
-             order("names.text_name, names.author,
-                           observations.id DESC").to_a
+    expect = Observation.where(location_id: locations(:burbank).id).
+               includes(:name).
+               order("names.text_name, names.author, observations.id DESC").to_a
     assert_query(expect, :Observation, :at_location,
                          location: locations(:burbank))
   end
 
   def test_observation_at_where
-    assert_query([3], :Observation, :at_where, user_where: "glendale",
-                      location: "glendale")
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :at_where, user_where: "glendale", location: "glendale")
   end
 
   def test_observation_by_rss_log
-    assert_query([2], :Observation, :by_rss_log)
+    assert_query([observations(:detailed_unknown_obs).id], :Observation,
+                 :by_rss_log)
   end
 
   def test_observation_by_user
@@ -1877,12 +1883,24 @@ byebug
   end
 
   def test_observation_in_set
-    assert_query([9, 1, 8, 2, 7, 3, 6, 4, 5], :Observation, :in_set, ids: [9, 1, 8, 2, 7, 3, 6, 4, 5])
+    obs_set_ids = [observations(:unknown_with_no_naming).id,
+                   observations(:minimal_unknown_obs).id,
+                   observations(:strobilurus_diminutivus_obs).id,
+                   observations(:detailed_unknown_obs).id,
+                   observations(:agaricus_campestros_obs).id,
+                   observations(:coprinus_comatus_obs).id,
+                   observations(:agaricus_campestras_obs).id,
+                   observations(:agaricus_campestris_obs).id,
+                   observations(:agaricus_campestrus_obs).id]
+    assert_query(obs_set_ids, :Observation, :in_set, ids: obs_set_ids)
   end
 
   def test_observation_in_species_list
-    # These two are identical in everyway, so should be disambiguated by reverse_id.
-    assert_query([2, 1], :Observation, :in_species_list, species_lists(:unknown_species_list).id)
+    # These two are identical, so should be disambiguated by reverse_id.
+    assert_query([observations(:detailed_unknown_obs).id,
+                  observations(:minimal_unknown_obs).id], :Observation,
+                 :in_species_list,
+                 species_list: species_lists(:unknown_species_list).id)
   end
 
   def test_observation_of_children
@@ -1960,26 +1978,31 @@ byebug
 
   def test_observation_pattern
     # notes
-    assert_query([6, 7, 5, 8], :Observation, :pattern_search,
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id,
+                  observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :pattern_search,
                  pattern: '"somewhere else"', by: :name)
     # assert_query([1], :Observation, :pattern_search,
     #                   pattern: 'wow!') # comment
     # where
-    assert_query([8], :Observation, :pattern_search, pattern: "pipi valley")
+    assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :pattern_search, pattern: "pipi valley")
 
     # location
-    expect = Observation.where(location_id: locations(:burbank)).includes(:name).
-             order("names.text_name, names.author,
-                                observations.id DESC").to_a
-    assert_query(expect, :Observation, :pattern_search, pattern: "burbank",
-                                                        by: :name)
+    expect = Observation.where(location_id: locations(:burbank)).
+               includes(:name).
+               order("names.text_name, names.author,observations.id DESC").to_a
+    assert_query(expect, :Observation,
+                 :pattern_search, pattern: "burbank", by: :name)
 
     # name
-    expect = Observation.where("text_name LIKE 'agaricus%'").includes(:name).
-             order("names.text_name, names.author,
-                                observations.id DESC")
-    assert_query(expect.map(&:id), :Observation, :pattern_search,
-                 pattern: "agaricus", by: :name)
+    expect = Observation.
+               where("text_name LIKE 'agaricus%'").includes(:name).
+                 order("names.text_name, names.author, observations.id DESC")
+    assert_query(expect.map(&:id), :Observation,
+                 :pattern_search, pattern: "agaricus", by: :name)
   end
 
   def test_project_all
