@@ -2073,7 +2073,8 @@ byebug
   ##############################################################################
 
   def test_whiny_nil_in_map_locations
-    query = Query.lookup(:User, :in_set, ids: [1, 1000, 2])
+    query = Query.lookup(:User, :in_set,
+                         ids: [rolf.id, 1000, mary.id])
     query.query
     assert_equal(2, query.results.length)
   end
