@@ -1329,7 +1329,9 @@ byebug
     assert_query([images(:connected_coprinus_comatus_image).id], :Image,
                  :with_observations_at_where, user_where: "glendale",
                  location: "glendale")
-    assert_query([], :Image, :with_observations_at_where, user_where: "snazzle", location: "snazzle")
+    assert_query([], :Image,
+                 :with_observations_at_where,
+                 user_where: "snazzle", location: "snazzle")
   end
 
   def test_image_with_observations_by_user
@@ -1345,12 +1347,15 @@ byebug
 
   def test_image_with_observations_in_set
     assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id, images(:in_situ_image).id],
-                  :Image, :with_observations_in_set,
-                  ids: [images(:turned_over_image).id,
-                        images(:disconnected_coprinus_comatus_image).id])
-    assert_query([], :Image, :with_observations_in_set,
-                 ids: [1])
+                  images(:turned_over_image).id,
+                  images(:in_situ_image).id],
+                 :Image,
+                 :with_observations_in_set,
+                 ids: [observations(:detailed_unknown_obs).id,
+                       observations(:agaricus_campestris_obs).id])
+    assert_query([], :Image,
+                 :with_observations_in_set,
+                 ids: [observations(:minimal_unknown_obs).id])
   end
 
   def test_image_with_observations_in_species_list
@@ -1390,13 +1395,13 @@ byebug
     assert_query([images(:turned_over_image).id,
                   images(:in_situ_image).id], :Image,
                  :with_observations_of_name,
-                 name: 1)
+                 name: names(:fungi).id)
     assert_query([images(:connected_coprinus_comatus_image).id],
                  :Image, :with_observations_of_name,
-                 name: 2)
+                 name: names(:coprinus_comatus).id)
     assert_query([images(:agaricus_campestris_image).id], :Image,
                  :with_observations_of_name,
-                 name: 3)
+                 name: names(:agaricus_campestris).id)
     assert_query([], :Image, :with_observations_of_name,
                  name: names(:conocybe_filaris).id)
   end
@@ -1781,7 +1786,11 @@ byebug
   end
 
   def test_observation_of_children
-    assert_query([6, 4, 7, 5], :Observation, :of_children, name: names(:agaricus))
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation, :of_children, name: names(:agaricus))
   end
 
   def test_observation_of_name
@@ -1791,23 +1800,62 @@ byebug
     names.each { |n| name.merge_synonyms(n) }
     observations(:agaricus_campestras_obs).update_attribute(:user, mary)
     observations(:agaricus_campestros_obs).update_attribute(:user, mary)
-    spl = SpeciesList.first
+    spl = species_lists(:first_species_list)
     spl.observations << observations(:agaricus_campestrus_obs)
     spl.observations << observations(:agaricus_campestros_obs)
-    proj = Project.first
+    proj = projects(:eol_project)
     proj.observations << observations(:agaricus_campestris_obs)
     proj.observations << observations(:agaricus_campestras_obs)
-    assert_query([10, 9, 2, 1], :Observation, :of_name, name: 1)
-    assert_query([],  :Observation, :of_name, name: 9)
-    assert_query([4], :Observation, :of_name, name: 3)
-    assert_query([7, 6, 5], :Observation, :of_name, name: 3, synonyms: :exclusive)
-    assert_query([7, 6, 5, 4], :Observation, :of_name, name: 3, synonyms: :all)
-    assert_query([3], :Observation, :of_name, name: 3, nonconsensus: :exclusive)
-    assert_query([4, 3], :Observation, :of_name, name: 3, nonconsensus: :all)
-    assert_query([5, 4], :Observation, :of_name, name: 3, synonyms: :all, user: rolf.id)
-    assert_query([7, 6], :Observation, :of_name, name: 3, synonyms: :all, user: mary.id)
-    assert_query([7, 5], :Observation, :of_name, name: 3, synonyms: :all, species_list: species_lists(:first_species_list).id)
-    assert_query([6, 4], :Observation, :of_name, name: 3, synonyms: :all, project: 1)
+    assert_query([observations(:unknown_with_lat_long).id,
+                  observations(:unknown_with_no_naming).id,
+                  observations(:detailed_unknown_obs).id,
+                  observations(:minimal_unknown_obs).id], :Observation,
+                 :of_name, name: names(:fungi).id)
+    assert_query([], :Observation,
+                 :of_name, name: names(:macrolepiota_rachodes).id)
+    assert_query([observations(:agaricus_campestris_obs).id], :Observation,
+                 :of_name, name: names(:agaricus_campestris).id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 synonyms: :exclusive)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all)
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 nonconsensus: :exclusive)
+    assert_query([observations(:agaricus_campestris_obs).id,
+                  observations(:coprinus_comatus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 nonconsensus: :all)
+    assert_query([observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 user: rolf.id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 user: mary.id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 species_list: species_lists(:first_species_list).id)
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 project: projects(:eol_project).id)
   end
 
   def test_observation_pattern
