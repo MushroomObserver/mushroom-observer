@@ -1357,7 +1357,7 @@ byebug
     assert_query([images(:turned_over_image).id,
                   images(:in_situ_image).id],
                  :Image, :with_observations_in_species_list,
-                species_list: 3)
+                 species_list: species_lists(:unknown_species_list).id)
     assert_query([], :Image, :with_observations_in_species_list,
                  species_list: species_lists(:first_species_list).id)
   end
@@ -1493,7 +1493,7 @@ byebug
 
   def test_location_with_observations_in_species_list
     assert_query([2], :Location, :with_observations_in_species_list,
-                 species_list: 3)
+                 species_lists(:unknown_species_list).id)
     assert_query([], :Location, :with_observations_in_species_list,
                  species_list: species_lists(:first_species_list).id)
   end
@@ -1673,7 +1673,7 @@ byebug
   end
 
   def test_name_with_observations_in_species_list
-    assert_query([1], :Name, :with_observations_in_species_list, species_list: 3)
+    assert_query([1], :Name, :with_observations_in_species_list, species_lists(:unknown_species_list).id)
     assert_query([], :Name, :with_observations_in_species_list, species_list: species_lists(:first_species_list).id)
   end
 
@@ -1750,7 +1750,7 @@ byebug
 
   def test_observation_in_species_list
     # These two are identical in everyway, so should be disambiguated by reverse_id.
-    assert_query([2, 1], :Observation, :in_species_list, species_list: 3)
+    assert_query([2, 1], :Observation, :in_species_list, species_lists(:unknown_species_list).id)
   end
 
   def test_observation_of_children
