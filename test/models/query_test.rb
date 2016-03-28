@@ -1580,9 +1580,25 @@ byebug
   end
 
   def test_name_by_user
-    assert_query([10, 12], :Name, :by_user, user: mary, by: :id)
-    assert_query([39, 42, 43, 49], :Name, :by_user, user: dick, by: :id)
-    assert_query([1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13],
+    assert_query([names(:macrolepiota_rhacodes).id,
+                  names(:chlorophyllum_rhacodes).id],
+                 :Name, :by_user, user: mary, by: :id)
+    assert_query([names(:boletus_edulis).id,
+                  names(:suillus).id,
+                  names(:suillus_by_white).id,
+                  names(:hygrocybe_russocoriacea_good_author).id],
+                 :Name, :by_user, user: dick, by: :id)
+    assert_query([names(:fungi).id,
+                  names(:coprinus_comatus).id,
+                  names(:agaricus_campestris).id,
+                  names(:conocybe_filaris).id,
+                  names(:amanita_baccata_arora).id,
+                  names(:amanita_baccata_borealis).id,
+                  names(:lepiota_rachodes).id,
+                  names(:lepiota_rhacodes).id,
+                  names(:macrolepiota_rachodes).id,
+                  names(:chlorophyllum_rachodes).id,
+                  names(:lactarius_alpinus).id],
                  :Name, :by_user, user: rolf, by: :id)
     assert_query([], :Name, :by_user, user: junk)
   end
@@ -1590,11 +1606,11 @@ byebug
   def test_name_by_editor
     assert_query([], :Name, :by_editor, user: rolf, by: :id)
     assert_query([], :Name, :by_editor, user: mary, by: :id)
-    assert_query([40], :Name, :by_editor, user: dick, by: :id)
+    assert_query([names(:peltigera).id], :Name, :by_editor, user: dick, by: :id)
   end
 
   def test_name_by_rss_log
-    assert_query([1], :Name, :by_rss_log)
+    assert_query([names(:fungi).id], :Name, :by_rss_log)
   end
 
   def test_name_in_set
