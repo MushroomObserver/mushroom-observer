@@ -2011,7 +2011,8 @@ byebug
   end
 
   def test_project_in_set
-    assert_query([1], :Project, :in_set, ids: [1])
+    assert_query([projects(:eol_project).id], :Project,
+                 :in_set, ids: [projects(:eol_project).id])
     assert_query([], :Project, :in_set, ids: [])
   end
 
