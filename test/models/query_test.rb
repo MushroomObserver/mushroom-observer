@@ -1575,16 +1575,23 @@ byebug
   end
 
   def test_name_advanced
-    assert_query([38], :Name, :advanced_search, name: "macrocybe*titans")
-    assert_query([2], :Name, :advanced_search, location: "glendale") # where
-    expect = Name.where("observations.location_id" => 2).
+    assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
+                 name: "macrocybe*titans")
+    assert_query([names(:coprinus_comatus).id], :Name, :advanced_search,
+                 location: "glendale") # where
+    expect = Name.where("observations.location_id" =>
+                  locations(:burbank).id).
              includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, :advanced_search, location: "burbank") # location
-    expect = Name.where("observations.user_id" => 1).
+    assert_query(expect, :Name, :advanced_search,
+                 location: "burbank") # location
+    expect = Name.where("observations.user_id" => rolf.id).
              includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, :advanced_search, user: "rolf")
-    assert_query([2], :Name, :advanced_search, content: "second fruiting") # notes
-    assert_query([1], :Name, :advanced_search, content: '"a little of everything"') # comment
+    assert_query(expect, :Name, :advanced_search,
+                 user: "rolf")
+    assert_query([names(:coprinus_comatus).id], :Name, :advanced_search,
+                 content: "second fruiting") # notes
+    assert_query([names(:fungi).id], :Name, :advanced_search,
+                 content: '"a little of everything"') # comment
   end
 
   def test_name_all
@@ -1643,7 +1650,17 @@ byebug
   end
 
   def test_name_in_set
-    assert_query([1, 2, 4, 8, 16], :Name, :in_set, ids: [1, 2, 4, 8, 16])
+    assert_query([names(:fungi).id,
+                  names(:coprinus_comatus).id,
+                  names(:conocybe_filaris).id,
+                  names(:lepiota_rhacodes).id,
+                  names(:lactarius_subalpinus).id], :Name,
+                  :in_set,
+                  ids: [names(:fungi).id,
+                        names(:coprinus_comatus).id,
+                        names(:conocybe_filaris).id,
+                        names(:lepiota_rhacodes).id,
+                        names(:lactarius_subalpinus).id])
   end
 
   def test_name_of_children
@@ -1663,8 +1680,10 @@ byebug
   end
 
   def test_name_pattern
-    assert_query([], :Name, :pattern_search, pattern: "petigera") # search_name
-    assert_query([41], :Name, :pattern_search, pattern: "petigera", misspellings: :either)
+    assert_query([], :Name, :pattern_search,
+                 pattern: "petigera") # search_name
+    assert_query([names(:petigera).id], :Name, :pattern_search,
+                 pattern: "petigera", misspellings: :either)
     # assert_query([40], :Name, :pattern_search, pattern: 'ye auld manual of lichenes') # citation
     # assert_query([20], :Name, :pattern_search, pattern: 'prevent me') # notes
     # assert_query([42], :Name, :pattern_search, pattern: 'smell as sweet') # gen_desc
@@ -1672,23 +1691,52 @@ byebug
   end
 
   def test_name_with_descriptions
-    assert_query([2, 3, 13, 20, 21, 32, 33, 34, 39, 40, 42], :Name, :with_descriptions, by: :id)
+    assert_query([names(:coprinus_comatus).id,
+                  names(:agaricus_campestris).id,
+                  names(:lactarius_alpinus).id,
+                  names(:agaricus_campestras).id,
+                  names(:agaricus_campestros).id,
+                  names(:russula_brevipes_author_notes).id,
+                  names(:russula_cremoricolor_no_author_notes).id,
+                  names(:russula_cremoricolor_author_notes).id,
+                  names(:boletus_edulis).id,
+                  names(:peltigera).id,
+                  names(:suillus).id],
+                 :Name,
+                 :with_descriptions, by: :id)
   end
 
   def test_name_with_descriptions_by_user
-    assert_query([3, 40], :Name, :with_descriptions_by_user, user: mary, by: :id)
-    assert_query([39, 40, 42], :Name, :with_descriptions_by_user, user: dick, by: :id)
+    assert_query([names(:agaricus_campestris).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_user, user: mary, by: :id)
+    assert_query([names(:boletus_edulis).id,
+                  names(:peltigera).id,
+                  names(:suillus).id],
+                 :Name,
+                 :with_descriptions_by_user, user: dick, by: :id)
   end
 
   def test_name_with_descriptions_by_author
-    assert_query([2, 40], :Name, :with_descriptions_by_author, user: rolf, by: :id)
-    assert_query([3, 40], :Name, :with_descriptions_by_author, user: mary, by: :id)
-    assert_query([39], :Name, :with_descriptions_by_author, user: dick, by: :id)
+    assert_query([names(:coprinus_comatus).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_author, user: rolf, by: :id)
+    assert_query([names(:agaricus_campestris).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_author, user: mary, by: :id)
+    assert_query([names(:boletus_edulis).id],
+                 :Name,
+                 :with_descriptions_by_author, user: dick, by: :id)
   end
 
   def test_name_with_descriptions_by_editor
-    assert_query([2], :Name, :with_descriptions_by_editor, user: rolf)
-    assert_query([2], :Name, :with_descriptions_by_editor, user: mary)
+    assert_query([names(:coprinus_comatus).id], :Name,
+                  :with_descriptions_by_editor, user: rolf)
+    assert_query([names(:coprinus_comatus).id], :Name,
+                  :with_descriptions_by_editor, user: mary)
     assert_query([], :Name, :with_descriptions_by_editor, user: dick)
   end
 
@@ -1700,26 +1748,54 @@ byebug
   end
 
   def test_name_with_observations_at_location
-    assert_query([20, 3, 21, 19, 1], :Name, :with_observations_at_location, location: locations(:burbank))
+    assert_query([names(:agaricus_campestras).id,
+                  names(:agaricus_campestris).id,
+                  names(:agaricus_campestros).id,
+                  names(:agaricus_campestrus).id,
+                  names(:fungi).id],
+                 :Name,
+                 :with_observations_at_location, location: locations(:burbank))
   end
 
   def test_name_with_observations_at_where
-    assert_query([2], :Name, :with_observations_at_where, user_where: "glendale", location: "glendale")
+    assert_query([names(:coprinus_comatus).id], :Name,
+                 :with_observations_at_where,
+                 user_where: "glendale", location: "glendale")
   end
 
   def test_name_with_observations_by_user
-    assert_query([20, 3, 21, 19, 2, 40, 24], :Name, :with_observations_by_user, user: rolf)
-    assert_query([1], :Name, :with_observations_by_user, user: mary)
+    assert_query([names(:agaricus_campestras).id,
+                  names(:agaricus_campestris).id,
+                  names(:agaricus_campestros).id,
+                  names(:agaricus_campestrus).id,
+                  names(:coprinus_comatus).id,
+                  names(:peltigera).id,
+                  names(:strobilurus_diminutivus_no_author).id],
+                 :Name,
+                 :with_observations_by_user, user: rolf)
+    assert_query([names(:fungi).id], :Name,
+                 :with_observations_by_user, user: mary)
     assert_query([], :Name, :with_observations_by_user, user: dick)
   end
 
   def test_name_with_observations_in_set
-    assert_query([20, 3, 1], :Name, :with_observations_in_set, ids: [2, 4, 6])
+    assert_query([names(:agaricus_campestras).id,
+                  names(:agaricus_campestris).id,
+                  names(:fungi).id],
+                 :Name,
+                 :with_observations_in_set,
+                 ids: [observations(:detailed_unknown_obs).id,
+                       observations(:agaricus_campestris_obs).id,
+                       observations(:agaricus_campestras_obs).id])
   end
 
   def test_name_with_observations_in_species_list
-    assert_query([1], :Name, :with_observations_in_species_list, species_lists(:unknown_species_list).id)
-    assert_query([], :Name, :with_observations_in_species_list, species_list: species_lists(:first_species_list).id)
+    assert_query([names(:fungi).id], :Name,
+                 :with_observations_in_species_list,
+                 species_list: species_lists(:unknown_species_list).id)
+    assert_query([], :Name,
+                 :with_observations_in_species_list,
+                 species_list: species_lists(:first_species_list).id)
   end
 
   def test_name_description_all
