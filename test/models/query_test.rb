@@ -539,11 +539,8 @@ class QueryTest < UnitTestCase
     assert_equal(roy.location_format, :scientific)
     assert_equal(Set.new,
                  Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results)
-    # assert_equal(2, query.index(3))
     assert_equal(User.all.find_index(junk), query.index(junk))
-    # assert_equal(3, query.index("4"))
     assert_equal(User.all.find_index(dick), query.index(dick))
-    # assert_equal(1, query.index(mary))
     assert_equal(User.all.find_index(mary), query.index(mary))
 
     # Verify that it's getting all this crap from cache.
