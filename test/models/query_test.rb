@@ -556,21 +556,26 @@ class QueryTest < UnitTestCase
     assert_equal(2, query.index(rolf))
   end
 
-  def paginate_test_setup(from, to)
-    @names = Name.all
-    @pages = Wrapper.new(from: from, to: to, num_per_page: to - from + 1)
+  def paginate_test_setup(from_nth, to_nth)
+    @names = Name.all.order(:id)
+    @pages = Wrapper.new(from: from_nth, to: to_nth,
+                         num_per_page: to_nth - from_nth + 1)
     @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
   end
 
-  def paginate_test(from, to, expected)
-    paginate_test_setup(from, to)
-    paginate_assertions(from, to, expected)
+  def paginate_test(from_nth, to_nth, expected_nths)
+    paginate_test_setup(from_nth, to_nth)
+    paginate_assertions(from_nth, to_nth, expected_nths)
   end
 
-  def paginate_assertions(from, to, expected)
-    assert_equal(expected, @query.paginate_ids(@pages))
+  # parameters are the ordinals of objects which have been ordered by id
+  # E.g., 1 corresponds to Name.all.order(:id).first
+  def paginate_assertions(from_nth, to_nth, expected_nths)
+    name_ids = @names.map {|n| n[:id]}
+    assert_equal(expected_nths,
+                 @query.paginate_ids(@pages).map {|id| name_ids.index(id) + 1 })
     assert_equal(@names.size, @pages.num_total)
-    assert_equal(@names[from..to], @query.paginate(@pages))
+    assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
   end
 
   def test_paginate_start
@@ -582,8 +587,8 @@ class QueryTest < UnitTestCase
     paginate_test(5, 8, [6, 7, 8, 9])
   end
 
-  def paginate_test_letter_setup(to, from)
-    paginate_test_setup(to, from)
+  def paginate_test_letter_setup(to_nth, from_nth)
+    paginate_test_setup(to_nth, from_nth)
     @query.need_letters = "names.text_name"
     @letters = @names.map { |n| n.text_name[0, 1] }.uniq.sort
   end
