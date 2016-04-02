@@ -99,8 +99,8 @@ class ApiControllerTest < FunctionalTestCase
          has_specimen: "yes",
          is_collection_location: "yes",
          notes: "These are notes.\nThey look like this.\n",
-         images: "1,2",
-         thumbnail: "2",
+         images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
+         thumbnail: images(:turned_over_image).id.to_s,
          projects: "EOL Project",
          species_lists: "Another Species List"
         )
@@ -159,7 +159,7 @@ class ApiControllerTest < FunctionalTestCase
                        date: "20120626",
                        notes: " Here are some notes. ",
                        copyright_holder: "My Friend",
-                       license: "2",
+                       license: licenses(:ccnc30).id.to_s,
                        original_name: "Coprinus_comatus.jpg",
                        projects: (proj = rolf.projects_member.first).id,
                        observations: (obs = rolf.observations.first).id
