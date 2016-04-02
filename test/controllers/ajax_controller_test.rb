@@ -172,7 +172,8 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_species_list
-    list1, list2, list3 = SpeciesList.all.map(&:title)
+    list1, list2, list3 = SpeciesList.all.order(:title).map(&:title)
+
     assert_equal("A Species List", list1)
     assert_equal("Another Species List", list2)
     assert_equal("List of mysteries", list3)
@@ -283,17 +284,17 @@ class AjaxControllerTest < FunctionalTestCase
   def test_image_vote
     image = images(:in_situ_image)
     assert_nil(image.users_vote(dick))
-    bad_ajax_request(:vote, type: :image, id: 1, value: 3)
+    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
     login("dick")
     assert_nil(image.users_vote(dick))
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
     assert_equal(3, image.reload.users_vote(dick))
 
-    good_ajax_request(:vote, type: :image, id: 1, value: 0)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 0)
     assert_nil(image.reload.users_vote(dick))
 
-    bad_ajax_request(:vote, type: :image, id: 1, value: 99)
+    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 99)
     bad_ajax_request(:vote, type: :image, id: 99, value: 0)
   end
 
@@ -302,7 +303,8 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id,
+                      value: 3)
 
     # Assert
     assert_template layout: nil
@@ -315,12 +317,12 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
-    assert_select("a[href='/image/show_image/1?vote=0']")
-    assert_select("a[href='/image/show_image/1?vote=1']")
-    assert_select("a[href='/image/show_image/1?vote=2']")
-    assert_select("a[href='/image/show_image/1?vote=4']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']")
   end
 
   def test_image_vote_renders_correct_data_attributes
@@ -328,7 +330,7 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
     assert_select("[data-role='image_vote']", 4) # #should show four vote links as dick already voted
     assert_select("[data-val]", 4) # #should show four vote links as dick already voted
