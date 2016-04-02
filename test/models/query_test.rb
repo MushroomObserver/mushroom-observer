@@ -765,7 +765,7 @@ class QueryTest < UnitTestCase
 
     # Get 1st result, which is 1st image of 1st imaged observation
     obs = obs_with_imgs_ids.first
-    imgs = Observation.find(obs).images.order("id ASC").map {|img| img.id}
+    imgs = Observation.find(obs).images.order("id ASC").map(&:id)
     img = imgs.first
     q = Query.where(["params REGEXP ?", "observation ##{obs}"]).first
     q.current_id = img
@@ -827,11 +827,11 @@ class QueryTest < UnitTestCase
   end
 
   def obs_with_imgs_ids
-    Observation.distinct.joins(:images).order(:id).map {|o| o.id}
+    Observation.distinct.joins(:images).order(:id).map(&:id)
   end
 
   def img_with_obs_ids
-    Image.distinct.joins(:observations).order(:id).map {|i| i.id}
+    Image.distinct.joins(:observations).order(:id).map(&:id)
   end
 
   # Return next result's: observation.id, image.id list, image.id
