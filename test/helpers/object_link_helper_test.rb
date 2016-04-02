@@ -40,15 +40,23 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_link_if_object
     # link to project, name not supplied
-    assert_equal('<a href="/project/show_project/2">Bolete Project</a>',
+    # pre  = '<a href="/project/show_project/'
+    path = "/project/show_project/"
+    obj = projects(:bolete_project)
+    link_text = "Bolete Project"
+    assert_equal(expected_link(path, obj, link_text),
                  link_to_object(projects(:bolete_project))
                 )
     # link to project, name supplied
-    assert_equal('<a href="/project/show_project/2">BP</a>',
+    link_text = "BP"
+    assert_equal(expected_link(path, obj, link_text),
                  link_to_object(projects(:bolete_project), "BP")
                 )
     # link to species list
-    assert_equal('<a href="/species_list/show_species_list/1">A Species List</a>',
+    path = "/species_list/show_species_list/"
+    obj = species_lists(:first_species_list)
+    link_text = "A Species List"
+    assert_equal(expected_link(path, obj, link_text),
                  link_to_object(species_lists(:first_species_list))
                 )
     # link to non-existent object, name not supplied
@@ -56,5 +64,9 @@ class ObjectLinkHelperTest < ActionView::TestCase
     # link to non-existent object, name supplied
     assert_nil(link_to_object(nil, "Nada"),
                "Non-existent object should lack link.")
+  end
+
+  def expected_link(path, obj, link_text)
+    '<a href="' + path + obj.id.to_s + '">' + link_text + "</a>"
   end
 end
