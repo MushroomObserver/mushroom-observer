@@ -20,7 +20,7 @@ class GlossaryControllerTest < FunctionalTestCase
       glossary_term: { name: "Convex", description: "Boring old convex" },
       copyright_holder: "Insil Choi",
       date: { copyright_year: "2013" },
-      upload: { license_id: "1" }
+      upload: { license_id: licenses(:ccnc30).id }
     }
   end
 end
