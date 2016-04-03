@@ -1812,7 +1812,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_edit_observation_with_another_users_image
     img1 = images(:in_situ_image)
-    img2 = images(:turned_over)
+    img2 = images(:turned_over_image)
     img3 = images(:commercial_inquiry_image)
 
     obs = observations(:detailed_unknown_obs)

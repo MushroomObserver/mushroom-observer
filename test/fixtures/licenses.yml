@@ -3,6 +3,11 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 ccnc25: # old id: 1
+  # Do not autogenerate id
+  # This is the default license for images.
+  # That id is defined and hard-coded in the schema, in the image table.
+  # So unless it's also hand-coded as a license fixture id, images are instantiated with the incorrect license.id.
+  id: 1
   display_name: Creative Commons Non-commercial v2.5
   url: http://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true

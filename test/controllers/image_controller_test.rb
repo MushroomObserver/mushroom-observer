@@ -22,59 +22,75 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_next_image
-    get_with_dump(:next_image, id: 2)
-    # assert_template(action: "show_image", id: 1) # Rails 3
-    assert_redirected_to(%r{show_image/1[\b|\?]})
+    get_with_dump(:next_image, id: images(:turned_over_image).id)
+    # Default sort order is inverse chronological (created_at DESC, id DESC).
+    # So here, "next" image is one created immediately previously.
+    assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|\?]})
   end
 
   def test_next_image_ss
-    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2, 1, 4, 3])
-    inner = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                               observation: 2, by: :id)
+    det_unknown =  observations(:detailed_unknown_obs).id
+    min_unknown =  observations(:minimal_unknown_obs).id
+    a_campestris = observations(:agaricus_campestris_obs).id
+    c_comatus =    observations(:coprinus_comatus_obs).id
+
+    outer = Query.lookup_and_save(:Observation,
+                                  :in_set, ids: [det_unknown,
+                                                 min_unknown,
+                                                 a_campestris,
+                                                 c_comatus])
+    inner = Query.lookup_and_save(:Image, :inside_observation,
+                                  outer: outer, observation: det_unknown,
+                                  by: :id)
 
     # Make sure the outer query is working right first.
-    outer.current_id = 2
+    outer.current_id = det_unknown
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(1, outer.current_id)
+    assert_equal(min_unknown, outer.current_id)
     assert_equal(0, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(4, outer.current_id)
+    assert_equal(a_campestris, outer.current_id)
     assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(3, outer.current_id)
+    assert_equal(c_comatus, outer.current_id)
     assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(nil, new_outer)
 
-    # No more images for obs #2, so goes to next obs (#1), but this has no
-    # images, so goes to next (#4), this has one image (#6).  (Shouldn't
+    # Start with inner at last image of first observation (det_unknown).
+    inner.current_id = observations(:detailed_unknown_obs).images.last.id
+
+    # No more images for det_unknowns, so inner goes to next obs (min_unknown),
+    # but this has no images, so goes to next (a_campestris),
+    # this has one image (agaricus_campestris_image).  (Shouldn't
     # care that outer query has changed, inner query remembers where it
     # was when inner query was created.)
-    inner.current_id = 2
     assert(new_inner = inner.next)
     assert_not_equal(inner, new_inner)
-    assert_equal(6, new_inner.current_id)
+    assert_equal(images(:agaricus_campestris_image).id, new_inner.current_id)
     save_query = Query.last
     assert(new_new_inner = new_inner.next)
     assert_not_equal(new_inner, new_new_inner)
-    assert_equal(5, new_new_inner.current_id)
+    assert_equal(images(:connected_coprinus_comatus_image).id,
+                 new_new_inner.current_id)
     assert_nil(new_new_inner.next)
 
     params = {
-      id: 2,
+      id: observations(:detailed_unknown_obs).images.last.id,
       params: @controller.query_params(inner)
     }.flatten
     get(:next_image, params)
-    assert_redirected_to(action: "show_image", id: 6,
+    assert_redirected_to(action: "show_image",
+                         id: images(:agaricus_campestris_image).id,
                          params: @controller.query_params(save_query))
   end
 
   # Test next_image in the context of a search
   def test_next_image_search
-    rolfs_favorite_image_id = 5
+    rolfs_favorite_image_id = images(:connected_coprinus_comatus_image).id
     image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
@@ -103,65 +119,81 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_prev_image
-    get_with_dump(:prev_image, id: 1)
-    # assert_redirected_to(action: "show_image", id: 2)
-    assert_redirected_to(%r{show_image/2[\b|\?]})
+    get_with_dump(:prev_image, id: images(:in_situ_image).id) # oldest image
+    # so "prev" is the 2nd oldest
+    assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|\?]})
   end
 
   def test_prev_image_ss
-    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2, 1, 4, 3])
-    inner = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                                               observation: 4, by: :id)
+    det_unknown =  observations(:detailed_unknown_obs).id
+    min_unknown =  observations(:minimal_unknown_obs).id
+    a_campestris = observations(:agaricus_campestris_obs).id
+    c_comatus =    observations(:coprinus_comatus_obs).id
+
+    outer = Query.lookup_and_save(:Observation,
+                                  :in_set, ids: [det_unknown,
+                                                 min_unknown,
+                                                 a_campestris,
+                                                 c_comatus])
+    inner = Query.lookup_and_save(:Image, :inside_observation,
+                                  outer: outer, observation: a_campestris,
+                                  by: :id)
 
     # Make sure the outer query is working right first.
-    outer.current_id = 4
+    outer.current_id = a_campestris
     new_outer = outer.prev
     assert_equal(outer, new_outer)
-    assert_equal(1, outer.current_id)
+    assert_equal(min_unknown, outer.current_id)
     assert_equal(0, outer.current.images.size)
     new_outer = outer.prev
     assert_equal(outer, new_outer)
-    assert_equal(2, outer.current_id)
+    assert_equal(det_unknown, outer.current_id)
     assert_equal(2, outer.current.images.size)
     new_outer = outer.prev
     assert_equal(nil, new_outer)
 
-    # No more images for obs #4, so goes to next obs (#1), but this has no
-    # images, so goes to next (#2), this has two images (#1 and #2).
+    # No more images for a_campestris, so goes to next obs (min_unknown),
+    # but this has no images, so goes to next (det_unknown). This has two images
+    # whose sort order is unknown because fixture ids are autognerated. So use
+    # .second to get the 2nd image and .first to get the 1st.
     # (Shouldn't care that outer query has changed, inner query remembers where
     # it was when inner query was created.)
-    inner.current_id = 6
+    inner.current_id = images(:agaricus_campestris_image).id
     assert(new_inner = inner.prev)
     assert_not_equal(inner, new_inner)
-    assert_equal(2, new_inner.current_id)
+    assert_equal(observations(:detailed_unknown_obs).images.second.id,
+                 new_inner.current_id)
     assert(new_new_inner = new_inner.prev)
     assert_equal(new_inner, new_new_inner)
-    assert_equal(1, new_inner.current_id)
+    assert_equal(observations(:detailed_unknown_obs).images.first.id,
+                 new_inner.current_id)
     assert_nil(new_inner.prev)
 
     params = {
-      id: 6,
+      id: images(:agaricus_campestris_image).id,
       params: @controller.query_params(inner)
     }.flatten
     get(:prev_image, params)
-    assert_redirected_to(action: "show_image", id: 2,
+    assert_redirected_to(action: "show_image",
+                         id: observations(:detailed_unknown_obs).images.second.id,
                          params: @controller.query_params(Query.last))
   end
 
   def test_show_original
-    get_with_dump(:show_original, id: 1)
-    assert_redirected_to(action: "show_image", size: "full_size", id: 1)
+    img_id = images(:in_situ_image).id
+    get_with_dump(:show_original, id: img_id)
+    assert_redirected_to(action: "show_image", size: "full_size", id: img_id)
   end
 
   def test_show_image
     image = images(:in_situ_image)
     num_views = image.num_views
-    get_with_dump(:show_image, id: 1)
+    get_with_dump(:show_image, id: image.id)
     assert_template("show_image", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
     for size in Image.all_sizes + [:original]
-      get(:show_image, id: 1, size: size)
+      get(:show_image, id: image.id, size: size)
       assert_template("show_image", partial: "_form_ccbyncsa25")
     end
   end
@@ -219,8 +251,9 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_image_search_by_number
-    get_with_dump(:image_search, pattern: 3)
-    assert_redirected_to(action: "show_image", id: 3)
+    img_id = images(:commercial_inquiry_image).id
+    get_with_dump(:image_search, pattern: img_id)
+    assert_redirected_to(action: "show_image", id: img_id)
   end
 
   def test_advanced_search
@@ -338,7 +371,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_delete_images
     obs = observations(:detailed_unknown_obs)
-    keep = images(:turned_over)
+    keep = images(:turned_over_image)
     remove = images(:in_situ_image)
     assert(obs.images.member?(keep))
     assert(obs.images.member?(remove))
@@ -374,7 +407,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_destroy_image
-    image = images(:turned_over)
+    image = images(:turned_over_image)
     obs = image.observations.first
     assert(obs.images.member?(image))
     params = { id: image.id.to_s }
@@ -477,7 +510,7 @@ class ImageControllerTest < FunctionalTestCase
     params = {
       mode: "observation",
       obs_id: obs.id.to_s,
-      img_id: "3"
+      img_id: image.id.to_s
     }
     owner = obs.user.login
     assert_not_equal("mary", owner)
@@ -502,7 +535,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(!glossary_term.images.member?(image))
     params = {
       id: glossary_term.id.to_s,
-      img_id: "3"
+      img_id: image.id.to_s
     }
     login("mary")
     get_with_dump(:reuse_image_for_glossary_term, params)
@@ -628,50 +661,50 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_original_filename_visibility
-    # Image 6 is Rolf's image, original name: "Name with áč€εиts.gif"
+    # Rolf's image, original name: "Name with áč€εиts.gif"
+    img_id = images(:agaricus_campestris_image).id
     login("mary")
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     login("rolf")
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_image, id: 6)
+    get(:show_image, id: img_id)
     assert_true(@response.body.include?("áč€εиts"))
   end
 
   def test_bulk_original_filename_purge
-    assert_equal(1, rolf.id)
-    imgs = Image.where("original_name != '' AND user_id = 1")
+    imgs = Image.where("original_name != '' AND user_id = #{rolf.id}")
     assert(imgs.any?)
 
     login("rolf")
     get(:bulk_filename_purge)
-    imgs = Image.where("original_name != '' AND user_id = 1")
+    imgs = Image.where("original_name != '' AND user_id = #{rolf.id}")
     assert(imgs.empty?)
   end
 
