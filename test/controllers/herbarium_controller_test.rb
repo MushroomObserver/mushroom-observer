@@ -93,7 +93,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_herbarium_post_with_existing_place_name
     login("rolf")
     params = create_herbarium_params
-    params[:herbarium][:place_name] = locations(:nybg).name
+    params[:herbarium][:place_name] = locations(:nybg_location).name
     post(:create_herbarium, params)
 
     herbarium = Herbarium.order(created_at: :desc).first
@@ -102,7 +102,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:email], herbarium.email)
     assert_equal(params[:herbarium][:mailing_address],
                  herbarium.mailing_address)
-    assert_equal(locations(:nybg), herbarium.location)
+    assert_equal(locations(:nybg_location), herbarium.location)
     assert_response(:redirect)
   end
 
@@ -159,7 +159,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_edit_herbarium_post_with_duplicate_name
     login("rolf")
     nybg = herbaria(:nybg_herbarium)
-    rolf = herbaria(:rolf)
+    rolf = herbaria(:rolf_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:name] = rolf.name

@@ -220,7 +220,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_create_and_save_location_description
-    loc = locations(:nybg) # use a location that has no description
+    loc = locations(:nybg_location) # use a location that has no description
     assert_nil(loc.description,
                "Test should use a location that has no description.")
     params = { description: { source_type: "public",
