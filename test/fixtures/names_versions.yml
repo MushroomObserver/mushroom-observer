@@ -654,7 +654,7 @@ suilus_version_1:
 
 abortiporus_biennis_1:
   id: 48
-  name_id: <%= ActiveRecord::FixtureSet.identify(:abortiporus_biennis) %>
+  name_id: <%= ActiveRecord::FixtureSet.identify(:abortiporus_biennis_for_eol) %>
   version: 1
   updated_at: 2015-07-05 21:41:10
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>

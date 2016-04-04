@@ -129,7 +129,6 @@ draft_coprinus_comatus: # old id: 8
   public: 0
   admin_groups: eol_admins, katrina_only
   authors: katrina
-  editors: rolf, mary
   reader_groups: eol_users, katrina_only
   writer_groups: eol_admins, katrina_only
 
