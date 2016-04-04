@@ -16,7 +16,9 @@ class InterestControllerTest < FunctionalTestCase
 
   def test_set_interest_another_user
     login("rolf")
-    get(:set_interest, type: "Observation", id: 1, user: mary.id)
+    get(:set_interest,
+        type: "Observation", id: observations(:minimal_unknown_obs),
+        user: mary.id)
     assert_flash(2)
   end
 
@@ -42,7 +44,7 @@ class InterestControllerTest < FunctionalTestCase
     # Succeed: Turn interest on in minimal_unknown.
     login("rolf")
     get(:set_interest, type: "Observation", id: minimal_unknown.id, state: 1,
-                       user: 1)
+                       user: rolf.id)
     assert_flash(0)
 
     # Make sure rolf now has one Interest: interested in minimal_unknown.
