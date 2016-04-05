@@ -8,12 +8,13 @@ class PublicationsControllerTest < FunctionalTestCase
   end
 
   def test_should_get_index_for_user_who_owns_a_publication
+    pub_id = publications(:one_pub).id
     login("rolf")
     get :index
     assert_response :success
     assert_not_nil assigns(:publications)
-    assert_link_in_html("Edit", action: :edit, id: 1)
-    assert_link_in_html("Destroy", action: :destroy, id: 1)
+    assert_link_in_html("Edit", action: :edit, id: pub_id)
+    assert_link_in_html("Destroy", action: :destroy, id: pub_id)
   end
 
   def test_should_get_new
@@ -62,29 +63,29 @@ class PublicationsControllerTest < FunctionalTestCase
   end
 
   def test_should_show_publication
-    get :show, id: publications(:one).id
+    get :show, id: publications(:one_pub).id
     assert_response :success
     login("rolf")
-    get :show, id: publications(:one).id
+    get :show, id: publications(:one_pub).id
     assert_response :success
   end
 
   def test_should_get_edit
     login
-    get :edit, id: publications(:one).id
+    get :edit, id: publications(:one_pub).id
     assert_response :success
   end
 
   def test_should_update_publication
     login
-    put :update, id: publications(:one).id, publication: {}
+    put :update, id: publications(:one_pub).id, publication: {}
     assert_redirected_to publication_path(assigns(:publication))
   end
 
   def test_should_destroy_publication
     login
     assert_difference("Publication.count", -1) do
-      delete :destroy, id: publications(:one).id
+      delete :destroy, id: publications(:one_pub).id
     end
 
     assert_redirected_to publications_path
