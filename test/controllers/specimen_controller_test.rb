@@ -25,13 +25,13 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_with_one_specimen_index
-    get_with_dump(:herbarium_index, id: herbaria(:rolf).id)
+    get_with_dump(:herbarium_index, id: herbaria(:rolf_herbarium).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_herbarium_with_no_specimens_index
-    get_with_dump(:herbarium_index, id: herbaria(:dick).id)
+    get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
@@ -43,7 +43,8 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_observation_with_one_specimen_index
-    get_with_dump(:observation_index, id: observations(:detailed_unknown_obs).id)
+    get_with_dump(:observation_index,
+                  id: observations(:detailed_unknown_obs).id)
     assert_response(:redirect)
     assert_no_flash
   end
