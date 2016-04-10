@@ -79,7 +79,7 @@ class AccountMailerTest < UnitTestCase
 
   def test_comment_email
     obs = observations(:minimal_unknown_obs)
-    comment = comments(:another_comment)
+    comment = comments(:minimal_unknown_obs_comment_2)
     run_mail_test("comment_response", rolf) do
       email = CommentEmail.build(dick, rolf, obs, comment).deliver_now
     end
@@ -87,7 +87,7 @@ class AccountMailerTest < UnitTestCase
 
   def test_comment_email2
     obs = observations(:minimal_unknown_obs)
-    comment = comments(:minimal_comment)
+    comment = comments(:minimal_unknown_obs_comment_1)
     run_mail_test("comment", mary) do
       email = CommentEmail.build(rolf, mary, obs, comment).deliver_now
     end
@@ -274,7 +274,7 @@ class AccountMailerTest < UnitTestCase
 
   def test_verify_api_key_email
     run_mail_test("verify_api_key", rolf) do
-      VerifyAPIKeyEmail.build(rolf, dick, ApiKey.first).deliver_now
+      VerifyAPIKeyEmail.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
     end
   end
 end

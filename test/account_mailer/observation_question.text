@@ -1,7 +1,7 @@
 From: news@mushroomobserver.org
 Reply-To: rolf@collectivesource.com
 To: mary@collectivesource.com
-Subject: [MO] Question About Fungi (2)
+Subject: [MO] Question About Fungi (<%= ActiveRecord::FixtureSet.identify(:detailed_unknown_obs) %>)
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=UTF-8
@@ -9,7 +9,7 @@ Content-Transfer-Encoding: 7bit
 
 Question from Another User
 
-Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following question to you about your observation Fungi (2):
+Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following question to you about your observation Fungi (<%= ActiveRecord::FixtureSet.identify(:detailed_unknown_obs) %>):
 
 Where did you find it?
 
@@ -18,9 +18,9 @@ Where did you find it?
 It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this observation: http://mushroomobserver.org/2
-Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_question/2
-Change your preferences: http://mushroomobserver.org/account/prefs/2
+Show this observation: http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:detailed_unknown_obs) %>
+Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_question/<%= ActiveRecord::FixtureSet.identify(:mary) %>
+Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

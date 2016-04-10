@@ -396,6 +396,7 @@ module GeneralExtensions
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
       template = File.open(filename, format).read
       template = enforce_encoding(encoding, file, template)
+      template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?
       if template_match(processed_str, template)
         # Stop soon as we find one that matches.
@@ -431,7 +432,8 @@ module GeneralExtensions
     result
   end
 
-  # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
+  # Ensure that all the lines in template are in str.
+  # Allows additional headers like 'Date' to get added to str and to vary
   def template_match(str, template)
     template = template.gsub /\r\n?/, "\n"
     str = str.gsub /\r\n?/, "\n"
