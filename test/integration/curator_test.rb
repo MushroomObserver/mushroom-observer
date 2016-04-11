@@ -6,7 +6,7 @@ class CuratorTest < IntegrationTestCase
   def test_first_specimen
     # Mary doesn't have a herbarium.
     sess = login!("mary", "testpassword", true)
-    sess.get("/1")
+    sess.get("/#{observations(:minimal_unknown_obs).id}")
     sess.assert_template("observer/show_observation")
     sess.click(label: :show_observation_create_specimen.t)
     sess.assert_template("specimen/add_specimen")
@@ -18,7 +18,7 @@ class CuratorTest < IntegrationTestCase
 
   def test_herbarium_index_from_add_specimen
     sess = login!("mary", "testpassword", true)
-    sess.get("/specimen/add_specimen/1")
+    sess.get("/specimen/add_specimen/#{observations(:minimal_unknown_obs).id}")
     sess.click(label: :herbarium_index.t)
     sess.assert_template("herbarium/index")
   end
