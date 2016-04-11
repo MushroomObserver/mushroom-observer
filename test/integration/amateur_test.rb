@@ -256,7 +256,7 @@ class AmateurTest < IntegrationTestCase
   # -------------------------------------------------------------------------
 
   def test_thumbnail_maps
-    get("/1")
+    get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
     assert_select('div#map_div', 1)
 
@@ -272,7 +272,7 @@ class AmateurTest < IntegrationTestCase
     session.assert_template("observer/show_observation")
     session.assert_select('div#map_div', 0)
 
-    session.get("/2")
+    session.get("/#{observations(:detailed_unknown_obs).id}")
     session.assert_template("observer/show_observation")
     session.assert_select('div#map_div', 0)
   end
