@@ -1738,6 +1738,7 @@ class NameTest < UnitTestCase
 
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
+    return unless sql_collates_accents?
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
     n3 = create_test_name("Agaricus Aeiøu")
