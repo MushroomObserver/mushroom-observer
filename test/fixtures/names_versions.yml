@@ -1,7 +1,6 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
 fungi_version_1:
-  id: 1
   name_id: <%= ActiveRecord::FixtureSet.identify(:fungi) %>
   updated_at: 2007-02-26 17:20:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -14,7 +13,6 @@ fungi_version_1:
   citation: ''
 
 coprinus_comatus_version_1:
-  id: 2
   name_id: <%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>
   updated_at: 2007-02-26 20:48:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -26,7 +24,6 @@ coprinus_comatus_version_1:
   sort_name: Coprinus comatus
 
 coprinus_comatus_version_2:
-  id: 3
   name_id: <%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>
   updated_at: 2007-02-27 20:48:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -40,7 +37,6 @@ coprinus_comatus_version_2:
   citation: ''
 
 agaricus_campestris_version_1:
-  id: 4
   name_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
   updated_at: 2007-03-19 17:20:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -54,7 +50,6 @@ agaricus_campestris_version_1:
   citation: ''
 
 conocybe_filaris_version_1:
-  id: 5
   name_id: <%= ActiveRecord::FixtureSet.identify(:conocybe_filaris) %>
   updated_at: 2007-03-19 15:51:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -68,7 +63,6 @@ conocybe_filaris_version_1:
   citation: ''
 
 amanita_baccata_arora_version_1:
-  id: 6
   name_id: <%= ActiveRecord::FixtureSet.identify(:amanita_baccata_arora) %>
   updated_at: 2007-04-09 08:53:30
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -82,7 +76,6 @@ amanita_baccata_arora_version_1:
   citation: ''
 
 amanita_baccata_borealis_version_1:
-  id: 7
   name_id: <%= ActiveRecord::FixtureSet.identify(:amanita_baccata_borealis) %>
   updated_at: 2007-04-09 08:54:30
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -96,7 +89,6 @@ amanita_baccata_borealis_version_1:
   citation: ''
 
 lepiota_rachodes_version_1:
-  id: 8
   name_id: <%= ActiveRecord::FixtureSet.identify(:lepiota_rachodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -110,7 +102,6 @@ lepiota_rachodes_version_1:
   citation: ''
 
 lepiota_rhacodes_version_1:
-  id: 9
   name_id: <%= ActiveRecord::FixtureSet.identify(:lepiota_rhacodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -124,7 +115,6 @@ lepiota_rhacodes_version_1:
   citation: ''
 
 macrolepiota_rachodes_version_1:
-  id: 10
   name_id: <%= ActiveRecord::FixtureSet.identify(:macrolepiota_rachodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -138,7 +128,6 @@ macrolepiota_rachodes_version_1:
   citation: ''
 
 macrolepiota_rhacodes_version_1:
-  id: 11
   name_id: <%= ActiveRecord::FixtureSet.identify(:macrolepiota_rhacodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
@@ -152,7 +141,6 @@ macrolepiota_rhacodes_version_1:
   citation: ''
 
 chlorophyllum_rachodes_version_1:
-  id: 12
   name_id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum_rachodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -166,7 +154,6 @@ chlorophyllum_rachodes_version_1:
   citation: ''
 
 chlorophyllum_rhacodes_version_1:
-  id: 13
   name_id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum_rhacodes) %>
   updated_at: 2007-04-30 21:34:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
@@ -180,7 +167,6 @@ chlorophyllum_rhacodes_version_1:
   citation: ''
 
 lactarius_alpinus_version_1:
-  id: 14
   name_id: <%= ActiveRecord::FixtureSet.identify(:lactarius_alpinus) %>
   updated_at: 2007-04-30 15:14:10
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -194,7 +180,6 @@ lactarius_alpinus_version_1:
   citation: ''
 
 lactarius_alpigenes_version_1:
-  id: 15
   name_id: <%= ActiveRecord::FixtureSet.identify(:lactarius_alpigenes) %>
   updated_at: 2007-04-30 15:14:10
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -209,7 +194,6 @@ lactarius_alpigenes_version_1:
   citation: ''
 
 lactarius_kuehneri_version_1:
-  id: 16
   name_id: <%= ActiveRecord::FixtureSet.identify(:lactarius_kuehneri) %>
   updated_at: 2007-04-30 15:14:10
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -224,7 +208,6 @@ lactarius_kuehneri_version_1:
   citation: ''
 
 lactarius_subalpinus_version_1:
-  id: 17
   name_id: <%= ActiveRecord::FixtureSet.identify(:lactarius_subalpinus) %>
   updated_at: 2007-04-30 15:14:10
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -239,7 +222,6 @@ lactarius_subalpinus_version_1:
   citation: ''
 
 psalliota_version_1:
-  id: 18
   name_id: <%= ActiveRecord::FixtureSet.identify(:psalliota) %>
   updated_at: 2007-06-09 08:06:40
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -252,7 +234,6 @@ psalliota_version_1:
   citation: ''
 
 agaricus_version_1:
-  id: 19
   name_id: <%= ActiveRecord::FixtureSet.identify(:agaricus) %>
   updated_at: 2007-06-09 08:06:40
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -265,7 +246,6 @@ agaricus_version_1:
   citation: ''
 
 agaricus_campestrus_version_1:
-  id: 20
   name_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestrus) %>
   updated_at: 2007-06-23 20:04:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -279,7 +259,6 @@ agaricus_campestrus_version_1:
   citation: ''
 
 agaricus_campestras_version_1:
-  id: 21
   name_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestras) %>
   updated_at: 2007-06-23 20:04:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -293,7 +272,6 @@ agaricus_campestras_version_1:
   citation: ''
 
 agaricus_campestros_version_1:
-  id: 22
   name_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestros) %>
   updated_at: 2007-06-23 20:04:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -307,7 +285,6 @@ agaricus_campestros_version_1:
   citation: ''
 
 coprinellus_micaceus_version_1:
-  id: 23
   name_id: <%= ActiveRecord::FixtureSet.identify(:coprinellus_micaceus) %>
   updated_at: 2007-06-24 12:45:55
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -319,7 +296,6 @@ coprinellus_micaceus_version_1:
   sort_name: Coprinellus micaceus
 
 coprinellus_micaceus_version_2:
-  id: 24
   name_id: <%= ActiveRecord::FixtureSet.identify(:coprinellus_micaceus) %>
   updated_at: 2007-06-24 12:45:55
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -333,7 +309,6 @@ coprinellus_micaceus_version_2:
   citation: ''
 
 coprinellus_micaceus_no_author_version_1:
-  id: 25
   name_id: <%= ActiveRecord::FixtureSet.identify(:coprinellus_micaceus_no_author) %>
   updated_at: 2007-06-24 12:45:55
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -347,7 +322,6 @@ coprinellus_micaceus_no_author_version_1:
   citation: ''
 
 strobilurus_diminutivus_no_author_version_1:
-  id: 26
   name_id: <%= ActiveRecord::FixtureSet.identify(:strobilurus_diminutivus_no_author) %>
   updated_at: 2007-07-20 20:54:45
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -360,7 +334,6 @@ strobilurus_diminutivus_no_author_version_1:
   citation: ''
 
 pluteus_petasatus_approved_version_1:
-  id: 27
   name_id: <%= ActiveRecord::FixtureSet.identify(:pluteus_petasatus_approved) %>
   updated_at: 2007-07-20 20:54:45
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -374,7 +347,6 @@ pluteus_petasatus_approved_version_1:
   citation: ''
 
 pluteus_petasatus_deprecated_version_1:
-  id: 28
   name_id: <%= ActiveRecord::FixtureSet.identify(:pluteus_petasatus_deprecated) %>
   updated_at: 2007-07-20 21:12:45
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -389,7 +361,6 @@ pluteus_petasatus_deprecated_version_1:
   citation: ''
 
 lepiota_version_1:
-  id: 29
   name_id: <%= ActiveRecord::FixtureSet.identify(:lepiota) %>
   updated_at: 2007-07-30 08:06:40
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -402,7 +373,6 @@ lepiota_version_1:
   citation: ''
 
 chlorophyllum_version_1:
-  id: 30
   name_id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum) %>
   updated_at: 2007-07-30 22:06:40
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -415,7 +385,6 @@ chlorophyllum_version_1:
   citation: ''
 
 bugs_bunny_one_version_1:
-  id: 31
   name_id: <%= ActiveRecord::FixtureSet.identify(:bugs_bunny_one) %>
   updated_at: 2008-01-31 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -429,7 +398,6 @@ bugs_bunny_one_version_1:
   citation: ''
 
 bugs_bunny_two_version_1:
-  id: 32
   name_id: <%= ActiveRecord::FixtureSet.identify(:bugs_bunny_two) %>
   updated_at: 2008-01-31 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -443,7 +411,6 @@ bugs_bunny_two_version_1:
   citation: ''
 
 russula_brevipes_no_author_version_1:
-  id: 33
   name_id: <%= ActiveRecord::FixtureSet.identify(:russula_brevipes_no_author) %>
   updated_at: 2008-03-10 22:31:27
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -456,7 +423,6 @@ russula_brevipes_no_author_version_1:
   citation: ''
 
 russula_brevipes_author_notes_version_1:
-  id: 34
   name_id: <%= ActiveRecord::FixtureSet.identify(:russula_brevipes_author_notes) %>
   updated_at: 2008-03-10 22:33:05
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -470,7 +436,6 @@ russula_brevipes_author_notes_version_1:
   citation: ''
 
 russula_cremoricolor_no_author_notes_version_1:
-  id: 35
   name_id: <%= ActiveRecord::FixtureSet.identify(:russula_cremoricolor_no_author_notes) %>
   updated_at: 2008-03-12 20:53:18
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -483,7 +448,6 @@ russula_cremoricolor_no_author_notes_version_1:
   citation: ''
 
 russula_cremoricolor_author_notes_version_1:
-  id: 36
   name_id: <%= ActiveRecord::FixtureSet.identify(:russula_cremoricolor_author_notes) %>
   updated_at: 2008-03-12 20:53:40
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -497,7 +461,6 @@ russula_cremoricolor_author_notes_version_1:
   citation: ''
 
 lentinellus_ursinus_author1_version_1:
-  id: 37
   name_id: <%= ActiveRecord::FixtureSet.identify(:lentinellus_ursinus_author1) %>
   updated_at: 2008-03-19 08:35:37
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -511,7 +474,6 @@ lentinellus_ursinus_author1_version_1:
   citation: ''
 
 lentinellus_ursinus_author2_version_1:
-  id: 38
   name_id: <%= ActiveRecord::FixtureSet.identify(:lentinellus_ursinus_author2) %>
   updated_at: 2008-03-19 08:35:37
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -525,7 +487,6 @@ lentinellus_ursinus_author2_version_1:
   citation: ''
 
 macrocybe_pegler_version_1:
-  id: 39
   name_id: <%= ActiveRecord::FixtureSet.identify(:macrocybe_pegler) %>
   updated_at: 2008-09-05 22:30:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -539,7 +500,6 @@ macrocybe_pegler_version_1:
   citation: ''
 
 macrocybe_titans_version_1:
-  id: 40
   name_id: <%= ActiveRecord::FixtureSet.identify(:macrocybe_titans) %>
   updated_at: 2008-09-05 22:30:00
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -553,7 +513,6 @@ macrocybe_titans_version_1:
   citation: ''
 
 boletus_edulis_version_1:
-  id: 41
   name_id: <%= ActiveRecord::FixtureSet.identify(:boletus_edulis) %>
   updated_at: 2008-10-05 16:17:08
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -567,7 +526,6 @@ boletus_edulis_version_1:
   citation: ''
 
 peltigera_version_1:
-  id: 42
   name_id: <%= ActiveRecord::FixtureSet.identify(:peltigera) %>
   updated_at: 2009-01-01 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
@@ -580,7 +538,6 @@ peltigera_version_1:
   deprecated: 1
 
 peltigera_version_2:
-  id: 43
   name_id: <%= ActiveRecord::FixtureSet.identify(:peltigera) %>
   updated_at: 2009-01-02 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -594,7 +551,6 @@ peltigera_version_2:
   sort_name: Peltigera sp. (Old) New Auth.
 
 petigera_version_1:
-  id: 44
   name_id: <%= ActiveRecord::FixtureSet.identify(:petigera) %>
   updated_at: 2009-01-02 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -609,7 +565,6 @@ petigera_version_1:
   citation: ''
 
 suillus_version_1:
-  id: 45
   name_id: <%= ActiveRecord::FixtureSet.identify(:suillus) %>
   updated_at: 2009-10-12 21:30:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -623,7 +578,6 @@ suillus_version_1:
   citation: ''
 
 suillus_by_white_version_1:
-  id: 46
   name_id: <%= ActiveRecord::FixtureSet.identify(:suillus_by_white) %>
   updated_at: 2009-10-12 21:30:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -637,7 +591,6 @@ suillus_by_white_version_1:
   citation: ''
 
 suilus_version_1:
-  id: 47
   name_id: <%= ActiveRecord::FixtureSet.identify(:suilus) %>
   updated_at: 2009-10-12 21:30:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
@@ -653,7 +606,6 @@ suilus_version_1:
   citation: ''
 
 abortiporus_biennis_1:
-  id: 48
   name_id: <%= ActiveRecord::FixtureSet.identify(:abortiporus_biennis_for_eol) %>
   version: 1
   updated_at: 2015-07-05 21:41:10

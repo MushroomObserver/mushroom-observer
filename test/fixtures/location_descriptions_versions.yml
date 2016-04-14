@@ -1,5 +1,5 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-
+# Location description and user associations must be specified by id, not label.
 albion_desc_version_1:
   id: 1
   location_description_id: <%= ActiveRecord::FixtureSet.identify(:albion_desc) %>

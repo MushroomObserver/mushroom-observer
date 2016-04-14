@@ -5,26 +5,26 @@
 minimal_unknown_obs_comment_1: # 1
   created_at: 2006-03-02 21:14:00
   updated_at: 2006-03-02 21:14:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
+  user: rolf
   summary: A comment on minimal unknown
   comment: Wow!  That's really cool
   target_type: Observation
-  target_id: <%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
+  target: minimal_unknown_obs
 
 minimal_unknown_obs_comment_2: # 2
   created_at: 2006-03-02 21:16:00
   updated_at: 2006-03-02 21:16:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
+  user: dick
   summary: Let's _try_ a more "complicated" comment.
   comment: "With _Agaricus campestris_ links and *boldface* and\n4x4 other weird(tm) !image 2! stuff.\n\nJust to test html_to_ascii...  -A&P"
   target_type: Observation
-  target_id: <%= ActiveRecord::FixtureSet.identify(:minimal_unknown_obs) %>
+  target: minimal_unknown_obs
 
 detailed_unknown_obs_comment: # 3
   created_at: 2007-03-02 21:16:00
   updated_at: 2007-03-02 21:16:00
-  user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
+  user: mary
   summary: Let's give detailed_unknown_obs a little of everything.
   comment: ''
   target_type: Observation
-  target_id: <%= ActiveRecord::FixtureSet.identify(:detailed_unknown_obs) %>
+  target: detailed_unknown_obs
