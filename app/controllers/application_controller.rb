@@ -518,13 +518,13 @@ class ApplicationController < ActionController::Base
     # changing it to what it already is!!
     code = code.split("-")[0]
     if I18n.locale.to_s != code
-puts "params: #{params}"
-puts "old I18n.locale: #{I18n.locale.to_s}"
-puts "code: #{code}"
+    puts "File.exist?('config/locales/fr.txt'): #{File.exist?('config/locales/fr.txt')}"
+    puts "File.exist?('config/locales/fr.yml'): #{File.exist?('config/locales/fr.yml')}"
+    puts "File.size('config/locales/fr.txt'): #{File.size('config/locales/fr.txt')}"
+    puts "File.size('config/locales/fr.yml'): #{File.size('config/locales/fr.yml')}"
+
       I18n.locale = code
-puts "new I18n.locale #{I18n.locale}"
       session[:locale] = code
-puts "new session[:locale] #{session[:locale]}"
     end
 
     # Update user preference.
