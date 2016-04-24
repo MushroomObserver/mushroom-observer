@@ -29,3 +29,5 @@ alias mosql='mysql -u mo -h xxx -p"xxx" mo_production'
 function mosqle {
   mysql -u mo -h xxx -p"xxx" mo_production -e "source $1"
 }
+
+alias moserver='rails s -b 0.0.0.0'
