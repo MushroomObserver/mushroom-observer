@@ -465,7 +465,7 @@ class Observation < AbstractModel
       favorite = false
       if value > 0
         favorite = true
-        for v in users_votes(user)
+        for v in users_votes(user) - [vote]
           # If any other vote higher, this is not the favorite.
           if v.value > value
             favorite = false
