@@ -497,8 +497,6 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-puts "params: #{params}"
-
     code = if params[:user_locale]
              logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
              params[:user_locale]
@@ -519,8 +517,6 @@ puts "params: #{params}"
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
     code = code.split("-")[0]
-puts "code: #{code}"
-puts "I18n.locale: #{I18n.locale.to_s}"
     if I18n.locale.to_s != code
       I18n.locale = code
       session[:locale] = code
