@@ -51,8 +51,6 @@ class CapybarLurkerTest < IntegrationTestCase
     assert_match(%r{#{:app_title.l }: How to Use}, page.title, "Wrong page")
 
     click_on("Français")
-    print page.html
-
     if :how_title.has_translation?
       subtitle = :how_title.t
     else
