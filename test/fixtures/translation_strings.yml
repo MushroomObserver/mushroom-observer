@@ -166,7 +166,7 @@ version_wizard:
 french_app_contributors:
   # id: 18
   version: 1
-  language_id: french
+  language: french
   tag: app_contributors
   text: Contributeurs
   updated_at: 2014-10-20
