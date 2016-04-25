@@ -902,6 +902,7 @@
   log_approved_by: Approved by [user].
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
   log_consensus_changed: Consensus changed from [old] to [new].
+  log_consensus_created_at: Initial name [name].
   log_consensus_reached: "Consensus established: [name]"
   log_deprecated_by: Deprecated by [user].
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"

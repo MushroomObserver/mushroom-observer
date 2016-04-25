@@ -101,6 +101,15 @@ class ObservationTest < UnitTestCase
     refute(obs.showable_owner_id?)
   end
 
+  def test_weakened_favorite
+    vote = votes(:owner_only_favorite_ne_consensus)
+    vote.observation.change_vote(vote.naming, Vote.min_pos_vote, vote.user)
+    vote.reload
+
+    assert_equal(true, vote.favorite,
+                 "Weakened favorite should remain favorite")
+  end
+
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
