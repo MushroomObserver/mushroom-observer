@@ -117,8 +117,8 @@ class ApiController < ApplicationController
     # need to default to xml for backwards compatibility
     request.format = "xml" if request.format == "html"
     respond_to do |format|
-      format.xml { render args }
-      format.js  { render args }
+      format.xml  { render args }
+      format.json { render args }
     end
   end
 end

@@ -23,7 +23,6 @@ class API
   attr_accessor :query
   attr_accessor :detail
   attr_accessor :includes
-  attr_accessor :page_length
   attr_accessor :page_number
 
   initializers << lambda do
@@ -46,12 +45,12 @@ class API
       high_detail_page_length
     elsif method == "PUT"
       put_page_length
-    elsif method == "PUT"
+    elsif method == "DELTE"
       delete_page_length
     elsif detail == :low
       low_detail_page_length
     else
-      model.count
+      1e6
     end
   end
 
