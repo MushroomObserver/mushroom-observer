@@ -398,6 +398,18 @@ end
     assert_input_value(:location_display_name, loc.display_name)
   end
 
+  def test_edit_unknown_location
+    loc = locations(:unknown_location)
+    old_loc_display_name = loc.display_name
+    params = { id: loc.id,
+               location: { display_name: "Rome, Italy" }
+             }
+    post_requires_login(:edit_location, params)
+
+    assert_equal(old_loc_display_name, loc.reload.display_name,
+                 "Users should not be able to change Unknown location")
+  end
+
   def test_update_location
     count = Location::Version.count
     count2 = LocationDescription::Version.count
