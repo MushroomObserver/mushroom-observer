@@ -15,7 +15,6 @@ class LanguageExporterTest < UnitTestCase
 
   def teardown
     Language.reset_input_file_override
-    FileUtils.remove_dir("#{Rails.root}/config/test_locales", force: true)
     super
   end
 
