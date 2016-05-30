@@ -15,6 +15,7 @@ class LanguageExporterTest < UnitTestCase
 
   def teardown
     Language.reset_input_file_override
+    FileUtils.remove_dir("#{Rails.root}/config/test_locales", force: true)
     super
   end
 
@@ -200,24 +201,25 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_export_round_trip
+    template = "#{Rails.root}/test/templates/export_round_trip.yml"
     use_test_locales do
       file = @official.export_file
+      FileUtils.copy(template, file)
       @official.write_export_file_lines(File.open(file, "r:utf-8").readlines)
-      data = File.open(file, "r:utf-8") do |fh|
-        YAML.load(fh)
-      end
+      data = File.open(file, "r:utf-8") { |fh| YAML.load(fh) }
       assert(data, "File read failed for #{file}")
 
-      for tag, str in data
+      data.each do |tag, str|
         assert(tag.is_a?(String),
                "#{file} #{tag}: tag is a #{tag.class} not a String!")
         assert(str.is_a?(String),
                "#{file} #{tag}: value is a #{str.class} not a String!")
       end
+
       lines = @official.send_private(:format_export_file, data, data)
       new_data = YAML.load(lines.join)
       seen = {}
-      for tag, old_str in data
+      data.each do |tag, old_str|
         if new_str = new_data[tag]
           old_str = @official.send_private(:clean_string, old_str)
           new_str = @official.send_private(:clean_string, new_str)
@@ -227,7 +229,7 @@ class LanguageExporterTest < UnitTestCase
         end
         seen[tag] = true
       end
-      for tag in new_data.keys.reject { |tag| seen[tag] }
+      (new_data.keys.reject { |tag| seen[tag] }).each do |tag|
         flunk("Unexpected string for #{tag}.")
       end
     end
