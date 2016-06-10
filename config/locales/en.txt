@@ -51,7 +51,7 @@
 #  Option two: Change the translations on the live, running site via the "Edit
 #  Translations on This Page" link at the bottom of the page while viewing the
 #  page in the desired language.  Any changes made here will be stored in the
-#  live database, and will propogate automatically to all other currently
+#  live database, and will propagate automatically to all other currently
 #  running instances immediately.
 #
 #  rake lang:update:
@@ -608,7 +608,7 @@
   viewed: viewed
 
   # Common adjectives describing species names. (Note: "approved" seems to be
-  # interchangable with "accepted" in our site -- both indicate that the
+  # interchangeable with "accepted" in our site -- both indicate that the
   # scientific community accepts this name as correct.  "Reviewed" on the
   # other hand indicates that a user in the "reviewers" group has looked at
   # an object and didn't see any obvious mistakes.)
@@ -1245,7 +1245,7 @@
   form_names_uses: Uses
   form_names_notes: Notes
   form_names_refs: References
-  form_names_text_name_help: "Unformatted version of the name without any author info.\nE.g., \"Amanita muscara var. flavivolvata\"."
+  form_names_text_name_help: "Unformatted version of the name without any author info.\nE.g., \"Amanita muscaria var. flavivolvata\"."
   form_names_text_name_locked: Name is in use.  Make name changes in each observation.
   form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
@@ -2504,7 +2504,7 @@
   set_interest_already_off: You have already told us to ignore [name].
   set_interest_already_on: You have already told us to watch [name].
   set_interest_bad_object: "Object [type] #[id] doesn't exist."
-  set_interest_failure: Could not save changes.  Please try again or report this to the webaster.
+  set_interest_failure: Could not save changes.  Please try again or report this to the webmaster.
   set_interest_success_was_off: Cancelled your ban on emails about [name].
   set_interest_success_was_on: Cancelled your request for emails about [name].
   set_interest_success_off: We will now ignore any changes in [name].
@@ -2689,14 +2689,14 @@
   change_member_status_make_member_help: Make Regular Member - Ensures that [:user] is a member of the project, but not in the admin group. Afterwords the [:user] will be able to view and create draft names for this project.  They will be the only non-admin members able to edit their drafts.
   change_member_status_members: Current Project Members
   change_member_status_remove_member: Remove Member
-  change_member_status_remove_member_help: Remove Member - Removes all member and admin priviledges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
+  change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
 
   # observer/change_user_bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
   change_user_bonuses: Award Bonus
-  change_user_bonuses_help: "List one bonus per line, each specifiying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
+  change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
 
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
