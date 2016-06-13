@@ -603,6 +603,13 @@ class LocationController < ApplicationController
       @display_name = @location.display_name
       done = false
       if request.method == "POST"
+
+        if Location.is_unknown?(@location.name) && !is_in_admin_mode?
+          flash_error("This Location is protected (not editable). To change an Observation's location, edit Observation 'Where'.")
+          redirect_to(action: "show_location", id: @location.id)
+          return
+        end
+
         @display_name = begin
                           params[:location][:display_name].strip_squeeze
                         rescue

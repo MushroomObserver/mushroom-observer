@@ -82,6 +82,7 @@ module GeneralExtensions
 
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
+    FileUtils.remove_dir("#{Rails.root}/config/test_locales", force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
