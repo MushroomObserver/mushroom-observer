@@ -190,8 +190,9 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_updated_at, rss_log)
     assert(rss_log.updated_at > time)
 
+    location_with_notes = locations(:albion)
     rss_log.update_attribute(:updated_at, time)
-    Location.first.merge(loc)
+    location_with_notes.merge(loc)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
