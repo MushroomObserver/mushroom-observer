@@ -12,14 +12,14 @@ Content-Transfer-Encoding: 7bit
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <div class="textile"><h2><strong>Research Request</strong></h2>
-<p>Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation <u><b><i>Agaricus campestris</i></b> L. (4)</u>:</p></div>
+<p>Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation <u><b><i>Agaricus campestris</i></b> L. (<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>)</u>:</p></div>
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-<div class="textile"><p>A note about <a href="http://mushroomobserver.org/4">http://mushroomobserver.org/4</a> for rolf</p></div>
+<div class="textile"><p>A note about <a href="http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>">http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %></a> for rolf</p></div>
 </div>
 <div class="textile"><p>It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.<br />
 Here are some handy links:</p></div>
 <ul type=none>
-<li>Show this observation: <a href="http://mushroomobserver.org/observer/show_observation/4">http://mushroomobserver.org/observer/show_observation/4</a></li>
+<li>Show this observation: <a href="http://mushroomobserver.org/observer/show_observation/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>">http://mushroomobserver.org/observer/show_observation/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %></a></li>
 <li>Latest changes at Mushroom Observer: <a href="http://mushroomobserver.org">http://mushroomobserver.org</a></li>
 </ul>
 <div class="textile"><p>If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org</p></div>

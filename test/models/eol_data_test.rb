@@ -16,6 +16,7 @@ class EolDataTest < UnitTestCase
 
   def test_create
     obj = EolData.new
+
     assert_equal(SortedSet, obj.names.class)
     assert(2 <= obj.name_count)
     assert(2 <= obj.total_image_count)

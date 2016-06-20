@@ -18,34 +18,36 @@ class SpeciesListTest < UnitTestCase
 
   def test_add_and_remove_observations
     spl = species_lists(:first_species_list)
-    obs1 = Observation.find(1)
-    obs2 = Observation.find(2)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    detailed_unknown_obs = observations(:detailed_unknown_obs)
     assert_obj_list_equal([], spl.observations)
 
-    spl.add_observation(obs1)
-    assert_obj_list_equal([obs1], spl.observations)
+    spl.add_observation(minimal_unknown_obs)
+    assert_obj_list_equal([minimal_unknown_obs], spl.observations)
 
-    spl.add_observation(obs1)
-    assert_obj_list_equal([obs1], spl.observations)
+    spl.add_observation(minimal_unknown_obs)
+    assert_obj_list_equal([minimal_unknown_obs], spl.observations)
 
-    spl.add_observation(obs2)
-    assert_obj_list_equal([obs1, obs2], spl.observations.sort_by(&:id))
+    spl.add_observation(detailed_unknown_obs)
+    assert_obj_list_equal([minimal_unknown_obs,
+                           detailed_unknown_obs].sort_by(&:id),
+                          spl.observations.sort_by(&:id))
 
-    spl.remove_observation(obs1)
-    assert_obj_list_equal([obs2], spl.observations)
+    spl.remove_observation(minimal_unknown_obs)
+    assert_obj_list_equal([detailed_unknown_obs], spl.observations)
 
-    spl.remove_observation(obs1)
-    assert_obj_list_equal([obs2], spl.observations)
+    spl.remove_observation(minimal_unknown_obs)
+    assert_obj_list_equal([detailed_unknown_obs], spl.observations)
 
-    spl.remove_observation(obs2)
+    spl.remove_observation(detailed_unknown_obs)
     assert_obj_list_equal([], spl.observations)
 
-    spl.remove_observation(obs2)
+    spl.remove_observation(detailed_unknown_obs)
     assert_obj_list_equal([], spl.observations)
   end
 
   def test_construct_observation
-    spl = SpeciesList.first
+    spl = species_lists(:first_species_list)
     assert_users_equal(rolf, spl.user)
     proj = projects(:bolete_project)
     proj.add_species_list(spl)

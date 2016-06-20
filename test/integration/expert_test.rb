@@ -119,7 +119,6 @@ class ExpertTest < IntegrationTestCase
     list = names.join("\r\n")
 
     amanita = Name.where(text_name: "Amanita baccata")
-    suillus = Name.where(text_name: "Suillus")
 
     albion = locations(:albion)
     albion_name = albion.name
@@ -167,8 +166,8 @@ class ExpertTest < IntegrationTestCase
     sess.open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!("list_members").split(/\r\n/).sort)
-      form.check(/chosen_multiple_names_\d+_#{amanita[0].id}/)
-      form.check(/chosen_multiple_names_\d+_#{suillus[1].id}/)
+      form.check(/chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/)
+      form.check(/chosen_multiple_names_\d+_#{names(:suillus_by_white).id}/)
 
       # For some reason these need to be explicitly re-checked
       form.assert_value("member_is_collection_location", false) # Should be true

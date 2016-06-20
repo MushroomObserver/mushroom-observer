@@ -17,7 +17,7 @@ A feature
 
 Here are some handy links:
 
-Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_feature/1
-Change your preferences: http://mushroomobserver.org/account/prefs/1
+Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_feature/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
+Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 

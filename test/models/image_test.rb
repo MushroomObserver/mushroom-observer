@@ -3,7 +3,7 @@ require "test_helper"
 
 class ImageTest < UnitTestCase
   def test_votes
-    img = images(:in_situ)
+    img = images(:in_situ_image)
     assert(img.image_votes.empty?)
     assert_equal(0, img.num_votes)
     assert_equal(0, img.vote_cache.to_i)
@@ -38,8 +38,8 @@ class ImageTest < UnitTestCase
   def test_copyright_logging
     User.current = mary
 
-    license_one = License.find(1)
-    license_two = License.find(3)
+    license_one = licenses(:ccnc25)
+    license_two = licenses(:ccwiki30)
     name_one = "Bobby Singer"
     name_two = "Robert H. Singer"
     date_one = Date.parse("2007-12-31")
@@ -96,7 +96,7 @@ class ImageTest < UnitTestCase
     assert_false(img.has_edit_permission?(dick))
 
     # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
-    img = images(:in_situ)
+    img = images(:in_situ_image)
     assert_false(img.has_edit_permission?(rolf))
     assert_true(img.has_edit_permission?(mary))
     assert_true(img.has_edit_permission?(dick))

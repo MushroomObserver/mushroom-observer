@@ -161,18 +161,19 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_locations_by_user
-    get_with_dump(:locations_by_user, id: 1)
+    get_with_dump(:locations_by_user, id: rolf.id)
     assert_template("list_locations")
   end
 
   def test_locations_by_editor
-    get_with_dump(:locations_by_editor, id: 1)
+    get_with_dump(:locations_by_editor, id: rolf.id)
     assert_template("list_locations")
   end
 
   def test_list_location_descriptions
     login("mary")
-    Location.find(2).description = LocationDescription.create!(location_id: 2)
+    burbank = locations(:burbank)
+    burbank.description = LocationDescription.create!(location_id: burbank.id)
     get_with_dump(:list_location_descriptions)
     assert_template("list_location_descriptions")
   end
@@ -180,16 +181,14 @@ class LocationControllerTest < FunctionalTestCase
   def test_location_descriptions_by_author
     descs = LocationDescription.all
     assert_equal(1, descs.length)
-    get_with_dump(:location_descriptions_by_author, id: 1)
-    # assert_template(action: :show_location_description, id: descs.first.id)
-    # assert_response(:redirect)
+    get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
       %r{/location/show_location_description/#{ descs.first.id }}
     )
     end
 
   def test_location_descriptions_by_editor
-    get_with_dump(:location_descriptions_by_editor, id: 1)
+    get_with_dump(:location_descriptions_by_editor, id: rolf.id)
     assert_template("list_location_descriptions")
   end
 
@@ -220,7 +219,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_create_and_save_location_description
-    loc = locations(:nybg) # use a location that has no description
+    loc = locations(:nybg_location) # use a location that has no description
     assert_nil(loc.description,
                "Test should use a location that has no description.")
     params = { description: { source_type: "public",
@@ -268,13 +267,13 @@ class LocationControllerTest < FunctionalTestCase
                               project_id: "",
                               public_write: "1",
                               public: "1",
-                              license_id: "3",
+                              license_id: licenses(:ccwiki30).id.to_s,
                               gen_desc: "research station",
                               ecology: "redwood",
                               species: "redwood zone",
                               notes: "church camp",
                               refs: "" },
-               id: loc.id }
+               id: location_descriptions(:albion_desc).id }
 
     post_requires_login(:edit_location_description, params)
 

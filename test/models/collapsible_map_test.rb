@@ -149,7 +149,7 @@ class CollapsibleMapTest < UnitTestCase
   end
 
   def test_extending_mapset_with_boxes
-    obs = observations(:amateur_observation)
+    obs = observations(:amateur_obs)
     loc = locations(:burbank)
     n, s, e, w = *loc.edges
     mapset = MapSet.new(obs)
@@ -352,7 +352,7 @@ class CollapsibleMapTest < UnitTestCase
   end
 
   def test_mapping_one_observation_with_gps
-    obs = observations(:amateur_observation)
+    obs = observations(:amateur_obs)
     assert(obs.lat && obs.long && !obs.location)
     coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
@@ -365,7 +365,7 @@ class CollapsibleMapTest < UnitTestCase
   end
 
   def test_mapping_one_observation_with_location
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     assert(!obs.lat && !obs.long && obs.location)
     coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)

@@ -240,7 +240,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(2, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
@@ -391,8 +391,8 @@ class LocationTest < UnitTestCase
   end
 
   def do_merge_test(obj)
-    loc1 = Location.first
-    loc2 = Location.last
+    loc1 = locations(:albion)
+    loc2 = locations(:nybg_location)
     obj.update_attribute(:location, loc1)
     obj.reload
     assert_equal(loc1.id, obj.location_id)

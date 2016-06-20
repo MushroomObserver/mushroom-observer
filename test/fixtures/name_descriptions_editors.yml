@@ -1,9 +1,0 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-
-coprinus_comatus_desc_authors_1:
-  name_description_id: 15
-  user_id: 1
-
-coprinus_comatus_desc_authors_2:
-  name_description_id: 15
-  user_id: 2

@@ -21,7 +21,7 @@ class ObservationTest < UnitTestCase
   # Add an observation to the database
   def test_create
     create_new_objects
-    assert_kind_of(Observation, observations(:minimal_unknown))
+    assert_kind_of(Observation, observations(:minimal_unknown_obs))
     assert_kind_of(Observation, @cc_obs)
     assert_kind_of(Naming, namings(:minimal_unknown_naming))
     assert_kind_of(Naming, @cc_nam)
@@ -60,30 +60,26 @@ class ObservationTest < UnitTestCase
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(@cc_nam.id) }
   end
 
-  def test_all_observations_order
-    # obs = Observation.all(:order => "id")
-    obs = Observation.order("id")
-    assert_equal(observations(:coprinus_comatus_obs).id, obs[2].id)
-    assert_equal(observations(:detailed_unknown).id, obs[1].id)
-  end
-
   def test_remove_image_twice
-    observations(:minimal_unknown).images = [
+    observations(:minimal_unknown_obs).images = [
       images(:commercial_inquiry_image),
       images(:disconnected_coprinus_comatus_image),
       images(:connected_coprinus_comatus_image)
     ]
-    observations(:minimal_unknown).thumb_image = images(:commercial_inquiry_image)
-    observations(:minimal_unknown).remove_image(images(:commercial_inquiry_image))
-    assert_equal(observations(:minimal_unknown).thumb_image, images(:disconnected_coprinus_comatus_image))
-    observations(:minimal_unknown).remove_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(observations(:minimal_unknown).thumb_image, images(:connected_coprinus_comatus_image))
+    observations(:minimal_unknown_obs).thumb_image = images(:commercial_inquiry_image)
+    observations(:minimal_unknown_obs).remove_image(images(:commercial_inquiry_image))
+    assert_equal(observations(:minimal_unknown_obs).thumb_image, images(:disconnected_coprinus_comatus_image))
+    observations(:minimal_unknown_obs).remove_image(images(:disconnected_coprinus_comatus_image))
+    assert_equal(observations(:minimal_unknown_obs).thumb_image, images(:connected_coprinus_comatus_image))
   end
 
   def test_name_been_proposed
-    assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:coprinus_comatus)))
-    assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:agaricus_campestris)))
-    assert(!observations(:coprinus_comatus_obs).name_been_proposed?(names(:conocybe_filaris)))
+    assert(observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:coprinus_comatus)))
+    assert(observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:agaricus_campestris)))
+    assert(!observations(:coprinus_comatus_obs).
+      name_been_proposed?(names(:conocybe_filaris)))
   end
 
   def test_owner_id
@@ -117,19 +113,19 @@ class ObservationTest < UnitTestCase
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
-    assert(observations(:detailed_unknown).specimen)
-    assert(observations(:detailed_unknown).specimens.length > 0)
+    assert(observations(:detailed_unknown_obs).specimen)
+    assert(observations(:detailed_unknown_obs).specimens.length > 0)
   end
 
   def test_observer_accepts_general_email_questions
     obs = observations(:owner_accepts_general_questions)
-    assert(obs.observer_takes_email_questions_from?(users(:dick)),
+    assert(obs.observer_takes_email_questions_from?(dick),
            "User with email_general_question should take questions from others")
   end
 
   def test_observer_refuses_general_email_questions
     obs = observations(:owner_refuses_general_questions)
-    refute(obs.observer_takes_email_questions_from?(users(:rolf)),
+    refute(obs.observer_takes_email_questions_from?(rolf),
            "User with email_general_question off should not take questions")
   end
 
@@ -276,7 +272,8 @@ class ObservationTest < UnitTestCase
     # so think of this as Mary changing Rolf's vote. :)
     User.current = mary
     obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
-    assert_equal(3, votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
+    assert_equal(3,
+                 votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
@@ -422,19 +419,16 @@ class ObservationTest < UnitTestCase
     QueuedEmail.queue_emails(true)
 
     obs = observations(:coprinus_comatus_obs)
-
     marys_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: mary,
       state: false
     )
-
     dicks_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: dick,
       state: false
     )
-
     katrinas_interest = Interest.create(
       target: observations(:coprinus_comatus_obs),
       user: katrina,
@@ -446,7 +440,8 @@ class ObservationTest < UnitTestCase
     assert_save(marys_interest)
 
     User.current = rolf
-    observations(:coprinus_comatus_obs).notes = "I have new information on this observation."
+    observations(:coprinus_comatus_obs).
+      notes = "I have new information on this observation."
     observations(:coprinus_comatus_obs).save
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -462,9 +457,9 @@ class ObservationTest < UnitTestCase
     assert_save(marys_interest)
     dicks_interest.state = true
     assert_save(dicks_interest)
-
     User.current = rolf
     obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
+
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
                  flavor: "QueuedEmail::ObservationChange",
@@ -489,7 +484,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (3)"
+                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (#{observations(:coprinus_comatus_obs).id})"
                 )
     QueuedEmail.queue_emails(false)
   end
@@ -635,13 +630,13 @@ class ObservationTest < UnitTestCase
 
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Mary
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     assert_false(obs.has_edit_permission?(rolf))
     assert_true(obs.has_edit_permission?(mary))
     assert_false(obs.has_edit_permission?(dick))
 
     # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     assert_false(obs.has_edit_permission?(rolf))
     assert_true(obs.has_edit_permission?(mary))
     assert_true(obs.has_edit_permission?(dick))

@@ -120,7 +120,7 @@ class NameTest < UnitTestCase
     result = Name.find_or_create_name_and_parents("Coprinus comatus v. bogus (With) Author")
     assert_equal 3, result.length
     assert_equal nil, result[0].id
-    assert_equal 2,   result[1].id
+    assert_equal names(:coprinus_comatus).id, result[1].id
     assert_equal nil, result[2].id
     assert_equal "Coprinus", result[0].text_name
     assert_equal "Coprinus comatus", result[1].text_name
@@ -133,7 +133,7 @@ class NameTest < UnitTestCase
     result = Name.find_or_create_name_and_parents("Conocybe filaris var bogus (With) Author")
     assert_equal 3, result.length
     assert_equal nil, result[0].id
-    assert_equal 4,   result[1].id
+    assert_equal names(:conocybe_filaris).id, result[1].id
     assert_equal nil, result[2].id
     assert_equal "Conocybe", result[0].text_name
     assert_equal "Conocybe filaris", result[1].text_name
@@ -145,14 +145,14 @@ class NameTest < UnitTestCase
     # Agaricus fixture does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus L.")
     assert_equal 1, result.length
-    assert_equal 18, result[0].id
+    assert_equal names(:agaricus).id, result[0].id
     assert_equal "Agaricus", result[0].text_name
     assert_equal "L.", result[0].author
 
     # Agaricus does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus abra f. cadabra (With) Another Author")
     assert_equal 3, result.length
-    assert_equal 18, result[0].id
+    assert_equal names(:agaricus).id, result[0].id
     assert_equal nil, result[1].id
     assert_equal nil, result[2].id
     assert_equal "Agaricus", result[0].text_name
@@ -1143,31 +1143,31 @@ class NameTest < UnitTestCase
   end
 
   def test_rank_matchers
-    name = Name.find(1)   # Fungi
+    name = names(:fungi)
     refute(name.at_or_below_genus?)
     refute(name.below_genus?)
     refute(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(18)  # Agaricus
+    name = names(:agaricus)
     assert(name.at_or_below_genus?)
     refute(name.below_genus?)
     refute(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(52)  # Amanita subgenus Lepidella
+    name = names(:amanita_subgenus_lepidella)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     assert(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(2) # Coprinus comatus
+    name = names(:coprinus_comatus)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     refute(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
 
-    name = Name.find(53) # Amanita boudieri var. beillei
+    name = names(:amanita_boudieri_var_beillei)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     refute(name.between_genus_and_species?)
@@ -1499,7 +1499,7 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(nil, desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::NameChange",
@@ -1533,8 +1533,8 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(rolf.id, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
                  flavor: "QueuedEmail::NameChange",
@@ -1573,8 +1573,8 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(:unreviewed, desc.review_status)
     assert_equal(nil, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(5, QueuedEmail.count)
     assert_email(4,
                  flavor: "QueuedEmail::NameChange",
@@ -1608,8 +1608,8 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(nil, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(6, QueuedEmail.count)
     assert_email(5,
                  flavor: "QueuedEmail::NameChange",
@@ -1655,7 +1655,7 @@ class NameTest < UnitTestCase
     assert(names(:tremella_mesenterica).is_lichen?)
     assert(names(:tremella).is_lichen?)
     assert(names(:tremella_justpublished).is_lichen?)
-    assert(!names(:agaricus_campestris).is_lichen?)
+    refute(names(:agaricus_campestris).is_lichen?)
   end
 
   def test_has_eol_data
@@ -1738,6 +1738,7 @@ class NameTest < UnitTestCase
 
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
+    return unless sql_collates_accents?
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
     n3 = create_test_name("Agaricus Aeiøu")

@@ -5,7 +5,6 @@ class VoteTest < UnitTestCase
   # Create one.
   def test_create
     assert_kind_of(Naming, namings(:agaricus_campestris_naming))
-    mary = users(:mary)
     assert_kind_of(User, mary)
     now = Time.now
     vote = Vote.new(

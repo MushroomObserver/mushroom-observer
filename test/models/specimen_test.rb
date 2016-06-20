@@ -14,7 +14,7 @@ class SpecimenTest < UnitTestCase
   def test_personal_herbarium_name_and_languages
     assert_equal("herbarium", :herbarium.t)  # Ensure the translations are initialized
     TranslationString.translations(:fr)[:user_personal_herbarium] = "[name]: Herbier Personnel"
-    user = users(:mary)
+    user = mary
     I18n.locale = "en"
     assert_equal("Mary Newbie (mary): Personal Herbarium", user.personal_herbarium_name)
     I18n.locale = "fr"

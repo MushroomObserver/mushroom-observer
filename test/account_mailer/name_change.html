@@ -12,7 +12,7 @@ Content-Transfer-Encoding: 7bit
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <div class="textile"><h2><strong>Name was Changed</strong></h2>
-<p>There were change(s) made to the name <u><i>Petigera</i> (40)</u>:</p></div>
+<p>There were change(s) made to the name <u><i>Petigera</i> (<%= ActiveRecord::FixtureSet.identify(:peltigera) %>)</u>:</p></div>
 <strong>By:</strong> Tricky Dick (dick)</p></div>
 <div class="textile"><p><strong>Name changed to:</strong> Peltigera<br />
 <strong>Author changed to:</strong> (Old) New Auth.<br />
@@ -56,10 +56,10 @@ Family: <em>Peltigeraceae</em></p></div>
 <div class="textile"><p>You received this email because you are an author of a description of the changed name.<br />
 Here are some handy links:</p></div>
 <ul type=none>
-<li>Show this name: <a href="http://mushroomobserver.org/name/show_name/40">http://mushroomobserver.org/name/show_name/40</a></li>
-<li>I&#8217;m not interested in this name: <a href="http://mushroomobserver.org/interest/set_interest?id=40&amp;type=Name&amp;user=2&amp;state=-1">http://mushroomobserver.org/interest/set_interest?id=40&amp;type=Name&amp;user=2&amp;state=-1</a></li>
-<li>Stop sending me email like this: <a href="http://mushroomobserver.org/account/no_email_names_author/2">http://mushroomobserver.org/account/no_email_names_author/2</a></li>
-<li>Change your preferences: <a href="http://mushroomobserver.org/account/prefs/2">http://mushroomobserver.org/account/prefs/2</a></li>
+<li>Show this name: <a href="http://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:peltigera) %>">http://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:peltigera) %></a></li>
+<li>I&#8217;m not interested in this name: <a href="http://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&amp;type=Name&amp;user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&amp;state=-1">http://mushroomobserver.org/interest/set_interest?id=<%= ActiveRecord::FixtureSet.identify(:peltigera) %>&amp;type=Name&amp;user=<%= ActiveRecord::FixtureSet.identify(:mary) %>&amp;state=-1</a></li>
+<li>Stop sending me email like this: <a href="http://mushroomobserver.org/account/no_email_names_author/<%= ActiveRecord::FixtureSet.identify(:mary) %>">http://mushroomobserver.org/account/no_email_names_author/<%= ActiveRecord::FixtureSet.identify(:mary) %></a></li>
+<li>Change your preferences: <a href="http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>">http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %></a></li>
 <li>Latest changes at Mushroom Observer: <a href="http://mushroomobserver.org">http://mushroomobserver.org</a></li>
 </ul>
 <br/>
