@@ -42,28 +42,6 @@ class ExtensionTest < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: String Tests
-  # ----------------------------
-
-  def test_string_truncate_html
-    assert_equal("123", "123".truncate_html(5))
-    assert_equal("12345", "12345".truncate_html(5))
-    assert_equal("1234...", "123456".truncate_html(5))
-    assert_equal("<i>1234...</i>", "<i>123456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3</b>4...</i>", "<i>12<b>3</b>456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3<hr/></b>4...</i>", "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
-    assert_equal("<i>12</i>3<b>4...</b>", "<i>12</i>3<b>456</b>".truncate_html(5))
-  end
-
-  def test_iconv
-    assert_equal("áëìøũ", "áëìøũ".iconv("utf-8").encode("utf-8"))
-    assert_equal("áëìøu", "áëìøũ".iconv("iso8859-1").encode("utf-8"))
-    assert_equal("aeiou", "áëìøũ".iconv("ascii-8bit").encode("utf-8"))
-    assert_equal("ενα", "ενα".iconv("utf-8").encode("utf-8"))
-    assert_equal("???", "ενα".iconv("ascii-8bit").encode("utf-8"))
-  end
-
-  # ----------------------------
   #  :section: Hash Tests
   # ----------------------------
 
