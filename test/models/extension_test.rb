@@ -77,30 +77,4 @@ class ExtensionTest < UnitTestCase
     hash.remove_nils!
     assert_equal({ a: 1, c: 3 }, hash)
   end
-
-  # ----------------------------
-  #  :section: Time Tests
-  # ----------------------------
-
-  def test_fancy_time
-    assert_fancy_time(0.seconds, :time_just_seconds_ago)
-    assert_fancy_time(59.seconds, :time_just_seconds_ago)
-    assert_fancy_time(60.seconds, :time_one_minute_ago)
-    assert_fancy_time(119.seconds, :time_one_minute_ago)
-    assert_fancy_time(120.seconds, :time_minutes_ago, n: 2)
-    assert_fancy_time(59.minutes, :time_minutes_ago, n: 59)
-    assert_fancy_time(60.minutes, :time_one_hour_ago)
-    assert_fancy_time(119.minutes, :time_one_hour_ago)
-    assert_fancy_time(120.minutes, :time_hours_ago, n: 2)
-    assert_fancy_time(23.hours, :time_hours_ago, n: 23)
-    assert_fancy_time(24.hours, :time_one_day_ago)
-  end
-
-  def assert_fancy_time(diff, tag, args = {})
-    ref = Time.now
-    time = ref - diff
-    expect = tag.l(args.merge(date: time.web_date))
-    actual = time.fancy_time(ref)
-    assert_equal(expect, actual)
-  end
 end
