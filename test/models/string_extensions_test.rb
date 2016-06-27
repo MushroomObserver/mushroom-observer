@@ -68,6 +68,7 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("<i>12<b>3</b>4...</i>", "<i>12<b>3</b>456</i>".truncate_html(5))
     assert_equal("<i>12<b>3<hr/></b>4...</i>", "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
     assert_equal("<i>12</i>3<b>4...</b>", "<i>12</i>3<b>456</b>".truncate_html(5))
+    assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
   end
 
   def test_iconv
