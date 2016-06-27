@@ -81,23 +81,10 @@ class StringExtensionsTest < UnitTestCase
 
   def test_levenshtein_distance
     assert_equal(3, "".levenshtein_distance_to("abc"))          # 3 add
-    assert_equal(6, "".levenshtein_distance_to("abc", 2, 1, 1))
-    assert_equal(3, "".levenshtein_distance_to("abc", 1, 2, 1))
-    assert_equal(3, "".levenshtein_distance_to("abc", 1, 1, 2))
 
     assert_equal(3, "abc".levenshtein_distance_to(""))          # 3 del
-    assert_equal(3, "abc".levenshtein_distance_to("", 2, 1, 1))
-    assert_equal(6, "abc".levenshtein_distance_to("", 1, 2, 1))
-    assert_equal(3, "abc".levenshtein_distance_to("", 1, 1, 2))
 
     assert_equal(3, "abc".levenshtein_distance_to("def"))       # 3 chg
-    assert_equal(3, "abc".levenshtein_distance_to("def", 2, 1, 1))
-    assert_equal(3, "abc".levenshtein_distance_to("def", 1, 2, 1))
-    # 3 chg = 3 add + 3 del
-    assert_equal(6, "abc".levenshtein_distance_to("def", 1, 1, 2))
-    # 3 add + 3 del
-    assert_equal(6, "abc".levenshtein_distance_to("def", 1, 1, 10))
-
     assert_equal(3, "çŚ©".levenshtein_distance_to("Äøµ"))
     assert_equal(1, "Agaricus campestris".
       levenshtein_distance_to("Agaricus campestras"))
