@@ -79,6 +79,11 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("???", "ενα".iconv("ascii-8bit").encode("utf-8"))
   end
 
+  def test_character_asciiness
+    assert("a".is_ascii_character?)
+    refute("á".is_ascii_character?)
+  end
+
   def test_levenshtein_distance
     assert_equal(3, "".levenshtein_distance_to("abc"))          # 3 add
 
