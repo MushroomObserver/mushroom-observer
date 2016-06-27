@@ -596,11 +596,6 @@ class String
     dup.force_encoding("binary")[0].ord < 128
   end
 
-  # Does this string start with a non-ASCII character?
-  def is_nonascii_character?
-    dup.force_encoding("binary")[0].ord >= 128
-  end
-
   # Returns percentage match between +self+ and +other+, where 1.0 means the two
   # strings are equal, and 0.0 means every character is different.
   def percent_match(other)
