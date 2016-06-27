@@ -109,4 +109,9 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(0.8421, "Agaricis Campestras".
       percent_match("Agaricus campestris").round(4))
   end
+
+  ### Test extensions used with Textile ###
+  def test_tp_nodiv
+    assert("<p>a</p>", "a".tp_nodiv)
+  end
 end
