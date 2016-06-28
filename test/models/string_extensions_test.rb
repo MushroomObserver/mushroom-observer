@@ -60,6 +60,12 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("aéio", "aéioü".truncate_bytesize(5))
   end
 
+  def test_truncate_bytesize_in_place
+    str = "aéioü"
+    str.truncate_bytesize!(5)
+    assert_equal("aéio", str)
+  end
+
   def test_string_truncate_html
     assert_equal("123", "123".truncate_html(5))
     assert_equal("12345", "12345".truncate_html(5))
