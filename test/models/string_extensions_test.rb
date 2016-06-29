@@ -3,18 +3,6 @@ require "test_helper"
 
 # test extensions to Ruby and Rails String Class
 class StringExtensionsTest < UnitTestCase
-  def test_bytesize
-    str = "abčde"
-    assert_equal(5, str.length)
-    assert_equal(6, str.bytesize)
-    assert_equal("abčd", str.truncate_bytesize(5))
-    assert_equal("abč", str.truncate_bytesize(4))
-    assert_equal("ab", str.truncate_bytesize(3))
-    assert_equal("ab", str.truncate_bytesize(2))
-    assert_equal("a", str.truncate_bytesize(1))
-    assert_equal("", str.truncate_bytesize(0))
-  end
-
   def test_capitalize_first
     assert_equal("", "".capitalize_first)
     assert_equal("A", "a".capitalize_first)
@@ -55,9 +43,17 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_truncate_bytesize
+    str = "abčde"
+    assert_equal("abčd", str.truncate_bytesize(5))
+    assert_equal("abč",  str.truncate_bytesize(4))
+    assert_equal("ab",   str.truncate_bytesize(3))
+    assert_equal("ab",   str.truncate_bytesize(2))
+    assert_equal("a",    str.truncate_bytesize(1))
+    assert_equal("",     str.truncate_bytesize(0))
+
     assert_equal("aéioü", "aéioü".truncate_bytesize(7))
-    assert_equal("aéio", "aéioü".truncate_bytesize(6))
-    assert_equal("aéio", "aéioü".truncate_bytesize(5))
+    assert_equal("aéio",  "aéioü".truncate_bytesize(6))
+    assert_equal("aéio",  "aéioü".truncate_bytesize(5))
   end
 
   def test_truncate_bytesize_in_place
