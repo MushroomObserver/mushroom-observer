@@ -34,6 +34,7 @@
 #
 ################################################################################
 
+# MO extensions to Ruby String class
 class String
   require "digest/md5"
 
@@ -371,6 +372,8 @@ class String
   # an HTML tag.
   HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
 
+  ### Textile-related methods ###
+  #
   def t(sanitize = true)
     Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
@@ -398,6 +401,8 @@ class String
     Textile.textilize(self, true, sanitize)
   end
 
+  ### String transformations ###
+  #
   # Convert string (assumed to be in UTF-8) to plain ASCII.
   def to_ascii
     to_s.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
@@ -490,10 +495,6 @@ class String
       html_safe                      # convert &xxx; and &#nnn; to ascii
   end
 
-  def print_thing(thing)
-    print "#{self}: #{thing.class}: #{thing}\n"
-  end
-
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
@@ -567,14 +568,14 @@ class String
     end
   end
 
+  # Find amount first line is indented and remove that from all lines.
+  def unindent
+    gsub /^#{self[/\A\s*/]}/, ""
+  end
+
   # Byte truncation.  bytesize differs from length if there are accents.
   # Very useful when validating ActiveRecord records,
   # because mysql limits the number of bytes, not characters.
-
-  # Truncate a string so that its *binary* length is within a given limit.
-  def truncate_bytesize!(len)
-    replace(truncate_bytesize(len))
-  end
 
   # Truncate a string so that its *binary* length is within a given limit.
   def truncate_bytesize(bytes)
@@ -582,6 +583,13 @@ class String
     result.bytesize <= bytes ? result : result.chop
   end
 
+  # Truncate string bytesize in place
+  def truncate_bytesize!(len)
+    replace(truncate_bytesize(len))
+  end
+
+  ### String Queries ###
+  #
   # Does this string start with a ASCII character?
   def is_ascii_character?
     dup.force_encoding("binary")[0].ord < 128
@@ -633,13 +641,14 @@ class String
     return x
   end
 
-  # Find amount first line is indented and remove that from all lines.
-  def unindent
-    gsub /^#{self[/\A\s*/]}/, ""
-  end
-
   # Returns the MD5 sum.
   def md5sum
     Digest::MD5.hexdigest(self)
+  end
+
+  ### Misc Utilities ###
+  #
+  def print_thing(thing)
+    print "#{self}: #{thing.class}: #{thing}\n"
   end
 end
