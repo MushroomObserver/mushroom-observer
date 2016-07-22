@@ -150,6 +150,10 @@ class ObservationTest < UnitTestCase
 
     min_map.location = locations(:albion)
     assert_equal(locations(:albion).id, min_map.location_id)
+
+    min_map.location = false
+    assert_nil(min_map.location)
+    assert_nil(min_map.location_id)
   end
 
   # --------------------------------------
