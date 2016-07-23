@@ -464,10 +464,10 @@ class QueryTest < UnitTestCase
 
     assert_equal("1", query.select_value.to_s) # first id
     assert_equal("11", query.select_value(limit: "10, 10").to_s) # tenth id
-    assert_equal(num.to_s, query.select_value(order: :reverse).to_s) # last id
+    assert_equal(Name.last.id, query.select_value(order: :reverse))
     assert_equal("Fungi", query.select_value(select: "text_name").to_s)
 
-    assert_equal((1..num).map(&:to_s), query.select_values.map(&:to_s))
+    assert_equal(Name.all.map(&:id), query.select_values)
     assert_equal(%w(3 18 19 20 21),
                  query.select_values(where: 'text_name LIKE "Agaricus%"').
                        map(&:to_s))
@@ -484,8 +484,8 @@ class QueryTest < UnitTestCase
       assert_equal((1..num).map { |x| { "id" => x.to_s } }, query.select_all)
       assert_equal({ "id" => "1" }, query.select_one)
     else
-      assert_equal((1..num).map { |x| [x] }, query.select_rows)
-      assert_equal((1..num).map { |x| { "id" => x } }, query.select_all)
+      assert_equal(Name.all.map { |x| [x.id] }, query.select_rows)
+      assert_equal(Name.all.map { |x| { "id" => x.id } }, query.select_all)
       assert_equal({ "id" => 1 }, query.select_one)
     end
     assert_equal([@fungi], query.find_by_sql(limit: 1))
