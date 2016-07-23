@@ -881,7 +881,7 @@ amanita_subgenus_lepidella:
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
   notes: NULL
 
-amanita_boudieri_var._beillei:
+amanita_boudieri_var_beillei:
   id: 53
   # accepted_name_id: 53
   version: 1
@@ -894,4 +894,16 @@ amanita_boudieri_var._beillei:
   sort_name: Amanita boudieri var. beillei
   display_name: '**__Amanita boudieri__ var. __beillei__**'
   author: ''
+  notes: NULL
+
+# uses auto
+boletus_edulis_group:
+  version: 1
+  rank: <%= Name.ranks[:Group] %>
+  text_name: Boletus edulis group
+  display_name: '**__Boletus edulis__** group'
+  search_name: Boletus edulis group
+  sort_name: Boletus edulis   group
+  author: ''
+  citation: ''
   notes: NULL
