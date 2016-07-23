@@ -59,13 +59,12 @@ module ObjectLinkHelper
   end
 
   def mycobank_taxon(name)
-    return name.text_name.gsub(" ", "%20") unless
-      name.between_genus_and_species?
-    genus_only(name)
-  end
-
-  def genus_only(name)
-    name.text_name.match(/([^\s]+)/).to_s
+    if name.between_genus_and_species?
+      nm_text = name.text_before_rank
+    else
+      nm_text = name.text_name
+    end
+    nm_text.gsub(" ", "%20")
   end
 
   # language parameter for MycoBank link
