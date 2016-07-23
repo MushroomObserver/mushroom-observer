@@ -36,6 +36,9 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
     name = Name.find(53)  # Amanita boudieri var. beillei
     assert_equal("Amanita%20boudieri%20var.%20beillei", mycobank_taxon(name))
+
+    name = names(:boletus_edulis_group)
+    assert_equal("Boletus%20edulis", mycobank_taxon(name))
   end
 
   def test_link_if_object
