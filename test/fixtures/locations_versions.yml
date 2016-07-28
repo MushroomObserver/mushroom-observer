@@ -1,10 +1,10 @@
 # Read about fixtures at http_version_1://ar.rubyonrails.org/classes/Fixtures.html
+# location and user associations must be specified by id, not label
 
 albion_version_1:
-  id: 1
-  location_id: 1
+  location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
   updated_at: 2007-12-27 06:41:20
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Albion, California, USA
   scientific_name: USA California, Albion
@@ -16,10 +16,9 @@ albion_version_1:
   low: 0.0
 
 albion_version_2:
-  id: 2
-  location_id: 1
+  location_id: <%= ActiveRecord::FixtureSet.identify(:albion) %>
   updated_at: 2007-12-27 06:41:20
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 2
   name: Albion, California, USA
   scientific_name: USA, California, Albion
@@ -31,10 +30,9 @@ albion_version_2:
   low: 0.0
 
 burbank_version_1:
-  id: 3
-  location_id: 2
+  location_id: <%= ActiveRecord::FixtureSet.identify(:burbank) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Burbank, Los Angeles Co., California, USA
   scientific_name: USA, California, Los Angeles Co., Burbank
@@ -46,10 +44,9 @@ burbank_version_1:
   low: 148.0
 
 mitrula_marsh_version_1:
-  id: 4
-  location_id: 3
+  location_id: <%= ActiveRecord::FixtureSet.identify(:mitrula_marsh) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: '\"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA'
   scientific_name: 'USA, California, Yuba Co., Bassetts, Sand Lake, \"Mitrula Marsh\"'
@@ -59,10 +56,9 @@ mitrula_marsh_version_1:
   south: 39.5184
 
 salt_point_version_1:
-  id: 5
-  location_id: 4
+  location_id: <%= ActiveRecord::FixtureSet.identify(:salt_point) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Salt Point State Park, Sonoma Co., California, USA
   scientific_name: USA, California, Sonoma Co., Salt Point State Park
@@ -74,10 +70,9 @@ salt_point_version_1:
   low: 0.0
 
 gualala_version_1:
-  id: 6
-  location_id: 5
+  location_id: <%= ActiveRecord::FixtureSet.identify(:gualala) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Gualala, Mendocino Co., California, USA
   scientific_name: USA, California, Mendocino Co., Gualala
@@ -89,10 +84,9 @@ gualala_version_1:
   low: 0.0
 
 elgin_co_version_1:
-  id: 7
-  location_id: 6
+  location_id: <%= ActiveRecord::FixtureSet.identify(:elgin_co) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Elgin County, Ontario, Canada
   scientific_name: Canada, Ontario, Elgin County
@@ -102,10 +96,9 @@ elgin_co_version_1:
   south: 42.4701
 
 brett_woods_version_1:
-  id: 8
-  location_id: 7
+  location_id: <%= ActiveRecord::FixtureSet.identify(:bretton_woods) %>
   updated_at: 2007-12-27 06:47:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Brett Woods, Fairfield Co., Connecticut, USA
   scientific_name: USA, Connecticut, Fairfield Co., Brett Woods
@@ -115,10 +108,9 @@ brett_woods_version_1:
   south: 41.1939
 
 point_reyes_version_1:
-  id: 9
-  location_id: 8
+  location_id: <%= ActiveRecord::FixtureSet.identify(:point_reyes) %>
   updated_at: 2008-01-01 11:50:00
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Point Reyes National Seashore, Marin Co., California, USA
   scientific_name: USA, California, Marin Co., Point Reyes National Seashore
@@ -128,10 +120,9 @@ point_reyes_version_1:
   south: 37.9255
 
 howarth_park_version_1:
-  id: 10
-  location_id: 9
+  location_id: <%= ActiveRecord::FixtureSet.identify(:howarth_park) %>
   updated_at: 2008-01-01 15:24:18
-  user_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   name: Howarth Park, Santa Rosa, Sonoma Co., California, USA
   scientific_name: USA, California, Sonoma Co., Santa Rosa, Howarth Park
@@ -139,4 +130,3 @@ howarth_park_version_1:
   west: -122.6712
   east: -122.6632
   south: 38.4496
-

@@ -1,12 +1,15 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+# Explicitly call ActiveRecord to generate stable hashed ids:
+# if "id:" is omitted, Rails throws ActiveRecord::Fixture::FormatError;
+# if "id:" is included but left blank, the id is nil.
+# So use ActiveRecord to get the hashed id.
 macrolepiota_rachodes_synonym:
-  id: 1
+  id: <%= ActiveRecord::FixtureSet.identify(:macrolepiota_rachodes_synonym) %>
 
 chlorophyllum_rachodes_synonym:
-  id: 2
+  id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum_rachodes_synonym) %>
 
 lactarius_alpinus_synonym:
-  id: 3
+  id: <%= ActiveRecord::FixtureSet.identify(:lactarius_alpinus_synonym) %>
 
 peltigera_synonym:
-  id: 4
+  id: <%= ActiveRecord::FixtureSet.identify(:peltigera_synonym) %>

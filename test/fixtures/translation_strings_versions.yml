@@ -1,23 +1,24 @@
 greek_one_version1:
   id: 1
   version: 1
-  translation_string_id: 13
+  translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: один
   updated_at: 2012-03-31
-  user_id: 2
+  user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
 
 greek_one_version2:
   id: 2
   version: 2
-  translation_string_id: 13
+  translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: ένα
   updated_at: 2012-04-30
-  user_id: 4
+  user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
 
 version_wizard_version1:
   id: 3
   version: 1
-  translation_string_id: 17
+  translation_string_id: <%= ActiveRecord::FixtureSet.
+    identify(:version_wizard) %>
   text: Gandalf
   updated_at: 2013-08-22
-  user_id: 6
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>

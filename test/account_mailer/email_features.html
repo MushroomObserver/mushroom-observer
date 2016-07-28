@@ -18,8 +18,8 @@ Content-Transfer-Encoding: 7bit
 </div>
 <div class="textile"><p>Here are some handy links:</p></div>
 <ul type=none>
-<li>Stop sending me email like this: <a href="http://mushroomobserver.org/account/no_email_general_feature/1">http://mushroomobserver.org/account/no_email_general_feature/1</a></li>
-<li>Change your preferences: <a href="http://mushroomobserver.org/account/prefs/1">http://mushroomobserver.org/account/prefs/1</a></li>
+<li>Stop sending me email like this: <a href="http://mushroomobserver.org/account/no_email_general_feature/<%= ActiveRecord::FixtureSet.identify(:rolf) %>">http://mushroomobserver.org/account/no_email_general_feature/<%= ActiveRecord::FixtureSet.identify(:rolf) %></a></li>
+<li>Change your preferences: <a href="http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %>">http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:rolf) %></a></li>
 <li>Latest changes at Mushroom Observer: <a href="http://mushroomobserver.org">http://mushroomobserver.org</a></li>
 </ul>
 <br/>

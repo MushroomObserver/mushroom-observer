@@ -233,34 +233,34 @@ class NameControllerTest < FunctionalTestCase
 
   def test_show_name
     assert_equal(0, Query.count)
-    get_with_dump(:show_name, id: 2)
+    get_with_dump(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Creates two for children and all four observations sections,
     # but one never used.
     assert_equal(2, Query.count)
 
-    get(:show_name, id: 2)
+    get(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Should re-use all the old queries.
     assert_equal(2, Query.count)
 
-    get(:show_name, id: 3)
+    get(:show_name, id: names(:agaricus_campestris).id)
     assert_template(:show_name, partial: "_name")
     # Needs new queries this time.
     assert_equal(5, Query.count)
 
     # Agarcius: has children taxa.
-    get(:show_name, id: 18)
+    get(:show_name, id: names(:agaricus).id)
     assert_template(:show_name, partial: "_name")
   end
 
   def test_show_name_with_eol_link
-    get(:show_name, id: 51)
+    get(:show_name, id: names(:abortiporus_biennis_for_eol).id)
     assert_template(:show_name, partial: "_name")
   end
 
   def test_name_external_links_exist
-    get(:show_name, id: 2)
+    get(:show_name, id: names(:coprinus_comatus).id)
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
@@ -268,7 +268,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_mycobank_url
-    get(:show_name, id: 2)
+    get(:show_name, id: names(:coprinus_comatus).id)
 
     # There is a MycoBank link which includes taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
@@ -280,7 +280,7 @@ class NameControllerTest < FunctionalTestCase
   # TODO: Show a name that has a parent to trigger
 
   def test_show_past_name
-    get_with_dump(:show_past_name, id: 2)
+    get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
     assert_template(:show_past_name, partial: "_name")
   end
 
@@ -339,23 +339,24 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_names_by_user
-    get_with_dump(:names_by_user, id: 1)
+    get_with_dump(:names_by_user, id: rolf.id)
     assert_template(:list_names)
   end
 
   def test_names_by_editor
-    get_with_dump(:names_by_editor, id: 1)
+    get_with_dump(:names_by_editor, id: rolf.id)
     assert_template(:list_names)
   end
 
   def test_name_descriptions_by_author
-    get_with_dump(:name_descriptions_by_author, id: 1)
+    get_with_dump(:name_descriptions_by_author, id: rolf.id)
     assert_template(:list_name_descriptions)
   end
 
   def test_name_descriptions_by_editor
-    get_with_dump(:name_descriptions_by_editor, id: 1)
-    assert_redirected_to(action: :show_name_description, id: 15,
+    get_with_dump(:name_descriptions_by_editor, id: rolf.id)
+    assert_redirected_to(action: :show_name_description,
+                         id: name_descriptions(:coprinus_comatus_desc).id,
                          params: @controller.query_params)
   end
 
@@ -370,9 +371,12 @@ class NameControllerTest < FunctionalTestCase
     get_with_dump(:name_search, pattern: "agaricis campestrus")
     assert_template(:list_names)
     assert_select("div.alert-warning", 1)
-    assert_select("a[href*='show_name/19']", text: Name.find(19).search_name)
-    assert_select("a[href*='show_name/20']", text: Name.find(20).search_name)
-    assert_select("a[href*='show_name/21']", text: Name.find(21).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestrus).id}']",
+                  text: names(:agaricus_campestrus).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestras).id}']",
+                  text: names(:agaricus_campestras).search_name)
+    assert_select("a[href*='show_name/#{names(:agaricus_campestros).id}']",
+                  text: names(:agaricus_campestros).search_name)
 
     get(:name_search, pattern: "Agaricus")
     assert_template(:list_names)
@@ -955,7 +959,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(1, old_name.namings.size)
     old_obs = old_name.namings[0].observation
     assert_equal(2, new_name.namings.size)
-    new_obs = new_name.namings[0].observation
+    new_obs = new_name.namings.
+                select { |n| n.observation.name == new_name }[0].observation
     assert_false(old_name.mergeable?)
     assert_false(new_name.mergeable?)
     params = {

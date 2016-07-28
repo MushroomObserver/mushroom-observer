@@ -8,28 +8,31 @@ class CommentControllerTest < FunctionalTestCase
   end
 
   def test_show_comment
-    get_with_dump(:show_comment, id: 1)
+    get_with_dump(:show_comment,
+                  id: comments(:minimal_unknown_obs_comment_1).id)
     assert_template("show_comment")
   end
 
   def test_show_comments_for_user
-    get_with_dump(:show_comments_for_user, id: 1)
+    get_with_dump(:show_comments_for_user, id: rolf.id)
     assert_template("list_comments")
   end
 
   def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, id: rolf.id)
-    assert_redirected_to(action: "show_comment", id: 1,
+    assert_redirected_to(action: "show_comment",
+                         id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(Query.last))
   end
 
   def test_add_comment
-    requires_login(:add_comment, id: 1, type: "Observation")
-    assert_form_action(action: "add_comment", id: 1, type: "Observation")
+    obs_id = observations(:minimal_unknown_obs).id
+    requires_login(:add_comment, id: obs_id, type: "Observation")
+    assert_form_action(action: "add_comment", id: obs_id, type: "Observation")
   end
 
   def test_edit_comment
-    comment = comments(:minimal_comment)
+    comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
     params = { id: comment.id.to_s }
     assert_equal("rolf", comment.user.login)
@@ -39,7 +42,7 @@ class CommentControllerTest < FunctionalTestCase
   end
 
   def test_destroy_comment
-    comment = comments(:minimal_comment)
+    comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
@@ -53,7 +56,7 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_save_comment
     assert_equal(10, rolf.contribution)
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size
     params = { id: obs.id,
                type: "Observation",
@@ -69,7 +72,7 @@ class CommentControllerTest < FunctionalTestCase
   end
 
   def test_update_comment
-    comment = comments(:minimal_comment)
+    comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
     params = { id: comment.id,
                comment: { summary: "New Summary", comment: "New text." } }

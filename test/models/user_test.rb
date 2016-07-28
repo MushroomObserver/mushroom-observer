@@ -176,8 +176,8 @@ class UserTest < UnitTestCase
   end
 
   def test_preferred_herbarium_name
-    assert_equal(herbaria(:nybg).name, rolf.preferred_herbarium_name)
-    assert_equal(users(:mary).personal_herbarium_name, mary.preferred_herbarium_name)
+    assert_equal(herbaria(:nybg_herbarium).name, rolf.preferred_herbarium_name)
+    assert_equal(mary.personal_herbarium_name, mary.preferred_herbarium_name)
   end
 
   def test_remove_image
@@ -203,7 +203,7 @@ class UserTest < UnitTestCase
   end
 
   def test_erase_user_with_comment_and_name_descriptions
-    user = users(:dick)
+    user = dick
     num_comments = Comment.count
     assert_equal(1, user.comments.length)
     comment_id = user.comments.first.id
@@ -219,7 +219,7 @@ class UserTest < UnitTestCase
   end
 
   def test_erase_user_with_observation
-    user = users(:katrina)
+    user = katrina
     num_observations = Observation.count
     num_namings = Naming.count
     num_votes = Vote.count
@@ -241,7 +241,7 @@ class UserTest < UnitTestCase
     assert_equal(observation_id, image.observations.first.id)
 
     # Move some other user's comment over to make sure they get deleted, too.
-    comment = users(:rolf).comments.first
+    comment = rolf.comments.first
     comment.target_id = observation.id
     comment.save
     comment_id = comment.id

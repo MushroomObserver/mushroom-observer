@@ -108,7 +108,7 @@ class AmateurTest < IntegrationTestCase
   # ----------------------------------
 
   def test_post_comment
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? { |c| c.user == katrina })
 
@@ -199,7 +199,7 @@ class AmateurTest < IntegrationTestCase
     namer_session = open_session.extend(NamerDsl)
     namer = katrina
 
-    obs = observations(:detailed_unknown)
+    obs = observations(:detailed_unknown_obs)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? { |c| c.user == namer })
     # (Make sure the name we are going to suggest doesn't exist yet.)
@@ -256,7 +256,7 @@ class AmateurTest < IntegrationTestCase
   # -------------------------------------------------------------------------
 
   def test_thumbnail_maps
-    get("/1")
+    get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
     assert_select('div#map_div', 1)
 
@@ -272,7 +272,7 @@ class AmateurTest < IntegrationTestCase
     session.assert_template("observer/show_observation")
     session.assert_select('div#map_div', 0)
 
-    session.get("/2")
+    session.get("/#{observations(:detailed_unknown_obs).id}")
     session.assert_template("observer/show_observation")
     session.assert_select('div#map_div', 0)
   end

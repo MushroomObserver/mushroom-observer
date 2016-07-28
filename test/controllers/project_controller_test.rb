@@ -69,22 +69,24 @@ class ProjectControllerTest < FunctionalTestCase
   end
 
   def test_show_project
-    get_with_dump(:show_project, id: 1)
+    p_id = projects(:eol_project).id
+    get_with_dump(:show_project, id: p_id)
     assert_template("show_project")
-    assert_select("a[href*='admin_request/1']")
-    assert_select("a[href*='edit_project/1']", count: 0)
-    assert_select("a[href*='add_members/1']", count: 0)
-    assert_select("a[href*='destroy_project/1']", count: 0)
+    assert_select("a[href*='admin_request/#{p_id}']")
+    assert_select("a[href*='edit_project/#{p_id}']", count: 0)
+    assert_select("a[href*='add_members/#{p_id}']", count: 0)
+    assert_select("a[href*='destroy_project/#{p_id}']", count: 0)
   end
 
   def test_show_project_logged_in
+    p_id = projects(:eol_project).id
     requires_login(:add_project)
-    get_with_dump(:show_project, id: 1)
+    get_with_dump(:show_project, id: p_id)
     assert_template("show_project")
-    assert_select("a[href*='admin_request/1']")
-    assert_select("a[href*='edit_project/1']")
-    assert_select("a[href*='add_members/1']")
-    assert_select("a[href*='destroy_project/1']")
+    assert_select("a[href*='admin_request/']")
+    assert_select("a[href*='edit_project/#{p_id}']")
+    assert_select("a[href*='add_members/#{p_id}']")
+    assert_select("a[href*='destroy_project/#{p_id}']")
   end
 
   def test_list_projects
@@ -374,11 +376,13 @@ class ProjectControllerTest < FunctionalTestCase
   end
 
   def test_changing_project_name
+    proj = projects(:eol_project)
     login("rolf")
-    post(:edit_project, id: 1, project: { title: "New Project", summary: "New Summary" })
+    post(:edit_project, id: projects(:eol_project).id,
+         project: { title: "New Project", summary: "New Summary" })
     assert_flash_success
-    project = Project.find(1)
-    assert_equal("New Project", project.title)
-    assert_equal("New Summary", project.summary)
+    proj = proj.reload
+    assert_equal("New Project", proj.title)
+    assert_equal("New Summary", proj.summary)
   end
 end

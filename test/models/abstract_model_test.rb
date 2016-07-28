@@ -77,7 +77,7 @@ class AbstractModelTest < UnitTestCase
     assert(now2 >= obs.updated_at - 1.second, '"updated_at" is too new.')
 
     # Now check the internal representation.  Should be UTC.
-    obs = Observation.find(2)
+    obs = observations(:detailed_unknown_obs)
     created_at = Time.utc(2006, 5, 12, 17, 20, 0).in_time_zone
     assert_equal(created_at, obs.created_at, "Time in database is wrong.")
   end
@@ -87,7 +87,7 @@ class AbstractModelTest < UnitTestCase
   # --------------------------------------------------------
 
   def test_save_updated_at
-    obs = Observation.find(2)
+    obs = observations(:detailed_unknown_obs)
     updated_at = obs.updated_at
     Observation.record_timestamps = false
     obs.last_view = Time.now
@@ -99,16 +99,16 @@ class AbstractModelTest < UnitTestCase
 
   def test_update_view_stats
     User.current = rolf
-    obs      = Observation.find(2)
-    image    = obs.images.first
-    comment  = obs.comments.first
-    interest = obs.interests.first
-    location = obs.location
-    loc_desc = obs.location.description
-    name     = obs.name
+    obs       = observations(:detailed_unknown_obs)
+    image     = obs.images.first
+    comment   = obs.comments.first
+    interest  = obs.interests.first
+    location  = obs.location
+    loc_desc  = obs.location.description
+    name      = obs.name
     name_desc = obs.name.description
-    naming   = obs.namings.first
-    user     = obs.user
+    naming    = obs.namings.first
+    user      = obs.user
 
     obs_attrs      = obs.attributes.dup
     image_attrs    = image.attributes.dup
@@ -116,7 +116,7 @@ class AbstractModelTest < UnitTestCase
     interest_attrs = interest.attributes.dup
     location_attrs = location.attributes.dup
     assert_nil(loc_desc)
-    name_attrs = name.attributes.dup
+    name_attrs     = name.attributes.dup
     assert_nil(name_desc)
     naming_attrs   = naming.attributes.dup
     user_attrs     = user.attributes.dup
@@ -190,8 +190,9 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_updated_at, rss_log)
     assert(rss_log.updated_at > time)
 
+    location_with_notes = locations(:albion)
     rss_log.update_attribute(:updated_at, time)
-    Location.first.merge(loc)
+    location_with_notes.merge(loc)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
@@ -253,7 +254,7 @@ class AbstractModelTest < UnitTestCase
     obs = Observation.new(
       when: Time.now,
       where: "Anywhere",
-      name_id: 1
+      name_id: names(:fungi).id
     )
 
     assert_nil(obs.rss_log)

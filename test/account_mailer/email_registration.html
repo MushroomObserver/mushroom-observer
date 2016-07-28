@@ -12,7 +12,7 @@ Content-Transfer-Encoding: 7bit
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <div class="textile"><h2><strong>Hello Nathan Wilson</strong></h2>
 <p>Please click the following link to verify that you received this email and intended to register 4 attendee(s) for the <span class="caps">MSA</span> Annual Meeting 2012:</p>
-<p><a href="http://mushroomobserver.org/conference/verify/1">http://mushroomobserver.org/conference/verify/1</a></p></div>
+<p><a href="http://mushroomobserver.org/conference/verify/<%= ActiveRecord::FixtureSet.identify(:njw_at_msa) %>">http://mushroomobserver.org/conference/verify/<%= ActiveRecord::FixtureSet.identify(:njw_at_msa) %></a></p></div>
 <br/>
 </body>
 </html>

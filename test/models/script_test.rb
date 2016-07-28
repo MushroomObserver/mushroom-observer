@@ -50,7 +50,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} dick > #{tempfile}"
     assert system(cmd)
     expect = "id login name email verified last_use\n" \
-             "4 dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
+             "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
     actual = File.read(tempfile).gsub(/ +/, " ")
     assert_equal(expect, actual)
   end
@@ -140,8 +140,15 @@ class ScriptTest < UnitTestCase
            "Something went wrong with #{script}:\n#{errors}")
     assert(File.exist?(output_file),
            "#{script} failed to write #{output_file}")
+
     output = File.read(output_file)
     fixture = "#{::Rails.root}/test/reports/name_list_data.js"
-    assert_string_equal_file(output, fixture)
+    if sql_collates_accents?
+      assert_string_equal_file(output, fixture)
+    else
+      expect = File.read(fixture)
+      assert_equal(expect.tr("ü","u"), output.tr("ü","u"),
+                   "File #{output} is wrong.")
+    end
   end
 end
