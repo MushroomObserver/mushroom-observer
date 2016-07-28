@@ -182,6 +182,10 @@ a:hover {
     background-color: $LINK_HOVER_BG_COLOR;
 }
 
+body {
+  word-wrap: break-word;
+}
+
 .btn, .btn:visited,
 .btn-default, .btn-default:visited {
     color: $BUTTON_FG_COLOR;
