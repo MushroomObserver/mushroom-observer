@@ -4,8 +4,7 @@
 #
 #  TimeWithZone is a Rails class that supercedes Time and DateTime.  We've
 #  added these simple wrappers to standardize the formatting of dates and times
-#  throughout the site.  They are also made available to the three core classes
-#  (Date, Time, DateTime), just in case.
+#  throughout the site.
 #
 #  == Instance Methods
 #
@@ -16,8 +15,6 @@
 #  email_date::     Format as date for emails.
 #  email_time::     Format as date-time for emails.
 #
-################################################################################
-
 class ActiveSupport::TimeWithZone
   Date::DATE_FORMATS[:web]   = MO.web_date_format
   Time::DATE_FORMATS[:web]   = MO.web_time_format
@@ -86,24 +83,9 @@ class ActiveSupport::TimeWithZone
       :"time_#{unit}s_ago".l(n: n, date: web_date)
     end
   end
-
-  # Force unit tests to verify existence of these translations.
-  if false
-    :time_one_minute_ago.l
-    :time_one_hour_ago.l
-    :time_one_day_ago.l
-    :time_one_week_ago.l
-    :time_one_month_ago.l
-    :time_one_year_ago.l
-    :time_minutes_ago.l
-    :time_hours_ago.l
-    :time_days_ago.l
-    :time_weeks_ago.l
-    :time_months_ago.l
-    :time_years_ago.l
-  end
 end
 
+# Make MO date and time formats available to Time, just in case.
 class Time
   def web_date
     in_time_zone.web_date
@@ -134,36 +116,7 @@ class Time
   end
 end
 
-class DateTime
-  def web_date
-    in_time_zone.web_date
-  end
-
-  def web_time
-    in_time_zone.web_time
-  end
-
-  def api_date
-    in_time_zone.api_date
-  end
-
-  def api_time
-    in_time_zone.api_time
-  end
-
-  def email_date
-    in_time_zone.email_date
-  end
-
-  def email_time
-    in_time_zone.email_time
-  end
-
-  def fancy_time(*x)
-    in_time_zone.fancy_time(*x)
-  end
-end
-
+# Make MO date formats available to Date, just in case.
 class Date
   def web_date
     strftime(MO.web_date_format)
@@ -175,5 +128,25 @@ class Date
 
   def email_date
     strftime(MO.email_date_format)
+  end
+end
+
+# Make MO Time formats available to DateTime, just in case.
+# DateTime inherits MO Date formats from Date, its superclass.
+class DateTime
+  def web_time
+    in_time_zone.web_time
+  end
+
+  def api_time
+    in_time_zone.api_time
+  end
+
+  def email_time
+    in_time_zone.email_time
+  end
+
+  def fancy_time(*x)
+    in_time_zone.fancy_time(*x)
   end
 end
