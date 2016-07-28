@@ -135,6 +135,23 @@ class ObservationTest < UnitTestCase
            "User with email_general_question should take questions from others")
   end
 
+  def test_minimal_map_observation
+    obs = observations(:minimal_unknown)
+    min_map = MinimalMapObservation.new(obs.id, obs.lat, obs.long,
+                                        obs.location.id)
+
+    assert(min_map.is_observation?)
+    refute(min_map.is_location?)
+    refute(min_map.lat_long_dubious?)
+
+    min_map.location = locations(:albion)
+    assert_equal(locations(:albion).id, min_map.location_id)
+
+    min_map.location = false
+    assert_nil(min_map.location)
+    assert_nil(min_map.location_id)
+  end
+
   # --------------------------------------
   #  Test email notification heuristics.
   # --------------------------------------
