@@ -20,22 +20,22 @@ class ObjectLinkHelperTest < ActionView::TestCase
   end
 
   def test_mycobank_taxon
-    name = names(:fungi)
-    assert_equal("Fungi", mycobank_taxon(name))
+    # Happy path (text_name)
+    name = names(:coprinus_comatus)
+    assert_equal(name.text_name, mycobank_taxon(name))
 
-    name = names(:agaricus)
-    assert_equal("Agaricus", mycobank_taxon(name))
+    # Also happy path; test to make sure not accidentally chopping var.
+    name = names(:amanita_boudieri_var_beillei)
+    assert_equal(name.text_name, mycobank_taxon(name))
 
     name = names(:amanita_subgenus_lepidella)
     assert_equal("Amanita", mycobank_taxon(name),
                  "MycoBank taxon name for Ranks between Genus and Species" \
-                 "should == genus")
+                 " should end before rank")
 
-    name = names(:coprinus_comatus)
-    assert_equal("Coprinus%20comatus", mycobank_taxon(name))
-
-    name = names(:amanita_boudieri_var_beillei)
-    assert_equal("Amanita%20boudieri%20var.%20beillei", mycobank_taxon(name))
+    name = names(:boletus_edulis_group)
+    assert_equal("Boletus edulis", mycobank_taxon(name),
+                 "MycoBank taxon for group should include binomial")
   end
 
   def test_link_if_object

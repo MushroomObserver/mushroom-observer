@@ -845,3 +845,15 @@ amanita_boudieri_var_beillei: # id: 53
   display_name: '**__Amanita boudieri__ var. __beillei__**'
   author: ''
   notes: NULL
+
+# uses auto
+boletus_edulis_group:
+  version: 1
+  rank: <%= Name.ranks[:Group] %>
+  text_name: Boletus edulis group
+  display_name: '**__Boletus edulis__** group'
+  search_name: Boletus edulis group
+  sort_name: Boletus edulis   group
+  author: ''
+  citation: ''
+  notes: NULL

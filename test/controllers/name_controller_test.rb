@@ -516,7 +516,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:list_names)
     name_links = css_select(".table a")
     assert_equal(10, name_links.length)
-    expected = Name.all.order("text_name, author").limit(10).offset(10).to_a
+    expected = Name.all.order("sort_name").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     url = @controller.url_with_query(action: "show_name",
                                      id: expected.first.id, only_path: true)

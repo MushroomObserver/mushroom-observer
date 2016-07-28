@@ -942,6 +942,10 @@ class Name < AbstractModel
     notes && notes.match(/\S/)
   end
 
+  def text_before_rank
+    text_name.split(" " + rank.to_s.downcase).first
+  end
+
   ##############################################################################
   #
   #  :section: Synonymy
