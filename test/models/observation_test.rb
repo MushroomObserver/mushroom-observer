@@ -136,18 +136,27 @@ class ObservationTest < UnitTestCase
   end
 
   def test_minimal_map_observation
-    obs = observations(:minimal_unknown)
+    obs = observations(:minimal_unknown_obs)
+
     min_map = MinimalMapObservation.new(obs.id, obs.lat, obs.long,
                                         obs.location.id)
+    assert_objs_equal(locations(:burbank), min_map.location)
+    assert_equal(locations(:burbank).id, min_map.location_id)
 
+    min_map = MinimalMapObservation.new(obs.id, obs.lat, obs.long,
+                                        obs.location)
+    assert_objs_equal(locations(:burbank), min_map.location)
+    assert_equal(locations(:burbank).id, min_map.location_id)
+  
     assert(min_map.is_observation?)
     refute(min_map.is_location?)
     refute(min_map.lat_long_dubious?)
 
     min_map.location = locations(:albion)
+    assert_objs_equal(locations(:albion), min_map.location)
     assert_equal(locations(:albion).id, min_map.location_id)
 
-    min_map.location = false
+    min_map.location = nil
     assert_nil(min_map.location)
     assert_nil(min_map.location_id)
   end
