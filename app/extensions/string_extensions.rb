@@ -578,9 +578,18 @@ class String
   # because mysql limits the number of bytes, not characters.
 
   # Truncate a string so that its *binary* length is within a given limit.
-  def truncate_bytesize(bytes)
-    bytesize <= bytes ? (return self) : result = self[0..[0, bytes - 1].max]
-    result.bytesize <= bytes ? result : result.chop
+  def truncate_bytesize(len)
+    return self if bytesize <= len
+    result = self
+    if encoding == "UTF-8"
+      result = result.force_encoding("binary")[0..len]
+      result = result[0..-2] while result[-1].ord & 0xC0 == 0x80
+      result = result[0..-2].force_encoding("UTF-8")
+    else
+      result = result[0..len - 1]
+      result = result[0..-2] while result.bytesize > len
+    end
+    result
   end
 
   # Truncate string bytesize in place

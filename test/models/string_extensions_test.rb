@@ -43,17 +43,29 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_truncate_bytesize
-    str = "abčde"
-    assert_equal("abčd", str.truncate_bytesize(5))
-    assert_equal("abč",  str.truncate_bytesize(4))
-    assert_equal("ab",   str.truncate_bytesize(3))
-    assert_equal("ab",   str.truncate_bytesize(2))
-    assert_equal("a",    str.truncate_bytesize(1))
-    assert_equal("",     str.truncate_bytesize(0))
+    # These European diacriticals are all 2-byte utf-8 entities:
+    assert_equal("åéïø",  "åéïøü".truncate_bytesize(9))
+    assert_equal("åéïø",  "åéïøü".truncate_bytesize(8))
+    assert_equal("åéï",   "åéïøü".truncate_bytesize(7))
+    assert_equal("åéï",   "åéïøü".truncate_bytesize(6))
+    assert_equal("åé",    "åéïøü".truncate_bytesize(5))
+    assert_equal("åé",    "åéïøü".truncate_bytesize(4))
+    assert_equal("å",     "åéïøü".truncate_bytesize(3))
+    assert_equal("å",     "åéïøü".truncate_bytesize(2))
+    assert_equal("",      "åéïøü".truncate_bytesize(1))
+    assert_equal("",      "åéïøü".truncate_bytesize(0))
 
-    assert_equal("aéioü", "aéioü".truncate_bytesize(7))
-    assert_equal("aéio",  "aéioü".truncate_bytesize(6))
-    assert_equal("aéio",  "aéioü".truncate_bytesize(5))
+    # These kanji are 3-byte, 4-byte and 3-byte utf-8 entities, respectively:
+    assert_equal("平𩸽名", "平𩸽名".truncate_bytesize(11))
+    assert_equal("平𩸽名", "平𩸽名".truncate_bytesize(10))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(9))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(8))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(7))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(6))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(5))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(4))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(3))
+    assert_equal("",       "平𩸽名".truncate_bytesize(2))
   end
 
   def test_truncate_bytesize_in_place
