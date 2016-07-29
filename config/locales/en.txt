@@ -3129,7 +3129,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
-  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":[url].
+  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/name/show_name/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
