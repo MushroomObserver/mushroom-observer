@@ -884,9 +884,12 @@ class Observation < AbstractModel
     img
   end
 
-  def is_imageless_sensu_danny?
-    thumb_image_id.nil? && species_lists.count == 0 && specimens.count == 0 &&
-      notes.length < 100
+  def has_backup_data?
+    thumb_image_id != nil ||
+      species_lists.count > 0 ||
+      specimens.count > 0 ||
+      specimen ||
+      notes.length >= 100
   end
 
   ##############################################################################

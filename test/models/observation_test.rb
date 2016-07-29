@@ -670,12 +670,15 @@ class ObservationTest < UnitTestCase
 
   def test_imageless
     # has image
-    assert_false(observations(:coprinus_comatus_obs).is_imageless_sensu_danny?)
+    assert_true(observations(:coprinus_comatus_obs).has_backup_data?)
 
     # has species list
-    assert_false(observations(:minimal_unknown_obs).is_imageless_sensu_danny?)
+    assert_true(observations(:minimal_unknown_obs).has_backup_data?)
+
+    # has specimen
+    assert_true(observations(:amateur_obs).has_backup_data?)
 
     # not enough notes
-    assert_true(observations(:agaricus_campestrus_obs).is_imageless_sensu_danny?)
+    assert_false(observations(:agaricus_campestrus_obs).has_backup_data?)
   end
 end

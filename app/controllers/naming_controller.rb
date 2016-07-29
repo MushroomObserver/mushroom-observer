@@ -86,7 +86,7 @@ class NamingController < ApplicationController
   end
 
   def valid_use_of_imageless(name, obs)
-    name.imageless? && !obs.is_imageless_sensu_danny? ?
+    name.imageless? && obs.has_backup_data? ?
       flash_warning(:runtime_bad_use_of_imageless.t) : true
   end
 
