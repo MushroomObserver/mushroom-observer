@@ -31,7 +31,7 @@ class NamingController < ApplicationController
   def destroy # :norobots:
     pass_query_params
     naming = Naming.find(params[:id].to_s)
-    if can_destroy?(naming)
+    if destroy_if_we_can(naming)
       flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
     end
     default_redirect(naming.observation)
@@ -39,7 +39,7 @@ class NamingController < ApplicationController
 
   private
 
-  def can_destroy?(naming)
+  def destroy_if_we_can(naming)
     if !check_permission!(naming)
       flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
     elsif !naming.deletable?
@@ -69,22 +69,25 @@ class NamingController < ApplicationController
   end
 
   def check_for_notifications
-    action = if has_unshown_notifications?(@user, :naming)
-               :show_notifications
-             else
-               :show_observation
-             end
+    action = has_unshown_notifications?(@user, :naming) ?
+               :show_notifications : :show_observation
     default_redirect(@params.observation, action)
   end
 
   def can_save?
     unproposed_name(:runtime_create_naming_already_proposed) &&
+      valid_use_of_imageless(@params.name, @params.observation) &&
       validate_object(@params.naming) &&
       validate_object(@params.vote)
   end
 
   def unproposed_name(warning)
     @params.name_been_proposed? ? flash_warning(warning.t) : true
+  end
+
+  def valid_use_of_imageless(name, obs)
+    name.imageless? && !obs.is_imageless_sensu_danny? ?
+      flash_warning(:runtime_bad_use_of_imageless.t) : true
   end
 
   def validate_name
@@ -102,8 +105,9 @@ class NamingController < ApplicationController
 
   def edit_post
     if validate_name &&
-       (@params.naming_is_name? ||
-        unproposed_name(:runtime_edit_naming_someone_else))
+       (@params.name_not_changing? ||
+        unproposed_name(:runtime_edit_naming_someone_else) &&
+        valid_use_of_imageless(@params.name, @params.observation))
       @params.need_new_naming? ? create_new_naming : change_naming
       default_redirect(@params.observation)
     else

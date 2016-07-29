@@ -857,3 +857,14 @@ boletus_edulis_group:
   author: ''
   citation: ''
   notes: NULL
+
+imageless:
+  version: 1
+  rank: <%= Name.ranks[:Genus] %>
+  text_name: Imageless
+  display_name: '**__Imageless__**'
+  search_name: Imageless
+  sort_name: Imageless
+  author: ''
+  citation: ''
+  notes: NULL
