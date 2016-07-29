@@ -667,4 +667,15 @@ class ObservationTest < UnitTestCase
     assert_true(obs.has_edit_permission?(mary))
     assert_true(obs.has_edit_permission?(dick))
   end
+
+  def test_imageless
+    # has image
+    assert_false(observations(:coprinus_comatus_obs).is_imageless_sensu_danny?)
+
+    # has species list
+    assert_false(observations(:minimal_unknown_obs).is_imageless_sensu_danny?)
+
+    # not enough notes
+    assert_true(observations(:agaricus_campestrus_obs).is_imageless_sensu_danny?)
+  end
 end

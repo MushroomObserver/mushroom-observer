@@ -578,6 +578,16 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(2, nam2.votes.length)
   end
 
+  def test_enforce_imageless_rules
+    params = {
+      id: observations(:coprinus_comatus_obs).id,
+      name: { name: "Imageless" }
+    }
+    login("dick")
+    post(:create, params)
+    assert_response(:success) # really means failed
+  end
+
   def assert_edit
     assert_action("edit", %w(
       _show_observation
