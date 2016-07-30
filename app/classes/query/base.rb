@@ -1,4 +1,6 @@
 class Query::Base
+  include Query::Initialize
+
   def self.parameter_declarations
     {
       join?:   [:string], # low level access
