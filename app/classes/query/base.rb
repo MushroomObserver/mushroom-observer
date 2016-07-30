@@ -1,5 +1,6 @@
 class Query::Base
   include Query::Initialize
+  include Query::Title
 
   def self.parameter_declarations
     {
