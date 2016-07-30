@@ -1,9 +1,6 @@
 class Query::ObservationByRssLog < Query::Observation
-  def self.parameter_declarations
-    super.merge(
-    )
-  end
-
   def initialize
+    add_join(:rss_logs)
+    params[:by] ||= "rss_log"
   end
 end
