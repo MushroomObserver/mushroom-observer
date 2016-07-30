@@ -10,4 +10,8 @@ class Query::User < Query::Base
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
   end
+
+  def default_order
+    "name"
+  end
 end
