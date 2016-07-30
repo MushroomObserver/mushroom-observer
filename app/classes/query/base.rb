@@ -2,17 +2,18 @@ class Query::Base
   include Query::Initialize
   include Query::Title
 
-  def self.parameter_declarations
+  def parameter_declarations
     {
-      join?:   [:string], # low level access
+      join?:   [:string],
       tables?: [:string],
       where?:  [:string],
       group?:  :string,
       order?:  :string,
-
       by?:     :string,
-
       title?:  [:string],
     }
+  end
+
+  def initialize
   end
 end

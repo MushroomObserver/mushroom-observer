@@ -1,5 +1,5 @@
 module Query::OfName
-  def extra_parameters
+  def of_name_parameters
     {
       synonyms?:     { string: [:no, :all, :exclusive] },
       nonconsensus?: { string: [:no, :all, :exclusive] },

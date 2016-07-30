@@ -1,5 +1,5 @@
 class Query::ObservationForProject < Query::Observation
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       project: Project
     )
@@ -10,5 +10,6 @@ class Query::ObservationForProject < Query::Observation
     title_args[:project] = project.title
     self.where << "observations_projects.project_id = '#{project.id}'"
     add_join("observations_projects")
+    super
   end
 end

@@ -1,5 +1,5 @@
 class Query::ObservationAtLocation < Query::Observation
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       location: Location
     )
@@ -8,8 +8,8 @@ class Query::ObservationAtLocation < Query::Observation
   def initialize
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    add_join(:names)
     self.where << "locations.location_id = '#{location.id}'"
     params[:by] ||= "name"
+    super
   end
 end

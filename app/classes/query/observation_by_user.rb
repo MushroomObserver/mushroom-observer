@@ -1,5 +1,5 @@
 class Query::ObservationByUser < Query::Observation
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       user: User
     )
@@ -10,5 +10,6 @@ class Query::ObservationByUser < Query::Observation
     title_args[:user] = user.legal_name
     self.where << "observations.user_id = '#{user.id}'"
     params[:by] ||= "updated_at"
+    super
   end
 end

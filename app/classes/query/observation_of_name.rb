@@ -1,10 +1,10 @@
 class Query::ObservationOfName < Query::Observation
   include Query::OfName
 
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       name: :name,
-    ).merge(extra_parameters)
+    ).merge(of_name_parameters)
   end
 
   def initialize
@@ -15,20 +15,10 @@ class Query::ObservationOfName < Query::Observation
     restrict_to_one_project
     restrict_to_one_species_list
     restrict_to_one_user
+    super
   end
 
   def add_join_to_observations_table(table)
     add_join(table)
   end
-
-#   Use this in ImageWithObservationsOfName
-#   def add_join_to_observations_table(table)
-#     add_join(:observations, table)
-#   end
-
-#   Use this in LocationWithObservationsOfName
-#   def add_join_to_observations_table(table)
-#     add_join(:observations, table)
-#     self.where |=  ["observations.is_collection_location IS TRUE"]
-#   end
 end

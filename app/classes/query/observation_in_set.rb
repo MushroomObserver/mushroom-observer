@@ -1,5 +1,5 @@
 class Query::ObservationInSet < Query::Observation
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       ids: [Observation]
     )
@@ -9,5 +9,6 @@ class Query::ObservationInSet < Query::Observation
     set = clean_id_set(params[:ids])
     self.where << "observations.id IN (#{set})"
     self.order = "FIND_IN_SET(observations.id,'#{set}') ASC"
+    super
   end
 end

@@ -1,16 +1,18 @@
 class Query::UserPatternSearch < Query::User
-  def self.parameter_declarations
+  include Query::PatternSearch
+
+  def parameter_declarations
     super.merge(
       pattern: :string
     )
   end
 
   def initialize
-    pattern = params[:pattern].to_s.strip_squeeze
-    clean  = clean_pattern(pattern)
-    search = google_parse(clean)
-
-    self.where += google_conditions(search,
-                                    "CONCAT(users.login,users.name)")
+    search = google_parse_pattern
+    add_search_conditions(search,
+      "users.login",
+      "users.name"
+    )
+    super
   end
 end

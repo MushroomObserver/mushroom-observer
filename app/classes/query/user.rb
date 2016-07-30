@@ -1,5 +1,5 @@
 class Query::User < Query::Base
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       created_at?: [:time],
       updated_at?: [:time]
@@ -9,9 +9,7 @@ class Query::User < Query::Base
   def initialize
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
-  end
-
-  def default_order
-    "name"
+    params[:by] ||= "name"
+    super
   end
 end

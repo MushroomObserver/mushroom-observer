@@ -1,16 +1,25 @@
 class Query::ObservationAdvancedSearch < Query::Observation
   include Query::AdvancedSearch
 
+  def parameter_declarations 
+    super.merge(advanced_search_parameters)
+  end
+
   def initialize
-    name, user, location, content = google_parse_params
-    make_sure_user_entered_something(name, user, location, content)
-    add_join(:names)      unless name.blank?
-    add_join(:users)      unless user.blank?
-    add_join(:locations!) unless location.blank?
-    add_name_condition(name)
-    add_user_condition(user)
-    add_location_condition(location)
-    add_content_condition(content)
+    initialize_advanced_search
+    super
+  end
+
+  def add_join_to_names
+    add_join(:names)
+  end
+
+  def add_join_to_users
+    add_join(:users)
+  end
+
+  def add_join_to_locations
+    add_join(:locations)
   end
 
   def content_join_spec

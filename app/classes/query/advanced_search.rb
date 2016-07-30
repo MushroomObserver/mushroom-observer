@@ -1,7 +1,21 @@
 module Query::AdvancedSearch
-  def self.parameter_declarations
-    super.merge(
-    )
+  def advanced_search_parameters
+    {
+      name?:     :string,
+      location?: :string,
+      user?:     :string,
+      content?:  :string,
+      search_location_notes?: :boolean
+    }
+  end
+
+  def initialize_advanced_search
+    name, user, location, content = google_parse_params
+    make_sure_user_entered_something(name, user, location, content)
+    add_name_condition(name)
+    add_user_condition(user)
+    add_location_condition(location)
+    add_content_condition(content)
   end
 
   def google_parse_params
@@ -22,12 +36,14 @@ module Query::AdvancedSearch
   def add_name_condition(name)
     unless name.blank?
       self.where += google_conditions(name, "names.search_name")
+      add_join_to_names
     end
   end
 
   def add_user_condition(user)
     unless user.blank?
       self.where += google_conditions(user, "CONCAT(users.login,users.name)")
+      add_join_to_users
     end
   end
 
@@ -41,6 +57,7 @@ module Query::AdvancedSearch
         val_spec = "IF(locations.id,locations.name,observations.where)"
       end
       self.where += google_conditions(location, val_spec)
+      add_join_to_locations
     end
   end
 

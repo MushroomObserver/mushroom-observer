@@ -3,5 +3,6 @@ class Query::UserAll < Query::User
 
   def initialize
     add_sort_order_to_title
+    super
   end
 end

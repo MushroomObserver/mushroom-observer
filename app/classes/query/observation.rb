@@ -1,5 +1,5 @@
 class Query::Observation < Query::Base
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       created_at?:     [:time],
       updated_at?:     [:time],
@@ -85,5 +85,6 @@ class Query::Observation < Query::Base
     end
     initialize_model_do_bounding_box(:observation)
     initialize_observation_filters
+    super
   end
 end

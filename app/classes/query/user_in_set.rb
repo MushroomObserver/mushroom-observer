@@ -1,5 +1,5 @@
 class Query::UserInSet < Query::User
-  def self.parameter_declarations
+  def parameter_declarations
     super.merge(
       ids: [User]
     )
@@ -9,5 +9,6 @@ class Query::UserInSet < Query::User
     set = clean_id_set(params[:ids])
     self.where << "users.id IN (#{set})"
     self.order = "FIND_IN_SET(users.id,'#{set}') ASC"
+    super
   end
 end
