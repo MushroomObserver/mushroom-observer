@@ -7,7 +7,7 @@ class Query::UserInSet < Query::User
 
   def initialize
     set = clean_id_set(params[:ids])
-    self.where << "userss.id IN (#{set})"
+    self.where << "users.id IN (#{set})"
     self.order = "FIND_IN_SET(users.id,'#{set}') ASC"
   end
 end
