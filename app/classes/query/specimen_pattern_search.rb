@@ -13,5 +13,6 @@ class Query::SpecimenPatternSearch < Query::Specimen
       "specimens.herbarium_label",
       "COALESCE(specimens.notes,'')"
     )
+  super
   end
 end
