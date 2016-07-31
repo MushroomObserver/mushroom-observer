@@ -4,7 +4,10 @@ module Query::Modules::Serialization
   end
 
   def serialize
-    self.class.to_s.sub(/.*::/, "") + ":" +
+    params = params.merge(
+      model:  model.to_s.to_sym,
+      flavor: flavor
+    )
     params.keys.sort_by(&:to_s).map do |key|
       val = params[key]
       if key.to_s.match(/\W/)
@@ -29,24 +32,27 @@ module Query::Modules::Serialization
   end
 
   def serialize_string(val)
-    val.force_encoding("binary").gsub(/[,;:#%&=\/\?\x00-\x1f\x7f-\xff]/) do |char|
+    # The "n" modifier forces the Regexp to be in ascii 8 bit encoding = binary.
+    val.force_encoding("binary").gsub(/[,;:#%&=\/\?\x00-\x1f\x7f-\xff]/n) do |char|
       "%" + (char.ord % "%02.2X")
     end
-  def
+  end
 
   module ClassMethods
     def deserialize(str)
-      hash = {}
-      klass, str = str.to_s.split(":", 2)
-      klass = "Query::#{klass}".constantize
+      params = {}
       str.split(";").each do |line|
         if line.match(/^(\w+)=(.*)/)
           key = Regexp.last_match(1)
           val = Regexp.last_match(2)
-          hash[key.to_sym] = deserialize_value(val)
+          params[key.to_sym] = deserialize_value(val)
         end
       end
-      klass.new(hash)
+      model  = params[:model]
+      flavor = params[:flavor]
+      params.delete(:model)
+      params.delete(:flavor)
+      Query.lookup(model, flavor, params)
     end
 
     def deserialize_value(val)
@@ -67,7 +73,7 @@ module Query::Modules::Serialization
       val.force_encoding("binary").gsub(/%(..)/) do |match|
         match[1].hex.chr("binary")
       end.force_encoding("UTF-8")
-    def
+    end
 
     def deserialize_number(val)
       val.include?(".") ? val.to_f : val.to_i

@@ -8,7 +8,7 @@ class Query::ObservationOfChildren < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
     add_name_condition(name)

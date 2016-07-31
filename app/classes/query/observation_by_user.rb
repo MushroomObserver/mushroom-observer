@@ -5,7 +5,7 @@ class Query::ObservationByUser < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     self.where << "observations.user_id = '#{user.id}'"

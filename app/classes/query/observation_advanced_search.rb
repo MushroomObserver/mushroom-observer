@@ -7,7 +7,7 @@ class Query::ObservationAdvancedSearch < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     initialize_advanced_search
     super
   end

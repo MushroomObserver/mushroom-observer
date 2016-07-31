@@ -1,11 +1,7 @@
 class Query::CommentAll < Query::Comment
   include Query::Initializers::All
 
-  def flavor
-    :all
-  end
-
-  def initialize
+  def initialize_flavor
     add_sort_order_to_title
     super
   end

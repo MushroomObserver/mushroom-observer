@@ -1,5 +1,5 @@
 class Query::ObservationByRssLog < Query::Observation
-  def initialize
+  def initialize_flavor
     add_join(:rss_logs)
     params[:by] ||= "rss_log"
     super

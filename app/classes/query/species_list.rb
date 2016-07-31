@@ -1,24 +1,24 @@
 class Query::SpeciesList < Query::Base
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      date?: [:date],
-      users?: [User],
-      names?: [:string],
-      synonym_names?: [:string],
+      created_at?:     [:time],
+      updated_at?:     [:time],
+      date?:           [:date],
+      users?:          [User],
+      names?:          [:string],
+      synonym_names?:  [:string],
       children_names?: [:string],
-      locations?: [:string],
-      projects?: [:string],
-      title_has?: :string,
-      has_notes?: :boolean,
-      notes_has?: :string,
-      has_comments?: { string: [:yes] },
-      comments_has?: :string
+      locations?:      [:string],
+      projects?:       [:string],
+      title_has?:      :string,
+      has_notes?:      :boolean,
+      notes_has?:      :string,
+      has_comments?:   { string: [:yes] },
+      comments_has?:   :string
     )
   end
 
-  def initialize
+  def initialize_flavor
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)

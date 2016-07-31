@@ -7,16 +7,12 @@ class Query::SpecimenPatternSearch < Query::Specimen
     )
   end
 
-  def initialize
+  def initialize_flavor
     search = google_parse_pattern
     add_search_conditions(search,
       "users.login",
       "users.name"
     )
-<<<<<<< HEAD
-  super
-=======
     super
->>>>>>> a3ce6dd949116c5773fa3e3c3496518e74a892cb
   end
 end
