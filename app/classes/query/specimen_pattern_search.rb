@@ -13,10 +13,6 @@ class Query::SpecimenPatternSearch < Query::Specimen
       "users.login",
       "users.name"
     )
-<<<<<<< HEAD
-  super
-=======
     super
->>>>>>> a3ce6dd949116c5773fa3e3c3496518e74a892cb
   end
 end
