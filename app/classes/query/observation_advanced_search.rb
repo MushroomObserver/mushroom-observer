@@ -1,8 +1,10 @@
 class Query::ObservationAdvancedSearch < Query::Observation
-  include Query::AdvancedSearch
+  include Query::Initializers::AdvancedSearch
 
   def parameter_declarations 
-    super.merge(advanced_search_parameters)
+    super.merge(
+      advanced_search_parameter_declarations
+    )
   end
 
   def initialize

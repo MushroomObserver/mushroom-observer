@@ -1,5 +1,5 @@
 class Query::SpecimenPatternSearch < Query::Specimen
-  include Query::PatternSearch
+  include Query::Initializers::PatternSearch
 
   def parameter_declarations
     super.merge(
@@ -10,9 +10,13 @@ class Query::SpecimenPatternSearch < Query::Specimen
   def initialize
     search = google_parse_pattern
     add_search_conditions(search,
-      "specimens.herbarium_label",
-      "COALESCE(specimens.notes,'')"
+      "users.login",
+      "users.name"
     )
+<<<<<<< HEAD
   super
+=======
+    super
+>>>>>>> a3ce6dd949116c5773fa3e3c3496518e74a892cb
   end
 end

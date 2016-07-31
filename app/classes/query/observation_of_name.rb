@@ -1,10 +1,10 @@
 class Query::ObservationOfName < Query::Observation
-  include Query::OfName
+  include Query::Initializers::OfName
 
   def parameter_declarations
     super.merge(
-      name: :name,
-    ).merge(of_name_parameters)
+      of_name_parameter_declarations
+    )
   end
 
   def initialize
@@ -18,7 +18,7 @@ class Query::ObservationOfName < Query::Observation
     super
   end
 
-  def add_join_to_observations_table(table)
+  def add_join_to_observations(table)
     add_join(table)
   end
 end

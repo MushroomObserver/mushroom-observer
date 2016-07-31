@@ -1,5 +1,5 @@
 class Query::ObservationPatternSearch < Query::Observation
-  include Query::PatternSearch
+  include Query::Initializers::PatternSearch
 
   def parameter_declarations
     super.merge(
@@ -9,13 +9,13 @@ class Query::ObservationPatternSearch < Query::Observation
 
   def initialize
     search = google_parse_pattern
-    add_join(:locations!)
-    add_join(:names)
     add_search_conditions(search,
       "names.search_name",
       "COALESCE(observations.notes,'')",
       "IF(locations.id,locations.name,observations.where)"
     )
+    add_join(:locations!)
+    add_join(:names)
     super
   end
 end

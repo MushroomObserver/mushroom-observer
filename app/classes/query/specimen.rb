@@ -1,4 +1,8 @@
 class Query::Specimen < Query::Base
+  def model
+    Specimen
+  end
+
   def parameter_declarations
     super.merge(
     )
