@@ -1,4 +1,8 @@
 class Query::Comment < Query::Base
+  def model
+    Comment
+  end
+
   def parameter_declarations
     super.merge(
       created_at?: [:time],
@@ -10,7 +14,7 @@ class Query::Comment < Query::Base
     )
   end
 
-  def initialize
+  def initialize_model
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)

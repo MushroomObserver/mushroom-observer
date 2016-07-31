@@ -184,4 +184,7 @@ MushroomObserver::Application.configure do
     Cantharellaceae.css
     Hygrocybe.css
   ) if config.assets && config.assets.precompile
+
+  # Max number of results Query will put in "IN (...)" clauses.
+  config.query_max_array = 1000
 end

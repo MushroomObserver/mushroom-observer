@@ -1,5 +1,5 @@
-module Query::AdvancedSearch
-  def advanced_search_parameters
+module Query::Initializers::AdvancedSearch
+  def advanced_search_parameter_declarations
     {
       name?:     :string,
       location?: :string,
@@ -49,7 +49,7 @@ module Query::AdvancedSearch
 
   def add_location_condition(location)
     unless location.blank?
-      if model_symbol == :Location
+      if model == Location
         val_spec = "locations.name"
       elsif params[:search_location_notes]
         val_spec = "IF(locations.id,CONCAT(locations.name,locations.notes),observations.where)"
@@ -65,11 +65,11 @@ module Query::AdvancedSearch
     unless content.blank?
 
       # # This was the old query using left outer join to include comments.
-      # self.join << case model_symbol
-      # when :Image       ; {:images_observations => {:observations => :comments!}}
-      # when :Location    ; {:observations => :comments!}
-      # when :Name        ; {:observations => :comments!}
-      # when :Observation ; :comments!
+      # self.join << case model
+      # when Image       ; {:images_observations => {:observations => :comments!}}
+      # when Location    ; {:observations => :comments!}
+      # when Name        ; {:observations => :comments!}
+      # when Observation ; :comments!
       # end
       # self.where += google_conditions(content,
       #   'CONCAT(observations.notes,IF(comments.id,CONCAT(comments.summary,comments.comment),""))')
@@ -81,21 +81,22 @@ module Query::AdvancedSearch
         args2 = args.dup
         extend_where(args2)
         args2[:where] += google_conditions(content, "observations.notes")
-        results = model_class.connection.select_rows(query(args2))
+        results = model.connection.select_rows(query(args2))
 
         args2 = args.dup
         extend_join(args2) << content_join_spec
         extend_where(args2)
         val_spec = CONCAT(observations.notes,comments.summary,comments.comment)"
         args2[:where] += google_conditions(content, val_spec)
-        results |= model_class.connection.select_rows(query(args2))
+        results |= model.connection.select_rows(query(args2))
       end
     end
   end
+end
 
 #     # This case is a disaster.  Perform it as an observation query, then
 #     # coerce into images.
-#     if (model_symbol == :Image) && !content.blank?
+#     if (model == Image) && !content.blank?
 #       self.executor = lambda do |args|
 #         args2 = args.dup
 #         args2.delete(:select)
@@ -106,42 +107,40 @@ module Query::AdvancedSearch
 #         args2 = args.dup
 #         extend_join(args2) << :images_observations
 #         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
-#         model_class.connection.select_rows(query(args2))
+#         model.connection.select_rows(query(args2))
 #       end
 #       return
 #     end
 
-#     case model_symbol
-#     when :Image
+#     case model
+#     when Image
 #       add_join(:images_observations, :observations) unless [user, name, location, content].all?(&:blank?)
 #       add_join(:observations, :users)      unless user.blank?
 #       add_join(:observations, :names)      unless name.blank?
 #       add_join(:observations, :locations!) unless location.blank?
-#     when :Location
+#     when Location
 #       add_join(:observations, :users) unless user.blank?
 #       add_join(:observations, :names) unless name.blank?
 #       add_join(:observations)         unless content.blank?
-#     when :Name
+#     when Name
 #       add_join(:observations, :users)      unless user.blank?
 #       add_join(:observations, :locations!) unless location.blank?
 #       add_join(:observations)              unless content.blank?
-#     when :Observation
+#     when Observation
 #       add_join(:names)      unless name.blank?
 #       add_join(:users)      unless user.blank?
 #       add_join(:locations!) unless location.blank?
 #     end
 
 #   def content_join_spec
-#           case model_symbol
-#             when :Image
+#           case model
+#             when Image
 #               { images_observations: { observations: :comments } }
-#             when :Location
+#             when Location
 #               { observations: :comments }
-#             when :Name
+#             when Name
 #               { observations: :comments }
-#             when :Observation
+#             when Observation
 #               :comments
 #           end
 #   end
-
-end

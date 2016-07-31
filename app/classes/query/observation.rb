@@ -1,4 +1,8 @@
 class Query::Observation < Query::Base
+  def model
+    Observation
+  end
+
   def parameter_declarations
     super.merge(
       created_at?:     [:time],

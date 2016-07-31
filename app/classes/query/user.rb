@@ -1,4 +1,8 @@
 class Query::User < Query::Base
+  def model
+    User
+  end
+
   def parameter_declarations
     super.merge(
       created_at?: [:time],

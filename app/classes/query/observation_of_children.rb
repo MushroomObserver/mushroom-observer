@@ -1,5 +1,5 @@
 class Query::ObservationOfChildren < Query::Observation
-  include Query::OfChildren
+  include Query::Initializers::OfChildren
 
   def parameter_declarations
     super.merge(

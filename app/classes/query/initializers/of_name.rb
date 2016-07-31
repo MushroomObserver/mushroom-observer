@@ -1,6 +1,7 @@
-module Query::OfName
-  def of_name_parameters
+module Query::Initializers::OfName
+  def of_name_parameter_declarations
     {
+      name:          :name,
       synonyms?:     { string: [:no, :all, :exclusive] },
       nonconsensus?: { string: [:no, :all, :exclusive] },
       project?:      Project,
@@ -58,13 +59,13 @@ module Query::OfName
     elsif params[:nonconsensus] == :all
       self.where << "namings.name_id IN (#{id_set})"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
-      add_join_to_observations_table(:namings)
+      add_join_to_observations(:namings)
     elsif nonconsensus == :exclusive
       self.where << "namings.name_id IN (#{id_set}) AND " \
                     "(observations.name_id NOT IN (#{id_set}) OR " \
                     "COALESCE(observations.vote_cache,0) < 0)"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
-      add_join_to_observations_table(:namings)
+      add_join_to_observations(:namings)
     else
       fail "Invalid nonconsensus inclusion mode: '#{params[:nonconsensus]}'"
     end
@@ -74,7 +75,7 @@ module Query::OfName
     if params[:project]
       project = find_cached_parameter_instance(Project, :project)
       self.where << "observations_projects.project_id = #{project.id}"
-      add_join_to_observations_table(:observations_projects)
+      add_join_to_observations(:observations_projects)
     end
   end
 
@@ -82,7 +83,7 @@ module Query::OfName
     if params[:species_list]
       species_list = find_cached_parameter_instance(SpeciesList, :species_list)
       self.where << "observations_species_lists.species_list_id = #{species_list.id}"
-      add_join_to_observations_table(:observations_species_lists)
+      add_join_to_observations(:observations_species_lists)
     end
   end
 

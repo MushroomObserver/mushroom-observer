@@ -1,4 +1,4 @@
-module Query::OfChildren
+module Query::Initializers::OfChildren
   def add_name_condition(name)
     # If "all" is true, get all descendants, not just immediate children.
     all = params[:all]

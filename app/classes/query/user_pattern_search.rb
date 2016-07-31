@@ -1,5 +1,5 @@
 class Query::UserPatternSearch < Query::User
-  include Query::PatternSearch
+  include Query::Initializers::PatternSearch
 
   def parameter_declarations
     super.merge(
