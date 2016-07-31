@@ -8,7 +8,7 @@ class Query::Specimen < Query::Base
     )
   end
 
-  def initialize
+  def initialize_flavor
     params[:by] ||= "herbarium_label"
     super
   end

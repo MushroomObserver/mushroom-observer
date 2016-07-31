@@ -7,7 +7,7 @@ class Query::ObservationPatternSearch < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     search = google_parse_pattern
     add_search_conditions(search,
       "names.search_name",

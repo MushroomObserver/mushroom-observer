@@ -5,7 +5,7 @@ class Query::ObservationInSpeciesList < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
     add_join(:observations_species_lists)

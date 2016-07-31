@@ -7,7 +7,7 @@ class Query::ObservationOfName < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     give_parameter_defaults
     names = get_target_names
     choose_a_title(names)

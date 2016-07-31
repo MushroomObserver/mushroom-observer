@@ -14,7 +14,7 @@ class Query::Comment < Query::Base
     )
   end
 
-  def initialize_model
+  def initialize_flavor
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)

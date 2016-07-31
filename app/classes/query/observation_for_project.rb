@@ -5,7 +5,7 @@ class Query::ObservationForProject < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
     self.where << "observations_projects.project_id = '#{project.id}'"

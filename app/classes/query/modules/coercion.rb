@@ -19,7 +19,7 @@ module Query::Modules::Coercion
       just_test || begin
         params2 = params.dup
         params2.delete(:type)
-        class.lookup(new_model, :by_rss_log, params2)
+        Query.lookup(new_model, :by_rss_log, params2)
       end
 
     # Going from objects with observations to those observations themselves.
@@ -54,7 +54,7 @@ module Query::Modules::Coercion
           # Can't be sure old sort order will continue to work.
           params2.delete(:by)
         end
-        class.lookup(new_model, new_flavor, params2)
+        Query.lookup(new_model, new_flavor, params2)
       end
 
     # Going from observations to objects with those observations.
@@ -90,15 +90,15 @@ module Query::Modules::Coercion
         end
         if old_flavor == :in_set
           params2.delete(:title) if params2.key?(:title)
-          class.lookup(new_model, :"with_#{type1}_in_set",
+          Query.lookup(new_model, :"with_#{type1}_in_set",
                             params2.merge(old_title: title, old_by: params[:by]))
         elsif old_flavor == :advanced_search || old_flavor == :pattern_search
           params2.delete(:title) if params2.key?(:title)
-          class.lookup(new_model, :"with_#{type1}_in_set",
+          Query.lookup(new_model, :"with_#{type1}_in_set",
                             ids: result_ids, old_title: title, old_by: params[:by])
         elsif (new_model == :Location) &&
               (old_flavor == :at_location)
-          class.lookup(new_model, :in_set,
+          Query.lookup(new_model, :in_set,
                             ids: params2[:location])
         elsif (new_model == :Name) &&
               (old_flavor == :of_name)
@@ -107,7 +107,7 @@ module Query::Modules::Coercion
           # params[:misspellings] == :either / :no / :only
           nil
         elsif allowed_model_flavors[new_model].include?(new_flavor)
-          class.lookup(new_model, new_flavor, params2)
+          Query.lookup(new_model, new_flavor, params2)
         end
       end
 

@@ -10,7 +10,7 @@ class Query::User < Query::Base
     )
   end
 
-  def initialize
+  def initialize_flavor
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     params[:by] ||= "name"

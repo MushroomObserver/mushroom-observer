@@ -19,7 +19,7 @@ module Query::Modules::Initialization
     @order       = ""
     @executor    = nil
     initialize_title
-    initialize # flavor
+    initialize_flavor
     initialize_order
   end
 
@@ -467,7 +467,6 @@ module Query::Modules::Initialization
       @goods = args[:goods]
       @bads = args[:bads]
     end
-
     def blank?
       !@goods.any? && !@bads.any?
     end

@@ -68,7 +68,7 @@ module Query::Modules::NestedQueries
   def outer
     @outer ||= begin
       if outer_str
-        outer = self.class.deserialize(outer_str)
+        outer = Query.deserialize(outer_str)
         tweak_outer_query.call(outer) if tweak_outer_query
         outer
       end
@@ -94,7 +94,7 @@ module Query::Modules::NestedQueries
     else
       new_params[new_outer.model.type_tag] = new_outer.current_id
     end
-    class.lookup(model, flavor, new_params)
+    Query.lookup(model, flavor, new_params)
   end
 
   # Create a new copy of this query if the outer query changed, otherwise

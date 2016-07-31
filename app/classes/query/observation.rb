@@ -35,7 +35,7 @@ class Query::Observation < Query::Base
     )
   end
 
-  def initialize
+  def initialize_flavor
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)
@@ -89,6 +89,7 @@ class Query::Observation < Query::Base
     end
     initialize_model_do_bounding_box(:observation)
     initialize_observation_filters
+    params[:by] ||= "date"
     super
   end
 end

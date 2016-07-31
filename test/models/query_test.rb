@@ -3,7 +3,12 @@ require "test_helper"
 require "set"
 
 class QueryTest < UnitTestCase
-  def test_parameter_declarations
+  def test_it
+    query = Query.lookup(:Observation, :all)
+    query.initialize_query
+    num = query.num_results
+    puts "num: " + num.inspect
+    puts "sql: " + query.last_query
   end
 
 #   def assert_state_exists(id)

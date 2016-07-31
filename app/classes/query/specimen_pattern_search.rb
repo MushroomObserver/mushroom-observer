@@ -7,7 +7,7 @@ class Query::SpecimenPatternSearch < Query::Specimen
     )
   end
 
-  def initialize
+  def initialize_flavor
     search = google_parse_pattern
     add_search_conditions(search,
       "users.login",

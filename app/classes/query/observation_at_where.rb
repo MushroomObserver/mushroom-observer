@@ -6,7 +6,7 @@ class Query::ObservationAtWhere < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.where << "locations.where LIKE '%#{pattern}%'"

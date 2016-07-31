@@ -5,7 +5,7 @@ class Query::UserInSet < Query::User
     )
   end
 
-  def initialize
+  def initialize_flavor
     set = clean_id_set(params[:ids])
     self.where << "users.id IN (#{set})"
     self.order = "FIND_IN_SET(users.id,'#{set}') ASC"

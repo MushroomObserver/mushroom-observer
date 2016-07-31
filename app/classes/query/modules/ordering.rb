@@ -5,25 +5,24 @@ module Query::Modules::Ordering
       by = by.dup
       reverse = !!by.sub!(/^reverse_/, "")
       result = initialize_order_specs(by)
-      @order = reverse ? reverse_order(result) : result
-      end
+      self.order = reverse ? reverse_order(result) : result
     end
   end
 
-  def initialize_order_spec(by)
+  def initialize_order_specs(by)
     table = model.table_name
     columns = model.column_names
     case by
 
     when "updated_at", "created_at", "last_login", "num_views"
-      "#{table}.#{by} DESC" if column_names.include?(by)
+      "#{table}.#{by} DESC" if columns.include?(by)
 
     when "date"
-      if column_names.include?("date")
+      if columns.include?("date")
         "#{table}.date DESC"
-      elsif column_names.include?("when")
+      elsif columns.include?("when")
         "#{table}.when DESC"
-      elsif column_names.include?("created_at")
+      elsif columns.include?("created_at")
         "#{table}.created_at DESC"
       end
 
@@ -47,32 +46,32 @@ module Query::Modules::Ordering
       elsif model == Observation
         add_join(:names)
         "names.sort_name ASC, observations.when DESC"
-      elsif column_names.include?("sort_name")
+      elsif columns.include?("sort_name")
         "#{table}.sort_name ASC"
-      elsif column_names.include?("name")
+      elsif columns.include?("name")
         "#{table}.name ASC"
-      elsif column_names.include?("title")
+      elsif columns.include?("title")
         "#{table}.title ASC"
       end
 
     when "title", "login", "summary", "copyright_holder", "where", "herbarium_label"
-      "#{table}.#{by} ASC" if column_names.include?(by)
+      "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
-      if column_names.include?("user_id")
+      if columns.include?("user_id")
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
 
     when "location"
-      if column_names.include?("location_id")
+      if columns.include?("location_id")
         add_join(:locations)
         User.current_location_format == :scientific ?
           "locations.scientific_name ASC" : "locations.name ASC"
       end
 
     when "rss_log"
-      if column_names.include?("rss_log_id")
+      if columns.include?("rss_log_id")
         add_join(:rss_logs)
         "rss_logs.updated_at DESC"
       end
@@ -125,7 +124,9 @@ module Query::Modules::Ordering
 
   def reverse_order(order)
     order.gsub(/(\s)(ASC|DESC)(,|\Z)/) do
-      Regexp.last_match(1) + (Regexp.last_match(2) == "ASC" ? "DESC" : "ASC") + Regexp.last_match(3)
+      Regexp.last_match(1) +
+        (Regexp.last_match(2) == "ASC" ? "DESC" : "ASC") +
+        Regexp.last_match(3)
     end
   end
 end

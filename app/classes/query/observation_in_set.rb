@@ -5,7 +5,7 @@ class Query::ObservationInSet < Query::Observation
     )
   end
 
-  def initialize
+  def initialize_flavor
     set = clean_id_set(params[:ids])
     self.where << "observations.id IN (#{set})"
     self.order = "FIND_IN_SET(observations.id,'#{set}') ASC"
