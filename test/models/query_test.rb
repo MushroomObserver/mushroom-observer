@@ -1926,56 +1926,67 @@ class QueryTest < UnitTestCase
     # assert_query([40], :Name, :pattern_search, pattern: 'superficially similar') # look_alikes
   end
 
-#   def test_name_with_descriptions
-#     assert_query([names(:coprinus_comatus).id,
-#                   names(:agaricus_campestris).id,
-#                   names(:lactarius_alpinus).id,
-#                   names(:agaricus_campestras).id,
-#                   names(:agaricus_campestros).id,
-#                   names(:russula_brevipes_author_notes).id,
-#                   names(:russula_cremoricolor_no_author_notes).id,
-#                   names(:russula_cremoricolor_author_notes).id,
-#                   names(:boletus_edulis).id,
-#                   names(:peltigera).id,
-#                   names(:suillus).id],
-#                  :Name,
-#                  :with_descriptions, by: :id)
-#   end
-#
-#   def test_name_with_descriptions_by_user
-#     assert_query([names(:agaricus_campestris).id,
-#                   names(:peltigera).id],
-#                  :Name,
-#                  :with_descriptions_by_user, user: mary, by: :id)
-#     assert_query([names(:boletus_edulis).id,
-#                   names(:peltigera).id,
-#                   names(:suillus).id],
-#                  :Name,
-#                  :with_descriptions_by_user, user: dick, by: :id)
-#   end
-#
-#   def test_name_with_descriptions_by_author
-#     assert_query([names(:coprinus_comatus).id,
-#                   names(:peltigera).id],
-#                  :Name,
-#                  :with_descriptions_by_author, user: rolf, by: :id)
-#     assert_query([names(:agaricus_campestris).id,
-#                   names(:peltigera).id],
-#                  :Name,
-#                  :with_descriptions_by_author, user: mary, by: :id)
-#     assert_query([names(:boletus_edulis).id],
-#                  :Name,
-#                  :with_descriptions_by_author, user: dick, by: :id)
-#   end
-#
-#   def test_name_with_descriptions_by_editor
-#     assert_query([names(:coprinus_comatus).id], :Name,
-#                   :with_descriptions_by_editor, user: rolf)
-#     assert_query([names(:coprinus_comatus).id], :Name,
-#                   :with_descriptions_by_editor, user: mary)
-#     assert_query([], :Name, :with_descriptions_by_editor, user: dick)
-#   end
-#
+  def test_name_with_descriptions
+    assert_query([names(:coprinus_comatus).id,
+                  names(:agaricus_campestris).id,
+                  names(:lactarius_alpinus).id,
+                  names(:agaricus_campestras).id,
+                  names(:agaricus_campestros).id,
+                  names(:russula_brevipes_author_notes).id,
+                  names(:russula_cremoricolor_no_author_notes).id,
+                  names(:russula_cremoricolor_author_notes).id,
+                  names(:boletus_edulis).id,
+                  names(:peltigera).id,
+                  names(:suillus).id],
+                 :Name,
+                 :with_descriptions, by: :id)
+  end
+
+  def test_name_with_descriptions_by_user
+    assert_query([names(:agaricus_campestris).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_user, user: mary, by: :id)
+    assert_query([names(:boletus_edulis).id,
+                  names(:peltigera).id,
+                  names(:suillus).id],
+                 :Name,
+                 :with_descriptions_by_user, user: dick, by: :id)
+  end
+
+  def test_name_with_descriptions_by_author
+    assert_query([names(:coprinus_comatus).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_author, user: rolf, by: :id)
+    assert_query([names(:agaricus_campestris).id,
+                  names(:peltigera).id],
+                 :Name,
+                 :with_descriptions_by_author, user: mary, by: :id)
+    assert_query([names(:boletus_edulis).id],
+                 :Name,
+                 :with_descriptions_by_author, user: dick, by: :id)
+  end
+
+  def test_name_with_descriptions_by_editor
+    assert_query([names(:coprinus_comatus).id], :Name,
+                  :with_descriptions_by_editor, user: rolf)
+    assert_query([names(:coprinus_comatus).id], :Name,
+                  :with_descriptions_by_editor, user: mary)
+    assert_query([], :Name, :with_descriptions_by_editor, user: dick)
+  end
+
+
+  def test_name_with_descriptions_in_set
+    desc1 = name_descriptions(:peltigera_desc)
+    desc2 = name_descriptions(:peltigera_alt_desc)
+    desc3 = name_descriptions(:draft_boletus_edulis)
+    name1 = names(:peltigera)
+    name2 = names(:boletus_edulis)
+    assert_query([name2, name1], :Name, :with_descriptions_in_set,
+                 ids: [desc1, desc2, desc3])
+  end
+
 #   def test_name_with_observations
 #     expect = Observation.connection.select_values %(
 #       SELECT DISTINCT name_id FROM observations ORDER BY name_id ASC
