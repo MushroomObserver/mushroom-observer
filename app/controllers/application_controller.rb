@@ -1027,12 +1027,15 @@ class ApplicationController < ActionController::Base
     if params[:north].blank?
       query
     else
-      Query.lookup(query.model_symbol, query.flavor, query.params.merge(
-                                                       north: tweak_up(params[:north], 0.001, 90),
-                                                       south: tweak_down(params[:south], 0.001, -90),
-                                                       east: tweak_up(params[:east], 0.001, 180),
-                                                       west: tweak_down(params[:west], 0.001, -180)
-      ))
+      model = query.model.to_s.to_sym
+      flavor = query.flavor
+      args = query.params.merge(
+        north: tweak_up(params[:north], 0.001, 90),
+        south: tweak_down(params[:south], 0.001, -90),
+        east: tweak_up(params[:east], 0.001, 180),
+        west: tweak_down(params[:west], 0.001, -180)
+      )
+      Query.lookup(model, flavor, args)
     end
   end
 
