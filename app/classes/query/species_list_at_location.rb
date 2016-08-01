@@ -8,7 +8,7 @@ class Query::SpeciesListAtLocation < Query::SpeciesList
   def initialize_flavor
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    self.where << "locations.location_id = '#{location.id}'"
+    self.where << "species_lists.location_id = '#{location.id}'"
     super
   end
 
