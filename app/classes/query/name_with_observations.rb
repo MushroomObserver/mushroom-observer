@@ -4,7 +4,8 @@ class Query::NameWithObservations < Query::Name
   end
 
   def initialize_flavor
-    add_join(:"observation_descriptions")
+    add_join(:observations)
+    initialize_observation_filters
     super
   end
 
