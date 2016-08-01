@@ -4,12 +4,12 @@ module Query::Modules::Serialization
   end
 
   def serialize
-    params = params.merge(
+    hash = params.merge(
       model:  model.to_s.to_sym,
       flavor: flavor
     )
-    params.keys.sort_by(&:to_s).map do |key|
-      val = params[key]
+    hash.keys.sort_by(&:to_s).map do |key|
+      val = hash[key]
       if key.to_s.match(/\W/)
         fail "Keys of params must be all alphanumeric: '#{key}'"
       end

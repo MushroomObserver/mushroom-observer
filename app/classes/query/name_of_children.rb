@@ -1,4 +1,4 @@
-class Query::ObservationOfChildren < Query::Observation
+class Query::NameOfChildren < Query::Name
   include Query::Initializers::OfChildren
 
   def parameter_declarations
@@ -12,7 +12,6 @@ class Query::ObservationOfChildren < Query::Observation
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
     add_name_condition(name)
-    add_join(:names)
     super
   end
 

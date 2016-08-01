@@ -279,7 +279,7 @@
 ################################################################################
 
 module Query
-  def self.new(model, flavor, params={}, current=nil)
+  def self.new(model, flavor=:all, params={}, current=nil)
     klass = "Query::#{model}#{flavor.to_s.camelize}".constantize
     query = klass.new
     query.params = params
@@ -288,7 +288,10 @@ module Query
     return query
   end
 
-  def self.deserialize(str)
-    Query::Base.deserialize(model, flavor, params, current)
-  end
+  # Delegate all these to Query::Base class.
+  def self.deserialize(*args)     ; Query::Base.deserialize(*args)     ; end
+  def self.safe_find(*args)       ; Query::Base.safe_find(*args)       ; end
+  def self.find(*args)            ; Query::Base.find(*args)            ; end
+  def self.lookup_and_save(*args) ; Query::Base.lookup_and_save(*args) ; end
+  def self.lookup(*args)          ; Query::Base.lookup(*args)          ; end
 end

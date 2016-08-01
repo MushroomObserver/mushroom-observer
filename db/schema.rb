@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151007003058) do
+ActiveRecord::Schema.define(version: 20160731145100) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -483,13 +483,11 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.datetime "updated_at"
   end
 
-  create_table "queries", force: :cascade do |t|
+  create_table "query_records", force: :cascade do |t|
     t.datetime "updated_at"
     t.integer  "access_count", limit: 4
-    t.text     "params",       limit: 65535
+    t.text     "description",  limit: 65535
     t.integer  "outer_id",     limit: 4
-    t.integer  "flavor",       limit: 4
-    t.integer  "model",        limit: 4
   end
 
   create_table "queued_email_integers", force: :cascade do |t|
