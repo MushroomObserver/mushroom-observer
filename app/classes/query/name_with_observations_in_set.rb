@@ -1,16 +1,13 @@
 class Query::NameWithObservationsInSet < Query::Name
   include Query::Initializers::InSet
+  include Query::Initializers::ObservationFilters
 
   def parameter_declarations
     super.merge(
       ids: [Observation],
       old_title?: :string,
-      old_by?: :string,
-      has_specimen?: :boolean,
-      has_images?: :boolean,
-      has_obs_tag?: [:string],
-      has_name_tag?: [:string]
-    )
+      old_by?: :string
+    ).merge(observation_filter_parameter_declarations)
   end
 
   def initialize_flavor

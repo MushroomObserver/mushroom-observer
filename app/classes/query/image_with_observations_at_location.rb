@@ -1,4 +1,4 @@
-class Query::NameWithObservationsAtLocation < Query::Name
+class Query::ImageWithObservationsAtLocation < Query::Image
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations
@@ -10,11 +10,10 @@ class Query::NameWithObservationsAtLocation < Query::Name
   def initialize_flavor
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    add_join(:observations)
+    add_join(:images_observations, :observations)
     self.where << "observations.location_id = '#{params[:location]}'"
     self.where << "observations.is_collection_location IS TRUE"
     initialize_observation_filters
-
     super
   end
 

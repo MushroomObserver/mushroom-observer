@@ -8,10 +8,8 @@ class Query::NameDescriptionByAuthor < Query::NameDescription
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-
-    glue_table = "name_decriptions_authors".to_sym
-    add_join(glue_table)
-    self.where << "#{glue_table}.user_id = '#{params[:user]}'"
+    add_join(:name_descriptions_authors)
+    self.where << "name_descriptions_authors.user_id = '#{user.id}'"
     super
   end
 

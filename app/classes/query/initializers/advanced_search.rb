@@ -94,53 +94,16 @@ module Query::Initializers::AdvancedSearch
   end
 end
 
-#     # This case is a disaster.  Perform it as an observation query, then
-#     # coerce into images.
-#     if (model == Image) && !content.blank?
-#       self.executor = lambda do |args|
-#         args2 = args.dup
-#         args2.delete(:select)
-#         params2 = params.dup
-#         params2.delete(:by)
-#         ids = self.class.lookup(:Observation, flavor, params2).result_ids(args2)
-#         ids = clean_id_set(ids)
-#         args2 = args.dup
-#         extend_join(args2) << :images_observations
-#         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
-#         model.connection.select_rows(query(args2))
-#       end
-#       return
-#     end
-
 #     case model
-#     when Image
-#       add_join(:images_observations, :observations) unless [user, name, location, content].all?(&:blank?)
-#       add_join(:observations, :users)      unless user.blank?
-#       add_join(:observations, :names)      unless name.blank?
-#       add_join(:observations, :locations!) unless location.blank?
 #     when Location
 #       add_join(:observations, :users) unless user.blank?
 #       add_join(:observations, :names) unless name.blank?
 #       add_join(:observations)         unless content.blank?
-#     when Name
-#       add_join(:observations, :users)      unless user.blank?
-#       add_join(:observations, :locations!) unless location.blank?
-#       add_join(:observations)              unless content.blank?
-#     when Observation
-#       add_join(:names)      unless name.blank?
-#       add_join(:users)      unless user.blank?
-#       add_join(:locations!) unless location.blank?
 #     end
 
 #   def content_join_spec
 #           case model
-#             when Image
-#               { images_observations: { observations: :comments } }
 #             when Location
 #               { observations: :comments }
-#             when Name
-#               { observations: :comments }
-#             when Observation
-#               :comments
 #           end
 #   end

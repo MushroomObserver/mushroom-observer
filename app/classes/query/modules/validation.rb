@@ -199,6 +199,14 @@ module Query::Modules::Validation
     end
   end
 
+  def validate_query(arg, val)
+    if val.is_a?(Query::Base)
+      val
+    else
+      fail("Value for :#{arg} should be a Query class, got: #{val.inspect}")
+    end
+  end
+
   def find_cached_parameter_instance(model, arg)
     @params_cache ||= {}
     @params_cache[arg] ||= model.find(params[arg])

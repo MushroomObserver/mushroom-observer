@@ -1,4 +1,4 @@
-class Query::NameWithObservations < Query::Name
+class Query::ImageWithObservations < Query::Image
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations
@@ -6,7 +6,7 @@ class Query::NameWithObservations < Query::Name
   end
 
   def initialize_flavor
-    add_join(:observations)
+    add_join(:images_observations, :observations)
     initialize_observation_filters
     super
   end

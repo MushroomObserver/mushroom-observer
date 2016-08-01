@@ -8,23 +8,23 @@ class Query::NameAdvancedSearch < Query::Name
   end
 
   def initialize_flavor
+    add_join(:observations) if !params[:content].blank?
     initialize_advanced_search
     super
   end
 
-  def add_join_to_observations
-    add_join(:observations)
+  def add_join_to_names
   end
 
   def add_join_to_users
-    add_join(:users)
+    add_join(:observations, :users)
   end
 
   def add_join_to_locations
-    add_join(:locations!)
+    add_join(:observations, :locations!)
   end
 
   def content_join_spec
-    :comments
+    { observations: :comments }
   end
 end

@@ -1,4 +1,6 @@
 class Query::Observation < Query::Base
+  include Query::Initializers::ObservationFilters
+
   def model
     Observation
   end
@@ -17,11 +19,9 @@ class Query::Observation < Query::Base
       species_lists?:  [:string],
       confidence?:     [:float],
       is_col_loc?:     :boolean,
-      has_specimen?:   :boolean,
       has_location?:   :boolean,
       has_notes?:      :boolean,
       has_name?:       :boolean,
-      has_images?:     :boolean,
       has_votes?:      :boolean,
       has_comments?:   { string: [:yes] },
       notes_has?:      :string,
@@ -30,9 +30,7 @@ class Query::Observation < Query::Base
       south?:          :float,
       east?:           :float,
       west?:           :float,
-      has_obs_tag?:    [:string],
-      has_name_tag?:   [:string]
-    )
+    ).merge(observation_filter_parameter_declarations)
   end
 
   def initialize_flavor

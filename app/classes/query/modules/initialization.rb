@@ -23,27 +23,6 @@ module Query::Modules::Initialization
     initialize_order
   end
 
-  # Used for all observation queries, and for all observation queries which
-  # have been coerced into other models' queries.
-  def initialize_observation_filters
-    initialize_model_do_boolean(:has_specimen,
-                                "observations.specimen IS TRUE",
-                                "observations.specimen IS FALSE"
-                               )
-    initialize_model_do_boolean(:has_images,
-                                "observations.thumb_image_id IS NOT NULL",
-                                "observations.thumb_image_id IS NULL"
-                               )
-    if params[:has_obs_tag]
-      # TODO: no way to join on existing triples table!
-      # join.add_leaf(:observations, :triple_glue.observation)
-    end
-    if params[:has_name_tag]
-      # TODO: no way to join on existing triples table!
-      # join.add_leaf(:observations, :triple_glue.name)
-    end
-  end
-
   def initialize_model_do_boolean(arg, true_cond, false_cond)
     @where << (params[arg] ? true_cond : false_cond) unless params[arg].nil?
   end

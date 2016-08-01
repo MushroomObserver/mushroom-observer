@@ -8,7 +8,6 @@ class Query::NameByUser < Query::Name
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    table = model_class.table_name
     self.where << "names.user_id = '#{user.id}'"
     super
   end
