@@ -8,10 +8,8 @@ class Query::LocationDescriptionByEditor < Query::LocationDescription
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-
-    glue_table = "location_decriptions_editors".to_sym
-    add_join(glue_table)
-    self.where << "#{glue_table}.user_id = '#{params[:user]}'"
+    add_join(:location_descriptions_editors)
+    self.where << "location_descriptions_editors.user_id = '#{user.id}'"
     super
   end
 
