@@ -6,7 +6,7 @@ class Query::SpeciesListAtWhere < Query::SpeciesList
     )
   end
 
-  def initialize
+  def initialize_flavor
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.where << "species_lists.where LIKE '%#{pattern}%'"

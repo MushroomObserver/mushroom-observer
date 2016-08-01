@@ -1,4 +1,6 @@
 class Query::UserInSet < Query::User
+  include Query::Initializers::InSet
+
   def parameter_declarations
     super.merge(
       ids: [User]
@@ -6,9 +8,7 @@ class Query::UserInSet < Query::User
   end
 
   def initialize_flavor
-    set = clean_id_set(params[:ids])
-    self.where << "users.id IN (#{set})"
-    self.order = "FIND_IN_SET(users.id,'#{set}') ASC"
+    initialize_in_set_flavor("users")
     super
   end
 end

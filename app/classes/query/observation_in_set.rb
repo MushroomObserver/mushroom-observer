@@ -1,4 +1,6 @@
 class Query::ObservationInSet < Query::Observation
+  include Query::Initializers::InSet
+
   def parameter_declarations
     super.merge(
       ids: [Observation]
@@ -6,9 +8,7 @@ class Query::ObservationInSet < Query::Observation
   end
 
   def initialize_flavor
-    set = clean_id_set(params[:ids])
-    self.where << "observations.id IN (#{set})"
-    self.order = "FIND_IN_SET(observations.id,'#{set}') ASC"
+    initialize_in_set_flavor("observations")
     super
   end
 end

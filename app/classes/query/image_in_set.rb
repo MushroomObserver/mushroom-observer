@@ -1,4 +1,6 @@
 class Query::ImageInSet < Query::Image
+  include Query::Initializers::InSet
+
   def parameter_declarations
     super.merge(
       ids: [Image]
@@ -6,9 +8,7 @@ class Query::ImageInSet < Query::Image
   end
 
   def initialize_flavor
-    set = clean_id_set(params[:ids])
-    self.where << "images.id IN (#{set})"
-    self.order = "FIND_IN_SET(images.id,'#{set}') ASC"
+    initialize_in_set_flavor("images")
     super
   end
 end
