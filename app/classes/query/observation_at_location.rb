@@ -8,7 +8,7 @@ class Query::ObservationAtLocation < Query::Observation
   def initialize_flavor
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    self.where << "locations.location_id = '#{location.id}'"
+    self.where << "observations.location_id = '#{location.id}'"
     super
   end
 

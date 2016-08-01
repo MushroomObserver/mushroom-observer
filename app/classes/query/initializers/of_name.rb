@@ -60,7 +60,7 @@ module Query::Initializers::OfName
       self.where << "namings.name_id IN (#{id_set})"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
       add_join_to_observations(:namings)
-    elsif nonconsensus == :exclusive
+    elsif params[:nonconsensus] == :exclusive
       self.where << "namings.name_id IN (#{id_set}) AND " \
                     "(observations.name_id NOT IN (#{id_set}) OR " \
                     "COALESCE(observations.vote_cache,0) < 0)"

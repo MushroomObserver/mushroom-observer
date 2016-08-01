@@ -11,9 +11,9 @@ class Query::NamePatternSearch < Query::Name
     search = google_parse_pattern
     note_fields =
       [
-        names.search_name,
-        COALESCE(names.citation,''),
-        COALESCE(names.notes,'')
+        "names.search_name",
+        "COALESCE(names.citation,'')",
+        "COALESCE(names.notes,'')"
       ] +
       NameDescription.all_note_fields.map do |x|
         "COALESCE(name_descriptions.#{x},'')"

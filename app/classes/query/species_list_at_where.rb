@@ -2,7 +2,7 @@ class Query::SpeciesListAtWhere < Query::SpeciesList
   def parameter_declarations
     super.merge(
       location: :string,
-      user_where: :string
+      user_where: :string  # apparently used only by observer controller(?)
     )
   end
 
