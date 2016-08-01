@@ -1,5 +1,5 @@
 class Query::ProjectByRssLog < Query::Project
-  def initialize
+  def initialize_flavor
     add_join(:rss_logs)
     super
   end

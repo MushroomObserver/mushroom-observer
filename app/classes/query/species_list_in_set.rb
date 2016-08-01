@@ -1,4 +1,6 @@
 class Query::SpeciesListInSet < Query::SpeciesList
+  include Query::Initializers::InSet
+
   def parameter_declarations
     super.merge(
       ids: [SpeciesList]
@@ -6,10 +8,7 @@ class Query::SpeciesListInSet < Query::SpeciesList
   end
 
   def initialize_flavor
-    table = "species_lists"
-    set = clean_id_set(params[:ids])
-    self.where << "#{table}.id IN (#{set})"
-    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+    initialize_in_set_flavor("species_lists")
     super
   end
 end

@@ -1,6 +1,6 @@
 class Query::Project < Query::Base
   def model
-    Observation
+    Project
   end
 
   def parameter_declarations

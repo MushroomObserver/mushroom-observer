@@ -20,15 +20,15 @@ module Query::Initializers::AdvancedSearch
 
   def google_parse_params
     [
-      google_parse(params[:name])
-      google_parse(params[:user].to_s.gsub(/ *<[^<>]*>/, ""))
-      google_parse(params[:location])
+      google_parse(params[:name]),
+      google_parse(params[:user].to_s.gsub(/ *<[^<>]*>/, "")),
+      google_parse(params[:location]),
       google_parse(params[:content])
     ]
   end
 
   def make_sure_user_entered_something(*args)
-    if *args.all?(&:blank?)
+    if args.all?(&:blank?)
       fail :runtime_no_conditions.t
     end
   end
@@ -86,7 +86,7 @@ module Query::Initializers::AdvancedSearch
         args2 = args.dup
         extend_join(args2) << content_join_spec
         extend_where(args2)
-        val_spec = CONCAT(observations.notes,comments.summary,comments.comment)"
+        val_spec = "CONCAT(observations.notes,comments.summary,comments.comment)"
         args2[:where] += google_conditions(content, val_spec)
         results |= model.connection.select_rows(query(args2))
       end

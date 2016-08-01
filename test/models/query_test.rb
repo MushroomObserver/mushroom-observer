@@ -2180,9 +2180,9 @@ class QueryTest < UnitTestCase
     assert_query([observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestrus_obs).id,
-                  observations(:strobilurus_diminutivus_obs).id], :Observation,
-                 :pattern_search,
-                 pattern: '"somewhere else"', by: :name)
+                  observations(:strobilurus_diminutivus_obs).id],
+                 :Observation, :pattern_search, pattern: '"somewhere else"',
+                 by: :name)
     # assert_query([1], :Observation, :pattern_search,
     #                   pattern: 'wow!') # comment
     # where
