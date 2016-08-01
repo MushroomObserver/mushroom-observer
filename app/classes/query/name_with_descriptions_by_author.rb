@@ -1,6 +1,8 @@
 class Query::NameWithDescriptionsByAuthor < Query::Name
   def parameter_declarations
-    user: User
+    super.merge(
+      user: User
+    )
   end
 
   def initialize_flavor
