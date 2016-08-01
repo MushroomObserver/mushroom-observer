@@ -34,7 +34,7 @@ module Query::Modules::Serialization
   def serialize_string(val)
     # The "n" modifier forces the Regexp to be in ascii 8 bit encoding = binary.
     val.force_encoding("binary").gsub(/[,;:#%&=\/\?\x00-\x1f\x7f-\xff]/n) do |char|
-      "%" + (char.ord % "%02.2X")
+      "%" + ("%02.2X" % char.ord)
     end
   end
 

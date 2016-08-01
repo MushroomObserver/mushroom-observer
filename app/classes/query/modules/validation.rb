@@ -29,7 +29,7 @@ module Query::Modules::Validation
         val = scalar_validate(arg_sym, val, arg_type)
       end
     end
-    if !val.blank?
+    if !val.nil?
       new_args[arg_sym] = val
     elsif !optional
       fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
@@ -71,7 +71,7 @@ module Query::Modules::Validation
           arg_type.respond_to?(:descends_from_active_record?)
       validate_id(arg, val, arg_type)
     elsif arg_type.is_a?(Hash)
-      validate_enum(arg, val, set)
+      validate_enum(arg, val, arg_type)
     else
       fail("Invalid declaration of :#{arg} for #{model} :#{flavor} query! (invalid type: #{arg_type.class.name})")
     end
