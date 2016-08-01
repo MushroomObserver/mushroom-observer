@@ -3,11 +3,6 @@ class Query::Specimen < Query::Base
     Specimen
   end
 
-  def parameter_declarations
-    super.merge(
-    )
-  end
-
   def initialize_flavor
     super
   end

@@ -8,8 +8,12 @@ module Query::Modules::Coercion
     old_flavor = flavor
     new_model  = new_model.to_s.to_sym
 
+    # Trivial case: model not actually changing!
+    if old_model == new_model
+      self
+
     # Going from list_rss_logs to showing observation, name, etc.
-    if (old_model == :RssLog) &&
+    elsif (old_model == :RssLog) &&
        (old_flavor == :all) &&
        (begin
           new_model.to_s.constantize.reflect_on_association(:rss_log)
@@ -110,10 +114,6 @@ module Query::Modules::Coercion
           Query.lookup(new_model, new_flavor, params2)
         end
       end
-
-    # Let superclass handle anything else.
-    else
-      super
     end
   end
 end

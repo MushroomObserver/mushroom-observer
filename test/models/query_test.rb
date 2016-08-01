@@ -3,28 +3,24 @@ require "test_helper"
 require "set"
 
 class QueryTest < UnitTestCase
-#   def model_all_test(model)
-#     query = Query.lookup(model.name.to_sym, :all)
-#     query.initialize_query
-#     num = query.num_results
-#     puts "#{model.name}_all sql: " + query.last_query
-#     assert_equal(model.all.size, num)
-#   end
-# 
-#   def test_comment_all
-#     model_all_test(Comment)
-#   end
-# 
+  def model_all_test(model, params={})
+    query = Query.lookup(model.name.to_sym, :all, params)
+    assert_equal(model.count, query.num_results)
+  end
+
+  def test_comment_all
+    model_all_test(Comment)
+  end
+
 #   def test_herbarium_all
 #     skip
 #     model_all_test(Herbarium)
 #   end
-# 
-#   def test_image_all
-#     skip
-#     model_all_test(Image)
-#   end
-# 
+
+  def test_image_all
+    model_all_test(Image)
+  end
+
 #   def test_location_all
 #     skip
 #     model_all_test(Location)
@@ -34,52 +30,43 @@ class QueryTest < UnitTestCase
 #     skip
 #     model_all_test(LocationDescription)
 #   end
-# 
-#   def test_name_all
-#     skip
-#     model_all_test(Name)
-#   end
-# 
+
+  def test_name_all
+    # By default ignore misspelt names.
+    model_all_test(Name, misspellings: :either)
+  end
+
 #   def test_name_description_all
 #     skip
 #     model_all_test(NameDescription)
 #   end
-# 
-#   def test_observation_all
-#     model_all_test(Observation)
-#   end
-# 
+
+  def test_observation_all
+    model_all_test(Observation)
+  end
+
 #   def test_project_all
 #     skip
 #     model_all_test(Project)
 #   end
-# 
-#   def test_rss_log_all
-#     skip
-#     model_all_test(RssLog)
-#   end
-# 
-#   def test_species_list_all
-#     model_all_test(SpeciesList)
-#   end
-# 
-#   def test_specimen_all
-#     model_all_test(Specimen)
-#   end
-# 
-#   def test_user_all
-#     model_all_test(User)
-#   end
+
+  def test_rss_log_all
+    model_all_test(RssLog)
+  end
+
+  def test_species_list_all
+    model_all_test(SpeciesList)
+  end
+
+  def test_specimen_all
+    model_all_test(Specimen)
+  end
+
+  def test_user_all
+    model_all_test(User)
+  end
 
   ##############################################################################
-
-  def assert_state_exists(id)
-    assert(!id.nil? && Query.find(id))
-  end
-
-  def assert_state_not_exists(id)
-    assert_nil(Query.safe_find(id))
-  end
 
   def assert_query(expect, *args)
     expect = expect.to_a unless expect.respond_to?(:map!)
@@ -102,17 +89,17 @@ class QueryTest < UnitTestCase
   def test_basic
     assert_raises(NameError) { Query.lookup(:BogusModel) }
     assert_raises(NameError) { Query.lookup(:Name, :bogus) }
+
     query = Query.lookup(:Observation)
     assert(query.record.new_record?)
-
     assert_equal("Observation", query.model.to_s)
     assert_equal(:all, query.flavor)
 
     query2 = Query.lookup_and_save(:Observation)
     assert(!query2.record.new_record?)
-    assert_not_equal(query, query2)
+    assert_equal(query, query2)
 
-    assert_equal(query2.serialize, Query.safe_find(query2.id).serialize)
+    assert_equal(query2, Query.safe_find(query2.id))
     assert_nil(Query.safe_find(0))
 
     updated_at = query2.record.updated_at
@@ -209,540 +196,560 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, order: %w(1 2)) }
   end
 
-#   def test_initialize_helpers
-#     query = Query.lookup(:Name)
-# 
-#     assert_equal("4,1,2", query.clean_id_set(["4", 1, 4, 2, 4, 1, 2]))
-#     assert_equal("-1", query.clean_id_set([]))
-# 
-#     assert_equal("blah", query.clean_pattern("blah"))
-#     assert_equal("foo bar", query.clean_pattern("foo bar"))
-#     assert_equal('\\"foo\\%bar\\"', query.clean_pattern('"foo%bar"'))
-#     assert_equal('one\\\\two', query.clean_pattern('one\\two'))
-#     assert_equal("foo%bar", query.clean_pattern("foo*bar"))
-# 
-#     assert_equal(nil, query.and_clause)
-#     assert_equal("one", query.and_clause("one"))
-#     assert_equal("(one AND two)", query.and_clause("one", "two"))
-#     assert_equal("(one AND two AND three)", query.and_clause("one", "two", "three"))
-# 
-#     assert_equal(nil, query.or_clause)
-#     assert_equal("one", query.or_clause("one"))
-#     assert_equal("(one OR two)", query.or_clause("one", "two"))
-#     assert_equal("(one OR two OR three)", query.or_clause("one", "two", "three"))
-#   end
-# 
-#   def test_google_parse
-#     query = Query.lookup(:Name)
-#     assert_equal([["blah"]], query.google_parse("blah").goods)
-#     assert_equal([%w(foo bar)], query.google_parse("foo OR bar").goods)
-#     assert_equal([["one"], %w(foo bar), ["two"]],
-#                  query.google_parse("one foo OR bar two").goods)
-#     assert_equal([["one"], ["foo", "bar", "quoted phrase", "-gar"], ["two"]],
-#                  query.google_parse('one foo OR bar OR "quoted phrase" OR -gar two').goods)
-#     assert_equal([], query.google_parse("-bad").goods)
-#     assert_equal(["bad"], query.google_parse("-bad").bads)
-#     assert_equal(["bad"], query.google_parse("foo -bad bar").bads)
-#     assert_equal(["bad wolf"], query.google_parse('foo -"bad wolf" bar').bads)
-#     assert_equal(["bad wolf", "foo", "bar"],
-#                  query.google_parse('-"bad wolf" -foo -bar').bads)
-#   end
-# 
-#   def test_google_conditions
-#     query = Query.lookup(:Name)
-#     assert_equal(
-#       ["x LIKE '%blah%'"],
-#       query.google_conditions(query.google_parse("blah"), "x")
-#     )
-#     assert_equal(
-#       ["x NOT LIKE '%bad%'"],
-#       query.google_conditions(query.google_parse("-bad"), "x")
-#     )
-#     assert_equal(
-#       ["x LIKE '%foo%' AND x NOT LIKE '%bad%'"],
-#       query.google_conditions(query.google_parse("foo -bad"), "x")
-#     )
-#     assert_equal(
-#       ["x LIKE '%foo%' AND x LIKE '%bar%' AND x NOT LIKE '%bad%'"],
-#       query.google_conditions(query.google_parse("foo bar -bad"), "x")
-#     )
-#     assert_equal(
-#       ["(x LIKE '%foo%' OR x LIKE '%bar%') AND x NOT LIKE '%bad%'"],
-#       query.google_conditions(query.google_parse("foo OR bar -bad"), "x")
-#     )
-#     assert_equal(
-#       ["(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' AND x NOT LIKE '%lost boys%'"],
-#       query.google_conditions(query.google_parse('foo OR bar OR "any*thing" -bad surprise! -"lost boys"'), "x")
-#     )
-#   end
-# 
-#   def test_lookup
-#     assert_equal(0, Query.count)
-# 
-#     q1 = Query.lookup_and_save(:Observation)
-#     assert_equal(1, Query.count)
-# 
-#     q2 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
-#     assert_equal(2, Query.count)
-# 
-#     # New because params are different from q1.
-#     q3 = Query.lookup_and_save(:Observation, :all, by: :id)
-#     assert_equal(3, Query.count)
-# 
-#     # Not new because flavor is explicitly defaulted before validate.
-#     q4 = Query.lookup_and_save(:Observation, :all)
-#     assert_equal(3, Query.count)
-#     assert_equal(q1, q4, Query.count)
-# 
-#     # Ditto default flavor.
-#     q5 = Query.lookup_and_save(:Observation, :default, by: :id)
-#     assert_equal(3, Query.count)
-#     assert_equal(q3, q5, Query.count)
-# 
-#     # New pattern is new query.
-#     q6 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "new blah")
-#     assert_equal(4, Query.count)
-# 
-#     # Old pattern but new order.
-#     q7 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah", by: :date)
-#     assert_equal(5, Query.count)
-# 
-#     # Identical, even though :by is explicitly set in one.
-#     q8 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
-#     assert_equal(5, Query.count)
-# 
-#     # Identical query, but new query because order given explicitly.  Order is
-#     # not given default until query is initialized, thus default not stored in
-#     # params, so lookup doesn't know about it.
-#     q9 = Query.lookup_and_save(:Observation, :all, by: :date)
-#     assert_equal(6, Query.count)
-# 
-#     # Just a sanity check.
-#     q10 = Query.lookup_and_save(:Name)
-#     assert_equal(7, Query.count)
-#   end
-# 
-#   def test_cleanup
-#     # Due to the modified => updated_at change explicitly setting updated_at this way doesn't
-#     # work.  However, I don't really understand what this test does or if it's important, since
-#     # the time zone comment is definitely inaccurate. - NJW
-# 
-#     # This avoids any possible difference in time zone between mysql and you.
-#     # (This should be obsolete, but timezone handling is tested elsewhere.)
-#     now = DateTime.parse(Query.connection.select_value("SELECT NOW()").to_s)
-# 
-#     s11 = Query.new(access_count: 0, updated_at: now - 1.minute)
-#     s12 = Query.new(access_count: 0, updated_at: now - 6.hour + 1.minute)
-#     s13 = Query.new(access_count: 0, updated_at: now - 6.hour - 1.minute)
-#     s14 = Query.new(access_count: 0, updated_at: now - 1.day + 1.minute)
-#     s15 = Query.new(access_count: 0, updated_at: now - 1.day - 1.minute)
-#     s21 = Query.new(access_count: 1, updated_at: now - 1.minute)
-#     s22 = Query.new(access_count: 1, updated_at: now - 6.hour + 1.minute)
-#     s23 = Query.new(access_count: 1, updated_at: now - 6.hour - 1.minute)
-#     s24 = Query.new(access_count: 1, updated_at: now - 1.day + 1.minute)
-#     s25 = Query.new(access_count: 1, updated_at: now - 1.day - 1.minute)
-# 
-#     assert_save(s11)
-#     assert_save(s12)
-#     assert_save(s13)
-#     assert_save(s14)
-#     assert_save(s15)
-#     assert_save(s21)
-#     assert_save(s22)
-#     assert_save(s23)
-#     assert_save(s24)
-#     assert_save(s25)
-# 
-#     s11 = s11.id
-#     s12 = s12.id
-#     s13 = s13.id
-#     s14 = s14.id
-#     s15 = s15.id
-#     s21 = s21.id
-#     s22 = s22.id
-#     s23 = s23.id
-#     s24 = s24.id
-#     s25 = s25.id
-# 
-#     assert_state_exists(s11)
-#     assert_state_exists(s12)
-#     assert_state_exists(s13)
-#     assert_state_exists(s14)
-#     assert_state_exists(s15)
-#     assert_state_exists(s21)
-#     assert_state_exists(s22)
-#     assert_state_exists(s23)
-#     assert_state_exists(s24)
-#     assert_state_exists(s25)
-# 
-#     Query.cleanup
-# 
-#     assert_state_exists(s11)
-#     assert_state_exists(s12)
-#     assert_state_not_exists(s13)
-#     assert_state_not_exists(s14)
-#     assert_state_not_exists(s15)
-#     assert_state_exists(s21)
-#     assert_state_exists(s22)
-#     assert_state_exists(s23)
-#     assert_state_exists(s24)
-#     assert_state_not_exists(s25)
-#   end
-# 
-#   ##############################################################################
-#   #
-#   #  :section: Query Mechanics
-#   #
-#   ##############################################################################
-# 
-#   def test_query
-#     query = Query.lookup(:Name)
-#     query.initialize_query
-#     assert_equal([], query.join)
-#     assert_equal([], query.tables)
-#     assert_equal(1, query.where.length) # misspellings
-#     assert_equal("", query.group)
-#     assert_not_equal("", query.order) # whatever the default order is
-# 
-#     # Clean it out completely.
-#     query.where = []
-#     query.order = ""
-# 
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names`",
-#       clean(query.query)
-#     )
-#     assert_equal(
-#       "SELECT foo bar FROM `names`",
-#       clean(query.query(select: "foo bar"))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` JOIN `rss_logs` ON names.rss_log_id = rss_logs.id",
-#       clean(query.query(join: :rss_logs))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` JOIN `observations` ON observations.name_id = names.id JOIN `rss_logs` ON observations.rss_log_id = rss_logs.id",
-#       clean(query.query(join: { observations: :rss_logs }))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names`, `rss_logs`",
-#       clean(query.query(tables: :rss_logs))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names`, `images`, `comments`",
-#       clean(query.query(tables: [:images, :comments]))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` WHERE shazam!",
-#       clean(query.query(where: "shazam!"))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
-#       clean(query.query(where: %w(foo bar)))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
-#       clean(query.query(where: %w(foo bar)))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` GROUP BY blah blah blah",
-#       clean(query.query(group: "blah blah blah"))
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` ORDER BY foo, bar, names.id DESC",
-#       clean(query.query(order: "foo, bar")) # (tacks on 'id DESC' for disambiguation)
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` ORDER BY comments.id ASC",
-#       clean(query.query(order: "comments.id ASC")) # (sees id in there already)
-#     )
-#     assert_equal(
-#       "SELECT DISTINCT names.id FROM `names` LIMIT 10",
-#       clean(query.query(limit: 10))
-#     )
-# 
-#     # Now, all together...
-#     assert_equal(
-#       "SELECT names.* FROM `names`, `images` " \
-#       "JOIN `observations` ON observations.name_id = names.id " \
-#       "JOIN `users` ON names.reviewer_id = users.id " \
-#       "WHERE one = two AND foo LIKE bar " \
-#       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
-#       clean(query.query(
-#               select: "names.*",
-#               join:   [:observations, :'users.reviewer'],
-#               tables: :images,
-#               where:  ["one = two", "foo LIKE bar"],
-#               group:  "blah.id",
-#               order:  "names.id ASC",
-#               limit:  "10, 10"
-#       ))
-#     )
-#   end
-# 
-#   def test_join_conditions
-#     query = Query.lookup(:Name)
-#     query.initialize_query
-#     query.where = []
-#     query.order = ""
-# 
-#     # Yikes!!  This should about test everything.
-#     sql = query.query(
-#       join: [{ observations: [:locations,
-#                               :comments, { images_observations: :images }]
-#               },
-#              :'users.reviewer'])
-#     assert_match(/names.reviewer_id = users.id/, sql)
-#     assert_match(/observations.name_id = names.id/, sql)
-#     assert_match(/observations.location_id = locations.id/, sql)
-#     assert_match(/comments.target_id = observations.id/, sql)
-#     assert_match(/comments.target_type = (['"])Observation\1/, sql)
-#     assert_match(/images_observations.observation_id = observations.id/, sql)
-#     assert_match(/images_observations.image_id = images.id/, sql)
-#   end
-# 
-#   def test_reverse_order
-#     query = Query.lookup(:Name)
-#     assert_equal("", query.reverse_order(""))
-#     assert_equal("id ASC", query.reverse_order("id DESC"))
-#     assert_equal("one ASC, two DESC, three ASC",
-#                  query.reverse_order("one DESC, two ASC, three DESC"))
-#     assert_equal('IF(users.name = "", users.login, users.name) DESC, users.id ASC',
-#                  query.reverse_order('IF(users.name = "", users.login, users.name) ASC, users.id DESC'))
-#   end
-# 
-#   def test_join_direction
-#     # RssLog can join to Observation two ways.  When joining from observations
-#     # to rss_logs, use observations.rss_log_id = rss_logs.id.
-#     query = Query.lookup(:Observation)
-#     query.initialize_query
-#     query.join << :rss_logs
-#     assert_match(/observations.rss_log_id = rss_logs.id/, query.query)
-# 
-#     # And use rss_logs.observation_id = observations.id the other way.
-#     query = Query.lookup(:RssLog)
-#     query.initialize_query
-#     query.join << :observations
-#     assert_match(/rss_logs.observation_id = observations.id/, query.query)
-#   end
-# 
-#   def test_low_levels
-#     query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
-# 
-#     @fungi = names(:fungi)
-#     @agaricus = names(:agaricus)
-#     num = Name.count
-#     num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
-# 
-#     assert_equal(num, query.select_count)
-#     assert_equal(num, query.select_count(limit: 10)) # limits no. of counts!!
-#     assert_equal(num_agaricus,
-#                  query.select_count(where: 'text_name LIKE "Agaricus%"'))
-# 
-#     assert_equal(Name.first.id, query.select_value)
-#     assert_equal(Name.offset(10).first.id,
-#                  query.select_value(limit: "10, 10")) # 11th id
-#     assert_equal(Name.last.id, query.select_value(order: :reverse)) # last id
-#     assert_equal(Name.first.text_name,
-#                  query.select_value(select: "text_name").to_s)
-# 
-#     assert_equal(Name.all.map {|name| name.id.to_s},
-#                  query.select_values.map(&:to_s))
-#     assert_equal([names(:agaricus_campestris).id.to_s,
-#                   names(:agaricus).id.to_s,
-#                   names(:agaricus_campestrus).id.to_s,
-#                   names(:agaricus_campestras).id.to_s,
-#                   names(:agaricus_campestros).id.to_s
-#                   ].sort,
-#                  query.select_values(where: 'text_name LIKE "Agaricus%"').
-#                        map(&:to_s).sort)
-# 
-#     agaricus = query.select_values(select: "text_name",
-#                                    where: 'text_name LIKE "Agaricus%"').
-#                                    map(&:to_s)
-#     assert_equal(num_agaricus, agaricus.uniq.length)
-#     assert_equal(num_agaricus,
-#                  agaricus.select { |x| x[0, 8] == "Agaricus" }.count)
-# 
-#     assert_equal(Name.all.map { |x| [x.id] }, query.select_rows)
-#     assert_equal(Name.all.map { |x| { "id" => x.id } }, query.select_all)
-#     assert_equal({ "id" => Name.first.id }, query.select_one)
-# 
-#     assert_equal([Name.first], query.find_by_sql(limit: 1))
-#     assert_equal(@agaricus.children.sort_by(&:id),
-#                  query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
-#   end
-# 
-#   def test_tables_used
-#     query = Query.lookup(:Observation, :all, by: :id)
-#     assert_equal([:observations], query.tables_used)
-# 
-#     query = Query.lookup(:Observation, :all, by: :name)
-#     assert_equal([:names, :observations], query.tables_used)
-# 
-#     query = Query.lookup(:Image, :all, by: :name)
-# 
-#     assert_equal([:images, :images_observations, :names, :observations],
-#                  query.tables_used)
-#     assert_equal(true, query.uses_table?(:images))
-#     assert_equal(true, query.uses_table?(:images_observations))
-#     assert_equal(true, query.uses_table?(:names))
-#     assert_equal(true, query.uses_table?(:observations))
-#     assert_equal(false, query.uses_table?(:comments))
-#   end
-# 
-#   def test_results
-#     query = Query.lookup(:User, :all, by: :id)
-#     all_users = User.all
-# 
-#     assert_equal(Set.new,
-#                  Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id,
-#                           roy.id]) - query.result_ids)
-#     assert_equal(roy.location_format, :scientific)
-#     assert_equal(Set.new,
-#                  Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results)
-#     assert_equal(User.all.find_index(junk), query.index(junk))
-#     assert_equal(User.all.find_index(dick), query.index(dick))
-#     assert_equal(User.all.find_index(mary), query.index(mary))
-# 
-#     # Verify that it's getting all this crap from cache.
-#     query.result_ids = [rolf.id, junk.id, katrina.id, 100]
-#     assert_equal([rolf, junk, katrina], query.results)
-# 
-#     # Should be able to set it this way, too.
-#     query.results = [dick, mary, rolf]
-#     assert_equal(3, query.num_results)
-#     assert_equal([dick.id, mary.id, rolf.id], query.result_ids)
-#     assert_equal([dick, mary, rolf], query.results)
-#     assert_equal(1, query.index(mary))
-#     assert_equal(2, query.index(rolf))
-#   end
-# 
-#   def paginate_test_setup(from_nth, to_nth)
-#     @names = Name.all.order(:id)
-#     @pages = Wrapper.new(from: from_nth, to: to_nth,
-#                          num_per_page: to_nth - from_nth + 1)
-#     @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
-#   end
-# 
-#   def paginate_test(from_nth, to_nth, expected_nths)
-#     paginate_test_setup(from_nth, to_nth)
-#     paginate_assertions(from_nth, to_nth, expected_nths)
-#   end
-# 
-#   # parameters are the ordinals of objects which have been ordered by id
-#   # E.g., 1 corresponds to Name.all.order(:id).first
-#   def paginate_assertions(from_nth, to_nth, expected_nths)
-#     name_ids = @names.map {|n| n[:id]}
-#     assert_equal(expected_nths,
-#                  @query.paginate_ids(@pages).map {|id| name_ids.index(id) + 1 })
-#     assert_equal(@names.size, @pages.num_total)
-#     assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
-#   end
-# 
-#   def test_paginate_start
-#     paginate_test(1, 4, [2, 3, 4, 5])
-#   end
-# 
-#   def test_paginate_middle
-#     MO.debugger_flag = true
-#     paginate_test(5, 8, [6, 7, 8, 9])
-#   end
-# 
-#   def paginate_test_letter_setup(to_nth, from_nth)
-#     paginate_test_setup(to_nth, from_nth)
-#     @query.need_letters = "names.text_name"
-#     @letters = @names.map { |n| n.text_name[0, 1] }.uniq.sort
-#   end
-# 
-#   def test_paginate_need_letters
-#     paginate_test_letter_setup(1, 4)
-#     paginate_assertions(1, 4, [2, 3, 4, 5])
-#     assert_equal(@letters, @pages.used_letters.sort)
-#   end
-# 
-#   def test_paginate_ells
-#     paginate_test_letter_setup(3, 6)
-#     @pages = Wrapper.new(from: 3, to: 6, letter: "L", num_per_page: 4)
-# 
-#     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
-#     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
-#     assert(@ells.length >= 9)
-#     assert_equal(@ells[3..6].map(&:id), @query.paginate_ids(@pages))
-#     assert_equal(@letters, @pages.used_letters.sort)
-#     assert_equal(@ells[3..6], @query.paginate(@pages))
-#   end
-# 
-#   def test_eager_instantiator
-#     query = Query.lookup(:Observation)
-#     ids = query.result_ids
-# 
-#     first = query.instantiate([ids[0]]).first
-#     assert(!first.images.loaded?)
-# 
-#     first = query.instantiate([ids[0]], include: :images).first
-#     assert(!first.images.loaded?)
-# 
-#     # Have to test it on a different one, because first is now cached.
-#     second = query.instantiate([ids[1]], include: :images).first
-#     assert(second.images.loaded?)
-# 
-#     # Or we can clear out the cache and it will work...
-#     query.clear_cache
-#     first = query.instantiate([ids[0]], include: :images).first
-#     assert(first.images.loaded?)
-#   end
-# 
-#   ##############################################################################
-#   #
-#   #  :section: Sequence Operators
-#   #
-#   ##############################################################################
-# 
-#   def test_current
-#     query = Query.lookup(:Name)
-#     @fungi = names(:fungi)
-#     @agaricus = names(:agaricus)
-#     @peltigera = names(:peltigera)
-# 
-#     assert_nil(query.current_id)
-#     assert_nil(query.current)
-# 
-#     query.current_id = @fungi.id
-#     assert_equal(@fungi.id, query.current_id)
-#     assert_equal(@fungi, query.current)
-# 
-#     query.current = @agaricus
-#     assert_equal(@agaricus.id, query.current_id)
-#     assert_equal(@agaricus, query.current)
-# 
-#     query.current = @peltigera.id
-#     assert_equal(@peltigera.id, query.current_id)
-#     assert_equal(@peltigera, query.current)
-#   end
-# 
-#   def test_next_and_prev
-#     query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
-#     @names = Name.all
-# 
-#     query.current = @names[2]
-#     assert_equal(query, query.prev); assert_equal(@names[1].id, query.current_id)
-#     assert_equal(query, query.prev); assert_equal(@names[0].id, query.current_id)
-#     assert_equal(nil, query.prev); assert_equal(@names[0].id, query.current_id)
-#     assert_equal(query, query.next); assert_equal(@names[1].id, query.current_id)
-#     assert_equal(query, query.next); assert_equal(@names[2].id, query.current_id)
-#     assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
-#     assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
-#     assert_equal(nil,   query.next); assert_equal(@names[-1].id, query.current_id)
-#     assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
-#     assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
-#     query.reset;                      assert_equal(@names[2].id, query.current_id)
-#   end
-# 
-#   def assert_starts_with(expected, result)
-#     assert_equal(expected, result[0..expected.length - 1])
-#   end
-# 
+  def test_initialize_helpers
+    query = Query.lookup(:Name)
+
+    assert_equal("4,1,2", query.clean_id_set(["4", 1, 4, 2, 4, 1, 2]))
+    assert_equal("-1", query.clean_id_set([]))
+
+    assert_equal("blah", query.clean_pattern("blah"))
+    assert_equal("foo bar", query.clean_pattern("foo bar"))
+    assert_equal('\\"foo\\%bar\\"', query.clean_pattern('"foo%bar"'))
+    assert_equal('one\\\\two', query.clean_pattern('one\\two'))
+    assert_equal("foo%bar", query.clean_pattern("foo*bar"))
+
+    assert_equal(nil, query.and_clause)
+    assert_equal("one", query.and_clause("one"))
+    assert_equal("(one AND two)", query.and_clause("one", "two"))
+    assert_equal("(one AND two AND three)", query.and_clause("one", "two", "three"))
+
+    assert_equal(nil, query.or_clause)
+    assert_equal("one", query.or_clause("one"))
+    assert_equal("(one OR two)", query.or_clause("one", "two"))
+    assert_equal("(one OR two OR three)", query.or_clause("one", "two", "three"))
+  end
+
+  def test_google_parse
+    query = Query.lookup(:Name)
+    assert_equal([["blah"]], query.google_parse("blah").goods)
+    assert_equal([%w(foo bar)], query.google_parse("foo OR bar").goods)
+    assert_equal([["one"], %w(foo bar), ["two"]],
+                 query.google_parse("one foo OR bar two").goods)
+    assert_equal([["one"], ["foo", "bar", "quoted phrase", "-gar"], ["two"]],
+                 query.google_parse('one foo OR bar OR "quoted phrase" OR -gar two').goods)
+    assert_equal([], query.google_parse("-bad").goods)
+    assert_equal(["bad"], query.google_parse("-bad").bads)
+    assert_equal(["bad"], query.google_parse("foo -bad bar").bads)
+    assert_equal(["bad wolf"], query.google_parse('foo -"bad wolf" bar').bads)
+    assert_equal(["bad wolf", "foo", "bar"],
+                 query.google_parse('-"bad wolf" -foo -bar').bads)
+  end
+
+  def test_google_conditions
+    query = Query.lookup(:Name)
+    assert_equal(
+      ["x LIKE '%blah%'"],
+      query.google_conditions(query.google_parse("blah"), "x")
+    )
+    assert_equal(
+      ["x NOT LIKE '%bad%'"],
+      query.google_conditions(query.google_parse("-bad"), "x")
+    )
+    assert_equal(
+      ["x LIKE '%foo%' AND x NOT LIKE '%bad%'"],
+      query.google_conditions(query.google_parse("foo -bad"), "x")
+    )
+    assert_equal(
+      ["x LIKE '%foo%' AND x LIKE '%bar%' AND x NOT LIKE '%bad%'"],
+      query.google_conditions(query.google_parse("foo bar -bad"), "x")
+    )
+    assert_equal(
+      ["(x LIKE '%foo%' OR x LIKE '%bar%') AND x NOT LIKE '%bad%'"],
+      query.google_conditions(query.google_parse("foo OR bar -bad"), "x")
+    )
+    assert_equal(
+      ["(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' AND x NOT LIKE '%lost boys%'"],
+      query.google_conditions(query.google_parse('foo OR bar OR "any*thing" -bad surprise! -"lost boys"'), "x")
+    )
+  end
+
+  def test_lookup
+    assert_equal(0, QueryRecord.count)
+
+    q1 = Query.lookup_and_save(:Observation)
+    assert_equal(1, QueryRecord.count)
+
+    q2 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    assert_equal(2, QueryRecord.count)
+
+    # New because params are different from q1.
+    q3 = Query.lookup_and_save(:Observation, :all, by: :id)
+    assert_equal(3, QueryRecord.count)
+
+    # Not new because flavor is explicitly defaulted before validate.
+    q4 = Query.lookup_and_save(:Observation, :all)
+    assert_equal(3, QueryRecord.count)
+    assert_equal(q1, q4, QueryRecord.count)
+
+    # Ditto default flavor.
+    q5 = Query.lookup_and_save(:Observation, :all, by: :id)
+    assert_equal(3, QueryRecord.count)
+    assert_equal(q3, q5, QueryRecord.count)
+
+    # New pattern is new query.
+    q6 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "new blah")
+    assert_equal(4, QueryRecord.count)
+
+    # Old pattern but new order.
+    q7 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah", by: :date)
+    assert_equal(5, QueryRecord.count)
+
+    # Identical, even though :by is explicitly set in one.
+    q8 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    assert_equal(5, QueryRecord.count)
+
+    # Identical query, but new query because order given explicitly.  Order is
+    # not given default until query is initialized, thus default not stored in
+    # params, so lookup doesn't know about it.
+    q9 = Query.lookup_and_save(:Observation, :all, by: :date)
+    assert_equal(6, QueryRecord.count)
+
+    # Just a sanity check.
+    q10 = Query.lookup_and_save(:Name)
+    assert_equal(7, QueryRecord.count)
+  end
+
+  # def test_cleanup
+  #   # Due to the modified => updated_at change explicitly setting updated_at
+  #   # this way doesn't work.  However, I don't really understand what this test
+  #   # does or if it's important, since the time zone comment is definitely
+  #   # inaccurate. - NJW
+  #
+  #   # It is supposed to verify that QueryRecord.cleanup culls old unused
+  #   # queries.  This is called automatically periodicallt when clients create
+  #   # or lookup new queries. - JPH
+  #
+  #   # This avoids any possible difference in time zone between mysql and you.
+  #   # (This should be obsolete, but timezone handling is tested elsewhere.)
+  #   now = DateTime.parse(QueryRecord.connection.select_value("SELECT NOW()").to_s)
+  #
+  #   s11 = QueryRecord.new(access_count: 0, updated_at: now - 1.minute)
+  #   s12 = QueryRecord.new(access_count: 0, updated_at: now - 6.hour + 1.minute)
+  #   s13 = QueryRecord.new(access_count: 0, updated_at: now - 6.hour - 1.minute)
+  #   s14 = QueryRecord.new(access_count: 0, updated_at: now - 1.day + 1.minute)
+  #   s15 = QueryRecord.new(access_count: 0, updated_at: now - 1.day - 1.minute)
+  #   s21 = QueryRecord.new(access_count: 1, updated_at: now - 1.minute)
+  #   s22 = QueryRecord.new(access_count: 1, updated_at: now - 6.hour + 1.minute)
+  #   s23 = QueryRecord.new(access_count: 1, updated_at: now - 6.hour - 1.minute)
+  #   s24 = QueryRecord.new(access_count: 1, updated_at: now - 1.day + 1.minute)
+  #   s25 = QueryRecord.new(access_count: 1, updated_at: now - 1.day - 1.minute)
+  #
+  #   assert_save(s11)
+  #   assert_save(s12)
+  #   assert_save(s13)
+  #   assert_save(s14)
+  #   assert_save(s15)
+  #   assert_save(s21)
+  #   assert_save(s22)
+  #   assert_save(s23)
+  #   assert_save(s24)
+  #   assert_save(s25)
+  #
+  #   s11 = s11.id
+  #   s12 = s12.id
+  #   s13 = s13.id
+  #   s14 = s14.id
+  #   s15 = s15.id
+  #   s21 = s21.id
+  #   s22 = s22.id
+  #   s23 = s23.id
+  #   s24 = s24.id
+  #   s25 = s25.id
+  #
+  #   assert_state_exists(s11)
+  #   assert_state_exists(s12)
+  #   assert_state_exists(s13)
+  #   assert_state_exists(s14)
+  #   assert_state_exists(s15)
+  #   assert_state_exists(s21)
+  #   assert_state_exists(s22)
+  #   assert_state_exists(s23)
+  #   assert_state_exists(s24)
+  #   assert_state_exists(s25)
+  #
+  #   QueryRecord.cleanup
+  #
+  #   assert_state_exists(s11)
+  #   assert_state_exists(s12)
+  #   assert_state_not_exists(s13)
+  #   assert_state_not_exists(s14)
+  #   assert_state_not_exists(s15)
+  #   assert_state_exists(s21)
+  #   assert_state_exists(s22)
+  #   assert_state_exists(s23)
+  #   assert_state_exists(s24)
+  #   assert_state_not_exists(s25)
+  # end
+  #
+  # def assert_state_exists(id)
+  #   assert(!id.nil? && QueryRecord.find(id))
+  # end
+  #
+  # def assert_state_not_exists(id)
+  #   assert_raises(ActiveRecord::RecordNotFound) { QueryRecord.find(id) }
+  # end
+
+  ##############################################################################
+  #
+  #  :section: Query Mechanics
+  #
+  ##############################################################################
+
+  def test_query
+    query = Query.lookup(:Name)
+    query.initialize_query
+    assert_equal([], query.join)
+    assert_equal([], query.tables)
+    assert_equal(1, query.where.length) # misspellings
+    assert_equal("", query.group)
+    assert_not_equal("", query.order) # whatever the default order is
+
+    # Clean it out completely.
+    query.where = []
+    query.order = ""
+
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names`",
+      clean(query.query)
+    )
+    assert_equal(
+      "SELECT foo bar FROM `names`",
+      clean(query.query(select: "foo bar"))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` JOIN `rss_logs` ON names.rss_log_id = rss_logs.id",
+      clean(query.query(join: :rss_logs))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` JOIN `observations` ON observations.name_id = names.id JOIN `rss_logs` ON observations.rss_log_id = rss_logs.id",
+      clean(query.query(join: { observations: :rss_logs }))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names`, `rss_logs`",
+      clean(query.query(tables: :rss_logs))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names`, `images`, `comments`",
+      clean(query.query(tables: [:images, :comments]))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` WHERE shazam!",
+      clean(query.query(where: "shazam!"))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
+      clean(query.query(where: %w(foo bar)))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
+      clean(query.query(where: %w(foo bar)))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` GROUP BY blah blah blah",
+      clean(query.query(group: "blah blah blah"))
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` ORDER BY foo, bar, names.id DESC",
+      clean(query.query(order: "foo, bar")) # (tacks on 'id DESC' for disambiguation)
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` ORDER BY comments.id ASC",
+      clean(query.query(order: "comments.id ASC")) # (sees id in there already)
+    )
+    assert_equal(
+      "SELECT DISTINCT names.id FROM `names` LIMIT 10",
+      clean(query.query(limit: 10))
+    )
+
+    # Now, all together...
+    assert_equal(
+      "SELECT names.* FROM `names`, `images` " \
+      "JOIN `observations` ON observations.name_id = names.id " \
+      "JOIN `users` ON names.reviewer_id = users.id " \
+      "WHERE one = two AND foo LIKE bar " \
+      "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
+      clean(query.query(
+              select: "names.*",
+              join:   [:observations, :'users.reviewer'],
+              tables: :images,
+              where:  ["one = two", "foo LIKE bar"],
+              group:  "blah.id",
+              order:  "names.id ASC",
+              limit:  "10, 10"
+      ))
+    )
+  end
+
+  def test_join_conditions
+    query = Query.lookup(:Name)
+    query.initialize_query
+    query.where = []
+    query.order = ""
+
+    # Joins should include these:
+    #   names => observations => locations
+    #   names => observations => comments
+    #   names => observations => images_observations => images
+    #   names => users (as reviewer)
+    sql = query.query(
+      join: [
+        {
+          observations: [
+            :locations,
+            :comments,
+            { images_observations: :images }
+          ]
+        },
+        :'users.reviewer'
+      ]
+    )
+    assert_match(/names.reviewer_id = users.id/, sql)
+    assert_match(/observations.name_id = names.id/, sql)
+    assert_match(/observations.location_id = locations.id/, sql)
+    assert_match(/comments.target_id = observations.id/, sql)
+    assert_match(/comments.target_type = (['"])Observation\1/, sql)
+    assert_match(/images_observations.observation_id = observations.id/, sql)
+    assert_match(/images_observations.image_id = images.id/, sql)
+  end
+
+  def test_reverse_order
+    query = Query.lookup(:Name)
+    assert_equal("", query.reverse_order(""))
+    assert_equal("id ASC", query.reverse_order("id DESC"))
+    assert_equal("one ASC, two DESC, three ASC",
+                 query.reverse_order("one DESC, two ASC, three DESC"))
+    assert_equal('IF(users.name = "", users.login, users.name) DESC, users.id ASC',
+                 query.reverse_order('IF(users.name = "", users.login, users.name) ASC, users.id DESC'))
+  end
+
+  def test_join_direction
+    # RssLog can join to Observation two ways.  When joining from observations
+    # to rss_logs, use observations.rss_log_id = rss_logs.id.
+    query = Query.lookup(:Observation)
+    query.initialize_query
+    query.join << :rss_logs
+    assert_match(/observations.rss_log_id = rss_logs.id/, query.query)
+
+    # And use rss_logs.observation_id = observations.id the other way.
+    query = Query.lookup(:RssLog)
+    query.initialize_query
+    query.join << :observations
+    assert_match(/rss_logs.observation_id = observations.id/, query.query)
+  end
+
+  def test_low_levels
+    query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
+
+    @fungi = names(:fungi)
+    @agaricus = names(:agaricus)
+    num = Name.count
+    num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
+
+    assert_equal(num, query.select_count)
+    assert_equal(num, query.select_count(limit: 10)) # limits no. of counts!!
+    assert_equal(num_agaricus,
+                 query.select_count(where: 'text_name LIKE "Agaricus%"'))
+
+    assert_equal(Name.first.id, query.select_value)
+    assert_equal(Name.offset(10).first.id,
+                 query.select_value(limit: "10, 10")) # 11th id
+    assert_equal(Name.last.id, query.select_value(order: :reverse)) # last id
+    assert_equal(Name.first.text_name,
+                 query.select_value(select: "text_name").to_s)
+
+    assert_equal(Name.all.map {|name| name.id.to_s},
+                 query.select_values.map(&:to_s))
+    assert_equal([names(:agaricus_campestris).id.to_s,
+                  names(:agaricus).id.to_s,
+                  names(:agaricus_campestrus).id.to_s,
+                  names(:agaricus_campestras).id.to_s,
+                  names(:agaricus_campestros).id.to_s
+                  ].sort,
+                 query.select_values(where: 'text_name LIKE "Agaricus%"').
+                       map(&:to_s).sort)
+
+    agaricus = query.select_values(select: "text_name",
+                                   where: 'text_name LIKE "Agaricus%"').
+                                   map(&:to_s)
+    assert_equal(num_agaricus, agaricus.uniq.length)
+    assert_equal(num_agaricus,
+                 agaricus.select { |x| x[0, 8] == "Agaricus" }.count)
+
+    assert_equal(Name.all.map { |x| [x.id] }, query.select_rows)
+    assert_equal(Name.all.map { |x| { "id" => x.id } }, query.select_all)
+    assert_equal({ "id" => Name.first.id }, query.select_one)
+
+    assert_equal([Name.first], query.find_by_sql(limit: 1))
+    assert_equal(@agaricus.children.sort_by(&:id),
+                 query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
+  end
+
+  def test_tables_used
+    query = Query.lookup(:Observation, :all, by: :id)
+    assert_equal([:observations], query.tables_used)
+
+    query = Query.lookup(:Observation, :all, by: :name)
+    assert_equal([:names, :observations], query.tables_used)
+
+    query = Query.lookup(:Image, :all, by: :name)
+
+    assert_equal([:images, :images_observations, :names, :observations],
+                 query.tables_used)
+    assert_equal(true, query.uses_table?(:images))
+    assert_equal(true, query.uses_table?(:images_observations))
+    assert_equal(true, query.uses_table?(:names))
+    assert_equal(true, query.uses_table?(:observations))
+    assert_equal(false, query.uses_table?(:comments))
+  end
+
+  def test_results
+    query = Query.lookup(:User, :all, by: :id)
+    all_users = User.all
+
+    assert_equal(Set.new,
+                 Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id,
+                          roy.id]) - query.result_ids)
+    assert_equal(roy.location_format, :scientific)
+    assert_equal(Set.new,
+                 Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results)
+    assert_equal(User.all.find_index(junk), query.index(junk))
+    assert_equal(User.all.find_index(dick), query.index(dick))
+    assert_equal(User.all.find_index(mary), query.index(mary))
+
+    # Verify that it's getting all this crap from cache.
+    query.result_ids = [rolf.id, junk.id, katrina.id, 100]
+    assert_equal([rolf, junk, katrina], query.results)
+
+    # Should be able to set it this way, too.
+    query.results = [dick, mary, rolf]
+    assert_equal(3, query.num_results)
+    assert_equal([dick.id, mary.id, rolf.id], query.result_ids)
+    assert_equal([dick, mary, rolf], query.results)
+    assert_equal(1, query.index(mary))
+    assert_equal(2, query.index(rolf))
+  end
+
+  def paginate_test_setup(from_nth, to_nth)
+    @names = Name.all.order(:id)
+    @pages = Wrapper.new(from: from_nth, to: to_nth,
+                         num_per_page: to_nth - from_nth + 1)
+    @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
+  end
+
+  def paginate_test(from_nth, to_nth, expected_nths)
+    paginate_test_setup(from_nth, to_nth)
+    paginate_assertions(from_nth, to_nth, expected_nths)
+  end
+
+  # parameters are the ordinals of objects which have been ordered by id
+  # E.g., 1 corresponds to Name.all.order(:id).first
+  def paginate_assertions(from_nth, to_nth, expected_nths)
+    name_ids = @names.map {|n| n[:id]}
+    assert_equal(expected_nths,
+                 @query.paginate_ids(@pages).map {|id| name_ids.index(id) + 1 })
+    assert_equal(@names.size, @pages.num_total)
+    assert_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+  end
+
+  def test_paginate_start
+    paginate_test(1, 4, [2, 3, 4, 5])
+  end
+
+  def test_paginate_middle
+    MO.debugger_flag = true
+    paginate_test(5, 8, [6, 7, 8, 9])
+  end
+
+  def paginate_test_letter_setup(to_nth, from_nth)
+    paginate_test_setup(to_nth, from_nth)
+    @query.need_letters = "names.text_name"
+    @letters = @names.map { |n| n.text_name[0, 1] }.uniq.sort
+  end
+
+  def test_paginate_need_letters
+    paginate_test_letter_setup(1, 4)
+    paginate_assertions(1, 4, [2, 3, 4, 5])
+    assert_equal(@letters, @pages.used_letters.sort)
+  end
+
+  def test_paginate_ells
+    paginate_test_letter_setup(3, 6)
+    @pages = Wrapper.new(from: 3, to: 6, letter: "L", num_per_page: 4)
+
+    # Make sure we have a bunch of Lactarii, Leptiotas, etc.
+    @ells = @names.select { |n| n.text_name[0, 1] == "L" }
+    assert(@ells.length >= 9)
+    assert_equal(@ells[3..6].map(&:id), @query.paginate_ids(@pages))
+    assert_equal(@letters, @pages.used_letters.sort)
+    assert_equal(@ells[3..6], @query.paginate(@pages))
+  end
+
+  def test_eager_instantiator
+    query = Query.lookup(:Observation)
+    ids = query.result_ids
+
+    first = query.instantiate([ids[0]]).first
+    assert(!first.images.loaded?)
+
+    first = query.instantiate([ids[0]], include: :images).first
+    assert(!first.images.loaded?)
+
+    # Have to test it on a different one, because first is now cached.
+    second = query.instantiate([ids[1]], include: :images).first
+    assert(second.images.loaded?)
+
+    # Or we can clear out the cache and it will work...
+    query.clear_cache
+    first = query.instantiate([ids[0]], include: :images).first
+    assert(first.images.loaded?)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Sequence Operators
+  #
+  ##############################################################################
+
+  def test_current
+    query = Query.lookup(:Name)
+    @fungi = names(:fungi)
+    @agaricus = names(:agaricus)
+    @peltigera = names(:peltigera)
+
+    assert_nil(query.current_id)
+    assert_nil(query.current)
+
+    query.current_id = @fungi.id
+    assert_equal(@fungi.id, query.current_id)
+    assert_equal(@fungi, query.current)
+
+    query.current = @agaricus
+    assert_equal(@agaricus.id, query.current_id)
+    assert_equal(@agaricus, query.current)
+
+    query.current = @peltigera.id
+    assert_equal(@peltigera.id, query.current_id)
+    assert_equal(@peltigera, query.current)
+  end
+
+  def test_next_and_prev
+    query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
+    @names = Name.all
+
+    query.current = @names[2]
+    assert_equal(query, query.prev); assert_equal(@names[1].id, query.current_id)
+    assert_equal(query, query.prev); assert_equal(@names[0].id, query.current_id)
+    assert_equal(nil, query.prev); assert_equal(@names[0].id, query.current_id)
+    assert_equal(query, query.next); assert_equal(@names[1].id, query.current_id)
+    assert_equal(query, query.next); assert_equal(@names[2].id, query.current_id)
+    assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
+    assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
+    assert_equal(nil,   query.next); assert_equal(@names[-1].id, query.current_id)
+    assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
+    assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
+    query.reset;                      assert_equal(@names[2].id, query.current_id)
+  end
+
 #   def test_inner_outer
 #     outer = Query.lookup_and_save(:Observation, :all, by: :id)
 # 
@@ -931,30 +938,30 @@ class QueryTest < UnitTestCase
 #   def prev_result(obs, imgs, img)
 #     next_result(obs, imgs, img, -1)
 #   end
-# 
-#   ##############################################################################
-#   #
-#   #  :section: Test Coerce
-#   #
-#   ##############################################################################
-# 
-#   def test_basic_coerce
-#     assert_equal(0, Query.count)
-# 
-#     q1 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "search")
-#     assert_equal(1, Query.count)
-# 
-#     # Trvial coercion: any flavor from a model to the same model.
-#     q2 = q1.coerce(:Observation)
-#     assert_equal(q1, q2)
-#     assert_equal(1, Query.count)
-# 
-#     # No search is coercable to RssLog (yet).
-#     q3 = q1.coerce(:RssLog)
-#     assert_nil(q3)
-#     assert_equal(1, Query.count)
-#   end
-# 
+
+  ##############################################################################
+  #
+  #  :section: Test Coerce
+  #
+  ##############################################################################
+
+  def test_basic_coerce
+    assert_equal(0, QueryRecord.count)
+
+    q1 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "search")
+    assert_equal(1, QueryRecord.count)
+
+    # Trvial coercion: any flavor from a model to the same model.
+    q2 = q1.coerce(:Observation)
+    assert_equal(q1, q2)
+    assert_equal(1, QueryRecord.count)
+
+    # No search is coercable to RssLog (yet).
+    q3 = q1.coerce(:RssLog)
+    assert_nil(q3)
+    assert_equal(1, QueryRecord.count)
+  end
+
 #   def test_observation_image_coercion
 #     # Several observation queries can be turned into name queries.
 #     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
@@ -1368,18 +1375,18 @@ class QueryTest < UnitTestCase
 #     assert_equal({}, q4.params)
 #     assert_equal({}, q5.params)
 #   end
-# 
-#   ##############################################################################
-#   #
-#   #  :section: Test Query Results
-#   #
-#   ##############################################################################
-# 
-#   def test_comment_all
-#     expect = Comment.all.reverse
-#     assert_query(expect, :Comment, :all)
-#   end
-# 
+
+  ##############################################################################
+  #
+  #  :section: Test Query Results
+  #
+  ##############################################################################
+
+  def test_comment_all
+    expect = Comment.all.reverse
+    assert_query(expect, :Comment, :all)
+  end
+
 #   def test_comment_by_user
 #     expect = Comment.where(user_id: mary.id).reverse
 #     assert_query(expect, :Comment, :by_user, user: mary)
@@ -1423,31 +1430,31 @@ class QueryTest < UnitTestCase
 #                   images(:in_situ_image).id], :Image,
 #                   :advanced_search, content: "little", location: "burbank")
 #   end
-# 
-#   def test_image_all
-#     expect = Image.all.reverse
-#     assert_query(expect, :Image, :all)
-#   end
-# 
-#   def test_image_by_user
-#     expect = Image.where(user_id: rolf.id).reverse
-#     assert_query(expect, :Image, :by_user, user: rolf)
-#     expect = Image.where(user_id: mary.id).reverse
-#     assert_query(expect, :Image, :by_user, user: mary)
-#     expect = Image.where(user_id: dick.id).reverse
-#     assert_query(expect, :Image, :by_user, user: dick)
-#   end
-# 
-#   def test_image_in_set
-#     assert_query([images(:turned_over_image).id,
-#                   images(:agaricus_campestris_image).id,
-#                   images(:disconnected_coprinus_comatus_image).id], :Image,
-#                  :in_set,
-#                  ids: [images(:turned_over_image).id,
-#                        images(:agaricus_campestris_image).id,
-#                        images(:disconnected_coprinus_comatus_image).id])
-#   end
-# 
+
+  def test_image_all
+    expect = Image.all.reverse
+    assert_query(expect, :Image, :all)
+  end
+
+  def test_image_by_user
+    expect = Image.where(user_id: rolf.id).reverse
+    assert_query(expect, :Image, :by_user, user: rolf)
+    expect = Image.where(user_id: mary.id).reverse
+    assert_query(expect, :Image, :by_user, user: mary)
+    expect = Image.where(user_id: dick.id).reverse
+    assert_query(expect, :Image, :by_user, user: dick)
+  end
+
+  def test_image_in_set
+    assert_query([images(:turned_over_image).id,
+                  images(:agaricus_campestris_image).id,
+                  images(:disconnected_coprinus_comatus_image).id], :Image,
+                 :in_set,
+                 ids: [images(:turned_over_image).id,
+                       images(:agaricus_campestris_image).id,
+                       images(:disconnected_coprinus_comatus_image).id])
+  end
+
 #   def test_image_inside_observation
 #     obs = observations(:detailed_unknown_obs)
 #     assert_equal(2, obs.images.length)
@@ -1786,28 +1793,28 @@ class QueryTest < UnitTestCase
 #     assert_query([names(:fungi).id], :Name, :advanced_search,
 #                  content: '"a little of everything"') # comment
 #   end
-# 
-#   def test_name_all
-#     expect = Name.all.order(:sort_name).to_a
-#     # SQL does not sort 'Kuhner' and 'Kühner'
-#     do_test_name_all(expect) if sql_collates_accents?
-# 
-#     pair = expect.select { |x| x.text_name == "Lentinellus ursinus" }
-#     a = expect.index(pair.first)
-#     b = expect.index(pair.last)
-#     expect[a], expect[b] = expect[b], expect[a]
-#     do_test_name_all(expect)
-#   end
-# 
-#   def do_test_name_all(expect)
-#     expect_good = expect.reject(&:is_misspelling?)
-#     expect_bad  = expect.select(&:is_misspelling?)
-#     assert_query(expect_good, :Name, :all)
-#     assert_query(expect, :Name, :all, misspellings: :either)
-#     assert_query(expect_good, :Name, :all, misspellings: :no)
-#     assert_query(expect_bad, :Name, :all, misspellings: :only)
-#   end
-# 
+
+  def test_name_all
+    expect = Name.all.order(:sort_name).to_a
+    # SQL does not sort 'Kuhner' and 'Kühner'
+    do_test_name_all(expect) if sql_collates_accents?
+
+    pair = expect.select { |x| x.text_name == "Lentinellus ursinus" }
+    a = expect.index(pair.first)
+    b = expect.index(pair.last)
+    expect[a], expect[b] = expect[b], expect[a]
+    do_test_name_all(expect)
+  end
+
+  def do_test_name_all(expect)
+    expect_good = expect.reject(&:is_misspelling?)
+    expect_bad  = expect.select(&:is_misspelling?)
+    assert_query(expect_good, :Name, :all)
+    assert_query(expect, :Name, :all, misspellings: :either)
+    assert_query(expect_good, :Name, :all, misspellings: :no)
+    assert_query(expect_bad, :Name, :all, misspellings: :only)
+  end
+
 #   def test_name_by_user
 #     assert_query([names(:macrolepiota_rhacodes).id,
 #                   names(:chlorophyllum_rhacodes).id],
@@ -1841,27 +1848,27 @@ class QueryTest < UnitTestCase
 #   def test_name_by_rss_log
 #     assert_query([names(:fungi).id], :Name, :by_rss_log)
 #   end
-# 
-#   def test_name_in_set
-#     assert_query([names(:fungi).id,
-#                   names(:coprinus_comatus).id,
-#                   names(:conocybe_filaris).id,
-#                   names(:lepiota_rhacodes).id,
-#                   names(:lactarius_subalpinus).id], :Name,
-#                   :in_set,
-#                   ids: [names(:fungi).id,
-#                         names(:coprinus_comatus).id,
-#                         names(:conocybe_filaris).id,
-#                         names(:lepiota_rhacodes).id,
-#                         names(:lactarius_subalpinus).id])
-#   end
-# 
-#   def test_name_of_children
-#     expect = Name.where("text_name LIKE 'agaricus %'").order("text_name").to_a
-#     expect.reject!(&:is_misspelling?)
-#     assert_query(expect, :Name, :of_children, name: names(:agaricus))
-#   end
-# 
+
+  def test_name_in_set
+    assert_query([names(:fungi).id,
+                  names(:coprinus_comatus).id,
+                  names(:conocybe_filaris).id,
+                  names(:lepiota_rhacodes).id,
+                  names(:lactarius_subalpinus).id], :Name,
+                  :in_set,
+                  ids: [names(:fungi).id,
+                        names(:coprinus_comatus).id,
+                        names(:conocybe_filaris).id,
+                        names(:lepiota_rhacodes).id,
+                        names(:lactarius_subalpinus).id])
+  end
+
+  def test_name_of_children
+    expect = Name.where("text_name LIKE 'agaricus %'").order("text_name").to_a
+    expect.reject!(&:is_misspelling?)
+    assert_query(expect, :Name, :of_children, name: names(:agaricus))
+  end
+
 #   def test_name_of_parents
 #     fungi = names(:fungi)
 #     peltigera = names(:peltigera)
@@ -1871,18 +1878,18 @@ class QueryTest < UnitTestCase
 #     assert_query([], :Name, :of_parents, name: agaricus)
 #     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
 #   end
-# 
-#   def test_name_pattern
-#     assert_query([], :Name, :pattern_search,
-#                  pattern: "petigera") # search_name
-#     assert_query([names(:petigera).id], :Name, :pattern_search,
-#                  pattern: "petigera", misspellings: :either)
-#     # assert_query([40], :Name, :pattern_search, pattern: 'ye auld manual of lichenes') # citation
-#     # assert_query([20], :Name, :pattern_search, pattern: 'prevent me') # notes
-#     # assert_query([42], :Name, :pattern_search, pattern: 'smell as sweet') # gen_desc
-#     # assert_query([40], :Name, :pattern_search, pattern: 'superficially similar') # look_alikes
-#   end
-# 
+
+  def test_name_pattern
+    assert_query([], :Name, :pattern_search,
+                 pattern: "petigera") # search_name
+    assert_query([names(:petigera).id], :Name, :pattern_search,
+                 pattern: "petigera", misspellings: :either)
+    # assert_query([40], :Name, :pattern_search, pattern: 'ye auld manual of lichenes') # citation
+    # assert_query([20], :Name, :pattern_search, pattern: 'prevent me') # notes
+    # assert_query([42], :Name, :pattern_search, pattern: 'smell as sweet') # gen_desc
+    # assert_query([40], :Name, :pattern_search, pattern: 'superficially similar') # look_alikes
+  end
+
 #   def test_name_with_descriptions
 #     assert_query([names(:coprinus_comatus).id,
 #                   names(:agaricus_campestris).id,
@@ -2024,180 +2031,180 @@ class QueryTest < UnitTestCase
 #                  :NameDescription, :by_editor, user: mary)
 #     assert_query([], :NameDescription, :by_editor, user: dick)
 #   end
-# 
-#   def test_observation_advanced
-#     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
-#                  :advanced_search, name: "diminutivus")
-#     assert_query([observations(:coprinus_comatus_obs).id], :Observation,
-#                  :advanced_search, location: "glendale") # where
-#     expect = Observation.where(location_id: locations(:burbank)).to_a
-#     assert_query(expect, :Observation,
-#                  :advanced_search, location: "burbank", by: :id) # location
-#     expect = Observation.where(user_id: rolf.id).to_a
-#     assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
-#     assert_query([observations(:coprinus_comatus_obs).id], :Observation,
-#                  :advanced_search, content: "second fruiting") # notes
-#     assert_query([observations(:minimal_unknown_obs).id], :Observation,
-#                  :advanced_search, content: "agaricus") # comment
-#   end
-# 
-#   def test_observation_all
-#     expect = Observation.all.order("`when` DESC, id DESC").to_a
-#     assert_query(expect, :Observation, :all)
-#   end
-# 
-#   def test_observation_at_location
-#     expect = Observation.where(location_id: locations(:burbank).id).
-#                includes(:name).
-#                order("names.text_name, names.author, observations.id DESC").to_a
-#     assert_query(expect, :Observation, :at_location,
-#                          location: locations(:burbank))
-#   end
-# 
-#   def test_observation_at_where
-#     assert_query([observations(:coprinus_comatus_obs).id], :Observation,
-#                  :at_where, user_where: "glendale", location: "glendale")
-#   end
-# 
-#   def test_observation_by_rss_log
-#     assert_query([observations(:detailed_unknown_obs).id], :Observation,
-#                  :by_rss_log)
-#   end
-# 
-#   def test_observation_by_user
-#     expect = Observation.where(user_id: rolf.id).to_a
-#     assert_query(expect, :Observation, :by_user, user: rolf, by: :id)
-#     expect = Observation.where(user_id: mary.id).to_a
-#     assert_query(expect, :Observation, :by_user, user: mary, by: :id)
-#     expect = Observation.where(user_id: dick.id).to_a
-#     assert_query(expect, :Observation, :by_user, user: dick, by: :id)
-#     expect = Observation.where(user_id: junk.id).to_a
-#     assert_query([], :Observation, :by_user, user: junk, by: :id)
-#   end
-# 
-#   def test_observation_in_set
-#     obs_set_ids = [observations(:unknown_with_no_naming).id,
-#                    observations(:minimal_unknown_obs).id,
-#                    observations(:strobilurus_diminutivus_obs).id,
-#                    observations(:detailed_unknown_obs).id,
-#                    observations(:agaricus_campestros_obs).id,
-#                    observations(:coprinus_comatus_obs).id,
-#                    observations(:agaricus_campestras_obs).id,
-#                    observations(:agaricus_campestris_obs).id,
-#                    observations(:agaricus_campestrus_obs).id]
-#     assert_query(obs_set_ids, :Observation, :in_set, ids: obs_set_ids)
-#   end
-# 
-#   def test_observation_in_species_list
-#     # These two are identical, so should be disambiguated by reverse_id.
-#     assert_query([observations(:detailed_unknown_obs).id,
-#                   observations(:minimal_unknown_obs).id], :Observation,
-#                  :in_species_list,
-#                  species_list: species_lists(:unknown_species_list).id)
-#   end
-# 
-#   def test_observation_of_children
-#     assert_query([observations(:agaricus_campestras_obs).id,
-#                   observations(:agaricus_campestris_obs).id,
-#                   observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestrus_obs).id],
-#                  :Observation, :of_children, name: names(:agaricus))
-#   end
-# 
-#   def test_observation_of_name
-#     User.current = rolf
-#     names = Name.where("text_name like 'Agaricus camp%'").to_a
-#     name = names.pop
-#     names.each { |n| name.merge_synonyms(n) }
-#     observations(:agaricus_campestras_obs).update_attribute(:user, mary)
-#     observations(:agaricus_campestros_obs).update_attribute(:user, mary)
-#     spl = species_lists(:first_species_list)
-#     spl.observations << observations(:agaricus_campestrus_obs)
-#     spl.observations << observations(:agaricus_campestros_obs)
-#     proj = projects(:eol_project)
-#     proj.observations << observations(:agaricus_campestris_obs)
-#     proj.observations << observations(:agaricus_campestras_obs)
-#     assert_query([observations(:unknown_with_lat_long).id,
-#                   observations(:unknown_with_no_naming).id,
-#                   observations(:detailed_unknown_obs).id,
-#                   observations(:minimal_unknown_obs).id], :Observation,
-#                  :of_name, name: names(:fungi).id)
-#     assert_query([], :Observation,
-#                  :of_name, name: names(:macrolepiota_rachodes).id)
-#     assert_query([observations(:agaricus_campestris_obs).id], :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id)
-#     assert_query([observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestras_obs).id,
-#                   observations(:agaricus_campestrus_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id,
-#                  synonyms: :exclusive)
-#     assert_query([observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestras_obs).id,
-#                   observations(:agaricus_campestrus_obs).id,
-#                   observations(:agaricus_campestris_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id, synonyms: :all)
-#     assert_query([observations(:coprinus_comatus_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id,
-#                  nonconsensus: :exclusive)
-#     assert_query([observations(:agaricus_campestris_obs).id,
-#                   observations(:coprinus_comatus_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id,
-#                  nonconsensus: :all)
-#     assert_query([observations(:agaricus_campestrus_obs).id,
-#                   observations(:agaricus_campestris_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
-#                  user: rolf.id)
-#     assert_query([observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestras_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
-#                  user: mary.id)
-#     assert_query([observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestrus_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
-#                  species_list: species_lists(:first_species_list).id)
-#     assert_query([observations(:agaricus_campestras_obs).id,
-#                   observations(:agaricus_campestris_obs).id],
-#                  :Observation,
-#                  :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
-#                  project: projects(:eol_project).id)
-#   end
-# 
-#   def test_observation_pattern
-#     # notes
-#     assert_query([observations(:agaricus_campestras_obs).id,
-#                   observations(:agaricus_campestros_obs).id,
-#                   observations(:agaricus_campestrus_obs).id,
-#                   observations(:strobilurus_diminutivus_obs).id], :Observation,
-#                  :pattern_search,
-#                  pattern: '"somewhere else"', by: :name)
-#     # assert_query([1], :Observation, :pattern_search,
-#     #                   pattern: 'wow!') # comment
-#     # where
-#     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
-#                  :pattern_search, pattern: "pipi valley")
-# 
-#     # location
-#     expect = Observation.where(location_id: locations(:burbank)).
-#                includes(:name).
-#                order("names.text_name, names.author,observations.id DESC").to_a
-#     assert_query(expect, :Observation,
-#                  :pattern_search, pattern: "burbank", by: :name)
-# 
-#     # name
-#     expect = Observation.
-#                where("text_name LIKE 'agaricus%'").includes(:name).
-#                  order("names.text_name, names.author, observations.id DESC")
-#     assert_query(expect.map(&:id), :Observation,
-#                  :pattern_search, pattern: "agaricus", by: :name)
-#   end
-# 
+
+  def test_observation_advanced
+    assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :advanced_search, name: "diminutivus")
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :advanced_search, location: "glendale") # where
+    expect = Observation.where(location_id: locations(:burbank)).to_a
+    assert_query(expect, :Observation,
+                 :advanced_search, location: "burbank", by: :id) # location
+    expect = Observation.where(user_id: rolf.id).to_a
+    assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :advanced_search, content: "second fruiting") # notes
+    assert_query([observations(:minimal_unknown_obs).id], :Observation,
+                 :advanced_search, content: "agaricus") # comment
+  end
+
+  def test_observation_all
+    expect = Observation.all.order("`when` DESC, id DESC").to_a
+    assert_query(expect, :Observation, :all)
+  end
+
+  def test_observation_at_location
+    expect = Observation.where(location_id: locations(:burbank).id).
+               includes(:name).
+               order("names.text_name, names.author, observations.id DESC").to_a
+    assert_query(expect, :Observation, :at_location,
+                         location: locations(:burbank))
+  end
+
+  def test_observation_at_where
+    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
+                 :at_where, user_where: "glendale", location: "glendale")
+  end
+
+  def test_observation_by_rss_log
+    assert_query([observations(:detailed_unknown_obs).id], :Observation,
+                 :by_rss_log)
+  end
+
+  def test_observation_by_user
+    expect = Observation.where(user_id: rolf.id).to_a
+    assert_query(expect, :Observation, :by_user, user: rolf, by: :id)
+    expect = Observation.where(user_id: mary.id).to_a
+    assert_query(expect, :Observation, :by_user, user: mary, by: :id)
+    expect = Observation.where(user_id: dick.id).to_a
+    assert_query(expect, :Observation, :by_user, user: dick, by: :id)
+    expect = Observation.where(user_id: junk.id).to_a
+    assert_query([], :Observation, :by_user, user: junk, by: :id)
+  end
+
+  def test_observation_in_set
+    obs_set_ids = [observations(:unknown_with_no_naming).id,
+                   observations(:minimal_unknown_obs).id,
+                   observations(:strobilurus_diminutivus_obs).id,
+                   observations(:detailed_unknown_obs).id,
+                   observations(:agaricus_campestros_obs).id,
+                   observations(:coprinus_comatus_obs).id,
+                   observations(:agaricus_campestras_obs).id,
+                   observations(:agaricus_campestris_obs).id,
+                   observations(:agaricus_campestrus_obs).id]
+    assert_query(obs_set_ids, :Observation, :in_set, ids: obs_set_ids)
+  end
+
+  def test_observation_in_species_list
+    # These two are identical, so should be disambiguated by reverse_id.
+    assert_query([observations(:detailed_unknown_obs).id,
+                  observations(:minimal_unknown_obs).id], :Observation,
+                 :in_species_list,
+                 species_list: species_lists(:unknown_species_list).id)
+  end
+
+  def test_observation_of_children
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation, :of_children, name: names(:agaricus))
+  end
+
+  def test_observation_of_name
+    User.current = rolf
+    names = Name.where("text_name like 'Agaricus camp%'").to_a
+    name = names.pop
+    names.each { |n| name.merge_synonyms(n) }
+    observations(:agaricus_campestras_obs).update_attribute(:user, mary)
+    observations(:agaricus_campestros_obs).update_attribute(:user, mary)
+    spl = species_lists(:first_species_list)
+    spl.observations << observations(:agaricus_campestrus_obs)
+    spl.observations << observations(:agaricus_campestros_obs)
+    proj = projects(:eol_project)
+    proj.observations << observations(:agaricus_campestris_obs)
+    proj.observations << observations(:agaricus_campestras_obs)
+    assert_query([observations(:unknown_with_lat_long).id,
+                  observations(:unknown_with_no_naming).id,
+                  observations(:detailed_unknown_obs).id,
+                  observations(:minimal_unknown_obs).id], :Observation,
+                 :of_name, name: names(:fungi).id)
+    assert_query([], :Observation,
+                 :of_name, name: names(:macrolepiota_rachodes).id)
+    assert_query([observations(:agaricus_campestris_obs).id], :Observation,
+                 :of_name, name: names(:agaricus_campestris).id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 synonyms: :exclusive)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all)
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 nonconsensus: :exclusive)
+    assert_query([observations(:agaricus_campestris_obs).id,
+                  observations(:coprinus_comatus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id,
+                 nonconsensus: :all)
+    assert_query([observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 user: rolf.id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 user: mary.id)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 species_list: species_lists(:first_species_list).id)
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation,
+                 :of_name, name: names(:agaricus_campestris).id, synonyms: :all,
+                 project: projects(:eol_project).id)
+  end
+
+  def test_observation_pattern
+    # notes
+    assert_query([observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestrus_obs).id,
+                  observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :pattern_search,
+                 pattern: '"somewhere else"', by: :name)
+    # assert_query([1], :Observation, :pattern_search,
+    #                   pattern: 'wow!') # comment
+    # where
+    assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
+                 :pattern_search, pattern: "pipi valley")
+
+    # location
+    expect = Observation.where(location_id: locations(:burbank)).
+               includes(:name).
+               order("names.text_name, names.author,observations.id DESC").to_a
+    assert_query(expect, :Observation,
+                 :pattern_search, pattern: "burbank", by: :name)
+
+    # name
+    expect = Observation.
+               where("text_name LIKE 'agaricus%'").includes(:name).
+                 order("names.text_name, names.author, observations.id DESC")
+    assert_query(expect.map(&:id), :Observation,
+                 :pattern_search, pattern: "agaricus", by: :name)
+  end
+
 #   def test_project_all
 #     assert_query([projects(:bolete_project).id, projects(:eol_project).id],
 #                  :Project, :all)
@@ -2208,70 +2215,70 @@ class QueryTest < UnitTestCase
 #                  :in_set, ids: [projects(:eol_project).id])
 #     assert_query([], :Project, :in_set, ids: [])
 #   end
-# 
-#   def test_rsslog_all
-#     ids = RssLog.all.map(&:id)
-#     assert_query(ids, :RssLog, :all)
-#   end
-# 
+
+  def test_rsslog_all
+    ids = RssLog.all.map(&:id)
+    assert_query(ids, :RssLog, :all)
+  end
+
 #   def test_rsslog_in_set
 #     rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
 #                       rss_logs(:name_rss_log).id]
 #     assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
 #   end
-# 
-#   def test_specieslist_all
-#     expect = SpeciesList.all.order("title").to_a
-#     assert_query(expect, :SpeciesList, :all)
-#   end
-# 
+
+  def test_specieslist_all
+    expect = SpeciesList.all.order("title").to_a
+    assert_query(expect, :SpeciesList, :all)
+  end
+
 #   def test_specieslist_by_rss_log
 #     assert_query([species_lists(:first_species_list).id], :SpeciesList,
 #                  :by_rss_log)
 #   end
-# 
-#   def test_specieslist_by_user
-#     assert_query([species_lists(:first_species_list).id,
-#                   species_lists(:another_species_list).id], :SpeciesList,
-#                  :by_user, user: rolf, by: :id)
-#     assert_query([species_lists(:unknown_species_list).id], :SpeciesList,
-#                  :by_user, user: mary, by: :id)
-#     assert_query([], :SpeciesList, :by_user, user: dick)
-#   end
-# 
+
+  def test_specieslist_by_user
+    assert_query([species_lists(:first_species_list).id,
+                  species_lists(:another_species_list).id], :SpeciesList,
+                 :by_user, user: rolf, by: :id)
+    assert_query([species_lists(:unknown_species_list).id], :SpeciesList,
+                 :by_user, user: mary, by: :id)
+    assert_query([], :SpeciesList, :by_user, user: dick)
+  end
+
 #   def test_specieslist_in_set
 #     list_set_ids = [species_lists(:first_species_list).id,
 #                     species_lists(:unknown_species_list).id]
 #     assert_query(list_set_ids, :SpeciesList, :in_set, ids: list_set_ids)
 #   end
-# 
-#   def test_user_all
-#     expect = User.all.order("name").to_a
-#     assert_query(expect, :User, :all)
-#     expect = User.all.order("login").to_a
-#     assert_query(expect, :User, :all, by: :login)
-#   end
-# 
-#   def test_user_in_set
-#     assert_query([rolf.id, mary.id, junk.id],
-#                  :User, :in_set,
-#                  ids: [junk.id, mary.id, rolf.id],
-#                  by: :reverse_name)
-#   end
-# 
-#   ##############################################################################
-#   #
-#   #  :section: Other stuff
-#   #
-#   ##############################################################################
-# 
-#   def test_whiny_nil_in_map_locations
-#     query = Query.lookup(:User, :in_set,
-#                          ids: [rolf.id, 1000, mary.id])
-#     query.query
-#     assert_equal(2, query.results.length)
-#   end
-# 
+
+  def test_user_all
+    expect = User.all.order("name").to_a
+    assert_query(expect, :User, :all)
+    expect = User.all.order("login").to_a
+    assert_query(expect, :User, :all, by: :login)
+  end
+
+  def test_user_in_set
+    assert_query([rolf.id, mary.id, junk.id],
+                 :User, :in_set,
+                 ids: [junk.id, mary.id, rolf.id],
+                 by: :reverse_name)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Other stuff
+  #
+  ##############################################################################
+
+  def test_whiny_nil_in_map_locations
+    query = Query.lookup(:User, :in_set,
+                         ids: [rolf.id, 1000, mary.id])
+    query.query
+    assert_equal(2, query.results.length)
+  end
+
 #   def test_location_ordering
 #     albion = locations(:albion)
 #     elgin_co = locations(:elgin_co)
@@ -2304,14 +2311,14 @@ class QueryTest < UnitTestCase
 #                  :in_set,
 #                  ids: [obs1.id, obs2.id], by: :location)
 #   end
-# 
-#   def test_filtering_content
-#     peltigera = names(:peltigera)
-#     expect = Observation.where(specimen: true).order(when: :desc)
-#     assert_query(expect, :Observation, :all, has_specimen: true)
-#     expect = Observation.where.not(thumb_image_id: nil).order(when: :desc)
-#     assert_query(expect, :Observation, :all, has_images: true)
-#     # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
-#     # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
-#   end
+
+  def test_filtering_content
+    peltigera = names(:peltigera)
+    expect = Observation.where(specimen: true).order(when: :desc)
+    assert_query(expect, :Observation, :all, has_specimen: true)
+    expect = Observation.where.not(thumb_image_id: nil).order(when: :desc)
+    assert_query(expect, :Observation, :all, has_images: true)
+    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
+    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
+  end
 end

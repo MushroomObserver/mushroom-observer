@@ -40,4 +40,8 @@ class Query::Base
   def default_order
     "all"
   end
+
+  def ==(other)
+    self.serialize == other.serialize
+  end
 end
