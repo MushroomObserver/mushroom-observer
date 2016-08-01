@@ -870,31 +870,31 @@ class SpeciesListController < ApplicationController
   def calc_checklist(query = nil)
     results = []
     if query || (query = get_query_from_session)
-      case query.model_symbol
-      when :Name
+      case query.model
+      when Name
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           limit:  1000
         )
-      when :Observation
+      when Observation
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join:   :names,
           limit:  1000
         )
-      when :Image
+      when Image
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join:   { images_observations: { observations: :names } },
           limit:  1000
         )
-      when :Location
+      when Location
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join:   { observations: :names },
           limit:  1000
         )
-      when :RssLog
+      when RssLog
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
           join:   { observations: :names },

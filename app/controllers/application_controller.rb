@@ -1252,8 +1252,8 @@ class ApplicationController < ActionController::Base
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) &&
        !args[:always_index]
-      redirect_with_query(controller: query.model_class.show_controller,
-                          action: query.model_class.show_action,
+      redirect_with_query(controller: query.model.show_controller,
+                          action: query.model.show_action,
                           id: query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
@@ -1276,7 +1276,7 @@ class ApplicationController < ActionController::Base
       @timer_start = Time.now
       @objects = query.paginate(@pages, include: include)
       @timer_end = Time.now
-      logger.warn("QUERY finished: model=#{query.model_string}, " \
+      logger.warn("QUERY finished: model=#{query.model}, " \
                   "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                   "time=#{(@timer_end - @timer_start).to_f}")
 
@@ -1306,8 +1306,8 @@ class ApplicationController < ActionController::Base
       if !link_all && (by.to_s == this_by)
         results << str
       else
-        results << [str, { controller: query.model_class.show_controller,
-                           action: query.model_class.index_action,
+        results << [str, { controller: query.model.show_controller,
+                           action: query.model.index_action,
                            by: by }.merge(query_params)]
       end
     end
@@ -1319,8 +1319,8 @@ class ApplicationController < ActionController::Base
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, { controller: query.model_class.show_controller,
-                       action: query.model_class.index_action,
+    results << [str, { controller: query.model.show_controller,
+                       action: query.model.index_action,
                        by: reverse_by }.merge(query_params)]
 
     results
