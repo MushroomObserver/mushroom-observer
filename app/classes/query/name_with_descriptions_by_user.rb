@@ -6,17 +6,11 @@ class Query::NameWithDescriptionsByUser < Query::Name
   end
 
   def initialize_flavor
-    type = "name"   # was: type = model_string.underscore
-    desc_table = :"#{type}_descriptions"
+    desc_table = :name_descriptions
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     add_join(desc_table)
-    self.where << "#{desc_table}.user_id = '#{params[:user]}'"
-
+    self.where << "#{desc_table}.user_id = '#{user.id}'"
     super
-  end
-
-  def default_order
-    "name"
   end
 end

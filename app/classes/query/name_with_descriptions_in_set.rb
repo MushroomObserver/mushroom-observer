@@ -3,19 +3,15 @@ class Query::NameWithDescriptionsInSet < Query::Name
 
   def parameter_declarations
     super.merge(
-      ids: [NameDescription],
+      ids:        [NameDescription],
       old_title?: :string,
-      old_by?: :string
+      old_by?:    :string
     )
   end
 
   def initialize_flavor
     initialize_in_set_flavor("name_descriptions")
-    add_join("name_descriptions")
-    super
-  end
-
-  def default_order
+    add_join(:name_descriptions)
     super
   end
 end

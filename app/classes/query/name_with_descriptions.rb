@@ -7,8 +7,4 @@ class Query::NameWithDescriptions < Query::Name
     add_join(:"name_descriptions")
     super
   end
-
-  def default_order
-    "name"
-  end
 end
