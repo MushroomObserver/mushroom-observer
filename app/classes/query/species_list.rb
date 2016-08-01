@@ -53,7 +53,10 @@ class Query::SpeciesList < Query::Base
       initialize_model_do_search(:comments_has,
                                  "CONCAT(comments.summary,comments.notes)")
       add_join(:comments)
-    params[:by] ||= "title"
     super
+  end
+
+  def default_order
+    "title"
   end
 end

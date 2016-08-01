@@ -21,7 +21,10 @@ class Query::Comment < Query::Base
     initialize_model_do_enum_set(:types, :target_type, Comment.all_types, :string)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
-    params[:by] ||= "created_at"
     super
+  end
+
+  def default_order
+    "created_at"
   end
 end

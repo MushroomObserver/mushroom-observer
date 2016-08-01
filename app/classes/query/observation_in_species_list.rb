@@ -10,7 +10,10 @@ class Query::ObservationInSpeciesList < Query::Observation
     title_args[:species_list] = species_list.format_name
     add_join(:observations_species_lists)
     self.where << "observations_species_lists.species_list_id = '#{species_list.id}'"
-    params[:by] ||= "name"
     super
+  end
+
+  def default_order
+    "name"
   end
 end

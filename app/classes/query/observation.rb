@@ -89,7 +89,10 @@ class Query::Observation < Query::Base
     end
     initialize_model_do_bounding_box(:observation)
     initialize_observation_filters
-    params[:by] ||= "date"
     super
+  end
+
+  def default_order
+    "date"
   end
 end

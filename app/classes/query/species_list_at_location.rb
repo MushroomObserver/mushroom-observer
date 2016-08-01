@@ -9,7 +9,10 @@ class Query::SpeciesListAtLocation < Query::SpeciesList
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     self.where << "locations.location_id = '#{location.id}'"
-    params[:by] ||= "name"
     super
+  end
+
+  def default_order
+    "name"
   end
 end

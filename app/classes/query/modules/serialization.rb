@@ -52,7 +52,7 @@ module Query::Modules::Serialization
       flavor = params[:flavor]
       params.delete(:model)
       params.delete(:flavor)
-      Query.lookup(model, flavor, params)
+      Query.new(model, flavor, params)
     end
 
     def deserialize_value(val)

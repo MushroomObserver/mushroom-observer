@@ -10,7 +10,10 @@ class Query::ObservationAtWhere < Query::Observation
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.where << "locations.where LIKE '%#{pattern}%'"
-    params[:by] ||= "name"
     super
+  end
+
+  def default_order
+    "name"
   end
 end

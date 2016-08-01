@@ -9,7 +9,10 @@ class Query::ObservationByUser < Query::Observation
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     self.where << "observations.user_id = '#{user.id}'"
-    params[:by] ||= "updated_at"
     super
+  end
+
+  def default_order
+    "updated_at"
   end
 end

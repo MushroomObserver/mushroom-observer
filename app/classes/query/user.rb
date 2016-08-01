@@ -13,7 +13,10 @@ class Query::User < Query::Base
   def initialize_flavor
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
-    params[:by] ||= "name"
     super
+  end
+
+  def default_order
+    "name"
   end
 end

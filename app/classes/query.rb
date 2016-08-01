@@ -279,7 +279,7 @@
 ################################################################################
 
 module Query
-  def self.lookup(model, flavor, params={}, current=nil)
+  def self.new(model, flavor, params={}, current=nil)
     klass = "Query::#{model}#{flavor.to_s.camelize}".constantize
     query = klass.new
     query.params = params

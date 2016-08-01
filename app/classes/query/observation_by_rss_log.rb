@@ -1,7 +1,10 @@
 class Query::ObservationByRssLog < Query::Observation
   def initialize_flavor
     add_join(:rss_logs)
-    params[:by] ||= "rss_log"
     super
+  end
+
+  def default_order
+    "rss_log"
   end
 end

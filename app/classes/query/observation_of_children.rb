@@ -12,7 +12,10 @@ class Query::ObservationOfChildren < Query::Observation
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
     add_name_condition(name)
-    params[:by] ||= "name"
     super
+  end
+
+  def default_order
+    "name"
   end
 end

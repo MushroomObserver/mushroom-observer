@@ -1,7 +1,11 @@
 module Query::Modules::Ordering
   def initialize_order
     by = params[:by]
+    # Let queries define custom order spec in "order", but have explicitly
+    # passed-in "by" parameter take precedence.  If neither is given, then
+    # fall back on the "default_order" finally.
     if by || order.blank?
+      by ||= default_order
       by = by.dup
       reverse = !!by.sub!(/^reverse_/, "")
       result = initialize_order_specs(by)

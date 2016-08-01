@@ -994,21 +994,21 @@ class ApplicationController < ActionController::Base
         end
     if q && (query = Query.safe_find(q))
       # This is right kind of query.
-      if !model || (query.model_string == model)
+      if !model || (query.model.to_s == model)
         result = query
       # If not, try coercing it.
       elsif query2 = query.coerce(model)
         result = query2
       # If that fails, try the outer query coercing if necessary.
       elsif query = query.outer
-        if query.model_string == model
+        if query.model.to_s == model
           result = query
         elsif query2 = query.coerce(model)
           result = query2
         end
       end
       if update && result
-        result.access_count += 1
+        result.increment_access_count
         result.save
       end
     end
@@ -1066,7 +1066,7 @@ class ApplicationController < ActionController::Base
                 nil
               end) &&
          (query = Query.safe_find(q)) && # ... and query exists
-         (query.model_symbol == :RssLog) && # ... and it's a RssLog query
+         (query.model == RssLog)      && # ... and it's a RssLog query
          (rss_log = begin
                       object.rss_log
                     rescue
@@ -1150,7 +1150,7 @@ class ApplicationController < ActionController::Base
     number_arg   = args[:number_arg] || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include] || nil
-    type = query.model_class.type_tag
+    type = query.model.type_tag
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1167,60 +1167,61 @@ class ApplicationController < ActionController::Base
 
     # Supply default error message to display if no results found.
     if (query.params.keys - query.required_parameters - [:by]).empty?
-      @error ||= case query.flavor
-                 when :all
-                   :runtime_no_objects.t(type: type)
-                 when :at_location
-                   loc = query.find_cached_parameter_instance(Location, :location)
-                   :runtime_index_no_at_location.t(type: type,
-                                                   location: loc.display_name)
-                 when :at_where
-                   :runtime_index_no_at_location.t(type: type,
-                                                   location: query.params[:location])
-                 when :by_author
-                   user = query.find_cached_parameter_instance(User, :user)
-                   :runtime_user_hasnt_authored.t(type: type, user: user.legal_name)
-                 when :by_editor
-                   user = query.find_cached_parameter_instance(User, :user)
-                   :runtime_user_hasnt_edited.t(type: type, user: user.legal_name)
-                 when :by_rss_log
-                   :runtime_index_no_by_rss_log.t(type: type)
-                 when :by_user
-                   user = query.find_cached_parameter_instance(User, :user)
-                   :runtime_user_hasnt_created.t(type: type, user: user.legal_name)
-                 when :for_target
-                   :runtime_index_no_for_object.t(type: type)
-                 when :for_user
-                   user = query.find_cached_parameter_instance(User, :user)
-                   :runtime_index_no_for_user.t(type: type, user: user.legal_name)
-                 when :in_species_list
-                   spl = query.find_cached_parameter_instance(SpeciesList, :species_list)
-                   :runtime_index_no_in_species_list.t(type: type, name: spl.title)
-                 when :inside_observation
-                   id = query.params[:observation]
-                   :runtime_index_no_inside_observation.t(type: type, id: id)
-                 when :of_children
-                   name = query.find_cached_parameter_instance(Name, :name)
-                   :runtime_index_no_of_children.t(type: type,
-                                                   name: name.display_name)
-                 when :of_name
-                   name = query.find_cached_parameter_instance(Name, :name)
-                   :runtime_index_no_of_name.t(type: type, name: name.display_name)
-                 when :of_parents
-                   name = query.find_cached_parameter_instance(Name, :name)
-                   :runtime_index_no_of_parents.t(type: type,
-                                                  name: name.display_name)
-                 when :pattern_search
-                   :runtime_no_matches_pattern.t(type: type,
-                                                 value: query.params[:pattern].to_s).html_safe
-                 when :regexp_search
-                   :runtime_no_matches_regexp.t(type: type,
-                                                value: query.params[:regexp].to_s)
-                 when :with_descriptions
-                   :runtime_index_no_with.t(type: type, attachment: :description)
-                 when :with_observations
-                   :runtime_index_no_with.t(type: type, attachment: :observation)
-      end
+      @error ||=
+        case query.flavor
+        when :all
+          :runtime_no_objects.t(type: type)
+        when :at_location
+          loc = query.find_cached_parameter_instance(Location, :location)
+          :runtime_index_no_at_location.t(type: type,
+                                          location: loc.display_name)
+        when :at_where
+          :runtime_index_no_at_location.t(type: type,
+                                          location: query.params[:location])
+        when :by_author
+          user = query.find_cached_parameter_instance(User, :user)
+          :runtime_user_hasnt_authored.t(type: type, user: user.legal_name)
+        when :by_editor
+          user = query.find_cached_parameter_instance(User, :user)
+          :runtime_user_hasnt_edited.t(type: type, user: user.legal_name)
+        when :by_rss_log
+          :runtime_index_no_by_rss_log.t(type: type)
+        when :by_user
+          user = query.find_cached_parameter_instance(User, :user)
+          :runtime_user_hasnt_created.t(type: type, user: user.legal_name)
+        when :for_target
+          :runtime_index_no_for_object.t(type: type)
+        when :for_user
+          user = query.find_cached_parameter_instance(User, :user)
+          :runtime_index_no_for_user.t(type: type, user: user.legal_name)
+        when :in_species_list
+          spl = query.find_cached_parameter_instance(SpeciesList, :species_list)
+          :runtime_index_no_in_species_list.t(type: type, name: spl.title)
+        when :inside_observation
+          id = query.params[:observation]
+          :runtime_index_no_inside_observation.t(type: type, id: id)
+        when :of_children
+          name = query.find_cached_parameter_instance(Name, :name)
+          :runtime_index_no_of_children.t(type: type,
+                                          name: name.display_name)
+        when :of_name
+          name = query.find_cached_parameter_instance(Name, :name)
+          :runtime_index_no_of_name.t(type: type, name: name.display_name)
+        when :of_parents
+          name = query.find_cached_parameter_instance(Name, :name)
+          :runtime_index_no_of_parents.t(type: type,
+                                         name: name.display_name)
+        when :pattern_search
+          :runtime_no_matches_pattern.t(type: type,
+                                        value: query.params[:pattern].to_s).html_safe
+        when :regexp_search
+          :runtime_no_matches_regexp.t(type: type,
+                                       value: query.params[:regexp].to_s)
+        when :with_descriptions
+          :runtime_index_no_with.t(type: type, attachment: :description)
+        when :with_observations
+          :runtime_index_no_with.t(type: type, attachment: :observation)
+        end
     end
     @error ||= :runtime_no_matches.t(type: type)
 

@@ -1,4 +1,5 @@
 class Query::Base
+  include Query::Modules::ActiveRecord
   include Query::Modules::Coercion
   include Query::Modules::HighLevelQueries
   include Query::Modules::Initialization
@@ -34,5 +35,9 @@ class Query::Base
     self.where  += params[:where]       if params[:where]
     self.group   = params[:group]       if params[:group]
     self.order   = params[:order]       if params[:order]
+  end
+
+  def default_order
+    "all"
   end
 end

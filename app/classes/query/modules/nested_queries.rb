@@ -1,5 +1,5 @@
 module Query::Modules::NestedQueries
-  attr_accessor :outer_str
+  attr_accessor :outer_id
 
   # This gives inner queries the ability to tweak the outer query.  For
   # example, this is a handy way to tell the outer query to skip outer results
@@ -60,15 +60,15 @@ module Query::Modules::NestedQueries
 
   # Is this query nested in an outer query?
   def has_outer?
-    !outer_str.blank?
+    !outer_id.blank?
   end
 
-  # Get instance for +outer_str+, modifying it slightly to skip results with
+  # Get instance for +outer_id+, modifying it slightly to skip results with
   # empty inner queries.
   def outer
     @outer ||= begin
-      if outer_str
-        outer = Query.deserialize(outer_str)
+      if outer_id
+        outer = Query.find(outer_id)
         tweak_outer_query.call(outer) if tweak_outer_query
         outer
       end
