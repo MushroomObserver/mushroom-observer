@@ -1,8 +1,7 @@
 module Query::Initializers::PatternSearch
   def google_parse_pattern
     pattern = params[:pattern].to_s.strip_squeeze
-    clean = clean_pattern(pattern)
-    google_parse(clean)
+    google_parse(pattern)
   end
 
   def add_search_conditions(search, *val_specs)

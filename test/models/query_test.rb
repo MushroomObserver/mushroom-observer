@@ -71,8 +71,11 @@ class QueryTest < UnitTestCase
     expect = expect.to_a unless expect.respond_to?(:map!)
     expect.map!(&:id) if expect.first.is_a?(AbstractModel)
     query = Query.lookup(*args)
-    assert((Set.new(expect) - Set.new(query.result_ids)).empty?,
-           query.last_query)
+    actual = query.result_ids
+    assert((Set.new(expect) - Set.new(actual)).empty?,
+           "Query results are wrong.  SQL is:\n" + query.last_query + "\n" +
+           "Expect: #{expect.inspect}\n" +
+           "Actual: #{actual.inspect}\n")
     assert_match(/#{args[0].t}|Advanced Search|(Lower|Higher) Taxa/,
                  query.title)
     assert(!query.title.include?("[:"),

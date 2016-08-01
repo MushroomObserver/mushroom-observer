@@ -21,7 +21,7 @@ class Query::ObservationAdvancedSearch < Query::Observation
   end
 
   def add_join_to_locations
-    add_join(:locations)
+    add_join(:locations!)
   end
 
   def content_join_spec
