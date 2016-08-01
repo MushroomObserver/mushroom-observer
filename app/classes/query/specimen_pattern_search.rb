@@ -10,8 +10,8 @@ class Query::SpecimenPatternSearch < Query::Specimen
   def initialize_flavor
     search = google_parse_pattern
     add_search_conditions(search,
-      "users.login",
-      "users.name"
+      "specimens.herbarium_label",
+      "COALESCE(specimens.notes,'')"
     )
     super
   end
