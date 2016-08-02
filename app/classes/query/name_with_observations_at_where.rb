@@ -3,8 +3,8 @@ class Query::NameWithObservationsAtWhere < Query::Name
 
   def parameter_declarations
     super.merge(
-      location: :string,
-      user_where: :string
+      location:   :string,
+      user_where: :string  # apparently used only by observer controller(?)
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -15,7 +15,6 @@ class Query::NameWithObservationsAtWhere < Query::Name
     self.where << "observations.where LIKE '%#{clean_pattern(location)}%'"
     self.where << "observations.is_collection_location IS TRUE"
     initialize_observation_filters
-
     super
   end
 

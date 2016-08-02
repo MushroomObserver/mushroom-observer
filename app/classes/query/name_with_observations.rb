@@ -10,8 +10,4 @@ class Query::NameWithObservations < Query::Name
     initialize_observation_filters
     super
   end
-
-  def default_order
-    "name"
-  end
 end

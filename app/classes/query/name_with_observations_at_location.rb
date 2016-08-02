@@ -14,11 +14,6 @@ class Query::NameWithObservationsAtLocation < Query::Name
     self.where << "observations.location_id = '#{params[:location]}'"
     self.where << "observations.is_collection_location IS TRUE"
     initialize_observation_filters
-
     super
-  end
-
-  def default_order
-    "name"
   end
 end
