@@ -890,7 +890,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 
@@ -1450,7 +1449,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id], :Image,
                  :pattern_search, pattern: "agaricus") # name
@@ -1513,7 +1511,6 @@ class QueryTest < UnitTestCase
   def test_image_with_observations_for_project
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_image_with_observations_in_set
     assert_query([images(:agaricus_campestris_image).id,
@@ -1692,7 +1689,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_location_with_observations
     assert_query([locations(:burbank).id], :Location, :with_observations)
   end
@@ -1706,7 +1702,6 @@ class QueryTest < UnitTestCase
   def test_location_with_observations_for_project
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id], :Location,
@@ -1780,7 +1775,6 @@ class QueryTest < UnitTestCase
   def test_location_description_in_set
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
@@ -2001,7 +1995,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_name_with_observations_in_set
     assert_query([names(:agaricus_campestras).id,
                   names(:agaricus_campestris).id,
@@ -2060,7 +2053,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
                  :advanced_search, name: "diminutivus")
@@ -2114,7 +2106,6 @@ class QueryTest < UnitTestCase
   def test_observation_for_project
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_observation_in_set
     obs_set_ids = [observations(:unknown_with_no_naming).id,
@@ -2248,7 +2239,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_project_in_set
     assert_query([projects(:eol_project).id], :Project,
                  :in_set, ids: [projects(:eol_project).id])
@@ -2258,7 +2248,6 @@ class QueryTest < UnitTestCase
   def test_project_pattern_search
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_rss_log_all
     ids = RssLog.all.map(&:id)
@@ -2277,14 +2266,15 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_at_location
-    skip("Placeholder for unwritten test.")
+    expect = SpeciesList.where(location: locations(:burbank))
+    assert_query(SpeciesList.where(location: locations(:burbank)),
+                 :SpeciesList, :at_location, location: locations(:burbank))
+    assert_query([], :SpeciesList, :at_location, location: locations(:gualala))
   end
-
 
   def test_species_list_at_where
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id], :SpeciesList,
@@ -2304,7 +2294,6 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
                     species_lists(:unknown_species_list).id]
@@ -2315,16 +2304,14 @@ class QueryTest < UnitTestCase
     skip("Placeholder for unwritten test.")
   end
 
-
   def test_specimen_all
-    skip("Placeholder for unwritten test.")
+    expect = Specimen.all.order(:herbarium_label)
+    assert_query(expect, :Specimen, :all)
   end
-
 
   def test_specimen_pattern_search
     skip("Placeholder for unwritten test.")
   end
-
 
   def test_user_all
     expect = User.all.order("name").to_a
@@ -2343,7 +2330,6 @@ class QueryTest < UnitTestCase
   def test_user_pattern_search
     skip("Placeholder for unwritten test.")
   end
-
 
   ##############################################################################
   #
