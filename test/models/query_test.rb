@@ -886,7 +886,10 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-  def test_is_coercable; end # xxx
+  def test_is_coercable
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
@@ -1443,7 +1446,10 @@ class QueryTest < UnitTestCase
                                                           outer: 1) # (outer is only used by prev/next)
   end
 
-  def test_image_for_project; end # xxx
+  def test_image_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id], :Image,
@@ -1504,7 +1510,10 @@ class QueryTest < UnitTestCase
     assert_query([], :Image, :with_observations_by_user, user: dick)
   end
 
-  def test_image_with_observations_for_project; end # xxx
+  def test_image_with_observations_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_image_with_observations_in_set
     assert_query([images(:agaricus_campestris_image).id,
@@ -1649,7 +1658,9 @@ class QueryTest < UnitTestCase
     assert_query([], :Location, :pattern_search, pattern: "Canada -Elgin")
   end
 
-  def test_location_regexp_search; end # xxx
+  def test_location_regexp_search
+    skip("Placeholder for unwritten test.")
+  end
 
   def test_location_with_descriptions
     assert_query([locations(:albion).id], :Location, :with_descriptions)
@@ -1677,7 +1688,10 @@ class QueryTest < UnitTestCase
                  :Location, :with_descriptions_by_editor, user: mary)
   end
 
-  def test_location_with_descriptions_in_set; end # xxx
+  def test_location_with_descriptions_in_set
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_location_with_observations
     assert_query([locations(:burbank).id], :Location, :with_observations)
@@ -1689,7 +1703,10 @@ class QueryTest < UnitTestCase
     assert_query([], :Location, :with_observations_by_user, user: dick.id)
   end
 
-  def test_location_with_observations_for_project; end # xxx
+  def test_location_with_observations_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id], :Location,
@@ -1760,7 +1777,10 @@ class QueryTest < UnitTestCase
     assert_query([], :LocationDescription, :by_editor, user: dick)
   end
 
-  def test_location_description_in_set; end # xxx
+  def test_location_description_in_set
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
@@ -1977,7 +1997,10 @@ class QueryTest < UnitTestCase
     assert_query([], :Name, :with_observations_by_user, user: dick)
   end
 
-  def test_name_with_observations_for_project; end # xxx
+  def test_name_with_observations_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_name_with_observations_in_set
     assert_query([names(:agaricus_campestras).id,
@@ -2033,7 +2056,10 @@ class QueryTest < UnitTestCase
     assert_query([], :NameDescription, :by_editor, user: dick)
   end
 
-  def test_name_description_in_set; end # xxx
+  def test_name_description_in_set
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
@@ -2085,7 +2111,10 @@ class QueryTest < UnitTestCase
     assert_query([], :Observation, :by_user, user: junk, by: :id)
   end
 
-  def test_observation_for_project; end # xxx
+  def test_observation_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_observation_in_set
     obs_set_ids = [observations(:unknown_with_no_naming).id,
@@ -2215,7 +2244,10 @@ class QueryTest < UnitTestCase
                  :Project, :all)
   end
 
-  def test_project_by_rss_log; end # xxx
+  def test_project_by_rss_log
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_project_in_set
     assert_query([projects(:eol_project).id], :Project,
@@ -2223,7 +2255,10 @@ class QueryTest < UnitTestCase
     assert_query([], :Project, :in_set, ids: [])
   end
 
-  def test_project_pattern_search; end # xxx
+  def test_project_pattern_search
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_rss_log_all
     ids = RssLog.all.map(&:id)
@@ -2241,9 +2276,15 @@ class QueryTest < UnitTestCase
     assert_query(expect, :SpeciesList, :all)
   end
 
-  def test_species_list_at_location; end # xxx
+  def test_species_list_at_location
+    skip("Placeholder for unwritten test.")
+  end
 
-  def test_species_list_at_where; end # xxx
+
+  def test_species_list_at_where
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id], :SpeciesList,
@@ -2259,7 +2300,10 @@ class QueryTest < UnitTestCase
     assert_query([], :SpeciesList, :by_user, user: dick)
   end
 
-  def test_species_list_for_project; end # xxx
+  def test_species_list_for_project
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
@@ -2267,11 +2311,20 @@ class QueryTest < UnitTestCase
     assert_query(list_set_ids, :SpeciesList, :in_set, ids: list_set_ids)
   end
 
-  def test_species_list_pattern_search; end # xxx
+  def test_species_list_pattern_search
+    skip("Placeholder for unwritten test.")
+  end
 
-  def test_specimen_all; end # xxx
 
-  def test_specimen_pattern_search; end # xxx
+  def test_specimen_all
+    skip("Placeholder for unwritten test.")
+  end
+
+
+  def test_specimen_pattern_search
+    skip("Placeholder for unwritten test.")
+  end
+
 
   def test_user_all
     expect = User.all.order("name").to_a
@@ -2287,7 +2340,10 @@ class QueryTest < UnitTestCase
                  by: :reverse_name)
   end
 
-  def test_user_pattern_search; end # xxx
+  def test_user_pattern_search
+    skip("Placeholder for unwritten test.")
+  end
+
 
   ##############################################################################
   #
@@ -2345,4 +2401,3 @@ class QueryTest < UnitTestCase
     # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
   end
 end
-
