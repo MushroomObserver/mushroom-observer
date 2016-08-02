@@ -11,8 +11,4 @@ class Query::NameDescriptionByUser < Query::NameDescription
     self.where << "name_descriptions.user_id = '#{user.id}'"
     super
   end
-
-  def default_order
-    "name"
-  end
 end

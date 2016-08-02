@@ -13,8 +13,4 @@ class Query::NameOfParents < Query::Name
     self.where << "names.id IN (#{set})"
     super
   end
-
-  def default_order
-    "name"
-  end
 end

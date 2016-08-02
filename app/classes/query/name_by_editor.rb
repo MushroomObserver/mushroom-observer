@@ -8,15 +8,10 @@ class Query::NameByEditor < Query::Name
   def initialize_flavor
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-
-    version_table = "names_versions".to_sym
+    version_table = :names_versions
     add_join(version_table)
-    self.where << "#{version_table}.user_id = '#{params[:user]}'"
-    self.where << "names.user_id != '#{params[:user]}'"
-    super
-  end
-
-  def default_order
+    self.where << "#{version_table}.user_id = '#{user.id}'"
+    self.where << "names.user_id != '#{user.id}'"
     super
   end
 end

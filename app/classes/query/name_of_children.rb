@@ -14,8 +14,4 @@ class Query::NameOfChildren < Query::Name
     add_name_condition(name)
     super
   end
-
-  def default_order
-    "name"
-  end
 end

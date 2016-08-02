@@ -11,8 +11,4 @@ class Query::NameByUser < Query::Name
     self.where << "names.user_id = '#{user.id}'"
     super
   end
-
-  def default_order
-    "name"
-  end
 end
