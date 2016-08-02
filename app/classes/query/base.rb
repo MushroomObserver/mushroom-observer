@@ -38,7 +38,7 @@ class Query::Base
   end
 
   def default_order
-    "all"
+    fail "Didn't supply default order for #{model} #{flavor} query.";
   end
 
   def ==(other)

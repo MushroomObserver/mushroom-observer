@@ -979,7 +979,7 @@ class QueryTest < UnitTestCase
     q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
     qAa = Query.lookup_and_save(:Observation, :of_children, name: names(:conocybe_filaris).id)
-    assert_equal(10, Query.count)
+    assert_equal(10, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Image))
@@ -1076,7 +1076,7 @@ class QueryTest < UnitTestCase
     q8a = Query.lookup_and_save(:Observation, :at_location, location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where, user_where: "california", location: "california")
     qAa = Query.lookup_and_save(:Observation, :of_children, name: names(:conocybe_filaris).id)
-    assert_equal(10, Query.count)
+    assert_equal(10, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Location))
@@ -1212,7 +1212,7 @@ class QueryTest < UnitTestCase
             lookup_and_save(:Observation,
                             :at_where,
                             user_where: "california", location: "california")
-    assert_equal(9, Query.count)
+    assert_equal(9, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Name))
@@ -1292,7 +1292,7 @@ class QueryTest < UnitTestCase
     q2a = Query.lookup_and_save(:NameDescription, :by_author, user: rolf.id)
     q3a = Query.lookup_and_save(:NameDescription, :by_editor, user: rolf.id)
     q4a = Query.lookup_and_save(:NameDescription, :by_user, user: rolf.id)
-    assert_equal(4, Query.count)
+    assert_equal(4, QueryRecord.count)
 
     # Try coercing them into name queries.
     assert(q1b = q1a.coerce(:Name))
@@ -1775,8 +1775,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_by_user
-    assert_query([location_descriptions(:albion_desc).id], :LocationDescription,
-                 :by_user, user: rolf)
+    assert_query([location_descriptions(:albion_desc).id],
+                 :LocationDescription, :by_user, user: rolf)
     assert_query([], :LocationDescription, :by_user, user: dick)
   end
 
