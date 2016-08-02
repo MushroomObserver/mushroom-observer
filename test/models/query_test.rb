@@ -2269,7 +2269,8 @@ class QueryTest < UnitTestCase
     expect = SpeciesList.where(location: locations(:burbank))
     assert_query(SpeciesList.where(location: locations(:burbank)),
                  :SpeciesList, :at_location, location: locations(:burbank))
-    assert_query([], :SpeciesList, :at_location, location: locations(:gualala))
+    assert_query([], :SpeciesList, :at_location,
+                     location: locations(:location_no_mushrooms))
   end
 
   def test_species_list_at_where

@@ -126,16 +126,21 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_location
-    mitrula = locations(:mitrula_marsh).name
-    reyes = locations(:point_reyes).name
-    pipi = observations(:strobilurus_diminutivus_obs).where
+    # names of Locations whose names have words starting with "m"
+    m_loc_names = Location.where("name REGEXP ?", "[[:<:]]M").
+                           map(&:name)
+    # wheres of Observations whose wheres have words starting with "m"
+    # need extra "observation" to avoid confusing sql with bare "where".
+    m_obs_wheres = Observation.where("observations.where REGEXP ?", "[[:<:]]M").
+                               map(&:where)
+    m = m_loc_names + m_obs_wheres
 
-    expect = [mitrula, reyes, pipi].sort
+    expect = m.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
-    expect = [mitrula, reyes, pipi].map { |x| Location.reverse_name(x) }.sort
+    expect = m.map { |x| Location.reverse_name(x) }.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto", format: "scientific")
     assert_equal(expect, @response.body.split("\n"))
