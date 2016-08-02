@@ -30,19 +30,27 @@ module Query::Modules::ActiveRecord
 
     def lookup(*args)
       query = Query.new(*args)
-      record =
-        QueryRecord.find_by_description(query.serialize) ||
-        QueryRecord.new(
-          description:  query.serialize,
-          updated_at:   Time.now,
-          access_count: 0
-        )
+      record = get_record(query)
       record.query = query
       query.record = record
       query.outer_id = record.outer_id
       QueryRecord.cleanup
       query
     end
+
+    def get_record(query)
+      desc = query.serialize
+      QueryRecord.find_by_description(desc) ||
+      QueryRecord.new(
+        description:  desc,
+        updated_at:   Time.now,
+        access_count: 0
+      )
+    end
+  end
+
+  def record
+    @record ||= Query.get_record(self)
   end
 
   def id

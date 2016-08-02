@@ -3,6 +3,10 @@
 class QueryRecord < ActiveRecord::Base
   attr_accessor :query
 
+  def query
+    ::Query.deserialize(description)
+  end
+
   # Only keep unused states around for an hour, and used states for a day.
   # This goes through the whole lot and destroys old ones.
   def self.cleanup
