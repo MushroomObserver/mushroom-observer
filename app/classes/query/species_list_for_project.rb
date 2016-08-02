@@ -8,8 +8,8 @@ class Query::SpeciesListForProject < Query::SpeciesList
   def initialize_flavor
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    self.where << "species_lists_projects.project_id = '#{params[:project]}'"
-    add_join("species_lists_projects")
+    self.where << "projects_species_lists.project_id = '#{params[:project]}'"
+    add_join("projects_species_lists")
     super
   end
 end

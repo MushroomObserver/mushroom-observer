@@ -964,11 +964,11 @@ class ApplicationController < ActionController::Base
 
     # Otherwise, just create a default one.
     else
-      result = create_query(model, :default, args)
+      result = create_query(model, :all, args)
     end
 
     if result && !browser.bot?
-      result.access_count += 1
+      result.increment_access_count
       result.save
     end
     result
@@ -1018,7 +1018,7 @@ class ApplicationController < ActionController::Base
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
-  def create_query(model_symbol, flavor = :default, args = {})
+  def create_query(model_symbol, flavor = :all, args = {})
     Query.lookup(model_symbol, flavor, args)
   end
 

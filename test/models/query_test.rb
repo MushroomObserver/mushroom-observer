@@ -886,6 +886,8 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
+  def test_is_coercable; end # xxx
+
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 

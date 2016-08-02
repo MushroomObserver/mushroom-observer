@@ -1,4 +1,8 @@
 module Query::Modules::Coercion
+  def is_coercable?(new_model)
+    !!coerce(new_model, :just_test)
+  end
+
   # Attempt to coerce a query for one model into a related query for another
   # model.  This is currently only defined for a very few specific cases.  I
   # have no idea how to generalize it.  Returns a new Query in rare successful

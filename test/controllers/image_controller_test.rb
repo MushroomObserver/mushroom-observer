@@ -71,7 +71,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(new_inner = inner.next)
     assert_not_equal(inner, new_inner)
     assert_equal(images(:agaricus_campestris_image).id, new_inner.current_id)
-    save_query = Query.last
+    save_query = QueryRecord.last
     assert(new_new_inner = new_inner.next)
     assert_not_equal(new_inner, new_new_inner)
     assert_equal(images(:connected_coprinus_comatus_image).id,
@@ -176,7 +176,7 @@ class ImageControllerTest < FunctionalTestCase
     get(:prev_image, params)
     assert_redirected_to(action: "show_image",
                          id: observations(:detailed_unknown_obs).images.second.id,
-                         params: @controller.query_params(Query.last))
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   def test_show_original

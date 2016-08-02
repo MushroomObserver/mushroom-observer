@@ -232,22 +232,22 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_show_name
-    assert_equal(0, Query.count)
+    assert_equal(0, QueryRecord.count)
     get_with_dump(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Creates two for children and all four observations sections,
     # but one never used.
-    assert_equal(2, Query.count)
+    assert_equal(2, QueryRecord.count)
 
     get(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Should re-use all the old queries.
-    assert_equal(2, Query.count)
+    assert_equal(2, QueryRecord.count)
 
     get(:show_name, id: names(:agaricus_campestris).id)
     assert_template(:show_name, partial: "_name")
     # Needs new queries this time.
-    assert_equal(5, Query.count)
+    assert_equal(5, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show_name, id: names(:agaricus).id)
@@ -290,7 +290,7 @@ class NameControllerTest < FunctionalTestCase
     name13 = names[13]
     name14 = names[14]
     get(:next_name, id: name12.id)
-    q = @controller.query_params(Query.last)
+    q = @controller.query_params(QueryRecord.last)
     assert_redirected_to(action: :show_name, id: name13.id, params: q)
     get(:next_name, id: name13.id)
     assert_redirected_to(action: :show_name, id: name14.id, params: q)
