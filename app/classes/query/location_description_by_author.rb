@@ -12,8 +12,4 @@ class Query::LocationDescriptionByAuthor < Query::LocationDescription
     self.where << "location_descriptions_authors.user_id = '#{user.id}'"
     super
   end
-
-  def default_order
-    "name"
-  end
 end

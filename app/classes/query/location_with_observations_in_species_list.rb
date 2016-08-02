@@ -16,8 +16,4 @@ class Query::ImageWithObservationsInSpeciesList < Query::Image
     initialize_observation_filters
     super
   end
-
-  def default_order
-    "name"
-  end
 end

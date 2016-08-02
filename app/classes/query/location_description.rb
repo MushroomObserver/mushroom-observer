@@ -17,8 +17,4 @@ class Query::LocationDescription < Query::Base
     initialize_model_do_objects_by_id(:users)
     super
   end
-
-  def default_order
-    "name"
-  end
 end
