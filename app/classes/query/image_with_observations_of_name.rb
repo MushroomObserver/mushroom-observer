@@ -35,4 +35,3 @@ class Query::ImageWithObservationsOfName < Query::Image
     "name"
   end
 end
-

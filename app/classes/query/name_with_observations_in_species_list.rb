@@ -8,16 +8,11 @@ class Query::NameWithObservationsInSpeciesList < Query::Name
   end
 
   def initialize_flavor
-    species_list = find_cached_parameter_instance(SpeciesList,
-                                                  :species_list)
+    species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
     add_join(:observations, :observations_species_lists)
-    self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
+    self.where << "observations_species_lists.species_list_id = '#{species_list.id}'"
     initialize_observation_filters
     super
-  end
-
-  def default_order
-    "name"
   end
 end

@@ -15,4 +15,3 @@ class Query::LocationWithDescriptionsInSet < Query::Location
     super
   end
 end
-

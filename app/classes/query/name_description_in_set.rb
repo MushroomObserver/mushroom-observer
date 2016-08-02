@@ -12,4 +12,3 @@ class Query::NameDescsriptionInSet < Query::NameDescsription
     super
   end
 end
-

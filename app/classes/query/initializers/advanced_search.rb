@@ -93,17 +93,3 @@ module Query::Initializers::AdvancedSearch
     end
   end
 end
-
-#     case model
-#     when Location
-#       add_join(:observations, :users) unless user.blank?
-#       add_join(:observations, :names) unless name.blank?
-#       add_join(:observations)         unless content.blank?
-#     end
-
-#   def content_join_spec
-#           case model
-#             when Location
-#               { observations: :comments }
-#           end
-#   end
