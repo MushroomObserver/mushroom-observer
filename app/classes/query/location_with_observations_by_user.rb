@@ -12,6 +12,7 @@ class Query::LocationWithObservationsByUser < Query::Location
     title_args[:user] = user.legal_name
     add_join(:observations)
     self.where << "observations.user_id = '#{user.id}'"
+    self.where << "observations.is_collection_location IS TRUE"
     initialize_observation_filters
     super
   end

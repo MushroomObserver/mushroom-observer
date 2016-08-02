@@ -11,9 +11,8 @@ class Query::NameWithObservationsForProject < Query::Name
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
     add_join(:observations, :observations_projects)
-    self.where << "observations_projects.project_id = '#{params[:project]}'"
+    self.where << "observations_projects.project_id = '#{project.id}'"
     initialize_observation_filters
-
     super
   end
 

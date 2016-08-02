@@ -12,7 +12,7 @@ class Query::ImageWithObservationsForProject < Query::Image
     title_args[:project] = project.title
     add_join(:images_observations, :observations)
     add_join(:observations, :observations_projects)
-    self.where << "observations_projects.project_id = '#{params[:project]}'"
+    self.where << "observations_projects.project_id = '#{project.id}'"
     initialize_observation_filters
     super
   end
