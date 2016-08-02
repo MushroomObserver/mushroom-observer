@@ -1,9 +1,9 @@
-class Query::NameDescsriptionInSet < Query::NameDescsription
+class Query::NameDescriptionInSet < Query::NameDescription
   include Query::Initializers::InSet
 
   def parameter_declarations
     super.merge(
-      ids: [NameDescsription]
+      ids: [NameDescription]
     )
   end
 
