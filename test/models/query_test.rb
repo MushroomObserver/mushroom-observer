@@ -3,65 +3,6 @@ require "test_helper"
 require "set"
 
 class QueryTest < UnitTestCase
-  def model_all_test(model, params={})
-    query = Query.lookup(model.name.to_sym, :all, params)
-    assert_equal(model.count, query.num_results)
-  end
-
-  def test_comment_all
-    model_all_test(Comment)
-  end
-
-  def test_herbarium_all
-    model_all_test(Herbarium)
-  end
-
-  def test_image_all
-    model_all_test(Image)
-  end
-
-  def test_location_all
-    model_all_test(Location)
-  end
-
-  def test_location_description_all
-    model_all_test(LocationDescription)
-  end
-
-  def test_name_all
-    # By default ignore misspelt names.
-    model_all_test(Name, misspellings: :either)
-  end
-
-  def test_name_description_all
-    model_all_test(NameDescription)
-  end
-
-  def test_observation_all
-    model_all_test(Observation)
-  end
-
-  def test_project_all
-    model_all_test(Project)
-  end
-
-  def test_rss_log_all
-    model_all_test(RssLog)
-  end
-
-  def test_species_list_all
-    model_all_test(SpeciesList)
-  end
-
-  def test_specimen_all
-    model_all_test(Specimen)
-  end
-
-  def test_user_all
-    model_all_test(User)
-  end
-
-  ##############################################################################
 
   def assert_query(expect, *args)
     expect = expect.to_a unless expect.respond_to?(:map!)
@@ -1438,7 +1379,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Herbarium, :pattern_search, pattern: "awesome")
   end
 
-  def test_image_advanced
+  def test_image_advanced_search
     assert_query([images(:agaricus_campestris_image).id], :Image, :advanced_search, name: "Agaricus")
     assert_query([images(:agaricus_campestris_image).id,
                   images(:turned_over_image).id,
@@ -1499,7 +1440,7 @@ class QueryTest < UnitTestCase
                                                           outer: 1) # (outer is only used by prev/next)
   end
 
-  def test_image_pattern
+  def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id], :Image,
                  :pattern_search, pattern: "agaricus") # name
     assert_query([images(:agaricus_campestris_image).id,
@@ -1619,7 +1560,7 @@ class QueryTest < UnitTestCase
                  name: names(:conocybe_filaris).id)
   end
 
-  def test_location_advanced
+  def test_location_advanced_search
     assert_query([locations(:burbank).id], :Location, :advanced_search,
                  name: "agaricus")
     assert_query([], :Location, :advanced_search, name: "coprinus")
@@ -1692,7 +1633,7 @@ class QueryTest < UnitTestCase
                        locations(:elgin_co).id])
   end
 
-  def test_location_pattern
+  def test_location_pattern_search
     expect = Location.all.select { |l| l.display_name =~ /california/i }
     assert_query(expect, :Location,
                  :pattern_search, pattern: "California", by: :id)
@@ -1806,7 +1747,7 @@ class QueryTest < UnitTestCase
     assert_query([], :LocationDescription, :by_editor, user: dick)
   end
 
-  def test_name_advanced
+  def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
                  name: "macrocybe*titans")
     assert_query([names(:coprinus_comatus).id], :Name, :advanced_search,
@@ -1911,7 +1852,7 @@ class QueryTest < UnitTestCase
     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
   end
 
-  def test_name_pattern
+  def test_name_pattern_search
     assert_query([], :Name, :pattern_search,
                  pattern: "petigera") # search_name
     assert_query([names(:petigera).id], :Name, :pattern_search,
@@ -2075,7 +2016,7 @@ class QueryTest < UnitTestCase
     assert_query([], :NameDescription, :by_editor, user: dick)
   end
 
-  def test_observation_advanced
+  def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
                  :advanced_search, name: "diminutivus")
     assert_query([observations(:coprinus_comatus_obs).id], :Observation,
@@ -2219,7 +2160,7 @@ class QueryTest < UnitTestCase
                  project: projects(:eol_project).id)
   end
 
-  def test_observation_pattern
+  def test_observation_pattern_search
     # notes
     assert_query([observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestros_obs).id,
@@ -2259,28 +2200,28 @@ class QueryTest < UnitTestCase
     assert_query([], :Project, :in_set, ids: [])
   end
 
-  def test_rsslog_all
+  def test_rss_log_all
     ids = RssLog.all.map(&:id)
     assert_query(ids, :RssLog, :all)
   end
 
-  def test_rsslog_in_set
+  def test_rss_log_in_set
     rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
                       rss_logs(:name_rss_log).id]
     assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
   end
 
-  def test_specieslist_all
+  def test_species_list_all
     expect = SpeciesList.all.order("title").to_a
     assert_query(expect, :SpeciesList, :all)
   end
 
-  def test_specieslist_by_rss_log
+  def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id], :SpeciesList,
                  :by_rss_log)
   end
 
-  def test_specieslist_by_user
+  def test_species_list_by_user
     assert_query([species_lists(:first_species_list).id,
                   species_lists(:another_species_list).id], :SpeciesList,
                  :by_user, user: rolf, by: :id)
@@ -2289,7 +2230,7 @@ class QueryTest < UnitTestCase
     assert_query([], :SpeciesList, :by_user, user: dick)
   end
 
-  def test_specieslist_in_set
+  def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
                     species_lists(:unknown_species_list).id]
     assert_query(list_set_ids, :SpeciesList, :in_set, ids: list_set_ids)
@@ -2364,4 +2305,25 @@ class QueryTest < UnitTestCase
     # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
     # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
   end
+
+  def test_image_for_project; end # xxx
+  def test_image_with_observations_for_project; end # xxx
+  def test_location_regexp_search; end # xxx
+  def test_location_with_descriptions_in_set; end # xxx
+  def test_location_with_observations_for_project; end # xxx
+  def test_location_description_in_set; end # xxx
+  def test_name_with_observations_for_project; end # xxx
+  def test_name_description_in_set; end # xxx
+  def test_name_descriptions_in_set; end # xxx
+  def test_observation_for_project; end # xxx
+  def test_project_by_rss_log; end # xxx
+  def test_project_pattern_search; end # xxx
+  def test_species_list_at_location; end # xxx
+  def test_species_list_at_where; end # xxx
+  def test_species_list_for_project; end # xxx
+  def test_species_list_pattern_search; end # xxx
+  def test_specimen_all; end # xxx
+  def test_specimen_pattern_search; end # xxx
+  def test_user_pattern_search; end # xxx
 end
+
