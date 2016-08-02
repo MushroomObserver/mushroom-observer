@@ -201,6 +201,8 @@ module Query::Modules::Validation
 
   def validate_query(arg, val)
     if val.is_a?(Query::Base)
+      val.record.id
+    elsif val.is_a?(Fixnum)
       val
     else
       fail("Value for :#{arg} should be a Query class, got: #{val.inspect}")

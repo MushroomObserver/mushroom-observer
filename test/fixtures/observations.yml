@@ -21,9 +21,9 @@ detailed_unknown_obs: # old id: 2
   location: burbank
   name: fungi
   specimen: 1
-  thumb_image: in_situ_image
   notes: Found in a strange place... & with śtrangè characters™
   rss_log: observation_rss_log
+  thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
   specimens: interesting_unknown
@@ -51,6 +51,7 @@ agaricus_campestris_obs: # old id: 4
   name: agaricus_campestris
   specimen: 0
   notes: From the lawn next door
+  thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
   specimens: agaricus_campestris_spec
 
@@ -137,6 +138,7 @@ peltigera_obs: # old id: 12
   specimen: 1
   notes: 'Growing on a hardwood'
   vote_cache: 3
+  thumb_image: peltigera_image
   images: peltigera_image
 
 peltigera_rolf_obs: # old id: 13
@@ -150,6 +152,7 @@ peltigera_rolf_obs: # old id: 13
   specimen: 1
   notes: 'Growing on a hardwood'
   vote_cache: 3
+  thumb_image: rolf_profile_image
   images: rolf_profile_image
 
 fungi_obs: # old id: 14
@@ -163,6 +166,7 @@ fungi_obs: # old id: 14
   specimen: 0
   notes: 'Observation for plane pileus'
   vote_cache: 3
+  thumb_image: conic_image, plane_image_example
   images: conic_image, plane_image_example
 
 boletus_edulis_obs: # old id: 15
