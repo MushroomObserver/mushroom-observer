@@ -117,8 +117,9 @@ module Query::Modules::Coercion
     end
   end
 
-  def recognized_flavor?(model,flavor)
-    "Query::#{model}#{flavor.camelize}".constantize
+  def recognized_flavor?(model, flavor)
+    klass = "Query::#{model}#{flavor.to_s.camelize}"
+    klass.constantize
     true
   rescue NameError
     false
