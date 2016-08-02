@@ -110,10 +110,17 @@ module Query::Modules::Coercion
           # params[:synonyms] == :all / :no / :exclusive
           # params[:misspellings] == :either / :no / :only
           nil
-        elsif allowed_model_flavors[new_model].include?(new_flavor)
+        elsif recognized_flavor?(new_model, new_flavor)
           Query.lookup(new_model, new_flavor, params2)
         end
       end
     end
+  end
+
+  def recognized_flavor?(model,flavor)
+    "Query::#{model}#{flavor.camelize}".constantize
+    true
+  rescue NameError
+    false
   end
 end

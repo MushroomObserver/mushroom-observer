@@ -994,16 +994,16 @@ class QueryTest < UnitTestCase
     assert(qAb = qAa.coerce(:Image))
 
     # They should all be new records
-    assert(q1b.new_record?); assert_save(q1b)
-    assert(q2b.new_record?); assert_save(q2b)
-    assert(q3b.new_record?); assert_save(q3b)
-    assert(q4b.new_record?); assert_save(q4b)
-    assert(q5b.new_record?); assert_save(q5b)
-    assert(q6b.new_record?); assert_save(q6b)
-    assert(q7b.new_record?); assert_save(q7b)
-    assert(q8b.new_record?); assert_save(q8b)
-    assert(q9b.new_record?); assert_save(q9b)
-    assert(qAb.new_record?); assert_save(qAb)
+    assert(q1b.record.new_record?); assert_save(q1b)
+    assert(q2b.record.new_record?); assert_save(q2b)
+    assert(q3b.record.new_record?); assert_save(q3b)
+    assert(q4b.record.new_record?); assert_save(q4b)
+    assert(q5b.record.new_record?); assert_save(q5b)
+    assert(q6b.record.new_record?); assert_save(q6b)
+    assert(q7b.record.new_record?); assert_save(q7b)
+    assert(q8b.record.new_record?); assert_save(q8b)
+    assert(q9b.record.new_record?); assert_save(q9b)
+    assert(qAb.record.new_record?); assert_save(qAb)
 
     # Check their descriptions.
     assert_equal("Image", q1b.model.to_s)
@@ -1041,16 +1041,16 @@ class QueryTest < UnitTestCase
     assert(qAc = qAb.coerce(:Observation))
 
     # Only some should be new.
-    assert(q1c.new_record?)  # (lost order)
-    assert(!q2c.new_record?); assert_equal(q2a, q2c)
-    assert(!q3c.new_record?); assert_equal(q3a, q3c)
-    assert(!q4c.new_record?); assert_equal(q4a, q4c)
-    assert(q5c.new_record?)  # (has an explicit title now)
-    assert(q6c.new_record?)  # (converted to in_set)
-    assert(q7c.new_record?)  # (converted to in_set)
-    assert(!q8c.new_record?); assert_equal(q8a, q8c)
-    assert(!q9c.new_record?); assert_equal(q9a, q9c)
-    assert(!qAc.new_record?); assert_equal(qAa, qAc)
+    assert(q1c.record.new_record?)  # (lost order)
+    assert(!q2c.record.new_record?); assert_equal(q2a, q2c)
+    assert(!q3c.record.new_record?); assert_equal(q3a, q3c)
+    assert(!q4c.record.new_record?); assert_equal(q4a, q4c)
+    assert(q5c.record.new_record?)  # (has an explicit title now)
+    assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(!q8c.record.new_record?); assert_equal(q8a, q8c)
+    assert(!q9c.record.new_record?); assert_equal(q9a, q9c)
+    assert(!qAc.record.new_record?); assert_equal(qAa, qAc)
 
     # All four "new" ones should now be reversable.
     q1c.save; q1d = q1c.coerce(:Image); assert_equal(q1b, q1d)
@@ -1091,15 +1091,15 @@ class QueryTest < UnitTestCase
     assert(qAb = qAa.coerce(:Location))
 
     # They should all be new records
-    assert(q1b.new_record?); assert_save(q1b)
-    assert(q2b.new_record?); assert_save(q2b)
-    assert(q3b.new_record?); assert_save(q3b)
-    assert(q4b.new_record?); assert_save(q4b)
-    assert(q5b.new_record?); assert_save(q5b)
-    assert(q6b.new_record?); assert_save(q6b)
-    assert(q7b.new_record?); assert_save(q7b)
-    assert(q8b.new_record?); assert_save(q8b)
-    assert(qAb.new_record?); assert_save(qAb)
+    assert(q1b.record.new_record?); assert_save(q1b)
+    assert(q2b.record.new_record?); assert_save(q2b)
+    assert(q3b.record.new_record?); assert_save(q3b)
+    assert(q4b.record.new_record?); assert_save(q4b)
+    assert(q5b.record.new_record?); assert_save(q5b)
+    assert(q6b.record.new_record?); assert_save(q6b)
+    assert(q7b.record.new_record?); assert_save(q7b)
+    assert(q8b.record.new_record?); assert_save(q8b)
+    assert(qAb.record.new_record?); assert_save(qAb)
 
     # Check their descriptions.
     assert_equal("Location", q1b.model.to_s)
@@ -1162,14 +1162,14 @@ class QueryTest < UnitTestCase
     assert(qAc = qAb.coerce(:Observation))
 
     # Only some should be new.
-    assert(q1c.new_record?)  # (lost order)
-    assert(!q2c.new_record?); assert_equal(q2a, q2c)
-    assert(!q3c.new_record?); assert_equal(q3a, q3c)
-    assert(!q4c.new_record?); assert_equal(q4a, q4c)
-    assert(q5c.new_record?)  # (has an explicit title now)
-    assert(q6c.new_record?)  # (converted to in_set)
-    assert(q7c.new_record?)  # (converted to in_set)
-    assert(!qAc.new_record?); assert_equal(qAa, qAc)
+    assert(q1c.record.new_record?)  # (lost order)
+    assert(!q2c.record.new_record?); assert_equal(q2a, q2c)
+    assert(!q3c.record.new_record?); assert_equal(q3a, q3c)
+    assert(!q4c.record.new_record?); assert_equal(q4a, q4c)
+    assert(q5c.record.new_record?)  # (has an explicit title now)
+    assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(!qAc.record.new_record?); assert_equal(qAa, qAc)
 
     # All four "new" ones should now be reversable.
     q1c.save; q1d = q1c.coerce(:Location); assert_equal(q1b, q1d)
@@ -1226,15 +1226,15 @@ class QueryTest < UnitTestCase
     assert(q9b = q9a.coerce(:Name))
 
     # They should all be new records
-    assert(q1b.new_record?); assert_save(q1b)
-    assert(q2b.new_record?); assert_save(q2b)
-    assert(q3b.new_record?); assert_save(q3b)
-    # assert(q4b.new_record?); assert_save(q4b)
-    assert(q5b.new_record?); assert_save(q5b)
-    assert(q6b.new_record?); assert_save(q6b)
-    assert(q7b.new_record?); assert_save(q7b)
-    assert(q8b.new_record?); assert_save(q8b)
-    assert(q9b.new_record?); assert_save(q9b)
+    assert(q1b.record.new_record?); assert_save(q1b)
+    assert(q2b.record.new_record?); assert_save(q2b)
+    assert(q3b.record.new_record?); assert_save(q3b)
+    # assert(q4b.record.new_record?); assert_save(q4b)
+    assert(q5b.record.new_record?); assert_save(q5b)
+    assert(q6b.record.new_record?); assert_save(q6b)
+    assert(q7b.record.new_record?); assert_save(q7b)
+    assert(q8b.record.new_record?); assert_save(q8b)
+    assert(q9b.record.new_record?); assert_save(q9b)
 
     # Check their descriptions.
     assert_equal("Name", q1b.model.to_s)
@@ -1269,15 +1269,15 @@ class QueryTest < UnitTestCase
     assert(q9c = q9b.coerce(:Observation))
 
     # Only some should be new.
-    assert(q1c.new_record?) # (lost order)
-    assert(!q2c.new_record?); assert_equal(q2a, q2c)
-    assert(!q3c.new_record?); assert_equal(q3a, q3c)
-    # assert(!q4c.new_record?); assert_equal(q4a, q4c)
-    assert(q5c.new_record?)  # (has an explicit title now)
-    assert(q6c.new_record?)  # (converted to in_set)
-    assert(q7c.new_record?)  # (converted to in_set)
-    assert(!q8c.new_record?); assert_equal(q8a, q8c)
-    assert(!q9c.new_record?); assert_equal(q9a, q9c)
+    assert(q1c.record.new_record?) # (lost order)
+    assert(!q2c.record.new_record?); assert_equal(q2a, q2c)
+    assert(!q3c.record.new_record?); assert_equal(q3a, q3c)
+    # assert(!q4c.record.new_record?); assert_equal(q4a, q4c)
+    assert(q5c.record.new_record?)  # (has an explicit title now)
+    assert(q6c.record.new_record?)  # (converted to in_set)
+    assert(q7c.record.new_record?)  # (converted to in_set)
+    assert(!q8c.record.new_record?); assert_equal(q8a, q8c)
+    assert(!q9c.record.new_record?); assert_equal(q9a, q9c)
 
     # All four "new" ones should now be reversable.
     q1c.save; q1d = q1c.coerce(:Name); assert_equal(q1b, q1d)
@@ -1301,10 +1301,10 @@ class QueryTest < UnitTestCase
     assert(q4b = q4a.coerce(:Name))
 
     # They should all be new records
-    assert(q1b.new_record?); assert_save(q1b)
-    assert(q2b.new_record?); assert_save(q2b)
-    assert(q3b.new_record?); assert_save(q3b)
-    assert(q4b.new_record?); assert_save(q4b)
+    assert(q1b.record.new_record?); assert_save(q1b)
+    assert(q2b.record.new_record?); assert_save(q2b)
+    assert(q3b.record.new_record?); assert_save(q3b)
+    assert(q4b.record.new_record?); assert_save(q4b)
 
     # Make sure they're right.
     assert_equal("Name", q1b.model.to_s)
@@ -1352,10 +1352,10 @@ class QueryTest < UnitTestCase
     q6 = q1.coerce(:User)
 
     # Make sure they succeeded and created new queries.
-    assert(q2); assert(q2.new_record?); assert_save(q2)
-    assert(q3); assert(q3.new_record?); assert_save(q3)
-    assert(q4); assert(q4.new_record?); assert_save(q4)
-    assert(q5); assert(q5.new_record?); assert_save(q5)
+    assert(q2); assert(q2.record.new_record?); assert_save(q2)
+    assert(q3); assert(q3.record.new_record?); assert_save(q3)
+    assert(q4); assert(q4.record.new_record?); assert_save(q4)
+    assert(q5); assert(q5.record.new_record?); assert_save(q5)
     assert_nil(q6)
 
     # Make sure they are correct.
