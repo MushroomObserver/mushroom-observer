@@ -21,4 +21,3 @@ class Query::LocationWithObservationsForProject < Query::Location
     "name"
   end
 end
-

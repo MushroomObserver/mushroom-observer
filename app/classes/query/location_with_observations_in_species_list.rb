@@ -21,4 +21,3 @@ class Query::ImageWithObservationsInSpeciesList < Query::Image
     "name"
   end
 end
-

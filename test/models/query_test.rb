@@ -2365,4 +2365,3 @@ class QueryTest < UnitTestCase
     # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
   end
 end
-

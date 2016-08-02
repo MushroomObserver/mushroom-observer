@@ -8,4 +8,3 @@ class Query::LocationWithDescriptions < Query::Location
     super
   end
 end
-

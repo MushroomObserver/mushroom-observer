@@ -11,4 +11,3 @@ class Query::LocationWithObservations < Query::Location
     super
   end
 end
-
