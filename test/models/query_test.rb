@@ -1449,7 +1449,7 @@ class QueryTest < UnitTestCase
     assert_query(projects(:bolete_project).images.sort,
                  :Image, :for_project, project: projects(:bolete_project), by: :id)
     assert_query([], :Image, :for_project, project: projects(:empty_project))
-  end #xxx
+  end
 
   def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id], :Image,
@@ -1755,9 +1755,13 @@ class QueryTest < UnitTestCase
     desc1.add_author(rolf)
     desc2.add_author(mary)
     desc3.add_author(rolf)
-    assert_query([desc1, desc3], :LocationDescription, :by_author, user: rolf, by: :id)
-    assert_query([desc2], :LocationDescription, :by_author, user: mary)
-    assert_query([], :LocationDescription, :by_author, user: dick)
+    descs = LocationDescription.all
+
+    assert_query(descs.find_all {|d| d.authors.include?(rolf)},
+                :LocationDescription, :by_author, user: rolf, by: :id)
+    assert_query(descs.find_all {|d| d.authors.include?(mary)},
+                :LocationDescription, :by_author, user: mary)
+    assert_query([], :LocationDescription, :by_author, user: users(:zero_user))
   end
 
   def test_location_description_by_editor

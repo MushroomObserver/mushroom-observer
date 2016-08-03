@@ -120,3 +120,23 @@ spammer: # old id: 7
   keep_filenames: <%= User.keep_filenames[:toss] %>
   # Associations
   user_groups: all_users, spammer_only
+
+# Has nothing: no comments, descriptions, images, locations, names,
+#  observations, projects, publications, species lists, specimens, or anything
+# except account
+zero_user:
+  login: zero
+  name: Zero
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
+  email: zero@collectivesource.com
+  verified: 2016-08-05 15:50:00
+  contribution: 0
+  created_here: true
+  locale: en-US
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
+  # Associations
+  user_groups: all_users
+
