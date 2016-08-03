@@ -9,7 +9,7 @@ class QueryTest < UnitTestCase
     expect.map!(&:id) if expect.first.is_a?(AbstractModel)
     query = Query.lookup(*args)
     actual = query.result_ids
-    assert((Set.new(expect) - Set.new(actual)).empty?,
+    assert((Set.new(expect) == Set.new(actual)),
            "Query results are wrong.  SQL is:\n" + query.last_query + "\n" +
            "Expect: #{expect.inspect}\n" +
            "Actual: #{actual.inspect}\n")
