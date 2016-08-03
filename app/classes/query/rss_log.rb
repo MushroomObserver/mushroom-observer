@@ -1,4 +1,6 @@
 class Query::RssLog < Query::Base
+  include Query::Initializers::ObservationFilters
+
   def model
     RssLog
   end
@@ -7,12 +9,17 @@ class Query::RssLog < Query::Base
     super.merge(
       updated_at?: [:time],
       type?:       :string
-    )
+    ).merge(observation_filter_parameter_declarations)
   end
 
   def initialize_flavor
     initialize_model_do_time(:updated_at)
-    add_rss_log_type_condition(params[:type])
+    add_rss_log_type_condition
+    if has_any_observation_filters? &&
+       (types.include?("all") OR types.include?("observation"))
+      add_join(:observations!)
+      initialize_observation_filters_for_rss_log
+    end
     super
   end
 
@@ -20,8 +27,11 @@ class Query::RssLog < Query::Base
     "updated_at"
   end
 
-  def add_rss_log_type_condition(arg)
-    types = (arg || "all").to_s.split
+  def types
+    @rss_log_types ||= (params[:type] || "all").to_s.split
+  end
+
+  def add_rss_log_type_condition
     unless types.include?("all")
       types &= RssLog.all_types
       if types.empty?
