@@ -1967,18 +1967,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_by_user
-    assert_query([names(:agaricus_campestras).id,
-                  names(:agaricus_campestris).id,
-                  names(:agaricus_campestros).id,
-                  names(:agaricus_campestrus).id,
-                  names(:coprinus_comatus).id,
-                  names(:peltigera).id,
-                  names(:strobilurus_diminutivus_no_author).id],
-                 :Name,
-                 :with_observations_by_user, user: rolf)
-    assert_query([names(:fungi).id], :Name,
-                 :with_observations_by_user, user: mary)
-    assert_query([], :Name, :with_observations_by_user, user: dick)
+    assert_query(Name.joins(:observations).
+                      where(:observations => { user: rolf }).distinct,
+                 :Name, :with_observations_by_user, user: rolf)
+    assert_query(Name.joins(:observations).
+                      where(:observations => { user: mary }).distinct,
+                 :Name, :with_observations_by_user, user: mary)
+    assert_query([], :Name, :with_observations_by_user, user: users(:zero_user))
   end
 
   def test_name_with_observations_for_project
