@@ -1616,9 +1616,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_by_user
-    assert_query(Location.where(user: :rolf).order(:id),
+    assert_query(Location.where(user: rolf),
                  :Location, :by_user, user: rolf, by: :id)
-    assert_query([], :Location, :by_user, user: mary)
+    assert_query([], :Location, :by_user, user: users(:zero_user))
   end
 
   def test_location_by_editor
