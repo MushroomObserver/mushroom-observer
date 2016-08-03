@@ -1690,9 +1690,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations_by_user
-    assert_query([locations(:burbank).id], :Location,
-                 :with_observations_by_user, user: rolf.id)
-    assert_query([], :Location, :with_observations_by_user, user: dick.id)
+    assert_query(Location.joins(:observations).
+                          where(:observations => { user: rolf }),
+                 :Location, :with_observations_by_user, user: rolf.id)
+    assert_query([], :Location, :with_observations_by_user,
+                     user: users(:zero_user))
   end
 
   def test_location_with_observations_for_project
