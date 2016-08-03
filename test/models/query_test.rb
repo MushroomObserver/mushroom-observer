@@ -1821,27 +1821,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_by_user
-    assert_query([names(:macrolepiota_rhacodes).id,
-                  names(:chlorophyllum_rhacodes).id],
+    assert_query(Name.where(user: mary).where(correct_spelling: nil),
                  :Name, :by_user, user: mary, by: :id)
-    assert_query([names(:boletus_edulis).id,
-                  names(:suillus).id,
-                  names(:suillus_by_white).id,
-                  names(:hygrocybe_russocoriacea_good_author).id],
+    assert_query(Name.where(user: dick).where(correct_spelling: nil),
                  :Name, :by_user, user: dick, by: :id)
-    assert_query([names(:fungi).id,
-                  names(:coprinus_comatus).id,
-                  names(:agaricus_campestris).id,
-                  names(:conocybe_filaris).id,
-                  names(:amanita_baccata_arora).id,
-                  names(:amanita_baccata_borealis).id,
-                  names(:lepiota_rachodes).id,
-                  names(:lepiota_rhacodes).id,
-                  names(:macrolepiota_rachodes).id,
-                  names(:chlorophyllum_rachodes).id,
-                  names(:lactarius_alpinus).id],
+    assert_query(Name.where(user: rolf).where(correct_spelling: nil),
                  :Name, :by_user, user: rolf, by: :id)
-    assert_query([], :Name, :by_user, user: junk)
+    assert_query([], :Name, :by_user, user: users(:zero_user))
   end
 
   def test_name_by_editor
