@@ -1385,28 +1385,26 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_advanced_search
-    assert_query([images(:agaricus_campestris_image).id], :Image, :advanced_search, name: "Agaricus")
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, :advanced_search, name: "Agaricus")
     assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                 :advanced_search, location: "burbank")
+                  images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, :advanced_search, location: "burbank")
     assert_query([images(:connected_coprinus_comatus_image).id], :Image,
                  :advanced_search, location: "glendale")
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                :advanced_search, user: "mary")
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                :advanced_search, content: "little")
-    assert_query([images(:connected_coprinus_comatus_image).id], :Image,
-                 :advanced_search, content: "fruiting")
-    assert_query([], :Image,
-                 :advanced_search, name: "agaricus", location: "glendale")
+    assert_query(Image.includes(:observations).
+                       where(:observations => { user: mary } ),
+                 :Image, :advanced_search, user: "mary")
+    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, :advanced_search, content: "little")
+    assert_query([images(:connected_coprinus_comatus_image).id],
+                 :Image, :advanced_search, content: "fruiting")
+    assert_query([],
+                 :Image, :advanced_search, name: "agaricus", location: "glendale")
     assert_query([images(:agaricus_campestris_image).id], :Image,
                  :advanced_search, name: "agaricus", location: "burbank")
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                  :advanced_search, content: "little", location: "burbank")
+    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, :advanced_search, content: "little", location: "burbank")
   end
 
   def test_image_all
