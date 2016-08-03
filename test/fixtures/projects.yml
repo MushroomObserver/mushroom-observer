@@ -39,3 +39,10 @@ empty_project:
   admin_group: mary_only
   title: Empty Project
   summary: No Images Observations or Lists
+
+one_image_project:
+  user: mary
+  user_group: mary_only
+  admin_group: mary_only
+  title: One Image Project
+  summary: One Images, No Observations or Lists

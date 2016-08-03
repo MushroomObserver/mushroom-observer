@@ -2235,8 +2235,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_all
-    assert_query([projects(:bolete_project).id, projects(:eol_project).id],
-                 :Project, :all)
+    assert_query(Project.all, :Project, :all)
   end
 
   def test_project_by_rss_log
