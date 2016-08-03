@@ -887,8 +887,8 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_is_coercable
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
@@ -1509,8 +1509,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_for_project
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_image_with_observations_in_set
     assert_query([images(:agaricus_campestris_image).id,
@@ -1655,8 +1655,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_location_with_descriptions
     assert_query([locations(:albion).id], :Location, :with_descriptions)
@@ -1685,8 +1685,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions_in_set
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_location_with_observations
     assert_query([locations(:burbank).id], :Location, :with_observations)
@@ -1699,8 +1699,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations_for_project
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id], :Location,
@@ -1772,8 +1772,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_in_set
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
@@ -1941,7 +1941,6 @@ class QueryTest < UnitTestCase
     assert_query([], :Name, :with_descriptions_by_editor, user: dick)
   end
 
-
   def test_name_with_descriptions_in_set
     desc1 = name_descriptions(:peltigera_desc)
     desc2 = name_descriptions(:peltigera_alt_desc)
@@ -1991,8 +1990,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_for_project
-    skip("Placeholder for unwritten test.")
-  end
+        skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_name_with_observations_in_set
     assert_query([names(:agaricus_campestras).id,
@@ -2049,8 +2048,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_in_set
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
@@ -2103,8 +2102,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_for_project
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_observation_in_set
     obs_set_ids = [observations(:unknown_with_no_naming).id,
@@ -2235,8 +2234,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_by_rss_log
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_project_in_set
     assert_query([projects(:eol_project).id], :Project,
@@ -2245,8 +2244,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_pattern_search
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_rss_log_all
     ids = RssLog.all.map(&:id)
@@ -2273,8 +2272,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_at_where
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id], :SpeciesList,
@@ -2291,8 +2290,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_for_project
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
@@ -2301,8 +2300,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_pattern_search
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_specimen_all
     expect = Specimen.all.order(:herbarium_label)
@@ -2310,8 +2309,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_specimen_pattern_search
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   def test_user_all
     expect = User.all.order("name").to_a
@@ -2328,8 +2327,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_pattern_search
-    skip("Placeholder for unwritten test.")
-  end
+      skip("Placeholder for unwritten test.")
+  end #xxx
 
   ##############################################################################
   #
