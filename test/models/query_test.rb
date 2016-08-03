@@ -1470,11 +1470,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:connected_coprinus_comatus_image).id,
-                  images(:turned_over_image).id,
-                  images(:in_situ_image).id,
-                  images(:peltigera_image).id],
+    assert_query(Image.includes(:observations).
+                       where.not(:observations => { thumb_image: nil }),
                  :Image, :with_observations)
   end
 
