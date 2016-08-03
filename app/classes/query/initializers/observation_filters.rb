@@ -6,6 +6,12 @@ module Query::Initializers::ObservationFilters
     }
   end
 
+  # Lets application controller easily check if we need to apply user's content
+  # filter parameters to the current query.
+  def observation_filters
+    true
+  end
+
   def has_any_observation_filters?
     keys = observation_filter_parameter_declarations.keys
     keys = keys.map {|k| k.sub(/\?$/, "")}
