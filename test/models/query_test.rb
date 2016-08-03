@@ -1556,10 +1556,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_of_name
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                 :with_observations_of_name,
-                 name: names(:fungi).id)
+    assert_query(Image.joins(:images_observations, :observations).
+                       where(:observations => { name: names(:fungi) }),
+                 :Image, :with_observations_of_name, name: names(:fungi).id)
     assert_query([images(:connected_coprinus_comatus_image).id],
                  :Image, :with_observations_of_name,
                  name: names(:coprinus_comatus).id)
