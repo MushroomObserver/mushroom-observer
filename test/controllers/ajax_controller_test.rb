@@ -163,14 +163,14 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_project
-    eol = projects(:eol_project).title
-    bolete = projects(:bolete_project).title
-
+    # titles of Projects whose titles have words starting with "p"
+    b_titles = Project.where("title REGEXP ?", "[[:<:]]b").map(&:title)
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
-    assert_equal(["B", bolete], @response.body.split("\n"))
+    assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
 
+    p_titles = Project.where("title REGEXP ?", "[[:<:]]p").map(&:title)
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
-    assert_equal(["P", bolete, eol], @response.body.split("\n"))
+    assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
 
     good_ajax_request(:auto_complete, type: :project, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))

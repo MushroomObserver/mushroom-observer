@@ -1446,8 +1446,10 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_for_project
-    skip("Placeholder for unwritten test.")
-  end
+    assert_query(projects(:bolete_project).images.sort,
+                 :Image, :for_project, project: projects(:bolete_project), by: :id)
+    assert_query([], :Image, :for_project, project: projects(:empty_project))
+  end #xxx
 
   def test_image_pattern_search
     assert_query([images(:agaricus_campestris_image).id], :Image,
