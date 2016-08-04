@@ -1495,14 +1495,15 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_by_user
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:connected_coprinus_comatus_image).id,
-                  images(:peltigera_image).id], :Image,
-                 :with_observations_by_user, user: rolf)
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                  :with_observations_by_user, user: mary)
-    assert_query([], :Image, :with_observations_by_user, user: dick)
+    assert_query(Image.joins(:observations).
+                       where(:observations => { user: rolf }),
+                :Image, :with_observations_by_user, user: rolf)
+
+    assert_query(Image.joins(:observations).
+                       where(:observations => { user: mary }),
+                 :Image, :with_observations_by_user, user: mary)
+
+    assert_query([], :Image, :with_observations_by_user, user: users(:zero_user))
   end
 
   def test_image_with_observations_for_project
