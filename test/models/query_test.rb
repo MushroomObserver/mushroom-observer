@@ -1957,13 +1957,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_at_location
-    assert_query([names(:agaricus_campestras).id,
-                  names(:agaricus_campestris).id,
-                  names(:agaricus_campestros).id,
-                  names(:agaricus_campestrus).id,
-                  names(:fungi).id],
-                 :Name,
-                 :with_observations_at_location, location: locations(:burbank))
+  assert_query(Name.joins(:observations).
+                    where(:observations => { location: locations(:burbank) }).
+                    distinct,
+              :Name, :with_observations_at_location,
+              location: locations(:burbank))
   end
 
   def test_name_with_observations_at_where
