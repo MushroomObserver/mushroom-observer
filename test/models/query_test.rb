@@ -1631,7 +1631,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_by_rss_log
-    assert_query([locations(:mitrula_marsh).id], :Location, :by_rss_log)
+    assert_query(Location.joins(:rss_log).distinct,
+                 :Location, :by_rss_log)
   end
 
   def test_location_in_set
