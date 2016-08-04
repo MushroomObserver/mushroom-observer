@@ -62,7 +62,7 @@ module Query::Modules::Joining
     },
     locations: {
       licenses: :license_id,
-      :"location_descriptions.default": :description_id,
+      "location_descriptions.default" => :description_id,
       rss_logs: :rss_log_id,
       users: :user_id
     },
@@ -98,10 +98,10 @@ module Query::Modules::Joining
     },
     names: {
       licenses: :license_id,
-      :"name_descriptions.default": :description_id,
+      "name_descriptions.default" => :description_id,
       rss_logs: :rss_log_id,
       users: :user_id,
-      :"users.reviewer": :reviewer_id
+      "users.reviewer" => :reviewer_id
     },
     names_versions: {
       names: :name_id
@@ -120,8 +120,8 @@ module Query::Modules::Joining
       names: :name_id,
       rss_logs: :rss_log_id,
       users: :user_id,
-      :"images.thumb_image": :thumb_image_id,
-      :"image_votes.thumb_image": [:thumb_image_id, :image_id]
+      "images.thumb_image" => :thumb_image_id,
+      "image_votes.thumb_image" => [:thumb_image_id, :image_id]
     },
     observations_projects: {
       observations: :observation_id,
@@ -134,7 +134,7 @@ module Query::Modules::Joining
     projects: {
       users: :user_id,
       user_groups: :user_group_id,
-      :"user_groups.admin_group": :admin_group_id
+      "user_groups.admin_group" => :admin_group_id
     },
     projects_species_lists: {
       projects: :project_id,
