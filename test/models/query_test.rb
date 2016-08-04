@@ -1755,8 +1755,9 @@ class QueryTest < UnitTestCase
     desc1.add_author(rolf)
     desc2.add_author(mary)
     desc3.add_author(rolf)
-    descs = LocationDescription.all
 
+    # Using Rails instead of db; don't know how to do it with .joins & .where
+    descs = LocationDescription.all
     assert_query(descs.find_all {|d| d.authors.include?(rolf)},
                 :LocationDescription, :by_author, user: rolf, by: :id)
     assert_query(descs.find_all {|d| d.authors.include?(mary)},
@@ -1772,9 +1773,14 @@ class QueryTest < UnitTestCase
     desc1.add_editor(rolf) # Fails since he's already an author!
     desc2.add_editor(mary)
     desc3.add_editor(rolf)
-    assert_query([desc3], :LocationDescription, :by_editor, user: rolf, by: :id)
-    assert_query([desc2], :LocationDescription, :by_editor, user: mary)
-    assert_query([], :LocationDescription, :by_editor, user: dick)
+
+    # Using Rails instead of db; don't know how to do it with .joins & .where
+    descs = LocationDescription.all
+    assert_query(descs.find_all {|d| d.editors.include?(rolf)},
+                :LocationDescription, :by_editor, user: rolf, by: :id)
+    assert_query(descs.find_all {|d| d.editors.include?(mary)},
+                :LocationDescription, :by_editor, user: mary)
+    assert_query([], :LocationDescription, :by_editor, user: users(:zero_user))
   end
 
   def test_location_description_in_set
