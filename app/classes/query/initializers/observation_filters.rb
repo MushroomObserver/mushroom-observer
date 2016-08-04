@@ -14,7 +14,9 @@ module Query::Initializers::ObservationFilters
 
   def has_any_observation_filters?
     keys = observation_filter_parameter_declarations.keys
+    keys = keys.map(&:to_s)
     keys = keys.map {|k| k.sub(/\?$/, "")}
+    keys = keys.map(&:to_sym)
     keys.any? {|k| params[k] != nil}
   end
 
