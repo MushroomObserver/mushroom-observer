@@ -33,6 +33,7 @@ class Query::RssLog < Query::Base
 
   def add_rss_log_type_condition
     unless types.include?("all")
+      types = self.types
       types &= RssLog.all_types
       if types.empty?
         self.where << "FALSE"
