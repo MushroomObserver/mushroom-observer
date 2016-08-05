@@ -33,11 +33,11 @@ module Query::Initializers::ObservationFilters
     result = []
     if params[:has_specimen] != nil
       val = params[:has_specimen] ? "TRUE" : "FALSE"
-      result << "#{prepend}observations.specimen IS #{val}"
+      result << "observations.specimen IS #{val}"
     end
     if params[:has_images] != nil
       val = params[:has_images] ? "NOT NULL" : "NULL"
-      result << "#{prepend}observations.thumb_image_id IS #{val}"
+      result << "observations.thumb_image_id IS #{val}"
     end
     result
   end
