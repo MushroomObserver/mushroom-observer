@@ -1,4 +1,4 @@
-class Query::NameDescriptionAll < Query::NameDescription
+class Query::NameDescriptionAll < Query::NameDescriptionBase
   include Query::Initializers::All
 
   def initialize_flavor

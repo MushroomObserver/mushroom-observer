@@ -1,4 +1,4 @@
-class Query::ProjectAll < Query::Project
+class Query::ProjectAll < Query::ProjectBase
   include Query::Initializers::All
 
   def initialize_flavor

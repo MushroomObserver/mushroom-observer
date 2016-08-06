@@ -1,4 +1,4 @@
-class Query::CommentForTarget < Query::Comment
+class Query::CommentForTarget < Query::CommentBase
   def parameter_declarations
     super.merge(
       target: AbstractModel,

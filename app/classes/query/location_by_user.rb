@@ -1,4 +1,4 @@
-class Query::LocationByUser < Query::Location
+class Query::LocationByUser < Query::LocationBase
   def parameter_declarations
     super.merge(
       user: User

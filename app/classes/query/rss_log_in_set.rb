@@ -1,4 +1,4 @@
-class Query::RssLogInSet < Query::RssLog
+class Query::RssLogInSet < Query::RssLogBase
   include Query::Initializers::InSet
 
   def parameter_declarations

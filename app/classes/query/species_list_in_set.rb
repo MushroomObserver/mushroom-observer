@@ -1,4 +1,4 @@
-class Query::SpeciesListInSet < Query::SpeciesList
+class Query::SpeciesListInSet < Query::SpeciesListBase
   include Query::Initializers::InSet
 
   def parameter_declarations

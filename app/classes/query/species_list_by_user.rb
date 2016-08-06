@@ -1,4 +1,4 @@
-class Query::SpeciesListByUser < Query::SpeciesList
+class Query::SpeciesListByUser < Query::SpeciesListBase
   def parameter_declarations
     super.merge(
       user: User

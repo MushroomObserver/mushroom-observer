@@ -1,4 +1,4 @@
-class Query::Herbarium < Query::Base
+class Query::HerbariumBase < Query::Base
   def model
     Herbarium
   end

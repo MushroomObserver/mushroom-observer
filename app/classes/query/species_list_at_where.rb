@@ -1,4 +1,4 @@
-class Query::SpeciesListAtWhere < Query::SpeciesList
+class Query::SpeciesListAtWhere < Query::SpeciesListBase
   def parameter_declarations
     super.merge(
       location: :string,

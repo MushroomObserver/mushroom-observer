@@ -1,4 +1,4 @@
-class Query::NameWithObservationsForProject < Query::Name
+class Query::NameWithObservationsForProject < Query::NameBase
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations

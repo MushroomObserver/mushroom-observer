@@ -1,4 +1,4 @@
-class Query::Observation < Query::Base
+class Query::ObservationBase < Query::Base
   include Query::Initializers::ObservationFilters
 
   def model

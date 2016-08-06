@@ -1,4 +1,4 @@
-class Query::NameDescriptionByEditor < Query::NameDescription
+class Query::NameDescriptionByEditor < Query::NameDescriptionBase
   def parameter_declarations
     super.merge(
       user: User

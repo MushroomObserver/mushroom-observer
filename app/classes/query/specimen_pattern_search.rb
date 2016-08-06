@@ -1,4 +1,4 @@
-class Query::SpecimenPatternSearch < Query::Specimen
+class Query::SpecimenPatternSearch < Query::SpecimenBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

@@ -1,4 +1,4 @@
-class Query::LocationAdvancedSearch < Query::Location
+class Query::LocationAdvancedSearch < Query::LocationBase
   include Query::Initializers::AdvancedSearch
 
   def parameter_declarations

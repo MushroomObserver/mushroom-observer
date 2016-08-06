@@ -1,4 +1,4 @@
-class Query::ImagePatternSearch < Query::Image
+class Query::ImagePatternSearch < Query::ImageBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

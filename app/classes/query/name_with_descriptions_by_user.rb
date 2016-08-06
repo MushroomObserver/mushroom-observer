@@ -1,4 +1,4 @@
-class Query::NameWithDescriptionsByUser < Query::Name
+class Query::NameWithDescriptionsByUser < Query::NameBase
   def parameter_declarations
     super.merge(
       user: User

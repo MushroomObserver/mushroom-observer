@@ -1,4 +1,4 @@
-class Query::CommentInSet < Query::Comment
+class Query::CommentInSet < Query::CommentBase
   include Query::Initializers::InSet
 
   def parameter_declarations

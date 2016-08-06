@@ -1,4 +1,4 @@
-class Query::ObservationAtWhere < Query::Observation
+class Query::ObservationAtWhere < Query::ObservationBase
   def parameter_declarations
     super.merge(
       location: :string,

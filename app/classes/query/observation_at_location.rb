@@ -1,4 +1,4 @@
-class Query::ObservationAtLocation < Query::Observation
+class Query::ObservationAtLocation < Query::ObservationBase
   def parameter_declarations
     super.merge(
       location: Location

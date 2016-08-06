@@ -1,4 +1,4 @@
-class Query::ImageByUser < Query::Image
+class Query::ImageByUser < Query::ImageBase
   def parameter_declarations
     super.merge(
       user: User

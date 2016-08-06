@@ -1,4 +1,4 @@
-class Query::SpecimenAll < Query::Specimen
+class Query::SpecimenAll < Query::SpecimenBase
   include Query::Initializers::All
 
   def initialize_flavor

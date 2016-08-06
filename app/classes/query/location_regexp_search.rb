@@ -1,4 +1,4 @@
-class Query::LocationRegexpSearch < Query::Location
+class Query::LocationRegexpSearch < Query::LocationBase
 
   def parameter_declarations
     super.merge(
@@ -8,7 +8,8 @@ class Query::LocationRegexpSearch < Query::Location
 
   def initialize_flavor
     regexp = params[:regexp].to_s.strip_squeeze
-    self.where += ["locations.name REGEXP '#{Location.connection.quote_string(regexp)}'"]
+    regexp = Location.connection.quote_string(regexp)
+    self.where += ["locations.name REGEXP '#{regexp}'"]
     super
   end
 end

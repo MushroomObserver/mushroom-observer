@@ -1,4 +1,4 @@
-class Query::CommentForUser < Query::Comment
+class Query::CommentForUser < Query::CommentBase
   def parameter_declarations
     super.merge(
       user: User

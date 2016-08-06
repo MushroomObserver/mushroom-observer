@@ -1,4 +1,4 @@
-class Query::Name < Query::Base
+class Query::NameBase < Query::Base
   def model
     Name
   end

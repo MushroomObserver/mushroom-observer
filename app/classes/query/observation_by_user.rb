@@ -1,4 +1,4 @@
-class Query::ObservationByUser < Query::Observation
+class Query::ObservationByUser < Query::ObservationBase
   def parameter_declarations
     super.merge(
       user: User

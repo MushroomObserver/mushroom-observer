@@ -1,4 +1,4 @@
-class Query::HerbariumInSet < Query::Herbarium
+class Query::HerbariumInSet < Query::HerbariumBase
   include Query::Initializers::InSet
 
   def parameter_declarations

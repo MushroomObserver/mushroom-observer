@@ -1,4 +1,4 @@
-class Query::ObservationAll < Query::Observation
+class Query::ObservationAll < Query::ObservationBase
   include Query::Initializers::All
 
   def initialize_flavor

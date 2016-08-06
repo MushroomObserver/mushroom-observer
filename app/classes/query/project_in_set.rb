@@ -1,4 +1,4 @@
-class Query::ProjectInSet < Query::Project
+class Query::ProjectInSet < Query::ProjectBase
   include Query::Initializers::InSet
 
   def parameter_declarations

@@ -1,4 +1,4 @@
-class Query::Image < Query::Base
+class Query::ImageBase < Query::Base
   def model
     Image
   end

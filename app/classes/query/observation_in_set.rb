@@ -1,4 +1,4 @@
-class Query::ObservationInSet < Query::Observation
+class Query::ObservationInSet < Query::ObservationBase
   include Query::Initializers::InSet
 
   def parameter_declarations

@@ -1,4 +1,4 @@
-class Query::CommentPatternSearch < Query::Comment
+class Query::CommentPatternSearch < Query::CommentBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

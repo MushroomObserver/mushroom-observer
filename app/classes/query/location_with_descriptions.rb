@@ -1,4 +1,4 @@
-class Query::LocationWithDescriptions < Query::Location
+class Query::LocationWithDescriptions < Query::LocationBase
   def parameter_declarations
     super
   end

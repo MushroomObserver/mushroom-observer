@@ -1,4 +1,4 @@
-class Query::UserInSet < Query::User
+class Query::UserInSet < Query::UserBase
   include Query::Initializers::InSet
 
   def parameter_declarations

@@ -1,4 +1,4 @@
-class Query::ImageInsideObservation < Query::Image
+class Query::ImageInsideObservation < Query::ImageBase
   def parameter_declarations
     super.merge(
       observation: Observation,

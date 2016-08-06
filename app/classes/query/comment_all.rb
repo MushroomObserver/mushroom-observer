@@ -1,4 +1,4 @@
-class Query::CommentAll < Query::Comment
+class Query::CommentAll < Query::CommentBase
   include Query::Initializers::All
 
   def initialize_flavor

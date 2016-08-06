@@ -1,4 +1,4 @@
-class Query::NameOfParents < Query::Name
+class Query::NameOfParents < Query::NameBase
   def parameter_declarations
     super.merge(
       name: Name

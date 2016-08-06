@@ -1,13 +1,17 @@
-class Query::LocationDescription < Query::Base
+class Query::LocationBase < Query::Base
   def model
-    LocationDescription
+    Location
   end
 
   def parameter_declarations
     super.merge(
       created_at?: [:time],
       updated_at?: [:time],
-      users?: [User]
+      users?:      [User],
+      north?:      :float,
+      south?:      :float,
+      east?:       :float,
+      west?:       :float
     )
   end
 
@@ -15,6 +19,7 @@ class Query::LocationDescription < Query::Base
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_bounding_box(:location)
     super
   end
 

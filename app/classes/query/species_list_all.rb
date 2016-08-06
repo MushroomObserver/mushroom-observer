@@ -1,4 +1,4 @@
-class Query::SpeciesListAll < Query::SpeciesList
+class Query::SpeciesListAll < Query::SpeciesListBase
   include Query::Initializers::All
 
   def initialize_flavor

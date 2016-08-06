@@ -1,4 +1,4 @@
-class Query::UserAll < Query::User
+class Query::UserAll < Query::UserBase
   include Query::Initializers::All
 
   def initialize_flavor

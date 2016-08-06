@@ -1,4 +1,4 @@
-class Query::LocationWithDescriptionsInSet < Query::Location
+class Query::LocationWithDescriptionsInSet < Query::LocationBase
   include Query::Initializers::InSet
 
   def parameter_declarations

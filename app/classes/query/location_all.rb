@@ -1,4 +1,4 @@
-class Query::LocationAll < Query::Location
+class Query::LocationAll < Query::LocationBase
   include Query::Initializers::All
 
   def initialize_flavor

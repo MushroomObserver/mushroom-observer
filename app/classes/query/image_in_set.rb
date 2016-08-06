@@ -1,4 +1,4 @@
-class Query::ImageInSet < Query::Image
+class Query::ImageInSet < Query::ImageBase
   include Query::Initializers::InSet
 
   def parameter_declarations

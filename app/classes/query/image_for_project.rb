@@ -1,4 +1,4 @@
-class Query::ImageForProject < Query::Image
+class Query::ImageForProject < Query::ImageBase
   def parameter_declarations
     super.merge(
       project: Project

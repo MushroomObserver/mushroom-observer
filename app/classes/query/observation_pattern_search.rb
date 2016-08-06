@@ -1,4 +1,4 @@
-class Query::ObservationPatternSearch < Query::Observation
+class Query::ObservationPatternSearch < Query::ObservationBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

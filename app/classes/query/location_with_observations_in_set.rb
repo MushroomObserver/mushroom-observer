@@ -1,4 +1,4 @@
-class Query::LocationWithObservationsInSet < Query::Location
+class Query::LocationWithObservationsInSet < Query::LocationBase
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations

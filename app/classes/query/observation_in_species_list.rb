@@ -1,4 +1,4 @@
-class Query::ObservationInSpeciesList < Query::Observation
+class Query::ObservationInSpeciesList < Query::ObservationBase
   def parameter_declarations
     super.merge(
       species_list: SpeciesList

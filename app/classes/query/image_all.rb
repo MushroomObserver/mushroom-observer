@@ -1,4 +1,4 @@
-class Query::ImageAll < Query::Image
+class Query::ImageAll < Query::ImageBase
   include Query::Initializers::All
 
   def initialize_flavor

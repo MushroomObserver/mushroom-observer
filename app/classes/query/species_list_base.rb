@@ -1,4 +1,4 @@
-class Query::SpeciesList < Query::Base
+class Query::SpeciesListBase < Query::Base
   def model
     SpeciesList
   end

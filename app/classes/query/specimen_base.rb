@@ -1,4 +1,4 @@
-class Query::Specimen < Query::Base
+class Query::SpecimenBase < Query::Base
   def model
     Specimen
   end

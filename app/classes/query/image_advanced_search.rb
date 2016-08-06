@@ -1,4 +1,4 @@
-class Query::ImageAdvancedSearch < Query::Image
+class Query::ImageAdvancedSearch < Query::ImageBase
   include Query::Initializers::AdvancedSearch
 
   def parameter_declarations 

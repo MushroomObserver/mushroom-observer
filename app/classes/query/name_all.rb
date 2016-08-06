@@ -1,4 +1,4 @@
-class Query::NameAll < Query::Name
+class Query::NameAll < Query::NameBase
   include Query::Initializers::All
 
   def initialize_flavor

@@ -1,4 +1,4 @@
-class Query::HerbariumPatternSearch < Query::Herbarium
+class Query::HerbariumPatternSearch < Query::HerbariumBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

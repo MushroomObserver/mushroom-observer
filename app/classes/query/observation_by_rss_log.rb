@@ -1,4 +1,4 @@
-class Query::ObservationByRssLog < Query::Observation
+class Query::ObservationByRssLog < Query::ObservationBase
   def initialize_flavor
     add_join(:rss_logs)
     super

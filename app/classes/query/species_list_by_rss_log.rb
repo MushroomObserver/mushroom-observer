@@ -1,4 +1,4 @@
-class Query::SpeciesListByRssLog < Query::SpeciesList
+class Query::SpeciesListByRssLog < Query::SpeciesListBase
   def initialize_flavor
     add_join(:rss_logs)
     super

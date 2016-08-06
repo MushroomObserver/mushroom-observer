@@ -1,4 +1,4 @@
-class Query::SpeciesListAtLocation < Query::SpeciesList
+class Query::SpeciesListAtLocation < Query::SpeciesListBase
   def parameter_declarations
     super.merge(
       location: Location

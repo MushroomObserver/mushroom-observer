@@ -1,4 +1,4 @@
-class Query::ImageWithObservationsInSet < Query::Image
+class Query::ImageWithObservationsInSet < Query::ImageBase
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations

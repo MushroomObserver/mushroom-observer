@@ -1,4 +1,4 @@
-class Query::LocationPatternSearch < Query::Location
+class Query::LocationPatternSearch < Query::LocationBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

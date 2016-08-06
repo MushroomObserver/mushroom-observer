@@ -1,4 +1,4 @@
-class Query::ObservationOfChildren < Query::Observation
+class Query::ObservationOfChildren < Query::ObservationBase
   include Query::Initializers::OfChildren
 
   def parameter_declarations

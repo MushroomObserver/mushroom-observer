@@ -1,4 +1,4 @@
-class Query::ProjectPatternSearch < Query::Project
+class Query::ProjectPatternSearch < Query::ProjectBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

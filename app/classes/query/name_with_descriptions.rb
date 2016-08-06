@@ -1,4 +1,4 @@
-class Query::NameWithDescriptions < Query::Name
+class Query::NameWithDescriptions < Query::NameBase
   def parameter_declarations
     super
   end

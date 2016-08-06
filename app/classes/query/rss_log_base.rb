@@ -1,4 +1,4 @@
-class Query::RssLog < Query::Base
+class Query::RssLogBase < Query::Base
   include Query::Initializers::ObservationFilters
 
   def model

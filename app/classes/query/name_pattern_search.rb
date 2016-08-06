@@ -1,4 +1,4 @@
-class Query::NamePatternSearch < Query::Name
+class Query::NamePatternSearch < Query::NameBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

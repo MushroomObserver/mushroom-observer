@@ -1,4 +1,4 @@
-class Query::SpeciesListPatternSearch < Query::SpeciesList
+class Query::SpeciesListPatternSearch < Query::SpeciesListBase
   include Query::Initializers::PatternSearch
 
   def parameter_declarations

@@ -1,4 +1,4 @@
-class Query::Project < Query::Base
+class Query::ProjectBase < Query::Base
   def model
     Project
   end

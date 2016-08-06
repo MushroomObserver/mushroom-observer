@@ -1,4 +1,4 @@
-class Query::Comment < Query::Base
+class Query::CommentBase < Query::Base
   def model
     Comment
   end

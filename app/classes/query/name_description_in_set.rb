@@ -1,4 +1,4 @@
-class Query::NameDescriptionInSet < Query::NameDescription
+class Query::NameDescriptionInSet < Query::NameDescriptionBase
   include Query::Initializers::InSet
 
   def parameter_declarations

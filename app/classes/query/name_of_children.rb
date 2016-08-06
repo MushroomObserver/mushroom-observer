@@ -1,4 +1,4 @@
-class Query::NameOfChildren < Query::Name
+class Query::NameOfChildren < Query::NameBase
   include Query::Initializers::OfChildren
 
   def parameter_declarations

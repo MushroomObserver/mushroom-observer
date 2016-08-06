@@ -1,4 +1,4 @@
-class Query::SpeciesListForProject < Query::SpeciesList
+class Query::SpeciesListForProject < Query::SpeciesListBase
   def parameter_declarations
     super.merge(
       project: Project

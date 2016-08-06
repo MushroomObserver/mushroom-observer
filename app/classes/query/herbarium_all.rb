@@ -1,4 +1,4 @@
-class Query::HerbariumAll < Query::Herbarium
+class Query::HerbariumAll < Query::HerbariumBase
   include Query::Initializers::All
 
   def initialize_flavor
