@@ -63,7 +63,7 @@ Only four tables accept POST requests presently: observations, images, users
 and api_keys (see below).  Include data for the new record in parameters.
 Example: 
 
-* POST http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=Pasadena&date=2016-08-06&notes=growing+in+lawn
+* POST http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=USA,+California,+Pasadena&date=2016-08-06&notes=growing+in+lawn
 
 The response will include the id of the new record.
 
@@ -142,14 +142,20 @@ However, only a handful of requests are officially tested:
 * observations (GET and POST)
 * projects (GET)
 * species_lists (GET)
-* users (GET, POST)
+* users (GET and POST)
 
 Use the special "help=1" parameter to request a set of parameters supported for
 each table.  Detailed documentation doesn't exist; we're relying on things
 being simplistic enough to be more or less self-explanatory.  Note that it is
 safe to mess around with strange parameters and see what they do.  Note that
 XML responses include a copy of the SQL query used.  This can be a very
-effective way of discovering exactly how unfamiliar parameters work. 
+effective way of discovering exactly how unfamiliar parameters work.  Here's
+the SQL query from one of the examples above:
+
+> SELECT DISTINCT observations.id
+  FROM `observations` 
+  WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6 AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
+  ORDER BY observations.id ASC
 
 See also the database diagram here:
 
