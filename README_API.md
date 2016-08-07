@@ -9,7 +9,7 @@ Overview
 Mushroom Observer supports a simple API based on sending GET, POST, PUT and
 DELETE requests to URLs of the form: 
 
-  http://mushroomobserver.org/api/<database_table>
+* http://mushroomobserver.org/api/<database_table>
 
 GET requests are read-only and do not require authentication.  POST (create),
 PUT (update) and DELETE (destroy) requests require authentication via an API
@@ -20,7 +20,7 @@ repo has almost finished adding the ability to request responses in JSON.  Any
 interested in this feature are welcome to take over the development and finish
 it off: 
 
-  https://github.com/pellaea/mushroom-observer/tree/json_api
+* https://github.com/pellaea/mushroom-observer/tree/json_api
 
 
 GET Requests
@@ -47,9 +47,9 @@ request full detail records for each of the matching records.
 It is easy to play with this aspect of the API in a browser.  Try the following
 queries, for example: 
 
-  GET http://mushroomobserver.org/api/observations?children_of=Tulostoma
-  GET http://mushroomobserver.org/api/observations?locations=Delaware&date=6
-  GET http://mushroomobserver.org/api/observations?help=1
+* GET http://mushroomobserver.org/api/observations?children_of=Tulostoma
+* GET http://mushroomobserver.org/api/observations?locations=Delaware&date=6
+* GET http://mushroomobserver.org/api/observations?help=1
 
 These return the ids of, respectively, (1) all observations of the genus
 Tulostoma, (2) all observations from Delaware posted in June (any year), and
@@ -63,7 +63,7 @@ Only four tables accept POST requests presently: observations, images, users
 and api_keys (see below).  Include data for the new record in parameters.
 Example: 
 
-  POST http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=Pasadena&date=2016-08-06&notes=growing+in+lawn
+* POST http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=Pasadena&date=2016-08-06&notes=growing+in+lawn
 
 The response will include the id of the new record.
 
@@ -79,7 +79,7 @@ same as for GET requests, including "set_xxx" parameters to tell MO how to
 modify all of the matching records.  For example, this would be a way to change
 the location of a set of your observations: 
 
-  PUT http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&id=12300-12400&set_location=USA,+California,+Pasadena
+* PUT http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&id=12300-12400&set_location=USA,+California,+Pasadena
 
 
 DELETE Requests
@@ -89,7 +89,7 @@ None are tested at the moment.  In principle one would structure the query the
 same as for GET requests.  MO will destroy all matching records.  For example,
 this should delete all your observations from a given location: 
 
-  DELETE http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&locations=Madison+Heights
+* DELETE http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&locations=Madison+Heights
 
 
 API Keys
@@ -102,12 +102,12 @@ user, so MO will know who you are.
 The easiest way for an individual user to obtain an API key is to create one
 directly via the website: 
 
-  http://mushroomobserver.org/account/api_keys
+* http://mushroomobserver.org/account/api_keys
 
 For convenience, apps may also create a key on behalf of a user using a POST
 request: 
 
-  POST http://mushroomobserver.org/api/api_keys?api_key=xxx&user=xxx
+* POST http://mushroomobserver.org/api/api_keys?api_key=xxx&user=xxx
 
 In this case, the app creator must create a special API key for that app.  This
 is the key that will be used in the request above to create a new API key for
@@ -153,5 +153,5 @@ effective way of discovering exactly how unfamiliar parameters work.
 
 See also the database diagram here:
 
-  https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif
+* https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif
 
