@@ -35,7 +35,7 @@ In addition to these filter parameters two special pseudoparameters are
 accepted: 
 
 * help=1 -- Resturn a list of accepted parameters.
-* detail=none -- Return only record ids.
+* detail=none -- Return only record ids (default).
 * detail=low -- Return some basic data with each record.
 * detail=high -- Return a great deal of data with each record.
 
@@ -162,3 +162,6 @@ See also the database diagram here:
 
 * https://github.com/MushroomObserver/mushroom-observer/blob/master/DATA_STRUCTURE.gif
 
+and the database schema here:
+
+* https://github.com/MushroomObserver/mushroom-observer/blob/master/db/schema.rb
