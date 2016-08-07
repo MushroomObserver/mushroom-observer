@@ -2141,16 +2141,6 @@ class ObserverControllerTest < FunctionalTestCase
     @obs2 = observations(:coprinus_comatus_obs)
     @img1 = @obs1.images.first
     @img2 = @obs2.images.first
-    assert_users_equal(mary, @obs1.user)
-    assert_users_equal(rolf, @obs2.user)
-    assert_users_equal(mary, @img1.user)
-    assert_users_equal(rolf, @img2.user)
-    assert_obj_list_equal([@proj2], @obs1.projects)
-    assert_obj_list_equal([], @obs2.projects)
-    assert_obj_list_equal([@proj2], @img1.projects)
-    assert_obj_list_equal([], @img2.projects)
-    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_list_equal([dick], @proj2.user_group.users)
   end
 
   def assert_project_checks(project_states)
