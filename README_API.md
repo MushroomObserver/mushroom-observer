@@ -67,7 +67,7 @@ Example:
 
 The response will include the id of the new record.
 
-Attach the image as POST data or URL.  See test/test_api for an example of how
+Attach the image as POST data or URL.  See script/test_api for an example of how
 to attach an image in the POST data. 
 
 
