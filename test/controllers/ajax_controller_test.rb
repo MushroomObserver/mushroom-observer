@@ -164,11 +164,11 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_auto_complete_project
     # titles of Projects whose titles have words starting with "p"
-    b_titles = Project.where("title REGEXP ?", "[[:<:]]b").map(&:title)
+    b_titles = Project.where("title REGEXP ?", "[[:<:]]b").map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
     assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
 
-    p_titles = Project.where("title REGEXP ?", "[[:<:]]p").map(&:title)
+    p_titles = Project.where("title REGEXP ?", "[[:<:]]p").map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
     assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
 
