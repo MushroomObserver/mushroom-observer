@@ -152,13 +152,15 @@ class UserTest < UnitTestCase
     spl2  = species_lists(:another_species_list)
     spl3  = species_lists(:unknown_species_list)
     assert_obj_list_equal([spl1, spl2], rolf.species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], mary.species_lists)
+    assert_obj_list_equal(SpeciesList.where(user: mary), mary.species_lists)
     assert_obj_list_equal([], dick.species_lists)
     assert_obj_list_equal([dick], proj.user_group.users)
     assert_obj_list_equal([spl3], proj.species_lists)
 
-    assert_obj_list_equal([spl1, spl2], rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], mary.all_editable_species_lists)
+    assert_obj_list_equal([spl1, spl2],
+                           rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal(SpeciesList.where(user: mary),
+                          mary.all_editable_species_lists)
     assert_obj_list_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
@@ -170,8 +172,10 @@ class UserTest < UnitTestCase
     rolf.reload
     mary.reload
     dick.reload
-    assert_obj_list_equal([spl1, spl2, spl3], rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl1, spl3], mary.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl2, spl3],
+                          rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
+                           mary.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([], dick.all_editable_species_lists)
   end
 

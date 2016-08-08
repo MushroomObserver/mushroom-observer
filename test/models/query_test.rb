@@ -2263,22 +2263,27 @@ class QueryTest < UnitTestCase
   end #xxx
 
   def test_species_list_by_rss_log
-    assert_query([species_lists(:first_species_list).id], :SpeciesList,
-                 :by_rss_log)
+    assert_query([species_lists(:first_species_list).id],
+                 :SpeciesList, :by_rss_log)
   end
 
   def test_species_list_by_user
     assert_query([species_lists(:first_species_list).id,
-                  species_lists(:another_species_list).id], :SpeciesList,
-                 :by_user, user: rolf, by: :id)
-    assert_query([species_lists(:unknown_species_list).id], :SpeciesList,
-                 :by_user, user: mary, by: :id)
+                  species_lists(:another_species_list).id],
+                 :SpeciesList, :by_user, user: rolf, by: :id)
+    assert_query(SpeciesList.where(user: mary),
+                 :SpeciesList, :by_user, user: mary)
     assert_query([], :SpeciesList, :by_user, user: dick)
   end
 
   def test_species_list_for_project
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :SpeciesList, :for_project, project: projects(:empty_project))
+    assert_query(projects(:bolete_project).species_lists,
+                 :SpeciesList, :for_project, project: projects(:bolete_project))
+    assert_query(projects(:two_list_project).species_lists,
+                 :SpeciesList, :for_project, project: projects(:two_list_project))
+  end
 
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,

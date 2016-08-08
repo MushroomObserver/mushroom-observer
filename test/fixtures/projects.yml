@@ -37,12 +37,13 @@ empty_project:
   user: mary
   user_group: mary_only
   admin_group: mary_only
-  title: Empty Project
+  title: $LABEL
   summary: No Images Observations or Lists
 
-one_image_project:
+two_list_project:
   user: mary
   user_group: mary_only
   admin_group: mary_only
-  title: One Image Project
-  summary: One Images, No Observations or Lists
+  title: $LABEL
+  summary: Two Lists, No Images Observations
+  species_lists: query_first_list
