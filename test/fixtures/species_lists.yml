@@ -52,3 +52,11 @@ query_second_list:
   location: burbank
   title: $LABEL
   notes: Used by QueryTest
+
+where_no_mushrooms_list:
+  when: 2006-03-09
+  user: mary
+  where: no mushrooms
+  location: no_mushrooms_location
+  title: $LABEL
+  notes: Used by QueryTest

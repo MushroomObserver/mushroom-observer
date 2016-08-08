@@ -2074,8 +2074,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_at_where
-    assert_query([observations(:coprinus_comatus_obs).id], :Observation,
-                 :at_where, user_where: "glendale", location: "glendale")
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation, :at_where, user_where: "glendale",
+                 location: "glendale")
   end
 
   def test_observation_by_rss_log
@@ -2251,16 +2252,20 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_at_location
-    expect = SpeciesList.where(location: locations(:burbank))
     assert_query(SpeciesList.where(location: locations(:burbank)),
                  :SpeciesList, :at_location, location: locations(:burbank))
-    assert_query([], :SpeciesList, :at_location,
-                     location: locations(:location_no_mushrooms))
+    assert_query([],
+                 :SpeciesList, :at_location, location: locations(:unused_location))
   end
 
   def test_species_list_at_where
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :SpeciesList, :at_where, user_where: "nowhere",
+                                          location: "nowhere")
+    assert_query([species_lists(:where_no_mushrooms_list)],
+                 :SpeciesList, :at_where, user_where: "no mushrooms",
+                                          location: "no mushrooms")
+  end
 
   def test_species_list_by_rss_log
     assert_query([species_lists(:first_species_list).id],
