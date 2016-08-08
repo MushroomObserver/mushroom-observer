@@ -1450,21 +1450,20 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_pattern_search
-    assert_query([images(:agaricus_campestris_image).id], :Image,
-                 :pattern_search, pattern: "agaricus") # name
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, :pattern_search, pattern: "agaricus") # name
     assert_query([images(:agaricus_campestris_image).id,
                   images(:connected_coprinus_comatus_image).id,
                   images(:turned_over_image).id,
                   images(:in_situ_image).id],
                 :Image, :pattern_search, pattern: "bob dob") # copyright holder
-    assert_query([images(:in_situ_image).id], :Image, :pattern_search,
-                  pattern: "looked gorilla OR original") # notes
+    assert_query([images(:in_situ_image).id],
+                 :Image, :pattern_search, pattern: "looked gorilla OR original") # notes
     assert_query([images(:agaricus_campestris_image).id,
-                  images(:connected_coprinus_comatus_image).id], :Image,
-                 :pattern_search, pattern: "notes some") # notes
-    assert_query([images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image, :pattern_search,
-                 pattern: "dobbs -notes") # copyright and not notes
+                  images(:connected_coprinus_comatus_image).id],
+                 :Image, :pattern_search, pattern: "notes some") # notes
+    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, :pattern_search, pattern: "dobbs -notes") # (c), not notes
     assert_query([images(:in_situ_image).id], :Image, :pattern_search,
                  pattern: "DSCN8835") # original filename
   end
@@ -1649,10 +1648,10 @@ class QueryTest < UnitTestCase
 
   def test_location_pattern_search
     expect = Location.all.select { |l| l.display_name =~ /california/i }
-    assert_query(expect, :Location,
-                 :pattern_search, pattern: "California", by: :id)
-    assert_query([locations(:elgin_co).id], :Location,
-                 :pattern_search, pattern: "Canada")
+    assert_query(expect,
+                 :Location, :pattern_search, pattern: "California", by: :id)
+    assert_query([locations(:elgin_co).id],
+                 :Location, :pattern_search, pattern: "Canada")
     assert_query([], :Location, :pattern_search, pattern: "Canada -Elgin")
   end
 
@@ -1881,10 +1880,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_pattern_search
-    assert_query([], :Name, :pattern_search,
-                 pattern: "petigera") # search_name
-    assert_query([names(:petigera).id], :Name, :pattern_search,
-                 pattern: "petigera", misspellings: :either)
+    assert_query([],
+                 :Name, :pattern_search, pattern: "petigera") # search_name
+    assert_query([names(:petigera).id],
+                 :Name, :pattern_search, pattern: "petigera",
+                                         misspellings: :either)
     # assert_query([40], :Name, :pattern_search, pattern: 'ye auld manual of lichenes') # citation
     # assert_query([20], :Name, :pattern_search, pattern: 'prevent me') # notes
     # assert_query([42], :Name, :pattern_search, pattern: 'smell as sweet') # gen_desc
@@ -2197,27 +2197,23 @@ class QueryTest < UnitTestCase
                   observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestrus_obs).id,
                   observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :pattern_search, pattern: '"somewhere else"',
-                 by: :name)
-    # assert_query([1], :Observation, :pattern_search,
-    #                   pattern: 'wow!') # comment
+                 :Observation, :pattern_search, pattern: '"somewhere else"')
     # where
-    assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
-                 :pattern_search, pattern: "pipi valley")
-
+    assert_query([observations(:strobilurus_diminutivus_obs).id],
+                 :Observation, :pattern_search, pattern: "pipi valley")
     # location
     expect = Observation.where(location_id: locations(:burbank)).
                includes(:name).
                order("names.text_name, names.author,observations.id DESC").to_a
-    assert_query(expect, :Observation,
-                 :pattern_search, pattern: "burbank", by: :name)
+    assert_query(expect,
+                 :Observation, :pattern_search, pattern: "burbank", by: :name)
 
     # name
     expect = Observation.
                where("text_name LIKE 'agaricus%'").includes(:name).
                  order("names.text_name, names.author, observations.id DESC")
-    assert_query(expect.map(&:id), :Observation,
-                 :pattern_search, pattern: "agaricus", by: :name)
+    assert_query(expect.map(&:id),
+                 :Observation, :pattern_search, pattern: "agaricus", by: :name)
   end
 
   def test_project_all
@@ -2235,8 +2231,19 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_pattern_search
-      skip("Placeholder for unwritten test.")
-  end #xxx
+   assert_query([],
+                :Project, :pattern_search, pattern: "no project has this")
+   # title
+   assert_query(Project.where("summary LIKE '%bolete%'
+                              OR title LIKE '%bolete%'"),
+                :Project, :pattern_search, pattern: "bolete")
+   # summary
+   assert_query(Project.where("summary LIKE '%two lists%'
+                              OR title LIKE '%two lists%'"),
+                :Project, :pattern_search, pattern: "two lists")
+   assert_query(Project.all,
+                :Project, :pattern_search, pattern: "")
+  end
 
   def test_rss_log_all
     ids = RssLog.all.map(&:id)
