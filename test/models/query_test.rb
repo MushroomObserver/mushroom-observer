@@ -2096,8 +2096,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_for_project
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :Observation, :for_project, project: projects(:empty_project))
+    assert_query(projects(:bolete_project).observations,
+                 :Observation, :for_project, project: projects(:bolete_project))
+  end
 
   def test_observation_in_set
     obs_set_ids = [observations(:unknown_with_no_naming).id,

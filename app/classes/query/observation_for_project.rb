@@ -1,3 +1,4 @@
+# Observations attached to a given project
 class Query::ObservationForProject < Query::ObservationBase
   def parameter_declarations
     super.merge(
