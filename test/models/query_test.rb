@@ -2316,8 +2316,19 @@ class QueryTest < UnitTestCase
   end
 
   def test_specimen_pattern_search
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                :Specimen, :pattern_search, pattern: "no specimen has this")
+    # in label
+    assert_query(Specimen.where("herbarium_label LIKE '%Agaricus%'
+                              OR notes LIKE '%Agaricus%'"),
+                :Specimen, :pattern_search, pattern: "Agaricus")
+    # in notes
+    assert_query(Specimen.where("herbarium_label LIKE '%rares%'
+                              OR notes LIKE '%rare%'"),
+                :Specimen, :pattern_search, pattern: "rare")
+    assert_query(Specimen.all,
+                :Specimen, :pattern_search, pattern: "")
+  end
 
   def test_user_all
     expect = User.all.order("name").to_a
