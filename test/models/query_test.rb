@@ -1994,8 +1994,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_for_project
-        skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :Name, :with_observations_for_project,
+                 project: projects(:empty_project))
+
+    assert_query([observations(:two_img_obs).name],
+                 :Name, :with_observations_for_project,
+                 project: projects(:two_img_obs_project))
+  end
 
   def test_name_with_observations_in_set
     assert_query([names(:agaricus_campestras).id,
