@@ -6,7 +6,6 @@
 # admins: rolf (1), mary (2)
 # members: rolf (1), mary (2), katrina (5)
 eol_project:
-  # id: 1
   user: rolf
   user_group: eol_users
   admin_group: eol_admins
@@ -21,7 +20,6 @@ eol_project:
 # images: 1 and 2 (detailed_unknown_obs's images - owned by mary)
 # species_lists: 3 (unknown_species_list - owned by mary)
 bolete_project:
-  # id: 2
   user: dick
   user_group: bolete_users
   admin_group: bolete_admins
@@ -47,3 +45,10 @@ two_list_project:
   title: $LABEL
   summary: Two Lists, No Images Observations
   species_lists: query_first_list
+
+obs_collected_and_displayed_project:
+  user: dick
+  user_group: dick_only
+  admin_group: dick_only
+  title: $LABEL
+  observations: collected_at_obs, displayed_at_obs

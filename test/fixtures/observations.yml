@@ -243,3 +243,16 @@ owner_refuses_general_questions: # old id: 22
   location: burbank
   name: boletus_edulis
   notes: ''
+
+collected_at_obs:
+  when: 2016-08-09
+  user: dick
+  location: collection_location
+  name: boletus_edulis
+
+displayed_at_obs:
+  when: 2016-08-09
+  user: dick
+  location: display_location
+  is_collection_location: false
+  name: boletus_edulis

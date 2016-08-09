@@ -1690,7 +1690,8 @@ class QueryTest < UnitTestCase
   end #xxx
 
   def test_location_with_observations
-    assert_query([locations(:burbank).id], :Location, :with_observations)
+    assert_query(Location.joins(:observations).uniq,
+                 :Location, :with_observations)
   end
 
   def test_location_with_observations_by_user
@@ -1702,8 +1703,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations_for_project
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :Location, :with_observations_for_project,
+                 project: projects(:empty_project))
+    assert_query([observations(:collected_at_obs).location],
+                 :Location, :with_observations_for_project,
+                 project: projects(:obs_collected_and_displayed_project))
+  end
 
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id], :Location,

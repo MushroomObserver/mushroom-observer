@@ -168,3 +168,23 @@ no_mushrooms_location:
   west: -180
   east: 180
   south: -90
+
+collection_location: # used by QueryTest
+  user_id: 0
+  version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 90
+  west: -180
+  east: 180
+  south: -90
+
+display_location: # used by QueryTest
+  user_id: 0
+  version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 90
+  west: -180
+  east: 180
+  south: -90
