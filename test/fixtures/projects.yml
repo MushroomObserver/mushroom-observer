@@ -58,3 +58,11 @@ two_img_obs_project:
   admin_group: dick_only
   title: $LABEL
   observations: two_img_obs
+
+rss_log_project:
+  user: dick
+  user_group: dick_only
+  admin_group: dick_only
+  title: $LABEL
+  rss_log: project_rss_log
+

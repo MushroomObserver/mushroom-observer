@@ -2238,8 +2238,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_by_rss_log
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query(Project.joins(:rss_log).distinct,
+                 :Project, :by_rss_log)
+  end
 
   def test_project_in_set
     assert_query([projects(:eol_project).id], :Project,

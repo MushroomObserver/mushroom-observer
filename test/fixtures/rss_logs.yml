@@ -37,3 +37,8 @@ glossary_term_rss_log:
   glossary_term: conic_glossary_term
   updated_at: 2013-09-01 12:49:30
   notes: "Updated Glossary Term"
+
+project_rss_log:
+  project: two_list_project
+  updated_at: 2016-08-08 12:00:00
+  notes: "Updated Project"
