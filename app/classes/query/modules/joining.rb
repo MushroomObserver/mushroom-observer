@@ -133,6 +133,7 @@ module Query::Modules::Joining
     },
     projects: {
       users: :user_id,
+      rss_logs: :rss_log_id,
       user_groups: :user_group_id,
       :"user_groups.admin_group" => :admin_group_id
     },
