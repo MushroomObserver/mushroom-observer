@@ -1661,8 +1661,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_regexp_search
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query(Location.where("name REGEXP 'California'"),
+                :Location, :regexp_search, regexp: ".alifornia")
+  end
 
   def test_location_with_descriptions
     assert_query([locations(:albion).id], :Location, :with_descriptions)
