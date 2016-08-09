@@ -1,6 +1,6 @@
 # Locations of (Observations attached to given Project)
-# where Observation was collected at that Location,
-# rather than merely being displayed at that Location.
+# where Observation was collected at a location,
+# rather than merely displayed at a location.
 class Query::LocationWithObservationsForProject < Query::LocationBase
   include Query::Initializers::ObservationFilters
 
