@@ -38,13 +38,12 @@ empty_project:
   title: $LABEL
   summary: No Images Observations or Lists
 
-two_list_project:
+two_list_project: # 2 lists, 0 observations, 0 images
   user: mary
   user_group: mary_only
   admin_group: mary_only
   title: $LABEL
-  summary: Two Lists, No Images Observations
-  species_lists: query_first_list
+  species_lists: query_first_list, query_second_list
 
 obs_collected_and_displayed_project:
   user: dick
