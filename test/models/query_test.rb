@@ -2363,8 +2363,17 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_pattern_search
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                :User, :pattern_search, pattern: "nonexistent pattern")
+    # in login
+    assert_query(User.where(login: users(:spammer).login),
+                :User, :pattern_search, pattern: users(:spammer).login)
+    # in name
+    assert_query(User.where(name: users(:mary).name),
+                :User, :pattern_search, pattern: users(:mary).name)
+    assert_query(User.all,
+                :User, :pattern_search, pattern: "")
+  end
 
   ##############################################################################
   #
