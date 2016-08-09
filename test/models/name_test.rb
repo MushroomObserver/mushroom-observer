@@ -1909,9 +1909,4 @@ class NameTest < UnitTestCase
     assert_obj_list_equal([species3, species4], Name.suggest_alternate_spellings("Lecanora grandi"))
     assert_obj_list_equal([species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
-
-  def test_imageless
-    assert_true(names(:imageless).imageless?)
-    assert_false(names(:fungi).imageless?)
-  end
 end
