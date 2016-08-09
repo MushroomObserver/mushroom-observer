@@ -53,10 +53,26 @@ query_second_list:
   title: $LABEL
   notes: Used by QueryTest
 
+query_notes_list:
+  when: 2006-03-09
+  user: mary
+  where: nil
+  location: burbank
+  title: $LABEL
+  notes: amazingraremushroom # 1-word notes, unique for SpeciesList
+
 where_no_mushrooms_list:
   when: 2006-03-09
   user: mary
   where: no mushrooms
   location: no_mushrooms_location
+  title: $LABEL
+  notes: Used by QueryTest
+
+where_list:
+  when: 2006-03-09
+  user: mary
+  where: wherenolocation  # 1-word where, unique for SpeciesList
+  location: nil
   title: $LABEL
   notes: Used by QueryTest

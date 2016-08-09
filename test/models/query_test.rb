@@ -2307,8 +2307,26 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_pattern_search
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                :SpeciesList, :pattern_search, pattern: "nonexistent pattern")
+    # in title
+    assert_query(SpeciesList.where(title: "query_first_list"),
+                :SpeciesList, :pattern_search, pattern: "query_first_list")
+    # in notes
+    pattern = species_lists(:query_notes_list).notes
+    assert_query(SpeciesList.where(notes: pattern),
+                :SpeciesList, :pattern_search, pattern: pattern)
+    # in location
+    assert_query(SpeciesList.where(location: locations(:burbank)),
+                :SpeciesList, :pattern_search, pattern: locations(:burbank).name)
+    # in where
+    pattern = species_lists(:where_list).where
+    assert_query(SpeciesList.where(where: pattern),
+                :SpeciesList, :pattern_search, pattern: pattern)
+
+    assert_query(SpeciesList.all,
+                :SpeciesList, :pattern_search, pattern: "")
+  end
 
   def test_specimen_all
     expect = Specimen.all.order(:herbarium_label)
