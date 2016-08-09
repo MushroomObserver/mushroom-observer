@@ -143,3 +143,16 @@ rolf_profile_image: # old id: 13
   when: 2013-09-08
   copyright_holder: Rolf Singer
   transferred: true
+
+query_first_image:
+  user: rolf
+  when: 2016-08-09
+  copyright_holder: Nobody
+  transferred: true
+
+query_second_image:
+  user: rolf
+  when: 2016-08-09
+  copyright_holder: Nobody
+  transferred: true
+

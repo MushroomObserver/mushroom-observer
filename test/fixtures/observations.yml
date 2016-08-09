@@ -256,3 +256,12 @@ displayed_at_obs:
   location: display_location
   is_collection_location: false
   name: boletus_edulis
+
+two_img_obs:
+  when: 2016-08-09
+  user: dick
+  location: display_location
+  is_collection_location: false
+  name: boletus_edulis
+  images: query_first_image, query_second_image
+  thumb_image: nil # avoid breaking QueryTest#test_inner_outer

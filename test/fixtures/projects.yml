@@ -51,3 +51,10 @@ obs_collected_and_displayed_project:
   admin_group: dick_only
   title: $LABEL
   observations: collected_at_obs, displayed_at_obs
+
+two_img_obs_project:
+  user: dick
+  user_group: dick_only
+  admin_group: dick_only
+  title: $LABEL
+  observations: two_img_obs
