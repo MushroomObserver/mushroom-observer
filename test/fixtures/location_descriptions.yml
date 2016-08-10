@@ -3,7 +3,7 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-albion_desc: # old id: 1
+albion_desc:  # Do not add other decriptions by rolf; it will break tests
   location: albion
   created_at: 2007-12-27 06:41:20
   updated_at: 2007-12-27 06:41:20
@@ -17,3 +17,15 @@ albion_desc: # old id: 1
   editors:
   reader_groups: all_users
   writer_groups: all_users
+
+no_mushrooms_location_desc:
+  location: no_mushrooms_location
+  user: dick
+  version: 1
+  notes: A location without mushrooms.
+  source_type: <%= LocationDescription.source_types[:public] %>
+  public: 1
+  authors: dick
+  reader_groups: dick_only
+  writer_groups: dick_only
+

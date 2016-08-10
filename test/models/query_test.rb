@@ -1666,12 +1666,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions
-    assert_query([locations(:albion).id], :Location, :with_descriptions)
+    assert_query(LocationDescription.all.map(&:location_id).uniq,
+                 :Location, :with_descriptions)
   end
 
   def test_location_with_descriptions_by_user
-    assert_query([locations(:albion).id], :Location,
-                 :with_descriptions_by_user, user: rolf)
+    assert_query([locations(:albion).id],
+                 :Location, :with_descriptions_by_user, user: rolf)
     assert_query([], :Location, :with_descriptions_by_user, user: mary)
   end
 
@@ -1757,7 +1758,7 @@ class QueryTest < UnitTestCase
   def test_location_description_by_user
     assert_query([location_descriptions(:albion_desc).id],
                  :LocationDescription, :by_user, user: rolf)
-    assert_query([], :LocationDescription, :by_user, user: dick)
+    assert_query([], :LocationDescription, :by_user, user: mary)
   end
 
   def test_location_description_by_author
@@ -1797,8 +1798,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_in_set
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :LocationDescription, :in_set,
+                 ids: rolf.id)
+    assert_query(LocationDescription.all,
+                 :LocationDescription, :in_set,
+                 ids: LocationDescription.select(:id).to_a)
+    assert_query([location_descriptions(:albion_desc).id],
+                 :LocationDescription, :in_set,
+                 ids: [rolf.id, location_descriptions(:albion_desc).id])
+  end
 
   def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,

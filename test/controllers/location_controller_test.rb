@@ -180,7 +180,6 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_location_descriptions_by_author
     descs = LocationDescription.all
-    assert_equal(1, descs.length)
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
       %r{/location/show_location_description/#{ descs.first.id }}
