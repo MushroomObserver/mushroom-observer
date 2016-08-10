@@ -340,6 +340,12 @@ class ApplicationController < ActionController::Base
       @user.save
     end
 
+    # Kick Byrain off the site.
+    if @user && @user.id == 2750
+      render(:text => "Your account has been temporarily suspended.", :layout => false)
+      return false
+    end
+
     # Tell Rails to continue to process.
     true
   end
