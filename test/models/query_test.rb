@@ -2068,8 +2068,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_in_set
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([],
+                 :NameDescription, :in_set,
+                 ids: rolf.id)
+    assert_query(NameDescription.all,
+                 :NameDescription, :in_set,
+                 ids: NameDescription.select(:id).to_a)
+    assert_query([NameDescription.first.id],
+                 :NameDescription, :in_set,
+                 ids: [rolf.id, NameDescription.first.id])
+  end
 
   def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id], :Observation,
