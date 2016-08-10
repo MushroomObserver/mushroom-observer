@@ -885,10 +885,6 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-  def test_is_coercable
-      skip("Placeholder for unwritten test.")
-  end #xxx
-
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 
@@ -1318,6 +1314,11 @@ class QueryTest < UnitTestCase
     assert_equal({}, q3.params)
     assert_equal({}, q4.params)
     assert_equal({}, q5.params)
+  end
+
+  def test_is_coercable
+    assert(Query.lookup(:Observation, :all, by: :id).is_coercable?(:Image))
+    refute(Query.lookup(:Herbarium, :all, by: :id).is_coercable?(:Project))
   end
 
   ##############################################################################
