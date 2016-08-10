@@ -3,7 +3,6 @@ require "test_helper"
 require "set"
 
 class QueryTest < UnitTestCase
-
   def assert_query(expect, *args)
     expect = expect.to_a unless expect.respond_to?(:map!)
     expect.map!(&:id) if expect.first.is_a?(AbstractModel)
@@ -1693,8 +1692,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions_in_set
-      skip("Placeholder for unwritten test.")
-  end #xxx
+    assert_query([locations(:albion), locations(:no_mushrooms_location)],
+                 :Location, :with_descriptions_in_set,
+                 ids: [location_descriptions(:albion_desc).id,
+                       location_descriptions(:no_mushrooms_location_desc).id])
+    assert_query([locations(:albion)],
+                 :Location, :with_descriptions_in_set,
+                 ids: [location_descriptions(:albion_desc).id, rolf.id])
+    assert_query([],
+                 :Location, :with_descriptions_in_set, ids: [rolf.id])
+  end
 
   def test_location_with_observations
     assert_query(Location.joins(:observations).uniq,
@@ -1968,8 +1975,8 @@ class QueryTest < UnitTestCase
     desc3 = name_descriptions(:draft_boletus_edulis)
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
-    assert_query([name2, name1], :Name, :with_descriptions_in_set,
-                 ids: [desc1, desc2, desc3])
+    assert_query([name2, name1],
+                 :Name, :with_descriptions_in_set, ids: [desc1, desc2, desc3])
   end
 
   def test_name_with_observations
