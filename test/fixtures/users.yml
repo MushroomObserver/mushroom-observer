@@ -4,6 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 #
 # Rolf is an experienced user
+# Also the default user for Images fixtures
 rolf: # old id: 1
   login: rolf
   name: Rolf Singer
@@ -55,6 +56,7 @@ junk: # old id: 3
   user_groups: all_users, junk_only
 
 # Need third for testing votes
+# Also is the default user for Observation fixture set.
 dick: # old id: 4
   login: dick
   name: Tricky Dick
