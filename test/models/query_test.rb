@@ -2466,12 +2466,21 @@ class QueryTest < UnitTestCase
   end
 
   def test_filtering_content
+    ##### image filters #####
     expect = Observation.where.not(thumb_image_id: nil)
     assert_query(expect, :Observation, :all, has_images: true)
 
+    expect = Observation.where(thumb_image_id: nil)
+    assert_query(expect, :Observation, :all, has_images: false)
+
+    ##### specimen filters #####
     expect = Observation.where(specimen: true)
     assert_query(expect, :Observation, :all, has_specimen: true)
 
+    expect = Observation.where(specimen: false)
+    assert_query(expect, :Observation, :all, has_specimen: false)
+
+    ##### lichen filters #####
     # peltigera = names(:peltigera)
     # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
     # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
