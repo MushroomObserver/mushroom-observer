@@ -115,6 +115,11 @@
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
+#  view_owner_id::      View Observation author's ID on Obs page
+#  filter_prefs:        Serialized prefs for site-wide Obs filters, e.g.:
+#                        prefs_obs_imged: :imaged_only
+#                        prefs_obs_imged: :imageless_only
+#                        prefs_obs_imged: :both
 #
 #  ==== Email options
 #  Send notifications if...
@@ -810,6 +815,15 @@ class User < AbstractModel
   #
   def alert_message
     "user_alert_message_#{alert_type}".to_sym
+  end
+
+  ##############################################################################
+  #
+  #  :section: Filter Preferences
+  #
+  ##############################################################################
+
+  def prefs_obs_imged
   end
 
   ################################################################################
