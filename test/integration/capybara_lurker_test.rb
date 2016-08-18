@@ -89,11 +89,8 @@ class CapybarLurkerTest < IntegrationTestCase
 
     # First login
     visit(root_path)
-    # ensure that the Login links load before clicking on one
-    assert(page.has_content?("Login"))
     first(:link, "Login").click
     assert_equal("#{:app_title.l }: Please login", page.title, "Wrong page")
-
     fill_in("User name or Email address:", with: lurker.login)
     fill_in("Password:", with: "testpassword")
     click_button("Login")
