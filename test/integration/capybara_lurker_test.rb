@@ -81,6 +81,7 @@ class CapybarLurkerTest < IntegrationTestCase
   end
 
   def test_show_observation
+    reset_session!
     # Use detailed_unknown since it has everything.
     lurker = users(:katrina)
     obs = observations(:detailed_unknown_obs)
