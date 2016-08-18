@@ -1522,6 +1522,8 @@
   prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
 
+  prefs_filters: Observation Filters
+  prefs_filters_explanation: (Control Observation visibility and behavior, site-wide.)
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
