@@ -290,6 +290,6 @@ class UserTest < UnitTestCase
   end
 
   def test_user_filters
-    assert_equal({ obs_imged: :imaged }, mary.filter_prefs)
+    assert_equal({ obs_imged: :imaged }, users(:imged_user).filter_prefs)
   end
 end

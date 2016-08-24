@@ -34,7 +34,6 @@ mary: # old id: 2
   name: Mary Newbie
   email: mary@collectivesource.com
   verified: 2006-03-02 21:14:00
-  filter_prefs: <%= { obs_imged: :imaged }.to_yaml.inspect %>
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only
 
@@ -93,3 +92,11 @@ zero_user:
   email: zero@collectivesource.com
   verified: 2016-08-05 15:50:00
   contribution: 0
+
+# excludes imageless Observations from search results, rss feed
+imged_user:
+  <<: *DEFAULTS
+  name: Ignore Imageless
+  email:  imged@collective_source.com
+  verified:  2016-08-24 16:20:00
+  filter_prefs: <%= { obs_imged: :imaged }.to_yaml.inspect %>
