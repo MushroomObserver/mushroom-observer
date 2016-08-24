@@ -288,4 +288,8 @@ class UserTest < UnitTestCase
   def test_is_unsuccessful_contributor?
     assert_false(users(:spammer).is_successful_contributor?)
   end
+
+  def test_user_filters
+    assert_equal({ obs_imged: :imaged }, mary.filter_prefs)
+  end
 end
