@@ -841,7 +841,7 @@ class User < AbstractModel
   end
 
   def obs_imged_checkbox
-    filter_prefs[:obs_imged] == :imaged ? 1 : 0
+    filter_prefs[:obs_imged] == :imaged_only ? 1 : 0
   end
 
   ##############################################################################
