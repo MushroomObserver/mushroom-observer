@@ -99,4 +99,4 @@ imged_user:
   name: Ignore Imageless
   email:  imged@collective_source.com
   verified:  2016-08-24 16:20:00
-  filter_prefs: <%= { obs_imged: :imaged_only }.to_yaml.inspect %>
+  filter_obs_imged: true

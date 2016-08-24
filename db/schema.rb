@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160822105524) do
+ActiveRecord::Schema.define(version: 20160731145100) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -587,37 +587,37 @@ ActiveRecord::Schema.define(version: 20160822105524) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string   "login",                        limit: 80,    default: "",         null: false
-    t.string   "password",                     limit: 40,    default: "",         null: false
-    t.string   "email",                        limit: 80,    default: "",         null: false
+    t.string   "login",                        limit: 80,    default: "",    null: false
+    t.string   "password",                     limit: 40,    default: "",    null: false
+    t.string   "email",                        limit: 80,    default: "",    null: false
     t.string   "theme",                        limit: 40
     t.string   "name",                         limit: 80
     t.datetime "created_at"
     t.datetime "last_login"
     t.datetime "verified"
-    t.integer  "license_id",                   limit: 4,     default: 3,          null: false
+    t.integer  "license_id",                   limit: 4,     default: 3,     null: false
     t.integer  "contribution",                 limit: 4,     default: 0
     t.integer  "location_id",                  limit: 4
     t.integer  "image_id",                     limit: 4
     t.string   "locale",                       limit: 5
     t.text     "bonuses",                      limit: 65535
-    t.boolean  "email_comments_owner",                       default: true,       null: false
-    t.boolean  "email_comments_response",                    default: true,       null: false
-    t.boolean  "email_comments_all",                         default: false,      null: false
-    t.boolean  "email_observations_consensus",               default: true,       null: false
-    t.boolean  "email_observations_naming",                  default: true,       null: false
-    t.boolean  "email_observations_all",                     default: false,      null: false
-    t.boolean  "email_names_author",                         default: true,       null: false
-    t.boolean  "email_names_editor",                         default: false,      null: false
-    t.boolean  "email_names_reviewer",                       default: true,       null: false
-    t.boolean  "email_names_all",                            default: false,      null: false
-    t.boolean  "email_locations_author",                     default: true,       null: false
-    t.boolean  "email_locations_editor",                     default: false,      null: false
-    t.boolean  "email_locations_all",                        default: false,      null: false
-    t.boolean  "email_general_feature",                      default: true,       null: false
-    t.boolean  "email_general_commercial",                   default: true,       null: false
-    t.boolean  "email_general_question",                     default: true,       null: false
-    t.boolean  "email_html",                                 default: true,       null: false
+    t.boolean  "email_comments_owner",                       default: true,  null: false
+    t.boolean  "email_comments_response",                    default: true,  null: false
+    t.boolean  "email_comments_all",                         default: false, null: false
+    t.boolean  "email_observations_consensus",               default: true,  null: false
+    t.boolean  "email_observations_naming",                  default: true,  null: false
+    t.boolean  "email_observations_all",                     default: false, null: false
+    t.boolean  "email_names_author",                         default: true,  null: false
+    t.boolean  "email_names_editor",                         default: false, null: false
+    t.boolean  "email_names_reviewer",                       default: true,  null: false
+    t.boolean  "email_names_all",                            default: false, null: false
+    t.boolean  "email_locations_author",                     default: true,  null: false
+    t.boolean  "email_locations_editor",                     default: false, null: false
+    t.boolean  "email_locations_all",                        default: false, null: false
+    t.boolean  "email_general_feature",                      default: true,  null: false
+    t.boolean  "email_general_commercial",                   default: true,  null: false
+    t.boolean  "email_general_question",                     default: true,  null: false
+    t.boolean  "email_html",                                 default: true,  null: false
     t.datetime "updated_at"
     t.boolean  "admin"
     t.boolean  "created_here"
@@ -630,15 +630,14 @@ ActiveRecord::Schema.define(version: 20160822105524) do
     t.integer  "votes_anonymous",              limit: 4,     default: 1
     t.integer  "location_format",              limit: 4,     default: 1
     t.datetime "last_activity"
-    t.integer  "hide_authors",                 limit: 4,     default: 1,          null: false
-    t.boolean  "thumbnail_maps",                             default: true,       null: false
+    t.integer  "hide_authors",                 limit: 4,     default: 1,     null: false
+    t.boolean  "thumbnail_maps",                             default: true,  null: false
     t.string   "auth_code",                    limit: 40
-    t.integer  "keep_filenames",               limit: 4,     default: 1,          null: false
+    t.integer  "keep_filenames",               limit: 4,     default: 1,     null: false
     t.text     "notes",                        limit: 65535
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count",                 limit: 4
-    t.boolean  "view_owner_id",                              default: false,      null: false
-    t.string   "filter_prefs",                 limit: 255,   default: "--- {}\n"
+    t.boolean  "view_owner_id",                              default: false, null: false
   end
 
   create_table "votes", force: :cascade do |t|

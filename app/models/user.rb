@@ -116,9 +116,8 @@
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
 #  view_owner_id::      View Observation author's ID on Obs page
-#  filter_prefs:        Serialized prefs for site-wide Obs filters, e.g.:
-#                        { obs_imged: :imaged_only,
-#                          obs_specimens: vouchered_only }
+#  filter_obs_imged::   Exclude imageless Observations from search results and
+#                       RSS feeds
 #
 #  ==== Email options
 #  Send notifications if...
@@ -814,34 +813,6 @@ class User < AbstractModel
   #
   def alert_message
     "user_alert_message_#{alert_type}".to_sym
-  end
-
-  ##############################################################################
-  #
-  #  :section: Filter Preferences
-  #
-  ##############################################################################
-  # Filters which apply site-wide to search results.
-  #  * obs_imaged: imaged        # excludes imageless Observations from results.
-  # filter_prefs are stored as a single serialized Hash, e.g.:
-  #   { obs_imged: imaged_only, obs_specimens: vouchered, ... }
-  # In the db, the column type is String, which has a limit of 255 bytes, and
-  # the default is set to {} via migration. If the max size of filter_prefs
-  # were to exceed 255 bytes, then the column must be changed to Text.
-  # MySQL 5.x cannot set a default for Text, so the default would have to be set
-  # some other way.
-  serialize :filter_prefs, Hash
-
-  def filter_prefs
-    read_attribute(:filter_prefs)
-  end
-
-  def filter_prefs=(val)
-    write_attribute(:filter_prefs, val)
-  end
-
-  def obs_imged_checkbox
-    filter_prefs[:obs_imged] == :imaged_only ? 1 : 0
   end
 
   ##############################################################################
