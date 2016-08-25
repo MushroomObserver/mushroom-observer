@@ -288,5 +288,4 @@ class UserTest < UnitTestCase
   def test_is_unsuccessful_contributor?
     assert_false(users(:spammer).is_successful_contributor?)
   end
-  end
 end
