@@ -1,7 +1,7 @@
 require "test_helper"
 require "capybara_helper"
 
-# Test typical sessions of user who never creates an account or contributes.
+# Test user filters
 class FilterTest < IntegrationTestCase
   def test_user_filter_preferences
     user = users(:zero_user)
