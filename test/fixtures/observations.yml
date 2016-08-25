@@ -5,8 +5,8 @@
 #
 # If an Observation fixture has any images, it must have a thumb_image because
 # Query uses existence of thumb as efficient hack for existence of images.
-# If an Observation fixture has a where, it should also have a blank location
-# in order to override DEFAULTS
+# If an Observation fixture has a where, it must also have a blank location
+# in order to override DEFAULTS, e.g.:
 #   where: somewhere
 #   location:
 DEFAULTS: &DEFAULTS
@@ -63,7 +63,6 @@ agaricus_campestris_obs:
   when: 2007-03-19
   user: rolf
   name: agaricus_campestris
-  specimen: 0
   notes: From the lawn next door
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
@@ -76,7 +75,6 @@ agaricus_campestrus_obs:
   when: 2007-06-23
   user: rolf
   name: agaricus_campestrus
-  specimen: 0
   notes: From somewhere else
 
 agaricus_campestras_obs:
@@ -85,9 +83,7 @@ agaricus_campestras_obs:
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
   user: rolf
-  location: burbank
   name: agaricus_campestras
-  specimen: 0
   notes: From somewhere else
 
 agaricus_campestros_obs:
@@ -96,9 +92,7 @@ agaricus_campestros_obs:
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
   user: rolf
-  location: burbank
   name: agaricus_campestros
-  specimen: 0
   notes: From somewhere else
 
 strobilurus_diminutivus_obs:
@@ -110,9 +104,7 @@ strobilurus_diminutivus_obs:
   location:
   name: strobilurus_diminutivus_no_author
   where: Pipi Valley, Sierra Mountains, CA
-  specimen: 0
   notes: From somewhere else
-  vote_cache: 0
 
 unknown_with_no_naming:
   <<: *DEFAULTS
@@ -135,7 +127,6 @@ unknown_with_lat_long:
 amateur_obs:
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00
-  updated_at: 2010-12-31 06:46:00
   when: 2010-12-30
   user: katrina
   location:
@@ -149,8 +140,6 @@ amateur_obs:
 
 peltigera_obs:
   <<: *DEFAULTS
-  created_at: 2012-06-07 16:31:40
-  updated_at: 2012-06-07 16:31:40
   when: 2012-06-07
   user: rolf
   location:
@@ -165,8 +154,6 @@ peltigera_obs:
 
 peltigera_rolf_obs:
   <<: *DEFAULTS
-  created_at: 2013-09-14 08:37:55
-  updated_at: 2013-09-14 08:37:55
   when: 2013-09-08
   user: mary
   location:
@@ -181,15 +168,12 @@ peltigera_rolf_obs:
 
 fungi_obs:
   <<: *DEFAULTS
-  created_at: 2013-09-15 22:14:40
-  updated_at: 2013-09-15 22:14:40
   when: 2013-09-15
   user: rolf
   location:
   where: 'Briceland, California, USA'
   is_collection_location: 0
   name: fungi
-  specimen: 0
   notes: 'Observation for plane pileus'
   vote_cache: 3
   thumb_image: conic_image
@@ -197,62 +181,44 @@ fungi_obs:
 
 boletus_edulis_obs:
   <<: *DEFAULTS
-  created_at: 2014-04-21 07:48:00
-  updated_at: 2014-04-21 07:48:00
   when: 2014-04-21
   location:
   where: 'New York, New York, USA'
   name: boletus_edulis
   is_collection_location: 0
-  specimen: 0
   notes: 'A tasty bolete!'
   vote_cache: 3
 
 owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
-  created_at: 2015-10-08 15:18:00
-  updated_at: 2015-10-08 15:18:00
   when: 2015-10-08
 
 owner_only_favorite_eq_consensus:
   <<: *DEFAULTS
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
 
 owner_only_favorite_ne_consensus:
   <<: *DEFAULTS
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
   name: tremella
 
 owner_multiple_favorites:
   <<: *DEFAULTS
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
-  location: burbank
 
 owner_uncertain_favorite:
   <<: *DEFAULTS
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   when: 2015-10-08
 
 owner_accepts_general_questions:
   <<: *DEFAULTS
-  created_at: 2015-10-18 19:27:00
-  updated_at: 2015-10-18 19:27:00
   when: 2015-10-18
   user: roy                      # roy has email_general_questions == true
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
-  created_at: 2015-10-18 19:27:00
-  updated_at: 2015-10-18 19:27:00
   when: 2015-10-18
-  user: dick                      # dick has email_general_questions == false
+  user: dick                     # dick has email_general_questions == false
 
 collected_at_obs:
   <<: *DEFAULTS
