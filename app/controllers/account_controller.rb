@@ -375,6 +375,7 @@ class AccountController < ApplicationController
       [:bool, :email_general_feature],
       [:bool, :email_general_commercial],
       [:bool, :email_general_question],
+      [:bool, :filter_obs_imged],
       # [ :str,  :email_digest ],
       [:bool, :thumbnail_maps],
       [:bool, :view_owner_id]

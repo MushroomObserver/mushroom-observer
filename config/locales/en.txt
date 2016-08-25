@@ -1524,6 +1524,7 @@
 
   prefs_filters: Observation Filters
   prefs_filters_explanation: (Control Observation visibility and behavior, site-wide.)
+  prefs_filters_obs_imged: Exclude imageless Observations?
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
