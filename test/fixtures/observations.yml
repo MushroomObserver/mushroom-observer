@@ -239,6 +239,8 @@ two_img_obs:
   images: query_first_image, query_second_image
   thumb_image: query_first_image
 
-imageless_unvouchered obs:
+imageless_unvouchered_obs:
   <<: *DEFAULTS
   when: 2016-08-25
+  user: ignore_imageless_user
+

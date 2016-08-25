@@ -82,7 +82,7 @@ spammer: # old id: 7
   # Associations
   user_groups: all_users, spammer_only
 
-# Has nothing: no comments, descriptions, images, locations, names,
+# Has nothing -- No: comments, descriptions, filters, images, locations, names,
 # observations, projects, publications, species lists, specimens, or anything
 # except account
 zero_user:
@@ -94,7 +94,7 @@ zero_user:
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
-imged_user:
+ignore_imageless_user:
   <<: *DEFAULTS
   name: Ignore Imageless
   email:  imged@collective_source.com
