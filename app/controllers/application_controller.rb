@@ -1161,11 +1161,11 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-#     # Apply content filter to any queries which are capable of being filtered.
-#     if query.respond_to?(:observation_filters)
-#       filter_params = @user ? @user.content_filter : MO.default_content_filter
-#       query.params.merge!(filter_params)
-#     end
+    # Apply content filter to any queries which are capable of being filtered.
+    if query.respond_to?(:observation_filters)
+      filter_params = @user ? @user.content_filter : MO.default_content_filter
+      query.params.merge!(filter_params) if filter_params
+    end
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
