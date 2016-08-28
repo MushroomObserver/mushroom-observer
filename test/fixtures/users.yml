@@ -100,3 +100,4 @@ ignore_imageless_user:
   email:  imged@collective_source.com
   verified:  2016-08-24 16:20:00
   filter_obs_imged: true
+  layout_count: 24
