@@ -770,6 +770,7 @@ class QueryTest < UnitTestCase
 
     ##### Test next and previous on the query results. #####
     # (Results are images of all obs with images, not just inner1 - inner4.)
+    non_uniq_imgs_with_obs_count = Image.joins(:observations).size
 
     # Get 1st result, which is 1st image of 1st imaged observation
     obs = obs_with_imgs_ids.first
@@ -786,7 +787,7 @@ class QueryTest < UnitTestCase
 
     ### Use next to step forward through the other results, ###
     # checking for the right query, observation, and image
-    (img_with_obs_ids.count - 1).times do
+    (non_uniq_imgs_with_obs_count - 1).times do
       obs, imgs, img = next_result(obs, imgs, img)
       q = q.next
       # Are we looking at the right obs and query?
@@ -813,7 +814,7 @@ class QueryTest < UnitTestCase
 
     ### Use prev to step back through the results, ###
     # again checking for the right query, observation, and image
-    (img_with_obs_ids.count - 1).times do
+    (non_uniq_imgs_with_obs_count - 1).times do
       obs, imgs, img = prev_result(obs, imgs, img)
       q = q.prev
       # Are we looking at the right obs and query?
@@ -845,10 +846,6 @@ class QueryTest < UnitTestCase
 
   def obs_with_imgs_ids
     Observation.distinct.joins(:images).order(:id).map(&:id)
-  end
-
-  def img_with_obs_ids
-    Image.distinct.joins(:observations).order(:id).map(&:id)
   end
 
   # Return next result's: observation.id, image.id list, image.id
