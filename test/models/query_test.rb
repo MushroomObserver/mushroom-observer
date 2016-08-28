@@ -1475,11 +1475,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_at_location
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                  :with_observations_at_location,
-                  location: locations(:burbank).id)
+    assert_query(Image.joins(observations: :location).
+                       where(observations: { location: locations(:burbank) }).
+                       where(observations: { is_collection_location: true }),
+                 :Image, :with_observations_at_location,
+                 location: locations(:burbank).id)
     assert_query([], :Image, :with_observations_at_location,
                  location: locations(:mitrula_marsh).id)
   end
