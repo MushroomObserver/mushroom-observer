@@ -1387,8 +1387,9 @@ class QueryTest < UnitTestCase
   def test_image_advanced_search
     assert_query([images(:agaricus_campestris_image).id],
                  :Image, :advanced_search, name: "Agaricus")
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id, images(:in_situ_image).id],
+    assert_query(Image.joins(observations: :location).
+                       where(observations: { location: locations(:burbank) }).
+                       where(observations: { is_collection_location: true }),
                  :Image, :advanced_search, location: "burbank")
     assert_query([images(:connected_coprinus_comatus_image).id], :Image,
                  :advanced_search, location: "glendale")
