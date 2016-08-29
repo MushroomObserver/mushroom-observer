@@ -1501,11 +1501,9 @@ class NameController < ApplicationController
         if @notification
           @note_template = @notification.note_template
         else
-          mailing_address = @user.mailing_address.strip if @user.mailing_address
-          mailing_address = ":mailing_address" if mailing_address.blank?
           @note_template = :email_tracking_note_template.l(
             species_name: @name.real_text_name,
-            mailing_address: mailing_address,
+            mailing_address: @user.mailing_address_for_tracking_template,
             users_name: @user.legal_name
           )
         end
