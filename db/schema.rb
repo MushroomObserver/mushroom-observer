@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160731145100) do
+ActiveRecord::Schema.define(version: 20160829175601) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -638,6 +638,7 @@ ActiveRecord::Schema.define(version: 20160731145100) do
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count",                 limit: 4
     t.boolean  "view_owner_id",                              default: false, null: false
+    t.string   "content_filter",               limit: 255
   end
 
   create_table "votes", force: :cascade do |t|
