@@ -669,12 +669,7 @@ class User < AbstractModel
   #
   ##############################################################################
 
-  # Translate user preferences into Query parameters
-  def content_filter
-    query_content_filter_params = {}
-    query_content_filter_params[:has_images] = true if filter_obs_imged
-    query_content_filter_params
-  end
+  serialize :content_filter, Hash
 
   ##############################################################################
   #
