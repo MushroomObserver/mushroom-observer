@@ -343,7 +343,7 @@ class AccountController < ApplicationController
       end
     end
 
-    for type, arg, post in [
+    for type, pref, post in [
       [:str,  :login,           true],
       [:str,  :email,           true],
       [:str,  :locale,          true],
@@ -375,19 +375,31 @@ class AccountController < ApplicationController
       [:bool, :email_general_feature],
       [:bool, :email_general_commercial],
       [:bool, :email_general_question],
-      [:bool, :filter_obs_imged],
       # [ :str,  :email_digest ],
       [:bool, :thumbnail_maps],
-      [:bool, :view_owner_id]
+      [:bool, :view_owner_id],
+      [:content_filter, :filter_obs_imged_checkbox]
     ]
-      val = params[:user][arg]
-      val = case type
-            when :str  then val.to_s
-            when :int  then val.to_i
-            when :bool then val == "1"
-            when :enum then val ||= User.enum_default_value(arg)
+      val = params[:user][pref]
+      case type
+      when :str
+        val = val.to_s
+        @user.send("#{pref}=", val) if @user.send(pref) != val
+      when :int
+        val = val.to_i
+        @user.send("#{pref}=", val) if @user.send(pref) != val
+      when :bool
+        val = (val == "1")
+        @user.send("#{pref}=", val) if @user.send(pref) != val
+      when :enum
+        val = val ||= User.enum_default_value(pref)
+        @user.send("#{pref}=", val) if @user.send(pref) != val
+      when :content_filter
+        if pref == :filter_obs_imged_checkbox
+          val == "1" ? val = "NOT NULL" : val = nil
+          @user.content_filter[:has_images] = val
+        end
       end
-      @user.send("#{arg}=", val) if @user.send(arg) != val
     end
 
     legal_name_change = @user.legal_name_change

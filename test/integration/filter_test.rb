@@ -4,6 +4,7 @@ require "capybara_helper"
 # Test user filters
 class FilterTest < IntegrationTestCase
   def test_user_image_filter
+    ### Prove that :has_images filter excludes imageless Observations #####
     # This user filters out imageless Observations
     user = users(:ignore_imageless_user)
     obs = observations(:imageless_unvouchered_obs)
@@ -28,19 +29,23 @@ class FilterTest < IntegrationTestCase
     # And hits should not contain obs (which is imageless)
     results.assert_no_text(obs.id.to_s)
 
-    ### Now change preferences and see if we get all Observations ###
+    ### Now prove that turning filter off stops filtering ##################
+    # Prove that preference page UI works
     click_on("Preferences", match: :first)
     assert(page.has_content?("Observation Filters"),
            "Preference page lacks Observation Filters section")
-    obs_imged_checkbox = find_field("user[filter_obs_imged]")
+    obs_imged_checkbox = find_field("user[filter_obs_imged_checkbox]")
     assert(obs_imged_checkbox.checked?,
            "'#{:prefs_filters_obs_imged.t}' checkbox should be checked.")
-    page.uncheck("user[filter_obs_imged]")
+    page.uncheck("user[filter_obs_imged_checkbox]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
+    refute(obs_imged_checkbox.checked?,
+           "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
     user.reload
-    assert_equal(false, user.filter_obs_imged)
+    assert_equal(nil, user.content_filter[:has_images],
+                 "Unchecking and saving should turn off filter")
 
-    # repeat the search
+    # Repeat the search
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")

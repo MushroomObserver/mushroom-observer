@@ -671,6 +671,10 @@ class User < AbstractModel
 
   serialize :content_filter, Hash
 
+  def filter_obs_imged_checkbox
+    content_filter[:has_images] == "NOT NULL" ? 1 : 0
+  end
+
   ##############################################################################
   #
   #  :section: Profile
