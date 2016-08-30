@@ -116,7 +116,9 @@
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
 #  view_owner_id::      View Observation author's ID on Obs page
-#  filter_obs_imged::   Exclude imageless Observations from search results and
+#
+#  ==== Content filter options
+#  has_images::         Exclude imageless Observations from search results and
 #                       rss feeds
 #
 #  ==== Email options
@@ -671,7 +673,8 @@ class User < AbstractModel
 
   serialize :content_filter, Hash
 
-  def filter_obs_imged_checkbox
+  # Used by prefs form to get checkbox value
+  def has_images
     content_filter[:has_images] == "NOT NULL" ? 1 : 0
   end
 
