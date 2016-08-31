@@ -1,8 +1,8 @@
 module Query::Initializers::ObservationFilters
   def observation_filter_parameter_declarations
     {
-      has_specimen?: :boolean,
-      has_images?:   :boolean
+      has_images?:   :string,
+      has_specimen?: :boolean
     }
   end
 
@@ -40,9 +40,11 @@ module Query::Initializers::ObservationFilters
       val = params[:has_specimen] ? "TRUE" : "FALSE"
       result << "observations.specimen IS #{val}"
     end
-    if params[:has_images] != nil
-      val = params[:has_images] ? "NOT NULL" : "NULL"
-      result << "observations.thumb_image_id IS #{val}"
+
+    unless (val = params[:has_images]) == nil
+      if ["NOT NULL", "NULL"].include?(val)
+        result << "observations.thumb_image_id IS #{val}"
+      end
     end
     result
   end

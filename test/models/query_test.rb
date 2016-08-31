@@ -2466,10 +2466,10 @@ class QueryTest < UnitTestCase
   def test_filtering_content
     ##### image filters #####
     expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: true)
+    assert_query(expect, :Observation, :all, has_images: "NOT NULL")
 
     expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: false)
+    assert_query(expect, :Observation, :all, has_images: "NULL")
 
     ##### specimen filters #####
     expect = Observation.where(specimen: true)

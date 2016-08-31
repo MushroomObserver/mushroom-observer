@@ -50,6 +50,22 @@
       <p class="help-block"><%= :advanced_search_content_notes.t %></p>
     </div>
 
+    <!-- Filters Settings of Advanced Search Form -->
+    <div id="advanced_search_filters">
+      <div class="form-group">
+        <span class="bold"><%= :advanced_search_filters.t %></span>
+        (<%= :advanced_search_filters_explanation.t %>)
+
+        <%= label_tag(:filter_has_images,
+                    :advanced_search_filter_has_images.t + ":") %>
+        <%= select(:search, :has_images,
+                   [[:advanced_search_filter_has_images_both.l,  "no filter"],
+                    [:advanced_search_filter_has_images_imaged.t, "NOT NULL"],
+                    [:advanced_search_filter_has_images_imageless.t,  "NULL"]],
+                   selected: "no filter") %>
+      </div>
+    </div>
+
     <%= submit_tag(:SEARCH.l, class: "btn center-block") %>
   <% end %>
 </div>

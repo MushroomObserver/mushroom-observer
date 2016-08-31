@@ -538,12 +538,14 @@ class ObserverController < ApplicationController
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
   #   image/advanced_search
+  #   location/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
     return unless request.method == "POST"
 
     model = params[:search][:type].to_s.camelize.constantize
+
 
     # Pass along all given search fields (remove angle-bracketed user name,
     # though, since it was only included by the auto-completer as a hint).
@@ -561,14 +563,18 @@ class ObserverController < ApplicationController
       search[:content] = x
     end
 
+    # Add_observation filters to search
+    if model == Observation
+      search[:has_images] = params[:search][:has_images]
+    end
+
     # Create query (this just validates the parameters).
     query = create_query(model, :advanced_search, search)
 
     # Let the individual controllers execute and render it.
-    redirect_to(add_query_param({
-                                  controller: model.show_controller,
-                                  action: "advanced_search"
-                                }, query))
+    redirect_to(add_query_param({ controller: model.show_controller,
+                                  action: "advanced_search" },
+                                query))
   end
 
   # Displays matrix of selected Observation's (based on current Query).

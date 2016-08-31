@@ -3,7 +3,7 @@ require "capybara_helper"
 
 # Test user filters
 class FilterTest < IntegrationTestCase
-  def test_user_image_filter
+  def test_user_content_filter
     ### Prove that :has_images filter excludes imageless Observations #####
     # This user filters out imageless Observations
     user = users(:ignore_imageless_user)
@@ -11,6 +11,7 @@ class FilterTest < IntegrationTestCase
     imged_obss = Observation.where(name: obs.name).
                              where.not(thumb_image_id: nil)
 
+    reset_session!
     visit("/account/login")
     fill_in("User name or Email address:", with: user.login)
     fill_in("Password:", with: "testpassword")
@@ -51,6 +52,41 @@ class FilterTest < IntegrationTestCase
     click_button("Search")
     results = page.find("div.results", match: :first)
 
+    # Number of hits should == **total** Observations of obs.name
+    results.assert_text(obs.name.text_name,
+                        count: Observation.where(name: obs.name).size)
+    # And hits should contain obs (which is imageless)
+    results.assert_text(obs.id.to_s)
+  end
+
+  def test_advanced_search_filters
+    # Login a user who filters out imageless Observations
+    user = users(:ignore_imageless_user)
+    obs = observations(:imageless_unvouchered_obs)
+    imged_obss = Observation.where(name: obs.name).
+                             where.not(thumb_image_id: nil)
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Verfy Advanced Search form
+    click_on("Advanced Search", match: :first)
+    filters = page.find("div#advanced_search_filters")
+    within("div#advanced_search_filters") do
+      # Verify Labels.
+      assert_text(:advanced_search_filters.t)
+      assert_text(:advanced_search_filter_has_images.t)
+      # Verify Filters and default values
+      assert_equal("no filter", find("#search_has_images").value)
+   end
+
+    # Fill out and submit the form
+    fill_in("Name", with: obs.name.text_name)
+    find("#content").click_button("Search")
+
+    # Advance Search Filters should override user's { has_images: "NOT NULL" }
+    results = page.find("div.results", match: :first)
     # Number of hits should == **total** Observations of obs.name
     results.assert_text(obs.name.text_name,
                         count: Observation.where(name: obs.name).size)
