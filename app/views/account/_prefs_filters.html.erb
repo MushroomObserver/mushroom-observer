@@ -1,12 +1,17 @@
 <!-- Filters Settings of Account Preferences Form -->
 <div class="form-group push-down">
-  <span class="bold"><%= :prefs_filters.t %></span>
-  <%= :prefs_filters_explanation.t %>
+  <span class="bold"><%= :prefs_content_filters.t %></span>
+  <p><%= :prefs_content_filters_explanation.t %><p>
 </div>
 
-<div class="form-group push-down form-inline">
-  <%= form.check_box(:has_images, class: "form-control") %>
-  <%= label_tag(:user_has_images, :prefs_filters_obs_imged.t) %>
+<div class="form-group indent push-down">
+  <span class="bold"><%= :prefs_obs_filters.t %></span><br>
+  <span><%= :prefs_obs_filters_explanation.t %></span>
+
+  <div class="form-inline">
+    <%= form.check_box(:has_images, class: "form-control") %>
+    <%= label_tag(:user_has_images, :prefs_obs_filters_has_images.t) %>
+  </div>
 </div>
 
 <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>

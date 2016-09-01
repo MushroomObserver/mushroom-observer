@@ -543,27 +543,11 @@ class ObserverController < ApplicationController
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
     return unless request.method == "POST"
-
     model = params[:search][:type].to_s.camelize.constantize
 
 
-    # Pass along all given search fields (remove angle-bracketed user name,
-    # though, since it was only included by the auto-completer as a hint).
-    search = {}
-    unless (x = params[:search][:name].to_s).blank?
-      search[:name] = x
-    end
-    unless (x = params[:search][:location].to_s).blank?
-      search[:location] = x
-    end
-    unless (x = params[:search][:user].to_s).blank?
-      search[:user] = x.sub(/ <.*/, "")
-    end
-    unless (x = params[:search][:content].to_s).blank?
-      search[:content] = x
-    end
-
-    # Add_observation filters to search
+    # Pass along filled-in text field and search content filters with Query
+    search = filled_in_text_fields
     if model == Observation
       search[:has_images] = params[:search][:has_images]
     end
@@ -575,6 +559,21 @@ class ObserverController < ApplicationController
     redirect_to(add_query_param({ controller: model.show_controller,
                                   action: "advanced_search" },
                                 query))
+  end
+
+  def filled_in_text_fields
+    result = {}
+    [:content, :location, :name].each do |field|
+      if (val = params[:search][field].to_s).present?
+        result[field] = val
+      end
+    end
+    # Treat User field differently; remove angle-bracketed user name,
+    # since it was included by the auto-completer only as a hint.
+    if (x = params[:search][:user].to_s).present?
+      result[:user] = x.sub(/ <.*/, "")
+    end
+    result
   end
 
   # Displays matrix of selected Observation's (based on current Query).

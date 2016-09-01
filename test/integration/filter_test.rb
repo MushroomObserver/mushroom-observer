@@ -78,7 +78,7 @@ class FilterTest < IntegrationTestCase
       assert_text(:advanced_search_filters.t)
       assert_text(:advanced_search_filter_has_images.t)
       # Verify Filters and default values
-      assert_equal("no filter", find("#search_has_images").value)
+      assert(find("#search_has_images_off").checked?)
    end
 
     # Fill out and submit the form

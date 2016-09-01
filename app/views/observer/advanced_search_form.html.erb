@@ -53,19 +53,34 @@
     <!-- Filters Settings of Advanced Search Form -->
     <div id="advanced_search_filters">
       <div class="form-group">
-        <span class="bold"><%= :advanced_search_filters.t %></span>
-        (<%= :advanced_search_filters_explanation.t %>)
+        <div class="push-down">
+          <span class="bold"><%= :advanced_search_filters.t %></span>
+          <p><%= :advanced_search_filters_explain.t %>.<p>
+        </div>
+        <div class = "indent">
+          <span class="bold"><%= :prefs_obs_filters.t %></span>
+          (<%= :prefs_obs_filters_explanation.t %>)<br/>
 
-        <%= label_tag(:filter_has_images,
-                    :advanced_search_filter_has_images.t + ":") %>
-        <%= select(:search, :has_images,
-                   [[:advanced_search_filter_has_images_both.l,  "no filter"],
-                    [:advanced_search_filter_has_images_imaged.t, "NOT NULL"],
-                    [:advanced_search_filter_has_images_imageless.t,  "NULL"]],
-                   selected: "no filter") %>
+<!--
+          <%= label_tag(:filter_has_images,
+                        :advanced_search_filter_has_images.t + ":") %>
+          <%= select(:search, :has_images,
+                     [[:advanced_search_filter_has_images_both.l,        "off"],
+                      [:advanced_search_filter_has_images_imaged.t, "NOT NULL"],
+                      [:advanced_search_filter_has_images_imageless.t,  "NULL"]],
+                     selected: "off") %>
+-->
+          <%= :advanced_search_filter_has_images.t %>.<br/>
+          <%= radio_button(:search, :has_images, "NOT NULL") %>
+          <%= :advanced_search_filter_has_images_imaged.l %>.<br/>
+          <%= radio_button(:search, :has_images, "NULL") %>
+          <%= :advanced_search_filter_has_images_imageless.l %>.<br/>
+          <%= radio_button(:search, :has_images, "off", checked: true) %>
+          <%= :advanced_search_filter_has_images_both.l %>.<br/>
+
+        </div>
       </div>
     </div>
-
     <%= submit_tag(:SEARCH.l, class: "btn center-block") %>
   <% end %>
 </div>
