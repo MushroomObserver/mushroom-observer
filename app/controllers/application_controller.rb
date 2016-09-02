@@ -1161,8 +1161,8 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-    # Apply content filter to any query which can be filtered,
-    # unless its already filtered.
+    # Apply observation filters to any query which can be filtered,
+    # unless it's already filtered.
     if query.respond_to?(:observation_filters) &&
        !query.has_any_observation_filters?
       filter_params = @user ? @user.content_filter : MO.default_content_filter
