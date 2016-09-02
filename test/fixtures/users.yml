@@ -4,24 +4,25 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 #
 DEFAULTS: &DEFAULTS
-  login: $LABEL
-  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
-  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
-  contribution: 10
-  created_here: true
-  image_size: <%= User.image_sizes[:medium] %>
+  auth_code:      cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
+  contribution:   10
+  created_here:   true
+  email:          $LABEL@collectivesource.com
+  image_size:     <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  locale: en-US
+  locale:         en-US
+  login:          $LABEL
+  name:           $LABEL
+  password:       ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   # Associations
-  user_groups: all_users
+  user_groups:    all_users, $LABEL_only
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures
-rolf: # old id: 1
+rolf:
   <<: *DEFAULTS
   name: Rolf Singer
-  email: rolf@collectivesource.com
   verified: 2006-03-02 21:14:00
   license: ccwiki30
   image: rolf_profile_image
@@ -29,75 +30,65 @@ rolf: # old id: 1
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
-mary: # old id: 2
+mary:
   <<: *DEFAULTS
   name: Mary Newbie
-  email: mary@collectivesource.com
   verified: 2006-03-02 21:14:00
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only
 
 # Junk gets denied
-junk: # old id: 3
+junk:
   <<: *DEFAULTS
   name: Junk Box
-  email: junk@collectivesource.com
-  user_groups: all_users, junk_only
 
 # Need third for testing votes
 # Also is the default user for Observation fixture set.
-dick: # old id: 4
+dick:
   <<: *DEFAULTS
   name: Tricky Dick
-  email: dick@collectivesource.com
   email_general_question: false
   verified: 2006-03-02 21:14:00
   user_groups: all_users, bolete_users, bolete_admins, dick_only
 
 # Need fourth for testing votes
-katrina: # old id: 5
+katrina:
   <<: *DEFAULTS
-  name: Katrina
-  email: katrina@collectivesource.com
   verified: 2008-03-02 21:14:00
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
   user_groups: all_users, eol_users, katrina_only
 
 # Roy is a scientific user
-roy: # old id: 6
+roy:
   <<: *DEFAULTS
   name: Roy Halling
-  email: roy@collectivesource.com
   email_general_question: true
   verified: 2010-07-15 21:20:00
   location_format: <%= User.location_formats[:scientific] %>
-  user_groups: all_users, roy_only
 
-spammer: # old id: 7
+spammer:
   <<: *DEFAULTS
   login: spamspamspam
-  name: Must Spam
-  email: spammer@collectivesource.com
   verified: 2010-07-15 21:20:00
-  # Associations
-  user_groups: all_users, spammer_only
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
 # observations, projects, publications, species lists, specimens, or anything
 # except account
 zero_user:
   <<: *DEFAULTS
-  login: zero
-  name: Zero
-  email: zero@collectivesource.com
   verified: 2016-08-05 15:50:00
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
 ignore_imageless_user:
   <<: *DEFAULTS
-  name: Ignore Imageless
-  email:  imged@collective_source.com
   verified:  2016-08-24 16:20:00
   content_filter: <%= { has_images: "NOT NULL" }.to_yaml.inspect %>
+  layout_count: 24
+
+# hides unvouchered Observations
+vouchered_only_user:
+  <<: *DEFAULTS
+  verified:  2016-09-02 13:50:00
+  content_filter: <%= { has_specimens: true }.to_yaml.inspect %>
   layout_count: 24
