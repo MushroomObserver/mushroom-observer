@@ -2197,10 +2197,14 @@
   advanced_search_content: Content
   advanced_search_content_help: Text contained in [:observation] notes or [:comments]
   advanced_search_content_notes: "Content search supports full Google syntax, including \"OR\", double quotes, and negation:\naaa bbb -> contains \"aaa\" and \"bbb\" in any order\n\"aaa bbb\" -> contains \"aaa\" followed immediately by \"bbb\"\naaa OR bbb -> contains either \"aaa\" or \"bbb\"\n-aaa -bbb -> reject anything that contains \"aaa\" or \"bbb\""
-  advanced_search_filter_has_images: Filter Observations based on presence/absence of images
+  advanced_search_filter_has_images: Filter Observations based on whether they have images
   advanced_search_filter_has_images_both: Include both imaged and imageless Observations
-  advanced_search_filter_has_images_imaged: Exclude Observations which have no images
-  advanced_search_filter_has_images_imageless: Exclude Observations which have images
+  advanced_search_filter_has_images_imaged: Exclude imageless Observations
+  advanced_search_filter_has_images_imageless: Exclude imaged Observations
+  advanced_search_filter_has_specimens: Filter Observations based whether they have specimens ("vouchers")
+  advanced_search_filter_has_specimens_both: Include both vouchered and unvouchered Observations
+  advanced_search_filter_has_specimens_vouchered: Exclude voucherless Observations
+  advanced_search_filter_has_specimens_unvouchered: Exclude vouchered Observations
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, override any user Content Filters
   advanced_search_filters_observation: Observation Filters

@@ -683,7 +683,7 @@ class User < AbstractModel
   #   Supplement ApplicationController#show_index_of_objects as needed.
   #
   # To be able to override the new filter in Advanced Searches, at least:
-  #   Add tests, e.g., to test/integration/filter_test#test_user_content_filter
+  #   Add tests, e.g., to test/integration/filter_test#test_advanced_search_filters
   #   Supplement fixtures as needed by added tests
   #   Supplement _advanced_search_filters.html.erb as needed
   #   Supplement ObservationController#advanced_search_form as needed.
@@ -693,7 +693,7 @@ class User < AbstractModel
   # There are probably other steps/files I've forgotten. JDC 2016-09-01
   serialize :content_filter, Hash
 
-  # Used by prefs form to get checkbox value
+  # Methods used by forms to get checkbox or other values
   # "NOT NULL": Observation has image(s)
   # Otherwise, user content filter is off
   # ("NULL"   : Observation has no image, available only via Advanced Search)
@@ -701,7 +701,6 @@ class User < AbstractModel
     content_filter[:has_images] == "NOT NULL" ? 1 : 0
   end
 
-  # Used by prefs form to get checkbox value
   # true      : Observation has specimen(s)
   # Otherwise, user content filter is off
   # ("FALSE"  : Observation has no specimen, available only via Advanced Search)

@@ -98,6 +98,7 @@ class FilterTest < IntegrationTestCase
   end
 
   def test_advanced_search_filters
+    # has_images_filter
     # Login a user who filters out imageless Observations
     user = users(:ignore_imageless_user)
     obs = observations(:imageless_unvouchered_obs)
@@ -117,6 +118,7 @@ class FilterTest < IntegrationTestCase
       assert_text(:advanced_search_filter_has_images.t)
       # Verify Filters and default values
       assert(find("#search_has_images_off").checked?)
+      assert(find("#search_has_specimens").checked?)  # == search is off
    end
 
     # Fill out and submit the form
@@ -129,6 +131,37 @@ class FilterTest < IntegrationTestCase
     results.assert_text(obs.name.text_name,
                         count: Observation.where(name: obs.name).size)
     # And hits should contain obs (which is imageless)
+    results.assert_text(obs.id.to_s)
+
+    ############################################################################
+    # has_specimens filter
+    # user who sees voucherless Observations, but hides imageless Observations
+    user = users(:ignore_imageless_user)
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Verify additional parts of Advanced Search form
+    click_on("Advanced Search", match: :first)
+    filters = page.find("div#advanced_search_filters")
+    within(filters) do
+      assert_text(:advanced_search_filter_has_specimens.t)
+      assert(find("#search_has_specimens").checked?)
+    end
+
+    # Fill out and submit the form
+    fill_in("Name", with: obs.name.text_name)
+    choose("search_has_specimens_true")
+byebug
+    find("#content").click_button("Search")
+
+    # Advance Search Filters should override user content_filter so hits
+    #   should == vouchered Observations of obs.name, both imaged and imageless
+    expect = Observation.where(name: obs.name).where(specimen: true)
+    results = page.find("div.results", match: :first)
+    results.assert_text(obs.name.text_name, count: expect.size)
+    # And hits should contain obs (which is image)
     results.assert_text(obs.id.to_s)
   end
 end

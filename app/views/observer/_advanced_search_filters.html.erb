@@ -5,28 +5,27 @@
       <span class="bold"><%= :advanced_search_filters.t %></span>
       <p><%= :advanced_search_filters_explain.t %>.<p>
     </div>
-    <div class = "indent">
+    <div class="indent">
       <span class="bold"><%= :prefs_obs_filters.t %></span>
       (<%= :prefs_obs_filters_explanation.t %>)<br/>
 
-<!-- has_images as a drop-drop menu
-      <%= label_tag(:filter_has_images,
-                    :advanced_search_filter_has_images.t + ":") %>
-      <%= select(:search, :has_images,
-                 [[:advanced_search_filter_has_images_both.l,        "off"],
-                  [:advanced_search_filter_has_images_imaged.t, "NOT NULL"],
-                  [:advanced_search_filter_has_images_imageless.t,  "NULL"]],
-                 selected: "off") %>
--->
-      <!-- has_images radio buttons -->
       <%= :advanced_search_filter_has_images.t %>.<br/>
-      <%= radio_button(:search, :has_images, "NOT NULL") %>
+      <!-- has_images radio buttons -->
+      <%= radio_button_tag(:has_images, "NOT NULL", false) %>
       <%= :advanced_search_filter_has_images_imaged.l %>.<br/>
-      <%= radio_button(:search, :has_images, "NULL") %>
+      <%= radio_button_tag(:has_images, "NULL", false) %>
       <%= :advanced_search_filter_has_images_imageless.l %>.<br/>
-      <%= radio_button(:search, :has_images, "off", checked: true) %>
+      <%= radio_button_tag(:has_images, nil, checked: true) %>
       <%= :advanced_search_filter_has_images_both.l %>.<br/>
-
+      <br/>
+      <%= :advanced_search_filter_has_specimens.t %>.<br/>
+      <!-- has_specimens radio buttons -->
+      <%= radio_button_tag(:has_specimens, true, false) %>
+      <%= :advanced_search_filter_has_specimens_vouchered.l %>.<br/>
+      <%= radio_button_tag(:has_specimens, false, false) %>
+      <%= :advanced_search_filter_has_specimens_unvouchered.l %>.<br/>
+      <%= radio_button_tag(:has_specimens, nil, checked: true) %>
+      <%= :advanced_search_filter_has_specimens_both.l %>.<br/>
     </div>
   </div>
 </div>
