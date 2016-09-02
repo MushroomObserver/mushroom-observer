@@ -67,7 +67,7 @@ class FilterTest < IntegrationTestCase
     results.assert_text(obs.id.to_s)
 
     # Prove that :has_specimens filter excludes voucherless Observations
-    # First verify UI
+    #   First verify UI
     click_on("Preferences", match: :first)
     #     :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images]")

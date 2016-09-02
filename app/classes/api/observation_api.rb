@@ -40,9 +40,9 @@ class API
         projects:       parse_strings(:projects),
         species_lists:  parse_strings(:species_lists),
         confidence:     parse_float_range(:confidence,
-                                          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+                        limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
         is_col_loc:     parse_boolean(:is_collection_location),
-        has_specimen:   parse_boolean(:has_specimen),
+        has_specimens:  parse_boolean(:has_specimens),
         has_location:   parse_boolean(:has_location),
         has_notes:      parse_boolean(:has_notes),
         has_name:       parse_boolean(:has_name),
@@ -66,9 +66,9 @@ class API
       @herbarium = parse_herbarium(:herbarium, default: nil)
       @specimen_id = parse_string(:specimen_id, default: nil)
       @herbarium_label = parse_string(:herbarium_label, default: nil)
-      has_specimen = parse_boolean(:has_specimen,
+      has_specimens = parse_boolean(:has_specimens,
                                    default: @herbarium || @specimen_id || @herbarium_label || false)
-      unless has_specimen
+      unless has_specimens
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium) if @herbarium
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id) if @specimen_id
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label) if @herbarium_label
@@ -99,7 +99,7 @@ class API
         lat: lat,
         long: long,
         alt: alt,
-        specimen: has_specimen,
+        specimen: has_specimens,
         is_collection_location: parse_boolean(:is_collection_location, default: true),
         thumb_image: thumbnail,
         images: images,
@@ -161,7 +161,7 @@ class API
         lat: lat,
         long: long,
         alt: alt,
-        specimen: parse_boolean(:set_has_specimen),
+        specimen: parse_boolean(:set_has_specimens),
         is_collection_location: parse_boolean(:set_is_collection_location),
         thumb_image: thumbnail
       }

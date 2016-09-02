@@ -705,7 +705,7 @@ class User < AbstractModel
   # true      : Observation has specimen(s)
   # Otherwise, user content filter is off
   # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
-  def has_specimen
+  def has_specimens
     content_filter[:has_images] == true ? 1 : 0
   end
 

@@ -3351,7 +3351,7 @@
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
   api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_version: Invalid version number "[version]".
-  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_use_this_field_if_has_specimens: The parameter, "[field]", can only be used if the observation has a specimen.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
