@@ -676,6 +676,7 @@ class User < AbstractModel
   #   Supplement fixtures as needed by added tests
   #   Supplement _prefs_filters.html.erb as needed
   #   Add any methods required by a view checkbox to this section.
+  #   Add filter to AccountController#prefs_types & #update_content_filter
   #   For Observation filter, supplement Query::Initializers::ObservationFilters
   #   To filter another object, create a new initializer and include in
   #     appropriate searches.
@@ -693,8 +694,19 @@ class User < AbstractModel
   serialize :content_filter, Hash
 
   # Used by prefs form to get checkbox value
+  # "NOT NULL": Observation has image(s)
+  # Otherwise, user content filter is off
+  # ("NULL"   : Observation has no image, available only via Advanced Search)
   def has_images
     content_filter[:has_images] == "NOT NULL" ? 1 : 0
+  end
+
+  # Used by prefs form to get checkbox value
+  # true      : Observation has specimen(s)
+  # Otherwise, user content filter is off
+  # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
+  def has_specimen
+    content_filter[:has_images] == true ? 1 : 0
   end
 
   ##############################################################################

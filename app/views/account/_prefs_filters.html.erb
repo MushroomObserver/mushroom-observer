@@ -4,14 +4,23 @@
   <p><%= :prefs_content_filters_explanation.t %><p>
 </div>
 
+<!-- Observation Filters -->
 <div class="form-group indent push-down">
   <span class="bold"><%= :prefs_obs_filters.t %></span><br>
-  <span><%= :prefs_obs_filters_explanation.t %></span>
+  <span><%= :prefs_obs_filters_explanation.t %>.</span>
 
+  <!-- has_images filter -->
   <div class="form-inline">
     <%= form.check_box(:has_images, class: "form-control") %>
-    <%= label_tag(:user_has_images, :prefs_obs_filters_has_images.t) %>
+    <%= label_tag(:user_has_images, :prefs_obs_filters_has_images.t) %>.
   </div>
+
+  <!-- has_specimens filter -->
+  <div class="form-inline">
+    <%= form.check_box(:has_specimens, class: "form-control") %>
+    <%= label_tag(:user_has_specimens, :prefs_obs_filters_has_specimens.t) %>.
+  </div>
+
 </div>
 
 <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>

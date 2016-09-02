@@ -1525,8 +1525,9 @@
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide, except [:app_advanced_search].
   prefs_obs_filters: Observation Filters
-  prefs_obs_filters_explanation: Control Observation visibility.
-  prefs_obs_filters_has_images: Hide imageless Observations.
+  prefs_obs_filters_explanation: Control Observation visibility
+  prefs_obs_filters_has_images: Hide Observations with no images
+  prefs_obs_filters_has_specimens: Hide Observations with no specimens
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images

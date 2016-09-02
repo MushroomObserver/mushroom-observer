@@ -244,8 +244,20 @@ imageless_unvouchered_obs:
   when: 2016-08-25
   user: ignore_imageless_user
 
-imged_b_edulis_obs_two:      # need >=2 imaged B edulis Obs's for filter tests
+imged_unvouchered_obs:      # need >=2 imaged B edulis Obs's for filter tests
   <<: *DEFAULTS
   when: 2016-08-27
   images: query_first_image
   thumb_image: query_first_image
+
+vouchered_obs:
+  <<: *DEFAULTS
+  when: 2016-09-01
+  specimen: 1
+
+vouchered_obs_2:
+  <<: *DEFAULTS
+  when: 2016-09-01
+  specimen: 1
+
+

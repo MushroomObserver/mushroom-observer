@@ -14,12 +14,12 @@ module Query::Initializers::ObservationFilters
     ["NOT NULL", "NULL"].include?(params[:has_images])
   end
 
-  # "TRUE"    : Observation has specimen(s)
-  # "FALSE"   : Observation has no specimen
+  # true      : Observation has specimen(s)
+  # false     : Observation has no specimen
   # "off"     : filter is off; convenience value which persists in Query params,
   #           : but is otherwise ignored
   def has_specimen_value_valid?
-    ["TRUE", "FALSE"].include?(params[:has_specimen])
+    [true, false].include?(params[:has_specimen])
   end
 
   # Lets application controller easily check if we need to apply user's content

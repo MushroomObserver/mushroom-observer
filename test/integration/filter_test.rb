@@ -4,7 +4,8 @@ require "capybara_helper"
 # Test user filters
 class FilterTest < IntegrationTestCase
   def test_user_content_filter
-    ### Prove that :has_images filter excludes imageless Observations #####
+    # :has_images filter
+    # Prove that :has_images filter excludes imageless Observations
     # This user filters out imageless Observations
     user = users(:ignore_imageless_user)
     obs = observations(:imageless_unvouchered_obs)
@@ -57,6 +58,43 @@ class FilterTest < IntegrationTestCase
                         count: Observation.where(name: obs.name).size)
     # And hits should contain obs (which is imageless)
     results.assert_text(obs.id.to_s)
+
+    ############################################################################
+    # has_specimens filter
+    # First test additional parts of Preferences
+    obs = observations(:imged_unvouchered_obs)
+    # Last search should contain obs (which lacks a specimen)
+    results.assert_text(obs.id.to_s)
+
+    # Prove that :has_specimens filter excludes voucherless Observations
+    # First verify UI
+    click_on("Preferences", match: :first)
+    #     :has_images should still be off
+    obs_imged_checkbox = find_field("user[has_images]")
+    refute(obs_imged_checkbox.checked?,
+           "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
+    #     :has_specimens should be off (It was never turned on).
+    has_specimens_checkbox = find_field("user[has_specimens]")
+    refute(has_specimens_checkbox.checked?,
+           "'#{:prefs_obs_filters_has_specimens.t}' checkbox should be unchecked.")
+
+    # Turn on :has_specimens
+    page.check("user[has_specimens]")
+    click_button("#{:SAVE_EDITS.t}", match: :first)
+    user.reload
+    assert_equal(true, user.content_filter[:has_specimens])
+
+    # And repeat the search
+    fill_in("search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :search_type)
+    click_button("Search")
+    results = page.find("div.results", match: :first)
+    vouchered_obss = Observation.where(name: obs.name).where(specimen: true)
+
+    # Number of hits should == number of **vouchered** Observations of obs.name
+    results.assert_text(obs.name.text_name, count: vouchered_obss.size)
+    # And hits should not contain obs (which is unvouchered)
+    results.assert_no_text(obs.id.to_s)
   end
 
   def test_advanced_search_filters
