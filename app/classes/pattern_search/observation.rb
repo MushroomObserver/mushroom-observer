@@ -15,7 +15,7 @@ module PatternSearch
         elsif term.var == :date
           args[:date] = term.parse_date_range
         elsif term.var == :specimen
-          args[:has_specimens] = term.parse_pattern
+          args[:has_specimen] = term.parse_pattern
         else
           fail BadObservationTermError.new(term: term)
         end

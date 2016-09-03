@@ -1527,7 +1527,7 @@
   prefs_obs_filters: Observation Filters
   prefs_obs_filters_explanation: Control Observation visibility
   prefs_obs_filters_has_images: Hide Observations with no images
-  prefs_obs_filters_has_specimens: Hide Observations with no specimens
+  prefs_obs_filters_has_specimen: Hide Observations with no specimens
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -2201,10 +2201,10 @@
   advanced_search_filter_has_images_both: Include both imaged and imageless Observations
   advanced_search_filter_has_images_imaged: Exclude imageless Observations
   advanced_search_filter_has_images_imageless: Exclude imaged Observations
-  advanced_search_filter_has_specimens: Filter Observations based on whether they have specimens (vouchers)
-  advanced_search_filter_has_specimens_both: Include both vouchered and unvouchered Observations
-  advanced_search_filter_has_specimens_vouchered: Exclude voucherless Observations
-  advanced_search_filter_has_specimens_unvouchered: Exclude vouchered Observations
+  advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
+  advanced_search_filter_has_specimen_both: Include both vouchered and unvouchered Observations
+  advanced_search_filter_has_specimen_vouchered: Exclude voucherless Observations
+  advanced_search_filter_has_specimen_unvouchered: Exclude vouchered Observations
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, override any user Content Filters
   advanced_search_filters_observation: Observation Filters
@@ -3355,7 +3355,7 @@
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
   api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_version: Invalid version number "[version]".
-  api_can_only_use_this_field_if_has_specimens: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"

@@ -96,7 +96,7 @@ class ApiControllerTest < FunctionalTestCase
          latitude: "34.5678N",
          longitude: "123.4567W",
          altitude: "1234 ft",
-         has_specimens: "yes",
+         has_specimen: "yes",
          is_collection_location: "yes",
          notes: "These are notes.\nThey look like this.\n",
          images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",

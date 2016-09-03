@@ -550,7 +550,7 @@ class ObserverController < ApplicationController
     # And pass along and search content filters
     if model == Observation
       search[:has_images] = params[:has_images]
-      search[:has_specimens] = params[:has_specimens]
+      search[:has_specimen] = params[:has_specimen]
     end
 
     # Create query (this just validates the parameters).

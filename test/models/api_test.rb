@@ -289,7 +289,7 @@ class ApiTest < UnitTestCase
       latitude:      "39.229°N",
       longitude:     "123.770°W",
       altitude:      "50m",
-      has_specimens: "yes",
+      has_specimen: "yes",
       name:          "Coprinus comatus",
       vote:          "2",
       projects:      @proj.id,
@@ -311,7 +311,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.remove(:latitude)) # need to supply both or neither
     assert_api_fail(params.merge(longitude: "bogus"))
     assert_api_fail(params.merge(altitude: "bogus"))
-    assert_api_fail(params.merge(has_specimens: "bogus"))
+    assert_api_fail(params.merge(has_specimen: "bogus"))
     assert_api_fail(params.merge(name: "Unknown name"))
     assert_api_fail(params.merge(vote: "take that"))
     assert_api_fail(params.merge(extra: "argument"))
@@ -388,13 +388,13 @@ class ApiTest < UnitTestCase
       name:     names(:peltigera).text_name
     }
 
-    assert_api_fail(params.merge(has_specimens: "no", herbarium: "1"))
-    assert_api_fail(params.merge(has_specimens: "no", specimen_id: "1"))
-    assert_api_fail(params.merge(has_specimens: "no", herbarium_label: "1"))
-    assert_api_fail(params.merge(has_specimens: "yes", specimen_id: "1", herbarium_label: "1"))
-    assert_api_fail(params.merge(has_specimens: "yes", herbarium: "bogus"))
+    assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", specimen_id: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", herbarium_label: "1"))
+    assert_api_fail(params.merge(has_specimen: "yes", specimen_id: "1", herbarium_label: "1"))
+    assert_api_fail(params.merge(has_specimen: "yes", herbarium: "bogus"))
 
-    assert_api_pass(params.merge(has_specimens: "yes"))
+    assert_api_pass(params.merge(has_specimen: "yes"))
     obs = Observation.last
     spec = Specimen.last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
@@ -402,7 +402,7 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([obs], spec.observations)
 
     nybg = herbaria(:nybg_herbarium)
-    assert_api_pass(params.merge(has_specimens: "yes", herbarium: nybg.code,
+    assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
                                  specimen_id: "R. Singer 12345"))
     obs = Observation.last
     spec = Specimen.last

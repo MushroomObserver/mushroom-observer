@@ -2,7 +2,7 @@ module Query::Initializers::ObservationFilters
   def observation_filter_parameter_declarations
     {
       has_images?:    :string,
-      has_specimens?: :string
+      has_specimen?: :string
     }
   end
 
@@ -18,8 +18,8 @@ module Query::Initializers::ObservationFilters
   # false     : Observation has no specimen
   # "off"     : filter is off; convenience value which persists in Query params,
   #           : but is otherwise ignored
-  def has_specimens_value_valid?
-    ["TRUE", "FALSE"].include?(params[:has_specimens])
+  def has_specimen_value_valid?
+    ["TRUE", "FALSE"].include?(params[:has_specimen])
   end
 
   # Lets application controller easily check if we need to apply user's content
@@ -63,8 +63,8 @@ module Query::Initializers::ObservationFilters
       result << "observations.thumb_image_id IS #{params[:has_images]}"
     end
 
-    if has_specimens_value_valid?
-      result << "observations.specimen IS #{params[:has_specimens]}"
+    if has_specimen_value_valid?
+      result << "observations.specimen IS #{params[:has_specimen]}"
     end
     result
   end

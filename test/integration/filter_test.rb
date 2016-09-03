@@ -60,29 +60,29 @@ class FilterTest < IntegrationTestCase
     results.assert_text(obs.id.to_s)
 
     ############################################################################
-    # has_specimens filter
+    # has_specimen filter
     # First test additional parts of Preferences
     obs = observations(:imged_unvouchered_obs)
     # Last search should contain obs (which lacks a specimen)
     results.assert_text(obs.id.to_s)
 
-    # Prove that :has_specimens filter excludes voucherless Observations
+    # Prove that :has_specimen filter excludes voucherless Observations
     #   First verify UI
     click_on("Preferences", match: :first)
     #     :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images]")
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
-    #     :has_specimens should be off (It was never turned on).
-    has_specimens_checkbox = find_field("user[has_specimens]")
-    refute(has_specimens_checkbox.checked?,
-           "'#{:prefs_obs_filters_has_specimens.t}' checkbox should be unchecked.")
+    #     :has_specimen should be off (It was never turned on).
+    has_specimen_checkbox = find_field("user[has_specimen]")
+    refute(has_specimen_checkbox.checked?,
+           "'#{:prefs_obs_filters_has_specimen.t}' checkbox should be unchecked.")
 
-    # Turn on :has_specimens
-    page.check("user[has_specimens]")
+    # Turn on :has_specimen
+    page.check("user[has_specimen]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     user.reload
-    assert_equal("TRUE", user.content_filter[:has_specimens])
+    assert_equal("TRUE", user.content_filter[:has_specimen])
 
     # And repeat the search
     fill_in("search_pattern", with: obs.name.text_name)
@@ -119,7 +119,7 @@ class FilterTest < IntegrationTestCase
       assert_text(:advanced_search_filter_has_images.t)
       # Verify radio box defaults
       assert(find("#has_images_off").checked?)
-      assert(find("#has_specimens_off").checked?)
+      assert(find("#has_specimen_off").checked?)
    end
 
     # Fill out and submit the form
@@ -135,7 +135,7 @@ class FilterTest < IntegrationTestCase
     results.assert_text(obs.id.to_s)
 
     ############################################################################
-    # has_specimens filter
+    # has_specimen filter
     # user who sees voucherless Observations, but hides imageless Observations
     user = users(:ignore_imageless_user)
     visit("/account/login")
@@ -146,14 +146,14 @@ class FilterTest < IntegrationTestCase
     # Verify additional parts of Advanced Search form
     click_on("Advanced Search", match: :first)
     within(filters) do
-      assert_text(:advanced_search_filter_has_specimens.t)
-      assert(find("#has_specimens_off").checked?)
+      assert_text(:advanced_search_filter_has_specimen.t)
+      assert(find("#has_specimen_off").checked?)
     end
 
     # Fill out and submit the form
     obs = observations(:vouchered_imged_obs)
     fill_in("Name", with: obs.name.text_name)
-    choose("has_specimens_TRUE")
+    choose("has_specimen_TRUE")
     find("#content").click_button("Search")
 
     # Advance Search Filters should override user content_filter so hits

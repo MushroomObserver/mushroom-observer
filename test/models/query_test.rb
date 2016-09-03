@@ -2473,10 +2473,10 @@ class QueryTest < UnitTestCase
 
     ##### specimen filters #####
     expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, :all, has_specimens: "TRUE")
+    assert_query(expect, :Observation, :all, has_specimen: "TRUE")
 
     expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, :all, has_specimens: "FALSE")
+    assert_query(expect, :Observation, :all, has_specimen: "FALSE")
 
     ##### lichen filters #####
     # peltigera = names(:peltigera)

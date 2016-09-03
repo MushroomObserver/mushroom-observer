@@ -355,7 +355,7 @@ class AccountController < ApplicationController
       [:email_observations_naming, :bool],
       [:email, :str],
       [:has_images, :content_filter],
-      [:has_specimens, :content_filter],
+      [:has_specimen, :content_filter],
       [:hide_authors, :enum],
       [:image_size, :enum],
       [:keep_filenames, :enum],
@@ -412,9 +412,9 @@ class AccountController < ApplicationController
     when :has_images
       val == "1" ? val = "NOT NULL" : val = "off"
       @user.content_filter[:has_images] = val
-    when :has_specimens
+    when :has_specimen
       val == "1" ? val = "TRUE" : val = "off"
-      @user.content_filter[:has_specimens] = val
+      @user.content_filter[:has_specimen] = val
     end
   end
 

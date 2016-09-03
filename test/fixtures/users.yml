@@ -90,5 +90,5 @@ ignore_imageless_user:
 vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
-  content_filter: <%= { has_specimens: true }.to_yaml.inspect %>
+  content_filter: <%= { has_specimen: true }.to_yaml.inspect %>
   layout_count: 24
