@@ -42,7 +42,6 @@
 #  :all_norobots:
 #
 ################################################################################
-
 class AccountController < ApplicationController
   before_action :login_required, except: [
     :email_new_password,
@@ -408,14 +407,9 @@ class AccountController < ApplicationController
   end
 
   def update_content_filter(pref, val)
-    case pref
-    when :has_images
-      val == "1" ? val = "NOT NULL" : val = "off"
-      @user.content_filter[:has_images] = val
-    when :has_specimen
-      val == "1" ? val = "TRUE" : val = "off"
-      @user.content_filter[:has_specimen] = val
-    end
+    filter = eval(pref.to_s)
+    val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
+    @user.content_filter[pref] = val
   end
 
   def update_copyright_holder

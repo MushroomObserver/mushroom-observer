@@ -584,6 +584,7 @@ class ApplicationController < ActionController::Base
     logger.debug "[globalite] client accepted locales: #{result.join(", ")}"
     result
   end
+  include Query::Initializers::ObservationFilters
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.

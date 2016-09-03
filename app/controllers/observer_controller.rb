@@ -111,6 +111,7 @@
 class ObserverController < ApplicationController
   require "find"
   require "set"
+  include Query::Initializers::ObservationFilters
 
   require_dependency "observation_report"
   require_dependency "pattern_search"
@@ -547,10 +548,9 @@ class ObserverController < ApplicationController
 
     # Pass along filled-in text field with Query
     search = filled_in_text_fields
-    # And pass along and search content filters
+    # And pass along any filters from the form
     if model == Observation
-      search[:has_images] = params[:has_images]
-      search[:has_specimen] = params[:has_specimen]
+      observation_filter_keys.each { |k| search[k] = params[k] }
     end
 
     # Create query (this just validates the parameters).
