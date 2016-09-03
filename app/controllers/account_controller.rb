@@ -410,10 +410,10 @@ class AccountController < ApplicationController
   def update_content_filter(pref, val)
     case pref
     when :has_images
-      val == "1" ? val = "NOT NULL" : val = nil
+      val == "1" ? val = "NOT NULL" : val = "off"
       @user.content_filter[:has_images] = val
     when :has_specimens
-      val == "1" ? val = true : val = nil
+      val == "1" ? val = "TRUE" : val = "off"
       @user.content_filter[:has_specimens] = val
     end
   end

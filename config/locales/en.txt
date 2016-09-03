@@ -2201,7 +2201,7 @@
   advanced_search_filter_has_images_both: Include both imaged and imageless Observations
   advanced_search_filter_has_images_imaged: Exclude imageless Observations
   advanced_search_filter_has_images_imageless: Exclude imaged Observations
-  advanced_search_filter_has_specimens: Filter Observations based whether they have specimens ("vouchers")
+  advanced_search_filter_has_specimens: Filter Observations based on whether they have specimens (vouchers)
   advanced_search_filter_has_specimens_both: Include both vouchered and unvouchered Observations
   advanced_search_filter_has_specimens_vouchered: Exclude voucherless Observations
   advanced_search_filter_has_specimens_unvouchered: Exclude vouchered Observations

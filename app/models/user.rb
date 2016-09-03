@@ -667,12 +667,10 @@ class User < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Content Filters
+  # :section: Content Filters
   #
-  ##############################################################################
-
-  # To add a new User content filter:
-  #   Add tests, e.g., to test/integration/filter_test#test_user_content_filter
+  # To add a new Content Filter:
+  #   Add tests, e.g., to TestUserContentFilter
   #   Supplement fixtures as needed by added tests
   #   Supplement _prefs_filters.html.erb as needed
   #   Add any methods required by a view checkbox to this section.
@@ -680,20 +678,26 @@ class User < AbstractModel
   #   For Observation filter, supplement Query::Initializers::ObservationFilters
   #   To filter another object, create a new initializer and include in
   #     appropriate searches.
-  #   Supplement ApplicationController#show_index_of_objects as needed.
+  #   Supplement ApplicationController#show_index_of_objects as needed
   #
   # To be able to override the new filter in Advanced Searches, at least:
-  #   Add tests, e.g., to test/integration/filter_test#test_advanced_search_filters
+  #   Add tests, e.g., to TestAdvancedSearchFilters
   #   Supplement fixtures as needed by added tests
   #   Supplement _advanced_search_filters.html.erb as needed
   #   Supplement ObservationController#advanced_search_form as needed.
   #   Supplement ApplicationController#show_index_of_objects as needed.
   #   Supplement Query::RssLogBase as needed.
   #
-  # There are probably other steps/files I've forgotten. JDC 2016-09-01
+  # To also add it as a Pattern Search
+  #   Supplement PatternSearchTest
+  #   Supplement classes/pattern_search/observation.rb or, if it's not and
+  #     Observation search add a new pattern_search file and class.
+  #
+  # There are probably other steps/files I've forgotten. JDC 2016-09-02
+  #
   serialize :content_filter, Hash
 
-  # Methods used by forms to get checkbox or other values
+  # Methods used by forms to get checkbox values
   # "NOT NULL": Observation has image(s)
   # Otherwise, user content filter is off
   # ("NULL"   : Observation has no image, available only via Advanced Search)
@@ -701,11 +705,11 @@ class User < AbstractModel
     content_filter[:has_images] == "NOT NULL" ? 1 : 0
   end
 
-  # true      : Observation has specimen(s)
+  # TRUE      : Observation has specimen(s)
   # Otherwise, user content filter is off
   # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
   def has_specimens
-    content_filter[:has_images] == true ? 1 : 0
+    content_filter[:has_specimens] == "TRUE" ? 1 : 0
   end
 
   ##############################################################################

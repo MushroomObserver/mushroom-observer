@@ -44,7 +44,7 @@ class FilterTest < IntegrationTestCase
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
     user.reload
-    assert_equal(nil, user.content_filter[:has_images],
+    assert_equal("off", user.content_filter[:has_images],
                  "Unchecking and saving should turn off filter")
 
     # Repeat the search
@@ -82,11 +82,12 @@ class FilterTest < IntegrationTestCase
     page.check("user[has_specimens]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     user.reload
-    assert_equal(true, user.content_filter[:has_specimens])
+    assert_equal("TRUE", user.content_filter[:has_specimens])
 
     # And repeat the search
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
+
     click_button("Search")
     results = page.find("div.results", match: :first)
     vouchered_obss = Observation.where(name: obs.name).where(specimen: true)
@@ -116,9 +117,9 @@ class FilterTest < IntegrationTestCase
       # Verify Labels.
       assert_text(:advanced_search_filters.t)
       assert_text(:advanced_search_filter_has_images.t)
-      # Verify Filters and default values
-      assert(find("#search_has_images_off").checked?)
-      assert(find("#search_has_specimens").checked?)  # == search is off
+      # Verify radio box defaults
+      assert(find("#has_images_off").checked?)
+      assert(find("#has_specimens_off").checked?)
    end
 
     # Fill out and submit the form
@@ -144,16 +145,15 @@ class FilterTest < IntegrationTestCase
 
     # Verify additional parts of Advanced Search form
     click_on("Advanced Search", match: :first)
-    filters = page.find("div#advanced_search_filters")
     within(filters) do
       assert_text(:advanced_search_filter_has_specimens.t)
-      assert(find("#search_has_specimens").checked?)
+      assert(find("#has_specimens_off").checked?)
     end
 
     # Fill out and submit the form
+    obs = observations(:vouchered_imged_obs)
     fill_in("Name", with: obs.name.text_name)
-    choose("search_has_specimens_true")
-byebug
+    choose("has_specimens_TRUE")
     find("#content").click_button("Search")
 
     # Advance Search Filters should override user content_filter so hits
@@ -161,7 +161,7 @@ byebug
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("div.results", match: :first)
     results.assert_text(obs.name.text_name, count: expect.size)
-    # And hits should contain obs (which is image)
+    # And hits should contain obs (which is imaged)
     results.assert_text(obs.id.to_s)
   end
 end

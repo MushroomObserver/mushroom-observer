@@ -255,9 +255,11 @@ vouchered_obs:
   when: 2016-09-01
   specimen: 1
 
-vouchered_obs_2:
+vouchered_imged_obs:
   <<: *DEFAULTS
   when: 2016-09-01
   specimen: 1
+  images: query_first_image
+  thumb_image: query_first_image
 
 

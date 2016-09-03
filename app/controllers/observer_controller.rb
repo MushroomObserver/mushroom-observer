@@ -545,13 +545,12 @@ class ObserverController < ApplicationController
     return unless request.method == "POST"
     model = params[:search][:type].to_s.camelize.constantize
 
-
     # Pass along filled-in text field with Query
     search = filled_in_text_fields
     # And pass along and search content filters
     if model == Observation
-      search[:has_images] = params[:search][:has_images]
-      search[:has_specimens] = params[:search][:has_specimens]
+      search[:has_images] = params[:has_images]
+      search[:has_specimens] = params[:has_specimens]
     end
 
     # Create query (this just validates the parameters).
