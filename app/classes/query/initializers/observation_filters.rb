@@ -61,9 +61,9 @@ module Query::Initializers::ObservationFilters
 
   # array of literal sql conditions to be included in query
   def obs_filter_sql_conds
-    observation_filter_keys.each_with_object([]) do |filter_key, conds|
-      filter = eval(filter_key.to_s)
-      if filter[:on_vals].include?(params[filter_key])
+    observation_filter_keys.each_with_object([]) do |filter_sym, conds|
+      filter = eval(filter_sym.to_s)
+      if filter[:on_vals].include?(params[filter_sym])
         conds << filter[:sql_cond]
       end
     end
