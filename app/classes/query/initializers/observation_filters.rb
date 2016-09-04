@@ -30,12 +30,25 @@ module Query::Initializers::ObservationFilters
     true
   end
 
+  # Lets application controller check if we need to apply user's content
+  # filter parameters to the current query.
   def has_any_observation_filters?
     observation_filter_keys.any? {|k| params[k] != nil}
   end
 
+  # Lets Query::RssLogBase check if we need to apply user's content
+  # filter parameters to the current query.
   def any_observation_filter_is_on?
-    observation_filter_keys.any? {|k| params[k] && params[k] != "off" }
+    observation_filter_keys.any? { |filter_sym| is_on?(filter_sym) }
+  end
+
+  # Does params[:x] == one of x's on_vals?
+  # E.g., is_on?(:has_images) == true if
+  #   params[:has_images] == "NOT NULL" || "NULL"
+  def is_on?(filter_sym)
+    return unless params[filter_sym]
+    filter = eval(filter_sym.to_s)
+    filter[:on_vals].include?(params[filter_sym])
   end
 
   def observation_filter_keys
