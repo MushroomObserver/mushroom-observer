@@ -181,6 +181,9 @@ class LocationController < ApplicationController
   # Map results of a search or index.
   def map_locations # :nologin: :norobots:
     @query = find_or_create_query(:Location)
+
+    apply_allowed_default_filter_prefs_to(@query)
+
     if @query.flavor == :all
       @title = :map_locations_global_map.t
     else

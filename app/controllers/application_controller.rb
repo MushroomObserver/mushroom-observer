@@ -1162,9 +1162,8 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-    # Apply user filter prefs to any query which can be filtered,
-    # unless those filters are overriden.
-    apply_allowed_default_filters_to(query)
+    # Apply filter prefs to any filterable query, unless prefs are overriden.
+    apply_allowed_default_filter_prefs_to(query)
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1309,7 +1308,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def apply_allowed_default_filters_to(query)
+  def apply_allowed_default_filter_prefs_to(query)
     apply_default_filters_to(query) if default_filters_applicable_to?(query)
   end
 
