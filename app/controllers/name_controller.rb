@@ -1480,6 +1480,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @query = create_query(:Observation, :of_name, name: @name)
+      apply_allowed_default_filters_to(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
   end

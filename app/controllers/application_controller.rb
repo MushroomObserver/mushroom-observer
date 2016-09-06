@@ -1162,13 +1162,9 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-    # Apply observation filters to any query which can be filtered,
-    # unless it's already filtered.
-    if query.respond_to?(:observation_filters) &&
-       !query.has_any_observation_filters?
-      filter_params = @user ? @user.content_filter : MO.default_content_filter
-      query.params.merge!(filter_params) if filter_params
-    end
+    # Apply user filter prefs to any query which can be filtered,
+    # unless those filters are overriden.
+    apply_allowed_default_filters_to(query)
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1311,6 +1307,23 @@ class ApplicationController < ActionController::Base
       # Render the list if given template.
       render(action: args[:action]) if args[:action]
     end
+  end
+
+  def apply_allowed_default_filters_to(query)
+    apply_default_filters_to(query) if default_filters_applicable_to?(query)
+  end
+
+  # The default filters are applicable if the query responds to them
+  # AND the query is unfiltered.
+  def default_filters_applicable_to?(query)
+    query.respond_to?(:observation_filters) &&
+      !query.has_any_observation_filters?
+  end
+
+  # Apply user defaults if they exists, else apply site-wide default.
+  def apply_default_filters_to(query)
+    default_filters = @user ? @user.content_filter : MO.default_content_filter
+    query.params.merge!(default_filters) if default_filters
   end
 
   # Create sorting links for index pages, "graying-out" the current order.

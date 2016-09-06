@@ -778,6 +778,7 @@ class ObserverController < ApplicationController
   # Map results of a search or index.
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
+    apply_allowed_default_filters_to(@query)
     @title = :map_locations_title.t(locations: @query.title)
     @query = restrict_query_to_box(@query)
     @timer_start = Time.now
