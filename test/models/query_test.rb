@@ -2424,12 +2424,18 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_is_on?
-    query = Query.lookup(:Observation, :all, has_images: "NOT NULL")
+    query = Query.lookup(:Observation, :all, has_images: "NOT NULL",
+                                             has_specimen: "off")
     assert(query.is_on?(:has_images))
     refute(query.is_on?(:has_specimen))
 
+    query = Query.lookup(:Observation, :all, has_images: "off",
+                                             has_specimen: "TRUE")
+    refute(query.is_on?(:has_images))
+    assert(query.is_on?(:has_specimen))
+
     query = Query.lookup(:Observation, :all)
-    assert(query.is_on?(:has_images))
+    refute(query.is_on?(:has_images))
     refute(query.is_on?(:has_specimen))
   end
 
