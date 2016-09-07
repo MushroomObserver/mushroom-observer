@@ -1316,7 +1316,7 @@ class ApplicationController < ActionController::Base
   # AND the query is unfiltered.
   def default_filters_applicable_to?(query)
     query.respond_to?(:observation_filters) &&
-      !query.has_any_observation_filters?
+      !query.has_obs_filter_params?
   end
 
   # Apply user defaults if they exists, else apply site-wide default.

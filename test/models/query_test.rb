@@ -2456,18 +2456,18 @@ class QueryTest < UnitTestCase
     refute(query.any_observation_filter_is_on?)
   end
 
-  def test_has_any_observation_filters?
+  def test_has_obs_filter_params?
     query = Query.lookup(:Observation, :all, has_images: "NOT NULL")
-    assert(query.has_any_observation_filters?)
+    assert(query.has_obs_filter_params?)
 
     query = Query.lookup(:Observation, :all, has_specimen: "TRUE")
-    assert(query.has_any_observation_filters?)
+    assert(query.has_obs_filter_params?)
 
     query = Query.lookup(:Observation, :all, has_images: "off")
-    assert(query.has_any_observation_filters?)
+    assert(query.has_obs_filter_params?)
 
     query = Query.lookup(:Observation, :all)
-    refute(query.has_any_observation_filters?)
+    refute(query.has_obs_filter_params?)
   end
 
   def test_filtering_content

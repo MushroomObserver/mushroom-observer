@@ -34,7 +34,7 @@ module Query::Initializers::ObservationFilters
   # current query; defaults are added unless query already has
   # observation filter params, even if those filters are off.
   # This allows for overriding of default filters.
-  def has_any_observation_filters?
+  def has_obs_filter_params?
     observation_filter_keys.any? {|k| params[k] != nil}
   end
 
