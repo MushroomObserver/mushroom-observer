@@ -38,11 +38,11 @@ class FilterTest < IntegrationTestCase
            "Preference page lacks Observation Filters section")
     obs_imged_checkbox = find_field("user[has_images]")
     assert(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_obs_imged.t}' checkbox should be checked.")
+           "'#{:prefs_obs_filters_has_images.t}' checkbox should be checked.")
     page.uncheck("user[has_images]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     refute(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
+           "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
     user.reload
     assert_equal("off", user.content_filter[:has_images],
                  "Unchecking and saving should turn off filter")
@@ -72,7 +72,7 @@ class FilterTest < IntegrationTestCase
     #     :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images]")
     refute(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_obs_imged.t}' checkbox should be unchecked")
+           "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
     #     :has_specimen should be off (It was never turned on).
     has_specimen_checkbox = find_field("user[has_specimen]")
     refute(has_specimen_checkbox.checked?,
