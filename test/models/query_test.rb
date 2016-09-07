@@ -2419,6 +2419,33 @@ class QueryTest < UnitTestCase
 
   ##############################################################################
   #
+  #  :section: Filters
+  #
+  ##############################################################################
+
+  def test_filtering_content
+    ##### image filters #####
+    expect = Observation.where.not(thumb_image_id: nil)
+    assert_query(expect, :Observation, :all, has_images: "NOT NULL")
+
+    expect = Observation.where(thumb_image_id: nil)
+    assert_query(expect, :Observation, :all, has_images: "NULL")
+
+    ##### specimen filters #####
+    expect = Observation.where(specimen: true)
+    assert_query(expect, :Observation, :all, has_specimen: "TRUE")
+
+    expect = Observation.where(specimen: false)
+    assert_query(expect, :Observation, :all, has_specimen: "FALSE")
+
+    ##### lichen filters #####
+    # peltigera = names(:peltigera)
+    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
+    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
+  end
+
+  ##############################################################################
+  #
   #  :section: Other stuff
   #
   ##############################################################################
@@ -2463,24 +2490,4 @@ class QueryTest < UnitTestCase
                  ids: [obs1.id, obs2.id], by: :location)
   end
 
-  def test_filtering_content
-    ##### image filters #####
-    expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "NOT NULL")
-
-    expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "NULL")
-
-    ##### specimen filters #####
-    expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, :all, has_specimen: "TRUE")
-
-    expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, :all, has_specimen: "FALSE")
-
-    ##### lichen filters #####
-    # peltigera = names(:peltigera)
-    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
-    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
-  end
 end
