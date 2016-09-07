@@ -30,14 +30,16 @@ module Query::Initializers::ObservationFilters
     true
   end
 
-  # Lets application controller check if we need to apply user's content
-  # filter parameters to the current query.
+  # Lets ApplicationController check whether to add default filters to
+  # current query; defaults are added unless query already has
+  # observation filter params, even if those filters are off.
+  # This allows for overriding of default filters.
   def has_any_observation_filters?
     observation_filter_keys.any? {|k| params[k] != nil}
   end
 
-  # Lets Query::RssLogBase check if we need to apply user's content
-  # filter parameters to the current query.
+  # Lets Query::RssLogBase check if whether to add filtered observations
+  # to the current query.
   def any_observation_filter_is_on?
     observation_filter_keys.any? { |filter_sym| is_on?(filter_sym) }
   end
