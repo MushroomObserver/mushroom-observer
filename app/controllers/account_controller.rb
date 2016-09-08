@@ -353,8 +353,8 @@ class AccountController < ApplicationController
       [:email_observations_consensus, :bool],
       [:email_observations_naming, :bool],
       [:email, :str],
-      [:has_images, :content_filter],
-      [:has_specimen, :content_filter],
+      [:has_images_checkbox, :content_filter],
+      [:has_specimen_checkbox, :content_filter],
       [:hide_authors, :enum],
       [:image_size, :enum],
       [:keep_filenames, :enum],
@@ -407,9 +407,11 @@ class AccountController < ApplicationController
   end
 
   def update_content_filter(pref, val)
-    filter = eval(pref.to_s)
+    filter_name_str = pref.to_s.sub(%r{_checkbox$}, "")
+    filter_sym = filter_name_str.to_sym
+    filter = eval(filter_name_str)
     val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
-    @user.content_filter[pref] = val
+    @user.content_filter[filter_sym] = val
   end
 
   def update_copyright_holder

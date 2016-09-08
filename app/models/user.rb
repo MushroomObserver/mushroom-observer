@@ -701,14 +701,14 @@ class User < AbstractModel
   # "NOT NULL": Observation has image(s)
   # Otherwise, user content filter is off
   # ("NULL"   : Observation has no image, available only via Advanced Search)
-  def has_images
+  def has_images_checkbox
     content_filter[:has_images] == "NOT NULL" ? 1 : 0
   end
 
   # TRUE      : Observation has specimen(s)
   # Otherwise, user content filter is off
   # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
-  def has_specimen
+  def has_specimen_checkbox
     content_filter[:has_specimen] == "TRUE" ? 1 : 0
   end
 

@@ -36,11 +36,12 @@ class FilterTest < IntegrationTestCase
     click_on("Preferences", match: :first)
     assert(page.has_content?("Observation Filters"),
            "Preference page lacks Observation Filters section")
-    obs_imged_checkbox = find_field("user[has_images]")
+    obs_imged_checkbox = find_field("user[has_images_checkbox]")
     assert(obs_imged_checkbox.checked?,
            "'#{:prefs_obs_filters_has_images.t}' checkbox should be checked.")
-    page.uncheck("user[has_images]")
+    page.uncheck("user[has_images_checkbox]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
+
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
     user.reload
@@ -70,16 +71,16 @@ class FilterTest < IntegrationTestCase
     #   First verify UI
     click_on("Preferences", match: :first)
     #     :has_images should still be off
-    obs_imged_checkbox = find_field("user[has_images]")
+    obs_imged_checkbox = find_field("user[has_images_checkbox]")
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
     #     :has_specimen should be off (It was never turned on).
-    has_specimen_checkbox = find_field("user[has_specimen]")
+    has_specimen_checkbox = find_field("user[has_specimen_checkbox]")
     refute(has_specimen_checkbox.checked?,
            "'#{:prefs_obs_filters_has_specimen.t}' checkbox should be unchecked.")
 
     # Turn on :has_specimen
-    page.check("user[has_specimen]")
+    page.check("user[has_specimen_checkbox]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     user.reload
     assert_equal("TRUE", user.content_filter[:has_specimen])
