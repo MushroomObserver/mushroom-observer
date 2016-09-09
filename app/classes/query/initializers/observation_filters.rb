@@ -1,27 +1,11 @@
 module Query::Initializers::ObservationFilters
+  include ::Filter
+
   def observation_filter_parameter_declarations
     {
       has_images?:   :string,
       has_specimen?: :string
     }
-  end
-
-  def has_images
-    {
-      checked_val:  "NOT NULL",           # value when checkbox checked
-      off_val:      "off",                # filter is off
-      on_vals:      ["NOT NULL", "NULL"], # allowed values when filter is on
-      sql_cond:     "observations.thumb_image_id IS #{params[:has_images]}"
-    }
-  end
-
-  def has_specimen
-    {
-      checked_val:  "TRUE",
-      off_val:      "off",
-      on_vals:      ["TRUE", "FALSE"],
-      sql_cond:     "observations.specimen IS #{params[:has_specimen]}"
-   }
   end
 
   # Lets application controller easily check if we need to apply user's content
