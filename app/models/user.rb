@@ -669,32 +669,6 @@ class User < AbstractModel
   #
   # :section: Content Filters
   #
-  # To add a new Content Filter:
-  #   Add tests, e.g., to TestUserContentFilter
-  #   Supplement fixtures as needed by added tests
-  #   Supplement _prefs_filters.html.erb as needed
-  #   Add any methods required by a view checkbox to this section.
-  #   Add filter to AccountController#prefs_types & #update_content_filter
-  #   For Observation filter, supplement Query::Initializers::ObservationFilters
-  #   To filter another object, create a new initializer and include in
-  #     appropriate searches.
-  #   Supplement ApplicationController#show_index_of_objects as needed
-  #
-  # To be able to override the new filter in Advanced Searches, at least:
-  #   Add tests, e.g., to TestAdvancedSearchFilters
-  #   Supplement fixtures as needed by added tests
-  #   Supplement _advanced_search_filters.html.erb as needed
-  #   Supplement ObservationController#advanced_search_form as needed.
-  #   Supplement ApplicationController#show_index_of_objects as needed.
-  #   Supplement Query::RssLogBase as needed.
-  #
-  # To also add it as a Pattern Search
-  #   Supplement PatternSearchTest
-  #   Supplement classes/pattern_search/observation.rb or, if it's not and
-  #     Observation search add a new pattern_search file and class.
-  #
-  # There are probably other steps/files I've forgotten. JDC 2016-09-02
-  #
   serialize :content_filter, Hash
 
   # Methods used by forms to get checkbox values

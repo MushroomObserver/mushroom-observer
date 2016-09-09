@@ -111,7 +111,6 @@
 class ObserverController < ApplicationController
   require "find"
   require "set"
-  include Query::Initializers::ObservationFilters
 
   require_dependency "observation_report"
   require_dependency "pattern_search"
