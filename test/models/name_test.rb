@@ -19,8 +19,7 @@ class NameTest < UnitTestCase
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
-    i = 0
-    for var in [
+    [
       :text_name,
       :real_text_name,
       :search_name,
@@ -30,7 +29,7 @@ class NameTest < UnitTestCase
       :parent_name,
       :rank,
       :author
-    ]
+    ].each do |var|
       expect = args[var]
       if var == :real_text_name
         actual = Name.display_to_real_text(parse)
@@ -39,14 +38,14 @@ class NameTest < UnitTestCase
       else
         actual = parse.send(var)
       end
+
       if actual != expect
         any_errors = true
         var = "#{var} (*)"
       end
       msg << "%-20s %-40s %-40s" % [var.to_s, expect.inspect, actual.inspect]
-      i += 1
     end
-    assert_not any_errors, msg.join("\n")
+    refute(any_errors, msg.join("\n"))
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
