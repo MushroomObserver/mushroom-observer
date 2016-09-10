@@ -73,6 +73,7 @@ class NameTest < UnitTestCase
     assert_name_match(pattern, string + " in ed.", first_match, " in ed.")
     assert_name_match(pattern, string + " nomen nudum", first_match, " nomen nudum")
     assert_name_match(pattern, string + " nom. prov.", first_match, " nom. prov.")
+    assert_name_match(pattern, string + " comb. prov.", first_match, " comb. prov.")
     assert_name_match(pattern, string + " sensu Author", first_match, " sensu Author")
     assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
     assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
@@ -191,6 +192,8 @@ class NameTest < UnitTestCase
     assert_equal("nom. prov", Name.standardize_author("nom prov"))
     assert_equal("nom. nudum", Name.standardize_author("Nomen nudum"))
     assert_equal("nom.", Name.standardize_author("nomen"))
+    assert_equal("comb.", Name.standardize_author("comb"))
+    assert_equal("comb. prov", Name.standardize_author("comb prov"))
     assert_equal("sensu Borealis", Name.standardize_author("SENS Borealis"))
     assert_equal('sensu "Aurora"', Name.standardize_author('sEnSu. "Aurora"'))
   end
