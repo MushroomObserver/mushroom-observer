@@ -466,13 +466,13 @@ class NameTest < UnitTestCase
       "Lecidea sanguineoatra sens. Nyl",
       text_name: "Lecidea sanguineoatra",
       real_text_name: "Lecidea sanguineoatra",
-      search_name: "Lecidea sanguineoatra sens. Nyl",
-      real_search_name: "Lecidea sanguineoatra sens. Nyl",
-      sort_name: "Lecidea sanguineoatra  sens. Nyl",
-      display_name: "**__Lecidea sanguineoatra__** sens. Nyl",
+      search_name: "Lecidea sanguineoatra sensu Nyl",
+      real_search_name: "Lecidea sanguineoatra sensu Nyl",
+      sort_name: "Lecidea sanguineoatra  sensu Nyl",
+      display_name: "**__Lecidea sanguineoatra__** sensu Nyl",
       parent_name: "Lecidea",
       rank: :Species,
-      author: "sens. Nyl"
+      author: "sensu Nyl"
     )
   end
 
@@ -1013,6 +1013,21 @@ class NameTest < UnitTestCase
       parent_name: nil,
       rank: :Family,
       author: "sensu Reid"
+    )
+  end
+
+  def test_name_parse_comb
+    do_name_parse_test(
+      "Sebacina schweinitzii comb prov.",
+      text_name: "Sebacina schweinitzii",
+      real_text_name: "Sebacina schweinitzii",
+      search_name: "Sebacina schweinitzii comb. prov.",
+      real_search_name: "Sebacina schweinitzii comb. prov.",
+      sort_name: "Sebacina schweinitzii  comb. prov.",
+      display_name: "**__Sebacina schweinitzii__** comb. prov.",
+      parent_name: "Sebacina",
+      rank: :Species,
+      author: "comb. prov."
     )
   end
 

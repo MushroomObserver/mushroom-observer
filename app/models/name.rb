@@ -1860,11 +1860,11 @@ class Name < AbstractModel
 
   def self.standardize_author(str)
     str = str.to_s.
-          sub(/^#{AUCT_ABBR}/, "auct. ").
-          sub(/^#{INED_ABBR}/, "ined. ").
-          sub(/^#{NOM_ABBR}/, "nom. ").
-          sub(/^#{COMB_ABBR}/, "comb. ").
-          sub(/^#{SENSU_ABBR}/, "sensu ").
+          sub(/^ ?#{AUCT_ABBR}/,  "auct. ").
+          sub(/^ ?#{INED_ABBR}/,  "ined. ").
+          sub(/^ ?#{NOM_ABBR}/,   "nom. ").
+          sub(/^ ?#{COMB_ABBR}/,  "comb. ").
+          sub(/^ ?#{SENSU_ABBR}/, "sensu ").
           strip_squeeze
     squeeze_author(str)
   end
