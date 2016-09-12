@@ -189,11 +189,11 @@ class NameTest < UnitTestCase
     assert_equal("auct. N. Amer.", Name.standardize_author("auct. N. Amer."))
     assert_equal("ined. Xxx", Name.standardize_author("IN ED Xxx"))
     assert_equal("ined.", Name.standardize_author("ined."))
-    assert_equal("nom. prov", Name.standardize_author("nom prov"))
+    assert_equal("nom. prov.", Name.standardize_author("nom prov"))
     assert_equal("nom. nudum", Name.standardize_author("Nomen nudum"))
     assert_equal("nom.", Name.standardize_author("nomen"))
     assert_equal("comb.", Name.standardize_author("comb"))
-    assert_equal("comb. prov", Name.standardize_author("comb prov"))
+    assert_equal("comb. prov.", Name.standardize_author("comb prov"))
     assert_equal("sensu Borealis", Name.standardize_author("SENS Borealis"))
     assert_equal('sensu "Aurora"', Name.standardize_author('sEnSu. "Aurora"'))
   end
@@ -1018,7 +1018,7 @@ class NameTest < UnitTestCase
 
   def test_name_parse_comb
     do_name_parse_test(
-      "Sebacina schweinitzii comb prov.",
+      "Sebacina schweinitzii comb prov",
       text_name: "Sebacina schweinitzii",
       real_text_name: "Sebacina schweinitzii",
       search_name: "Sebacina schweinitzii comb. prov.",

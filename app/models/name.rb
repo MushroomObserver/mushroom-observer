@@ -1532,6 +1532,8 @@ class Name < AbstractModel
   NOM_ABBR     = / nomen | nom\.? /xi
   COMB_ABBR    = / combinatio | comb\.? /xi
   SENSU_ABBR   = / sensu?\.? /xi
+  NOV_ABBR     = / nova | novum | nov\.? /xi
+  PROV_ABBR    = / provisional | prov\.? /xi
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
@@ -1865,6 +1867,9 @@ class Name < AbstractModel
           sub(/^ ?#{NOM_ABBR}/,   "nom. ").
           sub(/^ ?#{COMB_ABBR}/,  "comb. ").
           sub(/^ ?#{SENSU_ABBR}/, "sensu ").
+          # Having fixed comb. & nom., standardize their suffixes
+          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
+          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
           strip_squeeze
     squeeze_author(str)
   end
