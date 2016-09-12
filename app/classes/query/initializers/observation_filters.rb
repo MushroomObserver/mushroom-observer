@@ -1,5 +1,5 @@
 module Query::Initializers::ObservationFilters
-  include ::Filter
+  include ::ContentFilter
 
   def observation_filter_parameter_declarations
     {

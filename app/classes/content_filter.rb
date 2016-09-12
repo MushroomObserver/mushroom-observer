@@ -1,5 +1,5 @@
 # filters which are applied in Query
-module Filter
+module ContentFilter
 # OLD INSTRUCTIONS (moved from User)
 # To add a new Content Filter:
 #   Add tests, e.g., to TestUserContentFilter
@@ -35,7 +35,8 @@ module Filter
   ### filter definitions ###
   def has_images
     {
-      sym:          :has_images,          # symbol for this filter
+      name:         "has_images",         # filter name, as string
+      sym:          :has_images,          # filter mame, as symbol
       model:        Observation,          # model on which filter operates
       checked_val:  "NOT NULL",           # value when checkbox checked
       off_val:      "off",                # filter is off
@@ -47,6 +48,7 @@ module Filter
 
   def has_specimen
     {
+      name:         "has_specimen",
       sym:          :has_specimen,
       model:        Observation,
       checked_val:  "TRUE",
@@ -70,4 +72,7 @@ module Filter
   def observation_filter_keys
     observation_filters.each_with_object([]) { |fltr, keys| keys << fltr[:sym] }
   end
+
+  module_function(:has_images, :has_specimen, :filters, :observation_filters,
+                  :observation_filter_keys)
 end
