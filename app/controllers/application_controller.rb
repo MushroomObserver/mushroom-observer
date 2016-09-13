@@ -1316,7 +1316,7 @@ class ApplicationController < ActionController::Base
   # The default filters are applicable if the query responds to them
   # AND the query is unfiltered.
   def default_filters_applicable_to?(query)
-    query.respond_to?(:observation_filters) &&
+    query.respond_to?(:observation_filter_input) &&
       !query.has_obs_filter_params?
   end
 

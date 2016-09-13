@@ -10,7 +10,7 @@ module Query::Initializers::ObservationFilters
 
   # Lets application controller easily check if we need to apply user's content
   # filter parameters to the current query.
-  def observation_filters
+  def observation_filter_input
     true
   end
 
