@@ -999,7 +999,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: At long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5).<br/>You should see no new changes in the site due to this latest upgrade, but of course <a href="/observer/ask_webmaster_question">send us a note</a> if you see anything wrong. See <a href="/observer/news">Release Notes</a> for more details.
+  app_banner_box: "\"Letter to the Mushroom Observer Community\":/observer/letter_to_community -- please read."
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
