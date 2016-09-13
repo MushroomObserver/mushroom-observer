@@ -8,19 +8,9 @@
 <div class="form-group indent push-down">
   <span class="bold"><%= :prefs_obs_filters.t %></span><br>
   <span><%= :prefs_obs_filters_explanation.t %>.</span>
-
-  <!-- has_images filter -->
-  <div class="form-inline">
-    <%= form.check_box(:has_images_checkbox, class: "form-control") %>
-    <%= label_tag(:user_has_images_checkbox, :prefs_obs_filters_has_images.t) %>.
-  </div>
-
-  <!-- has_specimen filter -->
-  <div class="form-inline">
-    <%= form.check_box(:has_specimen_checkbox, class: "form-control") %>
-    <%= label_tag(:user_has_specimen_checkbox, :prefs_obs_filters_has_specimen.t) %>.
-  </div>
-
+  <%= render partial: "prefs_obs_filter_checkboxes",
+             collection: observation_filters, as: :filter,
+             locals: { form: form } %>
 </div>
 
 <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>

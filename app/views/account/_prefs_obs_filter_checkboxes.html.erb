@@ -1,0 +1,8 @@
+<%# Render a checkbox if filter needs one. %>
+<%= content_tag_if(filter[:checked_val].present?,
+                   :div, class: "form-inline") do %>
+  <%= form.check_box("#{filter[:name]}_checkbox".to_sym,
+                     class: "form-control") %>
+  <%= label_tag(("user_" + filter[:name] + "_checkbox").to_sym,
+                ("prefs_obs_filters_" + filter[:name]).to_sym.t) %>.
+<% end %>
