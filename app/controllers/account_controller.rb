@@ -332,7 +332,7 @@ class AccountController < ApplicationController
   # Table for converting form value to object value
   # Used by update_prefs_from_form
   def prefs_types
-    [
+    result =[
       [:email_comments_all, :bool],
       [:email_comments_owner, :bool],
       [:email_comments_response, :bool],
@@ -353,8 +353,6 @@ class AccountController < ApplicationController
       [:email_observations_consensus, :bool],
       [:email_observations_naming, :bool],
       [:email, :str],
-      [:has_images_checkbox, :content_filter],
-      [:has_specimen_checkbox, :content_filter],
       [:hide_authors, :enum],
       [:image_size, :enum],
       [:keep_filenames, :enum],
@@ -369,9 +367,12 @@ class AccountController < ApplicationController
       [:view_owner_id, :bool],
       [:votes_anonymous, :enum]
     ]
+    observation_filters.each {|f| result << [f[:checkbox], :content_filter] }
+    result
   end
 
   def prefs # :prefetch:
+    @user.observation_filters = observation_filters
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
@@ -407,9 +408,8 @@ class AccountController < ApplicationController
   end
 
   def update_content_filter(pref, val)
-    filter_name_str = pref.to_s.sub(%r{_checkbox$}, "")
-    filter_sym = filter_name_str.to_sym
-    filter = eval(filter_name_str)
+    filter_sym = pref.to_s.sub(%r{_checkbox$}, "").to_sym
+    filter = send(filter_sym)
     val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
     @user.content_filter[filter_sym] = val
   end

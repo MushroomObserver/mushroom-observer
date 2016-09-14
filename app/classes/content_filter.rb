@@ -5,7 +5,7 @@ module ContentFilter
 #   Add tests, e.g., to TestUserContentFilter
 #   Supplement fixtures as needed by added tests
 #   Supplement _prefs_filters.html.erb as needed
-#   Add any methods required by a view checkbox to this section.
+#   Add a filter definition below, and add that definition to #filters below
 #   Add filter to AccountController#prefs_types & #update_content_filter
 #   For Observation filter, supplement Query::Initializers::ObservationFilters
 #   To filter another object, create a new initializer and include in
@@ -25,12 +25,7 @@ module ContentFilter
 #   Supplement classes/pattern_search/observation.rb or, if it's not and
 #     Observation search add a new pattern_search file and class.
 #
-# There are probably other steps/files I've forgotten. JDC 2016-09-02
-#
-# New Instructions
-#   Add tests, e.g., to TestUserContentFilter
-#   Supplement fixtures as needed by added tests
-#   define filter below
+# There are probably other steps/files I've forgotten. JDC 2016-09-14
 
   ### filter definitions ###
   def has_images
@@ -38,6 +33,7 @@ module ContentFilter
       name:         "has_images",         # filter name, as string
       sym:          :has_images,          # filter mame, as symbol
       model:        Observation,          # model on which filter operates
+      checkbox:     :has_images_checkbox, # prefs form checkbox
       checked_val:  "NOT NULL",           # value when checkbox checked
       off_val:      "off",                # filter is off
       on_vals:      ["NOT NULL", "NULL"], # allowed values when filter is on
@@ -51,6 +47,7 @@ module ContentFilter
       name:         "has_specimen",
       sym:          :has_specimen,
       model:        Observation,
+      checkbox:     :has_specimen_checkbox,
       checked_val:  "TRUE",
       off_val:      "off",
       on_vals:      ["TRUE", "FALSE"],

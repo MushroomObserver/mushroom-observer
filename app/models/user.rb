@@ -670,6 +670,9 @@ class User < AbstractModel
   # :section: Content Filters
   #
   serialize :content_filter, Hash
+  attr_accessor(:filter, :observation_filters)
+
+  include ::ContentFilter
 
   # Methods used by forms to get checkbox values
   # "NOT NULL": Observation has image(s)
@@ -685,6 +688,7 @@ class User < AbstractModel
   def has_specimen_checkbox
     content_filter[:has_specimen] == "TRUE" ? 1 : 0
   end
+
 
   ##############################################################################
   #
