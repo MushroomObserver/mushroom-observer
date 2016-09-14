@@ -585,7 +585,7 @@ class ApplicationController < ActionController::Base
     result
   end
   include ::ContentFilter
-  helper_method(:observation_filters)
+  helper_method(:observation_filters, :observation_filters_with_checkboxes)
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.

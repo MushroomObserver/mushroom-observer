@@ -70,6 +70,10 @@ module ContentFilter
     observation_filters.each_with_object([]) { |fltr, keys| keys << fltr[:sym] }
   end
 
+  def observation_filters_with_checkboxes
+    observation_filters.select { |fltr| fltr[:checkbox].present? }
+  end
+
   module_function(:has_images, :has_specimen, :filters, :observation_filters,
                   :observation_filter_keys)
 end

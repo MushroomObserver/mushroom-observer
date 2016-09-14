@@ -9,7 +9,7 @@
   <span class="bold"><%= :prefs_obs_filters.t %></span><br>
   <span><%= :prefs_obs_filters_explanation.t %>.</span>
   <%= render partial: "prefs_obs_filter_checkboxes",
-             collection: observation_filters, as: :filter,
+             collection: observation_filters_with_checkboxes, as: :filter,
              locals: { form: form } %>
 </div>
 
