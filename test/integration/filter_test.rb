@@ -31,7 +31,7 @@ class FilterTest < IntegrationTestCase
     # And hits should not contain obs (which is imageless)
     results.assert_no_text(obs.id.to_s)
 
-    ### Now prove that turning filter off stops filtering ##################
+    ### Now prove that turning filter off stops filtering ###
     # Prove that preference page UI works
     click_on("Preferences", match: :first)
     assert(page.has_content?("Observation Filters"),

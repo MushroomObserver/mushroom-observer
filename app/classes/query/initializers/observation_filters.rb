@@ -33,8 +33,13 @@ module Query::Initializers::ObservationFilters
   #   params[:has_images] == "NOT NULL" || "NULL"
   def is_on?(filter_sym)
     return unless params[filter_sym]
-    filter = eval(filter_sym.to_s)
+    filter = send(filter_sym)
     filter[:on_vals].include?(params[filter_sym])
+  end
+
+  # array of filters which are applied in this query
+  def applied_filters
+
   end
 
   def observation_filter_keys
@@ -61,7 +66,7 @@ module Query::Initializers::ObservationFilters
   # array of literal sql conditions to be included in query
   def obs_filter_sql_conds
     observation_filter_keys.each_with_object([]) do |filter_sym, conds|
-      filter = eval(filter_sym.to_s)
+      filter = send(filter_sym)
       if filter[:on_vals].include?(params[filter_sym])
         conds << filter[:sql_cond]
       end
