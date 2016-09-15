@@ -70,6 +70,7 @@ module ContentFilter
     observation_filters.each_with_object([]) { |fltr, keys| keys << fltr[:sym] }
   end
 
+  # Lets view check whether to create checkbox.
   def observation_filters_with_checkboxes
     observation_filters.select { |fltr| fltr[:checkbox].present? }
   end

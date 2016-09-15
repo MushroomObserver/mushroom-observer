@@ -1,11 +1,12 @@
 module Query::Initializers::ObservationFilters
   include ::ContentFilter
 
+  # Hash of filter_parameters: :parameter_type, e.g.: has_images?: :string
+  # Uses filter definitions in ContentFilter to populate hash.
   def observation_filter_parameter_declarations
-    {
-      has_images?:   :string,
-      has_specimen?: :string
-    }
+    observation_filter_keys.each_with_object({}) do |f_sym, decs|
+      decs["#{f_sym.to_s}?".to_sym] = :string
+    end
   end
 
   # Lets application controller easily check if we need to apply user's content
@@ -25,28 +26,22 @@ module Query::Initializers::ObservationFilters
   # Lets Query::RssLogBase check if whether to add filtered observations
   # to the current query.
   def any_observation_filter_is_on?
-    observation_filter_keys.any? { |filter_sym| is_on?(filter_sym) }
+    on_obs_filters.any?
   end
 
-  # Does params[:x] == one of x's on_vals?
-  # E.g., is_on?(:has_images) == true if
-  #   params[:has_images] == "NOT NULL" || "NULL"
+  # array of filters which are on (applied) in this query
+  def on_obs_filters
+    observation_filter_keys.each_with_object([]) do |filter, ons|
+      ons << filter if is_on?(filter)
+    end
+  end
+
+  # Does params[:x] == one of x's on_vals?  For example:
+  #   is_on?(:has_images) == true if params[:has_images] == "NOT NULL" || "NULL"
   def is_on?(filter_sym)
     return unless params[filter_sym]
     filter = send(filter_sym)
     filter[:on_vals].include?(params[filter_sym])
-  end
-
-  # array of filters which are applied in this query
-  def applied_filters
-
-  end
-
-  def observation_filter_keys
-    keys = observation_filter_parameter_declarations.keys
-    keys = keys.map(&:to_s)
-    keys = keys.map {|k| k.sub(/\?$/, "")}
-    keys.map(&:to_sym)
   end
 
   def initialize_observation_filters_for_rss_log
@@ -65,11 +60,9 @@ module Query::Initializers::ObservationFilters
 
   # array of literal sql conditions to be included in query
   def obs_filter_sql_conds
-    observation_filter_keys.each_with_object([]) do |filter_sym, conds|
+    on_obs_filters.each_with_object([]) do |filter_sym, conds|
       filter = send(filter_sym)
-      if filter[:on_vals].include?(params[filter_sym])
-        conds << filter[:sql_cond]
-      end
+      conds << filter[:sql_cond]
     end
   end
 end
