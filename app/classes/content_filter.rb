@@ -2,32 +2,37 @@
 module ContentFilter
 
 # To add a new Content Filter:
+# * Indicates unnecessary for new observation filter -- it's done automatically.
+#
 #   Add tests, e.g., to TestUserContentFilter
 #   Supplement fixtures as needed by added tests
 #   Add a filter definition below, and add that definition to #filters below
 #   Add a new checkbox_val method in User
-#   * Supplement _prefs_filters.html.erb as needed
-#   * Add filter to AccountController#prefs_types & #update_content_filter
-#   * For Observation filter, supplement Query::Initializers::ObservationFilters
-#   * Supplement ApplicationController#show_index_of_objects as needed
-# (* indicates unnecessary for new observation filter)
+#   In /config/locales/en.txt define text to be displayed before and next to
+#     check boxes, using prefs_obs_filters_has_images: as a model.
+# * Supplement _prefs_filters.html.erb as needed
+# * Add filter to AccountController#prefs_types & #update_content_filter
+# * For Observation filter, supplement Query::Initializers::ObservationFilters
+# * Supplement ApplicationController#show_index_of_objects as needed
 #   To filter another object, create a new initializer and include in
 #     appropriate searches.
 #
 # To be able to override the new filter in Advanced Searches, at least:
 #   Add tests, e.g., to TestAdvancedSearchFilters
 #   Supplement fixtures as needed by added tests
-#   Supplement _advanced_search_filters.html.erb as needed
-#   Supplement ObservationController#advanced_search_form as needed.
-#   Supplement ApplicationController#show_index_of_objects as needed.
-#   Supplement Query::RssLogBase as needed.
+#   In /config/locales/en.txt define text to be displayed before and next to
+#     radio boxes, using advanced_search_filter_has_images: as a model.
+# * Supplement _advanced_search_filters.html.erb as needed
+# * Supplement ObservationController#advanced_search_form as needed.
+# * Supplement ApplicationController#show_index_of_objects as needed.
+# * Supplement Query::RssLogBase as needed.
 #
 # To also add it as a Pattern Search
 #   Supplement PatternSearchTest
-#   Supplement classes/pattern_search/observation.rb or, if it's not and
-#     Observation search add a new pattern_search file and class.
+#   Supplement classes/pattern_search/observation.rb or -- if it's not an
+#     Observation search -- add a new pattern_search file and class.
 #
-# There are probably other steps/files I've forgotten. JDC 2016-09-14
+# There are probably other steps/files I've forgotten. JDC 2016-09-15
 
   ### filter definitions ###
   # In the order you want filters to appear in advanced_search

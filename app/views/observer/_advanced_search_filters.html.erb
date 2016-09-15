@@ -5,27 +5,14 @@
       <span class="bold"><%= :advanced_search_filters.t %></span>
       <p><%= :advanced_search_filters_explain.t %>.<p>
     </div>
+    <%# Observation filters %>
     <div class="indent">
       <span class="bold"><%= :prefs_obs_filters.t %></span>
       (<%= :prefs_obs_filters_explanation.t %>)<br/>
+      <%# Observation filter radio buttons %>
+      <%= render partial: "advanced_search_obs_filter_radio_buttons",
+                          collection: observation_filters, as: :filter %>
 
-      <%= :advanced_search_filter_has_images.t %>.<br/>
-      <!-- has_images radio buttons -->
-      <%= radio_button_tag(:has_images, "NOT NULL", false) %>
-      <%= :advanced_search_filter_has_images_imaged.l %>.<br/>
-      <%= radio_button_tag(:has_images, "NULL", false) %>
-      <%= :advanced_search_filter_has_images_imageless.l %>.<br/>
-      <%= radio_button_tag(:has_images, "off", checked: true) %>
-      <%= :advanced_search_filter_has_images_both.l %>.<br/>
-      <br/>
-      <%= :advanced_search_filter_has_specimen.t %>.<br/>
-      <!-- has_specimen radio buttons -->
-      <%= radio_button_tag(:has_specimen, "TRUE", false) %>
-      <%= :advanced_search_filter_has_specimen_vouchered.l %>.<br/>
-      <%= radio_button_tag(:has_specimen, "FALSE", false) %>
-      <%= :advanced_search_filter_has_specimen_unvouchered.l %>.<br/>
-      <%= radio_button_tag(:has_specimen, "off", checked: true) %>
-      <%= :advanced_search_filter_has_specimen_both.l %>.<br/>
     </div>
   </div>
 </div>
