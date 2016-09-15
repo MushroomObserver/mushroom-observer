@@ -89,6 +89,7 @@ class CapybarLurkerTest < IntegrationTestCase
     name = obs.name
 
     # First login
+    reset_session!
     visit(root_path)
     first(:link, "Login").click
     assert_equal("#{:app_title.l }: Please login", page.title, "Wrong page")

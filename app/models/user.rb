@@ -623,7 +623,7 @@ class User < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Interests
+  #  :section: Interests and Tracking
   #
   ##############################################################################
 
@@ -663,6 +663,11 @@ class User < AbstractModel
   #
   def ignoring?(object)
     interest_in(object) == :ignoring
+  end
+
+  def mailing_address_for_tracking_template
+    result = mailing_address.strip if mailing_address
+    result = "**insert mailing address for specimens**" if result.blank?
   end
 
   ##############################################################################

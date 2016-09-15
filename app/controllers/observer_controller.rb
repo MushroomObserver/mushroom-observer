@@ -1303,10 +1303,7 @@ class ObserverController < ApplicationController
     begin
       @observation = Observation.find(id)
       display_name = @observation.name.display_name
-      flash_notice(:observer_recalc_old_name.t(name: display_name))
       text = @observation.calc_consensus(true)
-      flash_notice text unless text.blank?
-      flash_notice(:observer_recalc_new_name.t(name: display_name))
     rescue => err
       flash_error(:observer_recalc_caught_error.t(error: err))
     end
