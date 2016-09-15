@@ -1,16 +1,18 @@
 # filters which are applied in Query
 module ContentFilter
-# OLD INSTRUCTIONS (moved from User)
+
 # To add a new Content Filter:
 #   Add tests, e.g., to TestUserContentFilter
 #   Supplement fixtures as needed by added tests
-#   Supplement _prefs_filters.html.erb as needed
 #   Add a filter definition below, and add that definition to #filters below
-#   Add filter to AccountController#prefs_types & #update_content_filter
-#   For Observation filter, supplement Query::Initializers::ObservationFilters
+#   Add a new checkbox_val method in User
+#   * Supplement _prefs_filters.html.erb as needed
+#   * Add filter to AccountController#prefs_types & #update_content_filter
+#   * For Observation filter, supplement Query::Initializers::ObservationFilters
+#   * Supplement ApplicationController#show_index_of_objects as needed
+# (* indicates unnecessary for new observation filter)
 #   To filter another object, create a new initializer and include in
 #     appropriate searches.
-#   Supplement ApplicationController#show_index_of_objects as needed
 #
 # To be able to override the new filter in Advanced Searches, at least:
 #   Add tests, e.g., to TestAdvancedSearchFilters
@@ -28,17 +30,29 @@ module ContentFilter
 # There are probably other steps/files I've forgotten. JDC 2016-09-14
 
   ### filter definitions ###
+  # In the order you want filters to appear in advanced_search
+  # name:         filter name, as string
+  # sym:          filter mame, as symbol
+  # model:        model on which filter operates.  Used by ContentFilter
+  # checkbox:     prefs form checkbox, e.g., :has_images_checkbox.
+  #               Used by prefs view
+  # checked_val:  value when checkbox checked
+  # off_val:      value when filter is off
+  # on_vals:      array of allowed values when filter is on,
+  #               in order you want them to appear in advanced_filters
+  # sql_cond:     predicate added to Query "where", when filter is on.  E.g.:
+  #               "observations.specimen IS #{params[:has_specimen]}"
+
   def has_images
     {
-      name:         "has_images",         # filter name, as string
-      sym:          :has_images,          # filter mame, as symbol
-      model:        Observation,          # model on which filter operates
-      checkbox:     :has_images_checkbox, # prefs form checkbox
-      checked_val:  "NOT NULL",           # value when checkbox checked
-      off_val:      "off",                # filter is off
-      on_vals:      ["NOT NULL", "NULL"], # allowed values when filter is on
+      name:         "has_images",
+      sym:          :has_images,
+      model:        Observation,
+      checkbox:     :has_images_checkbox,
+      checked_val:  "NOT NULL",
+      off_val:      "off",
+      on_vals:      ["NOT NULL", "NULL"],
       sql_cond:     "observations.thumb_image_id IS #{params[:has_images]}"
-                                          # predicate added to Query where
     }
   end
 
@@ -59,8 +73,7 @@ module ContentFilter
     [has_images, has_specimen]
   end
 
-  ### other methods for use throughout application ###
-  ### These reflect on above method definitions.
+  ### These reflect on above methods.
   def observation_filters
     filters.select { |fltr| fltr[:model] == Observation }
   end

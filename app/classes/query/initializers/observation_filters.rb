@@ -1,7 +1,7 @@
 module Query::Initializers::ObservationFilters
   include ::ContentFilter
 
-  # Hash of filter_parameters: :parameter_type, e.g.: has_images?: :string
+  # Hash of filter_parameters, each pair like:  has_images?: :string
   # Uses filter definitions in ContentFilter to populate hash.
   def observation_filter_parameter_declarations
     observation_filter_keys.each_with_object({}) do |f_sym, decs|
@@ -37,7 +37,7 @@ module Query::Initializers::ObservationFilters
   end
 
   # Does params[:x] == one of x's on_vals?  For example:
-  #   is_on?(:has_images) == true if params[:has_images] == "NOT NULL" || "NULL"
+  # is_on?(:has_images) is true if params[:has_images] == "NOT NULL" || "NULL"
   def is_on?(filter_sym)
     return unless params[filter_sym]
     filter = send(filter_sym)
