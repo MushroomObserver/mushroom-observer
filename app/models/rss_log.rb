@@ -387,7 +387,7 @@ class RssLog < AbstractModel
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
       end
     end
-    [tag.to_sym, Hash[*args], time]
+    [tag.to_s.to_sym, Hash[*args], time]
   end
 
   # Protect special characters (whitespace) in string for log encoder/decoder.
