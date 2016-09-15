@@ -7,3 +7,4 @@ exclude_paths:
 - app/assets/javascripts/jquery.js
 - app/assets/javascripts/jstz.js
 - app/assets/javascripts/lightbox.js
+- **.old.rb
