@@ -34,10 +34,18 @@ class FilterTest < IntegrationTestCase
     # And hits should not contain obs (which is imageless)
     results.assert_no_text(obs.id.to_s)
 
+    # Show Locations should be filtered
+    click_link("Show Locations")
+    page.find_by_id("title").assert_text(:filtered.t)
+
+    # And mapping them should also be filtered.
+    click_link("Map Locations")
+    page.find_by_id("title").assert_text(:filtered.t)
+
     ### Now prove that turning filter off stops filtering ###
     # Prove that preference page UI works
     click_on("Preferences", match: :first)
-    assert(page.has_content?("Observation Filters"),
+    assert(page.has_content?(:prefs_obs_filters.t),
            "Preference page lacks Observation Filters section")
     obs_imged_checkbox = find_field("user[has_images_checkbox]")
     assert(obs_imged_checkbox.checked?,

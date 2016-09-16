@@ -1163,11 +1163,7 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-    # Apply filter prefs to any filterable query, unless prefs are overriden.
-    apply_allowed_default_filter_prefs_to(query)
-
-    # Supply list of filters which are on.
-    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
+    update_filter_status_of(query)
 
     # Tell site to come back here on +redirect_back_or_default+.rr
     store_location
@@ -1312,6 +1308,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def update_filter_status_of(query)
+    apply_allowed_default_filter_prefs_to(query)
+    supply_list_of_filters_on_for(query)
+  end
+
   def apply_allowed_default_filter_prefs_to(query)
     apply_default_filters_to(query) if default_filters_applicable_to?(query)
   end
@@ -1327,6 +1328,10 @@ class ApplicationController < ActionController::Base
   def apply_default_filters_to(query)
     default_filters = @user ? @user.content_filter : MO.default_content_filter
     query.params.merge!(default_filters) if default_filters
+  end
+
+  def supply_list_of_filters_on_for(query)
+    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
   end
 
   # Create sorting links for index pages, "graying-out" the current order.
