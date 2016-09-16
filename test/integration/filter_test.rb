@@ -22,10 +22,13 @@ class FilterTest < IntegrationTestCase
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")
+
     assert_match(%r{#{:app_title.l }: Observations Matching ‘#{obs.name.text_name}},
                  page.title, "Wrong page")
-    results = page.find("div.results", match: :first)
 
+    page.find_by_id("title").assert_text(:filtered.t)
+
+    results = page.find("div.results", match: :first)
     # Number of hits should == number of **imaged** Observations of obs.name
     results.assert_text(obs.name.text_name, count: imged_obss.size)
     # And hits should not contain obs (which is imageless)
@@ -52,8 +55,10 @@ class FilterTest < IntegrationTestCase
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
     click_button("Search")
-    results = page.find("div.results", match: :first)
 
+    page.find_by_id("title").assert_no_text(:filtered.t)
+
+    results = page.find("div.results", match: :first)
     # Number of hits should == **total** Observations of obs.name
     results.assert_text(obs.name.text_name,
                         count: Observation.where(name: obs.name).size)
@@ -90,6 +95,8 @@ class FilterTest < IntegrationTestCase
     page.select("Observations", from: :search_type)
 
     click_button("Search")
+    page.find_by_id("title").assert_text(:filtered.t)
+
     results = page.find("div.results", match: :first)
     vouchered_obss = Observation.where(name: obs.name).where(specimen: true)
 
@@ -128,6 +135,8 @@ class FilterTest < IntegrationTestCase
     find("#content").click_button("Search")
 
     # Advance Search Filters should override user's { has_images: "NOT NULL" }
+    page.find_by_id("title").assert_no_text(:filtered.t)
+
     results = page.find("div.results", match: :first)
     # Number of hits should == **total** Observations of obs.name
     results.assert_text(obs.name.text_name,
@@ -159,6 +168,7 @@ class FilterTest < IntegrationTestCase
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
+    page.find_by_id("title").assert_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("div.results", match: :first)
     results.assert_text(obs.name.text_name, count: expect.size)

@@ -1166,7 +1166,10 @@ class ApplicationController < ActionController::Base
     # Apply filter prefs to any filterable query, unless prefs are overriden.
     apply_allowed_default_filter_prefs_to(query)
 
-    # Tell site to come back here on +redirect_back_or_default+.
+    # Supply list of filters which are on.
+    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
+
+    # Tell site to come back here on +redirect_back_or_default+.rr
     store_location
 
     # Clear out old query from session.  (Don't do it if caller just finished

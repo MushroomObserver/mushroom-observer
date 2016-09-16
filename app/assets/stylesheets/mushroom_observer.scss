@@ -1378,16 +1378,20 @@ table.table-namings {
     padding-left: 10px !important;
 }
 
-.align-top {
-    vertical-align: top !important;
-}
-
 .align-bottom {
     vertical-align: bottom !important;
 }
 
 .align-right {
     text-align: right;
+}
+
+.align-top {
+    vertical-align: top !important;
+}
+
+.align-1px {
+    text-align: 1px;
 }
 
 .bold {

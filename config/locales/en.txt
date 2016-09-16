@@ -195,6 +195,7 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  filtered: filtered
   IMAGE: Image
   image: image
   IMAGES: Images
