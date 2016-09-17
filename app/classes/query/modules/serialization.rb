@@ -71,7 +71,7 @@ module Query::Modules::Serialization
 
     def deserialize_string(val)
       val.force_encoding("binary").gsub(/%(..)/) do |match|
-        match[1].hex.chr("binary")
+        match[1..2].hex.chr("binary")
       end.force_encoding("UTF-8")
     end
 
