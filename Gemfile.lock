@@ -115,9 +115,8 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     mysql2 (0.3.21)
-    nokogiri (1.6.8)
+    nokogiri (1.6.8.1)
       mini_portile2 (~> 2.1.0)
-      pkg-config ~> (1.1.7)
     parser (2.3.1.4)
       ast (~> 2.2)
     powerpack (0.1.1)
