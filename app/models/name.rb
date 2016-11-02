@@ -1530,12 +1530,15 @@ class Name < AbstractModel
   AUCT_ABBR    = / auct\.? /xi
   INED_ABBR    = / in\s?ed\.? /xi
   NOM_ABBR     = / nomen | nom\.? /xi
+  COMB_ABBR    = / combinatio | comb\.? /xi
   SENSU_ABBR   = / sensu?\.? /xi
+  NOV_ABBR     = / nova | novum | nov\.? /xi
+  PROV_ABBR    = / provisional | prov\.? /xi
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
   ANY_NAME_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} | #{SP_ABBR} | #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} | #{GROUP_ABBR} /x
-  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
@@ -1859,10 +1862,14 @@ class Name < AbstractModel
 
   def self.standardize_author(str)
     str = str.to_s.
-          sub(/^#{AUCT_ABBR}/, "auct. ").
-          sub(/^#{INED_ABBR}/, "ined. ").
-          sub(/^#{NOM_ABBR}/, "nom. ").
-          sub(/^#{SENSU_ABBR}/, "sensu ").
+          sub(/^ ?#{AUCT_ABBR}/,  "auct. ").
+          sub(/^ ?#{INED_ABBR}/,  "ined. ").
+          sub(/^ ?#{NOM_ABBR}/,   "nom. ").
+          sub(/^ ?#{COMB_ABBR}/,  "comb. ").
+          sub(/^ ?#{SENSU_ABBR}/, "sensu ").
+          # Having fixed comb. & nom., standardize their suffixes
+          sub(/(?<=comb. |nom. ) ?#{NOV_ABBR}/,  "nov. ").
+          sub(/(?<=comb. |nom. ) ?#{PROV_ABBR}/, "prov. ").
           strip_squeeze
     squeeze_author(str)
   end

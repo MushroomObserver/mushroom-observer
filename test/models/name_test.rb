@@ -19,8 +19,7 @@ class NameTest < UnitTestCase
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
-    i = 0
-    for var in [
+    [
       :text_name,
       :real_text_name,
       :search_name,
@@ -30,7 +29,7 @@ class NameTest < UnitTestCase
       :parent_name,
       :rank,
       :author
-    ]
+    ].each do |var|
       expect = args[var]
       if var == :real_text_name
         actual = Name.display_to_real_text(parse)
@@ -39,14 +38,14 @@ class NameTest < UnitTestCase
       else
         actual = parse.send(var)
       end
+
       if actual != expect
         any_errors = true
         var = "#{var} (*)"
       end
       msg << "%-20s %-40s %-40s" % [var.to_s, expect.inspect, actual.inspect]
-      i += 1
     end
-    assert_not any_errors, msg.join("\n")
+    refute(any_errors, msg.join("\n"))
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
@@ -74,6 +73,7 @@ class NameTest < UnitTestCase
     assert_name_match(pattern, string + " in ed.", first_match, " in ed.")
     assert_name_match(pattern, string + " nomen nudum", first_match, " nomen nudum")
     assert_name_match(pattern, string + " nom. prov.", first_match, " nom. prov.")
+    assert_name_match(pattern, string + " comb. prov.", first_match, " comb. prov.")
     assert_name_match(pattern, string + " sensu Author", first_match, " sensu Author")
     assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
     assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
@@ -189,9 +189,11 @@ class NameTest < UnitTestCase
     assert_equal("auct. N. Amer.", Name.standardize_author("auct. N. Amer."))
     assert_equal("ined. Xxx", Name.standardize_author("IN ED Xxx"))
     assert_equal("ined.", Name.standardize_author("ined."))
-    assert_equal("nom. prov", Name.standardize_author("nom prov"))
+    assert_equal("nom. prov.", Name.standardize_author("nom prov"))
     assert_equal("nom. nudum", Name.standardize_author("Nomen nudum"))
     assert_equal("nom.", Name.standardize_author("nomen"))
+    assert_equal("comb.", Name.standardize_author("comb"))
+    assert_equal("comb. prov.", Name.standardize_author("comb prov"))
     assert_equal("sensu Borealis", Name.standardize_author("SENS Borealis"))
     assert_equal('sensu "Aurora"', Name.standardize_author('sEnSu. "Aurora"'))
   end
@@ -464,13 +466,13 @@ class NameTest < UnitTestCase
       "Lecidea sanguineoatra sens. Nyl",
       text_name: "Lecidea sanguineoatra",
       real_text_name: "Lecidea sanguineoatra",
-      search_name: "Lecidea sanguineoatra sens. Nyl",
-      real_search_name: "Lecidea sanguineoatra sens. Nyl",
-      sort_name: "Lecidea sanguineoatra  sens. Nyl",
-      display_name: "**__Lecidea sanguineoatra__** sens. Nyl",
+      search_name: "Lecidea sanguineoatra sensu Nyl",
+      real_search_name: "Lecidea sanguineoatra sensu Nyl",
+      sort_name: "Lecidea sanguineoatra  sensu Nyl",
+      display_name: "**__Lecidea sanguineoatra__** sensu Nyl",
       parent_name: "Lecidea",
       rank: :Species,
-      author: "sens. Nyl"
+      author: "sensu Nyl"
     )
   end
 
@@ -1011,6 +1013,21 @@ class NameTest < UnitTestCase
       parent_name: nil,
       rank: :Family,
       author: "sensu Reid"
+    )
+  end
+
+  def test_name_parse_comb
+    do_name_parse_test(
+      "Sebacina schweinitzii comb prov",
+      text_name: "Sebacina schweinitzii",
+      real_text_name: "Sebacina schweinitzii",
+      search_name: "Sebacina schweinitzii comb. prov.",
+      real_search_name: "Sebacina schweinitzii comb. prov.",
+      sort_name: "Sebacina schweinitzii  comb. prov.",
+      display_name: "**__Sebacina schweinitzii__** comb. prov.",
+      parent_name: "Sebacina",
+      rank: :Species,
+      author: "comb. prov."
     )
   end
 
