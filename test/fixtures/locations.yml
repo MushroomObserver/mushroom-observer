@@ -148,3 +148,43 @@ nybg_location: # old id: 11
   west: -73.879
   east: -73.878
   south: 40.866
+
+unused_location: # Do not use this location for any object
+  user_id: 0
+  version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 90
+  west: -180
+  east: 180
+  south: -90
+
+no_mushrooms_location:
+  user_id: 0
+  version: 1
+  name: No Mushrooms
+  scientific_name: No Mushrooms
+  north: 90
+  west: -180
+  east: 180
+  south: -90
+
+collection_location: # used by QueryTest
+  user_id: 0
+  version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 90
+  west: -180
+  east: 180
+  south: -90
+
+display_location: # used by QueryTest
+  user_id: 0
+  version: 1
+  name: $LABEL
+  scientific_name: $LABEL
+  north: 90
+  west: -180
+  east: 180
+  south: -90

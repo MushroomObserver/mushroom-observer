@@ -4,6 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 #
 # Rolf is an experienced user
+# Also the default user for Images fixtures
 rolf: # old id: 1
   login: rolf
   name: Rolf Singer
@@ -55,6 +56,7 @@ junk: # old id: 3
   user_groups: all_users, junk_only
 
 # Need third for testing votes
+# Also is the default user for Observation fixture set.
 dick: # old id: 4
   login: dick
   name: Tricky Dick
@@ -120,3 +122,23 @@ spammer: # old id: 7
   keep_filenames: <%= User.keep_filenames[:toss] %>
   # Associations
   user_groups: all_users, spammer_only
+
+# Has nothing: no comments, descriptions, images, locations, names,
+#  observations, projects, publications, species lists, specimens, or anything
+# except account
+zero_user:
+  login: zero
+  name: Zero
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
+  email: zero@collectivesource.com
+  verified: 2016-08-05 15:50:00
+  contribution: 0
+  created_here: true
+  locale: en-US
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
+  # Associations
+  user_groups: all_users
+

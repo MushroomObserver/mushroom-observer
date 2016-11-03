@@ -203,11 +203,11 @@ class ObserverControllerTest < FunctionalTestCase
     o_chron = Observation.order(:created_at)
     get(:next_observation, id: o_chron.fourth.id)
     assert_redirected_to(action: :show_observation, id: o_chron.third.id,
-                         params: @controller.query_params(Query.last))
+                         params: @controller.query_params(QueryRecord.last))
 
     get(:prev_observation, id: o_chron.fourth.id)
     assert_redirected_to(action: :show_observation, id: o_chron.fifth.id,
-                         params: @controller.query_params(Query.last))
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   def test_prev_and_next_observation_with_fancy_query
@@ -505,7 +505,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_show_observation
-    assert_equal(0, Query.count)
+    assert_equal(0, QueryRecord.count)
 
     # Test it on obs with no namings first.
     obs_id = observations(:unknown_with_no_naming).id
@@ -544,7 +544,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure no queries created for show_image links.  (Well, okay, four
     # queries are created for Darvin's new "show species" and "show similar
     # observations" links...)
-    assert_equal(4, Query.count)
+    assert_equal(4, QueryRecord.count)
   end
 
   def test_show_owner_id
@@ -2141,16 +2141,6 @@ class ObserverControllerTest < FunctionalTestCase
     @obs2 = observations(:coprinus_comatus_obs)
     @img1 = @obs1.images.first
     @img2 = @obs2.images.first
-    assert_users_equal(mary, @obs1.user)
-    assert_users_equal(rolf, @obs2.user)
-    assert_users_equal(mary, @img1.user)
-    assert_users_equal(rolf, @img2.user)
-    assert_obj_list_equal([@proj2], @obs1.projects)
-    assert_obj_list_equal([], @obs2.projects)
-    assert_obj_list_equal([@proj2], @img1.projects)
-    assert_obj_list_equal([], @img2.projects)
-    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_list_equal([dick], @proj2.user_group.users)
   end
 
   def assert_project_checks(project_states)

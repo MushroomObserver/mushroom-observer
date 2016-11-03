@@ -22,7 +22,7 @@ class CommentControllerTest < FunctionalTestCase
     get_with_dump(:show_comments_by_user, id: rolf.id)
     assert_redirected_to(action: "show_comment",
                          id: comments(:minimal_unknown_obs_comment_1).id,
-                         params: @controller.query_params(Query.last))
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   def test_add_comment

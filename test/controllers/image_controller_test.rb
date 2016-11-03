@@ -29,39 +29,41 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_next_image_ss
-    det_unknown =  observations(:detailed_unknown_obs).id
-    min_unknown =  observations(:minimal_unknown_obs).id
-    a_campestris = observations(:agaricus_campestris_obs).id
-    c_comatus =    observations(:coprinus_comatus_obs).id
+    det_unknown =  observations(:detailed_unknown_obs)    # 2 images
+    min_unknown =  observations(:minimal_unknown_obs)     # 0 images
+    a_campestris = observations(:agaricus_campestris_obs) # 1 image
+    c_comatus =    observations(:coprinus_comatus_obs)    # 1 image
 
+    # query 1 (outer)
     outer = Query.lookup_and_save(:Observation,
                                   :in_set, ids: [det_unknown,
                                                  min_unknown,
                                                  a_campestris,
                                                  c_comatus])
+    # query 2 (inner for first obs)
     inner = Query.lookup_and_save(:Image, :inside_observation,
                                   outer: outer, observation: det_unknown,
                                   by: :id)
 
     # Make sure the outer query is working right first.
-    outer.current_id = det_unknown
+    outer.current = det_unknown
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(min_unknown, outer.current_id)
+    assert_equal(min_unknown.id, outer.current_id)
     assert_equal(0, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(a_campestris, outer.current_id)
+    assert_equal(a_campestris.id, outer.current_id)
     assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(c_comatus, outer.current_id)
+    assert_equal(c_comatus.id, outer.current_id)
     assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(nil, new_outer)
 
     # Start with inner at last image of first observation (det_unknown).
-    inner.current_id = observations(:detailed_unknown_obs).images.last.id
+    inner.current = det_unknown.images.last.id
 
     # No more images for det_unknowns, so inner goes to next obs (min_unknown),
     # but this has no images, so goes to next (a_campestris),
@@ -71,16 +73,18 @@ class ImageControllerTest < FunctionalTestCase
     assert(new_inner = inner.next)
     assert_not_equal(inner, new_inner)
     assert_equal(images(:agaricus_campestris_image).id, new_inner.current_id)
-    save_query = Query.last
+    new_inner.save # query 3 (inner for third obs)
+    save_query = new_inner
     assert(new_new_inner = new_inner.next)
     assert_not_equal(new_inner, new_new_inner)
     assert_equal(images(:connected_coprinus_comatus_image).id,
                  new_new_inner.current_id)
+    new_new_inner.save # query 4 (inner for fourth obs)
     assert_nil(new_new_inner.next)
 
     params = {
-      id: observations(:detailed_unknown_obs).images.last.id,
-      params: @controller.query_params(inner)
+      id: det_unknown.images.last.id,
+      params: @controller.query_params(inner) # inner for first obs
     }.flatten
     get(:next_image, params)
     assert_redirected_to(action: "show_image",
@@ -176,7 +180,7 @@ class ImageControllerTest < FunctionalTestCase
     get(:prev_image, params)
     assert_redirected_to(action: "show_image",
                          id: observations(:detailed_unknown_obs).images.second.id,
-                         params: @controller.query_params(Query.last))
+                         params: @controller.query_params(QueryRecord.last))
   end
 
   def test_show_original
