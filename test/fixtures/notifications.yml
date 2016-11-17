@@ -14,7 +14,7 @@ agaricus_campestris_notification_with_note:
   user: mary
   flavor: <%= Notification.flavors[:name] %>
   obj_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
-  note_template: A note about :observation for :observer
+  note_template: A note about :observation for :observer. Please send to :mailing_address.
 
 agaricus_campestris_notification_without_note:
   user: katrina

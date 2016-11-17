@@ -39,6 +39,7 @@ mary: # old id: 2
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only
+  mailing_address: 123 Some Pl., Pasadena, CA 91106
 
 # Junk gets denied
 junk: # old id: 3

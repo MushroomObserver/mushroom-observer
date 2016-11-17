@@ -11,7 +11,7 @@ Research Request
 
 Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation Agaricus campestris L. (<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>):
 
-A note about http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %> for rolf
+A note about http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %> for rolf. Please send to 123 Some Pl., Pasadena, CA 91106.
 
 --------------------------------------------------
 
