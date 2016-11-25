@@ -999,7 +999,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Thank you! We are very grateful for 2½ months of peace and prosperity on MO.<br/>\nKeep an eye out for Nathan's upcoming article in Fungi magazine commemorating MO's tenth year."
+  app_banner_box: X
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1479,7 +1479,7 @@
   # observer/news
   news_title: "Latest Release: November 15, 2016"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
-  news_content: "[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+  news_content: "[:news_content_pr_241]\n\n[:news_content_pr_240]\n\n[:news_content_pr_238]\n\n[:news_content_commit_22deee6]\n\n[:news_content_commit_33639d5]\n\n[:news_content_commit_96e27e9]\n\n[:news_content_pr_236]\n\n[:news_content_pr_235]\n\n[:news_content_pr_233]\n\n[:news_content_pr_232]\n\n[:news_content_pr_231]\n\n[:news_content_pr_230]\n\n[:news_content_pr_226]\n\n[:news_content_pr_224]\n\n[:news_content_pr_223]\n\n[:news_content_pr_221]\n\n[:news_content_pr_220]\n\n[:news_content_pr_219]\n\n[:news_content_pr_217]\n\n[:news_content_pr_216]\n\n[:news_content_pr_215]\n\n[:news_content_pr_213]\n\n[:news_content_pr_212]\n\n[:news_content_pr_208]"
 
   # observer/news individual updates
   news_content_pr_241: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/241\">PR #241</a> (September 15, 2016) Extensive refactor of Query model in preparation for user filters."
