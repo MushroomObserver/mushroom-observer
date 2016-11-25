@@ -63,8 +63,9 @@
             started unstarted unscheduled -
             day week month none -
             all
-            names lists locations projects search taxonomy voting interface
-            design email api eol i18n other admin code server
+            api comments descriptions email i18n images lists locations maps
+            names observations performance projects search specimen voting
+            other
           ) %>
             <tr>
               <td align="right" style="font-size:120%; white-space:nowrap"><%=
@@ -120,7 +121,7 @@
                 story.comments.length.to_s
               %></span>)</span>
             <span class="pivotal_labels"><%=
-              labels = story.sorted_labels.map do |label |
+              labels = story.sorted_labels.map do |label|
                 str = :"pivotal_label_#{label}".l
                 str = label if str.match(/^\[/)
                 link_to(h(str), {}, data: {role: "click_on_label", label: label}, class: "p#{story.label_value(label)}")

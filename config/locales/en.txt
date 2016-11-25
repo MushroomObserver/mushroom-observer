@@ -2437,23 +2437,6 @@
   pivotal_state_started: in progress
   pivotal_head_critical: serious bugs or mission-critical work
   pivotal_head_bottleneck: stuff required by lots of other things
-  pivotal_head_api: programmer's interface via XML-RPC, etc.
-  pivotal_head_design: web layout and graphic design
-  pivotal_head_email: notification emails
-  pivotal_head_eol: EOL content sharing
-  pivotal_head_i18n: translation text and all the associated machinery
-  pivotal_head_interface: web interface
-  pivotal_head_lists: species lists, checklists, etc.
-  pivotal_head_locations: location descriptions and/or geocoding
-  pivotal_head_names: species descriptions
-  pivotal_head_projects: group projects
-  pivotal_head_search: search capabilities and data mining
-  pivotal_head_taxonomy: synonymy, hierarchy, syntax, etc.
-  pivotal_head_voting: voting on observations, their names, images, etc.
-  pivotal_head_other: uncategorized
-  pivotal_head_admin: administration tasks
-  pivotal_head_code: internal code, e.g. documentation, refactoring, etc.
-  pivotal_head_server: server installation, configuration, and diagnostics
   pivotal_head_open: areas we are actively soliciting feedback
   pivotal_head_started: areas developers are actively working
   pivotal_head_unstarted: scheduled for work soon
@@ -2463,44 +2446,9 @@
   pivotal_head_month: has comments within last month
   pivotal_head_none: has no recent comments
   pivotal_head_all: show everything
+  pivotal_head_other: uncategorized
   pivotal_label_critical: critical
   pivotal_label_bottleneck: bottleneck
-  pivotal_label_api: api
-  pivotal_label_descriptions: descriptions
-  pivotal_label_design: design
-  pivotal_label_documentation: documentation
-  pivotal_label_email: email
-  pivotal_label_eol: eol
-  pivotal_label_github: github
-  pivotal_label_glossary: glossary
-  pivotal_label_herbarium: herbarium
-  pivotal_label_i18n: translations
-  pivotal_label_images: images
-  pivotal_label_interface: interface
-  pivotal_label_js: javascript
-  pivotal_label_lists: lists
-  pivotal_label_locations: locations
-  pivotal_label_mobile: mobile
-  pivotal_label_names: names
-  pivotal_label_observations: observations
-  pivotal_label_pivotal_tracker: pivotal
-  pivotal_label_preferences: prefs
-  pivotal_label_projects: projects
-  pivotal_label_publications: publications
-  pivotal_label_rss: rss
-  pivotal_label_search: searching
-  pivotal_label_specimens: specimens
-  pivotal_label_taxonomy: taxonomy
-  pivotal_label_tests: tests
-  pivotal_label_textile: textile
-  pivotal_label_upgrade: upgrade
-  pivotal_label_users: users
-  pivotal_label_vagrant: vagrant
-  pivotal_label_voting: voting
-  pivotal_label_other: other
-  pivotal_label_admin: admin
-  pivotal_label_code: code
-  pivotal_label_server: server
   pivotal_label_open: open
   pivotal_label_day: day
   pivotal_label_week: week
@@ -2510,6 +2458,41 @@
   pivotal_label_unstarted: "[:pivotal_state_unstarted]"
   pivotal_label_started: "[:pivotal_state_started]"
   pivotal_label_all: "[:all]"
+  pivotal_label_other: other
+
+  pivotal_head_api: programmatic interface
+  pivotal_head_comments: commenting on observations, names, etc.
+  pivotal_head_descriptions: species descriptions and drafts
+  pivotal_head_email: email notifications
+  pivotal_head_i18n: translating site into other languages
+  pivotal_head_images: image information, manipulation
+  pivotal_head_lists: species lists, checklists
+  pivotal_head_locations: location names, geocoding
+  pivotal_head_maps: how observations are mapped
+  pivotal_head_names: taxonomy, synonymy, etc.
+  pivotal_head_observations: observation fields and interface
+  pivotal_head_performance: site performance
+  pivotal_head_projects: working on group projects
+  pivotal_head_search: search capabilities and data mining
+  pivotal_head_specimen: how herbarium specimens are documented
+  pivotal_head_voting: voting on observation names and images
+
+  pivotal_label_api: API
+  pivotal_label_comments: "[:comments]"
+  pivotal_label_descriptions: "[:descriptions]"
+  pivotal_label_email: email
+  pivotal_label_i18n: translations
+  pivotal_label_images: "[:images]"
+  pivotal_label_lists: lists
+  pivotal_label_locations: "[:locations]"
+  pivotal_label_maps: "[:maps]"
+  pivotal_label_names: "[:names]"
+  pivotal_label_observations: "[:observations]"
+  pivotal_label_performance: performance
+  pivotal_label_projects: "[:projects]"
+  pivotal_label_search: search
+  pivotal_label_specimen: "[:specimens]"
+  pivotal_label_voting: voting
 
   # observer/textile
   sandbox_enter: Enter Textile you wish to test here
