@@ -1,4 +1,5 @@
 function popup_exif(image_id) {
+  var old_keypress = document.onkeypress;
   var cover = jQuery("<div class='exif_cover'>")
     .append(jQuery("<table>")
       .append(jQuery("<tr>")
@@ -8,9 +9,11 @@ function popup_exif(image_id) {
           )
         )
       )
-    );
+    ).click(function () {
+      cover.remove();
+      document.onkeypress = old_keypress;
+    });
   jQuery('body').append(cover);
-  var old_keypress = document.onkeypress;
   document.onkeypress = function (e) {
     if (e.keyCode == 27 || e.keyCode == 13) {
       cover.remove();
