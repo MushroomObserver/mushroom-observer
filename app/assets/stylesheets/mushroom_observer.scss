@@ -1085,6 +1085,9 @@ div.row_controls {
       }
       td:first-child {
         padding-left: 0;
+        width: auto;
+        min-width: 20em;
+        max-width: 40em;
       }
     }
   }
