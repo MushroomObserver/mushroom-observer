@@ -1385,6 +1385,7 @@
   image_show_huge: Huge
   image_show_full_size: Full Size
   image_show_original: Show Original Image
+  image_show_exif: Show EXIF Header
   image_show_original_name: Original File Name
   image_show_make_default: Make this the default size
   image_show_transform_note: Image is being processed. This may take several seconds.

@@ -107,6 +107,28 @@ class AjaxController < ApplicationController
     end
   end
 
+  # Get EXIF header of image, return as HTML table.
+  def exif
+    id = params[:id].to_s
+    image = Image.safe_find(id)
+    if image
+      result = `wget -qO- '#{image.original_url}' | exiftool - 2>&1`
+    else
+      result = "Couldn't find image id ##{id}."
+    end
+    if image && $?.exitstatus == 0
+      @data = result.split("\n").map { |line|
+        key, val = line.split(/\s*:\s+/, 2)
+        [key, val]
+      }.select { |key, val|
+        val != "" && val != "n/a" 
+      }
+      render(inline: "<%= make_table(@data) %>")
+    else
+      render(text: result, status: 500)
+    end
+  end
+
   # Mark an object for export. Renders updated export controls.
   # type::  Type of object.
   # id::    Object id.
