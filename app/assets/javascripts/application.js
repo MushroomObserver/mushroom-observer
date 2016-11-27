@@ -12,6 +12,7 @@
 //= require validate_file_input_fields
 //= require main
 //= require lightbox
+//= require popup_exif
 
 lightbox.option({
     'fadeDuration': 0,
