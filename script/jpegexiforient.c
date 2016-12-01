@@ -33,6 +33,10 @@
  * 88          88      88  88
  * 88          88  888888  888888
  *
+ *
+ *  5 Sept 2016 - Added ability to skip over JFIF header if present.
+ *  This should correct orientation issues with images from iPhones that
+ *  include colorspace info in a JFIF header  C.D Neefus
  */
 
 #include <stdio.h>
@@ -101,7 +105,7 @@ usage (FILE *out)
 int
 main (int argc, char **argv)
 {
-  int n_flag, set_flag;
+  int n_flag, set_flag, exif_flag;
   unsigned int length, i;
   int is_motorola; /* Flag for byte order */
   unsigned int offset, number_of_tags, tagnum;
@@ -154,14 +158,27 @@ main (int argc, char **argv)
     }
   }
 
-  /* Read File head, check for JPEG SOI + Exif APP1 */
+  /* Read File head, check for JPEG SOI + Exif APP1 or APP0 */
   for (i = 0; i < 4; i++)
     exif_data[i] = (unsigned char) read_1_byte();
   if (exif_data[0] != 0xFF ||
       exif_data[1] != 0xD8 ||
-      exif_data[2] != 0xFF ||
-      exif_data[3] != 0xE1)
+      exif_data[2] != 0xFF)
     return 0;
+  if (exif_data[3] != 0xE1)  /* if file header is APP0, skip over the JFIF header and find the Exif header */
+  {
+      exif_flag = 0;
+      while exif_flag == 0
+      {
+        exif_data[0] = (unsigned char) read_1_byte();
+        if (exif_data[0] == 0xFF)
+        {
+            exif_data[0] = (unsigned char) read_1_byte();
+            if (exif_data[0] == 0xE1) exif_flag = 1;
+        }
+      }
+  }
+      
 
   /* Get the marker parameter length count */
   length = read_2_bytes();
