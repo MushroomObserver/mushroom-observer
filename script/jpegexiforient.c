@@ -168,7 +168,7 @@ main (int argc, char **argv)
   if (exif_data[3] != 0xE1)  /* if file header is APP0, skip over the JFIF header and find the Exif header */
   {
       exif_flag = 0;
-      while exif_flag == 0
+      while (exif_flag == 0)
       {
         exif_data[0] = (unsigned char) read_1_byte();
         if (exif_data[0] == 0xFF)
