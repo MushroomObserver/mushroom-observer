@@ -20,6 +20,7 @@
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
 #    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
+#
 #    text_name          Amanita muscaria var. muscaria
 #                         (pure text, no accents or authors)
 #    (real_text_name)   Amanita muscaria var. muscaria
