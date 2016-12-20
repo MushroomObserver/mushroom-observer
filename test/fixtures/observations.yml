@@ -6,6 +6,7 @@ DEFAULTS: &DEFAULTS
   name: boletus_edulis
   notes: $LABEL # for debugging
   user: dick
+  vote_cache: 0.0
 
 minimal_unknown_obs: # old id: 1
   <<: *DEFAULTS
@@ -17,6 +18,7 @@ minimal_unknown_obs: # old id: 1
   name: fungi
   species_lists: unknown_species_list
   specimens: interesting_unknown
+  notes: ""
 
 detailed_unknown_obs: # old id: 2
   <<: *DEFAULTS
