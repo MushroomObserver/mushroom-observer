@@ -2,7 +2,7 @@
 
 require "test_helper"
 class PatternSearchTest < UnitTestCase
-  def test_parser
+  def test_parse_next_term
     parser = PatternSearch::Parser.new("")
     x = 'test name:blah two:1,2,3 foo:"quote" bar:\'a\',"b" slash:\\,,"\\""'
     assert_equal([:pattern, "test"], parser.parse_next_term!(x))
