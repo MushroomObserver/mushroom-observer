@@ -1104,7 +1104,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_nil(obs.rss_log)
     # This was getting set to zero instead of nil if no images were uploaded
     # when obs was created.
-    assert_equal(nil, obs.thumb_image_id)
+    assert_nil(obs.thumb_image_id)
   end
 
   def test_create_simple_observation_of_unknown_taxon

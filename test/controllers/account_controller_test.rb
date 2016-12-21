@@ -37,7 +37,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("newbob", user.login)
     assert_equal("needs a name!", user.name)
     assert_equal("nathan@collectivesource.com", user.email)
-    assert_equal(nil, user.verified)
+    assert_nil(user.verified)
     assert_equal(false, user.admin)
     assert_equal(true, user.created_here)
 

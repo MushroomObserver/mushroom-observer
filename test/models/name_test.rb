@@ -101,7 +101,7 @@ class NameTest < UnitTestCase
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
-    assert_equal(expected, result)
+    assert(expected == result)
   rescue RuntimeError => err
     raise err if expected
   end
@@ -119,9 +119,9 @@ class NameTest < UnitTestCase
     # Saw this bug 20080114 -JPH
     result = Name.find_or_create_name_and_parents("Coprinus comatus v. bogus (With) Author")
     assert_equal 3, result.length
-    assert_equal nil, result[0].id
+    assert_nil result[0].id
     assert_equal names(:coprinus_comatus).id, result[1].id
-    assert_equal nil, result[2].id
+    assert_nil result[2].id
     assert_equal "Coprinus", result[0].text_name
     assert_equal "Coprinus comatus", result[1].text_name
     assert_equal "Coprinus comatus var. bogus", result[2].text_name
@@ -132,9 +132,9 @@ class NameTest < UnitTestCase
     # Conocybe filaris does not have an author.
     result = Name.find_or_create_name_and_parents("Conocybe filaris var bogus (With) Author")
     assert_equal 3, result.length
-    assert_equal nil, result[0].id
+    assert_nil result[0].id
     assert_equal names(:conocybe_filaris).id, result[1].id
-    assert_equal nil, result[2].id
+    assert_nil result[2].id
     assert_equal "Conocybe", result[0].text_name
     assert_equal "Conocybe filaris", result[1].text_name
     assert_equal "Conocybe filaris var. bogus", result[2].text_name
@@ -153,8 +153,8 @@ class NameTest < UnitTestCase
     result = Name.find_or_create_name_and_parents("Agaricus abra f. cadabra (With) Another Author")
     assert_equal 3, result.length
     assert_equal names(:agaricus).id, result[0].id
-    assert_equal nil, result[1].id
-    assert_equal nil, result[2].id
+    assert_nil result[1].id
+    assert_nil result[2].id
     assert_equal "Agaricus", result[0].text_name
     assert_equal "Agaricus abra", result[1].text_name
     assert_equal "Agaricus abra f. cadabra", result[2].text_name
@@ -1433,7 +1433,7 @@ class NameTest < UnitTestCase
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -1456,7 +1456,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -1490,7 +1490,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 2, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
     assert_equal(2, QueuedEmail.count)
@@ -1525,7 +1525,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 3, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.count)
@@ -1600,7 +1600,7 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(:unreviewed, desc.review_status)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(5, QueuedEmail.count)
@@ -1635,7 +1635,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(6, QueuedEmail.count)
