@@ -21,7 +21,8 @@
 #  edit_species_list::                    Edit existing list.
 #  upload_species_list::                  Same as edit_species_list but gets list from file.
 #  destroy_species_list::                 Destroy list.
-#  manage_species_lists::                 Add/remove an observation from a user's lists.
+#  add_remove_observations::              Add/remove query results to/from a list.
+#  manage_species_lists::                 Add/remove one observation from a user's lists.
 #  add_observation_to_species_list::      (post method)
 #  remove_observation_from_species_list:: (post method)
 #  bulk_editor::                          Bulk edit observations in species list.
@@ -55,6 +56,7 @@ class SpeciesListController < ApplicationController
   before_action :disable_link_prefetching, except: [
     :create_species_list,
     :edit_species_list,
+    :add_remove_observations,
     :manage_species_lists,
     :show_species_list
   ]
@@ -387,6 +389,53 @@ class SpeciesListController < ApplicationController
       else
         redirect_to(action: "show_species_list", id: @species_list)
       end
+    end
+  end
+
+  def add_remove_observations # :prefetch: :norobots:
+    pass_query_params
+    @id = params[:species_list].to_s
+    @query = find_query(:Observation)
+    if !@query
+      flash_error(:species_list_add_remove_no_query.t)
+      redirect_to(action: "list_species_lists")
+    end
+  end
+
+  def post_add_remove_observations # :prefetch: :norobots:
+    pass_query_params
+    id = params[:species_list].to_s
+    query = find_query(:Observation)
+    if id =~ /^\d+$/
+      species_list = SpeciesList.safe_find(id)
+    else
+      species_list = SpeciesList.where(title: id).first
+    end
+    flash_error(:species_list_add_remove_no_query.t) if !query
+    flash_error(:species_list_add_remove_bad_name.t(name: id.inspect)) if !species_list
+    if !query && !species_list
+      redirect_to(action: "list_species_lists")
+    elsif !query
+      redirect_to(action: "show_species_list", id: species_list.id)
+    elsif !species_list
+      redirect_to(add_query_param(action: :add_remove_observations, species_list: id))
+    else
+      if check_permission!(species_list)
+        if params[:commit] == :ADD.l
+          num = -species_list.observation_ids.count
+          species_list.observation_ids += query.result_ids
+          num += species_list.observation_ids.count
+          flash_notice(:species_list_add_remove_add_success.t(num: num))
+        elsif params[:commit] == :REMOVE.l
+          num = species_list.observation_ids.count
+          species_list.observation_ids -= query.result_ids
+          num -= species_list.observation_ids.count
+          flash_notice(:species_list_add_remove_remove_success.t(num: num))
+        else
+          flash_error("Invalid mode: #{params[:commit].inspect}")
+        end
+      end
+      redirect_to(action: "show_species_list", id: species_list.id)
     end
   end
 

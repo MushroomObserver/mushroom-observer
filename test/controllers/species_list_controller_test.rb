@@ -1726,4 +1726,89 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_checkbox_state(:member_is_collection_location, true)
     assert_checkbox_state(:member_specimen, false)
   end
+
+  def test_add_remove_observations
+    query = Query.lookup(:Observation, :all, users: users(:mary))
+    assert(query.num_results > 1)
+    params = @controller.query_params(query)
+
+    requires_login(:add_remove_observations)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/list_species_lists})
+    assert_flash_error
+
+    get(:add_remove_observations, params)
+    assert_response(:success)
+    assert_input_value(:species_list, "")
+
+    get(:add_remove_observations, params.merge(species_list: "blah"))
+    assert_response(:success)
+    assert_input_value(:species_list, "blah")
+  end
+
+  def test_post_add_remove_observations
+    query = Query.lookup(:Observation, :all, users: users(:mary))
+    assert(query.num_results > 1)
+    params = @controller.query_params(query)
+
+    spl = species_lists(:unknown_species_list)
+    old_count = spl.observations.size
+    new_count = (spl.observations + query.results).uniq.count
+
+    # make sure there are already some observations in list
+    assert(old_count > 1)
+    # make sure we are actually trying to add some observations!
+    assert(new_count > old_count)
+    # make sure some of the query results are already in there
+    assert(query.results & spl.observations != [])
+
+    post_requires_login(:post_add_remove_observations)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/list_species_lists})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(species_list: "blah"))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, species_list: spl.title)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(commit: :ADD.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    login("mary")
+    post(:post_add_remove_observations, params.merge(commit: :ADD.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_success
+    assert_equal(new_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(commit: :REMOVE.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_success
+    assert_equal(0, spl.reload.observations.size)
+  end
 end
