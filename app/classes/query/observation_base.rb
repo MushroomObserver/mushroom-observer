@@ -22,7 +22,6 @@ class Query::ObservationBase < Query::Base
       has_location?:   :boolean,
       has_notes?:      :boolean,
       has_name?:       :boolean,
-      has_votes?:      :boolean,
       has_comments?:   { string: [:yes] },
       notes_has?:      :string,
       comments_has?:   :string,
@@ -38,12 +37,12 @@ class Query::ObservationBase < Query::Base
     initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_objects_by_name(Name, :names)
+    initialize_model_do_objects_by_name(Name, :names, "observations.name_id")
     initialize_model_do_objects_by_name(
-      Name, :synonym_names, :name_id, filter: :synonyms
+      Name, :synonym_names, "observations.name_id", filter: :synonyms
     )
     initialize_model_do_objects_by_name(
-      Name, :children_names, :name_id, filter: :all_children
+      Name, :children_names, "observations.name_id", filter: :all_children
     )
     initialize_model_do_locations
     initialize_model_do_objects_by_name(
@@ -69,20 +68,16 @@ class Query::ObservationBase < Query::Base
       id = Name.unknown.id
       initialize_model_do_boolean(:has_name,
                                   "observations.name_id != #{id}",
-                                  "observations.name_id == #{id}")
+                                  "observations.name_id = #{id}")
     end
     initialize_model_do_boolean(:has_notes,
                                 'LENGTH(COALESCE(observations.notes,"")) > 0',
                                 'LENGTH(COALESCE(observations.notes,"")) = 0'
                                )
-    initialize_model_do_boolean(:has_votes,
-                                "observations.vote_cache IS NOT NULL",
-                                "observations.vote_cache IS NULL"
-                               )
     add_join(:comments) if params[:has_comments]
     unless params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
-                                 "CONCAT(comments.summary,comments.notes)")
+                                 "CONCAT(comments.summary,comments.comment)")
       add_join(:comments)
     end
     initialize_model_do_bounding_box(:observation)
