@@ -209,7 +209,8 @@ class AjaxController < ApplicationController
     end
   end
 
-  # Cast vote. Renders new set of vote controls for HTML page.
+  # Cast vote. Renders new set of vote controls for HTML page if image,
+  # nothing if naming.
   # type::  Type of object.
   # id::    ID of object.
   # value:: Value of vote.
