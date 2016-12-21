@@ -41,7 +41,7 @@ class TextileTest < UnitTestCase
 
     assert_name_link_matches("_Agaricus_", "Agaricus", "Agaricus")
     assert_equal({ "A" => "Agaricus" }, Textile.name_lookup)
-    assert_equal(nil, Textile.last_species)
+    assert_nil(Textile.last_species)
 
     assert_name_link_matches("_A. campestris_", "A. campestris", "Agaricus campestris")
     assert_equal({ "A" => "Agaricus" }, Textile.name_lookup)
@@ -51,8 +51,8 @@ class TextileTest < UnitTestCase
     assert_name_link_matches("_A. campestris_", "A. campestris", "Amanita campestris")
     assert_equal({ "A" => "Amanita" }, Textile.name_lookup)
     assert_equal("Amanita campestris", Textile.last_species)
-    assert_equal(nil, Textile.last_subspecies)
-    assert_equal(nil, Textile.last_variety)
+    assert_nil(Textile.last_subspecies)
+    assert_nil(Textile.last_variety)
 
     assert_name_link_matches("_v. farrea_", "v. farrea", "Amanita campestris var. farrea")
     assert_equal("Amanita campestris", Textile.last_species)
@@ -62,8 +62,8 @@ class TextileTest < UnitTestCase
     assert_name_link_matches("_A. baccata sensu Borealis_", "A. baccata sensu Borealis", "Amanita baccata sensu Borealis")
     assert_equal({ "A" => "Amanita" }, Textile.name_lookup)
     assert_equal("Amanita baccata", Textile.last_species)
-    assert_equal(nil, Textile.last_subspecies)
-    assert_equal(nil, Textile.last_variety)
+    assert_nil(Textile.last_subspecies)
+    assert_nil(Textile.last_variety)
 
     assert_name_link_matches('_A. "fakename"_', 'A. "fakename"', 'Amanita "fakename"')
     assert_name_link_matches("_A. newname in ed._", "A. newname in ed.", "Amanita newname in ed.")

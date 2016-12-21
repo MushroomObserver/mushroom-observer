@@ -5,30 +5,30 @@ class MOPaginatorTest < UnitTestCase
   def test_basic
     pages = MOPaginator.new
 
-    assert_equal(nil, pages.letter_arg)
-    assert_equal(nil, pages.number_arg)
-    assert_equal(nil, pages.page_arg)
-    assert_equal(nil, pages.letter)
+    assert_nil(pages.letter_arg)
+    assert_nil(pages.number_arg)
+    assert_nil(pages.page_arg)
+    assert_nil(pages.letter)
     assert_equal(1,   pages.number)
     assert_equal(1,   pages.page)
     assert_equal(0,   pages.num_total)
     assert_equal(0,   pages.length)
     assert_equal(100, pages.num_per_page)
-    assert_equal(nil, pages.used_letters)
+    assert_nil(pages.used_letters)
 
-    pages.letter_arg = nil;          assert_equal(nil, pages.letter_arg)
+    pages.letter_arg = nil;          assert_nil(pages.letter_arg)
     pages.letter_arg = "l";          assert_equal("l", pages.letter_arg)
     pages.letter_arg = :letter;      assert_equal(:letter, pages.letter_arg)
     pages.letter_arg = ["anything"]; assert_equal(["anything"], pages.letter_arg)
 
-    pages.number_arg = nil;          assert_equal(nil, pages.number_arg)
+    pages.number_arg = nil;          assert_nil(pages.number_arg)
     pages.number_arg = "l";          assert_equal("l", pages.number_arg)
     pages.number_arg = :number;      assert_equal(:number, pages.number_arg)
     pages.number_arg = ["anything"]; assert_equal(["anything"], pages.number_arg)
 
-    pages.letter = nil; assert_equal(nil, pages.letter)
-    pages.letter = 32;  assert_equal(nil, pages.letter)
-    pages.letter = " "; assert_equal(nil, pages.letter)
+    pages.letter = nil; assert_nil(pages.letter)
+    pages.letter = 32;  assert_nil(pages.letter)
+    pages.letter = " "; assert_nil(pages.letter)
     pages.letter = "Q"; assert_equal("Q", pages.letter)
     pages.letter = "z"; assert_equal("Z", pages.letter)
     pages.letter = :x;  assert_equal("X", pages.letter)
@@ -52,7 +52,7 @@ class MOPaginatorTest < UnitTestCase
     assert_raises(RuntimeError) { pages.num_per_page = 0 }
     assert_raises(RuntimeError) { pages.num_per_page = "str" }
 
-    pages.used_letters = nil;             assert_equal(nil, pages.used_letters)
+    pages.used_letters = nil;             assert_nil(pages.used_letters)
     pages.used_letters = [];              assert_equal([], pages.used_letters)
     pages.used_letters = [1, 2, 3]; assert_equal([], pages.used_letters)
     pages.used_letters = ["a", :b, :C, "D"]; assert_equal(%w(A B C D), pages.used_letters)

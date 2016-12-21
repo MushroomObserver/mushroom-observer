@@ -247,11 +247,11 @@ class ExpertTest < IntegrationTestCase
     ].sort, obs.map(&:name).map(&:search_name).sort)
     assert_equal("Something New", spl.title)
     assert_equal(new_location, spl.where)
-    assert_equal(nil, spl.location)
+    assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
-    assert_equal(nil, obs.last.location)
+    assert_nil(obs.last.location)
     assert_equal(new_location, obs.last.where)
-    assert_equal(nil, obs.last.location)
+    assert_nil(obs.last.location)
     assert_equal("New member notes.", obs.last.notes.strip)
     assert_false(obs.last.is_collection_location)
     assert_false(obs.last.specimen)
@@ -278,9 +278,9 @@ class ExpertTest < IntegrationTestCase
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
-    assert_equal(nil, spl.where)
+    assert_nil(spl.where)
     assert_equal(loc, spl.location)
-    assert_equal(nil, obs.last.where)
+    assert_nil(obs.last.where)
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.

@@ -368,7 +368,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal("Looks good to me.", nr1.notes)
     assert_equal("", nr2.notes)
     assert_equal("Spore texture.", nr3.notes)
-    assert_equal(nil, nr4.notes)
+    assert_nil(nr4.notes)
     assert(nr1.used?)
     assert(nr2.used?)
     assert(nr3.used?)
