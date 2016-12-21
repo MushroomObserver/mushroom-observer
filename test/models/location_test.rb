@@ -317,12 +317,12 @@ class LocationTest < UnitTestCase
   end
 
   def test_parse_latitude
-    assert_equal(nil, Location.parse_latitude(""))
+    assert_nil(Location.parse_latitude(""))
     assert_equal(12.3456, Location.parse_latitude("12.3456"))
     assert_equal(-12.3456, Location.parse_latitude(" -12.3456 "))
-    assert_equal(nil, Location.parse_latitude("123.456"))
+    assert_nil(Location.parse_latitude("123.456"))
     assert_equal(12.3456, Location.parse_latitude("12.3456N"))
-    assert_equal(nil, Location.parse_latitude("12.3456E"))
+    assert_nil(Location.parse_latitude("12.3456E"))
     assert_equal(12.5824, Location.parse_latitude('12°34\'56.789"N'))
     assert_equal(12.5760, Location.parse_latitude("12 34.56"))
     assert_equal(-12.5760, Location.parse_latitude("-12 34 33.6"))
@@ -330,13 +330,13 @@ class LocationTest < UnitTestCase
   end
 
   def test_parse_longitude
-    assert_equal(nil, Location.parse_longitude(""))
+    assert_nil(Location.parse_longitude(""))
     assert_equal(12.3456, Location.parse_longitude("12.3456"))
     assert_equal(-12.3456, Location.parse_longitude(" -12.3456 "))
-    assert_equal(nil, Location.parse_longitude("190.456"))
+    assert_nil(Location.parse_longitude("190.456"))
     assert_equal(170.4560, Location.parse_longitude("170.456"))
     assert_equal(12.3456, Location.parse_longitude("12.3456E"))
-    assert_equal(nil, Location.parse_longitude("12.3456S"))
+    assert_nil(Location.parse_longitude("12.3456S"))
     assert_equal(12.5824, Location.parse_longitude('12°34\'56.789"E'))
     assert_equal(12.5760, Location.parse_longitude("12 34.56"))
     assert_equal(-12.5760, Location.parse_longitude("-12 34 33.6"))
@@ -344,8 +344,8 @@ class LocationTest < UnitTestCase
   end
 
   def test_convert_altitude
-    assert_equal(nil, Location.parse_altitude(""))
-    assert_equal(nil, Location.parse_altitude("blah"))
+    assert_nil(Location.parse_altitude(""))
+    assert_nil(Location.parse_altitude("blah"))
     assert_equal(123, Location.parse_altitude("123"))
     assert_equal(-123, Location.parse_altitude("-123.456"))
     assert_equal(-124, Location.parse_altitude("-123.567"))

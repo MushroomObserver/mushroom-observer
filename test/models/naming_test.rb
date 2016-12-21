@@ -59,7 +59,7 @@ class NamingTest < UnitTestCase
   end
 
   def test_basic_reasons
-    assert_equal(nil, namings(:minimal_unknown_naming).reasons)
+    assert_nil(namings(:minimal_unknown_naming).reasons)
 
     assert_equal({ 1 => "Isn't it obvious?" },
                  namings(:coprinus_comatus_naming).reasons)
@@ -163,8 +163,8 @@ class NamingTest < UnitTestCase
 
     assert_equal("", nrs[1].notes)
     assert_equal("I asked *Uncle Herb*", nrs[2].notes)
-    assert_equal(nil, nrs[3].notes)
-    assert_equal(nil, nrs[4].notes)
+    assert_nil(nrs[3].notes)
+    assert_nil(nrs[4].notes)
 
     nrs[3].notes = "test"
     nrs[2].notes = nil

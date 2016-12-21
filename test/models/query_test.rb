@@ -109,7 +109,7 @@ class QueryTest < UnitTestCase
     assert_equal("rolf", Query.lookup(:Name, :pattern_search, pattern: :rolf).params[:pattern])
 
     assert_raises(RuntimeError) { Query.lookup(:Name, :of_children) }
-    assert_equal(nil, Query.lookup(:Name, :of_children, name: @fungi).params[:all])
+    assert_nil(Query.lookup(:Name, :of_children, name: @fungi).params[:all])
     assert_equal(false, Query.lookup(:Name, :of_children, name: @fungi, all: false).params[:all])
     assert_equal(false, Query.lookup(:Name, :of_children, name: @fungi, all: "false").params[:all])
     assert_equal(false, Query.lookup(:Name, :of_children, name: @fungi, all: 0).params[:all])
@@ -147,12 +147,12 @@ class QueryTest < UnitTestCase
     assert_equal('one\\\\two', query.clean_pattern('one\\two'))
     assert_equal("foo%bar", query.clean_pattern("foo*bar"))
 
-    assert_equal(nil, query.and_clause)
+    assert_nil(query.and_clause)
     assert_equal("one", query.and_clause("one"))
     assert_equal("(one AND two)", query.and_clause("one", "two"))
     assert_equal("(one AND two AND three)", query.and_clause("one", "two", "three"))
 
-    assert_equal(nil, query.or_clause)
+    assert_nil(query.or_clause)
     assert_equal("one", query.or_clause("one"))
     assert_equal("(one OR two)", query.or_clause("one", "two"))
     assert_equal("(one OR two OR three)", query.or_clause("one", "two", "three"))
@@ -678,12 +678,12 @@ class QueryTest < UnitTestCase
     query.current = @names[2]
     assert_equal(query, query.prev); assert_equal(@names[1].id, query.current_id)
     assert_equal(query, query.prev); assert_equal(@names[0].id, query.current_id)
-    assert_equal(nil, query.prev); assert_equal(@names[0].id, query.current_id)
+    assert_nil(query.prev); assert_equal(@names[0].id, query.current_id)
     assert_equal(query, query.next); assert_equal(@names[1].id, query.current_id)
     assert_equal(query, query.next); assert_equal(@names[2].id, query.current_id)
     assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
     assert_equal(query, query.last); assert_equal(@names[-1].id, query.current_id)
-    assert_equal(nil,   query.next); assert_equal(@names[-1].id, query.current_id)
+    assert_nil(query.next); assert_equal(@names[-1].id, query.current_id)
     assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
     assert_equal(query, query.first); assert_equal(@names[0].id, query.current_id)
     query.reset;                      assert_equal(@names[2].id, query.current_id)
