@@ -8,6 +8,10 @@ MushroomObserver::Application.configure do
   # List of alternate server domains.  We redirect from each of these to the real one.
   config.bad_domains = []
 
+  config.site_name = "Mushroom Observer"
+  config.domain = "mushroomobserver.org"
+  config.http_domain = "http://mushroomobserver.org"
+
   # Base URL of the source repository.
   config.code_repository = "https://github.com/MushroomObserver"
 
@@ -62,12 +66,13 @@ MushroomObserver::Application.configure do
   config.email_queue_delay  = 5
 
   # Default email addresses.
-  config.news_email_address        = "news@mushroomobserver.org"
-  config.noreply_email_address     = "no-reply@mushroomobserver.org"
-  config.accounts_email_address    = "webmaster@mushroomobserver.org"
-  config.error_email_address       = "webmaster@mushroomobserver.org"
-  config.webmaster_email_address   = "webmaster@mushroomobserver.org"
-  config.exception_recipients      = "webmaster@mushroomobserver.org"
+  config.news_email_address = "news@" + config.domain
+  config.noreply_email_address = "no-reply@" + config.domain
+  config.accounts_email_address = "webmaster@" + config.domain
+  config.error_email_address = "webmaster@" + config.domain
+  config.webmaster_email_address = "webmaster@" + config.domain
+  config.exception_recipients = "webmaster@" + config.domain
+  config.donation_business = "UQ23P3G6FBYKN"
 
   # File where the list of most commonly used names lives.
   config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"

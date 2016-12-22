@@ -82,4 +82,8 @@ class SupportController < ApplicationController
   def letter
     store_location
   end
+
+  def thanks
+    store_location
+  end
 end
