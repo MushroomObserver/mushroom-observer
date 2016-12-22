@@ -39,7 +39,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("nathan@collectivesource.com", user.email)
     assert_nil(user.verified)
     assert_equal(false, user.admin)
-    assert_equal(true, user.created_here)
 
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))

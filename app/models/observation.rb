@@ -1045,10 +1045,8 @@ class Observation < AbstractModel
 
     # Send notification to all except the person who triggered the change.
     for recipient in recipients.uniq - [sender]
-      if recipient.created_here
-        QueuedEmail::ConsensusChange.create_email(sender, recipient,
-                                                  self, old_name, new_name)
-      end
+      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
+                                                old_name, new_name)
     end
   end
 

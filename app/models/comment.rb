@@ -162,6 +162,7 @@ class Comment < AbstractModel
   # 2. users who already commented on the same object
   # 3. users who have expressed Interest in that object
   # 4. users masochistic enough to want to be notified of _all_ comments
+  # 5. users highlighted in the comment itself
   #
   def notify_users
     if target = self.target
@@ -184,11 +185,6 @@ class Comment < AbstractModel
       end
 
       # Send to other people who have commented on this same object if they want.
-      #     for other_comment in Comment.find(:all, :conditions => # Rails 3
-      #       ['comments.target_type = ? AND comments.target_id = ? AND
-      #        users.email_comments_response = TRUE',
-      #       target.class.to_s, target.id], :include => 'user')
-
       for other_comment in Comment.
                            includes(:user).
                            where("comments.target_type" => target.class.to_s,
@@ -196,6 +192,10 @@ class Comment < AbstractModel
                                  "users.email_comments_response" => TRUE)
         recipients.push(other_comment.user)
       end
+
+      # Send to highlighted users. (considered a "comment response" for now)
+      recipients += highlighted_users("#{summary}\n#{comment}") \
+                      .select(&:email_comments_response)
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
@@ -210,9 +210,7 @@ class Comment < AbstractModel
 
       # Send comment to everyone (except the person who wrote the comment!)
       for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
-        end
+        QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
       end
     end
   end
@@ -264,6 +262,39 @@ class Comment < AbstractModel
 
     if target_type.to_s.bytesize > 30
       errors.add(:target_type, :validate_comment_object_type_too_long.t)
+    end
+  end
+
+  USER_LINK_REGEX  = / (?:^|\W) _+ user \s+ ([^_\s](?:[^_\n]+[^_\s])?) _+ (?!\w) /xi
+  AT_USER_AT_REGEX = / (?:^|\W) @ ([^@\n]+) @ /x
+  AT_USER_REGEX    = / (?:^|\W) @ (\w+) [^@] /x
+
+  def highlighted_users(str)
+    users = []
+    while str.match(USER_LINK_REGEX)
+      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      name = Regexp.last_match(1)
+      users << lookup_user(name)
+    end
+    while str.match(AT_USER_AT_REGEX)
+      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      name = Regexp.last_match(1)
+      users << lookup_user(name)
+    end
+    while str.match(AT_USER_REGEX)
+      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      name = Regexp.last_match(1)
+      users << lookup_user(name)
+    end
+    users.reject(&:nil?).uniq
+  end
+
+  def lookup_user(name)
+    if name =~ /^\d+$/
+      return User.safe_find(name)
+    else
+      return User.find_by_login(name) ||
+             User.find_by_name(name)
     end
   end
 end

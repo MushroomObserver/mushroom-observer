@@ -45,7 +45,6 @@ class API
         image: parse_image(:image),
         verified: nil,
         admin: false,
-        created_here: true,
         layout_count: 15
       }
     end
