@@ -1764,7 +1764,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     post_requires_login(:post_add_remove_observations)
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/list_species_lists})
+    assert_redirected_to(%r{/species_list/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
