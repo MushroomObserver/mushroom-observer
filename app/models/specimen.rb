@@ -67,9 +67,7 @@ class Specimen < AbstractModel
     return if recipients.member?(sender) # Only worry about non-curators
 
     for recipient in recipients
-      if recipient.created_here
-        QueuedEmail::AddSpecimenNotCurator.create_email(sender, recipient, self)
-      end
+      QueuedEmail::AddSpecimenNotCurator.create_email(sender, recipient, self)
     end
   end
 end

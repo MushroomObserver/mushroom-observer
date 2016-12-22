@@ -99,7 +99,6 @@
 #  password::           Hashed password.
 #  email::              Email address.
 #  admin::              Allowed to enter admin mode?
-#  created_here::       Was this account originally created on this server?
 #  alert::              Alert message we need to display for User. (serialized)
 #  bonuses::            List of zero or more contribution bonuses. (serialized)
 #  contribution::       Contribution score (integer).
@@ -215,40 +214,6 @@
 #  == Callbacks
 #
 #  crypt_password::     Password attribute is encrypted before object is created.
-#
-#  == Note on Globalization
-#
-#  The login name must be locally unique, however a remote server could in
-#  theory simultaneously create an account with the same login.  This is dealt
-#  with by tacking the server code on to the end locally.  Thus the local
-#  account will be unchanged, but the remote account will have a different
-#  login name on the two servers.  The end result looks like this:
-#
-#    server    US Fred's login   Russian Fred's login
-#    US        "fred"            "fred (us1)"
-#    Russia    "fred (ru1)"      "fred"
-#
-#  We check for this possibility in <tt>/account/login</tt>, just in case
-#  Russian Fred tries to log in on the US server.
-#
-#  In any case, the US server will _not_ know Russian Fred's password, and will
-#  redirect him to a special page which acknowledges that he has an account on
-#  the US server, would he like to create a password so he can login on either
-#  server?
-#
-#  There are several such attributes which are not transferred over, such as
-#  +admin+ and +created_here+, a flag that is set to true on the server in
-#  which the account was first created.  Here is a summary of attributes that
-#  differ from server to server: (In this example the admin User, Fred, was
-#  created on "us1" server.)
-#
-#    Attribute      Local Server    Remote Server
-#    id             1502            1513
-#    login          fred            fred (us1)
-#    password       xxxxxxxx        nil
-#    admin          true            false
-#    created_here   true            false
-#    alert          anything        anything
 #
 ################################################################################
 

@@ -172,7 +172,6 @@ class ApiTest < UnitTestCase
     assert_nil(user.verified)
     assert_nil(user.last_activity)
     assert_nil(user.last_login)
-    assert_equal(true, user.created_here)
     assert_equal(false, user.admin)
     assert_equal(0, user.contribution)
     assert_nil(user.bonuses)

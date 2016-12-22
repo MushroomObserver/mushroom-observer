@@ -59,7 +59,7 @@
 #  == Instance Methods
 #
 #  text_name::              Alias for +summary+ for debugging.
-#  target_type_localized::  Translate the name of the object type it's attached to.
+#  target_type_localized::  Translate name of the object type it's attached to.
 #
 #  ==== Logging
 #  log_create::             Log creation on object's log if it can.
@@ -68,6 +68,7 @@
 #
 #  ==== Callbacks
 #  notify_users::           Sends notification emails after creation.
+#  oil_and_water::          Sends admin email if users start to bicker.
 #
 #  == Polymorphism
 #
@@ -87,9 +88,9 @@
 #    # Have we changed the object reference (either type or id)?
 #    comment.target_changed?
 #
-################################################################################
-
 class Comment < AbstractModel
+  require_dependency "comment/callbacks"
+
   belongs_to :target, polymorphic: true
   belongs_to :user
 
@@ -122,148 +123,51 @@ class Comment < AbstractModel
     ""
   end
 
-  ##############################################################################
-  #
-  #  :section: Logging
-  #
-  ##############################################################################
-
   # Log creation of comment on object's RSS log if it can.
   def log_create(target = self.target)
-    if target && target.respond_to?(:log)
-      target.log(:log_comment_added, summary: summary, touch: true)
-    end
+    return unless target && target.respond_to?(:log)
+    target.log(:log_comment_added, summary: summary, touch: true)
   end
 
   # Log update of comment on object's RSS log if it can.
   def log_update(target = self.target)
-    if target && target.respond_to?(:log)
-      target.log(:log_comment_updated, summary: summary, touch: false)
-    end
+    return unless target && target.respond_to?(:log)
+    target.log(:log_comment_updated, summary: summary, touch: false)
   end
 
   # Log destruction of comment on object's RSS log if it can.
   def log_destroy(target = self.target)
-    if target && target.respond_to?(:log)
-      target.log(:log_comment_destroyed, summary: summary, touch: false)
-    end
+    return unless target && target.respond_to?(:log)
+    target.log(:log_comment_destroyed, summary: summary, touch: false)
   end
 
-  ##############################################################################
-  #
-  #  :section: Callbacks
-  #
-  ##############################################################################
-
-  # Callback called after creation.  Lots of people potentially can receive an
-  # email whenever a Comment is posted:
-  #
-  # 1. the owner of the object
-  # 2. users who already commented on the same object
-  # 3. users who have expressed Interest in that object
-  # 4. users masochistic enough to want to be notified of _all_ comments
-  #
-  def notify_users
-    if target = self.target
-      sender = user
-      recipients = []
-
-      # Send to owner/authors if they want.
-      if target.respond_to?(:authors)
-        owners = target.authors || []
-      else
-        owners = [target.user]
-      end
-      for user in owners
-        recipients.push(user) if user && user.email_comments_owner
-      end
-
-      # Send to masochists who want to see all comments.
-      for user in User.where(email_comments_all: true)
-        recipients.push(user)
-      end
-
-      # Send to other people who have commented on this same object if they want.
-      #     for other_comment in Comment.find(:all, :conditions => # Rails 3
-      #       ['comments.target_type = ? AND comments.target_id = ? AND
-      #        users.email_comments_response = TRUE',
-      #       target.class.to_s, target.id], :include => 'user')
-
-      for other_comment in Comment.
-                           includes(:user).
-                           where("comments.target_type" => target.class.to_s,
-                                 "comments.target_id" => target.id,
-                                 "users.email_comments_response" => TRUE)
-        recipients.push(other_comment.user)
-      end
-
-      # Send to people who have registered interest.
-      # Also remove everyone who has explicitly said they are NOT interested.
-      # for interest in Interest.find_all_by_target(target)
-      for interest in Interest.where_target(target)
-        if interest.state
-          recipients.push(interest.user)
-        else
-          recipients.delete(interest.user)
-        end
-      end
-
-      # Send comment to everyone (except the person who wrote the comment!)
-      for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
-        end
-      end
-    end
-  end
-
-  # Notify webmaster when comments get fiery on an observation.
-  # We keep two lists of users, one on each side of a "lively" debate.
-  # Send notifications when at least one user from both lists comments on
-  # the same comment.
-  def oil_and_water
-    user_ids = Comment.where(target_id: target_id, target_type: target_type).
-               map { |c| c.user_id.to_i }.uniq.sort
-    water = (user_ids & MO.water_users).any?
-    oil   = (user_ids & MO.oil_users).any?
-    if water && oil
-      target   = begin
-                   target_type.camelize.constantize.safe_find(target_id)
-                 rescue
-                   nil
-                 end
-      show_url = begin
-                   target.show_url
-                 rescue
-                   "(can't find object?!)"
-                 end
-      logins   = User.where(id: user_ids).map(&:login)
-      subject  = "Oil and water on #{target_type} ##{target_id}"
-      content  = "#{show_url}\n" \
-                 "All users: #{logins.join(", ")}\n\n" \
-                 "User: #{user.login}\nSummary: #{summary}\n\n#{comment}"
-      WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver_now
-    end
-  end
-
-  ################################################################################
+  ############################################################################
 
   protected
 
   validate :check_requirements
-  def check_requirements # :nodoc:
-    if !user && !User.current
-      errors.add(:user, :validate_comment_user_missing.t)
-    end
 
+  def check_requirements # :nodoc:
+    check_user
+    check_summary
+    check_target
+  end
+
+  def check_user # :nodoc:
+    return if user || User.current
+    errors.add(:user, :validate_comment_user_missing.t)
+  end
+
+  def check_summary # :nodoc:
     if summary.to_s.blank?
       errors.add(:summary, :validate_comment_summary_missing.t)
     elsif summary.bytesize > 100
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
+  end
 
-    if target_type.to_s.bytesize > 30
-      errors.add(:target_type, :validate_comment_object_type_too_long.t)
-    end
+  def check_target # :nodoc:
+    return unless target_type.to_s.bytesize > 30
+    errors.add(:target_type, :validate_comment_object_type_too_long.t)
   end
 end
