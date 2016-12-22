@@ -1395,6 +1395,7 @@
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
+  list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
   # location/list_place_names
@@ -1857,6 +1858,16 @@
 
   # species_list/edit_species_list
   species_list_edit_title: "[:edit_object(type=:species_list)]: [name]"
+
+  # species_list/add_remove_observations
+  species_list_add_remove_title: Add or Remove Observations from Species List
+  species_list_add_remove_cancel: "Cancel (back to observation index)"
+  species_list_add_remove_body: Adding or removing [num] observation(s) to/from species list. Enter title or id of target species list. Don't worry, it will ignore observations already added or removed from the list.
+  species_list_add_remove_label: Target species list
+  species_list_add_remove_add_success: "Successfully added [num] observation(s) to species list."
+  species_list_add_remove_remove_success: "Successfully removed [num] observation(s) from species list."
+  species_list_add_remove_no_query: Missing observation query results, or query has expired.
+  species_list_add_remove_bad_name: "Unrecognized species list id or title: [name]"
 
   # species_list/manage_species_lists
   species_list_manage_title: Manage Species Lists for [name]
