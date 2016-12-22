@@ -33,17 +33,17 @@ function VotePopupModule(showNamingsLostChangesText) {
       var value = _this.val();
       var naming_id = _this.data("id");
       _haveVotesChanged = true;
-      _this.attr("disabled", "disabled");
 
       // If setting vote to 3.0, go through all the rest and downgrade any
-      // old 3.0's to 2.0.  Only one 3.0 vote is allowed.
+      // old 3.0's to 2.0.  Only one 3.0 vote is allowed. Also disable all
+      // the menus while the AJAX request is pending.
       if (value == "3.0") {
         $change_vote_selects.each(function () {
           var _this2 = $(this);
           if (_this2.data("id") != naming_id && _this2.val() == "3.0") {
             _this2.val("2.0");
-            _this2.attr("disabled", "disabled");
           }
+          _this2.attr("disabled", "disabled");
         });
       }
 
