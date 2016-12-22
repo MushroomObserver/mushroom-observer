@@ -271,30 +271,27 @@ class Comment < AbstractModel
 
   def highlighted_users(str)
     users = []
-    while str.match(USER_LINK_REGEX)
-      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
-      name = Regexp.last_match(1)
-      users << lookup_user(name)
-    end
-    while str.match(AT_USER_AT_REGEX)
-      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
-      name = Regexp.last_match(1)
-      users << lookup_user(name)
-    end
-    while str.match(AT_USER_REGEX)
-      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
-      name = Regexp.last_match(1)
-      users << lookup_user(name)
-    end
+    users += search_for_highlighted_users(str, USER_LINK_REGEX)
+    users += search_for_highlighted_users(str, AT_USER_AT_REGEX)
+    users += search_for_highlighted_users(str, AT_USER_REGEX)
     users.reject(&:nil?).uniq
+  end
+
+  def search_for_highlighted_users(str, regex)
+    users = []
+    while str.match(regex)
+      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      users << lookup_user(Regexp.last_match(1))
+    end
+    users
   end
 
   def lookup_user(name)
     if name =~ /^\d+$/
-      return User.safe_find(name)
+      User.safe_find(name)
     else
-      return User.find_by_login(name) ||
-             User.find_by_name(name)
+      User.find_by_login(name) ||
+      User.find_by_name(name)
     end
   end
 end
