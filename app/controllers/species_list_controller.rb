@@ -406,11 +406,7 @@ class SpeciesListController < ApplicationController
     pass_query_params
     id = params[:species_list].to_s
     query = find_query(:Observation)
-    if id =~ /^\d+$/
-      species_list = SpeciesList.safe_find(id)
-    else
-      species_list = SpeciesList.where(title: id).first
-    end
+    species_list = lookup_species_list(id)
     flash_error(:species_list_add_remove_no_query.t) if !query
     flash_error(:species_list_add_remove_bad_name.t(name: id.inspect)) if !species_list
     if !query && !species_list
@@ -420,23 +416,35 @@ class SpeciesListController < ApplicationController
     elsif !species_list
       redirect_to(add_query_param(action: :add_remove_observations, species_list: id))
     else
-      if check_permission!(species_list)
-        if params[:commit] == :ADD.l
-          num = -species_list.observation_ids.count
-          species_list.observation_ids += query.result_ids
-          num += species_list.observation_ids.count
-          flash_notice(:species_list_add_remove_add_success.t(num: num))
-        elsif params[:commit] == :REMOVE.l
-          num = species_list.observation_ids.count
-          species_list.observation_ids -= query.result_ids
-          num -= species_list.observation_ids.count
-          flash_notice(:species_list_add_remove_remove_success.t(num: num))
-        else
-          flash_error("Invalid mode: #{params[:commit].inspect}")
-        end
-      end
-      redirect_to(action: "show_species_list", id: species_list.id)
+      do_add_remove_observations(species_list, query)
     end
+  end
+
+  def lookup_species_list(id)
+    if id =~ /^\d+$/
+      SpeciesList.safe_find(id)
+    else
+      SpeciesList.where(title: id).first
+    end
+  end
+
+  def do_add_remove_observations(species_list, query)
+    if check_permission!(species_list)
+      if params[:commit] == :ADD.l
+        num = -species_list.observation_ids.count
+        species_list.observation_ids += query.result_ids
+        num += species_list.observation_ids.count
+        flash_notice(:species_list_add_remove_add_success.t(num: num))
+      elsif params[:commit] == :REMOVE.l
+        num = species_list.observation_ids.count
+        species_list.observation_ids -= query.result_ids
+        num -= species_list.observation_ids.count
+        flash_notice(:species_list_add_remove_remove_success.t(num: num))
+      else
+        flash_error("Invalid mode: #{params[:commit].inspect}")
+      end
+    end
+    redirect_to(action: "show_species_list", id: species_list.id)
   end
 
   # Form to let user add/remove an observation from one of their species lists.
