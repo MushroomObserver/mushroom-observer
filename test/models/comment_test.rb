@@ -24,10 +24,14 @@ class CommentTest < UnitTestCase
 
   def test_user_highlighting
     x = Comment.first
-    assert_obj_list_equal([],     x.send(:highlighted_users, ""))
-    assert_obj_list_equal([mary], x.send(:highlighted_users, "_user #{mary.id}_"))
-    assert_obj_list_equal([mary], x.send(:highlighted_users, "@Mary Newbie@"))
-    assert_obj_list_equal([mary], x.send(:highlighted_users, "@mary blah blah"))
+    assert_user_list_equal([],     x.send(:highlighted_users, ""))
+    assert_user_list_equal([mary], x.send(:highlighted_users, "_user #{mary.id}_"))
+    assert_user_list_equal([mary], x.send(:highlighted_users, "@Mary Newbie@"))
+    assert_user_list_equal([mary], x.send(:highlighted_users, "@mary blah blah"))
+    assert_user_list_equal([mary, rolf, dick],
+                           x.send(:highlighted_users, "@mary,@rolf,@dick"))
+    assert_user_list_equal([mary, rolf, dick],
+                           x.send(:highlighted_users, "@mary@,@rolf@,@dick@"))
 
     obs = observations(:coprinus_comatus_obs)
     num = num_emails

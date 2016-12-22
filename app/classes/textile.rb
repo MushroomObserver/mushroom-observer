@@ -78,6 +78,9 @@ class Textile < String
       check_our_images!
     end
 
+    # Textile will screw with "@John Doe@".  We need to protect at signs now.
+    gsub!("@", "&#64;")
+
     # Let Textile munge the thing up now.
     red = RedCloth.new(self)
     red.sanitize_html = sanitize
