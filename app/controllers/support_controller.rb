@@ -44,7 +44,6 @@ class SupportController < ApplicationController
                 else
                   Donation.new
                 end
-    @donation = Donation.new
   end
 
   def find_user(email)
