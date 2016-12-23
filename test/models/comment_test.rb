@@ -73,18 +73,20 @@ class CommentTest < UnitTestCase
     assert_equal(num, num_emails)
 
     mary.update_attributes!(email_comments_response: true)
-    Comment.create!(target: obs, user: dick, summary: "2")
+    assert(obs.id, namings(:coprinus_comatus_other_naming).observation_id)
+    assert(mary.id, namings(:coprinus_comatus_other_naming).user_id)
+    Comment.create!(target: obs.reload, user: dick, summary: "2")
     assert_equal(num + 1, num_emails) # mary because of naming
 
     Comment.create!(target: obs, user: mary, summary: "3")
     assert_equal(num + 1, num_emails)
 
     dick.update_attributes!(email_comments_response: true)
-    Comment.create!(target: obs, user: mary, summary: "4")
+    Comment.create!(target: obs.reload, user: mary, summary: "4")
     assert_equal(num + 2, num_emails) # dick because of comment
     
     rolf.update_attributes!(email_comments_response: true)
-    Comment.create!(target: obs, user: katrina, summary: "5")
+    Comment.create!(target: obs.reload, user: katrina, summary: "5")
     assert_equal(num + 5, num_emails) # rolf, mary, dick all have comments
   end
 end

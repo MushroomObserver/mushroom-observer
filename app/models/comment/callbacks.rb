@@ -15,7 +15,7 @@ class Comment
     recipients = []
     add_owners_and_authors!(recipients)
     add_users_interested_in_all_comments!(recipients)
-    add_users_with_comments_on_same_target!(recipients)
+    add_users_with_other_comments!(recipients)
     add_users_with_namings!(recipients)
     add_highlighted_users!(recipients, "#{summary}\n#{comment}")
     add_interested_users!(recipients)
@@ -28,7 +28,7 @@ class Comment
   # Send notifications when at least one user from both lists comments on
   # the same comment.
   def oil_and_water
-    user_ids = users_with_comments_on_same_target.map(&:id).sort
+    user_ids = users_with_other_comments.map(&:id).sort
     return unless (user_ids & MO.water_users).any?
     return unless (user_ids & MO.oil_users).any?
     WebmasterEmail.build(
@@ -51,8 +51,8 @@ class Comment
     users.concat(User.where(email_comments_all: true))
   end
 
-  def add_users_with_comments_on_same_target!(users)
-    users.concat(users_with_comments_on_same_target.
+  def add_users_with_other_comments!(users)
+    users.concat(users_with_other_comments.
                  select(&:email_comments_response))
   end
 
@@ -87,7 +87,7 @@ class Comment
     target.respond_to?(:authors) ? target.authors || [] : [target.user]
   end
 
-  def users_with_comments_on_same_target
+  def users_with_other_comments
     Comment.where(target_type: target_type, target_id: target_id).
       map(&:user).uniq
   end
