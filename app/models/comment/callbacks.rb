@@ -16,6 +16,7 @@ class Comment
     add_owners_and_authors!(recipients)
     add_users_interested_in_all_comments!(recipients)
     add_users_with_comments_on_same_target!(recipients)
+    add_users_with_namings!(recipients)
     add_highlighted_users!(recipients, "#{summary}\n#{comment}")
     add_interested_users!(recipients)
     recipients.delete(user)
@@ -52,6 +53,12 @@ class Comment
 
   def add_users_with_comments_on_same_target!(users)
     users.concat(users_with_comments_on_same_target.
+                 select(&:email_comments_response))
+  end
+
+  def add_users_with_namings!(users)
+    return unless target_type == "Observation"
+    users.concat(target.namings.map(&:user).uniq.
                  select(&:email_comments_response))
   end
 

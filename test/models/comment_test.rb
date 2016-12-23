@@ -22,7 +22,7 @@ class CommentTest < UnitTestCase
     assert_equal(num + 2, num_emails)
   end
 
-  def test_user_highlighting
+  def test_user_highlighting_parsing
     x = Comment.first
     assert_user_list_equal([],     x.send(:highlighted_users, ""))
     assert_user_list_equal([mary], x.send(:highlighted_users, "_user #{mary.id}_"))
@@ -32,7 +32,9 @@ class CommentTest < UnitTestCase
                            x.send(:highlighted_users, "@mary,@rolf,@dick"))
     assert_user_list_equal([mary, rolf, dick],
                            x.send(:highlighted_users, "@mary@,@rolf@,@dick@"))
+  end
 
+  def test_user_highlighting_emails
     obs = observations(:coprinus_comatus_obs)
     num = num_emails
     mary.update_attributes!(email_comments_response: false)
@@ -56,5 +58,33 @@ class CommentTest < UnitTestCase
     katrina.update_attributes!(email_comments_response: true)
     Comment.create!(target: obs, user: rolf, summary: "checked", comment: "@dick - yes\n\n@mary - no\n\n@katrina - maybe")
     assert_equal(num + 5, num_emails)
+  end
+
+  def test_comment_notification
+    # owned by rolf, namings by rolf and mary, no comments
+    obs = observations(:coprinus_comatus_obs)
+    num = num_emails
+    rolf.update_attributes!(email_comments_owner:    false)
+    rolf.update_attributes!(email_comments_response: false)
+    mary.update_attributes!(email_comments_response: false)
+    dick.update_attributes!(email_comments_response: false)
+
+    Comment.create!(target: obs, user: rolf, summary: "1")
+    assert_equal(num, num_emails)
+
+    mary.update_attributes!(email_comments_response: true)
+    Comment.create!(target: obs, user: dick, summary: "2")
+    assert_equal(num + 1, num_emails) # mary because of naming
+
+    Comment.create!(target: obs, user: mary, summary: "3")
+    assert_equal(num + 1, num_emails)
+
+    dick.update_attributes!(email_comments_response: true)
+    Comment.create!(target: obs, user: mary, summary: "4")
+    assert_equal(num + 2, num_emails) # dick because of comment
+    
+    rolf.update_attributes!(email_comments_response: true)
+    Comment.create!(target: obs, user: katrina, summary: "5")
+    assert_equal(num + 5, num_emails) # rolf, mary, dick all have comments
   end
 end
