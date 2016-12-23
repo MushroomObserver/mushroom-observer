@@ -658,9 +658,7 @@ class Location < AbstractModel
 
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::LocationChange.create_email(sender, recipient, self)
-        end
+        QueuedEmail::LocationChange.create_email(sender, recipient, self)
       end
     end
   end

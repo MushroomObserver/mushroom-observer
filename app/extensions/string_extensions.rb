@@ -340,6 +340,7 @@ class String
   # Plain-text alternatives to the HTML special characters RedCloth uses.
   unless defined? HTML_SPECIAL_CHAR_EQUIVALENTS
     HTML_SPECIAL_CHAR_EQUIVALENTS = {
+      "#64"   => "@",
       "amp"   => "&",
       "#38"   => "&",
       "gt"    => ">",

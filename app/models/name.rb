@@ -2231,9 +2231,7 @@ class Name < AbstractModel
 
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
-        end
+        QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
       end
     end
   end
