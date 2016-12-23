@@ -2,15 +2,25 @@
 require "test_helper"
 
 class SupportControllerTest < FunctionalTestCase
-  # Replace this with your real tests.
   def test_donors
     get_with_dump(:donors)
     assert_template(:donors)
   end
 
   def test_donate
+    login("rolf")
     get_with_dump(:donate)
     assert_template(:donate)
+    assert_select("form input[value=\"#{users(:rolf).name}\"]")
+  end
+
+  def test_confirm
+    get_with_dump(:confirm)
+    assert_template(:confirm)
+  end
+
+  def test_confirm_post
+    confirm_post(25, 0)
   end
 
   def confirm_post(amount, other_amount)
@@ -35,10 +45,6 @@ class SupportControllerTest < FunctionalTestCase
     assert_equal(rolf.email, donation.email)
     assert_equal(anon, donation.anonymous)
     assert_equal(false, donation.reviewed)
-  end
-
-  def test_confirm_post
-    confirm_post(25, 0)
   end
 
   def test_confirm_other_amount_post
@@ -108,8 +114,23 @@ class SupportControllerTest < FunctionalTestCase
     assert(reloaded.reviewed)
   end
 
+  def test_thanks
+    get_with_dump(:thanks)
+    assert_template(:thanks)
+  end
+
   def test_letter
     get_with_dump(:letter)
     assert_template(:letter)
+  end
+
+  def test_wrapup_2011
+    get_with_dump(:wrapup_2011)
+    assert_template(:wrapup_2011)
+  end
+
+  def test_wrapup_2012
+    get_with_dump(:wrapup_2012)
+    assert_template(:wrapup_2012)
   end
 end
