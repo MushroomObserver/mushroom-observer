@@ -2177,7 +2177,7 @@
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
   donate_explanation: Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below. Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 
-  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section 501(c)(3) of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
+  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section 501( c )(3) of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
   # support/confirm
   confirm_title: Donation Confirmation
