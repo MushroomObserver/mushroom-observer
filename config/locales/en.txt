@@ -999,7 +999,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: X
+  app_banner_box: Great news! We can now accept "tax-deductible donations":/support/donate through the newly formed Mushroom Observer, Inc.!
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -2164,7 +2164,7 @@
   delete_specimen_cannot_delete: Attempt to delete specimen without permission
 
   # support/donate
-  donate_title: Donate to Mushroom Observer
+  donate_title: Donate to Mushroom Observer, Inc.
   donate_tab: Donate
   donate_other: Other Amount
   donate_anonymous: Anonymous donation
@@ -2174,16 +2174,18 @@
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
-  donate_thanks: "Thank you for your interest in donating to Mushroom Observer.  To support Mushroom Observer, please send a personal gift to   Nathan Wilson either through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nAs discussed in the <a href=\"/support/wrapup_2012\">2012 Wrapup</a> funding for the Mushroom Observer is no longer being handled by the Consortium for Digital Mycology Resources (CDMR).  The CDMR is now in the process of dissolving and the expectation is that a new non-profit focused solely on Mushroom Observer will be created.\n\nIn the mean time Mushroom Observer is being supported directly by Nathan now in large part through personal gifts.  All such gifts will be used to cover costs directly associated with running the Mushroom Observer and will continue to be recognized on the Mushroom Observer <a href=\"/support/donors\">donors page</a>. Unfortunately, since they will be personal gifts to Nathan you will not be able to count them as tax deductible donations.\n\nBest regards and thanks for all your contributions to Mushroom Observer."
+  donate_thanks: Thank you for your interest in donating to Mushroom Observer!
+  donate_explanation: Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below. Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
+
+  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by Mushroom Observer, Inc. for educational purposes. Mushroom Observer, Inc. is a public charity described under section 501(c)(3) of the Internal Revenue Code. Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an e-mail acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
   # support/confirm
   confirm_title: Donation Confirmation
   confirm_amount: Amount
-  confirm_text: Thank you for offering to make the following gift.  To complete this transaction using PayPal, click the button below.
+  confirm_text: Thank you for offering to make the following donation.  To complete this transaction using PayPal, click the button below.
 
   # support/thanks
   thanks_title: Thanks for Your Support!
-  thanks_no_amount: Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
   thanks_note: "Thank you for helping to support the Mushroom Observer.  Your support is greatly appreciated and will help Mushroom Observer continue its mission.\n\nYour donation will be acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received unless you have requested special arrangements for your acknowledgement.  Examples of special arrangements might be to make the donation anonymously or to leave it in someone else's name.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
   # support/letter
