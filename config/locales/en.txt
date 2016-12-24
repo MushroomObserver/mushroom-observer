@@ -999,7 +999,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!  \"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n\"*Donate Today!*\":/support/donate"
+  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!\n\"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n\"*Donate Today!*\":/support/donate"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -2186,7 +2186,7 @@
 
   # support/governance
   governance_title: Governance of the Mushroom Observer
-  governance: The "Mushroom Observer website":/ is owned and operated by the Massachusetts based non-profit, Mushroom Observer, Inc. - specifically the domain, mushroomobserver.org, as well as all relevant source code copyrights are owned by Mushroom Observer, Inc. The images and user entered text on the site are owned by their respective authors and are licensed for use under Creative Commons licenses as described on the "Introduction":/observer/intro page.\n\nMushroom Observer, Inc. was organized based on its "articles of organization":/doc/mo-articles.pdf and operates under its "bylaws":/doc/mo-bylaws.pdf which may be revised from time to by its Board of Directors. If you have questions about the governance of the site or need to get in touch with members of the Board of Directors please "send us a comment":/observer/ask_webmaster_question.
+  governance: The "Mushroom Observer website":/ is owned and operated by the Massachusetts based non-profit, Mushroom Observer, Inc. - specifically the domain, mushroomobserver.org, as well as all relevant source code copyrights are owned by Mushroom Observer, Inc. The images and user entered text on the site are owned by their respective authors and are licensed for use under Creative Commons licenses as described on the "Introduction":/observer/intro page.\n\nMushroom Observer, Inc. was organized based on its "articles of organization":/doc/mo-articles.pdf and operates under its "bylaws":/doc/mo-bylaws.pdf which may be revised from time to by its Board of Directors. Mushroom Observer, Inc. has been "recognized as a section ==501(c)(3)== public charity":/doc/mo-determination.pdf serving educational purposes. If you have questions about the governance of the site or need to get in touch with members of the Board of Directors please "send us a comment":/observer/ask_webmaster_question.
 
   # support/thanks
   thanks_title: Thanks for Your Support!
