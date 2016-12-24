@@ -33,7 +33,7 @@ module Query::Modules::Serialization
 
   def serialize_string(val)
     # The "n" modifier forces the Regexp to be in ascii 8 bit encoding = binary.
-    val.force_encoding("binary").gsub(/[,;:#%&=\/\?\x00-\x1F\x7F-\xFF]/n) do |char|
+    String.new(val).force_encoding("binary").gsub(/[,;:#%&=\/\?\x00-\x1f\x7f-\xff]/n) do |char|
       "%" + ("%02.2X" % char.ord)
     end
   end
@@ -70,7 +70,7 @@ module Query::Modules::Serialization
     end
 
     def deserialize_string(val)
-      val.force_encoding("binary").gsub(/%(..)/) do |match|
+      String.new(val).force_encoding("binary").gsub(/%(..)/) do |match|
         match[1..2].hex.chr("binary")
       end.force_encoding("UTF-8")
     end

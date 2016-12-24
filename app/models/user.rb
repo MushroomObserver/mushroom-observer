@@ -99,7 +99,6 @@
 #  password::           Hashed password.
 #  email::              Email address.
 #  admin::              Allowed to enter admin mode?
-#  created_here::       Was this account originally created on this server?
 #  alert::              Alert message we need to display for User. (serialized)
 #  bonuses::            List of zero or more contribution bonuses. (serialized)
 #  contribution::       Contribution score (integer).

@@ -14,6 +14,7 @@ DEFAULTS: &DEFAULTS
   notes: $LABEL # sometimes useful for debugging
   location: burbank
   user: dick
+  vote_cache: 0.0
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -24,6 +25,7 @@ minimal_unknown_obs:
   name: fungi
   species_lists: unknown_species_list
   specimens: interesting_unknown
+  notes: ""
 
 detailed_unknown_obs:
   <<: *DEFAULTS

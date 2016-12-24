@@ -574,7 +574,7 @@ end
 
     # Shouldn't match anything.
     requires_login(:list_merge_options, where: "Somewhere out there")
-    assert_equal(nil, assigns(:matches))
+    assert_nil(assigns(:matches))
   end
 
   def test_add_to_location
@@ -585,7 +585,7 @@ end
       where: (where = "undefined location"),
       notes: "new observation"
     )
-    assert_equal(obs.location, nil)
+    assert_nil(obs.location)
     where = obs.where
     params = {
       where:    where,
@@ -605,7 +605,7 @@ end
       where: (where = "Albion, Mendocino Co., California, USA"),
       notes: "new observation"
     )
-    assert_equal(obs.location, nil)
+    assert_nil(obs.location)
     assert_equal(:scientific, roy.location_format)
     params = {
       where: where,

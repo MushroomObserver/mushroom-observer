@@ -47,7 +47,6 @@ class API
         has_notes:      parse_boolean(:has_notes),
         has_name:       parse_boolean(:has_name),
         has_images:     parse_boolean(:has_images),
-        has_votes:      parse_boolean(:has_votes),
         has_comments:   parse_boolean(:has_comments, limit: true),
         notes_has:      parse_string(:notes_has),
         comments_has:   parse_string(:comments_has),

@@ -13,6 +13,57 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
+<%
+  javascript_include 'donate'
+%>
+
 <div class="max-width-text">
   <%= :donate_thanks.tp %>
+  <%= :donate_explanation.tp %>
+
+  <div id="main_container" class="container-fluid">
+    <%= form_tag(action: :confirm) do %>
+      <p>
+	<div class="row">
+	  <% for a in [25.00, 50.00, 100.00, 200.00] %>
+            <div class="col-xs-3">
+              <%= radio_button("donation", "amount", a,
+		  :onchange => "enableOther()") + " $#{a.to_i}" %>
+	    </div>
+	  <% end %>
+	</div>
+      </p>
+      <p>
+	<div class="row col-xs-12">
+	  <%= radio_button("donation", "amount", "other",
+              :onchange => "enableOther()")%>
+	  <%= :donate_other.t %>: $
+	  <%= text_field("donation", "other_amount", :size => 7)%>
+	  <br/><br/>
+	</div>
+      </p>
+      <p>
+	<div class="row col-xs-12">
+	  <%= :donate_who.t + ": " %>
+	  <%= text_field('donation', 'who', :size => 30) %>
+	</div>
+      </p>
+      <p>
+	<div class="row col-xs-12">
+	  <%= check_box('donation', 'anonymous') %>
+	  <%= :donate_anonymous.t %>
+	  <br/><br/>
+	</div>
+      </p>
+      <p>
+	<div class="row col-xs-12">
+	  <%= :donate_email.t + ": " %><%= text_field('donation', 'email', :size => 30) %>
+	  <br/><br/>
+	</div>
+      </p>
+      <%= submit_tag(:donate_confirm.t) %>
+      <br/><br/>
+    <% end %>
+  </div>
+  <%= :donate_fine_print.tp %>
 </div>

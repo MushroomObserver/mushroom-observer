@@ -20,6 +20,7 @@
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
 #    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
+#
 #    text_name          Amanita muscaria var. muscaria
 #                         (pure text, no accents or authors)
 #    (real_text_name)   Amanita muscaria var. muscaria
@@ -2230,9 +2231,7 @@ class Name < AbstractModel
 
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
-        end
+        QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
       end
     end
   end

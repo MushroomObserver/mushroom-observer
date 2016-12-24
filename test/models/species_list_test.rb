@@ -109,7 +109,7 @@ class SpeciesListTest < UnitTestCase
     assert_obj_list_equal([], o.projects)
     assert_equal("2012-01-13", o.when.web_date)
     assert_equal("Undefined Location", o.where)
-    assert_equal(nil, o.location)
+    assert_nil(o.location)
     assert_equal("notes", o.notes)
     assert_equal(12.5667, o.lat.round(4))
     assert_equal(-123.75, o.long.round(4))

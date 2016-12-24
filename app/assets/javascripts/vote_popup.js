@@ -29,18 +29,47 @@ function VotePopupModule(showNamingsLostChangesText) {
     });
 
     $change_vote_selects.change(function (event) {
-      var _this = $(this); //references the vote being changed
-      _haveVotesChanged = true;  //votes have been changed
-      getUserAttention();
+      var _this = $(this);
+      var value = _this.val();
+      var naming_id = _this.data("id");
+      _haveVotesChanged = true;
+
       // If setting vote to 3.0, go through all the rest and downgrade any
-      // old 3.0's to 2.0.  Only one 3.0 vote is allowed.
-      if (_this.val() == "3.0") {
-        var changedNamingId = _this.data().id;
+      // old 3.0's to 2.0.  Only one 3.0 vote is allowed. Also disable all
+      // the menus while the AJAX request is pending.
+      if (value == "3.0") {
         $change_vote_selects.each(function () {
-          if ($(this).data().id != changedNamingId && $(this).val() == "3.0")
-            $(this).val("2.0");
+          var _this2 = $(this);
+          if (_this2.data("id") != naming_id && _this2.val() == "3.0") {
+            _this2.val("2.0");
+          }
+          _this2.attr("disabled", "disabled");
         });
       }
+
+      jQuery.ajax("/ajax/vote/naming/" + naming_id, {
+        data: {value: value, authenticity_token: csrf_token()},
+        dataType: "text",
+        async: true,
+        complete: function (request) {
+          _haveVotesChanged = false;
+          if (request.status == 200) {
+            $change_vote_selects.each(function () {
+              $(this).data("old_value", $(this).val())
+                     .attr("disabled", null);
+            });
+          } else {
+            $change_vote_selects.each(function () {
+              $(this).val($(this).data("old_value"))
+                     .attr("disabled", null);
+            });
+            alert(request.responseText);
+          }
+        }
+      });
+
+    }).each(function (event) {
+      $(this).data("old_value", $(this).val());
     });
 
     // Alert the user if they haven't saved data.
@@ -49,18 +78,7 @@ function VotePopupModule(showNamingsLostChangesText) {
         return showNamingsLostChangesText;
     }
 
-    // Blinks some bold text on the update votes button to alert the user they
-    // need to update the votes.
-    function getUserAttention(timesFlashed) {
-      var _timesToFlash = 3;
-      if (timesFlashed == undefined)
-        timesFlashed = 0;
-      setTimeout(function () {
-        if (_timesToFlash > timesFlashed) {
-          $save_votes_button.toggleClass("bold");
-          getUserAttention(timesFlashed + 1);
-        }
-      }, 300);
-    }
+    // Don't need this if AJAX available.
+    $save_votes_button.hide();
   });
 }

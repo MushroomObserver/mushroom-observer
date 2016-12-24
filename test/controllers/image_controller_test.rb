@@ -60,7 +60,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(c_comatus.id, outer.current_id)
     assert_equal(1, outer.current.images.size)
     new_outer = outer.next
-    assert_equal(nil, new_outer)
+    assert_nil(new_outer)
 
     # Start with inner at last image of first observation (det_unknown).
     inner.current = det_unknown.images.last.id
@@ -154,7 +154,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(det_unknown, outer.current_id)
     assert_equal(2, outer.current.images.size)
     new_outer = outer.prev
-    assert_equal(nil, new_outer)
+    assert_nil(new_outer)
 
     # No more images for a_campestris, so goes to next obs (min_unknown),
     # but this has no images, so goes to next (det_unknown). This has two images
@@ -407,7 +407,7 @@ class ImageControllerTest < FunctionalTestCase
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
     assert(!obs.reload.images.member?(keep))
-    assert_equal(nil, obs.thumb_image_id)
+    assert_nil(obs.thumb_image_id)
   end
 
   def test_destroy_image

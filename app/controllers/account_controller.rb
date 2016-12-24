@@ -92,7 +92,6 @@ class AccountController < ApplicationController
         @new_user.updated_at = now
         @new_user.last_login = now
         @new_user.admin = false
-        @new_user.created_here = true
         @new_user.layout_count = 15
         @new_user.mailing_address = ""
         @new_user.notes = ""

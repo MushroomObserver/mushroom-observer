@@ -328,9 +328,9 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
     assert(obs.vote_cache > 2)
     assert_equal("", obs.notes.to_s)
-    assert_equal(nil, obs.lat)
-    assert_equal(nil, obs.long)
-    assert_equal(nil, obs.alt)
+    assert_nil(obs.lat)
+    assert_nil(obs.long)
+    assert_nil(obs.alt)
     assert_equal(false, obs.is_collection_location)
     assert_equal(false, obs.specimen)
   end
@@ -1281,14 +1281,14 @@ class SpeciesListControllerTest < FunctionalTestCase
                  rescue
                    nil
                  end
-      assert_equal(old_vote,            new_vote)
-      assert_equal(old_obs.when,        new_obs.when)
-      assert_equal(old_obs.where,       new_obs.where)
-      assert_equal(old_obs.location_id, new_obs.location_id)
-      assert_equal(old_obs.notes,       new_obs.notes)
-      assert_equal(old_obs.lat,         new_obs.lat)
-      assert_equal(old_obs.long,        new_obs.long)
-      assert_equal(old_obs.alt,         new_obs.alt)
+      assert(old_vote == new_vote)
+      assert_equal(old_obs.when, new_obs.when)
+      assert(old_obs.where == new_obs.where)
+      assert(old_obs.location_id == new_obs.location_id)
+      assert_equal(old_obs.notes, new_obs.notes)
+      assert(old_obs.lat == new_obs.lat)
+      assert(old_obs.long == new_obs.long)
+      assert(old_obs.alt == new_obs.alt)
       assert_equal(old_obs.is_collection_location, new_obs.is_collection_location)
       assert_equal(old_obs.specimen, new_obs.specimen)
     end
@@ -1330,25 +1330,25 @@ class SpeciesListControllerTest < FunctionalTestCase
                 end
     assert_not_equal(Vote.minimum_vote, old_vote1)
     assert_equal(Vote.minimum_vote, new_vote1)
-    assert_equal(now.to_date,    new_obs1.when)
+    assert_equal(now.to_date, new_obs1.when)
     assert_equal("new location", new_obs1.where)
-    assert_equal(nil,            new_obs1.location)
-    assert_equal("new notes",    new_obs1.notes)
-    assert_equal(obs1.lat,       new_obs1.lat)
-    assert_equal(obs1.long,      new_obs1.long)
-    assert_equal(obs1.alt,       new_obs1.alt)
+    assert_nil(new_obs1.location)
+    assert_equal("new notes", new_obs1.notes)
+    assert(obs1.lat == new_obs1.lat)
+    assert(obs1.long == new_obs1.long)
+    assert(obs1.alt == new_obs1.alt)
     assert_equal(obs1.is_collection_location, new_obs1.is_collection_location)
     assert_equal(obs1.specimen, new_obs1.specimen)
-    assert_equal(old_vote2, new_vote2)
-    assert_equal(obs2.when,      new_obs2.when)
-    assert_equal(obs2.where,     new_obs2.where)
+    assert(old_vote2 == new_vote2)
+    assert_equal(obs2.when, new_obs2.when)
+    assert(obs2.where == new_obs2.where)
     assert_equal(obs2.location_id, new_obs2.location_id)
-    assert_equal(obs2.notes,     new_obs2.notes)
-    assert_equal(12.5822,        new_obs2.lat)
-    assert_equal(-78.1533,       new_obs2.long)
-    assert_equal(105,            new_obs2.alt)
-    assert_equal(true,           new_obs2.is_collection_location)
-    assert_equal(true,           new_obs2.specimen)
+    assert_equal(obs2.notes, new_obs2.notes)
+    assert_equal(12.5822, new_obs2.lat)
+    assert_equal(-78.1533, new_obs2.long)
+    assert_equal(105, new_obs2.alt)
+    assert_equal(true, new_obs2.is_collection_location)
+    assert_equal(true, new_obs2.specimen)
 
     # Make illegal change.
     params = {
@@ -1365,13 +1365,13 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_flash_warning
     new_obs3 = Observation.find(obs3.id)
     assert_equal(old_vote3, new_obs3.namings.first.users_vote(obs3.user).value)
-    assert_equal(obs3.when,        new_obs3.when)
-    assert_equal(obs3.where,       new_obs3.where)
-    assert_equal(obs3.location_id, new_obs3.location_id)
-    assert_equal(obs3.notes,       new_obs3.notes)
-    assert_equal(obs3.lat,         new_obs3.lat)
-    assert_equal(obs3.long,        new_obs3.long)
-    assert_equal(obs3.alt,         new_obs3.alt)
+    assert_equal(obs3.when, new_obs3.when)
+    assert_equal(obs3.where, new_obs3.where)
+    assert(obs3.location_id == new_obs3.location_id)
+    assert_equal(obs3.notes, new_obs3.notes)
+    assert(obs3.lat == new_obs3.lat)
+    assert(obs3.long == new_obs3.long)
+    assert(obs3.alt == new_obs3.alt)
     assert_equal(obs3.is_collection_location, new_obs3.is_collection_location)
     assert_equal(obs3.specimen, new_obs3.specimen)
 
@@ -1725,5 +1725,90 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_input_value(:member_alt, "")
     assert_checkbox_state(:member_is_collection_location, true)
     assert_checkbox_state(:member_specimen, false)
+  end
+
+  def test_add_remove_observations
+    query = Query.lookup(:Observation, :all, users: users(:mary))
+    assert(query.num_results > 1)
+    params = @controller.query_params(query)
+
+    requires_login(:add_remove_observations)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/list_species_lists})
+    assert_flash_error
+
+    get(:add_remove_observations, params)
+    assert_response(:success)
+    assert_input_value(:species_list, "")
+
+    get(:add_remove_observations, params.merge(species_list: "blah"))
+    assert_response(:success)
+    assert_input_value(:species_list, "blah")
+  end
+
+  def test_post_add_remove_observations
+    query = Query.lookup(:Observation, :all, users: users(:mary))
+    assert(query.num_results > 1)
+    params = @controller.query_params(query)
+
+    spl = species_lists(:unknown_species_list)
+    old_count = spl.observations.size
+    new_count = (spl.observations + query.results).uniq.count
+
+    # make sure there are already some observations in list
+    assert(old_count > 1)
+    # make sure we are actually trying to add some observations!
+    assert(new_count > old_count)
+    # make sure some of the query results are already in there
+    assert(query.results & spl.observations != [])
+
+    post_requires_login(:post_add_remove_observations)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(species_list: "blah"))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, species_list: spl.title)
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(commit: :ADD.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    login("mary")
+    post(:post_add_remove_observations, params.merge(commit: :ADD.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_success
+    assert_equal(new_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations, params.merge(commit: :REMOVE.l, species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_success
+    assert_equal(0, spl.reload.observations.size)
   end
 end

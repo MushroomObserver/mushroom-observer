@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160829175601) do
+ActiveRecord::Schema.define(version: 20161223070100) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -620,7 +620,6 @@ ActiveRecord::Schema.define(version: 20160829175601) do
     t.boolean  "email_html",                                 default: true,  null: false
     t.datetime "updated_at"
     t.boolean  "admin"
-    t.boolean  "created_here"
     t.text     "alert",                        limit: 65535
     t.boolean  "email_locations_admin",                      default: false
     t.boolean  "email_names_admin",                          default: false
@@ -638,7 +637,6 @@ ActiveRecord::Schema.define(version: 20160829175601) do
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count",                 limit: 4
     t.boolean  "view_owner_id",                              default: false, null: false
-    t.string   "content_filter",               limit: 255
   end
 
   create_table "votes", force: :cascade do |t|
