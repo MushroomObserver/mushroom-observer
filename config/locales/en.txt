@@ -999,7 +999,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!\n\"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n\"*Donate Today!*\":/support/donate"
+  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!\n\"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n%(btn)\"*Donate Today!*\":/support/donate%"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
