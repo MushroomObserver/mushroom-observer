@@ -637,6 +637,7 @@ ActiveRecord::Schema.define(version: 20161223070100) do
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count",                 limit: 4
     t.boolean  "view_owner_id",                              default: false, null: false
+    t.string   "content_filter",               limit: 255
   end
 
   create_table "votes", force: :cascade do |t|
