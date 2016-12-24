@@ -52,7 +52,7 @@
       banner_txt = :app_banner_box.t
       banner_md5 = banner_txt.to_s.md5sum.html_safe
       if banner_txt.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
-        <div class="alert alert-info message-banner" id="message_banner">
+        <div class="alert alert-success message-banner" id="message_banner">
           <%= javascript_tag("var banner_md5 = '#{banner_md5}'") %>
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
