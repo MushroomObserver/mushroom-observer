@@ -53,6 +53,7 @@ dick:
 # Need fourth for testing votes
 katrina:
   <<: *DEFAULTS
+  name: Katrina
   verified: 2008-03-02 21:14:00
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
   user_groups: all_users, eol_users, katrina_only
