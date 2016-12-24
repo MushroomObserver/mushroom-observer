@@ -1,12 +1,17 @@
 # encoding: utf-8
 MushroomObserver::Application.configure do
-  # Ensure that these are defined in case we're executing this script on its own
-  # (e.g., to provide access to configs for bash sripts).
+  # Ensure that these are defined in case we're executing this script
+  # on its own (e.g., to provide access to configs for bash sripts).
   config.root = File.expand_path("../..", __FILE__)
   config.env  = ENV["RAILS_ENV"]
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.  We redirect from each of these
+  # to the real one.
   config.bad_domains = []
+
+  config.site_name = "Mushroom Observer"
+  config.domain = "mushroomobserver.org"
+  config.http_domain = "http://mushroomobserver.org"
 
   # Base URL of the source repository.
   config.code_repository = "https://github.com/MushroomObserver"
@@ -20,7 +25,8 @@ MushroomObserver::Application.configure do
   # Default locale when nothing sets it explicitly.
   config.default_locale = "en"
 
-  # I18n namespace all our app-specific translations are kept in inside localization files.
+  # I18n namespace all our app-specific translations are kept in
+  # inside localization files.
   config.locale_namespace = "mo"
 
   # Make Active Record use UTC instead of local time.  This is critical if we
@@ -50,7 +56,7 @@ MushroomObserver::Application.configure do
   config.default_theme = "BlackOnWhite"
 
   # Available themes.
-  config.themes = %w( Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite )
+  config.themes = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)
 
   # Queued email only gets delivered if you have run the rake task email:send.
   # script/send_email is a cron script for running email:send.  (Delay is in
@@ -62,12 +68,13 @@ MushroomObserver::Application.configure do
   config.email_queue_delay  = 5
 
   # Default email addresses.
-  config.news_email_address        = "news@mushroomobserver.org"
-  config.noreply_email_address     = "no-reply@mushroomobserver.org"
-  config.accounts_email_address    = "webmaster@mushroomobserver.org"
-  config.error_email_address       = "webmaster@mushroomobserver.org"
-  config.webmaster_email_address   = "webmaster@mushroomobserver.org"
-  config.exception_recipients      = "webmaster@mushroomobserver.org"
+  config.news_email_address = "news@" + config.domain
+  config.noreply_email_address = "no-reply@" + config.domain
+  config.accounts_email_address = "webmaster@" + config.domain
+  config.error_email_address = "webmaster@" + config.domain
+  config.webmaster_email_address = "webmaster@" + config.domain
+  config.exception_recipients = "webmaster@" + config.domain
+  config.donation_business = "UQ23P3G6FBYKN"
 
   # File where the list of most commonly used names lives.
   config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"
@@ -87,10 +94,11 @@ MushroomObserver::Application.configure do
   config.pivotal_test_id  = 77_165_602
 
   # Configuration files for location validator.
-  config.location_countries_file = "#{config.root}/config/location/countries.yml"
-  config.location_states_file    = "#{config.root}/config/location/states.yml"
-  config.location_prefixes_file  = "#{config.root}/config/location/prefixes.yml"
-  config.location_bad_terms_file = "#{config.root}/config/location/bad_terms.yml"
+  location_path = "#{config.root}/config/location/"
+  config.location_countries_file = "#{location_path}countries.yml"
+  config.location_states_file    = "#{location_path}states.yml"
+  config.location_prefixes_file  = "#{location_path}prefixes.yml"
+  config.location_bad_terms_file = "#{location_path}bad_terms.yml"
 
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
@@ -112,7 +120,8 @@ MushroomObserver::Application.configure do
   #   }
   # }
 
-  # Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
+  # Search order when serving images.
+  # Key is size, e.g., :thumbnail, :small, etc.
   # config.image_precedence = {
   #   :default => [:local, :cdmr]
   # }
@@ -123,7 +132,8 @@ MushroomObserver::Application.configure do
 
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
-  config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set> &"
+  config.process_image_command =
+    "#{config.root}/script/process_image <id> <ext> <set> &"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
   config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb
@@ -143,7 +153,8 @@ MushroomObserver::Application.configure do
   config.secret_key_base = "a" * 30
 
   # EOL parameters.
-  config.eol_ranks = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
+  config.eol_ranks = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
+                      :Class, :Phylum, :Kingdom]
   config.eol_ranks_for_export = [:Form, :Variety, :Subspecies, :Species, :Genus]
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
@@ -164,26 +175,28 @@ MushroomObserver::Application.configure do
 
   # Set of javascript and stylesheet files not included by default and
   # therefore need to be precompiled explicitly.
-  config.assets.precompile += %w(
-    api_key.js
-    date_select.js
-    edit_location.js
-    image_slider.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    rss_feed_select_helper.js
-    selectize.min.js
-    single_image_uploader.js
-    translations.js
-    vote_popup.js
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-  ) if config.assets && config.assets.precompile
+  if config.assets && config.assets.precompile
+    config.assets.precompile += %w(
+      api_key.js
+      date_select.js
+      edit_location.js
+      image_slider.js
+      multi_image_upload.js
+      name_lister.js
+      pivotal.js
+      rss_feed_select_helper.js
+      selectize.min.js
+      single_image_uploader.js
+      translations.js
+      vote_popup.js
+      Admin.css
+      Agaricus.css
+      Amanita.css
+      BlackOnWhite.css
+      Cantharellaceae.css
+      Hygrocybe.css
+    )
+  end
 
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000
