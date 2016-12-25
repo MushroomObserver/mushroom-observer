@@ -182,12 +182,13 @@ class ObservationTest < UnitTestCase
 
     # Observation owner is not notified if comment added by themselves.
     # (Rolf owns coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
+    # (But Mary will get a comment-response email because she has a naming.)
     User.current = rolf
     new_comment = Comment.create(
       summary: "This is Rolf...",
       target: obs
     )
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
 
     # Observation owner is not notified if naming added by themselves.
     User.current = rolf
@@ -196,14 +197,14 @@ class ObservationTest < UnitTestCase
       name: names(:agaricus_campestris),
       vote_cache: 0
     )
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
     assert_equal(names(:coprinus_comatus), obs.reload.name)
 
     # Observation owner is not notified if consensus changed by themselves.
     User.current = rolf
     obs.change_vote(new_naming, 3)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
 
     # Make Rolf opt out of all emails.
     rolf.email_comments_owner = false
@@ -213,12 +214,13 @@ class ObservationTest < UnitTestCase
     assert_save(rolf)
 
     # Rolf should not be notified of anything here, either...
+    # But Mary still will get something for having the naming.
     User.current = dick
     new_comment = Comment.create(
       summary: "This is Dick...",
-      target: observations(:coprinus_comatus_obs)
+      target: obs.reload
     )
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(2, QueuedEmail.count)
 
     User.current = dick
     new_naming = Naming.create(
@@ -226,7 +228,7 @@ class ObservationTest < UnitTestCase
       name: names(:peltigera),
       vote_cache: 0
     )
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(2, QueuedEmail.count)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make sure this changes consensus...
@@ -236,7 +238,7 @@ class ObservationTest < UnitTestCase
     User.current = dick
     obs.change_vote(new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
-    assert_equal(0, QueuedEmail.count)
+    assert_equal(2, QueuedEmail.count)
     QueuedEmail.queue_emails(false)
   end
 
