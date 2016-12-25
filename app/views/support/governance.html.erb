@@ -1,0 +1,13 @@
+<%
+  @title = :governance_title.l
+
+  tabs = [
+    link_to(:donate_tab.t, action: :donate),
+    link_to(:donors_tab.t, action: :donors)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= :governance.tp %>
+</div>

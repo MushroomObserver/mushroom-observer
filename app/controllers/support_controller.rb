@@ -100,4 +100,8 @@ class SupportController < ApplicationController
   def thanks
     store_location
   end
+
+  def governance
+    store_location
+  end
 end
