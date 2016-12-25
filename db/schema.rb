@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161223070100) do
+ActiveRecord::Schema.define(version: 20161224183940) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -74,6 +74,7 @@ ActiveRecord::Schema.define(version: 20161223070100) do
     t.boolean  "anonymous",                                       default: false, null: false
     t.boolean  "reviewed",                                        default: true,  null: false
     t.integer  "user_id",    limit: 4
+    t.boolean  "recurring",                                       default: false
   end
 
   create_table "glossary_terms", force: :cascade do |t|
