@@ -207,9 +207,9 @@ class PatternSearchTest < UnitTestCase
     assert_equal(20131230, o2.when.year * 10000 + o2.when.month * 100 + o2.when.day)
     x = PatternSearch::Observation.new("Agaricus user:dick")
     assert_obj_list_equal([o1, o2], x.query.results)
-    x = PatternSearch::Observation.new("Agaricus user:dick specimen:TRUE")
+    x = PatternSearch::Observation.new("Agaricus user:dick specimen:yes")
     assert_obj_list_equal([o1], x.query.results)
-    x = PatternSearch::Observation.new("Agaricus user:dick specimen:FALSE")
+    x = PatternSearch::Observation.new("Agaricus user:dick specimen:no")
     assert_obj_list_equal([o2], x.query.results)
     x = PatternSearch::Observation.new("Agaricus date:2013")
     assert_obj_list_equal([o2], x.query.results)
@@ -225,7 +225,7 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal([o1, o2], x.query.results)
     x = PatternSearch::Observation.new("Agaricus albion user:dick date:2001-2014")
     assert_obj_list_equal([o1, o2], x.query.results)
-    x = PatternSearch::Observation.new("Agaricus albion user:dick date:2001-2014 specimen:TRUE")
+    x = PatternSearch::Observation.new("Agaricus albion user:dick date:2001-2014 specimen:true")
     assert_obj_list_equal([o1], x.query.results)
   end
 

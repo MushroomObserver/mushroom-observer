@@ -54,7 +54,7 @@ module PatternSearch
         elsif term.var == :images
           args[:has_images] = term.parse_boolean
         elsif term.var == :specimen
-          args[:has_specimen] = term.parse_boolean
+          args[:has_specimen] = term.parse_to_true_false_string
         elsif term.var == :has_name
           args[:has_name] = term.parse_boolean
         elsif term.var == :has_notes

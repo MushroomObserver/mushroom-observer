@@ -1,6 +1,10 @@
 # encoding: utf-8
 
 module PatternSearch
+  # Parse PatternSearch parameter terms
+  # Sample use:
+  #   elsif term.var == :specimen
+  #     args[:has_specimen] = term.parse_boolean_string
   class Term
     attr_accessor :var
     attr_accessor :vals
@@ -35,12 +39,25 @@ module PatternSearch
       vals.map { |v| quote(v) }.join(" ")
     end
 
-    def parse_boolean(only_yes=false)
+    def parse_boolean(only_yes = false)
       fail MissingValueError.new(var: var) if vals.empty?
       fail TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       return true  if val.match(/^(1|yes|true)$/i)
       return false if val.match(/^(0|no|false)$/i) && !only_yes
+      fail BadYesError.new(var: var, val: val) if only_yes
+      fail BadBooleanError.new(var: var, val: val)
+    end
+
+    # Assure that param has only one value - a booleanish string -
+    #   returning "TRUE" or "FALSE" (rather than true/false).
+    # This is needed where the param interacts with user content filters
+    def parse_to_true_false_string(only_yes = false)
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      return "TRUE" if val.match(/^(1|yes|true)$/i)
+      return "FALSE" if val.match(/^(0|no|false)$/i) && !only_yes
       fail BadYesError.new(var: var, val: val) if only_yes
       fail BadBooleanError.new(var: var, val: val)
     end
@@ -52,8 +69,7 @@ module PatternSearch
           Name.safe_find(val) ||
             fail(BadNameError.new(var: var, val: val))
         else
-          Name.find_by_text_name(val) ||
-          Name.find_by_search_name(val) ||
+          Name.find_by_text_name(val) || Name.find_by_search_name(val) ||
             fail(BadNameError.new(var: var, val: val))
         end
       end.map(&:id)
@@ -107,7 +123,7 @@ module PatternSearch
             fail(BadUserError.new(var: var, val: val))
         else
           User.find_by_login(val) ||
-          User.find_by_name(val)  ||
+            User.find_by_name(val)  ||
             fail(BadUserError.new(var: var, val: val))
         end
       end.map(&:id)
@@ -116,7 +132,7 @@ module PatternSearch
     def parse_string
       fail MissingValueError.new(var: var) if vals.empty?
       fail TooManyValuesError.new(var: var) if vals.length > 1
-      return vals.first
+      vals.first
     end
 
     def parse_float(min, max)
