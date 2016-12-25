@@ -51,13 +51,30 @@ module PatternSearch
 
     # Assure that param has only one value - a booleanish string -
     #   returning "TRUE" or "FALSE" (rather than true/false).
-    # This is needed where the param interacts with user content filters
+    # This is needed where the param interacts with user content filters and
+    #   and where the relevant sql string is TRUE / FALSE
+    #   e.g., :has_specimen
     def parse_to_true_false_string(only_yes = false)
       fail MissingValueError.new(var: var) if vals.empty?
       fail TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       return "TRUE" if val.match(/^(1|yes|true)$/i)
       return "FALSE" if val.match(/^(0|no|false)$/i) && !only_yes
+      fail BadYesError.new(var: var, val: val) if only_yes
+      fail BadBooleanError.new(var: var, val: val)
+    end
+
+    # Assure that param has only one value - a booleanish string -
+    #   returning "NULL" or "NOT NULL" (rather than true/false).
+    # This is needed where the param interacts with user content filters and
+    #   and where the relevant sql string is NULL / NOT NULL
+    #   e.g., :has_images
+    def parse_to_null_not_null_string(only_yes = false)
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      return "NOT NULL" if val.match(/^(1|yes|true)$/i)
+      return "NULL" if val.match(/^(0|no|false)$/i) && !only_yes
       fail BadYesError.new(var: var, val: val) if only_yes
       fail BadBooleanError.new(var: var, val: val)
     end
