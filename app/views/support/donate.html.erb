@@ -6,15 +6,15 @@
   ]
   if is_in_admin_mode?
     tabs += [
-	    link_to(:create_donation_tab.t, action: :create_donation),
-	    link_to(:review_donations_tab.t, action: :review_donations)
+            link_to(:create_donation_tab.t, action: :create_donation),
+            link_to(:review_donations_tab.t, action: :review_donations)
     ]
   end
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%
-  javascript_include 'donate'
+  javascript_include "donate"
 %>
 
 <div class="max-width-text">
@@ -24,42 +24,42 @@
   <div id="main_container" class="container-fluid">
     <%= form_tag(action: :confirm) do %>
       <p>
-	<div class="row">
-	  <% for a in [25.00, 50.00, 100.00, 200.00] %>
+        <div class="row donation-amount">
+          <% for a in [25.00, 50.00, 100.00, 200.00] %>
             <div class="col-xs-3">
-              <%= radio_button("donation", "amount", a,
-		  :onchange => "enableOther()") + " $#{a.to_i}" %>
-	    </div>
-	  <% end %>
-	</div>
+              <%= radio_button(:donation, :amount, a) %>
+              $<%= a.to_i %>
+            </div>
+          <% end %>
+        </div>
       </p>
       <p>
-	<div class="row col-xs-12">
-	  <%= radio_button("donation", "amount", "other",
-              :onchange => "enableOther()")%>
-	  <%= :donate_other.t %>: $
-	  <%= text_field("donation", "other_amount", :size => 7)%>
-	  <br/><br/>
-	</div>
+        <div class="row col-xs-12">
+          <%= radio_button(:donation, :amount, "other") %>
+          <%= :donate_other.t %>:
+          $<%= text_field(:donation, :other_amount, size: 7) %>
+          <br/><br/>
+        </div>
       </p>
       <p>
-	<div class="row col-xs-12">
-	  <%= :donate_who.t + ": " %>
-	  <%= text_field('donation', 'who', :size => 30) %>
-	</div>
+        <div class="row col-xs-12">
+          <%= :donate_who.t %>:
+          <%= text_field(:donation, :who, size: 30) %>
+        </div>
       </p>
       <p>
-	<div class="row col-xs-12">
-	  <%= check_box('donation', 'anonymous') %>
-	  <%= :donate_anonymous.t %>
-	  <br/><br/>
-	</div>
+        <div class="row col-xs-12">
+          <%= check_box(:donation, :anonymous) %>
+          <%= :donate_anonymous.t %>
+          <br/><br/>
+        </div>
       </p>
       <p>
-	<div class="row col-xs-12">
-	  <%= :donate_email.t + ": " %><%= text_field('donation', 'email', :size => 30) %>
-	  <br/><br/>
-	</div>
+        <div class="row col-xs-12">
+          <%= :donate_email.t %>:
+          <%= text_field(:donation, :email, size: 30) %>
+          <br/><br/>
+        </div>
       </p>
       <%= submit_tag(:donate_confirm.t) %>
       <br/><br/>
@@ -67,3 +67,13 @@
   </div>
   <%= :donate_fine_print.tp %>
 </div>
+
+<% inject_javascript_at_end %(
+  var other = $("#donation_other_amount").attr("disabled", "disabled");
+  $(".donation-amount input").change(function () {
+    other.attr("disabled", "disabled");
+  });
+  $("#donation_amount_other").change(function () {
+    other.attr("disabled", null);
+  });
+) %>
