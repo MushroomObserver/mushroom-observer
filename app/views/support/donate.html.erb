@@ -11,9 +11,7 @@
     ]
   end
   @tabsets = { right: draw_tab_set(tabs) }
-%>
 
-<%
   javascript_include "donate"
 %>
 
@@ -24,7 +22,7 @@
   <div id="main_container" class="container-fluid">
     <%= form_tag(action: :confirm) do %>
       <p>
-        <div class="row donation-amount">
+        <div class="row">
           <% for a in [25.00, 50.00, 100.00, 200.00] %>
             <div class="col-xs-3">
               <%= radio_button(:donation, :amount, a) %>
@@ -67,13 +65,3 @@
   </div>
   <%= :donate_fine_print.tp %>
 </div>
-
-<% inject_javascript_at_end %(
-  var other = $("#donation_other_amount").attr("disabled", "disabled");
-  $(".donation-amount input").change(function () {
-    other.attr("disabled", "disabled");
-  });
-  $("#donation_amount_other").change(function () {
-    other.attr("disabled", null);
-  });
-) %>

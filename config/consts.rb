@@ -179,6 +179,7 @@ MushroomObserver::Application.configure do
     config.assets.precompile += %w(
       api_key.js
       date_select.js
+      donate.js
       edit_location.js
       image_slider.js
       multi_image_upload.js
