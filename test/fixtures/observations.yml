@@ -264,4 +264,7 @@ vouchered_imged_obs:
   images: query_first_image
   thumb_image: query_first_image
 
-
+updated_2013_obs:
+  <<: *DEFAULTS
+  when: 2013-09-08
+  updated_at: 2013-09-08 17:21:00
