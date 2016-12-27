@@ -2170,6 +2170,7 @@
   donate_tab: Donate
   donate_other: Other Amount
   donate_anonymous: Anonymous donation
+  donate_recurring: Monthly recurring donation
   donate_who: Name for Donors Page
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
@@ -2185,7 +2186,8 @@
   confirm_title: Donation Confirmation
   confirm_amount: Amount
   confirm_text: Thank you for offering to make the following donation.  To complete this transaction using PayPal, click the button below.
-  confirm_positive_integer_error: Other amount must be a positive integer
+  confirm_positive_number_error: Other Amount must be a number greater than zero
+  confirm_recurring: Recurring monthly
 
   # support/governance
   governance_title: Governance of the Mushroom Observer

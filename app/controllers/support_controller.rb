@@ -7,7 +7,7 @@ class SupportController < ApplicationController
     store_location
     @donation = Donation.new
     @donation.user = @user
-    @donation.amount = 100.00
+    @donation.amount = 100
     return unless @user
     @donation.who = @user.name
     @donation.email = @user.email
@@ -32,6 +32,7 @@ class SupportController < ApplicationController
     email = params["donation"]["email"]
     Donation.create(amount: params["donation"]["amount"],
                     who: params["donation"]["who"],
+                    recurring: params["donation"]["recurring"],
                     anonymous: params["donation"]["anonymous"],
                     email: email,
                     user: find_user(email),
@@ -40,7 +41,7 @@ class SupportController < ApplicationController
 
   def confirm
     @donation = if request.method == "POST"
-                  confirm_donation(params)
+                  confirm_donation(params["donation"])
                 else
                   Donation.new
                 end
@@ -53,18 +54,19 @@ class SupportController < ApplicationController
   end
 
   def confirm_donation(params)
-    amount = params["donation"]["amount"]
-    amount = params["donation"]["other_amount"] if amount == "other"
-    return unless valid_amount?(amount, :confirm_positive_integer_error.t)
+    amount = params["amount"]
+    amount = params["other_amount"] if amount == "other"
+    return unless valid_amount?(amount, :confirm_positive_number_error.t)
     Donation.create(amount: amount,
-                    who: params["donation"]["who"],
-                    anonymous: params["donation"]["anonymous"],
-                    email: params["donation"]["email"],
+                    who: params["who"],
+                    recurring: params["recurring"],
+                    anonymous: params["anonymous"],
+                    email: params["email"],
                     reviewed: false)
   end
 
   def valid_amount?(amount, error)
-    if amount.to_s != amount.to_i.to_s || amount.to_i <= 0
+    if amount.to_f <= 0
       flash_error(error)
       redirect_to(action: "donate")
       return false

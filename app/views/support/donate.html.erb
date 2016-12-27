@@ -36,6 +36,12 @@
           <%= radio_button(:donation, :amount, "other") %>
           <%= :donate_other.t %>:
           $<%= text_field(:donation, :other_amount, size: 7) %>
+        </div>
+      </p>
+      <p>
+        <div class="row col-xs-12">
+          <%= check_box(:donation, :recurring) %>
+          <%= :donate_recurring.t %>
           <br/><br/>
         </div>
       </p>
