@@ -4,8 +4,8 @@ require "capybara_helper"
 # Test user filters
 class FilterTest < IntegrationTestCase
   def test_user_content_filter
-    # :has_images filter
-    # Prove that :has_images filter excludes imageless Observations
+    ### :has_images filter
+    ### Prove that :has_images filter excludes imageless Observations
     # This user filters out imageless Observations
     user = users(:ignore_imageless_user)
     obs = observations(:imageless_unvouchered_obs)
@@ -75,30 +75,31 @@ class FilterTest < IntegrationTestCase
 
     ############################################################################
     # has_specimen filter
-    # First test additional parts of Preferences
+
+    # We just did a completely unfiltered search
+    # With :has_specimen off, search results should include unvouchered obs
     obs = observations(:imged_unvouchered_obs)
-    # Last search should contain obs (which lacks a specimen)
     results.assert_text(obs.id.to_s)
 
-    # Prove that :has_specimen filter excludes voucherless Observations
-    #   First verify UI
+    # Verify Prefences UI
     click_on("Preferences", match: :first)
-    #     :has_images should still be off
+    #   :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images_checkbox]")
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
-    #     :has_specimen should be off (It was never turned on).
+    #   :has_specimen should be off (It was never turned on).
     has_specimen_checkbox = find_field("user[has_specimen_checkbox]")
     refute(has_specimen_checkbox.checked?,
            "'#{:prefs_obs_filters_has_specimen.t}' checkbox should be unchecked.")
 
-    # Turn on :has_specimen
+    #   Turn on :has_specimen
     page.check("user[has_specimen_checkbox]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     user.reload
     assert_equal("TRUE", user.content_filter[:has_specimen])
 
-    # And repeat the search
+    # Prove that :has_specimen filter excludes voucherless Observations
+    # Repeat the search
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
 
