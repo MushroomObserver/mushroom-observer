@@ -55,11 +55,21 @@ class SupportController < ApplicationController
   def confirm_donation(params)
     amount = params["donation"]["amount"]
     amount = params["donation"]["other_amount"] if amount == "other"
+    return unless valid_amount?(amount, :confirm_positive_integer_error.l)
     Donation.create(amount: amount,
                     who: params["donation"]["who"],
                     anonymous: params["donation"]["anonymous"],
                     email: params["donation"]["email"],
                     reviewed: false)
+  end
+
+  def valid_amount?(amount, error)
+    if amount.to_s != amount.to_i.to_s || amount.to_i <= 0
+      flash_error(error)
+      redirect_to(action: "donate")
+      return false
+    end
+    true
   end
 
   def review_donations

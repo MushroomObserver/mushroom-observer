@@ -1,9 +1,8 @@
 $(window).load(function () {
-  var other = $("#donation_other_amount").attr("disabled", "disabled");
-  $("[name='donation[amount]'").change(function () {
-    other.attr("disabled", "disabled");
+  $("#donation_other_amount").click(function () {
+    $("#donation_amount_other")[0].checked = true;
   });
-  $("#donation_amount_other").change(function () {
-    other.attr("disabled", null);
+  $("#donation_other_amount").keyup(function () {
+    this.value = this.value.replace(/[^0-9]/g,'');
   });
 });

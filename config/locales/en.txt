@@ -2185,6 +2185,7 @@
   confirm_title: Donation Confirmation
   confirm_amount: Amount
   confirm_text: Thank you for offering to make the following donation.  To complete this transaction using PayPal, click the button below.
+  confirm_positive_integer_error: Other amount must be a positive integer
 
   # support/governance
   governance_title: Governance of the Mushroom Observer
