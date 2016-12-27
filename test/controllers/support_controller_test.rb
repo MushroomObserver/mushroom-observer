@@ -62,6 +62,14 @@ class SupportControllerTest < FunctionalTestCase
     confirm_post("other", 30)
   end
 
+  def test_confirm_bad_other_amount
+    amount = 0
+    params = donation_params(amount, rolf, false)
+    params[:donation][:other_amount] = amount
+    post(:confirm, params)
+    assert_flash(:confirm_positive_integer_error.t)
+  end
+
   def test_create_donation
     get(:create_donation)
     assert_response(:redirect)

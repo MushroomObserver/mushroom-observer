@@ -14,7 +14,7 @@ class SupportController < ApplicationController
   end
 
   def create_donation
-    return unless check_donate_admin(:create_donation_not_allowed.l)
+    return unless check_donate_admin(:create_donation_not_allowed.t)
     @donation = if request.method == "POST"
                   post_donation(params)
                 else
@@ -55,7 +55,7 @@ class SupportController < ApplicationController
   def confirm_donation(params)
     amount = params["donation"]["amount"]
     amount = params["donation"]["other_amount"] if amount == "other"
-    return unless valid_amount?(amount, :confirm_positive_integer_error.l)
+    return unless valid_amount?(amount, :confirm_positive_integer_error.t)
     Donation.create(amount: amount,
                     who: params["donation"]["who"],
                     anonymous: params["donation"]["anonymous"],
@@ -73,7 +73,7 @@ class SupportController < ApplicationController
   end
 
   def review_donations
-    return unless check_donate_admin(:review_donations_not_allowed.l)
+    return unless check_donate_admin(:review_donations_not_allowed.t)
     update_donations(params[:reviewed]) if request.method == "POST"
     @donations = Donation.all.order("created_at DESC")
     @reviewed = {}
