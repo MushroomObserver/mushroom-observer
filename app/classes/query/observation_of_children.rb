@@ -19,4 +19,16 @@ class Query::ObservationOfChildren < Query::ObservationBase
   def default_order
     "name"
   end
+
+  def coerce_into_image_query
+    Query.lookup(:Image, :with_observations_of_children, params)
+  end
+
+  def coerce_into_location_query
+    Query.lookup(:Location, :with_observations_of_children, params)
+  end
+
+  def coerce_into_name_query
+    Query.lookup(:Name, :with_observations_of_children, params)
+  end
 end

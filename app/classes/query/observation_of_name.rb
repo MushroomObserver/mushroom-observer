@@ -21,4 +21,19 @@ class Query::ObservationOfName < Query::ObservationBase
   def add_join_to_observations(table)
     add_join(table)
   end
+
+  def coerce_into_image_query
+    Query.lookup(:Image, :with_observations_of_name, params)
+  end
+
+  def coerce_into_location_query
+    Query.lookup(:Location, :with_observations_of_name, params)
+  end
+
+  def coerce_into_name_query
+    Query.lookup(:Name, :in_set, params[:name])
+    # TODO: -- need 'synonyms' flavor
+    # params[:synonyms] == :all / :no / :exclusive
+    # params[:misspellings] == :either / :no / :only
+  end
 end

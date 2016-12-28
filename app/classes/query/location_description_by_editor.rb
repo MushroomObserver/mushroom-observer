@@ -12,4 +12,8 @@ class Query::LocationDescriptionByEditor < Query::LocationDescriptionBase
     self.where << "location_descriptions_editors.user_id = '#{user.id}'"
     super
   end
+
+  def coerce_into_location_query
+    Query.lookup(:Location, :with_descriptions_by_editor, params)
+  end
 end

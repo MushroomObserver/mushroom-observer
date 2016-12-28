@@ -11,4 +11,8 @@ class Query::LocationDescriptionInSet < Query::LocationDescriptionBase
     initialize_in_set_flavor("location_descriptions")
     super
   end
+
+  def coerce_into_location_query
+    Query.lookup(:Location, :with_descriptions_in_set, params)
+  end
 end

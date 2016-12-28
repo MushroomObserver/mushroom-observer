@@ -10,4 +10,8 @@ class Query::LocationWithObservations < Query::LocationBase
     initialize_observation_filters
     super
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :all, params)
+  end
 end

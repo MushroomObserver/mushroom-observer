@@ -14,4 +14,8 @@ class Query::LocationWithDescriptionsInSet < Query::LocationBase
     add_join(:location_descriptions)
     super
   end
+
+  def coerce_into_location_description_query
+    Query.lookup(:LocationDescription, :in_set, params)
+  end
 end

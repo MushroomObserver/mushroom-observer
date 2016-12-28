@@ -12,4 +12,8 @@ class Query::LocationDescriptionByAuthor < Query::LocationDescriptionBase
     self.where << "location_descriptions_authors.user_id = '#{user.id}'"
     super
   end
+
+  def coerce_into_location_query
+    Query.lookup(:Location, :with_descriptions_by_author, params)
+  end
 end

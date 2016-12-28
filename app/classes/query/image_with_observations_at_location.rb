@@ -20,4 +20,8 @@ class Query::ImageWithObservationsAtLocation < Query::ImageBase
   def default_order
     "name"
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :at_location, params)
+  end
 end

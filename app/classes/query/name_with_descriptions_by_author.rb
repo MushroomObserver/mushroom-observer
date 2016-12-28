@@ -14,4 +14,8 @@ class Query::NameWithDescriptionsByAuthor < Query::NameBase
     self.where << "#{glue_table}.user_id = '#{user.id}'"
     super
   end
+
+  def coerce_into_name_description_query
+    Query.lookup(:NameDescription, :by_author, params)
+  end
 end

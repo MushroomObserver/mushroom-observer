@@ -12,4 +12,8 @@ class Query::NameDescriptionByEditor < Query::NameDescriptionBase
     self.where << "name_descriptions_editors.user_id = '#{user.id}'"
     super
   end
+
+  def coerce_into_name_query
+    Query.lookup(:Name, :with_descriptions_by_editor, params)
+  end
 end

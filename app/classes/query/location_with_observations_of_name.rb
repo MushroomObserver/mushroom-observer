@@ -31,4 +31,8 @@ class Query::LocationWithObservationsOfName < Query::LocationBase
   def add_join_to_observations(table)
     add_join(:observations, table)
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :of_name, params)
+  end
 end

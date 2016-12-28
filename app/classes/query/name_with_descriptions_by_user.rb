@@ -13,4 +13,8 @@ class Query::NameWithDescriptionsByUser < Query::NameBase
     self.where << "#{desc_table}.user_id = '#{user.id}'"
     super
   end
+
+  def coerce_into_name_description_query
+    Query.lookup(:NameDescription, :by_user, params)
+  end
 end

@@ -34,4 +34,8 @@ class Query::ImageWithObservationsOfName < Query::ImageBase
   def default_order
     "name"
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :of_name, params)
+  end
 end

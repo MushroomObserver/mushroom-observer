@@ -22,4 +22,8 @@ class Query::ImageWithObservationsOfChildren < Query::ImageBase
   def default_order
     "name"
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :of_children, params)
+  end
 end

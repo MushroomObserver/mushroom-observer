@@ -18,4 +18,8 @@ class Query::NameWithObservationsInSet < Query::NameBase
     initialize_observation_filters
     super
   end
+
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :in_set, params)
+  end
 end
