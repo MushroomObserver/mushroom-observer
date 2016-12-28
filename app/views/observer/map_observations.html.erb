@@ -1,10 +1,13 @@
 <%
-  tabs = [
-    link_with_query(:show_objects.t(type: :observation),
-                    controller: :observer, action: :index_observation),
-    link_with_query(:show_objects.t(type: :location),
-                    controller: :location, action: :index_location)
-  ]
+  tabs = []
+  if @query && @query.is_coercable?(:Observation)
+    tabs << link_with_query(:show_objects.t(type: :observation),
+                            controller: :observer, action: :index_observation)
+  end
+  if @query && @query.is_coercable?(:Location)
+    tabs << link_with_query(:show_objects.t(type: :location),
+                            controller: :location, action: :index_location)
+  end
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

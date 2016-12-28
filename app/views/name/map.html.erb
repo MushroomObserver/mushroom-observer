@@ -3,20 +3,25 @@
 
   tabs = [
     link_with_query(:name_map_about.t(name: @name.display_name),
-                    @name.show_link_args),
-    link_with_query(:show_objects.t(type: :location),
-                    controller: :location, action: :index_location),
-    link_with_query(:show_objects.t(type: :observation),
-                    controller: :observer, action: :index_observation)
+                    @name.show_link_args)
   ]
+  if @query && @query.is_coercable?(:Location)
+    tabs << link_with_query(:show_objects.t(type: :location),
+                            controller: :location, action: :index_location)
+  end
+  if @query && @query.is_coercable?(:Observation)
+    tabs << link_with_query(:show_objects.t(type: :observation),
+                            controller: :observer, action: :index_observation)
+  end
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-
-<%= if @observations.any?
-      gmap = make_map(@observations, query_params: query_params(@query), zoom: 2)
-      finish_map(gmap)
-      gmap.div(width:"100%", height: 550).html_safe
-    else
-      :name_map_no_maps.tp(:name => @name.display_name)
-    end %>
+<%=
+  if @observations.any?
+    gmap = make_map(@observations, query_params: query_params(@query), zoom: 2)
+    finish_map(gmap)
+    gmap.div(width:"100%", height: 550).html_safe
+  else
+    :name_map_no_maps.tp(:name => @name.display_name)
+  end
+%>
