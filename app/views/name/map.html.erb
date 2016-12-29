@@ -3,16 +3,10 @@
 
   tabs = [
     link_with_query(:name_map_about.t(name: @name.display_name),
-                    @name.show_link_args)
+                    @name.show_link_args),
+    link_to_coerced_query(@query, Location),
+    link_to_coerced_query(@query, Observation)
   ]
-  if @query && @query.is_coercable?(:Location)
-    tabs << link_with_query(:show_objects.t(type: :location),
-                            controller: :location, action: :index_location)
-  end
-  if @query && @query.is_coercable?(:Observation)
-    tabs << link_with_query(:show_objects.t(type: :observation),
-                            controller: :observer, action: :index_observation)
-  end
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 

@@ -724,29 +724,9 @@ class ObserverController < ApplicationController
                             query)]
     @links << link
 
-    # Add "show location" link if this query can be coerced into a
-    # location query.
-    if query.is_coercable?(:Location)
-      @links << [:show_objects.t(type: :location),
-                 add_query_param({ controller: "location",
-                                   action: "index_location" },
-                                 query)]
-    end
-
-    # Add "show names" link if this query can be coerced into a name query.
-    if query.is_coercable?(:Name)
-      @links << [:show_objects.t(type: :name),
-                 add_query_param({ controller: "name", action: "index_name" },
-                                 query)]
-    end
-
-    # Add "show images" link if this query can be coerced into an image query.
-    if query.is_coercable?(:Image)
-      @links << [:show_objects.t(type: :image),
-                 add_query_param({ controller: "image",
-                                   action: "index_image" },
-                                 query)]
-    end
+    @links << coerced_query_link(query, Location)
+    @links << coerced_query_link(query, Name)
+    @links << coerced_query_link(query, Image)
 
     @links << [:list_observations_add_to_list.t,
                add_query_param({ controller: "species_list",
