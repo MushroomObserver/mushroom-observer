@@ -3,7 +3,8 @@ class Query::ImageWithObservationsForProject < Query::ImageBase
 
   def parameter_declarations
     super.merge(
-      project: Project
+      project: Project,
+      old_by?: :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -22,6 +23,6 @@ class Query::ImageWithObservationsForProject < Query::ImageBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :for_project, params)
+    Query.lookup(:Observation, :for_project, params_with_old_by_restored)
   end
 end

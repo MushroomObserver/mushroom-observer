@@ -17,14 +17,21 @@ class Query::ObservationAtLocation < Query::ObservationBase
   end
 
   def coerce_into_image_query
-    Query.lookup(:Image, :with_observations_at_location, params)
+    do_coerce(:Image)
   end
 
   def coerce_into_location_query
+    # This should result in a query with exactly one result, so the resulting
+    # index should immediately display the actual location instead of an index.
+    # Thus title and saving the old sort order are unimportant.
     Query.lookup(:Location, :in_set, ids: params[:location])
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_observations_at_location, params)
+    do_coerce(:Name)
+  end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :with_observations_at_location, params_plus_old_by)
   end
 end

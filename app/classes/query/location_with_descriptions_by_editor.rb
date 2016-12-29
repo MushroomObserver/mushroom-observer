@@ -1,7 +1,8 @@
 class Query::LocationWithDescriptionsByEditor < Query::LocationBase
   def parameter_declarations
     super.merge(
-      user: User
+      user:    User,
+      old_by?: :string
     )
   end
 
@@ -16,6 +17,6 @@ class Query::LocationWithDescriptionsByEditor < Query::LocationBase
   end
 
   def coerce_into_location_description_query
-    Query.lookup(:LocationDescription, :by_editor, params)
+    Query.lookup(:LocationDescription, :by_editor, params_with_old_by_restored)
   end
 end

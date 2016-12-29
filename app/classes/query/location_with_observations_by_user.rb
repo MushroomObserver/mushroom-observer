@@ -3,7 +3,8 @@ class Query::LocationWithObservationsByUser < Query::LocationBase
 
   def parameter_declarations
     super.merge(
-      user: User
+      user:    User,
+      old_by?: :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -18,6 +19,6 @@ class Query::LocationWithObservationsByUser < Query::LocationBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :by_user, params)
+    Query.lookup(:Observation, :by_user, params_with_old_by_restored)
   end
 end

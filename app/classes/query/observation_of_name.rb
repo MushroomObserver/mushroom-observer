@@ -2,9 +2,7 @@ class Query::ObservationOfName < Query::ObservationBase
   include Query::Initializers::OfName
 
   def parameter_declarations
-    super.merge(
-      of_name_parameter_declarations
-    )
+    super.merge(of_name_parameter_declarations)
   end
 
   def initialize_flavor
@@ -12,9 +10,6 @@ class Query::ObservationOfName < Query::ObservationBase
     names = get_target_names
     choose_a_title(names)
     add_name_conditions(names)
-    restrict_to_one_project
-    restrict_to_one_species_list
-    restrict_to_one_user
     super
   end
 
@@ -23,17 +18,24 @@ class Query::ObservationOfName < Query::ObservationBase
   end
 
   def coerce_into_image_query
-    Query.lookup(:Image, :with_observations_of_name, params)
+    do_coerce(:Image)
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_observations_of_name, params)
+    do_coerce(:Location)
   end
 
-  def coerce_into_name_query
-    Query.lookup(:Name, :in_set, params[:name])
-    # TODO: -- need 'synonyms' flavor
-    # params[:synonyms] == :all / :no / :exclusive
-    # params[:misspellings] == :either / :no / :only
+  # TODO -- need 'synonyms' flavor
+  # params[:synonyms] == :all / :no / :exclusive
+  # params[:misspellings] == :either / :no / :only
+  # def coerce_into_name_query
+  #   # This should result in a query with exactly one result, so the resulting
+  #   # index should immediately display the actual location instead of an index.
+  #   # Thus title and saving the old sort order are unimportant.
+  #   Query.lookup(:Name, :in_set, ids: params[:name])
+  # end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :with_observations_of_name, params_plus_old_by)
   end
 end

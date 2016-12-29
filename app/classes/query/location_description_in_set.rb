@@ -3,7 +3,8 @@ class Query::LocationDescriptionInSet < Query::LocationDescriptionBase
 
   def parameter_declarations
     super.merge(
-      ids: [LocationDescription]
+      ids:     [LocationDescription],
+      old_by?: :string
     )
   end
 
@@ -13,6 +14,6 @@ class Query::LocationDescriptionInSet < Query::LocationDescriptionBase
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_descriptions_in_set, params)
+    Query.lookup(:Location, :with_descriptions_in_set, params_plus_old_by)
   end
 end

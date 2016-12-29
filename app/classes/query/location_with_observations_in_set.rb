@@ -21,6 +21,6 @@ class Query::LocationWithObservationsInSet < Query::LocationBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :in_set, params)
+    Query.lookup(:Observation, :in_set, params_with_old_by_restored)
   end
 end

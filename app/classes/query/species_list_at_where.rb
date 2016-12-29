@@ -1,8 +1,8 @@
 class Query::SpeciesListAtWhere < Query::SpeciesListBase
   def parameter_declarations
     super.merge(
-      location: :string,
-      user_where: :string  # apparently used only by observer controller(?)
+      location:    :string,
+      user_where?: :string   # used to pass parameter to create_location
     )
   end
 

@@ -7,14 +7,18 @@ class Query::ObservationAll < Query::ObservationBase
   end
 
   def coerce_into_image_query
-    Query.lookup(:Image, :with_observations, params)
+    do_coerce(:Image)
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_observations, params)
+    do_coerce(:Location)
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_observations, params)
+    do_coerce(:Name)
+  end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :with_observations, params_plus_old_by)
   end
 end

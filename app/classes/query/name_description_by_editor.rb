@@ -1,7 +1,8 @@
 class Query::NameDescriptionByEditor < Query::NameDescriptionBase
   def parameter_declarations
     super.merge(
-      user: User
+      user:    User,
+      old_by?: :string
     )
   end
 
@@ -14,6 +15,6 @@ class Query::NameDescriptionByEditor < Query::NameDescriptionBase
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_descriptions_by_editor, params)
+    Query.lookup(:Name, :with_descriptions_by_editor, params_plus_old_by)
   end
 end

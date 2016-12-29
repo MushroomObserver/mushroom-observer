@@ -20,14 +20,19 @@ class Query::ObservationPatternSearch < Query::ObservationBase
   end
 
   def coerce_into_image_query
-    Query.lookup(:Image, :with_observations_in_set, ids: result_ids)
+    do_coerce(:Image)
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_observations_in_set, ids: result_ids)
+    do_coerce(:Location)
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_observations_in_set, ids: result_ids)
+    do_coerce(:Name)
+  end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :with_observations_in_set,
+                 add_old_title(add_old_by(ids: result_ids)))
   end
 end

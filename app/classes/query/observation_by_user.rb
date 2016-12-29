@@ -17,14 +17,18 @@ class Query::ObservationByUser < Query::ObservationBase
   end
 
   def coerce_into_image_query
-    Query.lookup(:Image, :with_observations_by_user, params)
+    do_coerce(:Image)
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_observations_by_user, params)
+    do_coerce(:Location)
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_observations_by_user, params)
+    do_coerce(:Name)
+  end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :with_observations_by_user, params_plus_old_by)
   end
 end

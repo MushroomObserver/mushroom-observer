@@ -4,8 +4,9 @@ class Query::ImageWithObservationsOfChildren < Query::ImageBase
 
   def parameter_declarations
     super.merge(
-      name: Name,
-      all?: :boolean
+      name:    Name,
+      all?:    :boolean,
+      old_by?: :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -24,6 +25,6 @@ class Query::ImageWithObservationsOfChildren < Query::ImageBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :of_children, params)
+    Query.lookup(:Observation, :of_children, params_with_old_by_restored)
   end
 end

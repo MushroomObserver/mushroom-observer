@@ -1,7 +1,8 @@
 class Query::NameWithDescriptionsByAuthor < Query::NameBase
   def parameter_declarations
     super.merge(
-      user: User
+      user:    User,
+      old_by?: :string
     )
   end
 
@@ -16,6 +17,6 @@ class Query::NameWithDescriptionsByAuthor < Query::NameBase
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :by_author, params)
+    Query.lookup(:NameDescription, :by_author, params_with_old_by_restored)
   end
 end

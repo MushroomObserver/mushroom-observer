@@ -3,7 +3,8 @@ class Query::NameDescriptionInSet < Query::NameDescriptionBase
 
   def parameter_declarations
     super.merge(
-      ids: [NameDescription]
+      ids:     [NameDescription],
+      old_by?: :string
     )
   end
 
@@ -13,6 +14,6 @@ class Query::NameDescriptionInSet < Query::NameDescriptionBase
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_descriptions_in_set, params)
+    Query.lookup(:Name, :with_descriptions_in_set, params_plus_old_by)
   end
 end

@@ -27,7 +27,7 @@ class Query::RssLogAll < Query::RssLogBase
   end
 
   def params_minus_type
-    return params if !params.has_key(:type)
+    return params unless params.has_key?(:type)
     params2 = params.dup
     params.delete(:type)
     params2

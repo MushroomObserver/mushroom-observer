@@ -3,7 +3,8 @@ class Query::NameWithObservationsInSpeciesList < Query::NameBase
 
   def parameter_declarations
     super.merge(
-      species_list: SpeciesList
+      species_list: SpeciesList,
+      old_by?:      :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -17,6 +18,6 @@ class Query::NameWithObservationsInSpeciesList < Query::NameBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :in_species_list, params)
+    Query.lookup(:Observation, :in_species_list, params_with_old_by_restored)
   end
 end

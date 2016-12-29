@@ -597,13 +597,6 @@ class ObserverController < ApplicationController
       nonconsensus: :no,
       by: :created_at
     }
-    args[:user] = params[:user_id] unless params[:user_id].blank?
-    args[:project] = params[:project_id] unless params[:project_id].blank?
-
-    unless params[:species_list_id].blank?
-      args[:species_list] = params[:species_list_id]
-    end
-
     query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)
   end

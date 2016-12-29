@@ -1,6 +1,4 @@
 class Query::NameWithDescriptionsInSet < Query::NameBase
-  include Query::Initializers::InSet
-
   def parameter_declarations
     super.merge(
       ids:        [NameDescription],
@@ -10,12 +8,15 @@ class Query::NameWithDescriptionsInSet < Query::NameBase
   end
 
   def initialize_flavor
-    initialize_in_set_flavor("name_descriptions")
+    title_args[:descriptions] = params[:old_title] ||
+                                :query_title_in_set.t(type: :description)
+    set = clean_id_set(params[:ids])
+    self.where << "name_descriptions.id IN (#{set})"
     add_join(:name_descriptions)
     super
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :in_set, params)
+    Query.lookup(:NameDescription, :in_set, params_with_old_by_restored)
   end
 end

@@ -1,6 +1,4 @@
 class Query::LocationWithDescriptionsInSet < Query::LocationBase
-  include Query::Initializers::InSet
-
   def parameter_declarations
     super.merge(
       ids:        [LocationDescription],
@@ -10,12 +8,15 @@ class Query::LocationWithDescriptionsInSet < Query::LocationBase
   end
 
   def initialize_flavor
-    initialize_in_set_flavor("location_descriptions")
+    title_args[:descriptions] = params[:old_title] ||
+                                :query_title_in_set.t(type: :description)
+    set = clean_id_set(params[:ids])
+    self.where << "location_descriptions.id IN (#{set})"
     add_join(:location_descriptions)
     super
   end
 
   def coerce_into_location_description_query
-    Query.lookup(:LocationDescription, :in_set, params)
+    Query.lookup(:LocationDescription, :in_set, params_with_old_by_restored)
   end
 end

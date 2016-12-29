@@ -3,7 +3,8 @@ class Query::NameWithObservationsAtLocation < Query::NameBase
 
   def parameter_declarations
     super.merge(
-      location: Location
+      location: Location,
+      old_by?:  :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -18,6 +19,6 @@ class Query::NameWithObservationsAtLocation < Query::NameBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :at_location, params)
+    Query.lookup(:Observation, :at_location, params_with_old_by_restored)
   end
 end

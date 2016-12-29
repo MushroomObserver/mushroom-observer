@@ -3,8 +3,9 @@ class Query::ImageWithObservationsAtWhere < Query::ImageBase
 
   def parameter_declarations
     super.merge(
-      location:   :string,
-      user_where: :string  # apparently used only by observer controller(?)
+      location:    :string,
+      user_where?: :string,  # used to pass parameter to create_location
+      old_by?:     :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -23,6 +24,6 @@ class Query::ImageWithObservationsAtWhere < Query::ImageBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :at_where, params)
+    Query.lookup(:Observation, :at_where, params_with_old_by_restored)
   end
 end

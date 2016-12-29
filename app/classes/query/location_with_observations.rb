@@ -2,7 +2,9 @@ class Query::LocationWithObservations < Query::LocationBase
   include Query::Initializers::ObservationFilters
 
   def parameter_declarations
-    super.merge(observation_filter_parameter_declarations)
+    super.merge(
+      old_by?: :string
+    ).merge(observation_filter_parameter_declarations)
   end
 
   def initialize_flavor
@@ -12,6 +14,6 @@ class Query::LocationWithObservations < Query::LocationBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :all, params)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end

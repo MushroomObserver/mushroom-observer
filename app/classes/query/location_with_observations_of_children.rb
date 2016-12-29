@@ -4,8 +4,9 @@ class Query::LocationWithObservationsOfChildren < Query::LocationBase
 
   def parameter_declarations
     super.merge(
-      name: Name,
-      all?: :boolean
+      name:    Name,
+      all?:    :boolean,
+      old_by?: :string
     ).merge(observation_filter_parameter_declarations)
   end
 
@@ -20,6 +21,6 @@ class Query::LocationWithObservationsOfChildren < Query::LocationBase
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :of_children, params)
+    Query.lookup(:Observation, :of_children, params_with_old_by_restored)
   end
 end
