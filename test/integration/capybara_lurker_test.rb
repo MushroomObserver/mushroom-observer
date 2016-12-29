@@ -36,9 +36,9 @@ class CapybarLurkerTest < IntegrationTestCase
       first(:xpath, observation_image_xpath).click
       assert_match(%r{#{:app_title.l }: Image}, page.title, "Wrong page")
     end # back at Observation
+    assert_match(%r{#{:app_title.l }: Observation}, page.title, "Wrong page")
 
     # Go back to observation and click on "About...".
-    assert_match(%r{#{:app_title.l }: Observation}, page.title, "Wrong page")
     click_link("About ")
     assert_match(%r{#{:app_title.l }: Name}, page.title, "Wrong page")
 
@@ -71,10 +71,10 @@ class CapybarLurkerTest < IntegrationTestCase
                  page.title, "Wrong page")
 
     click_on("List Projects")
-    assert_equal("#{:app_title.l }: Project Index", page.title, "Wrong page")
+    assert_equal("#{:app_title.l }: Projects by Title", page.title, "Wrong page")
 
     click_on("Comments")
-    assert_equal("#{:app_title.l }: Comment Index", page.title, "Wrong page")
+    assert_equal("#{:app_title.l }: Comments by Date Created", page.title, "Wrong page")
 
     click_on("Site Stats")
     assert_equal("#{:app_title.l }: Site Statistics", page.title, "Wrong page")
