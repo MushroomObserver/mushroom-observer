@@ -231,12 +231,7 @@ class NameController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.coercable?(:Observation)
-      @links << [:show_objects.t(type: :observation),
-                 add_query_param({
-                                   controller: "observer", action: "index_observation"
-                                 }, query)]
-    end
+    @links << coerced_query_link(query, Observation)
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
@@ -316,10 +311,7 @@ class NameController < ApplicationController
 
     # Add "show names" link if this query can be coerced into an
     # observation query.
-    if query.coercable?(:Name)
-      @links << [:show_objects.t(type: :name),
-                 add_query_param({ action: "index_name" }, query)]
-    end
+    @links << coerced_query_link(query, Name)
 
     show_index_of_objects(query, args)
   end

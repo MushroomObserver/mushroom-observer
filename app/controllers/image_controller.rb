@@ -148,12 +148,7 @@ class ImageController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.coercable?(:Observation)
-      @links << [:show_objects.t(type: :observation),
-                 add_query_param({
-                                   controller: "observer", action: "index_observation"
-                                 }, query)]
-    end
+    @links << coerced_query_link(query, Observation)
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||

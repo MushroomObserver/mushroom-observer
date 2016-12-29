@@ -924,6 +924,19 @@ class ApplicationController < ActionController::Base
     url_for(add_query_param(args))
   end
 
+  def coerced_query_link(query, model)
+    return nil unless query && query.coercable?(model.name.to_sym)
+    link_args = {
+      controller: model.show_controller,
+      action: model.index_action
+    }
+    return [
+      :show_objects.t(type: model.type_tag),
+      add_query_param(link_args, query)
+    ]
+  end
+  helper_method :coerced_query_link
+
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
@@ -1142,7 +1155,7 @@ class ApplicationController < ActionController::Base
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links::
+  # @links:         Extra links to add to right hand tab set.
   # @sorts::
   # @layout::
   # @pages::        Paginator instance.
