@@ -4,4 +4,4 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 mycoportal:
   name:    MycoPortal
-  project: empty_project
+  project: empty_project # mary is only member and admin

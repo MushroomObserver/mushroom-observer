@@ -9,7 +9,7 @@ class ExternalLinks < ActiveRecord::Migration
       t.datetime "created_at"
       t.datetime "updated_at"
       t.integer  "user_id",          limit: 4
-      t.integer  "obseration_id",    limit: 4
+      t.integer  "observation_id",   limit: 4
       t.integer  "external_site_id", limit: 4
       t.string   "url",              limit: 100
     end

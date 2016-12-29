@@ -6,6 +6,6 @@ coprinus_comatus_obs_mycoportal_link:
   user:          mary
   created_at:    2016-12-29 15:21:00
   updated_at:    2016-12-29 15:21:00
-  observation:   coprinus_comatus_obs
+  observation:   coprinus_comatus_obs # owned by rolf
   external_site: mycoportal
-  url:           http://mycoportal.org/portal/collections/individual/index.php?occid=1950183
+  url:           "http://mycoportal.org/portal/collections/individual/index.php?occid=1950183"
