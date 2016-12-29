@@ -148,7 +148,7 @@ class ImageController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Observation)
+    if query.coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
                  add_query_param({
                                    controller: "observer", action: "index_observation"

@@ -41,8 +41,10 @@
 #  3) observations with non-consensus naming that is a synonym of @name
 #
 #    query = Query.lookup(:Observation, :of_name, name: @name)
-#    query = Query.lookup(:Observation, :of_name, name: @name, synonyms: :exclusive)
-#    query = Query.lookup(:Observation, :of_name, name: @name, synonyms: :all, nonconsensus: :exclusive)
+#    query = Query.lookup(:Observation, :of_name,
+#                         name: @name, synonyms: :exclusive)
+#    query = Query.lookup(:Observation, :of_name,
+#                         name: @name, synonyms: :all, nonconsensus: :exclusive)
 #
 #  You may further tweak a query after it's been created:
 #
@@ -156,20 +158,27 @@
 #    outer = find_or_create_query(:Observation)
 #    inner = create_query(:Image, :inside_observation, outer: outer,
 #                         observation: @observation)
-#    for image in inner.results
-#      link_to(image, add_query_param({action: "show_image", id: image.id}, inner))
+#    inner.results each do |image|
+#      link_to(image,
+#        add_query_param({action: :show_image, id: image.id}, inner))
 #    end
 #
 #    # Now show_image can be oblivous:
 #    query = find_or_create_query(:Image)
-#    link_to("Prev", add_query_param({action: "prev_image", id: image.id}, query))
-#    link_to("Next", add_query_param({action: "next_image", id: image.id}, query))
-#    link_to("Back", add_query_param({action: "show_observation", id: image.id, query))
+#    link_to("Prev",
+#      add_query_param({action: :prev_image, id: image.id}, query))
+#    link_to("Next",
+#      add_query_param({action: :next_image, id: image.id}, query))
+#    link_to("Back",
+#      add_query_param({action: :show_observation, id: image.id, query))
 #
 #    # And this is how prev and next work:
 #    query = find_or_create_query(:Image, current: params[:id].to_s)
 #    if new_query = query.next
-#      redirect_to(add_query_param({action: "show_image", id: new_query.current_id}, new_query))
+#      redirect_to(
+#        add_query_param({action: :show_image, id: new_query.current_id},
+#                        new_query)
+#      )
 #    else
 #      flash_error 'No more images!'
 #    end
@@ -219,7 +228,7 @@
 #  serialize::          Returns string which describes the Query completely.
 #  initialized?::       Has this query been initialized?
 #  coerce::             Coerce a query for one model into a query for another.
-#  is_coercable?::      Check if +coerce+ will work (but don't actually do it).
+#  oercable?::          Check if +coerce+ will work (but don't actually do it).
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
@@ -276,22 +285,35 @@
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
-################################################################################
-
 module Query
-  def self.new(model, flavor=:all, params={}, current=nil)
+  def self.new(model, flavor = :all, params = {}, current = nil)
     klass = "Query::#{model}#{flavor.to_s.camelize}".constantize
     query = klass.new
     query.params = params
     query.validate_params
     query.current = current if current
-    return query
+    query
   end
 
   # Delegate all these to Query::Base class.
-  def self.deserialize(*args)     ; Query::Base.deserialize(*args)     ; end
-  def self.safe_find(*args)       ; Query::Base.safe_find(*args)       ; end
-  def self.find(*args)            ; Query::Base.find(*args)            ; end
-  def self.lookup_and_save(*args) ; Query::Base.lookup_and_save(*args) ; end
-  def self.lookup(*args)          ; Query::Base.lookup(*args)          ; end
+
+  def self.deserialize(*args)
+    Query::Base.deserialize(*args)
+  end
+
+  def self.safe_find(*args)
+    Query::Base.safe_find(*args)
+  end
+
+  def self.find(*args)
+    Query::Base.find(*args)
+  end
+
+  def self.lookup_and_save(*args)
+    Query::Base.lookup_and_save(*args)
+  end
+
+  def self.lookup(*args)
+    Query::Base.lookup(*args)
+  end
 end

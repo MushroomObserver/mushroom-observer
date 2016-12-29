@@ -1289,9 +1289,9 @@ class QueryTest < UnitTestCase
     assert_equal({}, q5.params)
   end
 
-  def test_is_coercable
-    assert(Query.lookup(:Observation, :all, by: :id).is_coercable?(:Image))
-    refute(Query.lookup(:Herbarium, :all, by: :id).is_coercable?(:Project))
+  def test_coercable
+    assert(Query.lookup(:Observation, :all, by: :id).coercable?(:Image))
+    refute(Query.lookup(:Herbarium, :all, by: :id).coercable?(:Project))
   end
 
   ##############################################################################

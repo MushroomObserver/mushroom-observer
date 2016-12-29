@@ -129,7 +129,7 @@ class LocationController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Observation)
+    if query.coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
                  add_query_param({ controller: "observer", action: "index_observation" },
                                  query)]
@@ -137,7 +137,7 @@ class LocationController < ApplicationController
 
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
-    if query.is_coercable?(:LocationDescription)
+    if query.coercable?(:LocationDescription)
       @links << [:show_objects.t(type: :description),
                  add_query_param({ action: "index_location_description" }, query)]
     end
@@ -325,7 +325,7 @@ class LocationController < ApplicationController
 
     # Add "show locations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Location)
+    if query.coercable?(:Location)
       @links << [:show_objects.t(type: :location),
                  add_query_param({ action: "index_location" }, query)]
     end
