@@ -70,7 +70,7 @@ class AjaxController < ApplicationController
   end
 
   def session_user!
-    User.current = get_session_user or raise "Must be logged in."
+    User.current = get_session_user || raise("Must be logged in.")
   end
 
   # Used by unit tests.
