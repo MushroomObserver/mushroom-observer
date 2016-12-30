@@ -119,6 +119,8 @@
 #  ==== Content filter options
 #  has_images::         Exclude imageless Observations from search results and
 #                       rss feeds
+#  has_specimen::       Exclude unvouchered Observations (Observations without
+#                       a Specimen) from search results and rss feeds
 #
 #  ==== Email options
 #  Send notifications if...
