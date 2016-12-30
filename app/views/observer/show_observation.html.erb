@@ -5,8 +5,14 @@
 
   javascript_include("vote_popup")
 
-  show_map = @user ? @user.thumbnail_maps : !browser.bot? && !session[:hide_thumbnail_maps]
+  show_map = if @user
+               @user.thumbnail_maps
+             else
+               !browser.bot? && !session[:hide_thumbnail_maps]
+             end
   show_lists = @observation.species_lists.any?
+  show_links = @observation.external_links.any? ||
+               @external_sites_without_links.any?
 %>
 
 <div class="row">
@@ -27,6 +33,9 @@
     </div>
     <% if show_lists %>
       <%= render(partial: "show_lists", locals: {observation: @observation}) %>
+    <% end %>
+    <% if show_links %>
+      <%= render(partial: "show_links", locals: {observation: @observation}) %>
     <% end %>
     <% if show_map %>
       <div class="hidden-xs">

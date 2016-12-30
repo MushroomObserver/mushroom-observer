@@ -1,0 +1,35 @@
+<h4>
+  <%= :EXTERNAL_LINKS.t %>
+</h4>
+<div class="list-group">
+  <div class="list-group-item kill-padding">
+    <table class="table table-responsive" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
+      <% observation.external_links.each do |link| %>
+        <tr>
+          <td style="border-top:0">
+            <%= link_to(link.external_site.name, link.url) %>
+            <% if check_permission(link) %>
+              <span class="hidden" data-role="link-controls">
+                [<%= content_tag(:span, :EDIT.t,
+                                 data: { role: "edit-link", id: link.id }) %> |
+                <%= content_tag(:span, :REMOVE.t,
+                                 data: { role: "remove-link", id: link.id }) %>]
+              </span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      <% @new_sites.each do |site| %>
+        <tr>
+          <td style="border-top:0">
+            <%= site.name %>
+            <span class="hidden" data-role="link-controls">
+              [<%= content_tag(:span, :ADD.t,
+                               data: { role: "add-link", id: link.id }) %>]
+            </span>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>

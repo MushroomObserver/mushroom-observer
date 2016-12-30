@@ -21,4 +21,18 @@ class ExternalSiteTest < UnitTestCase
     site = ExternalSite.create(name: "x" * 1000)
     assert_not_empty(site.errors[:name])
   end
+
+  def test_user_external_sites
+    site = external_sites(:mycoportal)
+    assert_obj_list_equal([], rolf.external_sites)
+    assert_obj_list_equal([], dick.external_sites)
+    assert_obj_list_equal([site], mary.external_sites)
+  end
+
+  def test_member
+    site = external_sites(:mycoportal)
+    assert_false(site.member?(rolf))
+    assert_false(site.member?(dick))
+    assert_true(site.member?(mary))
+  end
 end

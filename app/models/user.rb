@@ -571,6 +571,12 @@ class User < AbstractModel
     )
   end
 
+  # Return an Array of ExternalSite's that this user has permission to add
+  # links for.
+  def external_sites
+    @external_sites ||= ExternalSite.where(project: projects_member)
+  end
+
   def preferred_herbarium_name
     preferred_herbarium.name
   rescue

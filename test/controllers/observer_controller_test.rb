@@ -2537,4 +2537,18 @@ class ObserverControllerTest < FunctionalTestCase
     get :textile
     assert_equal(403, @response.status)
   end
+
+  def test_external_sites_user_can_add_links_to
+    site = external_sites(:mycoportal)
+    do_external_sites_test([], nil, nil)
+    do_external_sites_test([], dick, observations(:minimal_unknown_obs))
+    do_external_sites_test([], mary, observations(:coprinus_comatus_obs))
+    do_external_sites_test([site], mary, observations(:minimal_unknown_obs))
+  end
+
+  def do_external_sites_test(expect, user, obs)
+    @controller.instance_variable_set("@user", user)
+    actual = @controller.external_sites_user_can_add_links_to(obs)
+    assert_equal(expect.map(&:name), actual.map(&:name))
+  end
 end

@@ -16,4 +16,8 @@ class ExternalSite < AbstractModel
 
   validates :project, presence: true
   validates :name,    presence: true, length: { maximum: 100 }
+
+  def member?(user)
+    user.in_group?(project.user_group)
+  end
 end

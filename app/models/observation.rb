@@ -121,6 +121,7 @@ class Observation < AbstractModel
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
+  has_many   :external_links
 
   # Has to go before "has many interests" or interests will be destroyed
   # before it has a chance to notify the interested users of the destruction.

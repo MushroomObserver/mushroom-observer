@@ -875,12 +875,26 @@ class ObserverController < ApplicationController
   # Inputs: params[:id]
   # Outputs:
   #   @observation
-  #   @votes                        (user's vote for each naming.id)
+  #   @canonical_url
+  #   @mappable
+  #   @new_sites
+  #   @votes
   def show_observation # :nologin: :prefetch:
     pass_query_params
     store_location
+    check_if_user_wants_to_make_their_votes_public
+    check_if_user_wants_to_change_thumbnail_size
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless @observation
+    update_view_stats(@observation)
+    @canonical_url = canonical_url(@observation)
+    @mappable      = check_if_query_is_mappable
+    @new_sites     = external_sites_user_can_add_links_to(@observation)
+    @votes         = users_votes(@observation)
+  end
 
-    # Make it really easy for users to elect to go public with their votes.
+  # Make it really easy for users to elect to go public with their votes.
+  def check_if_user_wants_to_make_their_votes_public
     if params[:go_public] == "1"
       @user.votes_anonymous = :no
       @user.save
@@ -890,30 +904,42 @@ class ObserverController < ApplicationController
       @user.save
       flash_notice(:show_votes_gone_private.t)
     end
+  end
 
-    # Make it easy for users to change thumbnail size.
-    unless params[:set_thumbnail_size].blank?
-      set_default_thumbnail_size(params[:set_thumbnail_size])
-    end
+  # Make it easy for users to change thumbnail size.
+  def check_if_user_wants_to_change_thumbnail_size
+    return if params[:set_thumbnail_size].blank?
+    set_default_thumbnail_size(params[:set_thumbnail_size])
+  end
 
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
-    update_view_stats(@observation)
-    @canonical_url = "#{MO.http_domain}/observer/show_observation/#{@observation.id}"
+  # Tell search engines what the "correct" URL is for this page.
+  def canonical_url(obs)
+    "#{MO.http_domain}/observer/show_observation/#{obs.id}"
+  end
 
-    # Decide if the current query can be used to create a map.
+  # Decide if the current query can be used to create a map.
+  def check_if_query_is_mappable
     query = find_query(:Observation)
-    @mappable = query && query.is_coercable?(:Location)
+    query && query.is_coercable?(:Location)
+  end
 
-    # Provide a list of user's votes to view.
-    if @user
-      @votes = {}
-      @observation.namings.each do |naming|
-        vote = naming.votes.find { |x| x.user_id == @user.id }
-        vote ||= Vote.new(value: 0)
-        @votes[naming.id] = vote
-      end
+  # Provide a list of user's votes to view.
+  def users_votes(obs)
+    return {} unless @user
+    votes = {}
+    obs.namings.each do |naming|
+      vote = naming.votes.find { |x| x.user_id == @user.id }
+      vote ||= Vote.new(value: 0)
+      votes[naming.id] = vote
     end
+    votes
+  end
+
+  # Get a list of external_sites which the user has permission to add
+  # external_links to (and which no external_link to exists yet).
+  def external_sites_user_can_add_links_to(obs)
+    return [] unless @user
+    @user.external_sites - obs.external_links.map(&:external_site)
   end
 
   def show_obs
