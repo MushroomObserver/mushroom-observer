@@ -1637,6 +1637,7 @@
   rss_log_title: Activity Log
   rss_by: by [user]
   rss_title: "[:app_title]"
+  rss_filtered_mouseover: Filters - including any Content Filters in your Preferences - have been applied.
   rss_show: "Show:"
   rss_hide: "Hide:"
   rss_all: Everything
