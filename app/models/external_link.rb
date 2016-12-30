@@ -44,4 +44,10 @@ class ExternalLink < AbstractModel
   def site_name
     external_site.name
   end
+
+  def can_edit?(user)
+    return false unless user
+    return true if user.id == observation.user_id
+    external_site.project.is_member?(user)
+  end
 end

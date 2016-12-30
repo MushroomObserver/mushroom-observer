@@ -10,8 +10,7 @@
             <%= content_tag(:a, link.external_site.name, href: link.url,
                 data: { role: "link", url: link.url, link: link.id,
                         site: link.external_site.id, obs: observation.id }) %>
-            <% if @user == observation.user ||
-                  @user && @user.member?(link.project.user_group) %>
+            <% if link.can_edit?(@user) %>
               <span data-role="link-controls" class="hidden-links">[<%=
                 content_tag(:a, :EDIT.t, href: "#",
                                  data: { role: "edit-link" })
