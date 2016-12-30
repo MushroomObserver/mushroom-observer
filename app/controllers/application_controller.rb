@@ -202,30 +202,36 @@ class ApplicationController < ActionController::Base
 
   # Catch errors for integration tests, and report stats re completed request.
   def catch_errors
-    start      = Time.now
+    start      = Time.current
     controller = params[:controller]
     action     = params[:action]
     robot      = browser.bot? ? "robot" : "user"
-    ip         = begin
-                   request.remote_ip
-                 rescue
-                   "unknown"
-                 end
-    url        = begin
-                   request.url
-                 rescue
-                   "unknown"
-                 end
-    ua         = begin
-                   browser.ua
-                 rescue
-                   "unknown"
-                 end
+    ip         = catch_ip
+    url        = catch_url
+    ua         = catch_ua
     yield
-    logger.warn("TIME: #{Time.now - start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
+    logger.warn("TIME: #{Time.current - start} #{status}"\
+                "#{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
-    @error = e
-    raise e
+    raise @error = e
+  end
+
+  def catch_ip
+    request.remote_ip
+  rescue
+   "unknown"
+  end
+
+  def catch_url
+    request.url
+  rescue
+   "unknown"
+  end
+
+  def catch_ua
+    browser.ua
+  rescue
+   "unknown"
   end
 
   # Update Globalite with any recent changes to translations.
