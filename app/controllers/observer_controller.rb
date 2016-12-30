@@ -939,7 +939,7 @@ class ObserverController < ApplicationController
   # external_links to (and which no external_link to exists yet).
   def external_sites_user_can_add_links_to(obs)
     return [] unless @user
-    if @user == obs.user
+    if @user == obs.user || is_in_admin_mode? 
       ExternalSite.all - obs.external_links.map(&:external_site)
     else
       @user.external_sites - obs.external_links.map(&:external_site)
