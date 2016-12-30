@@ -50,7 +50,6 @@ module ContentFilter
 
   def has_images
     {
-      name:         "has_images",
       sym:          :has_images,
       model:        Observation,
       checkbox:     :has_images_checkbox,
@@ -63,7 +62,6 @@ module ContentFilter
 
   def has_specimen
     {
-      name:         "has_specimen",
       sym:          :has_specimen,
       model:        Observation,
       checkbox:     :has_specimen_checkbox,
