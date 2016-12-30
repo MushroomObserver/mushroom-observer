@@ -67,7 +67,8 @@ class AjaxController
 
   def render_errors_or_id(link)
     if link.errors.any?
-      render(text: link.formatted_errors.join("\n"), status: 500)
+      msg = link.formatted_errors.join("\n")
+      render(text: msg.strip_html, status: 500)
     else
       render(text: link.id)
     end

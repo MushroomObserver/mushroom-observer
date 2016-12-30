@@ -39,4 +39,9 @@ class ExternalLink < AbstractModel
     return if url.to_s =~ VALID_URL_PAT
     errors.add(:url, :validate_invalid_url.t)
   end
+
+  # Convenience function to allow +sort_by(&:site_name)+.
+  def site_name
+    external_site.name
+  end
 end
