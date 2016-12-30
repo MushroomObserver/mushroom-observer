@@ -3007,6 +3007,7 @@
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
   validate_invalid: Invalid [field].
+  validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
   validate_not_in_range: "[Field] is out of range."
