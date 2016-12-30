@@ -378,10 +378,10 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal("2014-11-27", @json_response["when"])
   end
 
-  def test_get_multi_image_template
-    bad_ajax_request(:get_multi_image_template)
+  def test_multi_image_template
+    bad_ajax_request(:multi_image_template)
     login("dick")
-    good_ajax_request(:get_multi_image_template)
+    good_ajax_request(:multi_image_template)
   end
 
   def test_add_external_link

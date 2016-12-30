@@ -30,16 +30,16 @@
 #  create_image_object::      Uploads image without observation yet.
 #
 class AjaxController < ApplicationController
-  include AjaxController::ApiKey
-  include AjaxController::AutoComplete
-  include AjaxController::Exif
-  include AjaxController::Export
-  include AjaxController::ExternalLink
-  include AjaxController::Geocode
-  include AjaxController::OldTranslation
-  include AjaxController::Pivotal
-  include AjaxController::UploadImage
-  include AjaxController::Vote
+  require_dependency "ajax_controller/api_key"
+  require_dependency "ajax_controller/auto_complete"
+  require_dependency "ajax_controller/exif"
+  require_dependency "ajax_controller/export"
+  require_dependency "ajax_controller/external_link"
+  require_dependency "ajax_controller/geocode"
+  require_dependency "ajax_controller/old_translation"
+  require_dependency "ajax_controller/pivotal"
+  require_dependency "ajax_controller/upload_image"
+  require_dependency "ajax_controller/vote"
 
   disable_filters
   around_action :catch_ajax_errors
@@ -61,16 +61,16 @@ class AjaxController < ApplicationController
   end
 
   def backtrace(e)
-    msg = ""
+    result = ""
     e.backtrace.each do |line|
-      return msg if line =~ /action_controller.*perform_action/
-      msg += line + "\n"
+      break if line =~ /action_controller.*perform_action/
+      result += line + "\n"
     end
+    result
   end
 
   def session_user!
-    User.current = get_session_user
-    raise "Must be logged in." unless User.current
+    User.current = get_session_user or raise "Must be logged in."
   end
 
   # Used by unit tests.

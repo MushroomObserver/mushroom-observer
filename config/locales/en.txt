@@ -195,6 +195,10 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  EXTERNAL_LINK: External Link
+  external_link: external link
+  EXTERNAL_LINKS: External Links
+  external_links: external links
   IMAGE: Image
   image: image
   IMAGES: Images
