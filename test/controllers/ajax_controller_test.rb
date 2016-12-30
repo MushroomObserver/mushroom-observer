@@ -386,6 +386,7 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_add_external_link
     obs  = observations(:agaricus_campestris_obs) # owned by rolf
+    obs2 = observations(:agaricus_campestrus_obs) # owned by rolf
     site = ExternalSite.first
     url  = "http://valid.url"
     params = {
@@ -417,10 +418,10 @@ class AjaxControllerTest < FunctionalTestCase
 
     # mary can because she's a member of the external site's project
     login("mary")
-    good_ajax_request(:external_link, params)
+    good_ajax_request(:external_link, params.merge(id: obs2.id))
     assert_equal(@response.body, ExternalLink.last.id.to_s)
     assert_users_equal(mary, ExternalLink.last.user)
-    assert_objs_equal(obs, ExternalLink.last.observation)
+    assert_objs_equal(obs2, ExternalLink.last.observation)
     assert_objs_equal(site, ExternalLink.last.external_site)
     assert_equal(url, ExternalLink.last.url)
   end
