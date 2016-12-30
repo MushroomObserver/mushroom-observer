@@ -32,7 +32,8 @@
 #  get_session_user::       (retrieve user from session)
 #
 #  ==== Internationalization
-#  all_locales::            Array of available locales for which we have translations.
+#  all_locales::            Array of available locales for which we have
+#                           translations.
 #  set_locale::             (filter: determine which locale is requested)
 #  get_sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
@@ -55,28 +56,36 @@
 #
 #  ==== Searching
 #  clear_query_in_session:: Clears out Query stored in session below.
-#  store_query_in_session:: Stores Query in session for use by create_species_list.
+#  store_query_in_session:: Stores Query in session for use by
+#                           create_species_list.
 #  get_query_from_session:: Gets Query that was stored in the session above.
-#  query_params::           Parameters to add to link_to, etc. for passing Query around.
+#  query_params::           Parameters to add to link_to, etc. for passing
+#                           Query around.
 #  set_query_params::       Make +query_params+ refer to a given Query.
-#  pass_query_params::      Tell +query_params+ to pass-through the Query given to this action.
+#  pass_query_params::      Tell +query_params+ to pass-through the Query
+#                            given to this action.
 #  find_query::             Find a given Query or return nil.
 #  find_or_create_query::   Find appropriate Query or create as necessary.
 #  create_query::           Create a new Query from scratch.
-#  redirect_to_next_object:: Find next object from a Query and redirect to its show page.
+#  redirect_to_next_object:: Find next object from a Query and redirect to its
+#                            show page.
 #
 #  ==== Indexes
 #  show_index_of_objects::  Show paginated set of Query results as a list.
 #  add_sorting_links::      Create sorting links for index pages.
-#  find_or_goto_index::     Look up object by id, displaying error and redirecting on failure.
-#  goto_index::             Redirect to a reasonable fallback (index) page in case of error.
+#  find_or_goto_index::     Look up object by id, displaying error and
+#                           redirecting on failure.
+#  goto_index::             Redirect to a reasonable fallback (index) page
+#                           in case of error.
 #  paginate_letters::       Paginate an Array by letter.
 #  paginate_numbers::       Paginate an Array normally.
 #
 #  ==== Memory usage
-#  log_memory_usage::       (filter: logs memory use stats from <tt>/proc/$$/smaps</tt>)
+#  log_memory_usage::       (filter: logs memory use stats from
+#                           <tt>/proc/$$/smaps</tt>)
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
-#  count_objects::          (does... nothing??!!... for every Object that currently exists)
+#  count_objects::          (does... nothing??!!... for every Object that
+#                           currently exists)
 #
 #  ==== Other stuff
 #  disable_link_prefetching:: (filter: prevents prefetching of destroy methods)
@@ -84,10 +93,8 @@
 #  calc_layout_params::     Gather User's list layout preferences.
 #  catch_errors             (filter: catches errors for integration tests)
 #  default_thumbnail_size:: Default thumbnail size: :thumbnail or :small.
-#  set_default_thumbnail_size:: Change the default thumbnail size for the current user.
+#  set_default_thumbnail_size:: Change default thumbnail size for  current user.
 #
-################################################################################
-
 class ApplicationController < ActionController::Base
   require "extensions"
   require "login_system"
@@ -129,7 +136,7 @@ class ApplicationController < ActionController::Base
     before_action { User.current = nil }
   end
 
-  ## @view can be used by classes to access some view specific features like render
+  ## @view can be used by classes to access view specific features like render
   def create_view_instance_variable
     @view = view_context
   end
@@ -157,7 +164,8 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(text: "Robots are not allowed on this page.", status: 403, layout: false)
+    render(text: "Robots are not allowed on this page.", status: 403,
+           layout: false)
     false
   end
 
@@ -173,24 +181,26 @@ class ApplicationController < ActionController::Base
   layout :choose_layout
   def choose_layout
     change = params[:user_theme].to_s
-    unless change.blank?
-      if MO.themes.member?(change)
-        if @user
-          @user.theme = change
-          @user.save
-        else
-          session[:theme] = change
-        end
-      else
-        session[:layout] = change
-      end
-    end
+    change_theme_to(change) if change.present?
     layout = session[:layout].to_s
     layout = "application" if layout.blank?
     layout
   end
 
-  # Catch errors for integration tests, and report stats about completed request.
+  def change_theme_to(change)
+    if MO.themes.member?(change)
+      if @user
+        @user.theme = change
+        @user.save
+      else
+        session[:theme] = change
+      end
+    else
+      session[:layout] = change
+    end
+  end
+
+  # Catch errors for integration tests, and report stats re completed request.
   def catch_errors
     start      = Time.now
     controller = params[:controller]
@@ -1165,7 +1175,7 @@ class ApplicationController < ActionController::Base
 
     update_filter_status_of(query)
 
-    # Tell site to come back here on +redirect_back_or_default+.rr
+    # Tell site to come back here on +redirect_back_or_default+.
     store_location
 
     # Clear out old query from session.  (Don't do it if caller just finished
@@ -1310,7 +1320,7 @@ class ApplicationController < ActionController::Base
 
   def update_filter_status_of(query)
     apply_allowed_default_filter_prefs_to(query)
-    supply_list_of_filters_on_for(query)
+    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
   end
 
   def apply_allowed_default_filter_prefs_to(query)
@@ -1328,10 +1338,6 @@ class ApplicationController < ActionController::Base
   def apply_default_filters_to(query)
     default_filters = @user ? @user.content_filter : MO.default_content_filter
     query.params.merge!(default_filters) if default_filters
-  end
-
-  def supply_list_of_filters_on_for(query)
-    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
   end
 
   # Create sorting links for index pages, "graying-out" the current order.
