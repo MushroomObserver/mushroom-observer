@@ -1366,6 +1366,11 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Comment, :pattern_search, pattern: "unknown")
   end
 
+  def test_external_link_all
+    expect = ExternalLink.all.sort_by(&:id)
+    assert_query(expect, :ExternalLink, :all, by: :id)
+  end
+
   def test_herbarium_all
     expect = Herbarium.all.sort_by(&:name)
     assert_query(expect, :Herbarium, :all)
