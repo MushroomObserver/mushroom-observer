@@ -11,8 +11,7 @@
                !browser.bot? && !session[:hide_thumbnail_maps]
              end
   show_lists = @observation.species_lists.any?
-  show_links = @observation.external_links.any? ||
-               @external_sites_without_links.any?
+  show_links = @observation.external_links.any? || @new_sites.any?
 %>
 
 <div class="row">

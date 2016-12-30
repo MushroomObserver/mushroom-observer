@@ -10,9 +10,9 @@
             <%= link_to(link.external_site.name, link.url) %>
             <% if check_permission(link) %>
               <span class="hidden" data-role="link-controls">
-                [<%= content_tag(:span, :EDIT.t,
+                [<%= content_tag(:a, :EDIT.t, href: "#",
                                  data: { role: "edit-link", id: link.id }) %> |
-                <%= content_tag(:span, :REMOVE.t,
+                <%= content_tag(:a, :REMOVE.t, href: "#",
                                  data: { role: "remove-link", id: link.id }) %>]
               </span>
             <% end %>
@@ -20,12 +20,12 @@
         </tr>
       <% end %>
       <% @new_sites.each do |site| %>
-        <tr>
+        <tr class="hidden" data-role="link-controls">
           <td style="border-top:0">
             <%= site.name %>
-            <span class="hidden" data-role="link-controls">
-              [<%= content_tag(:span, :ADD.t,
-                               data: { role: "add-link", id: link.id }) %>]
+            <span>
+              [<%= content_tag(:a, :ADD.t, href: "#",
+                               data: { role: "add-link", id: site.id }) %>]
             </span>
           </td>
         </tr>
