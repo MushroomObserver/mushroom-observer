@@ -35,4 +35,18 @@ class ExternalSiteTest < UnitTestCase
     assert_false(site.member?(dick))
     assert_true(site.member?(mary))
   end
+
+  def test_uniqueness
+    site1 = ExternalSite.first
+    site2 = ExternalSite.create(
+      name: site1.name,
+      project: site1.project
+    )
+    assert_not_empty(site2.errors)
+    site3 = ExternalSite.create(
+      name: site1.name + " two",
+      project: site1.project
+    )
+    assert_empty(site3.errors)
+  end
 end

@@ -29,4 +29,24 @@ class ExternalLinkTest < UnitTestCase
     site = ExternalLink.create(url: "http://valid.url")
     assert_empty(site.errors[:url])
   end
+
+  def test_uniqueness
+    link1 = ExternalLink.first
+    another_obs = observations(:minimal_unknown_obs)
+    assert_not_equal(link1.observation.id, another_obs.id)
+    link2 = ExternalLink.create(
+      user:          mary,
+      observation:   link1.observation,
+      external_site: link1.external_site,
+      url:           "http://another.com"
+    )
+    assert_not_empty(link2.errors)
+    link3 = ExternalLink.create(
+      user:          mary,
+      observation:   another_obs,
+      external_site: link1.external_site,
+      url:           "http://another.com"
+    )
+    assert_empty(link3.errors)
+  end
 end

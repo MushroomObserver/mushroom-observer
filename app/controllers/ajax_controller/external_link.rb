@@ -40,7 +40,7 @@ class AjaxController
       obs  = link.observation
       site = link.external_site
     end
-    return if obs.user == @user || site.member?(@user)
+    return if obs.user == @user || site.member?(@user) || @user.admin
     raise "Permission denied."
   end
 

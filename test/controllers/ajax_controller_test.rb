@@ -476,4 +476,35 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:external_link, params)
     assert_nil(ExternalLink.safe_find(link.id))
   end
+
+  def test_check_link_permission
+    # obs owned by rolf, mary member of site project
+    site = external_sites(:mycoportal)
+    obs  = observations(:coprinus_comatus_obs)
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    @controller.instance_variable_set("@user", rolf)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+    @controller.instance_variable_set("@user", mary)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+    @controller.instance_variable_set("@user", dick)
+    assert_link_forbidden(link)
+    assert_link_forbidden(obs, site)
+    dick.update_attribute("admin", true)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+  end
+
+  def assert_link_allowed(*args)
+    assert_nothing_raised do
+      @controller.send(:check_link_permission!, *args)
+    end
+  end
+
+  def assert_link_forbidden(*args)
+    assert_raises(RuntimeError) do
+       @controller.send(:check_link_permission!, *args)
+    end
+  end
 end
