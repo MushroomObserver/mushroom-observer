@@ -239,9 +239,9 @@ class ApplicationController < ActionController::Base
     Language.update_recent_translations
   end
 
-  # Keep track of localization strings so that users can edit them (sort of) in situ.
+  # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by_locale(I18n.locale)
+    @language = Language.find_by(locale: I18n.locale)
     if @user && @language &&
        (!@language.official || is_reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -303,24 +303,23 @@ class ApplicationController < ActionController::Base
   # destroyed.
   #
   def autologin
-    # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
+    # render(text: "Sorry, we've taken MO down to test something urgent."\
+    #              "We'll be back in a few minutes. -Jason", layout: false)
     # return false
 
     # if browser.bot?
-    #   render(:status => 503, :text => "robots are temporarily blocked from MO", :layout => false)
+    #   render(status: 503, text: "robots are temporarily blocked from MO",
+    #          layout: false)
     #   return false
     # end
 
     # Guilty until proven innocent...
-    @user = nil
-    User.current = nil
+    clear_user_globals
 
     # Do nothing if already logged in: if user asked us to remember him the
     # cookie will already be there, if not then we want to leave it out.
-    if (user = get_session_user) &&
-       (user.verified)
-      @user = user
-      @user.reload
+    if (user = get_session_user) && user.verified
+      refresh_logged_in_user_instance(user)
 
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"]) &&
@@ -328,42 +327,71 @@ class ApplicationController < ActionController::Base
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
+      login_valid_user(user)
+    else delete_invalid_cookies
+    end
+
+    make_logged_in_user_available_to_everyone
+    track_last_page_request_by_user
+    block_suspended_users
+  end
+
+  def clear_user_globals
+    @user = nil
+    User.current = nil
+  end
+
+  def refresh_logged_in_user_instance(user)
+    @user = user
+    @user.reload
+  end
+
+  def login_valid_user(user)
       @user = set_session_user(user)
-      @user.last_login = Time.now
+      @user.last_login = Time.current
       @user.save
 
       # Reset cookie to push expiry forward.  This way it will continue to
       # remember the user until they are inactive for over a month.  (Else
       # they'd have to login every month, no matter how often they login.)
       set_autologin_cookie(user)
+  end
 
-    # Delete invalid cookies.
-    else
-      clear_autologin_cookie
-      set_session_user(nil)
-    end
+  def delete_invalid_cookies
+    clear_autologin_cookie
+    set_session_user(nil)
+  end
 
-    # Make currently logged-in user available to everyone.
+  def make_logged_in_user_available_to_everyone
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : "0"} robot=#{browser.bot? ? "Y" : "N"}")
+    logger.warn("user=#{@user ? @user.id : "0"}" \
+                "robot=#{browser.bot? ? "Y" : "N"}")
+  end
 
-    # Keep track of last time user requested a page, but only update at most once an hour.
+  # Track when user requested a page, but update at most once an hour.
+  def track_last_page_request_by_user
     if @user && (
-      !@user.last_activity ||
-      @user.last_activity.to_s("%Y%m%d%H") != Time.now.to_s("%Y%m%d%H")
-    )
-      @user.last_activity = Time.now
+        !@user.last_activity ||
+        @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H")
+      )
+      @user.last_activity = Time.current
       @user.save
     end
+  end
 
-    # Kick Byrain off the site.
-    if @user && @user.id == 2750
-      render(:text => "Your account has been temporarily suspended.", :layout => false)
-      return false
-    end
+  def block_suspended_users
+    return true unless user_suspended? # Tell Rails to continue processing.
+    block user
+    false                              # Tell Rails to stop processing.
+  end
 
-    # Tell Rails to continue to process.
-    true
+  def user_suspended?
+    @user && @user.id == 2750 # Kick Byrain off the site.
+  end
+
+  def block_user
+    render(text: "Your account has been temporarily suspended.",
+           layout: false)
   end
 
   # ----------------------------
