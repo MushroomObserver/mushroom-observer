@@ -2179,6 +2179,7 @@
   donate_tab: Donate
   donate_other: Other Amount
   donate_anonymous: Anonymous donation
+  donate_recurring: Monthly recurring donation
   donate_who: Name for Donors Page
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
@@ -2194,6 +2195,8 @@
   confirm_title: Donation Confirmation
   confirm_amount: Amount
   confirm_text: Thank you for offering to make the following donation.  To complete this transaction using PayPal, click the button below.
+  confirm_positive_number_error: Other Amount must be a number greater than zero
+  confirm_recurring: Recurring monthly
 
   # support/governance
   governance_title: Governance of the Mushroom Observer
@@ -3339,6 +3342,7 @@
   runtime_image_remove_denied: You do not have permission to remove images from this observation.
   runtime_image_remove_missing: This observation doesn't have that image!
   runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.
+  runtime_name_for_description_not_found: "Sorry, the name this description belongs to no longer exists."
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone has either deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
   runtime_reverify_already_verified: Your account is already verified!  Please log in.
