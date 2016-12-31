@@ -19,7 +19,9 @@ class Query::ExternalLinkBase < Query::Base
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_id(:observations)
-    initialize_model_do_objects_by_name(ExternalSite, :external_sites)
+    initialize_model_do_objects_by_name(
+      ExternalSite, :external_sites, "external_links.external_site_id"
+    )
     initialize_model_do_search(:url, :url)
     super
   end
