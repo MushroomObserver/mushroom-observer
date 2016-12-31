@@ -219,19 +219,19 @@ class ApplicationController < ActionController::Base
   def catch_ip
     request.remote_ip
   rescue
-   "unknown"
+    "unknown"
   end
 
   def catch_url
     request.url
   rescue
-   "unknown"
+    "unknown"
   end
 
   def catch_ua
     browser.ua
   rescue
-   "unknown"
+    "unknown"
   end
 
   # Update Globalite with any recent changes to translations.
@@ -258,9 +258,9 @@ class ApplicationController < ActionController::Base
 
   # Redirect from www.mo.org to mo.org.
   #
-  # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
-  # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  MO.bad_domains would be something like:
+  # This would be much easier to check if HTTP_HOST != MO.domain, but if this
+  # ever were to break we'd get into an infinite loop too easily that way.
+  # I think this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
@@ -326,7 +326,7 @@ class ApplicationController < ActionController::Base
           (split = cookie.split(" ")) &&
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
-          (user.verified)
+          user.verified
       login_valid_user(user)
     else delete_invalid_cookies
     end
@@ -347,14 +347,14 @@ class ApplicationController < ActionController::Base
   end
 
   def login_valid_user(user)
-      @user = set_session_user(user)
-      @user.last_login = Time.current
-      @user.save
+    @user = set_session_user(user)
+    @user.last_login = Time.current
+    @user.save
 
-      # Reset cookie to push expiry forward.  This way it will continue to
-      # remember the user until they are inactive for over a month.  (Else
-      # they'd have to login every month, no matter how often they login.)
-      set_autologin_cookie(user)
+    # Reset cookie to push expiry forward.  This way it will continue to
+    # remember the user until they are inactive for over a month.  (Else
+    # they'd have to login every month, no matter how often they login.)
+    set_autologin_cookie(user)
   end
 
   def delete_invalid_cookies
@@ -373,7 +373,7 @@ class ApplicationController < ActionController::Base
     if @user && (
         !@user.last_activity ||
         @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H")
-      )
+    )
       @user.last_activity = Time.current
       @user.save
     end
@@ -406,22 +406,26 @@ class ApplicationController < ActionController::Base
   #   end %>
   #
   def check_permission(obj)
-    result = false
-    if is_in_admin_mode?
-      result = true
-    elsif obj.respond_to?(:user_id) &&
-          User.current_id == obj.user_id
-      result = true
-    elsif obj.respond_to?(:has_edit_permission?) &&
-          obj.has_edit_permission?(User.current)
-      result = true
-    elsif (obj.is_a?(String) || obj.is_a?(Fixnum)) &&
-          obj.to_i == User.current_id
-      result = true
-    end
-    result
+    is_in_admin_mode? || correct_user_for_object?(obj)
   end
   helper_method :check_permission
+
+  def correct_user_for_object?(obj)
+    owned_by_user?(obj) || editable_by_user?(obj) || obj_is_user?(obj)
+  end
+
+  def owned_by_user?(obj)
+    obj.respond_to?(:user_id) && User.current_id == obj.user_id
+  end
+
+  def editable_by_user?(obj)
+    obj.respond_to?(:has_edit_permission?) &&
+      obj.has_edit_permission?(User.current)
+  end
+
+  def obj_is_user?(obj)
+    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == User.current_id
+  end
 
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  Flashes a "denied" error message if false.
@@ -490,7 +494,7 @@ class ApplicationController < ActionController::Base
   # Before filter: check if the current User has an alert.  If so, it redirects
   # to <tt>/account/show_alert</tt>.  Returns true.
   def check_user_alert
-    if @user && @user.alert && @user.alert_next_showing < Time.now &&
+    if @user && @user.alert && @user.alert_next_showing < Time.current &&
        # Careful not to start infinite redirect-loop!
        action_name != "show_alert"
       redirect_to(controller: :account, action: :show_alert)
@@ -547,30 +551,12 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    code = if params[:user_locale]
-             logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
-             params[:user_locale]
-           elsif @user && !@user.locale.blank? && params[:controller] != "ajax"
-             logger.debug "[I18n] loading locale: #{@user.locale} from @user"
-             @user.locale
-           elsif session[:locale]
-             logger.debug "[I18n] loading locale: #{session[:locale]} from session"
-             session[:locale]
-           elsif locale = get_valid_locale_from_request_header
-             logger.debug "[I18n] loading locale: #{locale} from request header"
-             locale
-           else
-             MO.default_locale
-    end
+    code = specified_locale || MO.default_locale
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    code = code.split("-")[0]
-    if I18n.locale.to_s != code
-      I18n.locale = code
-      session[:locale] = code
-    end
+    change_locale_if_needed(code)
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
@@ -581,6 +567,41 @@ class ApplicationController < ActionController::Base
 
     # Tell Rails to continue to process request.
     true
+  end
+
+  def specified_locale
+    params_locale || prefs_locale || session_locale || browser_locale
+  end
+
+  def params_locale
+    return unless params[:user_locale]
+    logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
+    params[:user_locale]
+  end
+
+  def prefs_locale
+    return unless @user && !@user.locale.blank? && params[:controller] != "ajax"
+    logger.debug "[I18n] loading locale: #{@user.locale} from @user"
+    @user.locale
+  end
+
+  def session_locale
+    return unless session[:locale]
+    logger.debug "[I18n] loading locale: #{session[:locale]} from session"
+    session[:locale]
+  end
+
+  def browser_locale
+    return unless locale = get_valid_locale_from_request_header
+    logger.debug "[I18n] loading locale: #{locale} from request header"
+    locale
+  end
+
+  def change_locale_if_needed(code)
+    new_locale = code.split("-")[0]
+    return if I18n.locale.to_s == new_locale
+    I18n.locale = new_locale
+    session[:locale] = new_locale
   end
 
   # Before filter: Set timezone based on cookie set in application layout.
