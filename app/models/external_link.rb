@@ -50,4 +50,11 @@ class ExternalLink < AbstractModel
     return true if user.id == observation.user_id
     external_site.project.is_member?(user)
   end
+
+  def self.show_controller; end
+  def self.show_action; end
+  def self.edit_action; end
+  def self.index_action; end
+  def self.show_url(id); end
+  def self.show_link_args(id); end
 end
