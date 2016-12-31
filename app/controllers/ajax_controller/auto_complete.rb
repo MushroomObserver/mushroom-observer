@@ -1,4 +1,5 @@
 # encoding: utf-8
+# see ajax_controller.rb
 class AjaxController
   require "cgi"
 

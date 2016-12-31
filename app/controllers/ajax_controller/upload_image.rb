@@ -1,4 +1,5 @@
 # encoding: utf-8
+# see ajax_controller.rb
 class AjaxController
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation

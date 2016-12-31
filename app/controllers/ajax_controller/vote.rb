@@ -1,4 +1,5 @@
 # encoding: utf-8
+# see ajax_controller.rb
 class AjaxController
   # Cast vote. Renders new set of vote controls for HTML page if image,
   # nothing if naming.

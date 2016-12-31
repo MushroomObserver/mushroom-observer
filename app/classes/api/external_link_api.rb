@@ -1,6 +1,6 @@
 # encoding: utf-8
-
 class API
+  # API queries on external_links table.
   class ExternalLinkAPI < ModelAPI
     self.model = ExternalLink
 
@@ -28,15 +28,15 @@ class API
     end
 
     def build_object
-      fail NoMethodForAction("POST", action)
+      raise NoMethodForAction("POST", action)
     end
 
     def build_setter
-      fail NoMethodForAction("PUT", action)
+      raise NoMethodForAction("PUT", action)
     end
 
     def delete
-      fail NoMethodForAction("DELETE", action)
+      raise NoMethodForAction("DELETE", action)
     end
   end
 end

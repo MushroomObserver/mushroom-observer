@@ -1,4 +1,5 @@
 # encoding: utf-8
+# see ajax_controller.rb
 class AjaxController
   # Deal with Pivotal stories.  Renders updated story, vote controls, etc.
   # type::  Type of request: 'story', 'vote', 'comment'

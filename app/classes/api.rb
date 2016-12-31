@@ -75,7 +75,7 @@
 #  more changes to all matching objects.  Changes are specified with "set"
 #  parameters, e.g.:
 #
-#    set_date: '2009-07-31'      Change date in all matching objects to 20090731.
+#    set_date: '2009-07-31'      Change date to 20090731.
 #    set_location: 'California'  Change location (can also take ID).
 #    set_specimen: 'true'        Tell it that you have a specimen.
 #
@@ -86,8 +86,8 @@
 #  object.  Creating multiple objects requires multiple requests.  In this
 #  case, use only the "set" parameters above.
 #
-#  Authentication for PUT, POST, DELETE methods is accomplished by passing
-#  in an API key.  Users can create one or more API keys via the API Key Manager
+#  Authentication for PUT, POST, DELETE methods is accomplished by passing in
+#  an API key.  Users can create one or more API keys via the API Key Manager
 #  available on their Preferences and Profile page:
 #
 #    api_key: 'sdF78aw32KM23d9J23FJgseR87f32'
@@ -113,8 +113,6 @@
 #  page::                 Current page number.
 #  pages::                Number of pages available.
 #
-################################################################################
-
 class API
   require_dependency "api/errors"
   require_dependency "api/base"
@@ -138,9 +136,9 @@ class API
   require_dependency "api/model_api"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  for file in Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb")
-    if file.match(/(api\/\w+_api)\.rb$/) && Regexp.last_match(1) != "api/model_api"
-      require_dependency Regexp.last_match(1)
-    end
+  Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|
+    next if file !~ %r{(api/\w+_api)\.rb$}
+    next if Regexp.last_match(1) == "api/model_api"
+    require_dependency Regexp.last_match(1)
   end
 end
