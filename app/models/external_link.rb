@@ -8,7 +8,7 @@
 #  the site who is allowed to create external links to that site.  It is
 #  important to note that only the owner of an observation and users associated
 #  with an external_site (via an external_site's project's member user_group)
-#  are allowed to attach a URL for that external_site to that observation. 
+#  are allowed to attach a URL for that external_site to that observation.
 #
 #  (Wow, that was difficult to write...)
 #
@@ -27,10 +27,10 @@ class ExternalLink < AbstractModel
   belongs_to :external_site
   belongs_to :user
 
-  validates :observation,   presence: true, uniqueness: {scope: :external_site}
+  validates :observation, presence: true, uniqueness: { scope: :external_site }
   validates :external_site, presence: true
-  validates :user,          presence: true
-  validates :url,           presence: true, length: { maximum: 100 }
+  validates :user, presence: true
+  validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
 
   VALID_URL_PAT = %r{^[a-z]+://}
