@@ -961,9 +961,8 @@ class ApplicationController < ActionController::Base
 
   # Get Query last stored on the "clipboard" (session).
   def get_query_from_session
-    if id = session[:checklist_source]
-      Query.safe_find(id)
-    end
+    return unless (id = session[:checklist_source])
+    Query.safe_find(id)
   end
 
   # Return query parameter(s) necessary to pass query information along to
@@ -1028,20 +1027,11 @@ class ApplicationController < ActionController::Base
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
-    if result = find_query(model, false)
-
-      # Check if the existing query needs to be updated.
-      any_changes = false
-      for arg, val in args
-        if result.params[:arg] != val
-          any_changes = true
-          break
-        end
-      end
+    if (result = find_query(model, false))
 
       # If it does, we need to create a new query, otherwise the modifications
       # won't persist.  Use the existing query as the template, though.
-      if any_changes
+      if query_needs_update?(args, result)
         result = create_query(model, result.flavor, result.params.merge(args))
       end
 
@@ -1050,10 +1040,7 @@ class ApplicationController < ActionController::Base
       result = create_query(model, :all, args)
     end
 
-    if result && !browser.bot?
-      result.increment_access_count
-      result.save
-    end
+    save_query_unless_bot(result)
     result
   end
 
@@ -1098,11 +1085,29 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  def query_needs_update?(args, result)
+    any_changes = false
+    args.each do |_arg, val|
+      if result.params[:arg] != val
+        any_changes = true
+        break
+      end
+    end
+    any_changes
+  end
+
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
   def create_query(model_symbol, flavor = :all, args = {})
     Query.lookup(model_symbol, flavor, args)
+  end
+
+  def save_query_unless_bot(result)
+    if result && !browser.bot?
+      result.increment_access_count
+      result.save
+    end
   end
 
   # Create a new query by adding a bounding box to the given one.
