@@ -2,7 +2,7 @@
   @title = :rss_log_title.t.nowrap
 
   if @links.any?
-    tabs = @links.map {|str,url| link_to(str, url)}
+    tabs = create_links(@links)
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
