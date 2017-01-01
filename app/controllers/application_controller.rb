@@ -35,9 +35,9 @@
 #  all_locales::            Array of available locales for which we have
 #                           translations.
 #  set_locale::             (filter: determine which locale is requested)
-#  get_sorted_locales_from_request_header::
+#  sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
-#  get_valid_locale_from_request_header::
+#  valid_locale_from_request_header::
 #                           (choose locale that best matches request header)
 #
 #  ==== Error handling
@@ -473,15 +473,13 @@ class ApplicationController < ActionController::Base
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
   def has_unshown_notifications?(user, flavor = :naming)
     result = false
-    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-    for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
+    QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
       ints = q.get_integers(%w(shown notification), true)
-      unless ints["shown"]
-        notification = Notification.safe_find(ints["notification"].to_i)
-        if notification && notification.note_template
-          result = true
-          break
-        end
+      next if ints["shown"]
+      notification = Notification.safe_find(ints["notification"].to_i)
+      if notification && notification.note_template
+        result = true
+        break
       end
     end
     result
@@ -592,7 +590,7 @@ class ApplicationController < ActionController::Base
   end
 
   def browser_locale
-    return unless locale = get_valid_locale_from_request_header
+    return unless locale = valid_locale_from_request_header
     logger.debug "[I18n] loading locale: #{locale} from request header"
     locale
   end
@@ -626,20 +624,19 @@ class ApplicationController < ActionController::Base
   #
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
-  def get_sorted_locales_from_request_header
+  def sorted_locales_from_request_header
     result = []
     if accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
 
       # Extract locales and weights, creating map from locale to weight.
       locale_weights = {}
       accepted_locales.split(",").each do |term|
-        if (term + ";q=1") =~ /^(.+?);q=([^;]+)/
-          locale_weights[Regexp.last_match(1)] = (begin
-                                                    Regexp.last_match(2).to_f
-                                                  rescue
-                                                    -1.0
-                                                  end)
-        end
+        next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+        locale_weights[Regexp.last_match(1)] = (begin
+                                                  Regexp.last_match(2).to_f
+                                                rescue
+                                                  -1.0
+                                                end)
       end
 
       # Now sort by decreasing weights.
@@ -654,14 +651,14 @@ class ApplicationController < ActionController::Base
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
-  def get_valid_locale_from_request_header
+  def valid_locale_from_request_header
     # Get list of languages browser requested, sorted in the order it prefers
     # them.
-    requested_locales = get_sorted_locales_from_request_header.map do |locale|
-      if locale.match(/^(\w\w)-(\w+)$/)
-        locale = Regexp.last_match(1).downcase
+    requested_locales = sorted_locales_from_request_header.map do |locale|
+      if locale =~ /^(\w\w)-(\w+)$/
+        Regexp.last_match(1).downcase
       else
-        locale = locale.downcase
+        locale.downcase
       end
     end
 
@@ -675,7 +672,7 @@ class ApplicationController < ActionController::Base
     match = "en"
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
-      language, region = locale.split("-")
+      language = locale.split("-").first
 
       if I18n.available_locales.include?(language.to_sym)
         match = language
@@ -772,9 +769,8 @@ class ApplicationController < ActionController::Base
   helper_method :flash_error
 
   def flash_object_errors(obj)
-    if obj && obj.errors && (obj.errors.size > 0)
-      flash_error(obj.formatted_errors.join("<br/>"))
-    end
+    return unless obj && obj.errors && !obj.errors.empty?
+    flash_error(obj.formatted_errors.join("<br/>"))
   end
 
   def save_with_log(obj)
@@ -823,16 +819,14 @@ class ApplicationController < ActionController::Base
   #   (this is described better in views/observer/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
-    if approved_names
-      if approved_names.is_a?(String)
-        approved_names = approved_names.split(/\r?\n/)
-      end
-      for ns in name_list.split("\n")
-        unless ns.blank?
-          name_parse = NameParse.new(ns)
-          construct_approved_name(name_parse, approved_names, deprecate)
-        end
-      end
+    return unless approved_names
+    if approved_names.is_a?(String)
+      approved_names = approved_names.split(/\r?\n/)
+    end
+    name_list.split("\n").each do |ns|
+      next if ns.blank?
+      name_parse = NameParse.new(ns)
+      construct_approved_name(name_parse, approved_names, deprecate)
     end
   end
 
