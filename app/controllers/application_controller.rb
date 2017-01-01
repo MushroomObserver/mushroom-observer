@@ -1029,8 +1029,9 @@ class ApplicationController < ActionController::Base
     model = model_symbol.to_s
     if (result = find_query(model, false))
 
-      # If it does, we need to create a new query, otherwise the modifications
-      # won't persist.  Use the existing query as the template, though.
+      # If existing query needs updates, we need to create a new query,
+      # otherwise the modifications won't persist.
+      # Use the existing query as the template, though.
       if query_needs_update?(args, result)
         result = create_query(model, result.flavor, result.params.merge(args))
       end
@@ -1047,7 +1048,7 @@ class ApplicationController < ActionController::Base
   BY_MAP = {
     "modified" => :updated_at,
     "created" => :created_at
-  }
+  }.freeze
 
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
@@ -1056,44 +1057,56 @@ class ApplicationController < ActionController::Base
   # Lookup the given kind of Query, returning nil if it no longer exists.
   def find_query(model = nil, update = !browser.bot?)
     model = model.to_s if model
-    result = nil
-    q = begin
-          params[:q].dealphabetize
-        rescue
-          nil
-        end
-    if q && (query = Query.safe_find(q))
-      # This is right kind of query.
-      if !model || (query.model.to_s == model)
-        result = query
-      # If not, try coercing it.
-      elsif query2 = query.coerce(model)
-        result = query2
-      # If that fails, try the outer query coercing if necessary.
-      elsif query = query.outer
-        if query.model.to_s == model
-          result = query
-        elsif query2 = query.coerce(model)
-          result = query2
-        end
-      end
-      if update && result
-        result.increment_access_count
-        result.save
-      end
-    end
+    q = query_index
+
+    return nil unless q && (query = Query.safe_find(q))
+    result = find_new_query_for_model(model, query)
+    save_updated_query(result) if update && result
     result
   end
 
-  def query_needs_update?(args, result)
-    any_changes = false
-    args.each do |_arg, val|
-      if result.params[:arg] != val
-        any_changes = true
-        break
-      end
+  def query_index
+    begin
+      params[:q].dealphabetize
+    rescue
+      nil
     end
-    any_changes
+  end
+
+  # Turn old query into a new query for given model,
+  # (re-using the old query if it's still correct),
+  # and returning nil if no new query can be found.
+  def find_new_query_for_model(model, old_query)
+    old_query_correct_for_model?(model, old_query) ||
+      old_query_coercable_for_model?(model, old_query) ||
+      outer_query_correct_or_coerceable_for_model?(model, old_query) ||
+      nil
+  end
+
+  def old_query_correct_for_model?(model, old_query)
+    old_query if !old_query || (old_query.model.to_s == model)
+  end
+
+  def old_query_coercable_for_model?(model, old_query)
+    old_query.coerce(model)
+  end
+
+  def outer_query_correct_or_coerceable_for_model?(model, old_query)
+    return unless (outer_query = old_query.outer)
+    if outer_query.model.to_s == model
+      outer_query
+    elsif (coerced_outer_query = outer_query.coerce(model))
+      coerced_outer_query
+    end
+  end
+
+  def save_updated_query(result)
+    result.increment_access_count
+    result.save
+  end
+
+  def query_needs_update?(new_args, query)
+    new_args.any? { |_arg, val| query.params[:arg] != val }
   end
 
   # Create a new Query of the given flavor for the given model.  Pass it
@@ -1104,10 +1117,10 @@ class ApplicationController < ActionController::Base
   end
 
   def save_query_unless_bot(result)
-    if result && !browser.bot?
-      result.increment_access_count
-      result.save
-    end
+    return unless result && !browser.bot?
+
+    result.increment_access_count
+    result.save
   end
 
   # Create a new query by adding a bounding box to the given one.
