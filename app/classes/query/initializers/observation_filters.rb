@@ -1,44 +1,68 @@
 module Query::Initializers::ObservationFilters
+  include ::ContentFilter
+
+  # Hash of filter_parameters, each pair like:  has_images?: :string
+  # Uses filter definitions in ContentFilter to populate hash.
   def observation_filter_parameter_declarations
-    {
-      has_specimen?: :boolean,
-      has_images?:   :boolean
-    }
+    observation_filter_keys.each_with_object({}) do |f_sym, decs|
+      decs["#{f_sym.to_s}?".to_sym] = :string
+    end
   end
 
   # Lets application controller easily check if we need to apply user's content
   # filter parameters to the current query.
-  def observation_filters
+  def observation_filter_input
     true
   end
 
-  def has_any_observation_filters?
-    keys = observation_filter_parameter_declarations.keys
-    keys = keys.map(&:to_s)
-    keys = keys.map {|k| k.sub(/\?$/, "")}
-    keys = keys.map(&:to_sym)
-    keys.any? {|k| params[k] != nil}
+  # Lets ApplicationController check whether to add default filters to
+  # current query; defaults are added unless query already has
+  # observation filter params, even if those filters are off.
+  # This allows for overriding of default filters.
+  def has_obs_filter_params?
+    observation_filter_keys.any? {|k| params[k] != nil}
+  end
+
+  # Lets Query::RssLogBase check if whether to add filtered observations
+  # to the current query.
+  def any_observation_filter_is_on?
+    on_obs_filters.any?
+  end
+
+  # array of filters which are on (applied) in this query
+  def on_obs_filters
+    observation_filter_keys.each_with_object([]) do |filter, ons|
+      ons << filter if is_on?(filter)
+    end
+  end
+
+  # Does params[:x] == one of x's on_vals?  For example:
+  # is_on?(:has_images) is true if params[:has_images] == "NOT NULL" || "NULL"
+  def is_on?(filter_sym)
+    return unless params[filter_sym]
+    filter = send(filter_sym)
+    filter[:on_vals].include?(params[filter_sym])
   end
 
   def initialize_observation_filters_for_rss_log
-    conds = observation_filter_conditions
+    conds = obs_filter_sql_conds
+    return if conds.empty?
+
+    # and_clause splat wraps a single arg in an array; so if only 1 condition,
+    # call and_clause with a string (rather than 1-element array).
+    conds = conds.first if conds.size == 1
     @where << "observations.id IS NULL OR (#{and_clause(conds)})"
   end
 
   def initialize_observation_filters
-    @where += observation_filter_conditions
+    @where += obs_filter_sql_conds
   end
 
-  def observation_filter_conditions
-    result = []
-    if params[:has_specimen] != nil
-      val = params[:has_specimen] ? "TRUE" : "FALSE"
-      result << "observations.specimen IS #{val}"
+  # array of literal sql conditions to be included in query
+  def obs_filter_sql_conds
+    on_obs_filters.each_with_object([]) do |filter_sym, conds|
+      filter = send(filter_sym)
+      conds << filter[:sql_cond]
     end
-    if params[:has_images] != nil
-      val = params[:has_images] ? "NOT NULL" : "NULL"
-      result << "observations.thumb_image_id IS #{val}"
-    end
-    result
   end
 end

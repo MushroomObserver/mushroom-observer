@@ -15,7 +15,7 @@ class Query::RssLogBase < Query::Base
   def initialize_flavor
     initialize_model_do_time(:updated_at)
     add_rss_log_type_condition
-    if has_any_observation_filters? &&
+    if any_observation_filter_is_on? &&
        (types.include?("all") || types.include?("observation"))
       add_join(:observations!)
       initialize_observation_filters_for_rss_log

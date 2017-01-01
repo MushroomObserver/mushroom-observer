@@ -280,7 +280,7 @@ module ObservationReport
         user_login             = clean_string(row[USER_LOGIN])
         user_name              = clean_string(row[USER_NAME])
         collection_date        = clean_string(row[OBS_WHEN])
-        has_specimen           = clean_boolean(row[OBS_SPECIMEN])
+        has_specimen          = clean_boolean(row[OBS_SPECIMEN])
         original_label         = clean_string(row[SPEC_LABEL])
         consensus_name_id      = clean_integer(row[NAME_ID])
         consensus_name         = clean_string(row[NAME_TEXT_NAME])

@@ -42,7 +42,6 @@
 #  :all_norobots:
 #
 ################################################################################
-
 class AccountController < ApplicationController
   before_action :login_required, except: [
     :email_new_password,
@@ -325,80 +324,111 @@ class AccountController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Preferences
+  #  :section: Preferences and Profile
   #
   ##############################################################################
 
+  # Table for converting form value to object value
+  # Used by update_prefs_from_form
+  def prefs_types
+    result =[
+      [:email_comments_all, :bool],
+      [:email_comments_owner, :bool],
+      [:email_comments_response, :bool],
+      [:email_general_commercial, :bool],
+      [:email_general_feature, :bool],
+      [:email_general_question, :bool],
+      [:email_html, :bool],
+      [:email_locations_admin, :bool],
+      [:email_locations_all, :bool],
+      [:email_locations_author, :bool],
+      [:email_locations_editor, :bool],
+      [:email_names_admin, :bool],
+      [:email_names_all, :bool],
+      [:email_names_author, :bool],
+      [:email_names_editor, :bool],
+      [:email_names_reviewer, :bool],
+      [:email_observations_all, :bool],
+      [:email_observations_consensus, :bool],
+      [:email_observations_naming, :bool],
+      [:email, :str],
+      [:hide_authors, :enum],
+      [:image_size, :enum],
+      [:keep_filenames, :enum],
+      [:layout_count, :int],
+      [:license_id, :int],
+      [:locale, :str],
+      [:location_format, :enum],
+      [:login, :str],
+      [:theme, :str],
+      [:thumbnail_maps, :bool],
+      [:thumbnail_size, :enum],
+      [:view_owner_id, :bool],
+      [:votes_anonymous, :enum]
+    ]
+    observation_filters.each {|f| result << [f[:checkbox], :content_filter] }
+    result
+  end
+
   def prefs # :prefetch:
+    @user.observation_filters = observation_filters
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
-    # Make sure password matches confirmation.
-    if password = params["user"]["password"]
-      if password == params["user"]["password_confirmation"]
-        @user.change_password(password)
-      else
-        @user.errors.add(:password, :runtime_prefs_password_no_match.t)
+    update_password
+    update_prefs_from_form
+    update_copyright_holder if prefs_changed_successfully
+  end
+
+  def update_password
+    return unless password = params["user"]["password"]
+    if password == params["user"]["password_confirmation"]
+      @user.change_password(password)
+    else
+      @user.errors.add(:password, :runtime_prefs_password_no_match.t)
+    end
+  end
+
+  def update_prefs_from_form
+    prefs_types.each do |pref, type|
+      val = params[:user][pref]
+      case type
+      when :str  then update_pref(pref, val.to_s)
+      when :int  then update_pref(pref, val.to_i)
+      when :bool then update_pref(pref, val == "1")
+      when :enum then update_pref(pref, val ||= User.enum_default_value(pref))
+      when :content_filter then update_content_filter(pref, val)
       end
     end
+  end
 
-    for type, arg, post in [
-      [:str,  :login,           true],
-      [:str,  :email,           true],
-      [:str,  :locale,          true],
-      [:int,  :license_id,      true],
-      [:bool, :email_html,      true],
-      [:enum, :keep_filenames],
-      [:enum, :location_format],
-      [:enum, :hide_authors],
-      [:enum, :votes_anonymous, true],
-      [:enum, :thumbnail_size],
-      [:enum, :image_size],
-      [:str,  :theme],
-      [:int,  :layout_count],
-      [:bool, :email_comments_owner],
-      [:bool, :email_comments_response],
-      [:bool, :email_comments_all],
-      [:bool, :email_observations_consensus],
-      [:bool, :email_observations_naming],
-      [:bool, :email_observations_all],
-      [:bool, :email_names_admin],
-      [:bool, :email_names_author],
-      [:bool, :email_names_editor],
-      [:bool, :email_names_reviewer],
-      [:bool, :email_names_all],
-      [:bool, :email_locations_admin],
-      [:bool, :email_locations_author],
-      [:bool, :email_locations_editor],
-      [:bool, :email_locations_all],
-      [:bool, :email_general_feature],
-      [:bool, :email_general_commercial],
-      [:bool, :email_general_question],
-      # [ :str,  :email_digest ],
-      [:bool, :thumbnail_maps],
-      [:bool, :view_owner_id]
-    ]
-      val = params[:user][arg]
-      val = case type
-            when :str  then val.to_s
-            when :int  then val.to_i
-            when :bool then val == "1"
-            when :enum then val ||= User.enum_default_value(arg)
-      end
-      @user.send("#{arg}=", val) if @user.send(arg) != val
-    end
+  def update_pref(pref, val)
+    @user.send("#{pref}=", val) if @user.send(pref) != val
+  end
 
-    legal_name_change = @user.legal_name_change
+  def update_content_filter(pref, val)
+    filter_sym = pref.to_s.sub(%r{_checkbox$}, "").to_sym
+    filter = send(filter_sym)
+    val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
+    @user.content_filter[filter_sym] = val
+  end
+
+  def update_copyright_holder
+    return unless new_holder = @user.legal_name_change
+    Image.update_copyright_holder(*new_holder, @user)
+  end
+
+  def prefs_changed_successfully
+    result = false
     if !@user.changed
       flash_notice(:runtime_no_changes.t)
     elsif !@user.errors.empty? || !@user.save
       flash_object_errors(@user)
     else
-      if legal_name_change
-        Image.update_copyright_holder(*legal_name_change, @user)
-      end
       flash_notice(:runtime_prefs_success.t)
+      result = true
     end
+    result
   end
 
   def profile # :prefetch:
