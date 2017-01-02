@@ -1,6 +1,31 @@
 module Query
   module Modules
     # Handles coercing queries from one model to a related model.
+    # 
+    # Define a method in each Query subclass for each model it can be coerced
+    # into.  Examples:
+    #
+    #   ObservationAll << ObservationBase
+    #     # An index of all observations can be coerced easily into a query for
+    #     # their names. Just lookup all names which have observations.
+    #     def coerce_into_name_query
+    #       Query.lookup(:Name, :with_observations, params)
+    #     end
+    #   end
+    #
+    #   ObservationAdvancedSearch << ObservationBase
+    #     # Perhaps only some advanced searches can be coerced.  Add this
+    #     # method (with question mark) to check if it is possible.
+    #     def coerce_into_name_query?
+    #       params[:content].blank?
+    #     end
+    #
+    #     # This is only called if it passed coerce_into_name_query? first.
+    #     def coerce_into_name_query
+    #       Query.lookup(:Name, ...)
+    #     end
+    #   end
+    #
     module Coercion
       # Test if a query for one model can be coerced into an equivalent query
       # for a related model.

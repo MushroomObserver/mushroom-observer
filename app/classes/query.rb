@@ -228,7 +228,7 @@
 #  serialize::          Returns string which describes the Query completely.
 #  initialized?::       Has this query been initialized?
 #  coerce::             Coerce a query for one model into a query for another.
-#  oercable?::          Check if +coerce+ will work (but don't actually do it).
+#  coercable?::         Check if +coerce+ will work (but don't actually do it).
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
