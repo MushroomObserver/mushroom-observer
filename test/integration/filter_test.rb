@@ -56,7 +56,7 @@ class FilterTest < IntegrationTestCase
     refute(obs_imged_checkbox.checked?,
            "'#{:prefs_obs_filters_has_images.t}' checkbox should be unchecked")
     user.reload
-    assert_equal("off", user.content_filter[:has_images],
+    assert_nil(user.content_filter[:has_images],
                  "Unchecking and saving should turn off filter")
 
     # Repeat the search
@@ -96,7 +96,7 @@ class FilterTest < IntegrationTestCase
     page.check("user[has_specimen_checkbox]")
     click_button("#{:SAVE_EDITS.t}", match: :first)
     user.reload
-    assert_equal("TRUE", user.content_filter[:has_specimen])
+    assert_equal("yes", user.content_filter[:has_specimen])
 
     # Prove that :has_specimen filter excludes voucherless Observations
     # Repeat the search
@@ -143,7 +143,7 @@ class FilterTest < IntegrationTestCase
     fill_in("Name", with: obs.name.text_name)
     find("#content").click_button("Search")
 
-    # Advance Search Filters should override user's { has_images: "NOT NULL" }
+    # Advance Search Filters should override user's { has_images: "yes" }
     page.find_by_id("title").assert_no_text(:filtered.t)
 
     results = page.find("div.results", match: :first)
@@ -172,12 +172,12 @@ class FilterTest < IntegrationTestCase
     # Fill out and submit the form
     obs = observations(:vouchered_imged_obs)
     fill_in("Name", with: obs.name.text_name)
-    choose("has_specimen_TRUE")
+    choose("has_specimen_yes")
     find("#content").click_button("Search")
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
-    page.find_by_id("title").assert_text(:filtered.t)
+    page.find_by_id("title").assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("div.results", match: :first)
     results.assert_text(obs.name.text_name, count: expect.size)

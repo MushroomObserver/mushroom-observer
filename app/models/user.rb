@@ -675,26 +675,17 @@ class User < AbstractModel
   #
   # :section: Content Filters
   #
+  ##############################################################################
+
   serialize :content_filter, Hash
-  attr_accessor(:filter, :observation_filters)
 
-  include ::ContentFilter
-
-  # Methods used by forms to get checkbox values
-  # "NOT NULL": Observation has image(s)
-  # Otherwise, user content filter is off
-  # ("NULL"   : Observation has no image, available only via Advanced Search)
-  def has_images_checkbox
-    content_filter[:has_images] == "NOT NULL" ? 1 : 0
+  # Define methods like "has_images_checkbox" for use by account/prefs form.
+  ContentFilter.all.each do |fltr|
+    next unless fltr.checkbox.present?
+    define_method(fltr.checkbox) do
+      content_filter[fltr.sym] == fltr.checked_val ? 1 : 0
+    end
   end
-
-  # TRUE      : Observation has specimen(s)
-  # Otherwise, user content filter is off
-  # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
-  def has_specimen_checkbox
-    content_filter[:has_specimen] == "TRUE" ? 1 : 0
-  end
-
 
   ##############################################################################
   #

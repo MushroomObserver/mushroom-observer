@@ -2266,12 +2266,12 @@
 
   advanced_search_filter_has_images: Filter Observations based on whether they have images
   advanced_search_filter_has_images_off: Include both imaged and imageless Observations
-  advanced_search_filter_has_images_not_null: Exclude imageless Observations
-  advanced_search_filter_has_images_null: Exclude imaged Observations
+  advanced_search_filter_has_images_yes: Exclude imageless Observations
+  advanced_search_filter_has_images_no: Exclude imaged Observations
   advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
   advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
-  advanced_search_filter_has_specimen_true: Exclude voucherless Observations
-  advanced_search_filter_has_specimen_false: Exclude vouchered Observations
+  advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
+  advanced_search_filter_has_specimen_no: Exclude vouchered Observations
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater

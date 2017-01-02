@@ -2377,67 +2377,37 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-  def test_is_on?
-    query = Query.lookup(:Observation, :all, has_images: "NOT NULL",
-                                             has_specimen: "off")
-    assert(query.is_on?(:has_images))
-    refute(query.is_on?(:has_specimen))
-
-    query = Query.lookup(:Observation, :all, has_images: "off",
-                                             has_specimen: "TRUE")
-    refute(query.is_on?(:has_images))
-    assert(query.is_on?(:has_specimen))
-
-    query = Query.lookup(:Observation, :all)
-    refute(query.is_on?(:has_images))
-    refute(query.is_on?(:has_specimen))
-  end
-
    def test_any_observation_filter_is_on?
-    query = Query.lookup(:Observation, :all, has_images: "NOT NULL",
-                                             has_specimen: "off")
+    query = Query.lookup(:Observation, :all, has_images: "yes")
     assert(query.any_observation_filter_is_on?)
 
-    query = Query.lookup(:Observation, :all, has_images: "off",
-                                             has_specimen: "TRUE")
+    query = Query.lookup(:Observation, :all, has_images: "no")
     assert(query.any_observation_filter_is_on?)
 
-    query = Query.lookup(:Observation, :all, has_images: "off",
-                                             has_specimen: "off")
-    refute(query.any_observation_filter_is_on?)
+    query = Query.lookup(:Observation, :all, has_specimen: "yes")
+    assert(query.any_observation_filter_is_on?)
+
+    query = Query.lookup(:Observation, :all, has_specimen: "no")
+    assert(query.any_observation_filter_is_on?)
 
     query = Query.lookup(:Observation, :all)
     refute(query.any_observation_filter_is_on?)
-  end
-
-  def test_has_obs_filter_params?
-    query = Query.lookup(:Observation, :all, has_images: "NOT NULL")
-    assert(query.has_obs_filter_params?)
-
-    query = Query.lookup(:Observation, :all, has_specimen: "TRUE")
-    assert(query.has_obs_filter_params?)
-
-    query = Query.lookup(:Observation, :all, has_images: "off")
-    assert(query.has_obs_filter_params?)
-
-    query = Query.lookup(:Observation, :all)
-    refute(query.has_obs_filter_params?)
   end
 
   def test_filtering_content
     ##### image filters #####
     expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "NOT NULL")
+    assert_query(expect, :Observation, :all, has_images: "yes")
 
     expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: "NULL")
+    assert_query(expect, :Observation, :all, has_images: "no")
 
     ##### specimen filters #####
     expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, :all, has_specimen: "TRUE")
+    assert_query(expect, :Observation, :all, has_specimen: "yes")
 
     expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, :all, has_specimen: "FALSE")
+    assert_query(expect, :Observation, :all, has_specimen: "no")
 
     ##### lichen filters #####
     # peltigera = names(:peltigera)

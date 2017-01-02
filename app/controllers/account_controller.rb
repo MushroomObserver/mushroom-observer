@@ -366,12 +366,11 @@ class AccountController < ApplicationController
       [:view_owner_id, :bool],
       [:votes_anonymous, :enum]
     ]
-    observation_filters.each {|f| result << [f[:checkbox], :content_filter] }
+    ContentFilter.all.each {|fltr| result << [fltr.checkbox, :content_filter] }
     result
   end
 
   def prefs # :prefetch:
-    @user.observation_filters = observation_filters
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
@@ -407,10 +406,12 @@ class AccountController < ApplicationController
   end
 
   def update_content_filter(pref, val)
-    filter_sym = pref.to_s.sub(%r{_checkbox$}, "").to_sym
-    filter = send(filter_sym)
-    val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
-    @user.content_filter[filter_sym] = val
+    fltr = ContentFilter.all.select {|f| f.checkbox == pref}.first
+    if val == "1"
+      @user.content_filter[fltr.sym] = fltr.checked_val
+    else
+      @user.content_filter.delete(fltr.sym)
+    end
   end
 
   def update_copyright_holder

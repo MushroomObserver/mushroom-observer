@@ -4,13 +4,13 @@
   <p><%= :prefs_content_filters_explanation.t %><p>
 </div>
 
-<!-- Observation Filters -->
+<!-- Observation Filters -- TODO: generalize to other models -->
 <div class="form-group indent push-down">
   <span class="bold"><%= :prefs_obs_filters.t %></span><br>
   <span><%= :prefs_obs_filters_explanation.t %>.</span>
   <%= render partial: "prefs_obs_filter_checkboxes",
-             collection: observation_filters_with_checkboxes, as: :filter,
-             locals: { form: form } %>
+             collection: ContentFilter.observation_filters_with_checkboxes,
+             as: :filter, locals: { form: form } %>
 </div>
 
 <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
