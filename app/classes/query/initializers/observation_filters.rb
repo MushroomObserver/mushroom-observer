@@ -51,11 +51,7 @@ module Query
       def initialize_observation_filters_for_rss_log
         conds = obs_filter_sql_conds
         return if conds.empty?
-
-        # and_clause splat wraps a single arg in an array; so if only 1 condition,
-        # call and_clause with a string (rather than 1-element array).
-        conds = conds.first if conds.size == 1
-        @where << "observations.id IS NULL OR (#{and_clause(conds)})"
+        @where << "observations.id IS NULL OR (#{and_clause(*conds)})"
       end
 
       def initialize_observation_filters
