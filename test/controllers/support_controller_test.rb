@@ -29,37 +29,52 @@ class SupportControllerTest < FunctionalTestCase
   def confirm_post(amount, other_amount)
     donations = Donation.count
     anon = false
+    recurring = false
     final_amount = amount == "other" ? other_amount : amount
-    params = donation_params(amount, rolf, anon)
+    params = donation_params(amount, rolf, anon, recurring)
     params[:donation][:other_amount] = other_amount
     post(:confirm, params)
     assert_template(:confirm)
-    assert_donations(donations + 1, final_amount, rolf, anon, false)
+    assert_donations(donations + 1, final_amount, false, params[:donation])
   end
 
-  def assert_donations(count, amount, user, anon, reviewed)
+  def assert_donations(count, final_amount, reviewed, params)
     donation = Donation.all.order("created_at DESC")[0]
-    assert_equal([count, amount,
-                  donation.user && user, user.name, user.email,
-                  anon, reviewed],
-                 [Donation.count, donation.amount,
-                  donation.user, donation.who, donation.email,
-                  donation.anonymous, donation.reviewed])
+    assert_equal([count, final_amount, reviewed],
+                 [Donation.count, donation.amount, donation.reviewed])
+    assert_donation_params(params, donation)
   end
 
-  def donation_params(amount, user, anon)
+  def assert_donation_params(params, donation)
+    assert_equal([params[:who], params[:email],
+                  params[:anonymous], params[:recurring]],
+                 [donation.who, donation.email,
+                  donation.anonymous, donation.recurring])
+  end
+
+  def donation_params(amount, user, anon, recurring = false)
     {
       donation: {
         amount: amount,
         who: user.name,
         email: user.email,
-        anonymous: anon
+        anonymous: anon,
+        recurring: recurring,
+        reviewed: false
       }
     }
   end
 
   def test_confirm_other_amount_post
     confirm_post("other", 30)
+  end
+
+  def test_confirm_bad_other_amount
+    amount = 0
+    params = donation_params(amount, rolf, false)
+    params[:donation][:other_amount] = amount
+    post(:confirm, params)
+    assert_flash(:confirm_positive_number_error.t)
   end
 
   def test_create_donation
@@ -70,20 +85,20 @@ class SupportControllerTest < FunctionalTestCase
   end
 
   def test_create_donation_post
-    create_donation_post(false)
+    create_donation_post(false, false)
   end
 
-  def create_donation_post(anon)
+  def create_donation_post(anon, recurring)
     make_admin
     amount = 100.00
     donations = Donation.count
-    params = donation_params(amount, rolf, anon)
+    params = donation_params(amount, rolf, anon, recurring)
     post(:create_donation, params)
-    assert_donations(donations + 1, amount, rolf, anon, true)
+    assert_donations(donations + 1, amount, true, params[:donation])
   end
 
-  def test_create_donation_anon_post
-    create_donation_post(true)
+  def test_create_donation_anon_recurring_post
+    create_donation_post(true, true)
   end
 
   def test_review_donations

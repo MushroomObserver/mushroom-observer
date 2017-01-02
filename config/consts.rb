@@ -179,6 +179,7 @@ MushroomObserver::Application.configure do
     config.assets.precompile += %w(
       api_key.js
       date_select.js
+      donate.js
       edit_location.js
       image_slider.js
       multi_image_upload.js
@@ -200,4 +201,7 @@ MushroomObserver::Application.configure do
 
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000
+
+  # Filter(s) to apply to all Querys
+  config.default_content_filter = nil
 end

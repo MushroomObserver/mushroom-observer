@@ -1,0 +1,6 @@
+<%# Render a checkbox and label for an observation_filter %>
+<%= content_tag(:div, class: "form-inline") do %>
+  <%= form.check_box(filter[:checkbox], class: "form-control") %>
+  <%= label_tag(("user_" + filter[:sym].to_s + "_checkbox").to_sym,
+                ("prefs_obs_filters_" + filter[:sym].to_s).to_sym.t) %>.
+<% end %>

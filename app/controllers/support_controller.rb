@@ -7,14 +7,14 @@ class SupportController < ApplicationController
     store_location
     @donation = Donation.new
     @donation.user = @user
-    @donation.amount = 100.00
+    @donation.amount = 100
     return unless @user
     @donation.who = @user.name
     @donation.email = @user.email
   end
 
   def create_donation
-    return unless check_donate_admin(:create_donation_not_allowed.l)
+    return unless check_donate_admin(:create_donation_not_allowed.t)
     @donation = if request.method == "POST"
                   post_donation(params)
                 else
@@ -32,6 +32,7 @@ class SupportController < ApplicationController
     email = params["donation"]["email"]
     Donation.create(amount: params["donation"]["amount"],
                     who: params["donation"]["who"],
+                    recurring: params["donation"]["recurring"],
                     anonymous: params["donation"]["anonymous"],
                     email: email,
                     user: find_user(email),
@@ -40,7 +41,7 @@ class SupportController < ApplicationController
 
   def confirm
     @donation = if request.method == "POST"
-                  confirm_donation(params)
+                  confirm_donation(params["donation"])
                 else
                   Donation.new
                 end
@@ -53,17 +54,28 @@ class SupportController < ApplicationController
   end
 
   def confirm_donation(params)
-    amount = params["donation"]["amount"]
-    amount = params["donation"]["other_amount"] if amount == "other"
+    amount = params["amount"]
+    amount = params["other_amount"] if amount == "other"
+    return unless valid_amount?(amount, :confirm_positive_number_error.t)
     Donation.create(amount: amount,
-                    who: params["donation"]["who"],
-                    anonymous: params["donation"]["anonymous"],
-                    email: params["donation"]["email"],
+                    who: params["who"],
+                    recurring: params["recurring"],
+                    anonymous: params["anonymous"],
+                    email: params["email"],
                     reviewed: false)
   end
 
+  def valid_amount?(amount, error)
+    if amount.to_f <= 0
+      flash_error(error)
+      redirect_to(action: "donate")
+      return false
+    end
+    true
+  end
+
   def review_donations
-    return unless check_donate_admin(:review_donations_not_allowed.l)
+    return unless check_donate_admin(:review_donations_not_allowed.t)
     update_donations(params[:reviewed]) if request.method == "POST"
     @donations = Donation.all.order("created_at DESC")
     @reviewed = {}

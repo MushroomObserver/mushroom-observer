@@ -770,6 +770,7 @@ class QueryTest < UnitTestCase
 
     ##### Test next and previous on the query results. #####
     # (Results are images of all obs with images, not just inner1 - inner4.)
+    non_uniq_imgs_with_obs_count = Image.joins(:observations).size
 
     # Get 1st result, which is 1st image of 1st imaged observation
     obs = obs_with_imgs_ids.first
@@ -786,7 +787,7 @@ class QueryTest < UnitTestCase
 
     ### Use next to step forward through the other results, ###
     # checking for the right query, observation, and image
-    (img_with_obs_ids.count - 1).times do
+    (non_uniq_imgs_with_obs_count - 1).times do
       obs, imgs, img = next_result(obs, imgs, img)
       q = q.next
       # Are we looking at the right obs and query?
@@ -813,7 +814,7 @@ class QueryTest < UnitTestCase
 
     ### Use prev to step back through the results, ###
     # again checking for the right query, observation, and image
-    (img_with_obs_ids.count - 1).times do
+    (non_uniq_imgs_with_obs_count - 1).times do
       obs, imgs, img = prev_result(obs, imgs, img)
       q = q.prev
       # Are we looking at the right obs and query?
@@ -845,10 +846,6 @@ class QueryTest < UnitTestCase
 
   def obs_with_imgs_ids
     Observation.distinct.joins(:images).order(:id).map(&:id)
-  end
-
-  def img_with_obs_ids
-    Image.distinct.joins(:observations).order(:id).map(&:id)
   end
 
   # Return next result's: observation.id, image.id list, image.id
@@ -1360,8 +1357,9 @@ class QueryTest < UnitTestCase
   def test_image_advanced_search
     assert_query([images(:agaricus_campestris_image).id],
                  :Image, :advanced_search, name: "Agaricus")
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id, images(:in_situ_image).id],
+    assert_query(Image.joins(observations: :location).
+                       where(observations: { location: locations(:burbank) }).
+                       where(observations: { is_collection_location: true }),
                  :Image, :advanced_search, location: "burbank")
     assert_query([images(:connected_coprinus_comatus_image).id], :Image,
                  :advanced_search, location: "glendale")
@@ -1448,11 +1446,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_at_location
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:turned_over_image).id,
-                  images(:in_situ_image).id], :Image,
-                  :with_observations_at_location,
-                  location: locations(:burbank).id)
+    assert_query(Image.joins(observations: :location).
+                       where(observations: { location: locations(:burbank) }).
+                       where(observations: { is_collection_location: true }),
+                 :Image, :with_observations_at_location,
+                 location: locations(:burbank).id)
     assert_query([], :Image, :with_observations_at_location,
                  location: locations(:mitrula_marsh).id)
   end
@@ -2375,6 +2373,80 @@ class QueryTest < UnitTestCase
 
   ##############################################################################
   #
+  #  :section: Filters
+  #
+  ##############################################################################
+
+  def test_is_on?
+    query = Query.lookup(:Observation, :all, has_images: "NOT NULL",
+                                             has_specimen: "off")
+    assert(query.is_on?(:has_images))
+    refute(query.is_on?(:has_specimen))
+
+    query = Query.lookup(:Observation, :all, has_images: "off",
+                                             has_specimen: "TRUE")
+    refute(query.is_on?(:has_images))
+    assert(query.is_on?(:has_specimen))
+
+    query = Query.lookup(:Observation, :all)
+    refute(query.is_on?(:has_images))
+    refute(query.is_on?(:has_specimen))
+  end
+
+   def test_any_observation_filter_is_on?
+    query = Query.lookup(:Observation, :all, has_images: "NOT NULL",
+                                             has_specimen: "off")
+    assert(query.any_observation_filter_is_on?)
+
+    query = Query.lookup(:Observation, :all, has_images: "off",
+                                             has_specimen: "TRUE")
+    assert(query.any_observation_filter_is_on?)
+
+    query = Query.lookup(:Observation, :all, has_images: "off",
+                                             has_specimen: "off")
+    refute(query.any_observation_filter_is_on?)
+
+    query = Query.lookup(:Observation, :all)
+    refute(query.any_observation_filter_is_on?)
+  end
+
+  def test_has_obs_filter_params?
+    query = Query.lookup(:Observation, :all, has_images: "NOT NULL")
+    assert(query.has_obs_filter_params?)
+
+    query = Query.lookup(:Observation, :all, has_specimen: "TRUE")
+    assert(query.has_obs_filter_params?)
+
+    query = Query.lookup(:Observation, :all, has_images: "off")
+    assert(query.has_obs_filter_params?)
+
+    query = Query.lookup(:Observation, :all)
+    refute(query.has_obs_filter_params?)
+  end
+
+  def test_filtering_content
+    ##### image filters #####
+    expect = Observation.where.not(thumb_image_id: nil)
+    assert_query(expect, :Observation, :all, has_images: "NOT NULL")
+
+    expect = Observation.where(thumb_image_id: nil)
+    assert_query(expect, :Observation, :all, has_images: "NULL")
+
+    ##### specimen filters #####
+    expect = Observation.where(specimen: true)
+    assert_query(expect, :Observation, :all, has_specimen: "TRUE")
+
+    expect = Observation.where(specimen: false)
+    assert_query(expect, :Observation, :all, has_specimen: "FALSE")
+
+    ##### lichen filters #####
+    # peltigera = names(:peltigera)
+    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
+    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
+  end
+
+  ##############################################################################
+  #
   #  :section: Other stuff
   #
   ##############################################################################
@@ -2419,24 +2491,4 @@ class QueryTest < UnitTestCase
                  ids: [obs1.id, obs2.id], by: :location)
   end
 
-  def test_filtering_content
-    ##### image filters #####
-    expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: true)
-
-    expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, :all, has_images: false)
-
-    ##### specimen filters #####
-    expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, :all, has_specimen: true)
-
-    expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, :all, has_specimen: false)
-
-    ##### lichen filters #####
-    # peltigera = names(:peltigera)
-    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
-    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
-  end
 end

@@ -98,16 +98,16 @@
           }) if include_naming %>
   </div>
 </div>
-<!-- HAS_SPECIMENS -->
-<% if has_specimens %>
+<!-- has_specimen -->
+<% if has_specimen %>
   <div class="well well-sm push-down max-width-text">
     <%= content_tag(:p, :form_observations_delete_specimens_help.t, class: "help-block") %>
   </div>
 <% end %>
-<!-- /HAS_SPECIMENS -->
+<!-- /has_specimen -->
 
 <!-- NO_SPECIMENS -->
-<% if !has_specimens %>
+<% if !has_specimen %>
   <div class="row">
     <div class="col-xs-12 push-down max-width-text">
       <div class="form-inline">

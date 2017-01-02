@@ -51,9 +51,9 @@
 #  check_for_new_synonym::       (used by change_synonyms)
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
-################################################################################
-
 class NameController < ApplicationController
+  require_dependency "name_controller/show_name_description"
+
   include DescriptionControllerHelpers
 
   before_action :login_required, except: [
@@ -385,44 +385,6 @@ class NameController < ApplicationController
       @has_synonym = @synonym_query.select_count
       @has_other = @other_query.select_count
       @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
-    end
-  end
-
-  # Show just a NameDescription.
-  def show_name_description # :nologin: :prefetch:
-    store_location
-    pass_query_params
-    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/name/show_name_description/#{@description.id}"
-
-      # Tell robots the proper URL to use to index this content.
-      @canonical_url = "#{MO.http_domain}/name/show_name_description/#{@description.id}"
-
-      # Public or user has permission.
-      if @description.is_reader?(@user)
-        @name = @description.name
-        update_view_stats(@description)
-
-        # Get a list of projects the user can create drafts for.
-        @projects = @user && @user.projects_member.select do |project|
-          !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
-        end
-
-      # User doesn't have permission to see this description.
-      else
-        if @description.source_type == :project
-          flash_error(:runtime_show_draft_denied.t)
-          if project = @description.project
-            redirect_to(controller: "project", action: "show_project",
-                        id: project.id)
-          else
-            redirect_to(action: "show_name", id: @description.name_id)
-          end
-        else
-          flash_error(:runtime_show_description_denied.t)
-          redirect_to(action: "show_name", id: @description.name_id)
-        end
-      end
     end
   end
 
@@ -1472,6 +1434,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @query = create_query(:Observation, :of_name, name: @name)
+      update_filter_status_of(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
   end
