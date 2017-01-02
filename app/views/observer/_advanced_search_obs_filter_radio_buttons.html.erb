@@ -1,0 +1,16 @@
+<%# Per filter, render: (1) a caption proceeding its radio buttons, and
+    (2) each radio button with a label. %>
+<div class="form-inline">
+  <%# Caption %>
+  <%= ("advanced_search_filter_" + filter[:sym].to_s).to_sym.t %>.<br/>
+  <%# One radio button per on value %>
+  <% filter[:on_vals].each do |val| %>
+    <%= radio_button_tag(filter[:sym], val, false) %>
+    <%= ("advanced_search_filter_#{filter[:sym].to_s}_" +
+         val.downcase.gsub(/ /, "_")).to_sym.l %>.<br/>
+  <% end %>
+  <%# Off radio button %>
+  <%= radio_button_tag(filter[:sym], filter[:off_val], checked: true) %>
+  <%= ("advanced_search_filter_#{filter[:sym].to_s}_off").to_sym.l %>.<br/>
+  <br/>
+</div>

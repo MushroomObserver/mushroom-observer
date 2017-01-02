@@ -1,0 +1,16 @@
+<!-- Filters Settings of Account Preferences Form -->
+<div class="form-group push-down">
+  <span class="bold"><%= :prefs_content_filters.t %></span>
+  <p><%= :prefs_content_filters_explanation.t %><p>
+</div>
+
+<!-- Observation Filters -->
+<div class="form-group indent push-down">
+  <span class="bold"><%= :prefs_obs_filters.t %></span><br>
+  <span><%= :prefs_obs_filters_explanation.t %>.</span>
+  <%= render partial: "prefs_obs_filter_checkboxes",
+             collection: observation_filters_with_checkboxes, as: :filter,
+             locals: { form: form } %>
+</div>
+
+<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>

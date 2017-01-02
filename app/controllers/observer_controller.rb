@@ -538,37 +538,42 @@ class ObserverController < ApplicationController
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
   #   image/advanced_search
+  #   location/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
     return unless request.method == "POST"
-
     model = params[:search][:type].to_s.camelize.constantize
 
-    # Pass along all given search fields (remove angle-bracketed user name,
-    # though, since it was only included by the auto-completer as a hint).
-    search = {}
-    unless (x = params[:search][:name].to_s).blank?
-      search[:name] = x
-    end
-    unless (x = params[:search][:location].to_s).blank?
-      search[:location] = x
-    end
-    unless (x = params[:search][:user].to_s).blank?
-      search[:user] = x.sub(/ <.*/, "")
-    end
-    unless (x = params[:search][:content].to_s).blank?
-      search[:content] = x
+    # Pass along filled-in text field with Query
+    search = filled_in_text_fields
+    # And pass along any filters from the form
+    if model == Observation
+      observation_filter_keys.each { |k| search[k] = params[k] }
     end
 
     # Create query (this just validates the parameters).
     query = create_query(model, :advanced_search, search)
 
     # Let the individual controllers execute and render it.
-    redirect_to(add_query_param({
-                                  controller: model.show_controller,
-                                  action: "advanced_search"
-                                }, query))
+    redirect_to(add_query_param({ controller: model.show_controller,
+                                  action: "advanced_search" },
+                                query))
+  end
+
+  def filled_in_text_fields
+    result = {}
+    [:content, :location, :name].each do |field|
+      if (val = params[:search][field].to_s).present?
+        result[field] = val
+      end
+    end
+    # Treat User field differently; remove angle-bracketed user name,
+    # since it was included by the auto-completer only as a hint.
+    if (x = params[:search][:user].to_s).present?
+      result[:user] = x.sub(/ <.*/, "")
+    end
+    result
   end
 
   # Displays matrix of selected Observation's (based on current Query).
@@ -597,13 +602,6 @@ class ObserverController < ApplicationController
       nonconsensus: :no,
       by: :created_at
     }
-    args[:user] = params[:user_id] unless params[:user_id].blank?
-    args[:project] = params[:project_id] unless params[:project_id].blank?
-
-    unless params[:species_list_id].blank?
-      args[:species_list] = params[:species_list_id]
-    end
-
     query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)
   end
@@ -724,29 +722,9 @@ class ObserverController < ApplicationController
                             query)]
     @links << link
 
-    # Add "show location" link if this query can be coerced into a
-    # location query.
-    if query.is_coercable?(:Location)
-      @links << [:show_objects.t(type: :location),
-                 add_query_param({ controller: "location",
-                                   action: "index_location" },
-                                 query)]
-    end
-
-    # Add "show names" link if this query can be coerced into a name query.
-    if query.is_coercable?(:Name)
-      @links << [:show_objects.t(type: :name),
-                 add_query_param({ controller: "name", action: "index_name" },
-                                 query)]
-    end
-
-    # Add "show images" link if this query can be coerced into an image query.
-    if query.is_coercable?(:Image)
-      @links << [:show_objects.t(type: :image),
-                 add_query_param({ controller: "image",
-                                   action: "index_image" },
-                                 query)]
-    end
+    @links << coerced_query_link(query, Location)
+    @links << coerced_query_link(query, Name)
+    @links << coerced_query_link(query, Image)
 
     @links << [:list_observations_add_to_list.t,
                add_query_param({ controller: "species_list",
@@ -777,6 +755,7 @@ class ObserverController < ApplicationController
   # Map results of a search or index.
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
+    update_filter_status_of(@query)
     @title = :map_locations_title.t(locations: @query.title)
     @query = restrict_query_to_box(@query)
     @timer_start = Time.now
@@ -903,7 +882,7 @@ class ObserverController < ApplicationController
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
-    @mappable = query && query.is_coercable?(:Location)
+    @mappable = query && query.coercable?(:Location)
 
     # Provide a list of user's votes to view.
     if @user

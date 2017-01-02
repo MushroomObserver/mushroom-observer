@@ -4,7 +4,7 @@
     link_with_query(:list_place_names_map.t, action: :map_locations),
     link_to(:list_countries.t, action: :list_countries)
   ]
-  tabs += @links.map {|str,url| link_to(str, url)} if @links
+  tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   @known_pages = @pages

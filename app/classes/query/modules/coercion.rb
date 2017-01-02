@@ -1,131 +1,98 @@
-module Query::Modules::Coercion
-  def is_coercable?(new_model)
-    !!coerce(new_model, :just_test)
-  end
-
-  # Attempt to coerce a query for one model into a related query for another
-  # model.  This is currently only defined for a very few specific cases.  I
-  # have no idea how to generalize it.  Returns a new Query in rare successful
-  # cases; returns +nil+ in all other cases.
-  def coerce(new_model, just_test = false)
-    old_model  = model.to_s.to_sym
-    old_flavor = flavor
-    new_model  = new_model.to_s.to_sym
-
-    # Trivial case: model not actually changing!
-    if old_model == new_model
-      self
-
-    # Going from list_rss_logs to showing observation, name, etc.
-    elsif (old_model == :RssLog) &&
-       (old_flavor == :all) &&
-       (begin
-          new_model.to_s.constantize.reflect_on_association(:rss_log)
-        rescue
-          false
-        end)
-      just_test || begin
-        params2 = params.dup
-        params2.delete(:type)
-        Query.lookup(new_model, :by_rss_log, params2)
+module Query
+  module Modules
+    # Handles coercing queries from one model to a related model.
+    # 
+    # Define a method in each Query subclass for each model it can be coerced
+    # into.  Examples:
+    #
+    #   ObservationAll << ObservationBase
+    #     # An index of all observations can be coerced easily into a query for
+    #     # their names. Just lookup all names which have observations.
+    #     def coerce_into_name_query
+    #       Query.lookup(:Name, :with_observations, params)
+    #     end
+    #   end
+    #
+    #   ObservationAdvancedSearch << ObservationBase
+    #     # Perhaps only some advanced searches can be coerced.  Add this
+    #     # method (with question mark) to check if it is possible.
+    #     def coerce_into_name_query?
+    #       params[:content].blank?
+    #     end
+    #
+    #     # This is only called if it passed coerce_into_name_query? first.
+    #     def coerce_into_name_query
+    #       Query.lookup(:Name, ...)
+    #     end
+    #   end
+    #
+    module Coercion
+      # Test if a query for one model can be coerced into an equivalent query
+      # for a related model.
+      def coercable?(new_model)
+        @new_model = new_model.to_s
+        return true if @new_model == model.to_s
+        if respond_to?(test_method)
+          send(test_method)
+        else
+          respond_to?(coerce_method)
+        end
       end
 
-    # Going from objects with observations to those observations themselves.
-    elsif ((new_model == :Observation) &&
-            [:Image, :Location, :Name].include?(old_model) &&
-            old_flavor.to_s.match(/^with_observations/)) ||
-          ((new_model == :LocationDescription) &&
-            (old_model == :Location) &&
-            old_flavor.to_s.match(/^with_descriptions/)) ||
-          ((new_model == :NameDescription) &&
-            (old_model == :Name) &&
-            old_flavor.to_s.match(/^with_descriptions/))
-      just_test || begin
-        if old_flavor.to_s.match(/^with_[a-z]+$/)
-          new_flavor = :all
-        else
-          new_flavor = old_flavor.to_s.sub(/^with_[a-z]+_/, "").to_sym
+      # Attempt to coerce a query for one model into a related query for
+      # another model.  Returns a new Query or true if successful; returns
+      # +nil+ otherwise.
+      def coerce(new_model)
+        @new_model = new_model.to_s
+        return self if @new_model == model.to_s
+        if respond_to?(test_method)
+          return nil unless send(test_method)
+          send(coerce_method)
+        elsif respond_to?(coerce_method)
+          send(coerce_method)
         end
-        params2 = params.dup
-        if params2[:title]
-          params2[:title] = "raw " + title
-        elsif params2[:old_title]
-          # This is passed through from previous coerce.
-          params2[:title] = "raw " + params2[:old_title]
-          params2.delete(:old_title)
-        end
-        if params2[:old_by]
-          # This is passed through from previous coerce.
-          params2[:by] = params2[:old_by]
-          params2.delete(:old_by)
-        elsif params2[:by]
-          # Can't be sure old sort order will continue to work.
-          params2.delete(:by)
-        end
-        Query.lookup(new_model, new_flavor, params2)
       end
 
-    # Going from observations to objects with those observations.
-    elsif ((old_model == :Observation) &&
-            [:Image, :Location, :Name].include?(new_model)) ||
-          ((old_model == :LocationDescription) &&
-            (new_model == :Location)) ||
-          ((old_model == :NameDescription) &&
-            (new_model == :Name))
-      just_test || begin
-        if old_model == :Observation
-          type1 = :observations
-          type2 = :observation
-        else
-          type1 = :descriptions
-          type2 = old_model.to_s.underscore.to_sym
-        end
-        if old_flavor == :all
-          new_flavor = :"with_#{type1}"
-        else
-          new_flavor = :"with_#{type1}_#{old_flavor}"
-        end
+      def test_method
+        "coerce_into_#{@new_model.underscore}_query?"
+      end
+
+      def coerce_method
+        "coerce_into_#{@new_model.underscore}_query"
+      end
+
+      # If coercing to blah_with_observations or blah_with_descriptions
+      # queries, save current sort order in the unused parameter "old_by"
+      # so we can restore it if coerced back later.  (See below.)
+      def params_plus_old_by
         params2 = params.dup
-        if params2[:title]
-          # This can spiral out of control, but so be it.
-          params2[:title] = "raw " +
-                            :"query_title_with_#{type2}s_in_set".
-                            t(observations: title, type: new_model.to_s.underscore.to_sym)
-        end
-        if params2[:by]
-          # Can't be sure old sort order will continue to work.
-          params2.delete(:by)
-        end
-        if old_flavor == :in_set
-          params2.delete(:title) if params2.key?(:title)
-          Query.lookup(new_model, :"with_#{type1}_in_set",
-                            params2.merge(old_title: title, old_by: params[:by]))
-        elsif old_flavor == :advanced_search || old_flavor == :pattern_search
-          params2.delete(:title) if params2.key?(:title)
-          Query.lookup(new_model, :"with_#{type1}_in_set",
-                            ids: result_ids, old_title: title, old_by: params[:by])
-        elsif (new_model == :Location) &&
-              (old_flavor == :at_location)
-          Query.lookup(new_model, :in_set,
-                            ids: params2[:location])
-        elsif (new_model == :Name) &&
-              (old_flavor == :of_name)
-          # TODO: -- need 'synonyms' flavor
-          # params[:synonyms] == :all / :no / :exclusive
-          # params[:misspellings] == :either / :no / :only
-          nil
-        elsif recognized_flavor?(new_model, new_flavor)
-          Query.lookup(new_model, new_flavor, params2)
-        end
+        params2.delete(:by)
+        add_old_by(params2)
+      end
+
+      # If returning back to observation or description query, this restores
+      # the original sort order (kept silently in "old_by"). (See above.)
+      def params_with_old_by_restored
+        params2 = params.dup
+        params2.delete(:by)
+        params2.delete(:old_by)
+        params2.delete(:old_title)
+        params2[:by] = params[:old_by] if params.key?(:old_by)
+        params2
+      end
+
+      # Save current sort order to a hash of parameters as "old_by".
+      def add_old_by(hash)
+        return hash unless params.key?(:by)
+        hash[:old_by] = params[:by]
+        hash
+      end
+
+      # Save current title to a hash of parameters as "old_title".
+      def add_old_title(hash)
+        hash[:old_title] = title
+        hash
       end
     end
-  end
-
-  def recognized_flavor?(model, flavor)
-    klass = "Query::#{model}#{flavor.to_s.camelize}"
-    klass.constantize
-    true
-  rescue NameError
-    false
   end
 end

@@ -1,96 +1,113 @@
-module Query::Initializers::OfName
-  def of_name_parameter_declarations
-    {
-      name:          :name,
-      synonyms?:     { string: [:no, :all, :exclusive] },
-      nonconsensus?: { string: [:no, :all, :exclusive] },
-      project?:      Project,
-      species_list?: SpeciesList,
-      user?:         User
-    }
-  end
-
-  def give_parameter_defaults
-    params[:synonyms]     ||= :no
-    params[:nonconsensus] ||= :no
-  end
-
-  def get_target_names
-    if name = get_cached_parameter_instance(:name)
-      names = [name]
-    else
-      name = params[:name]
-      if name.is_a?(Fixnum) || name.match(/^\d+$/)
-        names = [Name.find(name.to_i)]
-      else
-        names = Name.where(search_name: name)
-        names = Name.where(text_name: name) if names.empty?
+module Query
+  module Initializers
+    # Help initialize "of_name" queries.
+    module OfName
+      def of_name_parameter_declarations
+        {
+          name:          :name,
+          synonyms?:     { string: [:no, :all, :exclusive] },
+          nonconsensus?: { string: [:no, :all, :exclusive] }
+        }
       end
-    end
-    names
-  end
 
-  def get_corresponding_name_ids(names)
-    if params[:synonyms] == :no
-      name_ids = names.map(&:id) + names.map(&:misspelling_ids).flatten
-    elsif params[:synonyms] == :all
-      name_ids = names.map(&:synonym_ids).flatten
-    elsif params[:synonyms] == :exclusive
-      name_ids = names.map(&:synonym_ids).flatten - names.map(&:id) - names.map(&:misspelling_ids).flatten
-    else
-      fail "Invalid synonym inclusion mode: '#{synonyms}'"
-    end
-    clean_id_set(name_ids.uniq)
-  end   
+      def give_parameter_defaults
+        params[:synonyms]     ||= :no
+        params[:nonconsensus] ||= :no
+      end
 
-  def choose_a_title(names)
-    title_args[:tag] = :query_title_of_name
-    title_args[:tag] = :query_title_of_name_synonym      if params[:synonyms] != :no
-    title_args[:tag] = :query_title_of_name_nonconsensus if params[:nonconsensus] != :no
-    title_args[:name] = names.length == 1 ? names.first.display_name : params[:name]
-  end
+      def target_names
+        name = get_cached_parameter_instance(:name)
+        return [name] if name
+        name = params[:name]
+        if name.is_a?(Integer) || name.match(/^\d+$/)
+          [Name.find(name.to_i)]
+        else
+          names = Name.where(search_name: name)
+          names = Name.where(text_name: name) if names.empty?
+          names
+        end
+      end
 
-  def add_name_conditions(names)
-    id_set = get_corresponding_name_ids(names)
-    if params[:nonconsensus] == :no
-      self.where << "observations.name_id IN (#{id_set}) AND " \
-                    "COALESCE(observations.vote_cache,0) >= 0"
-      self.order = "COALESCE(observations.vote_cache,0) DESC, observations.when DESC"
-    elsif params[:nonconsensus] == :all
-      self.where << "namings.name_id IN (#{id_set})"
-      self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
-      add_join_to_observations(:namings)
-    elsif params[:nonconsensus] == :exclusive
-      self.where << "namings.name_id IN (#{id_set}) AND " \
-                    "(observations.name_id NOT IN (#{id_set}) OR " \
-                    "COALESCE(observations.vote_cache,0) < 0)"
-      self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
-      add_join_to_observations(:namings)
-    else
-      fail "Invalid nonconsensus inclusion mode: '#{params[:nonconsensus]}'"
-    end
-  end
+      def choose_a_title(names, with_observations = false)
+        choose_a_title_tag(with_observations)
+        choose_a_title_args(names)
+      end
 
-  def restrict_to_one_project
-    if params[:project]
-      project = find_cached_parameter_instance(Project, :project)
-      self.where << "observations_projects.project_id = #{project.id}"
-      add_join_to_observations(:observations_projects)
-    end
-  end
+      def choose_a_title_tag(with_observations)
+        tag = "of_name"
+        tag = "of_name_synonym"          if params[:synonyms] != :no
+        tag = "of_name_nonconsensus"     if params[:nonconsensus] != :no
+        tag = "with_observations_#{tag}" if with_observations
+        self.title_tag = :"query_title_#{tag}"
+      end
 
-  def restrict_to_one_species_list
-    if params[:species_list]
-      species_list = find_cached_parameter_instance(SpeciesList, :species_list)
-      self.where << "observations_species_lists.species_list_id = #{species_list.id}"
-      add_join_to_observations(:observations_species_lists)
-    end
-  end
+      def choose_a_title_args(names)
+        title_args[:name] = params[:name]
+        title_args[:name] = names.first.display_name if names.length == 1
+      end
 
-  def restrict_to_one_user
-    if params[:user]
-      user = find_cached_parameter_instance(User, :user)
-      self.where << "observations.user_id = #{user.id}"
+      def add_name_conditions(names)
+        id_set = corresponding_name_id_set(names)
+        if params[:nonconsensus] == :no
+          add_name_conditions_consensus_only(id_set)
+        elsif params[:nonconsensus] == :all
+          add_name_conditions_all_namings(id_set)
+        elsif params[:nonconsensus] == :exclusive
+          add_name_conditions_just_losers(id_set)
+        end
+      end
+
+      def add_name_conditions_consensus_only(id_set)
+        where << "observations.name_id IN (#{id_set}) AND " \
+                 "COALESCE(observations.vote_cache,0) >= 0"
+        self.order = "COALESCE(observations.vote_cache,0) DESC, " \
+                     "observations.when DESC"
+      end
+
+      def add_name_conditions_all_namings(id_set)
+        where << "namings.name_id IN (#{id_set})"
+        self.order = "COALESCE(namings.vote_cache,0) DESC, " \
+                     "observations.when DESC"
+        add_join_to_observations(:namings)
+      end
+
+      def add_name_conditions_just_losers(id_set)
+        where << "namings.name_id IN (#{id_set}) AND " \
+                 "(observations.name_id NOT IN (#{id_set}) OR " \
+                 "COALESCE(observations.vote_cache,0) < 0)"
+        self.order = "COALESCE(namings.vote_cache,0) DESC, " \
+                     "observations.when DESC"
+        add_join_to_observations(:namings)
+      end
+
+      def corresponding_name_id_set(names)
+        name_ids = corresponding_name_ids(names)
+        clean_id_set(name_ids.uniq)
+      end
+
+      def corresponding_name_ids(names)
+        if params[:synonyms] == :no
+          just_names(names)
+        elsif params[:synonyms] == :all
+          names_and_synonyms(names)
+        elsif params[:synonyms] == :exclusive
+          just_synonyms(names)
+        end
+      end
+
+      def just_names(names)
+        names.map(&:id) + names.map(&:misspelling_ids).flatten
+      end
+
+      def names_and_synonyms(names)
+        names.map(&:synonym_ids).flatten
+      end
+
+      def just_synonyms(names)
+        names.map(&:synonym_ids).flatten -
+          names.map(&:id) -
+          names.map(&:misspelling_ids).flatten
+      end
     end
   end
 end

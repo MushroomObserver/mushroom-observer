@@ -202,7 +202,8 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(["D", "dick <Tricky Dick>"], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
-    assert_equal(["K", "katrina <Katrina>"], @response.body.split("\n"))
+    assert_equal(["K", "#{katrina.login} <#{katrina.name}>"],
+                 @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))

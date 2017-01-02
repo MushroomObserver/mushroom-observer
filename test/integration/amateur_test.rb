@@ -73,7 +73,6 @@ class AmateurTest < IntegrationTestCase
     rolf_cookies = get_cookies(rolf, :true)
     mary_cookies = get_cookies(mary, true)
     dick_cookies = get_cookies(dick, false)
-
     try_autologin(rolf_cookies, rolf)
     try_autologin(mary_cookies, mary)
     try_autologin(dick_cookies, false)
