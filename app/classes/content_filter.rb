@@ -29,13 +29,13 @@ class ContentFilter
   #
   #   Add tests, e.g., to TestUserContentFilter
   #   Supplement fixtures as needed by added tests
-  #   Add a filter definition below, and add that definition to #filters below
-  #   Add a new checkbox_val method in User
+  #   Add a filter definition below
+  # * Add a new checkbox_val method in User
   #   In /config/locales/en.txt define text to be displayed before and next to
   #     check boxes, using prefs_obs_filters_has_images: as a model.
   # * Supplement _prefs_filters.html.erb as needed
   # * Add filter to AccountController#prefs_types & #update_content_filter
-  # * For Observation filter, supplement Query::Initializers::ObservationFilters
+  #   For Observation filter, supplement Query::Initializers::ObservationFilters
   # * Supplement ApplicationController#show_index_of_objects as needed
   #   To filter another object, create a new initializer and include in
   #     appropriate searches.
