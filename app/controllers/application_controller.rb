@@ -1125,19 +1125,19 @@ class ApplicationController < ActionController::Base
 
   # Create a new query by adding a bounding box to the given one.
   def restrict_query_to_box(query)
-    if params[:north].blank?
-      query
-    else
-      model = query.model.to_s.to_sym
-      flavor = query.flavor
-      args = query.params.merge(
-        north: tweak_up(params[:north], 0.001, 90),
-        south: tweak_down(params[:south], 0.001, -90),
-        east: tweak_up(params[:east], 0.001, 180),
-        west: tweak_down(params[:west], 0.001, -180)
-      )
-      Query.lookup(model, flavor, args)
-    end
+    params[:north].blank? ? query : tweak_bounding_box_params(query)
+  end
+
+  def tweak_bounding_box_params(query)
+    model = query.model.to_s.to_sym
+    flavor = query.flavor
+    args = query.params.merge(
+      north: tweak_up(params[:north], 0.001, 90),
+      south: tweak_down(params[:south], 0.001, -90),
+      east: tweak_up(params[:east], 0.001, 180),
+      west: tweak_down(params[:west], 0.001, -180)
+    )
+    Query.lookup(model, flavor, args)
   end
 
   def tweak_up(v, amount, max)
@@ -1158,59 +1158,58 @@ class ApplicationController < ActionController::Base
   #   end
   #
   def redirect_to_next_object(method, model, id)
-    if object = find_or_goto_index(model, id)
+    return unless (object = find_or_goto_index(model, id))
 
-      # Special exception for prev/next in RssLog query: If go to "next" in
-      # show_observation, for example, inside an RssLog query, go to the next
-      # object, even if it's not an observation.    If...
-      if params[:q] && # ... query parameter given
-         (q = begin
-                params[:q].dealphabetize
-              rescue
-                nil
-              end) &&
-         (query = Query.safe_find(q)) && # ... and query exists
-         (query.model == RssLog)      && # ... and it's a RssLog query
-         (rss_log = begin
-                      object.rss_log
-                    rescue
-                      nil
-                    end) && # ... and current rss_log exists
-         query.index(rss_log) && # ... and it's in query results
-         (query.current = object.rss_log) && # ... and can set current index in query results
-         (new_query = query.send(method)) && # ... and next/prev doesn't return nil (at end)
-         (rss_log = new_query.current) # ... and can get new rss_log object
-        query  = new_query
-        object = rss_log.target || rss_log
-        id = object.id
+    # Special exception for prev/next in RssLog query: If go to "next" in
+    # show_observation, for example, inside an RssLog query, go to the next
+    # object, even if it's not an observation.    If...
+    if params[:q] && # ... query parameter given
+       (q = begin
+              params[:q].dealphabetize
+            rescue
+              nil
+            end) &&
+       (query = Query.safe_find(q)) && # ... and query exists
+       (query.model == RssLog)      && # ... and it's a RssLog query
+       (rss_log = begin
+                    object.rss_log
+                  rescue
+                    nil
+                  end) && # ... and current rss_log exists
+       query.index(rss_log) && # ... and it's in query results
+       (query.current = object.rss_log) && # ... and can set current index in query results
+       (new_query = query.send(method)) && # ... and next/prev doesn't return nil (at end)
+       (rss_log = new_query.current) # ... and can get new rss_log object
+      query  = new_query
+      object = rss_log.target || rss_log
+      id = object.id
 
-      # Normal case: attempt to coerce the current query into an appropriate
-      # type, and go from there.  This handles all the exceptional cases:
-      # 1) query not coercable (creates a new default one)
-      # 2) current object missing from results of the current query
-      # 3) no more objects being left in the query in the given direction
+    # Normal case: attempt to coerce the current query into an appropriate
+    # type, and go from there.  This handles all the exceptional cases:
+    # 1) query not coercable (creates a new default one)
+    # 2) current object missing from results of the current query
+    # 3) no more objects being left in the query in the given direction
+    else
+      query = find_or_create_query(object.class)
+      query.current = object
+      if !query.index(object)
+        type = object.type_tag
+        flash_error(:runtime_object_not_in_index.t(id: object.id, type: type))
+      elsif new_query = query.send(method)
+        query = new_query
+        id = query.current_id
       else
-        query = find_or_create_query(object.class)
-        query.current = object
-        if !query.index(object)
-          type = object.type_tag
-          flash_error(:runtime_object_not_in_index.t(id: object.id, type: type))
-        elsif new_query = query.send(method)
-          query = new_query
-          id = query.current_id
-        else
-          type = object.type_tag
-          flash_error(:runtime_no_more_search_objects.t(type: type))
-        end
+        type = object.type_tag
+        flash_error(:runtime_no_more_search_objects.t(type: type))
       end
-
-      # Redirect to the show_object page appropriate for the new object.
-      redirect_to(add_query_param({
-                                    controller: object.show_controller,
-                                    action: object.show_action,
-                                    id: id
-                                  }, query))
     end
+
+    # Redirect to the show_object page appropriate for the new object.
+    redirect_to(add_query_param({
+                                  controller: object.show_controller,
+                                  action: object.show_action,
+                                  id: id
+                                }, query))
   end
 
   ##############################################################################
