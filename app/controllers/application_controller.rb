@@ -1129,19 +1129,20 @@ class ApplicationController < ActionController::Base
 
   # Create a new query by adding a bounding box to the given one.
   def restrict_query_to_box(query)
-    params[:north].blank? ? query : tweak_bounding_box_params(query)
-  end
+    return query if params[:north].blank?
 
-  def tweak_bounding_box_params(query)
     model = query.model.to_s.to_sym
     flavor = query.flavor
-    args = query.params.merge(
+    Query.lookup(model, flavor, tweaked_bounding_box_params)
+  end
+
+  def tweaked_bounding_box_params
+    query.params.merge(
       north: tweak_up(params[:north], 0.001, 90),
       south: tweak_down(params[:south], 0.001, -90),
       east: tweak_up(params[:east], 0.001, 180),
       west: tweak_down(params[:west], 0.001, -180)
     )
-    Query.lookup(model, flavor, args)
   end
 
   def tweak_up(v, amount, max)
@@ -1247,16 +1248,19 @@ class ApplicationController < ActionController::Base
   # @extra_data::   Results of block yielded on every object if block given.
   #
   # Other side-effects:
-  # store_location::          Sets this as the +redirect_back_or_default+ location.
-  # clear_query_in_session::  Clears the query from the "clipboard" (if you didn't just store this query on it!).
-  # set_query_params::        Tells +query_params+ to pass this query on in links on this page.
+  # store_location::          Sets this as the +redirect_back_or_default+
+  #                           location.
+  # clear_query_in_session::  Clears the query from the "clipboard"
+  #                           (if you didn't just store this query on it!).
+  # set_query_params::        Tells +query_params+ to pass this query on
+  #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
     letter_arg   = args[:letter_arg] || :letter
     number_arg   = args[:number_arg] || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include] || nil
-    type = query.model.type_tag
+    type         = query.model.type_tag
 
     update_filter_status_of(query)
 
@@ -1321,7 +1325,8 @@ class ApplicationController < ActionController::Base
                                          name: name.display_name)
         when :pattern_search
           :runtime_no_matches_pattern.t(type: type,
-                                        value: query.params[:pattern].to_s).html_safe
+                                        value: query.params[:pattern].
+                                                     to_s).html_safe
         when :regexp_search
           :runtime_no_matches_regexp.t(type: type,
                                        value: query.params[:regexp].to_s)
@@ -1353,9 +1358,9 @@ class ApplicationController < ActionController::Base
     query.need_letters = args[:letters] if args[:letters]
 
     # Get number of results first so we know how to paginate.
-    @timer_start = Time.now
+    @timer_start = Time.current
     @num_results = query.num_results
-    @timer_end = Time.now
+    @timer_end = Time.current
 
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) &&
@@ -1370,7 +1375,7 @@ class ApplicationController < ActionController::Base
                  paginate_letters(letter_arg, number_arg, num_per_page)
                else
                  paginate_numbers(number_arg, num_per_page)
-      end
+               end
 
       # Skip to correct place if coming back in to index from show_object.
       if !args[:id].blank? &&
@@ -1381,9 +1386,9 @@ class ApplicationController < ActionController::Base
 
       # Instantiate correct subset.
       logger.warn("QUERY starting: #{query.query.inspect}")
-      @timer_start = Time.now
+      @timer_start = Time.current
       @objects = query.paginate(@pages, include: include)
-      @timer_end = Time.now
+      @timer_end = Time.current
       logger.warn("QUERY finished: model=#{query.model}, " \
                   "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
                   "time=#{(@timer_end - @timer_start).to_f}")
@@ -1431,7 +1436,7 @@ class ApplicationController < ActionController::Base
     this_by = query.params[:by] || query.default_order
     this_by = this_by.to_s.sub(/^reverse_/, "")
 
-    for by, label in links
+    links.each do |by, label|
       str = label.t
       if !link_all && (by.to_s == this_by)
         results << str
@@ -1444,16 +1449,13 @@ class ApplicationController < ActionController::Base
 
     # Add a "reverse" button.
     str = :sort_by_reverse.t
-    if query.params[:by].to_s.match(/^reverse_/)
-      reverse_by = this_by
-    else
-      reverse_by = "reverse_#{this_by}"
-    end
     results << [str, { controller: query.model.show_controller,
                        action: query.model.index_action,
-                       by: reverse_by }.merge(query_params)]
+                       by: reverse_by(query, this_by) }.merge(query_params)]
+  end
 
-    results
+  def reverse_by(query, this_by)
+    query.params[:by].to_s =~ /^reverse_/ ? this_by : "reverse_#{this_by}"
   end
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
@@ -1490,7 +1492,7 @@ class ApplicationController < ActionController::Base
             when "species_list" then SpeciesList
             when "user" then RssLog
             when "vote" then Observation
-    end
+            end
     fail "Not sure where to go from #{redirect || controller.name}." unless model
     redirect_with_query(controller: model.show_controller,
                         action: model.index_action)
@@ -1510,7 +1512,8 @@ class ApplicationController < ActionController::Base
   #   <%= pagination_letters(@pages) %>
   #   <%= pagination_numbers(@pages) %>
   #
-  def paginate_letters(letter_arg = :letter, number_arg = :page, num_per_page = 50)
+  def paginate_letters(letter_arg = :letter, number_arg = :page,
+                       num_per_page = 50)
     MOPaginator.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
@@ -1566,24 +1569,23 @@ class ApplicationController < ActionController::Base
   def log_memory_usage
     sd = sc = pd = pc = 0
     File.new("/proc/#{$PROCESS_ID}/smaps").each_line do |line|
-      if line.match(/\d+/)
-        val = $&.to_i
-        line.match(/^Shared_Dirty/) ? (sd += val) :
-        line.match(/^Shared_Clean/) ? (sc += val) :
-        line.match(/^Private_Dirty/) ? (pd += val) :
-        line.match(/^Private_Clean/) ? (pc += val) : 1
-      end
+      next unless line.match(/\d+/)
+      val = $&.to_i
+      line =~ /^Shared_Dirty/  ? (sd += val) :
+      line =~ /^Shared_Clean/  ? (sc += val) :
+      line =~ /^Private_Dirty/ ? (pd += val) :
+      line =~ /^Private_Clean/ ? (pc += val) : 1
     end
     uid = session[:user_id].to_i
     logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
       [pd, pc, sd, sc, $PROCESS_ID, uid, request.fullpath]
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Other stuff
   #
-  ################################################################################
+  ##############################################################################
 
   # Before filter: disable link prefetching.
   #
@@ -1600,19 +1602,18 @@ class ApplicationController < ActionController::Base
   # -JPH 20100123
   #
   def disable_link_prefetching
-    if request.env["HTTP_X_MOZ"] == "prefetch"
-      logger.debug "prefetch detected: sending 403 Forbidden"
-      render(text: "", status: 403)
-      return false
-    end
+    return unless request.env["HTTP_X_MOZ"] == "prefetch"
+
+    logger.debug "prefetch detected: sending 403 Forbidden"
+    render(text: "", status: 403)
+    false
   end
 
   # Tell an object that someone has looked at it (unless a robot made the
   # request).
   def update_view_stats(object)
-    if object.respond_to?(:update_view_stats) && !browser.bot?
-      object.update_view_stats
-    end
+    return unless object.respond_to?(:update_view_stats) && !browser.bot?
+    object.update_view_stats
   end
 
   # Default image size to use for thumbnails: either :thumbnail or :small.
