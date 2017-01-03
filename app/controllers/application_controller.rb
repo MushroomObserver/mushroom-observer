@@ -1059,18 +1059,22 @@ class ApplicationController < ActionController::Base
     model = model.to_s if model
     q = query_index
 
-    return nil unless q && (query = Query.safe_find(q))
+    return nil unless (query = query_exists(q))
+
     result = find_new_query_for_model(model, query)
     save_updated_query(result) if update && result
     result
   end
 
   def query_index
-    begin
-      params[:q].dealphabetize
-    rescue
-      nil
-    end
+    params[:q].dealphabetize
+  rescue
+    nil
+  end
+
+  def query_exists(q)
+    return unless q && (query = Query.safe_find(q))
+    query
   end
 
   # Turn old query into a new query for given model,
@@ -1162,24 +1166,17 @@ class ApplicationController < ActionController::Base
 
     # Special exception for prev/next in RssLog query: If go to "next" in
     # show_observation, for example, inside an RssLog query, go to the next
-    # object, even if it's not an observation.    If...
-    if params[:q] && # ... query parameter given
-       (q = begin
-              params[:q].dealphabetize
-            rescue
-              nil
-            end) &&
-       (query = Query.safe_find(q)) && # ... and query exists
-       (query.model == RssLog)      && # ... and it's a RssLog query
-       (rss_log = begin
-                    object.rss_log
-                  rescue
-                    nil
-                  end) && # ... and current rss_log exists
-       query.index(rss_log) && # ... and it's in query results
-       (query.current = object.rss_log) && # ... and can set current index in query results
-       (new_query = query.send(method)) && # ... and next/prev doesn't return nil (at end)
-       (rss_log = new_query.current) # ... and can get new rss_log object
+    # object, even if it's not an observation. If...
+    if params[:q] && #                          ... query parameter given
+       (query = query_exists(query_index)) && # ... and query exists
+       (query.model == RssLog) && #             ... and it's a RssLog query
+       (rss_log = rss_log_exists) && #          ... and current rss_log exists
+       query.index(rss_log) && #                ... and it's in query results
+       #                         ... and can set current index in query results
+       (query.current = object.rss_log) &&
+       #                          ... and next/prev doesn't return nil (at end)
+       (new_query = query.send(method)) &&
+       (rss_log = new_query.current) #       ... and can get new rss_log object
       query  = new_query
       object = rss_log.target || rss_log
       id = object.id
@@ -1195,7 +1192,7 @@ class ApplicationController < ActionController::Base
       if !query.index(object)
         type = object.type_tag
         flash_error(:runtime_object_not_in_index.t(id: object.id, type: type))
-      elsif new_query = query.send(method)
+      elsif (new_query = query.send(method))
         query = new_query
         id = query.current_id
       else
@@ -1210,6 +1207,12 @@ class ApplicationController < ActionController::Base
                                   action: object.show_action,
                                   id: id
                                 }, query))
+  end
+
+  def rss_log_exists
+    object.rss_log
+  rescue
+    nil
   end
 
   ##############################################################################
