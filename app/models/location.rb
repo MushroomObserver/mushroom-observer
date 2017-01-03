@@ -327,6 +327,12 @@ class Location < AbstractModel
     name.split(/,\s*/).reverse.join(", ") if name
   end
 
+  # Reverse given name if required in order to make country last.
+  def self.reverse_name_if_necessary(name)
+    last_part = name.split(/,\s*/).last
+    understood_country?(last_part) ? name : reverse_name(name)
+  end
+
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
     find_by_name(name) ||

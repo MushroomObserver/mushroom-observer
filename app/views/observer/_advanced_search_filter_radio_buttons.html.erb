@@ -5,11 +5,13 @@
   <%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
   <%# One radio button per on value %>
   <% filter.on_vals.each do |val| %>
-    <%= radio_button_tag(filter.sym, val, false) %>
+    <%= checked = @filter_defaults[filter.sym].to_s == val.to_s
+        radio_button_tag(:"content_filter_#{filter.sym}", val, checked) %>
     <%= :"advanced_search_filter_#{filter.sym}_#{val}".l %>.<br/>
   <% end %>
   <%# Off radio button %>
-  <%= radio_button_tag(filter.sym, "off", checked: true) %>
+  <%= checked = @filter_defaults[filter.sym].to_s == filter.off_val.to_s
+      radio_button_tag(:"content_filter_#{filter.sym}", "", checked) %>
   <%= :"advanced_search_filter_#{filter.sym}_off".l %>.<br/>
   <br/>
 </div>

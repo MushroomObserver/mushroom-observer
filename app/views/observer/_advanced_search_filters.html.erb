@@ -5,13 +5,14 @@
       <span class="bold"><%= :advanced_search_filters.t %></span>
       <p><%= :advanced_search_filters_explain.t %>.<p>
     </div>
-    <%# Observation filters -- TODO: generalize to other model filters %>
-    <div class="indent">
-      <span class="bold"><%= :prefs_obs_filters.t %></span>
-      (<%= :prefs_obs_filters_explanation.t %>)<br/>
-      <%# Observation filter radio buttons %>
-      <%= render partial: "advanced_search_obs_filter_radio_buttons",
-                 collection: ContentFilter.observation_filters, as: :filter %>
-    </div>
+    <% ContentFilter.all.each do |filter| %>
+      <% if filter.type == :boolean %>
+        <%= render partial: "advanced_search_filter_radio_buttons",
+                   locals: { filter: filter } %>
+      <% elsif filter.type == :string %>
+        <%= render partial: "advanced_search_filter_text_field",
+                   locals: { filter: filter } %>
+      <% end %>
+    <% end %>
   </div>
 </div>

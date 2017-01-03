@@ -1,0 +1,7 @@
+<%# Render a textfield and label for a content filter %>
+<%= content_tag(:div, class: "form-inline") do %>
+  <%= label_tag(:"user_content_filter_#{filter.sym}",
+                :"prefs_filters_#{filter.sym}".t) %>:
+  <%= form.text_field(:"content_filter_#{filter.sym}",
+                      class: "form-control") %>
+<% end %>
