@@ -1077,21 +1077,21 @@ class ApplicationController < ActionController::Base
   # (re-using the old query if it's still correct),
   # and returning nil if no new query can be found.
   def find_new_query_for_model(model, old_query)
-    old_query_correct_for_model?(model, old_query) ||
-      old_query_coercable_for_model?(model, old_query) ||
-      outer_query_correct_or_coerceable_for_model?(model, old_query) ||
+    old_query_correct_for_model(model, old_query) ||
+      old_query_coercable_for_model(model, old_query) ||
+      outer_query_correct_or_coerceable_for_model(model, old_query) ||
       nil
   end
 
-  def old_query_correct_for_model?(model, old_query)
+  def old_query_correct_for_model(model, old_query)
     old_query if !old_query || (old_query.model.to_s == model)
   end
 
-  def old_query_coercable_for_model?(model, old_query)
+  def old_query_coercable_for_model(model, old_query)
     old_query.coerce(model)
   end
 
-  def outer_query_correct_or_coerceable_for_model?(model, old_query)
+  def outer_query_correct_or_coerceable_for_model(model, old_query)
     return unless (outer_query = old_query.outer)
     if outer_query.model.to_s == model
       outer_query
