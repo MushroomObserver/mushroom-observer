@@ -1,13 +1,13 @@
 module Query
   # Names with observations in a given species list.
   class NameWithObservationsInSpeciesList < Query::NameBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         species_list: SpeciesList,
         old_by?:      :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -15,7 +15,7 @@ module Query
       title_args[:species_list] = spl.format_name
       add_join(:observations, :observations_species_lists)
       where << "observations_species_lists.species_list_id = '#{spl.id}'"
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

@@ -10,8 +10,6 @@
 #  all::             Array of all available content filters.
 #  find::            Look up a named filter.
 #  by_model::        Array of content filters applicable to a given model.
-#  query_parameter_declarations_for_model::
-#                    Hash of Query parameter declarations for a given model.
 #
 #  == Instance methods
 #
@@ -70,12 +68,6 @@ class ContentFilter
 
   def self.by_model(model)
     all.select { |fltr| fltr.models.include?(model) }
-  end
-
-  def self.query_parameter_declarations_for_model(model)
-    by_model(model).each_with_object({}) do |fltr, decs|
-      decs[:"#{fltr.sym}?"] = fltr.type
-    end
   end
 
   def applicable_to_model?(model)
