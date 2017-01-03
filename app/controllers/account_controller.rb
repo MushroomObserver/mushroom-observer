@@ -370,7 +370,7 @@ class AccountController < ApplicationController
 
   def content_filter_types
     ContentFilter.all.map do |fltr|
-      [:"content_filter_#{fltr.sym}", fltr.type]
+      [fltr.sym, :content_filter]
     end
   end
 
@@ -400,12 +400,23 @@ class AccountController < ApplicationController
       when :integer then update_pref(pref, val.to_i)
       when :boolean then update_pref(pref, val == "1")
       when :enum    then update_pref(pref, val || User.enum_default_value(pref))
+      when :content_filter then update_content_filter(pref, val)
       end
     end
   end
 
   def update_pref(pref, val)
     @user.send("#{pref}=", val) if @user.send(pref) != val
+  end
+
+  def update_content_filter(pref, val)
+    filter = ContentFilter.find(pref)
+    @user.content_filter[pref] = 
+      if filter.type == :boolean
+        val == "1" ? filter.checked_val : filter.off_val
+      else
+        val.to_s
+      end
   end
 
   def update_copyright_holder

@@ -328,6 +328,8 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
+  serialize :content_filter, Hash
+
   ##############################################################################
   #
   #  :section: Callbacks and Other Basic Stuff
@@ -666,36 +668,6 @@ class User < AbstractModel
   def mailing_address_for_tracking_template
     result = mailing_address.strip if mailing_address
     result = "**insert mailing address for specimens**" if result.blank?
-  end
-
-  ##############################################################################
-  #
-  # :section: Content Filters
-  #
-  ##############################################################################
-
-  serialize :content_filter, Hash
-
-  # Define methods like "content_filter_has_images" and
-  # "content_filter_has_images=" for use by account/prefs form.
-  ContentFilter.all.each do |fltr|
-
-    define_method("content_filter_#{fltr.sym}") do
-      if fltr.type == :boolean
-        content_filter[fltr.sym] == fltr.checked_val
-      else
-        content_filter[fltr.sym]
-      end
-    end
-
-    define_method("content_filter_#{fltr.sym}=") do |val|
-      content_filter[fltr.sym] =
-        if fltr.type == :boolean
-          val ? fltr.checked_val : fltr.off_val
-        else
-          val
-        end
-    end
   end
 
   ##############################################################################
