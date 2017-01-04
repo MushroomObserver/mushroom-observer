@@ -21,10 +21,9 @@
 #  login_for_ajax::         (filter: minimal version of autologin for ajax)
 #  check_permission::       Make sure current User is the right one.
 #  check_permission!::      Same, but flashes "denied" message, too.
-#  is_reviewer?::           Is the current User a reviewer?
-#  is_in_admin_mode?::      Is the current User in admin mode?
-#  has_unshown_notifications?::
-#                           Are there pending Notification's of a given type?
+#  reviewer?::              Is the current User a reviewer?
+#  in_admin_mode?::         Is the current User in admin mode?
+#  unshown_notifications?:: Are there pending Notification's of a given type?
 #  check_user_alert::       (filter: redirect to show_alert if has alert)
 #  set_autologin_cookie::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
@@ -254,7 +253,7 @@ class ApplicationController < ActionController::Base
   def track_translations
     @language = Language.find_by(locale: I18n.locale)
     if @user && @language &&
-       (!@language.official || is_reviewer?)
+       (!@language.official || reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
     else
       Language.ignore_usage
@@ -429,7 +428,7 @@ class ApplicationController < ActionController::Base
   #   end %>
   #
   def check_permission(obj)
-    is_in_admin_mode? || correct_user_for_object?(obj)
+    in_admin_mode? || correct_user_for_object?(obj)
   end
   helper_method :check_permission
 
@@ -468,25 +467,26 @@ class ApplicationController < ActionController::Base
     end
     result
   end
-  alias_method :check_user_id, :check_permission!
+  alias check_user_id check_permission!
 
   # Is the current User a reviewer?  Returns true or false.  (*NOTE*: this is
   # available to views.)
-  def is_reviewer?
+  def reviewer?
     result = false
     result = @user.in_group?("reviewers") if @user
     result
   end
-  alias_method :is_reviewer, :is_reviewer?
-  helper_method :is_reviewer
-  helper_method :is_reviewer?
+  alias is_reviewer? reviewer?
+  alias is_reviewer reviewer?
+  helper_method :reviwer?, :is_reviewer?, :is_reviewer
 
   # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
   # is available to views.)
-  def is_in_admin_mode?
+  def in_admin_mode?
     @user && @user.admin && session[:admin]
   end
-  helper_method :is_in_admin_mode?
+  alias is_in_admin_mode? in_admin_mode?
+  helper_method :in_admin_mode?, :is_in_admin_mode?
 
   # Are there are any QueuedEmail's of the given flavor for the given User?
   # Returns true or false.
@@ -494,19 +494,20 @@ class ApplicationController < ActionController::Base
   # This only applies to emails that are associated with Notification's for
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  def has_unshown_notifications?(user, flavor = :naming)
+  def unshown_notifications?(user, flavor = :naming)
     result = false
     QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
       ints = q.get_integers(%w(shown notification), true)
       next if ints["shown"]
       notification = Notification.safe_find(ints["notification"].to_i)
-      if notification && notification.note_template
-        result = true
-        break
-      end
+      next unless notification && notification.note_template
+
+      result = true
+      break
     end
     result
   end
+  alias has_unshown_notifications? unshown_notifications?
 
   # ----------------------------
   #  "Private" methods.
@@ -628,18 +629,20 @@ class ApplicationController < ActionController::Base
   # Before filter: Set timezone based on cookie set in application layout.
   def set_timezone
     tz = cookies[:tz]
-    if tz.blank?
-      # For now, until we get rid of reliance on @js, this is a surrogate for
-      # testing if the client's JS is enabled and sufficiently fully-featured.
-      @js = Rails.env == "test"
-    else
+    if tz.present?
       begin
         Time.zone = tz
       rescue
         logger.warn "TimezoneError: #{tz.inspect}"
       end
-      @js = true
     end
+    @js = js_enabled?(tz)
+  end
+
+  # Until we get rid of reliance on @js, this is a surrogate for
+  # testing if the client's JS is enabled and sufficiently fully-featured.
+  def js_enabled?(tz)
+    tz.present? ? true : Rails.env == "test"
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
@@ -651,17 +654,7 @@ class ApplicationController < ActionController::Base
     result = []
     if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
 
-      # Extract locales and weights, creating map from locale to weight.
-      locale_weights = {}
-      accepted_locales.split(",").each do |term|
-        next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
-        locale_weights[Regexp.last_match(1)] = (begin
-                                                  Regexp.last_match(2).to_f
-                                                rescue
-                                                  -1.0
-                                                end)
-      end
-
+      locale_weights = map_locales_to_weights(accepted_locales)
       # Now sort by decreasing weights.
       result = locale_weights.sort { |a, b| b[1] <=> a[1] }.map { |a| a[0] }
     end
@@ -671,6 +664,18 @@ class ApplicationController < ActionController::Base
   end
   include ::ContentFilter
   helper_method(:observation_filters, :observation_filters_with_checkboxes)
+
+  # Extract locales and weights, creating map from locale to weight.
+  def map_locales_to_weights(locales)
+    locales.split(",").each_with_object({}) do |term, loc_wts|
+      next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+      loc_wts[Regexp.last_match(1)] = (begin
+                                         Regexp.last_match(2).to_f
+                                       rescue
+                                         -1.0
+                                       end)
+    end
+  end
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
@@ -1516,7 +1521,7 @@ class ApplicationController < ActionController::Base
             when "user" then RssLog
             when "vote" then Observation
             end
-    fail "Not sure where to go from #{redirect || controller.name}." unless model
+    fail "Unsure where to go from #{redirect || controller.name}." unless model
     redirect_with_query(controller: model.show_controller,
                         action: model.index_action)
   end
@@ -1670,7 +1675,7 @@ class ApplicationController < ActionController::Base
   end
 
   def has_permission?(obj, error_message)
-    result = (is_in_admin_mode? || obj.can_edit?(@user))
+    result = (in_admin_mode? || obj.can_edit?(@user))
     flash_error(error_message) unless result
     result
   end
