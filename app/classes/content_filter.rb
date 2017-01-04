@@ -16,6 +16,7 @@
 #  sym::             Name of filter (symbol).
 #  models::          Array of models this filter can be applied to.
 #  applicable_to_model?:: Can this filter be applied to a model query?
+#  on?::             Test if a filter is turned on.
 #
 #  == Adding new filters
 #

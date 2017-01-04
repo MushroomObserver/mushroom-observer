@@ -8,5 +8,9 @@ class ContentFilter
     def type
       :boolean
     end
+
+    def on?(val)
+      val.to_s != off_val.to_s
+    end
   end
 end

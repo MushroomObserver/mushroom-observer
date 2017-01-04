@@ -23,7 +23,7 @@ module Query
       def content_filter_sql_conds(model)
         ContentFilter.by_model(model).
           each_with_object([]) do |fltr, conds|
-            next if params[fltr.sym].blank?
+            next if params[fltr.sym].to_s == ""
             method = :"#{model.type_tag}_content_filter_sql_conds_for_#{fltr.sym}"
             conds.push(*send(method, params[fltr.sym]))
           end

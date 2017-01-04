@@ -3,11 +3,10 @@ require "test_helper"
 
 class ContentFilterTest < UnitTestCase
   def test_filters
-    assert_equal(2, ContentFilter.all.length)
-    assert_equal(2, ContentFilter.observation_filters.length)
-    assert_equal([:has_images, :has_specimen],
-                 ContentFilter.observation_filter_keys)
-    assert_equal(2, ContentFilter.observation_filters_with_checkboxes.length)
+    assert_equal([:has_images, :has_specimen, :location_filter],
+                 ContentFilter.all.map(&:sym))
+    assert_equal([:location_filter],
+                 ContentFilter.by_model(Location).map(&:sym))
   end
 
   def test_find
