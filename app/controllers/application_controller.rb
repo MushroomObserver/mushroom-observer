@@ -202,18 +202,23 @@ class ApplicationController < ActionController::Base
 
   # Catch errors for integration tests, and report stats re completed request.
   def catch_errors
-    start      = Time.current
-    controller = params[:controller]
-    action     = params[:action]
-    robot      = browser.bot? ? "robot" : "user"
-    ip         = catch_ip
-    url        = catch_url
-    ua         = catch_ua
+    start = start_state
     yield
-    logger.warn("TIME: #{Time.current - start} #{status}"\
-                "#{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
+    logger.warn(error_stats(start))
   rescue => e
     raise @error = e
+  end
+
+  def start_state
+    {
+      time:       Time.current,
+      controller: params[:controller],
+      action:     params[:action],
+      robot:      browser.bot? ? "robot" : "user",
+      ip:         catch_ip,
+      url:        catch_url,
+      ua:         catch_ua
+    }
   end
 
   def catch_ip
@@ -232,6 +237,12 @@ class ApplicationController < ActionController::Base
     browser.ua
   rescue
     "unknown"
+  end
+
+  def error_stats(start)
+    "TIME: #{Time.current - start[:time]} #{status} " \
+    "#{start[:controller]} #{start[:action]} " \
+    "#{start[:robot]} #{start[:ip]}\t#{start[:url]}\t#{start[:ua]}"
   end
 
   # Update Globalite with any recent changes to translations.
@@ -316,21 +327,7 @@ class ApplicationController < ActionController::Base
     # Guilty until proven innocent...
     clear_user_globals
 
-    # Do nothing if already logged in: if user asked us to remember him the
-    # cookie will already be there, if not then we want to leave it out.
-    if (user = get_session_user) && user.verified
-      refresh_logged_in_user_instance(user)
-
-    # Log in if cookie is valid, and autologin is enabled.
-    elsif (cookie = cookies["mo_user"]) &&
-          (split = cookie.split(" ")) &&
-          (user = User.where(id: split[0]).first) &&
-          (split[1] == user.auth_code) &&
-          user.verified
-      login_valid_user(user)
-    else delete_invalid_cookies
-    end
-
+    try_user_autologin(get_session_user)
     make_logged_in_user_available_to_everyone
     track_last_page_request_by_user
     block_suspended_users
@@ -339,6 +336,32 @@ class ApplicationController < ActionController::Base
   def clear_user_globals
     @user = nil
     User.current = nil
+  end
+
+  def try_user_autologin(user)
+    # Do nothing if already logged in: if user asked us to remember him the
+    # cookie will already be there, if not then we want to leave it out.
+    if already_logged_in?(user)
+      refresh_logged_in_user_instance(user)
+
+    # Log in if cookie is valid, and autologin is enabled.
+    elsif (user = valid_user_from_cookie) && user.verified
+      login_valid_user(user)
+    else
+      delete_invalid_cookies
+    end
+  end
+
+  def already_logged_in?(user)
+    user && user.verified
+  end
+
+  def valid_user_from_cookie
+    return unless (cookie = cookies["mo_user"]) &&
+                  (split = cookie.split(" ")) &&
+                  (user = User.where(id: split[0]).first) &&
+                  (split[1] == user.auth_code)
+    user
   end
 
   def refresh_logged_in_user_instance(user)
