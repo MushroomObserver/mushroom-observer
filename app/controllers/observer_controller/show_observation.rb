@@ -59,7 +59,7 @@ class ObserverController
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query && query.is_coercable?(:Location)
+    query && query.coercable?(:Location)
   end
 
   # Provide a list of user's votes to view.

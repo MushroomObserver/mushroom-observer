@@ -138,7 +138,7 @@ class ObserverController
 
     # Add "show location" link if this query can be coerced into a
     # location query.
-    if query.is_coercable?(:Location)
+    if query.coercable?(:Location)
       @links << [:show_objects.t(type: :location),
                  add_query_param({ controller: "location",
                                    action: "index_location" },
@@ -146,14 +146,14 @@ class ObserverController
     end
 
     # Add "show names" link if this query can be coerced into a name query.
-    if query.is_coercable?(:Name)
+    if query.coercable?(:Name)
       @links << [:show_objects.t(type: :name),
                  add_query_param({ controller: "name", action: "index_name" },
                                  query)]
     end
 
     # Add "show images" link if this query can be coerced into an image query.
-    if query.is_coercable?(:Image)
+    if query.coercable?(:Image)
       @links << [:show_objects.t(type: :image),
                  add_query_param({ controller: "image",
                                    action: "index_image" },
