@@ -114,6 +114,13 @@
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
+#  view_owner_id::      View Observation author's ID on Obs page
+#
+#  ==== Content filter options
+#  has_images::         Exclude imageless Observations from search results and
+#                       rss feeds
+#  has_specimen::       Exclude unvouchered Observations (Observations without
+#                       a Specimen) from search results and rss feeds
 #
 #  ==== Email options
 #  Send notifications if...
@@ -141,7 +148,6 @@
 #  password_confirmation::  Used to confirm password during sign-up.
 #
 #  == Methods
-#
 #  current::            Report the User that is currently logged in.
 #  current_id::         Report the User (id) that is currently logged in.
 #
@@ -212,7 +218,6 @@
 #  remove_image::       Ensures that this user doesn't reference this image
 #
 #  == Callbacks
-#
 #  crypt_password::     Password attribute is encrypted before object is created.
 #
 class User < AbstractModel
@@ -661,6 +666,22 @@ class User < AbstractModel
     result = mailing_address.strip if mailing_address
     result = "**insert mailing address for specimens**" if result.blank?
     result
+  end
+
+  ##############################################################################
+  #
+  # :section: Content Filters
+  #
+  ##############################################################################
+
+  serialize :content_filter, Hash
+
+  # Define methods like "has_images_checkbox" for use by account/prefs form.
+  ContentFilter.all.each do |fltr|
+    next unless fltr.checkbox.present?
+    define_method(fltr.checkbox) do
+      content_filter[fltr.sym] == fltr.checked_val ? 1 : 0
+    end
   end
 
   ##############################################################################

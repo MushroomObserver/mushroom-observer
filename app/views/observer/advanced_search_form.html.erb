@@ -50,6 +50,8 @@
       <p class="help-block"><%= :advanced_search_content_notes.t %></p>
     </div>
 
+    <%= render partial: "advanced_search_filters" %>
+
     <%= submit_tag(:SEARCH.l, class: "btn center-block") %>
   <% end %>
 </div>

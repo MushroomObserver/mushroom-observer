@@ -32,11 +32,12 @@
 #  get_session_user::       (retrieve user from session)
 #
 #  ==== Internationalization
-#  all_locales::            Array of available locales for which we have translations.
+#  all_locales::            Array of available locales for which we have
+#                           translations.
 #  set_locale::             (filter: determine which locale is requested)
-#  get_sorted_locales_from_request_header::
+#  sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
-#  get_valid_locale_from_request_header::
+#  valid_locale_from_request_header::
 #                           (choose locale that best matches request header)
 #
 #  ==== Error handling
@@ -55,28 +56,36 @@
 #
 #  ==== Searching
 #  clear_query_in_session:: Clears out Query stored in session below.
-#  store_query_in_session:: Stores Query in session for use by create_species_list.
+#  store_query_in_session:: Stores Query in session for use by
+#                           create_species_list.
 #  get_query_from_session:: Gets Query that was stored in the session above.
-#  query_params::           Parameters to add to link_to, etc. for passing Query around.
+#  query_params::           Parameters to add to link_to, etc. for passing
+#                           Query around.
 #  set_query_params::       Make +query_params+ refer to a given Query.
-#  pass_query_params::      Tell +query_params+ to pass-through the Query given to this action.
+#  pass_query_params::      Tell +query_params+ to pass-through the Query
+#                            given to this action.
 #  find_query::             Find a given Query or return nil.
 #  find_or_create_query::   Find appropriate Query or create as necessary.
 #  create_query::           Create a new Query from scratch.
-#  redirect_to_next_object:: Find next object from a Query and redirect to its show page.
+#  redirect_to_next_object:: Find next object from a Query and redirect to its
+#                            show page.
 #
 #  ==== Indexes
 #  show_index_of_objects::  Show paginated set of Query results as a list.
 #  add_sorting_links::      Create sorting links for index pages.
-#  find_or_goto_index::     Look up object by id, displaying error and redirecting on failure.
-#  goto_index::             Redirect to a reasonable fallback (index) page in case of error.
+#  find_or_goto_index::     Look up object by id, displaying error and
+#                           redirecting on failure.
+#  goto_index::             Redirect to a reasonable fallback (index) page
+#                           in case of error.
 #  paginate_letters::       Paginate an Array by letter.
 #  paginate_numbers::       Paginate an Array normally.
 #
 #  ==== Memory usage
-#  log_memory_usage::       (filter: logs memory use stats from <tt>/proc/$$/smaps</tt>)
+#  log_memory_usage::       (filter: logs memory use stats from
+#                           <tt>/proc/$$/smaps</tt>)
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
-#  count_objects::          (does... nothing??!!... for every Object that currently exists)
+#  count_objects::          (does... nothing??!!... for every Object that
+#                           currently exists)
 #
 #  ==== Other stuff
 #  disable_link_prefetching:: (filter: prevents prefetching of destroy methods)
@@ -84,10 +93,8 @@
 #  calc_layout_params::     Gather User's list layout preferences.
 #  catch_errors             (filter: catches errors for integration tests)
 #  default_thumbnail_size:: Default thumbnail size: :thumbnail or :small.
-#  set_default_thumbnail_size:: Change the default thumbnail size for the current user.
+#  set_default_thumbnail_size:: Change default thumbnail size for  current user.
 #
-################################################################################
-
 class ApplicationController < ActionController::Base
   require "extensions"
   require "login_system"
@@ -129,7 +136,7 @@ class ApplicationController < ActionController::Base
     before_action { User.current = nil }
   end
 
-  ## @view can be used by classes to access some view specific features like render
+  ## @view can be used by classes to access view specific features like render
   def create_view_instance_variable
     @view = view_context
   end
@@ -157,7 +164,8 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(text: "Robots are not allowed on this page.", status: 403, layout: false)
+    render(text: "Robots are not allowed on this page.", status: 403,
+           layout: false)
     false
   end
 
@@ -173,49 +181,57 @@ class ApplicationController < ActionController::Base
   layout :choose_layout
   def choose_layout
     change = params[:user_theme].to_s
-    unless change.blank?
-      if MO.themes.member?(change)
-        if @user
-          @user.theme = change
-          @user.save
-        else
-          session[:theme] = change
-        end
-      else
-        session[:layout] = change
-      end
-    end
+    change_theme_to(change) if change.present?
     layout = session[:layout].to_s
     layout = "application" if layout.blank?
     layout
   end
 
-  # Catch errors for integration tests, and report stats about completed request.
+  def change_theme_to(change)
+    if MO.themes.member?(change)
+      if @user
+        @user.theme = change
+        @user.save
+      else
+        session[:theme] = change
+      end
+    else
+      session[:layout] = change
+    end
+  end
+
+  # Catch errors for integration tests, and report stats re completed request.
   def catch_errors
-    start      = Time.now
+    start      = Time.current
     controller = params[:controller]
     action     = params[:action]
     robot      = browser.bot? ? "robot" : "user"
-    ip         = begin
-                   request.remote_ip
-                 rescue
-                   "unknown"
-                 end
-    url        = begin
-                   request.url
-                 rescue
-                   "unknown"
-                 end
-    ua         = begin
-                   browser.ua
-                 rescue
-                   "unknown"
-                 end
+    ip         = catch_ip
+    url        = catch_url
+    ua         = catch_ua
     yield
-    logger.warn("TIME: #{Time.now - start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
+    logger.warn("TIME: #{Time.current - start} #{status}"\
+                "#{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
-    @error = e
-    raise e
+    raise @error = e
+  end
+
+  def catch_ip
+    request.remote_ip
+  rescue
+    "unknown"
+  end
+
+  def catch_url
+    request.url
+  rescue
+    "unknown"
+  end
+
+  def catch_ua
+    browser.ua
+  rescue
+    "unknown"
   end
 
   # Update Globalite with any recent changes to translations.
@@ -223,9 +239,9 @@ class ApplicationController < ActionController::Base
     Language.update_recent_translations
   end
 
-  # Keep track of localization strings so that users can edit them (sort of) in situ.
+  # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by_locale(I18n.locale)
+    @language = Language.find_by(locale: I18n.locale)
     if @user && @language &&
        (!@language.official || is_reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -242,9 +258,9 @@ class ApplicationController < ActionController::Base
 
   # Redirect from www.mo.org to mo.org.
   #
-  # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
-  # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  MO.bad_domains would be something like:
+  # This would be much easier to check if HTTP_HOST != MO.domain, but if this
+  # ever were to break we'd get into an infinite loop too easily that way.
+  # I think this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
@@ -287,67 +303,95 @@ class ApplicationController < ActionController::Base
   # destroyed.
   #
   def autologin
-    # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
+    # render(text: "Sorry, we've taken MO down to test something urgent."\
+    #              "We'll be back in a few minutes. -Jason", layout: false)
     # return false
 
     # if browser.bot?
-    #   render(:status => 503, :text => "robots are temporarily blocked from MO", :layout => false)
+    #   render(status: 503, text: "robots are temporarily blocked from MO",
+    #          layout: false)
     #   return false
     # end
 
     # Guilty until proven innocent...
-    @user = nil
-    User.current = nil
+    clear_user_globals
 
     # Do nothing if already logged in: if user asked us to remember him the
     # cookie will already be there, if not then we want to leave it out.
-    if (user = get_session_user) &&
-       (user.verified)
-      @user = user
-      @user.reload
+    if (user = get_session_user) && user.verified
+      refresh_logged_in_user_instance(user)
 
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"]) &&
           (split = cookie.split(" ")) &&
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
-          (user.verified)
-      @user = set_session_user(user)
-      @user.last_login = Time.now
-      @user.save
-
-      # Reset cookie to push expiry forward.  This way it will continue to
-      # remember the user until they are inactive for over a month.  (Else
-      # they'd have to login every month, no matter how often they login.)
-      set_autologin_cookie(user)
-
-    # Delete invalid cookies.
-    else
-      clear_autologin_cookie
-      set_session_user(nil)
+          user.verified
+      login_valid_user(user)
+    else delete_invalid_cookies
     end
 
-    # Make currently logged-in user available to everyone.
+    make_logged_in_user_available_to_everyone
+    track_last_page_request_by_user
+    block_suspended_users
+  end
+
+  def clear_user_globals
+    @user = nil
+    User.current = nil
+  end
+
+  def refresh_logged_in_user_instance(user)
+    @user = user
+    @user.reload
+  end
+
+  def login_valid_user(user)
+    @user = set_session_user(user)
+    @user.last_login = Time.current
+    @user.save
+
+    # Reset cookie to push expiry forward.  This way it will continue to
+    # remember the user until they are inactive for over a month.  (Else
+    # they'd have to login every month, no matter how often they login.)
+    set_autologin_cookie(user)
+  end
+
+  def delete_invalid_cookies
+    clear_autologin_cookie
+    set_session_user(nil)
+  end
+
+  def make_logged_in_user_available_to_everyone
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : "0"} robot=#{browser.bot? ? "Y" : "N"}")
+    logger.warn("user=#{@user ? @user.id : "0"}" \
+                "robot=#{browser.bot? ? "Y" : "N"}")
+  end
 
-    # Keep track of last time user requested a page, but only update at most once an hour.
+  # Track when user requested a page, but update at most once an hour.
+  def track_last_page_request_by_user
     if @user && (
-      !@user.last_activity ||
-      @user.last_activity.to_s("%Y%m%d%H") != Time.now.to_s("%Y%m%d%H")
+        !@user.last_activity ||
+        @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H")
     )
-      @user.last_activity = Time.now
+      @user.last_activity = Time.current
       @user.save
     end
+  end
 
-    # Kick Byrain off the site.
-    if @user && @user.id == 2750
-      render(:text => "Your account has been temporarily suspended.", :layout => false)
-      return false
-    end
+  def block_suspended_users
+    return true unless user_suspended? # Tell Rails to continue processing.
+    block user
+    false                              # Tell Rails to stop processing.
+  end
 
-    # Tell Rails to continue to process.
-    true
+  def user_suspended?
+    @user && @user.id == 2750 # Kick Byrain off the site.
+  end
+
+  def block_user
+    render(text: "Your account has been temporarily suspended.",
+           layout: false)
   end
 
   # ----------------------------
@@ -362,22 +406,26 @@ class ApplicationController < ActionController::Base
   #   end %>
   #
   def check_permission(obj)
-    result = false
-    if is_in_admin_mode?
-      result = true
-    elsif obj.respond_to?(:user_id) &&
-          User.current_id == obj.user_id
-      result = true
-    elsif obj.respond_to?(:has_edit_permission?) &&
-          obj.has_edit_permission?(User.current)
-      result = true
-    elsif (obj.is_a?(String) || obj.is_a?(Fixnum)) &&
-          obj.to_i == User.current_id
-      result = true
-    end
-    result
+    is_in_admin_mode? || correct_user_for_object?(obj)
   end
   helper_method :check_permission
+
+  def correct_user_for_object?(obj)
+    owned_by_user?(obj) || editable_by_user?(obj) || obj_is_user?(obj)
+  end
+
+  def owned_by_user?(obj)
+    obj.respond_to?(:user_id) && User.current_id == obj.user_id
+  end
+
+  def editable_by_user?(obj)
+    obj.respond_to?(:has_edit_permission?) &&
+      obj.has_edit_permission?(User.current)
+  end
+
+  def obj_is_user?(obj)
+    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == User.current_id
+  end
 
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  Flashes a "denied" error message if false.
@@ -392,7 +440,7 @@ class ApplicationController < ActionController::Base
   #   end
   #
   def check_permission!(obj)
-    unless result = check_permission(obj)
+    unless (result = check_permission(obj))
       flash_error :permission_denied.t
     end
     result
@@ -425,15 +473,13 @@ class ApplicationController < ActionController::Base
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
   def has_unshown_notifications?(user, flavor = :naming)
     result = false
-    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-    for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
+    QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
       ints = q.get_integers(%w(shown notification), true)
-      unless ints["shown"]
-        notification = Notification.safe_find(ints["notification"].to_i)
-        if notification && notification.note_template
-          result = true
-          break
-        end
+      next if ints["shown"]
+      notification = Notification.safe_find(ints["notification"].to_i)
+      if notification && notification.note_template
+        result = true
+        break
       end
     end
     result
@@ -446,7 +492,7 @@ class ApplicationController < ActionController::Base
   # Before filter: check if the current User has an alert.  If so, it redirects
   # to <tt>/account/show_alert</tt>.  Returns true.
   def check_user_alert
-    if @user && @user.alert && @user.alert_next_showing < Time.now &&
+    if @user && @user.alert && @user.alert_next_showing < Time.current &&
        # Careful not to start infinite redirect-loop!
        action_name != "show_alert"
       redirect_to(controller: :account, action: :show_alert)
@@ -503,30 +549,12 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    code = if params[:user_locale]
-             logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
-             params[:user_locale]
-           elsif @user && !@user.locale.blank? && params[:controller] != "ajax"
-             logger.debug "[I18n] loading locale: #{@user.locale} from @user"
-             @user.locale
-           elsif session[:locale]
-             logger.debug "[I18n] loading locale: #{session[:locale]} from session"
-             session[:locale]
-           elsif locale = get_valid_locale_from_request_header
-             logger.debug "[I18n] loading locale: #{locale} from request header"
-             locale
-           else
-             MO.default_locale
-    end
+    code = specified_locale || MO.default_locale
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    code = code.split("-")[0]
-    if I18n.locale.to_s != code
-      I18n.locale = code
-      session[:locale] = code
-    end
+    change_locale_if_needed(code)
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
@@ -537,6 +565,41 @@ class ApplicationController < ActionController::Base
 
     # Tell Rails to continue to process request.
     true
+  end
+
+  def specified_locale
+    params_locale || prefs_locale || session_locale || browser_locale
+  end
+
+  def params_locale
+    return unless params[:user_locale]
+    logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
+    params[:user_locale]
+  end
+
+  def prefs_locale
+    return unless @user && !@user.locale.blank? && params[:controller] != "ajax"
+    logger.debug "[I18n] loading locale: #{@user.locale} from @user"
+    @user.locale
+  end
+
+  def session_locale
+    return unless session[:locale]
+    logger.debug "[I18n] loading locale: #{session[:locale]} from session"
+    session[:locale]
+  end
+
+  def browser_locale
+    return unless (locale = valid_locale_from_request_header)
+    logger.debug "[I18n] loading locale: #{locale} from request header"
+    locale
+  end
+
+  def change_locale_if_needed(code)
+    new_locale = code.split("-")[0]
+    return if I18n.locale.to_s == new_locale
+    I18n.locale = new_locale
+    session[:locale] = new_locale
   end
 
   # Before filter: Set timezone based on cookie set in application layout.
@@ -561,20 +624,19 @@ class ApplicationController < ActionController::Base
   #
   #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
   #
-  def get_sorted_locales_from_request_header
+  def sorted_locales_from_request_header
     result = []
-    if accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"]
+    if (accepted_locales = request.env["HTTP_ACCEPT_LANGUAGE"])
 
       # Extract locales and weights, creating map from locale to weight.
       locale_weights = {}
       accepted_locales.split(",").each do |term|
-        if (term + ";q=1") =~ /^(.+?);q=([^;]+)/
-          locale_weights[Regexp.last_match(1)] = (begin
-                                                    Regexp.last_match(2).to_f
-                                                  rescue
-                                                    -1.0
-                                                  end)
-        end
+        next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+        locale_weights[Regexp.last_match(1)] = (begin
+                                                  Regexp.last_match(2).to_f
+                                                rescue
+                                                  -1.0
+                                                end)
       end
 
       # Now sort by decreasing weights.
@@ -587,14 +649,14 @@ class ApplicationController < ActionController::Base
 
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
-  def get_valid_locale_from_request_header
+  def valid_locale_from_request_header
     # Get list of languages browser requested, sorted in the order it prefers
     # them.
-    requested_locales = get_sorted_locales_from_request_header.map do |locale|
-      if locale.match(/^(\w\w)-(\w+)$/)
-        locale = Regexp.last_match(1).downcase
+    requested_locales = sorted_locales_from_request_header.map do |locale|
+      if locale =~ /^(\w\w)-(\w+)$/
+        Regexp.last_match(1).downcase
       else
-        locale = locale.downcase
+        locale.downcase
       end
     end
 
@@ -608,7 +670,7 @@ class ApplicationController < ActionController::Base
     match = "en"
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
-      language, region = locale.split("-")
+      language = locale.split("-").first
 
       if I18n.available_locales.include?(language.to_sym)
         match = language
@@ -705,9 +767,8 @@ class ApplicationController < ActionController::Base
   helper_method :flash_error
 
   def flash_object_errors(obj)
-    if obj && obj.errors && (obj.errors.size > 0)
-      flash_error(obj.formatted_errors.join("<br/>"))
-    end
+    return unless obj && obj.errors && !obj.errors.empty?
+    flash_error(obj.formatted_errors.join("<br/>"))
   end
 
   def save_with_log(obj)
@@ -756,16 +817,14 @@ class ApplicationController < ActionController::Base
   #   (this is described better in views/observer/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
-    if approved_names
-      if approved_names.is_a?(String)
-        approved_names = approved_names.split(/\r?\n/)
-      end
-      for ns in name_list.split("\n")
-        unless ns.blank?
-          name_parse = NameParse.new(ns)
-          construct_approved_name(name_parse, approved_names, deprecate)
-        end
-      end
+    return unless approved_names
+    if approved_names.is_a?(String)
+      approved_names = approved_names.split(/\r?\n/)
+    end
+    name_list.split("\n").each do |ns|
+      next if ns.blank?
+      name_parse = NameParse.new(ns)
+      construct_approved_name(name_parse, approved_names, deprecate)
     end
   end
 
@@ -774,80 +833,96 @@ class ApplicationController < ActionController::Base
   def construct_approved_name(name_parse, approved_names, deprecate)
     # Don't do anything if the given names are not approved
     if approved_names.member?(name_parse.name)
-
-      # Create name object for this name (and any parents, such as genus).
-      names = Name.find_or_create_name_and_parents(name_parse.search_name)
-
-      # Parse must have failed.
-      if names.last.nil?
-        flash_error :runtime_no_create_name.t(type: :name,
-                                              value: name_parse.name)
-
-      # Was successful.
-      else
-        name = names.last
-        name.rank = name_parse.rank if name_parse.rank
-
-        # Process comments (for bulk name editor).
-        if comment = name_parse.comment
-          # Okay to add citation to any record without an existing citation.
-          if comment.match(/^citation: *(.*)/)
-            citation = Regexp.last_match(1)
-            name.citation = citation if name.citation.blank?
-          # Only save comment if name didn't exist
-          elsif name.new_record?
-            name.notes = comment
-          else
-            flash_warning("Didn't save comment for #{name.real_search_name}, " \
-                          "name already exists. (comment = \"#{comment}\")")
-          end
-        end
-
-        # Only bulk name editor allows the synonym syntax now.  Tell it to
-        # approve the left-hand name.
-        deprecate2 = deprecate
-        deprecate2 = false if name_parse.has_synonym
-
-        # Save the names (deals with deprecation here).
-        Name.save_names(names, deprecate2)
-        names.each { |n| flash_object_errors(n) }
-      end
+      # Build just the given names (not synonyms)
+      construct_given_name(name_parse, deprecate)
     end
 
     # Do the same thing for synonym (found the Approved = Synonym syntax).
-    if name_parse.has_synonym &&
-       approved_names.member?(name_parse.synonym)
+    return unless name_parse.has_synonym &&
+                  approved_names.member?(name_parse.synonym)
+    construct_synonyms(name_parse)
+  end
 
-      # Create the synonym.
-      synonyms = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+  def construct_given_name(name_parse, deprecate)
+    # Create name object for this name (and any parents, such as genus).
+    names = Name.find_or_create_name_and_parents(name_parse.search_name)
 
-      # Parse must have failed.
-      if synonyms.last.nil?
-        flash_error :runtime_no_create_name.t(type: :name,
-                                              value: name_parse.synonym)
+    # if above parse was successful
+    if (name = names.last)
+      name.rank = name_parse.rank if name_parse.rank
 
-      # Was successful.
-      else
-        synonym = synonyms.last
-        synonym.rank = name_parse.synonym_rank if name_parse.synonym_rank
+      process_given_name_comments_for_bulk_editor(name_parse, name)
 
-        # Process comments (for bulk name editor).
-        if comment = name_parse.synonym_comment
-          # Only save comment if name didn't exist
-          if synonym.new_record?
-            synonym.notes = comment
-          else
-            flash_warning("Didn't save comment for #{synonym.real_search_name}, " \
-                          "name already exists. (comment = \"#{comment}\")")
-          end
-        end
+      # Only bulk name editor allows the synonym syntax now.  Tell it to
+      # approve the left-hand name.
+      deprecate2 = (name_parse.has_synonym ? false : deprecate)
 
-        # Deprecate and save.
-        synonym.change_deprecated(true)
-        synonym.save_with_log(:log_deprecated_by, touch: true)
-        Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
-      end
+      save_approved_given_names(names, deprecate2)
+
+    # Parse must have failed.
+    else
+      flash_error :runtime_no_create_name.t(type: :name,
+                                            value: name_parse.name)
     end
+  end
+
+  def process_given_name_comments_for_bulk_editor(name_parse, name)
+    return unless (comment = name_parse.comment)
+
+    # Okay to add citation to any record without an existing citation.
+    if comment =~ /^citation: *(.*)/
+      citation = Regexp.last_match(1)
+      name.citation = citation if name.citation.blank?
+    # Only save comment if name didn't exist
+    elsif name.new_record?
+      name.notes = comment
+    else
+      flash_warning("Didn't save comment for #{name.real_search_name}, " \
+                    "name already exists. (comment = \"#{comment}\")")
+    end
+  end
+
+  def save_approved_given_names(names, deprecate2)
+    Name.save_names(names, deprecate2)
+    names.each { |n| flash_object_errors(n) }
+  end
+
+  def construct_synonyms(name_parse)
+    synonyms = create_synonym(name_parse)
+
+    # Parse was successful
+    if (synonym = synonyms.last)
+      synonym.rank = name_parse.synonym_rank if name_parse.synonym_rank
+      process_synonym_comments_for_bulk_editor(name_parse, synonym)
+      save_synonyms(synonym, synonyms)
+
+    # Parse must have failed.
+    else
+      flash_error :runtime_no_create_name.t(type: :name,
+                                            value: name_parse.synonym)
+    end
+  end
+
+  def create_synonym(name_parse)
+    Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+  end
+
+  def process_synonym_comments_for_bulk_editor(name_parse, synonym)
+    return unless (comment = name_parse.synonym_comment)
+    # Only save comment if name didn't exist
+    if synonym.new_record?
+      synonym.notes = comment
+    else
+      flash_warning("Didn't save comment for #{synonym.real_search_name}, " \
+                    "name already exists. (comment = \"#{comment}\")")
+    end
+  end
+
+  # Deprecate and save.
+  def save_synonyms(synonym, synonyms)
+    synonym.change_deprecated(true)
+    synonym.save_with_log(:log_deprecated_by, touch: true)
+    Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
   end
 
   ##############################################################################
@@ -923,6 +998,19 @@ class ApplicationController < ActionController::Base
   def url_with_query(args)
     url_for(add_query_param(args))
   end
+
+  def coerced_query_link(query, model)
+    return nil unless query && query.coercable?(model.name.to_sym)
+    link_args = {
+      controller: model.show_controller,
+      action: model.index_action
+    }
+    return [
+      :show_objects.t(type: model.type_tag),
+      add_query_param(link_args, query)
+    ]
+  end
+  helper_method :coerced_query_link
 
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
@@ -1142,7 +1230,7 @@ class ApplicationController < ActionController::Base
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links::
+  # @links:         Extra links to add to right hand tab set.
   # @sorts::
   # @layout::
   # @pages::        Paginator instance.
@@ -1161,11 +1249,7 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type = query.model.type_tag
 
-#     # Apply content filter to any queries which are capable of being filtered.
-#     if query.respond_to?(:observation_filters)
-#       filter_params = @user ? @user.content_filter : MO.default_content_filter
-#       query.params.merge!(filter_params)
-#     end
+    apply_content_filters(query)
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1308,6 +1392,26 @@ class ApplicationController < ActionController::Base
       # Render the list if given template.
       render(action: args[:action]) if args[:action]
     end
+  end
+
+  def apply_content_filters(query)
+    filters = users_content_filters || {}
+    @any_content_filters_applied = false
+    ContentFilter.all.each do |fltr|
+      key = fltr.sym
+      # applicable to this query?
+      next unless query.takes_parameter?(key)
+      # overridden by search, etc.?
+      next if query.params.key?(key)
+      # in user's content filter?
+      next unless filters.key?(key)
+      query.params[key] = filters[key]
+      @any_content_filters_applied = true
+    end
+  end
+
+  def users_content_filters
+    @user ? @user.content_filter : MO.default_content_filter
   end
 
   # Create sorting links for index pages, "graying-out" the current order.

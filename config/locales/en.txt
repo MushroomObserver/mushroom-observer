@@ -199,6 +199,7 @@
   external_link: external link
   EXTERNAL_LINKS: External Links
   external_links: external links
+  filtered: filtered
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -1483,11 +1484,12 @@
   name_map_no_maps: No observations of [name] have mappable location information.
 
   # observer/news
-  news_title: "Latest Release: December 22, 2016"
+  news_title: "Latest Release: December 27, 2016"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
-  news_content: "[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+  news_content: "[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
 
   # observer/news individual updates
+  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
   news_content_pr_256: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/256\">PR #256</a> (December 25, 2016) Made it so users who have only proposed a name for an observation will get comment response notifications, instead of requiring users to comment in order to get comment response notifications."
   news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
   news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\".  If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
@@ -1560,6 +1562,12 @@
   prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
 
+  prefs_content_filters: Content Filters
+  prefs_content_filters_explanation: Control content visibility site-wide, except [:app_advanced_search].
+  prefs_obs_filters: Observation Filters
+  prefs_obs_filters_explanation: Control Observation visibility
+  prefs_obs_filters_has_images: Hide Observations with no images
+  prefs_obs_filters_has_specimen: Hide Observations with no specimens
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -1633,6 +1641,7 @@
   rss_log_title: Activity Log
   rss_by: by [user]
   rss_title: "[:app_title]"
+  rss_filtered_mouseover: "[:app_title] has applied filter(s), including any filter(s) in your preferences or search parameters."
   rss_show: "Show:"
   rss_hide: "Hide:"
   rss_all: Everything
@@ -2257,6 +2266,19 @@
   advanced_search_observer_help: Who observed the mushroom
   advanced_search_result_type: Result Type
   advanced_search_result_type_help: Do you want [:observations], [:images] or [:names]/[:descriptions]?
+
+  advanced_search_filters: Search Filters
+  advanced_search_filters_explain: Apply to this search only, override any user Content Filters
+  advanced_search_filters_observation: Observation Filters
+
+  advanced_search_filter_has_images: Filter Observations based on whether they have images
+  advanced_search_filter_has_images_off: Include both imaged and imageless Observations
+  advanced_search_filter_has_images_yes: Exclude imageless Observations
+  advanced_search_filter_has_images_no: Exclude imaged Observations
+  advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
+  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
+  advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
+  advanced_search_filter_has_specimen_no: Exclude vouchered Observations
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater

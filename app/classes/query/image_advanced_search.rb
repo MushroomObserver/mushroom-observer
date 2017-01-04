@@ -1,16 +1,25 @@
-class Query::ImageAdvancedSearch < Query::ImageBase
-  include Query::Initializers::AdvancedSearch
+module Query
+  # Advanced image search.
+  class ImageAdvancedSearch < Query::ImageBase
+    include Query::Initializers::AdvancedSearch
 
-  def parameter_declarations 
-    super.merge(
-      advanced_search_parameter_declarations
-    )
-  end
+    def parameter_declarations
+      super.merge(
+        advanced_search_parameter_declarations
+      )
+    end
 
-  def initialize_flavor
+    def initialize_flavor
+      return if handle_content_search!
+      add_join(:images_observations, :observations)
+      initialize_advanced_search
+      super
+    end
+
     # This case is a disaster.  Perform it as an observation query, then
     # coerce into images.
-    if !params[:content].blank?
+    def handle_content_search!
+      return false if params[:content].blank?
       self.executor = lambda do |args|
         args2 = args.dup
         args2.delete(:select)
@@ -23,23 +32,18 @@ class Query::ImageAdvancedSearch < Query::ImageBase
         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
         model.connection.select_rows(query(args2))
       end
-      return
     end
 
-    add_join(:images_observations, :observations)
-    initialize_advanced_search
-    super
-  end
+    def add_join_to_names
+      add_join(:observations, :names)
+    end
 
-  def add_join_to_names
-    add_join(:observations, :names)
-  end
+    def add_join_to_users
+      add_join(:observations, :users)
+    end
 
-  def add_join_to_users
-    add_join(:observations, :users)
-  end
-
-  def add_join_to_locations
-    add_join(:observations, :locations!)
+    def add_join_to_locations
+      add_join(:observations, :locations!)
+    end
   end
 end

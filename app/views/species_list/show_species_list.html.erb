@@ -73,14 +73,12 @@
 
           <div class="list-group-item default">
             <%= :species_list_show_members.t %>:
-            <%= link_with_query(:show_objects.t(type: :observation),
-                                controller: :observer, action: :index_observation) %> |
-            <%= link_with_query(:show_objects.t(type: :image),
-                                controller: :image, action: :index_image) %> |
-            <%= link_with_query(:show_objects.t(type: :name),
-                                controller: :name, action: :index_name) %> |
+            <%= link_to_coerced_query(@query, Observation) %> |
+            <%= link_to_coerced_query(@query, Image) %> |
+            <%= link_to_coerced_query(@query, Name) %> |
             <%= link_to(:app_checklist.t,
-                        controller: :observer, action: :checklist,
+                        controller: :observer,
+                        action: :checklist,
                         species_list_id: @species_list.id) %>
             <% if Rails.env == "development" || is_reviewer? %>
                 | <%= link_to(:species_list_show_print_labels.t,

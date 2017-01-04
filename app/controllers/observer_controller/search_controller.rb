@@ -51,37 +51,41 @@ class ObserverController
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
   #   image/advanced_search
+  #   location/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
     return unless request.method == "POST"
-
     model = params[:search][:type].to_s.camelize.constantize
+    query_params = {}
+    add_filled_in_text_fields(query_params)
+    add_applicable_filter_parameters(query_params, model)
+    query = create_query(model, :advanced_search, query_params)
+    redirect_to(add_query_param({ controller: model.show_controller,
+                                  action: :advanced_search },
+                                query))
+  end
 
-    # Pass along all given search fields (remove angle-bracketed user name,
-    # though, since it was only included by the auto-completer as a hint).
-    search = {}
-    unless (x = params[:search][:name].to_s).blank?
-      search[:name] = x
+  def add_filled_in_text_fields(query_params)
+    [:content, :location, :name, :user].each do |field|
+      val = params[:search][field].to_s
+      next unless val.present?
+      # Treat User field differently; remove angle-bracketed user name,
+      # since it was included by the auto-completer only as a hint.
+      if field == :user
+        val = val.sub(/ <.*/, "")
+      end
+      query_params[field] = val
     end
-    unless (x = params[:search][:location].to_s).blank?
-      search[:location] = x
-    end
-    unless (x = params[:search][:user].to_s).blank?
-      search[:user] = x.sub(/ <.*/, "")
-    end
-    unless (x = params[:search][:content].to_s).blank?
-      search[:content] = x
-    end
+  end
 
-    # Create query (this just validates the parameters).
-    query = create_query(model, :advanced_search, search)
-
-    # Let the individual controllers execute and render it.
-    redirect_to(add_query_param({
-                                  controller: model.show_controller,
-                                  action: "advanced_search"
-                                }, query))
+  def add_applicable_filter_parameters(query_params, model)
+    ContentFilter.all.each do |fltr|
+      next unless model == fltr.model
+      val = params[fltr.sym]
+      val = fltr.off_val if val == "off"
+      query_params[fltr.sym] = val
+    end
   end
 
   # Displays matrix of advanced search results.

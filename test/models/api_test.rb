@@ -288,7 +288,7 @@ class ApiTest < UnitTestCase
       latitude:      "39.229°N",
       longitude:     "123.770°W",
       altitude:      "50m",
-      has_specimen:  "yes",
+      has_specimen: "yes",
       name:          "Coprinus comatus",
       vote:          "2",
       projects:      @proj.id,

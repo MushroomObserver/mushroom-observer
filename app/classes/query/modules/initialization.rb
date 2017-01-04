@@ -23,6 +23,12 @@ module Query::Modules::Initialization
     initialize_order
   end
 
+  def initialize_in_set_flavor(table) 
+    set = clean_id_set(params[:ids])
+    where << "#{table}.id IN (#{set})"
+    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+  end
+
   def initialize_model_do_boolean(arg, true_cond, false_cond)
     @where << (params[arg] ? true_cond : false_cond) unless params[arg].nil?
   end

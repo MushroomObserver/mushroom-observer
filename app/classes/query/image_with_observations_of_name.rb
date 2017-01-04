@@ -1,37 +1,36 @@
-class Query::ImageWithObservationsOfName < Query::ImageBase
-  include Query::Initializers::ObservationFilters
-  include Query::Initializers::OfName
+module Query
+  # Images with observations of a given name.
+  class ImageWithObservationsOfName < Query::ImageBase
+    include Query::Initializers::ObservationFilters
+    include Query::Initializers::OfName
 
-  def parameter_declarations
-    super.merge(
-      name:          :name,
-      synonyms?:     { string: [:no, :all, :exclusive] },
-      nonconsensus?: { string: [:no, :all, :exclusive] },
-      project?:      Project,
-      species_list?: SpeciesList,
-      user?:         User
-    ).merge(observation_filter_parameter_declarations)
-  end
+    def parameter_declarations
+      super.merge(
+        old_by?: :string
+      ).merge(of_name_parameter_declarations).
+        merge(observation_filter_parameter_declarations)
+    end
 
-  def initialize_flavor
-    give_parameter_defaults
-    names = get_target_names
-    choose_a_title(names)
-    add_join(:images_observations, :observations)
-    add_name_conditions(names)
-    restrict_to_one_project
-    restrict_to_one_species_list
-    restrict_to_one_user
-    title_args[:tag] = title_args[:tag].to_s.sub("title", "title_with_observations").to_sym
-    initialize_observation_filters
-    super
-  end
+    def initialize_flavor
+      give_parameter_defaults
+      names = target_names
+      choose_a_title(names, :with_observation)
+      add_join(:images_observations, :observations)
+      add_name_conditions(names)
+      initialize_observation_filters
+      super
+    end
 
-  def add_join_to_observations(table)
-    add_join(:observations, table)
-  end
+    def add_join_to_observations(table)
+      add_join(:observations, table)
+    end
 
-  def default_order
-    "name"
+    def default_order
+      "name"
+    end
+
+    def coerce_into_observation_query
+      Query.lookup(:Observation, :of_name, params_with_old_by_restored)
+    end
   end
 end

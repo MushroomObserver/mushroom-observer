@@ -9,7 +9,7 @@ Content-Transfer-Encoding: quoted-printable
 
 Author Request
 
-Katrina (katrina@collectivesource.com) asked the Mushroom Observer websit=
+<%= (User.find(ActiveRecord::FixtureSet.identify(:katrina)).name) %> (katrina@collectivesource.com) asked the Mushroom Observer websit=
 e to forward the following request to you regarding Coprinus comatus (O.F=
 . M=C3=BCll.) Pers. (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>):
 
