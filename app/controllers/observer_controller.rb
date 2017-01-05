@@ -885,14 +885,7 @@ class ObserverController < ApplicationController
     @mappable = query && query.coercable?(:Location)
 
     # Provide a list of user's votes to view.
-    if @user
-      @votes = {}
-      @observation.namings.each do |naming|
-        vote = naming.votes.find { |x| x.user_id == @user.id }
-        vote ||= Vote.new(value: 0)
-        @votes[naming.id] = vote
-      end
-    end
+    @votes = gather_users_votes(@observation, @user) if @user
   end
 
   def show_obs

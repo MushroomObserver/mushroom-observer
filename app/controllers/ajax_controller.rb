@@ -239,7 +239,14 @@ class AjaxController < ApplicationController
       fail "Invalid id for vote/naming: #{id.inspect}"
     else
       @naming.change_vote(value, @user)
-      render(text: "")
+      @observation = @naming.observation
+      @votes = gather_users_votes(@observation, @user)
+      render(inline: %(<div>
+        <%= content_tag(:div, show_obs_title(@observation),
+              title: show_obs_title(@observation).strip_html.html_safe) %>
+        <%= content_tag(:div, render(partial: 'naming/show',
+              locals: { observation: @observation })) %>
+      </div>))
     end
   end
 
