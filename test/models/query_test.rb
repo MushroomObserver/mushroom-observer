@@ -2394,13 +2394,18 @@ class QueryTest < UnitTestCase
 
     ##### location filter #####
     expect = Location.where("name LIKE '%California%'")
-    assert_query(expect, :Location, :all, location_filter: "California, USA")
-    assert_query(expect, :Location, :all, location_filter: "USA, California")
+    assert_query(expect, :Location, :all, region: "California, USA")
+    assert_query(expect, :Location, :all, region: "USA, California")
 
     expect = Observation.where("`where` LIKE '%California, USA'") +
       Observation.joins(:location).where("locations.name LIKE '%California%'")
     assert_query(expect.sort_by(&:id), :Observation, :all,
-                 location_filter: "California, USA", by: :id)
+                 region: "California, USA", by: :id)
+
+    expect = Location.where("name LIKE '%, USA' OR name LIKE '%, Canada'")
+    assert(expect.include?(locations(:albion))) # usa
+    assert(expect.include?(locations(:elgin_co))) # canada
+    assert_query(expect, :Location, :all, region: "North America")
 
     ##### lichen filters #####
     # peltigera = names(:peltigera)

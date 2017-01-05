@@ -3,9 +3,9 @@ require "test_helper"
 
 class ContentFilterTest < UnitTestCase
   def test_filters
-    assert_equal([:has_images, :has_specimen, :location_filter],
+    assert_equal([:has_images, :has_specimen, :region],
                  ContentFilter.all.map(&:sym))
-    assert_equal([:location_filter],
+    assert_equal([:region],
                  ContentFilter.by_model(Location).map(&:sym))
   end
 

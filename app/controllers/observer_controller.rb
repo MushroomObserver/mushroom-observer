@@ -544,7 +544,7 @@ class ObserverController < ApplicationController
   def advanced_search_form # :nologin: :norobots:
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
-    model = params[:search][:type].to_s.camelize.constantize
+    model = params[:search][:model].to_s.camelize.constantize
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)

@@ -1563,7 +1563,7 @@
   prefs_content_filters_explanation: Control content visibility site-wide.
   prefs_filters_has_images: Hide Observations with no images
   prefs_filters_has_specimen: Hide Observations with no specimens
-  prefs_filters_location_filter: Show only Observations and Locations within this state and/or country
+  prefs_filters_region: Show only Observations and Locations within this region
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -2270,7 +2270,7 @@
   advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
   advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
   advanced_search_filter_has_specimen_no: Exclude vouchered Observations
-  advanced_search_filter_location_filter: "Include only Observations and Locations within this state and/or country, e.g., \"California, USA\""
+  advanced_search_filter_region: "Restrict Observations and Locations to a region, e.g., \"California, USA\" or \"Europe\""
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater

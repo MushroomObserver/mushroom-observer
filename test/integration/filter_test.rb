@@ -60,8 +60,8 @@ class FilterTest < IntegrationTestCase
                "Unchecking and saving should turn off filter")
     assert_nil(user.content_filter[:has_specimen],
                "Has specimen filter should be off")
-    assert_blank(user.content_filter[:location_filter],
-               "Location filter should be off")
+    assert_blank(user.content_filter[:region],
+               "Region filter should be off")
 
     # Repeat the search
     fill_in("search_pattern", with: obs.name.text_name)

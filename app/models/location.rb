@@ -353,6 +353,7 @@ class Location < AbstractModel
     end
   end
 
+  UNDERSTOOD_CONTINENTS = load_param_hash(MO.location_continents_file)
   UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
@@ -392,6 +393,14 @@ class Location < AbstractModel
 
   def self.understood_country?(candidate)
     understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
+  end
+
+  def self.understood_continent?(candidate)
+    UNDERSTOOD_CONTINENTS.key?(candidate)
+  end
+
+  def self.countries_in_continent(a_continent)
+    UNDERSTOOD_CONTINENTS[a_continent]
   end
 
   def self.countries_by_count

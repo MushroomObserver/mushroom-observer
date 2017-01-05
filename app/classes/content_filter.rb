@@ -41,24 +41,9 @@ class ContentFilter
   # Array of all available filters.
   def self.all
     @@filters ||= [
-      ContentFilter::BooleanFilter.new(
-        sym:         :has_images,
-        models:      [Observation],
-        on_vals:     ["yes", "no"],
-        checked_val: "yes",
-        off_val:     nil
-      ),
-      ContentFilter::BooleanFilter.new(
-        sym:         :has_specimen,
-        models:      [Observation],
-        on_vals:     ["yes", "no"],
-        checked_val: "yes",
-        off_val:     nil
-      ),
-      ContentFilter::StringFilter.new(
-        sym:         :location_filter,
-        models:      [Observation, Location]
-      )
+      HasImages.new,
+      HasSpecimen.new,
+      Region.new
     ]
   end
 

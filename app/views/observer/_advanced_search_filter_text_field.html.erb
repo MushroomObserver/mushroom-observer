@@ -1,5 +1,4 @@
-<div class="form-inline">
-  <%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
-  <%= text_field_tag(:"content_filter_#{filter.sym}",
-                     @filter_defaults[filter.sym]) %><br/>
-</div>
+<%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
+<%= text_field_tag(:"content_filter_#{filter.sym}",
+                   @filter_defaults[filter.sym]) %><br/>
+<br/>

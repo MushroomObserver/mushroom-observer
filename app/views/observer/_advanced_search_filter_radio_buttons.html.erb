@@ -1,17 +1,10 @@
-<%# Per filter, render: (1) a caption proceeding its radio buttons, and
-    (2) each radio button with a label. %>
-<div class="form-inline">
-  <%# Caption %>
-  <%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
-  <%# One radio button per on value %>
-  <% filter.on_vals.each do |val| %>
-    <%= checked = @filter_defaults[filter.sym].to_s == val.to_s
-        radio_button_tag(:"content_filter_#{filter.sym}", val, checked) %>
-    <%= :"advanced_search_filter_#{filter.sym}_#{val}".l %>.<br/>
-  <% end %>
-  <%# Off radio button %>
-  <%= checked = @filter_defaults[filter.sym].to_s == filter.off_val.to_s
-      radio_button_tag(:"content_filter_#{filter.sym}", "", checked) %>
-  <%= :"advanced_search_filter_#{filter.sym}_off".l %>.<br/>
-  <br/>
-</div>
+<%= :"advanced_search_filter_#{filter.sym}".t %>.<br/>
+<% filter.on_vals.each do |val| %>
+  <%= checked = @filter_defaults[filter.sym].to_s == val.to_s
+      radio_button_tag(:"content_filter_#{filter.sym}", val, checked) %>
+  <%= :"advanced_search_filter_#{filter.sym}_#{val}".l %>.<br/>
+<% end %>
+<%= checked = @filter_defaults[filter.sym].to_s == filter.off_val.to_s
+    radio_button_tag(:"content_filter_#{filter.sym}", "", checked) %>
+<%= :"advanced_search_filter_#{filter.sym}_off".l %>.<br/>
+<br/>
