@@ -67,6 +67,11 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(:pt, I18n.locale)
     session.delete("locale")
 
+    @request.env["HTTP_ACCEPT_LANGUAGE"] = "xx-xx,pt-pt"
+    good_ajax_request(:test)
+    assert_equal(:pt, I18n.locale)
+    session.delete("locale")
+
     @request.env["HTTP_ACCEPT_LANGUAGE"] = "en-xx,en;q=0.5"
     good_ajax_request(:test)
     assert_equal(:en, I18n.locale)
