@@ -697,19 +697,14 @@ class ApplicationController < ActionController::Base
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
   def lookup_valid_locale(requested_locales)
-    match = "en"
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
       language = locale.split("-").first
-
-      if I18n.available_locales.include?(language.to_sym)
-        match = language
-        logger.debug "[globalite] language match: #{match}"
-      end
-
-      break if match
+      next unless I18n.available_locales.include?(language.to_sym)
+      logger.debug "[globalite] language match: #{language}"
+      return language
     end
-    match
+    "en"
   end
 
   ##############################################################################
