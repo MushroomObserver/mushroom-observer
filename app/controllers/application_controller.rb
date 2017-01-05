@@ -25,10 +25,10 @@
 #  in_admin_mode?::         Is the current User in admin mode?
 #  unshown_notifications?:: Are there pending Notification's of a given type?
 #  check_user_alert::       (filter: redirect to show_alert if has alert)
-#  set_autologin_cookie::   (set autologin cookie)
+#  cookie_set_autologin::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
-#  set_session_user::       (store user in session -- id only)
-#  get_session_user::       (retrieve user from session)
+#  session_set_user::       (store user in session -- id only)
+#  session_get_user::       (retrieve user from session)
 #
 #  ==== Internationalization
 #  all_locales::            Array of available locales for which we have
@@ -57,10 +57,10 @@
 #  clear_query_in_session:: Clears out Query stored in session below.
 #  store_query_in_session:: Stores Query in session for use by
 #                           create_species_list.
-#  get_query_from_session:: Gets Query that was stored in the session above.
+#  query_get_from_session:: Gets Query that was stored in the session above.
 #  query_params::           Parameters to add to link_to, etc. for passing
 #                           Query around.
-#  set_query_params::       Make +query_params+ refer to a given Query.
+#  query_set_params::       Make +query_params+ refer to a given Query.
 #  pass_query_params::      Tell +query_params+ to pass-through the Query
 #                            given to this action.
 #  find_query::             Find a given Query or return nil.
@@ -326,7 +326,7 @@ class ApplicationController < ActionController::Base
     # Guilty until proven innocent...
     clear_user_globals
 
-    try_user_autologin(get_session_user)
+    try_user_autologin(session_get_user)
     make_logged_in_user_available_to_everyone
     track_last_page_request_by_user
     block_suspended_users
@@ -369,19 +369,19 @@ class ApplicationController < ActionController::Base
   end
 
   def login_valid_user(user)
-    @user = set_session_user(user)
+    @user = session_set_user(user)
     @user.last_login = Time.current
     @user.save
 
     # Reset cookie to push expiry forward.  This way it will continue to
     # remember the user until they are inactive for over a month.  (Else
     # they'd have to login every month, no matter how often they login.)
-    set_autologin_cookie(user)
+    cookie_set_autologin(user)
   end
 
   def delete_invalid_cookies
     clear_autologin_cookie
-    set_session_user(nil)
+    session_set_user(nil)
   end
 
   def make_logged_in_user_available_to_everyone
@@ -495,17 +495,16 @@ class ApplicationController < ActionController::Base
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
   def unshown_notifications?(user, flavor = :naming)
-    result = false
     QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
       ints = q.get_integers(%w(shown notification), true)
       next if ints["shown"]
       notification = Notification.safe_find(ints["notification"].to_i)
       next unless notification && notification.note_template
 
-      result = true
-      break
+      return true
     end
-    result
+
+    false
   end
   alias has_unshown_notifications? unshown_notifications?
 
@@ -525,12 +524,13 @@ class ApplicationController < ActionController::Base
   end
 
   # Create/update the auto-login cookie.
-  def set_autologin_cookie(user)
+  def cookie_set_autologin(user)
     cookies["mo_user"] = {
       value: "#{user.id} #{user.auth_code}",
       expires: 1.month.from_now
     }
   end
+  alias set_autologin_cookie cookie_set_autologin
 
   # Destroy the auto-login cookie.
   def clear_autologin_cookie
@@ -538,16 +538,18 @@ class ApplicationController < ActionController::Base
   end
 
   # Store User in session (id only).
-  def set_session_user(user)
+  def session_set_user(user)
     session[:user_id] = user ? user.id : nil
     user
   end
+  alias set_session_user session_set_user
 
   # Retrieve the User from session.  Returns User object or nil.  (Does not
   # check verified status or anything.)
-  def get_session_user
+  def session_get_user
     User.safe_find(session[:user_id])
   end
+  alias get_session_user session_get_user
 
   ##############################################################################
   #
@@ -983,10 +985,11 @@ class ApplicationController < ActionController::Base
   end
 
   # Get Query last stored on the "clipboard" (session).
-  def get_query_from_session
+  def query_get_from_session
     return unless (id = session[:checklist_source])
     Query.safe_find(id)
   end
+  alias get_query_from_session query_get_from_session
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
@@ -1032,7 +1035,7 @@ class ApplicationController < ActionController::Base
 
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
-  def set_query_params(query = nil)
+  def query_set_params(query = nil)
     @query_params = {}
     if browser.bot?
       # do nothing
@@ -1042,7 +1045,8 @@ class ApplicationController < ActionController::Base
     end
     @query_params
   end
-  helper_method :set_query_params
+  alias set_query_params query_set_params
+  helper_method :set_query_params, :query_set_params
 
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
@@ -1050,22 +1054,13 @@ class ApplicationController < ActionController::Base
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
-    if (result = find_query(model, false))
-
-      # If existing query needs updates, we need to create a new query,
-      # otherwise the modifications won't persist.
-      # Use the existing query as the template, though.
-      if query_needs_update?(args, result)
-        result = create_query(model, result.flavor, result.params.merge(args))
-      end
-
-    # Otherwise, just create a default one.
-    else
-      result = create_query(model, :all, args)
-    end
-
+    result = existing_updated_or_default_query(model, args)
     save_query_unless_bot(result)
     result
+  end
+
+  def map_past_bys(args)
+    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
 
   BY_MAP = {
@@ -1073,14 +1068,30 @@ class ApplicationController < ActionController::Base
     "created" => :created_at
   }.freeze
 
-  def map_past_bys(args)
-    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
+  # Lookup the query and,
+  # If it exists, return it or - if its arguments need modification -
+  # a new query based on the existing one but with modified arguments.
+  # If it does not exist, resturn default query.
+  def existing_updated_or_default_query(model, args)
+    result = find_query(model, false)
+    if result
+      # If existing query needs updates, we need to create a new query,
+      # otherwise the modifications won't persist.
+      # Use the existing query as the template, though.
+      if query_needs_update?(args, result)
+        result = create_query(model, result.flavor, result.params.merge(args))
+      end
+    # If no query found, just create a default one.
+    else
+      result = create_query(model, :all, args)
+    end
+    result
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.
   def find_query(model = nil, update = !browser.bot?)
     model = model.to_s if model
-    q = query_index
+    q = dealphabetize_q_param
 
     return nil unless (query = query_exists(q))
 
@@ -1089,7 +1100,7 @@ class ApplicationController < ActionController::Base
     result
   end
 
-  def query_index
+  def dealphabetize_q_param
     params[:q].dealphabetize
   rescue
     nil
@@ -1192,7 +1203,8 @@ class ApplicationController < ActionController::Base
     # show_observation, for example, inside an RssLog query, go to the next
     # object, even if it's not an observation. If...
     if params[:q] && #                          ... query parameter given
-       (query = query_exists(query_index)) && # ... and query exists
+       #                                        ... and query exists
+       (query = query_exists(dealphabetize_q_param)) &&
        (query.model == RssLog) && #             ... and it's a RssLog query
        (rss_log = rss_log_exists) && #          ... and current rss_log exists
        query.index(rss_log) && #                ... and it's in query results
@@ -1275,7 +1287,7 @@ class ApplicationController < ActionController::Base
   #                           location.
   # clear_query_in_session::  Clears the query from the "clipboard"
   #                           (if you didn't just store this query on it!).
-  # set_query_params::        Tells +query_params+ to pass this query on
+  # query_set_params::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
@@ -1295,7 +1307,7 @@ class ApplicationController < ActionController::Base
     clear_query_in_session if session[:checklist_source] != query.id
 
     # Pass this query on when clicking on results.
-    set_query_params(query)
+    query_set_params(query)
 
     # Supply a default title.
     @title ||= query.title
