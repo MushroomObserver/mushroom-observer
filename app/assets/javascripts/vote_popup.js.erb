@@ -1,4 +1,4 @@
-function VotePopupModule(showNamingsLostChangesText) {
+function VotePopupModule(translations) {
   $(document).ready(function () {
 
     var _haveVotesChanged = false;
@@ -31,7 +31,6 @@ function VotePopupModule(showNamingsLostChangesText) {
 
       open_popup_buttons().click(function (event) {
         event.preventDefault();
-        console.log(event);
         var namingId = $(this).data("id");
         vote_popups().hide();
         $("#show_votes_" + namingId)
@@ -57,12 +56,22 @@ function VotePopupModule(showNamingsLostChangesText) {
           });
         }
 
+        var whirly = $("<div class='popup'>").appendTo($("body"))
+          .css("padding", "1em 2em")
+          .append(
+            $("<span>").text(translations.show_namings_saving + "... "),
+            $("<img>").attr("src", "<%= asset_path('indicator.gif') %>")
+          )
+          .center()
+          .show();
+
         $.ajax("/ajax/vote/naming/" + naming_id, {
           data: {value: value, authenticity_token: csrf_token()},
           dataType: "text",
           async: true,
           complete: function (request) {
             _haveVotesChanged = false;
+            whirly.remove();
             if (request.status == 200) {
               var html  = $(request.responseText);
               var title = html.children().eq(0);
@@ -80,8 +89,6 @@ function VotePopupModule(showNamingsLostChangesText) {
             }
           }
         });
-
-        // TODO: Popup a whirly to make it clear something is happening.
       });
 
       // Save initial value in case of error, when we'll need to revert.
@@ -93,7 +100,7 @@ function VotePopupModule(showNamingsLostChangesText) {
     // Alert the user if they haven't saved data.
     window.onbeforeunload = function () {
       if (_haveVotesChanged && !_haveVotesBeenSaved)
-        return showNamingsLostChangesText;
+        return translations.show_namings_lose_changes;
     }
 
     attach_bindings();

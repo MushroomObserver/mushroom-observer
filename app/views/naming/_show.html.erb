@@ -254,6 +254,9 @@
   <% end %>
 </div>
 <% inject_javascript_at_end %(
-  VotePopupModule('#{j :show_namings_lose_changes.l.gsub("\n", " ")}')
+  VotePopupModule({
+    show_namings_lose_changes: '#{j :show_namings_lose_changes.l.gsub("\n", " ")}',
+    show_namings_saving: '#{j :show_namings_saving.l}'
+  })
 ) %>
 <!--/VOTE POPUPS-->
