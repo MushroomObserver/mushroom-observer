@@ -1199,43 +1199,10 @@ class ApplicationController < ActionController::Base
   def redirect_to_next_object(method, model, id)
     return unless (object = find_or_goto_index(model, id))
 
-    # Special exception for prev/next in RssLog query: If go to "next" in
-    # show_observation, for example, inside an RssLog query, go to the next
-    # object, even if it's not an observation. If...
-    if params[:q] && #                          ... query parameter given
-       #                                        ... and query exists
-       (query = query_exists(dealphabetize_q_param)) &&
-       (query.model == RssLog) && #             ... and it's a RssLog query
-       (rss_log = rss_log_exists) && #          ... and current rss_log exists
-       query.index(rss_log) && #                ... and it's in query results
-       #                         ... and can set current index in query results
-       (query.current = object.rss_log) &&
-       #                          ... and next/prev doesn't return nil (at end)
-       (new_query = query.send(method)) &&
-       (rss_log = new_query.current) #       ... and can get new rss_log object
-      query  = new_query
-      object = rss_log.target || rss_log
-      id = object.id
-
-    # Normal case: attempt to coerce the current query into an appropriate
-    # type, and go from there.  This handles all the exceptional cases:
-    # 1) query not coercable (creates a new default one)
-    # 2) current object missing from results of the current query
-    # 3) no more objects being left in the query in the given direction
-    else
-      query = find_or_create_query(object.class)
-      query.current = object
-      if !query.index(object)
-        type = object.type_tag
-        flash_error(:runtime_object_not_in_index.t(id: object.id, type: type))
-      elsif (new_query = query.send(method))
-        query = new_query
-        id = query.current_id
-      else
-        type = object.type_tag
-        flash_error(:runtime_no_more_search_objects.t(type: type))
-      end
-    end
+    next_params = find_query_and_next_object(object, method, id)
+    object = next_params[:object]
+    id =     next_params[:id]
+    query =  next_params[:query]
 
     # Redirect to the show_object page appropriate for the new object.
     redirect_to(add_query_param({
@@ -1245,10 +1212,83 @@ class ApplicationController < ActionController::Base
                                 }, query))
   end
 
+  def find_query_and_next_object(object, method, id)
+    # prev/next in RssLog query
+    query_and_next_object_rss_log_increment(object, method) ||
+      # other cases (normal case or no next object)
+      query_and_next_object_normal(object, method, id)
+  end
+
+  def query_and_next_object_rss_log_increment(object, method)
+    # Special exception for prev/next in RssLog query: If go to "next" in
+    # show_observation, for example, inside an RssLog query, go to the next
+    # object, even if it's not an observation. If...
+    #             ... q param is an RssLog query
+    return unless (query = current_query_is_rss_log) &&
+                  # ... and current rss_log exists, it's in query results,
+                  #     and can set current index of query results from rss_log
+                  (rss_log = results_index_settable_from_rss_log(query,
+                                                                 object)) &&
+                  # ... and next/prev doesn't return nil (at end)
+                  (new_query = query.send(method)) &&
+                  # ... and can get new rss_log object
+                  (rss_log = new_query.current)
+
+    { object: rss_log.target || rss_log, id: object.id, query: new_query }
+  end
+
+  # q parameter exists, a query exists for that param, and it's an rss query
+  def current_query_is_rss_log
+    return unless params[:q] && (query = query_exists(dealphabetize_q_param))
+    query if query.model == RssLog
+  end
+
+  # Can we can set current index in query results based on rss_log query?
+  def results_index_settable_from_rss_log(query, object)
+    return unless (rss_log = rss_log_exists) &&
+                  in_query_results(rss_log, query) &&
+                  # ... and can set current index in query results
+                  (query.current = object.rss_log)
+    rss_log
+  end
+
   def rss_log_exists
     object.rss_log
   rescue
     nil
+  end
+
+  def in_query_results(rss_log, query)
+    query.index(rss_log)
+  end
+
+  # Normal case: attempt to coerce the current query into an appropriate
+  # type, and go from there.  This handles all the exceptional cases:
+  # 1) query not coercable (creates a new default one)
+  # 2) current object missing from results of the current query
+  # 3) no more objects being left in the query in the given direction
+  def query_and_next_object_normal(object, method, id)
+    query = find_or_create_query(object.class)
+    query.current = object
+
+    if !query.index(object)
+      current_object_missing_from_current_query_results(object, id, query)
+    elsif (new_query = query.send(method))
+      { object: object, id: new_query.current_id, query: new_query }
+    else
+      no_more_objects_in_given_direction(object, id, query)
+    end
+  end
+
+  def current_object_missing_from_current_query_results(object, id, query)
+    flash_error(:runtime_object_not_in_index.t(id: object.id,
+                                               type: object.type_tag))
+    { object: object, id: id, query: query }
+  end
+
+  def no_more_objects_in_given_direction(object, id, query)
+    flash_error(:runtime_no_more_search_objects.t(type: object.type_tag))
+    { object: object, id: id, query: query }
   end
 
   ##############################################################################
