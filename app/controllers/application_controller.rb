@@ -88,11 +88,11 @@
 #
 #  ==== Other stuff
 #  disable_link_prefetching:: (filter: prevents prefetching of destroy methods)
-#  update_view_stats::      Called after each show_object request.
-#  calc_layout_params::     Gather User's list layout preferences.
-#  catch_errors             (filter: catches errors for integration tests)
-#  default_thumbnail_size:: Default thumbnail size: :thumbnail or :small.
-#  set_default_thumbnail_size:: Change default thumbnail size for  current user.
+#  update_view_stats::        Called after each show_object request.
+#  calc_layout_params::       Gather User's list layout preferences.
+#  catch_errors               (filter: catches errors for integration tests)
+#  default_thumbnail_size::   Default thumbnail size: :thumbnail or :small.
+#  default_thumbnail_size=::  Change default thumbnail size for current user.
 #
 class ApplicationController < ActionController::Base
   require "extensions"
@@ -1414,13 +1414,7 @@ class ApplicationController < ActionController::Base
     @error ||= :runtime_no_matches.t(type: type)
 
     # Add magic links for sorting.
-    if (sorts = args[:sorting_links]) &&
-       (sorts.length > 1) &&
-       !browser.bot?
-      @sorts = add_sorting_links(query, sorts, args[:link_all_sorts])
-    else
-      @sorts = nil
-    end
+    @sorts = sorting_links(query, args)
     # "@sorts".print_thing(@sorts)
 
     # Get user prefs for displaying results as a matrix.
@@ -1470,11 +1464,10 @@ class ApplicationController < ActionController::Base
 
       # Give the caller the opportunity to add extra columns.
       if block_given?
-        @extra_data = @objects.inject({}) do |data, object|
+        @extra_data = @objects.each_with_object({}) do |object, data|
           row = yield(object)
           row = [row] unless row.is_a?(Array)
           data[object.id] = row
-          data
         end
       end
 
@@ -1505,28 +1498,38 @@ class ApplicationController < ActionController::Base
     query.params.merge!(default_filters) if default_filters
   end
 
+  def sorting_links(query, args)
+    return nil unless (sorts = args[:sorting_links]) &&
+                      (sorts.length > 1) &&
+                      !browser.bot?
+    add_sorting_links(query, sorts, args[:link_all_sorts])
+  end
+
   # Create sorting links for index pages, "graying-out" the current order.
   def add_sorting_links(query, links, link_all = false)
     results = []
-    this_by = query.params[:by] || query.default_order
-    this_by = this_by.to_s.sub(/^reverse_/, "")
+    this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
 
     links.each do |by, label|
-      str = label.t
-      if !link_all && (by.to_s == this_by)
-        results << str
-      else
-        results << [str, { controller: query.model.show_controller,
-                           action: query.model.index_action,
-                           by: by }.merge(query_params)]
-      end
+      results << link_or_grayed_text(link_all, this_by, label, query, by)
     end
 
     # Add a "reverse" button.
-    str = :sort_by_reverse.t
-    results << [str, { controller: query.model.show_controller,
-                       action: query.model.index_action,
-                       by: reverse_by(query, this_by) }.merge(query_params)]
+    results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
+  end
+
+  def link_or_grayed_text(link_all, this_by, label, query, by)
+    if !link_all && (by.to_s == this_by)
+      label.t
+    else
+      sort_link(label.t, query, by)
+    end
+  end
+
+  def sort_link(text, query, by)
+    [text, { controller: query.model.show_controller,
+             action: query.model.index_action,
+             by: by }.merge(query_params)]
   end
 
   def reverse_by(query, this_by)
@@ -1552,26 +1555,34 @@ class ApplicationController < ActionController::Base
   # when things go south.  This makes a good stab at guessing, at least.
   def goto_index(redirect = nil)
     pass_query_params
-    redirect = redirect.name.underscore if redirect.is_a?(Class)
-    model = case (redirect || controller.name).to_s
-            when "account" then RssLog
-            when "comment" then Comment
-            when "image" then Image
-            when "location" then Location
-            when "name" then Name
-            when "naming" then Observation
-            when "observation" then Observation
-            when "observer" then RssLog
-            when "project" then Project
-            when "rss_log" then RssLog
-            when "species_list" then SpeciesList
-            when "user" then RssLog
-            when "vote" then Observation
-            end
-    fail "Unsure where to go from #{redirect || controller.name}." unless model
-    redirect_with_query(controller: model.show_controller,
-                        action: model.index_action)
+    from = redirect_from(redirect)
+    to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
+    raise "Unsure where to go from #{from}." unless to_model
+    redirect_with_query(controller: to_model.show_controller,
+                        action: to_model.index_action)
   end
+
+  # Return string which is the class or controller to fall back from.
+  def redirect_from(redirect)
+    redirect = redirect.name.underscore if redirect.is_a?(Class)
+    (redirect || controller.name).to_s
+  end
+
+  REDIRECT_FALLBACK_MODELS = {
+    account: RssLog,
+    comment: Comment,
+    image: Image,
+    location: Location,
+    name: Name,
+    naming: Observation,
+    observation: Observation,
+    observer: RssLog,
+    project: Project,
+    rss_log: RssLog,
+    species_list: SpeciesList,
+    user: RssLog,
+    vote: Observation
+  }.freeze
 
   # Initialize Paginator object.  This now does very little thanks to the new
   # Query model.
@@ -1703,36 +1714,34 @@ class ApplicationController < ActionController::Base
   end
   helper_method :default_thumbnail_size
 
-  # Set the default thumbnail size, either for the current user if logged in,
-  # or for the current session.
-  def set_default_thumbnail_size(val)
-    if @user
-      if @user.thumbnail_size != val
-        @user.thumbnail_size = val
-        @user.save_without_our_callbacks
-      end
+  def default_thumbnail_size=(val)
+    if @user && @user.thumbnail_size != val
+      @user.thumbnail_size = val
+      @user.save_without_our_callbacks
     else
       session[:thumbnail_size] = val
     end
   end
+  alias set_default_thumbnail_size default_thumbnail_size=
 
   def calc_layout_params
     count = (@user && @user.layout_count) || MO.default_layout_count
     { "count" => count }
   end
 
-  def has_permission?(obj, error_message)
+  def permission?(obj, error_message)
     result = (in_admin_mode? || obj.can_edit?(@user))
     flash_error(error_message) unless result
     result
   end
+  alias has_permission? permission?
 
   def can_delete?(obj)
-    has_permission?(obj, :runtime_no_destroy.l(type: obj.type_tag))
+    permission?(obj, :runtime_no_destroy.l(type: obj.type_tag))
   end
 
   def can_edit?(obj)
-    has_permission?(obj, :runtime_no_update.l(type: obj.type_tag))
+    permission?(obj, :runtime_no_update.l(type: obj.type_tag))
   end
 
   def render_xml(args)
