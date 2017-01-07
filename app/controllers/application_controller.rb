@@ -1032,7 +1032,7 @@ class ApplicationController < ActionController::Base
       controller: model.show_controller,
       action: model.index_action
     }
-    return [
+    [
       :show_objects.t(type: model.type_tag),
       add_query_param(link_args, query)
     ]
