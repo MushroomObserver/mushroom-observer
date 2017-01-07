@@ -1,14 +1,14 @@
 module Query
   # Names with observations in a given set.
   class NameWithObservationsInSet < Query::NameBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         ids:        [Observation],
         old_title?: :string,
         old_by?:    :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -17,7 +17,7 @@ module Query
       set = clean_id_set(params[:ids])
       add_join(:observations)
       where << "observations.id IN (#{set})"
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

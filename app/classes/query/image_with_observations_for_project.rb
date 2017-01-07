@@ -1,13 +1,13 @@
 module Query
   # Images with observations attached to a given project.
   class ImageWithObservationsForProject < Query::ImageBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         project: Project,
         old_by?: :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -16,7 +16,7 @@ module Query
       add_join(:images_observations, :observations)
       add_join(:observations, :observations_projects)
       where << "observations_projects.project_id = '#{project.id}'"
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

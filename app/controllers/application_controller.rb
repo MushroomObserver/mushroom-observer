@@ -664,8 +664,6 @@ class ApplicationController < ActionController::Base
     logger.debug "[globalite] client accepted locales: #{result.join(", ")}"
     result
   end
-  include ::ContentFilter
-  helper_method(:observation_filters, :observation_filters_with_checkboxes)
 
   # Extract locales and weights, creating map from locale to weight.
   def map_locales_to_weights(locales)
@@ -1350,7 +1348,7 @@ class ApplicationController < ActionController::Base
     include      = args[:include] || nil
     type         = query.model.type_tag
 
-    update_filter_status_of(query)
+    apply_content_filters(query)
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1489,26 +1487,24 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def update_filter_status_of(query)
-    apply_allowed_default_filter_prefs_to(query)
-    @on_obs_filters = query.on_obs_filters if query.respond_to?(:on_obs_filters)
+  def apply_content_filters(query)
+    filters = users_content_filters || {}
+    @any_content_filters_applied = false
+    ContentFilter.all.each do |fltr|
+      key = fltr.sym
+      # applicable to this query?
+      next unless query.takes_parameter?(key)
+      # overridden by search, etc.?
+      next if query.params.key?(key)
+      # in user's content filter?
+      next unless fltr.on?(filters[key])
+      query.params[key] = filters[key]
+      @any_content_filters_applied = true
+    end
   end
 
-  def apply_allowed_default_filter_prefs_to(query)
-    apply_default_filters_to(query) if default_filters_applicable_to?(query)
-  end
-
-  # The default filters are applicable if the query responds to them
-  # AND the query is unfiltered.
-  def default_filters_applicable_to?(query)
-    query.respond_to?(:observation_filter_input) &&
-      !query.has_obs_filter_params?
-  end
-
-  # Apply user defaults if they exists, else apply site-wide default.
-  def apply_default_filters_to(query)
-    default_filters = @user ? @user.content_filter : MO.default_content_filter
-    query.params.merge!(default_filters) if default_filters
+  def users_content_filters
+    @user ? @user.content_filter : MO.default_content_filter
   end
 
   def sorting_links(query, args)

@@ -195,7 +195,6 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
-  filtered: filtered
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -589,6 +588,8 @@
   created_at: created at
   DESTROYED: Destroyed
   destroyed: destroyed
+  FILTERED: Filtered
+  filtered: filtered
   MODIFIED: Modified
   modified: modified
   OPTIONAL: Optional
@@ -1559,11 +1560,10 @@
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
 
   prefs_content_filters: Content Filters
-  prefs_content_filters_explanation: Control content visibility site-wide, except [:app_advanced_search].
-  prefs_obs_filters: Observation Filters
-  prefs_obs_filters_explanation: Control Observation visibility
-  prefs_obs_filters_has_images: Hide Observations with no images
-  prefs_obs_filters_has_specimen: Hide Observations with no specimens
+  prefs_content_filters_explanation: Control content visibility site-wide.
+  prefs_filters_has_images: Hide Observations with no images
+  prefs_filters_has_specimen: Hide Observations with no specimens
+  prefs_filters_region: Show only Observations and Locations within this region
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -1637,7 +1637,7 @@
   rss_log_title: Activity Log
   rss_by: by [user]
   rss_title: "[:app_title]"
-  rss_filtered_mouseover: "[:app_title] has applied filter(s), including any filter(s) in your preferences or search parameters."
+  rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
   rss_hide: "Hide:"
   rss_all: Everything
@@ -2261,17 +2261,16 @@
   advanced_search_result_type_help: Do you want [:observations], [:images] or [:names]/[:descriptions]?
 
   advanced_search_filters: Search Filters
-  advanced_search_filters_explain: Apply to this search only, override any user Content Filters
-  advanced_search_filters_observation: Observation Filters
-
+  advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
   advanced_search_filter_has_images: Filter Observations based on whether they have images
   advanced_search_filter_has_images_off: Include both imaged and imageless Observations
-  advanced_search_filter_has_images_not_null: Exclude imageless Observations
-  advanced_search_filter_has_images_null: Exclude imaged Observations
+  advanced_search_filter_has_images_yes: Exclude imageless Observations
+  advanced_search_filter_has_images_no: Exclude imaged Observations
   advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
   advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
-  advanced_search_filter_has_specimen_true: Exclude voucherless Observations
-  advanced_search_filter_has_specimen_false: Exclude vouchered Observations
+  advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
+  advanced_search_filter_has_specimen_no: Exclude vouchered Observations
+  advanced_search_filter_region: "Restrict Observations and Locations to a region, e.g., \"California, USA\" or \"Europe\""
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater

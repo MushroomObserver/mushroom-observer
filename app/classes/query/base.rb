@@ -31,6 +31,11 @@ module Query
       }
     end
 
+    def takes_parameter?(key)
+      parameter_declarations.key?(key) ||
+        parameter_declarations.key?("#{key}?".to_sym)
+    end
+
     def initialize_flavor
       add_join_from_string(params[:join]) if params[:join]
       self.tables += params[:tables]      if params[:tables]
