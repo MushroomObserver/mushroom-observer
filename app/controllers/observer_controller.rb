@@ -602,13 +602,6 @@ class ObserverController < ApplicationController
       nonconsensus: :no,
       by: :created_at
     }
-    args[:user] = params[:user_id] unless params[:user_id].blank?
-    args[:project] = params[:project_id] unless params[:project_id].blank?
-
-    unless params[:species_list_id].blank?
-      args[:species_list] = params[:species_list_id]
-    end
-
     query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)
   end
@@ -729,29 +722,9 @@ class ObserverController < ApplicationController
                             query)]
     @links << link
 
-    # Add "show location" link if this query can be coerced into a
-    # location query.
-    if query.is_coercable?(:Location)
-      @links << [:show_objects.t(type: :location),
-                 add_query_param({ controller: "location",
-                                   action: "index_location" },
-                                 query)]
-    end
-
-    # Add "show names" link if this query can be coerced into a name query.
-    if query.is_coercable?(:Name)
-      @links << [:show_objects.t(type: :name),
-                 add_query_param({ controller: "name", action: "index_name" },
-                                 query)]
-    end
-
-    # Add "show images" link if this query can be coerced into an image query.
-    if query.is_coercable?(:Image)
-      @links << [:show_objects.t(type: :image),
-                 add_query_param({ controller: "image",
-                                   action: "index_image" },
-                                 query)]
-    end
+    @links << coerced_query_link(query, Location)
+    @links << coerced_query_link(query, Name)
+    @links << coerced_query_link(query, Image)
 
     @links << [:list_observations_add_to_list.t,
                add_query_param({ controller: "species_list",
@@ -909,7 +882,7 @@ class ObserverController < ApplicationController
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
-    @mappable = query && query.is_coercable?(:Location)
+    @mappable = query && query.coercable?(:Location)
 
     # Provide a list of user's votes to view.
     if @user

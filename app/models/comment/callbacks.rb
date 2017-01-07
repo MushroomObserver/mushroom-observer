@@ -1,6 +1,6 @@
 # encoding: utf-8
+# see app/models/comment.rb
 class Comment
-
   # Callback called after creation.  Lots of people potentially can receive
   # an email whenever a Comment is posted:
   #

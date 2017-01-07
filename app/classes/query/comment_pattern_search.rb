@@ -1,18 +1,22 @@
-class Query::CommentPatternSearch < Query::CommentBase
-  include Query::Initializers::PatternSearch
+module Query
+  # Simple comment search.
+  class CommentPatternSearch < Query::CommentBase
+    include Query::Initializers::PatternSearch
 
-  def parameter_declarations
-    super.merge(
-      pattern: :string
-    )
-  end
+    def parameter_declarations
+      super.merge(
+        pattern: :string
+      )
+    end
 
-  def initialize_flavor
-    search = google_parse_pattern
-    add_search_conditions(search,
-      "comments.summary",
-      "COALESCE(comments.comment,'')"
-    )
-    super
+    def initialize_flavor
+      search = google_parse_pattern
+      add_search_conditions(
+        search,
+        "comments.summary",
+        "COALESCE(comments.comment,'')"
+      )
+      super
+    end
   end
 end

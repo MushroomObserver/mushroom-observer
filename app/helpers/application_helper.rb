@@ -43,6 +43,20 @@ module ApplicationHelper
     link_to(name, add_query_param(options), html_options)
   end
 
+  # Take a query which can be coerced into a different model, and create a link
+  # to the results of that coerced query.  Return +nil+ if not coercable.
+  def link_to_coerced_query(query, model)
+    link = coerced_query_link(query, model)
+    return nil unless link
+    link_to(*link)
+  end
+
+  # Convert @links in index views into a list of tabs for RHS tab set.
+  def create_links(links)
+    return [] unless links
+    links.reject(&:nil?).map { |str, url| link_to(str, url) }
+  end
+
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent(w = 10)

@@ -4,7 +4,7 @@
   tabs = [
     link_to(:create_herbarium.t, action: :create_herbarium)
   ]
-  tabs += @links.map {|str,url| link_to(str,url)} if @links
+  tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
