@@ -178,7 +178,7 @@ class LocationController < ApplicationController
   def map_locations # :nologin: :norobots:
     @query = find_or_create_query(:Location)
 
-    update_filter_status_of(@query)
+    apply_content_filters(@query)
 
     if @query.flavor == :all
       @title = :map_locations_global_map.t

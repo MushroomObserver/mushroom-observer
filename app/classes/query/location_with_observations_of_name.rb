@@ -1,14 +1,14 @@
 module Query
   # Locations with observations of a given name.
   class LocationWithObservationsOfName < Query::LocationBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
     include Query::Initializers::OfName
 
     def parameter_declarations
       super.merge(
         old_by?: :string
       ).merge(of_name_parameter_declarations).
-        merge(observation_filter_parameter_declarations)
+        merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -18,7 +18,7 @@ module Query
       add_join(:observations)
       add_name_conditions(names)
       where << "observations.is_collection_location IS TRUE"
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

@@ -1,13 +1,13 @@
 module Query
   # Names with observations attached to a given project.
   class NameWithObservationsForProject < Query::NameBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         project: Project,
         old_by?: :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -15,7 +15,7 @@ module Query
       title_args[:project] = project.title
       add_join(:observations, :observations_projects)
       where << "observations_projects.project_id = '#{project.id}'"
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

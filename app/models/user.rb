@@ -117,10 +117,7 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  has_images::         Exclude imageless Observations from search results and
-#                       rss feeds
-#  has_specimen::       Exclude unvouchered Observations (Observations without
-#                       a Specimen) from search results and rss feeds
+#  content_filter::     Serialized Hash of ContentFilter parameters.
 #
 #  ==== Email options
 #  Send notifications if...
@@ -330,6 +327,8 @@ class User < AbstractModel
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
+
+  serialize :content_filter, Hash
 
   ##############################################################################
   #
@@ -670,31 +669,6 @@ class User < AbstractModel
     result = mailing_address.strip if mailing_address
     result = "**insert mailing address for specimens**" if result.blank?
   end
-
-  ##############################################################################
-  #
-  # :section: Content Filters
-  #
-  serialize :content_filter, Hash
-  attr_accessor(:filter, :observation_filters)
-
-  include ::ContentFilter
-
-  # Methods used by forms to get checkbox values
-  # "NOT NULL": Observation has image(s)
-  # Otherwise, user content filter is off
-  # ("NULL"   : Observation has no image, available only via Advanced Search)
-  def has_images_checkbox
-    content_filter[:has_images] == "NOT NULL" ? 1 : 0
-  end
-
-  # TRUE      : Observation has specimen(s)
-  # Otherwise, user content filter is off
-  # ("FALSE"  : Observation has no specimen, available only via Advanced Search)
-  def has_specimen_checkbox
-    content_filter[:has_specimen] == "TRUE" ? 1 : 0
-  end
-
 
   ##############################################################################
   #

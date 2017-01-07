@@ -60,6 +60,13 @@ class LocationTest < UnitTestCase
     assert(!Location.understood_country?("Moon"))
   end
 
+  def test_understood_continent
+    assert(Location.understood_continent?("Central America"))
+    assert(!Location.understood_continent?("Atlantis"))
+    assert(Location.countries_in_continent("Europe").include?("France"))
+    assert(!Location.countries_in_continent("Europe").include?("Canada"))
+  end
+
   def test_versioning
     User.current = mary
     loc = Location.create!(

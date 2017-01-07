@@ -542,38 +542,35 @@ class ObserverController < ApplicationController
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
+    @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
-    model = params[:search][:type].to_s.camelize.constantize
-
-    # Pass along filled-in text field with Query
-    search = filled_in_text_fields
-    # And pass along any filters from the form
-    if model == Observation
-      observation_filter_keys.each { |k| search[k] = params[k] }
-    end
-
-    # Create query (this just validates the parameters).
-    query = create_query(model, :advanced_search, search)
-
-    # Let the individual controllers execute and render it.
+    model = params[:search][:model].to_s.camelize.constantize
+    query_params = {}
+    add_filled_in_text_fields(query_params)
+    add_applicable_filter_parameters(query_params, model)
+    query = create_query(model, :advanced_search, query_params)
     redirect_to(add_query_param({ controller: model.show_controller,
-                                  action: "advanced_search" },
+                                  action: :advanced_search },
                                 query))
   end
 
-  def filled_in_text_fields
-    result = {}
-    [:content, :location, :name].each do |field|
-      if (val = params[:search][field].to_s).present?
-        result[field] = val
+  def add_filled_in_text_fields(query_params)
+    [:content, :location, :name, :user].each do |field|
+      val = params[:search][field].to_s
+      next unless val.present?
+      # Treat User field differently; remove angle-bracketed user name,
+      # since it was included by the auto-completer only as a hint.
+      if field == :user
+        val = val.sub(/ <.*/, "")
       end
+      query_params[field] = val
     end
-    # Treat User field differently; remove angle-bracketed user name,
-    # since it was included by the auto-completer only as a hint.
-    if (x = params[:search][:user].to_s).present?
-      result[:user] = x.sub(/ <.*/, "")
+  end
+
+  def add_applicable_filter_parameters(query_params, model)
+    ContentFilter.by_model(model).each do |fltr|
+      query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
     end
-    result
   end
 
   # Displays matrix of selected Observation's (based on current Query).
@@ -755,7 +752,7 @@ class ObserverController < ApplicationController
   # Map results of a search or index.
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
-    update_filter_status_of(@query)
+    apply_content_filters(@query)
     @title = :map_locations_title.t(locations: @query.title)
     @query = restrict_query_to_box(@query)
     @timer_start = Time.now

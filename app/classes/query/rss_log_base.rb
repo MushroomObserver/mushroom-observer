@@ -1,7 +1,7 @@
 module Query
   # Code common to all rss log queries.
   class RssLogBase < Query::Base
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def model
       RssLog
@@ -11,17 +11,15 @@ module Query
       super.merge(
         updated_at?: [:time],
         type?:       :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation)).
+        merge(content_filter_parameter_declarations(Location))
     end
 
     def initialize_flavor
       initialize_model_do_time(:updated_at)
       add_rss_log_type_condition
-      if any_observation_filter_is_on? &&
-         (types.include?("all") || types.include?("observation"))
-        add_join(:observations!)
-        initialize_observation_filters_for_rss_log
-      end
+      initialize_content_filters_for_rss_log(Observation)
+      initialize_content_filters_for_rss_log(Location)
       super
     end
 

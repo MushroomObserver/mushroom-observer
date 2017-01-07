@@ -8,14 +8,14 @@
   <%= form_tag(action: :advanced_search_form) do %>
 
     <div class="form-group">
-      <%= label_tag(:search_type, :advanced_search_result_type.t + ":") %>
+      <%= label_tag(:search_model, :advanced_search_result_type.t + ":") %>
       <span class="help"><%= :advanced_search_result_type_help.t %></span><br/>
-      <%= select(:search, :type, [
-                                   [:OBSERVATIONS.l, :observation],
-                                   [:IMAGES.l, :image],
-                                   [:LOCATIONS.l, :location],
-                                   [:NAMES.l, :name],
-                                 ]) %>
+      <%= select(:search, :model, [
+                                    [:OBSERVATIONS.l, :observation],
+                                    [:IMAGES.l, :image],
+                                    [:LOCATIONS.l, :location],
+                                    [:NAMES.l, :name],
+                                  ]) %>
     </div>
 
     <div class="form-group">

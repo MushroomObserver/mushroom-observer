@@ -52,9 +52,9 @@ module PatternSearch
           args[:south] = term.parse_float(-90, 90)
 
         elsif term.var == :images
-          args[:has_images] = term.parse_to_null_not_null_string
+          args[:has_images] = term.parse_boolean
         elsif term.var == :specimen
-          args[:has_specimen] = term.parse_to_true_false_string
+          args[:has_specimen] = term.parse_boolean
         elsif term.var == :has_name
           args[:has_name] = term.parse_boolean
         elsif term.var == :has_notes

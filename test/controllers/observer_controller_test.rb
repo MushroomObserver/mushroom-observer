@@ -281,7 +281,7 @@ class ObserverControllerTest < FunctionalTestCase
            search: {
              name: "Don't know",
              user: "myself",
-             type: model.name.underscore,
+             model: model.name.underscore,
              content: "Long pink stem and small pink cap",
              location: "Eastern Oklahoma"
            },

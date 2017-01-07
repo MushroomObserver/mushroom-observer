@@ -1,17 +1,17 @@
 module Query
   # Images attached to observations.
   class ImageWithObservations < Query::ImageBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         old_by?: :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
       add_join(:images_observations, :observations)
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 
