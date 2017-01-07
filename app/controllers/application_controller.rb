@@ -1603,14 +1603,21 @@ class ApplicationController < ActionController::Base
     MOPaginator.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
-      letter: (params[letter_arg].to_s.match(/^([A-Z])$/i) ? Regexp.last_match(1).upcase : nil),
-      number: (begin
-                 params[number_arg].to_s.to_i
-               rescue
-                 1
-               end),
+      letter: paginator_letter(letter_arg),
+      number: paginator_number(number_arg),
       num_per_page: num_per_page
     )
+  end
+
+  def paginator_letter(parameter_key)
+    return nil unless params[parameter_key].to_s =~ /^([A-Z])$/i
+    Regexp.last_match(1).upcase
+  end
+
+  def paginator_number(parameter_key)
+    params[parameter_key].to_s.to_i
+  rescue
+    1
   end
 
   # Initialize Paginator object.  This now does very little thanks to
@@ -1629,11 +1636,7 @@ class ApplicationController < ActionController::Base
   def paginate_numbers(arg = :page, num_per_page = 50)
     MOPaginator.new(
       number_arg: arg,
-      number: (begin
-                 params[arg].to_s.to_i
-               rescue
-                 1
-               end),
+      number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end
@@ -1654,17 +1657,26 @@ class ApplicationController < ActionController::Base
 
   def log_memory_usage
     sd = sc = pd = pc = 0
+
     File.new("/proc/#{$PROCESS_ID}/smaps").each_line do |line|
-      next unless line.match(/\d+/)
+      next unless line =~ /\d+/
       val = $&.to_i
-      line =~ /^Shared_Dirty/  ? (sd += val) :
-      line =~ /^Shared_Clean/  ? (sc += val) :
-      line =~ /^Private_Dirty/ ? (pd += val) :
-      line =~ /^Private_Clean/ ? (pc += val) : 1
+      case line.match(/^[\w]+/)[0]
+      when "Shared_Dirty"  then sd += val
+      when "Shared_Clean"  then sc += val
+      when "Private_Dirty" then pd += val
+      when "Private_Clean" then pc += val
+      else 1
+      end
     end
+
     uid = session[:user_id].to_i
-    logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
-      [pd, pc, sd, sc, $PROCESS_ID, uid, request.fullpath]
+    logger.warn format(memory_usage_log_format,
+                       pd, pc, sd, sc, $PROCESS_ID, uid, request.fullpath)
+  end
+
+  def memory_usage_log_format
+    "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n"
   end
 
   ##############################################################################
