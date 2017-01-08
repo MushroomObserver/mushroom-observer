@@ -1649,6 +1649,16 @@ class ApplicationController < ActionController::Base
       format.xml { render args }
     end
   end
+
+  # Bad place for this, but need proper refactor to have a good place.
+  def gather_users_votes(obs, user)
+    obs.namings.each_with_object({}) do |naming, votes|
+      votes[naming.id] = 
+        naming.votes.find { |vote| vote.user_id == user.id } ||
+        Vote.new(value: 0)
+    end
+  end
+
   ##############################################################################
 
   private
