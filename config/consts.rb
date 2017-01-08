@@ -95,6 +95,7 @@ MushroomObserver::Application.configure do
 
   # Configuration files for location validator.
   location_path = "#{config.root}/config/location/"
+  config.location_continents_file = "#{location_path}continents.yml"
   config.location_countries_file = "#{location_path}countries.yml"
   config.location_states_file    = "#{location_path}states.yml"
   config.location_prefixes_file  = "#{location_path}prefixes.yml"
@@ -177,6 +178,7 @@ MushroomObserver::Application.configure do
   # therefore need to be precompiled explicitly.
   if config.assets && config.assets.precompile
     config.assets.precompile += %w(
+      advanced_search.js
       api_key.js
       date_select.js
       donate.js

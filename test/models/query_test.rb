@@ -2382,23 +2382,6 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-   def test_any_observation_filter_is_on?
-    query = Query.lookup(:Observation, :all, has_images: "yes")
-    assert(query.any_observation_filter_is_on?)
-
-    query = Query.lookup(:Observation, :all, has_images: "no")
-    assert(query.any_observation_filter_is_on?)
-
-    query = Query.lookup(:Observation, :all, has_specimen: "yes")
-    assert(query.any_observation_filter_is_on?)
-
-    query = Query.lookup(:Observation, :all, has_specimen: "no")
-    assert(query.any_observation_filter_is_on?)
-
-    query = Query.lookup(:Observation, :all)
-    refute(query.any_observation_filter_is_on?)
-  end
-
   def test_filtering_content
     ##### image filters #####
     expect = Observation.where.not(thumb_image_id: nil)
@@ -2413,6 +2396,21 @@ class QueryTest < UnitTestCase
 
     expect = Observation.where(specimen: false)
     assert_query(expect, :Observation, :all, has_specimen: "no")
+
+    ##### location filter #####
+    expect = Location.where("name LIKE '%California%'")
+    assert_query(expect, :Location, :all, region: "California, USA")
+    assert_query(expect, :Location, :all, region: "USA, California")
+
+    expect = Observation.where("`where` LIKE '%California, USA'") +
+      Observation.joins(:location).where("locations.name LIKE '%California%'")
+    assert_query(expect.sort_by(&:id), :Observation, :all,
+                 region: "California, USA", by: :id)
+
+    expect = Location.where("name LIKE '%, USA' OR name LIKE '%, Canada'")
+    assert(expect.include?(locations(:albion))) # usa
+    assert(expect.include?(locations(:elgin_co))) # canada
+    assert_query(expect, :Location, :all, region: "North America")
 
     ##### lichen filters #####
     # peltigera = names(:peltigera)
@@ -2444,8 +2442,7 @@ class QueryTest < UnitTestCase
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    assert_query([elgin_co, albion], :Location,
-                 :in_set,
+    assert_query([elgin_co, albion], :Location, :in_set,
                  ids: [albion.id, elgin_co.id], by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
@@ -2455,15 +2452,12 @@ class QueryTest < UnitTestCase
 
     User.current = rolf
     assert_equal(:postal, User.current_location_format)
-    assert_query([obs1, obs2], :Observation,
-                 :in_set,
+    assert_query([obs1, obs2], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    assert_query([obs2, obs1], :Observation,
-                 :in_set,
+    assert_query([obs2, obs1], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
   end
-
 end

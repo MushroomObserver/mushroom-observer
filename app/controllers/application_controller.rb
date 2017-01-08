@@ -1399,7 +1399,7 @@ class ApplicationController < ActionController::Base
       # overridden by search, etc.?
       next if query.params.key?(key)
       # in user's content filter?
-      next unless filters.key?(key)
+      next unless fltr.on?(filters[key])
       query.params[key] = filters[key]
       @any_content_filters_applied = true
     end

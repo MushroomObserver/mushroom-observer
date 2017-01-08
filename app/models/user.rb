@@ -117,10 +117,7 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  has_images::         Exclude imageless Observations from search results and
-#                       rss feeds
-#  has_specimen::       Exclude unvouchered Observations (Observations without
-#                       a Specimen) from search results and rss feeds
+#  content_filter::     Serialized Hash of ContentFilter parameters.
 #
 #  ==== Email options
 #  Send notifications if...
@@ -328,6 +325,8 @@ class User < AbstractModel
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
+
+  serialize :content_filter, Hash
 
   ##############################################################################
   #
@@ -666,22 +665,6 @@ class User < AbstractModel
     result = mailing_address.strip if mailing_address
     result = "**insert mailing address for specimens**" if result.blank?
     result
-  end
-
-  ##############################################################################
-  #
-  # :section: Content Filters
-  #
-  ##############################################################################
-
-  serialize :content_filter, Hash
-
-  # Define methods like "has_images_checkbox" for use by account/prefs form.
-  ContentFilter.all.each do |fltr|
-    next unless fltr.checkbox.present?
-    define_method(fltr.checkbox) do
-      content_filter[fltr.sym] == fltr.checked_val ? 1 : 0
-    end
   end
 
   ##############################################################################
