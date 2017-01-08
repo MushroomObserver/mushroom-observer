@@ -1,6 +1,8 @@
 module Query
   # Common code for all location queries.
   class LocationBase < Query::Base
+    include Query::Initializers::ContentFilters
+
     def model
       Location
     end
@@ -14,7 +16,7 @@ module Query
         south?:      :float,
         east?:       :float,
         west?:       :float
-      )
+      ).merge(content_filter_parameter_declarations(Location))
     end
 
     def initialize_flavor
@@ -22,6 +24,7 @@ module Query
       initialize_model_do_time(:updated_at)
       initialize_model_do_objects_by_id(:users)
       initialize_model_do_bounding_box(:location)
+      initialize_content_filters(Location)
       super
     end
 

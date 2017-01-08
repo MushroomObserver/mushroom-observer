@@ -1,7 +1,7 @@
 module Query
   # Images with observations of subtaxa of a given name.
   class ImageWithObservationsOfChildren < Query::ImageBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
     include Query::Initializers::OfChildren
 
     def parameter_declarations
@@ -9,7 +9,7 @@ module Query
         name:    Name,
         all?:    :boolean,
         old_by?: :string
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -18,7 +18,7 @@ module Query
       add_name_condition(name)
       add_join(:images_observations, :observations)
       add_join(:observations, :names)
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

@@ -1,7 +1,7 @@
 module Query
   # Code common to all observation queries.
   class ObservationBase < Query::Base
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
 
     def model
       Observation
@@ -31,7 +31,7 @@ module Query
         south?:          :float,
         east?:           :float,
         west?:           :float
-      ).merge(observation_filter_parameter_declarations)
+      ).merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -90,7 +90,7 @@ module Query
         add_join(:comments)
       end
       initialize_model_do_bounding_box(:observation)
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

@@ -1,14 +1,14 @@
 module Query
   # Images with observations of a given name.
   class ImageWithObservationsOfName < Query::ImageBase
-    include Query::Initializers::ObservationFilters
+    include Query::Initializers::ContentFilters
     include Query::Initializers::OfName
 
     def parameter_declarations
       super.merge(
         old_by?: :string
       ).merge(of_name_parameter_declarations).
-        merge(observation_filter_parameter_declarations)
+        merge(content_filter_parameter_declarations(Observation))
     end
 
     def initialize_flavor
@@ -17,7 +17,7 @@ module Query
       choose_a_title(names, :with_observation)
       add_join(:images_observations, :observations)
       add_name_conditions(names)
-      initialize_observation_filters
+      initialize_content_filters(Observation)
       super
     end
 

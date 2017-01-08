@@ -84,12 +84,12 @@ zero_user:
 ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
-  content_filter: <%= { has_images: "NOT NULL" }.to_yaml.inspect %>
+  content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
 # hides unvouchered Observations
 vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
-  content_filter: <%= { has_specimen: true }.to_yaml.inspect %>
+  content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
