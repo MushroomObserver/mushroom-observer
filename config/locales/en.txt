@@ -199,7 +199,6 @@
   external_link: external link
   EXTERNAL_LINKS: External Links
   external_links: external links
-  filtered: filtered
   IMAGE: Image
   image: image
   IMAGES: Images
