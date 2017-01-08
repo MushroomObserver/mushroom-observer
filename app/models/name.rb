@@ -468,10 +468,6 @@ class Name < AbstractModel
     !unknown?
   end
 
-  def imageless?
-    text_name == "Imageless"
-  end
-
   def display_name
     str = self[:display_name]
     if User.current &&

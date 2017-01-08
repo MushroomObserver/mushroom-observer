@@ -36,12 +36,12 @@ class NamingParams
     end
   end
 
-  def name_not_changing?
+  def naming_is_name?
     @naming.name == @name
   end
 
   def need_new_naming?
-    !(@naming.editable? || name_not_changing?)
+    !@naming.editable? && !naming_is_name?
   end
 
   def add_reason(reason)
