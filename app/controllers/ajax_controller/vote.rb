@@ -18,10 +18,10 @@ class AjaxController
   private
 
   def cast_naming_vote(id, value_str)
-    naming = Naming.find(id)
+    @naming = Naming.find(id)
     value = Vote.validate_value(value_str)
     raise "Bad value." unless value
-    naming.change_vote(value, @user)
+    @naming.change_vote(value, @user)
     @observation = @naming.observation
     @votes = gather_users_votes(@observation, @user)
     render(inline: %(<div>
