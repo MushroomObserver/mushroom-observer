@@ -869,7 +869,7 @@ class ObserverController < ApplicationController
 
     # Make it easy for users to change thumbnail size.
     unless params[:set_thumbnail_size].blank?
-      set_default_thumbnail_size(params[:set_thumbnail_size])
+      default_thumbnail_size_set(params[:set_thumbnail_size])
     end
 
     @observation = find_or_goto_index(Observation, params[:id].to_s)

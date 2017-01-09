@@ -87,12 +87,13 @@
 #                           currently exists)
 #
 #  ==== Other stuff
-#  disable_link_prefetching:: (filter: prevents prefetching of destroy methods)
-#  update_view_stats::        Called after each show_object request.
-#  calc_layout_params::       Gather User's list layout preferences.
-#  catch_errors               (filter: catches errors for integration tests)
-#  default_thumbnail_size::   Default thumbnail size: :thumbnail or :small.
-#  default_thumbnail_size=::  Change default thumbnail size for current user.
+#  disable_link_prefetching::    (filter: prevents prefetching of destroy
+#                                 methods)
+#  update_view_stats::           Called after each show_object request.
+#  calc_layout_params::          Gather User's list layout preferences.
+#  catch_errors                  (filter: catches errors for integration tests)
+#  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
+#  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #
 class ApplicationController < ActionController::Base
   require "extensions"
@@ -1726,7 +1727,7 @@ class ApplicationController < ActionController::Base
   end
   helper_method :default_thumbnail_size
 
-  def default_thumbnail_size=(val)
+  def default_thumbnail_size_set(val)
     if @user && @user.thumbnail_size != val
       @user.thumbnail_size = val
       @user.save_without_our_callbacks
@@ -1734,7 +1735,6 @@ class ApplicationController < ActionController::Base
       session[:thumbnail_size] = val
     end
   end
-  alias set_default_thumbnail_size default_thumbnail_size=
 
   def calc_layout_params
     count = (@user && @user.layout_count) || MO.default_layout_count
