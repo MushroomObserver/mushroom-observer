@@ -1696,32 +1696,6 @@ class ApplicationController < ActionController::Base
     ObjectSpace.garbage_collect
   end
 
-  def log_memory_usage
-    sd = sc = pd = pc = 0
-
-    File.new("/proc/#{$PROCESS_ID}/smaps").each_line do |line|
-      next unless line =~ /\d+/
-      val = $&.to_i
-      case line.match(/^[\w]+/)[0]
-      when "Shared_Dirty"  then sd += val
-      when "Shared_Clean"  then sc += val
-      when "Private_Dirty" then pd += val
-      when "Private_Clean" then pc += val
-      else 1
-      end
-    end
-
-    uid = session[:user_id].to_i
-    logger.warn format(memory_usage_log_format,
-                       pd, pc, sd, sc, $PROCESS_ID, uid, request.fullpath)
-  end
-
-  def memory_usage_log_format
-    "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n"
-  end
-
-  private :memory_usage_log_format
-
   ##############################################################################
   #
   #  :section: Other stuff
