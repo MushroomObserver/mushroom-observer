@@ -483,8 +483,7 @@ class ApplicationController < ActionController::Base
   def in_admin_mode?
     @user && @user.admin && session[:admin]
   end
-  alias is_in_admin_mode? in_admin_mode?
-  helper_method :in_admin_mode?, :is_in_admin_mode?
+  helper_method :in_admin_mode?
 
   # Are there are any QueuedEmail's of the given flavor for the given User?
   # Returns true or false.

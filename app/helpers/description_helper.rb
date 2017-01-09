@@ -3,8 +3,8 @@ module DescriptionHelper
   # Create tabs for show_description page.
   def show_description_tab_set(desc)
     type = desc.type_tag.to_s.sub(/_description/, "").to_sym
-    writer = desc.is_writer?(@user) || is_in_admin_mode?
-    admin  = desc.is_admin?(@user) || is_in_admin_mode?
+    writer = desc.is_writer?(@user) || in_admin_mode?
+    admin  = desc.is_admin?(@user) || in_admin_mode?
     tabs = []
     if true
       tabs << link_with_query(:show_object.t(type: type),
@@ -102,8 +102,8 @@ module DescriptionHelper
     list.map! do |desc|
       any = true
       item = description_link(desc)
-      writer = desc.is_writer?(@user) || is_in_admin_mode?
-      admin  = desc.is_admin?(@user) || is_in_admin_mode?
+      writer = desc.is_writer?(@user) || in_admin_mode?
+      admin  = desc.is_admin?(@user) || in_admin_mode?
       if writer || admin
         links = []
         if writer

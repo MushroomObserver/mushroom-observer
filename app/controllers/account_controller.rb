@@ -705,7 +705,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    session[:admin] = true if @user && @user.admin && !is_in_admin_mode?
+    session[:admin] = true if @user && @user.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -716,7 +716,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group # :root:
     redirect = true
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method == "POST"
         user_name  = params["user_name"].to_s
         group_name = params["group_name"].to_s
@@ -749,7 +749,7 @@ class AccountController < ApplicationController
     redirect = true
     id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
-      if is_in_admin_mode?
+      if in_admin_mode?
         if request.method == "GET"
           # render form
           redirect = false
@@ -782,7 +782,7 @@ class AccountController < ApplicationController
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
   def destroy_user # :root:
-    if is_in_admin_mode?
+    if in_admin_mode?
       id = params["id"]
       unless id.blank?
         user = User.safe_find(id)

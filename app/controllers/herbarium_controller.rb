@@ -64,7 +64,7 @@ class HerbariumController < ApplicationController
   def delete_curator
     herbarium = Herbarium.find(params[:id].to_s)
     user = User.find(params[:user])
-    if is_in_admin_mode? || herbarium.is_curator?(@user)
+    if in_admin_mode? || herbarium.is_curator?(@user)
       if herbarium.is_curator?(user)
         herbarium.delete_curator(user)
       else
@@ -148,7 +148,7 @@ class HerbariumController < ApplicationController
 
   def edit_herbarium # :norobots:
     @herbarium = Herbarium.find(params[:id].to_s)
-    if is_in_admin_mode? || user_is_curator?(@herbarium)
+    if in_admin_mode? || user_is_curator?(@herbarium)
       if request.method == "POST"
         if ok_to_update(@herbarium, params[:herbarium])
           update_herbarium(@herbarium, params[:herbarium])

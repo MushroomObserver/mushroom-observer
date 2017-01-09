@@ -57,7 +57,7 @@
               <%= "M" if publication.mo_mentioned %>
             </td>
             <td>
-              <% if is_in_admin_mode? || publication.can_edit?(@user) %>
+              <% if in_admin_mode? || publication.can_edit?(@user) %>
                 <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
                 <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
                             {data: {confirm: :are_you_sure.t}}) %>
