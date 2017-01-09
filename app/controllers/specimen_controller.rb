@@ -188,7 +188,7 @@ class SpecimenController < ApplicationController
   end
 
   def can_delete?(specimen)
-    has_permission?(specimen, :delete_specimen_cannot_delete.l)
+    permission?(specimen, :delete_specimen_cannot_delete.l)
   end
 
   def edit_specimen # :norobots:

@@ -1746,7 +1746,6 @@ class ApplicationController < ActionController::Base
     flash_error(error_message) unless result
     result
   end
-  alias has_permission? permission?
 
   def can_delete?(obj)
     permission?(obj, :runtime_no_destroy.l(type: obj.type_tag))
