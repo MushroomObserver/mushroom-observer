@@ -789,7 +789,7 @@ class ObserverController < ApplicationController
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
     fail "no robots!" if browser.bot?
-    set_query_params(query)
+    query_params_set(query)
     @format = params[:format] || "raw"
     @encoding = params[:encoding] || "UTF-8"
     if params[:commit] == :CANCEL.l
@@ -1788,7 +1788,7 @@ class ObserverController < ApplicationController
   # Show selected search results as a matrix with "list_rss_logs" template.
   def show_selected_rss_logs(query, args = {})
     store_query_in_session(query)
-    set_query_params(query)
+    query_params_set(query)
 
     args = {
       action: "list_rss_logs",

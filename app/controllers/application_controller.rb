@@ -60,7 +60,7 @@
 #  query_from_session::     Gets Query that was stored in the session above.
 #  query_params::           Parameters to add to link_to, etc. for passing
 #                           Query around.
-#  query_set_params::       Make +query_params+ refer to a given Query.
+#  query_params_set::       Make +query_params+ refer to a given Query.
 #  pass_query_params::      Tell +query_params+ to pass-through the Query
 #                            given to this action.
 #  find_query::             Find a given Query or return nil.
@@ -1038,7 +1038,7 @@ class ApplicationController < ActionController::Base
 
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
-  def query_set_params(query = nil)
+  def query_params_set(query = nil)
     @query_params = {}
     if browser.bot?
       # do nothing
@@ -1048,8 +1048,7 @@ class ApplicationController < ActionController::Base
     end
     @query_params
   end
-  alias set_query_params query_set_params
-  helper_method :set_query_params, :query_set_params
+  helper_method :query_params_set
 
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
@@ -1330,7 +1329,7 @@ class ApplicationController < ActionController::Base
   #                           location.
   # clear_query_in_session::  Clears the query from the "clipboard"
   #                           (if you didn't just store this query on it!).
-  # query_set_params::        Tells +query_params+ to pass this query on
+  # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
   def show_index_of_objects(query, args = {})
@@ -1350,7 +1349,7 @@ class ApplicationController < ActionController::Base
     clear_query_in_session if session[:checklist_source] != query.id
 
     # Pass this query on when clicking on results.
-    query_set_params(query)
+    query_params_set(query)
 
     # Supply a default title.
     @title ||= query.title
