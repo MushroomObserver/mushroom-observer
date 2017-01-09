@@ -2368,10 +2368,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_lookup_observation
     get(:lookup_observation, id: observations(:minimal_unknown_obs).id)
     assert_redirected_to(controller: :observer, action: :show_observation,
-                         id: observations(:minimal_unknown_obs))
+                         id: observations(:minimal_unknown_obs).id)
   end
-
-
 
   def test_lookup_project
     p_id = projects(:eol_project).id
@@ -2414,6 +2412,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
   end
+
+  ###################
 
   def test_change_banner
     use_test_locales do
