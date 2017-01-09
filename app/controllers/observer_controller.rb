@@ -133,6 +133,7 @@ class ObserverController < ApplicationController
     :intro,
     :list_observations,
     :list_rss_logs,
+    :lookup_accepted_name,
     :lookup_comment,
     :lookup_image,
     :lookup_location,
