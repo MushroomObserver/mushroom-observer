@@ -376,7 +376,7 @@ class ApplicationController < ActionController::Base
     # Reset cookie to push expiry forward.  This way it will continue to
     # remember the user until they are inactive for over a month.  (Else
     # they'd have to login every month, no matter how often they login.)
-    cookie_set_autologin(user)
+    autologin_cookie_set(user)
   end
 
   def delete_invalid_cookies
@@ -520,13 +520,12 @@ class ApplicationController < ActionController::Base
   end
 
   # Create/update the auto-login cookie.
-  def cookie_set_autologin(user)
+  def autologin_cookie_set(user)
     cookies["mo_user"] = {
       value: "#{user.id} #{user.auth_code}",
       expires: 1.month.from_now
     }
   end
-  alias set_autologin_cookie cookie_set_autologin
 
   # Destroy the auto-login cookie.
   def clear_autologin_cookie

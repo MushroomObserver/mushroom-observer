@@ -257,7 +257,7 @@ class AccountController < ApplicationController
         User.current = @user
         set_session_user(@user)
         if @remember
-          set_autologin_cookie(@user)
+          autologin_cookie_set(@user)
         else
           clear_autologin_cookie
         end
@@ -411,7 +411,7 @@ class AccountController < ApplicationController
 
   def update_content_filter(pref, val)
     filter = ContentFilter.find(pref)
-    @user.content_filter[pref] = 
+    @user.content_filter[pref] =
       if filter.type == :boolean
         val == "1" ? filter.checked_val : filter.off_val
       else
