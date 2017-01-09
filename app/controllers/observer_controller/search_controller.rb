@@ -55,8 +55,9 @@ class ObserverController
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
+    @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
-    model = params[:search][:type].to_s.camelize.constantize
+    model = params[:search][:model].to_s.camelize.constantize
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
@@ -80,11 +81,8 @@ class ObserverController
   end
 
   def add_applicable_filter_parameters(query_params, model)
-    ContentFilter.all.each do |fltr|
-      next unless model == fltr.model
-      val = params[fltr.sym]
-      val = fltr.off_val if val == "off"
-      query_params[fltr.sym] = val
+    ContentFilter.by_model(model).each do |fltr|
+      query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
     end
   end
 

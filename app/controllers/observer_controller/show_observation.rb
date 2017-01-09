@@ -29,7 +29,7 @@ class ObserverController
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
     @new_sites     = external_sites_user_can_add_links_to(@observation)
-    @votes         = users_votes(@observation)
+    @votes         = gather_users_votes(@observation, @user) if @user
   end
 
   # Make it really easy for users to elect to go public with their votes.
@@ -60,18 +60,6 @@ class ObserverController
   def check_if_query_is_mappable
     query = find_query(:Observation)
     query && query.coercable?(:Location)
-  end
-
-  # Provide a list of user's votes to view.
-  def users_votes(obs)
-    return {} unless @user
-    votes = {}
-    obs.namings.each do |naming|
-      vote = naming.votes.find { |x| x.user_id == @user.id }
-      vote ||= Vote.new(value: 0)
-      votes[naming.id] = vote
-    end
-    votes
   end
 
   # Get a list of external_sites which the user has permission to add
