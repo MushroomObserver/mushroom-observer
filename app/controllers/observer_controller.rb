@@ -48,6 +48,7 @@
 #  lookup_comment::
 #  lookup_image::
 #  lookup_location::
+#  lookup_accepted_name::
 #  lookup_name::
 #  lookup_observation::
 #  lookup_project::
@@ -133,6 +134,7 @@ class ObserverController < ApplicationController
     :intro,
     :list_observations,
     :list_rss_logs,
+    :lookup_accepted_name,
     :lookup_comment,
     :lookup_image,
     :lookup_location,
@@ -424,21 +426,12 @@ class ObserverController < ApplicationController
           pattern = "%#{id}%"
           conditions = ["name LIKE ? OR scientific_name LIKE ?",
                         pattern, pattern]
-          # matches = Location.find(:all, # Rails 3
-          #                        limit: 100,
-          #                        conditions: conditions)
           matches = Location.limit(100).where(conditions)
         when "Project"
           pattern = "%#{id}%"
-          # matches = Project.find(:all, # Rails 3
-          #                        limit: 100,
-          #                        conditions: ["title LIKE ?", pattern])
           matches = Project.limit(100).where("title LIKE ?", pattern)
         when "SpeciesList"
           pattern = "%#{id}%"
-          # matches = SpeciesList.find(:all, # Rails 3
-          #                            limit: 100,
-          #                            conditions: ["title LIKE ?", pattern])
           matches = SpeciesList.limit(100).where("title LIKE ?", pattern)
         when "User"
           matches = User.where(login: id)

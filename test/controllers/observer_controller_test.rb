@@ -2288,24 +2288,32 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # ----------------------------
-  #  Lookup name.
+  #  Lookup's.
+  #  These are links of the form
+  #  /lookup_name/Amanita+muscaria
+  #  They are created by the Textile Sandbox, and should always redirect
+  #  to the appropriate model.
   # ----------------------------
 
-  def test_lookup_name
+  def test_lookup_comment
     c_id = comments(:minimal_unknown_obs_comment_1).id
     get(:lookup_comment, id: c_id)
     assert_redirected_to(controller: :comment, action: :show_comment, id: c_id)
     get(:lookup_comment, id: 10_000)
     assert_redirected_to(controller: :comment, action: :index_comment)
     assert_flash_error
+  end
 
+  def test_lookup_image
     i_id = images(:in_situ_image).id
     get(:lookup_image, id: i_id)
     assert_redirected_to(controller: :image, action: :show_image, id: i_id)
     get(:lookup_image, id: 10_000)
     assert_redirected_to(controller: :image, action: :index_image)
     assert_flash_error
+  end
 
+  def test_lookup_location
     l_id = locations(:albion).id
     get(:lookup_location, id: l_id)
     assert_redirected_to(controller: :location, action: :show_location, id: l_id)
@@ -2322,7 +2330,15 @@ class ObserverControllerTest < FunctionalTestCase
     # assert_redirected_to(controller: :location, action: :index_location)
     assert_redirected_to(%r{/location/index_location})
     assert_flash_warning
+  end
 
+  def test_lookup_accepted_name
+    get(:lookup_accepted_name, id: names(:lactarius_subalpinus).text_name)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:lactarius_alpinus))
+  end
+
+  def test_lookup_name
     n_id = names(:fungi).id
     get(:lookup_name, id: n_id)
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
@@ -2347,7 +2363,17 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_name, id: "Agaricus campestris Linn.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+  end
 
+  def test_lookup_observation
+    get(:lookup_observation, id: observations(:minimal_unknown_obs).id)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: observations(:minimal_unknown_obs))
+  end
+
+
+
+  def test_lookup_project
     p_id = projects(:eol_project).id
     get(:lookup_project, id: p_id)
     assert_redirected_to(controller: :project, action: :show_project, id: p_id)
@@ -2360,7 +2386,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_project, id: "project")
     assert_redirected_to(%r{/project/index_project})
     assert_flash_warning
+  end
 
+  def test_lookup_species_list
     sl_id = species_lists(:first_species_list).id
     get(:lookup_species_list, id: sl_id)
     assert_redirected_to(controller: :species_list, action: :show_species_list,
@@ -2375,7 +2403,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_species_list, id: "Flibbertygibbets")
     assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_flash_error
+  end
 
+  def test_lookup_user
     get(:lookup_user, id: rolf.id)
     assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
     get(:lookup_user, id: "mary")
