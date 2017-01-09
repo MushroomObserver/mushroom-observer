@@ -134,7 +134,7 @@ class AccountController < ApplicationController
         flash_warning(:runtime_reverify_already_verified.t)
         @user = nil
         User.current = nil
-        set_session_user(nil)
+        session_user_set(nil)
         redirect_to(action: :login)
 
       # If user was created via API, we must ask the user to choose a password
@@ -164,7 +164,7 @@ class AccountController < ApplicationController
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user
-            set_session_user(@user)
+            session_user_set(@user)
             @user.change_password(password)
             @user.verify
           end
@@ -180,7 +180,7 @@ class AccountController < ApplicationController
       else
         @user = user
         User.current = user
-        set_session_user(user)
+        session_user_set(user)
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
@@ -255,7 +255,7 @@ class AccountController < ApplicationController
         @user.updated_at = now
         @user.save
         User.current = @user
-        set_session_user(@user)
+        session_user_set(@user)
         if @remember
           autologin_cookie_set(@user)
         else
@@ -293,7 +293,7 @@ class AccountController < ApplicationController
   def logout_user # :nologin:
     @user = nil
     User.current = nil
-    set_session_user(nil)
+    session_user_set(nil)
     clear_autologin_cookie
   end
 

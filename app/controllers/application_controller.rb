@@ -25,10 +25,10 @@
 #  in_admin_mode?::         Is the current User in admin mode?
 #  unshown_notifications?:: Are there pending Notification's of a given type?
 #  check_user_alert::       (filter: redirect to show_alert if has alert)
-#  cookie_set_autologin::   (set autologin cookie)
+#  autologin_cookie_set::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
-#  session_set_user::       (store user in session -- id only)
-#  session_get_user::       (retrieve user from session)
+#  session_user_set::       (store user in session -- id only)
+#  session_user::           (retrieve user from session)
 #
 #  ==== Internationalization
 #  all_locales::            Array of available locales for which we have
@@ -326,7 +326,7 @@ class ApplicationController < ActionController::Base
     # Guilty until proven innocent...
     clear_user_globals
 
-    try_user_autologin(session_get_user)
+    try_user_autologin(session_user)
     make_logged_in_user_available_to_everyone
     track_last_page_request_by_user
     block_suspended_users
@@ -369,7 +369,7 @@ class ApplicationController < ActionController::Base
   end
 
   def login_valid_user(user)
-    @user = session_set_user(user)
+    @user = session_user_set(user)
     @user.last_login = Time.current
     @user.save
 
@@ -381,7 +381,7 @@ class ApplicationController < ActionController::Base
 
   def delete_invalid_cookies
     clear_autologin_cookie
-    session_set_user(nil)
+    session_user_set(nil)
   end
 
   def make_logged_in_user_available_to_everyone
@@ -533,18 +533,16 @@ class ApplicationController < ActionController::Base
   end
 
   # Store User in session (id only).
-  def session_set_user(user)
+  def session_user_set(user)
     session[:user_id] = user ? user.id : nil
     user
   end
-  alias set_session_user session_set_user
 
   # Retrieve the User from session.  Returns User object or nil.  (Does not
   # check verified status or anything.)
-  def session_get_user
+  def session_user
     User.safe_find(session[:user_id])
   end
-  alias get_session_user session_get_user
 
   ##############################################################################
   #

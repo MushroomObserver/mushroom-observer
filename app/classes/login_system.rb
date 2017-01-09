@@ -43,7 +43,7 @@ module LoginSystem
   def login_required
     return true unless protect?(action_name)
 
-    user = get_session_user
+    user = session_user
     return true if user && authorize?(user)
 
     # store current location so that we can

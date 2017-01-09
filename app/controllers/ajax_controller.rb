@@ -47,8 +47,8 @@ class AjaxController < ApplicationController
     render(text: msg, status: 500)
   end
 
-  def get_session_user!
-    User.current = get_session_user or fail "Must be logged in."
+  def session_user!
+    User.current = session_user or fail "Must be logged in."
   end
 
   # Used by unit tests.
@@ -83,7 +83,7 @@ class AjaxController < ApplicationController
     type  = params[:type].to_s
     id    = params[:id].to_s
     value = params[:value].to_s
-    @user = get_session_user!
+    @user = session_user!
     key   = ApiKey.safe_find(id)
     if !key
       fail :runtime_no_match_id.l(type: :api_key, id: id)
@@ -139,7 +139,7 @@ class AjaxController < ApplicationController
     value = params[:value].to_s
     if value != "0" && value != "1"
       fail "Invalid value for export: #{value.inspect}"
-    elsif @user = get_session_user!
+    elsif @user = session_user!
       case type
       when "image"
         export_image(id, value)
@@ -169,7 +169,7 @@ class AjaxController < ApplicationController
     name = params[:name].to_s
     if params[:format]
       name = Location.reverse_name(name) if params[:format] == "scientific"
-    elsif @user = get_session_user!
+    elsif @user = session_user!
       name = Location.reverse_name(name) if @user.location_format == :scientific
     end
     render(inline: Geocoder.new(name).ajax_response)
@@ -195,11 +195,11 @@ class AjaxController < ApplicationController
       @story = Pivotal.get_story(id)
       render(inline: "<%= pivotal_story(@story) %>")
     when "vote"
-      @user = get_session_user!
+      @user = session_user!
       @story = Pivotal.cast_vote(id, @user, value)
       render(inline: "<%= pivotal_vote_controls(@story) %>")
     when "comment"
-      @user = get_session_user!
+      @user = session_user!
       story = Pivotal.get_story(id)
       @comment = Pivotal.post_comment(id, @user, value)
       @num = story.comments.length + 1
@@ -218,7 +218,7 @@ class AjaxController < ApplicationController
     type  = params[:type].to_s
     id    = params[:id].to_s
     value = params[:value].to_s
-    if @user = get_session_user!
+    if @user = session_user!
       case type
       when "naming"
         cast_naming_vote(id, value)
@@ -260,7 +260,7 @@ class AjaxController < ApplicationController
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
   def get_multi_image_template
-    @user = get_session_user!
+    @user = session_user!
     @licenses = License.current_names_and_ids(@user.license) # for license menu
     @image = Image.new(user: @user, when: Time.now)
     render(partial: "/observer/form_multi_image_template")
@@ -269,7 +269,7 @@ class AjaxController < ApplicationController
   # Uploads an image object without an observation.
   # Returns image as JSON object.
   def create_image_object
-    user = get_session_user!
+    user = session_user!
     image_args = params[:image]
 
     original_name = image_args[:original_name].to_s
