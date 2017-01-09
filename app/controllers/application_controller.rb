@@ -476,9 +476,7 @@ class ApplicationController < ActionController::Base
     result = @user.in_group?("reviewers") if @user
     result
   end
-  alias is_reviewer? reviewer?
-  alias is_reviewer reviewer?
-  helper_method :reviwer?, :is_reviewer?, :is_reviewer
+  helper_method :reviewer?
 
   # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
   # is available to views.)

@@ -456,7 +456,7 @@ class NameController < ApplicationController
     pass_query_params
     id = params[:id].to_s
     desc = NameDescription.find(id)
-    desc.update_review_status(params[:value]) if is_reviewer?
+    desc.update_review_status(params[:value]) if reviewer?
     redirect_with_query(action: :show_name, id: desc.name_id)
   end
 

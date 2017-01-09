@@ -180,7 +180,6 @@ class ImageController < ApplicationController
     store_location
     return false unless @image = find_or_goto_index(Image, params[:id].to_s)
 
-    @is_reviewer = is_reviewer
     pass_query_params
 
     # Decide which size to display.

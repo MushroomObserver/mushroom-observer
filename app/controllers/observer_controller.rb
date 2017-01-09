@@ -1354,7 +1354,7 @@ class ObserverController < ApplicationController
     type  = params[:type].to_s
     value = params[:value].to_s
     model_class = type.camelize.safe_constantize
-    if !is_reviewer?
+    if !reviewer?
       flash_error(:runtime_admin_only.t)
       redirect_back_or_default("/")
     elsif !model_class ||

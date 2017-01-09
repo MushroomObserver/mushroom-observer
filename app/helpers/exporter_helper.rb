@@ -18,7 +18,7 @@ module ExporterHelper
   # Display the two export statuses, making the current state plain text and
   # the other a link to the observer/set_export_status callback.
   def set_export_status_controls(obj)
-    if is_reviewer?
+    if reviewer?
       if obj.ok_for_export
         content_tag(:b, :review_ok_for_export.t, class: "nowrap")
       else
