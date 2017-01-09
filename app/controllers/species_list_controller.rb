@@ -966,7 +966,7 @@ class SpeciesListController < ApplicationController
   # is destined for the instance variable @checklist.
   def calc_checklist(query = nil)
     results = []
-    if query || (query = get_query_from_session)
+    if query || (query = query_from_session)
       case query.model
       when Name
         results = query.select_rows(
