@@ -503,7 +503,6 @@ class ApplicationController < ActionController::Base
 
     false
   end
-  alias has_unshown_notifications? unshown_notifications?
 
   # ----------------------------
   #  "Private" methods.

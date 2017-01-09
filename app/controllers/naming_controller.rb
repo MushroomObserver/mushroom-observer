@@ -69,7 +69,7 @@ class NamingController < ApplicationController
   end
 
   def check_for_notifications
-    action = has_unshown_notifications?(@user, :naming) ?
+    action = unshown_notifications?(@user, :naming) ?
                :show_notifications : :show_observation
     default_redirect(@params.observation, action)
   end
