@@ -34,6 +34,8 @@
 #  all_locales::            Array of available locales for which we have
 #                           translations.
 #  set_locale::             (filter: determine which locale is requested)
+#  set_timezone::           (filter: Set timezone from cookie set by client's
+#                            browser.)
 #  sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
 #  valid_locale_from_request_header::
@@ -245,6 +247,8 @@ class ApplicationController < ActionController::Base
     "#{start[:robot]} #{start[:ip]}\t#{start[:url]}\t#{start[:ua]}"
   end
 
+  private :start_state, :catch_ip, :catch_url, :catch_ua, :error_stats
+
   # Update Globalite with any recent changes to translations.
   def refresh_translations
     Language.update_recent_translations
@@ -333,6 +337,8 @@ class ApplicationController < ActionController::Base
     block_suspended_users
   end
 
+  private ##########
+
   def clear_user_globals
     @user = nil
     User.current = nil
@@ -417,6 +423,8 @@ class ApplicationController < ActionController::Base
            layout: false)
   end
 
+  public ##########
+
   # ----------------------------
   #  "Public" methods.
   # ----------------------------
@@ -449,6 +457,9 @@ class ApplicationController < ActionController::Base
   def obj_is_user?(obj)
     (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == User.current_id
   end
+
+  private :correct_user_for_object?, :owned_by_user?, :editable_by_user?,
+          :obj_is_user?
 
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  Flashes a "denied" error message if false.
@@ -688,8 +699,7 @@ class ApplicationController < ActionController::Base
     lookup_valid_locale(requested_locales)
   end
 
-  # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
-  # Returns a String, or <tt>nil</tt> if no valid match found.
+  # Lookup the closest match based on the given request priorities.
   def lookup_valid_locale(requested_locales)
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
@@ -700,6 +710,8 @@ class ApplicationController < ActionController::Base
     end
     "en"
   end
+
+  private :js_enabled?, :map_locales_to_weights, :lookup_valid_locale
 
   ##############################################################################
   #
@@ -1062,6 +1074,20 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  # Lookup the given kind of Query, returning nil if it no longer exists.
+  def find_query(model = nil, update = !browser.bot?)
+    model = model.to_s if model
+    q = dealphabetize_q_param
+
+    return nil unless (query = query_exists(q))
+
+    result = find_new_query_for_model(model, query)
+    save_updated_query(result) if update && result
+    result
+  end
+
+  private ##########
+
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
@@ -1088,18 +1114,6 @@ class ApplicationController < ActionController::Base
     else
       result = create_query(model, :all, args)
     end
-    result
-  end
-
-  # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model = nil, update = !browser.bot?)
-    model = model.to_s if model
-    q = dealphabetize_q_param
-
-    return nil unless (query = query_exists(q))
-
-    result = find_new_query_for_model(model, query)
-    save_updated_query(result) if update && result
     result
   end
 
@@ -1150,12 +1164,16 @@ class ApplicationController < ActionController::Base
     new_args.any? { |_arg, val| query.params[:arg] != val }
   end
 
+  public ##########
+
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
   def create_query(model_symbol, flavor = :all, args = {})
     Query.lookup(model_symbol, flavor, args)
   end
+
+  private ##########
 
   def save_query_unless_bot(result)
     return unless result && !browser.bot?
@@ -1190,6 +1208,8 @@ class ApplicationController < ActionController::Base
     [min, v.to_f - amount].max
   end
 
+  public ##########
+
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate
@@ -1214,6 +1234,8 @@ class ApplicationController < ActionController::Base
                                   id: id
                                 }, query))
   end
+
+  private ##########
 
   def find_query_and_next_object(object, method, id)
     # prev/next in RssLog query
@@ -1293,6 +1315,8 @@ class ApplicationController < ActionController::Base
     flash_error(:runtime_no_more_search_objects.t(type: object.type_tag))
     { object: object, id: id, query: query }
   end
+
+  public ##########
 
   ##############################################################################
   #
@@ -1479,6 +1503,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  private ##########
+
   def apply_content_filters(query)
     filters = users_content_filters || {}
     @any_content_filters_applied = false
@@ -1506,6 +1532,8 @@ class ApplicationController < ActionController::Base
     add_sorting_links(query, sorts, args[:link_all_sorts])
   end
 
+  public ##########
+
   # Create sorting links for index pages, "graying-out" the current order.
   def add_sorting_links(query, links, link_all = false)
     results = []
@@ -1518,6 +1546,8 @@ class ApplicationController < ActionController::Base
     # Add a "reverse" button.
     results << sort_link(:sort_by_reverse.t, query, reverse_by(query, this_by))
   end
+
+  private ##########
 
   def link_or_grayed_text(link_all, this_by, label, query, by)
     if !link_all && (by.to_s == this_by)
@@ -1537,6 +1567,8 @@ class ApplicationController < ActionController::Base
     query.params[:by].to_s =~ /^reverse_/ ? this_by : "reverse_#{this_by}"
   end
 
+  public ##########
+
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
@@ -1549,6 +1581,8 @@ class ApplicationController < ActionController::Base
     end
     result
   end
+
+  private ##########
 
   # Redirects to an appropriate fallback index in case of unrecoverable error.
   # Most such errors are dealt with on a case-by-case basis in the controllers,
@@ -1585,6 +1619,8 @@ class ApplicationController < ActionController::Base
     vote: Observation
   }.freeze
 
+  public ##########
+
   # Initialize Paginator object.  This now does very little thanks to the new
   # Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
@@ -1610,17 +1646,6 @@ class ApplicationController < ActionController::Base
     )
   end
 
-  def paginator_letter(parameter_key)
-    return nil unless params[parameter_key].to_s =~ /^([A-Z])$/i
-    Regexp.last_match(1).upcase
-  end
-
-  def paginator_number(parameter_key)
-    params[parameter_key].to_s.to_i
-  rescue
-    1
-  end
-
   # Initialize Paginator object.  This now does very little thanks to
   # the new Query model.
   # arg::           Name of parameter to use.  (default is 'page')
@@ -1641,6 +1666,21 @@ class ApplicationController < ActionController::Base
       num_per_page: num_per_page
     )
   end
+
+  private ##########
+
+  def paginator_letter(parameter_key)
+    return nil unless params[parameter_key].to_s =~ /^([A-Z])$/i
+    Regexp.last_match(1).upcase
+  end
+
+  def paginator_number(parameter_key)
+    params[parameter_key].to_s.to_i
+  rescue
+    1
+  end
+
+  public ##########
 
   ##############################################################################
   #
@@ -1679,6 +1719,8 @@ class ApplicationController < ActionController::Base
   def memory_usage_log_format
     "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n"
   end
+
+  private :memory_usage_log_format
 
   ##############################################################################
   #
