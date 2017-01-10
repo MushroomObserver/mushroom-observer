@@ -17,6 +17,11 @@ class ObserverController
     lookup_general(Name)
   end
 
+  # This was created in late July 2012 to give MycoPortal a safe way to link
+  # back to MO's show_name pages.  In particular, it was not intended to be
+  # used with a name ID.  It can actually return a deprecated name if you give
+  # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it
+  # because it should never be called that way in the first place. -JPH 1/2017
   def lookup_accepted_name # :nologin
     lookup_general(Name, true)
   end
