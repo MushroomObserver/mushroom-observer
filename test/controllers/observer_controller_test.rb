@@ -729,10 +729,10 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_some_admin_pages
-    for (page, response, params) in [
+    [
       [:users_by_name,  "list_users", {}],
       [:email_features, "email_features", {}]
-    ]
+    ].each do |page, response, params|
       logout
       get(page, params)
       assert_redirected_to(controller: :account, action: :login)
@@ -1304,12 +1304,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_various_altitude_formats
-    for input, output in [
+    [
       ["500",     500],
       ["500m",    500],
       ["500 ft.", 152],
       [' 500\' ', 152]
-    ]
+    ].each do | input, output |
       where = "Unknown, Massachusetts, USA"
 
       generic_construct_observation({
