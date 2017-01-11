@@ -73,7 +73,7 @@ class TranslationController < ApplicationController
       fail(:edit_translations_login_required.t)
     elsif !@user.is_successful_contributor?
       fail(:unsuccessful_contributor_warning.t)
-    elsif lang.official && !is_reviewer?
+    elsif lang.official && !reviewer?
       fail(:edit_translations_reviewer_required.t)
     end
     lang

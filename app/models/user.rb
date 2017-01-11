@@ -83,7 +83,7 @@
 #  admins wandering around the site in "admin mode" during every-day usage.
 #  Thus we additionally require that admin User's also turn on admin mode.
 #  (There's a handy switch in the left-hand column of every page.)  This state
-#  is stored in the session.  (See ApplicationController#is_in_admin_mode?)
+#  is stored in the session.  (See ApplicationController#in_admin_mode?)
 #
 #  == Attributes
 #

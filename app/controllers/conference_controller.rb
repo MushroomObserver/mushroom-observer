@@ -27,7 +27,7 @@ class ConferenceController < ApplicationController
   end
 
   def create_event # :norobots:
-    if is_in_admin_mode? # Probably should be expanded to any MO user
+    if in_admin_mode? # Probably should be expanded to any MO user
       if request.method == "POST"
         event = ConferenceEvent.new(whitelisted_event_params)
         event.save
@@ -42,7 +42,7 @@ class ConferenceController < ApplicationController
   def edit_event # :norobots:
     # Expand to any MO user,
     # but make them owned and editable only by that user or an admin
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method == "POST"
         event = ConferenceEvent.find(params[:id].to_s)
         event.attributes = whitelisted_event_params
@@ -93,7 +93,7 @@ class ConferenceController < ApplicationController
   end
 
   def list_registrations # :norobots:
-    if is_in_admin_mode?
+    if in_admin_mode?
       @event = ConferenceEvent.find(params[:id].to_s)
       @hello = "Hello"
     else

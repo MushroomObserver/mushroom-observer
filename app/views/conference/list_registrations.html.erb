@@ -6,7 +6,7 @@
     link_to(:event_index.t, action: :index),
     link_to(:register_event.t, action: :register, id: @event.id)
   ]
-  if is_in_admin_mode?
+  if in_admin_mode?
     tabs += [
       link_to(:edit_event.t, action: :edit_event, id: @event.id),
       link_to(:create_event.t, action: :create_event)

@@ -564,7 +564,7 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          if has_unshown_notifications?(@user, :naming)
+          if unshown_notifications?(@user, :naming)
             redirect_to(controller: "observer", action: "show_notifications")
           else
             redirect_to(controller: "observer", action: "show_observation",
@@ -600,7 +600,7 @@ class LocationController < ApplicationController
       done = false
       if request.method == "POST"
 
-        if Location.is_unknown?(@location.name) && !is_in_admin_mode?
+        if Location.is_unknown?(@location.name) && !in_admin_mode?
           flash_error("This Location is protected (not editable). To change an Observation's location, edit Observation 'Where'.")
           redirect_to(action: "show_location", id: @location.id)
           return
@@ -624,7 +624,7 @@ class LocationController < ApplicationController
           end
 
           # Admins can actually merge them, then redirect to other location.
-          if is_in_admin_mode? || @location.mergable?
+          if in_admin_mode? || @location.mergable?
             merge.merge(@location)
             merge.save if merge.changed?
             @location = merge

@@ -199,7 +199,7 @@ class ObserverController
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
     fail "no robots!" if browser.bot?
-    set_query_params(query)
+    query_params_set(query)
     @format = params[:format] || "raw"
     @encoding = params[:encoding] || "UTF-8"
     if params[:commit] == :CANCEL.l

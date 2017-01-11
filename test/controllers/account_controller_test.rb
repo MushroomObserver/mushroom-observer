@@ -421,7 +421,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_no_email_hooks
-    for type in [
+    [
       :comments_owner,
       :comments_response,
       :comments_all,
@@ -438,7 +438,7 @@ class AccountControllerTest < FunctionalTestCase
       :general_feature,
       :general_commercial,
       :general_question
-    ]
+    ].each do |type|
       assert_request(
         action: "no_email_#{type}",
         params: { id: rolf.id },

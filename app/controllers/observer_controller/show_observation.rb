@@ -48,7 +48,7 @@ class ObserverController
   # Make it easy for users to change thumbnail size.
   def check_if_user_wants_to_change_thumbnail_size
     return if params[:set_thumbnail_size].blank?
-    set_default_thumbnail_size(params[:set_thumbnail_size])
+    default_thumbnail_size_set(params[:set_thumbnail_size])
   end
 
   # Tell search engines what the "correct" URL is for this page.
@@ -66,7 +66,7 @@ class ObserverController
   # external_links to (and which no external_link to exists yet).
   def external_sites_user_can_add_links_to(obs)
     return [] unless @user
-    if @user == obs.user || is_in_admin_mode?
+    if @user == obs.user || in_admin_mode?
       ExternalSite.all - obs.external_links.map(&:external_site)
     else
       @user.external_sites - obs.external_links.map(&:external_site)

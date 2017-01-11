@@ -3,7 +3,7 @@
 class ObserverController
   # User index, restricted to admins.
   def index_user # :nologin: :norobots:
-    if is_in_admin_mode? || find_query(:User)
+    if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
@@ -18,7 +18,7 @@ class ObserverController
 
   # User index, restricted to admins.
   def users_by_name # :norobots:
-    if is_in_admin_mode?
+    if in_admin_mode?
       query = create_query(:User, :all, by: :name)
       show_selected_users(query)
     else
@@ -45,11 +45,11 @@ class ObserverController
     args = {
       action: "list_users",
       include: :user_groups,
-      matrix: !is_in_admin_mode?
+      matrix: !in_admin_mode?
     }.merge(args)
 
     # Add some alternate sorting criteria.
-    if is_in_admin_mode?
+    if in_admin_mode?
       args[:sorting_links] = [
         ["id",          :sort_by_id.t],
         ["login",       :sort_by_login.t],
@@ -140,7 +140,7 @@ class ObserverController
   # for a given user.
   def change_user_bonuses # :root: :norobots:
     return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method != "POST"
         # Reformat bonuses as string for editing, one entry per line.
         @val = ""

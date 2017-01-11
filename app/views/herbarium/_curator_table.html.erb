@@ -1,4 +1,4 @@
-<% can_delete = herbarium.can_delete_curator?(@user) || is_in_admin_mode? %>
+<% can_delete = herbarium.can_delete_curator?(@user) || in_admin_mode? %>
 
 <table class="table-striped table-curators">
   <thead>

@@ -53,7 +53,7 @@ class ObserverController
 
   # Update banner across all translations.
   def change_banner # :root: :norobots:
-    if !is_in_admin_mode?
+    if !in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(action: "list_rss_logs")
     elsif request.method == "POST"
@@ -91,7 +91,7 @@ class ObserverController
     type  = params[:type].to_s
     value = params[:value].to_s
     model_class = type.camelize.safe_constantize
-    if !is_reviewer?
+    if !reviewer?
       flash_error(:runtime_admin_only.t)
       redirect_back_or_default("/")
     elsif !model_class ||

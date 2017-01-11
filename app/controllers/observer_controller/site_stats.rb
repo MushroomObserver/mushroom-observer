@@ -24,7 +24,7 @@ class ObserverController
 
   # Reports on the health of the system
   def server_status # :root: :norobots:
-    if is_in_admin_mode?
+    if in_admin_mode?
       case params[:commit]
       when :system_status_gc.l
         ObjectSpace.garbage_collect

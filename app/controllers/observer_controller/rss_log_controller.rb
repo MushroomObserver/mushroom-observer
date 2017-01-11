@@ -36,7 +36,7 @@ class ObserverController
   # Show selected search results as a matrix with "list_rss_logs" template.
   def show_selected_rss_logs(query, args = {})
     store_query_in_session(query)
-    set_query_params(query)
+    query_params_set(query)
 
     args = {
       action: "list_rss_logs",

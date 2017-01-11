@@ -2,7 +2,7 @@
 # TODO: move this into a new EmailController
 class ObserverController
   def email_features # :root: :norobots:
-    if is_in_admin_mode?
+    if in_admin_mode?
       @users = User.where("email_general_feature=1 && verified is not null")
       if request.method == "POST"
         @users.each do |user|

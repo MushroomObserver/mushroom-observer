@@ -134,7 +134,7 @@ class AccountController < ApplicationController
         flash_warning(:runtime_reverify_already_verified.t)
         @user = nil
         User.current = nil
-        set_session_user(nil)
+        session_user_set(nil)
         redirect_to(action: :login)
 
       # If user was created via API, we must ask the user to choose a password
@@ -164,7 +164,7 @@ class AccountController < ApplicationController
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user
-            set_session_user(@user)
+            session_user_set(@user)
             @user.change_password(password)
             @user.verify
           end
@@ -180,7 +180,7 @@ class AccountController < ApplicationController
       else
         @user = user
         User.current = user
-        set_session_user(user)
+        session_user_set(user)
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
@@ -255,9 +255,9 @@ class AccountController < ApplicationController
         @user.updated_at = now
         @user.save
         User.current = @user
-        set_session_user(@user)
+        session_user_set(@user)
         if @remember
-          set_autologin_cookie(@user)
+          autologin_cookie_set(@user)
         else
           clear_autologin_cookie
         end
@@ -293,7 +293,7 @@ class AccountController < ApplicationController
   def logout_user # :nologin:
     @user = nil
     User.current = nil
-    set_session_user(nil)
+    session_user_set(nil)
     clear_autologin_cookie
   end
 
@@ -411,7 +411,7 @@ class AccountController < ApplicationController
 
   def update_content_filter(pref, val)
     filter = ContentFilter.find(pref)
-    @user.content_filter[pref] = 
+    @user.content_filter[pref] =
       if filter.type == :boolean
         val == "1" ? filter.checked_val : filter.off_val
       else
@@ -705,7 +705,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    session[:admin] = true if @user && @user.admin && !is_in_admin_mode?
+    session[:admin] = true if @user && @user.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -716,7 +716,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group # :root:
     redirect = true
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method == "POST"
         user_name  = params["user_name"].to_s
         group_name = params["group_name"].to_s
@@ -749,7 +749,7 @@ class AccountController < ApplicationController
     redirect = true
     id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
-      if is_in_admin_mode?
+      if in_admin_mode?
         if request.method == "GET"
           # render form
           redirect = false
@@ -782,7 +782,7 @@ class AccountController < ApplicationController
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
   def destroy_user # :root:
-    if is_in_admin_mode?
+    if in_admin_mode?
       id = params["id"]
       unless id.blank?
         user = User.safe_find(id)
