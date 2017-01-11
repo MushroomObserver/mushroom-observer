@@ -431,6 +431,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:query_title_pattern_search.t(types: "Observations",
                                                pattern: "120"),
                  @controller.instance_variable_get("@title"))
+
+    # If pattern is id of a real Observation, go directly to that Observation.
+    obs = Observation.first
+    get_with_dump(:observation_search, pattern: obs.id)
+    assert_redirected_to(action: :show_observation, id: Observation.first.id)
   end
 
   def test_observation_search_with_spelling_correction
