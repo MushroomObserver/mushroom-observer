@@ -399,16 +399,24 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :user_search,
                          pattern: "34")
 
-    params = { search: { pattern: "", type: :google } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
-
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
     target = "http://google.com?q=site:mushroomobserver.org%20#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
+
+    params = { search: { pattern: "", type: :google } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+
+    params = { search: { pattern: "x", type: :nonexistent_type } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+
+    params = { search: { pattern: "", type: :observation } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_observations)
   end
 
   def test_observation_search
