@@ -465,6 +465,13 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations, partial: :_rss_log)
   end
 
+  def test_observations_of_name
+    params = { species_list_id: species_lists(:unknown_species_list).id,
+               name: observations(:minimal_unknown_obs).name }
+    get_with_dump(:observations_of_name, params)
+    assert_select("title", /Observations of Synonyms of/)
+  end
+
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: { controller: :observer, action: :list_rss_logs })
