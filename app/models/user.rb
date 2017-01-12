@@ -83,7 +83,7 @@
 #  admins wandering around the site in "admin mode" during every-day usage.
 #  Thus we additionally require that admin User's also turn on admin mode.
 #  (There's a handy switch in the left-hand column of every page.)  This state
-#  is stored in the session.  (See ApplicationController#is_in_admin_mode?)
+#  is stored in the session.  (See ApplicationController#in_admin_mode?)
 #
 #  == Attributes
 #
@@ -217,8 +217,6 @@
 #  == Callbacks
 #  crypt_password::     Password attribute is encrypted before object is created.
 #
-################################################################################
-
 class User < AbstractModel
   require "digest/sha1"
 
@@ -226,15 +224,16 @@ class User < AbstractModel
   # Do not change the integer associated with a value
   # first value is the default
   as_enum(:thumbnail_size,
-          { thumbnail: 1,
+          {
+            thumbnail: 1,
             small: 2
           },
           source: :thumbnail_size,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:image_size,
-          { thumbnail: 1,
+          {
+            thumbnail: 1,
             small: 2,
             medium: 3,
             large: 4,
@@ -243,42 +242,41 @@ class User < AbstractModel
           },
           source: :image_size,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:votes_anonymous,
-          { no: 1,
+          {
+            no: 1,
             yes: 2,
             old: 3
           },
           source: :votes_anonymous,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:location_format,
-          { postal: 1,
+          {
+            postal: 1,
             scientific: 2
           },
           source: :location_format,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:hide_authors,
-          { none: 1,
+          {
+            none: 1,
             above_species: 2
           },
           source: :hide_authors,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:keep_filenames,
-          { toss: 1,
+          {
+            toss: 1,
             keep_but_hide: 2,
             keep_and_show: 3
           },
           source: :keep_filenames,
           with: [],
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
@@ -478,27 +476,16 @@ class User < AbstractModel
   end
 
   def legal_name_changed?
-    !!legal_name_change
+    !legal_name_change.nil?
   end
 
   def legal_name_change
-    old_name  = begin
-                  name_change[0]
-                rescue
-                  name
-                end
-    old_login = begin
-                  login_change[0]
-                rescue
-                  login
-                end
+    old_name = name_change ? name_change[0] : name
+    old_login = login_change ? login_change[0] : login
     old_legal_name = old_name.blank? ? old_login : old_name
     new_legal_name = legal_name
-    if old_legal_name != new_legal_name
-      return [old_legal_name, new_legal_name]
-    else
-      return nil
-    end
+    return nil if old_legal_name == new_legal_name
+    [old_legal_name, new_legal_name]
   end
 
   ##############################################################################
@@ -549,7 +536,6 @@ class User < AbstractModel
   #   user.in_group?('reviewers')
   #
   def in_group?(group)
-    result = false
     if group.is_a?(UserGroup)
       user_groups.include?(group)
     else
@@ -573,6 +559,12 @@ class User < AbstractModel
       WHERE projects.user_group_id = user_groups_users.user_group_id
         AND user_groups_users.user_id = #{id}
     )
+  end
+
+  # Return an Array of ExternalSite's that this user has permission to add
+  # links for.
+  def external_sites
+    @external_sites ||= ExternalSite.where(project: projects_member)
   end
 
   def preferred_herbarium_name
@@ -645,7 +637,11 @@ class User < AbstractModel
           AND target_id = #{object.id}
         LIMIT 1
       )).to_s
-      state == "1" ? :watching : state == "0" ? :ignoring : nil
+      if state == "1"
+        :watching
+      elsif state == "0"
+        :ignoring
+      end
     end
   end
 
@@ -668,6 +664,7 @@ class User < AbstractModel
   def mailing_address_for_tracking_template
     result = mailing_address.strip if mailing_address
     result = "**insert mailing address for specimens**" if result.blank?
+    result
   end
 
   ##############################################################################
@@ -696,11 +693,12 @@ class User < AbstractModel
   #   contribution += user.sum_bonuses
   #
   def sum_bonuses
-    bonuses.inject(0) { |sum, pair| sum + pair[0] } if bonuses
+    return nil unless bonuses
+    bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
   def is_successful_contributor?
-    observations.length > 0
+    observations.any?
   end
 
   ##############################################################################
@@ -803,16 +801,20 @@ class User < AbstractModel
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
       result = connection.select_values(%(
-        SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+        SELECT CONCAT(users.login,
+                      IF(users.name = "", "", CONCAT(" <", users.name, ">")))
         FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH, last_login, NULL) DESC,
+        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH,
+                    last_login, NULL) DESC,
                  contribution DESC
         LIMIT 1000
       )).uniq.sort
 
-      File.open(MO.user_primer_cache_file, "w:utf-8").write(result.join("\n") + "\n")
+      File.open(MO.user_primer_cache_file, "w:utf-8").
+        write(result.join("\n") + "\n")
     else
-      result = File.open(MO.user_primer_cache_file, "r:UTF-8").readlines.map(&:chomp)
+      result = File.open(MO.user_primer_cache_file, "r:UTF-8").
+               readlines.map(&:chomp)
     end
     result
   end
@@ -823,7 +825,7 @@ class User < AbstractModel
   # 3) Personal descriptions and drafts.
   def self.erase_user(id)
     # Blank out any references in public records.
-    for table, col in [
+    [
       [:location_descriptions,          :user_id],
       [:location_descriptions_versions, :user_id],
       [:locations,                      :user_id],
@@ -838,7 +840,7 @@ class User < AbstractModel
       # Leave votes and namings, because I don't want to recalc consensuses.
       [:namings,                        :user_id],
       [:votes,                          :user_id]
-    ]
+    ].each do |table, col|
       User.connection.update %(
         UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
       )
@@ -848,7 +850,7 @@ class User < AbstractModel
     group = UserGroup.one_user(id)
     if group
       group_id = group.id
-      for table, col in [
+      [
         [:location_descriptions_admins,  :user_group_id],
         [:location_descriptions_readers, :user_group_id],
         [:location_descriptions_writers, :user_group_id],
@@ -856,7 +858,7 @@ class User < AbstractModel
         [:name_descriptions_readers,     :user_group_id],
         [:name_descriptions_writers,     :user_group_id],
         [:user_groups,                   :id]
-      ]
+      ].each do |table, col|
         User.connection.delete %(
           DELETE FROM #{table} WHERE `#{col}` = #{group_id}
         )
@@ -869,14 +871,14 @@ class User < AbstractModel
     )).map(&:to_s)
     if ids.any?
       ids = ids.join(",")
-      for table, id_col, type_col in [
+      [
         [:comments,            :target_id, :target_type],
         [:images_observations, :observation_id],
         [:interests,           :target_id, :target_type],
         [:namings,             :observation_id],
         [:rss_logs,            :observation_id],
         [:votes,               :observation_id]
-      ]
+      ].each do |table, id_col, type_col|
         if type_col
           User.connection.delete %(
             DELETE FROM #{table}
@@ -892,7 +894,7 @@ class User < AbstractModel
     end
 
     # Delete records they own, culminating in the user record itself.
-    for table, col in [
+    [
       [:comments,                      :user_id],
       [:images,                        :user_id],
       [:image_votes,                   :user_id],
@@ -907,7 +909,7 @@ class User < AbstractModel
       [:species_lists,                 :user_id],
       [:user_groups_users,             :user_id],
       [:users,                         :id]
-    ]
+    ].each do |table, col|
       User.connection.delete %(
         DELETE FROM #{table} WHERE `#{col}` = #{id}
       )
@@ -919,30 +921,26 @@ class User < AbstractModel
   # complicated set of pages. -JPH)
   def has_unshown_naming_notifications?(_observation = nil)
     result = false
-    for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
-                               user_id: id)
-      naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
-      if shown.nil?
-        notification = Notification.find(notification_id)
-        if notification && notification.note_template
-          result = true
-          break
-        end
-      end
+    QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
+                      user_id: id).each do |q|
+      _naming_id, notification_id, shown =
+        q.get_integers([:naming, :notification, :shown])
+      next unless shown.nil?
+      notification = Notification.find(notification_id)
+      next unless notification && notification.note_template
+      result = true
+      break
     end
     result
   end
 
   def remove_image(image)
-    if self.image == image
-      self.image = nil
-      save
-    end
+    return unless self.image == image
+    self.image = nil
+    save
   end
 
-  ################################################################################
-
-  protected
+  ##############################################################################
 
   # Encrypt a password.
   def self.sha1(pass) # :nodoc:
@@ -963,6 +961,8 @@ class User < AbstractModel
     end
     write_attribute("auth_code", String.random(40))
   end
+
+  protected
 
   validate :user_requirements
 

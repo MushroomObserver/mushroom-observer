@@ -15,7 +15,7 @@
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
   <%=
     css = MO.default_theme
-    if is_in_admin_mode?
+    if in_admin_mode?
       css = "Admin"
     elsif browser.bot?
       css = MO.default_theme
@@ -43,7 +43,7 @@
   <!--CALLOUT_BANNER-->
   <div class="row hidden-xs hidden-print">
     <div class="col-xs-12">
-      <% if is_in_admin_mode? %>
+      <% if in_admin_mode? %>
         <div class="Admin">
           DANGER: You are in administrator mode. Proceed with caution.
         </div>

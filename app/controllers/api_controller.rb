@@ -26,6 +26,10 @@ class ApiController < ApplicationController
     rest_query(:comment)
   end
 
+  def external_links
+    rest_query(:external_link)
+  end
+
   def images
     rest_query(:image)
   end

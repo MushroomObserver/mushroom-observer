@@ -23,7 +23,7 @@ class SupportController < ApplicationController
   end
 
   def check_donate_admin(error)
-    return true if is_in_admin_mode?
+    return true if in_admin_mode?
     flash_error(error)
     redirect_to(action: "donate")
   end

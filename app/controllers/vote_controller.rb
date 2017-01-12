@@ -47,7 +47,7 @@ class VoteController < ApplicationController
 
   # Refresh vote cache for all observations in the database.
   def refresh_vote_cache # :root: :norobots:
-    return unless is_in_admin_mode?
+    return unless in_admin_mode?
     # Naming.refresh_vote_cache
     Observation.refresh_vote_cache
     flash_notice(:refresh_vote_cache.t)

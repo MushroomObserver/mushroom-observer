@@ -254,13 +254,13 @@ module DescriptionControllerHelpers
       done = false
 
       # Doesn't have permission.
-      if !@description.is_admin?(@user) && !is_in_admin_mode?
+      if !@description.is_admin?(@user) && !in_admin_mode?
         flash_error(:runtime_description_adjust_permissions_denied.t)
         done = true
 
       # These types have fixed permissions.
       elsif [:public, :foreign].include?(@description.source_type) &&
-            !is_in_admin_mode?
+            !in_admin_mode?
         flash_error(:runtime_description_permissions_fixed.t)
         done = true
 
@@ -515,7 +515,7 @@ module DescriptionControllerHelpers
     # Just ignore illegal changes otherwise.  Form should prevent these,
     # anyway, but user could try to get sneaky and make changes via URL.
     if params.is_a?(Hash)
-      root = is_in_admin_mode?
+      root = in_admin_mode?
       admin = desc.is_admin?(@user)
       author = desc.is_author?(@user)
 

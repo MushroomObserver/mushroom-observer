@@ -630,6 +630,41 @@ class ApiTest < UnitTestCase
     assert_api_pass(params)
   end
 
+  def test_external_links_get
+    expect = ExternalLink.all.sort_by(&:id)
+    params = {
+      method: :get,
+      action: :external_link
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while getting links")
+    assert_obj_list_equal(expect, api.results.sort_by(&:id))
+  end
+
+  def test_external_links_fancy_get
+    site = external_sites(:mycoportal)
+    new_link = ExternalLink.create!(
+      user:          rolf,
+      created_at:    Date.parse("2017-01-01"),
+      updated_at:    Date.parse("2017-01-01"),
+      observation:   observations(:minimal_unknown_obs),
+      external_site: site,
+      url:           "http://blah.org"
+    )
+    expect = ExternalLink.where(external_site: site).sort_by(&:id).
+             select { |link| (2015..2016).include?(link.updated_at.year) }
+    assert_false(expect.include?(new_link))
+    params = {
+      method:         :get,
+      action:         :external_link,
+      external_sites: site.name,
+      updated_at:     "2015-2016"
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while getting links")
+    assert_obj_list_equal(expect, api.results.sort_by(&:id))
+  end
+
   # ----------------------------
   #  :section: Test Parsers
   # ----------------------------
@@ -896,6 +931,17 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_altitude_range, API::OrderedRange.new(54, 76), "76-54")
     assert_parse(:parse_altitude_ranges, nil, nil)
     assert_parse(:parse_altitude_ranges, [API::OrderedRange.new(54, 76), 3, 2], "76-54,3,2")
+  end
+
+  def test_parse_external_site
+    site = external_sites(:mycoportal)
+    assert_parse(:parse_external_site, nil, nil)
+    assert_parse(:parse_external_site, site, nil, default: site)
+    assert_parse(:parse_external_site, site, "#{site.id}")
+    assert_parse(:parse_external_site, site, "#{site.name}")
+    assert_parse(:parse_external_site, API::BadParameterValue, "")
+    assert_parse(:parse_external_site, API::ObjectNotFoundByString, "name")
+    assert_parse(:parse_external_site, API::ObjectNotFoundById, "12345")
   end
 
   def test_parse_image

@@ -871,7 +871,7 @@ class SpeciesListController < ApplicationController
         if @species_list.location.nil?
           redirect_to(controller: "location", action: "create_location",
                       where: @place_name, set_species_list: @species_list.id)
-        elsif has_unshown_notifications?(@user, :naming)
+        elsif unshown_notifications?(@user, :naming)
           redirect_to(controller: "observer", action: "show_notifications")
         else
           redirect_to(action: "show_species_list", id: @species_list)
@@ -966,7 +966,7 @@ class SpeciesListController < ApplicationController
   # is destined for the instance variable @checklist.
   def calc_checklist(query = nil)
     results = []
-    if query || (query = get_query_from_session)
+    if query || (query = query_from_session)
       case query.model
       when Name
         results = query.select_rows(

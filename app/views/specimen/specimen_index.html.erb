@@ -32,7 +32,7 @@
       observation = specimen.observations %>
       <tr>
         <td>
-          <%= if is_in_admin_mode? || specimen.can_edit?(@user)
+          <%= if in_admin_mode? || specimen.can_edit?(@user)
             link_to(:herbarium_edit_specimen.t, {action: :edit_specimen,
                     id: specimen.id}, class: "btn")
           end %>
@@ -49,7 +49,7 @@
           end.safe_join(", ") %>
         </td>
         <td>
-          <%= if is_in_admin_mode? || specimen.can_edit?(@user)
+          <%= if in_admin_mode? || specimen.can_edit?(@user)
             link_to(:herbarium_delete_specimen.t, {action: :delete_specimen,
                     id: specimen.id}, data: { confirm: :are_you_sure.t },
                     class: "btn")

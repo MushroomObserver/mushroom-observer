@@ -23,7 +23,7 @@ function MultiImageUploader(localized_text) {
     var fileStore = new FileStore(),
         dateUpdater = new DateUpdater(),
         _maxImageSize = <%= MO.image_upload_max_size %>,
-        _getTemplateUri = "/ajax/get_multi_image_template",
+        _getTemplateUri = "/ajax/multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
         _progressUri = "/ajax/upload_progress",
         _dots = [".", "..", "..."],

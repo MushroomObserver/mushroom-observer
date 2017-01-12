@@ -4,7 +4,7 @@
   tabs = [
     link_to(:donate_tab.t, action: :donate)
   ]
-  if is_in_admin_mode?
+  if in_admin_mode?
     tabs += [
 	    link_to(:create_donation_tab.t, action: :create_donation),
 	    link_to(:review_donations_tab.t, action: :review_donations)

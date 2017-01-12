@@ -6,6 +6,7 @@
 //= require box_resizer
 //= require confirm
 //= require csrf_token
+//= require external_link
 //= require image_vote
 //= require image_export
 //= require theater

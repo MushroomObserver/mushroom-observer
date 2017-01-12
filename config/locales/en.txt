@@ -195,6 +195,10 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  EXTERNAL_LINK: External Link
+  external_link: external link
+  EXTERNAL_LINKS: External Links
+  external_links: external links
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -1800,6 +1804,9 @@
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
   show_observation_create_specimen: Add Herbarium Specimen
+  show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
+  show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
+  show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -3025,6 +3032,7 @@
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
   validate_invalid: Invalid [field].
+  validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
   validate_not_in_range: "[Field] is out of range."

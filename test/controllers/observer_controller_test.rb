@@ -2333,10 +2333,10 @@ class ObserverControllerTest < FunctionalTestCase
 
   # ----------------------------
   #  Lookup's.
-  #  These are links of the form
-  #  /lookup_name/Amanita+muscaria
-  #  They are created by the Textile Sandbox, and should always redirect
+  #  These are links like /lookup_name/Amanita+muscaria
+  #  They can be created by the Textile Sandbox, and should always redirect
   #  to the appropriate model.
+  # /lookup_accepted_name is intended for use by other web sites
   # ----------------------------
 
   def test_lookup_comment
@@ -2610,5 +2610,25 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
     get :textile
     assert_equal(403, @response.status)
+  end
+
+  def test_external_sites_user_can_add_links_to
+    site = external_sites(:mycoportal)
+    # not logged in
+    do_external_sites_test([], nil, nil)
+    # dick is neither owner nor member of any site's project
+    do_external_sites_test([], dick, observations(:agaricus_campestris_obs))
+    # rolf is owner
+    do_external_sites_test([site], rolf, observations(:agaricus_campestris_obs))
+    # mary is member of site's project
+    do_external_sites_test([site], mary, observations(:agaricus_campestris_obs))
+    # but there is already a link on this obs
+    do_external_sites_test([], mary, observations(:coprinus_comatus_obs))
+  end
+
+  def do_external_sites_test(expect, user, obs)
+    @controller.instance_variable_set("@user", user)
+    actual = @controller.external_sites_user_can_add_links_to(obs)
+    assert_equal(expect.map(&:name), actual.map(&:name))
   end
 end

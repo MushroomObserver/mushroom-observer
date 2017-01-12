@@ -9,7 +9,7 @@
     link_with_query(:show_location_edit.t, action: :edit_location,
                     id: @location.id)
   ]
-  if is_in_admin_mode?
+  if in_admin_mode?
     tabs += [
       link_with_query(:show_location_destroy.t,
                       {action: :destroy_location, id: @location.id},
