@@ -578,6 +578,19 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, QueryRecord.count)
   end
 
+  def test_show_observation_change_vote_anonymity
+    obs = observations(:coprinus_comatus_obs)
+    user = login(users(:public_voter).name)
+
+    get_with_dump(:show_observation, id: obs.id, go_private: 1)
+    user.reload
+    assert_equal(:yes, user.votes_anonymous)
+
+    get_with_dump(:show_observation, id: obs.id, go_public: 1)
+    user.reload
+    assert_equal(:no, user.votes_anonymous)
+  end
+
   def test_show_owner_id
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)

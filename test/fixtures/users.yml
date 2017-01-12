@@ -93,3 +93,7 @@ vouchered_only_user:
   verified:  2016-09-02 13:50:00
   content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
+
+public_voter:
+  <<: *DEFAULTS
+  verified:  2017-01-11 14:03:00
