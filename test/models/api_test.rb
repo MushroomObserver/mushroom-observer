@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 require "test_helper"
-require "fakeweb"
 
 class Hash
   def remove(*keys)
@@ -475,8 +474,8 @@ class ApiTest < UnitTestCase
   def test_posting_image_via_url
     setup_image_dirs
     url = "http://mushroomobserver.org/images/thumb/459340.jpg"
-    response = File.read("#{::Rails.root}/test/images/test_image.curl")
-    FakeWeb.register_uri(:get, url, response: response)
+    stub_request(:any, url).
+      to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
     params = {
       method:     :post,
       action:     :image,
