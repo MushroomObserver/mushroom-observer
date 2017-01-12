@@ -1,7 +1,7 @@
 <%
   @title = :event_index_title.t
 
-  if is_in_admin_mode?
+  if in_admin_mode?
     tabs = [
       link_to(:create_event.t, action: :create_event)
     ]
@@ -14,7 +14,7 @@
     <tr>
       <td>
         <%= link_to(event.name, action: :show_event, id: event.id) %>
-        <% if is_in_admin_mode? %>
+        <% if in_admin_mode? %>
           [<%= link_to(:edit_event.t, action: :edit_event, id: event.id) %>]
         <% end %>
       </td>

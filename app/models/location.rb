@@ -327,6 +327,12 @@ class Location < AbstractModel
     name.split(/,\s*/).reverse.join(", ") if name
   end
 
+  # Reverse given name if required in order to make country last.
+  def self.reverse_name_if_necessary(name)
+    last_part = name.split(/,\s*/).last
+    understood_country?(last_part) ? name : reverse_name(name)
+  end
+
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
     find_by_name(name) ||
@@ -347,6 +353,7 @@ class Location < AbstractModel
     end
   end
 
+  UNDERSTOOD_CONTINENTS = load_param_hash(MO.location_continents_file)
   UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
@@ -386,6 +393,14 @@ class Location < AbstractModel
 
   def self.understood_country?(candidate)
     understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
+  end
+
+  def self.understood_continent?(candidate)
+    UNDERSTOOD_CONTINENTS.key?(candidate)
+  end
+
+  def self.countries_in_continent(a_continent)
+    UNDERSTOOD_CONTINENTS[a_continent]
   end
 
   def self.countries_by_count

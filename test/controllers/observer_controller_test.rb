@@ -281,7 +281,7 @@ class ObserverControllerTest < FunctionalTestCase
            search: {
              name: "Don't know",
              user: "myself",
-             type: model.name.underscore,
+             model: model.name.underscore,
              content: "Long pink stem and small pink cap",
              location: "Eastern Oklahoma"
            },
@@ -2288,24 +2288,32 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # ----------------------------
-  #  Lookup name.
+  #  Lookup's.
+  #  These are links like /lookup_name/Amanita+muscaria
+  #  They can be created by the Textile Sandbox, and should always redirect
+  #  to the appropriate model.
+  # /lookup_accepted_name is intended for use by other web sites
   # ----------------------------
 
-  def test_lookup_name
+  def test_lookup_comment
     c_id = comments(:minimal_unknown_obs_comment_1).id
     get(:lookup_comment, id: c_id)
     assert_redirected_to(controller: :comment, action: :show_comment, id: c_id)
     get(:lookup_comment, id: 10_000)
     assert_redirected_to(controller: :comment, action: :index_comment)
     assert_flash_error
+  end
 
+  def test_lookup_image
     i_id = images(:in_situ_image).id
     get(:lookup_image, id: i_id)
     assert_redirected_to(controller: :image, action: :show_image, id: i_id)
     get(:lookup_image, id: 10_000)
     assert_redirected_to(controller: :image, action: :index_image)
     assert_flash_error
+  end
 
+  def test_lookup_location
     l_id = locations(:albion).id
     get(:lookup_location, id: l_id)
     assert_redirected_to(controller: :location, action: :show_location, id: l_id)
@@ -2322,7 +2330,15 @@ class ObserverControllerTest < FunctionalTestCase
     # assert_redirected_to(controller: :location, action: :index_location)
     assert_redirected_to(%r{/location/index_location})
     assert_flash_warning
+  end
 
+  def test_lookup_accepted_name
+    get(:lookup_accepted_name, id: names(:lactarius_subalpinus).text_name)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:lactarius_alpinus))
+  end
+
+  def test_lookup_name
     n_id = names(:fungi).id
     get(:lookup_name, id: n_id)
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
@@ -2347,7 +2363,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_name, id: "Agaricus campestris Linn.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+  end
 
+  def test_lookup_project
     p_id = projects(:eol_project).id
     get(:lookup_project, id: p_id)
     assert_redirected_to(controller: :project, action: :show_project, id: p_id)
@@ -2360,7 +2378,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_project, id: "project")
     assert_redirected_to(%r{/project/index_project})
     assert_flash_warning
+  end
 
+  def test_lookup_species_list
     sl_id = species_lists(:first_species_list).id
     get(:lookup_species_list, id: sl_id)
     assert_redirected_to(controller: :species_list, action: :show_species_list,
@@ -2375,7 +2395,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_species_list, id: "Flibbertygibbets")
     assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_flash_error
+  end
 
+  def test_lookup_user
     get(:lookup_user, id: rolf.id)
     assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
     get(:lookup_user, id: "mary")
@@ -2536,5 +2558,25 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
     get :textile
     assert_equal(403, @response.status)
+  end
+
+  def test_external_sites_user_can_add_links_to
+    site = external_sites(:mycoportal)
+    # not logged in
+    do_external_sites_test([], nil, nil)
+    # dick is neither owner nor member of any site's project
+    do_external_sites_test([], dick, observations(:agaricus_campestris_obs))
+    # rolf is owner
+    do_external_sites_test([site], rolf, observations(:agaricus_campestris_obs))
+    # mary is member of site's project
+    do_external_sites_test([site], mary, observations(:agaricus_campestris_obs))
+    # but there is already a link on this obs
+    do_external_sites_test([], mary, observations(:coprinus_comatus_obs))
+  end
+
+  def do_external_sites_test(expect, user, obs)
+    @controller.instance_variable_set("@user", user)
+    actual = @controller.external_sites_user_can_add_links_to(obs)
+    assert_equal(expect.map(&:name), actual.map(&:name))
   end
 end

@@ -116,6 +116,8 @@ module Query::Modules::Initialization
             matches = model.where(search_name: name2)
             matches = model.where(text_name: name2) if matches.empty?
             objs += matches
+          when "ExternalSite"
+            objs += model.where(name: name)
           when "Project", "SpeciesList"
             objs += model.where(title: name)
           when "User"

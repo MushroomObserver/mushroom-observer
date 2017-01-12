@@ -4,7 +4,7 @@
 %>
 
 <% if review %>
-  <% if is_reviewer? %>
+  <% if reviewer? %>
     <%= set_export_status_controls(desc) %><br/>
   <% end %>
 
@@ -18,7 +18,7 @@
     </span><br/>
   <% end %>
 
-  <% if is_reviewer? %>
+  <% if reviewer? %>
     <%= indent + link_with_query(:review_unvetted.t, :action => 'set_review_status',
           :value => :unvetted, :id => desc.id) %><br/>
     <%= indent + link_with_query(:review_vetted.t, :action => 'set_review_status',

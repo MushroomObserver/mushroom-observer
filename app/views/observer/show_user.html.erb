@@ -46,7 +46,7 @@
                           action: :ask_user_question, id: id)
     ]
   end
-  if is_in_admin_mode?
+  if in_admin_mode?
     tabs += [
       link_to(:change_user_bonuses.t, controller: :observer,
               action: :change_user_bonuses, id: @show_user.id),

@@ -5,7 +5,7 @@
   map = @herbarium.location ? true : false
 
   tabs = []
-  if @herbarium.is_curator?(@user) || is_in_admin_mode?
+  if @herbarium.is_curator?(@user) || in_admin_mode?
     tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
   end
   tabs += [
@@ -24,7 +24,7 @@
 
     <div class="push-down">
       <%= render(partial: "curator_table", locals: {herbarium: @herbarium}) %>
-      <% if @herbarium.is_curator?(@user) || is_in_admin_mode? %>
+      <% if @herbarium.is_curator?(@user) || in_admin_mode? %>
         <%= form_tag(action: :show_herbarium, id: @herbarium) do %>
           <div class="form-inline push-down">
             <%= text_field(:curator, :name, class: "form-control") %>

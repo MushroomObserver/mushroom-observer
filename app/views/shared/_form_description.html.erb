@@ -5,7 +5,7 @@
   admin      = new_record || desc.is_admin?(@user)
   author     = new_record || desc.is_author?(@user)
   owner      = desc.user == @user
-  root       = is_in_admin_mode?
+  root       = in_admin_mode?
 %>
 
 <% if new_record || admin || author || owner || root %>

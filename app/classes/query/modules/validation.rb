@@ -21,27 +21,42 @@ module Query::Modules::Validation
   def validate_param(old_args, new_args, arg, arg_type)
     arg_sym = arg.to_s.sub(/\?$/, "").to_sym
     optional = (arg != arg_sym)
-    val = pop_param_value(old_args, arg_sym)
-    unless val.blank?
-      if arg_type.is_a?(Array)
-        val = array_validate(arg_sym, val, arg_type.first)
-      else
-        val = scalar_validate(arg_sym, val, arg_type)
+    begin
+      val = pop_param_value(old_args, arg_sym)
+      unless val.blank?
+        if arg_type.is_a?(Array)
+          val = array_validate(arg_sym, val, arg_type.first)
+        else
+          val = scalar_validate(arg_sym, val, arg_type)
+        end
       end
-    end
-    if !val.nil?
-      new_args[arg_sym] = val
-    elsif !optional
-      fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
+      if !val.nil?
+        new_args[arg_sym] = val
+      elsif !optional
+        fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
+      else
+        new_args[arg_sym] = nil
+      end
+    rescue MissingValue
+      if !optional
+        fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
+      end
     end
   end
 
+  class MissingValue < Exception; end
+
   def pop_param_value(args, arg)
-    result = args[arg]
-    result = args[arg.to_s] if result.nil?
+    if args.key?(arg)
+      val = args[arg]
+    elsif args.key?(arg.to_s)
+      val = args[arg.to_s]
+    else
+      raise MissingValue.new
+    end
     args.delete(arg)
     args.delete(arg.to_s)
-    result
+    val
   end
 
   def check_for_unexpected_params(old_args)

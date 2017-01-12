@@ -134,7 +134,7 @@ class AccountController < ApplicationController
         flash_warning(:runtime_reverify_already_verified.t)
         @user = nil
         User.current = nil
-        set_session_user(nil)
+        session_user_set(nil)
         redirect_to(action: :login)
 
       # If user was created via API, we must ask the user to choose a password
@@ -164,7 +164,7 @@ class AccountController < ApplicationController
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user
-            set_session_user(@user)
+            session_user_set(@user)
             @user.change_password(password)
             @user.verify
           end
@@ -180,7 +180,7 @@ class AccountController < ApplicationController
       else
         @user = user
         User.current = user
-        set_session_user(user)
+        session_user_set(user)
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
@@ -255,9 +255,9 @@ class AccountController < ApplicationController
         @user.updated_at = now
         @user.save
         User.current = @user
-        set_session_user(@user)
+        session_user_set(@user)
         if @remember
-          set_autologin_cookie(@user)
+          autologin_cookie_set(@user)
         else
           clear_autologin_cookie
         end
@@ -293,7 +293,7 @@ class AccountController < ApplicationController
   def logout_user # :nologin:
     @user = nil
     User.current = nil
-    set_session_user(nil)
+    session_user_set(nil)
     clear_autologin_cookie
   end
 
@@ -331,47 +331,50 @@ class AccountController < ApplicationController
   # Table for converting form value to object value
   # Used by update_prefs_from_form
   def prefs_types
-    result =[
-      [:email_comments_all, :bool],
-      [:email_comments_owner, :bool],
-      [:email_comments_response, :bool],
-      [:email_general_commercial, :bool],
-      [:email_general_feature, :bool],
-      [:email_general_question, :bool],
-      [:email_html, :bool],
-      [:email_locations_admin, :bool],
-      [:email_locations_all, :bool],
-      [:email_locations_author, :bool],
-      [:email_locations_editor, :bool],
-      [:email_names_admin, :bool],
-      [:email_names_all, :bool],
-      [:email_names_author, :bool],
-      [:email_names_editor, :bool],
-      [:email_names_reviewer, :bool],
-      [:email_observations_all, :bool],
-      [:email_observations_consensus, :bool],
-      [:email_observations_naming, :bool],
-      [:email, :str],
+    [
+      [:email_comments_all, :boolean],
+      [:email_comments_owner, :boolean],
+      [:email_comments_response, :boolean],
+      [:email_general_commercial, :boolean],
+      [:email_general_feature, :boolean],
+      [:email_general_question, :boolean],
+      [:email_html, :boolean],
+      [:email_locations_admin, :boolean],
+      [:email_locations_all, :boolean],
+      [:email_locations_author, :boolean],
+      [:email_locations_editor, :boolean],
+      [:email_names_admin, :boolean],
+      [:email_names_all, :boolean],
+      [:email_names_author, :boolean],
+      [:email_names_editor, :boolean],
+      [:email_names_reviewer, :boolean],
+      [:email_observations_all, :boolean],
+      [:email_observations_consensus, :boolean],
+      [:email_observations_naming, :boolean],
+      [:email, :string],
       [:hide_authors, :enum],
       [:image_size, :enum],
       [:keep_filenames, :enum],
-      [:layout_count, :int],
-      [:license_id, :int],
-      [:locale, :str],
+      [:layout_count, :integer],
+      [:license_id, :integer],
+      [:locale, :string],
       [:location_format, :enum],
-      [:login, :str],
-      [:theme, :str],
-      [:thumbnail_maps, :bool],
+      [:login, :string],
+      [:theme, :string],
+      [:thumbnail_maps, :boolean],
       [:thumbnail_size, :enum],
-      [:view_owner_id, :bool],
+      [:view_owner_id, :boolean],
       [:votes_anonymous, :enum]
-    ]
-    observation_filters.each {|f| result << [f[:checkbox], :content_filter] }
-    result
+    ] + content_filter_types
+  end
+
+  def content_filter_types
+    ContentFilter.all.map do |fltr|
+      [fltr.sym, :content_filter]
+    end
   end
 
   def prefs # :prefetch:
-    @user.observation_filters = observation_filters
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
@@ -393,10 +396,10 @@ class AccountController < ApplicationController
     prefs_types.each do |pref, type|
       val = params[:user][pref]
       case type
-      when :str  then update_pref(pref, val.to_s)
-      when :int  then update_pref(pref, val.to_i)
-      when :bool then update_pref(pref, val == "1")
-      when :enum then update_pref(pref, val ||= User.enum_default_value(pref))
+      when :string  then update_pref(pref, val.to_s)
+      when :integer then update_pref(pref, val.to_i)
+      when :boolean then update_pref(pref, val == "1")
+      when :enum    then update_pref(pref, val || User.enum_default_value(pref))
       when :content_filter then update_content_filter(pref, val)
       end
     end
@@ -407,10 +410,13 @@ class AccountController < ApplicationController
   end
 
   def update_content_filter(pref, val)
-    filter_sym = pref.to_s.sub(%r{_checkbox$}, "").to_sym
-    filter = send(filter_sym)
-    val == "1" ? val = filter[:checked_val] : val = filter[:off_val]
-    @user.content_filter[filter_sym] = val
+    filter = ContentFilter.find(pref)
+    @user.content_filter[pref] =
+      if filter.type == :boolean
+        val == "1" ? filter.checked_val : filter.off_val
+      else
+        val.to_s
+      end
   end
 
   def update_copyright_holder
@@ -699,7 +705,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    session[:admin] = true if @user && @user.admin && !is_in_admin_mode?
+    session[:admin] = true if @user && @user.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -710,7 +716,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group # :root:
     redirect = true
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method == "POST"
         user_name  = params["user_name"].to_s
         group_name = params["group_name"].to_s
@@ -743,7 +749,7 @@ class AccountController < ApplicationController
     redirect = true
     id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
-      if is_in_admin_mode?
+      if in_admin_mode?
         if request.method == "GET"
           # render form
           redirect = false
@@ -776,7 +782,7 @@ class AccountController < ApplicationController
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
   def destroy_user # :root:
-    if is_in_admin_mode?
+    if in_admin_mode?
       id = params["id"]
       unless id.blank?
         user = User.safe_find(id)

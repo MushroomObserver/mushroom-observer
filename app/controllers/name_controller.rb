@@ -456,7 +456,7 @@ class NameController < ApplicationController
     pass_query_params
     id = params[:id].to_s
     desc = NameDescription.find(id)
-    desc.update_review_status(params[:value]) if is_reviewer?
+    desc.update_review_status(params[:value]) if reviewer?
     redirect_with_query(action: :show_name, id: desc.name_id)
   end
 
@@ -500,7 +500,7 @@ class NameController < ApplicationController
             flash_warning(:runtime_edit_name_no_change.t) unless any_changes
             redirect_to_show_name
           end
-        elsif is_in_admin_mode? || @name.mergeable? || new_name.mergeable?
+        elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
           merge_name_into(new_name)
           redirect_to_show_name
         else
@@ -554,7 +554,7 @@ class NameController < ApplicationController
 
   # Only allowed to make substantive changes to name if you own all the references to it.
   def can_make_changes?
-    unless is_in_admin_mode?
+    unless in_admin_mode?
       for obj in @name.namings + @name.observations
         return false if obj.user_id != @user.id
       end
@@ -1434,7 +1434,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @query = create_query(:Observation, :of_name, name: @name)
-      update_filter_status_of(@query)
+      apply_content_filters(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
   end

@@ -7,7 +7,7 @@
     link_with_query(:cancel_and_show.t(type: :location_description),
                     @description.show_link_args)
   ]
-  if @description.is_admin?(@user) || is_in_admin_mode?
+  if @description.is_admin?(@user) || in_admin_mode?
     tabs << link_with_query(:show_description_adjust_permissions.t,
                             action: :adjust_permissions, id: @description.id)
   end
