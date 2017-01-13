@@ -80,6 +80,7 @@ function VotePopupModule(translations) {
               $("#title-caption").html(title.html());
               $("#naming_partial").html(div.html());
               attach_bindings();
+              save_votes_button().hide();
             } else {
               change_vote_selects().each(function () {
                 $(this).val($(this).data("old_value"))
