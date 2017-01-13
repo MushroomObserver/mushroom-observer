@@ -106,6 +106,23 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_location_bounding_box
+    delta = 0.001
+    get(:list_locations, north: 0, south: 0, east: 0, west: 0)
+    query = Query.find(QueryRecord.last.id)
+    assert_equal(0 + delta, query.params[:north])
+    assert_equal(0 - delta, query.params[:south])
+    assert_equal(0 + delta, query.params[:east])
+    assert_equal(0 - delta, query.params[:west])
+
+    get(:list_locations, north: 90, south: -90, east: 180, west: -180)
+    query = Query.find(QueryRecord.last.id)
+    assert_equal(90, query.params[:north])
+    assert_equal(-90, query.params[:south])
+    assert_equal(180, query.params[:east])
+    assert_equal(-180, query.params[:west])
+  end
+
   def test_list_countries
     get_with_dump(:list_countries)
     assert_template("list_countries")
