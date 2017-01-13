@@ -2,6 +2,8 @@ require "test_helper"
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
+  # When someone enters text in the Textile Sandbox and clicks the Test button,
+  #  MO should show what the entered text looks like.
   def test_post_textile
     visit("/observer/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
@@ -9,6 +11,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     page.assert_text("Jabberwocky", count: 2)
   end
 
+  # Covers ObservationController#map_observations.
   def test_map_observations
     name = names(:boletus_edulis)
     visit("/name/map/#{name.id}")
