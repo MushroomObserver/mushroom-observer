@@ -2,8 +2,9 @@ require "test_helper"
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
-  # When someone enters text in the Textile Sandbox and clicks the Test button,
-  #  MO should show what the entered text looks like.
+
+  # Prove that when a user "Tests" the text entered in the Textile Sandbox,
+  # MO displays what the entered text looks like.
   def test_post_textile
     visit("/observer/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
@@ -22,8 +23,9 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     title.assert_text("Observations of #{name.text_name}")
   end
 
-  # If users clicks on Observation in Observation search results and destroys
-  # Observation, MO should redirect to next Observation in results.
+  # Prove that if a user clicks an Observation in Observation search results
+  # having multiple Observations, and then destroys the Observation,
+  # MO redirects to the next Observation in results.
   def test_destroy_observation_from_search
     # Test needs a user with multiple observations with predictable sorts.
     user = users(:sortable_obs_user)
@@ -49,5 +51,28 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     title = page.find_by_id("title")
     assert_match(%r{#{:app_title.l}: Observation #{next_obs.id}}, page.title,
                  "Wrong page")
+  end
+
+  # Prove that unchecking a Project as part of editing an Observation
+  # removes the Observation from the Project.
+  def test_observation_edit_uncheck_project
+    user = users(:dick)
+    # user owns this Observation,
+    observation = observations(:collected_at_obs)
+    # which is part of this Project.
+    project = projects(:obs_collected_and_displayed_project)
+
+    # Log in user
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Edit the Observation, unchecking the Project.
+    visit("/observer/edit_observation/#{observation.id}")
+    uncheck("project_id_#{project.id}")
+    click_on("Save Edits", match: :first)
+
+    refute_includes(project.observations, observation)
   end
 end
