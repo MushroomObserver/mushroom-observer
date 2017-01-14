@@ -29,7 +29,9 @@ class ChecklistTest < UnitTestCase
 
   def test_checklist_for_site
     data = Checklist::ForSite.new
-    all_species = (rolfs_species + katrinas_species + dicks_species).sort
+    obss_of_species = Observation.joins(:name).
+                                  where("names.rank = #{Name.ranks[:Species]}")
+    all_species = obss_of_species.map { |obs| obs.name.text_name }.uniq.sort
     all_genera = genera(all_species)
     assert_equal(all_genera, data.genera)
     assert_equal(all_species, data.species)

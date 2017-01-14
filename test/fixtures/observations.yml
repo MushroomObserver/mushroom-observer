@@ -268,3 +268,22 @@ updated_2013_obs:
   <<: *DEFAULTS
   when: 2013-09-08
   updated_at: 2013-09-08 17:21:00
+
+# Two Observations sortable by Name, Date, Date Posted, Time Last Modified
+sortable_obs_users_first_obs:
+  <<: *DEFAULTS
+  created_at: 2016-01-10 17:20:00
+  updated_at: 2016-01-11 17:20:00
+  when: 2016-01-10
+  user: sortable_obs_user
+  name: tremella_justpublished
+  location: sortable_observation_user_location
+
+sortable_obs_users_second_obs:
+  <<: *DEFAULTS
+  created_at: 2017-01-10 17:20:00
+  updated_at: 2017-01-11 17:20:00
+  when: 2017-01-10
+  user: sortable_obs_user
+  name: tremella_mesenterica
+  location: sortable_observation_user_location

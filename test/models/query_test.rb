@@ -1957,10 +1957,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations
-    expect = Observation.connection.select_values %(
-      SELECT DISTINCT name_id FROM observations ORDER BY name_id ASC
-    )
-    assert_query(expect.map(&:to_i), :Name, :with_observations, by: :id)
+    expect = Observation.pluck(:name_id).uniq.sort
+    assert_query(expect, :Name, :with_observations, by: :id)
   end
 
   def test_name_with_observations_at_location

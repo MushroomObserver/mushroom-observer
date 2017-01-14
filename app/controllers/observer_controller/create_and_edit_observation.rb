@@ -339,6 +339,7 @@ class ObserverController
       this_state.current = @observation
       next_state = this_state.next
     end
+
     if !check_permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
       redirect_to(add_query_param({ action: "show_observation", id: obs_id },
