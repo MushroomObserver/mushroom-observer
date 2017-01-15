@@ -75,4 +75,27 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
 
     refute_includes(project.observations, observation)
   end
+
+  # Prove that unchecking a Species List as part of an Observation editing
+  # removes the Observation from the Species List.
+  def test_observation_edit_uncheck_species_list
+    user = users(:mary)
+    # user owns this Observation,
+    observation = observations(:minimal_unknown_obs)
+    # which is part of this Species List.
+    species_list = species_lists(:unknown_species_list)
+
+    # Log in user
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Edit the Observation, unchecking the Project.
+    visit("/observer/edit_observation/#{observation.id}")
+    uncheck("list_id_#{species_list.id}")
+    click_on("Save Edits", match: :first)
+
+    refute_includes(species_list.observations, observation)
+  end
 end
