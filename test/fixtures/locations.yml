@@ -198,3 +198,11 @@ sortable_observation_user_location:
   east: -73.878
   south: 40.866
 
+obs_default_location:
+  user: obs_default_location_user
+  version: 1
+  name: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  north: 41.646
+  west: -70.763
+  east: -70.761
+  south: 41.645
