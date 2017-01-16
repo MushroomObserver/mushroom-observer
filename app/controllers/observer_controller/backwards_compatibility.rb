@@ -8,7 +8,7 @@ class ObserverController
       args = url.sub(/^[^?]*/, "")
     elsif url.match(/\/\d+$/)
       base = url.sub(/\/\d+$/, "")
-      args = url.sub(/.*(\/\d+)$/, "\1")
+      args = url.sub(/.*(\/\d+)$/, '\1')
     else
       base = url
       args = ""
