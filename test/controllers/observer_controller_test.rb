@@ -2119,6 +2119,38 @@ class ObserverControllerTest < FunctionalTestCase
                  @controller.instance_variable_get("@good_images").map(&:id))
   end
 
+  def test_image_upload_when_process_image_fails
+    login("rolf")
+
+    setup_image_dirs
+    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rack::Test::UploadedFile.new(file, "image/jpeg")
+
+    # Simulate process_image failure.
+    Image.any_instance.stubs(:process_image).returns(false)
+
+    post(:create_observation,
+         observation: {
+           place_name: "USA",
+           when: Time.current
+         },
+         image: { "0" => {
+           image: file,
+           copyright_holder: "zuul",
+           when: Time.current
+         } }
+        )
+
+    # Prove that an image was created, but that it is unattached, is in the
+    # @bad_images array, and has not been kept in the @good_images array
+    # for attachment later.
+    img = Image.find_by_copyright_holder("zuul")
+    assert(img)
+    assert_equal([], img.observations)
+    assert_includes(@controller.instance_variable_get("@bad_images"), img)
+    assert_empty(@controller.instance_variable_get("@good_images"))
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
