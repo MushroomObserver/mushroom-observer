@@ -753,6 +753,24 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  # Prove that recalc redirects to show_observation, and
+  # corrects an Observation's name.
+  def test_recalc
+    # Make the consensus inaccurate
+    obs = observations(:owner_only_favorite_eq_consensus)
+    accurate_consensus = obs.name
+    obs.name = names(:coprinus_comatus)
+    obs.save
+
+    # recalc
+    login
+    get(:recalc, id: obs.id)
+    obs.reload
+
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(accurate_consensus, obs.name)
+  end
+
   def test_some_admin_pages
     [
       [:users_by_name,  "list_users", {}],
