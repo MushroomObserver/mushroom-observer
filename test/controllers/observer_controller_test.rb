@@ -2580,9 +2580,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 
-  # -------------------------------------
+  # ------------------------------------------------------------
+  #  User
   #  observer_controller/user_controller
-  # -------------------------------------
+  #  Also see test/integration/observer_user_controller_test.rb
+  # ------------------------------------------------------------
 
   # Prove that user_index is restricted to admins
   def test_index_user

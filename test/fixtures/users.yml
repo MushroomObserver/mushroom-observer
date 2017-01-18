@@ -93,3 +93,17 @@ vouchered_only_user:
   verified:  2016-09-02 13:50:00
   content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
+
+uniquely_named_user:
+  <<: *DEFAULTS
+
+# Used by integration test of user_search
+first_name_sorts_user:
+  <<: *DEFAULTS
+  name: name sorts second
+
+second_name_sorts_user:
+  <<: *DEFAULTS
+  name: name sorts first
+
+
