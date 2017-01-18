@@ -2579,4 +2579,19 @@ class ObserverControllerTest < FunctionalTestCase
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
+
+  # -------------------------------------
+  #  observer_controller/user_controller
+  # -------------------------------------
+
+  # Prove that user_index is restricted to admins
+  def test_index_user
+    login("rolf")
+    get(:index_user)
+    assert_redirected_to(:root)
+
+    make_admin
+    get(:index_user)
+    assert_response(:success)
+  end
 end
