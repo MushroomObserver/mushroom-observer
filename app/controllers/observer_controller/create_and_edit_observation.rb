@@ -527,16 +527,6 @@ class ObserverController
     false
   end
 
-  # Update observation, check if valid.
-  def update_observation_object(observation, args)
-    success = true
-    unless observation.update(args.permit(observation_whitelisted_args))
-      flash_object_errors(observation)
-      success = false
-    end
-    success
-  end
-
   # Attempt to upload any images.  We will attach them to the observation
   # later, assuming we can create it.  Problem is if anything goes wrong, we
   # cannot repopulate the image forms (security issue associated with giving
