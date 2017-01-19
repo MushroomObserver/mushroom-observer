@@ -2374,6 +2374,10 @@ class QueryTest < UnitTestCase
                 :User, :pattern_search, pattern: users(:mary).name)
     assert_query(User.all,
                 :User, :pattern_search, pattern: "")
+    # sorted by location should include Users without location
+    # (Differs from searches on other Classes or by other sort orders)
+    assert_query(User.all,
+                :User, :pattern_search, pattern: "", by: "location")
   end
 
   ##############################################################################
