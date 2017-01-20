@@ -93,4 +93,51 @@ class ObserverUserControllerTest < IntegrationTestCase
 =end
   end
 
+  # ------------
+  #  Checklists
+  # ------------
+
+  # Prove that Life List goes to correct page which has correct content
+  def test_user_checklist
+    user = users(:rolf)
+    expect = Name.joins(observations: :user).
+                  where("observations.user_id = #{user.id}
+                         AND names.rank = #{Name.ranks[:Species]}").
+                  uniq
+
+    visit("/observer/show_user/#{user.id}")
+    click_on(:app_life_list.l)
+    assert_match(%r{Checklist for #{user.name}}, page.title, "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  # Prove that Species List checklist goes to correct page with correct content
+  def test_species_list_checklist
+    list = species_lists(:unknown_species_list)
+    expect = Name.joins(observations: :observations_species_lists).
+                        where("observations_species_lists.species_list_id
+                               = #{list.id}
+                               AND names.rank = #{Name.ranks[:Species]}").
+                        uniq
+
+    visit("/species_list/show_species_list/#{list.id}")
+    click_on("Checklist")
+    assert_match(%r{Checklist for #{list.title}}, page.title, "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  # Prove that checklist has as many links as species expected,
+  # and no species is missing
+  def prove_checklist_content(expect)
+    missing_names = (
+      expect.each_with_object([]) do |taxon, missing|
+        missing << taxon.text_name if page.has_no_content?(taxon.text_name)
+    end
+    )
+
+    page.assert_selector(".checklist a", count: expect.size)
+    assert(missing_names.empty?, "Species List missing #{missing_names}")
+  end
 end
