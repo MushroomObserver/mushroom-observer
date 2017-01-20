@@ -128,6 +128,21 @@ class ObserverUserControllerTest < IntegrationTestCase
     prove_checklist_content(expect)
   end
 
+  # Prove that Project checklist goes to correct page with correct content
+  def test_project_checklist
+    project = projects(:one_genus_two_species_project)
+    expect = Name.joins(observations: :observations_projects).
+                        where("observations_projects.project_id = #{project.id}
+                               AND names.rank = #{Name.ranks[:Species]}").
+                        uniq
+
+    visit("/project/show_project/#{project.id}")
+    click_on("Checklist")
+    assert_match(%r{Checklist for #{project.title}}, page.title, "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
   # Prove that checklist has as many links as species expected,
   # and no species is missing
   def prove_checklist_content(expect)
