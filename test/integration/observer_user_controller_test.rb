@@ -143,6 +143,16 @@ class ObserverUserControllerTest < IntegrationTestCase
     prove_checklist_content(expect)
   end
 
+  # Prove that Site checklist goes to correct page with correct content
+  def prove_site_checklist
+    expect = Name.where(rank: Name.ranks[:Species])
+
+    visit("/observer/checklist")
+    assert_match(%r{Checklist for #{:app_title.l}}, page.title, "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
   # Prove that checklist has as many links as species expected,
   # and no species is missing
   def prove_checklist_content(expect)
