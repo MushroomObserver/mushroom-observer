@@ -2221,7 +2221,7 @@ class ObserverControllerTest < FunctionalTestCase
   def init_for_list_checkbox_tests
     @spl1 = species_lists(:first_species_list)
     @spl2 = species_lists(:unknown_species_list)
-    @obs1 = observations(:coprinus_comatus_obs)
+    @obs1 = observations(:unlisted_rolf_obs)
     @obs2 = observations(:detailed_unknown_obs)
     assert_users_equal(rolf, @spl1.user)
     assert_users_equal(mary, @spl2.user)

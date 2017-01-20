@@ -69,3 +69,8 @@ where_list:
   when: 2006-03-09
   where: wherenolocation  # 1-word where, unique for SpeciesList
   location: nil
+
+one_genus_three_species_list:
+  <<: *DEFAULTS
+  when: 2017-01-20
+

@@ -106,7 +106,7 @@ class ObserverUserControllerTest < IntegrationTestCase
                   uniq
 
     visit("/observer/show_user/#{user.id}")
-    click_on(:app_life_list.l)
+    click_on(:app_life_list.l, match: :first)
     assert_match(%r{Checklist for #{user.name}}, page.title, "Wrong page")
 
     prove_checklist_content(expect)
@@ -114,7 +114,7 @@ class ObserverUserControllerTest < IntegrationTestCase
 
   # Prove that Species List checklist goes to correct page with correct content
   def test_species_list_checklist
-    list = species_lists(:unknown_species_list)
+    list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :observations_species_lists).
                         where("observations_species_lists.species_list_id
                                = #{list.id}
