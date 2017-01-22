@@ -2583,18 +2583,58 @@ class ObserverControllerTest < FunctionalTestCase
   # ------------------------------------------------------------
   #  User
   #  observer_controller/user_controller
-  #  Also see test/integration/observer_user_controller_test.rb
   # ------------------------------------------------------------
 
-  # Prove that user_index is restricted to admins
-  def test_index_user
-    login("rolf")
-    get(:index_user)
-    assert_redirected_to(:root)
+  #   -------------
+  #    user_search
+  #   -------------
 
-    make_admin
-    get(:index_user)
-    assert_response(:success)
+  # Prove that user-type pattern searches go to correct page
+  # When pattern is a user's id, go directly to that user's page
+  def test_user_search_id
+    user = users(:rolf)
+    get(:user_search, pattern: user.id)
+    assert_redirected_to(action: "show_user", id: user.id)
+  end
+
+  # When a non-id pattern matches only one user, show that user.
+  def test_user_search_name
+    user = users(:uniquely_named_user)
+    get(:user_search, pattern: user.name)
+    assert_redirected_to(%r{/show_user/#{user.id}})
+  end
+
+  # When pattern matches multiple users, list them.
+  def test_user_search_multiple_hits
+    pattern = "name_sorts_user"
+    get(:user_search, pattern: pattern)
+    # matcher includes optional quotation mark (?.)
+    assert_match(%r{Users Matching .?#{pattern}},
+                 css_select("title").text, "Wrong page")
+
+    prove_sorting_links_include_contribution
+  end
+
+  # When pattern has no matches, go to list page with flash message.
+  def test_user_search_unmatched
+    unmatched_pattern = "NonexistentUserContent"
+    get_without_clearing_flash(:user_search, pattern: unmatched_pattern)
+    # matcher includes optional quotation mark (?.)
+    assert_match(%r{Users Matching .?#{unmatched_pattern}},
+                 css_select("title").text, "Wrong page")
+
+    flash_text = (:runtime_no_matches.l).sub("[types]", "users")
+    assert_flash_text(flash_text)
+  end
+
+  #   ---------------------
+  #    show_selected_users
+  #   ---------------------
+
+  # Prove that sorting links include "Contribution" (when not in admin mode)
+  def prove_sorting_links_include_contribution
+    sorting_links = css_select("#sorts")
+    assert_match(/Contribution/, sorting_links.text)
   end
 
   #   -----------
@@ -2671,6 +2711,21 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_select(".checklist a", count: expect.size)
     assert(missing_names.empty?, "Species List missing #{missing_names}")
+  end
+
+  #   ---------------
+  #    admin actions
+  #   ---------------
+
+  # Prove that user_index is restricted to admins
+  def test_index_user
+    login("rolf")
+    get(:index_user)
+    assert_redirected_to(:root)
+
+    make_admin
+    get(:index_user)
+    assert_response(:success)
   end
 
   def test_change_user_bonuses
