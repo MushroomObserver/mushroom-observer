@@ -2597,6 +2597,82 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  #   -----------
+  #    checklist
+  #   -----------
+
+  # Prove that Life List goes to correct page which has correct content
+  def test_checklist_for_user
+    user = users(:rolf)
+    expect = Name.joins(observations: :user).
+                  where("observations.user_id = #{user.id}
+                         AND names.rank = #{Name.ranks[:Species]}").
+                  uniq
+
+    get(:checklist, id: user.id)
+    assert_match(%r{Checklist for #{user.name}}, css_select("title").text,
+                 "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  # Prove that Species List checklist goes to correct page with correct content
+  def test_checklist_for_species_list
+    list = species_lists(:one_genus_three_species_list)
+    expect = Name.joins(observations: :observations_species_lists).
+                        where("observations_species_lists.species_list_id
+                               = #{list.id}
+                               AND names.rank = #{Name.ranks[:Species]}").
+                        uniq
+
+    get(:checklist, species_list_id: list.id)
+    assert_match(%r{Checklist for #{list.title}}, css_select("title").text,
+                 "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  # Prove that Project checklist goes to correct page with correct content
+  def test_checklist_for_project
+    project = projects(:one_genus_two_species_project)
+    expect = Name.joins(observations: :observations_projects).
+                        where("observations_projects.project_id = #{project.id}
+                               AND names.rank = #{Name.ranks[:Species]}").
+                        uniq
+
+    get(:checklist, project_id: project.id)
+    assert_match(%r{Checklist for #{project.title}}, css_select("title").text,
+                 "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  # Prove that Site checklist goes to correct page with correct content
+  def test_checklist_for_site
+    expect = Name.joins(:observations).
+                  where({ rank: Name.ranks[:Species] }).
+                  uniq
+
+    get(:checklist)
+    assert_match(%r{Checklist for #{:app_title.l}}, css_select("title").text,
+                 "Wrong page")
+
+    prove_checklist_content(expect)
+  end
+
+  def prove_checklist_content(expect)
+    # Get expected names not included in the displayed checklist links.
+    missing_names = (
+      expect.each_with_object([]) do |taxon, missing|
+        next if /#{taxon.text_name}/ =~ css_select(".checklist a").text
+        missing << taxon.text_name
+      end
+    )
+
+    assert_select(".checklist a", count: expect.size)
+    assert(missing_names.empty?, "Species List missing #{missing_names}")
+  end
+
   def test_change_user_bonuses
     user = users(:mary)
     old_contribution = mary.contribution
