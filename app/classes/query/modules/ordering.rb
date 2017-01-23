@@ -69,7 +69,8 @@ module Query::Modules::Ordering
 
     when "location"
       if columns.include?("location_id")
-        add_join(:locations)
+        # Join Users with null locations, else join records with locations
+        model == User ? add_join(:locations!) : add_join(:locations)
         User.current_location_format == :scientific ?
           "locations.scientific_name ASC" : "locations.name ASC"
       end

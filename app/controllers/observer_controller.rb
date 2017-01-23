@@ -17,7 +17,6 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/indexes"
   require_dependency "observer_controller/site_stats"
   require_dependency "observer_controller/other"
-  require_dependency "observer_controller/backwards_compatibility"
 
   # These all belong in new controllers:
   require_dependency "observer_controller/author_controller"
