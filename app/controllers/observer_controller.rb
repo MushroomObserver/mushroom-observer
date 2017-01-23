@@ -33,7 +33,6 @@ class ObserverController < ApplicationController
     :advanced_search_form,
     :ask_webmaster_question,
     :checklist,
-    :color_themes,
     :download_observations,
     :hide_thumbnail_map,
     :how_to_help,
