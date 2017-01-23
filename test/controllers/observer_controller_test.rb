@@ -2725,19 +2725,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_user, id: users_alpha.third.id,
                          params: @controller.query_params(QueryRecord.last))
   end
-=begin
-  def test_prev_and_next_observation
-    # Uses default observation query
-    o_chron = Observation.order(:created_at)
-    get(:next_observation, id: o_chron.fourth.id)
-    assert_redirected_to(action: :show_observation, id: o_chron.third.id,
-                         params: @controller.query_params(QueryRecord.last))
-
-    get(:prev_observation, id: o_chron.fourth.id)
-    assert_redirected_to(action: :show_observation, id: o_chron.fifth.id,
-                         params: @controller.query_params(QueryRecord.last))
-  end
-=end
 
   #   ---------------
   #    admin actions
