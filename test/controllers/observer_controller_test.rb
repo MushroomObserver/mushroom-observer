@@ -106,13 +106,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:ask_webmaster_question)
     assert_form_action(action: :ask_webmaster_question)
 
-    get_with_dump(:color_themes)
-    assert_template(:color_themes)
-    for theme in MO.themes
-      get_with_dump(theme)
-      assert_template(theme)
-    end
-
     get_with_dump(:how_to_help)
     assert_template(:how_to_help)
 

@@ -28,7 +28,7 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/search_controller"
   require_dependency "observer_controller/user_controller"
 
-  before_action :login_required, except: MO.themes + [
+  before_action :login_required, except: [
     :advanced_search,
     :advanced_search_form,
     :ask_webmaster_question,
