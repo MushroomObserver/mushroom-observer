@@ -141,6 +141,9 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:observations_by_name)
     assert_template(:list_observations, partial: :_rss_log)
 
+    get(:observations_of_name, name: names(:boletus_edulis).text_name)
+    assert_template(:list_observations, partial: :_rss_log)
+
     get_with_dump(:rss)
     assert_template(:rss)
 
