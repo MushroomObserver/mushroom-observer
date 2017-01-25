@@ -417,6 +417,21 @@ class ObserverControllerTest < FunctionalTestCase
                  @controller.instance_variable_get("@title"))
   end
 
+  # Prove that when pattern is the id of a real observation,
+  # goes directly to that observation.
+  def test_observation_search_matching_id
+    obs = observations(:minimal_unknown_obs)
+    get(:observation_search, pattern: obs.id)
+    assert_redirected_to(%r{/#{obs.id}})
+  end
+
+  # Prove that when the pattern causes an error,
+  # MO just displays an observation list
+  def test_observation_search_bad_pattern
+    get(:observation_search, pattern: { error: "" })
+    assert_template(:list_observations)
+  end
+
   def test_observation_search_with_spelling_correction
     # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
     login("rolf")
