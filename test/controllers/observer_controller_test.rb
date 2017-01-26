@@ -432,6 +432,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations)
   end
 
+  def test_map_observations
+    get(:map_observations)
+    assert_template(:map_observations)
+  end
+
   def test_observation_search_with_spelling_correction
     # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
     login("rolf")
