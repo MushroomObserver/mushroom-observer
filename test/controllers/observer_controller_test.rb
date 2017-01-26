@@ -141,6 +141,9 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:observations_by_name)
     assert_template(:list_observations, partial: :_rss_log)
 
+    get(:observations_of_name, name: names(:boletus_edulis).text_name)
+    assert_template(:list_observations, partial: :_rss_log)
+
     get_with_dump(:rss)
     assert_template(:rss)
 
@@ -412,6 +415,26 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:query_title_pattern_search.t(types: "Observations",
                                                pattern: "120"),
                  @controller.instance_variable_get("@title"))
+  end
+
+  # Prove that when pattern is the id of a real observation,
+  # goes directly to that observation.
+  def test_observation_search_matching_id
+    obs = observations(:minimal_unknown_obs)
+    get(:observation_search, pattern: obs.id)
+    assert_redirected_to(%r{/#{obs.id}})
+  end
+
+  # Prove that when the pattern causes an error,
+  # MO just displays an observation list
+  def test_observation_search_bad_pattern
+    get(:observation_search, pattern: { error: "" })
+    assert_template(:list_observations)
+  end
+
+  def test_map_observations
+    get(:map_observations)
+    assert_template(:map_observations)
   end
 
   def test_observation_search_with_spelling_correction
