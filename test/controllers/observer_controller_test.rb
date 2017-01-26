@@ -2470,6 +2470,14 @@ class ObserverControllerTest < FunctionalTestCase
     assert_nil(session[:js_override])
   end
 
+  # Prove w3c_tests renders html only within a <body>
+  # (and therefore without MO's layout).
+  def test_w3c_tests
+    expect_start = "<html><head></head><body>"
+    get(:w3c_tests)
+    assert_equal(expect_start, @response.body[0..(expect_start.size - 1)])
+  end
+
   def test_index_observation_by_past_by
     get(:index_observation, by: :modified)
     assert_response(:success)
