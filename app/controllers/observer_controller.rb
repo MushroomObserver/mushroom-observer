@@ -28,12 +28,11 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/search_controller"
   require_dependency "observer_controller/user_controller"
 
-  before_action :login_required, except: MO.themes + [
+  before_action :login_required, except: [
     :advanced_search,
     :advanced_search_form,
     :ask_webmaster_question,
     :checklist,
-    :color_themes,
     :download_observations,
     :hide_thumbnail_map,
     :how_to_help,
@@ -58,6 +57,7 @@ class ObserverController < ApplicationController
     :map_observations,
     :news,
     :next_observation,
+    :next_user,
     :observation_search,
     :observations_by_name,
     :observations_of_name,
@@ -67,6 +67,7 @@ class ObserverController < ApplicationController
     :observations_at_location,
     :pattern_search,
     :prev_observation,
+    :prev_user,
     :rss,
     :show_obs,
     :show_observation,

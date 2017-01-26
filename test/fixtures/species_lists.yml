@@ -3,76 +3,74 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+DEFAULTS: &DEFAULTS
+  user:     mary
+  where:    nil
+  location: burbank
+  title:    $LABEL
+
 # has no obs
-first_species_list: # id: 1
+first_species_list:
+  <<: *DEFAULTS
   created_at: 2006-03-01 21:14:00
   updated_at: 2006-03-01 21:14:00
   when: 2006-03-01
   user: rolf
-  where: nil
-  location: burbank
   title: A Species List
   notes: ¡Got Skunked!
   rss_log: species_list_rss_log
 
 # has no obs
-another_species_list: # id: 2
+another_species_list:
+  <<: *DEFAULTS
   created_at: 2006-03-02 21:14:00
   updated_at: 2006-03-02 21:14:00
   when: 2006-03-02
   user: rolf
-  where: nil
-  location: burbank
   title: Another Species List
   notes: Got Skunked Again!
 
 # has: minimal_unknown_obs (1) and detailed_unknown_obs (2)
-unknown_species_list: # id: 3
+unknown_species_list:
+  <<: *DEFAULTS
   created_at: 2006-03-09 21:14:00
   updated_at: 2006-03-09 21:14:00
   when: 2006-03-09
-  user: mary
-  where: nil
-  location: burbank
   title: List of mysteries
   notes: Things I don't know
 
+# used by QueryTest
 query_first_list:
+  <<: *DEFAULTS
   when: 2006-03-09
-  user: mary
-  where: nil
-  location: burbank
-  title: $LABEL
-  notes: Used by QueryTest
 
+# used by QueryTest
 query_second_list:
+  <<: *DEFAULTS
   when: 2006-03-09
-  user: mary
-  where: nil
-  location: burbank
-  title: $LABEL
-  notes: Used by QueryTest
 
+# used by QueryTest
+# has 1-word notes which is unique for SpeciesList
 query_notes_list:
+  <<: *DEFAULTS
   when: 2006-03-09
-  user: mary
-  where: nil
-  location: burbank
-  title: $LABEL
-  notes: amazingraremushroom # 1-word notes, unique for SpeciesList
+  notes: amazingraremushroom
 
+# used by QueryTest
 where_no_mushrooms_list:
+  <<: *DEFAULTS
   when: 2006-03-09
-  user: mary
   where: no mushrooms
   location: no_mushrooms_location
-  title: $LABEL
-  notes: Used by QueryTest
 
+# used by QueryTest
 where_list:
+  <<: *DEFAULTS
   when: 2006-03-09
-  user: mary
   where: wherenolocation  # 1-word where, unique for SpeciesList
   location: nil
-  title: $LABEL
-  notes: Used by QueryTest
+
+one_genus_three_species_list:
+  <<: *DEFAULTS
+  when: 2017-01-20
+
