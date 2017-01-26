@@ -3,7 +3,7 @@
 <div class="max-width-text">
   <%= :color_themes_text.tp %>
   <p>
-    <% for name in MO.themes %>
+    <% MO.themes.each do|name| %>
       <%= link_to(name.to_sym.l, action: name) %><br/>
     <% end %>
   </p>
