@@ -2452,6 +2452,20 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def test_javascript_override
+    get(:turn_javascript_on)
+    assert_response(:redirect)
+    assert_equal(:on, session[:js_override])
+
+    get(:turn_javascript_off)
+    assert_response(:redirect)
+    assert_equal(:off, session[:js_override])
+
+    get(:turn_javascript_nil)
+    assert_response(:redirect)
+    assert_nil(session[:js_override])
+  end
+
   def test_index_observation_by_past_by
     get(:index_observation, by: :modified)
     assert_response(:success)
