@@ -2244,7 +2244,7 @@ class ObserverControllerTest < FunctionalTestCase
   def init_for_list_checkbox_tests
     @spl1 = species_lists(:first_species_list)
     @spl2 = species_lists(:unknown_species_list)
-    @obs1 = observations(:coprinus_comatus_obs)
+    @obs1 = observations(:unlisted_rolf_obs)
     @obs2 = observations(:detailed_unknown_obs)
     assert_users_equal(rolf, @spl1.user)
     assert_users_equal(mary, @spl2.user)
@@ -2601,5 +2601,53 @@ class ObserverControllerTest < FunctionalTestCase
     @controller.instance_variable_set("@user", user)
     actual = @controller.external_sites_user_can_add_links_to(obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
+  end
+
+  # ------------------------------------------------------------
+  #  User
+  #  observer_controller/user_controller
+  #  Also see test/integration/observer_user_controller_test.rb
+  # ------------------------------------------------------------
+
+  # Prove that user_index is restricted to admins
+  def test_index_user
+    login("rolf")
+    get(:index_user)
+    assert_redirected_to(:root)
+
+    make_admin
+    get(:index_user)
+    assert_response(:success)
+  end
+
+  def test_change_user_bonuses
+    user = users(:mary)
+    old_contribution = mary.contribution
+    bonus = "7 lucky \n 13 unlucky"
+
+    # Prove that non-admin cannot change bonuses and attempt to do so
+    # redirects to target user's page
+    login("rolf")
+    get(:change_user_bonuses, id: user.id)
+    assert_redirected_to(action: :show_user, id: user.id)
+
+    # Prove that admin posting bonuses in wrong format causes a flash error,
+    # leaving bonuses and contributions unchanged.
+    make_admin
+    post(:change_user_bonuses, id: user.id, val: "wong format 7")
+    assert_flash_error
+    user.reload
+    assert_empty(user.bonuses)
+    assert_equal(old_contribution, user.contribution)
+
+    # Prove that admin can change bonuses
+    post(:change_user_bonuses, id: user.id, val: bonus)
+    user.reload
+    assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
+    assert_equal(old_contribution + 20, user.contribution)
+
+    # Prove that admin can get bonuses
+    get(:change_user_bonuses, id: user.id)
+    assert_response(:success)
   end
 end

@@ -9,6 +9,7 @@
 # in order to override DEFAULTS, e.g.:
 #   where: somewhere
 #   location:
+
 DEFAULTS: &DEFAULTS
   name: boletus_edulis
   notes: $LABEL # sometimes useful for debugging
@@ -56,6 +57,7 @@ coprinus_comatus_obs:
   vote_cache: 1
   thumb_image: connected_coprinus_comatus_image
   images: connected_coprinus_comatus_image
+  species_lists: one_genus_three_species_list
   specimens: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
 
 agaricus_campestris_obs:
@@ -68,6 +70,7 @@ agaricus_campestris_obs:
   notes: From the lawn next door
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
+  species_lists: one_genus_three_species_list
   specimens: agaricus_campestris_spec
 
 agaricus_campestrus_obs:
@@ -153,6 +156,7 @@ peltigera_obs:
   vote_cache: 3
   thumb_image: peltigera_image
   images: peltigera_image
+  species_lists: one_genus_three_species_list
 
 peltigera_rolf_obs:
   <<: *DEFAULTS
@@ -190,6 +194,7 @@ boletus_edulis_obs:
   is_collection_location: 0
   notes: 'A tasty bolete!'
   vote_cache: 3
+  species_lists: one_genus_three_species_list
 
 owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
@@ -246,7 +251,8 @@ imageless_unvouchered_obs:
   when: 2016-08-25
   user: ignore_imageless_user
 
-imged_unvouchered_obs:      # need >=2 imaged B edulis Obs's for filter tests
+# need >=2 imaged B edulis Obs's for filter tests
+imged_unvouchered_obs:
   <<: *DEFAULTS
   when: 2016-08-27
   images: query_first_image
@@ -268,3 +274,10 @@ updated_2013_obs:
   <<: *DEFAULTS
   when: 2013-09-08
   updated_at: 2013-09-08 17:21:00
+
+unlisted_rolf_obs:
+  <<: *DEFAULTS
+  location: point_reyes
+  user: rolf
+  when: 2017-01-20
+
