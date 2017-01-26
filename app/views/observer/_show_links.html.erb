@@ -25,7 +25,7 @@
       <% @new_sites.sort_by(&:name).each do |site| %>
         <tr class="hidden-links">
           <td style="border-top:0">
-            <%= content_tag(:a, site.name,
+            <%= content_tag(:span, site.name,
                 data: { role: "link", obs: observation.id, site: site.id }) %>
             <span data-role="link-controls">[<%=
               content_tag(:a, :ADD.t, href: "#",
