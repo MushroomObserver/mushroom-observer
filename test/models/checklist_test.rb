@@ -12,6 +12,7 @@ class ChecklistTest < UnitTestCase
       "Agaricus campestris",
       "Agaricus campestros",
       "Agaricus campestrus",
+      "Boletus edulis",
       "Coprinus comatus",
       "Strobilurus diminutivus"
     ]
@@ -32,7 +33,7 @@ class ChecklistTest < UnitTestCase
     obss_of_species = Observation.joins(:name).
                                   where("names.rank = #{Name.ranks[:Species]}")
     all_species = obss_of_species.map { |obs| obs.name.text_name }.uniq.sort
-    all_genera = genera(all_species)
+    all_genera = genera(all_species).uniq
     assert_equal(all_genera, data.genera)
     assert_equal(all_species, data.species)
   end
@@ -51,8 +52,14 @@ class ChecklistTest < UnitTestCase
     assert_equal(katrinas_species, data.species)
 
     data = Checklist::ForUser.new(rolf)
-    assert_equal(3, data.num_genera)
-    assert_equal(6, data.num_species)
+    assert_equal(4, data.num_genera)
+
+    expect = Name.joins(observations: :user).
+                  where("observations.user_id = #{users(:rolf).id}
+                         AND names.rank = #{Name.ranks[:Species]}").
+                  uniq.size
+    assert_equal(expect, data.num_species)
+
     assert_equal(genera(rolfs_species), data.genera)
     assert_equal(rolfs_species, data.species)
 

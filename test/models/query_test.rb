@@ -1559,11 +1559,15 @@ class QueryTest < UnitTestCase
     assert_query([locations(:howarth_park).id,
                   locations(:salt_point).id],
                  :Location, :advanced_search, location: "park")
-    assert_query([locations(:burbank).id],
+
+    assert_query(Location.joins(observations: :user).
+                          where(observations: { user: rolf }).uniq,
                  :Location, :advanced_search, user: "rolf")
+
     assert_query(Location.joins(:observations).
-                          where(:observations => { user: dick }).distinct,
+                          where(observations: { user: dick }).uniq,
                  :Location, :advanced_search, user: "dick")
+
     # content in obs.notes
     assert_query([locations(:burbank).id],
                  :Location, :advanced_search, content: '"strange place"')
@@ -2372,6 +2376,10 @@ class QueryTest < UnitTestCase
                 :User, :pattern_search, pattern: users(:mary).name)
     assert_query(User.all,
                 :User, :pattern_search, pattern: "")
+    # sorted by location should include Users without location
+    # (Differs from searches on other Classes or by other sort orders)
+    assert_query(User.all,
+                :User, :pattern_search, pattern: "", by: "location")
   end
 
   ##############################################################################

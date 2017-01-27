@@ -1177,7 +1177,6 @@ class ApplicationController < ActionController::Base
 
   def save_query_unless_bot(result)
     return unless result && !browser.bot?
-
     result.increment_access_count
     result.save
   end
@@ -1185,19 +1184,19 @@ class ApplicationController < ActionController::Base
   # Create a new query by adding a bounding box to the given one.
   def restrict_query_to_box(query)
     return query if params[:north].blank?
-
     model = query.model.to_s.to_sym
     flavor = query.flavor
-    Query.lookup(model, flavor, tweaked_bounding_box_params)
+    tweaked_params = query.params.merge(tweaked_bounding_box_params)
+    Query.lookup(model, flavor, tweaked_params)
   end
 
   def tweaked_bounding_box_params
-    query.params.merge(
+    {
       north: tweak_up(params[:north], 0.001, 90),
       south: tweak_down(params[:south], 0.001, -90),
       east: tweak_up(params[:east], 0.001, 180),
       west: tweak_down(params[:west], 0.001, -180)
-    )
+    }
   end
 
   def tweak_up(v, amount, max)

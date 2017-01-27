@@ -11,6 +11,7 @@
 #  assert_flash_success:: Assert there was a notice but no warning or error.
 #  assert_flash_warning:: Assert there was a warning but no error.
 #  assert_flash_error::   Assert there was an error.
+#  assert_flash_text::    Assert flash has particular text
 #
 ################################################################################
 
@@ -65,6 +66,16 @@ module FlashExtensions
              "#{msg} Got the wrong flash error(s). " \
              "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
+    @controller.instance_variable_set("@last_notice", nil)
+    session[:notice] = nil
+  end
+
+  # Assert that a flash was rendered or is pending with the expected text.
+  def assert_flash_text(expect, msg = "Flash text incorrect")
+    got = get_last_flash
+    got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n") if got.present?
+    assert_equal(expect, got, msg)
+
     @controller.instance_variable_set("@last_notice", nil)
     session[:notice] = nil
   end
