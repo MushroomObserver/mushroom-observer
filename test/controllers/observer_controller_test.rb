@@ -187,9 +187,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Show all.
     params = {}
-    for type in RssLog.all_types
-      params["show_#{type}"] = "1"
-    end
+    RssLog.all_types.each { |type| params["show_#{type}"] = "1" }
     post(:index_rss_log, params)
     assert_template(:list_rss_logs, partial: rss_logs(:observation_rss_log).id)
   end
