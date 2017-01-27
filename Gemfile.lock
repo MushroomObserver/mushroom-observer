@@ -109,6 +109,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.4)
       mime-types (>= 1.16, < 4)
+    metaclass (0.0.4)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
@@ -119,6 +120,8 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    mocha (1.2.1)
+      metaclass (~> 0.0.1)
     mysql2 (0.3.21)
     nokogiri (1.6.8.1)
       mini_portile2 (~> 2.1.0)
@@ -236,6 +239,7 @@ DEPENDENCIES
   jquery-slick-rails (~> 1.5.0.1)
   minitest
   minitest-reporters (>= 0.5.0)
+  mocha
   mysql2 (~> 0.3.18)
   rails (~> 4.2.0)
   rtf

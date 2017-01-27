@@ -32,6 +32,9 @@ ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
 require "rails/test_help"
 
+# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
+require "mocha/mini_test"
+
 for file in %w(
   general_extensions
   flash_extensions

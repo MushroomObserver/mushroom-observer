@@ -73,4 +73,3 @@ where_list:
 one_genus_three_species_list:
   <<: *DEFAULTS
   when: 2017-01-20
-

@@ -76,6 +76,9 @@ gem "byebug", group: [:development, :test]
 # Allow selective disabling of internet
 gem "webmock", group: :test
 
+# Mocking and stubbing in Ruby
+gem "mocha", group: :test
+
 # Use capybara to simulate user-browser interaction
 gem "capybara"
 

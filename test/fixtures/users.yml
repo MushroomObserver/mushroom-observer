@@ -94,16 +94,23 @@ vouchered_only_user:
   content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
+public_voter:
+  <<: *DEFAULTS
+  verified: 2017-01-11 14:03:00
+
+# Has multiple Observations whose sortable attributes are unique
+# Need for tests in which sort order is predictable, e.g.,
+# ObserverControllerIntegrationTest#test_destroy_observation_from_search
+sortable_obs_user:
+  <<: *DEFAULTS
+  verified: 2017-01-13 05:14:00
+
 uniquely_named_user:
   <<: *DEFAULTS
+  verified: 2017-01-13 05:14:00
 
-# Used by integration test of user_search
-first_name_sorts_user:
+# Owns the default Location for Observations
+obs_default_location_user:
   <<: *DEFAULTS
-  name: name sorts second
-
-second_name_sorts_user:
-  <<: *DEFAULTS
-  name: name sorts first
-
+  verified: 2017-01-15 08:17:00
 

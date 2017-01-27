@@ -394,6 +394,25 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :observer, action: :user_search,
                          pattern: "34")
+
+    stub_request(:any, /google.com/)
+    pattern =  "hexiexiva"
+    params = { search: { pattern: pattern, type: :google } }
+    target = "http://google.com?q=site:mushroomobserver.org%20#{pattern}"
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(target)
+
+    params = { search: { pattern: "", type: :google } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+
+    params = { search: { pattern: "x", type: :nonexistent_type } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+
+    params = { search: { pattern: "", type: :observation } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :list_observations)
   end
 
   def test_observation_search
@@ -408,6 +427,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:query_title_pattern_search.t(types: "Observations",
                                                pattern: "120"),
                  @controller.instance_variable_get("@title"))
+
+    # If pattern is id of a real Observation, go directly to that Observation.
+    obs = Observation.first
+    get_with_dump(:observation_search, pattern: obs.id)
+    assert_redirected_to(action: :show_observation, id: Observation.first.id)
   end
 
   # Prove that when pattern is the id of a real observation,
@@ -460,6 +484,13 @@ class ObserverControllerTest < FunctionalTestCase
     params = { place_name: "Burbank" }
     get_with_dump(:observations_at_where, params)
     assert_template(:list_observations, partial: :_rss_log)
+  end
+
+  def test_observations_of_name
+    params = { species_list_id: species_lists(:unknown_species_list).id,
+               name: observations(:minimal_unknown_obs).name }
+    get_with_dump(:observations_of_name, params)
+    assert_select("title", /Observations of Synonyms of/)
   end
 
   def test_send_webmaster_question
@@ -561,6 +592,19 @@ class ObserverControllerTest < FunctionalTestCase
     # queries are created for Darvin's new "show species" and "show similar
     # observations" links...)
     assert_equal(4, QueryRecord.count)
+  end
+
+  def test_show_observation_change_vote_anonymity
+    obs = observations(:coprinus_comatus_obs)
+    user = login(users(:public_voter).name)
+
+    get_with_dump(:show_observation, id: obs.id, go_private: 1)
+    user.reload
+    assert_equal(:yes, user.votes_anonymous)
+
+    get_with_dump(:show_observation, id: obs.id, go_public: 1)
+    user.reload
+    assert_equal(:no, user.votes_anonymous)
   end
 
   def test_show_owner_id
@@ -725,11 +769,29 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  # Prove that recalc redirects to show_observation, and
+  # corrects an Observation's name.
+  def test_recalc
+    # Make the consensus inaccurate
+    obs = observations(:owner_only_favorite_eq_consensus)
+    accurate_consensus = obs.name
+    obs.name = names(:coprinus_comatus)
+    obs.save
+
+    # recalc
+    login
+    get(:recalc, id: obs.id)
+    obs.reload
+
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(accurate_consensus, obs.name)
+  end
+
   def test_some_admin_pages
-    for (page, response, params) in [
+    [
       [:users_by_name,  "list_users", {}],
       [:email_features, "email_features", {}]
-    ]
+    ].each do |page, response, params|
       logout
       get(page, params)
       assert_redirected_to(controller: :account, action: :login)
@@ -1305,12 +1367,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_various_altitude_formats
-    for input, output in [
+    [
       ["500",     500],
       ["500m",    500],
       ["500 ft.", 152],
       [' 500\' ', 152]
-    ]
+    ].each do | input, output |
       where = "Unknown, Massachusetts, USA"
 
       generic_construct_observation({
@@ -2077,6 +2139,38 @@ class ObserverControllerTest < FunctionalTestCase
                  @controller.instance_variable_get("@good_images").map(&:id))
   end
 
+  def test_image_upload_when_process_image_fails
+    login("rolf")
+
+    setup_image_dirs
+    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rack::Test::UploadedFile.new(file, "image/jpeg")
+
+    # Simulate process_image failure.
+    Image.any_instance.stubs(:process_image).returns(false)
+
+    post(:create_observation,
+         observation: {
+           place_name: "USA",
+           when: Time.current
+         },
+         image: { "0" => {
+           image: file,
+           copyright_holder: "zuul",
+           when: Time.current
+         } }
+        )
+
+    # Prove that an image was created, but that it is unattached, is in the
+    # @bad_images array, and has not been kept in the @good_images array
+    # for attachment later.
+    img = Image.find_by_copyright_holder("zuul")
+    assert(img)
+    assert_equal([], img.observations)
+    assert_includes(@controller.instance_variable_get("@bad_images"), img)
+    assert_empty(@controller.instance_variable_get("@good_images"))
+  end
+
   def test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
@@ -2385,6 +2479,12 @@ class ObserverControllerTest < FunctionalTestCase
                          id: names(:agaricus_campestris).id)
   end
 
+  def test_lookup_observation
+    get(:lookup_observation, id: observations(:minimal_unknown_obs).id)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: observations(:minimal_unknown_obs).id)
+  end
+
   def test_lookup_project
     p_id = projects(:eol_project).id
     get(:lookup_project, id: p_id)
@@ -2426,6 +2526,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
   end
+
+  ###################
 
   def test_change_banner
     use_test_locales do
