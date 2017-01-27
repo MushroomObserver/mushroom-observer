@@ -978,9 +978,13 @@ class ObserverControllerTest < FunctionalTestCase
     get("set_export_status", params.merge(value: "0"))
     assert_redirected_to(controller: :name, action: :show_name, id: name.id)
     assert_equal(false, name.reload.ok_for_export)
+
     get("set_export_status", params.merge(value: "1"))
     assert_redirected_to(controller: :name, action: :show_name, id: name.id)
     assert_equal(true, name.reload.ok_for_export)
+
+    get("set_export_status", params.merge(value: "1", return: true))
+    assert_redirected_to("/")
   end
 
   def test_original_filename_visibility
@@ -2466,6 +2470,28 @@ class ObserverControllerTest < FunctionalTestCase
                      str.text, "Didn't change text of #{str.language.locale} correctly.")
       end
     end
+  end
+
+  def test_javascript_override
+    get(:turn_javascript_on)
+    assert_response(:redirect)
+    assert_equal(:on, session[:js_override])
+
+    get(:turn_javascript_off)
+    assert_response(:redirect)
+    assert_equal(:off, session[:js_override])
+
+    get(:turn_javascript_nil)
+    assert_response(:redirect)
+    assert_nil(session[:js_override])
+  end
+
+  # Prove w3c_tests renders html, with all content within the <body>
+  # (and therefore without MO's layout).
+  def test_w3c_tests
+    expect_start = "<html><head></head><body>"
+    get(:w3c_tests)
+    assert_equal(expect_start, @response.body[0..(expect_start.size - 1)])
   end
 
   def test_index_observation_by_past_by
