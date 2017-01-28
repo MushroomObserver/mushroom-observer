@@ -103,6 +103,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:thumbnail, user.thumbnail_size)
   end
 
+  def test_show_obs
+    obs = observations(:fungi_obs)
+    get(:show_obs, id: obs.id)
+    assert_redirected_to(action: :show_observation, id: obs.id)
+  end
+
   def test_page_loads
     get_with_dump(:index)
     assert_template(:list_rss_logs, partial: :_rss_log)
