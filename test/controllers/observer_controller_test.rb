@@ -206,6 +206,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_rss_logs, partial: rss_logs(:observation_rss_log).id)
   end
 
+  def test_get_index_rss_log
+    # With params[:type], it should display only that type
+    expect = rss_logs(:glossary_term_rss_log)
+    get(:index_rss_log, type: :glossary_term)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    refute_match(/#{rss_logs(:observation_rss_log).observation.name}/,
+                 css_select(".rss-what").text)
+
+    # Without params[:type], it should display all logs
+    get(:index_rss_log)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
+                 css_select(".rss-what").text)
+  end
+
   def test_prev_and_next_observation
     # Uses default observation query
     o_chron = Observation.order(:created_at)
