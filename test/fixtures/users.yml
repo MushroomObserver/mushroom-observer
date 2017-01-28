@@ -114,3 +114,8 @@ obs_default_location_user:
   <<: *DEFAULTS
   verified: 2017-01-15 08:17:00
 
+small_thumbnail_user:
+  <<: *DEFAULTS
+  verified: 2017-01-28 08:17:00
+  thumbnail_size: small
+
