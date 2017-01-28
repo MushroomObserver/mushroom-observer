@@ -207,6 +207,18 @@ class ObserverControllerTest < FunctionalTestCase
                  css_select(".rss-what").text)
   end
 
+  def test_user_default_rss_log
+    # Prove that MO offers to make non-default log the user's default.
+    login("rolf")
+    get(:index_rss_log, type: :glossary_term)
+    link_text = @controller.instance_variable_get("@links").flatten.first
+    assert_equal(:rss_make_default.l, link_text)
+
+    # Prove that user can change his default rss log type.
+    get(:index_rss_log, type: :glossary_term, make_default: 1)
+    assert_equal("glossary_term", (rolf.reload).default_rss_type)
+  end
+
   def test_prev_and_next_observation
     # Uses default observation query
     o_chron = Observation.order(:created_at)
