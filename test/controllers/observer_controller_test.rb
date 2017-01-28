@@ -95,6 +95,14 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation, id: obs.id)
   end
 
+  def test_show_observation_change_thumbnail_size
+    user = users(:small_thumbnail_user)
+    login(user.name)
+    get(:show_observation, set_thumbnail_size: :thumbnail)
+    user.reload
+    assert_equal(:thumbnail, user.thumbnail_size)
+  end
+
   def test_page_loads
     get_with_dump(:index)
     assert_template(:list_rss_logs, partial: :_rss_log)
