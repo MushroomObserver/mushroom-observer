@@ -75,12 +75,12 @@ class ObserverController
   end
 
   # Go to next RssLog: redirects to show_<object>.
-  def next_rss_log # :norobots:
+  def next_rss_log # :nologin: :norobots:
     redirect_to_next_object(:next, RssLog, params[:id].to_s)
   end
 
   # Go to previous RssLog: redirects to show_<object>.
-  def prev_rss_log # :norobots:
+  def prev_rss_log # :nologin: :norobots:
     redirect_to_next_object(:prev, RssLog, params[:id].to_s)
   end
 

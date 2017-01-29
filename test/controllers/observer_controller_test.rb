@@ -201,11 +201,54 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Show all.
     params = {}
-    for type in RssLog.all_types
-      params["show_#{type}"] = "1"
-    end
+    RssLog.all_types.each { |type| params["show_#{type}"] = "1" }
     post(:index_rss_log, params)
     assert_template(:list_rss_logs, partial: rss_logs(:observation_rss_log).id)
+  end
+
+  def test_get_index_rss_log
+    # With params[:type], it should display only that type
+    expect = rss_logs(:glossary_term_rss_log)
+    get(:index_rss_log, type: :glossary_term)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    refute_match(/#{rss_logs(:observation_rss_log).observation.name}/,
+                 css_select(".rss-what").text)
+
+    # Without params[:type], it should display all logs
+    get(:index_rss_log)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
+                 css_select(".rss-what").text)
+  end
+
+  def test_user_default_rss_log
+    # Prove that MO offers to make non-default log the user's default.
+    login("rolf")
+    get(:index_rss_log, type: :glossary_term)
+    link_text = @controller.instance_variable_get("@links").flatten.first
+    assert_equal(:rss_make_default.l, link_text)
+
+    # Prove that user can change his default rss log type.
+    get(:index_rss_log, type: :glossary_term, make_default: 1)
+    assert_equal("glossary_term", (rolf.reload).default_rss_type)
+  end
+
+  def test_next_and_prev_rss_log
+    # First 2 log entries
+    logs = RssLog.order(updated_at: :desc).limit(2)
+
+    get(:next_rss_log, id: logs.first)
+    # assert_redirected_to does not work here because #next redirects to a url
+    # which includes a query after the id, but assert_redirected_to treats
+    # the query as part of the id.
+    assert_response(:redirect)
+    assert_match(%r{/show_rss_log/#{logs.second.id}},
+                 @response.header["Location"], "Redirected to wrong page")
+
+    get(:prev_rss_log, id: logs.second)
+    assert_response(:redirect)
+    assert_match(%r{/show_rss_log/#{logs.first.id}},
+                 @response.header["Location"], "Redirected to wrong page")
   end
 
   def test_prev_and_next_observation
