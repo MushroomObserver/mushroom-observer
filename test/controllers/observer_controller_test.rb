@@ -233,6 +233,24 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("glossary_term", (rolf.reload).default_rss_type)
   end
 
+  def test_next_and_prev_rss_log
+    # First 2 log entries
+    logs = RssLog.order(updated_at: :desc).limit(2)
+
+    get(:next_rss_log, id: logs.first)
+    # assert_redirected_to does not work here because #next redirects to a url
+    # which includes a query after the id, but assert_redirected_to treats
+    # the query as part of the id.
+    assert_response(:redirect)
+    assert_match(%r{/show_rss_log/#{logs.second.id}},
+                 @response.header["Location"], "Redirected to wrong page")
+
+    get(:prev_rss_log, id: logs.second)
+    assert_response(:redirect)
+    assert_match(%r{/show_rss_log/#{logs.first.id}},
+                 @response.header["Location"], "Redirected to wrong page")
+  end
+
   def test_prev_and_next_observation
     # Uses default observation query
     o_chron = Observation.order(:created_at)
