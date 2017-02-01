@@ -416,6 +416,16 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(3, results.length)
   end
 
+  # Prove that if advanced_search provokes exception,
+  # it returns to advanced search form.
+  def test_advanced_search_error
+    ObserverController.any_instance.stubs(:show_selected_observations).
+                       raises(RuntimeError)
+    query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
+    get(:advanced_search, @controller.query_params(query))
+    assert_redirected_to(action: "advanced_search_form")
+  end
+
   def test_pattern_search
     params = { search: { pattern: "12", type: :observation } }
     get_with_dump(:pattern_search, params)
