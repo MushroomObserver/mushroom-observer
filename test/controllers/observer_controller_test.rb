@@ -2540,6 +2540,13 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_name, id: "Agaricus campestris Linn.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
+    # Prove that lookup_name adds flash message when it hits an error,
+    # stubbing a method called by lookup_name in order to provoke an error.
+    ObserverController.any_instance.stubs(:fix_name_matches).
+                       raises(RuntimeError)
+    get(:lookup_name, id: names(:fungi).text_name)
+    assert_flash("RuntimeError")
   end
 
   def test_lookup_observation
