@@ -2548,6 +2548,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:fungi).id)
 
+    # Prove that when there are no hits and >1 spelling suggestion,
+    # it flashes a warning and shows the name index
+    get(:lookup_name, id: "Verpab")
+    assert_flash_warning(:runtime_suggest_multiple_alternates.t)
+    assert_redirected_to(%r{/name/index_name})
+
     # Prove that lookup_name adds flash message when it hits an error,
     # stubbing a method called by lookup_name in order to provoke an error.
     ObserverController.any_instance.stubs(:fix_name_matches).

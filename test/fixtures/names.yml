@@ -868,3 +868,29 @@ imageless:
   author: ''
   citation: ''
   notes: NULL
+
+# Next two names are used by test of lookup_name.
+# They are spelling suggested by lookup_name("Verpa").
+# NOTE: Verpa must not be used for any name, else the test will fail
+# because the lookup will find a match and not look for suggestions.
+suggested_by_verpa_authored:
+  version: 1
+  rank: <%= Name.ranks[:Genus] %>
+  text_name: Verpaa
+  display_name: '**__Verpaa__**'
+  search_name: Verpaa
+  sort_name: Verpaa
+  author: 'Bob'
+  citation: ''
+  notes: NULL
+
+suggested_by_verpa_authorless:
+  version: 1
+  rank: <%= Name.ranks[:Genus] %>
+  text_name: Verpaa
+  display_name: '**__Verpaa__**'
+  search_name: Verpaa
+  sort_name: Verpaa
+  author: ''
+  citation: ''
+  notes: NULL
