@@ -75,27 +75,19 @@ class ObserverController
           pattern = "%#{id}%"
           conditions = ["name LIKE ? OR scientific_name LIKE ?",
                         pattern, pattern]
-          # matches = Location.find(:all, # Rails 3
-          #                        limit: 100,
-          #                        conditions: conditions)
           matches = Location.limit(100).where(conditions)
         when "Project"
           pattern = "%#{id}%"
-          # matches = Project.find(:all, # Rails 3
-          #                        limit: 100,
-          #                        conditions: ["title LIKE ?", pattern])
           matches = Project.limit(100).where("title LIKE ?", pattern)
         when "SpeciesList"
           pattern = "%#{id}%"
-          # matches = SpeciesList.find(:all, # Rails 3
-          #                            limit: 100,
-          #                            conditions: ["title LIKE ?", pattern])
           matches = SpeciesList.limit(100).where("title LIKE ?", pattern)
         when "User"
           matches = User.where(login: id)
           matches = User.where(name: id) if matches.empty?
         end
       end
+
     rescue => e
       flash_error(e.to_s) unless Rails.env == "production"
     end

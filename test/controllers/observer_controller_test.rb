@@ -2523,27 +2523,53 @@ class ObserverControllerTest < FunctionalTestCase
     n_id = names(:fungi).id
     get(:lookup_name, id: n_id)
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
+
     get(:lookup_name, id: names(:coprinus_comatus).id)
     assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
+
     get(:lookup_name, id: "Agaricus campestris")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
     get(:lookup_name, id: "Agaricus newname")
     assert_redirected_to(controller: :name, action: :index_name)
     assert_flash_error
+
     get(:lookup_name, id: "Amanita baccata sensu Borealis")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:amanita_baccata_borealis).id)
+
     get(:lookup_name, id: "Amanita baccata")
-    # assert_redirected_to(controller: :name, action: :index_name)
     assert_redirected_to(%r{/name/index_name})
     assert_flash_warning
+
     get(:lookup_name, id: "Agaricus campestris L.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
     get(:lookup_name, id: "Agaricus campestris Linn.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
+    # Prove that when there are no hits and exactly one spelling suggestion,
+    # it gives a flash warning and shows the page for the suggestion.
+    get(:lookup_name, id: "Fungia")
+    assert_flash_warning(:runtime_suggest_one_alternate.t)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:fungi).id)
+
+    # Prove that when there are no hits and >1 spelling suggestion,
+    # it flashes a warning and shows the name index
+    get(:lookup_name, id: "Verpab")
+    assert_flash_warning(:runtime_suggest_multiple_alternates.t)
+    assert_redirected_to(%r{/name/index_name})
+
+    # Prove that lookup_name adds flash message when it hits an error,
+    # stubbing a method called by lookup_name in order to provoke an error.
+    ObserverController.any_instance.stubs(:fix_name_matches).
+                       raises(RuntimeError)
+    get(:lookup_name, id: names(:fungi).text_name)
+    assert_flash("RuntimeError")
   end
 
   def test_lookup_observation
