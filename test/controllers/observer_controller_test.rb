@@ -2541,7 +2541,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
 
-    # Prove that when there are no hits and one suggestion,
+    # Prove that when there are no hits and exactly one spelling suggestion,
     # it gives a flash warning and shows the page for the suggestion.
     get(:lookup_name, id: "Fungia")
     assert_flash_warning(:runtime_suggest_one_alternate.t)
