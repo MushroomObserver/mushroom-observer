@@ -2513,24 +2513,30 @@ class ObserverControllerTest < FunctionalTestCase
     n_id = names(:fungi).id
     get(:lookup_name, id: n_id)
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
+
     get(:lookup_name, id: names(:coprinus_comatus).id)
     assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
+
     get(:lookup_name, id: "Agaricus campestris")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
     get(:lookup_name, id: "Agaricus newname")
     assert_redirected_to(controller: :name, action: :index_name)
     assert_flash_error
+
     get(:lookup_name, id: "Amanita baccata sensu Borealis")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:amanita_baccata_borealis).id)
+
     get(:lookup_name, id: "Amanita baccata")
-    # assert_redirected_to(controller: :name, action: :index_name)
     assert_redirected_to(%r{/name/index_name})
     assert_flash_warning
+
     get(:lookup_name, id: "Agaricus campestris L.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
+
     get(:lookup_name, id: "Agaricus campestris Linn.")
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
