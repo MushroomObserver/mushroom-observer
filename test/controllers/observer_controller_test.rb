@@ -2541,6 +2541,13 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
 
+    # Prove that when there are no hits and one suggestion,
+    # it gives a flash warning and shows the page for the suggestion.
+    get(:lookup_name, id: "Fungia")
+    assert_flash_warning(:runtime_suggest_one_alternate.t)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:fungi).id)
+
     # Prove that lookup_name adds flash message when it hits an error,
     # stubbing a method called by lookup_name in order to provoke an error.
     ObserverController.any_instance.stubs(:fix_name_matches).
