@@ -21,3 +21,9 @@ agaricus_campestris_notification_without_note:
   flavor: <%= Notification.flavors[:name] %>
   obj_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
   note_template:
+
+no_observation_notification:
+  user: dick
+  flavor: <%= Notification.flavors[:name] %>
+  obj_id: <%= ActiveRecord::FixtureSet.identify(:notification_but_no_observation) %>
+  note_template:
