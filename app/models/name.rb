@@ -1440,9 +1440,8 @@ class Name < AbstractModel
     end
 
     # Move over any notifications on the old name.
-    # for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
-    for note in Notification.where(flavor: Notification.flavors[:name],
-                                   obj_id: old_name.id)
+    Notification.where(flavor: Notification.flavors[:name],
+                       obj_id: old_name.id).each do |note|
       note.obj_id = id
       note.save
     end
