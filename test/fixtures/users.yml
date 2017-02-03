@@ -119,3 +119,7 @@ small_thumbnail_user:
   verified: 2017-01-28 08:17:00
   thumbnail_size: small
 
+no_general_questions_user:
+  <<: *DEFAULTS
+  verified: 2017-02-02 20:17:00
+  email_general_question: false

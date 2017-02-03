@@ -821,6 +821,13 @@ class ObserverControllerTest < FunctionalTestCase
     id = images(:in_situ_image).id
     requires_login(:commercial_inquiry, id: id)
     assert_form_action(action: :commercial_inquiry, id: id)
+
+    # Prove that trying to ask question of user who refuses questions
+    # redirects to that user's page (instead of an email form).
+    user = users(:no_general_questions_user)
+    login(user.name)
+    get(:ask_user_question, id: user.id)
+    assert_flash_text(:permission_denied.t)
   end
 
   def test_destroy_observation
