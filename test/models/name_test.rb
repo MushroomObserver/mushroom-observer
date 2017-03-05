@@ -421,6 +421,16 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata ssp. grisea f. grisea group", "Amanita vaginata ssp. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata var. grisea f. grisea group", "Amanita vaginata var. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata ssp. grisea var. grisea f. grisea group", "Amanita vaginata ssp. grisea var. grisea f. grisea")
+
+    assert_name_match(pat, "Amanita clade", "Amanita")
+    assert_name_match(pat, "Amanita Clade", "Amanita")
+    assert_name_match(pat, "Amanita vaginata clade", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata ssp. grisea clade", "Amanita vaginata ssp. grisea")
+    assert_name_match(pat, "Amanita vaginata var. grisea clade", "Amanita vaginata var. grisea")
+    assert_name_match(pat, "Amanita vaginata f. grisea clade", "Amanita vaginata f. grisea")
+    assert_name_match(pat, "Amanita vaginata ssp. grisea f. grisea clade", "Amanita vaginata ssp. grisea f. grisea")
+    assert_name_match(pat, "Amanita vaginata var. grisea f. grisea clade", "Amanita vaginata var. grisea f. grisea")
+    assert_name_match(pat, "Amanita vaginata ssp. grisea var. grisea f. grisea clade", "Amanita vaginata ssp. grisea var. grisea f. grisea")
   end
 
   def test_some_bad_names
