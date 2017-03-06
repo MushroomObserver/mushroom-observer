@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx yyy ...) group or clade
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -154,7 +154,7 @@
 #                              return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_author::            Grab the author from the end of a name.
-#  parse_group::             Parse "Whatever group".
+#  parse_group::             Parse "Whatever group" or "whatever clade".
 #  parse_genus_or_up::       Parse "Xxx".
 #  parse_subgenus::          Parse "Xxx subgenus yyy".
 #  parse_section::           Parse "Xxx sect. yyy".
@@ -266,7 +266,7 @@ class Name < AbstractModel
             Phylum: 13,
             Kingdom: 14,
             Domain: 15,
-            Group: 16
+            Group: 16   # This rank is used for both group and clade
           },
           source: :rank,
           with: [],
@@ -1527,7 +1527,7 @@ class Name < AbstractModel
   SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi
   VAR_ABBR     = / variety | var\.? | v\.? /xi
   F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi
-  GROUP_ABBR   = / group | gr\.? | gp\.? /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade /xi
   AUCT_ABBR    = / auct\.? /xi
   INED_ABBR    = / in\s?ed\.? /xi
   NOM_ABBR     = / nomen | nom\.? /xi
@@ -1611,7 +1611,7 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ group$/) ? :Group :
+    text_name.match(/ (group|clade)$/) ? :Group :
     text_name.include?(" f. ") ? :Form :
     text_name.include?(" var. ") ? :Variety :
     text_name.include?(" subsp. ") ? :Subspecies :
@@ -1642,13 +1642,14 @@ class Name < AbstractModel
     results = nil
     if match = GROUP_PAT.match(str)
       name = match[1]
+      group_type = (str.split.last.downcase == "clade" ? "clade" : "group")
       text_name = name.tr("ë", "e")
       parent_name = name.sub(LAST_PART, "")
       results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
+        text_name: text_name + " #{group_type}",
+        search_name: text_name + " #{group_type}",
+        sort_name: format_sort_name(text_name, "#{group_type}"),
+        display_name: format_name(name, deprecated) + " #{group_type}",
         parent_name: parent_name,
         rank: :Group,
         author: ""
@@ -1934,7 +1935,7 @@ class Name < AbstractModel
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
                     gsub(/[Øø]/, "O").
                     strip.
-                    sub(/^group$/, " group")
+                    sub(/^(group|clade)$/, "\1")
     end
     str
   end

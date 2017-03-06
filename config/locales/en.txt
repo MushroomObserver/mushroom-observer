@@ -826,10 +826,10 @@
   rank_form: form
   RANK_PLURAL_FORM: Forms
   rank_plural_form: forms
-  RANK_GROUP: Group
-  rank_group: group
-  RANK_PLURAL_GROUP: Groups
-  rank_plural_group: groups
+  RANK_GROUP: Group or Clade
+  rank_group: group or clade
+  RANK_PLURAL_GROUP: Groups or Clades
+  rank_plural_group: groups or clades
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
@@ -1485,11 +1485,12 @@
   name_map_no_maps: No observations of [name] have mappable location information.
 
   # observer/news
-  news_title: "Latest Release: January 24, 2017"
+  news_title: "Latest Release: March 5, 2017"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
-  news_content: "[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+  news_content: "[:news_content_pr_289] \n\n[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
 
   # observer/news individual updates
+  news_content_pr_289: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/289\">PR #289</a> (March 5, 2017) Allow 'clade' Names. These work just like `group` Names."
   news_content_pr_276: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/276\">PR #276</a> (January 24, 2017) Revived pages explaining color themes. See http://mushroomobserver.org/theme/color_themes. Moved theme actions to a new controller."
   news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
   news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
