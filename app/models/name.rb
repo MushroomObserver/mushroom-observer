@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx yyy ...) group or clade
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -154,7 +154,7 @@
 #                              return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_author::            Grab the author from the end of a name.
-#  parse_group::             Parse "Whatever group".
+#  parse_group::             Parse "Whatever group" or "whatever clade".
 #  parse_genus_or_up::       Parse "Xxx".
 #  parse_subgenus::          Parse "Xxx subgenus yyy".
 #  parse_section::           Parse "Xxx sect. yyy".
