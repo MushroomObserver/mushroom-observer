@@ -826,10 +826,10 @@
   rank_form: form
   RANK_PLURAL_FORM: Forms
   rank_plural_form: forms
-  RANK_GROUP: Group
-  rank_group: group
-  RANK_PLURAL_GROUP: Groups
-  rank_plural_group: groups
+  RANK_GROUP: Group or Clade
+  rank_group: group or clade
+  RANK_PLURAL_GROUP: Groups or Clades
+  rank_plural_group: groups or clades
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
