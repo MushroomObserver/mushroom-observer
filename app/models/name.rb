@@ -266,7 +266,7 @@ class Name < AbstractModel
             Phylum: 13,
             Kingdom: 14,
             Domain: 15,
-            Group: 16
+            Group: 16   # This rank is used for both group and clade
           },
           source: :rank,
           with: [],
@@ -1611,7 +1611,7 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ group$/) ? :Group :
+    text_name.match(/ (group|clade)$/) ? :Group :
     text_name.include?(" f. ") ? :Form :
     text_name.include?(" var. ") ? :Variety :
     text_name.include?(" subsp. ") ? :Subspecies :
@@ -1642,13 +1642,14 @@ class Name < AbstractModel
     results = nil
     if match = GROUP_PAT.match(str)
       name = match[1]
+      group_type = (str.split.last.downcase == "clade" ? "clade" : "group")
       text_name = name.tr("ë", "e")
       parent_name = name.sub(LAST_PART, "")
       results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
+        text_name: text_name + " #{group_type}",
+        search_name: text_name + " #{group_type}",
+        sort_name: format_sort_name(text_name, "#{group_type}"),
+        display_name: format_name(name, deprecated) + " #{group_type}",
         parent_name: parent_name,
         rank: :Group,
         author: ""

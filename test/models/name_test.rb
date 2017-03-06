@@ -1826,6 +1826,8 @@ class NameTest < UnitTestCase
   def test_guess_rank
     assert_equal(:Group, Name.guess_rank("Pleurotus djamor group"))
     assert_equal(:Group, Name.guess_rank("Pleurotus djamor var. djamor group"))
+    assert_equal(:Group, Name.guess_rank("Morchella elata clade"))
+    assert_equal(:Group, Name.guess_rank("Gymnopilus aeruginosus-luteofolius clade"))
     assert_equal(:Form, Name.guess_rank("Pleurotus djamor var. djamor f. alba"))
     assert_equal(:Variety, Name.guess_rank("Pleurotus djamor var. djamor"))
     assert_equal(:Subspecies, Name.guess_rank("Pleurotus djamor subsp. djamor"))

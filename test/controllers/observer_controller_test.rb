@@ -1521,6 +1521,19 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:Group, name.rank)
   end
 
+  def test_create_observation_creating_clade
+    generic_construct_observation({
+                                    observation: { place_name: "Earth", lat: "", long: "" },
+                                    name: { name: "Morchella esculenta clade" },
+                                    approved_name: "Morchella esculenta clade"
+                                  }, 1, 1, 2)
+
+    name = Name.last
+    assert_equal("Morchella esculenta clade", name.text_name)
+    assert_equal("", name.author)
+    assert_equal(:Group, name.rank)
+  end
+
   def test_prevent_creation_of_species_under_deprecated_genus
     login("katrina")
     cladonia = Name.find_or_create_name_and_parents("Cladonia").last
