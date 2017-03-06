@@ -1935,7 +1935,7 @@ class Name < AbstractModel
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
                     gsub(/[Øø]/, "O").
                     strip.
-                    sub(/^group$/, " group")
+                    sub(/^(group|clade)$/, "\1")
     end
     str
   end
