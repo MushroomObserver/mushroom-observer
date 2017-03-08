@@ -1016,6 +1016,33 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_group_names
+    do_name_parse_test(  # monomial, no author
+      "Agaricus group",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus",
+      search_name:      "Agaricus group",
+      real_search_name: "Agaricus group",
+      sort_name:        "Agaricus   group",
+      display_name:     "**__Agaricus__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test(  # binomial, no author
+      "Agaricus campestris group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris",
+      search_name:      "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name:        "Agaricus campestris   group",
+      display_name:     "**__Agaricus campestris__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+  end
+
   def test_name_parse_comb
     do_name_parse_test(
       "Sebacina schweinitzii comb prov",
