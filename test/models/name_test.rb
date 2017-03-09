@@ -1020,7 +1020,7 @@ class NameTest < UnitTestCase
     do_name_parse_test(  # monomial, no author
       "Agaricus group",
       text_name:        "Agaricus group",
-      real_text_name:   "Agaricus",
+      real_text_name:   "Agaricus group",
       search_name:      "Agaricus group",
       real_search_name: "Agaricus group",
       sort_name:        "Agaricus   group",
@@ -1032,7 +1032,7 @@ class NameTest < UnitTestCase
     do_name_parse_test(  # binomial, no author
       "Agaricus campestris group",
       text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris",
+      real_text_name:   "Agaricus campestris group",
       search_name:      "Agaricus campestris group",
       real_search_name: "Agaricus campestris group",
       sort_name:        "Agaricus campestris   group",
