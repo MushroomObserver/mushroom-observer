@@ -1639,22 +1639,21 @@ class Name < AbstractModel
   end
 
   def self.parse_group(str, deprecated = false)
-    results = nil
-    if match = GROUP_PAT.match(str)
-      name = match[1]
-      text_name = name.tr("ë", "e")
-      parent_name = name.sub(LAST_PART, "")
-      results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
-        parent_name: parent_name,
-        rank: :Group,
-        author: ""
-      )
-    end
-    results
+    return unless match = GROUP_PAT.match(str)
+
+    name = match[1]
+    text_name = name.tr("ë", "e")
+    parent_name = name.sub(LAST_PART, "")
+
+    ParsedName.new(
+      text_name: text_name + " group",
+      search_name: text_name + " group",
+      sort_name: format_sort_name(text_name, "group"),
+      display_name: format_name(name, deprecated) + " group",
+      parent_name: parent_name,
+      rank: :Group,
+      author: ""
+    )
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
