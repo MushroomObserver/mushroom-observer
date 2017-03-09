@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx) | (Xxx yyy ...) group
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -1567,7 +1567,16 @@ class Name < AbstractModel
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
+  GROUP_PAT       = /^
+                      (?<taxon> "? #{UPPER_WORD}
+                        (?: \s #{LOWER_WORD}
+                          (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                          (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                        )? "?
+                      )
+                      \s #{GROUP_ABBR}
+                    $/x
 
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
@@ -1648,7 +1657,7 @@ class Name < AbstractModel
   def self.parse_group(str, deprecated = false)
     return unless match = GROUP_PAT.match(str)
 
-    name = match[1] # str - anything below species - group
+    name = match[:taxon]
     text_name = name.tr("ë", "e")
 
     ParsedName.new(
