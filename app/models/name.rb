@@ -1641,16 +1641,15 @@ class Name < AbstractModel
   def self.parse_group(str, deprecated = false)
     return unless match = GROUP_PAT.match(str)
 
-    name = match[1]
+    name = match[1] # str - anything below species - group
     text_name = name.tr("ë", "e")
-    parent_name = name.sub(LAST_PART, "")
 
     ParsedName.new(
       text_name: text_name + " group",
       search_name: text_name + " group",
       sort_name: format_sort_name(text_name, "group"),
       display_name: format_name(name, deprecated) + " group",
-      parent_name: parent_name,
+      parent_name: name.split.size == 1 ? "" : name.sub(LAST_PART, ""),
       rank: :Group,
       author: ""
     )

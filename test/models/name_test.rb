@@ -1025,7 +1025,7 @@ class NameTest < UnitTestCase
       real_search_name: "Agaricus group",
       sort_name:        "Agaricus   group",
       display_name:     "**__Agaricus__** group",
-      parent_name:      "Agaricus",
+      parent_name:      "",
       rank:             :Group,
       author:           ""
     )
