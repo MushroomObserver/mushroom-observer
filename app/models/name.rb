@@ -1894,11 +1894,16 @@ class Name < AbstractModel
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # Add itallics and boldface to a standardized name (without author).
+  # Add italics and boldface markup to a standardized name (without author).
   def self.format_name(str, deprecated = false)
+    # Temporarily remove "group" from end of name
+    group_suffix = / group$/.match(str)
+    str = str.sub(/ group$/, "")
+
+    # add markup
     boldness = deprecated ? "" : "**"
     words = str.split(" ")
-    if (words.length & 1) == 0
+    if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]
     end
@@ -1907,7 +1912,11 @@ class Name < AbstractModel
       words[i] = "#{boldness}__#{words[i]}__#{boldness}"
       i -= 2
     end
-    words.join(" ")
+
+    name = words.join(" ")
+
+    # Restore "group" at end, if it was there to start with
+    group_suffix ? name + group_suffix[0] : name
   end
 
   def self.clean_incoming_string(str)
