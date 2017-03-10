@@ -1940,6 +1940,7 @@ class Name < AbstractModel
     # Remember whether name included "group"
     group_suffix = / group\b/.match(name)
 
+    # Markup name (after removing "group") and adjust
     str = format_name(name.sub(/ group\b/, ""), :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
@@ -1966,7 +1967,7 @@ class Name < AbstractModel
     # including extra spaces so that "X y group" sorts before "X y Author"
     str = str + "   group" if group_suffix
 
-    unless author.blank?
+    if author.present?
       str += "  " + author.
                     gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
