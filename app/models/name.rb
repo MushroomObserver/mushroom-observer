@@ -442,10 +442,10 @@ class Name < AbstractModel
       gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " "). # (this part should be unnecessary)
       # Because "group" was removed by the 1st gsub above,
       # tack it back on (if it was part of display_name)
-      concat(group_designation(name))
+      concat(group_suffix(name))
   end
 
-  def self.group_designation(name)
+  def self.group_suffix(name)
     / group\b/.match(name.display_name).to_s
   end
 
