@@ -1660,20 +1660,22 @@ class Name < AbstractModel
 
     name = match[:taxon]
     author = match[:author]
-    text_name = name.tr("ë", "e")
-    search_name = text_name + " group"
-    search_name = search_name + " " + author if author
+
+    text_name = name.tr("ë", "e") + " group"
+
+    search_name = text_name + (author ? " " + author : "")
+
     display_name = format_name(name, deprecated) + " group"
     display_name = display_name + " " + author if author
 
     ParsedName.new(
-      text_name: text_name + " group",
-      search_name: search_name,
-      sort_name: format_sort_name(text_name + " group", author),
+      text_name:    text_name,
+      search_name:  search_name,
+      sort_name:    format_sort_name(text_name, author),
       display_name: display_name,
-      parent_name: name.split.size == 1 ? "" : name.sub(LAST_PART, ""),
-      rank: :Group,
-      author: (author ? author : "")
+      parent_name:  name.split.size == 1 ? "" : name.sub(LAST_PART, ""),
+      rank:         :Group,
+      author:       (author ? author : "")
     )
   end
 
