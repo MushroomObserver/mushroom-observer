@@ -1576,6 +1576,7 @@ class Name < AbstractModel
                         )? "?
                       )
                       \s #{GROUP_ABBR}
+                      (\s (?<author> #{AUTHOR_START}.*))?
                     $/x
 
   class ParsedName
@@ -1658,16 +1659,21 @@ class Name < AbstractModel
     return unless match = GROUP_PAT.match(str)
 
     name = match[:taxon]
+    author = match[:author]
     text_name = name.tr("ë", "e")
+    search_name = text_name + " group"
+    search_name = search_name + " " + author if author
+    display_name = format_name(name, deprecated) + " group"
+    display_name = display_name + " " + author if author
 
     ParsedName.new(
       text_name: text_name + " group",
-      search_name: text_name + " group",
-      sort_name: format_sort_name(text_name, "group"),
-      display_name: format_name(name, deprecated) + " group",
+      search_name: search_name,
+      sort_name: format_sort_name(text_name + " group", author),
+      display_name: display_name,
       parent_name: name.split.size == 1 ? "" : name.sub(LAST_PART, ""),
       rank: :Group,
-      author: ""
+      author: (author ? author : "")
     )
   end
 
@@ -1927,9 +1933,12 @@ class Name < AbstractModel
       strip_squeeze
   end
 
-  # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
+  # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
   def self.format_sort_name(name, author)
-    str = format_name(name, :deprecated).
+    # Remember whether name included "group"
+    group_suffix = / group\b/.match(name)
+
+    str = format_name(name.sub(/ group\b/, ""), :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
           sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
@@ -1951,13 +1960,15 @@ class Name < AbstractModel
           sub(/(^\w+?)o?mycota$/, '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
+    # If name included "group" add it between taxon and author,
+    # including extra spaces so that "X y group" sorts before "X y Author"
+    str = str + "   group" if group_suffix
+
     unless author.blank?
       str += "  " + author.
                     gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
-                    gsub(/[Øø]/, "O").
-                    strip.
-                    sub(/^group$/, " group")
+                    gsub(/[Øø]/, "O")
     end
     str
   end
