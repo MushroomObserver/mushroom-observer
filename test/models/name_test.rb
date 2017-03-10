@@ -1041,6 +1041,18 @@ class NameTest < UnitTestCase
       rank:             :Group,
       author:           ""
     )
+    do_name_parse_test(  # monomial, with author
+      "Agaricus group Author",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Author",
+      real_search_name: "Agaricus group Author",
+      sort_name:        "Agaricus   group  Author",
+      display_name:     "**__Agaricus__** group Author",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Author"
+    )
   end
 
   def test_name_parse_comb
