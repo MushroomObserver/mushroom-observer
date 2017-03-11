@@ -1956,7 +1956,7 @@ class Name < AbstractModel
       strip_squeeze
   end
 
-  # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
+  # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
   def self.format_sort_name(name, author)
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
@@ -1980,13 +1980,12 @@ class Name < AbstractModel
           sub(/(^\w+?)o?mycota$/, '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
-    unless author.blank?
+    if author.present?
       str += "  " + author.
                     gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
                     gsub(/[Øø]/, "O").
-                    strip.
-                    sub(/^group$/, " group")
+                    strip
     end
     str
   end
