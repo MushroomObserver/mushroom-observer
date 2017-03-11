@@ -439,7 +439,14 @@ class Name < AbstractModel
   def self.display_to_real_text(name)
     name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, "").
       gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " ") # (this part should be unnecessary)
+      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " "). # (this part should be unnecessary)
+      # Because "group" was removed by the 1st gsub above,
+      # tack it back on (if it was part of display_name)
+      concat(group_suffix(name))
+  end
+
+  def self.group_suffix(name)
+    / group\b/.match(name.display_name).to_s
   end
 
   def self.display_to_real_search(name)
