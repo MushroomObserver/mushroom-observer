@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx) | (Xxx yyy ...) group
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -1551,16 +1551,49 @@ class Name < AbstractModel
   AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
   AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
-  GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
-  SUBGENUS_PAT    = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)  (\s #{AUTHOR_START}.*)? $/x
-  SECTION_PAT     = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  SUBSECTION_PAT  = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?) (\s #{AUTHOR_START}.*)? $/x
+
+  # Taxa without authors (for use by GROUP PAT)
+  GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+
+  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
+  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x
+  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x
+  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
+  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
+  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
+
+  GROUP_PAT       = /^(?<taxon>
+                        #{GENUS_OR_UP_TAXON} |
+                        #{SUBGENUS_TAXON}    |
+                        #{SECTION_TAXON}     |
+                        #{SUBSECTION_TAXON}  |
+                        #{STIRPS_TAXON}      |
+                        #{SPECIES_TAXON}     |
+                        (?: "? #{UPPER_WORD} # infra-species taxa
+                          (?: \s #{LOWER_WORD}
+                            (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                          )? "?
+                        )
+                      )
+                      \s #{GROUP_ABBR}
+                      (\s (#{AUTHOR_START}.*))?
+                    $/x
 
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
