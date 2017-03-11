@@ -1031,6 +1031,105 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_group_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus group",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group",
+      real_search_name: "Agaricus group",
+      sort_name:        "Agaricus   group",
+      display_name:     "**__Agaricus__** group",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name:        "Agaricus campestris   group",
+      display_name:     "**__Agaricus campestris__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # monomial, with author
+      "Agaricus group Author",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Author",
+      real_search_name: "Agaricus group Author",
+      sort_name:        "Agaricus   group  Author",
+      display_name:     "**__Agaricus__** group Author",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, author
+      "Agaricus campestris group Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris group sensu Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group sensu Author",
+      real_search_name: "Agaricus campestris group sensu Author",
+      sort_name:        "Agaricus campestris   group  sensu Author",
+      display_name:     "**__Agaricus campestris__** group sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+    do_name_parse_test( # species with Tulloss form of sp. nov.
+      "Pleurotus sp. T44 group Tulloss",
+      text_name: 'Pleurotus "sp-T44" group',
+      real_text_name: 'Pleurotus "sp-T44" group',
+      search_name: 'Pleurotus "sp-T44" group Tulloss',
+      real_search_name: 'Pleurotus "sp-T44" group Tulloss',
+      sort_name: 'Pleurotus {sp-T44"   group  Tulloss',
+      display_name: '**__Pleurotus "sp-T44"__** group Tulloss',
+      parent_name: "Pleurotus",
+      rank: :Group,
+      author: "Tulloss"
+    )
+    do_name_parse_test( # subgenus group, with author
+      "Amanita subg. Vaginatae group (L.) Ach.",
+      text_name: "Amanita subgenus Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      real_search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      sort_name: "Amanita  {1subgenus  Vaginatae   group  (L.) Ach.",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** group (L.) Ach.",
+      parent_name: "Amanita",
+      rank: :Group,
+      author: "(L.) Ach."
+    )
+    do_name_parse_test( # stirps group, with sub-genus parent
+      "Amanita subgenus Vaginatae stirps Vaginatae group",
+      text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      sort_name: "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae   group",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__** group",
+      parent_name: "Amanita subgenus Vaginatae",
+      rank: :Group,
+      author: ""
+    )
+  end
+
   # -----------------------------
   #  Test classification.
   # -----------------------------
