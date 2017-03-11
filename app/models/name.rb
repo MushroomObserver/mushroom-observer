@@ -1931,11 +1931,11 @@ class Name < AbstractModel
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # Add itallics and boldface to a standardized name (without author).
+  # Add italics and boldface markup to a standardized name (without author).
   def self.format_name(str, deprecated = false)
     boldness = deprecated ? "" : "**"
     words = str.split(" ")
-    if (words.length & 1) == 0
+    if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]
     end
@@ -1944,6 +1944,7 @@ class Name < AbstractModel
       words[i] = "#{boldness}__#{words[i]}__#{boldness}"
       i -= 2
     end
+
     words.join(" ")
   end
 
