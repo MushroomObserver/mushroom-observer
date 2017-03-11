@@ -1672,22 +1672,33 @@ class Name < AbstractModel
   end
 
   def self.parse_group(str, deprecated = false)
-    results = nil
-    if match = GROUP_PAT.match(str)
-      name = match[1]
-      text_name = name.tr("ë", "e")
-      parent_name = name.sub(LAST_PART, "")
-      results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
-        parent_name: parent_name,
-        rank: :Group,
-        author: ""
-      )
+    return unless match = GROUP_PAT.match(str)
+
+    # Parse the string without "group"
+    ungrouped_str = str.sub(/\s#{GROUP_ABBR}/, "")
+    result = parse_name(ungrouped_str)
+    return nil unless result
+
+    # Adjust the parsed name
+    result.text_name += " group"
+
+    if result.author.present?
+      # Add "group" before author
+      author = Regexp.escape(result.author)
+      result.search_name.sub!( /(.*)(#{author})/, '\1group \2')
+      result.sort_name.sub!(   /(.*)(#{author})/, '\1 group  \2')
+      result.display_name.sub!(/(.*)(#{author})/, '\1group \2')
+    else
+      # Append "group" at end
+      result.search_name += " group"
+      result.sort_name += "   group"
+      result.display_name += " group"
     end
-    results
+
+    result.rank = :Group
+    result.parent_name ||= ""
+
+    result
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
