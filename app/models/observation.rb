@@ -161,10 +161,6 @@ class Observation < AbstractModel
     true
   end
 
-  def raw_place_name
-    location ? location.name : where
-  end
-
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to :postal).
