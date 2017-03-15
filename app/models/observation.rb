@@ -54,7 +54,6 @@
 #  last_view::              Last time it was viewed.
 #
 #  ==== "Fake" attributes
-#  idstr::                  Used by <tt>observer/reuse_image.rhtml</tt>.
 #  place_name::             Wrapper on top of +where+ and +location+.
 #                           Handles location_format.
 #
@@ -160,20 +159,6 @@ class Observation < AbstractModel
 
   def is_observation?
     true
-  end
-
-  # Always returns empty string.  (Used by
-  # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr
-    ""
-  end
-
-  # Adds error if couldn't find image with the given id.  (Used by
-  # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr=(id_field)
-    id = id_field.to_i
-    return if Image.safe_find(id)
-    errors.add(:thumb_image_id, :validate_observation_thumb_image_id_invalid.t)
   end
 
   def raw_place_name
