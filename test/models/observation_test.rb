@@ -599,33 +599,33 @@ class ObservationTest < UnitTestCase
     # Play with Rolf's vote for other namings.
     obs.change_vote(nam2, 1, rolf)
     nam2.reload
-    assert_false(nam1.is_owners_favorite?)
-    assert_true(nam2.is_owners_favorite?)
-    assert_false(nam3.is_owners_favorite?)
+    assert_false(obs.is_owners_favorite?(nam1))
+    assert_true(obs.is_owners_favorite?(nam2))
+    assert_false(obs.is_owners_favorite?(nam3))
     assert_names_equal(@name2, obs.name)
     assert_equal(nam2, obs.consensus_naming)
 
     obs.change_vote(nam3, 2, rolf)
     nam3.reload
-    assert_false(nam1.is_owners_favorite?)
-    assert_false(nam2.is_owners_favorite?)
-    assert_true(nam3.is_owners_favorite?)
+    assert_false(obs.is_owners_favorite?(nam1))
+    assert_false(obs.is_owners_favorite?(nam2))
+    assert_true(obs.is_owners_favorite?(nam3))
     assert_names_equal(@name3, obs.name)
     assert_equal(nam3, obs.consensus_naming)
 
     obs.change_vote(nam1, 3, rolf)
     nam1.reload
-    assert_true(nam1.is_owners_favorite?)
-    assert_false(nam2.is_owners_favorite?)
-    assert_false(nam3.is_owners_favorite?)
+    assert_true(obs.is_owners_favorite?(nam1))
+    assert_false(obs.is_owners_favorite?(nam2))
+    assert_false(obs.is_owners_favorite?(nam3))
     assert_names_equal(@name1, obs.name)
     assert_equal(nam1, obs.consensus_naming)
 
     obs.change_vote(nam1, 1, rolf)
     nam1.reload
-    assert_false(nam1.is_owners_favorite?)
-    assert_false(nam2.is_owners_favorite?)
-    assert_true(nam3.is_owners_favorite?)
+    assert_false(obs.is_owners_favorite?(nam1))
+    assert_false(obs.is_owners_favorite?(nam2))
+    assert_true(obs.is_owners_favorite?(nam3))
     assert_names_equal(@name3, obs.name)
     assert_equal(nam3, obs.consensus_naming)
 
