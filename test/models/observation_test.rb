@@ -634,18 +634,22 @@ class ObservationTest < UnitTestCase
     assert_equal(nam3, obs.consensus_naming)
 
     # Play with Mary's vote.
+    # make votes:
+    #   1060894351 Agaricus campestris L.: rolf=1.0, mary=1.0
+    #   1060894352 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=2.0(*)
+    #   1060894353 Conocybe filaris: rolf=2.0(*), mary=-1.0
     obs.change_vote(nam1, 1, mary)
     obs.change_vote(nam2, 2, mary)
     obs.change_vote(nam3, -1, mary)
     nam1.reload
     nam2.reload
     nam3.reload
+
     assert_false(nam1.is_users_favorite?(mary))
     assert_true(nam2.is_users_favorite?(mary))
     assert_false(nam3.is_users_favorite?(mary))
-    assert_names_equal(@name3, obs.name)
-    assert_equal(nam3, obs.consensus_naming)
-
+    assert_names_equal(@name2, obs.name)
+    assert_equal(nam2, obs.consensus_naming)
     obs.change_vote(nam2, 0.01, mary)
     nam2.reload
     assert_true(nam1.is_users_favorite?(mary))
