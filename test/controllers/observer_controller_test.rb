@@ -233,6 +233,16 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("glossary_term", (rolf.reload).default_rss_type)
   end
 
+  # Prove that user content_filter works on rss_log
+  def test_rss_log_with_content_filter
+    login(users(:vouchered_only_user).name)
+    get(:index_rss_log, type: :observation)
+    results = @controller.instance_variable_get("@objects")
+
+    assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
+    assert(results.include?(rss_logs(:observation_rss_log)))
+  end
+
   def test_next_and_prev_rss_log
     # First 2 log entries
     logs = RssLog.order(updated_at: :desc).limit(2)
