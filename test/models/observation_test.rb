@@ -659,8 +659,8 @@ class ObservationTest < UnitTestCase
     assert_true(nam1.is_users_favorite?(mary))
     assert_false(nam2.is_users_favorite?(mary))
     assert_false(nam3.is_users_favorite?(mary))
-    assert_names_equal(@name3, obs.name)
-    assert_equal(nam3, obs.consensus_naming)
+    assert_names_equal(@name1, obs.name)
+    assert_equal(nam1, obs.consensus_naming)
 
     obs.change_vote(nam1, -0.01, mary)
     nam1.reload
