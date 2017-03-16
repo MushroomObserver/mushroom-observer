@@ -703,8 +703,4 @@ class ObservationTest < UnitTestCase
     # not enough notes
     assert_false(observations(:agaricus_campestrus_obs).has_backup_data?)
   end
-
-  # Prove that dump_votes debugging routine correctly dumps votes
-  def test_dump_votes
-  end
 end
