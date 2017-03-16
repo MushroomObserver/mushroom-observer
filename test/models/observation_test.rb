@@ -653,7 +653,9 @@ class ObservationTest < UnitTestCase
     # nam2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=0.01
     # nam3 Conocybe filaris: rolf=2.0(*), mary=-1.0
     obs.change_vote(nam2, 0.01, mary)
+    nam1.reload
     nam2.reload
+    nam3.reload
     assert_true(nam1.is_users_favorite?(mary))
     assert_false(nam2.is_users_favorite?(mary))
     assert_false(nam3.is_users_favorite?(mary))
@@ -662,6 +664,8 @@ class ObservationTest < UnitTestCase
 
     obs.change_vote(nam1, -0.01, mary)
     nam1.reload
+    nam2.reload
+    nam3.reload
     assert_false(nam1.is_users_favorite?(mary))
     assert_true(nam2.is_users_favorite?(mary))
     assert_false(nam3.is_users_favorite?(mary))
