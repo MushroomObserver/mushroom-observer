@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx) | (Xxx yyy ...) group
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -439,7 +439,14 @@ class Name < AbstractModel
   def self.display_to_real_text(name)
     name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, "").
       gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " ") # (this part should be unnecessary)
+      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " "). # (this part should be unnecessary)
+      # Because "group" was removed by the 1st gsub above,
+      # tack it back on (if it was part of display_name)
+      concat(group_suffix(name))
+  end
+
+  def self.group_suffix(name)
+    / group\b/.match(name.display_name).to_s
   end
 
   def self.display_to_real_search(name)
@@ -1560,7 +1567,17 @@ class Name < AbstractModel
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
+  GROUP_PAT       = /^
+                      (?<taxon> "? #{UPPER_WORD}
+                        (?: \s #{LOWER_WORD}
+                          (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                          (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                        )? "?
+                      )
+                      \s #{GROUP_ABBR}
+                      (\s (?<author> #{AUTHOR_START}.*))?
+                    $/x
 
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
@@ -1639,22 +1656,27 @@ class Name < AbstractModel
   end
 
   def self.parse_group(str, deprecated = false)
-    results = nil
-    if match = GROUP_PAT.match(str)
-      name = match[1]
-      text_name = name.tr("ë", "e")
-      parent_name = name.sub(LAST_PART, "")
-      results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
-        parent_name: parent_name,
-        rank: :Group,
-        author: ""
-      )
-    end
-    results
+    return unless match = GROUP_PAT.match(str)
+
+    name = match[:taxon]
+    author = match[:author]
+
+    text_name = name.tr("ë", "e") + " group"
+
+    search_name = text_name + (author ? " " + author : "")
+
+    display_name = format_name(name, deprecated) + " group"
+    display_name = display_name + " " + author if author
+
+    ParsedName.new(
+      text_name:    text_name,
+      search_name:  search_name,
+      sort_name:    format_sort_name(text_name, author),
+      display_name: display_name,
+      parent_name:  name.split.size == 1 ? "" : name.sub(LAST_PART, ""),
+      rank:         :Group,
+      author:       (author ? author : "")
+    )
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
@@ -1880,11 +1902,16 @@ class Name < AbstractModel
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # Add itallics and boldface to a standardized name (without author).
+  # Add italics and boldface markup to a standardized name (without author).
   def self.format_name(str, deprecated = false)
+    # Temporarily remove "group" from end of name
+    group_suffix = / group$/.match(str)
+    str = str.sub(/ group$/, "")
+
+    # add markup
     boldness = deprecated ? "" : "**"
     words = str.split(" ")
-    if (words.length & 1) == 0
+    if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]
     end
@@ -1893,7 +1920,11 @@ class Name < AbstractModel
       words[i] = "#{boldness}__#{words[i]}__#{boldness}"
       i -= 2
     end
-    words.join(" ")
+
+    name = words.join(" ")
+
+    # Restore "group" at end, if it was there to start with
+    group_suffix ? name + group_suffix[0] : name
   end
 
   def self.clean_incoming_string(str)
@@ -1904,9 +1935,13 @@ class Name < AbstractModel
       strip_squeeze
   end
 
-  # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
+  # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
   def self.format_sort_name(name, author)
-    str = format_name(name, :deprecated).
+    # Remember whether name included "group"
+    group_suffix = / group\b/.match(name)
+
+    # Markup name (after removing "group") and adjust
+    str = format_name(name.sub(/ group\b/, ""), :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
           sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
@@ -1928,13 +1963,15 @@ class Name < AbstractModel
           sub(/(^\w+?)o?mycota$/, '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
-    unless author.blank?
+    # If name included "group" add it between taxon and author,
+    # including extra spaces so that "X y group" sorts before "X y Author"
+    str = str + "   group" if group_suffix
+
+    if author.present?
       str += "  " + author.
                     gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
-                    gsub(/[Øø]/, "O").
-                    strip.
-                    sub(/^group$/, " group")
+                    gsub(/[Øø]/, "O")
     end
     str
   end

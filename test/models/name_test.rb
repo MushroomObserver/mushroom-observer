@@ -1016,6 +1016,45 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_group_names
+    do_name_parse_test(  # monomial, no author
+      "Agaricus group",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group",
+      real_search_name: "Agaricus group",
+      sort_name:        "Agaricus   group",
+      display_name:     "**__Agaricus__** group",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test(  # binomial, no author
+      "Agaricus campestris group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name:        "Agaricus campestris   group",
+      display_name:     "**__Agaricus campestris__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test(  # monomial, with author
+      "Agaricus group Author",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Author",
+      real_search_name: "Agaricus group Author",
+      sort_name:        "Agaricus   group  Author",
+      display_name:     "**__Agaricus__** group Author",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Author"
+    )
+  end
+
   def test_name_parse_comb
     do_name_parse_test(
       "Sebacina schweinitzii comb prov",
@@ -1781,8 +1820,10 @@ class NameTest < UnitTestCase
     assert_equal(%w(Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou), x)
   end
 
-  def test_name_sort_order
-    names = [
+
+   # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
+   def test_name_spaceship_operator
+   names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
       create_test_name("Agaricomycetes"),
@@ -1790,16 +1831,19 @@ class NameTest < UnitTestCase
       create_test_name("Agaricales"),
       create_test_name("Agaricineae"),
       create_test_name("Agaricaceae"),
-      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Śliwa"),
+      create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
       create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
@@ -1811,6 +1855,44 @@ class NameTest < UnitTestCase
       SELECT sort_name FROM names WHERE id >= #{names.first.id} AND id <= #{names.last.id}
     )
     assert_equal(names.map(&:sort_name).sort, x.sort)
+  end
+
+    # Prove that alphabetized sort_names give us names in the expected order
+    # Differs from test_name_spaceship_operator in omitting "Agaricus Śliwa",
+    # whose sort_name is after all the levels between genus and species,
+    # apparently because "Ś" sorts after "{".
+   def test_name_sort_order
+   names = [
+      create_test_name("Agaricomycota"),
+      create_test_name("Agaricomycotina"),
+      create_test_name("Agaricomycetes"),
+      create_test_name("Agaricomycetidae"),
+      create_test_name("Agaricales"),
+      create_test_name("Agaricineae"),
+      create_test_name("Agaricaceae"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricus L."),
+      create_test_name("Agaricus Øosting"),
+      create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus subgenus Dick"),
+      create_test_name("Agaricus section Charlie"),
+      create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus stirps Arthur"),
+      create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
+      create_test_name('Agaricus "tree-beard"'),
+      create_test_name("Agaricus ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. erik Zoom"),
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      create_test_name('Agaricus "sp-LD50"')
+    ]
+    expected_sort_names = names.map(&:sort_name)
+    sorted_sort_names = names.sort.map(&:sort_name)
+
+    assert_equal(expected_sort_names, sorted_sort_names)
   end
 
   def test_guess_rank
