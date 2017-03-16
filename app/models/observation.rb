@@ -462,11 +462,12 @@ class Observation < AbstractModel
         end
       end
 
+      other_votes = (users_votes(user) - [vote])
       # Is this vote going to become the favorite?
       favorite = false
       if value > 0
         favorite = true
-        (users_votes(user) - [vote]).each do |v|
+        other_votes.each do |v|
           # If any other vote higher, this is not the favorite.
           if v.value > value
             favorite = false
@@ -477,6 +478,15 @@ class Observation < AbstractModel
             v.favorite = false
             v.save
           end
+        end
+      end
+
+      # Will another vote become a favorite?
+      max_positive_value = (other_votes.map(&:value) + [value, 0]).max
+      other_votes.each do |v|
+        if (v.value >= max_positive_value) && !v.favorite
+          v.favorite = true
+          v.save
         end
       end
 
