@@ -1128,6 +1128,18 @@ class NameTest < UnitTestCase
       rank: :Group,
       author: ""
     )
+    do_name_parse_test( # binomial, "group" part of epithet
+      "Agaricus grouperi group Author",
+      text_name:        "Agaricus grouperi group",
+      real_text_name:   "Agaricus grouperi group",
+      search_name:      "Agaricus grouperi group Author",
+      real_search_name: "Agaricus grouperi group Author",
+      sort_name:        "Agaricus grouperi   group  Author",
+      display_name:     "**__Agaricus grouperi__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
   end
 
   # -----------------------------

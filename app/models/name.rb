@@ -1682,7 +1682,7 @@ class Name < AbstractModel
     return unless match = GROUP_PAT.match(str)
 
     # Parse the string without "group"
-    ungrouped_str = str.sub(/\s#{GROUP_ABBR}/, "")
+    ungrouped_str = str.sub(/\s#{GROUP_ABBR}\b/, "")
     result = parse_name(ungrouped_str)
     return nil unless result
 
