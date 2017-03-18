@@ -1413,6 +1413,23 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(vote, obs.owners_votes.first.value)
   end
 
+  def test_bulk_editor_bad_when
+    spl = species_lists(:unknown_species_list)
+    obs = spl.observations.first
+    params = {
+      id: spl.id,
+      observation: {
+        obs.id.to_s => {
+          when_str: "2017-02-31",
+        }
+      }
+    }
+    login(spl.user.login)
+
+    post(:bulk_editor, params)
+    assert_flash(/#{:runtime_date_invalid.l}/)
+  end
+
   def test_project_checkboxes_in_create_species_list_form
     init_for_project_checkbox_tests
 
