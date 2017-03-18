@@ -1692,9 +1692,9 @@ class Name < AbstractModel
     if result.author.present?
       # Add "group" before author
       author = Regexp.escape(result.author)
-      result.search_name.sub!( /(.*)(#{author})/, '\1group \2')
-      result.sort_name.sub!(   /(.*)(#{author})/, '\1 group  \2')
-      result.display_name.sub!(/(.*)(#{author})/, '\1group \2')
+      result.search_name.sub!( /(#{author})$/, 'group \1')
+      result.sort_name.sub!(   /(#{author})$/, ' group  \1')
+      result.display_name.sub!(/(#{author})$/, 'group \1')
     else
       # Append "group" at end
       result.search_name += " group"
