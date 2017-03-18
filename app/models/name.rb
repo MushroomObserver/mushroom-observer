@@ -57,7 +57,7 @@
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
 #  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
 #  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
-#  GROUP_PAT::          (Xxx yyy ...) group
+#  GROUP_PAT::          (Xxx) | (Xxx yyy ...) group
 #  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -439,7 +439,14 @@ class Name < AbstractModel
   def self.display_to_real_text(name)
     name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, "").
       gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " ") # (this part should be unnecessary)
+      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " "). # (this part should be unnecessary)
+      # Because "group" was removed by the 1st gsub above,
+      # tack it back on (if it was part of display_name)
+      concat(group_suffix(name))
+  end
+
+  def self.group_suffix(name)
+    / group\b/.match(name.display_name).to_s
   end
 
   def self.display_to_real_search(name)
@@ -1551,16 +1558,56 @@ class Name < AbstractModel
   AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
   AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
-  GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
-  SUBGENUS_PAT    = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)  (\s #{AUTHOR_START}.*)? $/x
-  SECTION_PAT     = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  SUBSECTION_PAT  = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?) (\s #{AUTHOR_START}.*)? $/x
+
+  # Taxa without authors (for use by GROUP PAT)
+  GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+
+  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
+  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x
+  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x
+  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
+  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
+  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
+
+  GROUP_PAT       = /^(?<taxon>
+                        #{GENUS_OR_UP_TAXON} |
+                        #{SUBGENUS_TAXON}    |
+                        #{SECTION_TAXON}     |
+                        #{SUBSECTION_TAXON}  |
+                        #{STIRPS_TAXON}      |
+                        #{SPECIES_TAXON}     |
+                        (?: "? #{UPPER_WORD} # infra-species taxa
+                          (?: \s #{LOWER_WORD}
+                            (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                            (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
+                          )? "?
+                        )
+                      )
+                      (
+                        ( # group, optionally followed by author
+                          \s #{GROUP_ABBR} (\s (#{AUTHOR_START}.*))?
+                        )
+                        | # or
+                        ( # author followed by group
+                          ( \s (#{AUTHOR_START}.*)) \s #{GROUP_ABBR}
+                        )
+                      )
+                    $/x
 
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
@@ -1639,22 +1686,33 @@ class Name < AbstractModel
   end
 
   def self.parse_group(str, deprecated = false)
-    results = nil
-    if match = GROUP_PAT.match(str)
-      name = match[1]
-      text_name = name.tr("ë", "e")
-      parent_name = name.sub(LAST_PART, "")
-      results = ParsedName.new(
-        text_name: text_name + " group",
-        search_name: text_name + " group",
-        sort_name: format_sort_name(text_name, "group"),
-        display_name: format_name(name, deprecated) + " group",
-        parent_name: parent_name,
-        rank: :Group,
-        author: ""
-      )
+    return unless match = GROUP_PAT.match(str)
+
+    # Parse the string without "group"
+    ungrouped_str = str.sub(/\s#{GROUP_ABBR}\b/, "")
+    result = parse_name(ungrouped_str)
+    return nil unless result
+
+    # Adjust the parsed name
+    result.text_name += " group"
+
+    if result.author.present?
+      # Add "group" before author
+      author = Regexp.escape(result.author)
+      result.search_name.sub!( /(#{author})$/, 'group \1')
+      result.sort_name.sub!(   /(#{author})$/, ' group  \1')
+      result.display_name.sub!(/(#{author})$/, 'group \1')
+    else
+      # Append "group" at end
+      result.search_name += " group"
+      result.sort_name += "   group"
+      result.display_name += " group"
     end
-    results
+
+    result.rank = :Group
+    result.parent_name ||= ""
+
+    result
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
@@ -1880,11 +1938,11 @@ class Name < AbstractModel
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # Add itallics and boldface to a standardized name (without author).
+  # Add italics and boldface markup to a standardized name (without author).
   def self.format_name(str, deprecated = false)
     boldness = deprecated ? "" : "**"
     words = str.split(" ")
-    if (words.length & 1) == 0
+    if words.length.even?
       genus = words.shift
       words[0] = genus + " " + words[0]
     end
@@ -1893,6 +1951,7 @@ class Name < AbstractModel
       words[i] = "#{boldness}__#{words[i]}__#{boldness}"
       i -= 2
     end
+
     words.join(" ")
   end
 
@@ -1904,7 +1963,7 @@ class Name < AbstractModel
       strip_squeeze
   end
 
-  # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
+  # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
   def self.format_sort_name(name, author)
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
@@ -1928,13 +1987,12 @@ class Name < AbstractModel
           sub(/(^\w+?)o?mycota$/, '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
-    unless author.blank?
+    if author.present?
       str += "  " + author.
                     gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
                     gsub(/[Đđ]/, "d"). # mysql isn't collating these right
                     gsub(/[Øø]/, "O").
-                    strip.
-                    sub(/^group$/, " group")
+                    strip
     end
     str
   end

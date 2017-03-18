@@ -421,6 +421,9 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata ssp. grisea f. grisea group", "Amanita vaginata ssp. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata var. grisea f. grisea group", "Amanita vaginata var. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata ssp. grisea var. grisea f. grisea group", "Amanita vaginata ssp. grisea var. grisea f. grisea")
+    assert_name_match(pat, "Amanita vaginata Author group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata group Author", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata Amanita group", "Amanita vaginata")
   end
 
   def test_some_bad_names
@@ -1028,6 +1031,141 @@ class NameTest < UnitTestCase
       parent_name: "Sebacina",
       rank: :Species,
       author: "comb. prov."
+    )
+  end
+
+  def test_name_parse_group_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus group",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group",
+      real_search_name: "Agaricus group",
+      sort_name:        "Agaricus   group",
+      display_name:     "**__Agaricus__** group",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name:        "Agaricus campestris   group",
+      display_name:     "**__Agaricus campestris__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # monomial, with author
+      "Agaricus group Author",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Author",
+      real_search_name: "Agaricus group Author",
+      sort_name:        "Agaricus   group  Author",
+      display_name:     "**__Agaricus__** group Author",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, author
+      "Agaricus campestris group Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial with author, "group" at end
+      "Agaricus campestris Author group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris group sensu Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group sensu Author",
+      real_search_name: "Agaricus campestris group sensu Author",
+      sort_name:        "Agaricus campestris   group  sensu Author",
+      display_name:     "**__Agaricus campestris__** group sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+    do_name_parse_test( # species with Tulloss form of sp. nov.
+      "Pleurotus sp. T44 group Tulloss",
+      text_name: 'Pleurotus "sp-T44" group',
+      real_text_name: 'Pleurotus "sp-T44" group',
+      search_name: 'Pleurotus "sp-T44" group Tulloss',
+      real_search_name: 'Pleurotus "sp-T44" group Tulloss',
+      sort_name: 'Pleurotus {sp-T44"   group  Tulloss',
+      display_name: '**__Pleurotus "sp-T44"__** group Tulloss',
+      parent_name: "Pleurotus",
+      rank: :Group,
+      author: "Tulloss"
+    )
+    do_name_parse_test( # subgenus group, with author
+      "Amanita subg. Vaginatae group (L.) Ach.",
+      text_name: "Amanita subgenus Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      real_search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      sort_name: "Amanita  {1subgenus  Vaginatae   group  (L.) Ach.",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** group (L.) Ach.",
+      parent_name: "Amanita",
+      rank: :Group,
+      author: "(L.) Ach."
+    )
+    do_name_parse_test( # stirps group, with sub-genus parent
+      "Amanita subgenus Vaginatae stirps Vaginatae group",
+      text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      sort_name: "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae   group",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__** group",
+      parent_name: "Amanita subgenus Vaginatae",
+      rank: :Group,
+      author: ""
+    )
+    do_name_parse_test( # binomial, "group" part of epithet
+      "Agaricus grouperi group Author",
+      text_name:        "Agaricus grouperi group",
+      real_text_name:   "Agaricus grouperi group",
+      search_name:      "Agaricus grouperi group Author",
+      real_search_name: "Agaricus grouperi group Author",
+      sort_name:        "Agaricus grouperi   group  Author",
+      display_name:     "**__Agaricus grouperi__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # author duplicates a word in the taxon
+      "Agaricus group Agaricus",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Agaricus",
+      real_search_name: "Agaricus group Agaricus",
+      sort_name:        "Agaricus   group  Agaricus",
+      display_name:     "**__Agaricus__** group Agaricus",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Agaricus"
     )
   end
 
@@ -1781,7 +1919,8 @@ class NameTest < UnitTestCase
     assert_equal(%w(Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou), x)
   end
 
-  def test_name_sort_order
+  # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
+  def test_name_spaceship_operator
     names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
@@ -1790,16 +1929,19 @@ class NameTest < UnitTestCase
       create_test_name("Agaricales"),
       create_test_name("Agaricineae"),
       create_test_name("Agaricaceae"),
-      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Śliwa"),
+      create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
       create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
@@ -1811,6 +1953,44 @@ class NameTest < UnitTestCase
       SELECT sort_name FROM names WHERE id >= #{names.first.id} AND id <= #{names.last.id}
     )
     assert_equal(names.map(&:sort_name).sort, x.sort)
+  end
+
+  # Prove that alphabetized sort_names give us names in the expected order
+    # Differs from test_name_spaceship_operator in omitting "Agaricus Śliwa",
+    # whose sort_name is after all the levels between genus and species,
+    # apparently because "Ś" sorts after "{".
+  def test_name_sort_order
+    names = [
+      create_test_name("Agaricomycota"),
+      create_test_name("Agaricomycotina"),
+      create_test_name("Agaricomycetes"),
+      create_test_name("Agaricomycetidae"),
+      create_test_name("Agaricales"),
+      create_test_name("Agaricineae"),
+      create_test_name("Agaricaceae"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricus L."),
+      create_test_name("Agaricus Øosting"),
+      create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus subgenus Dick"),
+      create_test_name("Agaricus section Charlie"),
+      create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus stirps Arthur"),
+      create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
+      create_test_name('Agaricus "tree-beard"'),
+      create_test_name("Agaricus ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. erik Zoom"),
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      create_test_name('Agaricus "sp-LD50"')
+    ]
+    expected_sort_names = names.map(&:sort_name)
+    sorted_sort_names = names.sort.map(&:sort_name)
+
+    assert_equal(expected_sort_names, sorted_sort_names)
   end
 
   def test_guess_rank
