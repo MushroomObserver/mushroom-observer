@@ -1140,6 +1140,18 @@ class NameTest < UnitTestCase
       rank:             :Group,
       author:           "Author"
     )
+    do_name_parse_test( # author duplicates a word in the taxon
+      "Agaricus group Agaricus",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Agaricus",
+      real_search_name: "Agaricus group Agaricus",
+      sort_name:        "Agaricus   group  Agaricus",
+      display_name:     "**__Agaricus__** group Agaricus",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Agaricus"
+    )
   end
 
   # -----------------------------
