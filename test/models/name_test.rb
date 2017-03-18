@@ -424,6 +424,7 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata Author group", "Amanita vaginata")
     assert_name_match(pat, "Amanita vaginata group Author", "Amanita vaginata")
     assert_name_match(pat, "Amanita vaginata Amanita group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata clade", "Amanita vaginata")
   end
 
   def test_some_bad_names

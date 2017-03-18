@@ -1534,7 +1534,7 @@ class Name < AbstractModel
   SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi
   VAR_ABBR     = / variety | var\.? | v\.? /xi
   F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi
-  GROUP_ABBR   = / group | gr\.? | gp\.? /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade /xi
   AUCT_ABBR    = / auct\.? /xi
   INED_ABBR    = / in\s?ed\.? /xi
   NOM_ABBR     = / nomen | nom\.? /xi
