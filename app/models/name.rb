@@ -1598,8 +1598,15 @@ class Name < AbstractModel
                           )? "?
                         )
                       )
-                      \s #{GROUP_ABBR}
-                      (\s (#{AUTHOR_START}.*))?
+                      (
+                        ( # group, optionally followed by author
+                          \s #{GROUP_ABBR} (\s (#{AUTHOR_START}.*))?
+                        )
+                        | # or
+                        ( # author followed by group
+                          ( \s (#{AUTHOR_START}.*)) \s #{GROUP_ABBR}
+                        )
+                      )
                     $/x
 
   class ParsedName

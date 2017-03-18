@@ -421,6 +421,9 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata ssp. grisea f. grisea group", "Amanita vaginata ssp. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata var. grisea f. grisea group", "Amanita vaginata var. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata ssp. grisea var. grisea f. grisea group", "Amanita vaginata ssp. grisea var. grisea f. grisea")
+    assert_name_match(pat, "Amanita vaginata Author group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata group Author", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata Amanita group", "Amanita vaginata")
   end
 
   def test_some_bad_names
@@ -1070,6 +1073,18 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # binomial, author
       "Agaricus campestris group Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial with author, "group" at end
+      "Agaricus campestris Author group",
       text_name:        "Agaricus campestris group",
       real_text_name:   "Agaricus campestris group",
       search_name:      "Agaricus campestris group Author",
