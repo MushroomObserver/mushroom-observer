@@ -1139,8 +1139,16 @@ class Observation < AbstractModel
       errors.add(:alt, :runtime_altitude_error.t)
     end
 
-    if @when_str && !Date.parse(@when_str)
-      errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+    if @when_str
+      begin
+        Date.parse(@when_str)
+      rescue ArgumentError
+        if @when_str =~ /^\d{4}-\d{1,2}-\d{1,2}$/
+          errors.add(:when_str, :runtime_date_invalid.t)
+        else
+          errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+        end
+      end
     end
   end
 end
