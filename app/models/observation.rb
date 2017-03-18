@@ -230,8 +230,8 @@ class Observation < AbstractModel
 
   def when_str=(x)
     @when_str = x
-    self.when = x if Date.parse(x)
-    x
+    self.when = x if Date.parse(x) rescue ArgumentError
+    self.when
   end
 
   def lat=(x)
