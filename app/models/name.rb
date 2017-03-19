@@ -446,7 +446,7 @@ class Name < AbstractModel
   end
 
   def self.group_suffix(name)
-    / group\b/.match(name.display_name).to_s
+    GROUP_CHUNK.match(name.display_name).to_s
   end
 
   def self.display_to_real_search(name)
@@ -1609,6 +1609,8 @@ class Name < AbstractModel
                       )
                     $/x
 
+  GROUP_CHUNK     = /\s(?<group_abbr>#{GROUP_ABBR})\b/
+
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
     attr_accessor :rank, :author, :parent_name
@@ -1658,7 +1660,7 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ group$/) ? :Group :
+    text_name.match(/ (group|clade)$/) ? :Group :
     text_name.include?(" f. ") ? :Form :
     text_name.include?(" var. ") ? :Variety :
     text_name.include?(" subsp. ") ? :Subspecies :
@@ -1688,31 +1690,40 @@ class Name < AbstractModel
   def self.parse_group(str, deprecated = false)
     return unless match = GROUP_PAT.match(str)
 
-    # Parse the string without "group"
-    ungrouped_str = str.sub(/\s#{GROUP_ABBR}\b/, "")
-    result = parse_name(ungrouped_str)
+    result = parse_name(str_without_group(str))
     return nil unless result
 
     # Adjust the parsed name
-    result.text_name += " group"
+    group_chunk = GROUP_CHUNK.match(str)
+    group_type = group_type(group_chunk[:group_abbr])
+
+    result.text_name += " #{group_type}"
 
     if result.author.present?
-      # Add "group" before author
+      # Add "clade" or "group" before author
       author = Regexp.escape(result.author)
-      result.search_name.sub!( /(#{author})$/, 'group \1')
-      result.sort_name.sub!(   /(#{author})$/, ' group  \1')
-      result.display_name.sub!(/(#{author})$/, 'group \1')
+      result.search_name.sub!( /(#{author})$/, "#{group_type} \\1")
+      result.sort_name.sub!(   /(#{author})$/, " #{group_type}  \\1")
+      result.display_name.sub!(/(#{author})$/, "#{group_type} \\1")
     else
       # Append "group" at end
-      result.search_name += " group"
-      result.sort_name += "   group"
-      result.display_name += " group"
+      result.search_name +=  " #{group_type}"
+      result.sort_name +=    "   #{group_type}"
+      result.display_name += " #{group_type}"
     end
 
     result.rank = :Group
     result.parent_name ||= ""
 
     result
+  end
+
+  def self.str_without_group(str)
+    str.sub(GROUP_CHUNK, "")
+  end
+
+  def self.group_type(group_abbr)
+    group_abbr == "clade" ? "clade" : "group"
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)

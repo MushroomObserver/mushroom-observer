@@ -1170,6 +1170,45 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_clade_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus clade",
+      text_name:        "Agaricus clade",
+      real_text_name:   "Agaricus clade",
+      search_name:      "Agaricus clade",
+      real_search_name: "Agaricus clade",
+      sort_name:        "Agaricus   clade",
+      display_name:     "**__Agaricus__** clade",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade",
+      real_search_name: "Agaricus campestris clade",
+      sort_name:        "Agaricus campestris   clade",
+      display_name:     "**__Agaricus campestris__** clade",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris group sensu Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group sensu Author",
+      real_search_name: "Agaricus campestris group sensu Author",
+      sort_name:        "Agaricus campestris   group  sensu Author",
+      display_name:     "**__Agaricus campestris__** group sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+  end
+
   # -----------------------------
   #  Test classification.
   # -----------------------------
