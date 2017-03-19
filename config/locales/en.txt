@@ -1251,9 +1251,9 @@
   form_names_uses: Uses
   form_names_notes: Notes
   form_names_refs: References
-  form_names_text_name_help: "Unformatted version of the name without any author info.\nE.g., \"Amanita muscaria var. flavivolvata\"."
+  form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
   form_names_text_name_locked: Name is in use.  Make name changes in each observation.
-  form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
+  form_names_author_help: "Include the author using <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
