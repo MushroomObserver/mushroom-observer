@@ -125,6 +125,43 @@
 #  -Jason 20150509
 #
 ################################################################################
+#
+#  Hints about the entries.
+#
+#  Each entry is a *one-line* string. It must not contain a carriage return or
+#  line feed. To display a new line, use: \n, <br>, or <\br>.
+#  Example:
+#    entry: 1st line \n2nd line
+#  will display as
+#    1st line
+#    2nd line
+#
+#  The string can include html (without newline characters).
+#  Examples:
+#    entry: <b>bold</b> <i>italic</i> <u>underscore</u>
+#    entry: Use <a href="/observer/textile" target="_new">Textile</a>.
+#
+#  The string can incorporate other entries by including those entries' labels.
+#  An entry which includes other labels must be dumbquoted.
+#  Example:
+#    quoted_entry:  Hello
+#    quoting_entry: "[:quoted_entry] there."
+#
+#  Then in the code,
+#    quoting_entry.t
+#  will display as:
+#    Hello there.
+#
+#  Within a dumbquoted entry, dumbquotes must be escaped: \"
+#  (Smartquotes must *not* be escaped.)
+#  Example
+#    entry: "\"dumbquoted\" “smartquoted”."
+#  will display as
+#    "dumbquoted" “smartquoted”.
+#
+#  - Joe Cohen 20170312
+#
+################################################################################
 
   all_months: January February March April May June July August September October November December
   all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
