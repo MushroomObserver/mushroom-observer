@@ -87,7 +87,6 @@
 #  users_votes::            Get all of a given User's Vote's for this Obs..
 #  is_owners_favorite?::    Is a given naming the owner's favorite?
 #  is_users_favorite?::     Is a given naming a given user's favorite?
-#  vote_percent::           Convert Vote score to percentage.
 #  change_vote::            Change a given User's Vote for a given Naming.
 #  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
@@ -389,11 +388,6 @@ class Observation < AbstractModel
 
   def owner_id_known?
     owners_only_favorite_name.try(:known?)
-  end
-
-  # Convert cached Vote score to percentage.
-  def vote_percent
-    Vote.percent(vote_cache)
   end
 
   # Change User's Vote for this naming.  Automatically recalculates the
