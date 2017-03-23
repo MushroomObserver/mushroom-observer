@@ -230,7 +230,10 @@ class Observation < AbstractModel
 
   def when_str=(x)
     @when_str = x
-    self.when = x if Date.parse(x) rescue ArgumentError
+    begin
+      self.when = x if Date.parse(x)
+    rescue ArgumentError
+    end
     x
   end
 
@@ -1139,15 +1142,14 @@ class Observation < AbstractModel
       errors.add(:alt, :runtime_altitude_error.t)
     end
 
-    if @when_str
-      begin
-        Date.parse(@when_str)
-      rescue ArgumentError
-        if @when_str =~ /^\d{4}-\d{1,2}-\d{1,2}$/
-          errors.add(:when_str, :runtime_date_invalid.t)
-        else
-          errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
-        end
+    return unless @when_str
+    begin
+      Date.parse(@when_str)
+    rescue ArgumentError
+      if @when_str =~ /^\d{4}-\d{1,2}-\d{1,2}$/
+        errors.add(:when_str, :runtime_date_invalid.t)
+      else
+        errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
       end
     end
   end

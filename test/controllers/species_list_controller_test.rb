@@ -1274,7 +1274,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:bulk_editor, params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_warning
-    [[obs1, old_vote1], [obs2, old_vote2], [obs3, old_vote3]].each do |old_obs, old_vote|
+    [[obs1, old_vote1], [obs2, old_vote2],
+     [obs3, old_vote3]].each do |old_obs, old_vote|
       new_obs = Observation.find(old_obs.id)
       new_vote = begin
                    new_obs.namings.first.users_vote(new_obs.user).value
@@ -1420,7 +1421,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs.id.to_s => {
-          when_str: "2017-02-31",
+          when_str: "2017-02-31"
         }
       }
     }
