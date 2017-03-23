@@ -44,4 +44,5 @@ jQuery(document).ready(function () {
         // If file field immediately followed by span, show selection there.
         if (next.is('span')) next.html(val);
     });
+
 });
