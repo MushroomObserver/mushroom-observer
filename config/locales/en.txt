@@ -3175,6 +3175,7 @@
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.
+  runtime_date_invalid: Invalid date.
   runtime_date_should_be_yyyymmdd: Date should be in year-month-day format.
   runtime_delivered_message: Successfully delivered message.
   runtime_delivered_question: Successfully delivered question.
