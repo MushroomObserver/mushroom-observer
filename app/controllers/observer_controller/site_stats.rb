@@ -21,21 +21,4 @@ class ObserverController
     @observations = query.results(limit: 6,
                                   include: { thumb_image: :image_votes })
   end
-
-  # Reports on the health of the system
-  def server_status # :root: :norobots:
-    if in_admin_mode?
-      case params[:commit]
-      when :system_status_gc.l
-        ObjectSpace.garbage_collect
-        flash_notice("Collected garbage")
-      when :system_status_clear_caches.l
-        String.clear_textile_cache
-        flash_notice("Cleared caches")
-      end
-      @textile_name_size = String.textile_name_size
-    else
-      redirect_to(action: "list_observations")
-    end
-  end
 end

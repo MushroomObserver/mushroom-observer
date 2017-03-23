@@ -1274,7 +1274,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:bulk_editor, params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_warning
-    for old_obs, old_vote in [[obs1, old_vote1], [obs2, old_vote2], [obs3, old_vote3]]
+    [[obs1, old_vote1], [obs2, old_vote2],
+     [obs3, old_vote3]].each do |old_obs, old_vote|
       new_obs = Observation.find(old_obs.id)
       new_vote = begin
                    new_obs.namings.first.users_vote(new_obs.user).value
@@ -1411,6 +1412,23 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:bulk_editor, params)
     obs.reload
     assert_equal(vote, obs.owners_votes.first.value)
+  end
+
+  def test_bulk_editor_bad_when
+    spl = species_lists(:unknown_species_list)
+    obs = spl.observations.first
+    params = {
+      id: spl.id,
+      observation: {
+        obs.id.to_s => {
+          when_str: "2017-02-31"
+        }
+      }
+    }
+    login(spl.user.login)
+
+    post(:bulk_editor, params)
+    assert_flash(/#{:runtime_date_invalid.l}/)
   end
 
   def test_project_checkboxes_in_create_species_list_form

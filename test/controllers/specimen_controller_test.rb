@@ -237,4 +237,23 @@ class SpecimenControllerTest < FunctionalTestCase
       id: specimens(:interesting_unknown).id
     }
   end
+
+  def test_specimen_search
+    # Two specimens match this pattern.
+    pattern = "Coprinus comatus"
+    get(:specimen_search, pattern: pattern)
+
+    assert_response(:success)
+    assert_template("list_specimens")
+    # In results, expect 1 row per specimen
+    assert_select(".results tr", 2)
+  end
+
+  def test_index_specimen
+    get(:index_specimen)
+    assert_response(:success)
+    assert_template("list_specimens")
+    # In results, expect 1 row per specimen
+    assert_select(".results tr", Specimen.all.size)
+  end
 end

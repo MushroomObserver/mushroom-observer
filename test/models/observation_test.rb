@@ -147,7 +147,7 @@ class ObservationTest < UnitTestCase
                                         obs.location)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
-  
+
     assert(min_map.is_observation?)
     refute(min_map.is_location?)
     refute(min_map.lat_long_dubious?)
@@ -517,144 +517,164 @@ class ObservationTest < UnitTestCase
     QueuedEmail.queue_emails(false)
   end
 
-  # Why is this disabled???? -JPH 20120413
-  #
-  # def test_vote_favorite
-  #   @fungi = names(:fungi)
-  #   @name1 = names(:agaricus_campestris)
-  #   @name2 = names(:coprinus_comatus)
-  #   @name3 = names(:conocybe_filaris)
-  #
-  #   User.current = rolf
-  #   obs = Observation.create!(
-  #     :when    => Date.today,
-  #     :where   => "anywhere",
-  #     :name_id => @fungi.id
-  #   )
-  #
-  #   User.current = rolf
-  #   nam1 = Naming.create!(
-  #     :observation_id => obs.id,
-  #     :name_id => @name1.id
-  #   )
-  #
-  #   User.current = mary
-  #   nam2 = Naming.create!(
-  #     :observation_id => obs.id,
-  #     :name_id => @name2.id
-  #   )
-  #
-  #   User.current = dick
-  #   nam3 = Naming.create!(
-  #     :observation_id => obs.id,
-  #     :name_id => @name3.id
-  #   )
-  #
-  #   # Okay, nothing has votes yet.
-  #   obs.reload
-  #   assert_equal(@fungi, obs.name)
-  #   assert_equal(nil, obs.consensus_naming)
-  #   assert_equal(false, obs.owner_voted?(nam1))
-  #   assert_equal(false, obs.user_voted?(nam1, rolf))
-  #   assert_equal(false, obs.user_voted?(nam1, mary))
-  #   assert_equal(false, obs.user_voted?(nam1, dick))
-  #   assert_equal(nil, obs.owners_vote(nam1))
-  #   assert_equal(nil, obs.users_vote(nam1, rolf))
-  #   assert_equal(nil, obs.users_vote(nam1, mary))
-  #   assert_equal(nil, obs.users_vote(nam1, dick))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, rolf))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, mary))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, dick))
-  #
-  #   # They're all the same, none with votes yet, so first apparently wins.
-  #   obs.calc_consensus
-  #   assert_names_equal(@name1, obs.name)
-  #   assert_equal(nam1, obs.consensus_naming)
-  #
-  #   # Play with Rolf's vote for his naming (first naming).
-  #   obs.change_vote(nam1, 2, rolf)
-  #   assert_true(obs.owner_voted?(nam1))
-  #   assert_true(obs.user_voted?(nam1, rolf))
-  #   assert_true(vote = obs.owners_vote(nam1))
-  #   assert_equal(vote, obs.users_vote(nam1, rolf))
-  #   assert_equal(vote, nam1.users_vote(rolf))
-  #   assert_true(obs.is_owners_favorite?(nam1))
-  #   assert_true(obs.is_users_favorite?(nam1, rolf))
-  #   assert_true(nam1.is_users_favorite?(rolf))
-  #   assert_names_equal(@name1, obs.name)
-  #   assert_equal(nam1, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam1, 0.01, rolf)
-  # puts obs.dump_votes
-  #   assert_true(obs.is_owners_favorite?(nam1))
-  #   assert_names_equal(@name1, obs.name)
-  #   assert_equal(nam1, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam1, -0.01, rolf)
-  #   assert_false(obs.is_owners_favorite?(nam1))
-  #   assert_false(nam1.is_users_favorite?(rolf))
-  #   assert_names_equal(@name1, obs.name)
-  #   assert_equal(nam1, obs.consensus_naming)
-  #
-  #   # Play with Rolf's vote for other namings.
-  #   obs.change_vote(nam2, 1, rolf)
-  #   assert_false(nam1.is_owners_favorite?)
-  #   assert_true(nam2.is_owners_favorite?)
-  #   assert_false(nam3.is_owners_favorite?)
-  #   assert_names_equal(@name2, obs.name)
-  #   assert_equal(nam2, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam3, 2, rolf)
-  #   assert_false(nam1.is_owners_favorite?)
-  #   assert_false(nam2.is_owners_favorite?)
-  #   assert_true(nam3.is_owners_favorite?)
-  #   assert_names_equal(@name3, obs.name)
-  #   assert_equal(nam3, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam1, 3, rolf)
-  #   assert_true(nam1.is_owners_favorite?)
-  #   assert_false(nam2.is_owners_favorite?)
-  #   assert_false(nam3.is_owners_favorite?)
-  #   assert_names_equal(@name1, obs.name)
-  #   assert_equal(nam1, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam1, 1, rolf)
-  #   assert_false(nam1.is_owners_favorite?)
-  #   assert_false(nam2.is_owners_favorite?)
-  #   assert_true(nam3.is_owners_favorite?)
-  #   assert_names_equal(@name3, obs.name)
-  #   assert_equal(nam3, obs.consensus_naming)
-  #
-  #   # Play with Mary's vote.
-  #   obs.change_vote(nam1, 1, mary)
-  #   obs.change_vote(nam2, 2, mary)
-  #   obs.change_vote(nam3, -1, mary)
-  #   assert_false(nam1.is_users_favorite?(mary))
-  #   assert_true(nam2.is_users_favorite?(mary))
-  #   assert_false(nam3.is_users_favorite?(mary))
-  #   assert_names_equal(@name3, obs.name)
-  #   assert_equal(nam3, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam2, 0.01, mary)
-  #   assert_true(nam1.is_users_favorite?(mary))
-  #   assert_false(nam2.is_users_favorite?(mary))
-  #   assert_false(nam3.is_users_favorite?(mary))
-  #   assert_names_equal(@name3, obs.name)
-  #   assert_equal(nam3, obs.consensus_naming)
-  #
-  #   obs.change_vote(nam1, -0.01, mary)
-  #   assert_false(nam1.is_users_favorite?(mary))
-  #   assert_true(nam2.is_users_favorite?(mary))
-  #   assert_false(nam3.is_users_favorite?(mary))
-  #   assert_false(nam1.is_users_favorite?(rolf))
-  #   assert_false(nam2.is_users_favorite?(rolf))
-  #   assert_true(nam3.is_users_favorite?(rolf))
-  #   assert_false(nam1.is_users_favorite?(dick))
-  #   assert_false(nam2.is_users_favorite?(dick))
-  #   assert_false(nam3.is_users_favorite?(dick))
-  #   assert_names_equal(@name3, obs.name)
-  #   assert_equal(nam3, obs.consensus_naming)
-  # end
+  def test_vote_favorite
+    @fungi = names(:fungi)
+    @name1 = names(:agaricus_campestris)
+    @name2 = names(:coprinus_comatus)
+    @name3 = names(:conocybe_filaris)
+
+    User.current = rolf
+    obs = Observation.create!(
+      :when    => Date.today,
+      :where   => "anywhere",
+      :name_id => @fungi.id
+    )
+
+    User.current = rolf
+    namg1 = Naming.create!(
+      :observation_id => obs.id,
+      :name_id => @name1.id
+    )
+
+    User.current = mary
+    namg2 = Naming.create!(
+      :observation_id => obs.id,
+      :name_id => @name2.id
+    )
+
+    User.current = dick
+    namg3 = Naming.create!(
+      :observation_id => obs.id,
+      :name_id => @name3.id
+    )
+
+    namings = [namg1, namg2, namg3]
+
+    # Okay, nothing has votes yet.
+    obs.reload
+    assert_equal(@fungi, obs.name)
+    assert_nil(obs.consensus_naming)
+    refute(obs.owner_voted?(namg1))
+    refute(obs.user_voted?(namg1, rolf))
+    refute(obs.user_voted?(namg1, mary))
+    refute(obs.user_voted?(namg1, dick))
+    assert_nil(obs.owners_vote(namg1))
+    assert_nil(obs.users_vote(namg1, rolf))
+    assert_nil(obs.users_vote(namg1, mary))
+    assert_nil(obs.users_vote(namg1, dick))
+    refute(obs.is_users_favorite?(namg1, rolf))
+    refute(obs.is_users_favorite?(namg1, mary))
+    refute(obs.is_users_favorite?(namg1, dick))
+
+    # They're all the same, none with votes yet, so first apparently wins.
+    obs.calc_consensus
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    # Play with Rolf's vote for his naming (first naming).
+    obs.change_vote(namg1, 2, rolf)
+    namg1.reload
+    assert(obs.owner_voted?(namg1))
+    assert(obs.user_voted?(namg1, rolf))
+    assert(vote = obs.owners_vote(namg1))
+    assert_equal(vote, obs.users_vote(namg1, rolf))
+    assert_equal(vote, namg1.users_vote(rolf))
+    assert(obs.is_owners_favorite?(namg1))
+    assert(obs.is_users_favorite?(namg1, rolf))
+    assert(namg1.is_users_favorite?(rolf))
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    obs.change_vote(namg1, 0.01, rolf)
+    namg1.reload
+    assert(obs.is_owners_favorite?(namg1))
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    obs.change_vote(namg1, -0.01, rolf)
+    namg1.reload
+    refute(obs.is_owners_favorite?(namg1))
+    refute(namg1.is_users_favorite?(rolf))
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    # Play with Rolf's vote for other namings.
+    # Make votes namg1: -0.01, namg2: 1, namg3: 0
+    obs.change_vote(namg2, 1, rolf)
+    namings.each(&:reload)
+    namg2.reload
+    refute(obs.is_owners_favorite?(namg1))
+    assert(obs.is_owners_favorite?(namg2))
+    refute(obs.is_owners_favorite?(namg3))
+    assert_names_equal(@name2, obs.name)
+    assert_equal(namg2, obs.consensus_naming)
+
+    # Make votes namg1: -0.01, namg2: 1, namg3: 2
+    obs.change_vote(namg3, 2, rolf)
+    namings.each(&:reload)
+    refute(obs.is_owners_favorite?(namg1))
+    refute(obs.is_owners_favorite?(namg2))
+    assert(obs.is_owners_favorite?(namg3))
+    assert_names_equal(@name3, obs.name)
+    assert_equal(namg3, obs.consensus_naming)
+
+    # Make votes namg1: 3, namg2: 1, namg3: 2
+    obs.change_vote(namg1, 3, rolf)
+    namings.each(&:reload)
+    assert(obs.is_owners_favorite?(namg1))
+    refute(obs.is_owners_favorite?(namg2))
+    refute(obs.is_owners_favorite?(namg3))
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    # Make votes namg1: 1, namg2: 1, namg3: 2
+    obs.change_vote(namg1, 1, rolf)
+    namings.each(&:reload)
+    refute(obs.is_owners_favorite?(namg1))
+    refute(obs.is_owners_favorite?(namg2))
+    assert(obs.is_owners_favorite?(namg3))
+    assert_names_equal(@name3, obs.name)
+    assert_equal(namg3, obs.consensus_naming)
+
+    # Play with Mary's vote. Make votes:
+    # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0
+    # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=2.0(*)
+    # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
+    obs.change_vote(namg1, 1, mary)
+    obs.change_vote(namg2, 2, mary)
+    obs.change_vote(namg3, -1, mary)
+    namings.each(&:reload)
+    refute(namg1.is_users_favorite?(mary))
+    assert(namg2.is_users_favorite?(mary))
+    refute(namg3.is_users_favorite?(mary))
+    assert_names_equal(@name2, obs.name)
+    assert_equal(namg2, obs.consensus_naming)
+
+    # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0(*)
+    # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=0.01
+    # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
+    obs.change_vote(namg2, 0.01, mary)
+    namings.each(&:reload)
+    assert(namg1.is_users_favorite?(mary))
+    refute(namg2.is_users_favorite?(mary))
+    refute(namg3.is_users_favorite?(mary))
+    assert_names_equal(@name1, obs.name)
+    assert_equal(namg1, obs.consensus_naming)
+
+    obs.change_vote(namg1, -0.01, mary)
+    namings.each(&:reload)
+    refute(namg1.is_users_favorite?(mary))
+    assert(namg2.is_users_favorite?(mary))
+    refute(namg3.is_users_favorite?(mary))
+    refute(namg1.is_users_favorite?(rolf))
+    refute(namg2.is_users_favorite?(rolf))
+    assert(namg3.is_users_favorite?(rolf))
+    refute(namg1.is_users_favorite?(dick))
+    refute(namg2.is_users_favorite?(dick))
+    refute(namg3.is_users_favorite?(dick))
+    assert_names_equal(@name3, obs.name)
+    assert_equal(namg3, obs.consensus_naming)
+  end
 
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Mary

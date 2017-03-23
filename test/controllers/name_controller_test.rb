@@ -1523,6 +1523,29 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :deprecate_name, id: name.id)
   end
 
+  # Prove that notification is moved to new_name
+  # when old_name with notication is merged to new_name
+  def test_merge_with_notification
+    note = notifications(:no_observation_notification)
+    old_name = Name.find(note.obj_id)
+    new_name = names(:fungi)
+    login(old_name.user.name)
+    change_old_name_to_new_name_params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        rank: :Genus,
+        deprecated: "false"
+      }
+    }
+
+    post(:edit_name, change_old_name_to_new_name_params)
+    note.reload
+
+    assert_equal(new_name.id, note.obj_id,
+                 "Notification was not redirected to target of Name merger")
+  end
+
   # Test that misspellings are handle right when merging.
   def test_merge_with_misspellings
     login("rolf")

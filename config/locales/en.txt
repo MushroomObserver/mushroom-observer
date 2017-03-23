@@ -125,6 +125,43 @@
 #  -Jason 20150509
 #
 ################################################################################
+#
+#  Hints about the entries.
+#
+#  Each entry is a *one-line* string. It must not contain a carriage return or
+#  line feed. To display a new line, use: \n, <br>, or <\br>.
+#  Example:
+#    entry: 1st line \n2nd line
+#  will display as
+#    1st line
+#    2nd line
+#
+#  The string can include html (without newline characters).
+#  Examples:
+#    entry: <b>bold</b> <i>italic</i> <u>underscore</u>
+#    entry: Use <a href="/observer/textile" target="_new">Textile</a>.
+#
+#  The string can incorporate other entries by including those entries' labels.
+#  An entry which includes other labels must be dumbquoted.
+#  Example:
+#    quoted_entry:  Hello
+#    quoting_entry: "[:quoted_entry] there."
+#
+#  Then in the code,
+#    quoting_entry.t
+#  will display as:
+#    Hello there.
+#
+#  Within a dumbquoted entry, dumbquotes must be escaped: \"
+#  (Smartquotes must *not* be escaped.)
+#  Example
+#    entry: "\"dumbquoted\" “smartquoted”."
+#  will display as
+#    "dumbquoted" “smartquoted”.
+#
+#  - Joe Cohen 20170312
+#
+################################################################################
 
   all_months: January February March April May June July August September October November December
   all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
@@ -826,10 +863,10 @@
   rank_form: form
   RANK_PLURAL_FORM: Forms
   rank_plural_form: forms
-  RANK_GROUP: Group
-  rank_group: group
-  RANK_PLURAL_GROUP: Groups
-  rank_plural_group: groups
+  RANK_GROUP: Group or Clade
+  rank_group: group or clade
+  RANK_PLURAL_GROUP: Groups or Clades
+  rank_plural_group: groups or clades
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
@@ -1251,9 +1288,9 @@
   form_names_uses: Uses
   form_names_notes: Notes
   form_names_refs: References
-  form_names_text_name_help: "Unformatted version of the name without any author info.\nE.g., \"Amanita muscaria var. flavivolvata\"."
+  form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
   form_names_text_name_locked: Name is in use.  Make name changes in each observation.
-  form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
+  form_names_author_help: "Include the author using <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
@@ -1485,11 +1522,14 @@
   name_map_no_maps: No observations of [name] have mappable location information.
 
   # observer/news
-  news_title: "Latest Release: January 24, 2017"
+  news_title: "Latest Release: March 19, 2017"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
-  news_content: "[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+  news_content: "[:news_content_pr_294] \n\n[:news_content_pr_291] \n\n[:news_content_pr_293] \n\n[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
 
   # observer/news individual updates
+  news_content_pr_294: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/294\" target=\"_new\">PR #294</a> (March 19, 2017) Add support for clade names. These are just like group names, but use “clade” instead of “group”. Clarify and expand instructions on the Create Name and Edit Name pages."
+  news_content_pr_291: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/291\" target=\"_new\">PR #291</a> (March 18, 2017) Improve group names: allow “group” to be appended to any ICN valid Scientific Name, requiring “group” to be in the Scientific Name field."
+  news_content_pr_293: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/293\">PR #293</a> (March 16, 2017) Fixed bug which caused loss of “Big Eyes” next to a Proposed Name and caused incorrect calculation of Observer Preference."
   news_content_pr_276: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/276\">PR #276</a> (January 24, 2017) Revived pages explaining color themes. See http://mushroomobserver.org/theme/color_themes. Moved theme actions to a new controller."
   news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
   news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
@@ -3135,6 +3175,7 @@
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.
+  runtime_date_invalid: Invalid date.
   runtime_date_should_be_yyyymmdd: Date should be in year-month-day format.
   runtime_delivered_message: Successfully delivered message.
   runtime_delivered_question: Successfully delivered question.

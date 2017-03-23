@@ -26,12 +26,4 @@ class ObserverController
   def name_tracking_emails(user_id)
     QueuedEmail.where(flavor: "QueuedEmail::NameTracking", to_user_id: user_id)
   end
-
-  # Lists notifications that the given user has created.
-  # Inputs: none
-  # Outputs:
-  #   @notifications
-  def list_notifications # :norobots:
-    @notifications = Notification.where(user_id: @user.id).order(:flavor)
-  end
 end
