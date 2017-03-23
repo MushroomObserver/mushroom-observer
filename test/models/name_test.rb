@@ -1207,6 +1207,18 @@ class NameTest < UnitTestCase
       rank:             :Group,
       author:           "sensu Author"
     )
+    do_name_parse_test( # binomial with author, "clade" at end
+      "Agaricus campestris Author clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade Author",
+      real_search_name: "Agaricus campestris clade Author",
+      sort_name:        "Agaricus campestris   clade  Author",
+      display_name:     "**__Agaricus campestris__** clade Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
   end
 
   # -----------------------------
