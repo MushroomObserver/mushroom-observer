@@ -33,8 +33,8 @@
       <%= label_tag(:observation_place_name, "#{:WHERE.t}: (#{:required.t})") %>
       <%= text_field(:observation, :place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:observation_place_name, primer: Location.primer) %>
-      <span class="map-locate btn" style="margin-top:5px;">Locate on Map</span>
-      <span class="map-clear btn" style="margin-top:5px;">Clear Map</span>
+      <span class="map-locate map-btn btn">Locate on Map</span>
+      <span class="map-clear map-btn btn">Clear Map</span>
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
@@ -65,7 +65,7 @@
 <div class="row push-down max-width-text-times-two">
   <div class="col-sm-6">
     <label>Location:</label>
-    <div id="observationFormMap" style="height: 400px; width: 100%;"></div>
+    <div id="observationFormMap" class="form-observation-map"></div>
   </div>
   <div class="col-sm-6">
     <div class="well well-sm ">
