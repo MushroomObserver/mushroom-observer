@@ -1610,9 +1610,9 @@ class Name < AbstractModel
                       )
                     $/x
 
-  # group or clade part of text_name (which lacks author),
-  # capturing just group_or_clade
-  GROUP_CHUNK     = /\s(?<group_abbr>#{GROUP_ABBR})\b/
+  # group or clade part of name, with
+  # <group_wd> capture group capturing the stripped group or clade abbr
+  GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
 
   class ParsedName
     attr_accessor :text_name, :search_name, :sort_name, :display_name
@@ -1697,8 +1697,7 @@ class Name < AbstractModel
     return nil unless result
 
     # Adjust the parsed name
-    group_chunk = GROUP_CHUNK.match(str)
-    group_type = group_type(group_chunk[:group_abbr])
+    group_type = standardized_group_abbr(str)
 
     result.text_name += " #{group_type}"
 
@@ -1725,8 +1724,13 @@ class Name < AbstractModel
     str.sub(GROUP_CHUNK, "")
   end
 
-  def self.group_type(group_abbr)
-    group_abbr == "clade" ? "clade" : "group"
+  def self.standardized_group_abbr(str)
+    group_wd(str) == "clade" ? "clade" : "group"
+  end
+
+  # sripped group_abbr
+  def self.group_wd(str)
+    (GROUP_CHUNK.match(str))[:group_wd]
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
