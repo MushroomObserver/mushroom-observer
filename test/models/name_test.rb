@@ -424,6 +424,7 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata Author group", "Amanita vaginata")
     assert_name_match(pat, "Amanita vaginata group Author", "Amanita vaginata")
     assert_name_match(pat, "Amanita vaginata Amanita group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata clade", "Amanita vaginata")
   end
 
   def test_some_bad_names
@@ -1166,6 +1167,57 @@ class NameTest < UnitTestCase
       parent_name:      "",
       rank:             :Group,
       author:           "Agaricus"
+    )
+  end
+
+  def test_name_parse_clade_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus clade",
+      text_name:        "Agaricus clade",
+      real_text_name:   "Agaricus clade",
+      search_name:      "Agaricus clade",
+      real_search_name: "Agaricus clade",
+      sort_name:        "Agaricus   clade",
+      display_name:     "**__Agaricus__** clade",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade",
+      real_search_name: "Agaricus campestris clade",
+      sort_name:        "Agaricus campestris   clade",
+      display_name:     "**__Agaricus campestris__** clade",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris clade sensu Author",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade sensu Author",
+      real_search_name: "Agaricus campestris clade sensu Author",
+      sort_name:        "Agaricus campestris   clade  sensu Author",
+      display_name:     "**__Agaricus campestris__** clade sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+    do_name_parse_test( # binomial with author, "clade" at end
+      "Agaricus campestris Author clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade Author",
+      real_search_name: "Agaricus campestris clade Author",
+      sort_name:        "Agaricus campestris   clade  Author",
+      display_name:     "**__Agaricus campestris__** clade Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
     )
   end
 
