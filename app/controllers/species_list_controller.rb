@@ -445,17 +445,17 @@ class SpeciesListController < ApplicationController
   end
 
   def do_add_observations(species_list, query)
-    num = -species_list.observation_ids.count
-    species_list.observation_ids += query.result_ids
-    num += species_list.observation_ids.count
-    flash_notice(:species_list_add_remove_add_success.t(num: num))
+    ids = query.result_ids - species_list.observation_ids
+    return if ids.empty?
+    species_list.observation_ids += ids
+    flash_notice(:species_list_add_remove_add_success.t(num: ids.length))
   end
 
   def do_remove_observations(species_list, query)
-    num = species_list.observation_ids.count
-    species_list.observation_ids -= query.result_ids
-    num -= species_list.observation_ids.count
-    flash_notice(:species_list_add_remove_remove_success.t(num: num))
+    ids = query.result_ids & species_list.observation_ids
+    return if ids.empty?
+    species_list.observation_ids -= ids
+    flash_notice(:species_list_add_remove_remove_success.t(num: ids.length))
   end
 
   # Form to let user add/remove an observation from one of their species lists.
