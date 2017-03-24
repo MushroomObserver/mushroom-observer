@@ -1829,4 +1829,32 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_flash_success
     assert_equal(0, spl.reload.observations.size)
   end
+
+  def test_post_add_remove_double_observations
+    spl = species_lists(:unknown_species_list)
+    old_obs_list = SpeciesList.connection.select_values(%(
+      SELECT observation_id FROM observations_species_lists
+      WHERE species_list_id = #{spl.id}
+      ORDER BY observation_id ASC
+    ))
+    dup_obs = spl.observations.first
+    new_obs = (Observation.all - spl.observations).first
+    ids = [dup_obs.id, new_obs.id]
+    query = Query.lookup(:Observation, :in_set, :ids => ids)
+    params = @controller.query_params(query).merge(
+      commit: :ADD.l,
+      species_list: spl.title
+    )
+    login(spl.user.login)
+    post(:post_add_remove_observations, params)
+    assert_response(:redirect)
+    assert_flash_success
+    new_obs_list = SpeciesList.connection.select_values(%(
+      SELECT observation_id FROM observations_species_lists
+      WHERE species_list_id = #{spl.id}
+      ORDER BY observation_id ASC
+    ))
+    assert_equal(new_obs_list.length, old_obs_list.length + 1)
+    assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
+  end
 end
