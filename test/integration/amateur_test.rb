@@ -79,8 +79,11 @@ class AmateurTest < IntegrationTestCase
   end
 
   def get_cookies(user, autologin)
-    sess = login(user, "testpassword", autologin)
-    result = sess.cookies.dup
+    result = nil
+    open_session do |sess|
+      sess.login(user, "testpassword", autologin)
+      result = sess.cookies.dup
+    end
     if autologin
       assert_match(/^#{user.id}/, result["mo_user"])
     else
@@ -209,7 +212,8 @@ class AmateurTest < IntegrationTestCase
     namer_session.propose_then_login(namer, obs)
     naming = namer_session.create_name(obs, text_name)
 
-    voter_session = login!(rolf).extend(VoterDsl)
+    voter_session = open_session.extend(VoterDsl)
+    voter_session.login!(rolf)
     assert_not_equal(namer_session.session[:session_id], voter_session.session[:session_id])
     voter_session.vote_on_name(obs, naming)
     namer_session.failed_delete(obs)
@@ -218,8 +222,10 @@ class AmateurTest < IntegrationTestCase
   end
 
   def test_sessions
-    rolf_session = login!(rolf).extend(NamerDsl)
-    mary_session = login!(mary).extend(VoterDsl)
+    rolf_session = open_session.extend(NamerDsl)
+    rolf_session.login!(rolf)
+    mary_session = open_session.extend(VoterDsl)
+    mary_session.login!(mary)
     assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
   end
 
@@ -242,10 +248,10 @@ class AmateurTest < IntegrationTestCase
   # ------------------------------------------------------------------------
 
   def test_user_dropdown_avaiable
-    session = login("dick")
-    session.get("/")
-    session.assert_select("li#user_drop_down")
-    links = session.css_select("li#user_drop_down a")
+    login("dick")
+    get("/")
+    assert_select("li#user_drop_down")
+    links = css_select("li#user_drop_down a")
     assert_equal(links.length, 7)
   end
 
@@ -263,17 +269,17 @@ class AmateurTest < IntegrationTestCase
     assert_template("observer/show_observation")
     assert_select('div#map_div', 0)
 
-    session = login("dick")
-    session.assert_template("observer/show_observation")
-    session.assert_select('div#map_div', 1)
+    login("dick")
+    assert_template("observer/show_observation")
+    assert_select('div#map_div', 1)
 
-    session.click(label: "Hide thumbnail map.")
-    session.assert_template("observer/show_observation")
-    session.assert_select('div#map_div', 0)
+    click(label: "Hide thumbnail map.")
+    assert_template("observer/show_observation")
+    assert_select('div#map_div', 0)
 
-    session.get("/#{observations(:detailed_unknown_obs).id}")
-    session.assert_template("observer/show_observation")
-    session.assert_select('div#map_div', 0)
+    get("/#{observations(:detailed_unknown_obs).id}")
+    assert_template("observer/show_observation")
+    assert_select('div#map_div', 0)
   end
 
   # -----------------------------------------------------------------------
@@ -282,7 +288,8 @@ class AmateurTest < IntegrationTestCase
   # -----------------------------------------------------------------------
 
   def test_language_tracking
-    session = login(mary).extend(UserDsl)
+    session = open_session.extend(UserDsl)
+    session.login(mary)
     mary.locale = "el-GR"
     I18n.locale = mary.lang
     mary.save

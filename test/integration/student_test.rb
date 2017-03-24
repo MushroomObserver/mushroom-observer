@@ -15,11 +15,16 @@ class StudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    rolf_session    = login!(rolf).extend(AdminDsl)
-    mary_session    = login!(mary).extend(CreatorDsl)
-    katrina_session = login!(katrina).extend(StudentDsl)
-    dick_session    = login!(dick).extend(UserDsl)
+    rolf_session    = open_session.extend(AdminDsl)
+    mary_session    = open_session.extend(CreatorDsl)
+    katrina_session = open_session.extend(StudentDsl)
+    dick_session    = open_session.extend(UserDsl)
     lurker_session  = open_session.extend(UserDsl)
+
+    rolf_session.login!(rolf)
+    mary_session.login!(mary)
+    katrina_session.login!(katrina)
+    dick_session.login!(dick)
 
     assert_not_equal(mary_session.session[:session_id], dick_session.session[:session_id])
     url = mary_session.create_draft(name, gen_desc, project)

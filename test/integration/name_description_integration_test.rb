@@ -100,7 +100,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   def open_admin_session(user)
     user.admin = true
     user.save
-    sess = login!(user)
+    sess = open_session
+    sess.login!(user)
     sess.click(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
     sess.user = user
@@ -108,7 +109,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   end
 
   def open_normal_session(user)
-    sess = login!(user)
+    sess = open_session
+    sess.login!(user)
     teach_about_name_descriptions(sess)
     sess.user = user
     sess
