@@ -228,7 +228,7 @@ class AccountController < ApplicationController
       user_params = params[:user] || {}
       @login    = user_params[:login].to_s
       @password = user_params[:password].to_s
-      @remember = user_params[:user][:remember_me] == "1"
+      @remember = user_params[:remember_me] == "1"
       user = User.authenticate(@login, @password)
       user ||= User.authenticate(@login, @password.strip)
       if !user
