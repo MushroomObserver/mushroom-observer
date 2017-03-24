@@ -39,29 +39,29 @@ class ExpertTest < IntegrationTestCase
       "#{name3} #{author3}\r\n" \
       "#{name4} = #{name5}"
 
-    sess = login!(dick)
-    sess.get("/name/bulk_name_edit")
-    sess.open_form do |form|
+    login!(dick)
+    get("/name/bulk_name_edit")
+    open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
       form.submit
     end
-    sess.assert_flash_error
-    sess.assert_response(:success)
-    sess.assert_template("name/bulk_name_edit")
+    assert_flash_error
+    assert_response(:success)
+    assert_template("name/bulk_name_edit")
 
     # Don't mess around, just let it do whatever it does, and make sure it is
     # correct.  I don't want to make any assumptions about how the internals
     # work (e.g., I don't want to make any assertions about the hidden fields)
     # -- all I want to be sure of is that it doesn't mess up our list of names.
-    sess.open_form do |form|
+    open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!("list_members").split(/\r\n/).sort)
       # field = form.get_field('approved_names')
       form.submit
     end
-    sess.assert_flash_success
-    sess.assert_template("observer/list_rss_logs")
+    assert_flash_success
+    assert_template("observer/list_rss_logs")
 
     assert_not_nil(Name.find_by_text_name("Caloplaca"))
 
@@ -135,9 +135,9 @@ class ExpertTest < IntegrationTestCase
     dick.save
 
     # First attempt at creating a list.
-    sess = login!(dick)
-    sess.get("/species_list/create_species_list")
-    sess.open_form do |form|
+    login!(dick)
+    get("/species_list/create_species_list")
+    open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
       form.change("title", "List Title")
@@ -148,22 +148,22 @@ class ExpertTest < IntegrationTestCase
       form.check("member_specimen")
       form.submit
     end
-    sess.assert_flash_error
-    sess.assert_response(:success)
-    sess.assert_template("species_list/create_species_list")
+    assert_flash_error
+    assert_response(:success)
+    assert_template("species_list/create_species_list")
 
-    sess.assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
-    sess.assert_select('div#deprecated_names', /Lactarius alpigenes/)
-    sess.assert_select('div#deprecated_names', /Lactarius alpinus/)
-    sess.assert_select('div#deprecated_names', /Petigera/)
-    sess.assert_select('div#deprecated_names', /Peltigera/)
-    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
-    sess.assert_select('div#ambiguous_names', /Suillus.*Gray/)
-    sess.assert_select('div#ambiguous_names', /Suillus.*White/)
+    assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
+    assert_select('div#deprecated_names', /Lactarius alpigenes/)
+    assert_select('div#deprecated_names', /Lactarius alpinus/)
+    assert_select('div#deprecated_names', /Petigera/)
+    assert_select('div#deprecated_names', /Peltigera/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    assert_select('div#ambiguous_names', /Suillus.*Gray/)
+    assert_select('div#ambiguous_names', /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
-    sess.open_form do |form|
+    open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!("list_members").split(/\r\n/).sort)
       form.check(/chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/)
@@ -177,8 +177,8 @@ class ExpertTest < IntegrationTestCase
 
       form.submit
     end
-    sess.assert_flash_success
-    sess.assert_template("species_list/show_species_list")
+    assert_flash_success
+    assert_template("species_list/show_species_list")
 
     spl = SpeciesList.last
     obs = spl.observations
@@ -199,8 +199,8 @@ class ExpertTest < IntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    sess.click(href: /edit_species_list/)
-    sess.open_form do |form|
+    click(href: /edit_species_list/)
+    open_form do |form|
       form.assert_value("list_members", "")
       form.assert_value("title", "List Title")
       form.assert_value("place_name", albion_name_reverse)
@@ -217,21 +217,21 @@ class ExpertTest < IntegrationTestCase
       form.uncheck("member_specimen")
       form.submit
     end
-    sess.assert_flash_error
-    sess.assert_response(:success)
-    sess.assert_template("species_list/edit_species_list")
+    assert_flash_error
+    assert_response(:success)
+    assert_template("species_list/edit_species_list")
 
-    sess.assert_select('div#missing_names', /Agaricus nova/)
-    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    assert_select('div#missing_names', /Agaricus nova/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
-    sess.open_form do |form|
+    open_form do |form|
       form.check(/chosen_multiple_names_\d+_#{amanita[1].id}/)
       form.submit
     end
-    sess.assert_flash_success
-    sess.assert_template("location/create_location")
+    assert_flash_success
+    assert_template("location/create_location")
 
     spl.reload
     obs = spl.observations
@@ -258,7 +258,7 @@ class ExpertTest < IntegrationTestCase
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
-    sess.open_form do |form|
+    open_form do |form|
       form.assert_value("location_display_name", new_location_reverse)
       form.change("location_display_name", newer_location_reverse)
       form.change("location_north", "35.6622")
@@ -267,10 +267,10 @@ class ExpertTest < IntegrationTestCase
       form.change("location_west", "-83.0745")
       form.submit
     end
-    sess.assert_flash_success
-    sess.assert_template("species_list/show_species_list")
-    sess.assert_select('div#title', text: /#{spl.title}/)
-    sess.assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
+    assert_flash_success
+    assert_template("species_list/show_species_list")
+    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
@@ -284,19 +284,19 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.
-    sess.click(href: /add_comment/)
-    sess.assert_template("comment/add_comment")
-    sess.assert_select('div#title', text: /#{spl.title}/)
-    sess.assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
-    sess.open_form do |form|
+    click(href: /add_comment/)
+    assert_template("comment/add_comment")
+    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
+    open_form do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")
       form.submit
     end
-    sess.assert_flash_success
-    sess.assert_template("species_list/show_species_list")
-    sess.assert_select('div#title', text: /#{spl.title}/)
-    sess.assert_select("div.comment", text: /Slartibartfast/)
-    sess.assert_select("div.comment", text: /Steatopygia/)
+    assert_flash_success
+    assert_template("species_list/show_species_list")
+    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("div.comment", text: /Slartibartfast/)
+    assert_select("div.comment", text: /Steatopygia/)
   end
 end
