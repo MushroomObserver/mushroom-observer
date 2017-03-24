@@ -225,21 +225,10 @@ class AccountController < ApplicationController
       @login = ""
       @remember = true
     else
-      @login    = begin
-                    params[:user][:login].to_s
-                  rescue
-                    ""
-                  end
-      @password = begin
-                    params[:user][:password].to_s
-                  rescue
-                    ""
-                  end
-      @remember = begin
-                    params[:user][:remember_me] == "1"
-                  rescue
-                    false
-                  end
+      user_params = params[:user] || {}
+      @login    = user_params[:login].to_s
+      @password = user_params[:password].to_s
+      @remember = user_params[:user][:remember_me] == "1"
       user = User.authenticate(@login, @password)
       user ||= User.authenticate(@login, @password.strip)
       if !user
@@ -248,7 +237,6 @@ class AccountController < ApplicationController
         @unverified_user = user
         render(action: "reverify")
       else
-        # logger.warn("%s, %s, %s" % [user.login, @login, @password]])
         flash_notice :runtime_login_success.t
         @user = user
         @user.last_login = now = Time.now
