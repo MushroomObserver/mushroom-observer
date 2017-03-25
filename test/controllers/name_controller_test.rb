@@ -406,6 +406,55 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "create_name")
   end
 
+  def test_create_name_unauthored_authored
+    # Prove that user cannot create an authored non-:Group Name
+    # if unauthored one exists.
+    login
+    unauthored_name = names(:strobilurus_diminutivus_no_author)
+    author = unauthored_name.author
+    params = {
+      name: {
+        text_name: unauthored_name.text_name,
+        author:    "Author",
+        rank:      unauthored_name.rank,
+        status:    unauthored_name.status
+      }
+    }
+    assert_no_difference("Name.count") { post(:create_name, params) }
+    assert_equal(author, unauthored_name.author)
+
+    # And vice versa (can't created unauthored one if authored exists)
+    authored_name = names(:coprinus_comatus)
+    author = authored_name.author
+    params = {
+      name: {
+        text_name: authored_name.text_name,
+        author:    "",
+        rank:      authored_name.rank,
+        status:    authored_name.status
+      }
+    }
+    assert_no_difference("Name.count") { post(:create_name, params) }
+    assert_equal(author, authored_name.author)
+  end
+
+  # Prove that user cannot remove author.
+  def test_edit_name_remove_author
+    login
+    authored_name = names(:coprinus_comatus)
+    author = authored_name.author
+    params = {
+      name: {
+        text_name: authored_name.text_name,
+        author:    "",
+        rank:      authored_name.rank,
+        status:    authored_name.status
+      }
+    }
+    assert_no_difference("Name.count") { post(:edit_name, params) }
+    assert_equal(author, authored_name.author)
+  end
+
   def test_show_name_description
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
