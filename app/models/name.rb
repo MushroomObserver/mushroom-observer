@@ -1544,27 +1544,33 @@ class Name < AbstractModel
   NOV_ABBR     = / nova | novum | nov\.? /xi
   PROV_ABBR    = / provisional | prov\.? /xi
 
-  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} /x
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
+                      #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
-  ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} | #{GROUP_ABBR} /x
-  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
+  ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
+                      #{GROUP_ABBR} /x
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
+                          #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
-  LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$|species) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
+  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
+                           sp\.\s\S*\d\S* /x
 
-  # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
+  # Matches the last epithet in a (standardized) name,
+  # including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
 
-  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
+  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [
+                   A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
   #   AUTHOR_PAT ensures "sp", "ssp", etc., aren't included in author.
   #   AUTHOR_PAT removes the author first thing.
   # Then the other parsers have a much easier job.
   AUTHOR_PAT =
-     /^
+    /^
       ( "?
         #{UPPER_WORD}
         (?:
@@ -1581,7 +1587,7 @@ class Name < AbstractModel
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
     $/x
 
-# Taxa without authors (for use by GROUP PAT)
+  # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
   SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
   SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
