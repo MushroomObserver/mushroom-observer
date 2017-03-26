@@ -82,30 +82,7 @@ MushroomObserver::Application.configure do
   # number of complex assets.
   config.assets.debug = false
   config.assets.logger = false
-
   config.assets.digest = false
-
-  config.assets.precompile += %w(
-
-    api_key.js
-    edit_location.js
-    image_slider.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    rss_feed_select_helper.js
-    single_image_uploader.js
-    translations.js
-    vote_popup.js
-
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-
-  ) if config.assets && config.assets.precompile
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true

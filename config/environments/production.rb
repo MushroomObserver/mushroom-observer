@@ -25,23 +25,8 @@ MushroomObserver::Application.configure do
   # Enable queued email.
   config.queue_email = true
 
-  # # Use gmail to send email.
-  # config.action_mailer.smtp_settings = {
-  #   :address => "smtp.gmail.com",
-  #   :port => 587,
-  #   :authentication => :plain,
-  #   :enable_starttls_auto => true,
-  #   :user_name => "webmaster@mushroomobserver.org",
-  #   :password => "xxx"
-  # }
-
   # Testing
   config.action_mailer.delivery_method = :sendmail
-  # Defaults to:
-  # config.action_mailer.sendmail_settings = {
-  #   :location => '/usr/sbin/sendmail',
-  #   :arguments => '-i -t'
-  # }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 
@@ -72,7 +57,7 @@ MushroomObserver::Application.configure do
     # :default   => [:cdmr, :local, :mo]
   }
   config.image_fallback_source = :cdmr
-  config.keep_these_image_sizes_local = [:thumbnail, :small]
+  config.keep_these_image_sizes_local = []
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
@@ -146,29 +131,6 @@ MushroomObserver::Application.configure do
   # Precompile additional assets.
   # application.js, application.css, and all non-JS/CSS in app/assets
   # folder are already added.
-
-  # Precompile stuff aside from application.js, application.css, all images.
-  config.assets.precompile += %w(
-
-    api_key.js
-    edit_location.js
-    image_slider.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    rss_feed_select_helper.js
-    single_image_uploader.js
-    translations.js
-    vote_popup.js
-
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-
-  ) if config.assets && config.assets.precompile
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery

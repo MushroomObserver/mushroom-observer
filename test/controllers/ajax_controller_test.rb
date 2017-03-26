@@ -67,6 +67,11 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(:pt, I18n.locale)
     session.delete("locale")
 
+    @request.env["HTTP_ACCEPT_LANGUAGE"] = "xx-xx,pt-pt"
+    good_ajax_request(:test)
+    assert_equal(:pt, I18n.locale)
+    session.delete("locale")
+
     @request.env["HTTP_ACCEPT_LANGUAGE"] = "en-xx,en;q=0.5"
     good_ajax_request(:test)
     assert_equal(:en, I18n.locale)
@@ -126,16 +131,21 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_location
-    mitrula = locations(:mitrula_marsh).name
-    reyes = locations(:point_reyes).name
-    pipi = observations(:strobilurus_diminutivus_obs).where
+    # names of Locations whose names have words starting with "m"
+    m_loc_names = Location.where("name REGEXP ?", "[[:<:]]M").
+                           map(&:name)
+    # wheres of Observations whose wheres have words starting with "m"
+    # need extra "observation" to avoid confusing sql with bare "where".
+    m_obs_wheres = Observation.where("observations.where REGEXP ?", "[[:<:]]M").
+                               map(&:where)
+    m = m_loc_names + m_obs_wheres
 
-    expect = [mitrula, reyes, pipi].sort
+    expect = m.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
-    expect = [mitrula, reyes, pipi].map { |x| Location.reverse_name(x) }.sort
+    expect = m.map { |x| Location.reverse_name(x) }.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto", format: "scientific")
     assert_equal(expect, @response.body.split("\n"))
@@ -158,21 +168,22 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_project
-    eol = projects(:eol_project).title
-    bolete = projects(:bolete_project).title
-
+    # titles of Projects whose titles have words starting with "p"
+    b_titles = Project.where("title REGEXP ?", "[[:<:]]b").map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
-    assert_equal(["B", bolete], @response.body.split("\n"))
+    assert_equal((["B"] + b_titles).sort, @response.body.split("\n").sort)
 
+    p_titles = Project.where("title REGEXP ?", "[[:<:]]p").map(&:title).uniq
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
-    assert_equal(["P", bolete, eol], @response.body.split("\n"))
+    assert_equal((["P"] + p_titles).sort, @response.body.split("\n").sort)
 
     good_ajax_request(:auto_complete, type: :project, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_species_list
-    list1, list2, list3 = SpeciesList.all.map(&:title)
+    list1, list2, list3 = SpeciesList.all.order(:title).map(&:title)
+
     assert_equal("A Species List", list1)
     assert_equal("Another Species List", list2)
     assert_equal("List of mysteries", list3)
@@ -196,7 +207,8 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(["D", "dick <Tricky Dick>"], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
-    assert_equal(["K", "katrina <Katrina>"], @response.body.split("\n"))
+    assert_equal(["K", "#{katrina.login} <#{katrina.name}>"],
+                 @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
@@ -207,7 +219,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_export_image
-    img = images(:in_situ)
+    img = images(:in_situ_image)
     assert_true(img.ok_for_export) # (default)
 
     bad_ajax_request(:export, type: :image, id: img.id, value: "0")
@@ -264,36 +276,36 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_naming_vote
-    naming = Naming.find(1)
+    naming = namings(:minimal_unknown_naming)
     assert_nil(naming.users_vote(dick))
-    bad_ajax_request(:vote, type: :naming, id: 1, value: 3)
+    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
 
     login("dick")
-    good_ajax_request(:vote, type: :naming, id: 1, value: 3)
+    good_ajax_request(:vote, type: :naming, id: naming.id, value: 3)
     assert_equal(3, naming.reload.users_vote(dick).value)
 
-    good_ajax_request(:vote, type: :naming, id: 1, value: 0)
+    good_ajax_request(:vote, type: :naming, id: naming.id, value: 0)
     assert_nil(naming.reload.users_vote(dick))
 
-    bad_ajax_request(:vote, type: :naming, id: 1, value: 99)
+    bad_ajax_request(:vote, type: :naming, id: naming.id, value: 99)
     bad_ajax_request(:vote, type: :naming, id: 99, value: 0)
-    bad_ajax_request(:vote, type: :phooey, id: 1, value: 0)
+    bad_ajax_request(:vote, type: :phooey, id: naming.id, value: 0)
   end
 
   def test_image_vote
-    image = Image.find(1)
+    image = images(:in_situ_image)
     assert_nil(image.users_vote(dick))
-    bad_ajax_request(:vote, type: :image, id: 1, value: 3)
+    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
     login("dick")
     assert_nil(image.users_vote(dick))
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
     assert_equal(3, image.reload.users_vote(dick))
 
-    good_ajax_request(:vote, type: :image, id: 1, value: 0)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 0)
     assert_nil(image.reload.users_vote(dick))
 
-    bad_ajax_request(:vote, type: :image, id: 1, value: 99)
+    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 99)
     bad_ajax_request(:vote, type: :image, id: 99, value: 0)
   end
 
@@ -302,7 +314,8 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id,
+                      value: 3)
 
     # Assert
     assert_template layout: nil
@@ -315,12 +328,12 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
-    assert_select("a[href='/image/show_image/1?vote=0']")
-    assert_select("a[href='/image/show_image/1?vote=1']")
-    assert_select("a[href='/image/show_image/1?vote=2']")
-    assert_select("a[href='/image/show_image/1?vote=4']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']")
+    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']")
   end
 
   def test_image_vote_renders_correct_data_attributes
@@ -328,7 +341,7 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
 
     assert_select("[data-role='image_vote']", 4) # #should show four vote links as dick already voted
     assert_select("[data-val]", 4) # #should show four vote links as dick already voted
@@ -371,9 +384,134 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal("2014-11-27", @json_response["when"])
   end
 
-  def test_get_multi_image_template
-    bad_ajax_request(:get_multi_image_template)
+  def test_multi_image_template
+    bad_ajax_request(:multi_image_template)
     login("dick")
-    good_ajax_request(:get_multi_image_template)
+    good_ajax_request(:multi_image_template)
+  end
+
+  def test_add_external_link
+    obs  = observations(:agaricus_campestris_obs) # owned by rolf
+    obs2 = observations(:agaricus_campestrus_obs) # owned by rolf
+    site = ExternalSite.first
+    url  = "http://valid.url"
+    params = {
+      type:  "add",
+      id:    obs.id,
+      site:  site.id,
+      value: url
+    }
+
+    # not logged in
+    bad_ajax_request(:external_link, params)
+
+    # dick can't do it
+    login("dick")
+    bad_ajax_request(:external_link, params)
+
+    # rolf can because he owns it
+    login("rolf")
+    good_ajax_request(:external_link, params)
+    assert_equal(@response.body, ExternalLink.last.id.to_s)
+    assert_users_equal(rolf, ExternalLink.last.user)
+    assert_objs_equal(obs, ExternalLink.last.observation)
+    assert_objs_equal(site, ExternalLink.last.external_site)
+    assert_equal(url, ExternalLink.last.url)
+
+    # bad url
+    login("mary")
+    bad_ajax_request(:external_link, params.merge(value: "bad url"))
+
+    # mary can because she's a member of the external site's project
+    login("mary")
+    good_ajax_request(:external_link, params.merge(id: obs2.id))
+    assert_equal(@response.body, ExternalLink.last.id.to_s)
+    assert_users_equal(mary, ExternalLink.last.user)
+    assert_objs_equal(obs2, ExternalLink.last.observation)
+    assert_objs_equal(site, ExternalLink.last.external_site)
+    assert_equal(url, ExternalLink.last.url)
+  end
+
+  def test_edit_external_link
+    # obs owned by rolf, mary created link and is member of site's project
+    link    = ExternalLink.first
+    new_url = "http://another.valid.url"
+    params = {
+      type:  "edit",
+      id:    link.id,
+      value: new_url
+    }
+
+    # not logged in
+    bad_ajax_request(:external_link, params)
+
+    # dick doesn't have permission
+    login("dick")
+    bad_ajax_request(:external_link, params)
+
+    # mary can
+    login("mary")
+    good_ajax_request(:external_link, params)
+    assert_equal(new_url, link.reload.url)
+
+    # rolf can, too
+    login("rolf")
+    good_ajax_request(:external_link, params)
+
+    # bad url
+    bad_ajax_request(:external_link, params.merge(value: "bad url"))
+  end
+
+  def test_remove_external_link
+    # obs owned by rolf, mary created link and is member of site's project
+    link    = ExternalLink.first
+    new_url = "http://another.valid.url"
+    params = {
+      type:  "remove",
+      id:    link.id
+    }
+
+    # not logged in
+    bad_ajax_request(:external_link, params)
+
+    # dick doesn't have permission
+    login("dick")
+    bad_ajax_request(:external_link, params)
+
+    # mary can
+    login("mary")
+    good_ajax_request(:external_link, params)
+    assert_nil(ExternalLink.safe_find(link.id))
+  end
+
+  def test_check_link_permission
+    # obs owned by rolf, mary member of site project
+    site = external_sites(:mycoportal)
+    obs  = observations(:coprinus_comatus_obs)
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    @controller.instance_variable_set("@user", rolf)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+    @controller.instance_variable_set("@user", mary)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+    @controller.instance_variable_set("@user", dick)
+    assert_link_forbidden(link)
+    assert_link_forbidden(obs, site)
+    dick.update_attribute("admin", true)
+    assert_link_allowed(link)
+    assert_link_allowed(obs, site)
+  end
+
+  def assert_link_allowed(*args)
+    assert_nothing_raised do
+      @controller.send(:check_link_permission!, *args)
+    end
+  end
+
+  def assert_link_forbidden(*args)
+    assert_raises(RuntimeError) do
+       @controller.send(:check_link_permission!, *args)
+    end
   end
 end

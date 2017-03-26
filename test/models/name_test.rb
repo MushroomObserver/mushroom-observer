@@ -19,8 +19,7 @@ class NameTest < UnitTestCase
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
-    i = 0
-    for var in [
+    [
       :text_name,
       :real_text_name,
       :search_name,
@@ -30,7 +29,7 @@ class NameTest < UnitTestCase
       :parent_name,
       :rank,
       :author
-    ]
+    ].each do |var|
       expect = args[var]
       if var == :real_text_name
         actual = Name.display_to_real_text(parse)
@@ -39,14 +38,14 @@ class NameTest < UnitTestCase
       else
         actual = parse.send(var)
       end
+
       if actual != expect
         any_errors = true
         var = "#{var} (*)"
       end
       msg << "%-20s %-40s %-40s" % [var.to_s, expect.inspect, actual.inspect]
-      i += 1
     end
-    assert_not any_errors, msg.join("\n")
+    refute(any_errors, msg.join("\n"))
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
@@ -74,6 +73,7 @@ class NameTest < UnitTestCase
     assert_name_match(pattern, string + " in ed.", first_match, " in ed.")
     assert_name_match(pattern, string + " nomen nudum", first_match, " nomen nudum")
     assert_name_match(pattern, string + " nom. prov.", first_match, " nom. prov.")
+    assert_name_match(pattern, string + " comb. prov.", first_match, " comb. prov.")
     assert_name_match(pattern, string + " sensu Author", first_match, " sensu Author")
     assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
     assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
@@ -101,7 +101,7 @@ class NameTest < UnitTestCase
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
-    assert_equal(expected, result)
+    assert(expected == result)
   rescue RuntimeError => err
     raise err if expected
   end
@@ -119,9 +119,9 @@ class NameTest < UnitTestCase
     # Saw this bug 20080114 -JPH
     result = Name.find_or_create_name_and_parents("Coprinus comatus v. bogus (With) Author")
     assert_equal 3, result.length
-    assert_equal nil, result[0].id
-    assert_equal 2,   result[1].id
-    assert_equal nil, result[2].id
+    assert_nil result[0].id
+    assert_equal names(:coprinus_comatus).id, result[1].id
+    assert_nil result[2].id
     assert_equal "Coprinus", result[0].text_name
     assert_equal "Coprinus comatus", result[1].text_name
     assert_equal "Coprinus comatus var. bogus", result[2].text_name
@@ -132,9 +132,9 @@ class NameTest < UnitTestCase
     # Conocybe filaris does not have an author.
     result = Name.find_or_create_name_and_parents("Conocybe filaris var bogus (With) Author")
     assert_equal 3, result.length
-    assert_equal nil, result[0].id
-    assert_equal 4,   result[1].id
-    assert_equal nil, result[2].id
+    assert_nil result[0].id
+    assert_equal names(:conocybe_filaris).id, result[1].id
+    assert_nil result[2].id
     assert_equal "Conocybe", result[0].text_name
     assert_equal "Conocybe filaris", result[1].text_name
     assert_equal "Conocybe filaris var. bogus", result[2].text_name
@@ -145,16 +145,16 @@ class NameTest < UnitTestCase
     # Agaricus fixture does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus L.")
     assert_equal 1, result.length
-    assert_equal 18, result[0].id
+    assert_equal names(:agaricus).id, result[0].id
     assert_equal "Agaricus", result[0].text_name
     assert_equal "L.", result[0].author
 
     # Agaricus does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus abra f. cadabra (With) Another Author")
     assert_equal 3, result.length
-    assert_equal 18, result[0].id
-    assert_equal nil, result[1].id
-    assert_equal nil, result[2].id
+    assert_equal names(:agaricus).id, result[0].id
+    assert_nil result[1].id
+    assert_nil result[2].id
     assert_equal "Agaricus", result[0].text_name
     assert_equal "Agaricus abra", result[1].text_name
     assert_equal "Agaricus abra f. cadabra", result[2].text_name
@@ -165,9 +165,7 @@ class NameTest < UnitTestCase
 
   def test_standardize_name
     assert_equal("Amanita", Name.standardize_name("Amanita"))
-    assert_equal("Amanita subgenus Vaginatae", Name.standardize_name("Amanita (subg. Vaginatae)"))
     assert_equal("Amanita subgenus Vaginatae", Name.standardize_name("Amanita SUBG. Vaginatae"))
-    assert_equal("Amanita sect. Vaginatae", Name.standardize_name("Amanita (section Vaginatae)"))
     assert_equal("Amanita subsect. Vaginatae", Name.standardize_name("Amanita subsect Vaginatae"))
     assert_equal("Amanita stirps Vaginatae", Name.standardize_name("Amanita Stirps Vaginatae"))
     assert_equal("Amanita subgenus One sect. Two stirps Three", Name.standardize_name("Amanita Subg One Sect Two Stirps Three"))
@@ -189,9 +187,11 @@ class NameTest < UnitTestCase
     assert_equal("auct. N. Amer.", Name.standardize_author("auct. N. Amer."))
     assert_equal("ined. Xxx", Name.standardize_author("IN ED Xxx"))
     assert_equal("ined.", Name.standardize_author("ined."))
-    assert_equal("nom. prov", Name.standardize_author("nom prov"))
+    assert_equal("nom. prov.", Name.standardize_author("nom prov"))
     assert_equal("nom. nudum", Name.standardize_author("Nomen nudum"))
     assert_equal("nom.", Name.standardize_author("nomen"))
+    assert_equal("comb.", Name.standardize_author("comb"))
+    assert_equal("comb. prov.", Name.standardize_author("comb prov"))
     assert_equal("sensu Borealis", Name.standardize_author("SENS Borealis"))
     assert_equal('sensu "Aurora"', Name.standardize_author('sEnSu. "Aurora"'))
   end
@@ -270,6 +270,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, 'Amanita subsect. "Mismatch\'')
     assert_name_match_author_required(pat, "Amanita")
     assert_name_match_author_required(pat, "Amanita sp.")
+    assert_name_match_author_required(pat, '"Amanita" sp.')
     assert_name_match_author_required(pat, "Amanita vaginata")
     assert_name_match_author_required(pat, 'Amanita "vaginata"')
     assert_name_match_author_required(pat, "Amanita Subgenus Vaginatae")
@@ -302,9 +303,7 @@ class NameTest < UnitTestCase
     pat = Name::SUBGENUS_PAT
     assert_name_match_author_optional(pat, "Amanita subgenus Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Subg. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (SUBG Vaginatae)")
     assert_name_match_author_optional(pat, "Amanita subg Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (subg Vaginatae)")
     assert_name_match_author_optional(pat, '"Amanita subg. Vaginatae"')
   end
 
@@ -313,11 +312,8 @@ class NameTest < UnitTestCase
     pat = Name::SECTION_PAT
     assert_name_match_author_optional(pat, "Amanita section Vaginatae")
     assert_name_match_author_optional(pat, "Amanita Sect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (SECT Vaginatae)")
     assert_name_match_author_optional(pat, "Amanita sect Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg. Vaginatae sect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (sect Vaginatae)")
-    assert_name_match_author_optional(pat, "Amanita (subg Vaginatae sect Vaginatae)")
     assert_name_match_author_optional(pat, '"Amanita sect. Vaginatae"')
   end
 
@@ -326,11 +322,8 @@ class NameTest < UnitTestCase
     pat = Name::SUBSECTION_PAT
     assert_name_match_author_optional(pat, "Amanita subsection Vaginatae")
     assert_name_match_author_optional(pat, "Amanita SubSect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (SUBSECT Vaginatae)")
     assert_name_match_author_optional(pat, "Amanita subsect Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg. Vaginatae subsect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (subsect Vaginatae)")
-    assert_name_match_author_optional(pat, "Amanita (subg Vaginatae sect Vaginatae subsect Vaginatae)")
     assert_name_match_author_optional(pat, '"Amanita subsect. Vaginatae"')
   end
 
@@ -341,9 +334,6 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, "Amanita Stirps Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg. Vaginatae sect. Vaginatae stirps Vaginatae")
     assert_name_match_author_optional(pat, "Amanita subg. Vaginatae sect. Vaginatae subsect. Vaginatae stirps Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita (STIRPS Vaginatae)")
-    assert_name_match_author_optional(pat, "Amanita (stirps Vaginatae)")
-    assert_name_match_author_optional(pat, "Amanita (subgenus Vaginatae section Vaginatae stirps Vaginatae)")
     assert_name_match_author_optional(pat, '"Amanita stirps Vaginatae"')
   end
 
@@ -419,6 +409,10 @@ class NameTest < UnitTestCase
     assert_name_match(pat, "Amanita vaginata ssp. grisea f. grisea group", "Amanita vaginata ssp. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata var. grisea f. grisea group", "Amanita vaginata var. grisea f. grisea")
     assert_name_match(pat, "Amanita vaginata ssp. grisea var. grisea f. grisea group", "Amanita vaginata ssp. grisea var. grisea f. grisea")
+    assert_name_match(pat, "Amanita vaginata Author group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata group Author", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata Amanita group", "Amanita vaginata")
+    assert_name_match(pat, "Amanita vaginata clade", "Amanita vaginata")
   end
 
   def test_some_bad_names
@@ -464,13 +458,13 @@ class NameTest < UnitTestCase
       "Lecidea sanguineoatra sens. Nyl",
       text_name: "Lecidea sanguineoatra",
       real_text_name: "Lecidea sanguineoatra",
-      search_name: "Lecidea sanguineoatra sens. Nyl",
-      real_search_name: "Lecidea sanguineoatra sens. Nyl",
-      sort_name: "Lecidea sanguineoatra  sens. Nyl",
-      display_name: "**__Lecidea sanguineoatra__** sens. Nyl",
+      search_name: "Lecidea sanguineoatra sensu Nyl",
+      real_search_name: "Lecidea sanguineoatra sensu Nyl",
+      sort_name: "Lecidea sanguineoatra  sensu Nyl",
+      display_name: "**__Lecidea sanguineoatra__** sensu Nyl",
       parent_name: "Lecidea",
       rank: :Species,
-      author: "sens. Nyl"
+      author: "sensu Nyl"
     )
   end
 
@@ -789,21 +783,6 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_name_parse_24
-    do_name_parse_test(
-      "Amanita (subg Vaginatae)",
-      text_name: "Amanita subgenus Vaginatae",
-      real_text_name: "Amanita subgenus Vaginatae",
-      search_name: "Amanita subgenus Vaginatae",
-      real_search_name: "Amanita subgenus Vaginatae",
-      sort_name: "Amanita  {1subgenus  Vaginatae",
-      display_name: "**__Amanita__** subgenus **__Vaginatae__**",
-      parent_name: "Amanita",
-      rank: :Subgenus,
-      author: ""
-    )
-  end
-
   def test_name_parse_25
     do_name_parse_test(
       "Amanita stirps Vaginatae Ach. & Fr.",
@@ -890,21 +869,6 @@ class NameTest < UnitTestCase
       display_name: "**__Amanita vaginata__**",
       parent_name: "Amanita",
       rank: :Species,
-      author: ""
-    )
-  end
-
-  def test_name_parse_31
-    do_name_parse_test(
-      "Amanita (subsect Vaginatae)",
-      text_name: "Amanita subsect. Vaginatae",
-      real_text_name: "Amanita subsect. Vaginatae",
-      search_name: "Amanita subsect. Vaginatae",
-      real_search_name: "Amanita subsect. Vaginatae",
-      sort_name: "Amanita  {3subsect.  Vaginatae",
-      display_name: "**__Amanita__** subsect. **__Vaginatae__**",
-      parent_name: "Amanita",
-      rank: :Subsection,
       author: ""
     )
   end
@@ -1011,6 +975,207 @@ class NameTest < UnitTestCase
       parent_name: nil,
       rank: :Family,
       author: "sensu Reid"
+    )
+  end
+
+  def test_name_parse_comb
+    do_name_parse_test(
+      "Sebacina schweinitzii comb prov",
+      text_name: "Sebacina schweinitzii",
+      real_text_name: "Sebacina schweinitzii",
+      search_name: "Sebacina schweinitzii comb. prov.",
+      real_search_name: "Sebacina schweinitzii comb. prov.",
+      sort_name: "Sebacina schweinitzii  comb. prov.",
+      display_name: "**__Sebacina schweinitzii__** comb. prov.",
+      parent_name: "Sebacina",
+      rank: :Species,
+      author: "comb. prov."
+    )
+  end
+
+  def test_name_parse_group_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus group",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group",
+      real_search_name: "Agaricus group",
+      sort_name:        "Agaricus   group",
+      display_name:     "**__Agaricus__** group",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group",
+      real_search_name: "Agaricus campestris group",
+      sort_name:        "Agaricus campestris   group",
+      display_name:     "**__Agaricus campestris__** group",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # monomial, with author
+      "Agaricus group Author",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Author",
+      real_search_name: "Agaricus group Author",
+      sort_name:        "Agaricus   group  Author",
+      display_name:     "**__Agaricus__** group Author",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, author
+      "Agaricus campestris group Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial with author, "group" at end
+      "Agaricus campestris Author group",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group Author",
+      real_search_name: "Agaricus campestris group Author",
+      sort_name:        "Agaricus campestris   group  Author",
+      display_name:     "**__Agaricus campestris__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris group sensu Author",
+      text_name:        "Agaricus campestris group",
+      real_text_name:   "Agaricus campestris group",
+      search_name:      "Agaricus campestris group sensu Author",
+      real_search_name: "Agaricus campestris group sensu Author",
+      sort_name:        "Agaricus campestris   group  sensu Author",
+      display_name:     "**__Agaricus campestris__** group sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+    do_name_parse_test( # species with Tulloss form of sp. nov.
+      "Pleurotus sp. T44 group Tulloss",
+      text_name: 'Pleurotus "sp-T44" group',
+      real_text_name: 'Pleurotus "sp-T44" group',
+      search_name: 'Pleurotus "sp-T44" group Tulloss',
+      real_search_name: 'Pleurotus "sp-T44" group Tulloss',
+      sort_name: 'Pleurotus {sp-T44"   group  Tulloss',
+      display_name: '**__Pleurotus "sp-T44"__** group Tulloss',
+      parent_name: "Pleurotus",
+      rank: :Group,
+      author: "Tulloss"
+    )
+    do_name_parse_test( # subgenus group, with author
+      "Amanita subg. Vaginatae group (L.) Ach.",
+      text_name: "Amanita subgenus Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      real_search_name: "Amanita subgenus Vaginatae group (L.) Ach.",
+      sort_name: "Amanita  {1subgenus  Vaginatae   group  (L.) Ach.",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** group (L.) Ach.",
+      parent_name: "Amanita",
+      rank: :Group,
+      author: "(L.) Ach."
+    )
+    do_name_parse_test( # stirps group, with sub-genus parent
+      "Amanita subgenus Vaginatae stirps Vaginatae group",
+      text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_text_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      real_search_name: "Amanita subgenus Vaginatae stirps Vaginatae group",
+      sort_name: "Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae   group",
+      display_name: "**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__** group",
+      parent_name: "Amanita subgenus Vaginatae",
+      rank: :Group,
+      author: ""
+    )
+    do_name_parse_test( # binomial, "group" part of epithet
+      "Agaricus grouperi group Author",
+      text_name:        "Agaricus grouperi group",
+      real_text_name:   "Agaricus grouperi group",
+      search_name:      "Agaricus grouperi group Author",
+      real_search_name: "Agaricus grouperi group Author",
+      sort_name:        "Agaricus grouperi   group  Author",
+      display_name:     "**__Agaricus grouperi__** group Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
+    )
+    do_name_parse_test( # author duplicates a word in the taxon
+      "Agaricus group Agaricus",
+      text_name:        "Agaricus group",
+      real_text_name:   "Agaricus group",
+      search_name:      "Agaricus group Agaricus",
+      real_search_name: "Agaricus group Agaricus",
+      sort_name:        "Agaricus   group  Agaricus",
+      display_name:     "**__Agaricus__** group Agaricus",
+      parent_name:      "",
+      rank:             :Group,
+      author:           "Agaricus"
+    )
+  end
+
+  def test_name_parse_clade_names
+    do_name_parse_test( # monomial, no author
+      "Agaricus clade",
+      text_name:        "Agaricus clade",
+      real_text_name:   "Agaricus clade",
+      search_name:      "Agaricus clade",
+      real_search_name: "Agaricus clade",
+      sort_name:        "Agaricus   clade",
+      display_name:     "**__Agaricus__** clade",
+      parent_name:      "",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, no author
+      "Agaricus campestris clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade",
+      real_search_name: "Agaricus campestris clade",
+      sort_name:        "Agaricus campestris   clade",
+      display_name:     "**__Agaricus campestris__** clade",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           ""
+    )
+    do_name_parse_test( # binomial, sensu author
+      "Agaricus campestris clade sensu Author",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade sensu Author",
+      real_search_name: "Agaricus campestris clade sensu Author",
+      sort_name:        "Agaricus campestris   clade  sensu Author",
+      display_name:     "**__Agaricus campestris__** clade sensu Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "sensu Author"
+    )
+    do_name_parse_test( # binomial with author, "clade" at end
+      "Agaricus campestris Author clade",
+      text_name:        "Agaricus campestris clade",
+      real_text_name:   "Agaricus campestris clade",
+      search_name:      "Agaricus campestris clade Author",
+      real_search_name: "Agaricus campestris clade Author",
+      sort_name:        "Agaricus campestris   clade  Author",
+      display_name:     "**__Agaricus campestris__** clade Author",
+      parent_name:      "Agaricus",
+      rank:             :Group,
+      author:           "Author"
     )
   end
 
@@ -1143,35 +1308,46 @@ class NameTest < UnitTestCase
   end
 
   def test_rank_matchers
-    name = Name.find(1)   # Fungi
+    name = names(:fungi)
     refute(name.at_or_below_genus?)
     refute(name.below_genus?)
     refute(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(18)  # Agaricus
+    name = names(:agaricus)
     assert(name.at_or_below_genus?)
     refute(name.below_genus?)
     refute(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(52)  # Amanita subgenus Lepidella
+    name = names(:amanita_subgenus_lepidella)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     assert(name.between_genus_and_species?)
     refute(name.at_or_below_species?)
 
-    name = Name.find(2) # Coprinus comatus
+    name = names(:coprinus_comatus)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     refute(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
 
-    name = Name.find(53) # Amanita boudieri var. beillei
+    name = names(:amanita_boudieri_var_beillei)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     refute(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
+  end
+
+  def test_text_before_rank
+    name_above_genus = names(:fungi)
+    assert_equal("Fungi", name_above_genus.text_before_rank)
+
+    name_between_genus_and_species = names(:amanita_subgenus_lepidella)
+    assert_equal("Amanita", name_between_genus_and_species.text_before_rank)
+
+    variety_name = names(:amanita_boudieri_var_beillei)
+    assert_equal("Amanita boudieri var. beillei", variety_name.text_before_rank)
   end
 
   # def dump_list_of_names(list)
@@ -1405,7 +1581,7 @@ class NameTest < UnitTestCase
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -1428,7 +1604,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -1462,7 +1638,7 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 2, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
     assert_equal(2, QueuedEmail.count)
@@ -1497,9 +1673,9 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 3, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
+    assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::NameChange",
@@ -1533,8 +1709,8 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(rolf.id, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
                  flavor: "QueuedEmail::NameChange",
@@ -1572,9 +1748,9 @@ class NameTest < UnitTestCase
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(:unreviewed, desc.review_status)
-    assert_equal(nil, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_nil(desc.reviewer_id)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(5, QueuedEmail.count)
     assert_email(4,
                  flavor: "QueuedEmail::NameChange",
@@ -1607,9 +1783,9 @@ class NameTest < UnitTestCase
     assert_equal(description_version + 4, desc.version)
     assert_equal(2, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(nil, desc.reviewer_id)
-    assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_nil(desc.reviewer_id)
+    assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(6, QueuedEmail.count)
     assert_email(5,
                  flavor: "QueuedEmail::NameChange",
@@ -1655,7 +1831,7 @@ class NameTest < UnitTestCase
     assert(names(:tremella_mesenterica).is_lichen?)
     assert(names(:tremella).is_lichen?)
     assert(names(:tremella_justpublished).is_lichen?)
-    assert(!names(:agaricus_campestris).is_lichen?)
+    refute(names(:agaricus_campestris).is_lichen?)
   end
 
   def test_has_eol_data
@@ -1738,6 +1914,7 @@ class NameTest < UnitTestCase
 
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
+    return unless sql_collates_accents?
     n1 = create_test_name("Agaricus Aehou")
     n2 = create_test_name("Agaricus Aeiou")
     n3 = create_test_name("Agaricus Aeiøu")
@@ -1752,7 +1929,8 @@ class NameTest < UnitTestCase
     assert_equal(%w(Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou), x)
   end
 
-  def test_name_sort_order
+  # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
+  def test_name_spaceship_operator
     names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
@@ -1761,16 +1939,19 @@ class NameTest < UnitTestCase
       create_test_name("Agaricales"),
       create_test_name("Agaricineae"),
       create_test_name("Agaricaceae"),
-      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Śliwa"),
+      create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
       create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
       create_test_name("Agaricus ugliano Zoom"),
       create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
@@ -1782,6 +1963,44 @@ class NameTest < UnitTestCase
       SELECT sort_name FROM names WHERE id >= #{names.first.id} AND id <= #{names.last.id}
     )
     assert_equal(names.map(&:sort_name).sort, x.sort)
+  end
+
+  # Prove that alphabetized sort_names give us names in the expected order
+    # Differs from test_name_spaceship_operator in omitting "Agaricus Śliwa",
+    # whose sort_name is after all the levels between genus and species,
+    # apparently because "Ś" sorts after "{".
+  def test_name_sort_order
+    names = [
+      create_test_name("Agaricomycota"),
+      create_test_name("Agaricomycotina"),
+      create_test_name("Agaricomycetes"),
+      create_test_name("Agaricomycetidae"),
+      create_test_name("Agaricales"),
+      create_test_name("Agaricineae"),
+      create_test_name("Agaricaceae"),
+      create_test_name("Agaricus group"),
+      create_test_name("Agaricus Aaron"),
+      create_test_name("Agaricus L."),
+      create_test_name("Agaricus Øosting"),
+      create_test_name("Agaricus Zzyzx"),
+      create_test_name("Agaricus Đorn"),
+      create_test_name("Agaricus subgenus Dick"),
+      create_test_name("Agaricus section Charlie"),
+      create_test_name("Agaricus subsection Bob"),
+      create_test_name("Agaricus stirps Arthur"),
+      create_test_name("Agaricus aardvark"),
+      create_test_name("Agaricus aardvark group"),
+      create_test_name('Agaricus "tree-beard"'),
+      create_test_name("Agaricus ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. ugliano Zoom"),
+      create_test_name("Agaricus ugliano ssp. erik Zoom"),
+      create_test_name("Agaricus ugliano var. danny Zoom"),
+      create_test_name('Agaricus "sp-LD50"')
+    ]
+    expected_sort_names = names.map(&:sort_name)
+    sorted_sort_names = names.sort.map(&:sort_name)
+
+    assert_equal(expected_sort_names, sorted_sort_names)
   end
 
   def test_guess_rank
@@ -1896,5 +2115,10 @@ class NameTest < UnitTestCase
     assert_obj_list_equal([species3],           Name.suggest_alternate_spellings("Lecanora granti"))
     assert_obj_list_equal([species3, species4], Name.suggest_alternate_spellings("Lecanora grandi"))
     assert_obj_list_equal([species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis"))
+  end
+
+  def test_imageless
+    assert_true(names(:imageless).imageless?)
+    assert_false(names(:fungi).imageless?)
   end
 end

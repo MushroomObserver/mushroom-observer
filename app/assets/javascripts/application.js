@@ -6,12 +6,14 @@
 //= require box_resizer
 //= require confirm
 //= require csrf_token
+//= require external_link
 //= require image_vote
 //= require image_export
 //= require theater
 //= require validate_file_input_fields
 //= require main
 //= require lightbox
+//= require popup_exif
 
 lightbox.option({
     'fadeDuration': 0,

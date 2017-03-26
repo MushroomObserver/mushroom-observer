@@ -9,7 +9,7 @@ Content-Transfer-Encoding: 7bit
 
 Admin Request
 
-Katrina (katrina@collectivesource.com) asked the Mushroom Observer website to forward the following request to you regarding EOL Project:
+<%= (User.find(ActiveRecord::FixtureSet.identify(:katrina)).name) %> (katrina@collectivesource.com) asked the Mushroom Observer website to forward the following request to you regarding EOL Project:
 
 and this is why...
 
@@ -17,8 +17,7 @@ and this is why...
 
 Here are some handy links:
 
-Change user's status: http://mushroomobserver.org/project/change_user_status/1?candidate=5
-Show user's profile: http://mushroomobserver.org/observer/show_user/5
+Show user's profile: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

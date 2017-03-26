@@ -152,13 +152,15 @@ class UserTest < UnitTestCase
     spl2  = species_lists(:another_species_list)
     spl3  = species_lists(:unknown_species_list)
     assert_obj_list_equal([spl1, spl2], rolf.species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], mary.species_lists)
+    assert_obj_list_equal(SpeciesList.where(user: mary), mary.species_lists)
     assert_obj_list_equal([], dick.species_lists)
     assert_obj_list_equal([dick], proj.user_group.users)
     assert_obj_list_equal([spl3], proj.species_lists)
 
-    assert_obj_list_equal([spl1, spl2], rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], mary.all_editable_species_lists)
+    assert_obj_list_equal([spl1, spl2],
+                           rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal(SpeciesList.where(user: mary),
+                          mary.all_editable_species_lists)
     assert_obj_list_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
@@ -170,14 +172,16 @@ class UserTest < UnitTestCase
     rolf.reload
     mary.reload
     dick.reload
-    assert_obj_list_equal([spl1, spl2, spl3], rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl1, spl3], mary.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl2, spl3],
+                          rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
+                           mary.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([], dick.all_editable_species_lists)
   end
 
   def test_preferred_herbarium_name
-    assert_equal(herbaria(:nybg).name, rolf.preferred_herbarium_name)
-    assert_equal(users(:mary).personal_herbarium_name, mary.preferred_herbarium_name)
+    assert_equal(herbaria(:nybg_herbarium).name, rolf.preferred_herbarium_name)
+    assert_equal(mary.personal_herbarium_name, mary.preferred_herbarium_name)
   end
 
   def test_remove_image
@@ -203,7 +207,7 @@ class UserTest < UnitTestCase
   end
 
   def test_erase_user_with_comment_and_name_descriptions
-    user = users(:dick)
+    user = dick
     num_comments = Comment.count
     assert_equal(1, user.comments.length)
     comment_id = user.comments.first.id
@@ -219,7 +223,7 @@ class UserTest < UnitTestCase
   end
 
   def test_erase_user_with_observation
-    user = users(:katrina)
+    user = katrina
     num_observations = Observation.count
     num_namings = Naming.count
     num_votes = Vote.count
@@ -241,7 +245,7 @@ class UserTest < UnitTestCase
     assert_equal(observation_id, image.observations.first.id)
 
     # Move some other user's comment over to make sure they get deleted, too.
-    comment = users(:rolf).comments.first
+    comment = rolf.comments.first
     comment.target_id = observation.id
     comment.save
     comment_id = comment.id

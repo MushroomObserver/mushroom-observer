@@ -2,7 +2,7 @@
   @title = "Specimen '#{@specimen.herbarium_label}'"
 
   tabs = []
-  if is_in_admin_mode? || @specimen.can_edit?(@user)
+  if in_admin_mode? || @specimen.can_edit?(@user)
     tabs << link_to(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
   end
   tabs += [

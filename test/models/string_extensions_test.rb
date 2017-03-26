@@ -3,18 +3,6 @@ require "test_helper"
 
 # test extensions to Ruby and Rails String Class
 class StringExtensionsTest < UnitTestCase
-  def test_bytesize
-    str = "abčde"
-    assert_equal(5, str.length)
-    assert_equal(6, str.bytesize)
-    assert_equal("abčd", str.truncate_bytesize(5))
-    assert_equal("abč", str.truncate_bytesize(4))
-    assert_equal("ab", str.truncate_bytesize(3))
-    assert_equal("ab", str.truncate_bytesize(2))
-    assert_equal("a", str.truncate_bytesize(1))
-    assert_equal("", str.truncate_bytesize(0))
-  end
-
   def test_capitalize_first
     assert_equal("", "".capitalize_first)
     assert_equal("A", "a".capitalize_first)
@@ -55,30 +43,67 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_truncate_bytesize
-    assert_equal("aéioü", "aéioü".truncate_bytesize(7))
-    assert_equal("aéio", "aéioü".truncate_bytesize(6))
-    assert_equal("aéio", "aéioü".truncate_bytesize(5))
+    # These European diacriticals are all 2-byte utf-8 entities:
+    assert_equal("åéïø",  "åéïøü".truncate_bytesize(9))
+    assert_equal("åéïø",  "åéïøü".truncate_bytesize(8))
+    assert_equal("åéï",   "åéïøü".truncate_bytesize(7))
+    assert_equal("åéï",   "åéïøü".truncate_bytesize(6))
+    assert_equal("åé",    "åéïøü".truncate_bytesize(5))
+    assert_equal("åé",    "åéïøü".truncate_bytesize(4))
+    assert_equal("å",     "åéïøü".truncate_bytesize(3))
+    assert_equal("å",     "åéïøü".truncate_bytesize(2))
+    assert_equal("",      "åéïøü".truncate_bytesize(1))
+    assert_equal("",      "åéïøü".truncate_bytesize(0))
+
+    # These kanji are 3-byte, 4-byte and 3-byte utf-8 entities, respectively:
+    assert_equal("平𩸽名", "平𩸽名".truncate_bytesize(11))
+    assert_equal("平𩸽名", "平𩸽名".truncate_bytesize(10))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(9))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(8))
+    assert_equal("平𩸽",   "平𩸽名".truncate_bytesize(7))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(6))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(5))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(4))
+    assert_equal("平",     "平𩸽名".truncate_bytesize(3))
+    assert_equal("",       "平𩸽名".truncate_bytesize(2))
+  end
+
+  def test_truncate_bytesize_in_place
+    str = "aéioü"
+    str.truncate_bytesize!(5)
+    assert_equal("aéio", str)
+  end
+
+  def test_string_truncate_html
+    assert_equal("123", "123".truncate_html(5))
+    assert_equal("12345", "12345".truncate_html(5))
+    assert_equal("1234...", "123456".truncate_html(5))
+    assert_equal("<i>1234...</i>", "<i>123456</i>".truncate_html(5))
+    assert_equal("<i>12<b>3</b>4...</i>", "<i>12<b>3</b>456</i>".truncate_html(5))
+    assert_equal("<i>12<b>3<hr/></b>4...</i>", "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
+    assert_equal("<i>12</i>3<b>4...</b>", "<i>12</i>3<b>456</b>".truncate_html(5))
+    assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
+  end
+
+  def test_iconv
+    assert_equal("áëìøũ", "áëìøũ".iconv("utf-8").encode("utf-8"))
+    assert_equal("áëìøu", "áëìøũ".iconv("iso8859-1").encode("utf-8"))
+    assert_equal("aeiou", "áëìøũ".iconv("ascii-8bit").encode("utf-8"))
+    assert_equal("ενα", "ενα".iconv("utf-8").encode("utf-8"))
+    assert_equal("???", "ενα".iconv("ascii-8bit").encode("utf-8"))
+  end
+
+  def test_character_asciiness
+    assert("a".is_ascii_character?)
+    refute("á".is_ascii_character?)
   end
 
   def test_levenshtein_distance
     assert_equal(3, "".levenshtein_distance_to("abc"))          # 3 add
-    assert_equal(6, "".levenshtein_distance_to("abc", 2, 1, 1))
-    assert_equal(3, "".levenshtein_distance_to("abc", 1, 2, 1))
-    assert_equal(3, "".levenshtein_distance_to("abc", 1, 1, 2))
 
     assert_equal(3, "abc".levenshtein_distance_to(""))          # 3 del
-    assert_equal(3, "abc".levenshtein_distance_to("", 2, 1, 1))
-    assert_equal(6, "abc".levenshtein_distance_to("", 1, 2, 1))
-    assert_equal(3, "abc".levenshtein_distance_to("", 1, 1, 2))
 
     assert_equal(3, "abc".levenshtein_distance_to("def"))       # 3 chg
-    assert_equal(3, "abc".levenshtein_distance_to("def", 2, 1, 1))
-    assert_equal(3, "abc".levenshtein_distance_to("def", 1, 2, 1))
-    # 3 chg = 3 add + 3 del
-    assert_equal(6, "abc".levenshtein_distance_to("def", 1, 1, 2))
-    # 3 add + 3 del
-    assert_equal(6, "abc".levenshtein_distance_to("def", 1, 1, 10))
-
     assert_equal(3, "çŚ©".levenshtein_distance_to("Äøµ"))
     assert_equal(1, "Agaricus campestris".
       levenshtein_distance_to("Agaricus campestras"))
@@ -89,5 +114,10 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(0.7143, "Physcia".percent_match("Phycsia").round(4))
     assert_equal(0.8421, "Agaricis Campestras".
       percent_match("Agaricus campestris").round(4))
+  end
+
+  ### Test extensions used with Textile ###
+  def test_tp_nodiv
+    assert("<p>a</p>", "a".tp_nodiv)
   end
 end

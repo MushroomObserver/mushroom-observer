@@ -1,6 +1,10 @@
 # encoding: utf-8
 
 module PatternSearch
+  # Parse PatternSearch parameter terms
+  # Sample use:
+  #   elsif term.var == :specimen
+  #     args[:has_specimen] = term.parse_boolean_string
   class Term
     attr_accessor :var
     attr_accessor :vals
@@ -11,7 +15,11 @@ module PatternSearch
     end
 
     def <<(val)
-      vals << val
+      while val.to_s.match(/^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/)
+        vals << dequote(Regexp.last_match(1))
+        val = val.to_s[Regexp.last_match(0).length..-1]
+        break if val.blank?
+      end
     end
 
     def quote(x)
@@ -31,27 +39,144 @@ module PatternSearch
       vals.map { |v| quote(v) }.join(" ")
     end
 
-    def parse_boolean
+    def parse_boolean(only_yes = false)
       fail MissingValueError.new(var: var) if vals.empty?
       fail TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       return true  if val.match(/^(1|yes|true)$/i)
-      return false if val.match(/^(0|no|false)$/i)
+      return false if val.match(/^(0|no|false)$/i) && !only_yes
+      fail BadYesError.new(var: var, val: val) if only_yes
       fail BadBooleanError.new(var: var, val: val)
+    end
+
+    # Assure that param has only one value - a booleanish string -
+    #   returning "TRUE" or "FALSE" (rather than true/false).
+    # This is needed where the param interacts with user content filters and
+    #   and where the relevant sql string is TRUE / FALSE
+    #   e.g., :has_specimen
+    def parse_to_true_false_string(only_yes = false)
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      return "TRUE" if val.match(/^(1|yes|true)$/i)
+      return "FALSE" if val.match(/^(0|no|false)$/i) && !only_yes
+      fail BadYesError.new(var: var, val: val) if only_yes
+      fail BadBooleanError.new(var: var, val: val)
+    end
+
+    # Assure that param has only one value - a booleanish string -
+    #   returning "NULL" or "NOT NULL" (rather than true/false).
+    # This is needed where the param interacts with user content filters and
+    #   and where the relevant sql string is NULL / NOT NULL
+    #   e.g., :has_images
+    def parse_to_null_not_null_string(only_yes = false)
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      return "NOT NULL" if val.match(/^(1|yes|true)$/i)
+      return "NULL" if val.match(/^(0|no|false)$/i) && !only_yes
+      fail BadYesError.new(var: var, val: val) if only_yes
+      fail BadBooleanError.new(var: var, val: val)
+    end
+
+    def parse_list_of_names
+      fail MissingValueError.new(var: var) if vals.empty?
+      vals.map do |val|
+        if val.match(/^\d+$/)
+          Name.safe_find(val) ||
+            fail(BadNameError.new(var: var, val: val))
+        else
+          Name.find_by_text_name(val) || Name.find_by_search_name(val) ||
+            fail(BadNameError.new(var: var, val: val))
+        end
+      end.map(&:id)
+    end
+
+    def parse_list_of_locations
+      fail MissingValueError.new(var: var) if vals.empty?
+      vals.map do |val|
+        if val.match(/^\d+$/)
+          Location.safe_find(val) ||
+            fail(BadLocationError.new(var: var, val: val))
+        else
+          Location.find_by_name(val) ||
+          Location.find_by_scientific_name(val) ||
+            fail(BadLocationError.new(var: var, val: val))
+        end
+      end.map(&:id)
+    end
+
+    def parse_list_of_projects
+      fail MissingValueError.new(var: var) if vals.empty?
+      vals.map do |val|
+        if val.match(/^\d+$/)
+          Project.safe_find(val) ||
+            fail(BadProjectError.new(var: var, val: val))
+        else
+          Project.find_by_title(val) ||
+            fail(BadProjectError.new(var: var, val: val))
+        end
+      end.map(&:id)
+    end
+
+    def parse_list_of_species_lists
+      fail MissingValueError.new(var: var) if vals.empty?
+      vals.map do |val|
+        if val.match(/^\d+$/)
+          SpeciesList.safe_find(val) ||
+            fail(BadSpeciesListError.new(var: var, val: val))
+        else
+          SpeciesList.find_by_title(val) ||
+            fail(BadSpeciesListError.new(var: var, val: val))
+        end
+      end.map(&:id)
     end
 
     def parse_list_of_users
       fail MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
         if val.match(/^\d+$/)
-          (user = User.safe_find(val)) ||
+          User.safe_find(val) ||
             fail(BadUserError.new(var: var, val: val))
         else
-          (user = User.find_by_login(val)) ||
-            (user = User.find_by_name(val)) ||
+          User.find_by_login(val) ||
+            User.find_by_name(val)  ||
             fail(BadUserError.new(var: var, val: val))
         end
-        user
+      end.map(&:id)
+    end
+
+    def parse_string
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      vals.first
+    end
+
+    def parse_float(min, max)
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      fail BadFloatError.new(var: var, val:val, min: min, max: max) \
+        unless val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/)
+      fail BadFloatError.new(var: var, val:val, min: min, max: max) \
+        unless val.to_f >= min && val.to_f <= max
+      return val.to_f
+    end
+
+    def parse_confidence
+      fail MissingValueError.new(var: var) if vals.empty?
+      fail TooManyValuesError.new(var: var) if vals.length > 1
+      val = vals.first
+      if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
+         (-100..100).include?(val.to_f)
+        [val.to_f * 3 / 100, 3]
+      elsif val.to_s.match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
+            (-100..100).include?(Regexp.last_match(1).to_f) &&
+            (-100..100).include?(Regexp.last_match(3).to_f) &&
+            Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
+        [Regexp.last_match(1).to_f * 3 / 100, Regexp.last_match(3).to_f * 3 / 100]
+      else
+        fail BadConfidenceError.new(var: var, val: val)
       end
     end
 

@@ -9,16 +9,16 @@ Content-Transfer-Encoding: 7bit
 
 Research Request
 
-Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation Agaricus campestris L. (4):
+Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation Agaricus campestris L. (<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>):
 
-A note about http://mushroomobserver.org/4 for rolf
+A note about http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %> for rolf. Please send to 123 Some Pl., Pasadena, CA 91106.
 
 --------------------------------------------------
 
 It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this observation: http://mushroomobserver.org/observer/show_observation/4
+Show this observation: http://mushroomobserver.org/observer/show_observation/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

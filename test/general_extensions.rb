@@ -45,6 +45,15 @@ module GeneralExtensions
   #  :section: Test unit helpers
   #
   ##############################################################################
+  def sql_collates_accents?
+    sql_sorted = u_and_umlaut_collated_by_sql.map { |x| x[:notes] }
+    sql_sorted == sql_sorted.sort
+  end
+
+  # sql sort of 3 consecutive records whose :notes are, respectively: u, ü, u
+  def u_and_umlaut_collated_by_sql
+    ApiKey.select(:notes).where(key: "sort_test").order(:notes).to_a
+  end
 
   # These used to be automatically instantiated fixtures, e.g., @dick, etc.
   def rolf
@@ -73,6 +82,7 @@ module GeneralExtensions
 
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
+    FileUtils.remove_dir("#{Rails.root}/config/test_locales", force: true)
   end
 
   # Create test image dirs for tests that do image uploads.
@@ -387,6 +397,7 @@ module GeneralExtensions
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
       template = File.open(filename, format).read
       template = enforce_encoding(encoding, file, template)
+      template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?
       if template_match(processed_str, template)
         # Stop soon as we find one that matches.
@@ -422,7 +433,8 @@ module GeneralExtensions
     result
   end
 
-  # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
+  # Ensure that all the lines in template are in str.
+  # Allows additional headers like 'Date' to get added to str and to vary
   def template_match(str, template)
     template = template.gsub /\r\n?/, "\n"
     str = str.gsub /\r\n?/, "\n"

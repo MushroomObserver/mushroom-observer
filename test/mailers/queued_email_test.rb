@@ -17,12 +17,12 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_comment_email
-    QueuedEmail::CommentAdd.find_or_create_email(rolf, mary, comments(:minimal_comment))
+    QueuedEmail::CommentAdd.find_or_create_email(rolf, mary, comments(:minimal_unknown_obs_comment_1))
     assert_email(0,
                  flavor: "QueuedEmail::CommentAdd",
                  from: rolf,
                  to: mary,
-                 comment: comments(:minimal_comment).id
+                 comment: comments(:minimal_unknown_obs_comment_1).id
                 )
     email = QueuedEmail.first.deliver_email
     assert(email)

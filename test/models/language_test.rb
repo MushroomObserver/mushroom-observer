@@ -15,9 +15,9 @@ class LanguageTest < UnitTestCase
     greek = languages(:greek)
     assert_equal([], english.top_contributors)
     french_contributors = Set.new(french.top_contributors)
-    assert_equal(Set.new([[2, "mary"], [1, "rolf"]]), french_contributors)
-    assert(french_contributors.member?([2, "mary"]))
-    assert_equal([[4, "dick"]], greek.top_contributors)
+    assert_equal(Set.new([[mary.id, "mary"], [rolf.id, "rolf"]]), french_contributors)
+    assert(french_contributors.member?([mary.id, "mary"]))
+    assert_equal([[dick.id, "dick"]], greek.top_contributors)
   end
 
   def read_from_yaml(lang, symbol)
@@ -78,7 +78,7 @@ class LanguageTest < UnitTestCase
     User.current = str.user
     set_text(str, "Gandalf the Gray")
     expected_version = str.version + 1
-    User.current = users(:katrina)
+    User.current = katrina
     assert_not_equal(str.user_id, User.current_id)
     set_text(str, "Mithrandir")
     assert_equal(expected_version, str.version)

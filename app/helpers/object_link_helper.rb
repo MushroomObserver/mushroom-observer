@@ -51,7 +51,11 @@ module ObjectLinkHelper
 
   # Create link for name to search in MycoBank
   def mycobank_url(name)
-    mycobank_path + mycobank_taxon(name) + mycobank_language_suffix(locale).to_s
+    unescaped_str = (mycobank_path + mycobank_taxon(name) +
+                     mycobank_language_suffix(locale).to_s)
+    # CGI::escape.html(unescaped_str) should work, but throws error
+    #   ActionView::Template::Error: wrong number of arguments (0 for 1)
+    unescaped_str.gsub(" ", "%20")
   end
 
   def mycobank_path
@@ -59,13 +63,7 @@ module ObjectLinkHelper
   end
 
   def mycobank_taxon(name)
-    return name.text_name.gsub(" ", "%20") unless
-      name.between_genus_and_species?
-    genus_only(name)
-  end
-
-  def genus_only(name)
-    name.text_name.match(/([^\s]+)/).to_s
+    name.between_genus_and_species? ? name.text_before_rank : name.text_name
   end
 
   # language parameter for MycoBank link

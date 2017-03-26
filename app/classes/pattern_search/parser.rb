@@ -5,7 +5,8 @@ module PatternSearch
     attr_accessor :incoming_string
     attr_accessor :terms
 
-    TERM_REGEX = /^(\w+:)? ( "([^\\\"]+|\\.)*" | '([^\\\']+|\\.)*' | ([^\s\\]+|\\.)+ ) (\s+|$)/x
+    VAL_REGEX  = / "([^\\\"]+|\\.)*" | '([^\\\']+|\\.)*' | ([^\s\\,]+|\\.)+ /x
+    TERM_REGEX = /^(\w+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)/x
 
     def initialize(string)
       self.incoming_string = string
@@ -22,7 +23,7 @@ module PatternSearch
       until str.blank?
         (var, val) = parse_next_term!(str)
         term = hash[var] ||= Term.new(var)
-        term << term.dequote(val)
+        term << val
       end
       hash.values
     end

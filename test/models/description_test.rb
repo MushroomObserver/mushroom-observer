@@ -31,12 +31,14 @@ class DescriptionTest < UnitTestCase
     for model in [LocationDescription, NameDescription]
       case model.name
       when "LocationDescription"
-        obj = model.new(location_id: 1, license_id: 1)
+        obj = model.new(location_id: locations(:albion).id,
+                        license_id: licenses(:ccnc25).id)
         a = 50
         e = 5
         set_nontrivial = "notes="
       when "NameDescription"
-        obj = model.new(name_id: 1, license_id: 1)
+        obj = model.new(name_id: names(:fungi).id,
+              license_id: licenses(:ccnc25).id)
         a = 100
         e = 10
         set_nontrivial = "gen_desc="

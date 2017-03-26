@@ -12,9 +12,9 @@ Content-Transfer-Encoding: quoted-printable
 </head>
 <body topmargin=3D0 leftmargin=3D0 rightmargin=3D0 bottommargin=3D0><br/>=
 <div class=3D"textile"><h2><strong>Author Request</strong></h2>
-<p>Katrina (katrina@collectivesource.com) asked the Mushroom Observer web=
-site to forward the following request to you regarding <b><i>Coprinus com=
-atus</i></b> (O.F. M=C3=BCll.) Pers. (2):</p></div>
+<p>Katrina (katrina&#64;collectivesource.com) asked the Mushroom Observer=
+website to forward the following request to you regarding <b><i>Coprinus=
+comatus</i></b> (O.F. M=C3=BCll.) Pers. (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>):</p></div>
 <div style=3D'margin-left:20px; margin-right:20px; padding-left:20px; pad=
 ding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted=
 ; background:#E0E0E0; color:#000000;'>
@@ -23,18 +23,18 @@ ding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted=
 <div class=3D"textile"><p>Here are some handy links:</p></div>
 <ul type=3Dnone>
 <li>Make sender an author: <a href=3D"http://mushroomobserver.org/obs=
-erver/review_authors/15?type=3Dname_description&amp;add=3D5">http://mushr=
-oomobserver.org/observer/review_authors/15?type=3Dname_description&amp;ad=
-d=3D5</a></li>
+erver/review_authors/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=3Dname_description&amp;add=3D<%= ActiveRecord::FixtureSet.identify(:katrina) %>=
+">http://mushroomobserver.org/observer/review_authors/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=3Dnam=
+e_description&amp;add=3D<%= ActiveRecord::FixtureSet.identify(:katrina) %></a></li>
 <li>Show user&#8217;s profile: <a href=3D"http://mushroomobserver.org=
-/observer/show_user/5">http://mushroomobserver.org/observer/show_user/5</=
-a></li>
+/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:katrina) %>">http://mushroomobserver.org/observer/show_=
+user/<%= ActiveRecord::FixtureSet.identify(:katrina) %></a></li>
 <li>Latest changes at Mushroom Observer: <a href=3D"http://mushroomob=
 server.org">http://mushroomobserver.org</a></li>
 </ul>
 <div class=3D"textile"><p>If you feel this user is abusing this service p=
-lease forward this entire email message to: webmaster@mushroomobserver.or=
-g</p></div>
+lease forward this entire email message to: webmaster&#64;mushroomobserve=
+r.org</p></div>
 <br/>
 </body>
 </html>

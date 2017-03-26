@@ -23,7 +23,7 @@ function MultiImageUploader(localized_text) {
     var fileStore = new FileStore(),
         dateUpdater = new DateUpdater(),
         _maxImageSize = <%= MO.image_upload_max_size %>,
-        _getTemplateUri = "/ajax/get_multi_image_template",
+        _getTemplateUri = "/ajax/multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
         _progressUri = "/ajax/upload_progress",
         _dots = [".", "..", "..."],
@@ -96,12 +96,11 @@ function MultiImageUploader(localized_text) {
     //builds and refreshes the fix date box;
     DateUpdater.prototype.refreshBox = function () {
         var _this = this,
-            _distinctImgDates = fileStore.getDistinctImageDates();
+            _distinctImgDates = fileStore.getDistinctImageDates(),
+            obsDate = _this.observationDate();
 
         $imgRadioContainer.html('');
-        $obsRadioContainer.html('');
-
-        var obsDate = _this.observationDate();
+        $obsRadioContainer.html('');       
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
@@ -111,9 +110,7 @@ function MultiImageUploader(localized_text) {
 
         if (_this.areDatesInconsistent()) {
             $imgMessages.show('slow');
-        }
-
-        if (!this.areDatesInconsistent()) {
+        } else {
             $imgMessages.hide('slow')
         }
 
@@ -213,6 +210,15 @@ function MultiImageUploader(localized_text) {
         }
     };
 
+    FileStore.prototype.addUrl = function(url) {
+        var _this = this;
+        if (_this.fileDictionary[url] == undefined) {
+            var _fileStoreItem = new FileStoreItem(url, generateUUID());
+            _this.fileDictionary[url] = _fileStoreItem;
+            _this.fileStoreItems.push(_fileStoreItem);
+        }
+    };
+
     FileStore.prototype.updateImageDates = function (simpleDate) {
         var _this = this;
         _this.fileStoreItems.forEach(function (fileStoreItem) {
@@ -283,8 +289,14 @@ function MultiImageUploader(localized_text) {
 
     // Contains information about an image file.
 
-    function FileStoreItem(file, uuid) {
-        this.file = file;
+    function FileStoreItem(file_or_url, uuid) {
+        if (typeof file_or_url == "string") {
+          this.is_file = false;
+          this.url = file_or_url;
+        } else {
+          this.is_file = true;
+          this.file = file_or_url;
+        }
         this.uuid = uuid;
         this.dom_element = null;
         this.exif_data = null;
@@ -298,18 +310,20 @@ function MultiImageUploader(localized_text) {
             img_number: _this.uuid
         }, function (data) {  //on success
             _this.createTemplate(data) //the data returned is the raw HTML template
+            _this.getExifData();  //extract the EXIF data (async) and then load it
+            _this.loadImage(); //load image as base64 async
         });
     };
 
     FileStoreItem.prototype.createTemplate = function (html_string) {
         var _this = this;
 
-        html_string = html_string.replace('{{img_file_name}}', _this.file.name)
-            .replace('{{img_file_size}}', Math.floor((_this.file.size / 1024)) + "kb");
+        html_string = html_string.replace('{{img_file_name}}', _this.file_name())
+            .replace('{{img_file_size}}', this.is_file ? Math.floor((_this.file_size() / 1024)) + "kb" : "");
 
         _this.dom_element = $(html_string);  //Create the DOM element and add it to FileStoreItem;
 
-        if (_this.file.size > _maxImageSize)
+        if (_this.file_size() > _maxImageSize)
             _this.dom_element.find('.warn-text').text(localized_text.image_too_big_text);
 
         $addedImagesContainer.append(_this.dom_element); //add it to the page
@@ -323,26 +337,49 @@ function MultiImageUploader(localized_text) {
             dateUpdater.refreshBox();
         });
 
-        _this.getExifData();  //extract the EXIF data (async) and then load it
-        _this.loadImageAsFileUrl(); //load image as base64 async
+        replace_date_select_with_text_field(jQuery(_this.dom_element.find('select')[2]));
     };
 
-    FileStoreItem.prototype.loadImageAsFileUrl = function () {
+    FileStoreItem.prototype.file_name = function () {
+        if (this.is_file)
+            return this.file.name;
+        else
+            return decodeURI(this.url.replace(/.*\//, ""));
+    };
+
+    FileStoreItem.prototype.file_size = function () {
+        if (this.is_file)
+            return this.file.size;
+        else
+            return 0; // any way to get size from url??
+    };
+
+    FileStoreItem.prototype.loadImage = function () {
         var _this = this;
-        var fileReader = new FileReader();
-        fileReader.onload = function (fileLoadedEvent) {
-            var $img = _this.dom_element.find('.img-responsive').first(); //find the actual image element
-            $img.attr('src', fileLoadedEvent.target.result); //get the image element in the container and set the src to base64 img url
-        };
-        fileReader.readAsDataURL(_this.file);
+        if (_this.is_file) {
+            var fileReader = new FileReader();
+            fileReader.onload = function (fileLoadedEvent) {
+                var $img = _this.dom_element.find('.img-responsive').first(); //find the actual image element
+                $img.attr('src', fileLoadedEvent.target.result); //get the image element in the container and set the src to base64 img url
+            };
+            fileReader.readAsDataURL(_this.file);
+        } else {
+            var $img = _this.dom_element.find('.img-responsive').first();
+            $img.attr('src', _this.url).error(function () {
+                alert("Couldn't read image from: " + _this.url);
+                _this.destroy();
+            });
+        }
     };
 
     FileStoreItem.prototype.getExifData = function () {  //extracts the exif data async;
         var _fsItem = this;
-        EXIF.getData(_fsItem.file, function () {
-            _fsItem.exif_data = this.exifdata;
-            _fsItem.applyExifData();  //apply the data to the DOM
-        })
+        _fsItem.dom_element.find('.img-responsive').first().load(function() {
+            EXIF.getData(this, function () {
+                _fsItem.exif_data = this.exifdata;
+                _fsItem.applyExifData();  //apply the data to the DOM
+            });
+        });
     };
 
     FileStoreItem.prototype.applyExifData = function () {  //applys exif data to the DOM element, DOM element must already be attached
@@ -413,7 +450,7 @@ function MultiImageUploader(localized_text) {
         var _this = this,
         _$day = jQuery(_this.dom_element.find('select')[0]),
         _$month = jQuery(_this.dom_element.find('select')[1]),
-        _$year = jQuery(_this.dom_element.find('select')[2]);
+        _$year = jQuery(_this.dom_element.find('input')[2]);
         if (simpleDate) {
             _$day.val(simpleDate.day);
             _$month.val(simpleDate.month);
@@ -426,8 +463,8 @@ function MultiImageUploader(localized_text) {
         return {
             day: jQuery(this.dom_element.find('select')[0]).val(),
             month: jQuery(this.dom_element.find('select')[1]).val(),
-            year: jQuery(this.dom_element.find('select')[2]).val(),
-            license: jQuery(this.dom_element.find('select')[3]).val(),
+            year: jQuery(this.dom_element.find('input')[2]).val(),
+            license: jQuery(this.dom_element.find('select')[2]).val(),
             notes: jQuery(this.dom_element.find('textarea')[0]).val(),
             copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
         };
@@ -438,17 +475,20 @@ function MultiImageUploader(localized_text) {
             _info = _this.getUserEnteredInfo(),
             _fd = new FormData();
 
-        if (_this.file.size > _maxImageSize)
+        if (_this.file_size() > _maxImageSize)
             return null;
 
-        _fd.append("image[upload]", _this.file, _this.file.name);
+        if (_this.is_file)
+            _fd.append("image[upload]", _this.file, _this.file_name());
+        else
+            _fd.append("image[url]", _this.url);
         _fd.append("image[when][3i]", _info.day);
         _fd.append("image[when][2i]", _info.month);
         _fd.append("image[when][1i]", _info.year);
         _fd.append("image[notes]", _info.notes);
         _fd.append("image[copyright_holder]", _info.copyright_holder);
         _fd.append("image[license]", _info.license);
-        _fd.append("image[original_name]", _this.file.name);
+        _fd.append("image[original_name]", _this.file_name());
         return _fd;
     };
 
@@ -539,7 +579,10 @@ function MultiImageUploader(localized_text) {
 
     FileStoreItem.prototype.destroy = function () {
         this.dom_element.remove();  //remove element from the dom;
-        delete fileStore.fileDictionary[this.file.size]; //remove the file from the dictionary
+        if (this.is_file)
+            delete fileStore.fileDictionary[this.file_size()]; //remove the file from the dictionary
+        else
+            delete fileStore.fileDictionary[this.url]; //remove the file from the dictionary
         var idx = fileStore.fileStoreItems.indexOf(this); //removes the file from the array
         if (idx > -1)
             fileStore.fileStoreItems.splice(idx, 1);  //removes the file from the array
@@ -641,20 +684,29 @@ function MultiImageUploader(localized_text) {
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
-
-
+        
+               
         //Drag and Drop bindings on the window
-
+        
         $content.bind('dragover dragenter', function (e){
             if (e.preventDefault) { e.preventDefault(); }
+            jQuery('#right_side').addClass('dashed-border');
             return false;
         });
 
+        $content.bind('dragend dragleave dragexit', function (e){            
+            jQuery('#right_side').removeClass('dashed-border');            
+        });
         $content.bind('drop', function (e) {
             if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
-            var dataTransfer = e.originalEvent.dataTransfer;
-            console.log(e);
-            fileStore.addFiles(dataTransfer.files)
+            jQuery('#right_side').removeClass('dashed-border');
+            var dataTransfer = e.originalEvent.dataTransfer;            
+            if (dataTransfer.files.length > 0)
+                fileStore.addFiles(dataTransfer.files);
+            // There are issues to work out concerning dragging and dropping
+            // images from other websites into the observation form.
+            // else
+            //     fileStore.addUrl(dataTransfer.getData('Text'));
         });
 
         // Detect when files are added from browser

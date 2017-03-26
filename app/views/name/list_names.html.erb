@@ -3,7 +3,7 @@
     link_to(:name_index_add_name.t, action: :create_name),
     link_to(:name_index_bulk_edit.t, action: :bulk_name_edit)
   ]
-  tabs += @links.map {|str,url| link_to(str, url)} if @links
+  tabs += create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?

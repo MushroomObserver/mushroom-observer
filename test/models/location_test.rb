@@ -60,6 +60,13 @@ class LocationTest < UnitTestCase
     assert(!Location.understood_country?("Moon"))
   end
 
+  def test_understood_continent
+    assert(Location.understood_continent?("Central America"))
+    assert(!Location.understood_continent?("Atlantis"))
+    assert(Location.countries_in_continent("Europe").include?("France"))
+    assert(!Location.countries_in_continent("Europe").include?("Canada"))
+  end
+
   def test_versioning
     User.current = mary
     loc = Location.create!(
@@ -240,7 +247,7 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
-    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
+    assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
     assert_equal(2, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
@@ -317,12 +324,12 @@ class LocationTest < UnitTestCase
   end
 
   def test_parse_latitude
-    assert_equal(nil, Location.parse_latitude(""))
+    assert_nil(Location.parse_latitude(""))
     assert_equal(12.3456, Location.parse_latitude("12.3456"))
     assert_equal(-12.3456, Location.parse_latitude(" -12.3456 "))
-    assert_equal(nil, Location.parse_latitude("123.456"))
+    assert_nil(Location.parse_latitude("123.456"))
     assert_equal(12.3456, Location.parse_latitude("12.3456N"))
-    assert_equal(nil, Location.parse_latitude("12.3456E"))
+    assert_nil(Location.parse_latitude("12.3456E"))
     assert_equal(12.5824, Location.parse_latitude('12°34\'56.789"N'))
     assert_equal(12.5760, Location.parse_latitude("12 34.56"))
     assert_equal(-12.5760, Location.parse_latitude("-12 34 33.6"))
@@ -330,13 +337,13 @@ class LocationTest < UnitTestCase
   end
 
   def test_parse_longitude
-    assert_equal(nil, Location.parse_longitude(""))
+    assert_nil(Location.parse_longitude(""))
     assert_equal(12.3456, Location.parse_longitude("12.3456"))
     assert_equal(-12.3456, Location.parse_longitude(" -12.3456 "))
-    assert_equal(nil, Location.parse_longitude("190.456"))
+    assert_nil(Location.parse_longitude("190.456"))
     assert_equal(170.4560, Location.parse_longitude("170.456"))
     assert_equal(12.3456, Location.parse_longitude("12.3456E"))
-    assert_equal(nil, Location.parse_longitude("12.3456S"))
+    assert_nil(Location.parse_longitude("12.3456S"))
     assert_equal(12.5824, Location.parse_longitude('12°34\'56.789"E'))
     assert_equal(12.5760, Location.parse_longitude("12 34.56"))
     assert_equal(-12.5760, Location.parse_longitude("-12 34 33.6"))
@@ -344,8 +351,8 @@ class LocationTest < UnitTestCase
   end
 
   def test_convert_altitude
-    assert_equal(nil, Location.parse_altitude(""))
-    assert_equal(nil, Location.parse_altitude("blah"))
+    assert_nil(Location.parse_altitude(""))
+    assert_nil(Location.parse_altitude("blah"))
     assert_equal(123, Location.parse_altitude("123"))
     assert_equal(-123, Location.parse_altitude("-123.456"))
     assert_equal(-124, Location.parse_altitude("-123.567"))
@@ -391,8 +398,8 @@ class LocationTest < UnitTestCase
   end
 
   def do_merge_test(obj)
-    loc1 = Location.first
-    loc2 = Location.last
+    loc1 = locations(:albion)
+    loc2 = locations(:nybg_location)
     obj.update_attribute(:location, loc1)
     obj.reload
     assert_equal(loc1.id, obj.location_id)

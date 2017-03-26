@@ -1,0 +1,10 @@
+<% @title = :color_themes_title.t %>
+
+<div class="max-width-text">
+  <%= :color_themes_text.tp %>
+  <p>
+    <% MO.themes.each do|name| %>
+      <%= link_to(name.to_sym.l, action: name) %><br/>
+    <% end %>
+  </p>
+</div>

@@ -100,7 +100,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   def open_admin_session(user)
     user.admin = true
     user.save
-    sess = login!(user)
+    sess = open_session
+    sess.login!(user)
     sess.click(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
     sess.user = user
@@ -108,7 +109,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   end
 
   def open_normal_session(user)
-    sess = login!(user)
+    sess = open_session
+    sess.login!(user)
     teach_about_name_descriptions(sess)
     sess.user = user
     sess
@@ -324,7 +326,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       desc = new_name_description
       data = name_description_data
       assert_equal(data[:source_type], desc.source_type)
-      assert_equal(data[:source_name], desc.source_name)
+      assert(data[:source_name] == desc.source_name)
       assert_equal(data[:writable], desc.public_write)
       assert_equal(data[:readable], desc.public)
       assert_equal(data[:gen_desc].to_s, desc.gen_desc.to_s)

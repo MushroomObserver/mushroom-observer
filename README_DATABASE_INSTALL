@@ -1,13 +1,13 @@
 #
-#  Installation of the database server. [JPH 20140904]
+#  Installation of the database server. [NJW 20160224]
 #
 #  $USER             jason
 #  $DB_PASSWORD      xxxxxxxx
 #  $IP_ADDR          xxx.xxx.xxx.xxx
-#  $WEB_SERVER       web.mushroomobserver.org
-#  $SNAPSHOT_PATH    user@mushroomobserver.org:/var/web/mo/db
+#  $WEB_SERVER       mushroomobserver.org
+#  $SNAPSHOT_PATH    $USER@mushroomobserver.org:/var/web/mo/db
 #
-################################################################################
+###############################################################################
 
 local> ssh root@$IP_ADDR
 root> passwd -l root
@@ -17,7 +17,7 @@ root> useradd -m -s /bin/bash -G sudo $USER
 root> passwd $USER
 root> mkdir /home/$USER/.ssh
 root> vi /home/$USER/.ssh/authorized_keys
-  # paste in your local ~/.ssh/id_rsa.pub
+  # paste in appropriate id_rsa.pub
 root> chmod 600 /home/$USER/.ssh/authorized_keys
 root> chmod 700 /home/$USER/.ssh
 root> chown -R $USER:$USER /home/$USER/.ssh
@@ -86,12 +86,47 @@ root> mysql -u root -p
 root> service mysql restart
 
 # Configure on remote machine:
-remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
+remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=$DB_HOST ping
 remote> vi /var/web/mo/config/database.yml
   production:
+    adapter:  mysql2
     database: mo_production
-    host:     db.mushroomobserver.org
+    host:     $DB_HOST
     username: mo
     password: $DB_PASSWORD
+    socket:   /var/run/mysqld/mysqld.sock
+    encoding: utf8
+
 remote> rake db:version   # (just a simple test)
 
+# Update cron config file
+remote> vi /var/web/mo/config/mysql-production.cnf
+[client]
+host=$DB_HOST
+user=mo
+password="$DB_PASSWORD"
+
+[mysql]
+database=mo_production
+
+# Enable MRTG load average monitoring
+user> sudo su
+root> adduser mrtg
+root> mkdir ~mrtg/.ssh
+root> chown mrtg ~mrtg/.ssh
+root> cat > ~mrtg/.ssh/authorized_keys
+  # paste in appropriate id_rsa.pub
+root> cat > ~mrtg/load.sh
+#!/bin/sh
+
+# Check the 1 minute and 5 minute load averages
+# Alan Mon Dec 14 18:20:38 EST 2015
+
+cat /proc/loadavg | cut -d\  -f1 | sed s/\\\.//g
+cat /proc/loadavg | cut -d\  -f2 | sed s/\\\.//g
+
+uptime
+echo db3.mushroomobserver.org
+root> chmod 755 ~mrtg/load.sh
+# On the main MO webserver, make sure ~mrtg/mrtg.cfg has a target
+# which SSH's into the DB server and gets the load average.

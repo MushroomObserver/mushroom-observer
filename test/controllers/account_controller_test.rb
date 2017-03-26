@@ -37,9 +37,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("newbob", user.login)
     assert_equal("needs a name!", user.name)
     assert_equal("nathan@collectivesource.com", user.email)
-    assert_equal(nil, user.verified)
+    assert_nil(user.verified)
     assert_equal(false, user.admin)
-    assert_equal(true, user.created_here)
 
     # Make sure user groups are updated correctly.
     assert(UserGroup.all_users.users.include?(user))
@@ -298,7 +297,7 @@ class AccountControllerTest < FunctionalTestCase
         hide_authors:                 :above_species,
         image_size:                   :small,
         keep_filenames:               :keep_but_hide,
-        license_id:                   "1",
+        license_id:                   licenses(:ccnc25).id.to_s,
         layout_count:                 "100",
         locale:                       "el-GR",
         location_format:              :scientific,
@@ -410,7 +409,7 @@ class AccountControllerTest < FunctionalTestCase
       date: { copyright_year: "2003" }
     }
     post_requires_login(:profile, params)
-    assert_redirected_to(controller: :observer, action: :show_user, id: 1)
+    assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
     assert_flash_success
 
     rolf.reload
@@ -422,7 +421,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_no_email_hooks
-    for type in [
+    [
       :comments_owner,
       :comments_response,
       :comments_all,
@@ -439,7 +438,7 @@ class AccountControllerTest < FunctionalTestCase
       :general_feature,
       :general_commercial,
       :general_question
-    ]
+    ].each do |type|
       assert_request(
         action: "no_email_#{type}",
         params: { id: rolf.id },

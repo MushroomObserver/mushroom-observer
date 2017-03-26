@@ -51,9 +51,9 @@
 #  check_for_new_synonym::       (used by change_synonyms)
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
-################################################################################
-
 class NameController < ApplicationController
+  require_dependency "name_controller/show_name_description"
+
   include DescriptionControllerHelpers
 
   before_action :login_required, except: [
@@ -231,16 +231,11 @@ class NameController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(type: :observation),
-                 add_query_param({
-                                   controller: "observer", action: "index_observation"
-                                 }, query)]
-    end
+    @links << coerced_query_link(query, Observation)
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
-    if query.is_coercable?(:NameDescription)
+    if query.coercable?(:NameDescription)
       @links << [:show_objects.t(type: :description),
                  add_query_param({ action: "index_name_description" },
                                  query)]
@@ -316,10 +311,7 @@ class NameController < ApplicationController
 
     # Add "show names" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Name)
-      @links << [:show_objects.t(type: :name),
-                 add_query_param({ action: "index_name" }, query)]
-    end
+    @links << coerced_query_link(query, Name)
 
     show_index_of_objects(query, args)
   end
@@ -396,44 +388,6 @@ class NameController < ApplicationController
     end
   end
 
-  # Show just a NameDescription.
-  def show_name_description # :nologin: :prefetch:
-    store_location
-    pass_query_params
-    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/name/show_name_description/#{@description.id}"
-
-      # Tell robots the proper URL to use to index this content.
-      @canonical_url = "#{MO.http_domain}/name/show_name_description/#{@description.id}"
-
-      # Public or user has permission.
-      if @description.is_reader?(@user)
-        @name = @description.name
-        update_view_stats(@description)
-
-        # Get a list of projects the user can create drafts for.
-        @projects = @user && @user.projects_member.select do |project|
-          !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
-        end
-
-      # User doesn't have permission to see this description.
-      else
-        if @description.source_type == :project
-          flash_error(:runtime_show_draft_denied.t)
-          if project = @description.project
-            redirect_to(controller: "project", action: "show_project",
-                        id: project.id)
-          else
-            redirect_to(action: "show_name", id: @description.name_id)
-          end
-        else
-          flash_error(:runtime_show_description_denied.t)
-          redirect_to(action: "show_name", id: @description.name_id)
-        end
-      end
-    end
-  end
-
   # Show past version of Name.  Accessible only from show_name page.
   def show_past_name # :nologin: :prefetch: :norobots:
     pass_query_params
@@ -502,7 +456,7 @@ class NameController < ApplicationController
     pass_query_params
     id = params[:id].to_s
     desc = NameDescription.find(id)
-    desc.update_review_status(params[:value]) if is_reviewer?
+    desc.update_review_status(params[:value]) if reviewer?
     redirect_with_query(action: :show_name, id: desc.name_id)
   end
 
@@ -546,7 +500,7 @@ class NameController < ApplicationController
             flash_warning(:runtime_edit_name_no_change.t) unless any_changes
             redirect_to_show_name
           end
-        elsif is_in_admin_mode? || @name.mergeable? || new_name.mergeable?
+        elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
           merge_name_into(new_name)
           redirect_to_show_name
         else
@@ -600,7 +554,7 @@ class NameController < ApplicationController
 
   # Only allowed to make substantive changes to name if you own all the references to it.
   def can_make_changes?
-    unless is_in_admin_mode?
+    unless in_admin_mode?
       for obj in @name.namings + @name.observations
         return false if obj.user_id != @user.id
       end
@@ -1480,6 +1434,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @query = create_query(:Observation, :of_name, name: @name)
+      apply_content_filters(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
   end
@@ -1489,49 +1444,55 @@ class NameController < ApplicationController
   def email_tracking # :norobots:
     pass_query_params
     name_id = params[:id].to_s
-    if @name = find_or_goto_index(Name, name_id)
-      flavor = Notification.flavors[:name]
-      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(flavor, name_id, @user.id)
+    return unless @name = find_or_goto_index(Name, name_id)
 
-      # Initialize form.
-      if request.method != "POST"
-        unless @name.at_or_below_genus?
-          flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name, rank: @name.rank))
-        end
-        if @notification
-          @note_template = @notification.note_template
-        else
-          mailing_address = @user.mailing_address.strip
-          mailing_address = ":mailing_address" if mailing_address.blank?
-          @note_template = :email_tracking_note_template.l(
-            species_name: @name.real_text_name,
-            mailing_address: mailing_address,
-            users_name: @user.legal_name
-          )
-        end
-
-      # Submit form.
-      else
-        case params[:commit]
-        when :ENABLE.l, :UPDATE.l
-          note_template = params[:notification][:note_template]
-          note_template = nil if note_template.blank?
-          if @notification.nil?
-            @notification = Notification.new(flavor: :name, user: @user,
-                                             obj_id: name_id, note_template: note_template)
-            flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
-          else
-            @notification.note_template = note_template
-            flash_notice(:email_tracking_updated_messages.t)
-          end
-          @notification.save
-        when :DISABLE.l
-          @notification.destroy
-          flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
-        end
-        redirect_with_query(action: "show_name", id: name_id)
-      end
+    flavor = Notification.flavors[:name]
+    @notification = Notification.
+                      find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
+                                                            @user.id)
+    if request.method != "POST"
+      initialize_tracking_form
+    else
+      submit_tracking_form(name_id)
     end
+  end
+
+  def initialize_tracking_form
+    unless @name.at_or_below_genus?
+      flash_warning(:email_tracking_enabled_only_for.t(name: @name.display_name,
+                                                       rank: @name.rank))
+    end
+    if @notification
+      @note_template = @notification.note_template
+    else
+      @note_template = :email_tracking_note_template.l(
+        species_name: @name.real_text_name,
+        mailing_address: @user.mailing_address_for_tracking_template,
+        users_name: @user.legal_name
+      )
+    end
+  end
+
+  def submit_tracking_form(name_id)
+    case params[:commit]
+    when :ENABLE.l, :UPDATE.l
+      note_template = params[:notification][:note_template]
+      note_template = nil if note_template.blank?
+      if @notification.nil?
+        @notification = Notification.new(flavor: :name, user: @user,
+                                         obj_id: name_id,
+                                         note_template: note_template)
+        flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
+      else
+        @notification.note_template = note_template
+        flash_notice(:email_tracking_updated_messages.t)
+      end
+      @notification.save
+    when :DISABLE.l
+      @notification.destroy
+      flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
+    end
+    redirect_with_query(action: "show_name", id: name_id)
   end
 
   ################################################################################

@@ -3,14 +3,14 @@ require "test_helper"
 # tests of Herbarium controller
 class HerbariumControllerTest < FunctionalTestCase
   def test_show_herbarium
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     assert(nybg)
     get_with_dump(:show_herbarium, id: nybg.id)
     assert_template("show_herbarium")
   end
 
   def show_herbarium_params
-    { id: herbaria(:nybg).id,
+    { id: herbaria(:nybg_herbarium).id,
       curator: { name: users(:mary).login }
     }
   end
@@ -69,7 +69,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_herbarium_post_with_duplicate_name
     login("rolf")
     params = create_herbarium_params
-    params[:herbarium][:name] = herbaria(:nybg).name
+    params[:herbarium][:name] = herbaria(:nybg_herbarium).name
     post(:create_herbarium, params)
     assert_flash(/already exists/i)
     herbarium = Herbarium.order(created_at: :desc).first
@@ -93,7 +93,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_herbarium_post_with_existing_place_name
     login("rolf")
     params = create_herbarium_params
-    params[:herbarium][:place_name] = locations(:nybg).name
+    params[:herbarium][:place_name] = locations(:nybg_location).name
     post(:create_herbarium, params)
 
     herbarium = Herbarium.order(created_at: :desc).first
@@ -102,7 +102,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:email], herbarium.email)
     assert_equal(params[:herbarium][:mailing_address],
                  herbarium.mailing_address)
-    assert_equal(locations(:nybg), herbarium.location)
+    assert_equal(locations(:nybg_location), herbarium.location)
     assert_response(:redirect)
   end
 
@@ -122,7 +122,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_edit_herbarium
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     get_with_dump(:edit_herbarium, id: nybg.id)
     assert_response(:redirect)
 
@@ -142,7 +142,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post
     login("rolf")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     post(:edit_herbarium, params)
@@ -158,8 +158,8 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_with_duplicate_name
     login("rolf")
-    nybg = herbaria(:nybg)
-    rolf = herbaria(:rolf)
+    nybg = herbaria(:nybg_herbarium)
+    rolf = herbaria(:rolf_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:name] = rolf.name
@@ -172,7 +172,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_no_name_change
     login("rolf")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:herbarium][:name] = nybg.name
     params[:id] = nybg.id
@@ -189,7 +189,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_no_email
     login("rolf")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:email] = ""
@@ -202,7 +202,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_with_existing_place_name
     login("rolf")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:place_name] = locations(:salt_point).name
@@ -219,7 +219,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_with_nonexisting_place_name
     login("rolf")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
@@ -236,7 +236,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_post_by_non_curator
     login("mary")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     old_name = nybg.name
     params = create_herbarium_params
     params[:id] = nybg.id
@@ -250,7 +250,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def delete_curator_params
     {
-      id: herbaria(:nybg).id,
+      id: herbaria(:nybg_herbarium).id,
       user: users(:roy).id
     }
   end

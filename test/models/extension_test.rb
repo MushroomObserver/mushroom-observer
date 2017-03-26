@@ -42,28 +42,6 @@ class ExtensionTest < UnitTestCase
   end
 
   # ----------------------------
-  #  :section: String Tests
-  # ----------------------------
-
-  def test_string_truncate_html
-    assert_equal("123", "123".truncate_html(5))
-    assert_equal("12345", "12345".truncate_html(5))
-    assert_equal("1234...", "123456".truncate_html(5))
-    assert_equal("<i>1234...</i>", "<i>123456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3</b>4...</i>", "<i>12<b>3</b>456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3<hr/></b>4...</i>", "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
-    assert_equal("<i>12</i>3<b>4...</b>", "<i>12</i>3<b>456</b>".truncate_html(5))
-  end
-
-  def test_iconv
-    assert_equal("áëìøũ", "áëìøũ".iconv("utf-8").encode("utf-8"))
-    assert_equal("áëìøu", "áëìøũ".iconv("iso8859-1").encode("utf-8"))
-    assert_equal("aeiou", "áëìøũ".iconv("ascii-8bit").encode("utf-8"))
-    assert_equal("ενα", "ενα".iconv("utf-8").encode("utf-8"))
-    assert_equal("???", "ενα".iconv("ascii-8bit").encode("utf-8"))
-  end
-
-  # ----------------------------
   #  :section: Hash Tests
   # ----------------------------
 
@@ -76,31 +54,5 @@ class ExtensionTest < UnitTestCase
     hash = { a: 1, b: nil, c: 3, d: nil }
     hash.remove_nils!
     assert_equal({ a: 1, c: 3 }, hash)
-  end
-
-  # ----------------------------
-  #  :section: Time Tests
-  # ----------------------------
-
-  def test_fancy_time
-    assert_fancy_time(0.seconds, :time_just_seconds_ago)
-    assert_fancy_time(59.seconds, :time_just_seconds_ago)
-    assert_fancy_time(60.seconds, :time_one_minute_ago)
-    assert_fancy_time(119.seconds, :time_one_minute_ago)
-    assert_fancy_time(120.seconds, :time_minutes_ago, n: 2)
-    assert_fancy_time(59.minutes, :time_minutes_ago, n: 59)
-    assert_fancy_time(60.minutes, :time_one_hour_ago)
-    assert_fancy_time(119.minutes, :time_one_hour_ago)
-    assert_fancy_time(120.minutes, :time_hours_ago, n: 2)
-    assert_fancy_time(23.hours, :time_hours_ago, n: 23)
-    assert_fancy_time(24.hours, :time_one_day_ago)
-  end
-
-  def assert_fancy_time(diff, tag, args = {})
-    ref = Time.now
-    time = ref - diff
-    expect = tag.l(args.merge(date: time.web_date))
-    actual = time.fancy_time(ref)
-    assert_equal(expect, actual)
   end
 end

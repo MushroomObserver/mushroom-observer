@@ -1,0 +1,9 @@
+#!/bin/bash
+
+database="mo_development"
+username="mo"
+password="mo"
+
+gunzip -c checkpoint.gz | mysql -u $username -p$password $database
+mysql -u $username -p$password $database -e "source clean.sql"
+mysqldump -u $username -p$password $database | gzip > checkpoint_stripped.gz

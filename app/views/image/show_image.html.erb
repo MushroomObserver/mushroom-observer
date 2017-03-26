@@ -42,7 +42,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="row">
-          <div class="col-xs-12 text-center small">
+          <div class="col-xs-12 text-center small image-controls">
             <% if check_permission(@image) %>
               <%= link_with_query(:image_show_rotate_left.t, action: :transform_image,
                 op: :rotate_left, id: @image.id, size: @size) %> |
@@ -52,6 +52,11 @@
                 op: :mirror, id: @image.id, size: @size) %> |
             <% end %>
             <%= link_to(:image_show_original.t, Image.url(:original, @image.id)) %>
+            <% inject_javascript_at_end %(
+              jQuery(".image-controls").append(
+                " | <a href='javascript:popup_exif(#{@image.id})'>#{j :image_show_exif.t}</a>"
+              );
+            ) %>
           </div>
         </div>
       </div>
@@ -181,7 +186,7 @@
     </div>
     <!-- /INFO_PANEL -->
 
-    <% if is_reviewer? %>
+    <% if reviewer? %>
       <div class="push-up text-center">
         <%= set_export_status_controls(@image) %>
       </div>

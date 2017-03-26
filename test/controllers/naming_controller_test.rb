@@ -85,17 +85,18 @@ class NamingControllerTest < FunctionalTestCase
 
   def test_update_observation_chosen_multiple_match
     login("rolf")
-    nam = namings(:coprinus_comatus_naming)
-    old_name = nam.text_name
+    nmg = namings(:coprinus_comatus_naming)
+    old_name = nmg.text_name
     new_name = "Amanita baccata"
     params = {
-      id: nam.id.to_s,
+      id: nmg.id.to_s,
       name: { name: new_name },
       chosen_name: { name_id: names(:amanita_baccata_arora).id },
       vote: { value: 1 }
     }
     post(:edit, params)
-    assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: nmg.observation.id)
     # Must be cloning naming with no vote.
     assert_equal(12, rolf.reload.contribution)
     params = assigns(:params)
@@ -126,19 +127,20 @@ class NamingControllerTest < FunctionalTestCase
 
   def test_update_observation_chosen_deprecated
     login("rolf")
-    nam = namings(:coprinus_comatus_naming)
-    start_name = nam.name
+    nmg = namings(:coprinus_comatus_naming)
+    start_name = nmg.name
     new_name = "Lactarius subalpinus"
     chosen_name = names(:lactarius_alpinus)
     params = {
-      id: nam.id.to_s,
+      id: nmg.id.to_s,
       name: { name: new_name },
       approved_name: new_name,
       chosen_name: { name_id: chosen_name.id },
       vote: { value: 1 }
     }
     post(:edit, params)
-    assert_redirected_to(controller: :observer, action: "show_observation")
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: nmg.observation.id)
     # Must be cloning naming, with no vote.
     assert_equal(12, rolf.reload.contribution)
     params = assigns(:params)
@@ -149,18 +151,19 @@ class NamingControllerTest < FunctionalTestCase
 
   def test_update_observation_accepted_deprecated
     login("rolf")
-    nam = namings(:coprinus_comatus_naming)
-    start_name = nam.name
+    nmg = namings(:coprinus_comatus_naming)
+    start_name = nmg.name
     new_text_name = names(:lactarius_subalpinus).text_name
     params = {
-      id: nam.id.to_s,
+      id: nmg.id.to_s,
       name: { name: new_text_name },
       approved_name: new_text_name,
       chosen_name: {},
       vote: { value: 3 }
     }
     post(:edit, params)
-    assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: nmg.observation.id)
     # Must be cloning the naming, but no votes?
     assert_equal(12, rolf.reload.contribution)
     params = assigns(:params)
@@ -365,7 +368,7 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal("Looks good to me.", nr1.notes)
     assert_equal("", nr2.notes)
     assert_equal("Spore texture.", nr3.notes)
-    assert_equal(nil, nr4.notes)
+    assert_nil(nr4.notes)
     assert(nr1.used?)
     assert(nr2.used?)
     assert(nr3.used?)
@@ -573,6 +576,16 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(3, nam1.votes.length)
     assert_equal(0, nam2.reload.vote_sum)
     assert_equal(2, nam2.votes.length)
+  end
+
+  def test_enforce_imageless_rules
+    params = {
+      id: observations(:coprinus_comatus_obs).id,
+      name: { name: "Imageless" }
+    }
+    login("dick")
+    post(:create, params)
+    assert_response(:success) # really means failed
   end
 
   def assert_edit

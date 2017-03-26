@@ -29,31 +29,34 @@ class RandomTest < IntegrationTestCase
   end
 
   test "login and logout" do
-    sess = login!(rolf)
+    login!(rolf)
 
-    sess.get("/observer/how_to_help")
-    sess.assert_template("observer/how_to_help")
-    sess.assert_no_link_exists("/account/login")
-    sess.assert_link_exists("/account/logout_user")
-    sess.assert_link_exists("/observer/show_user/1")
+    get("/observer/how_to_help")
+    assert_template("observer/how_to_help")
+    assert_no_link_exists("/account/login")
+    assert_link_exists("/account/logout_user")
+    assert_link_exists("/observer/show_user/#{rolf.id}")
 
-    sess.click(label: "Logout")
-    sess.assert_template("account/logout_user")
-    sess.assert_link_exists("/account/login")
-    sess.assert_no_link_exists("/account/logout_user")
-    sess.assert_no_link_exists("/observer/show_user/1")
+    click(label: "Logout")
+    assert_template("account/logout_user")
+    assert_link_exists("/account/login")
+    assert_no_link_exists("/account/logout_user")
+    assert_no_link_exists("/observer/show_user/#{rolf.id}")
 
-    sess.click(label: "How To Help")
-    sess.assert_template("observer/how_to_help")
-    sess.assert_link_exists("/account/login")
-    sess.assert_no_link_exists("/account/logout_user")
-    sess.assert_no_link_exists("/observer/show_user/1")
+    click(label: "How To Help")
+    assert_template("observer/how_to_help")
+    assert_link_exists("/account/login")
+    assert_no_link_exists("/account/logout_user")
+    assert_no_link_exists("/observer/show_user/#{rolf.id}")
   end
 
   test "sessions" do
-    rolf_session = login(rolf)
-    mary_session = login(mary)
-    katrina_session = login(katrina)
+    rolf_session = open_session
+    rolf_session.login(rolf)
+    mary_session = open_session
+    mary_session.login(mary)
+    katrina_session = open_session
+    katrina_session.login(katrina)
 
     rolf_session.get("/")
     assert(/rolf/i, rolf_session.response.body)

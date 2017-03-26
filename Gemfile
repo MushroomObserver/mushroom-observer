@@ -72,8 +72,12 @@ gem "byebug", group: [:development, :test]
 # Use debugger
 # gem "debugger", group: [:development, :test]
 
-# Fake web responses in test mode
-gem "fakeweb", "~> 1.3", group: :test
+# Stub and set expectations on HTTP requests in test mode
+# Allow selective disabling of internet
+gem "webmock", group: :test
+
+# Mocking and stubbing in Ruby
+gem "mocha", group: :test
 
 # Use capybara to simulate user-browser interaction
 gem "capybara"

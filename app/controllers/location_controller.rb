@@ -129,15 +129,11 @@ class LocationController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(type: :observation),
-                 add_query_param({ controller: "observer", action: "index_observation" },
-                                 query)]
-    end
+    @links << coerced_query_link(query, Observation)
 
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
-    if query.is_coercable?(:LocationDescription)
+    if query.coercable?(:LocationDescription)
       @links << [:show_objects.t(type: :description),
                  add_query_param({ action: "index_location_description" }, query)]
     end
@@ -181,6 +177,9 @@ class LocationController < ApplicationController
   # Map results of a search or index.
   def map_locations # :nologin: :norobots:
     @query = find_or_create_query(:Location)
+
+    apply_content_filters(@query)
+
     if @query.flavor == :all
       @title = :map_locations_global_map.t
     else
@@ -325,10 +324,7 @@ class LocationController < ApplicationController
 
     # Add "show locations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Location)
-      @links << [:show_objects.t(type: :location),
-                 add_query_param({ action: "index_location" }, query)]
-    end
+    @links << coerced_query_link(query, Location)
 
     show_index_of_objects(query, args)
   end
@@ -568,7 +564,7 @@ class LocationController < ApplicationController
           SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          if has_unshown_notifications?(@user, :naming)
+          if unshown_notifications?(@user, :naming)
             redirect_to(controller: "observer", action: "show_notifications")
           else
             redirect_to(controller: "observer", action: "show_observation",
@@ -603,6 +599,13 @@ class LocationController < ApplicationController
       @display_name = @location.display_name
       done = false
       if request.method == "POST"
+
+        if Location.is_unknown?(@location.name) && !in_admin_mode?
+          flash_error("This Location is protected (not editable). To change an Observation's location, edit Observation 'Where'.")
+          redirect_to(action: "show_location", id: @location.id)
+          return
+        end
+
         @display_name = begin
                           params[:location][:display_name].strip_squeeze
                         rescue
@@ -621,7 +624,7 @@ class LocationController < ApplicationController
           end
 
           # Admins can actually merge them, then redirect to other location.
-          if is_in_admin_mode? || @location.mergable?
+          if in_admin_mode? || @location.mergable?
             merge.merge(@location)
             merge.save if merge.changed?
             @location = merge

@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 module PatternSearch
-  class Error < Exception
+  class Error < ::StandardError
     attr_accessor :args
     def initialize(args)
       self.args = args
@@ -10,43 +10,85 @@ module PatternSearch
 
   class SyntaxError < Error
     def to_s
-      "Syntax error in pattern at #{args[:string].inspect}."
+      :pattern_search_syntax_error.t(string: args[:string].inspect)
     end
   end
 
   class BadObservationTermError < Error
     def to_s
-      "Unexpected term in observation search, #{args[:term].var.inspect}."
+      :pattern_search_bad_observation_term_error.tp(term: args[:term].var.to_s.inspect)
     end
   end
 
   class MissingValueError < Error
     def to_s
-      "Missing value for #{args[:var].inspect}."
+      :pattern_search_missing_value_error.t(var: args[:var].inspect)
     end
   end
 
   class TooManyValuesError < Error
     def to_s
-      "Term #{args[:var].inspect} occurs more than once."
+      :pattern_search_too_many_values_error.t(term: args[:var].inspect)
     end
   end
 
   class BadBooleanError < Error
     def to_s
-      "Invalid value for #{args[:var].inspect}, #{args[:val].inspect}, expect \"1\", \"0\", \"yes\", \"no\", \"true\", \"false\"."
+      :pattern_search_bad_boolean_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadYesError < Error
+    def to_s
+      :pattern_search_bad_yes_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadFloatError < Error
+    def to_s
+      :pattern_search_bad_float_error.t(term: args[:var].inspect, value: args[:val].inspect, min: args[:min].inspect, max: args[:max].inspect)
+    end
+  end
+
+  class BadNameError < Error
+    def to_s
+      :pattern_search_bad_name_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadLocationError < Error
+    def to_s
+      :pattern_search_bad_location_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadProjectError < Error
+    def to_s
+      :pattern_search_bad_project_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadSpeciesListError < Error
+    def to_s
+      :pattern_search_bad_species_list_error.t(term: args[:var].inspect, value: args[:val].inspect)
     end
   end
 
   class BadUserError < Error
     def to_s
-      "Invalid or unrecognized value for #{args[:var].inspect}, #{args[:val].inspect}, expected user id, login or name."
+      :pattern_search_bad_user_error.t(term: args[:var].inspect, value: args[:val].inspect)
+    end
+  end
+
+  class BadConfidenceError < Error
+    def to_s
+      :pattern_search_bad_confidence_error.t(term: args[:var].inspect, value: args[:val].inspect)
     end
   end
 
   class BadDateRangeError < Error
     def to_s
-      "Invalid value for #{args[:var].inspect}, #{args[:val].inspect}, expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD."
+      :pattern_search_bad_date_range_error.t(term: args[:var].inspect, value: args[:val].inspect)
     end
   end
 end

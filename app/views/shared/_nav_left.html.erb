@@ -6,7 +6,7 @@
   <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
   <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
  
-  <% if is_in_admin_mode? %>
+  <% if in_admin_mode? %>
     <div class="list-group-item disabled bold">
       <%= :app_admin.t %>:
     </div>
@@ -37,7 +37,7 @@
     <%= link_to(:app_your_summary.t, {controller: :observer, action: :show_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general', class: "list-group-item visible-xs") %>
-    <%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: "list-group-item visible-xs"}) if @user.admin && !is_in_admin_mode? %>
+    <%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: "list-group-item visible-xs"}) if @user.admin && !in_admin_mode? %>
   <% end %>
  
   <div class="list-group-item disabled bold">

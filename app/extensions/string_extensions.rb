@@ -34,6 +34,7 @@
 #
 ################################################################################
 
+# MO extensions to Ruby String class
 class String
   require "digest/md5"
 
@@ -339,6 +340,7 @@ class String
   # Plain-text alternatives to the HTML special characters RedCloth uses.
   unless defined? HTML_SPECIAL_CHAR_EQUIVALENTS
     HTML_SPECIAL_CHAR_EQUIVALENTS = {
+      "#64"   => "@",
       "amp"   => "&",
       "#38"   => "&",
       "gt"    => ">",
@@ -371,6 +373,8 @@ class String
   # an HTML tag.
   HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
 
+  ### Textile-related methods ###
+  #
   def t(sanitize = true)
     Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
@@ -398,6 +402,8 @@ class String
     Textile.textilize(self, true, sanitize)
   end
 
+  ### String transformations ###
+  #
   # Convert string (assumed to be in UTF-8) to plain ASCII.
   def to_ascii
     to_s.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
@@ -490,10 +496,6 @@ class String
       html_safe                      # convert &xxx; and &#nnn; to ascii
   end
 
-  def print_thing(thing)
-    print "#{self}: #{thing.class}: #{thing}\n"
-  end
-
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
@@ -567,19 +569,19 @@ class String
     end
   end
 
+  # Find amount first line is indented and remove that from all lines.
+  def unindent
+    gsub /^#{self[/\A\s*/]}/, ""
+  end
+
   # Byte truncation.  bytesize differs from length if there are accents.
   # Very useful when validating ActiveRecord records,
   # because mysql limits the number of bytes, not characters.
 
   # Truncate a string so that its *binary* length is within a given limit.
-  def truncate_bytesize!(len)
-    replace(truncate_bytesize(len))
-  end
-
-  # Truncate a string so that its *binary* length is within a given limit.
   def truncate_bytesize(len)
-    bytesize <= len ? (return self) : result = self
-
+    return self if bytesize <= len
+    result = self
     if encoding == "UTF-8"
       result = result.force_encoding("binary")[0..len]
       result = result[0..-2] while result[-1].ord & 0xC0 == 0x80
@@ -591,45 +593,16 @@ class String
     result
   end
 
+  # Truncate string bytesize in place
+  def truncate_bytesize!(len)
+    replace(truncate_bytesize(len))
+  end
+
+  ### String Queries ###
+  #
   # Does this string start with a ASCII character?
   def is_ascii_character?
     dup.force_encoding("binary")[0].ord < 128
-  end
-
-  # Does this string start with a non-ASCII character?
-  def is_nonascii_character?
-    dup.force_encoding("binary")[0].ord >= 128
-  end
-
-  # Returns number of character edits required to transform +self+ into +other+.
-  # http://en.wikipedia.org/wiki/Levenshtein_distance
-  def levenshtein_distance_to(other, add = 1, del = 1, chg = 1)
-    s = self
-    t = other.to_s
-    m = s.length + 1
-    n = t.length + 1
-    return del * (m - 1) if n == 1
-    return add * (n - 1) if m == 1
-    d = []
-    for i in 0..m - 1
-      d[i] = [del * i]
-    end
-    for j in 0..n - 1
-      d[0][j] = add * j
-    end
-    for j in 1..n - 1
-      for i in 1..m - 1
-        if s[i - 1] == t[j - 1]
-          d[i][j] = d[i - 1][j - 1]
-        else
-          x = d[i - 1][j - 0] + del
-          y = d[i - 0][j - 1] + add
-          z = d[i - 1][j - 1] + chg
-          d[i][j] = x < y ? (x < z ? x : z) : (y < z ? y : z)
-        end
-      end
-    end
-    d[m - 1][n - 1]
   end
 
   # Returns percentage match between +self+ and +other+, where 1.0 means the two
@@ -639,13 +612,53 @@ class String
     1.0 - levenshtein_distance_to(other).to_f / max
   end
 
-  # Find amount first line is indented and remove that from all lines.
-  def unindent
-    gsub /^#{self[/\A\s*/]}/, ""
+  # Returns number of character edits required to transform +self+ into +other+.
+  def levenshtein_distance_to(other)
+    levenshtein_distance(self, other)
+  end
+
+  # This definition copied from Rails::Generators, Which is based directly on
+  # the Text gem implementation.
+  def levenshtein_distance(str1, str2)
+    s = str1
+    t = str2
+    n = s.length
+    m = t.length
+
+    return m if (0 == n)
+    return n if (0 == m)
+
+    d = (0..m).to_a
+    x = nil
+
+    str1.each_char.each_with_index do |char1,i|
+      e = i+1
+
+      str2.each_char.each_with_index do |char2,j|
+        cost = (char1 == char2) ? 0 : 1
+        x = [
+             d[j+1] + 1, # insertion
+             e + 1,      # deletion
+             d[j] + cost # substitution
+            ].min
+        d[j] = e
+        e = x
+      end
+
+      d[m] = x
+    end
+
+    return x
   end
 
   # Returns the MD5 sum.
   def md5sum
     Digest::MD5.hexdigest(self)
+  end
+
+  ### Misc Utilities ###
+  #
+  def print_thing(thing)
+    print "#{self}: #{thing.class}: #{thing}\n"
   end
 end

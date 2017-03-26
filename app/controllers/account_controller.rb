@@ -42,7 +42,6 @@
 #  :all_norobots:
 #
 ################################################################################
-
 class AccountController < ApplicationController
   before_action :login_required, except: [
     :email_new_password,
@@ -93,7 +92,6 @@ class AccountController < ApplicationController
         @new_user.updated_at = now
         @new_user.last_login = now
         @new_user.admin = false
-        @new_user.created_here = true
         @new_user.layout_count = 15
         @new_user.mailing_address = ""
         @new_user.notes = ""
@@ -136,7 +134,7 @@ class AccountController < ApplicationController
         flash_warning(:runtime_reverify_already_verified.t)
         @user = nil
         User.current = nil
-        set_session_user(nil)
+        session_user_set(nil)
         redirect_to(action: :login)
 
       # If user was created via API, we must ask the user to choose a password
@@ -166,7 +164,7 @@ class AccountController < ApplicationController
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user
-            set_session_user(@user)
+            session_user_set(@user)
             @user.change_password(password)
             @user.verify
           end
@@ -182,7 +180,7 @@ class AccountController < ApplicationController
       else
         @user = user
         User.current = user
-        set_session_user(user)
+        session_user_set(user)
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
@@ -227,21 +225,10 @@ class AccountController < ApplicationController
       @login = ""
       @remember = true
     else
-      @login    = begin
-                    params[:user][:login].to_s
-                  rescue
-                    ""
-                  end
-      @password = begin
-                    params[:user][:password].to_s
-                  rescue
-                    ""
-                  end
-      @remember = begin
-                    params[:user][:remember_me] == "1"
-                  rescue
-                    false
-                  end
+      user_params = params[:user] || {}
+      @login    = user_params[:login].to_s
+      @password = user_params[:password].to_s
+      @remember = user_params[:remember_me] == "1"
       user = User.authenticate(@login, @password)
       user ||= User.authenticate(@login, @password.strip)
       if !user
@@ -250,16 +237,15 @@ class AccountController < ApplicationController
         @unverified_user = user
         render(action: "reverify")
       else
-        # logger.warn("%s, %s, %s" % [user.login, @login, @password]])
         flash_notice :runtime_login_success.t
         @user = user
         @user.last_login = now = Time.now
         @user.updated_at = now
         @user.save
         User.current = @user
-        set_session_user(@user)
+        session_user_set(@user)
         if @remember
-          set_autologin_cookie(@user)
+          autologin_cookie_set(@user)
         else
           clear_autologin_cookie
         end
@@ -295,7 +281,7 @@ class AccountController < ApplicationController
   def logout_user # :nologin:
     @user = nil
     User.current = nil
-    set_session_user(nil)
+    session_user_set(nil)
     clear_autologin_cookie
   end
 
@@ -326,80 +312,117 @@ class AccountController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Preferences
+  #  :section: Preferences and Profile
   #
   ##############################################################################
+
+  # Table for converting form value to object value
+  # Used by update_prefs_from_form
+  def prefs_types
+    [
+      [:email_comments_all, :boolean],
+      [:email_comments_owner, :boolean],
+      [:email_comments_response, :boolean],
+      [:email_general_commercial, :boolean],
+      [:email_general_feature, :boolean],
+      [:email_general_question, :boolean],
+      [:email_html, :boolean],
+      [:email_locations_admin, :boolean],
+      [:email_locations_all, :boolean],
+      [:email_locations_author, :boolean],
+      [:email_locations_editor, :boolean],
+      [:email_names_admin, :boolean],
+      [:email_names_all, :boolean],
+      [:email_names_author, :boolean],
+      [:email_names_editor, :boolean],
+      [:email_names_reviewer, :boolean],
+      [:email_observations_all, :boolean],
+      [:email_observations_consensus, :boolean],
+      [:email_observations_naming, :boolean],
+      [:email, :string],
+      [:hide_authors, :enum],
+      [:image_size, :enum],
+      [:keep_filenames, :enum],
+      [:layout_count, :integer],
+      [:license_id, :integer],
+      [:locale, :string],
+      [:location_format, :enum],
+      [:login, :string],
+      [:theme, :string],
+      [:thumbnail_maps, :boolean],
+      [:thumbnail_size, :enum],
+      [:view_owner_id, :boolean],
+      [:votes_anonymous, :enum]
+    ] + content_filter_types
+  end
+
+  def content_filter_types
+    ContentFilter.all.map do |fltr|
+      [fltr.sym, :content_filter]
+    end
+  end
 
   def prefs # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
-    # Make sure password matches confirmation.
-    if password = params["user"]["password"]
-      if password == params["user"]["password_confirmation"]
-        @user.change_password(password)
+    update_password
+    update_prefs_from_form
+    update_copyright_holder if prefs_changed_successfully
+  end
+
+  def update_password
+    return unless password = params["user"]["password"]
+    if password == params["user"]["password_confirmation"]
+      @user.change_password(password)
+    else
+      @user.errors.add(:password, :runtime_prefs_password_no_match.t)
+    end
+  end
+
+  def update_prefs_from_form
+    prefs_types.each do |pref, type|
+      val = params[:user][pref]
+      case type
+      when :string  then update_pref(pref, val.to_s)
+      when :integer then update_pref(pref, val.to_i)
+      when :boolean then update_pref(pref, val == "1")
+      when :enum    then update_pref(pref, val || User.enum_default_value(pref))
+      when :content_filter then update_content_filter(pref, val)
+      end
+    end
+  end
+
+  def update_pref(pref, val)
+    @user.send("#{pref}=", val) if @user.send(pref) != val
+  end
+
+  def update_content_filter(pref, val)
+    filter = ContentFilter.find(pref)
+    @user.content_filter[pref] =
+      if filter.type == :boolean
+        val == "1" ? filter.checked_val : filter.off_val
       else
-        @user.errors.add(:password, :runtime_prefs_password_no_match.t)
+        val.to_s
       end
-    end
+  end
 
-    for type, arg, post in [
-      [:str,  :login,           true],
-      [:str,  :email,           true],
-      [:str,  :locale,          true],
-      [:int,  :license_id,      true],
-      [:bool, :email_html,      true],
-      [:enum, :keep_filenames],
-      [:enum, :location_format],
-      [:enum, :hide_authors],
-      [:enum, :votes_anonymous, true],
-      [:enum, :thumbnail_size],
-      [:enum, :image_size],
-      [:str,  :theme],
-      [:int,  :layout_count],
-      [:bool, :email_comments_owner],
-      [:bool, :email_comments_response],
-      [:bool, :email_comments_all],
-      [:bool, :email_observations_consensus],
-      [:bool, :email_observations_naming],
-      [:bool, :email_observations_all],
-      [:bool, :email_names_admin],
-      [:bool, :email_names_author],
-      [:bool, :email_names_editor],
-      [:bool, :email_names_reviewer],
-      [:bool, :email_names_all],
-      [:bool, :email_locations_admin],
-      [:bool, :email_locations_author],
-      [:bool, :email_locations_editor],
-      [:bool, :email_locations_all],
-      [:bool, :email_general_feature],
-      [:bool, :email_general_commercial],
-      [:bool, :email_general_question],
-      # [ :str,  :email_digest ],
-      [:bool, :thumbnail_maps],
-      [:bool, :view_owner_id]
-    ]
-      val = params[:user][arg]
-      val = case type
-            when :str  then val.to_s
-            when :int  then val.to_i
-            when :bool then val == "1"
-            when :enum then val ||= User.enum_default_value(arg)
-      end
-      @user.send("#{arg}=", val) if @user.send(arg) != val
-    end
+  def update_copyright_holder
+    return unless new_holder = @user.legal_name_change
+    Image.update_copyright_holder(*new_holder, @user)
+  end
 
-    legal_name_change = @user.legal_name_change
+  def prefs_changed_successfully
+    result = false
     if !@user.changed
       flash_notice(:runtime_no_changes.t)
     elsif !@user.errors.empty? || !@user.save
       flash_object_errors(@user)
     else
-      if legal_name_change
-        Image.update_copyright_holder(*legal_name_change, @user)
-      end
       flash_notice(:runtime_prefs_success.t)
+      result = true
     end
+    result
   end
 
   def profile # :prefetch:
@@ -670,7 +693,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    session[:admin] = true if @user && @user.admin && !is_in_admin_mode?
+    session[:admin] = true if @user && @user.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -681,7 +704,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group # :root:
     redirect = true
-    if is_in_admin_mode?
+    if in_admin_mode?
       if request.method == "POST"
         user_name  = params["user_name"].to_s
         group_name = params["group_name"].to_s
@@ -714,7 +737,7 @@ class AccountController < ApplicationController
     redirect = true
     id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
-      if is_in_admin_mode?
+      if in_admin_mode?
         if request.method == "GET"
           # render form
           redirect = false
@@ -747,7 +770,7 @@ class AccountController < ApplicationController
   # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
   def destroy_user # :root:
-    if is_in_admin_mode?
+    if in_admin_mode?
       id = params["id"]
       unless id.blank?
         user = User.safe_find(id)

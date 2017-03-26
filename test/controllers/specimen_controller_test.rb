@@ -20,18 +20,18 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_herbarium_index
-    get_with_dump(:herbarium_index, id: herbaria(:nybg).id)
+    get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_specimen_index
   end
 
   def test_herbarium_with_one_specimen_index
-    get_with_dump(:herbarium_index, id: herbaria(:rolf).id)
+    get_with_dump(:herbarium_index, id: herbaria(:rolf_herbarium).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_herbarium_with_no_specimens_index
-    get_with_dump(:herbarium_index, id: herbaria(:dick).id)
+    get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
@@ -43,7 +43,8 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_observation_with_one_specimen_index
-    get_with_dump(:observation_index, id: observations(:detailed_unknown).id)
+    get_with_dump(:observation_index,
+                  id: observations(:detailed_unknown_obs).id)
     assert_response(:redirect)
     assert_no_flash
   end
@@ -130,7 +131,7 @@ class SpecimenControllerTest < FunctionalTestCase
   # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
   def test_add_specimen_post_not_curator
     user = login("mary")
-    nybg = herbaria(:nybg)
+    nybg = herbaria(:nybg_herbarium)
     assert(!nybg.curators.member?(user))
     specimen_count = Specimen.count
     herbarium_count = Herbarium.count
@@ -235,5 +236,24 @@ class SpecimenControllerTest < FunctionalTestCase
     {
       id: specimens(:interesting_unknown).id
     }
+  end
+
+  def test_specimen_search
+    # Two specimens match this pattern.
+    pattern = "Coprinus comatus"
+    get(:specimen_search, pattern: pattern)
+
+    assert_response(:success)
+    assert_template("list_specimens")
+    # In results, expect 1 row per specimen
+    assert_select(".results tr", 2)
+  end
+
+  def test_index_specimen
+    get(:index_specimen)
+    assert_response(:success)
+    assert_template("list_specimens")
+    # In results, expect 1 row per specimen
+    assert_select(".results tr", Specimen.all.size)
   end
 end

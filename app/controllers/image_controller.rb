@@ -148,12 +148,7 @@ class ImageController < ApplicationController
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
-    if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(type: :observation),
-                 add_query_param({
-                                   controller: "observer", action: "index_observation"
-                                 }, query)]
-    end
+    @links << coerced_query_link(query, Observation)
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") ||
@@ -185,7 +180,6 @@ class ImageController < ApplicationController
     store_location
     return false unless @image = find_or_goto_index(Image, params[:id].to_s)
 
-    @is_reviewer = is_reviewer
     pass_query_params
 
     # Decide which size to display.
@@ -212,7 +206,7 @@ class ImageController < ApplicationController
       obs_query.current = obs
       img_query = create_query(:Image, :inside_observation,
                                observation: obs, outer: obs_query)
-      set_query_params(img_query)
+      query_params_set(img_query)
     end
 
     # Cast user's vote if passed in "vote" parameter.
@@ -486,7 +480,7 @@ class ImageController < ApplicationController
       next_state = nil
       # decide where to redirect after deleting image
       if this_state = find_query(:Image)
-        set_query_params(this_state)
+        query_params_set(this_state)
         this_state.current = @image
         next_state = this_state.next
       end
@@ -497,7 +491,7 @@ class ImageController < ApplicationController
         @image.destroy
         flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
         if next_state
-          set_query_params(next_state)
+          query_params_set(next_state)
           redirect_with_query(action: "show_image", id: next_state.current_id)
         else
           redirect_to(action: "list_images")

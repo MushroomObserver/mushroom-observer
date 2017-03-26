@@ -35,7 +35,7 @@
 #  translations is different for English (the "official" language) than the
 #  other languages.
 #
-#  English:
+#  English:  ""
 #
 #  Change and check in en.txt (not en.yml!), and run "rake lang:update"
 #  both locally and on the production server to pick up the changes.
@@ -51,7 +51,7 @@
 #  Option two: Change the translations on the live, running site via the "Edit
 #  Translations on This Page" link at the bottom of the page while viewing the
 #  page in the desired language.  Any changes made here will be stored in the
-#  live database, and will propogate automatically to all other currently
+#  live database, and will propagate automatically to all other currently
 #  running instances immediately.
 #
 #  rake lang:update:
@@ -125,6 +125,43 @@
 #  -Jason 20150509
 #
 ################################################################################
+#
+#  Hints about the entries.
+#
+#  Each entry is a *one-line* string. It must not contain a carriage return or
+#  line feed. To display a new line, use: \n, <br>, or <\br>.
+#  Example:
+#    entry: 1st line \n2nd line
+#  will display as
+#    1st line
+#    2nd line
+#
+#  The string can include html (without newline characters).
+#  Examples:
+#    entry: <b>bold</b> <i>italic</i> <u>underscore</u>
+#    entry: Use <a href="/observer/textile" target="_new">Textile</a>.
+#
+#  The string can incorporate other entries by including those entries' labels.
+#  An entry which includes other labels must be dumbquoted.
+#  Example:
+#    quoted_entry:  Hello
+#    quoting_entry: "[:quoted_entry] there."
+#
+#  Then in the code,
+#    quoting_entry.t
+#  will display as:
+#    Hello there.
+#
+#  Within a dumbquoted entry, dumbquotes must be escaped: \"
+#  (Smartquotes must *not* be escaped.)
+#  Example
+#    entry: "\"dumbquoted\" “smartquoted”."
+#  will display as
+#    "dumbquoted" “smartquoted”.
+#
+#  - Joe Cohen 20170312
+#
+################################################################################
 
   all_months: January February March April May June July August September October November December
   all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
@@ -195,6 +232,10 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
+  EXTERNAL_LINK: External Link
+  external_link: external link
+  EXTERNAL_LINKS: External Links
+  external_links: external links
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -588,6 +629,8 @@
   created_at: created at
   DESTROYED: Destroyed
   destroyed: destroyed
+  FILTERED: Filtered
+  filtered: filtered
   MODIFIED: Modified
   modified: modified
   OPTIONAL: Optional
@@ -608,7 +651,7 @@
   viewed: viewed
 
   # Common adjectives describing species names. (Note: "approved" seems to be
-  # interchangable with "accepted" in our site -- both indicate that the
+  # interchangeable with "accepted" in our site -- both indicate that the
   # scientific community accepts this name as correct.  "Reviewed" on the
   # other hand indicates that a user in the "reviewers" group has looked at
   # an object and didn't see any obvious mistakes.)
@@ -820,10 +863,10 @@
   rank_form: form
   RANK_PLURAL_FORM: Forms
   rank_plural_form: forms
-  RANK_GROUP: Group
-  rank_group: group
-  RANK_PLURAL_GROUP: Groups
-  rank_plural_group: groups
+  RANK_GROUP: Group or Clade
+  rank_group: group or clade
+  RANK_PLURAL_GROUP: Groups or Clades
+  rank_plural_group: groups or clades
 
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
@@ -902,6 +945,7 @@
   log_approved_by: Approved by [user].
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
   log_consensus_changed: Consensus changed from [old] to [new].
+  log_consensus_created_at: Initial name [name].
   log_consensus_reached: "Consensus established: [name]"
   log_deprecated_by: Deprecated by [user].
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
@@ -998,7 +1042,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: At long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5).<br/>You should see no new changes in the site due to this latest upgrade, but of course <a href="/observer/ask_webmaster_question">send us a note</a> if you see anything wrong. See <a href="/observer/news">Release Notes</a> for more details.
+  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!\n\"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n%(btn)\"*Donate Today!*\":/support/donate%"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1095,7 +1139,7 @@
   ask_webmaster_title: Email Question or Comment
   ask_webmaster_your_email: Your email address
   ask_webmaster_question: Question or Comment
-  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  Jason and I are currently the primary developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nNathan Wilson\nJason Hollinger\nMushroom Observer WebMasters"
+  ask_webmaster_note: "Thanks for your interest in the Mushroom Observer website.  This website was first launched in mid-2006.  The site is owned by the non-profit \"Mushroom Observer, Inc.\":/support/governance and administered by a group of volunteer developers and maintainers.  We welcome any questions you might have about using the site or comments on how the site might be improved.  Please have a look at our \"feature tracker\":/pivotal/index or our \"account on Pivotal Tracker\":https://www.pivotaltracker.com/projects/224629 to see what we have planned.  You can vote and comment on all the various suggestions for future development there.  However, they are only rough guides, subject to bugs or others issues that may come up and, of course, the availability of our own time to work on the site.\n\nThe Mushroom Observer Team"
 
   # comment/add_comment
   comment_add_title: Add Comment to [name]
@@ -1244,9 +1288,9 @@
   form_names_uses: Uses
   form_names_notes: Notes
   form_names_refs: References
-  form_names_text_name_help: "Unformatted version of the name without any author info.\nE.g., \"Amanita muscara var. flavivolvata\"."
+  form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
   form_names_text_name_locked: Name is in use.  Make name changes in each observation.
-  form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
+  form_names_author_help: "Include the author using <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
@@ -1301,7 +1345,7 @@
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
-  form_observations_gps_info: "We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation."
+  form_observations_gps_info: We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation.
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
@@ -1384,6 +1428,7 @@
   image_show_huge: Huge
   image_show_full_size: Full Size
   image_show_original: Show Original Image
+  image_show_exif: Show EXIF Header
   image_show_original_name: Original File Name
   image_show_make_default: Make this the default size
   image_show_transform_note: Image is being processed. This may take several seconds.
@@ -1393,6 +1438,7 @@
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
+  list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
   # location/list_place_names
@@ -1476,9 +1522,47 @@
   name_map_no_maps: No observations of [name] have mappable location information.
 
   # observer/news
-  news_title: "Latest Release: August 3, 2015"
-  news_header: This page provides notes on the latest release of the [:app_title] website.
-  news_content: "December 13, 2015. <u>Rails 4.2.5</u>\n\nAt long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5). This has not been true since at least March of 2009.  The upgrade process started last August when we were still using the 2.1.1 version of Ruby on Rails.\n\nThis has been a huge team effort by all the volunteer developers on the project. Thanks to every one of you for helping to make this happen.\n\nFor those who are interested in the technical low-down of this specific release, we got to 4.1 last month and the biggest change between 4.1 and 4.2 was a new HTML parsing library that required many minor code changes throughout out code base. There have also been some changes to how email is handled and a variety of other small changes to the code base.  You should see no new changes in the site due to this latest upgrade, but of course <a href=\"/observer/ask_webmaster_question\">send us a note</a> if you see anything wrong."
+  news_title: "Latest Release: March 19, 2017"
+  news_header: This page provides notes on the latest releases and changes to [:app_title].
+  news_content: "[:news_content_pr_294] \n\n[:news_content_pr_291] \n\n[:news_content_pr_293] \n\n[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+
+  # observer/news individual updates
+  news_content_pr_294: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/294\" target=\"_new\">PR #294</a> (March 19, 2017) Add support for clade names. These are just like group names, but use “clade” instead of “group”. Clarify and expand instructions on the Create Name and Edit Name pages."
+  news_content_pr_291: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/291\" target=\"_new\">PR #291</a> (March 18, 2017) Improve group names: allow “group” to be appended to any ICN valid Scientific Name, requiring “group” to be in the Scientific Name field."
+  news_content_pr_293: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/293\">PR #293</a> (March 16, 2017) Fixed bug which caused loss of “Big Eyes” next to a Proposed Name and caused incorrect calculation of Observer Preference."
+  news_content_pr_276: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/276\">PR #276</a> (January 24, 2017) Revived pages explaining color themes. See http://mushroomobserver.org/theme/color_themes. Moved theme actions to a new controller."
+  news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
+  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
+  news_content_pr_256: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/256\">PR #256</a> (December 25, 2016) Made it so users who have only proposed a name for an observation will get comment response notifications, instead of requiring users to comment in order to get comment response notifications."
+  news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
+  news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\".  If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
+  news_content_pr_247: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/247\">PR #247</a> (December 22, 2016) The vote pull-down menus on observation pages now automatically save without requiring an additional page load."
+  news_content_pr_246: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/246\">PR #246</a> (December 22, 2016) Added ability to add (or remove) results of an observation query to (from) an existing species list.  Look for link in upper right corner of any observation index page."
+  news_content_commit_efa11ea: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/commit/efa11ea\">Commit #efa11ea</a> (December 20, 2016) Added support for already-existing query capabilities via the search bar.  Search for observations matching \"help:me\" to see full list of new capabilites."
+  news_content_pr_241: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/241\">PR #241</a> (September 15, 2016) Extensive refactor of Query model in preparation for user filters."
+  news_content_pr_240: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/240\">PR #240</a> (September 11, 2016) Allows 'comb.' e.g., comb. nov., in author field.  Standardize 'comb.' and similar status indicators in future Name edits and creates."
+  news_content_pr_238: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/238\">PR #238</a> (September 9, 2016) Fixes bug in email tracking which caused uploader's mailing address to be used in place of the person who wants the notifications."
+  news_content_commit_22deee6: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/commit/22deee6\">Commit #22deee6</a> (Aug 16, 2016) Fix errors cause by corrupted RSS log. Make failures more graceful if log gets corrupted in the future."
+  news_content_commit_33639d5: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/commit/33639d5\">Commit #33639d5</a> (Aug 10, 2016) Letter to MO Community stating policy on abuse, community openness.  Block user account."
+  news_content_commit_96e27e9: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/commit/96e27e9\">Commit #96e27e9</a> (Aug 7, 2016) Add basic documentation of API to GitHub."
+  news_content_pr_236: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/236\">PR #236</a> (July 28, 2016) Prevent use of the Name \"Imageless\"."
+  news_content_pr_235: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/235\">PR #235</a> (July 28, 2016) Improve link to MycoBank for taxa at the Group rank."
+  news_content_pr_233: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/233\">PR #233</a> (July 28, 2016) Restore padding of tables created with Textile. Reduce size of Textile quoted paragraphs."
+  news_content_pr_232: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/232\">PR #232</a> (July 28, 2016) Wrap long words (to prevent them from extending into other windows)."
+  news_content_pr_231: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/230\">PR #231</a> (July 28, 2016) Improve test coverage of extensions."
+  news_content_pr_230: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/230\">PR #230</a> (July 28, 2016) Refactor fixtures and tests to use Advanced Fixtures."
+  news_content_pr_226: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/226\">PR #226</a> (May 30, 2016) Fix intermittent testing bug (in export_round_trip)."
+  news_content_pr_224: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/224\">PR #224</a> (May 7, 2016) Prevent changes to the \"Unknown\" Location."
+  news_content_pr_223: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/221\">PR #223</a> (April 24, 2016) Expand Show RSS Log page so it is easier to read."
+  news_content_pr_221: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/221\">PR #221</a> (April 24, 2016) Fix bug where weakened confidence level vote sometimes caused mistaken calculation of Observer's favorite."
+  news_content_pr_220: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/220\">PR #220</a> (February 1, 2016) Allow creation of Observations with observation date more than 20 years old."
+  news_content_pr_219: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/219\">PR #219</a> (January 16, 2016) Create Vote Controller."
+  news_content_pr_217: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/217\">PR #217</a> (January 15, 2016) Make \"Textile markup system\" a link everywhere on edit_name form."
+  news_content_pr_216: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/216\">PR #216</a> (January 15, 2016) Remove IP address blocking from Rails code."
+  news_content_pr_215: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/215\">PR #215</a> (January 15, 2016) Always show Observer Preference line in Observations if user checks \"View Observer’s Preferred ID?\"."
+  news_content_pr_213: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/213\">PR #213</a> (January 14, 2016) Add Capybara gem and counterparts of 2 older integration tests."
+  news_content_pr_212: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/212\">PR #212</a> (January 14, 2016) Enable web console in development mode on the VM."
+  news_content_pr_208: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/208\">PR #208</a> (December 13, 2015) <u>Rails 4.2.5</u>\n\nAt long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5). This has not been true since at least March of 2009.  The upgrade process started last August when we were still using the 2.1.1 version of Ruby on Rails.\n\nThis has been a huge team effort by all the volunteer developers on the project. Thanks to every one of you for helping to make this happen.\n\nFor those who are interested in the technical low-down of this specific release, we got to 4.1 last month and the biggest change between 4.1 and 4.2 was a new HTML parsing library that required many minor code changes throughout out code base. There have also been some changes to how email is handled and a variety of other small changes to the code base.  You should see no new changes in the site due to this latest upgrade, but of course <a href=\"/observer/ask_webmaster_question\">send us a note</a> if you see anything wrong."
 
   # shared/_observation_list
   observation_made_confidence: Community confidence
@@ -1493,6 +1577,7 @@
 
   prefs_appearance: Appearance Settings
   prefs_theme: Preferred theme
+  prefs_themes_about: About Themes
   prefs_locale: Language
   prefs_location_format: Location Format
   prefs_location_format_postal: Postal (New York, USA)
@@ -1521,6 +1606,11 @@
   prefs_view_owner_id: View Observer's Preferred ID?
   prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
 
+  prefs_content_filters: Content Filters
+  prefs_content_filters_explanation: Control content visibility site-wide.
+  prefs_filters_has_images: Hide Observations with no images
+  prefs_filters_has_specimen: Hide Observations with no specimens
+  prefs_filters_region: Show only Observations and Locations within this region
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -1594,6 +1684,7 @@
   rss_log_title: Activity Log
   rss_by: by [user]
   rss_title: "[:app_title]"
+  rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
   rss_hide: "Hide:"
   rss_all: Everything
@@ -1724,6 +1815,7 @@
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation.  Select '[:show_namings_propose_new_name]' if you want to suggest another option.  See the "How to Use":/observer/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
   show_namings_please_login: Please login to propose your own names and vote on existing names.
+  show_namings_saving: Saving
 
   # observer/show_observation
   show_observation_title: "[:OBSERVATION]: [name]"
@@ -1755,6 +1847,9 @@
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
   show_observation_create_specimen: Add Herbarium Specimen
+  show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
+  show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
+  show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1822,13 +1917,23 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: A working email address is required to verify your account.  This helps us keep the spammers out. \n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences. \n\nWhen you complete this page and click "Signup", we will send you an email with account verification information.
+  signup_email_help: "A working email address is required to verify your account.  This helps us keep the spammers out.\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences.\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information."
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
 
   # species_list/edit_species_list
   species_list_edit_title: "[:edit_object(type=:species_list)]: [name]"
+
+  # species_list/add_remove_observations
+  species_list_add_remove_title: Add or Remove Observations from Species List
+  species_list_add_remove_cancel: "Cancel (back to observation index)"
+  species_list_add_remove_body: Adding or removing [num] observation(s) to/from species list. Enter title or id of target species list. Don't worry, it will ignore observations already added or removed from the list.
+  species_list_add_remove_label: Target species list
+  species_list_add_remove_add_success: "Successfully added [num] observation(s) to species list."
+  species_list_add_remove_remove_success: "Successfully removed [num] observation(s) from species list."
+  species_list_add_remove_no_query: Missing observation query results, or query has expired.
+  species_list_add_remove_bad_name: "Unrecognized species list id or title: [name]"
 
   # species_list/manage_species_lists
   species_list_manage_title: Manage Species Lists for [name]
@@ -2121,26 +2226,35 @@
   delete_specimen_cannot_delete: Attempt to delete specimen without permission
 
   # support/donate
-  donate_title: Donate to Mushroom Observer
+  donate_title: Donate to Mushroom Observer, Inc.
   donate_tab: Donate
   donate_other: Other Amount
   donate_anonymous: Anonymous donation
+  donate_recurring: Monthly recurring donation
   donate_who: Name for Donors Page
   donate_email: Email (to ensure uniqueness)
   donate_confirm: Confirm
   donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
-  donate_thanks: "Thank you for your interest in donating to Mushroom Observer.  To support Mushroom Observer, please send a personal gift to   Nathan Wilson either through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nAs discussed in the <a href=\"/support/wrapup_2012\">2012 Wrapup</a> funding for the Mushroom Observer is no longer being handled by the Consortium for Digital Mycology Resources (CDMR).  The CDMR is now in the process of dissolving and the expectation is that a new non-profit focused solely on Mushroom Observer will be created.\n\nIn the mean time Mushroom Observer is being supported directly by Nathan now in large part through personal gifts.  All such gifts will be used to cover costs directly associated with running the Mushroom Observer and will continue to be recognized on the Mushroom Observer <a href=\"/support/donors\">donors page</a>. Unfortunately, since they will be personal gifts to Nathan you will not be able to count them as tax deductible donations.\n\nBest regards and thanks for all your contributions to Mushroom Observer."
+  donate_thanks: Thank you for your interest in donating to Mushroom Observer!
+  donate_explanation: Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the "Confirm" button below or by check made payable to "Mushroom Observer, Inc." and sent to:\n\nMushroom Observer\nc/o Nathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nDonors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
+
+  donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
   # support/confirm
   confirm_title: Donation Confirmation
   confirm_amount: Amount
-  confirm_text: Thank you for offering to make the following gift.  To complete this transaction using PayPal, click the button below.
+  confirm_text: Thank you for offering to make the following donation.  To complete this transaction using PayPal, click the button below.
+  confirm_positive_number_error: Other Amount must be a number greater than zero
+  confirm_recurring: Recurring monthly
+
+  # support/governance
+  governance_title: Governance of the Mushroom Observer
+  governance: The "Mushroom Observer website":/ is owned and operated by the Massachusetts based non-profit, Mushroom Observer, Inc. - specifically the domain, mushroomobserver.org, as well as all relevant source code copyrights are owned by Mushroom Observer, Inc. The images and user entered text on the site are owned by their respective authors and are licensed for use under Creative Commons licenses as described on the "Introduction":/observer/intro page.\n\nMushroom Observer, Inc. was organized based on its "articles of organization":/doc/mo-articles.pdf and operates under its "bylaws":/doc/mo-bylaws.pdf which may be revised from time to by its Board of Directors. Mushroom Observer, Inc. has been "recognized as a section ==501(c)(3)== public charity":/doc/mo-determination.pdf serving educational purposes. If you have questions about the governance of the site or need to get in touch with members of the Board of Directors please "send us a comment":/observer/ask_webmaster_question.
 
   # support/thanks
   thanks_title: Thanks for Your Support!
-  thanks_no_amount: Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
   thanks_note: "Thank you for helping to support the Mushroom Observer.  Your support is greatly appreciated and will help Mushroom Observer continue its mission.\n\nYour donation will be acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received unless you have requested special arrangements for your acknowledgement.  Examples of special arrangements might be to make the donation anonymously or to leave it in someone else's name.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
   # support/letter
@@ -2149,11 +2263,11 @@
 
   # support/wrapup_2011
   wrapup_2011_title: 2011 Wrapup to the Mushroom Observer Community
-  wrapup_2011_body: "To the Mushroom Observer Community,\n\n2011 has been a relatively quiet year for Mushroom Observer at least from the perspective of new development.  I have personally been working overtime on a new version of the Encyclopedia of Life and Jason has been working hard on a new lichen related website and book.\n\nEven so the site has continued to grow.  We now have over 180,000 images, 80,000 observations and we are very close to 3,000 registered users.  This continues our trend of nearly doubling every year.  Fortunately, due to generous donations from all of you, Jason was able to substantially upgrade our server configuration and to the best of our knowledge the system has been working very well despite the ever growing demand.  While we still have some money in the bank, we will continue to need \"additional donations\":/support/donate to keep the system going.\n\nAs was true last year, the donations are made through a not-for-profit corporation called The Consortium for Digital Mycology Resources (CDMR).  The CDMR is recognized as a non-profit by the state of California, but is still not an official federal 501c3 non-profit.  However, the application process has moved forward and for now we continue to act as a non-profit and donations are tax deductible.  For anyone interested in the details of that process please visit the \"CDMR website\":http://digitalmycology.org.\n\nThere have been a few notable new features added to Mushroom Observer over the last year.  Jason did a great job developing the \"MO Feature Tracker\":/pivotal/index interface that interacts with our new freely accessible \"Pivotal Tracker account\":https://www.pivotaltracker.com/projects/224629 for tracking bugs and feature requests.  In addition, I have been working quite a bit behind the scenes to prepare for a roughly 10 fold increase in the number of Mushroom Observer images that will be sharable with the broader biodiversity community and EOL in particular.\n\nAlong with this note, we are also releasing the newly developed \"Black on White\":/observer/BlackOnWhite color theme.  With this theme I am trying to provide a more current and professional look for the site. \"Feedback on the theme or suggestions for improvements\":/observer/ask_webmaster_question are very welcome.\n\nWhile there have not been a lot of new features released this year, there have been a number of important discussions going on about potential future development. These have included discussions of better ways of managing naming and voting so they align better with standard herbarium practices, improving the expressiveness of the voting system, rearranging the interface to be more workflow driven, and expanding the role of projects to encourage more focused collaboration within MO.\n\nWhich brings us to the biggest news.  I have begun doing some of my own research with the data from the Mushroom Observer and I have received several inquiries from other scientists interested in either using Mushroom Observer as it is to support their own research or to support additional development of the Mushroom Observer to expand the connections between Mushroom Observer and the scientific community.\n\nMy own research has included some preliminary analysis of the data in the Mushroom Observer database.  The most interesting finding has been that \"users who collect in the Western US on average find more species there than users who collect in the Eastern US\":/images/fungal_biogeography.png. I am currently in the process of developing funding and collaborators to more fully pursue this and other interesting questions that can be answered using our data.  Another area of research development has been with some of the computer scientists at Rensselaer Polytechnic Institute.  The group I am working with are focused on the emerging \"semantic web\":http://en.wikipedia.org/wiki/Semantic_web. We are developing a system for creating a new naming system for amateur/citizen mycologists. It will include a global, web-based registration system for names that are then associated with rigorous definitions that computers can reason about.  We have plans to support a summer internship through the EOL to help develop this idea.\n\nIn addition, as many of you are aware Tom Bruns at UC Berkeley has already been using Mushroom Observer to catalog the collections his collaborators (including many of you) have been finding in Yosemite National Park.  He and I have also begun discussions of what features would be valuable to add Mushroom Observer to support his call for developing a \"North American Mycoflora\":http://msafungi.org/wp-content/uploads/Inoculum/62(4).pdf. Another promising development was being asked to write a letter of support for a proposal that Barabara Thiers and Roy Haling have submitted to digitize the fungal herbaria throughout the US.  If that gets funded, they are interested in making their data available through the Mushroom Observer.\n\nFinally, through connections at the EOL, I was able to participate in a workshop focused on citizen science biodiversity observation systems.  The workshop was held in October outside of London and included representatives from \"iSpot\":http://www.ispot.org.uk/ and \"iNaturalist\":http://inaturalist.org along with several other significant global projects.  I went to the workshop not only to represent the technical side of the EOL, but also the Mushroom Observer.  As a result the group of projects involved in the workshop, including Mushroom Observer, are participating in a competition called \"Badges for Lifelong Learning\":http://www.dmlcompetition.net/Competition/4/badges-competition-cfp.php. We have already successfully passed the first stage of the competition and are working on our application for the second stage.\n\nWhile many of these projects promise exciting developments for MO over the next year and some may even include financial support for the development of new Mushroom Observer features, the on-going support for the site relies on \"donations\":/support/donate from you our users. Please help support this active internet community of people who enjoy sharing and learning more about the mushrooms around us.\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2011_body: "To the Mushroom Observer Community,\n\n2011 has been a relatively quiet year for Mushroom Observer at least from the perspective of new development.  I have personally been working overtime on a new version of the Encyclopedia of Life and Jason has been working hard on a new lichen related website and book.\n\nEven so the site has continued to grow.  We now have over 180,000 images, 80,000 observations and we are very close to 3,000 registered users.  This continues our trend of nearly doubling every year.  Fortunately, due to generous donations from all of you, Jason was able to substantially upgrade our server configuration and to the best of our knowledge the system has been working very well despite the ever growing demand.  While we still have some money in the bank, we will continue to need \"additional donations\":/support/donate to keep the system going.\n\nAs was true last year, the donations are made through a not-for-profit corporation called The Consortium for Digital Mycology Resources (CDMR).  The CDMR is recognized as a non-profit by the state of California, but is still not an official federal ==501(c)(3)== non-profit.  However, the application process has moved forward and for now we continue to act as a non-profit and donations are tax deductible.  For anyone interested in the details of that process please visit the \"CDMR website\":http://digitalmycology.org.\n\nThere have been a few notable new features added to Mushroom Observer over the last year.  Jason did a great job developing the \"MO Feature Tracker\":/pivotal/index interface that interacts with our new freely accessible \"Pivotal Tracker account\":https://www.pivotaltracker.com/projects/224629 for tracking bugs and feature requests.  In addition, I have been working quite a bit behind the scenes to prepare for a roughly 10 fold increase in the number of Mushroom Observer images that will be sharable with the broader biodiversity community and EOL in particular.\n\nAlong with this note, we are also releasing the newly developed \"Black on White\":/observer/BlackOnWhite color theme.  With this theme I am trying to provide a more current and professional look for the site. \"Feedback on the theme or suggestions for improvements\":/observer/ask_webmaster_question are very welcome.\n\nWhile there have not been a lot of new features released this year, there have been a number of important discussions going on about potential future development. These have included discussions of better ways of managing naming and voting so they align better with standard herbarium practices, improving the expressiveness of the voting system, rearranging the interface to be more workflow driven, and expanding the role of projects to encourage more focused collaboration within MO.\n\nWhich brings us to the biggest news.  I have begun doing some of my own research with the data from the Mushroom Observer and I have received several inquiries from other scientists interested in either using Mushroom Observer as it is to support their own research or to support additional development of the Mushroom Observer to expand the connections between Mushroom Observer and the scientific community.\n\nMy own research has included some preliminary analysis of the data in the Mushroom Observer database.  The most interesting finding has been that \"users who collect in the Western US on average find more species there than users who collect in the Eastern US\":/images/fungal_biogeography.png. I am currently in the process of developing funding and collaborators to more fully pursue this and other interesting questions that can be answered using our data.  Another area of research development has been with some of the computer scientists at Rensselaer Polytechnic Institute.  The group I am working with are focused on the emerging \"semantic web\":http://en.wikipedia.org/wiki/Semantic_web. We are developing a system for creating a new naming system for amateur/citizen mycologists. It will include a global, web-based registration system for names that are then associated with rigorous definitions that computers can reason about.  We have plans to support a summer internship through the EOL to help develop this idea.\n\nIn addition, as many of you are aware Tom Bruns at UC Berkeley has already been using Mushroom Observer to catalog the collections his collaborators (including many of you) have been finding in Yosemite National Park.  He and I have also begun discussions of what features would be valuable to add Mushroom Observer to support his call for developing a \"North American Mycoflora\":http://msafungi.org/wp-content/uploads/Inoculum/62(4).pdf. Another promising development was being asked to write a letter of support for a proposal that Barabara Thiers and Roy Haling have submitted to digitize the fungal herbaria throughout the US.  If that gets funded, they are interested in making their data available through the Mushroom Observer.\n\nFinally, through connections at the EOL, I was able to participate in a workshop focused on citizen science biodiversity observation systems.  The workshop was held in October outside of London and included representatives from \"iSpot\":http://www.ispot.org.uk/ and \"iNaturalist\":http://inaturalist.org along with several other significant global projects.  I went to the workshop not only to represent the technical side of the EOL, but also the Mushroom Observer.  As a result the group of projects involved in the workshop, including Mushroom Observer, are participating in a competition called \"Badges for Lifelong Learning\":http://www.dmlcompetition.net/Competition/4/badges-competition-cfp.php. We have already successfully passed the first stage of the competition and are working on our application for the second stage.\n\nWhile many of these projects promise exciting developments for MO over the next year and some may even include financial support for the development of new Mushroom Observer features, the on-going support for the site relies on \"donations\":/support/donate from you our users. Please help support this active internet community of people who enjoy sharing and learning more about the mushrooms around us.\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
   # support/wrapup_2012
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
-  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section 501(&zwj;c&zwj;)3 so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section 501(&zwj;c&zwj;)3 status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
+  wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
   ################################################################################
 
@@ -2197,6 +2311,18 @@
   advanced_search_result_type: Result Type
   advanced_search_result_type_help: Do you want [:observations], [:images] or [:names]/[:descriptions]?
 
+  advanced_search_filters: Search Filters
+  advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
+  advanced_search_filter_has_images: Filter Observations based on whether they have images
+  advanced_search_filter_has_images_off: Include both imaged and imageless Observations
+  advanced_search_filter_has_images_yes: Exclude imageless Observations
+  advanced_search_filter_has_images_no: Exclude imaged Observations
+  advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
+  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
+  advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
+  advanced_search_filter_has_specimen_no: Exclude vouchered Observations
+  advanced_search_filter_region: "Restrict Observations and Locations to a region, e.g., \"California, USA\" or \"Europe\""
+
   # observer/license_updater
   bulk_license_link: Bulk License Updater
 
@@ -2207,7 +2333,7 @@
   checklist_for_species_list_title: Checklist for [list]
   checklist_summary: "Summary: [species] species in [genera] genera"
 
-  # observer/color_themes
+  # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms.  By default the simple clean \"Black on White\" theme is used.  However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics.  Each color in a mushroom theme was pulled from a photograph included in the site from the given group.  The colors attempt to express the characteristic colors of the group.  In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
   color_themes_title: Color Themes
 
@@ -2410,23 +2536,6 @@
   pivotal_state_started: in progress
   pivotal_head_critical: serious bugs or mission-critical work
   pivotal_head_bottleneck: stuff required by lots of other things
-  pivotal_head_api: programmer's interface via XML-RPC, etc.
-  pivotal_head_design: web layout and graphic design
-  pivotal_head_email: notification emails
-  pivotal_head_eol: EOL content sharing
-  pivotal_head_i18n: translation text and all the associated machinery
-  pivotal_head_interface: web interface
-  pivotal_head_lists: species lists, checklists, etc.
-  pivotal_head_locations: location descriptions and/or geocoding
-  pivotal_head_names: species descriptions
-  pivotal_head_projects: group projects
-  pivotal_head_search: search capabilities and data mining
-  pivotal_head_taxonomy: synonymy, hierarchy, syntax, etc.
-  pivotal_head_voting: voting on observations, their names, images, etc.
-  pivotal_head_other: uncategorized
-  pivotal_head_admin: administration tasks
-  pivotal_head_code: internal code, e.g. documentation, refactoring, etc.
-  pivotal_head_server: server installation, configuration, and diagnostics
   pivotal_head_open: areas we are actively soliciting feedback
   pivotal_head_started: areas developers are actively working
   pivotal_head_unstarted: scheduled for work soon
@@ -2436,44 +2545,9 @@
   pivotal_head_month: has comments within last month
   pivotal_head_none: has no recent comments
   pivotal_head_all: show everything
+  pivotal_head_other: uncategorized
   pivotal_label_critical: critical
   pivotal_label_bottleneck: bottleneck
-  pivotal_label_api: api
-  pivotal_label_descriptions: descriptions
-  pivotal_label_design: design
-  pivotal_label_documentation: documentation
-  pivotal_label_email: email
-  pivotal_label_eol: eol
-  pivotal_label_github: github
-  pivotal_label_glossary: glossary
-  pivotal_label_herbarium: herbarium
-  pivotal_label_i18n: translations
-  pivotal_label_images: images
-  pivotal_label_interface: interface
-  pivotal_label_js: javascript
-  pivotal_label_lists: lists
-  pivotal_label_locations: locations
-  pivotal_label_mobile: mobile
-  pivotal_label_names: names
-  pivotal_label_observations: observations
-  pivotal_label_pivotal_tracker: pivotal
-  pivotal_label_preferences: prefs
-  pivotal_label_projects: projects
-  pivotal_label_publications: publications
-  pivotal_label_rss: rss
-  pivotal_label_search: searching
-  pivotal_label_specimens: specimens
-  pivotal_label_taxonomy: taxonomy
-  pivotal_label_tests: tests
-  pivotal_label_textile: textile
-  pivotal_label_upgrade: upgrade
-  pivotal_label_users: users
-  pivotal_label_vagrant: vagrant
-  pivotal_label_voting: voting
-  pivotal_label_other: other
-  pivotal_label_admin: admin
-  pivotal_label_code: code
-  pivotal_label_server: server
   pivotal_label_open: open
   pivotal_label_day: day
   pivotal_label_week: week
@@ -2483,6 +2557,41 @@
   pivotal_label_unstarted: "[:pivotal_state_unstarted]"
   pivotal_label_started: "[:pivotal_state_started]"
   pivotal_label_all: "[:all]"
+  pivotal_label_other: other
+
+  pivotal_head_api: programmatic interface
+  pivotal_head_comments: commenting on observations, names, etc.
+  pivotal_head_descriptions: species descriptions and drafts
+  pivotal_head_email: email notifications
+  pivotal_head_i18n: translating site into other languages
+  pivotal_head_images: image information, manipulation
+  pivotal_head_lists: species lists, checklists
+  pivotal_head_locations: location names, geocoding
+  pivotal_head_maps: how observations are mapped
+  pivotal_head_names: taxonomy, synonymy, etc.
+  pivotal_head_observations: observation fields and interface
+  pivotal_head_performance: site performance
+  pivotal_head_projects: working on group projects
+  pivotal_head_search: search capabilities and data mining
+  pivotal_head_specimen: how herbarium specimens are documented
+  pivotal_head_voting: voting on observation names and images
+
+  pivotal_label_api: API
+  pivotal_label_comments: "[:comments]"
+  pivotal_label_descriptions: "[:descriptions]"
+  pivotal_label_email: email
+  pivotal_label_i18n: translations
+  pivotal_label_images: "[:images]"
+  pivotal_label_lists: lists
+  pivotal_label_locations: "[:locations]"
+  pivotal_label_maps: "[:maps]"
+  pivotal_label_names: "[:names]"
+  pivotal_label_observations: "[:observations]"
+  pivotal_label_performance: performance
+  pivotal_label_projects: "[:projects]"
+  pivotal_label_search: search
+  pivotal_label_specimen: "[:specimens]"
+  pivotal_label_voting: voting
 
   # observer/textile
   sandbox_enter: Enter Textile you wish to test here
@@ -2503,7 +2612,7 @@
   set_interest_already_off: You have already told us to ignore [name].
   set_interest_already_on: You have already told us to watch [name].
   set_interest_bad_object: "Object [type] #[id] doesn't exist."
-  set_interest_failure: Could not save changes.  Please try again or report this to the webaster.
+  set_interest_failure: Could not save changes.  Please try again or report this to the webmaster.
   set_interest_success_was_off: Cancelled your ban on emails about [name].
   set_interest_success_was_on: Cancelled your request for emails about [name].
   set_interest_success_off: We will now ignore any changes in [name].
@@ -2688,14 +2797,14 @@
   change_member_status_make_member_help: Make Regular Member - Ensures that [:user] is a member of the project, but not in the admin group. Afterwords the [:user] will be able to view and create draft names for this project.  They will be the only non-admin members able to edit their drafts.
   change_member_status_members: Current Project Members
   change_member_status_remove_member: Remove Member
-  change_member_status_remove_member_help: Remove Member - Removes all member and admin priviledges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
+  change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
 
   # observer/change_user_bonuses
   change_user_bonuses_title: Contribution Bonuses for [user]
   change_user_bonuses: Award Bonus
-  change_user_bonuses_help: "List one bonus per line, each specifiying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
+  change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
 
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
@@ -2881,18 +2990,15 @@
 
   ################################################################################
 
-  # INTRO PAGE
+  # HELP PAGES
 
   # observer/intro
   intro_title: Introduction
   intro_purpose: "*Purpose&#58;* The purpose of this site is to record observations about mushrooms, help people identify mushrooms they aren't familiar with, and expand the community around the scientific exploration of mushrooms (mycology).  Some have asked what counts as a mushroom.  This site takes a very broad view.  While the emphasis is on the large fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms such as slime-molds are all welcome.  Ultimately, I hope this site will become a valuable resource for both amateur and professional mycologists.  I like to think of it as a living field guide for mushrooms or a collaborative mushroom field journal.\n\nFor those new to mycology, there is a huge amount of basic research that still needs to be done.  By some estimates less than 5% of the world's species of fungi are known to science.  While things are slightly better for the large fleshy fungi known as mushrooms, it is still a common experience to come across a mushroom that cannot be easily identified in the available books or which doesn't really fit the definition of any recognized species. This site is intended to address that gap by creating a place for us to talk about and record what we've found, as well as connect to the existing literature about mushrooms.  Please do not feel intimidated by the scientific bent of the site.  Everyone is welcome to dive in and add their own mushroom observations, upload mushroom photos and make [:comments] on other people's observations."
   intro_image_sharing: "*Image Sharing:* This site follows the principles of cooperative sharing pioneered by the \"Free Software Foundation\":http://fsf.org, further expressed by the \"Open Source software movement\":http://opensource.org, and expanded to other creative efforts by the \"Creative Commons\":http://creativecommons.org. Consequently all images are made available under one of the Creative Commons licenses or are in the public domain.  In short this means that when anyone uploads one of their images to the site, they are giving others explicit permission to use those images under certain \"conditions\":/observer/how_to_use#license in perpetuity.  This type of permission is very important for basic research.  It allows future researchers to freely use these data to expand our understanding of mushrooms.  It also significantly increases the likelihood that the data will continue to be available into the distant future.\n\nIf you upload your own images, this license does not mean you are giving up your copyright or your ability to make money off your images.  Depending on which license you choose, you can still require that anyone who wishes to use any of these images for commercial purposes get in touch with the copyright holder and work out the conditions for that use.  The site includes special links on the image pages to help create those relationships."
   intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *nathan at collectivesource.com* so we can coordinate our efforts."
+  intro_governance: "*Governance:* This site is owned and operated by \"Mushroom Observer, Inc.\":/support/governance."
   intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
-
-  ################################################################################
-
-  # HOW TO HELP PAGE
 
   # observer/how_to_help
   how_help_title: How to Help Make [:app_title] Better
@@ -2903,10 +3009,6 @@
   how_help_translators: "h4. 4. Translators\n\np(normal). The site is set up to support foreign languages.  All we need is someone to do the translations."
   how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
   how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, after some time consuming false starts, we are now in the process of creating a new non-profit focused solely on Mushroom Observer. This is just getting going so let us know if you want to get involved or have any business related advice."
-
-  ################################################################################
-
-  # HOW TO USE PAGE (COMMON TASKS)
 
   # observer/how_to_use
   how_title: How to Use [:app_title]
@@ -2927,10 +3029,6 @@
   how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location.  These observations will not appear in our \"occurrence maps\":#maps.  An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'.  Undefined location names will be followed by a link labeled '[:SEARCH]'.  If you click the link for an undefined location, it will show a list of observations reported for that location.  The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location.  Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined.  Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/location/list_locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location).  In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/location/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users).  If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's.  This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details.  Merging defined locations is restricted since it can cause significant data loss."
   how_creating_species_lists: "*Creating Species Lists* - To create a \"Species List\":#species_list, click '\"[:app_create_list]\":/species_list/create_species_list' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire species list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty species list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any species list you own.  (Note, you can add anyone's observations to a species list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/observer/advanced_search_form' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new species list form.\n\nLastly, when you are viewing an existing species list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new species list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that species list's names to the clipboard.  The next time you click '[:app_create_list]', the new species list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
 
-  ################################################################################
-
-  # HOW TO USE PAGE (GLOSSARY)
-
   # Note, glossary terms should appear in alphabetical order.
   how_glossary_body: "#(#comment)       [:how_comment]\n#(#image)         [:how_image]\n#(#license)       [:how_license]\n#(#location)      [:how_location]\n#(#name)          [:how_name]\n#(#observation)   [:how_observation]\n#(#proposed_name) [:how_proposed_name]\n#(#description)   [:how_description]\n#(#species_list)  [:how_species_list]\n#(#user)          [:how_user]\n#(#vote)          [:how_vote]"
   how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comment/show_comments_for_user' in the left-hand panel."
@@ -2946,10 +3044,7 @@
   how_user: "*User* - An account on [:app_title].  You are required to provide a valid email address when you first create an account.  This allows the system to stop automated programs from creating bogus accounts.  It also provides a way for other users to get in touch with you.  However, your email address will never be revealed unless you request an email be sent to another user and then only to that user.  If you are concerned about having your email address in our database, once you have verified your account, you can go to the '\"[:app_preferences]\":/account/prefs' page and remove your address."
   how_vote: "*Vote* - One \"User's\":#user vote on a \"Proposed Name\":#proposed_name for a given \"Observation\":#observation.  Expresses a level of confidence or agreement with that name, with half the choices (\"[min_pos_vote]\" and up) being positive and half (\"[min_neg_vote]\" and below) being negative.  Votes are owned by that user, and can only be changed or deleted by the owner or a site administrator."
 
-  ################################################################################
-
-  # LOCATION HELP PAGE
-
+  # Location help
   location_help_title: Locations in Mushroom Observer
   location_help_intro: "The Mushroom Observer provides two ways to represent the geographic location of an observation.  The simplest are latitude and longitude positions associated with the observation.  Please keep these accurate to within at least 300 meters (or about 1000 feet).  However, the more widely used method is a simple phrase describing the location.  For example, \"Beebe Woods, Falmouth, Massachusetts, USA\". The goal of these location names is to provide a consistent, reusable way of talking about where an observation was made without necessarily revealing a precise \"spot\". If you are comfortable provide more precise lat/longs for an observation, the location names are still useful for searches so you are encouraged to provide them as well.  The location names should, by default, go from the smallest contained area to the country name.  If you prefer to describe your locations as going from the largest (country) down to the smallest contained area, you can change your preference from the default, \"Postal\", to \"Scientific\" on your preference page.  There are cases such as \"Great Smoky Mountains National Park, Blount Co., Tennessee, USA\", where the area you are describing overlaps a number of counties, states or even countries.  In these cases, the country and other official political boundaries should come at the end as shown in the example.\n\nOriginally, the Mushroom Observer was very loose about these location names, hoping that the users would create a reasonably consistent set of rules and correct each other.  After about four years and thousands of location names, we found that there were rules emerging, but they were not applied at all consistently and people were not tending to directly correct each other. Consequently, we have tried to codify these rules and when reasonable to provide warnings if you attempt to create a new location that violates these rules. It is not always possible to correct identify \"bad\" locations, so if you get some warnings, but after reviewing the location decide it should be \"good\", then simply resubmitting the form will force the name into the database. However, all new location names will get reviewed regularly and may get changed to better fit the consensus rules.  Below are some examples of \"bad\" and \"good\" location names followed by a more detailed explanation of the current rules. Each example is labeled with the following section that explains the example in more detail.  These rules are by no means set it stone and we encourage the discussion and revision of them."
   location_help_example_help: These are cases that are not detected automatically, so no warning would be given.
@@ -2968,6 +3063,9 @@
   location_help_rule_other: "*Other Things to Avoid* - All lowercase - In general at least the leading letter of each area should be capitalized and when in doubt capitalize every leading letter.\nNo lat/longs - There is now direct support for this for each observation. Do not include it in the name of a location.\nNo habitat info - Habitat info should go in the notes for the observation.\nParentheses and Braces - If you're tempted to use parentheses or braces, stop yourself and ask if this information should be in the notes for the observation or if there is a better way to describe the location.\nAvoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should try to use the English version of a location name when possible and English does not include diacritics.  This is intended to encourage consistency and we are planning on providing proper support for other languages which will benefit from this consistency.  There are certainly cases where the a city or region is only know by a name that includes diacritics.  In these cases they should be used. A few simple web-searches should give you a good idea if there is a common English variation of a name (e.g., Montreal, Quebec for Montréal, Québec)."
   location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful.  If you don't find anything there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
 
+  # Search bar help
+  observation_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:\n* *date*: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.\n* *created*: Date observation was first posted.\n* *modified*: Date observation was last modified.\n* *name*: Consensus name is one of these names.\n* *synonym_of*: Consensus name is synonym of one of these names.\n* *child_of*: Consensus name is a subtaxon of one of these names.\n* *location*: Location mushroom was observed.\n* *project*: Observation belongs to one of these projects.\n* *list*: Observation belongs to one of these species lists.\n* *user*: Observation created by one of these users.\n* *notes*: Notes contains the given string.\n* *comments*: Comments contain the given string.\n* *confidence*: Confidence is in this range.\n* *east*: Longitude of eastern edge of search region.\n* *west*: Longitude of western edge of search region.\n* *north*: Latitude of northern edge of search region.\n* *south*: Latitude of southern edge of search region.\n* *images*: Has images? (\"yes\" or \"no\")\n* *specimen*: Has a specimen?\n* *has_name*: Has a name? (other than \"Fungi sp.\")\n* *has_notes*: Has notes?\n* *has_comments*: Has and comments?"
+
   ################################################################################
 
   # ERROR MESSAGES
@@ -2977,6 +3075,7 @@
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
   validate_invalid: Invalid [field].
+  validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
   validate_not_in_range: "[Field] is out of range."
@@ -2993,6 +3092,7 @@
   validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
+  validate_observation_invalid_year: Year is invalid.  Should be between 1500 and present.
   validate_observation_future_time: Time travel is not allowed, pick a date from the past.
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
@@ -3075,6 +3175,7 @@
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.
+  runtime_date_invalid: Invalid date.
   runtime_date_should_be_yyyymmdd: Date should be in year-month-day format.
   runtime_delivered_message: Successfully delivered message.
   runtime_delivered_question: Successfully delivered question.
@@ -3127,6 +3228,7 @@
 
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
+  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/name/show_name/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
@@ -3292,6 +3394,7 @@
   runtime_image_remove_denied: You do not have permission to remove images from this observation.
   runtime_image_remove_missing: This observation doesn't have that image!
   runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.
+  runtime_name_for_description_not_found: "Sorry, the name this description belongs to no longer exists."
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone has either deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
   runtime_reverify_already_verified: Your account is already verified!  Please log in.
@@ -3300,6 +3403,22 @@
   runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
   runtime_signup_success: Signup successful.  Verification email sent.
   runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
+
+  # Pattern search error messages.
+  pattern_search_syntax_error: "Syntax error in pattern at [string]."
+  pattern_search_bad_observation_term_error: "Unexpected term in observation search: [term]. [:observation_search_terms_help]"
+  pattern_search_missing_value_error: "Missing value for the term [var]."
+  pattern_search_too_many_values_error: "Search term [term] occurs more than once."
+  pattern_search_bad_boolean_error: "Invalid value for [term], [value], expected \"yes\" or \"no\"."
+  pattern_search_bad_yes_error: "Invalid value for [term], [value], only valid value is \"yes\"."
+  pattern_search_bad_float_error: "Invalid value for [term], [value], expected a number between [min] and [max]."
+  pattern_search_bad_confidence_error: "Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. \"0-100\"."
+  pattern_search_bad_name_error: "Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched."
+  pattern_search_bad_location_error: "Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched."
+  pattern_search_bad_project_error: "Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched."
+  pattern_search_bad_species_list_error: "Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched."
+  pattern_search_bad_user_error: "Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched."
+  pattern_search_bad_date_range_error: "Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD."
 
   ################################################################################
 

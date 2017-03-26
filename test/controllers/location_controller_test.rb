@@ -106,6 +106,23 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_location_bounding_box
+    delta = 0.001
+    get(:list_locations, north: 0, south: 0, east: 0, west: 0)
+    query = Query.find(QueryRecord.last.id)
+    assert_equal(0 + delta, query.params[:north])
+    assert_equal(0 - delta, query.params[:south])
+    assert_equal(0 + delta, query.params[:east])
+    assert_equal(0 - delta, query.params[:west])
+
+    get(:list_locations, north: 90, south: -90, east: 180, west: -180)
+    query = Query.find(QueryRecord.last.id)
+    assert_equal(90, query.params[:north])
+    assert_equal(-90, query.params[:south])
+    assert_equal(180, query.params[:east])
+    assert_equal(-180, query.params[:west])
+  end
+
   def test_list_countries
     get_with_dump(:list_countries)
     assert_template("list_countries")
@@ -161,35 +178,33 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_locations_by_user
-    get_with_dump(:locations_by_user, id: 1)
+    get_with_dump(:locations_by_user, id: rolf.id)
     assert_template("list_locations")
   end
 
   def test_locations_by_editor
-    get_with_dump(:locations_by_editor, id: 1)
+    get_with_dump(:locations_by_editor, id: rolf.id)
     assert_template("list_locations")
   end
 
   def test_list_location_descriptions
     login("mary")
-    Location.find(2).description = LocationDescription.create!(location_id: 2)
+    burbank = locations(:burbank)
+    burbank.description = LocationDescription.create!(location_id: burbank.id)
     get_with_dump(:list_location_descriptions)
     assert_template("list_location_descriptions")
   end
 
   def test_location_descriptions_by_author
     descs = LocationDescription.all
-    assert_equal(1, descs.length)
-    get_with_dump(:location_descriptions_by_author, id: 1)
-    # assert_template(action: :show_location_description, id: descs.first.id)
-    # assert_response(:redirect)
+    get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
       %r{/location/show_location_description/#{ descs.first.id }}
     )
     end
 
   def test_location_descriptions_by_editor
-    get_with_dump(:location_descriptions_by_editor, id: 1)
+    get_with_dump(:location_descriptions_by_editor, id: rolf.id)
     assert_template("list_location_descriptions")
   end
 
@@ -220,7 +235,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_create_and_save_location_description
-    loc = locations(:nybg) # use a location that has no description
+    loc = locations(:nybg_location) # use a location that has no description
     assert_nil(loc.description,
                "Test should use a location that has no description.")
     params = { description: { source_type: "public",
@@ -247,7 +262,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_unsuccessful_create_location_description
     loc = locations(:albion)
-    user = login("Must Spam")
+    user = login(users(:spammer).name)
     assert_false(user.is_successful_contributor?)
     get_with_dump(:create_location_description, id: loc.id)
     assert_response(:redirect)
@@ -268,13 +283,13 @@ class LocationControllerTest < FunctionalTestCase
                               project_id: "",
                               public_write: "1",
                               public: "1",
-                              license_id: "3",
+                              license_id: licenses(:ccwiki30).id.to_s,
                               gen_desc: "research station",
                               ecology: "redwood",
                               species: "redwood zone",
                               notes: "church camp",
                               refs: "" },
-               id: loc.id }
+               id: location_descriptions(:albion_desc).id }
 
     post_requires_login(:edit_location_description, params)
 
@@ -396,6 +411,18 @@ end
     assert_form_action(action: "edit_location", id: loc.id.to_s,
                        approved_where: loc.display_name)
     assert_input_value(:location_display_name, loc.display_name)
+  end
+
+  def test_edit_unknown_location
+    loc = locations(:unknown_location)
+    old_loc_display_name = loc.display_name
+    params = { id: loc.id,
+               location: { display_name: "Rome, Italy" }
+             }
+    post_requires_login(:edit_location, params)
+
+    assert_equal(old_loc_display_name, loc.reload.display_name,
+                 "Users should not be able to change Unknown location")
   end
 
   def test_update_location
@@ -564,7 +591,7 @@ end
 
     # Shouldn't match anything.
     requires_login(:list_merge_options, where: "Somewhere out there")
-    assert_equal(nil, assigns(:matches))
+    assert_nil(assigns(:matches))
   end
 
   def test_add_to_location
@@ -575,7 +602,7 @@ end
       where: (where = "undefined location"),
       notes: "new observation"
     )
-    assert_equal(obs.location, nil)
+    assert_nil(obs.location)
     where = obs.where
     params = {
       where:    where,
@@ -595,7 +622,7 @@ end
       where: (where = "Albion, Mendocino Co., California, USA"),
       notes: "new observation"
     )
-    assert_equal(obs.location, nil)
+    assert_nil(obs.location)
     assert_equal(:scientific, roy.location_format)
     params = {
       where: where,

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151007003058) do
+ActiveRecord::Schema.define(version: 20161229143700) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -74,6 +74,21 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.boolean  "anonymous",                                       default: false, null: false
     t.boolean  "reviewed",                                        default: true,  null: false
     t.integer  "user_id",    limit: 4
+    t.boolean  "recurring",                                       default: false
+  end
+
+  create_table "external_links", force: :cascade do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id",          limit: 4
+    t.integer  "observation_id",   limit: 4
+    t.integer  "external_site_id", limit: 4
+    t.string   "url",              limit: 100
+  end
+
+  create_table "external_sites", force: :cascade do |t|
+    t.string  "name",       limit: 100
+    t.integer "project_id", limit: 4
   end
 
   create_table "glossary_terms", force: :cascade do |t|
@@ -483,13 +498,11 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.datetime "updated_at"
   end
 
-  create_table "queries", force: :cascade do |t|
+  create_table "query_records", force: :cascade do |t|
     t.datetime "updated_at"
     t.integer  "access_count", limit: 4
-    t.text     "params",       limit: 65535
+    t.text     "description",  limit: 65535
     t.integer  "outer_id",     limit: 4
-    t.integer  "flavor",       limit: 4
-    t.integer  "model",        limit: 4
   end
 
   create_table "queued_email_integers", force: :cascade do |t|
@@ -622,7 +635,6 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.boolean  "email_html",                                 default: true,  null: false
     t.datetime "updated_at"
     t.boolean  "admin"
-    t.boolean  "created_here"
     t.text     "alert",                        limit: 65535
     t.boolean  "email_locations_admin",                      default: false
     t.boolean  "email_names_admin",                          default: false
@@ -640,6 +652,7 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count",                 limit: 4
     t.boolean  "view_owner_id",                              default: false, null: false
+    t.string   "content_filter",               limit: 255
   end
 
   create_table "votes", force: :cascade do |t|

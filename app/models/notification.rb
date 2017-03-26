@@ -60,16 +60,17 @@ class Notification < AbstractModel
   #
   def calc_note(args)
     if template = note_template
-      #     case self.flavor # Rails 3
       case flavor.to_sym
       when :name
-        user   = args[:user]
-        naming = args[:naming]
-        fail "Missing 'user' argument for #{flavor} notification."   unless user
+        tracker  = self.user
+        observer = args[:user]
+        naming   = args[:naming]
+        fail "Missing 'user' argument for #{flavor} notification."   unless observer
         fail "Missing 'naming' argument for #{flavor} notification." unless naming
-        template.gsub(":observer", user.login).
+        template.
+          gsub(":observer", observer.login).
           gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
-          gsub(":mailing_address", user.mailing_address || "").
+          gsub(":mailing_address", tracker.mailing_address || "").
           gsub(":location", naming.observation.place_name).
           gsub(":name", naming.format_name)
       end

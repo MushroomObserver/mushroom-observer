@@ -14,30 +14,32 @@ o Coprinus comatus (O.F. M=C3=BCll.) Pers.</title>
 </head>
 <body topmargin=3D0 leftmargin=3D0 rightmargin=3D0 bottommargin=3D0><br/>=
 <div class=3D"textile"><h2><strong>Consensus Change</strong></h2>
-<p>Consensus has changed for observation #3:</p></div>
+<p>Consensus has changed for observation #<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>:</p></div>
 <div class=3D"textile"><p><strong>Old name:</strong> <a href=3D"http://mu=
-shroomobserver.org/name/show_name/3"><b><i>Agaricus campestris</i></b> L.=
-</a><br />
+shroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>"><b><i>Agaricus campestris</i=
+></b> L.</a><br />
 <strong>New name:</strong> <a href=3D"http://mushroomobserver.org/name/sh=
-ow_name/2"><b><i>Coprinus comatus</i></b> (O.F. M=C3=BCll.) Pers.</a><br =
-/>
+ow_name/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>"><b><i>Coprinus comatus</i></b> (O.F. M=C3=BCll.) Pers.=
+</a><br />
 <strong>By:</strong> Tricky Dick (dick)</p></div>
 <div class=3D"textile"><p>Here are some handy links:</p></div>
 <ul type=3Dnone>
-<li>Show this observation: <a href=3D"http://mushroomobserver.org/3">=
-http://mushroomobserver.org/3</a></li>
+<li>Show this observation: <a href=3D"http://mushroomobserver.org/432=
+936842">http://mushroomobserver.org/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %></a></li>
 <li>Post a comment: <a href=3D"http://mushroomobserver.org/comment/ad=
-d_comment?id=3D3&amp;type=3DObservation">http://mushroomobserver.org/comm=
-ent/add_comment?id=3D3&amp;type=3DObservation</a></li>
+d_comment?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=3DObservation">http://mushroomobserver.=
+org/comment/add_comment?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=3DObservation</a></li>
 <li>I&#8217;m not interested in this observation: <a href=3D"http://m=
-ushroomobserver.org/interest/set_interest?id=3D3&amp;type=3DObservation&a=
-mp;user=3D2&amp;state=3D-1">http://mushroomobserver.org/interest/set_inte=
-rest?id=3D3&amp;type=3DObservation&amp;user=3D2&amp;state=3D-1</a></li>
+ushroomobserver.org/interest/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=3DObser=
+vation&amp;user=3D<%= ActiveRecord::FixtureSet.identify(:mary) %>&amp;state=3D-1">http://mushroomobserver.org/i=
+nterest/set_interest?id=3D<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>&amp;type=3DObservation&amp;user=3D365=
+790011&amp;state=3D-1</a></li>
 <li>Stop sending me email like this: <a href=3D"http://mushroomobserv=
-er.org/account/no_email_observations_consensus/2">http://mushroomobserver=
-.org/account/no_email_observations_consensus/2</a></li>
+er.org/account/no_email_observations_consensus/<%= ActiveRecord::FixtureSet.identify(:mary) %>">http://mushroom=
+observer.org/account/no_email_observations_consensus/<%= ActiveRecord::FixtureSet.identify(:mary) %></a></li>
 <li>Change your preferences: <a href=3D"http://mushroomobserver.org/a=
-ccount/prefs/2">http://mushroomobserver.org/account/prefs/2</a></li>
+ccount/prefs/365790011">http://mushroomobserver.org/account/prefs/3657900=
+11</a></li>
 <li>Latest changes at Mushroom Observer: <a href=3D"http://mushroomob=
 server.org">http://mushroomobserver.org</a></li>
 </ul>

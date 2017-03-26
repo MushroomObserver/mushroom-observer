@@ -21,9 +21,19 @@ MiniTest::Reporters.use!
 # Allow simuluation of user-browser interaction with capybara
 require "capybara/rails"
 
+# Allow stubbing and setting expectations on HTTP, and selective
+#  disabling of internet requests.
+require "webmock/minitest"
+
+# Disable external requests while allowing localhost
+WebMock.disable_net_connect!(allow_localhost: true)
+
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
 require "rails/test_help"
+
+# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
+require "mocha/mini_test"
 
 for file in %w(
   general_extensions

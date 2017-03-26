@@ -273,10 +273,8 @@ class NameDescription < Description
 
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
-        if recipient.created_here
-          QueuedEmail::NameChange.create_email(sender, recipient, name, self,
-                                               review_status_changed?)
-        end
+        QueuedEmail::NameChange.create_email(sender, recipient, name, self,
+                                             review_status_changed?)
       end
     end
 

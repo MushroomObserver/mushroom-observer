@@ -41,7 +41,8 @@ var MOAutocompleter = function(opts) {
 
   // These are potentially useful parameters the user might want to tweak.
   jQuery.extend(this, {
-    input_id:             null,            // id of text field
+    input_id:             null,            // id of text field (after initialization becomes a unique identifier)
+    input_elem:           null,            // jQuery element of text field
     pulldown_class:       'auto_complete', // class of pulldown div
     hot_class:            'selected',      // class of <li> when highlighted
     unordered:            false,           // ignore order of words when matching
@@ -61,16 +62,17 @@ var MOAutocompleter = function(opts) {
     pulldown_size:        10,              // maximum number of options shown at a time
     page_size:            10,              // amount to move cursor on page up and down
     max_request_length:   50,              // max length of string to send via AJAX
-    show_errors:          false            // show error messages returned via AJAX?
+    show_errors:          false,           // show error messages returned via AJAX?
+    act_like_select:      false            // include pulldown-icon on right, and always show all options
   });
   jQuery.extend(this, opts);
 
   // These are internal state variables the user should leave alone.
   jQuery.extend(this, {
-    input_elem:           null,            // DOM element of text field
-    datalist_elem:        null,            // DOM element of datalist
-    pulldown_elem:        null,            // DOM element of pulldown div
-    list_elem:            null,            // DOM element of pulldown ul
+    uuid:                 null,            // unique id for this object
+    datalist_elem:        null,            // jQuery element of datalist
+    pulldown_elem:        null,            // jQuery element of pulldown div
+    list_elem:            null,            // jQuery element of pulldown ul
     focused:              false,           // is user in text field?
     menu_up:              false,           // is pulldown visible?
     old_value:            {},              // previous value of input field
@@ -104,6 +106,10 @@ var MOAutocompleter = function(opts) {
   if (!this.input_elem)
     alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
+  // Create a unique ID for this instance.
+  this.uuid = Object.keys(AUTOCOMPLETERS).length;
+  this.input_elem.data("uuid", this.uuid);
+
   // Figure out a few browser-dependent dimensions.
   this.scrollbar_width = this.input_elem.getScrollBarWidth();
 
@@ -121,21 +127,22 @@ var MOAutocompleter = function(opts) {
   this.prepare_input_element(this.input_elem);
 
   // Keep catalog of autocompleter objects so we can reuse them as needed.
-  AUTOCOMPLETERS[this.input_id] = this;
+  AUTOCOMPLETERS[this.uuid] = this;
 }
 
 jQuery.extend(MOAutocompleter.prototype, {
 
   // Prepare another input element to share an existing autocompleter instance.
-  reuse: function(other_id) {
-    var other_elem = jQuery("#" + other_id);
+  reuse: function(other_elem) {
+    if (typeof other_elem == "string")
+      other_elem = jQuery("#" + other_elem);
     this.prepare_input_element(other_elem);
   },
 
   // Move/attach this autocompleter to a new field.
   switch_inputs: function(event, elem) {
-    if (this.input_id != elem.attr("id")) {
-      this.input_id   = elem.attr("id");
+    if (!this.input_elem.is(elem)) {
+      this.uuid       = elem.data("uuid");
       this.input_elem = elem;
       this.input_elem.parent().append(this.pulldown_elem);
     }
@@ -154,6 +161,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
       elem.focus(function(event) { return this2.switch_inputs(event, elem) });
+      elem.click(function(event) { return this2.our_click(event) });
       elem.blur(function(event) { return this2.our_blur(event) });
       elem.keydown(function(event) { return this2.our_keydown(event) });
       elem.keyup(function(event) { return this2.our_keyup(event) });
@@ -207,11 +215,15 @@ jQuery.extend(MOAutocompleter.prototype, {
         this.page_down();
         this.schedule_key(this.page_down);
         break;
+      default:
+        this.current_row = -1;
+        break;
       }
     }
     if (this.on_keydown)
       this.on_keydown(event);
-    if (this.menu_up && this.is_hot_key(key))
+    if (this.menu_up && this.is_hot_key(key) &&
+        !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
     return true;
   },
@@ -222,7 +234,8 @@ jQuery.extend(MOAutocompleter.prototype, {
     // jQuery("#log").append("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")<br/>");
     if (this.on_keypress)
       this.on_keypress(event);
-    if (this.menu_up && this.is_hot_key(key))
+    if (this.menu_up && this.is_hot_key(key) &&
+        !(key == EVENT_KEY_TAB || this.current_row < 0))
       return false;
     return true;
   },
@@ -239,16 +252,23 @@ jQuery.extend(MOAutocompleter.prototype, {
 
   // Input field has changed.
   our_change: function(do_refresh) {
-    var old_val = this.old_value[this.input_id];
+    var old_val = this.old_value[this.uuid];
     var new_val = this.input_elem.val();
     // jQuery("#log").append("our_change(" + this.input_elem.val() + ")<br/>");
     if (new_val != old_val) {
-      this.old_value[this.input_id] = new_val;
+      this.old_value[this.uuid] = new_val;
       if (do_refresh)
         this.schedule_refresh();
       if (this.on_change)
         this.on_change(new_val);
     }
+  },
+
+  // User clicked into text field.
+  our_click: function(event) {
+    if (this.act_like_select)
+      this.schedule_refresh();
+    return false;
   },
 
   // User entered text field.
@@ -283,15 +303,15 @@ jQuery.extend(MOAutocompleter.prototype, {
   // Prevent these keys from propagating to the input field.
   is_hot_key: function(key) {
     switch(key) {
-    case EVENT_KEY_ESC:      
-    case EVENT_KEY_RETURN:   
-    case EVENT_KEY_TAB:      
-    case EVENT_KEY_UP:       
-    case EVENT_KEY_DOWN:     
-    case EVENT_KEY_PAGEUP:   
-    case EVENT_KEY_PAGEDOWN: 
-    case EVENT_KEY_HOME:     
-    case EVENT_KEY_END:      
+    case EVENT_KEY_ESC:
+    case EVENT_KEY_RETURN:
+    case EVENT_KEY_TAB:
+    case EVENT_KEY_UP:
+    case EVENT_KEY_DOWN:
+    case EVENT_KEY_PAGEUP:
+    case EVENT_KEY_PAGEDOWN:
+    case EVENT_KEY_HOME:
+    case EVENT_KEY_END:
       return true;
     }
     return false;
@@ -306,7 +326,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     this.refresh_timer = setTimeout((function() {
       this.verbose("doing_refresh()");
       // jQuery("#log").append("refresh_timer(" + this.input_elem.val() + ")<br/>");
-      this.old_value[this.input_id] = this.input_elem.val();
+      this.old_value[this.uuid] = this.input_elem.val();
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();
@@ -688,7 +708,9 @@ jQuery.extend(MOAutocompleter.prototype, {
     var last = this.current_row < 0 ? null : this.matches[this.current_row];
 
     // Update list of options appropriately.
-    if (this.collapse > 0)
+    if (this.act_like_select)
+      this.update_select();
+    else if (this.collapse > 0)
       this.update_collapsed();
     else if (this.unordered)
       this.update_unordered();
@@ -703,6 +725,12 @@ jQuery.extend(MOAutocompleter.prototype, {
 
     // Reset width each time we change the options.
     this.current_width = this.input_elem.width();
+  },
+
+  // When "acting like a select" make it display all options in the
+  // order given right from the moment they enter the field.
+  update_select: function() {
+    this.matches = this.primer.split("\n");
   },
 
   // Grab all matches, doing exact match, ignoring number of words.
@@ -828,7 +856,7 @@ jQuery.extend(MOAutocompleter.prototype, {
           part = i;
       }
     }
-    new_row = exact >= 0 ? exact : part >= 0 ? part : matches.length > 0 ? 0 : -1;
+    new_row = exact >= 0 ? exact : part >= 0 ? part : -1;
     new_scr = this.scroll_offset;
     if (new_scr > new_row)
       new_scr = new_row;

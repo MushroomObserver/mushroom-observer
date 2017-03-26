@@ -1,11 +1,18 @@
 class SpecimenController < ApplicationController
   before_action :login_required, except: [
+    :index_specimen,
     :specimen_search,
     :list_specimens,
     :show_specimen,
     :herbarium_index,
     :observation_index
   ]
+
+  # Displays matrix of selected Specimen's (based on current Query).
+  def index_specimen # :nologin: :norobots:
+    query = find_or_create_query(:Specimen, by: params[:by])
+    show_selected_specimens(query, id: params[:id].to_s, always_index: true)
+  end
 
   # Display list of Specimens whose text matches a string pattern.
   def specimen_search # :nologin: :norobots:
@@ -188,7 +195,7 @@ class SpecimenController < ApplicationController
   end
 
   def can_delete?(specimen)
-    has_permission?(specimen, :delete_specimen_cannot_delete.l)
+    permission?(specimen, :delete_specimen_cannot_delete.l)
   end
 
   def edit_specimen # :norobots:

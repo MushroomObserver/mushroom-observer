@@ -24,33 +24,22 @@ class Pivotal
       "critical"        => 4,
       "bottleneck"      => 3,
       "api"             => 2,
-      "design"          => 2,
-      "documentation"   => 2,
+      "comments"        => 2,
+      "descriptions"    => 2,
       "email"           => 2,
-      "eol"             => 2,
-      "github"          => 2,
-      "glossary"        => 2,
-      "herbarium"       => 2,
       "i18n"            => 2,
       "images"          => 2,
-      "interface"       => 2,
       "lists"           => 2,
       "locations"       => 2,
+      "maps"            => 2,
       "names"           => 2,
       "observations"    => 2,
-      "pivotal_tracker" => 2,
+      "performance"     => 2,
       "projects"        => 2,
-      "publications"    => 2,
       "search"          => 2,
-      "taxonomy"        => 2,
-      "upgrade"         => 2,
-      "vagrant"         => 2,
+      "specimen"        => 2,
       "voting"          => 2,
-      "other"           => 2,
-      "admin"           => 1,
-      "code"            => 1,
-      "server"          => 1,
-      "open"            => 0
+      "other"           => 1,
     }
 
     def initialize(json)
@@ -148,11 +137,13 @@ class Pivotal
     end
 
     def sorted_labels
-      labels.select do |label|
-        !label.match(/^(requires .*|votes:.*|jason)$/)
+      result = labels.select do |label|
+        !label.match(/^(requires .*|votes:.*|jason)$/) &&
+        !LABEL_VALUE[label].nil?
       end.sort_by do |label|
         (9 - LABEL_VALUE[label].to_i).to_s + label
       end
+      result.empty? ? ["other"] : result
     end
 
     def user_vote(user)

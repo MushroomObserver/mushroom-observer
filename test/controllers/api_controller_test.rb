@@ -74,9 +74,9 @@ class ApiControllerTest < FunctionalTestCase
     assert_names_equal(names(:fungi), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
-    assert_equal(nil, obs.lat)
-    assert_equal(nil, obs.long)
-    assert_equal(nil, obs.alt)
+    assert_nil(obs.lat)
+    assert_nil(obs.long)
+    assert_nil(obs.alt)
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal("", obs.notes)
@@ -99,8 +99,8 @@ class ApiControllerTest < FunctionalTestCase
          has_specimen: "yes",
          is_collection_location: "yes",
          notes: "These are notes.\nThey look like this.\n",
-         images: "1,2",
-         thumbnail: "2",
+         images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
+         thumbnail: images(:turned_over_image).id.to_s,
          projects: "EOL Project",
          species_lists: "Another Species List"
         )
@@ -120,8 +120,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal("These are notes.\nThey look like this.", obs.notes)
-    assert_obj_list_equal([Image.find(1), Image.find(2)], obs.images)
-    assert_objs_equal(Image.find(2), obs.thumb_image)
+    assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)], obs.images)
+    assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_list_equal([projects(:eol_project)], obs.projects)
     assert_obj_list_equal([species_lists(:another_species_list)],
                           obs.species_lists)
@@ -159,7 +159,7 @@ class ApiControllerTest < FunctionalTestCase
                        date: "20120626",
                        notes: " Here are some notes. ",
                        copyright_holder: "My Friend",
-                       license: "2",
+                       license: licenses(:ccnc30).id.to_s,
                        original_name: "Coprinus_comatus.jpg",
                        projects: (proj = rolf.projects_member.first).id,
                        observations: (obs = rolf.observations.first).id
@@ -170,7 +170,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal("2012-06-26", img.when.web_date)
     assert_equal("Here are some notes.", img.notes)
     assert_equal("My Friend", img.copyright_holder)
-    assert_objs_equal(License.find(2), img.license)
+    assert_objs_equal(licenses(:ccnc30), img.license)
     assert_equal("Coprinus_comatus.jpg", img.original_name)
     assert_equal("image/jpeg", img.content_type)
     assert_equal(2288, img.width)

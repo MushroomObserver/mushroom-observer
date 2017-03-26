@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 class MinimalMapObservation
-  attr_accessor :id, :lat, :long, :location, :location_id
+  attr_accessor :id, :lat, :long, :location_id
 
   def initialize(id, lat, long, location_or_id)
     @id = id
@@ -10,10 +10,14 @@ class MinimalMapObservation
     if location_or_id.is_a?(Fixnum) ||
        location_or_id.is_a?(String)
       @location_id = location_or_id.to_i
-    elsif location
+    elsif location_or_id.is_a?(Location)
       @location = location_or_id
       @location_id = location_or_id.id
     end
+  end
+
+  def location
+    @location ||= @location_id.nil? ? nil : Location.find(@location_id)
   end
 
   def location=(loc)

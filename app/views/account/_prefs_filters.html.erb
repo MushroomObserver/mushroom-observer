@@ -1,0 +1,17 @@
+<!-- Filters Settings of Account Preferences Form -->
+<div class="form-group push-down">
+  <span class="bold"><%= :prefs_content_filters.t %></span>
+  <p><%= :prefs_content_filters_explanation.t %><p>
+</div>
+
+<% ContentFilter.all.each do |filter| %>
+  <% if filter.type == :boolean %>
+    <%= render partial: "prefs_filter_checkbox",
+               locals: { filter: filter, form: form } %>
+  <% elsif filter.type == :string %>
+    <%= render partial: "prefs_filter_text_field",
+               locals: { filter: filter, form: form } %>
+  <% end %>
+<% end %>
+
+<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
