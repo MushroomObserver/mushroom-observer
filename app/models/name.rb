@@ -1569,8 +1569,8 @@ class Name < AbstractModel
         #{UPPER_WORD}
         (?:
             # >= 1 of (rank Epithet)
-            \s \(? #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
-            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* \)? "?
+            \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
           |
             \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
             (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
@@ -1583,16 +1583,16 @@ class Name < AbstractModel
 
 # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  SECTION_TAXON     = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  STIRPS_TAXON      = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
   SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
@@ -1941,8 +1941,6 @@ class Name < AbstractModel
   end
 
   def self.standardize_name(str)
-    # remove old-style "(sect. Vaginatae)"
-    str = str.sub(/ \((.*)\)$/, ' \\1')
     words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
