@@ -270,6 +270,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, 'Amanita subsect. "Mismatch\'')
     assert_name_match_author_required(pat, "Amanita")
     assert_name_match_author_required(pat, "Amanita sp.")
+    assert_name_match_author_required(pat, '"Amanita" sp.')
     assert_name_match_author_required(pat, "Amanita vaginata")
     assert_name_match_author_required(pat, 'Amanita "vaginata"')
     assert_name_match_author_required(pat, "Amanita Subgenus Vaginatae")
