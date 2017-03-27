@@ -30,7 +30,7 @@ class ObserverController
         redirect_to(action: :list_rss_logs)
       else
         search = URI.escape("site:#{MO.domain} #{pattern}")
-        redirect_to("http://google.com/search?q=#{search}")
+        redirect_to("https://google.com/search?q=#{search}")
       end
       return
     else
