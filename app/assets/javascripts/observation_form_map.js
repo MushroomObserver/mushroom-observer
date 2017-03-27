@@ -49,8 +49,13 @@ if ( $('#observationFormMap').length ) {
         }
 
         // set bounds on map
-        $('.map-locate').click(function(e) {
+        $('.map-locate').click(function() {
             focusMap();
+        });
+
+        // clear map button
+        $('.map-clear').click(function(){
+            clearMap();
         });
 
         // use the geocoder to focus on a specific region on the map
@@ -74,6 +79,7 @@ if ( $('#observationFormMap').length ) {
         function placeMarker(location) {
             if (marker) {
                 marker.setPosition(location);
+                marker.setVisible(true);
             } else {
                 marker = new google.maps.Marker({
                     draggable: true,
@@ -108,6 +114,14 @@ if ( $('#observationFormMap').length ) {
                     }
                 }
             });
+        }
+
+        function clearMap() {
+            $(latInput).val('');
+            $(lngInput).val('');
+            $(elvInput).val('');
+
+            marker.setVisible(false);
         }
     })();
 }

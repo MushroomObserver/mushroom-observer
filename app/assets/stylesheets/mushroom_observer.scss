@@ -1761,6 +1761,10 @@ input[type=checkbox] {
     width: 100%;
 }
 
+.map-btn {
+    @extend .btn;
+    margin-top: 10px;
+}
 
 
 .spacer {
