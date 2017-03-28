@@ -107,13 +107,22 @@ class ApiController < ApplicationController
     @api = API.execute(args)
     User.current = @user = @api.user
     if @api.errors.any?(&:fatal)
-      render_xml(layout: "api", text: "")
+      do_render(layout: "api", text: "")
     else
-      render_xml(layout: "api", template: "/api/results")
+      do_render(layout: "api", template: "/api/results")
     end
   rescue => e
     @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
-    render_xml(layout: "api", text: "")
+    do_render(layout: "api", text: "")
+  end
+
+  def do_render(args)
+    # need to default to xml for backwards compatibility
+    request.format = "xml" if request.format == "html"
+    respond_to do |format|
+      format.xml  { render args }
+      format.json { render args }
+    end
   end
 end

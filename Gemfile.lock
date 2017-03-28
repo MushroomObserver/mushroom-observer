@@ -234,6 +234,7 @@ DEPENDENCIES
   coveralls
   cure_acts_as_versioned
   i18n
+  jbuilder (~> 1.2)
   jquery-rails
   jquery-slick-rails (~> 1.5.0.1)
   minitest
