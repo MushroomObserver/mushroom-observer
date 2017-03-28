@@ -170,4 +170,16 @@ module ApiHelper
       )
     end
   end
+
+  def json_detailed_object(xml, object, detail = false)
+    if object
+      json.target! << render(
+        partial: object.class.type_tag.to_s,
+        locals: {
+          object: object,
+          detail: detail
+        }
+      )
+    end
+  end
 end

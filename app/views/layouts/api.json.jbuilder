@@ -11,7 +11,8 @@ unless content.blank?
     json.number_of_pages @api.num_pages
     json.page_number @api.page_number
   end
-  json.results JSON.parse(content)
+  # json.results JSON.parse(content)
+  json.results content
 end
 if @api.errors.length > 0
   json.errors @api.errors do |error|

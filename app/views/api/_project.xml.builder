@@ -1,14 +1,16 @@
 xml.tag!(tag,
-  :id => object.id,
-  :url => object.show_url,
-  :type => 'project'
+  id: object.id,
+  url: object.show_url,
+  type: "project"
 ) do
   xml_string(xml, :title, object.title)
-  if detail
+  xml_datetime(xml, :created_at, object.created_at)
+  xml_datetime(xml, :updated_at, object.updated_at)
+  xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
+  if !detail
+    xml_minimal_object(xml, :creator, User, object.user_id)
+  else
     xml_detailed_object(xml, :creator, object.user)
-    xml_datetime(xml, :created_at, object.created_at)
-    xml_datetime(xml, :updated_at, object.updated_at)
-    xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
     admin_ids = object.admin_group.user_ids
     member_ids = object.user_group.user_ids
     xml.admins(:number => admin_ids.length) do
