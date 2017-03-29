@@ -16,7 +16,7 @@ class ObservationTest < UnitTestCase
     @cc_nam.observation = @cc_obs
   end
 
-  ################################################################################
+  ##############################################################################
 
   # Add an observation to the database
   def test_create
@@ -159,6 +159,13 @@ class ObservationTest < UnitTestCase
     min_map.location = nil
     assert_nil(min_map.location)
     assert_nil(min_map.location_id)
+  end
+
+  # Prove that unique_format_name returns blank string on error
+  def test_unique_format_name_rescue
+    obs = Observation.first
+    obs.name.display_name = nil    # mess up display_name to cause error
+    assert_equal("", obs.unique_format_name)
   end
 
   # --------------------------------------
