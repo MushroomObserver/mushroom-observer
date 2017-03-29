@@ -396,7 +396,7 @@ class Observation < AbstractModel
   def change_vote(naming, value, user = User.current)
     result = false
     naming = lookup_naming(naming)
-    vote  = naming.users_vote(user)
+    vote = naming.users_vote(user)
     value = value.to_f
 
     # This special value means destroy vote.
@@ -408,7 +408,7 @@ class Observation < AbstractModel
         # If this was one of the old favorites, we might have to elect new.
         if vote.favorite
 
-          # Get the max positive vote.
+          # Get user's max positive vote for this obs
           max = 0
           users_votes(user).each do |v|
             max = v.value if v.value > max
