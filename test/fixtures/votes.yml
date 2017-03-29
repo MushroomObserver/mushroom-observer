@@ -86,3 +86,15 @@ owner_uncertain_favorite_vote:
   naming: owner_uncertain_favorite_naming # Tremella mesenterica
   value: -1
   observation: owner_uncertain_favorite # Boletus edulis
+
+unequal_positive_namings_obs_top_vote:
+  <<: *DEFAULTS
+  observation: unequal_positive_namings_obs
+  naming:      unequal_positive_namings_top_naming
+
+unequal_positive_namings_obs_2nd_vote:
+  <<: *DEFAULTS
+  favorite:    false
+  observation: unequal_positive_namings_obs
+  naming:      unequal_positive_namings_2nd_naming
+  value:       <%= Vote.next_best_vote %>

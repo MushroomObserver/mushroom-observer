@@ -110,6 +110,20 @@ class ObservationTest < UnitTestCase
                  "Weakened favorite should remain favorite")
   end
 
+  # Prove that when user's favorite vote is deleted,
+  # user's 2nd postive vote becomes user's favorite
+  def test_change_vote_2nd_positive_choice_becomes_favorite
+    naming_top = namings(:unequal_positive_namings_top_naming)
+    obs = naming_top.observation
+    user = naming_top.user
+    old_2nd_choice = votes(:unequal_positive_namings_obs_2nd_vote)
+
+    obs.change_vote(naming_top, Vote.delete_vote, user)
+    old_2nd_choice.reload
+
+    assert_equal(true, old_2nd_choice.favorite)
+  end
+
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)

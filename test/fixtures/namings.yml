@@ -83,3 +83,13 @@ owner_uncertain_favorite_naming:
   user: dick
   name: tremella_mesenterica
   observation: owner_uncertain_favorite
+
+unequal_positive_namings_top_naming:
+  user: dick
+  name: tremella_mesenterica
+  observation: unequal_positive_namings_obs
+
+unequal_positive_namings_2nd_naming:
+  user: dick
+  name: tremella
+  observation: unequal_positive_namings_obs
