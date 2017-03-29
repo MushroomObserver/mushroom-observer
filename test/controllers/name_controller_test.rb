@@ -1458,7 +1458,7 @@ class NameControllerTest < FunctionalTestCase
     assert(bad_notes)
     good_name = names(:hygrocybe_russocoriacea_good_author)
     good_id = good_name.id
-    assert_nil(good_name.notes)
+    assert_empty(good_name.notes)
     good_author = good_name.author
     assert(good_author)
     params = {

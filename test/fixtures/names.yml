@@ -6,223 +6,150 @@
 # NOTE: If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
 # then update mushroom-observer/test/reports/name_list_data.js
 
-fungi: # id: 1
-  # accepted_name_id: 1
-  created_at: 2007-02-26 17:20:00
-  updated_at: 2007-02-26 17:20:00
+DEFAULTS: &DEFAULTS
+  author:   ""
+  citation: ""
+  notes:    ""
+  rank:     <%= Name.ranks[:Species] %>
+  user:     dick
+  version:  1
+
+fungi:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Kingdom] %>
   text_name: Fungi
-  author: ''
   display_name: '**__Fungi__**'
   search_name: Fungi
   sort_name: Fungi
-  citation: ''
   notes: C’mon, let's make sure we test at least one show_name with notes...
   rss_log: name_rss_log
 
-coprinus_comatus: # id: 2
-  # accepted_name_id: 2
+coprinus_comatus:
+  <<: *DEFAULTS
   description: coprinus_comatus_desc
-  created_at: 2007-02-27 20:47:00
-  updated_at: 2007-02-27 20:48:00
   user: rolf
   version: 2
-  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinus comatus
   author: '(O.F. Müll.) Pers.'
   display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
   search_name: Coprinus comatus (O.F. Müll.) Pers.
   sort_name: Coprinus comatus  (O.F. Müll.) Pers.
-  citation: ''
-  notes: ''
 
-agaricus_campestris: # id: 3
-  # accepted_name_id: 3
-  created_at: 2007-03-19 17:20:00
-  updated_at: 2007-03-19 17:20:00
+agaricus_campestris:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestris
   author: L.
   display_name: '**__Agaricus campestris__** L.'
   search_name: Agaricus campestris L.
   sort_name: Agaricus campestris  L.
-  citation: ''
-  notes: ''
 
-conocybe_filaris: # id: 4
-  # accepted_name_id: 4
-  created_at: 2007-03-28 15:50:00
-  updated_at: 2007-03-19 15:51:00
+conocybe_filaris:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Conocybe filaris
-  author: ''
   display_name: '**__Conocybe filaris__**'
   search_name: Conocybe filaris
   sort_name: Conocybe filaris
-  citation: ''
-  notes: ''
 
-amanita_baccata_arora: # id: 5
-  # accepted_name_id: 5
-  created_at: 2007-04-08 08:53:20
-  updated_at: 2007-04-09 08:53:30
+amanita_baccata_arora:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Amanita baccata
   author: sensu Arora
   display_name: '**__Amanita baccata__** sensu Arora'
   search_name: Amanita baccata sensu Arora
   sort_name: Amanita baccata  sensu Arora
-  citation: ''
-  notes: ''
 
-amanita_baccata_borealis: # id: 6
-  # accepted_name_id: 6
-  created_at: 2007-04-08 08:54:20
-  updated_at: 2007-04-09 08:54:30
+amanita_baccata_borealis:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Amanita baccata
   author: sensu Borealis
   display_name: '**__Amanita baccata__** sensu Borealis'
   search_name: Amanita baccata sensu Borealis
   sort_name: Amanita baccata  sensu Borealis
-  citation: ''
-  notes: ''
 
 # No Taxon 1
-lepiota_rachodes: # id: 7
-  # accepted_name_id: 7
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+lepiota_rachodes:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lepiota rachodes
   author: Vittad.
   display_name: '**__Lepiota rachodes__** Vittad.'
   search_name: Lepiota rachodes Vittad.
   sort_name: Lepiota rachodes  Vittad.
-  citation: ''
-  notes: ''
 
 # No Taxon 2
-lepiota_rhacodes: # id: 8
-  # accepted_name_id: 8
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+lepiota_rhacodes:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lepiota rhacodes
   author: Vittad.
   display_name: '**__Lepiota rhacodes__** Vittad.'
   search_name: Lepiota rhacodes Vittad.
   sort_name: Lepiota rhacodes  Vittad.
-  citation: ''
-  notes: ''
 
 # Taxon 1, Name 1
-macrolepiota_rachodes: # id: 9
-  # accepted_name_id: 9
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+macrolepiota_rachodes:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Macrolepiota rachodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
   search_name: Macrolepiota rachodes (Vittad.) Singer
   sort_name: Macrolepiota rachodes  (Vittad.) Singer
   synonym: macrolepiota_rachodes_synonym
-  citation: ''
-  notes: ''
 
 # Taxon 1, Name 2
-macrolepiota_rhacodes: # id: 10
-  # accepted_name_id: 9
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+macrolepiota_rhacodes:
+  <<: *DEFAULTS
   user: mary
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Macrolepiota rhacodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
   search_name: Macrolepiota rhacodes (Vittad.) Singer
   sort_name: Macrolepiota rhacodes  (Vittad.) Singer
   synonym: macrolepiota_rachodes_synonym
-  citation: ''
-  notes: ''
 
 # Taxon 2, Name 1
-chlorophyllum_rachodes: # id: 11
-  # accepted_name_id: 11
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+chlorophyllum_rachodes:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Chlorophyllum rachodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
   sort_name: Chlorophyllum rachodes  (Vittad.) Vellinga
   synonym: chlorophyllum_rachodes_synonym
-  citation: ''
-  notes: ''
 
 # Taxon 2, Name 2
-chlorophyllum_rhacodes: # id: 12
-  # accepted_name_id: 11
-  created_at: 2007-04-30 21:34:00
-  updated_at: 2007-04-30 21:34:00
+chlorophyllum_rhacodes:
+  <<: *DEFAULTS
   user: mary
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Chlorophyllum rhacodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
   sort_name: Chlorophyllum rhacodes  (Vittad.) Vellinga
   synonym: chlorophyllum_rachodes_synonym
-  citation: ''
-  notes: ''
 
 # Taxon 3, Name 1
-lactarius_alpinus: # id: 13
-  # accepted_name_id: 13
-  created_at: 2007-05-28 15:14:00
-  updated_at: 2007-04-30 15:14:10
+lactarius_alpinus:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius alpinus
   author: Peck
   display_name: '**__Lactarius alpinus__** Peck'
   search_name: Lactarius alpinus Peck
   sort_name: Lactarius alpinus  Peck
   synonym: lactarius_alpinus_synonym
-  citation: ''
-  notes: ''
 
 # Taxon 3, Name 2
-lactarius_alpigenes: # id: 14
-  # accepted_name_id: 13
-  created_at: 2007-05-28 15:14:00
-  updated_at: 2007-04-30 15:14:10
+lactarius_alpigenes:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius alpigenes
   author: Kühn.
   display_name: __Lactarius alpigenes__ Kühn.
@@ -230,17 +157,11 @@ lactarius_alpigenes: # id: 14
   sort_name: Lactarius alpigenes  Kühn.
   synonym: lactarius_alpinus_synonym
   deprecated: 1
-  citation: ''
-  notes: ''
 
 # Taxon 3, Name 3
-lactarius_kuehneri: # id: 15
-  # accepted_name_id: 13
-  created_at: 2007-05-28 15:14:00
-  updated_at: 2007-04-30 15:14:10
+lactarius_kuehneri:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius kuehneri
   author: Joss.
   display_name: __Lactarius kuehneri__ Joss.
@@ -248,17 +169,11 @@ lactarius_kuehneri: # id: 15
   sort_name: Lactarius kuehneri  Joss.
   synonym: lactarius_alpinus_synonym
   deprecated: 1
-  citation: ''
-  notes: ''
 
 # Taxon 3, Name 4
-lactarius_subalpinus: # id: 16
-  # accepted_name_id: 13
-  created_at: 2007-05-28 15:14:00
-  updated_at: 2007-04-30 15:14:10
+lactarius_subalpinus:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius subalpinus
   author: Kühn.
   display_name: __Lactarius subalpinus__ Kühn.
@@ -266,258 +181,160 @@ lactarius_subalpinus: # id: 16
   sort_name: Lactarius subalpinus  Kühn.
   synonym: lactarius_alpinus_synonym
   deprecated: 1
-  citation: ''
-  notes: ''
 
 # Deprecated genus
-psalliota: # id: 17
-  # accepted_name_id: 17
-  created_at: 2007-06-09 08:06:28
-  updated_at: 2007-06-09 08:06:40
+psalliota:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Psalliota
-  author: ''
   display_name: '**__Psalliota__**'
   search_name: Psalliota
   sort_name: Psalliota
-  citation: ''
-  notes: ''
 
 # Valid genus
-agaricus: # id: 18
-  # accepted_name_id: 18
-  created_at: 2007-06-09 08:06:28
-  updated_at: 2007-06-09 08:06:40
+agaricus:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Agaricus
-  author: ''
   display_name: '**__Agaricus__**'
   search_name: Agaricus
   sort_name: Agaricus
-  citation: ''
-  notes: ''
 
 # Misspelt name for testing merging
-agaricus_campestrus: # id: 19
-  # accepted_name_id: 19
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
+agaricus_campestrus:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestrus
   author: L.
   display_name: '**__Agaricus campestrus__** L.'
   search_name: Agaricus campestrus L.
   sort_name: Agaricus campestrus  L.
-  citation: ''
-  notes: ''
 
 # Name with notes
-agaricus_campestras: # id: 20
-  # accepted_name_id: 20
+agaricus_campestras:
+  <<: *DEFAULTS
   description: agaricus_campestras_desc
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestras
   author: L.
   display_name: '**__Agaricus campestras__** L.'
   search_name: Agaricus campestras L.
   sort_name: Agaricus campestras  L.
-  citation: ''
-  notes: ''
 
 # Another name with notes
-agaricus_campestros: # id: 21
-  # accepted_name_id: 21
+agaricus_campestros:
+  <<: *DEFAULTS
   description: agaricus_campestros_desc
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestros
   author: L.
   display_name: '**__Agaricus campestros__** L.'
   search_name: Agaricus campestros L.
   sort_name: Agaricus campestros  L.
-  citation: ''
-  notes: ''
 
 # For testing merges with existings versions
-coprinellus_micaceus: # id: 22
-  # accepted_name_id: 22
-  created_at: 2007-06-24 12:45:55
-  updated_at: 2007-06-24 12:45:55
+coprinellus_micaceus:
+  <<: *DEFAULTS
   user: rolf
   version: 2
-  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinellus micaceus
   author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
   display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
   sort_name: Coprinellus micaceus  (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  citation: ''
-  notes: ''
 
 # For testing merges with existing versions
-coprinellus_micaceus_no_author: # id: 23
-  # accepted_name_id: 23
-  created_at: 2007-06-24 12:45:55
-  updated_at: 2007-06-24 12:45:55
+coprinellus_micaceus_no_author:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinellus micaceus
-  author: ""
   display_name: '**__Coprinellus micaceus__**'
   search_name: Coprinellus micaceus
   sort_name: Coprinellus micaceus
-  citation: ''
-  notes: ''
 
 # For testing when the author is added to a name that has an observation
-strobilurus_diminutivus_no_author: # id: 24
-  # accepted_name_id: 24
-  created_at: 2007-07-20 20:54:45
-  updated_at: 2007-07-20 20:54:45
+strobilurus_diminutivus_no_author:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Strobilurus diminutivus
-  author: ''
   display_name: '**__Strobilurus diminutivus__**'
   search_name: Strobilurus diminutivus
   sort_name: Strobilurus diminutivus
-  citation: ''
-  notes: ''
 
 # For testing when there are both an approved and deprecated name with the same text name
-pluteus_petasatus_approved: # id: 25
-  # accepted_name_id: 25
-  created_at: 2007-07-20 20:54:45
-  updated_at: 2007-07-20 20:54:45
+pluteus_petasatus_approved:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Pluteus petasatus
   author: '(Fr.) Gillet'
   display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
   search_name: Pluteus petasatus (Fr.) Gillet
   sort_name: Pluteus petasatus  (Fr.) Gillet
-  citation: ''
-  notes: ''
 
 # For testing the where the author is added when a name has an observation
-pluteus_petasatus_deprecated: # id: 26
-  # accepted_name_id: 26
-  created_at: 2007-07-20 21:12:45
-  updated_at: 2007-07-20 21:12:45
+pluteus_petasatus_deprecated:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Pluteus petasatus
   author: '(Fries) Gillet'
   display_name: __Pluteus petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
   sort_name: Pluteus petasatus  (Fries) Gillet
   deprecated: 1
-  citation: ''
-  notes: ''
 
 # Valid genus
-lepiota: # id: 27
-  # accepted_name_id: 27
-  created_at: 2007-07-30 08:06:28
-  updated_at: 2007-07-30 08:06:40
+lepiota:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Lepiota
-  author: ''
   display_name: '**__Lepiota__**'
   search_name: Lepiota
   sort_name: Lepiota
-  citation: ''
-  notes: ''
 
 # Valid genus
-chlorophyllum: # id: 28
-  # accepted_name_id: 28
-  created_at: 2007-07-30 22:06:28
-  updated_at: 2007-07-30 22:06:40
+chlorophyllum:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Chlorophyllum
-  author: ''
   display_name: '**__Chlorophyllum__**'
   search_name: Chlorophyllum
   sort_name: Chlorophyllum
-  citation: ''
-  notes: ''
 
 # Two fake names with non-alphanumerics for severe stress-testing species lists.
-bugs_bunny_one: # id: 29
-  # accepted_name_id: 29
-  created_at: 2008-01-31 01:01:01
-  updated_at: 2008-01-31 01:01:01
+bugs_bunny_one:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   author: One
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** One'
   search_name: Warnerbros bugs-bunny One
   sort_name: Warnerbros bugs-bunny  One
-  citation: ''
-  notes: ''
 
-bugs_bunny_two: # id: 30
-  # accepted_name_id: 30
-  created_at: 2008-01-31 01:01:01
-  updated_at: 2008-01-31 01:01:01
+bugs_bunny_two:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   author: Two
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** Two'
   search_name: Warnerbros bugs-bunny Two
   sort_name: Warnerbros bugs-bunny  Two
-  citation: ''
-  notes: ''
 
-russula_brevipes_no_author: # id: 31
-  # accepted_name_id: 31
-  created_at: 2008-03-10 22:31:25
-  updated_at: 2008-03-10 22:31:27
+russula_brevipes_no_author:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Russula brevipes
-  author: ''
   display_name: '**__Russula brevipes__**'
   search_name: Russula brevipes
   sort_name: Russula brevipes
-  citation: ''
-  notes: ''
 
-russula_brevipes_author_notes: # id: 32
-  # accepted_name_id: 32
+russula_brevipes_author_notes:
+  <<: *DEFAULTS
   description: russula_brevipes_author_notes_desc
-  created_at: 2008-03-10 22:33:00
-  updated_at: 2008-03-10 22:33:05
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Russula brevipes
   author: Peck
   display_name: '**__Russula brevipes__** Peck'
@@ -526,120 +343,76 @@ russula_brevipes_author_notes: # id: 32
   citation: 'blah'
   notes: 'blah blah blah'
 
-russula_cremoricolor_no_author_notes: # id: 33
-  # accepted_name_id: 33
+russula_cremoricolor_no_author_notes:
+  <<: *DEFAULTS
   description: russula_cremoricolor_no_author_notes_desc
-  created_at: 2008-03-12 20:53:08
-  updated_at: 2008-03-12 20:53:18
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Russula cremoricolor
-  author: ''
   display_name: '**__Russula cremoricolor__**'
   search_name: Russula cremoricolor
   sort_name: Russula cremoricolor
-  citation: ''
-  notes: ''
 
-russula_cremoricolor_author_notes: # id: 34
-  # accepted_name_id: 34
+russula_cremoricolor_author_notes:
+  <<: *DEFAULTS
   description: russula_cremoricolor_author_notes_desc
-  created_at: 2008-03-12 20:53:36
-  updated_at: 2008-03-12 20:53:40
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Russula cremoricolor
   author: Earle
   display_name: '**__Russula cremoricolor__** Earle'
   search_name: Russula cremoricolor Earle
   sort_name: Russula cremoricolor  Earle
-  citation: ''
-  notes: ''
 
-lentinellus_ursinus_author1: # id: 35
-  # accepted_name_id: 35
-  created_at: 2008-03-19 08:35:30
-  updated_at: 2008-03-19 08:35:37
+lentinellus_ursinus_author1:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lentinellus ursinus
   author: Kühner
   display_name: '**__Lentinellus ursinus__** Kühner'
   search_name: Lentinellus ursinus Kühner
   sort_name: Lentinellus ursinus  Kühner
-  citation: ''
-  notes: ''
 
-lentinellus_ursinus_author2: # id: 36
-  # accepted_name_id: 36
-  created_at: 2008-03-19 08:35:30
-  updated_at: 2008-03-19 08:35:37
+lentinellus_ursinus_author2:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Lentinellus ursinus
   author: Kuhner
   display_name: '**__Lentinellus ursinus__** Kuhner'
   search_name: Lentinellus ursinus Kuhner
   sort_name: Lentinellus ursinus  Kuhner
-  citation: ''
-  notes: ''
 
 # Genus with correct author
-macrocybe_pegler: # id: 37
-  # accepted_name_id: 37
-  created_at: 2008-09-05 22:30:00
-  updated_at: 2008-09-05 22:30:00
+macrocybe_pegler:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   search_name: Macrocybe
   sort_name: Macrocybe
-  citation: ''
-  notes: ''
 
 # Genus with incorrect author
-macrocybe_titans: # id: 38
-  # accepted_name_id: 38
-  created_at: 2008-09-05 22:30:00
-  updated_at: 2008-09-05 22:30:00
+macrocybe_titans:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Macrocybe
   author: Titans
   display_name: '**__Macrocybe__** Titans'
   search_name: Macrocybe Titans
   sort_name: Macrocybe  Titans
-  citation: ''
-  notes: ''
 
-boletus_edulis: # id: 39
-  # accepted_name_id: 39
-  created_at: 2008-10-05 16:16:50
-  updated_at: 2008-10-05 16:17:08
-  user: dick
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
+boletus_edulis:
+  <<: *DEFAULTS
   text_name: Boletus edulis
   author: Bull.
   display_name: '**__Boletus edulis__** Bull.'
   search_name: Boletus edulis Bull.
   sort_name: Boletus edulis  Bull.
-  citation: ''
-  notes: ''
 
-peltigera: # id: 40
-  # accepted_name_id: 40
+peltigera:
+  <<: *DEFAULTS
   description: peltigera_desc
-  created_at: 2009-01-01 01:01:01
-  updated_at: 2009-01-02 01:01:01
   user: rolf
   version: 2
   rank: <%= Name.ranks[:Genus] %>
@@ -651,63 +424,39 @@ peltigera: # id: 40
   sort_name: Peltigera  (Old) New Auth.
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   synonym: peltigera_synonym
-  notes: ''
 
-petigera: # id: 41
-  # accepted_name_id: 40
-  created_at: 2009-01-01 01:01:01
-  updated_at: 2009-01-02 01:01:01
-  user: dick
-  version: 1
+petigera:
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Petigera
-  author: ''
   display_name: __Petigera__
   search_name: Petigera
   sort_name: Petigera
   correct_spelling: peltigera
   deprecated: true
   synonym: peltigera_synonym
-  citation: ''
-  notes: ''
 
-suillus: # id: 42
-  # accepted_name_id: 42
+suillus:
+  <<: *DEFAULTS
   description: suillus_desc
-  created_at: 2009-10-12 21:30:01
-  updated_at: 2009-10-12 21:30:01
-  user: dick
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Suillus
   author: Gray
   display_name: '**__Suillus__** Gray'
   search_name: Suillus Gray
   sort_name: Suillus  Gray
-  citation: ''
-  notes: ''
 
-suillus_by_white: # id: 43
-  # accepted_name_id: 43
-  created_at: 2009-10-12 21:30:01
-  updated_at: 2009-10-12 21:30:01
-  user: dick
-  version: 1
+suillus_by_white:
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Suillus
   author: E.B. White
   display_name: '**__Suillus__** E.B. White'
   search_name: Suillus E.B. White
   sort_name: Suillus  E.B. White
-  citation: ''
-  notes: ''
 
-suilus: # id: 44
-  # accepted_name_id: 44
-  created_at: 2009-10-12 21:30:01
-  updated_at: 2009-10-12 21:30:01
-  user: dick
-  version: 1
+suilus:
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Suilus
   author: E.B. White
@@ -716,61 +465,39 @@ suilus: # id: 44
   sort_name: Suilus  E.B. White
   correct_spelling: suillus_by_white
   deprecated: true
-  citation: ''
-  notes: ''
 
-tremella_mesenterica: # id: 45
-  # accepted_name_id: 45
-  created_at: 2011-11-06 18:07:20
-  updated_at: 2011-11-06 18:07:20
+tremella_mesenterica:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Tremella mesenterica
   author: Retz.
   display_name: '**__Tremella mesenterica__** Retz.'
   search_name: Tremella mesenterica Retz.
   sort_name: Tremella mesenterica  Retz.
-  citation: ''
-  notes: ''
 
-tremella: # id: 46
-  # accepted_name_id: 46
-  created_at: 2011-11-06 18:09:20
-  updated_at: 2011-11-06 18:09:20
+tremella:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Genus] %>
   text_name: Tremella
   author: Pers.
   display_name: '**__Tremella__** Pers.'
   search_name: Tremella Pers.
   sort_name: Tremella  Pers.
-  citation: ''
-  notes: ''
 
-tremella_justpublished: # id: 47
-  # accepted_name_id: 47
-  created_at: 2011-11-06 18:07:20
-  updated_at: 2011-11-06 18:07:20
+tremella_justpublished:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
-  rank: <%= Name.ranks[:Species] %>
   text_name: Tremella justpublished
   author: Retz.
   display_name: '**__Tremella justpublished__** Retz.'
   search_name: Tremella justpublished Retz.
   sort_name: Tremella justpublished  Retz.
-  citation: ''
   notes: A Tremella not known to be a lichen
 
-hygrocybe_russocoriacea_bad_author: # id: 48
-  # accepted_name_id: 48
-  version: 1
-  created_at: 2007-01-10 05:06:08
-  updated_at: 2011-12-15 18:35:28
+hygrocybe_russocoriacea_bad_author:
+  <<: *DEFAULTS
   user: rolf
-  rank: <%= Name.ranks[:Species] %>
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & T.K. Mill.) P.D. Orton & Watling
@@ -778,133 +505,91 @@ hygrocybe_russocoriacea_bad_author: # id: 48
   author: '(Berk. & T.K. Mill.) P.D. Orton & Watling'
   notes: '__Camarophyllus russocoriaceus__ is a synonym.  According to the Index Fungorum __Camarophyllus__ is now considered to be a synonym of __Hygrocybe__.'
 
-hygrocybe_russocoriacea_good_author: # id: 49
-  # accepted_name_id: 49
-  version: 1
-  created_at: 2011-12-10 03:50:48
-  updated_at: 2011-12-10 03:50:48
-  user: dick
-  rank: <%= Name.ranks[:Species] %>
+hygrocybe_russocoriacea_good_author:
+  <<: *DEFAULTS
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   display_name: '**__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
-  notes: NULL
 
-lichen: # id: 50
-  # accepted_name_id: 50
-  created_at: 2015-02-07 11:27:00
-  updated_at: 2015-02-07 11:27:00
+lichen:
+  <<: *DEFAULTS
   user: rolf
-  version: 1
   rank: <%= Name.ranks[:Kingdom] %>
   text_name: Lichen
-  author: ''
   display_name: '**__Lichen__**'
   search_name: Lichen
   sort_name: Lichen
-  citation: ''
   notes: This is a pseudoname to apply to all unknown lichenized fungi.
 
-abortiporus_biennis_for_eol: # id: 51
-  # accepted_name_id: 51
-  version: 1
-  created_at: 2015-07-05 21:41:10
-  updated_at: 2015-07-05 21:41:10
-  user: dick
-  rank: <%= Name.ranks[:Species] %>
+abortiporus_biennis_for_eol:
+  <<: *DEFAULTS
   text_name: Abortiporus biennis
   search_name: Abortiporus biennis (Bull.) Singer
   sort_name: Abortiporus biennis  (Bull.) Singer
   display_name: '**__Abortiporus biennis__** (Bull.) Singer'
   author: '(Bull.) Singer'
-  notes: NULL
 
-amanita_subgenus_lepidella: # id: 52
-  # accepted_name_id: 52
-  version: 1
-  created_at: 2015-07-31 15:10:10
-  updated_at: 2015-07-31 15:10:10
-  user: dick
+amanita_subgenus_lepidella:
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Subgenus] %>
   text_name: Amanita subgenus Lepidella
   search_name: Amanita subgenus Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
   sort_name: Amanita subgenus Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
   display_name: '**__Amanita__ subgenus __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
-  notes: NULL
 
-amanita_boudieri_var_beillei: # id: 53
-  # accepted_name_id: 53
-  version: 1
-  created_at: 2015-07-31 17:18:10
-  updated_at: 2015-07-31 17:18:10
-  user: dick
+amanita_boudieri_var_beillei:
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Variety] %>
   text_name: Amanita boudieri var. beillei
   search_name: Amanita boudieri var. beille
   sort_name: Amanita boudieri var. beillei
   display_name: '**__Amanita boudieri__ var. __beillei__**'
-  author: ''
-  notes: NULL
 
 # uses auto
 boletus_edulis_group:
-  version: 1
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Group] %>
   text_name: Boletus edulis group
   display_name: '**__Boletus edulis__** group'
   search_name: Boletus edulis group
   sort_name: Boletus edulis   group
-  author: ''
-  citation: ''
-  notes: NULL
 
 imageless:
-  version: 1
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Imageless
   display_name: '**__Imageless__**'
   search_name: Imageless
   sort_name: Imageless
-  author: ''
-  citation: ''
-  notes: NULL
 
 # Next two names are used by test of lookup_name.
 # They are spelling suggested by lookup_name("Verpa").
 # NOTE: Verpa must not be used for any name, else the test will fail
 # because the lookup will find a match and not look for suggestions.
 suggested_by_verpa_authored:
-  version: 1
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Verpaa
   display_name: '**__Verpaa__**'
   search_name: Verpaa
   sort_name: Verpaa
   author: 'Bob'
-  citation: ''
-  notes: NULL
 
 suggested_by_verpa_authorless:
-  version: 1
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Verpaa
   display_name: '**__Verpaa__**'
   search_name: Verpaa
   sort_name: Verpaa
-  author: ''
-  citation: ''
-  notes: NULL
 
 notification_but_no_observation:
-  version: 1
+  <<: *DEFAULTS
   rank: <%= Name.ranks[:Genus] %>
   text_name: Mushroom
   display_name: '**__Mushroom__**'
   search_name: Mushroom
   sort_name: Mushroom
-  user: dick
-  citation: ''
-  notes: NULL
