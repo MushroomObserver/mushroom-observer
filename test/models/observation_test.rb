@@ -703,4 +703,20 @@ class ObservationTest < UnitTestCase
     # not enough notes
     assert_false(observations(:agaricus_campestrus_obs).has_backup_data?)
   end
+
+  def test_dump_votes
+    obs = observations(:coprinus_comatus_obs)
+    # Add a Naming with no votes to completely test dump_votes.
+    no_votes_naming = Naming.new(
+      observation_id: obs.id,
+      name_id: names(:fungi).id,
+      user_id: users(:rolf).id
+    )
+    no_votes_naming.save!
+    votes = "#{obs.namings.first.id} Agaricus campestris L.: mary=3.0(*), rolf=-3.0\n" \
+            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: mary=1.0(*), rolf=2.0(*)\n"\
+            "#{no_votes_naming.id} Fungi: no votes"
+
+    assert_equal(votes, obs.dump_votes)
+  end
 end
