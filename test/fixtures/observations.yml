@@ -313,3 +313,8 @@ unequal_positive_namings_obs:
   <<: *DEFAULTS
   when: 2017-03-29
 
+# used for testing calc_consensus
+all_namings_deprecated_obs:
+  <<: *DEFAULTS
+  when: 2017-03-29
+  name: namings_deprecated

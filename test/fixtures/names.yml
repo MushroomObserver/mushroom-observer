@@ -3,8 +3,14 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# NOTE: If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
-# then update mushroom-observer/test/reports/name_list_data.js
+# WARNINGS on adding names
+# Do not add a Name starting with A or B.
+#  This will likely break NameControllerTest#test_next_and_prev
+# Do not add a Name starting with U or Z.
+#  AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
+#  NameControllerTest pagination tests expect 0 Names staring with Z.
+# If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
+#   then update mushroom-observer/test/reports/name_list_data.js
 
 DEFAULTS: &DEFAULTS
   author:   ""
@@ -593,3 +599,31 @@ notification_but_no_observation:
   display_name: '**__Mushroom__**'
   search_name: Mushroom
   sort_name: Mushroom
+
+# Next three Names for constructing an Observation with all Namings (and Votes)
+# for deprecated Names which are synonyms of same current Name
+namings_deprecated:
+  <<: *DEFAULTS
+  text_name:    Xa current
+  display_name: "**__Xa current__**"
+  search_name:  Xa current
+  sort_name:    Xa current
+  synonym:      namings_deprecated_synonym
+
+namings_deprecated_1:
+  <<: *DEFAULTS
+  text_name:    Xa deprecatedone
+  display_name: "**__Xa deprecatedone__**"
+  search_name:  Xa deprecatedone
+  sort_name:    Xa deprecatedone
+  synonym:      namings_deprecated_synonym
+  deprecated:   true
+
+namings_deprecated_2:
+  <<: *DEFAULTS
+  text_name:    Xa deprecatedtwo
+  display_name: "**__Xa deprecatedtwo__**"
+  search_name:  Xa deprecatedtwo
+  sort_name:    Xa deprecatedtwo
+  synonym:      namings_deprecated_synonym
+  deprecated:   true

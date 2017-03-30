@@ -93,3 +93,15 @@ unequal_positive_namings_2nd_naming:
   user: dick
   name: tremella
   observation: unequal_positive_namings_obs
+
+all_namings_deprecated_winning_naming:
+  user:        dick
+  observation: all_namings_deprecated_obs
+  name:        namings_deprecated_1
+  vote_cache:  <%= Vote.maximum_vote %>
+
+all_namings_deprecated_other_naming:
+  user:        rolf
+  observation: all_namings_deprecated_obs
+  name:        namings_deprecated_2
+  vote_cache:  <%= Vote.next_best_vote %>

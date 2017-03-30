@@ -124,6 +124,14 @@ class ObservationTest < UnitTestCase
     assert_equal(true, old_2nd_choice.favorite)
   end
 
+  # Prove that when all an Observation's Namings are deprecated,
+  # calc_consensus returns the synonym of the consensus with the highest vote.
+  def test_calc_consensus_all_namings_deprecated
+    obs = observations(:all_namings_deprecated_obs)
+    winning_naming = namings(:all_namings_deprecated_winning_naming)
+    assert_equal(winning_naming, obs.consensus_naming)
+  end
+
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)

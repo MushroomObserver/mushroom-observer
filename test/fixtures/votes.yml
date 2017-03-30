@@ -98,3 +98,4 @@ unequal_positive_namings_obs_2nd_vote:
   observation: unequal_positive_namings_obs
   naming:      unequal_positive_namings_2nd_naming
   value:       <%= Vote.next_best_vote %>
+
