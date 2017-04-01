@@ -23,7 +23,7 @@ if ( $('#observationFormMap').length ) {
         addGmapsListener(map, 'click');
 
         // adjust marker on field input
-        $([latInput, lngInput]).each(function(index) {
+        $([latInput, lngInput]).each(function() {
             var location;
 
             $(this).keyup(function() {
