@@ -1544,34 +1544,61 @@ class Name < AbstractModel
   NOV_ABBR     = / nova | novum | nov\.? /xi
   PROV_ABBR    = / provisional | prov\.? /xi
 
-  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} /x
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
+                      #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
-  ANY_NAME_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} | #{SP_ABBR} | #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} | #{GROUP_ABBR} /x
-  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
+  ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
+                      #{GROUP_ABBR} /x
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
+                          #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
-  LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$|species) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
+  BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
+  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
+                           sp\.\s\S*\d\S* /x
 
-  # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
+  # Matches the last epithet in a (standardized) name,
+  # including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
 
-  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
+  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [
+                   A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
-  AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
+  # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
+  #   AUTHOR_PAT ensures "sp", "ssp", etc., aren't included in author.
+  #   AUTHOR_PAT removes the author first thing.
+  # Then the other parsers have a much easier job.
+  AUTHOR_PAT =
+    /^
+      ( "?
+        #{UPPER_WORD}
+        (?:
+            # >= 1 of (rank Epithet)
+            \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+          |
+            \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+          |
+            "? \s #{SP_ABBR}
+        )?
+      )
+      ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
+    $/x
 
   # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  SECTION_TAXON     = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
+  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?)/x
-  STIRPS_TAXON      = /("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
+  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
   SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
@@ -1580,9 +1607,18 @@ class Name < AbstractModel
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
-  FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
+  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
+  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
+  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                       (\s #{AUTHOR_START}.*)?
+                   $/x
 
   GROUP_PAT       = /^(?<taxon>
                         #{GENUS_OR_UP_TAXON} |
@@ -1911,8 +1947,6 @@ class Name < AbstractModel
   end
 
   def self.standardize_name(str)
-    # remove old-style "(sect. Vaginatae)"
-    str = str.sub(/ \((.*)\)$/, ' \\1')
     words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2

@@ -54,7 +54,6 @@
 #  last_view::              Last time it was viewed.
 #
 #  ==== "Fake" attributes
-#  idstr::                  Used by <tt>observer/reuse_image.rhtml</tt>.
 #  place_name::             Wrapper on top of +where+ and +location+.
 #                           Handles location_format.
 #
@@ -88,7 +87,6 @@
 #  users_votes::            Get all of a given User's Vote's for this Obs..
 #  is_owners_favorite?::    Is a given naming the owner's favorite?
 #  is_users_favorite?::     Is a given naming a given user's favorite?
-#  vote_percent::           Convert Vote score to percentage.
 #  change_vote::            Change a given User's Vote for a given Naming.
 #  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
@@ -160,24 +158,6 @@ class Observation < AbstractModel
 
   def is_observation?
     true
-  end
-
-  # Always returns empty string.  (Used by
-  # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr
-    ""
-  end
-
-  # Adds error if couldn't find image with the given id.  (Used by
-  # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr=(id_field)
-    id = id_field.to_i
-    return if Image.safe_find(id)
-    errors.add(:thumb_image_id, :validate_observation_thumb_image_id_invalid.t)
-  end
-
-  def raw_place_name
-    location ? location.name : where
   end
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
@@ -410,18 +390,13 @@ class Observation < AbstractModel
     owners_only_favorite_name.try(:known?)
   end
 
-  # Convert cached Vote score to percentage.
-  def vote_percent
-    Vote.percent(vote_cache)
-  end
-
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
   def change_vote(naming, value, user = User.current)
     result = false
     naming = lookup_naming(naming)
-    vote  = naming.users_vote(user)
+    vote = naming.users_vote(user)
     value = value.to_f
 
     # This special value means destroy vote.
@@ -433,7 +408,7 @@ class Observation < AbstractModel
         # If this was one of the old favorites, we might have to elect new.
         if vote.favorite
 
-          # Get the max positive vote.
+          # Get user's max positive vote for this obs
           max = 0
           users_votes(user).each do |v|
             max = v.value if v.value > max
