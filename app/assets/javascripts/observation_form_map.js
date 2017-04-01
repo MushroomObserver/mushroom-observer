@@ -20,10 +20,7 @@ if ( $('#observationFormMap').length ) {
         // init elevation service
         var elevation = new google.maps.ElevationService();
 
-        google.maps.event.addListener(map, 'click', function(e) {
-            placeMarker(e.latLng);
-            updateFields();
-        });
+        addGmapsListener(map, 'click');
 
         // adjust marker on field input
         $([latInput, lngInput]).each(function(index, value) {
@@ -89,10 +86,7 @@ if ( $('#observationFormMap').length ) {
                 });
 
                 // when dragged
-                google.maps.event.addListener(marker, 'drag', function(e) {
-                    placeMarker(e.latLng);
-                    updateFields();
-                });
+                addGmapsListener(marker, 'drag');
             }
         }
 
@@ -106,7 +100,7 @@ if ( $('#observationFormMap').length ) {
             $(lngInput).val(marker.position.lng());
 
             elevation.getElevationForLocations(requestElevation, function(results, status) {
-                if (status == google.maps.ElevationStatus.OK) {
+                if (status === google.maps.ElevationStatus.OK) {
                     if (results[0]) {
                         $(elvInput).val(parseFloat(results[0].elevation));
                     } else {
@@ -123,5 +117,12 @@ if ( $('#observationFormMap').length ) {
 
             marker.setVisible(false);
         }
-    })();
+
+        function addGmapsListener(el, eventType) {
+            google.maps.event.addListener(el, eventType, function(e) {
+                placeMarker(e.latLng);
+                updateFields();
+            });
+        }
+    }());
 }
