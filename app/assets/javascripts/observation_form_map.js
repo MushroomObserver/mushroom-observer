@@ -23,7 +23,7 @@ if ( $('#observationFormMap').length ) {
         addGmapsListener(map, 'click');
 
         // adjust marker on field input
-        $([latInput, lngInput]).each(function(index, value) {
+        $([latInput, lngInput]).each(function(index) {
             var location;
 
             $(this).keyup(function() {
@@ -60,8 +60,9 @@ if ( $('#observationFormMap').length ) {
             var geocoder = new google.maps.Geocoder();
 
             // even a single letter will return a result
-            if ( $(searchInput).val().length <= 0 )
+            if ( $(searchInput).val().length <= 0 ) {
                 return false;
+            }
 
             geocoder.geocode({'address': $(searchInput).val() }, function(results, status) {
                 if (status === google.maps.GeocoderStatus.OK && results.length > 0) {
