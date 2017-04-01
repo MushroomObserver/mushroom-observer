@@ -45,7 +45,7 @@ class API
       high_detail_page_length
     elsif method == "PUT"
       put_page_length
-    elsif method == "DELTE"
+    elsif method == "DELETE"
       delete_page_length
     elsif detail == :low
       low_detail_page_length
