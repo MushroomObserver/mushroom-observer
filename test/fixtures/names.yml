@@ -11,6 +11,7 @@
 #  NameControllerTest pagination tests expect 0 Names staring with Z.
 # If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
 #   then update mushroom-observer/test/reports/name_list_data.js
+# Do not use "Verpa " as part of a Name. See :suggested_by_verpa_authored below.
 
 DEFAULTS: &DEFAULTS
   author:   ""
