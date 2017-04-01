@@ -16,7 +16,7 @@ class ObservationTest < UnitTestCase
     @cc_nam.observation = @cc_obs
   end
 
-  ################################################################################
+  ##############################################################################
 
   # Add an observation to the database
   def test_create
@@ -101,13 +101,35 @@ class ObservationTest < UnitTestCase
     refute(obs.showable_owner_id?)
   end
 
-  def test_weakened_favorite
+  def test_change_vote_weakened_favorite
     vote = votes(:owner_only_favorite_ne_consensus)
     vote.observation.change_vote(vote.naming, Vote.min_pos_vote, vote.user)
     vote.reload
 
     assert_equal(true, vote.favorite,
                  "Weakened favorite should remain favorite")
+  end
+
+  # Prove that when user's favorite vote is deleted,
+  # user's 2nd postive vote becomes user's favorite
+  def test_change_vote_2nd_positive_choice_becomes_favorite
+    naming_top = namings(:unequal_positive_namings_top_naming)
+    obs = naming_top.observation
+    user = naming_top.user
+    old_2nd_choice = votes(:unequal_positive_namings_obs_2nd_vote)
+
+    obs.change_vote(naming_top, Vote.delete_vote, user)
+    old_2nd_choice.reload
+
+    assert_equal(true, old_2nd_choice.favorite)
+  end
+
+  # Prove that when all an Observation's Namings are deprecated,
+  # calc_consensus returns the synonym of the consensus with the highest vote.
+  def test_calc_consensus_all_namings_deprecated
+    obs = observations(:all_namings_deprecated_obs)
+    winning_naming = namings(:all_namings_deprecated_winning_naming)
+    assert_equal(winning_naming, obs.consensus_naming)
   end
 
   def test_specimens
@@ -159,6 +181,13 @@ class ObservationTest < UnitTestCase
     min_map.location = nil
     assert_nil(min_map.location)
     assert_nil(min_map.location_id)
+  end
+
+  # Prove that unique_format_name returns blank string on error
+  def test_unique_format_name_rescue
+    obs = Observation.first
+    obs.name.display_name = nil    # mess up display_name to cause error
+    assert_equal("", obs.unique_format_name)
   end
 
   # --------------------------------------
@@ -702,5 +731,21 @@ class ObservationTest < UnitTestCase
 
     # not enough notes
     assert_false(observations(:agaricus_campestrus_obs).has_backup_data?)
+  end
+
+  def test_dump_votes
+    obs = observations(:coprinus_comatus_obs)
+    # Add a Naming with no votes to completely test dump_votes.
+    no_votes_naming = Naming.new(
+      observation_id: obs.id,
+      name_id: names(:fungi).id,
+      user_id: users(:rolf).id
+    )
+    no_votes_naming.save!
+    votes = "#{obs.namings.first.id} Agaricus campestris L.: mary=3.0(*), rolf=-3.0\n" \
+            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: mary=1.0(*), rolf=2.0(*)\n"\
+            "#{no_votes_naming.id} Fungi: no votes"
+
+    assert_equal(votes, obs.dump_votes)
   end
 end
