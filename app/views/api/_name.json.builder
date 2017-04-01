@@ -18,17 +18,17 @@ else
   if object.synonym
     json.synonyms (object.synonym.names - [object]).map do |synonym|
       {
-        id:         synonym.id
-        name:       synonym.real_text_name
-        author:     synonym.author
-        rank:       synonym.rank.to_s.downcase
-        deprecated: synonym.deprecated ? true : false
+        id:         synonym.id,
+        name:       synonym.real_text_name,
+        author:     synonym.author,
+        rank:       synonym.rank.to_s.downcase,
+        deprecated: synonym.deprecated ? true : false,
         misspelled: synonym.is_misspelling? ? true : false
       }
     end
   end
   unless object.classification.blank?
-    parse = Name.parse_classification(object.classification
+    parse = Name.parse_classification(object.classification)
     json.parents parse.map do |rank, name|
       {
         name: name,

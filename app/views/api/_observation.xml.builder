@@ -25,7 +25,7 @@ xml.tag!(tag,
   if detail
     xml.namings(:number => object.namings.length) do
       for naming in object.namings
-        xml_detailed_object(xml, :naming, naming)
+        xml_detailed_object(xml, :naming, naming, true)
       end
     end
     for image in object.images

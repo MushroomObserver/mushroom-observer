@@ -3,12 +3,13 @@ require "test_helper"
 require "rexml/document"
 
 class ApiControllerTest < FunctionalTestCase
-  def assert_no_api_errors
+  def assert_no_api_errors(msg2 = nil)
     @api = assigns(:api)
     if @api
       msg = "Caught API Errors:\n" + @api.errors.map do |error|
         error.to_s + "\n" + error.trace.join("\n")
       end.join("\n")
+      msg = msg2 + "\n" + msg if msg2
       assert(@api.errors.empty?, msg)
     end
   end
@@ -49,13 +50,16 @@ class ApiControllerTest < FunctionalTestCase
   ################################################################################
 
   def test_basic_get_requests
-    for model_class in [Comment, Image, Location, Name, Observation, Project,
-                        SpeciesList, User]
-      for detail in [:none, :low, :high]
-        assert_no_api_errors
-        get(model_class.table_name.to_sym, detail: detail)
-        assert_no_api_errors
-        assert_objs_equal(model_class.first, @api.results.first)
+    assert_no_api_errors
+    # TODO: ApiKey, ExternalLink, Herbarium, License, Naming, Specimen, Vote
+    [Comment, Image, Location, Name, Observation, Project,
+      SpeciesList, User].each do |model|
+      [:none, :low, :high].each do |detail|
+        [:xml, :json].each do |format|
+          get(model.table_name.to_sym, detail: detail, format: format)
+          assert_no_api_errors("Get #{model.name} #{detail} #{format}")
+          assert_objs_equal(model.first, @api.results.first)
+        end
       end
     end
   end

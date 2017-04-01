@@ -13,8 +13,8 @@ if !detail
   json.location_id object.location_id
   json.image_id    object.image_id
 else
-  json.location json_minimal_object(json, object.location)
-  json.image    json_minimal_object(json, object.image)
+  json.location { json_detailed_object(json, object.location) }
+  json.image    { json_detailed_object(json, object.image) }
   if @user == object or
      # (special exception: show API keys of new user when API creates new user)
      @show_api_keys_for_new_user

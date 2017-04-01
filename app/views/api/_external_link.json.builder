@@ -8,6 +8,6 @@ if !detail
   json.owner_id       object.user_id
   json.observation_id object.observation_id
 else
-  json.owner       json_detailed_object(json, object.user)
-  json.observation json_detailed_object(json, object.observation)
+  json.owner       { json_detailed_object(json, object.user) }
+  json.observation { json_detailed_object(json, object.observation) }
 end

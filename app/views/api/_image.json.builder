@@ -15,7 +15,7 @@ if !detail
   json.owner_id   object.user_id
 else
   json.license         object.license.display_name
-  json.owner           json_detailed_object(json, object.user)
+  json.owner           { json_detailed_object(json, object.user) }
   json.observation_ids object.observation_ids
   json.files           (Image.all_sizes + [:original]).map do |size|
     object.send("#{size}_url")

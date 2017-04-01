@@ -9,6 +9,6 @@ if !detail
   json.object_type object.target_type
   json.object_id   object.target_id
 else
-  json.owner  json_detailed_object(json, object.user)
-  json.object json_detailed_object(json, object.target)
+  json.owner  { json_detailed_object(json, object.user) }
+  json.object { json_detailed_object(json, object.target) }
 end
