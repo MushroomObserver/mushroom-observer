@@ -33,6 +33,8 @@
       <%= label_tag(:observation_place_name, "#{:WHERE.t}: (#{:required.t})") %>
       <%= text_field(:observation, :place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:observation_place_name, primer: Location.primer) %>
+      <span class="map-locate map-btn btn">Locate on Map</span>
+      <span class="map-clear map-btn btn">Clear Map</span>
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
@@ -61,6 +63,18 @@
 
 <!-- LAT_LONG_ALT -->
 <div class="row push-down max-width-text-times-two">
+  <div class="col-sm-6">
+    <label>Location:</label>
+    <div id="observationFormMap" class="form-observation-map"></div>
+  </div>
+  <div class="col-sm-6">
+    <div class="well well-sm ">
+      <div class="arrow-left hidden-xs"></div>
+      <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
+    </div>
+  </div>
+</div>
+<div class="row push-down max-width-text-times-two">
   <div class="col-xs-12 col-sm-6">
     <div class="row">
       <div class="col-xs-12 col-sm-4">
@@ -83,14 +97,9 @@
       </div>
     </div>
   </div>
-  <div class="col-xs-12 col-sm-6 ">
-    <div class="well well-sm ">
-      <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
-    </div>
-  </div>
 </div>
 <!-- /LAT_LONG_ALT -->
+
 <div class="row">
   <div class="col-xs-12 max-width-text-times-two">
 <%= render(partial: "naming/form", locals: {
@@ -98,6 +107,7 @@
           }) if include_naming %>
   </div>
 </div>
+
 <!-- has_specimen -->
 <% if has_specimen %>
   <div class="well well-sm push-down max-width-text">
@@ -394,8 +404,5 @@ jQuery(document).ready(function() {
     <%= label_tag(:log_change_checked, :form_observations_log_change.t) %>
   </div>
 <% end %>
-
-
-
 
 <!--[/form:observation]-->
