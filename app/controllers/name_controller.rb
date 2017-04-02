@@ -489,25 +489,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       init_edit_name_form
-      if request.method == "POST"
-        @parse = parse_name
-        new_name, @parents = find_or_create_name_and_parents
-        if new_name.new_record? || new_name == @name
-          email_admin_name_change unless can_make_changes? || minor_name_change?
-          update_correct_spelling
-          any_changes = update_existing_name
-          unless redirect_to_approve_or_deprecate
-            flash_warning(:runtime_edit_name_no_change.t) unless any_changes
-            redirect_to_show_name
-          end
-        elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
-          merge_name_into(new_name)
-          redirect_to_show_name
-        else
-          send_name_merge_email(new_name)
-          redirect_to_show_name
-        end
-      end
+      save_edits if request.method == "POST"
     end
   rescue RuntimeError => err
     reload_edit_name_form_on_error(err)
@@ -517,6 +499,26 @@ class NameController < ApplicationController
     @name = Name.new
     @name.rank = :Species
     @name_string = ""
+  end
+
+  def save_edits
+    @parse = parse_name
+    new_name, @parents = find_or_create_name_and_parents
+    if new_name.new_record? || new_name == @name
+      email_admin_name_change unless can_make_changes? || minor_name_change?
+      update_correct_spelling
+      any_changes = update_existing_name
+      unless redirect_to_approve_or_deprecate
+        flash_warning(:runtime_edit_name_no_change.t) unless any_changes
+        redirect_to_show_name
+      end
+    elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
+      merge_name_into(new_name)
+      redirect_to_show_name
+    else
+      send_name_merge_email(new_name)
+      redirect_to_show_name
+    end
   end
 
   def reload_create_name_form_on_error(err)
@@ -555,7 +557,7 @@ class NameController < ApplicationController
   # Only allowed to make substantive changes to name if you own all the references to it.
   def can_make_changes?
     unless in_admin_mode?
-      for obj in @name.namings + @name.observations
+     (@name.namings + @name.observations).each do |obj|
         return false if obj.user_id != @user.id
       end
     end
