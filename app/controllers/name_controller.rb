@@ -504,21 +504,30 @@ class NameController < ApplicationController
   def save_edits
     @parse = parse_name
     new_name, @parents = find_or_create_name_and_parents
-    if new_name.new_record? || new_name == @name
-      email_admin_name_change unless can_make_changes? || minor_name_change?
-      update_correct_spelling
-      any_changes = update_existing_name
-      unless redirect_to_approve_or_deprecate
-        flash_warning(:runtime_edit_name_no_change.t) unless any_changes
-        redirect_to_show_name
-      end
-    elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
-      merge_name_into(new_name)
-      redirect_to_show_name
-    else
-      send_name_merge_email(new_name)
+    merger_needed?(new_name) ? try_to_merge(new_name) : change_name
+  end
+
+  def merger_needed?(new_name)
+    !new_name.new_record? && new_name != @name
+  end
+
+  def change_name
+    email_admin_name_change unless can_make_changes? || minor_name_change?
+    update_correct_spelling
+    any_changes = update_existing_name
+    unless redirect_to_approve_or_deprecate
+      flash_warning(:runtime_edit_name_no_change.t) unless any_changes
       redirect_to_show_name
     end
+  end
+
+  def try_to_merge(new_name)
+    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
+      merge_name_into(new_name)
+    else
+      send_name_merge_email(new_name)
+    end
+    redirect_to_show_name
   end
 
   def reload_create_name_form_on_error(err)
