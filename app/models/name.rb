@@ -1521,6 +1521,21 @@ class Name < AbstractModel
     old_name.destroy
   end
 
+  ################################################################################
+  #
+  #  :section: Editing
+  #
+  ################################################################################
+
+  def all_references_owned_by_user?(user)
+    all_references.each { |obj| return false if obj.user_id != user.id }
+  end
+
+  # The references which a User must own in order to edit name
+  def all_references
+    namings + observations
+  end
+
   ##############################################################################
   #
   #  :section: Parsing Names

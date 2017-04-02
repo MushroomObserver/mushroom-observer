@@ -554,14 +554,12 @@ class NameController < ApplicationController
     @name_string = params[:name][:text_name]
   end
 
-  # Only allowed to make substantive changes to name if you own all the references to it.
   def can_make_changes?
-    unless in_admin_mode?
-     (@name.namings + @name.observations).each do |obj|
-        return false if obj.user_id != @user.id
-      end
-    end
-    true
+    in_admin_mode? || user_owns_all_references?
+  end
+
+  def user_owns_all_references?
+    @name.all_references_owned_by_user?(@user)
   end
 
   def minor_name_change?
