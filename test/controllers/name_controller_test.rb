@@ -438,23 +438,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(author, authored_name.author)
   end
 
-  # Prove that user cannot remove author.
-  def test_edit_name_remove_author
-    login
-    authored_name = names(:coprinus_comatus)
-    author = authored_name.author
-    params = {
-      name: {
-        text_name: authored_name.text_name,
-        author:    "",
-        rank:      authored_name.rank,
-        status:    authored_name.status
-      }
-    }
-    assert_no_difference("Name.count") { post(:edit_name, params) }
-    assert_equal(author, authored_name.author)
-  end
-
   def test_show_name_description
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
@@ -1498,6 +1481,23 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
+  end
+
+  # Prove that user cannot remove author.
+  def test_edit_name_remove_author
+    login
+    name = names(:coprinus_comatus)
+    author = name.author
+    params = {
+      name: {
+        text_name: name.text_name,
+        author:    "",
+        rank:      name.rank,
+        status:    name.status
+      }
+    }
+    assert_no_difference("Name.count") { post(:edit_name, params) }
+    assert_equal(author, name.author)
   end
 
   def test_edit_name_merge_author_with_notes
