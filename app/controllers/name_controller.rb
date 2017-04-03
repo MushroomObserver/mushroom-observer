@@ -504,15 +504,15 @@ class NameController < ApplicationController
   def save_edits
     @parse = parse_name
     new_name, @parents = find_or_create_name_and_parents
-    merger_needed?(new_name) ? try_to_merge(new_name) : change_name
+    should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
   end
 
-  def merger_needed?(new_name)
+  def should_be_merged?(new_name)
     !new_name.new_record? && new_name != @name
   end
 
-  def change_name
-    email_admin_name_change unless can_make_changes? || minor_name_change?
+  def try_to_change_name
+    email_admin_name_change unless user_has_change_privileges? || minor_change?
     update_correct_spelling
     any_changes = update_existing_name
     unless redirect_to_approve_or_deprecate
@@ -563,7 +563,7 @@ class NameController < ApplicationController
     @name_string = params[:name][:text_name]
   end
 
-  def can_make_changes?
+  def user_has_change_privileges?
     in_admin_mode? || user_owns_all_references?
   end
 
@@ -571,7 +571,7 @@ class NameController < ApplicationController
     @name.all_references_owned_by_user?(@user)
   end
 
-  def minor_name_change?
+  def minor_change?
     old_name = @name.real_search_name
     new_name = @parse.real_search_name
     new_name.percent_match(old_name) > 0.9
@@ -652,7 +652,7 @@ class NameController < ApplicationController
     end
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
-    for name in Name.find_or_create_parsed_name_and_parents(@parse)
+    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
       name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
     any_changes
