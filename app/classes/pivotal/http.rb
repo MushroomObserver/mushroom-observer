@@ -8,7 +8,7 @@ class Pivotal
 
   class << self
     def get_stories(_verbose = false)
-      json = get_request("stories?limit=10000&#{story_fields}")
+      json = get_request("stories?limit=500&filter=state:unscheduled,started,unstarted&#{story_fields}")
       stories = []
       JSON.parse(json).each do |obj|
         id   = obj["id"]

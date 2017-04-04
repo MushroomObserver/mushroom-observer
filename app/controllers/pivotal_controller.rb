@@ -29,7 +29,7 @@ class PivotalController < ApplicationController
 
   def index
     if MO.pivotal_enabled
-      @stories = Pivotal.get_stories.sort_by(&:story_order).select(&:active?)
+      @stories = Pivotal.get_stories.sort_by(&:story_order)
     else
       @stories = []
     end
