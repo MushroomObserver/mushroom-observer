@@ -943,10 +943,13 @@ class NameControllerTest < FunctionalTestCase
     }
     login("mary")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    # (creates Lactarius since it's not in  fixtures, AND changes L. alpigenes)
+    # creates Lactarius since it's not in fixtures
+    assert(Name.exists?(text_name: "Lactarius"))
+    # points for new name Lactarius and for changing Lactarius alpigenes
     assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert(name.reload.deprecated)
     assert_equal("new citation", name.citation)
