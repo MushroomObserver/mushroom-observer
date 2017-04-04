@@ -650,12 +650,14 @@ class NameController < ApplicationController
       flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
       any_changes = true
     end
-    # This name itself might have been a parent when we called
-    # find_or_create... last time(!)
+    update_parents
+    any_changes
+  end
+
+  def update_parents
     Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
       name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
-    any_changes
   end
 
   def merge_name_into(new_name)
