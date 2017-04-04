@@ -84,11 +84,11 @@ MushroomObserver::Application.configure do
   config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
 
   # Access data for Pivotal Tracker's API.
-  config.pivotal_enabled  = true
+  config.pivotal_enabled  = false
   config.pivotal_url      = "www.pivotaltracker.com"
   config.pivotal_path     = "/services/v5"
   config.pivotal_project  = "224629"
-  config.pivotal_token    = "295d867c4d6d991436af59362c2f8d45"
+  config.pivotal_token    = "xxx"
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
   config.pivotal_test_id  = 77_165_602
