@@ -1461,18 +1461,18 @@ class NameControllerTest < FunctionalTestCase
     name = names(:strobilurus_diminutivus_no_author)
     old_text_name = name.text_name
     new_author = "Desjardin"
-    assert(name.namings.length > 0)
     params = {
       id: name.id,
       name: {
-        text_name: old_text_name,
-        author: new_author,
-        rank: :Species,
+        text_name:  old_text_name,
+        author:     new_author,
+        rank:       :Species,
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
     login("mary")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     # No more email for filling in author.
