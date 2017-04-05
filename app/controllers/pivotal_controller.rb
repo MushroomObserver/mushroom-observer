@@ -28,10 +28,10 @@ class PivotalController < ApplicationController
   require_dependency "pivotal"
 
   def index
-    if MO.pivotal_enabled
-      @stories = Pivotal.get_stories.sort_by(&:story_order)
-    else
-      @stories = []
-    end
+    @stories = if MO.pivotal_enabled
+                 Pivotal.get_stories.sort_by(&:story_order)
+               else
+                 []
+               end
   end
 end
