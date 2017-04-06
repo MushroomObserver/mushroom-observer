@@ -554,7 +554,7 @@ amanita_boudieri_var_beillei:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Variety] %>
   text_name: Amanita boudieri var. beillei
-  search_name: Amanita boudieri var. beille
+  search_name: Amanita boudieri var. beillei
   sort_name: Amanita boudieri var. beillei
   display_name: '**__Amanita boudieri__ var. __beillei__**'
 
@@ -631,3 +631,12 @@ namings_deprecated_2:
   sort_name:    Xa deprecatedtwo
   synonym:      namings_deprecated_synonym
   deprecated:   true
+
+# For test of edit forcing creating of two ancestors
+coprinellus_micaceus_var_phony:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Variety] %>
+  text_name:         Coprinellus micaceus var. phony
+  display_name: "**__Coprinellus micaceus__ var. __phony__**"
+  search_name:       Coprinellus micaceus var. phony
+  sort_name:         Coprinellus micaceus var. phony
