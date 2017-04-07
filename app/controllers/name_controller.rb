@@ -515,7 +515,9 @@ class NameController < ApplicationController
     email_admin_name_change unless user_has_change_privileges? || minor_change?
     update_correct_spelling
     any_changes = update_existing_name
-    unless redirect_to_approve_or_deprecate
+    if status_changing?
+      redirect_to_approve_or_deprecate
+    else
       flash_warning(:runtime_edit_name_no_change.t) unless any_changes
       redirect_to_show_name
     end
@@ -705,17 +707,18 @@ class NameController < ApplicationController
     NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
+  def status_changing?
+    params[:name][:deprecated].to_s != @name.deprecated.to_s
+  end
+
   # Chain on to approve/deprecate name if changed status.
   def redirect_to_approve_or_deprecate
-    if params[:name][:deprecated].to_s == "true" && !@name.deprecated
+    if params[:name][:deprecated].to_s == "true"
       redirect_with_query(action: :deprecate_name, id: @name.id)
-      return true
-    elsif params[:name][:deprecated].to_s == "false" && @name.deprecated
-      redirect_with_query(action: :approve_name, id: @name.id)
-      return true
     else
-      false
+      redirect_with_query(action: :approve_name, id: @name.id)
     end
+    return true
   end
 
   def redirect_to_show_name
