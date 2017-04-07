@@ -1265,42 +1265,33 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(4, good_name.versions.size)
   end
 
-  # Test merge two names where the new name has notes.
-  def test_edit_name_merge_matching_notes
-    old_name = names(:russula_brevipes_no_author)
-    new_name = names(:russula_brevipes_author_notes)
-
-    assert_not_equal(old_name, new_name)
-    assert_equal(old_name.text_name, new_name.text_name)
-    assert_blank(old_name.author)
-    assert_nil(old_name.description)
-    assert_not_blank(new_name.author)
+  # Test merge two names where the new name has description notes.
+  def test_edit_name_merge_no_notes_into_description_notes
+    old_name = names(:mergeable_no_notes)
+    new_name = names(:mergeable_description_notes)
     notes = new_name.description.notes
-    assert_not_nil(new_name.description)
-
     params = {
       id: old_name.id,
       name: {
-        text_name: old_name.text_name,
-        author: old_name.author,
-        rank: old_name.rank,
-        citation: "",
+        text_name: new_name.text_name,
+        author:    new_name.author,
+        rank:      new_name.rank,
+        citation:  "",
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
     assert(new_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
     assert_equal(notes, new_name.description.notes)
   end
 
-  # Test merge two names where the old name had notes.
+ # Test merge two names where the old name had notes.
   def test_edit_name_merge_matching_notes_2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)

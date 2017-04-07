@@ -643,3 +643,18 @@ coprinellus_micaceus_var_phony:
   display_name: "**__Coprinellus micaceus__ var. __phony__**"
   search_name:       Coprinellus micaceus var. phony
   sort_name:         Coprinellus micaceus var. phony
+
+mergeable_no_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable noteless
+  search_name:       Mergeable noteless
+  sort_name:         Mergeable noteless
+  display_name: "**__Mergeable noteless__**"
+
+mergeable_description_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable description-notes
+  search_name:       Mergeable description-notes
+  sort_name:         Mergeable description-notes
+  display_name: "**__Mergeable description-notes__**"
+  description:       mergeable_description_notes_desc

@@ -159,3 +159,8 @@ coprinus_comatus_desc:
   name: coprinus_comatus
   authors: rolf
   editors: rolf, mary
+
+mergeable_description_notes_desc:
+  name:  mergeable_description_notes
+  notes: Notes for $LABEL
+
