@@ -237,6 +237,11 @@
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
 #
+#  ==== Editing
+#  user_owns_references_to_name?(user) ::
+#                            Does user own all references necessary for user to
+#                            change this Name?
+#
 #  == Callbacks
 #
 #  create_description::      After create: create (empty) official
@@ -1527,8 +1532,9 @@ class Name < AbstractModel
   #
   ################################################################################
 
-  def all_references_owned_by_user?(user)
+  def user_owns_references_to_name?(user)
     all_references.each { |obj| return false if obj.user_id != user.id }
+    true
   end
 
   # The references which a User must own in order to edit name

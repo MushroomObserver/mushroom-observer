@@ -564,11 +564,11 @@ class NameController < ApplicationController
   end
 
   def user_has_change_privileges?
-    in_admin_mode? || user_owns_all_references?
+    in_admin_mode? || user_owns_references_to_name?
   end
 
-  def user_owns_all_references?
-    @name.all_references_owned_by_user?(@user)
+  def user_owns_references_to_name?
+    @name.user_owns_references_to_name?(@user)
   end
 
   def minor_change?
