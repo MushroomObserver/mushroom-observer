@@ -503,7 +503,7 @@ class NameController < ApplicationController
 
   def save_edits
     @parse = parse_name
-    new_name, @parents = find_or_create_name_and_parents
+    new_name = (another_existing_name || @name)
     should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
   end
 
@@ -619,6 +619,10 @@ class NameController < ApplicationController
       end
     end
     [name, parents]
+  end
+
+  def another_existing_name
+    Name.find_exact_match(@parse)
   end
 
   def make_sure_name_doesnt_exist

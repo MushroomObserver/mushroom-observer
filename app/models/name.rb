@@ -2208,6 +2208,10 @@ class Name < AbstractModel
     result.to_a
   end
 
+  def self.find_exact_match(parsed_name)
+    Name.where(search_name: parsed_name.search_name).first
+  end
+
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
   # at least, supplying defaults for +search_name+, +display_name+, and
   # +sort_name+, and leaving +author+ blank by default.  Requires an
