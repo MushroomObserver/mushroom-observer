@@ -164,3 +164,6 @@ mergeable_description_notes_desc:
   name:  mergeable_description_notes
   notes: Notes for $LABEL
 
+mergeable_second_description_notes_desc:
+  name:  mergeable_second_description_notes
+  notes: Notes for $LABEL

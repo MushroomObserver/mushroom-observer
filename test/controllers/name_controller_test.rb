@@ -998,6 +998,7 @@ class NameControllerTest < FunctionalTestCase
                 select { |n| n.observation.name == new_name }[0].observation
     assert_false(old_name.mergeable?)
     assert_false(new_name.mergeable?)
+
     params = {
       id: old_name.id,
       name: {
@@ -1007,11 +1008,11 @@ class NameControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-
-    # Fails because Rolf isn't in admin mode.
     login("rolf")
     post(:edit_name, params)
+
     assert_redirected_to(action: :show_name, id: old_name.id)
+    # Fails because Rolf isn't in admin mode.
     assert_flash_warning
     assert_notify_email(old_name.real_search_name, new_name.real_search_name)
     assert(Name.find(old_name.id))
@@ -1390,34 +1391,28 @@ class NameControllerTest < FunctionalTestCase
 
   # Test merge two names that both start with notes.
   def test_edit_name_merge_both_notes
-    old_name = names(:russula_cremoricolor_no_author_notes)
-    new_name = names(:russula_cremoricolor_author_notes)
-    assert_not_equal(old_name, new_name)
-    assert_equal(old_name.text_name, new_name.text_name)
-    assert_blank(old_name.author)
-    assert_not_blank(new_name.author)
-    assert_not_blank(old_notes = old_name.description.notes)
-    assert_not_blank(new_notes = new_name.description.notes)
-    assert_not_equal(old_notes, new_notes)
+    old_name = names(:mergeable_description_notes)
+    new_name = names(:mergeable_second_description_notes)
+    old_notes = old_name.description.notes
+    new_notes = new_name.description.notes
     params = {
       id: old_name.id,
       name: {
-        text_name: old_name.text_name,
-        author: old_name.author,
-        rank: old_name.rank,
-        deprecated: (old_name.deprecated ? "true" : "false"),
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        deprecated: (new_name.deprecated ? "true" : "false"),
         citation: ""
       }
     }
+
     login("rolf")
     post(:edit_name, params)
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
     assert(new_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
     assert_equal(new_notes, new_name.description.notes)
     # Make sure old notes are still around.
     other_desc = (new_name.descriptions - [new_name.description]).first

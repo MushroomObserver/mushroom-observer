@@ -658,3 +658,11 @@ mergeable_description_notes:
   sort_name:         Mergeable description-notes
   display_name: "**__Mergeable description-notes__**"
   description:       mergeable_description_notes_desc
+
+mergeable_second_description_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable second-description-notes
+  search_name:       Mergeable second-description-notes
+  sort_name:         Mergeable second-description-notes
+  display_name: "**__Mergeable second-description-notes__**"
+  description:       mergeable_second_description_notes_desc
