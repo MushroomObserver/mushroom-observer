@@ -1901,19 +1901,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_descriptions
-    assert_query([names(:coprinus_comatus).id,
-                  names(:agaricus_campestris).id,
-                  names(:lactarius_alpinus).id,
-                  names(:agaricus_campestras).id,
-                  names(:agaricus_campestros).id,
-                  names(:russula_brevipes_author_notes).id,
-                  names(:russula_cremoricolor_no_author_notes).id,
-                  names(:russula_cremoricolor_author_notes).id,
-                  names(:boletus_edulis).id,
-                  names(:peltigera).id,
-                  names(:suillus).id],
-                 :Name,
-                 :with_descriptions, by: :id)
+    expect = NameDescription.distinct(:name_id).order(:name_id).pluck(:name_id)
+    assert_query(expect, :Name, :with_descriptions, by: :id)
   end
 
   def test_name_with_descriptions_by_user
