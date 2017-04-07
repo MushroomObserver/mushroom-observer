@@ -9,12 +9,15 @@
 # Do not add a Name starting with U or Z.
 #   AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
 #   NameControllerTest pagination tests expect 0 Names staring with Z.
-# If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
-#   then update mushroom-observer/test/reports/name_list_data.js
 # Do not use the following as part of Names
 #   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
 #   Verpa -- See :suggested_by_verpa_authored below.
+# Adding any Name likely will break ScriptTest#test_refresh_name_lister_cache.
+#   The fix is to update mushroom-observer/test/reports/name_list_data.js
+#   Suggestion: after adding a Name, first run that test method:
+#     $ rake test test/models/script_test.rb test_refresh_name_lister_cache
+#     If that fails, update name_list_data.js from the Actual results
 
 DEFAULTS: &DEFAULTS
   author:   ""
