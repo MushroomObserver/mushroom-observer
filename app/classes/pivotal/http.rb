@@ -8,17 +8,22 @@ class Pivotal
 
   class << self
     def get_stories(_verbose = false)
-      json = get_request("stories?limit=500&#{story_filters}&#{story_fields}")
+      states = ['unscheduled', 'started', 'unstarted']
       stories = []
-      JSON.parse(json).each do |obj|
-        id   = obj["id"]
-        name = obj["name"]
-        date = obj["updated_at"]
-        if Rails.env == "test" || name != "test"
-          story = Pivotal::Story.new(obj)
-          stories << story
+
+      states.each do |state|
+        json = get_request("stories?limit=500&filter=state:#{state}&#{story_fields}")
+        JSON.parse(json).each do |obj|
+          id   = obj["id"]
+          name = obj["name"]
+          date = obj["updated_at"]
+          if Rails.env == "test" || name != "test"
+            story = Pivotal::Story.new(obj)
+            stories << story
+          end
         end
       end
+
       stories
     end
 
@@ -68,10 +73,6 @@ class Pivotal
 
     def story_fields
       "fields=story_type,estimate,current_state,name,description,updated_at,labels(name),comments(created_at,text)"
-    end
-
-    def story_filters
-      "filter=state:unscheduled,started,unstarted"
     end
 
     def comment_fields
