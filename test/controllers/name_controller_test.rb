@@ -1269,6 +1269,7 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_merge_matching_notes
     old_name = names(:russula_brevipes_no_author)
     new_name = names(:russula_brevipes_author_notes)
+
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
     assert_blank(old_name.author)
@@ -1276,6 +1277,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not_blank(new_name.author)
     notes = new_name.description.notes
     assert_not_nil(new_name.description)
+
     params = {
       id: old_name.id,
       name: {
