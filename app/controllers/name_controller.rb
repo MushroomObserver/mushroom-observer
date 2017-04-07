@@ -508,7 +508,7 @@ class NameController < ApplicationController
   end
 
   def should_be_merged?(new_name)
-    !new_name.new_record? && new_name != @name
+    new_name != @name && Name.exists?(new_name.id)
   end
 
   def try_to_change_name
