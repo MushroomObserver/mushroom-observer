@@ -503,11 +503,11 @@ class NameController < ApplicationController
 
   def save_edits
     @parse = parse_name
-    new_name = existing_names_matching_desired_new_name - [@name]
+    new_name = existing_names_matching_desired_name - [@name]
     if ambiguous?(new_name)
       multiple_match_exception(new_name)
     else
-     # new_name is an ActiveRecord::Relation which is empty or one Name
+     # use first to get Name from ActiveRecord::Relation
      new_name = new_name.first || @name
      should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
     end
@@ -639,7 +639,7 @@ class NameController < ApplicationController
     [name, parents]
   end
 
-  def existing_names_matching_desired_new_name
+  def existing_names_matching_desired_name
     Name.existing_names_matching_parsed_name(@parse)
   end
 
