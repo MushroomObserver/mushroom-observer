@@ -1498,6 +1498,7 @@ class NameControllerTest < FunctionalTestCase
 
   # Prove that user can remove author if there's no exact match to desired Name
   def test_edit_name_remove_author_no_exact_match
+    old_name_count = Name.count
     name = names(:coprinus_comatus)
     params = {
       id: name.id,
@@ -1508,11 +1509,18 @@ class NameControllerTest < FunctionalTestCase
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
-   login(name.user.login)
-   post(:edit_name, params)
+    login(name.user.login)
+    post(:edit_name, params)
 
-    assert_no_difference("Name.count") { post(:edit_name, params) }
-    assert_equal("", name.reload.author)
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_flash_success
+    assert_empty(name.reload.author)
+    assert_no_emails
+    # It should create genus Coprinus because there is no Coprinus fixture
+    assert_equal(old_name_count + 1, Name.count)
+    assert_equal(Name.last.text_name, "Coprinus")
+  end
+
   # Prove that user can remove author if there's a match to desired Name,
   # and the merge with the match is non-destructive
   def test_edit_name_remove_author_nondestructive_merge
@@ -1537,6 +1545,29 @@ class NameControllerTest < FunctionalTestCase
     refute(Name.exists?(old_name.id))
   end
 
+  # Prove that user can add author if there's a match to desired Name,
+  # and the merge with the match is non-destructive
+  def test_edit_name_add_author_nondestructive_merge
+    old_name =   names(:mergeable_epithet_unauthored)
+    new_name =   names(:mergeable_epithet_authored)
+    new_author = new_name.author
+    params = {
+      id: old_name.id,
+      name: {
+        text_name:  old_name.text_name,
+        author:     new_author,
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login(old_name.user.login)
+
+    assert_difference("Name.count", -1) { post(:edit_name, params) }
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_flash_success
+    assert_equal(new_author, new_name.reload.author)
+    assert_no_emails
+    refute(Name.exists?(old_name.id))
   end
 
   def test_edit_name_merge_author_with_notes
