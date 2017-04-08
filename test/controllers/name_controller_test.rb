@@ -1496,21 +1496,23 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_text_name, name.text_name)
   end
 
-  # Prove that user cannot remove author.
-  def test_edit_name_remove_author
-    login
+  # Prove that user can remove author if there's no exact match to desired Name
+  def test_edit_name_remove_author_no_exact_match
     name = names(:coprinus_comatus)
-    author = name.author
     params = {
+      id: name.id,
       name: {
-        text_name: name.text_name,
-        author:    "",
-        rank:      name.rank,
-        status:    name.status
+        text_name:  name.text_name,
+        author:     "",
+        rank:       name.rank,
+        deprecated: (name.deprecated ? "true" : "false")
       }
     }
+   login(name.user.login)
+   post(:edit_name, params)
+
     assert_no_difference("Name.count") { post(:edit_name, params) }
-    assert_equal(author, name.author)
+    assert_equal("", name.reload.author)
   end
 
   def test_edit_name_merge_author_with_notes
