@@ -1072,26 +1072,24 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(new_versions, new_name.versions.size)
   end
 
-  # Prove that changing a variety's genus to a Name not in the db
-  # creates two Names: a new species and a new genus
+  # Prove that editing can create multiple ancestors
   def test_edit_name_create_multiple_ancestors
-    name = names(:coprinellus_micaceus_var_phony)
-    user = name.user
+    name = names(:two_ancestors)
+    new_name    = "Neo#{name.text_name.downcase}"
+    new_species = new_name.sub(/(\w* \w*).*/,'\1')
+    new_genus   = new_name.sub(/(\w*).*/,'\1')
     params = {
       id: name.id,
       name: {
-        text_name:  "New-coprinoid-genus micaceus var. phony",
+        text_name:  new_name,
         author:     name.author,
         rank:       name.rank,
       }
     }
     login(name.user.login)
-
     assert_difference("Name.count", 2) { post(:edit_name, params) }
-    assert(Name.exists?(text_name: "New-coprinoid-genus micaceus"),
-           "Failed to create new species")
-    assert(Name.exists?(text_name: "New-coprinoid-genus"),
-           "Failed to create new genus")
+    assert(Name.exists?(text_name: new_species), "Failed to create new species")
+    assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
   end
 
   # Make sure misspelling gets transferred when new name merges away.

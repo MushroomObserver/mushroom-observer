@@ -636,7 +636,7 @@ namings_deprecated_2:
   deprecated:   true
 
 # For test of edit forcing creating of two ancestors
-coprinellus_micaceus_var_phony:
+two_ancestors:
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Variety] %>
   text_name:         Coprinellus micaceus var. phony
