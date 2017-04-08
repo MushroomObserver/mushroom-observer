@@ -2208,8 +2208,17 @@ class Name < AbstractModel
     result.to_a
   end
 
-  def self.find_exact_match(parsed_name)
-    Name.where(search_name: parsed_name.search_name).first
+  # When trying to match a parsed_name which has an author, get exact match.
+  # Do the same for :Group-level Names: for these, we allow authored and
+  # unauthored names to coexist. Therefore we do **not** want an unauthored
+  # :Group level name to match an authored one -- the match must be exact.
+  # For unauthored, non-:Group-level names, match any name (authored or not).
+  def self.existing_names_matching_parsed_name(parsed_name)
+    if parsed_name.author.present? || (parsed_name.rank == :Group)
+      Name.where(search_name: parsed_name.search_name)
+    else
+      Name.where(text_name: parsed_name.text_name)
+    end
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,

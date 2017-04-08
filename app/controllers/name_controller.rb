@@ -503,8 +503,24 @@ class NameController < ApplicationController
 
   def save_edits
     @parse = parse_name
-    new_name = (another_existing_name || @name)
-    should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
+    new_name = existing_names_matching_desired_new_name - [@name]
+    if ambiguous?(new_name)
+      multiple_match_exception(new_name)
+    else
+     # new_name is an ActiveRecord::Relation which is empty or one Name
+     new_name = new_name.first || @name
+     should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
+    end
+  end
+
+  def ambiguous?(new_name)
+    new_name.size > 1
+  end
+
+  def multiple_match_exception(new_name)
+    raise(:edit_name_multiple_names_match.t(
+            str: @parse.real_search_name,
+            matches: new_name.map(&:search_name).join(" / ")))
   end
 
   def should_be_merged?(new_name)
@@ -623,8 +639,8 @@ class NameController < ApplicationController
     [name, parents]
   end
 
-  def another_existing_name
-    Name.find_exact_match(@parse)
+  def existing_names_matching_desired_new_name
+    Name.existing_names_matching_parsed_name(@parse)
   end
 
   def make_sure_name_doesnt_exist
