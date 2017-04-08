@@ -666,3 +666,18 @@ mergeable_second_description_notes:
   sort_name:         Mergeable second-description-notes
   display_name: "**__Mergeable second-description-notes__**"
   description:       mergeable_second_description_notes_desc
+
+mergeable_epithet_unauthored:
+  <<: *DEFAULTS
+  text_name:         Mergeable epithet
+  search_name:       Mergeable epithet
+  sort_name:         Mergeable epithet
+  display_name: "**__Mergeable epithet__**"
+
+mergeable_epithet_authored:
+  <<: *DEFAULTS
+  author:            Authored
+  text_name:         Mergeable epithet
+  search_name:       Mergeable epithet Authored
+  sort_name:         Mergeable epithet  Authored
+  display_name: "**__Mergeable epithet__** Authored"

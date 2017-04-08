@@ -1513,6 +1513,30 @@ class NameControllerTest < FunctionalTestCase
 
     assert_no_difference("Name.count") { post(:edit_name, params) }
     assert_equal("", name.reload.author)
+  # Prove that user can remove author if there's a match to desired Name,
+  # and the merge with the match is non-destructive
+  def test_edit_name_remove_author_nondestructive_merge
+    old_name = names(:mergeable_epithet_authored)
+    new_name = names(:mergeable_epithet_unauthored)
+    params = {
+      id: old_name.id,
+      name: {
+        text_name:  old_name.text_name,
+        author:     "",
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login(old_name.user.login)
+
+    assert_difference("Name.count", -1) { post(:edit_name, params) }
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_flash_success
+    assert_empty(new_name.reload.author)
+    assert_no_emails
+    refute(Name.exists?(old_name.id))
+  end
+
   end
 
   def test_edit_name_merge_author_with_notes
