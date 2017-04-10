@@ -238,9 +238,7 @@
 #  merge::                   Merge old name into this one and remove old one.
 #
 #  ==== Editing
-#  user_owns_references_to_name?(user) ::
-#                            Does user own all references necessary for user to
-#                            change this Name?
+#  changeable?(user) ::      May user change this Name?
 #
 #  == Callbacks
 #
@@ -1532,7 +1530,11 @@ class Name < AbstractModel
   #
   ################################################################################
 
-  def user_owns_references_to_name?(user)
+  def changeable?(user = @user)
+    noone_else_owns_references_to_name?(user)
+  end
+
+  def noone_else_owns_references_to_name?(user)
     all_references.each { |obj| return false if obj.user_id != user.id }
     true
   end

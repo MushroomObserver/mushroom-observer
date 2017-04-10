@@ -528,7 +528,7 @@ class NameController < ApplicationController
   end
 
   def try_to_change_name
-    email_admin_name_change unless user_has_change_privileges? || minor_change?
+    email_admin_name_change unless ok_to_make_any_change? || minor_change?
     update_correct_spelling
     any_changes = update_existing_name
     if status_changing?
@@ -581,12 +581,8 @@ class NameController < ApplicationController
     @name_string = params[:name][:text_name]
   end
 
-  def user_has_change_privileges?
-    in_admin_mode? || user_owns_references_to_name?
-  end
-
-  def user_owns_references_to_name?
-    @name.user_owns_references_to_name?(@user)
+  def ok_to_make_any_change?
+    in_admin_mode? || @name.changeable?(@user)
   end
 
   def minor_change?
