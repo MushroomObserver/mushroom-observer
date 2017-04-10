@@ -11,10 +11,10 @@
 #   location:
 
 DEFAULTS: &DEFAULTS
-  name: boletus_edulis
-  notes: $LABEL # sometimes useful for debugging
-  location: obs_default_location
-  user: dick
+  name:       boletus_edulis
+  notes:      $LABEL # sometimes useful for debugging
+  location:   obs_default_location
+  user:       dick
   vote_cache: 0.0
   when:       <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
 
@@ -302,3 +302,10 @@ unequal_positive_namings_obs:
 all_namings_deprecated_obs:
   <<: *DEFAULTS
   name: namings_deprecated
+
+# Has 2 namings
+# Has two namings, which (under current rules) makes the Names unmergeable
+authored_with_naming_obs:
+  <<: *DEFAULTS
+  name: authored_with_naming
+

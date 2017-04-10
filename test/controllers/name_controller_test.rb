@@ -1290,7 +1290,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(notes, new_name.description.notes)
   end
 
- # Test merge two names where the old name had notes.
+  # Test merge two names where the old name had notes.
   def test_edit_name_merge_matching_notes_2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
@@ -1566,6 +1566,26 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(new_author, new_name.reload.author)
     assert_no_emails
     refute(Name.exists?(old_name.id))
+  end
+
+  def test_edit_name_remove_author_destructive_merge
+    old_name = names(:authored_with_naming)
+    new_name = names(:unauthored_with_naming)
+    params = {
+      id: old_name.id,
+      name: {
+        text_name:  old_name.text_name,
+        author:     "",
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login("rolf")
+    post(:edit_name, params)
+
+    assert_flash_warning
+    assert_redirected_to(action: :show_name, id: old_name.id)
+    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
   end
 
   def test_edit_name_merge_author_with_notes

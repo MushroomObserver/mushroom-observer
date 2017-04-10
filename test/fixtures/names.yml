@@ -13,9 +13,9 @@
 #   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
 #   Verpa -- See :suggested_by_verpa_authored below.
-# Adding any Name likely will break ScriptTest#test_refresh_name_lister_cache.
-#   The fix is to update mushroom-observer/test/reports/name_list_data.js
-#   Suggestion: after adding a Name, first run that test method:
+# Adding almost any Name will break ScriptTest#test_refresh_name_lister_cache.
+#   Fix this by updating mushroom-observer/test/reports/name_list_data.js
+#   Suggestion: whenever adding a Name, run:
 #     $ rake test test/models/script_test.rb test_refresh_name_lister_cache
 #     If that fails, update name_list_data.js from the Actual results
 
@@ -681,3 +681,17 @@ mergeable_epithet_authored:
   search_name:       Mergeable epithet Authored
   sort_name:         Mergeable epithet  Authored
   display_name: "**__Mergeable epithet__** Authored"
+
+authored_with_naming:
+  <<: *DEFAULTS
+  text_name:         With naming
+  search_name:       With naming Authored
+  sort_name:         With naming  Authored
+  display_name: "**__With naming__** Authored"
+
+unauthored_with_naming:
+  <<: *DEFAULTS
+  text_name:         With naming
+  search_name:       With naming
+  sort_name:         With naming
+  display_name: "**__With naming__**"

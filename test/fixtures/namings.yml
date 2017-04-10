@@ -105,3 +105,16 @@ all_namings_deprecated_other_naming:
   observation: all_namings_deprecated_obs
   name:        namings_deprecated_2
   vote_cache:  <%= Vote.next_best_vote %>
+
+authored_with_naming_obs_authored_naming:
+  user:        rolf
+  observation: authored_with_naming_obs
+  name:        authored_with_naming
+  vote_cache:  <%= Vote.maximum_vote %>
+
+authored_with_naming_obs_unauthored_naming:
+  user:        dick
+  observation: authored_with_naming_obs
+  name:        unauthored_with_naming
+  vote_cache:  <%= Vote.next_best_vote %>
+
