@@ -16,6 +16,7 @@ DEFAULTS: &DEFAULTS
   location: obs_default_location
   user: dick
   vote_cache: 0.0
+  when:       <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -205,49 +206,39 @@ boletus_edulis_obs:
 
 owner_only_favorite_eq_fungi:
   <<: *DEFAULTS
-  when: 2015-10-08
 
 owner_only_favorite_eq_consensus:
   <<: *DEFAULTS
-  when: 2015-10-08
 
 owner_only_favorite_ne_consensus:
   <<: *DEFAULTS
-  when: 2015-10-08
   name: tremella
 
 owner_multiple_favorites:
   <<: *DEFAULTS
-  when: 2015-10-08
 
 owner_uncertain_favorite:
   <<: *DEFAULTS
-  when: 2015-10-08
 
 owner_accepts_general_questions:
   <<: *DEFAULTS
-  when: 2015-10-18
   user: roy                      # roy has email_general_questions == true
 
 owner_refuses_general_questions:
   <<: *DEFAULTS
-  when: 2015-10-18
   user: dick                     # dick has email_general_questions == false
 
 collected_at_obs:
   <<: *DEFAULTS
-  when: 2016-08-09
   location: collection_location
 
 displayed_at_obs:
   <<: *DEFAULTS
-  when: 2016-08-09
   location: display_location
   is_collection_location: false
 
 two_img_obs:
   <<: *DEFAULTS
-  when: 2016-08-09
   location: display_location
   is_collection_location: false
   images: query_first_image, query_second_image
@@ -255,24 +246,20 @@ two_img_obs:
 
 imageless_unvouchered_obs:
   <<: *DEFAULTS
-  when: 2016-08-25
   user: ignore_imageless_user
 
 # need >=2 imaged B edulis Obs's for filter tests
 imged_unvouchered_obs:
   <<: *DEFAULTS
-  when: 2016-08-27
   images: query_first_image
   thumb_image: query_first_image
 
 vouchered_obs:
   <<: *DEFAULTS
-  when: 2016-09-01
   specimen: 1
 
 vouchered_imged_obs:
   <<: *DEFAULTS
-  when: 2016-09-01
   specimen: 1
   images: query_first_image
   thumb_image: query_first_image
@@ -305,16 +292,13 @@ unlisted_rolf_obs:
   <<: *DEFAULTS
   location: point_reyes
   user: rolf
-  when: 2017-01-20
 
 # default user (dick) has unequal positive namings
 # used for testing change vote
 unequal_positive_namings_obs:
   <<: *DEFAULTS
-  when: 2017-03-29
 
 # used for testing calc_consensus
 all_namings_deprecated_obs:
   <<: *DEFAULTS
-  when: 2017-03-29
   name: namings_deprecated
