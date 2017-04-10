@@ -2121,4 +2121,15 @@ class NameTest < UnitTestCase
     assert_true(names(:imageless).imageless?)
     assert_false(names(:fungi).imageless?)
   end
+
+  def test_changeable?
+    name = names(:other_user_owns_naming_name)
+    refute(name.changeable?(name.user))
+
+    name = names(:other_user_owns_observation)
+    refute(name.changeable?(name.user))
+
+    name = names(:same_user_owns_naming_and_observation)
+    assert(name.changeable?(name.user))
+  end
 end

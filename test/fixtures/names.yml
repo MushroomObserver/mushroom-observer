@@ -695,3 +695,34 @@ unauthored_with_naming:
   search_name:       With naming
   sort_name:         With naming
   display_name: "**__With naming__**"
+
+# dick owns the Name and Observation, but mary owns a Naming
+other_user_owns_naming_name:
+  <<: *DEFAULTS
+  text_name:         Other-user-owns-naming
+  search_name:       Other-user-owns-naming
+  sort_name:         Other-user-owns-naming
+  display_name: "**__Other-user-owns-naming__**"
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
+# dick owns the Name and Naming, but mary owns an Observation
+other_user_owns_observation:
+  <<: *DEFAULTS
+  text_name:         Other-user-owns-obs
+  search_name:       Other-user-owns-obs
+  sort_name:         Other-user-owns-obs
+  display_name: "**__Other-user-owns-obs__**"
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
+# dick owns the Name and the only Observation and Naming
+same_user_owns_naming_and_observation:
+  <<: *DEFAULTS
+  text_name:         Same-user-owns-naming-and-observation
+  search_name:       Same-user-owns-naming-and-observation
+  sort_name:         Same-user-owns-naming-and-observation
+  display_name: "**__Same-user-owns-naming-and-observation__**"
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
