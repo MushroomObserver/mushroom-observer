@@ -88,7 +88,7 @@ MushroomObserver::Application.configure do
   config.pivotal_url      = "www.pivotaltracker.com"
   config.pivotal_path     = "/services/v5"
   config.pivotal_project  = "224629"
-  config.pivotal_token    = ""
+  config.pivotal_token    = "xxx"
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
   config.pivotal_test_id  = 77_165_602
