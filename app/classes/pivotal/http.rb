@@ -6,7 +6,6 @@ class Pivotal
   require "net/https"
   require "json"
   require "time"
-  require "benchmark"
 
   class << self
     def get_stories(_verbose = false)
