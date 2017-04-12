@@ -1,4 +1,5 @@
 # encoding: utf-8
+# /pivotal
 class Pivotal
   require "fileutils"
   require "net/http"
@@ -8,17 +9,25 @@ class Pivotal
 
   class << self
     def get_stories(_verbose = false)
-      json = get_request("stories?limit=10000&#{story_fields}")
       stories = []
+
+      request_stories("", stories)
+      request_stories("&offset=501", stories) if stories.count == 500
+
+      stories
+    end
+
+    def request_stories(api_params, stories)
+      json = get_request("stories?limit=500&filter=state:unscheduled,"\
+                         "started,unstarted&#{story_fields}" + api_params)
+
       JSON.parse(json).each do |obj|
-        id   = obj["id"]
-        name = obj["name"]
-        date = obj["updated_at"]
-        if Rails.env == "test" || name != "test"
+        if Rails.env == "test" || obj["name"] != "test"
           story = Pivotal::Story.new(obj)
           stories << story
         end
       end
+
       stories
     end
 
@@ -67,7 +76,8 @@ class Pivotal
     end
 
     def story_fields
-      "fields=story_type,estimate,current_state,name,description,updated_at,labels(name),comments(created_at,text)"
+      "fields=story_type,estimate,current_state,name,description,updated_at,"\
+      "labels(name),comments(created_at,text)"
     end
 
     def comment_fields
