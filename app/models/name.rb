@@ -1530,6 +1530,7 @@ class Name < AbstractModel
   #
   ################################################################################
 
+  # May user edit this name?
   def changeable?(user = @user)
     noone_else_owns_references_to_name?(user)
   end
