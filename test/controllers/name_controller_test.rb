@@ -1756,16 +1756,6 @@ class NameControllerTest < FunctionalTestCase
       deprecated: true,
       correct_spelling: name2
     )
-
-    assert_equal("Russula sect. Compactae", name1.text_name)
-    assert_equal("Russula sect. Compactae", name2.text_name)
-    assert_equal("Fr.", name1.author)
-    assert_equal("", name2.author)
-    assert(name1.deprecated)
-    assert(!name2.deprecated)
-    assert(name1.correct_spelling == name2)
-    assert(!name2.correct_spelling)
-
     params = {
       id: name2.id,
       name: {
@@ -1789,7 +1779,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_weird_merge_2
+  def test_merge_authored_with_old_style_unauthored
     login("rolf")
     name1 = Name.create!(
       text_name: "Amanita sect. Vaginatae",
@@ -1801,6 +1791,7 @@ class NameControllerTest < FunctionalTestCase
       deprecated:       false,
       correct_spelling: nil
     )
+    # The old way to create an intrageneric Name, using the author field
     name2 = Name.create!(
       text_name: "Amanita",
       search_name: "Amanita (sect. Vaginatae)",
@@ -1811,7 +1802,6 @@ class NameControllerTest < FunctionalTestCase
       deprecated: false,
       correct_spelling: nil
     )
-
     params = {
       id: name2.id,
       name: {
@@ -1822,6 +1812,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
@@ -1829,12 +1820,12 @@ class NameControllerTest < FunctionalTestCase
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(!name1.deprecated)
-    assert_equal("Ramaria sect. Vaginatae", name1.text_name)
+    assert_equal("Amanita sect. Vaginatae", name1.text_name)
     assert_equal("(Fr.) Quél.", name1.author)
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_weird_merge_3
+  def test_merge_authored_with_old_style_deprecated
     login("rolf")
     syn = Synonym.create
     name1 = Name.create!(
@@ -1848,6 +1839,7 @@ class NameControllerTest < FunctionalTestCase
       correct_spelling: nil,
       synonym: syn
     )
+    # The old way to create an intrageneric Name, using the author field
     name2 = Name.create!(
       text_name: "Cortinarius",
       search_name: "Cortinarius (sub Genus Sericeocybe)",
@@ -1941,6 +1933,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post(:create_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: Name.last.id)
     assert_no_emails
@@ -1953,7 +1946,7 @@ class NameControllerTest < FunctionalTestCase
     assert(Name.find_by_text_name("Pleurotus"))
   end
 
-  def test_fixing_variety
+  def test_edit_name_fixing_variety
     login("katrina")
     name = Name.create!(
       text_name: "Pleurotus djamor",
@@ -1975,6 +1968,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
@@ -1988,7 +1982,7 @@ class NameControllerTest < FunctionalTestCase
     assert(Name.find_by_text_name("Pleurotus"))
   end
 
-  def test_changing_to_group
+  def test_edit_name_change_to_group
     login("mary")
     name = Name.create!(
       text_name: "Lepiota echinatae",
@@ -2010,6 +2004,7 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
@@ -2021,7 +2016,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("", name.author)
   end
 
-  def test_screwy_notification_bug
+  def test_edit_name_screwy_notification_bug
     login("mary")
     name = Name.create!(
       text_name: "Ganoderma applanatum",
