@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require "test_helper"
 
 class NameControllerTest < FunctionalTestCase
@@ -888,6 +886,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
@@ -899,10 +898,9 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_post_just_change_notes
+    # has blank notes
     name = names(:conocybe_filaris)
     past_names = name.versions.size
-    assert_equal(1, name.version)
-    assert_equal("", name.notes)
     new_notes = "Add this to the notes."
     params = {
       id: name.id,
@@ -918,6 +916,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
@@ -927,8 +926,9 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(past_names + 1, name.versions.size)
   end
 
-  # Test name changes in various ways.
-  def test_edit_name_deprecated
+  ### Test name changes in various ways. ###
+
+  def test_edit_deprecated_name_remove_author
     name = names(:lactarius_alpigenes)
     assert(name.deprecated)
     params = {
@@ -955,12 +955,10 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("new citation", name.citation)
   end
 
-  def test_edit_name_different_user
+  def test_edit_name_by_user_who_doesnt_own_name
     name = names(:macrolepiota_rhacodes)
     name_owner = name.user
-    user = "rolf"
-    # Make sure it's not owned by the default user
-    assert_not_equal(user, name_owner.login)
+    user = rolf
     params = {
       id: name.id,
       name: {
@@ -971,11 +969,9 @@ class NameControllerTest < FunctionalTestCase
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     post(:edit_name, params)
-    # Hmmm, this isn't catching the fact that Rolf shouldn't be allowed to
-    # change the name, instead it seems to be doing nothing simply because he's
-    # not actually changing anything!
+
     assert_flash_warning
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
@@ -988,16 +984,10 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_destructive_merge
     old_name = agaricus_campestrus = names(:agaricus_campestrus)
     new_name = agaricus_campestris = names(:agaricus_campestris)
-    assert_not_equal(old_name, new_name)
     new_versions = new_name.versions.size
-    assert_equal(1, new_name.version)
-    assert_equal(1, old_name.namings.size)
     old_obs = old_name.namings[0].observation
-    assert_equal(2, new_name.namings.size)
     new_obs = new_name.namings.
                 select { |n| n.observation.name == new_name }[0].observation
-    assert_false(old_name.mergeable?)
-    assert_false(new_name.mergeable?)
 
     params = {
       id: old_name.id,
@@ -1029,9 +1019,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      old_name = Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
     assert(new_name.reload)
     assert_equal(1, new_name.version)
     assert_equal(new_versions, new_name.versions.size)
@@ -1041,14 +1029,11 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_author_merge
+    # Names differing only in author
     old_name = names(:amanita_baccata_borealis)
     new_name = names(:amanita_baccata_arora)
-    assert_not_equal(old_name, new_name)
-    assert_equal(old_name.text_name, new_name.text_name)
     new_author = new_name.author
-    assert_not_equal(old_name.author, new_author)
     new_versions = new_name.versions.size
-    assert_equal(1, new_name.version)
     params = {
       id: old_name.id,
       name: {
@@ -1060,24 +1045,23 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
-    assert(new_name.reload)
-    assert_equal(new_author, new_name.author)
+    refute(Name.exists?(old_name.id))
+    assert_equal(new_author, new_name.reload.author)
     assert_equal(1, new_name.version)
     assert_equal(new_versions, new_name.versions.size)
   end
 
   # Prove that editing can create multiple ancestors
   def test_edit_name_create_multiple_ancestors
-    name = names(:two_ancestors)
+    name        = names(:two_ancestors)
     new_name    = "Neo#{name.text_name.downcase}"
     new_species = new_name.sub(/(\w* \w*).*/,'\1')
     new_genus   = new_name.sub(/(\w*).*/,'\1')
+    name_count  = Name.count
     params = {
       id: name.id,
       name: {
@@ -1087,7 +1071,9 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login(name.user.login)
-    assert_difference("Name.count", 2) { post(:edit_name, params) }
+    post(:edit_name, params)
+
+    assert_equal(name_count + 2, Name.count)
     assert(Name.exists?(text_name: new_species), "Failed to create new species")
     assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
   end
@@ -1097,28 +1083,24 @@ class NameControllerTest < FunctionalTestCase
     old_name = names(:suilus)
     wrong_author_name = names(:suillus_by_white)
     new_name = names(:suillus)
-    assert_equal(old_name.correct_spelling, wrong_author_name)
     old_correct_spelling_id = old_name.correct_spelling_id
-    new_author = new_name.author
-    assert_not_equal(wrong_author_name.author, new_author)
     params = {
       id: wrong_author_name.id,
       name: {
-        text_name: wrong_author_name.text_name,
-        author: new_name.author,
-        rank: new_name.rank,
+        text_name:  wrong_author_name.text_name,
+        author:     new_name.author,
+        rank:       new_name.rank,
         deprecated: (wrong_author_name.deprecated ? "true" : "false")
       }
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(wrong_author_name.id)
-    end
-    assert_not_equal(old_correct_spelling_id, old_name.reload.correct_spelling_id)
+    refute(Name.exists?(wrong_author_name.id))
+    refute_equal(old_correct_spelling_id, old_name.reload.correct_spelling_id)
     assert_equal(old_name.correct_spelling, new_name)
   end
 
@@ -1126,15 +1108,9 @@ class NameControllerTest < FunctionalTestCase
   # new name is not deprecated.
   def test_edit_name_deprecated_merge
     old_name = names(:lactarius_alpigenes)
-    assert(old_name.deprecated)
     new_name = names(:lactarius_alpinus)
-    assert(!new_name.deprecated)
-    assert_not_equal(old_name, new_name)
-    assert_not_equal(old_name.text_name, new_name.text_name)
     new_author = new_name.author
-    assert_not_equal(old_name.author, new_author)
     new_versions = new_name.versions.size
-    assert_equal(1, new_name.version)
     params = {
       id: old_name.id,
       name: {
@@ -1146,12 +1122,11 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
     assert(new_name.reload)
     assert(!new_name.deprecated)
     assert_equal(new_author, new_name.author)
@@ -1167,8 +1142,6 @@ class NameControllerTest < FunctionalTestCase
     bad_name2 = names(:lactarius_kuehneri)
     bad_name3 = names(:lactarius_subalpinus)
     bad_name4 = names(:pluteus_petasatus_approved)
-    assert_equal(1, good_name.version)
-    assert_equal(1, good_name.versions.size)
     good_text_name = good_name.text_name
     good_author = good_name.author
 
@@ -1186,12 +1159,11 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: good_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(bad_name1.id)
-    end
+    refute(Name.exists?(bad_name1.id))
     assert(good_name.reload)
     assert(!good_name.deprecated)
     assert_equal(good_author, good_name.author)
@@ -1212,12 +1184,11 @@ class NameControllerTest < FunctionalTestCase
     params[:id] = bad_name2.id
     params[:name][:deprecated] = "true"
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: good_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(bad_name2.id)
-    end
+    refute(Name.exists?(bad_name2.id))
     assert(good_name.reload)
     assert(good_name.deprecated)
     assert_equal(good_author, good_name.author)
@@ -1231,12 +1202,11 @@ class NameControllerTest < FunctionalTestCase
     params[:id] = bad_name3.id
     params[:name][:deprecated] = "false"
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: good_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(bad_name3.id)
-    end
+    refute(Name.exists?(bad_name3.id))
     assert(good_name.reload)
     assert(!good_name.deprecated)
     assert_equal(good_author, good_name.author)
@@ -1250,12 +1220,11 @@ class NameControllerTest < FunctionalTestCase
     params[:id] = bad_name4.id
     params[:name][:deprecated] = "true"
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: good_name.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(bad_name4.id)
-    end
+    refute(Name.exists?(bad_name4.id))
     assert(good_name.reload)
     assert(good_name.deprecated)
     assert_equal(good_author, good_name.author)
@@ -1294,16 +1263,6 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_merge_matching_notes_2
     old_name = names(:russula_brevipes_author_notes)
     new_name = names(:conocybe_filaris)
-    assert_not_equal(old_name, new_name)
-    assert_not_equal(old_name.text_name, new_name.text_name)
-    assert_not_blank(old_name.author)
-    assert_not_blank(old_name.citation)
-    assert_not_blank(old_name.notes)
-    assert_not_blank(old_name.description)
-    assert_blank(new_name.author)
-    assert_blank(new_name.citation)
-    assert_blank(new_name.notes)
-    assert_blank(new_name.description)
     old_author = old_name.author
     old_citation = old_name.citation
     old_notes = old_name.notes
@@ -1321,13 +1280,12 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
     assert(new_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
     assert_equal("", new_name.author) # user explicitly set author to ""
     assert_equal(old_citation, new_name.citation)
     assert_equal(old_notes, new_name.notes)
@@ -1340,7 +1298,6 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_merge_one_with_observations
     old_name = names(:conocybe_filaris) # no observations
     new_name = names(:coprinus_comatus) # has observations
-    assert_not_equal(old_name, new_name)
     params = {
       id: old_name.id,
       name: {
@@ -1353,19 +1310,17 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
     assert(new_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(old_name.id)
-    end
+    refute(Name.exists?(old_name.id))
   end
 
   def test_edit_name_merge_one_with_observations_other_direction
     old_name = names(:coprinus_comatus) # has observations
     new_name = names(:conocybe_filaris) # no observations
-    assert_not_equal(old_name, new_name)
     params = {
       id: old_name.id,
       name: {
@@ -1382,9 +1337,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: old_name.id)
     assert_no_emails
     assert(old_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(new_name.id)
-    end
+    refute(Name.exists?(new_name.id))
   end
 
   # Test merge two names that both start with notes.
@@ -1403,9 +1356,9 @@ class NameControllerTest < FunctionalTestCase
         citation: ""
       }
     }
-
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
@@ -1420,12 +1373,6 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_both_with_notes_and_namings
     old_name = names(:agaricus_campestros)
     new_name = names(:agaricus_campestras)
-    assert_not_equal(old_name, new_name)
-    assert_not_equal(old_name.text_name, new_name.text_name)
-    assert_equal(old_name.author, new_name.author)
-    assert_equal(1, new_name.version)
-    assert_equal(1, old_name.namings.size)
-    assert_equal(1, new_name.namings.size)
     new_versions = new_name.versions.size
     old_obs = old_name.namings[0].observation
     new_obs = new_name.namings[0].observation
@@ -1520,10 +1467,11 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Prove that user can remove author if there's a match to desired Name,
-  # and the merge with the match is non-destructive
+  # and the merge is non-destructive
   def test_edit_name_remove_author_nondestructive_merge
-    old_name = names(:mergeable_epithet_authored)
-    new_name = names(:mergeable_epithet_unauthored)
+    old_name   = names(:mergeable_epithet_authored)
+    new_name   = names(:mergeable_epithet_unauthored)
+    name_count = Name.count
     params = {
       id: old_name.id,
       name: {
@@ -1534,21 +1482,23 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login(old_name.user.login)
+    post(:edit_name, params)
 
-    assert_difference("Name.count", -1) { post(:edit_name, params) }
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_flash_success
     assert_empty(new_name.reload.author)
     assert_no_emails
+    assert_equal(name_count - 1, Name.count)
     refute(Name.exists?(old_name.id))
   end
 
   # Prove that user can add author if there's a match to desired Name,
-  # and the merge with the match is non-destructive
+  # and the merge is non-destructive
   def test_edit_name_add_author_nondestructive_merge
-    old_name =   names(:mergeable_epithet_unauthored)
-    new_name =   names(:mergeable_epithet_authored)
+    old_name   = names(:mergeable_epithet_unauthored)
+    new_name   = names(:mergeable_epithet_authored)
     new_author = new_name.author
+    name_count = Name.count
     params = {
       id: old_name.id,
       name: {
@@ -1559,12 +1509,13 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login(old_name.user.login)
+    post(:edit_name, params)
 
-    assert_difference("Name.count", -1) { post(:edit_name, params) }
     assert_redirected_to(action: :show_name, id: new_name.id)
     assert_flash_success
     assert_equal(new_author, new_name.reload.author)
     assert_no_emails
+    assert_equal(name_count - 1, Name.count)
     refute(Name.exists?(old_name.id))
   end
 
@@ -1580,24 +1531,29 @@ class NameControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
+
     login("rolf")
     post(:edit_name, params)
-
     assert_flash_warning
     assert_redirected_to(action: :show_name, id: old_name.id)
     assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+
+    # Try again as an admin.
+    make_admin
+    post(:edit_name, params)
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_no_emails
+    refute(Name.exists?(old_name.id))
   end
 
   def test_edit_name_merge_author_with_notes
     bad_name = names(:hygrocybe_russocoriacea_bad_author)
     bad_id = bad_name.id
     bad_notes = bad_name.notes
-    assert(bad_notes)
     good_name = names(:hygrocybe_russocoriacea_good_author)
     good_id = good_name.id
-    assert_empty(good_name.notes)
     good_author = good_name.author
-    assert(good_author)
     params = {
       id: bad_name.id,
       name: {
@@ -1611,12 +1567,11 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
     make_admin
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: good_id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(bad_id)
-    end
+    refute(Name.exists?(bad_id))
     reload_name = Name.find(good_id)
     assert(reload_name)
     assert_equal(good_author, reload_name.author)
@@ -1636,7 +1591,6 @@ class NameControllerTest < FunctionalTestCase
         notes: name.notes
       }
     }
-    assert(name.deprecated)
 
     # No change: go to show_name, warning.
     params[:name][:deprecated] = "true"
@@ -1713,9 +1667,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name2.id)
-    end
+    refute(Name.exists?(name2.id))
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(!name1.deprecated)
@@ -1744,9 +1696,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name3.id)
-    end
+    refute(Name.exists?(name3.id))
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(name1.deprecated)
@@ -1776,16 +1726,14 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name4.id)
-    end
+    refute(Name.exists?(name4.id))
     assert(name1.reload)
     assert(name1.correct_spelling == Name.first)
     assert(name1.deprecated)
   end
 
   # Found this in the wild, it seems to have been fixed already, though...
-  def test_weird_merge
+  def test_merge_authored_misspelt_into_unauthored_correctly_spelled
     login("rolf")
 
     name2 = Name.create!(
@@ -1828,12 +1776,11 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name2.id)
-    end
+    refute(Name.exists?(name2.id))
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(name1.deprecated)
@@ -1849,9 +1796,9 @@ class NameControllerTest < FunctionalTestCase
       search_name: "Amanita sect. Vaginatae (Fr.) Quél.",
       sort_name: "Amanita sect. Vaginatae (Fr.) Quél.",
       display_name: "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
-      author: "(Fr.) Quél.",
-      rank: :Section,
-      deprecated: false,
+      author:           "(Fr.) Quél.",
+      rank:             :Section,
+      deprecated:       false,
       correct_spelling: nil
     )
     name2 = Name.create!(
@@ -1878,13 +1825,11 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name2.id)
-    end
+    refute(Name.exists?(name2.id))
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(!name1.deprecated)
-    assert_equal("Amanita sect. Vaginatae", name1.text_name)
+    assert_equal("Ramaria sect. Vaginatae", name1.text_name)
     assert_equal("(Fr.) Quél.", name1.author)
   end
 
@@ -1928,9 +1873,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name1.id)
     assert_no_emails
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(name2.id)
-    end
+    refute(Name.exists?(name2.id))
     assert(name1.reload)
     assert(!name1.correct_spelling)
     assert(!name1.deprecated)
