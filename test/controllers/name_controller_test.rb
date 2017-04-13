@@ -839,8 +839,32 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  def test_create_variety
+    login("katrina")
+    params = {
+      name: {
+        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
+        author: "",
+        rank: :Variety,
+        deprecated: "false"
+      }
+    }
+    post(:create_name, params)
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: Name.last.id)
+    assert_no_emails
+    name = Name.last
+    assert_equal(:Variety, name.rank)
+    assert_equal("Pleurotus djamor var. djamor", name.text_name)
+    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
+    assert_equal("(Fr.) Boedijn", name.author)
+    assert(Name.find_by_text_name("Pleurotus djamor"))
+    assert(Name.find_by_text_name("Pleurotus"))
+  end
+
   # ----------------------------
-  #  Edit name.
+  #  Edit name -- without merge
   # ----------------------------
 
   def test_edit_name_post
@@ -860,10 +884,9 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    # No more email for filling in author.
-    # assert_notify_email('Conocybe filaris', 'Conocybe filaris (Fr.) Kühner')
     assert_equal(20, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
@@ -926,8 +949,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(past_names + 1, name.versions.size)
   end
 
-  ### Test name changes in various ways. ###
-
   def test_edit_deprecated_name_remove_author
     name = names(:lactarius_alpigenes)
     assert(name.deprecated)
@@ -955,6 +976,55 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("new citation", name.citation)
   end
 
+  def test_edit_name_add_author
+    name = names(:strobilurus_diminutivus_no_author)
+    old_text_name = name.text_name
+    new_author = "Desjardin"
+    params = {
+      id: name.id,
+      name: {
+        text_name:  old_text_name,
+        author:     new_author,
+        rank:       :Species,
+        deprecated: (name.deprecated ? "true" : "false")
+      }
+    }
+    login("mary")
+    post(:edit_name, params)
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    # It creates genus Strobilurus because there is Strobilurus fixture
+    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
+    assert_equal(new_author, name.reload.author)
+    assert_equal(old_text_name, name.text_name)
+  end
+
+  # Prove that user can remove author if there's no exact match to desired Name
+  def test_edit_name_remove_author_no_exact_match
+    old_name_count = Name.count
+    name = names(:coprinus_comatus)
+    params = {
+      id: name.id,
+      name: {
+        text_name:  name.text_name,
+        author:     "",
+        rank:       name.rank,
+        deprecated: (name.deprecated ? "true" : "false")
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params)
+
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_flash_success
+    assert_empty(name.reload.author)
+    assert_no_emails
+    # It should also create genus Coprinus because there is no Coprinus fixture
+    assert_equal(old_name_count + 1, Name.count)
+    assert_equal(Name.last.text_name, "Coprinus")
+  end
+
   def test_edit_name_by_user_who_doesnt_own_name
     name = names(:macrolepiota_rhacodes)
     name_owner = name.user
@@ -980,6 +1050,223 @@ class NameControllerTest < FunctionalTestCase
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
   end
+
+  def test_edit_name_chain_to_approve_and_deprecate
+    login("rolf")
+    name = names(:lactarius_alpigenes)
+    params = {
+      id: name.id,
+      name: {
+        rank: name.rank,
+        text_name: name.text_name,
+        author: name.author,
+        citation: name.citation,
+        notes: name.notes
+      }
+    }
+
+    # No change: go to show_name, warning.
+    params[:name][:deprecated] = "true"
+    post(:edit_name, params)
+    assert_flash_warning
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+
+    # Change to accepted: go to approve_name, no flash.
+    params[:name][:deprecated] = "false"
+    post(:edit_name, params)
+    assert_no_flash
+    assert_redirected_to(action: :approve_name, id: name.id)
+
+    # Change to deprecated: go to deprecate_name, no flash.
+    name.change_deprecated(false)
+    name.save
+    params[:name][:deprecated] = "true"
+    post(:edit_name, params)
+    assert_no_flash
+    assert_redirected_to(action: :deprecate_name, id: name.id)
+  end
+
+  def test_edit_name_with_umlaut
+    login("dick")
+    names = Name.find_or_create_name_and_parents("Xanthoparmelia coloradoensis")
+    names.each(&:save)
+    name = names.last
+    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
+    assert_equal("Xanthoparmelia coloradoensis", name.search_name)
+    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
+
+    get(:edit_name, id: name.id)
+    assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
+    assert_input_value("name_author", "")
+
+    params = {
+      id: name.id,
+      name: {
+        # (test what happens if user puts author in wrong field)
+        text_name: "Xanthoparmelia coloradoënsis (Gyelnik) Hale",
+        author: "",
+        rank: :Species,
+        deprecated: "false"
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+    name.reload
+    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
+    assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale", name.search_name)
+    assert_equal("**__Xanthoparmelia coloradoënsis__** (Gyelnik) Hale",
+                 name.display_name)
+
+    get(:edit_name, id: name.id)
+    assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
+    assert_input_value("name_author", "(Gyelnik) Hale")
+
+    params[:name][:text_name] = "Xanthoparmelia coloradoensis"
+    params[:name][:author] = ""
+    post(:edit_name, params)
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+    name.reload
+    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
+    assert_equal("Xanthoparmelia coloradoensis", name.search_name)
+    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
+  end
+
+  def test_edit_name_fixing_variety
+    login("katrina")
+    name = Name.create!(
+      text_name: "Pleurotus djamor",
+      search_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
+      sort_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
+      display_name: "**__Pleurotus djamor__** (Fr.) Boedijn var. djamor",
+      author: "(Fr.) Boedijn var. djamor",
+      rank: :Species,
+      deprecated: false,
+      correct_spelling: nil
+    )
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
+        author: "",
+        rank: :Variety,
+        deprecated: "false"
+      }
+    }
+    post(:edit_name, params)
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+    name.reload
+    assert_equal(:Variety, name.rank)
+    assert_equal("Pleurotus djamor var. djamor", name.text_name)
+    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
+    assert_equal("(Fr.) Boedijn", name.author)
+    # In the bug in the wild, it was failing to create the parents.
+    assert(Name.find_by_text_name("Pleurotus djamor"))
+    assert(Name.find_by_text_name("Pleurotus"))
+  end
+
+  def test_edit_name_change_to_group
+    login("mary")
+    name = Name.create!(
+      text_name: "Lepiota echinatae",
+      search_name: "Lepiota echinatae Group",
+      sort_name: "Lepiota echinatae Group",
+      display_name: "**__Lepiota echinatae__** Group",
+      author: "Group",
+      rank: :Species,
+      deprecated: false,
+      correct_spelling: nil
+    )
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Lepiota echinatae",
+        author: "Group",
+        rank: :Group,
+        deprecated: "false"
+      }
+    }
+    post(:edit_name, params)
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_no_emails
+    name.reload
+    assert_equal(:Group, name.rank)
+    assert_equal("Lepiota echinatae group", name.text_name)
+    assert_equal("Lepiota echinatae group", name.search_name)
+    assert_equal("**__Lepiota echinatae__** group", name.display_name)
+    assert_equal("", name.author)
+  end
+
+  def test_edit_name_screwy_notification_bug
+    login("mary")
+    name = Name.create!(
+      text_name: "Ganoderma applanatum",
+      search_name: "Ganoderma applanatum",
+      sort_name: "Ganoderma applanatum",
+      display_name: "__Ganoderma applanatum__",
+      author: "",
+      rank: :Species,
+      deprecated: true,
+      correct_spelling: nil,
+      citation: "",
+      notes: ""
+    )
+    Interest.create!(
+      target: name,
+      user: rolf,
+      state: true
+    )
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Ganoderma applanatum",
+        author: "",
+        rank: :Species,
+        deprecated: "true",
+        citation: "",
+        notes: "Changed notes."
+      }
+    }
+    post(:edit_name, params)
+    # was crashing while notifying rolf because new version wasn't saved yet
+    assert_flash_success
+  end
+
+  # Prove that editing can create multiple ancestors
+  def test_edit_name_create_multiple_ancestors
+    name        = names(:two_ancestors)
+    new_name    = "Neo#{name.text_name.downcase}"
+    new_species = new_name.sub(/(\w* \w*).*/,'\1')
+    new_genus   = new_name.sub(/(\w*).*/,'\1')
+    name_count  = Name.count
+    params = {
+      id: name.id,
+      name: {
+        text_name:  new_name,
+        author:     name.author,
+        rank:       name.rank,
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params)
+
+    assert_equal(name_count + 2, Name.count)
+    assert(Name.exists?(text_name: new_species), "Failed to create new species")
+    assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
+  end
+
+  # ----------------------------
+  #  Edit name -- with merge
+  # ----------------------------
 
   def test_edit_name_destructive_merge
     old_name = agaricus_campestrus = names(:agaricus_campestrus)
@@ -1055,27 +1342,116 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(new_versions, new_name.versions.size)
   end
 
-  # Prove that editing can create multiple ancestors
-  def test_edit_name_create_multiple_ancestors
-    name        = names(:two_ancestors)
-    new_name    = "Neo#{name.text_name.downcase}"
-    new_species = new_name.sub(/(\w* \w*).*/,'\1')
-    new_genus   = new_name.sub(/(\w*).*/,'\1')
-    name_count  = Name.count
+  # Prove that user can remove author if there's a match to desired Name,
+  # and the merge is non-destructive
+  def test_edit_name_remove_author_nondestructive_merge
+    old_name   = names(:mergeable_epithet_authored)
+    new_name   = names(:mergeable_epithet_unauthored)
+    name_count = Name.count
     params = {
-      id: name.id,
+      id: old_name.id,
       name: {
-        text_name:  new_name,
-        author:     name.author,
-        rank:       name.rank,
+        text_name:  old_name.text_name,
+        author:     "",
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login(name.user.login)
+    login(old_name.user.login)
     post(:edit_name, params)
 
-    assert_equal(name_count + 2, Name.count)
-    assert(Name.exists?(text_name: new_species), "Failed to create new species")
-    assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_flash_success
+    assert_empty(new_name.reload.author)
+    assert_no_emails
+    assert_equal(name_count - 1, Name.count)
+    refute(Name.exists?(old_name.id))
+  end
+
+  # Prove that user can add author if there's a match to desired Name,
+  # and the merge is non-destructive
+  def test_edit_name_add_author_nondestructive_merge
+    old_name   = names(:mergeable_epithet_unauthored)
+    new_name   = names(:mergeable_epithet_authored)
+    new_author = new_name.author
+    name_count = Name.count
+    params = {
+      id: old_name.id,
+      name: {
+        text_name:  old_name.text_name,
+        author:     new_author,
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login(old_name.user.login)
+    post(:edit_name, params)
+
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_flash_success
+    assert_equal(new_author, new_name.reload.author)
+    assert_no_emails
+    assert_equal(name_count - 1, Name.count)
+    refute(Name.exists?(old_name.id))
+  end
+
+  def test_edit_name_remove_author_destructive_merge
+    old_name = names(:authored_with_naming)
+    new_name = names(:unauthored_with_naming)
+    params = {
+      id: old_name.id,
+      name: {
+        text_name:  old_name.text_name,
+        author:     "",
+        rank:       old_name.rank,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+
+    login("rolf")
+    post(:edit_name, params)
+    assert_flash_warning
+    assert_redirected_to(action: :show_name, id: old_name.id)
+    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+
+    # Try again as an admin.
+    make_admin
+    post(:edit_name, params)
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: new_name.id)
+    assert_no_emails
+    refute(Name.exists?(old_name.id))
+  end
+
+  def test_edit_name_merge_author_with_notes
+    bad_name = names(:hygrocybe_russocoriacea_bad_author)
+    bad_id = bad_name.id
+    bad_notes = bad_name.notes
+    good_name = names(:hygrocybe_russocoriacea_good_author)
+    good_id = good_name.id
+    good_author = good_name.author
+    params = {
+      id: bad_name.id,
+      name: {
+        text_name: bad_name.text_name,
+        author: good_author,
+        notes: bad_notes,
+        rank: :Species,
+        deprecated: (bad_name.deprecated ? "true" : "false")
+      }
+    }
+    login("rolf")
+    make_admin
+    post(:edit_name, params)
+
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: good_id)
+    assert_no_emails
+    refute(Name.exists?(bad_id))
+    reload_name = Name.find(good_id)
+    assert(reload_name)
+    assert_equal(good_author, reload_name.author)
+    assert_equal(bad_notes, reload_name.notes)
   end
 
   # Make sure misspelling gets transferred when new name merges away.
@@ -1333,6 +1709,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_name, params)
+
     assert_flash_success
     assert_redirected_to(action: :show_name, id: old_name.id)
     assert_no_emails
@@ -1415,208 +1792,9 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(2, new_name.namings.size)
   end
 
-  def test_edit_name_add_author
-    name = names(:strobilurus_diminutivus_no_author)
-    old_text_name = name.text_name
-    new_author = "Desjardin"
-    params = {
-      id: name.id,
-      name: {
-        text_name:  old_text_name,
-        author:     new_author,
-        rank:       :Species,
-        deprecated: (name.deprecated ? "true" : "false")
-      }
-    }
-    login("mary")
-    post(:edit_name, params)
-
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: name.id)
-    # No more email for filling in author.
-    # assert_notify_email(old_text_name, "#{old_text_name} #{new_author}")
-    # It seems to be creating Strobilurus as well?
-    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
-    assert_equal(new_author, name.reload.author)
-    assert_equal(old_text_name, name.text_name)
-  end
-
-  # Prove that user can remove author if there's no exact match to desired Name
-  def test_edit_name_remove_author_no_exact_match
-    old_name_count = Name.count
-    name = names(:coprinus_comatus)
-    params = {
-      id: name.id,
-      name: {
-        text_name:  name.text_name,
-        author:     "",
-        rank:       name.rank,
-        deprecated: (name.deprecated ? "true" : "false")
-      }
-    }
-    login(name.user.login)
-    post(:edit_name, params)
-
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_flash_success
-    assert_empty(name.reload.author)
-    assert_no_emails
-    # It should create genus Coprinus because there is no Coprinus fixture
-    assert_equal(old_name_count + 1, Name.count)
-    assert_equal(Name.last.text_name, "Coprinus")
-  end
-
-  # Prove that user can remove author if there's a match to desired Name,
-  # and the merge is non-destructive
-  def test_edit_name_remove_author_nondestructive_merge
-    old_name   = names(:mergeable_epithet_authored)
-    new_name   = names(:mergeable_epithet_unauthored)
-    name_count = Name.count
-    params = {
-      id: old_name.id,
-      name: {
-        text_name:  old_name.text_name,
-        author:     "",
-        rank:       old_name.rank,
-        deprecated: (old_name.deprecated ? "true" : "false")
-      }
-    }
-    login(old_name.user.login)
-    post(:edit_name, params)
-
-    assert_redirected_to(action: :show_name, id: new_name.id)
-    assert_flash_success
-    assert_empty(new_name.reload.author)
-    assert_no_emails
-    assert_equal(name_count - 1, Name.count)
-    refute(Name.exists?(old_name.id))
-  end
-
-  # Prove that user can add author if there's a match to desired Name,
-  # and the merge is non-destructive
-  def test_edit_name_add_author_nondestructive_merge
-    old_name   = names(:mergeable_epithet_unauthored)
-    new_name   = names(:mergeable_epithet_authored)
-    new_author = new_name.author
-    name_count = Name.count
-    params = {
-      id: old_name.id,
-      name: {
-        text_name:  old_name.text_name,
-        author:     new_author,
-        rank:       old_name.rank,
-        deprecated: (old_name.deprecated ? "true" : "false")
-      }
-    }
-    login(old_name.user.login)
-    post(:edit_name, params)
-
-    assert_redirected_to(action: :show_name, id: new_name.id)
-    assert_flash_success
-    assert_equal(new_author, new_name.reload.author)
-    assert_no_emails
-    assert_equal(name_count - 1, Name.count)
-    refute(Name.exists?(old_name.id))
-  end
-
-  def test_edit_name_remove_author_destructive_merge
-    old_name = names(:authored_with_naming)
-    new_name = names(:unauthored_with_naming)
-    params = {
-      id: old_name.id,
-      name: {
-        text_name:  old_name.text_name,
-        author:     "",
-        rank:       old_name.rank,
-        deprecated: (old_name.deprecated ? "true" : "false")
-      }
-    }
-
-    login("rolf")
-    post(:edit_name, params)
-    assert_flash_warning
-    assert_redirected_to(action: :show_name, id: old_name.id)
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
-
-    # Try again as an admin.
-    make_admin
-    post(:edit_name, params)
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: new_name.id)
-    assert_no_emails
-    refute(Name.exists?(old_name.id))
-  end
-
-  def test_edit_name_merge_author_with_notes
-    bad_name = names(:hygrocybe_russocoriacea_bad_author)
-    bad_id = bad_name.id
-    bad_notes = bad_name.notes
-    good_name = names(:hygrocybe_russocoriacea_good_author)
-    good_id = good_name.id
-    good_author = good_name.author
-    params = {
-      id: bad_name.id,
-      name: {
-        text_name: bad_name.text_name,
-        author: good_author,
-        notes: bad_notes,
-        rank: :Species,
-        deprecated: (bad_name.deprecated ? "true" : "false")
-      }
-    }
-    login("rolf")
-    make_admin
-    post(:edit_name, params)
-
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: good_id)
-    assert_no_emails
-    refute(Name.exists?(bad_id))
-    reload_name = Name.find(good_id)
-    assert(reload_name)
-    assert_equal(good_author, reload_name.author)
-    assert_equal(bad_notes, reload_name.notes)
-  end
-
-  def test_edit_name_chain_to_approve_and_deprecate
-    login("rolf")
-    name = names(:lactarius_alpigenes)
-    params = {
-      id: name.id,
-      name: {
-        rank: name.rank,
-        text_name: name.text_name,
-        author: name.author,
-        citation: name.citation,
-        notes: name.notes
-      }
-    }
-
-    # No change: go to show_name, warning.
-    params[:name][:deprecated] = "true"
-    post(:edit_name, params)
-    assert_flash_warning
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-
-    # Change to accepted: go to approve_name, no flash.
-    params[:name][:deprecated] = "false"
-    post(:edit_name, params)
-    assert_no_flash
-    assert_redirected_to(action: :approve_name, id: name.id)
-
-    # Change to deprecated: go to deprecate_name, no flash.
-    name.change_deprecated(false)
-    name.save
-    params[:name][:deprecated] = "true"
-    post(:edit_name, params)
-    assert_no_flash
-    assert_redirected_to(action: :deprecate_name, id: name.id)
-  end
-
   # Prove that notification is moved to new_name
   # when old_name with notication is merged to new_name
-  def test_merge_with_notification
+  def test_edit_name_merge_with_notification
     note = notifications(:no_observation_notification)
     old_name = Name.find(note.obj_id)
     new_name = names(:fungi)
@@ -1638,7 +1816,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Test that misspellings are handle right when merging.
-  def test_merge_with_misspellings
+  def test_edit_name_merge_with_misspellings
     login("rolf")
     name1 = names(:lactarius_alpinus)
     name2 = names(:lactarius_alpigenes)
@@ -1733,7 +1911,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Found this in the wild, it seems to have been fixed already, though...
-  def test_merge_authored_misspelt_into_unauthored_correctly_spelled
+  def test_edit_name_merge_authored_misspelt_into_unauthored_correctly_spelled
     login("rolf")
 
     name2 = Name.create!(
@@ -1779,7 +1957,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_merge_authored_with_old_style_unauthored
+  def test_edit_name_merge_authored_with_old_style_unauthored
     login("rolf")
     name1 = Name.create!(
       text_name: "Amanita sect. Vaginatae",
@@ -1825,7 +2003,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Another one found in the wild, probably already fixed.
-  def test_merge_authored_with_old_style_deprecated
+  def test_edit_name_merge_authored_with_old_style_deprecated
     login("rolf")
     syn = Synonym.create
     name1 = Name.create!(
@@ -1871,184 +2049,6 @@ class NameControllerTest < FunctionalTestCase
     assert(!name1.deprecated)
     assert_equal("Cortinarius subgenus Sericeocybe", name1.text_name)
     assert_equal("", name1.author)
-  end
-
-  def test_edit_name_with_umlaut
-    login("dick")
-    names = Name.find_or_create_name_and_parents("Xanthoparmelia coloradoensis")
-    names.each(&:save)
-    name = names.last
-    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
-    assert_equal("Xanthoparmelia coloradoensis", name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
-
-    get(:edit_name, id: name.id)
-    assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
-    assert_input_value("name_author", "")
-
-    params = {
-      id: name.id,
-      name: {
-        # (test what happens if user puts author in wrong field)
-        text_name: "Xanthoparmelia coloradoënsis (Gyelnik) Hale",
-        author: "",
-        rank: :Species,
-        deprecated: "false"
-      }
-    }
-    post(:edit_name, params)
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    name.reload
-    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
-    assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale", name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoënsis__** (Gyelnik) Hale",
-                 name.display_name)
-
-    get(:edit_name, id: name.id)
-    assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
-    assert_input_value("name_author", "(Gyelnik) Hale")
-
-    params[:name][:text_name] = "Xanthoparmelia coloradoensis"
-    params[:name][:author] = ""
-    post(:edit_name, params)
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    name.reload
-    assert_equal("Xanthoparmelia coloradoensis", name.text_name)
-    assert_equal("Xanthoparmelia coloradoensis", name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
-  end
-
-  def test_create_variety
-    login("katrina")
-    params = {
-      name: {
-        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
-        author: "",
-        rank: :Variety,
-        deprecated: "false"
-      }
-    }
-    post(:create_name, params)
-
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: Name.last.id)
-    assert_no_emails
-    name = Name.last
-    assert_equal(:Variety, name.rank)
-    assert_equal("Pleurotus djamor var. djamor", name.text_name)
-    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
-    assert_equal("(Fr.) Boedijn", name.author)
-    assert(Name.find_by_text_name("Pleurotus djamor"))
-    assert(Name.find_by_text_name("Pleurotus"))
-  end
-
-  def test_edit_name_fixing_variety
-    login("katrina")
-    name = Name.create!(
-      text_name: "Pleurotus djamor",
-      search_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
-      sort_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
-      display_name: "**__Pleurotus djamor__** (Fr.) Boedijn var. djamor",
-      author: "(Fr.) Boedijn var. djamor",
-      rank: :Species,
-      deprecated: false,
-      correct_spelling: nil
-    )
-    params = {
-      id: name.id,
-      name: {
-        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
-        author: "",
-        rank: :Variety,
-        deprecated: "false"
-      }
-    }
-    post(:edit_name, params)
-
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    name.reload
-    assert_equal(:Variety, name.rank)
-    assert_equal("Pleurotus djamor var. djamor", name.text_name)
-    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
-    assert_equal("(Fr.) Boedijn", name.author)
-    # In the bug in the wild, it was failing to create the parents.
-    assert(Name.find_by_text_name("Pleurotus djamor"))
-    assert(Name.find_by_text_name("Pleurotus"))
-  end
-
-  def test_edit_name_change_to_group
-    login("mary")
-    name = Name.create!(
-      text_name: "Lepiota echinatae",
-      search_name: "Lepiota echinatae Group",
-      sort_name: "Lepiota echinatae Group",
-      display_name: "**__Lepiota echinatae__** Group",
-      author: "Group",
-      rank: :Species,
-      deprecated: false,
-      correct_spelling: nil
-    )
-    params = {
-      id: name.id,
-      name: {
-        text_name: "Lepiota echinatae",
-        author: "Group",
-        rank: :Group,
-        deprecated: "false"
-      }
-    }
-    post(:edit_name, params)
-
-    assert_flash_success
-    assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    name.reload
-    assert_equal(:Group, name.rank)
-    assert_equal("Lepiota echinatae group", name.text_name)
-    assert_equal("Lepiota echinatae group", name.search_name)
-    assert_equal("**__Lepiota echinatae__** group", name.display_name)
-    assert_equal("", name.author)
-  end
-
-  def test_edit_name_screwy_notification_bug
-    login("mary")
-    name = Name.create!(
-      text_name: "Ganoderma applanatum",
-      search_name: "Ganoderma applanatum",
-      sort_name: "Ganoderma applanatum",
-      display_name: "__Ganoderma applanatum__",
-      author: "",
-      rank: :Species,
-      deprecated: true,
-      correct_spelling: nil,
-      citation: "",
-      notes: ""
-    )
-    Interest.create!(
-      target: name,
-      user: rolf,
-      state: true
-    )
-    params = {
-      id: name.id,
-      name: {
-        text_name: "Ganoderma applanatum",
-        author: "",
-        rank: :Species,
-        deprecated: "true",
-        citation: "",
-        notes: "Changed notes."
-      }
-    }
-    post(:edit_name, params)
-    # was crashing while notifying rolf because new version wasn't saved yet
-    assert_flash_success
   end
 
   # ----------------------------
