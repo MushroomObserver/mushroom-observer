@@ -687,6 +687,7 @@ class NameController < ApplicationController
     end
   end
 
+  # returns truthy if name changed & changes saved, else returns falsy
   def update_existing_name
     @name.attributes = @parse.params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
@@ -694,16 +695,18 @@ class NameController < ApplicationController
     if !@name.changed?
       any_changes = false
     elsif !@name.save_with_log(:log_name_updated)
-      fail(:runtime_unable_to_save_changes.t)
+      raise(:runtime_unable_to_save_changes.t)
     else
       flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
       any_changes = true
     end
-    update_parents
+    # Update ancestors regardless whether name changed; maybe this will add
+    # missing ancestors in case database is messed up
+    update_ancestors
     any_changes
   end
 
-  def update_parents
+  def update_ancestors
     Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
       name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
