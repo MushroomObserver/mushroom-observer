@@ -462,7 +462,7 @@ class NameController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create and Edit Names
+  #  :section: Create Names
   #
   ##############################################################################
 
@@ -531,11 +531,17 @@ class NameController < ApplicationController
     flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
   end
 
+  ##############################################################################
+  #
+  #  :section: Edit Names
+  #
+  ##############################################################################
+
   ### Make changes to name; accessible from show_name page.
   def edit_name # :prefetch: :norobots:
     store_location
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id].to_s)
+    if (@name = find_or_goto_index(Name, params[:id].to_s))
       init_edit_name_form
       save_edits if request.method == "POST"
     end
@@ -610,7 +616,7 @@ class NameController < ApplicationController
     new_name != @name && Name.exists?(new_name.id)
   end
 
-  ### user's changes require change only to a single existing name
+  #### user's changes require change only to a single existing name ####
   def try_to_change_name
     email_admin_name_change unless ok_to_make_any_change? || minor_change?
     update_correct_spelling
@@ -730,7 +736,7 @@ class NameController < ApplicationController
     redirect_with_query(action: :show_name, id: @name.id)
   end
 
-  ### user's changes require merger of two existing names
+  #### user's changes require merger of two existing names ####
   def try_to_merge(new_name)
     if in_admin_mode? || @name.mergeable? || new_name.mergeable?
       merge_name_into(new_name)
