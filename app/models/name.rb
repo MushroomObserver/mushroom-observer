@@ -153,17 +153,19 @@
 #                              fills in authors if supplied.
 #  find_or_create_name_and_parents:: Look up Name, create it,
 #                              return it and parents.
-#  parse_name::              Parse arbitrary taxon, return parts.
-#  parse_author::            Grab the author from the end of a name.
-#  parse_group::             Parse "Whatever group" or "whatever clade".
-#  parse_genus_or_up::       Parse "Xxx".
-#  parse_subgenus::          Parse "Xxx subgenus yyy".
-#  parse_section::           Parse "Xxx sect. yyy".
-#  parse_stirps::            Parse "Xxx stirps yyy".
-#  parse_species::           Parse "Xxx yyy".
-#  parse_subspecies::        Parse "Xxx yyy subsp. zzz".
-#  parse_variety::           Parse "Xxx yyy var. zzz".
-#  parse_form::              Parse "Xxx yyy f. zzz".
+#  extant_match_to_parsed_name :: 1st existing Name matching ParsedName
+#  new_name_from_parsed_name:: Make new Name instance from a ParsedName
+#  parse_name::               Parse arbitrary taxon, return parts.
+#  parse_author::             Grab the author from the end of a name.
+#  parse_group::              Parse "Whatever group" or "whatever clade".
+#  parse_genus_or_up::        Parse "Xxx".
+#  parse_subgenus::           Parse "Xxx subgenus yyy".
+#  parse_section::            Parse "Xxx sect. yyy".
+#  parse_stirps::             Parse "Xxx stirps yyy".
+#  parse_species::            Parse "Xxx yyy".
+#  parse_subspecies::         Parse "Xxx yyy subsp. zzz".
+#  parse_variety::            Parse "Xxx yyy var. zzz".
+#  parse_form::               Parse "Xxx yyy f. zzz".
 #
 #  ==== Other
 #  primer::                  List of names used for priming auto-completer.
@@ -2211,19 +2213,6 @@ class Name < AbstractModel
     result.to_a
   end
 
-  # When trying to match a parsed_name which has an author, get exact match.
-  # Do the same for :Group-level Names: for these, we allow authored and
-  # unauthored names to coexist. Therefore we do **not** want an unauthored
-  # :Group level name to match an authored one -- the match must be exact.
-  # For unauthored, non-:Group-level names, match any name (authored or not).
-  def self.existing_names_matching_parsed_name(parsed_name)
-    if parsed_name.author.present? || (parsed_name.rank == :Group)
-      Name.where(search_name: parsed_name.search_name)
-    else
-      Name.where(text_name: parsed_name.text_name)
-    end
-  end
-
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
   # at least, supplying defaults for +search_name+, +display_name+, and
   # +sort_name+, and leaving +author+ blank by default.  Requires an
@@ -2247,7 +2236,8 @@ class Name < AbstractModel
   end
 
   # make a Name given all the various name formats, etc.
-  # Used only by +make_name+, and +create_test_name+ in unit test.
+  # Used only by +make_name+, +new_name_from_parsed_name+, and
+  # +create_test_name+ in unit test.
   # Returns a Name instance, *UNSAVED*!!
   def self.new_name(params)
     result = Name.new(params)
@@ -2256,11 +2246,69 @@ class Name < AbstractModel
     result
   end
 
+  # Make a Name instance from a ParsedName
+  # Used by NameController#create_new_name
+  # Returns a Name instance, *UNSAVED*!!
+  def self.new_name_from_parsed_name(parsed_name)
+    new_name(parsed_name.params)
+  end
+
+  # Return extant Names matching a desire new Name
+  # Used by NameController#create_name
+  def self.names_matching_desired_new_name(parsed_name)
+    if exact_match(parsed_name).any?
+      exact_match(parsed_name)
+    elsif unauthored_any_match(parsed_name).any?
+      unauthored_any_match(parsed_name)
+    else
+      authored_with_unauthored_match(parsed_name)
+    end
+  end
+
+private
+  def self.exact_match(parsed_name)
+    # find_by_search_name(parsed_name.search_name)
+    Name.where(search_name: parsed_name.search_name)
+  end
+
+  # If desired Name is unauthored, match both authored & unauthored extant
+  # Names; we don't want to create an unauthored Name if an authored one exists.
+  def self.unauthored_any_match(parsed_name)
+    return nil unless parsed_name.author.empty?
+    # find_by_text_name(parsed_name.text_name)
+    Name.where(text_name: parsed_name.text_name)
+  end
+
+  # authored, non-:Group ParsedName is matched by an unauthored extant Name
+  # For non-:Group Names, we don't want to have authored/unauthored pairs
+  # But for Groups, we want to allow creation of authored Name despite
+  # existence of unauthored one (but not vice versa).
+  def self.authored_with_unauthored_match(parsed_name)
+    return nil if parsed_name.author.empty? || parsed_name.rank == :Group
+    # find_by_search_name(parsed_name.text_name)
+    Name.where(search_name: parsed_name.text_name)
+  end
+public
+
   ################################################################################
   #
   #  :section: Changing Name
   #
   ################################################################################
+
+  # When matchin a desired change name which has an author, get exact match.
+  # Do the same for :Group-level Names: for these, we allow authored and
+  # unauthored names to coexist. Therefore we do **not** want an unauthored
+  # :Group level name to match an authored one -- the match must be exact.
+  # For unauthored, non-:Group-level names, match any name (authored or not).
+  # Used by NameController#edit_name
+  def self.names_matching_desired_changed_name(parsed_name)
+    if parsed_name.author.present? || (parsed_name.rank == :Group)
+      Name.where(search_name: parsed_name.search_name)
+    else
+      Name.where(text_name: parsed_name.text_name)
+    end
+  end
 
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!

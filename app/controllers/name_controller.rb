@@ -474,10 +474,8 @@ class NameController < ApplicationController
       init_create_name_form
     else
       @parse = parse_name
-      @name, @parents = find_or_create_name_and_parents
-      make_sure_name_doesnt_exist
+      return unless new_name_allowable?
       create_new_name
-      redirect_to_show_name
     end
   rescue RuntimeError => err
     reload_create_name_form_on_error(err)
@@ -493,42 +491,69 @@ class NameController < ApplicationController
     flash_error(err.to_s) unless err.blank?
     flash_object_errors(@name)
     init_create_name_form
-    @name.rank = params[:name][:rank]
-    @name.author = params[:name][:author]
+    @name.rank =     params[:name][:rank]
+    @name.author =   params[:name][:author]
     @name.citation = params[:name][:citation]
-    @name.notes = params[:name][:notes]
-    @name_string = params[:name][:text_name]
+    @name.notes =    params[:name][:notes]
+    @name_string =   params[:name][:text_name]
   end
 
-  def find_or_create_name_and_parents
-    parents = Name.find_or_create_parsed_name_and_parents(@parse)
-    unless name = parents.pop
-      if params[:action] == "create_name"
-        fail(:create_name_multiple_names_match.t(str: @parse.real_search_name))
-      else
-        others = Name.where(text_name: @parse.text_name)
-        fail(:edit_name_multiple_names_match.t(str: @parse.real_search_name,
-                                               matches: others.map(&:search_name).join(" / ")))
-      end
+  def parse_name
+    text_name = params[:name][:text_name]
+    text_name = @name.real_text_name if text_name.blank? && @name
+    author = params[:name][:author]
+    in_str = Name.clean_incoming_string("#{text_name} #{author}")
+    in_rank = params[:name][:rank].to_sym
+    old_deprecated = @name ? @name.deprecated : false
+    parse = Name.parse_name(in_str, in_rank, old_deprecated)
+    if !parse || parse.rank != in_rank
+      rank_tag = :"rank_#{in_rank.to_s.downcase}"
+      fail(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
     end
-    [name, parents]
+    parse
   end
 
-  def make_sure_name_doesnt_exist
-    unless @name.new_record?
-      fail(:runtime_name_create_already_exists.t(name: @name.display_name))
+  def new_name_allowable?
+    matches = names_matching_desired_new_name
+    return true if matches.empty?
+    if matches.many?
+      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
+    else
+      raise(:runtime_name_create_already_exists.
+              t(name: matches.first.display_name))
     end
+    false
+  end
+
+  def names_matching_desired_new_name
+    Name.names_matching_desired_new_name(@parse)
   end
 
   def create_new_name
-    @name.attributes = @parse.params
-    @name.change_deprecated(true) if params[:name][:deprecated] == "true"
+    @name = Name.new_name_from_parsed_name(@parse)
+    adjust_name_attributes_from_params
+    if @name.save_with_log(:log_name_updated)
+      flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+      update_ancestors
+      redirect_to_show_name
+    else
+      raise(:runtime_unable_to_save_changes.t)
+    end
+  end
+
+  def adjust_name_attributes_from_params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
-    for name in @parents + [@name]
+  end
+
+  def update_ancestors
+    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
       name.save_with_log(:log_name_created_at) if name && name.new_record?
     end
-    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+  end
+
+  def redirect_to_show_name
+    redirect_with_query(action: :show_name, id: @name.id)
   end
 
   ##############################################################################
@@ -573,43 +598,25 @@ class NameController < ApplicationController
 
   def save_edits
     @parse = parse_name
-    new_name = existing_names_matching_desired_name - [@name]
-    if ambiguous?(new_name)
-      multiple_match_exception(new_name)
+    matches = names_matching_desired_changed_name - [@name]
+    if matches.many?
+      edit_multiple_match_exception(new_name)
     else
-     # use first to get Name from ActiveRecord::Relation
-     new_name = new_name.first || @name
-     should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
+      new_name = matches.first || @name
+      should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
     end
   end
 
-  def parse_name
-    text_name = params[:name][:text_name]
-    text_name = @name.real_text_name if text_name.blank? && @name
-    author = params[:name][:author]
-    in_str = Name.clean_incoming_string("#{text_name} #{author}")
-    in_rank = params[:name][:rank].to_sym
-    old_deprecated = @name ? @name.deprecated : false
-    parse = Name.parse_name(in_str, in_rank, old_deprecated)
-    if !parse || parse.rank != in_rank
-      rank_tag = :"rank_#{in_rank.to_s.downcase}"
-      fail(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
-    end
-    parse
+  def names_matching_desired_changed_name
+    Name.names_matching_desired_changed_name(@parse)
   end
 
-  def existing_names_matching_desired_name
-    Name.existing_names_matching_parsed_name(@parse)
-  end
-
-  def ambiguous?(new_name)
-    new_name.size > 1
-  end
-
-  def multiple_match_exception(new_name)
-    raise(:edit_name_multiple_names_match.t(
-            str: @parse.real_search_name,
-            matches: new_name.map(&:search_name).join(" / ")))
+  def edit_multiple_match_exception(new_name)
+    raise(:edit_name_multiple_names_match.
+            t(str: @parse.real_search_name,
+              matches: new_name.map(&:search_name).join(" / ")
+             )
+         )
   end
 
   def should_be_merged?(new_name)
@@ -693,11 +700,10 @@ class NameController < ApplicationController
     end
   end
 
-  # returns truthy if name changed & changes saved, else returns falsy
+  # Updates Name
+  # Returns truthy if name changed && changes saved, else falsy
   def update_existing_name
-    @name.attributes = @parse.params
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes = params[:name][:notes].to_s.strip
+    update_name_without_saving
     if !@name.changed?
       any_changes = false
     elsif !@name.save_with_log(:log_name_updated)
@@ -712,10 +718,9 @@ class NameController < ApplicationController
     any_changes
   end
 
-  def update_ancestors
-    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
-      name.save_with_log(:log_name_created_at) if name && name.new_record?
-    end
+  def update_name_without_saving
+    @name.attributes = @parse.params
+    adjust_name_attributes_from_params
   end
 
   def status_changing?
@@ -732,11 +737,7 @@ class NameController < ApplicationController
     return true
   end
 
-  def redirect_to_show_name
-    redirect_with_query(action: :show_name, id: @name.id)
-  end
-
-  #### user's changes require merger of two existing names ####
+  #### Changes require merger of two existing names ####
   def try_to_merge(new_name)
     if in_admin_mode? || @name.mergeable? || new_name.mergeable?
       merge_name_into(new_name)
@@ -748,10 +749,7 @@ class NameController < ApplicationController
 
   def merge_name_into(new_name)
     old_display_name_for_log = @name[:display_name]
-    # First update this name (without saving).
-    @name.attributes = @parse.params
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes = params[:name][:notes].to_s.strip
+    update_name_without_saving
     # Only change deprecation status if user explicity requested it.
     if @name.deprecated != (params[:name][:deprecated] == "true")
       change_deprecated = !@name.deprecated

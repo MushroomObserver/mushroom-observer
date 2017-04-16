@@ -404,38 +404,6 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "create_name")
   end
 
-  def test_create_name_unauthored_authored
-    # Prove that user cannot create an authored non-:Group Name
-    # if unauthored one exists.
-    login
-    unauthored_name = names(:strobilurus_diminutivus_no_author)
-    author = unauthored_name.author
-    params = {
-      name: {
-        text_name: unauthored_name.text_name,
-        author:    "Author",
-        rank:      unauthored_name.rank,
-        status:    unauthored_name.status
-      }
-    }
-    assert_no_difference("Name.count") { post(:create_name, params) }
-    assert_equal(author, unauthored_name.author)
-
-    # And vice versa (can't created unauthored one if authored exists)
-    authored_name = names(:coprinus_comatus)
-    author = authored_name.author
-    params = {
-      name: {
-        text_name: authored_name.text_name,
-        author:    "",
-        rank:      authored_name.rank,
-        status:    authored_name.status
-      }
-    }
-    assert_no_difference("Name.count") { post(:create_name, params) }
-    assert_equal(author, authored_name.author)
-  end
-
   def test_show_name_description
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
@@ -704,11 +672,11 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create_name, params)
-    assert_redirected_to(action: :show_name, id: Name.last.id)
+
+    assert(name = Name.find_by_text_name(text_name))
+    assert_redirected_to(action: :show_name, id: name.id)
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
     assert_equal(10 + 2 * @new_pts, rolf.reload.contribution)
-    assert(name = Name.find_by_text_name(text_name))
-    assert_equal(text_name, name.text_name)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
   end
@@ -732,6 +700,76 @@ class NameControllerTest < FunctionalTestCase
     names = Name.where(text_name: text_name)
     assert_obj_list_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
+  end
+
+  def test_create_name_unauthored_authored
+    # Prove user can't create authored non-:Group Name if unauthored one exists.
+    old_name_count = Name.count
+    name = names(:strobilurus_diminutivus_no_author)
+    params = {
+      name: {
+        text_name: name.text_name,
+        author:    "Author",
+        rank:      name.rank,
+        status:    name.status
+      }
+    }
+    user = users(:rolf)
+    login(user.login)
+    post(:create_name, params)
+
+    assert_response(:success)
+    flash_text = :runtime_name_create_already_exists.t(name: name.display_name)
+    assert_flash_text(flash_text)
+    assert_empty(name.reload.author)
+    assert_equal(old_name_count, Name.count)
+    expect = user.contribution
+    assert_equal(expect, user.reload.contribution)
+
+    # And vice versa
+    # Prove user can't create unauthored non-:Group Name if authored one exists.
+    name = names(:coprinus_comatus)
+    author = name.author
+    params = {
+      name: {
+        text_name: name.text_name,
+        author:    "",
+        rank:      name.rank,
+        status:    name.status
+      }
+    }
+    post(:create_name, params)
+
+    assert_response(:success)
+    flash_text = :runtime_name_create_already_exists.t(name: name.display_name)
+    assert_flash_text(flash_text)
+    assert_equal(author, name.reload.author)
+    assert_equal(old_name_count, Name.count)
+    expect = user.contribution
+    assert_equal(expect, user.reload.contribution)
+  end
+
+  def test_create_name_authored_group_unauthored_exists
+    name = names(:unauthored_group)
+    text_name = name.text_name
+    params = {
+      name: {
+        text_name: text_name,
+        author:    "Author",
+        rank:      :Group,
+        citation:  ""
+      }
+    }
+    login("rolf")
+    old_contribution = rolf.contribution
+    post(:create_name, params)
+
+    assert(authored_name = Name.find_by_search_name("#{text_name} Author"))
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: authored_name.id)
+    assert(Name.exists?(name.id))
+    assert_equal(old_contribution + SiteData::FIELD_WEIGHTS[:names],
+                 rolf.reload.contribution)
   end
 
   def test_create_name_bad_name
@@ -840,25 +878,26 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_create_variety
-    login("katrina")
+    text_name = "Pleurotus djamor var. djamor"
+    author    = "(Fr.) Boedijn"
     params = {
       name: {
-        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
-        author: "",
-        rank: :Variety,
+        text_name:  "#{text_name} #{author}",
+        author:     "",
+        rank:       :Variety,
         deprecated: "false"
       }
     }
+    login("katrina")
     post(:create_name, params)
 
+    assert(name = Name.find_by_text_name(text_name))
     assert_flash_success
-    assert_redirected_to(action: :show_name, id: Name.last.id)
+    assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    name = Name.last
     assert_equal(:Variety, name.rank)
-    assert_equal("Pleurotus djamor var. djamor", name.text_name)
-    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
-    assert_equal("(Fr.) Boedijn", name.author)
+    assert_equal("#{text_name} #{author}", name.search_name)
+    assert_equal(author, name.author)
     assert(Name.find_by_text_name("Pleurotus djamor"))
     assert(Name.find_by_text_name("Pleurotus"))
   end

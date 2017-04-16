@@ -565,10 +565,10 @@ amanita_boudieri_var_beillei:
 boletus_edulis_group:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Group] %>
-  text_name: Boletus edulis group
+  text_name:         Boletus edulis group
+  search_name:       Boletus edulis group
+  sort_name:         Boletus edulis   group
   display_name: '**__Boletus edulis__** group'
-  search_name: Boletus edulis group
-  sort_name: Boletus edulis   group
 
 imageless:
   <<: *DEFAULTS
@@ -722,7 +722,16 @@ same_user_owns_naming_and_observation:
   text_name:         Same-user-owns-naming-and-observation
   search_name:       Same-user-owns-naming-and-observation
   sort_name:         Same-user-owns-naming-and-observation
-  display_name: "**__Same-user-owns-naming-and-observation__**"
+  display_name: '**__Same-user-owns-naming-and-observation__**'
   rank:              <%= Name.ranks[:Genus] %>
   user:              dick
+
+unauthored_group:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Group] %>
+  text_name:         Group-unauthored group
+  search_name:       Group-unauthored group
+  sort_name:         Group-unauthored   group
+  display_name: '**__Group-unauthored__** group'
+
 
