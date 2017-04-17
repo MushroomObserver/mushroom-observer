@@ -2132,4 +2132,30 @@ class NameTest < UnitTestCase
     name = names(:same_user_owns_naming_and_observation)
     assert(name.changeable?(name.user))
   end
+
+  def test_names_matching_desired_new_name
+    # Prove unauthored ParseName matches are all extant matches to text_name
+    # Such as multiple authored Names
+    parsed = Name.parse_name("Amanita baccata")
+    expect = [names(:amanita_baccata_arora), names(:amanita_baccata_borealis)]
+    assert_equal(expect,
+                 Name.names_matching_desired_new_name(parsed).order(:author))
+    # or unauthored and authored Names
+    parsed = Name.parse_name(names(:unauthored_with_naming).text_name)
+    expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
+    assert_equal(expect,
+                 Name.names_matching_desired_new_name(parsed).order(:author))
+
+    # Prove authored Group ParsedName is not matched by extant unauthored Name
+    parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
+    refute(Name.names_matching_desired_new_name(parsed).
+                include?(names(:unauthored_with_naming))
+          )
+    # Prove authored non-Group ParsedName matched by union of exact matches and
+    # unauthored matches
+    parsed = Name.parse_name(names(:authored_with_naming).search_name)
+    expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
+    assert_equal(expect,
+                 Name.names_matching_desired_new_name(parsed).order(:author))
+  end
 end

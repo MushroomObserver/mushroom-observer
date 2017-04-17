@@ -2253,42 +2253,23 @@ class Name < AbstractModel
     new_name(parsed_name.params)
   end
 
-  # Return extant Names matching a desire new Name
+  # Return extant Names matching a desired new Name
   # Used by NameController#create_name
   def self.names_matching_desired_new_name(parsed_name)
-    if exact_match(parsed_name).any?
-      exact_match(parsed_name)
-    elsif unauthored_any_match(parsed_name).any?
-      unauthored_any_match(parsed_name)
+    # unauthored ParsedName matches Names with or w/o authors
+    if parsed_name.author.empty?
+      Name.where(text_name: parsed_name.text_name)
+    # authored :Group ParsedName must be matched exactly (but not vice versa)
+    # This lets user create an authored :Group despite the existence of an
+    # unauthored :Group
+    elsif parsed_name.rank == :Group
+      Name.where(search_name: parsed_name.search_name)
+    # authored non-:Group ParsedName matched by exact & authorless extant Names
     else
-      authored_with_unauthored_match(parsed_name)
+      Name.where(text_name: parsed_name.text_name).
+           where(author: [parsed_name.author, ""])
     end
   end
-
-private
-  def self.exact_match(parsed_name)
-    # find_by_search_name(parsed_name.search_name)
-    Name.where(search_name: parsed_name.search_name)
-  end
-
-  # If desired Name is unauthored, match both authored & unauthored extant
-  # Names; we don't want to create an unauthored Name if an authored one exists.
-  def self.unauthored_any_match(parsed_name)
-    return nil unless parsed_name.author.empty?
-    # find_by_text_name(parsed_name.text_name)
-    Name.where(text_name: parsed_name.text_name)
-  end
-
-  # authored, non-:Group ParsedName is matched by an unauthored extant Name
-  # For non-:Group Names, we don't want to have authored/unauthored pairs
-  # But for Groups, we want to allow creation of authored Name despite
-  # existence of unauthored one (but not vice versa).
-  def self.authored_with_unauthored_match(parsed_name)
-    return nil if parsed_name.author.empty? || parsed_name.rank == :Group
-    # find_by_search_name(parsed_name.text_name)
-    Name.where(search_name: parsed_name.text_name)
-  end
-public
 
   ################################################################################
   #
@@ -2296,15 +2277,18 @@ public
   #
   ################################################################################
 
-  # When matchin a desired change name which has an author, get exact match.
-  # Do the same for :Group-level Names: for these, we allow authored and
-  # unauthored names to coexist. Therefore we do **not** want an unauthored
-  # :Group level name to match an authored one -- the match must be exact.
-  # For unauthored, non-:Group-level names, match any name (authored or not).
+  # Return extant Names matching a desired changed Name
   # Used by NameController#edit_name
   def self.names_matching_desired_changed_name(parsed_name)
+    # When matching a desired changed name having an author, get exact matches.
+    # Do the same for all :Group-level Names; for these, we allow authored and
+    #   unauthored :Group Names to coexist. Thus an unauthored :Group level name
+    #   should *not* a desired authored name -- the match must be exact.
     if parsed_name.author.present? || (parsed_name.rank == :Group)
       Name.where(search_name: parsed_name.search_name)
+
+    # For unauthored, non-:Group-level names, match any name (authored or not)
+    # because non-:Group authored/unauthored pairs are not allowed.
     else
       Name.where(text_name: parsed_name.text_name)
     end
