@@ -1039,16 +1039,17 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_text_name, name.text_name)
   end
 
-  # Prove that user can remove author if there's no exact match to desired Name
+# Prove that user can change name -- without merger --
+  # if there's no exact match to desired Name
   def test_edit_name_remove_author_no_exact_match
     old_name_count = Name.count
-    name = names(:coprinus_comatus)
+    name = names(:amanita_baccata_arora)
     params = {
       id: name.id,
       name: {
-        text_name:  name.text_name,
+        text_name:  names(:coprinus_comatus).text_name,
         author:     "",
-        rank:       name.rank,
+        rank:       names(:coprinus_comatus).rank,
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
@@ -1318,10 +1319,10 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_name.id,
       name: {
-        text_name: agaricus_campestris.text_name,
-        author: "",
-        rank: :Species,
-        deprecated: (old_name.deprecated ? "true" : "false")
+        text_name:  agaricus_campestris.text_name,
+        author:     agaricus_campestris.author,
+        rank:       :Species,
+        deprecated: agaricus_campestris.deprecated
       }
     }
     login("rolf")
@@ -1998,47 +1999,49 @@ class NameControllerTest < FunctionalTestCase
   # Another one found in the wild, probably already fixed.
   def test_edit_name_merge_authored_with_old_style_unauthored
     login("rolf")
-    name1 = Name.create!(
-      text_name: "Amanita sect. Vaginatae",
-      search_name: "Amanita sect. Vaginatae (Fr.) Quél.",
-      sort_name: "Amanita sect. Vaginatae (Fr.) Quél.",
-      display_name: "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
+    # Obsolete intrageneric Name, :Genus with rank & author in the author field.
+    # (NameController no longer allows this.)
+    old_style_name = Name.create!(
+      text_name:        "Amanita",
+      search_name:      "Amanita (sect. Vaginatae)",
+      sort_name:        "Amanita  (sect. Vaginatae)",
+      display_name:     "**__Amanita__** (sect. Vaginatae)",
+      author:           "(sect. Vaginatae)",
+      rank:             :Genus,
+      deprecated:       false,
+      correct_spelling: nil
+    )
+    # New style. Uses correct rank, and puts rank text in text_name
+    new_style_name = Name.create!(
+      text_name:        "Amanita sect. Vaginatae",
+      search_name:      "Amanita sect. Vaginatae (Fr.) Quél.",
+      sort_name:        "Amanita sect. Vaginatae  (Fr.)   Quél.",
+      display_name:     "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
       author:           "(Fr.) Quél.",
       rank:             :Section,
       deprecated:       false,
       correct_spelling: nil
     )
-    # The old way to create an intrageneric Name, using the author field
-    name2 = Name.create!(
-      text_name: "Amanita",
-      search_name: "Amanita (sect. Vaginatae)",
-      sort_name: "Amanita (sect. Vaginatae)",
-      display_name: "**__Amanita__** (sect. Vaginatae)",
-      author: "(sect. Vaginatae)",
-      rank: :Genus,
-      deprecated: false,
-      correct_spelling: nil
-    )
     params = {
-      id: name2.id,
+      id: old_style_name.id,
       name: {
-        text_name: "Amanita sect. Vaginatae",
-        author: "",
-        rank: :Section,
+        text_name:  new_style_name.text_name,
+        author:     new_style_name.author,
+        rank:       new_style_name.rank,
         deprecated: "false"
       }
     }
     post(:edit_name, params)
 
     assert_flash_success
-    assert_redirected_to(action: :show_name, id: name1.id)
+    assert_redirected_to(action: :show_name, id: new_style_name.id)
     assert_no_emails
-    refute(Name.exists?(name2.id))
-    assert(name1.reload)
-    assert(!name1.correct_spelling)
-    assert(!name1.deprecated)
-    assert_equal("Amanita sect. Vaginatae", name1.text_name)
-    assert_equal("(Fr.) Quél.", name1.author)
+    refute(Name.exists?(old_style_name.id))
+    assert(new_style_name.reload)
+    assert(!new_style_name.correct_spelling)
+    assert(!new_style_name.deprecated)
+    assert_equal("Amanita sect. Vaginatae", new_style_name.text_name)
+    assert_equal("(Fr.) Quél.", new_style_name.author)
   end
 
   # Another one found in the wild, probably already fixed.

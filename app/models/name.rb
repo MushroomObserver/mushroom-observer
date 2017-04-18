@@ -2278,20 +2278,14 @@ class Name < AbstractModel
   ################################################################################
 
   # Return extant Names matching a desired changed Name
+  # When matching a desired changed name, get exact matches.
+  # This allows authored/unauthored pairs at all Ranks.
+  # We assume than when editing a Name, a User is making a deliberate choice.
+  # This contrasts with creating a Name, where we assume that the User may be
+  # overlooking an extant Name.
   # Used by NameController#edit_name
   def self.names_matching_desired_changed_name(parsed_name)
-    # When matching a desired changed name having an author, get exact matches.
-    # Do the same for all :Group-level Names; for these, we allow authored and
-    #   unauthored :Group Names to coexist. Thus an unauthored :Group level name
-    #   should *not* a desired authored name -- the match must be exact.
-    if parsed_name.author.present? || (parsed_name.rank == :Group)
-      Name.where(search_name: parsed_name.search_name)
-
-    # For unauthored, non-:Group-level names, match any name (authored or not)
-    # because non-:Group authored/unauthored pairs are not allowed.
-    else
-      Name.where(text_name: parsed_name.text_name)
-    end
+    Name.where(search_name: parsed_name.search_name)
   end
 
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
