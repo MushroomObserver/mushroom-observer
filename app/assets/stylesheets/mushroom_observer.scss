@@ -1756,6 +1756,17 @@ input[type=checkbox] {
   margin-left: 1px;
 }
 
+.form-observation-map {
+    height: 400px;
+    width: 100%;
+}
+
+.map-btn {
+    @extend .btn;
+    margin-top: 10px;
+}
+
+
 .spacer {
   height: 30px;
   width: 1px;

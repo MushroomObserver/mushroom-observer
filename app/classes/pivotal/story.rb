@@ -12,14 +12,6 @@ class Pivotal
     attr_accessor :comments
     attr_accessor :votes
 
-    ACTIVE_STATES = {
-      "unscheduled" => true,
-      "unstarted"   => true,
-      "started"     => true,
-      "finished"    => false,
-      "accepted"    => false
-    }
-
     LABEL_VALUE = {
       "critical"        => 4,
       "bottleneck"      => 3,
@@ -93,10 +85,6 @@ class Pivotal
           true
         end
       end.join("\n").sub(/\A\s+/, "").sub(/\s+\Z/, "\n")
-    end
-
-    def active?
-      ACTIVE_STATES[state] || false
     end
 
     def activity

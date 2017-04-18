@@ -12,6 +12,7 @@
 //= require theater
 //= require validate_file_input_fields
 //= require main
+//= require observation_form_map
 //= require lightbox
 //= require popup_exif
 
