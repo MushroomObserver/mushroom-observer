@@ -515,14 +515,13 @@ class NameController < ApplicationController
 
   def new_name_allowable?
     matches = names_matching_desired_new_name
-    return true if matches.empty?
-    if matches.many?
-      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
-    else
+    return true if matches.none?
+    if matches.one?
       raise(:runtime_name_create_already_exists.
               t(name: matches.first.display_name))
+    else
+      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
     end
-    false
   end
 
   def names_matching_desired_new_name

@@ -693,11 +693,35 @@ class NameControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:create_name, params)
+
     assert_response(:success)
-    assert_equal(count, Name.count, "Shouldn't have created a name; created #{Name.last.search_name.inspect}.")
+    assert_equal(count, Name.count,
+                 "Shouldn't have created #{Name.last.search_name.inspect}.")
     names = Name.where(text_name: text_name)
     assert_obj_list_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
+  end
+
+  def test_create_name_matching_multiple_names
+    desired_name = names(:coprinellus_micaceus_no_author)
+    text_name = desired_name.text_name
+    params = {
+      name: {
+        text_name: text_name,
+        author:    "",
+        rank:      desired_name.rank,
+        citation:  desired_name.citation
+      }
+    }
+    flash_text = :create_name_multiple_names_match.t(str: text_name)
+    count = Name.count
+    login("rolf")
+    post(:create_name, params)
+
+    assert_flash_text(flash_text)
+    assert_response(:success)
+    assert_equal(count, Name.count,
+                 "Shouldn't have created #{Name.last.search_name.inspect}.")
   end
 
   def test_create_name_unauthored_authored
@@ -930,6 +954,39 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
+  end
+
+  def test_edit_name_no_changes
+    name = names(:conocybe_filaris)
+    text_name  = name.text_name
+    author     = name.author
+    rank       = name.rank
+    citation   = name.citation
+    deprecated = name.deprecated
+    params = {
+      id: name.id,
+      name: {
+        text_name:   text_name,
+        author:      author,
+        rank:        rank,
+        citation:    citation,
+        deprecated: (deprecated ? "true" : "false")
+      }
+    }
+    user = name.user
+    contribution = user.contribution
+    login(user.login)
+    post(:edit_name, params)
+
+    assert_flash_text(:runtime_no_changes.l)
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_equal(text_name, name.reload.text_name)
+    assert_equal(author, name.author)
+    assert_equal(rank, name.rank)
+    assert_equal(citation, name.citation)
+    assert_equal(deprecated, name.deprecated)
+    assert_equal(user, name.user)
+    assert_equal(contribution, user.contribution)
   end
 
   # This catches a bug that was happening when editing a name that was in use.
