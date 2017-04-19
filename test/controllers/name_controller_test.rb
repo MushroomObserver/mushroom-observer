@@ -275,8 +275,6 @@ class NameControllerTest < FunctionalTestCase
     end
    end
 
-  # TODO: Show a name that has a parent to trigger
-
   def test_show_past_name
     get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
     assert_template(:show_past_name, partial: "_name")
