@@ -579,7 +579,7 @@ imageless:
   sort_name: Imageless
 
 # Next two names are used by test of lookup_name.
-# They are spelling suggested by lookup_name("Verpa").
+# They are spellings suggested by lookup_name("Verpa").
 # NOTE: Verpa must not be used for any name, else the test will fail
 # because the lookup will find a match and not look for suggestions.
 suggested_by_verpa_authored:
