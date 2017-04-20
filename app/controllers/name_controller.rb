@@ -685,24 +685,26 @@ class NameController < ApplicationController
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       # Clear status if checkbox unchecked.
       @name.correct_spelling = nil
-    elsif !@correct_spelling.blank?
-      # Set correct_spelling if one given.
-      name2 = Name.find_names_filling_in_authors(@correct_spelling).first
-      if !name2
-        fail(:runtime_form_names_misspelling_bad.t)
-      elsif name2.id == @name.id
-        fail(:runtime_form_names_misspelling_same.t)
-      else
-        @name.correct_spelling = name2
-        @name.merge_synonyms(name2)
-        @name.change_deprecated(true)
-        # Make sure the "correct" name isn't also a misspelled name!
-        if name2.is_misspelling?
-          name2.correct_spelling = nil
-          name2.save_with_log(:log_name_unmisspelled, other: @name.display_name)
-        end
-      end
+    else
+      set_correct_spelling if @correct_spelling.present?
     end
+  end
+
+  def set_correct_spelling
+    correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
+    raise(:runtime_form_names_misspelling_bad.t) unless correct_name
+    raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
+
+    @name.correct_spelling = correct_name
+    @name.merge_synonyms(correct_name)
+    @name.change_deprecated(true)
+    fix_correct_name(correct_name) if correct_name.is_misspelling?
+  end
+
+  def fix_correct_name(correct_name)
+    correct_name.correct_spelling = nil
+    correct_name.save_with_log(:log_name_unmisspelled,
+                               other: @name.display_name)
   end
 
   # Updates Name
