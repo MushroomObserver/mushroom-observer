@@ -1146,6 +1146,84 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(Name.last.text_name, "Coprinus")
   end
 
+  def test_edit_name_misspelling
+    # Prove we can clear misspelling by unchecking "misspelt" box
+    name = names(:petigera)
+    login(name.user.login)
+      params = {
+      id: name.id,
+      name: {
+        text_name:   name.text_name,
+        author:      name.author,
+        rank:        name.rank,
+        deprecated:  (name.deprecated ? "true" : "false"),
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params)
+    assert_flash_success
+    refute(name.reload.is_misspelling?)
+
+    # Prove we cannot correct misspelling with unrecognized Name
+    name = names(:suilus)
+      params = {
+      id: name.id,
+      name: {
+        text_name:         name.text_name,
+        author:            name.author,
+        rank:              name.rank,
+        deprecated:        (name.deprecated ? "true" : "false"),
+        misspelling:       1,
+        correct_spelling:  "Qwertyuiop"
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_error
+    assert(name.reload.is_misspelling?)
+
+    # Prove we cannot correct misspelling with same Name
+    name = names(:suilus)
+      params = {
+      id: name.id,
+      name: {
+        text_name:         name.text_name,
+        author:            name.author,
+        rank:              name.rank,
+        deprecated:        (name.deprecated ? "true" : "false"),
+        misspelling:       1,
+        correct_spelling:  name.text_name
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_error
+    assert(name.reload.is_misspelling?)
+
+    # Prove we can swap misspelling and correct_spelling
+    # Change "Suillus E.B. White" to "Suilus E.B. White"
+    old_misspelling = names(:suilus)
+    old_correct_spelling = old_misspelling.correct_spelling
+      params = {
+      id: old_correct_spelling.id,
+      name: {
+        text_name:         old_correct_spelling.text_name,
+        author:            old_correct_spelling.author,
+        rank:              old_correct_spelling.rank,
+        deprecated:        (old_correct_spelling.deprecated ? "true" : "false"),
+        misspelling:       1,
+        correct_spelling:  old_misspelling.text_name
+      }
+    }
+    post(:edit_name, params)
+    # old_correct_spelling's spelling status and deprecation should change
+    assert(old_correct_spelling.reload.is_misspelling?)
+    assert_equal(old_misspelling, old_correct_spelling.correct_spelling)
+    assert(old_correct_spelling.deprecated)
+    # old_misspelling's spelling status should change but deprecation should not
+    refute(old_misspelling.reload.is_misspelling?)
+    assert_empty(old_misspelling.correct_spelling)
+    assert(old_misspelling.deprecated)
+  end
+
   def test_edit_name_by_user_who_doesnt_own_name
     name = names(:macrolepiota_rhacodes)
     name_owner = name.user
