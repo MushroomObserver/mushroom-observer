@@ -991,7 +991,7 @@ class NameControllerTest < FunctionalTestCase
 
   # This catches a bug that was happening when editing a name that was in use.
   # In this case text_name and author are missing, confusing edit_name.
-  def test_edit_name_post_not_changeable
+  def test_edit_name_post_name_and_author_missing
     name = names(:conocybe_filaris)
     params = {
       id: name.id,
