@@ -622,7 +622,7 @@ class NameController < ApplicationController
     new_name != @name && Name.exists?(new_name.id)
   end
 
-  #### user's changes require change only to a single existing name ####
+  #### user's changes affect only one existing name ####
   def try_to_change_name
     email_admin_name_change unless insignificant_change?
     update_correct_spelling
