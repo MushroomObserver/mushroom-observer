@@ -1014,6 +1014,32 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(20, rolf.reload.contribution) # created Conocybe
   end
 
+  def test_edit_name_unchangeable_plus_admin_email
+    name = names(:other_user_owns_naming_name)
+    search_name = name.search_name
+    user = name.user
+    contribution = user.contribution
+    desired_text_name = name.text_name.
+                             sub(/\S+/, "Big-change-to-force-email-to-admin")
+    params = {
+      id: name.id,
+      name: {
+        text_name:  desired_text_name,
+        author:     "",
+        rank:       name.rank,
+        deprecated: "false"
+      }
+    }
+    login(name.user.login)
+    post(:edit_name, params)
+
+    assert(@@emails.one?)
+    assert_flash_success
+    assert_redirected_to(action: :show_name, id: name.id)
+    assert_equal(desired_text_name, name.reload.search_name)
+    assert_equal(contribution, user.reload.contribution)
+  end
+
   def test_edit_name_post_just_change_notes
     # has blank notes
     name = names(:conocybe_filaris)

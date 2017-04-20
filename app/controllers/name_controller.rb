@@ -624,7 +624,7 @@ class NameController < ApplicationController
 
   #### user's changes require change only to a single existing name ####
   def try_to_change_name
-    email_admin_name_change unless ok_to_make_any_change? || minor_change?
+    email_admin_name_change unless insignificant_change?
     update_correct_spelling
     any_changes = update_existing_name
     if status_changing?
@@ -633,6 +633,10 @@ class NameController < ApplicationController
       flash_warning(:runtime_edit_name_no_change.t) unless any_changes
       redirect_to_show_name
     end
+  end
+
+  def insignificant_change?
+    ok_to_make_any_change? || minor_change? || just_adding_author?
   end
 
   def ok_to_make_any_change?
@@ -645,19 +649,21 @@ class NameController < ApplicationController
     new_name.percent_match(old_name) > 0.9
   end
 
+  def just_adding_author?
+    @name.author.blank? && @parse.real_text_name == @name.real_text_name
+  end
+
   def email_admin_name_change
-    unless @name.author.blank? && @parse.real_text_name == @name.real_text_name
-      content = :email_name_change.l(
-        user: @user.login,
-        old: @name.real_search_name,
-        new: @parse.real_search_name,
-        observations: @name.observations.length,
-        namings: @name.namings.length,
-        url: "#{MO.http_domain}/name/show_name/#{@name.id}"
-      )
-      WebmasterEmail.build(@user.email, content).deliver_now
-      NameControllerTest.report_email(content) if Rails.env == "test"
-    end
+    content = :email_name_change.l(
+      user: @user.login,
+      old:  @name.real_search_name,
+      new:  @parse.real_search_name,
+      observations: @name.observations.length,
+      namings: @name.namings.length,
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+    )
+    WebmasterEmail.build(@user.email, content).deliver_now
+    NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
   # Update the misspelling status.
