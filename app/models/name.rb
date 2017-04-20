@@ -2122,8 +2122,9 @@ class Name < AbstractModel
       Name.where(search_name: parsed_name.search_name)
     # authored non-:Group ParsedName matched by exact & authorless extant Names
     else
-      Name.where(text_name: parsed_name.text_name).
-           where(author: [parsed_name.author, ""])
+      Name.
+        where(text_name: parsed_name.text_name).
+        where(author: [parsed_name.author, ""])
     end
   end
 

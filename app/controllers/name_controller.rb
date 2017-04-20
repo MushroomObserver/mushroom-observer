@@ -685,8 +685,8 @@ class NameController < ApplicationController
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       # Clear status if checkbox unchecked.
       @name.correct_spelling = nil
-    else
-      set_correct_spelling if @correct_spelling.present?
+    elsif @correct_spelling.present?
+      set_correct_spelling
     end
   end
 

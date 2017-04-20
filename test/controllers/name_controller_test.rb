@@ -1016,11 +1016,11 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_name_unchangeable_plus_admin_email
     name = names(:other_user_owns_naming_name)
-    search_name = name.search_name
     user = name.user
     contribution = user.contribution
+    # Change the first word
     desired_text_name = name.text_name.
-                             sub(/\S+/, "Big-change-to-force-email-to-admin")
+                        sub(/\S+/, "Big-change-to-force-email-to-admin")
     params = {
       id: name.id,
       name: {
@@ -1120,7 +1120,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_text_name, name.text_name)
   end
 
-# Prove that user can change name -- without merger --
+  # Prove that user can change name -- without merger --
   # if there's no exact match to desired Name
   def test_edit_name_remove_author_no_exact_match
     old_name_count = Name.count
@@ -1150,13 +1150,13 @@ class NameControllerTest < FunctionalTestCase
     # Prove we can clear misspelling by unchecking "misspelt" box
     name = names(:petigera)
     login(name.user.login)
-      params = {
+    params = {
       id: name.id,
       name: {
         text_name:   name.text_name,
         author:      name.author,
         rank:        name.rank,
-        deprecated:  (name.deprecated ? "true" : "false"),
+        deprecated:  (name.deprecated ? "true" : "false")
       }
     }
     login(name.user.login)
@@ -1166,7 +1166,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Prove we cannot correct misspelling with unrecognized Name
     name = names(:suilus)
-      params = {
+    params = {
       id: name.id,
       name: {
         text_name:         name.text_name,
@@ -1183,7 +1183,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Prove we cannot correct misspelling with same Name
     name = names(:suilus)
-      params = {
+    params = {
       id: name.id,
       name: {
         text_name:         name.text_name,
@@ -1202,7 +1202,7 @@ class NameControllerTest < FunctionalTestCase
     # Change "Suillus E.B. White" to "Suilus E.B. White"
     old_misspelling = names(:suilus)
     old_correct_spelling = old_misspelling.correct_spelling
-      params = {
+    params = {
       id: old_correct_spelling.id,
       name: {
         text_name:         old_correct_spelling.text_name,
@@ -1227,7 +1227,6 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_by_user_who_doesnt_own_name
     name = names(:macrolepiota_rhacodes)
     name_owner = name.user
-    user = rolf
     params = {
       id: name.id,
       name: {
@@ -1444,15 +1443,15 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_create_multiple_ancestors
     name        = names(:two_ancestors)
     new_name    = "Neo#{name.text_name.downcase}"
-    new_species = new_name.sub(/(\w* \w*).*/,'\1')
-    new_genus   = new_name.sub(/(\w*).*/,'\1')
+    new_species = new_name.sub(/(\w* \w*).*/, '\1')
+    new_genus   = new_name.sub(/(\w*).*/, '\1')
     name_count  = Name.count
     params = {
       id: name.id,
       name: {
         text_name:  new_name,
         author:     name.author,
-        rank:       name.rank,
+        rank:       name.rank
       }
     }
     login(name.user.login)
