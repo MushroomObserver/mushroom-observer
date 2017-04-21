@@ -726,6 +726,14 @@ same_user_owns_naming_and_observation:
   rank:              <%= Name.ranks[:Genus] %>
   user:              dick
 
+authored_group:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Group] %>
+  text_name:         Group-authored group
+  search_name:       Group-authored group Author
+  sort_name:         Group-unauthored  Author   group
+  display_name: '**__Group-unauthored__** group Author'
+
 unauthored_group:
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Group] %>

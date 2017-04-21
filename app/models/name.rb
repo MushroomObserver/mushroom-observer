@@ -2112,14 +2112,12 @@ class Name < AbstractModel
   # Return extant Names matching a desired new Name
   # Used by NameController#create_name
   def self.names_matching_desired_new_name(parsed_name)
-    # unauthored ParsedName matches Names with or w/o authors
-    if parsed_name.author.empty?
-      Name.where(text_name: parsed_name.text_name)
-    # authored :Group ParsedName must be matched exactly (but not vice versa)
-    # This lets user create an authored :Group despite the existence of an
-    # unauthored :Group
-    elsif parsed_name.rank == :Group
+    # authored :Group ParsedName must be matched exactly
+    if parsed_name.rank == :Group
       Name.where(search_name: parsed_name.search_name)
+    # unauthored ParsedName matches Names with or w/o authors
+    elsif parsed_name.author.empty?
+      Name.where(text_name: parsed_name.text_name)
     # authored non-:Group ParsedName matched by exact & authorless extant Names
     else
       Name.

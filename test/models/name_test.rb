@@ -2151,6 +2151,15 @@ class NameTest < UnitTestCase
     refute(Name.names_matching_desired_new_name(parsed).
                 include?(names(:unauthored_with_naming))
           )
+    # And vice versa
+    # Prove unauthored Group ParsedName is not matched by extant authored Name
+    extant  = names(:authored_group)
+    desired = extant.text_name
+    parsed  = Name.parse_name(desired)
+    refute(Name.names_matching_desired_new_name(parsed).include?(extant),
+           "'#{desired}' unexpectedly matches '#{extant.search_name}'"
+          )
+
     # Prove authored non-Group ParsedName matched by union of exact matches and
     # unauthored matches
     parsed = Name.parse_name(names(:authored_with_naming).search_name)
