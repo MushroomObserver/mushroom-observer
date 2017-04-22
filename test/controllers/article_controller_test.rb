@@ -6,7 +6,7 @@ class ArticleControllerTest < FunctionalTestCase
   #  Create article
   # ----------------------------
   def test_create_article_get
-    # Prove article cannot be created unless in admin mode
+    # Prove user cannot see article form unless in admin mode
     user = users(:rolf)
     login(user.login)
     error = assert_raises(RuntimeError) { get(:create_article) }
