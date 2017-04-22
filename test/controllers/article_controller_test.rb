@@ -18,15 +18,32 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
   def test_create_article_post
-    name = "Test article"
-    text = "The text of a new text article."
+    user   = users(:rolf)
+    author = user.name
+    title  = "Test article"
+    text   = "The text of a new text article."
     params = {
       article: {
-        name: name,
-        text: text
+        title:  name,
+        author: author,
+        text:   text
       }
     }
-    post_requires_login(:create_article, params)
-    assert_redirected_to(action: :show_article, id: Article.last.id)
+    old_count = Article.count
+    # Prove article cannot be created unless in admin mode
+    login(user.login)
+    error = assert_raises(RuntimeError) { post(:create_article, params) }
+    assert_equal(:create_article_not_allowed.t, error.message)
+    assert_equal(old_count = Article.count)
+
+    # Prove article cannot be created unless in admin mode
+    make_admin
+    post(:create_article, params)
+    assert_equal(old_count + 1, Article.count)
+    article = Article.last
+    assert_equal(title,  article.name)
+    assert_equal(author, article.author)
+    assert_equal(text,   article.text)
+    assert_redirected_to(action: :show_article, id: article.id)
   end
 end
