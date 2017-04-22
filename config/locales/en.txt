@@ -355,7 +355,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
-  # ("Author" is person who wrote a book or description.)
+  # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
   AUTHORS: Authors

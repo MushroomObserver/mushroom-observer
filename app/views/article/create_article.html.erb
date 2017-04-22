@@ -11,6 +11,11 @@
   </div>
 
   <div class="form-group push-down">
+    <%= label_tag(:article_author, :AUTHOR.t + ":") %>
+    <%= form.text_field(:author, class: "form-control") %>
+  </div>
+
+  <div class="form-group push-down">
     <%= label_tag(:article_text, :article_text.t + ":") %>
     <%= form.text_area(:text, rows: 20, class: "form-control") %>
   </div>
