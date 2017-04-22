@@ -2048,6 +2048,33 @@
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
+  ### news Article ###
+  #   news Article Fields
+  article_created_at:  Created At
+  article_updated_at:  Updated At
+  article_name:        Title
+  article_text:        Text
+
+  #   news Article Actions
+  # article/create_article
+  create_article_title: Create News Article
+  create_article_not_allowed: Only admins can create or edit News Articles
+
+  # article/edit_article
+  edit_article:       "[:edit_object(type=:article)]"
+  edit_article_title: "Editing News Article: [name]"
+  edit_article_save:  Save
+
+  # article/show_article
+  show_article:              Show News Article
+  show_article_title:        "News Article: [name]"
+  show_article_reuse_image:  Add Example
+  show_article_remove_image: Remove Examples
+
+  # article/index
+  article_index_title: News Articles
+  article_index:       Article Index
+
   # ConferenceEvent Fields
   conference_event_name: Name
   conference_event_location: Location
