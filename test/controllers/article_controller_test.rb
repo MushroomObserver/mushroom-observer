@@ -47,4 +47,9 @@ class ArticleControllerTest < FunctionalTestCase
     assert_equal(name,   article.name)
     assert_redirected_to(action: :show_article, id: article.id)
   end
+
+  def test_show_article
+    get(:show_article, id: articles(:premier_article).id)
+    assert_template(:show_article)
+  end
 end

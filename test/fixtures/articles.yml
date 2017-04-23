@@ -7,3 +7,6 @@ DEFAULTS: &DEFAULTS
   body:       Body of Article
   user:       rolf
   rss_log_id:
+
+premier_article:
+  <<: *DEFAULTS

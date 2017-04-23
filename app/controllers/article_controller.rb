@@ -23,76 +23,10 @@ class ArticleController < ApplicationController
     redirect_to(action: "show_article", id: article.id) and return
   end
 
-
-  end
-
-  def show_glossary_term # :nologin:
+  def show_article
     store_location
-    @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/#{@glossary_term.id}"
-    @layout = calc_layout_params
-    @objects = @glossary_term.images
-  end
-
-  def index # :nologin:
-    store_location
-    @glossary_terms = GlossaryTerm.all.order(:name)
-  end
-
-  def process_image(args)
-    image = nil
-    name = nil
-    upload = args[:image]
-    if upload.blank?
-      name = upload.original_filename.force_encoding("utf-8") if
-        upload.respond_to?(:original_filename)
-
-      image = Image.new(args)
-      if !image.save
-        flash_object_errors(image)
-      elsif !image.process_image
-        logger.error("Unable to upload image")
-        name = image.original_name
-        name = "???" if name.empty?
-        flash_error(:runtime_image_invalid_image.t(name: name))
-        flash_object_errors(image)
-      else
-        name = image.original_name
-        name = "##{image.id}" if name.empty?
-        flash_notice(:runtime_image_uploaded_image.t(name: name))
-      end
-    end
-    image
-  end
-
-  def edit_glossary_term # :norobots:
-    # Expand to any MO user,
-    # but make them owned and editable only by that user or an admin
-    if request.method == "POST"
-      glossary_term = GlossaryTerm.find(params[:id].to_s)
-      glossary_term.attributes = params[:glossary_term].
-        permit(:name, :description)
-      glossary_term.user = @user
-      glossary_term.save
-      redirect_to(action: "show_glossary_term", id: glossary_term.id)
-    else
-      @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    end
-  end
-
-  # Show past version of GlossaryTerm.
-  # Accessible only from show_glossary_term page.
-  def show_past_glossary_term # :nologin: :prefetch: :norobots:
-    pass_query_params
-    store_location
-    if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      if params[:version]
-        @glossary_term.revert_to(params[:version].to_i)
-      else
-        flash_error(:show_past_location_no_version.t)
-        redirect_to(action: show_glossary_term, id: @glossary_term.id)
-      end
-    end
+    return false unless @article = find_or_goto_index(Article, params[:id])
+    @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
 
   ##############################################################################
