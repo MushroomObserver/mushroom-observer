@@ -1,0 +1,23 @@
+<%
+  @title = :article_index_title.t
+
+  tabs = [
+    link_to(:create_article.t, action: :create_article)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<table class="table table-striped">
+  <% @articles.each do |article| %>
+    <tr>
+      <td class="max-width-text">
+        <%= link_to(article.name, action: :show_article, id: article.id) %>
+        <%= link_to(article.user, action: :show_user, id: article.user_id) %>
+        created: <%= article.created_at.web_time %>
+        updated: <%= article.updated_at.web_time %>
+        <br>
+        <%= article.body.tpl %>
+      </td>
+    </tr>
+  <% end %>
+</table>

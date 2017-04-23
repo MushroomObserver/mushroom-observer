@@ -2072,8 +2072,8 @@
   show_article_remove_image: Remove Examples
 
   # article/index
-  article_index_title: News Articles
-  article_index:       Article Index
+  article_index_title: "[ARTICLES]"
+  article_index:       "[:ARTICLE] Index"
 
   # ConferenceEvent Fields
   conference_event_name: Name

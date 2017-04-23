@@ -22,6 +22,11 @@ class ArticleController < ApplicationController
     redirect_to(action: "show_article", id: article.id) and return
   end
 
+  def index
+    store_location
+    @articles = Article.all.order(created_at: :desc)
+  end
+
   def show_article
     store_location
     return false unless @article = find_or_goto_index(Article, params[:id])

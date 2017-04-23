@@ -31,7 +31,7 @@ class ArticleControllerTest < FunctionalTestCase
     }
     old_count = Article.count
 
-    # Prove only admins can create articles
+    # Prove only authorized users can create articles
     login(user.login)
     error = assert_raises(RuntimeError) { post(:create_article, params) }
     assert_equal(:create_article_not_allowed.t, error.message)
@@ -45,6 +45,11 @@ class ArticleControllerTest < FunctionalTestCase
     assert_equal(body,   article.body)
     assert_equal(name,   article.name)
     assert_redirected_to(action: :show_article, id: article.id)
+  end
+
+  def test_index
+    get(:index)
+    assert_template(:index)
   end
 
   def test_show_article
