@@ -2074,7 +2074,7 @@
   show_article:       "[:show_object(type=:article)]"
 
   # article/index
-  article_index_title: "[ARTICLES]"
+  article_index_title: "[:ARTICLES]"
   article_index:       "[:ARTICLE] Index"
 
   # ConferenceEvent Fields
