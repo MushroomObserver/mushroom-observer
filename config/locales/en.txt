@@ -220,6 +220,10 @@
   api_key: API key
   API_KEYS: API Keys
   api_keys: API keys
+  ARTICLE: News Article
+  article: news article
+  ARTICLES: News Articles
+  articles: news articles
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -2049,6 +2053,7 @@
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
   ### news Article ###
+
   #   news Article Fields
   article_created_at:  Created At
   article_updated_at:  Updated At
@@ -2057,19 +2062,16 @@
 
   #   news Article Actions
   # article/create_article
-  create_article_title: Create News Article
-  create_article_not_allowed: Only admins can create or edit News Articles
+  create_article_title: "[:create_object(type=:article)]"
+  create_article_not_allowed: "Not authorized to [:CREATE] [:ARTICLES]"
 
   # article/edit_article
   edit_article:       "[:edit_object(type=:article)]"
-  edit_article_title: "Editing News Article: [name]"
+  edit_article_title: "Editing [:ARTICLE]: [name]"
   edit_article_save:  Save
 
   # article/show_article
-  show_article:              Show News Article
-  show_article_title:        "News Article: [name]"
-  show_article_reuse_image:  Add Example
-  show_article_remove_image: Remove Examples
+  show_article:       "[:show_object(type=:article)]"
 
   # article/index
   article_index_title: "[ARTICLES]"
