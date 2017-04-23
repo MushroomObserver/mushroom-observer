@@ -1,6 +1,10 @@
-# Actions for news articles
+#  News Articles
 #
-#  create_article:: Create new news article.
+#  Actions
+#
+#    create_article::   Create new news article
+#    show_article::
+#    list_article::     List all articles in inverse order of creation
 #
 class ArticleController < ApplicationController
   # Callbacks
