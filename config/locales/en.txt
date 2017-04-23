@@ -2063,7 +2063,6 @@
   #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
-  create_article_not_allowed: "Not authorized to [:CREATE] [:ARTICLES]"
 
   # article/edit_article
   edit_article:       "[:edit_object(type=:article)]"

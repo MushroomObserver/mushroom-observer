@@ -16,14 +16,17 @@ class ArticleController < ApplicationController
   # Create a new article
   # :norobots:
   def create_article
-    raise(:create_article_not_allowed.t) unless in_admin_mode?
+    if permitted?
     return unless request.method == "POST"
-
     article = Article.new(name:    params[:article][:name],
                           body:    params[:article][:body],
                           user_id: @user.id)
     article.save
-    redirect_to(action: "show_article", id: article.id) and return
+      redirect_to(action: "show_article", id: article.id)
+    else
+      flash_notice(:permission_denied.t)
+      redirect_to(action: "index")
+    end
   end
 
   def index
@@ -35,6 +38,10 @@ class ArticleController < ApplicationController
     store_location
     return false unless @article = find_or_goto_index(Article, params[:id])
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
+  end
+
+  def permitted?
+    in_admin_mode?
   end
 
   ##############################################################################
