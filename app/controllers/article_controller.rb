@@ -3,8 +3,8 @@
 #  Actions
 #
 #    create_article::   Create new news article
-#    show_article::
-#    list_article::     List all articles in inverse order of creation
+#    index::            List all articles in inverse order of creation
+#    show_article::     Display article
 #
 class ArticleController < ApplicationController
   # Callbacks
@@ -17,11 +17,11 @@ class ArticleController < ApplicationController
   # :norobots:
   def create_article
     if permitted?
-    return unless request.method == "POST"
-    article = Article.new(name:    params[:article][:name],
-                          body:    params[:article][:body],
-                          user_id: @user.id)
-    article.save
+      return unless request.method == "POST"
+      article = Article.new(name:    params[:article][:name],
+                            body:    params[:article][:body],
+                            user_id: @user.id)
+      article.save
       redirect_to(action: "show_article", id: article.id)
     else
       flash_notice(:permission_denied.t)
