@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161229143700) do
+ActiveRecord::Schema.define(version: 20170423010922) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -21,6 +21,16 @@ ActiveRecord::Schema.define(version: 20161229143700) do
     t.string   "key",        limit: 128,               null: false
     t.text     "notes",      limit: 65535
     t.datetime "verified"
+  end
+
+  create_table "articles", force: :cascade do |t|
+    t.string   "name",       limit: 255
+    t.string   "author",     limit: 255
+    t.text     "body",       limit: 65535
+    t.integer  "user_id",    limit: 4
+    t.integer  "rss_log_id", limit: 4
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
   create_table "comments", force: :cascade do |t|
