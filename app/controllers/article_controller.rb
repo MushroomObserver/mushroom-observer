@@ -15,34 +15,15 @@ class ArticleController < ApplicationController
     raise(:create_article_not_allowed.t) unless in_admin_mode?
     return unless request.method == "POST"
 
-    store_location
-    pass_query_params
-    create_new_article
-    redirect_to(action: "show_article", id: article.id)
+    article = Article.new(author:  params[:article][:author],
+                          body:    params[:article][:body],
+                          name:    params[:article][:name],
+                          user_id: @user.id)
+    article.save
+    redirect_to(action: "show_article", id: article.id) and return
   end
 
 
-  def create_glossary_term
-    if request.method == "POST"
-      glossary_term = GlossaryTerm.
-                      new(user: @user, name: params[:glossary_term][:name],
-                          description: params[:glossary_term][:description])
-      image_args = {
-        copyright_holder: params[:copyright_holder],
-        when: Time.local(params[:date][:copyright_year]),
-        license: License.safe_find(params[:upload][:license_id]),
-        user: @user,
-        image: params[:glossary_term][:upload_image]
-      }
-      glossary_term.add_image(process_image(image_args))
-      glossary_term.save
-      redirect_to(action: "show_glossary_term", id: glossary_term.id)
-    else
-      @copyright_holder = @user.name
-      @copyright_year = Time.now.year
-      @upload_license_id = @user.license_id
-      @licenses = License.current_names_and_ids(@user.license)
-    end
   end
 
   def show_glossary_term # :nologin:
@@ -112,5 +93,13 @@ class ArticleController < ApplicationController
         redirect_to(action: show_glossary_term, id: @glossary_term.id)
       end
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_article_params
+    params[:article].permit(:author, :body, :title)
   end
 end

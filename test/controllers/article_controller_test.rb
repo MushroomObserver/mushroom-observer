@@ -20,11 +20,11 @@ class ArticleControllerTest < FunctionalTestCase
   def test_create_article_post
     user   = users(:rolf)
     author = user.name
-    title  = "Test article"
+    name   = "Test article"
     body   = "The body of a new test article."
     params = {
       article: {
-        name:    title,
+        name:    name,
         author:  author,
         body:    body
       }
@@ -42,9 +42,9 @@ class ArticleControllerTest < FunctionalTestCase
     post(:create_article, params)
     assert_equal(old_count + 1, Article.count)
     article = Article.last
-    assert_equal(title,  article.name)
     assert_equal(author, article.author)
-    assert_equal(text,   article.body)
+    assert_equal(body,   article.body)
+    assert_equal(name,   article.name)
     assert_redirected_to(action: :show_article, id: article.id)
   end
 end
