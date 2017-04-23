@@ -1,2 +1,2 @@
-class Article < ActiveRecord::Base
+class Article < AbstractModel
 end
