@@ -2053,7 +2053,7 @@
   article_created_at:  Created At
   article_updated_at:  Updated At
   article_name:        Title
-  article_text:        Text
+  article_body:        Body
 
   #   news Article Actions
   # article/create_article
