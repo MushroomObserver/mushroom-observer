@@ -35,7 +35,7 @@ class ArticleControllerTest < FunctionalTestCase
     login(user.login)
     error = assert_raises(RuntimeError) { post(:create_article, params) }
     assert_equal(:create_article_not_allowed.t, error.message)
-    assert_equal(old_count = Article.count)
+    assert_equal(old_count, Article.count)
 
     # Prove article is created
     make_admin
