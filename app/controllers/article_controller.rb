@@ -15,9 +15,8 @@ class ArticleController < ApplicationController
     raise(:create_article_not_allowed.t) unless in_admin_mode?
     return unless request.method == "POST"
 
-    article = Article.new(author:  params[:article][:author],
+    article = Article.new(name:    params[:article][:name],
                           body:    params[:article][:body],
-                          name:    params[:article][:name],
                           user_id: @user.id)
     article.save
     redirect_to(action: "show_article", id: article.id) and return

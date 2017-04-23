@@ -42,7 +42,6 @@ class ArticleControllerTest < FunctionalTestCase
     post(:create_article, params)
     assert_equal(old_count + 1, Article.count)
     article = Article.last
-    assert_equal(author, article.author)
     assert_equal(body,   article.body)
     assert_equal(name,   article.name)
     assert_redirected_to(action: :show_article, id: article.id)
