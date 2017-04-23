@@ -1,5 +1,5 @@
 <%
-  @title = :show_article_title.t(name: @article.name)
+  @title = show_article_title(@article)
 
   tabs = [
     link_to(:article_index.t, action: :index),
