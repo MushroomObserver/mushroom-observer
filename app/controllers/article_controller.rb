@@ -16,6 +16,23 @@ class ArticleController < ApplicationController
   # Create a new article
   # :norobots:
   def create_article
+    store_location
+    if permitted?
+      return unless request.method == "POST"
+      article = Article.new(name:    params[:article][:name],
+                            body:    params[:article][:body],
+                            user_id: @user.id)
+      article.save
+      redirect_to(action: "show_article", id: article.id)
+    else
+      flash_notice(:permission_denied.t)
+      redirect_to(action: "index")
+    end
+  end
+
+  def edit_article
+    store_location
+    pass_query_params
     if permitted?
       return unless request.method == "POST"
       article = Article.new(name:    params[:article][:name],

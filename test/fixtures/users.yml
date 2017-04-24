@@ -14,6 +14,7 @@ DEFAULTS: &DEFAULTS
   name:           $LABEL
   password:       ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  verified:       <%= Time.now.strftime("%F %T")%>
   # Associations
   user_groups:    all_users, $LABEL_only
 
@@ -22,7 +23,6 @@ DEFAULTS: &DEFAULTS
 rolf:
   <<: *DEFAULTS
   name: Rolf Singer
-  verified: 2006-03-02 21:14:00
   license: ccwiki30
   image: rolf_profile_image
   view_owner_id: true
@@ -32,7 +32,6 @@ rolf:
 mary:
   <<: *DEFAULTS
   name: Mary Newbie
-  verified: 2006-03-02 21:14:00
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
   user_groups: all_users, eol_users, eol_admins, mary_only
   mailing_address: 123 Some Pl., Pasadena, CA 91106
@@ -55,7 +54,6 @@ dick:
 katrina:
   <<: *DEFAULTS
   name: Katrina
-  verified: 2008-03-02 21:14:00
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
   user_groups: all_users, eol_users, katrina_only
 
@@ -64,20 +62,17 @@ roy:
   <<: *DEFAULTS
   name: Roy Halling
   email_general_question: true
-  verified: 2010-07-15 21:20:00
   location_format: <%= User.location_formats[:scientific] %>
 
 spammer:
   <<: *DEFAULTS
   login: spamspamspam
-  verified: 2010-07-15 21:20:00
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
 # observations, projects, publications, species lists, specimens, or anything
 # except account
 zero_user:
   <<: *DEFAULTS
-  verified: 2016-08-05 15:50:00
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
@@ -96,30 +91,27 @@ vouchered_only_user:
 
 public_voter:
   <<: *DEFAULTS
-  verified: 2017-01-11 14:03:00
 
 # Has multiple Observations whose sortable attributes are unique
 # Need for tests in which sort order is predictable, e.g.,
 # ObserverControllerIntegrationTest#test_destroy_observation_from_search
 sortable_obs_user:
   <<: *DEFAULTS
-  verified: 2017-01-13 05:14:00
 
 uniquely_named_user:
   <<: *DEFAULTS
-  verified: 2017-01-13 05:14:00
 
 # Owns the default Location for Observations
 obs_default_location_user:
   <<: *DEFAULTS
-  verified: 2017-01-15 08:17:00
 
 small_thumbnail_user:
   <<: *DEFAULTS
-  verified: 2017-01-28 08:17:00
   thumbnail_size: small
 
 no_general_questions_user:
   <<: *DEFAULTS
-  verified: 2017-02-02 20:17:00
   email_general_question: false
+
+article_permission_user:
+  <<: *DEFAULTS

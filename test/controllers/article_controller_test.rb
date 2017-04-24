@@ -4,20 +4,20 @@ require "test_helper"
 class ArticleControllerTest < FunctionalTestCase
   def test_create_article_get
     # Prove unathorized user cannot see create_article form
-    user = users(:rolf)
-    login(user.login)
+    login(users(:zero_user).login)
     get(:create_article)
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index)
 
     # Prove authorized user can go to create_article form
+    login(users(:article_permission_user).login)
     make_admin
     get(:create_article)
     assert_form_action(action: "create_article")
   end
 
   def test_create_article_post
-    user   = users(:rolf)
+    user   = users(:article_permission_user)
     author = user.name
     name   = "Test article"
     body   = "The body of a new test article."
@@ -31,13 +31,35 @@ class ArticleControllerTest < FunctionalTestCase
     old_count = Article.count
 
     # Prove unauthorized user cannot create article
-    login(user.login)
+    login(users(:zero_user).login)
     post(:create_article, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
     assert_redirected_to(action: :index)
 
     # Prove authorized user can create article
+    login(user.login)
+    make_admin
+    post(:create_article, params)
+    assert_equal(old_count + 1, Article.count)
+    article = Article.last
+    assert_equal(body, article.body)
+    assert_equal(name, article.name)
+    assert_redirected_to(action: :show_article, id: article.id)
+  end
+
+  def test_edit_article_get
+  skip
+    # Prove unauthorized user cannot see edit form
+    article = articles(:premier_article)
+    login(users(:zero_user).login)
+    get(:edit_article)
+    assert_flash_text(:permission_denied.l)
+    assert_redirected_to(action: :index)
+
+    # Prove authorized user can create article
+    user = users(:article_permission_user)
+    login(users(:article_permission_user).login)
     make_admin
     post(:create_article, params)
     assert_equal(old_count + 1, Article.count)
@@ -58,14 +80,6 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
 =begin
-    def test_edit_article
-    # Prove only authorized users can create articles
-    article = articles(:premier_article)
-    login(users(:zero_user).login)
-    get(:edit_article, id: conic.id)
-    assert_response(:redirect)
-  end
-
   def test_edit_article_logged_in
     login
     get_with_dump(:edit_article, id: conic.id)
