@@ -9,17 +9,17 @@
 #
 #  Methods in public interface
 #
-#    permitted?         Permitted to create/modify Articles
+#    permitted?         boolean: permitted to create/update/destroy Articles
 #
 class ArticleController < ApplicationController
-  # Callbacks
+  ### Callbacks
   before_action :login_required, except: [
     :index,
     :show_article
   ]
   before_action :store_location
 
-
+  ### Actions and other Methods
   # Create a new article
   # :norobots:
   def create_article
@@ -38,6 +38,7 @@ class ArticleController < ApplicationController
     redirect_to(action: "index")
   end
 
+  # Edit existing article
   # :norobots:
   def edit_article
     write_permission_denied and return unless permitted?
@@ -69,16 +70,18 @@ class ArticleController < ApplicationController
     flash_object_errors(@article)
   end
 
+  # List all articles in inverse order of creation
   def index
     @articles = Article.all.order(created_at: :desc)
   end
 
+  # Display one Article
   def show_article
     return false unless @article = find_or_goto_index(Article, params[:id])
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
 
-  # permitted to create/modify Articles
+  # permitted to create/update/destroy any Article
   def permitted?
     in_admin_mode?
   end
