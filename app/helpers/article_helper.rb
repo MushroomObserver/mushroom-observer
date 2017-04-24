@@ -23,6 +23,7 @@ module ArticleHelper
    return tabs unless permitted?
    tabs.push(link_to(:create_article.t, action: :create_article),
              link_to(:edit_article.t, action: :edit_article, id: @article.id)
+             link_to(:DESTROY.t, action: :destroy_article, id: @article.id)
             )
   end
 end

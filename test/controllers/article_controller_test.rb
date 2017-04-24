@@ -101,4 +101,22 @@ class ArticleControllerTest < FunctionalTestCase
     get(:show_article, id: articles(:premier_article).id)
     assert_template(:show_article)
   end
+
+  def test_destroy_article
+    article = articles(:premier_article)
+    params  = { id: article.id }
+
+    # Prove unauthorized user cannot destroy article
+    login(users(:zero_user).login)
+    get(:destroy_article, params)
+    assert_flash_text(:permission_denied.l)
+    assert(Article.exists?(article.id))
+
+    # Prove authorized user can destroy article
+    login(article.user.login)
+    make_admin
+    get(:destroy_article, params)
+    refute(Article.exists?(article.id),
+           "Failed to destroy Article #{article.id}, '#{article.name}'")
+  end
 end

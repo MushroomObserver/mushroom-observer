@@ -3,6 +3,7 @@
 #  Actions
 #
 #    create_article::   Create new news article
+#    destroy_article::  Destroy article
 #    edit_article::     Update article
 #    index::            List all articles in inverse order of creation
 #    show_article::     Show article
@@ -79,6 +80,18 @@ class ArticleController < ApplicationController
   def show_article
     return false unless @article = find_or_goto_index(Article, params[:id])
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
+  end
+
+  # Destroy one article
+  # :norobots:
+  def destroy_article
+    write_permission_denied and return unless permitted?
+
+    pass_query_params
+    if (@article = Article.find(params[:id])) && @article.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
+    end
+    redirect_to(action: "index")
   end
 
   # permitted to create/update/destroy any Article
