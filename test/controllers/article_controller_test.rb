@@ -49,24 +49,20 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
   def test_edit_article_get
-  skip
     # Prove unauthorized user cannot see edit form
     article = articles(:premier_article)
+    params = { id: article.id }
+
     login(users(:zero_user).login)
-    get(:edit_article)
+    get(:edit_article, params)
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index)
 
     # Prove authorized user can create article
-    user = users(:article_permission_user)
-    login(users(:article_permission_user).login)
+    login(article.user.login)
     make_admin
-    post(:create_article, params)
-    assert_equal(old_count + 1, Article.count)
-    article = Article.last
-    assert_equal(body, article.body)
-    assert_equal(name, article.name)
-    assert_redirected_to(action: :show_article, id: article.id)
+    get(:edit_article, params)
+    assert_form_action(action: "edit_article")
   end
 
   def test_index

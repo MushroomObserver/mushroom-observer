@@ -1,0 +1,10 @@
+<% @title = :edit_article_title.l
+   tabs = [link_to(:article_index.t, action: :index)]
+   @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_for(:article, url: { action: :edit_article, id: @article.id }) do |form| %>
+  <%= render(partial: "form_article", locals: {form: form}) %>
+<% end %>
+:url => add_query_param(:action => :edit_name,
+      :id => @name.id)
