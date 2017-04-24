@@ -7,6 +7,10 @@
 #    index::            List all articles in inverse order of creation
 #    show_article::     Show article
 #
+#  Methods in public interface
+#
+#    permitted?         Permitted to create/modify Articles
+#
 class ArticleController < ApplicationController
   # Callbacks
   before_action :login_required, except: [
@@ -75,9 +79,11 @@ class ArticleController < ApplicationController
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
 
+  # permitted to create/modify Articles
   def permitted?
     in_admin_mode?
   end
+  helper_method :permitted?
 
   ##############################################################################
 
