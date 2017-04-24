@@ -17,11 +17,12 @@ class ArticleController < ApplicationController
     :index,
     :show_article
   ]
+  before_action :store_location
+
 
   # Create a new article
   # :norobots:
   def create_article
-    store_location
     write_permission_denied and return unless permitted?
 
     return unless request.method == "POST"
@@ -38,7 +39,6 @@ class ArticleController < ApplicationController
   end
 
   def edit_article
-    store_location
     write_permission_denied and return unless permitted?
 
     pass_query_params
@@ -69,12 +69,10 @@ class ArticleController < ApplicationController
   end
 
   def index
-    store_location
     @articles = Article.all.order(created_at: :desc)
   end
 
   def show_article
-    store_location
     return false unless @article = find_or_goto_index(Article, params[:id])
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
