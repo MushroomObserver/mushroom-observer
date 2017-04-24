@@ -4,20 +4,5 @@
 %>
 
 <table class="table table-striped">
-  <% @articles.each do |article| %>
-    <tr>
-      <td class="max-width-text">
-        <%= link_to(show_article_title(article),
-            action: :show_article, id: article.id) %>
-        <%= :AUTHOR.t %>:
-        <%= link_to(article.author, controller: "observer",
-            action: :show_user, id: article.user_id) %>
-        <br>
-        created: <%= article.created_at.web_time %>
-        updated: <%= article.updated_at.web_time %>
-        <br>
-        <%= truncate(article.body, length: 80) %>
-      </td>
-    </tr>
-  <% end %>
+  <%= render partial: "article", collection: @articles %>
 </table>
