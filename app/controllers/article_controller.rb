@@ -38,6 +38,7 @@ class ArticleController < ApplicationController
     redirect_to(action: "index")
   end
 
+  # :norobots:
   def edit_article
     write_permission_denied and return unless permitted?
 
