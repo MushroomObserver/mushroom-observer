@@ -6,5 +6,3 @@
 <%= form_for(:article, url: { action: :edit_article, id: @article.id }) do |form| %>
   <%= render(partial: "form_article", locals: {form: form}) %>
 <% end %>
-:url => add_query_param(:action => :edit_name,
-      :id => @name.id)

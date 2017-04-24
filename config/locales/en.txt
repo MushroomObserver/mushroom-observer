@@ -3309,6 +3309,7 @@
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
 
   # These shouldn't need translating, but you are free to override if you need to.
+  runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
   runtime_ask_observation_question_success: "[:runtime_delivered_question]"
   runtime_ask_user_question_success: "[:runtime_delivered_question]"
   runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"

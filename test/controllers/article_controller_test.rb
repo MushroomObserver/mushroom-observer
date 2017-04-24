@@ -65,6 +65,33 @@ class ArticleControllerTest < FunctionalTestCase
     assert_form_action(action: "edit_article")
   end
 
+  def test_edit_article_post
+    # Prove unauthorized user cannot edit article
+    article  = articles(:premier_article)
+    new_name = "Edited Article Title"
+    new_body = "Edited body"
+    params = {
+      id:      article.id,
+      article: { name: new_name, body: new_body }
+    }
+    login(users(:zero_user).login)
+    post(:edit_article, params)
+
+    assert_flash_text(:permission_denied.l)
+    assert_redirected_to(action: :index)
+
+    # Prove authorized user can create article
+    login(article.user.login)
+    make_admin
+    post(:edit_article, params)
+    article.reload
+
+    assert_flash_success
+    assert_redirected_to(action: :show_article, id: article.id)
+    assert_equal(new_name, article.name)
+    assert_equal(new_body, article.body)
+  end
+
   def test_index
     get(:index)
     assert_template(:index)
@@ -74,27 +101,4 @@ class ArticleControllerTest < FunctionalTestCase
     get(:show_article, id: articles(:premier_article).id)
     assert_template(:show_article)
   end
-
-=begin
-  def test_edit_article_logged_in
-    login
-    get_with_dump(:edit_article, id: conic.id)
-    assert_template(:edit_article)
-  end
-
-  def test_edit_article_post
-    old_count = GlossaryTerm::Version.count
-    make_admin
-    params = create_article_params
-    params[:id] = conic.id
-
-    post(:edit_article, params)
-    conic.reload
-
-    assert_equal(params[:article][:name], conic.name)
-    assert_equal(params[:article][:description], conic.description)
-    assert_equal(old_count + 1, GlossaryTerm::Version.count)
-    assert_response(:redirect)
-  end
-=end
 end

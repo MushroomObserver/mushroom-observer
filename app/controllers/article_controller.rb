@@ -3,8 +3,9 @@
 #  Actions
 #
 #    create_article::   Create new news article
+#    edit_article::     Update article
 #    index::            List all articles in inverse order of creation
-#    show_article::     Display article
+#    show_article::     Show article
 #
 class ArticleController < ApplicationController
   # Callbacks
@@ -41,8 +42,16 @@ class ArticleController < ApplicationController
     article_not_found unless @article
     return unless request.method == "POST"
 
-    @article.save
-    redirect_to(action: "show_article", id: article.id)
+    @article.name = params[:article][:name]
+    @article.body = params[:article][:body]
+    if @article.changed?
+      if @article.save
+        flash_notice(:runtime_edit_article_success.t(id: @article.id))
+      else
+        raise(:runtime_unable_to_save_changes.t)
+      end
+    end
+    redirect_to(action: "show_article", id: @article.id)
   end
 
   def article_not_found
@@ -75,6 +84,6 @@ class ArticleController < ApplicationController
   private
 
   def whitelisted_article_params
-    params[:article].permit(:author, :body, :title)
+    params[:article].permit(:body, :title)
   end
 end
