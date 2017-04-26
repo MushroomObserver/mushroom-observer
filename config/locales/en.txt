@@ -2053,10 +2053,7 @@
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
   ### news Article ###
-
   #   news Article Fields
-  article_created_at:  Created At
-  article_updated_at:  Updated At
   article_name:        Title
   article_body:        Body
 
@@ -2065,7 +2062,6 @@
   create_article_title: "[:create_object(type=:article)]"
 
   # article/edit_article
-  edit_article:       "[:edit_object(type=:article)]"
   edit_article_title: "Editing [:ARTICLE]: [name]"
   edit_article_save:  Save
 
@@ -2073,7 +2069,6 @@
   show_article:       "[:show_object(type=:article)]"
 
   # article/index
-  article_index_title: "[:ARTICLES]"
   article_index:       "[:ARTICLE] Index"
 
   # ConferenceEvent Fields
