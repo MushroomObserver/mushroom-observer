@@ -7,7 +7,7 @@ class ArticleControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     get(:create_article)
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index)
+    assert_redirected_to(action: :index_article)
 
     # Prove authorized user can go to create_article form
     login(users(:article_permission_user).login)
@@ -34,7 +34,7 @@ class ArticleControllerTest < FunctionalTestCase
     post(:create_article, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
-    assert_redirected_to(action: :index)
+    assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
     login(user.login)
@@ -56,7 +56,7 @@ class ArticleControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     get(:edit_article, params)
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index)
+    assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
     login(article.user.login)
@@ -78,7 +78,7 @@ class ArticleControllerTest < FunctionalTestCase
     post(:edit_article, params)
 
     assert_flash_text(:permission_denied.l)
-    assert_redirected_to(action: :index)
+    assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
     login(article.user.login)
@@ -93,8 +93,9 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
   def test_index
-    get(:index)
-    assert_template(:index)
+    get(:index_article)
+    assert(:success)
+    assert_template(:index_article)
   end
 
   def test_show_article

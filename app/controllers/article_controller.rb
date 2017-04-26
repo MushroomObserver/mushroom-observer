@@ -15,7 +15,7 @@
 class ArticleController < ApplicationController
   ### Callbacks
   before_action :login_required, except: [
-    :index,
+    :index_article,
     :show_article
   ]
   before_action :store_location
@@ -36,7 +36,7 @@ class ArticleController < ApplicationController
 
   def write_permission_denied
     flash_notice(:permission_denied.t)
-    redirect_to(action: "index")
+    redirect_to(action: "index_article")
   end
 
   # Edit existing article
@@ -72,8 +72,9 @@ class ArticleController < ApplicationController
   end
 
   # List all articles in inverse order of creation
-  def index
+  def index_article
     @articles = Article.all.order(created_at: :desc)
+    @canonical_url = "#{MO.http_domain}/article/index_article"
   end
 
   # Display one Article

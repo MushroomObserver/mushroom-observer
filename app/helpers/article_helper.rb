@@ -19,7 +19,7 @@ module ArticleHelper
   end
 
   def show_article_tabs
-   tabs = [link_to(:article_index.t, action: :index)]
+   tabs = [link_to(:index_article.t, action: :index_article)]
    return tabs unless permitted?
    tabs.push(link_to(:create_article.t, action: :create_article),
              link_to(:EDIT.t, action: :edit_article, id: @article.id),
