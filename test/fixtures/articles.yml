@@ -3,7 +3,6 @@
 
 DEFAULTS: &DEFAULTS
   name:       $LABEL
-  author:     Rolf
   body:       Body of Article
   user:       rolf
   rss_log_id:

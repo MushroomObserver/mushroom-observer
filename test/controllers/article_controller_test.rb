@@ -24,7 +24,6 @@ class ArticleControllerTest < FunctionalTestCase
     params = {
       article: {
         name:    name,
-        author:  author,
         body:    body
       }
     }
