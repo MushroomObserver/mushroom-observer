@@ -10,8 +10,10 @@
 #  user::               user who created article
 #
 # == methods
-#  display_name::       name boldfaced for display
-#  author::             user.name and login for display
+#  author::             user.name + user.login
+#  display_name::       name boldfaced
+#  format_name          name
+#  unique_format_name   name + id
 #
 class Article < AbstractModel
   belongs_to :user
@@ -25,16 +27,19 @@ class Article < AbstractModel
     "**#{name}**"
   end
 
+  # Article creator. Used by show and index templates
+  def author
+    "#{user.name} (#{user.login})"
+  end
+
+  # used by MatrixBoxPresenter to show orphaned obects
   def format_name
     name
   end
 
+  # title + id
+  # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
     name + " (#{id || "?"})"
-  end
-
-  # Article creator. Used by show and index templates
-  def author
-    "#{user.name} (#{user.login})"
   end
 end
