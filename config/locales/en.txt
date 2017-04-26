@@ -983,6 +983,9 @@
   log_updated_by: Updated by [user].
 
   # These should not need any translation.
+  log_article_created_at: "[:log_object_created_by_user(type=:article)]"
+  log_article_destroyed:  "[:log_object_destroyed_by_user(type=:article)]"
+  log_article_updated_at: "[:log_object_updated_by_user(type=:article)]"
   log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
   log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
   log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"

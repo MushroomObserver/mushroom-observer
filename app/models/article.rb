@@ -17,11 +17,23 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
-  # name boldfaced (in Textile) for display
+  # Automatically log standard events.
+  self.autolog_events = [:created_at!, :updated_at!, :destroyed!]
+
+  # name boldfaced (in Textile). Used by show and index templates
   def display_name
     "**#{name}**"
   end
 
+  def format_name
+    name
+  end
+
+  def unique_format_name
+    name + " (#{id || "?"})"
+  end
+
+  # Article creator. Used by show and index templates
   def author
     "#{user.name} (#{user.login})"
   end

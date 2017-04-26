@@ -45,6 +45,7 @@ class ArticleControllerTest < FunctionalTestCase
     assert_equal(body, article.body)
     assert_equal(name, article.name)
     assert_redirected_to(action: :show_article, id: article.id)
+    assert_not_nil(article.rss_log, "Failed to create rss_log entry")
   end
 
   def test_edit_article_get
