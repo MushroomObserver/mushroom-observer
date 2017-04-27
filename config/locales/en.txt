@@ -695,7 +695,6 @@
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
-  list_objects: List [TYPES]
   remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
   show_all: Show All
@@ -714,6 +713,7 @@
   and_num_more: And [num] more...
   are_you_sure: Are you sure?
   click_for_map: Click for map
+  EDITING: Editing
   google_images: Google Images
   show_on_map: Show on map
   many_times: "[num] times"
@@ -1714,7 +1714,7 @@
   shared_textile_link: More details here.
   shared_textile_help: Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
-  field_textile_link: This field can be formatted with the <a href="/observer/textile" target="_new">Textile markup system</a>.
+  field_textile_link: This field can be formatted with <a href="/observer/textile" target="_new">Textile</a>.
 
   # comment/_show_comments
   show_comments_add_comment: "[:add_object(type=:comment)]"
@@ -2065,10 +2065,6 @@
   #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
-
-  # article/edit_article
-  edit_article_title: "Editing [:ARTICLE]: [name]"
-  edit_article_save:  Save
 
   # article/show_article
   show_article: "[:show_object(type=:article)]"

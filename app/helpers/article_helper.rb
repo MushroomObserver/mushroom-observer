@@ -19,11 +19,19 @@ module ArticleHelper
             )
   end
 
-  # Title (nnn)
+  # "Title (#nnn)" textilized
   def show_article_title(article)
     capture do
       concat(article.display_name.t)
       concat(" (##{article.id || "?"})")
+    end
+  end
+
+  # "Editing: Title (#nnn)"  textilized
+  def edit_article_title(article)
+    capture do
+      concat("#{:EDITING.l}: ")
+      concat(show_article_title(article))
     end
   end
 end
