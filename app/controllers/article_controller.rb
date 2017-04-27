@@ -5,7 +5,7 @@
 #    create_article::   Create new news article
 #    destroy_article::  Destroy article
 #    edit_article::     Update article
-#    index::            List all articles in inverse order of creation
+#    index_article::    List all articles in inverse order of creation
 #    show_article::     Show article
 #
 #  Methods in public interface
