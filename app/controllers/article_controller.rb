@@ -110,6 +110,6 @@ class ArticleController < ApplicationController
   private
 
   def whitelisted_article_params
-    params[:article].permit(:body, :title)
+    params[:article].permit(:body, :name)
   end
 end
