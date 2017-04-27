@@ -52,8 +52,7 @@ class ArticleController < ApplicationController
   # :norobots:
   def edit_article
     pass_query_params
-    @article = find_or_goto_index(Article, params[:id].to_s)
-    article_not_found unless @article
+    @article = find_or_goto_index(Article, params[:id])
     return unless request.method == "POST"
 
     @article.name = params[:article][:name]
@@ -68,16 +67,6 @@ class ArticleController < ApplicationController
     else
       raise(:runtime_unable_to_save_changes.t)
     end
-  end
-
-  def article_not_found
-    rescue RuntimeError => err
-    reload_edit_name_form_on_error(err)
-  end
-
-  def reload_edit_article_form_on_error(err)
-    flash_error(err.to_s) unless err.blank?
-    flash_object_errors(@article)
   end
 
   # List all articles in inverse order of creation
