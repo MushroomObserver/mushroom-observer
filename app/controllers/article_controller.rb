@@ -51,7 +51,11 @@ class ArticleController < ApplicationController
 
     @article.name = params[:article][:name]
     @article.body = params[:article][:body]
-    if @article.changed?
+    @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)
+    redirect_to(action: "show_article", id: @article.id)
+  end
+
+  def save_edits
       if @article.save
         flash_notice(:runtime_edit_article_success.t(id: @article.id))
       else

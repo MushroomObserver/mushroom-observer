@@ -90,6 +90,14 @@ class ArticleControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_article, id: article.id)
     assert_equal(new_name, article.name)
     assert_equal(new_body, article.body)
+
+    # Prove that saving without changes provokes warning
+    # save it again without changes
+    post(:edit_article, params)
+    article.reload
+
+    assert_flash_warning
+    assert_redirected_to(action: :show_article, id: article.id)
   end
 
   def test_index
@@ -99,8 +107,15 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
   def test_show_article
+    # Prove that an actual article gets shown
     get(:show_article, id: articles(:premier_article).id)
+    assert_response(:success)
     assert_template(:show_article)
+
+    # Prove that trying to show non-existent article provokes error & redirect
+    get(:show_article, id: -1)
+    assert_flash_error
+    assert_response(:redirect)
   end
 
   def test_destroy_article
