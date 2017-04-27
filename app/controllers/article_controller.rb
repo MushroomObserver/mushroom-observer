@@ -19,13 +19,27 @@ class ArticleController < ApplicationController
     :show_article
   ]
   before_action :store_location
+  before_action :ignore_request_unless_permitted, except: [
+    :index_article,
+    :show_article
+  ]
+
+  def ignore_request_unless_permitted
+    return if permitted?
+    flash_notice(:permission_denied.t)
+    redirect_to(action: "index_article") and return
+  end
+
+  # permitted to create/update/destroy any Article
+  def permitted?
+    in_admin_mode?
+  end
+  helper_method :permitted?
 
   ### Actions and other Methods
   # Create a new article
   # :norobots:
   def create_article
-    write_permission_denied and return unless permitted?
-
     return unless request.method == "POST"
     article = Article.new(name:    params[:article][:name],
                           body:    params[:article][:body],
@@ -34,16 +48,9 @@ class ArticleController < ApplicationController
     redirect_to(action: "show_article", id: article.id)
   end
 
-  def write_permission_denied
-    flash_notice(:permission_denied.t)
-    redirect_to(action: "index_article")
-  end
-
   # Edit existing article
   # :norobots:
   def edit_article
-    write_permission_denied and return unless permitted?
-
     pass_query_params
     @article = find_or_goto_index(Article, params[:id].to_s)
     article_not_found unless @article
@@ -56,13 +63,11 @@ class ArticleController < ApplicationController
   end
 
   def save_edits
-      if @article.save
-        flash_notice(:runtime_edit_article_success.t(id: @article.id))
-      else
-        raise(:runtime_unable_to_save_changes.t)
-      end
+    if @article.save
+      flash_notice(:runtime_edit_article_success.t(id: @article.id))
+    else
+      raise(:runtime_unable_to_save_changes.t)
     end
-    redirect_to(action: "show_article", id: @article.id)
   end
 
   def article_not_found
@@ -90,20 +95,12 @@ class ArticleController < ApplicationController
   # Destroy one article
   # :norobots:
   def destroy_article
-    write_permission_denied and return unless permitted?
-
     pass_query_params
     if (@article = Article.find(params[:id])) && @article.destroy
       flash_notice(:runtime_destroyed_id.t(type: Article, value: params[:id]))
     end
-    redirect_to(action: "index")
+    redirect_to(action: "index_article")
   end
-
-  # permitted to create/update/destroy any Article
-  def permitted?
-    in_admin_mode?
-  end
-  helper_method :permitted?
 
   ##############################################################################
 
