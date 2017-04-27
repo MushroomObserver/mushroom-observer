@@ -19,11 +19,11 @@ module ArticleHelper
             )
   end
 
-  # Headline: (News Article 5)
+  # Title (nnn)
   def show_article_title(article)
     capture do
       concat(article.display_name.t)
-      concat(": (#{:ARTICLE.t} #{article.id || "?"})")
+      concat(" (##{article.id || "?"})")
     end
   end
 end

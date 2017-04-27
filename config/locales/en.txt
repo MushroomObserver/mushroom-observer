@@ -220,10 +220,10 @@
   api_key: API key
   API_KEYS: API Keys
   api_keys: API keys
-  ARTICLE: News Article
-  article: news article
-  ARTICLES: News Articles
-  articles: news articles
+  ARTICLE: Article
+  article: article
+  ARTICLES: Articles
+  articles: articles
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -2071,10 +2071,10 @@
   edit_article_save:  Save
 
   # article/show_article
-  show_article:       "[:show_object(type=:article)]"
+  show_article: "[:show_object(type=:article)]"
 
   # article/index_article
-  index_article:       "[:ARTICLE] Index"
+  index_article: "[:ARTICLE] Index"
 
   # ConferenceEvent Fields
   conference_event_name: Name
