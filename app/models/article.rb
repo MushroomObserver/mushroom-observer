@@ -16,6 +16,7 @@
 #  display_name::       name boldfaced
 #  format_name          name
 #  unique_format_name   name + id
+#  can_edit?            Can the user create, edit, or delete Articles?
 #
 class Article < AbstractModel
   belongs_to :user
@@ -43,5 +44,21 @@ class Article < AbstractModel
   # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
     name + " (#{id || "?"})"
+  end
+
+  # wrapper around class method of same name
+  def can_edit?(user)
+    Article.can_edit?(user)
+  end
+
+  # Can the user create, edit, or delete Articles?
+  def self.can_edit?(user)
+    news_article_project.is_member?(user)
+  end
+
+  # Project used to administer Article write permission.
+  # User of this project may create, edit, or delete Articles.
+  def self.news_article_project
+    Project.find_by(title: "News Article Project")
   end
 end

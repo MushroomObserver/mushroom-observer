@@ -10,14 +10,14 @@ class ArticleControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_article)
 
     # Prove authorized user can go to create_article form
-    login(users(:article_permission_user).login)
+    login(users(:article_writer).login)
     make_admin
     get(:create_article)
     assert_form_action(action: "create_article")
   end
 
   def test_create_article_post
-    user   = users(:article_permission_user)
+    user   = users(:article_writer)
     author = user.name
     name   = "Test article"
     body   = "The body of a new test article."
@@ -59,7 +59,7 @@ class ArticleControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
-    login(article.user.login)
+    login(users(:article_writer).login)
     make_admin
     get(:edit_article, params)
     assert_form_action(action: "edit_article")
@@ -81,7 +81,7 @@ class ArticleControllerTest < FunctionalTestCase
     assert_redirected_to(action: :index_article)
 
     # Prove authorized user can create article
-    login(article.user.login)
+    login(users(:article_writer).login)
     make_admin
     post(:edit_article, params)
     article.reload

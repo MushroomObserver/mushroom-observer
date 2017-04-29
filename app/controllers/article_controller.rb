@@ -32,7 +32,7 @@ class ArticleController < ApplicationController
 
   # permitted to create/update/destroy any Article
   def permitted?
-    in_admin_mode?
+    Article.can_edit?(@user)
   end
   helper_method :permitted?
 
