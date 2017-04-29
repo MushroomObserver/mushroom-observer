@@ -695,6 +695,7 @@
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
+  list_objects: List [TYPES]
   remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
   show_all: Show All
