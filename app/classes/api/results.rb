@@ -55,7 +55,7 @@ class API
   end
 
   def num_pages
-    num = result_ids.length
+    num = num_results
     len = page_length
     ((num + len - 1) / len).truncate
   end
