@@ -70,5 +70,7 @@ one_genus_two_species_project:
 
 news_article_project:
   <<: *DEFAULTS
-  title:      News Article Project
-  user_group: article_writers
+  title:       News Article Project
+  admin_group: article_writers
+  user_group:  article_writers
+  summary:     Project members can create, edit, and delete news Articles.
