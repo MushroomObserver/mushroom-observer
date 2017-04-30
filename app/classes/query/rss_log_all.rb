@@ -6,6 +6,10 @@ module Query
       super
     end
 
+    def coerce_into_article_query
+      do_coerce(:Article)
+    end
+
     def coerce_into_location_query
       do_coerce(:Location)
     end

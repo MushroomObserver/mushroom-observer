@@ -1,6 +1,10 @@
 module Query::Modules::Joining
 
   JOIN_CONDITIONS = {
+    articles: {
+     rss_logs: :rss_log_id,
+     users: :user_id
+    },
     comments: {
       location_descriptions: :target,
       locations: :target,
