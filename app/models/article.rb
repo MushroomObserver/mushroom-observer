@@ -4,7 +4,7 @@
 #
 # == Attributes
 #
-#  name::               headline
+#  title::              headline
 #  id::                 unique numerical id (starting at 1)
 #  rss_log_id::         unique numerical id
 #  created_at::         Date/time it was first created.
@@ -25,9 +25,9 @@ class Article < AbstractModel
   # Automatically log standard events.
   self.autolog_events = [:created_at!, :updated_at!, :destroyed!]
 
-  # name boldfaced (in Textile). Used by show and index templates
-  def display_name
-    "**#{name}**"
+  # title boldfaced (in Textile). Used by show and index templates
+  def display_title
+    "**#{title}**"
   end
 
   # Article creator. Used by show and index templates
@@ -37,13 +37,12 @@ class Article < AbstractModel
 
   # used by MatrixBoxPresenter to show orphaned obects
   def format_name
-    name
+    title
   end
 
-  # title + id
   # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
-    name + " (#{id || "?"})"
+    title + " (#{id || "?"})"
   end
 
   # wrapper around class method of same name

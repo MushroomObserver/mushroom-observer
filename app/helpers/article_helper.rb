@@ -22,7 +22,7 @@ module ArticleHelper
   # "Title (#nnn)" textilized
   def show_article_title(article)
     capture do
-      concat(article.display_name.t)
+      concat(article.display_title.t)
       concat(" (##{article.id || "?"})")
     end
   end

@@ -2,7 +2,7 @@
 # http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 DEFAULTS: &DEFAULTS
-  name:       $LABEL
+  title:      $LABEL
   body:       Body of Article
   user:       rolf
   rss_log_id:

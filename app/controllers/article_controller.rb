@@ -41,7 +41,7 @@ class ArticleController < ApplicationController
   # :norobots:
   def create_article
     return unless request.method == "POST"
-    article = Article.new(name:    params[:article][:name],
+    article = Article.new(title:   params[:article][:title],
                           body:    params[:article][:body],
                           user_id: @user.id)
     article.save
@@ -55,7 +55,7 @@ class ArticleController < ApplicationController
     @article = find_or_goto_index(Article, params[:id])
     return unless request.method == "POST"
 
-    @article.name = params[:article][:name]
+    @article.title = params[:article][:title]
     @article.body = params[:article][:body]
     @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)
     redirect_to(action: "show_article", id: @article.id)
@@ -96,6 +96,6 @@ class ArticleController < ApplicationController
   private
 
   def whitelisted_article_params
-    params[:article].permit(:body, :name)
+    params[:article].permit(:body, :title)
   end
 end

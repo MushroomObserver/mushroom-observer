@@ -2060,8 +2060,8 @@
 
   ### news Article ###
   #   news Article Fields
-  article_name: Title
-  article_body: Body
+  article_title: Title
+  article_body:  Body
 
   #   news Article Actions
   # article/create_article

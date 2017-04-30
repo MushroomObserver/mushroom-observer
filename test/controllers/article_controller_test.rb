@@ -19,12 +19,12 @@ class ArticleControllerTest < FunctionalTestCase
   def test_create_article_post
     user   = users(:article_writer)
     author = user.name
-    name   = "Test article"
+    title  = "Test article"
     body   = "The body of a new test article."
     params = {
       article: {
-        name:    name,
-        body:    body
+        title: title,
+        body:  body
       }
     }
     old_count = Article.count
@@ -43,7 +43,7 @@ class ArticleControllerTest < FunctionalTestCase
     assert_equal(old_count + 1, Article.count)
     article = Article.last
     assert_equal(body, article.body)
-    assert_equal(name, article.name)
+    assert_equal(title, article.title)
     assert_redirected_to(action: :show_article, id: article.id)
     assert_not_nil(article.rss_log, "Failed to create rss_log entry")
   end
@@ -68,11 +68,11 @@ class ArticleControllerTest < FunctionalTestCase
   def test_edit_article_post
     # Prove unauthorized user cannot edit article
     article  = articles(:premier_article)
-    new_name = "Edited Article Title"
+    new_title = "Edited Article Title"
     new_body = "Edited body"
     params = {
       id:      article.id,
-      article: { name: new_name, body: new_body }
+      article: { title: new_title, body: new_body }
     }
     login(users(:zero_user).login)
     post(:edit_article, params)
@@ -88,7 +88,7 @@ class ArticleControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_article, id: article.id)
-    assert_equal(new_name, article.name)
+    assert_equal(new_title, article.title)
     assert_equal(new_body, article.body)
 
     # Prove that saving without changes provokes warning
@@ -133,6 +133,6 @@ class ArticleControllerTest < FunctionalTestCase
     make_admin
     get(:destroy_article, params)
     refute(Article.exists?(article.id),
-           "Failed to destroy Article #{article.id}, '#{article.name}'")
+           "Failed to destroy Article #{article.id}, '#{article.title}'")
   end
 end

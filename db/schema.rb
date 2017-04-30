@@ -24,7 +24,7 @@ ActiveRecord::Schema.define(version: 20170426123736) do
   end
 
   create_table "articles", force: :cascade do |t|
-    t.string   "name",       limit: 255
+    t.string   "title",      limit: 255
     t.text     "body",       limit: 65535
     t.integer  "user_id",    limit: 4
     t.integer  "rss_log_id", limit: 4
