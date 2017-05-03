@@ -5,15 +5,16 @@
 #    create_article::   Create new news article
 #    destroy_article::  Destroy article
 #    edit_article::     Update article
-#    index_article::    List all articles in inverse order of creation
+#    index_article::    List selected (based on last search) articles
+#    list_articles::    List all articles
 #    show_article::     Show article
 #
-#  Methods in public interface
-#
+#  Callbacks and Methods
+#    ignore_request_unless_permitted:: Unless user permitted to perform request,
+#                       then index_articles
 #    permitted?         boolean: permitted to create/update/destroy Articles
 #
 class ArticleController < ApplicationController
-  ### Callbacks
   before_action :login_required, except: [
     :index_article,
     :list_articles,
@@ -25,7 +26,15 @@ class ArticleController < ApplicationController
     :list_articles,
     :show_article
   ]
+  helper_method :permitted?
 
+  ##############################################################################
+  #
+  #  :section: Callbacks, Methods
+  #
+  ##############################################################################
+
+  # Unless user permitted to perform request, just index_articles
   def ignore_request_unless_permitted
     return if permitted?
     flash_notice(:permission_denied.t)
@@ -36,43 +45,15 @@ class ArticleController < ApplicationController
   def permitted?
     Article.can_edit?(@user)
   end
-  helper_method :permitted?
 
-  ### Actions and other Methods
-  # Create a new article
-  # :norobots:
-  def create_article
-    return unless request.method == "POST"
-    article = Article.new(title:   params[:article][:title],
-                          body:    params[:article][:body],
-                          user_id: @user.id)
-    article.save
-    redirect_to(action: "show_article", id: article.id)
-  end
-
-  # Edit existing article
-  # :norobots:
-  def edit_article
-    pass_query_params
-    @article = find_or_goto_index(Article, params[:id])
-    return unless request.method == "POST"
-
-    @article.title = params[:article][:title]
-    @article.body = params[:article][:body]
-    @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)
-    redirect_to(action: "show_article", id: @article.id)
-  end
-
-  def save_edits
-    if @article.save
-      flash_notice(:runtime_edit_article_success.t(id: @article.id))
-    else
-      raise(:runtime_unable_to_save_changes.t)
-    end
-  end
+  ##############################################################################
+  #
+  #  :section: Index (multiple Articles)
+  #
+  ##############################################################################
 
   # List selected articles, based on current Query.
-  def index_article # :nologin: :norobots:
+  def index_article
     query = find_or_create_query(:Article, by: params[:by])
     show_selected_articles(query, id: params[:id].to_s, always_index: true)
   end
@@ -104,11 +85,48 @@ class ArticleController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  ##############################################################################
+  #
+  #  :section: Show, Create, Edit, Destroy (a single Article)
+  #
+  ##############################################################################
 
   # Display one Article
   def show_article
     return false unless @article = find_or_goto_index(Article, params[:id])
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
+  end
+
+  # Create a new article
+  # :norobots:
+  def create_article
+    return unless request.method == "POST"
+    article = Article.new(title:   params[:article][:title],
+                          body:    params[:article][:body],
+                          user_id: @user.id)
+    article.save
+    redirect_to(action: "show_article", id: article.id)
+  end
+
+  # Edit existing article
+  # :norobots:
+  def edit_article
+    pass_query_params
+    @article = find_or_goto_index(Article, params[:id])
+    return unless request.method == "POST"
+
+    @article.title = params[:article][:title]
+    @article.body = params[:article][:body]
+    @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)
+    redirect_to(action: "show_article", id: @article.id)
+  end
+
+  def save_edits
+    if @article.save
+      flash_notice(:runtime_edit_article_success.t(id: @article.id))
+    else
+      raise(:runtime_unable_to_save_changes.t)
+    end
   end
 
   # Destroy one article
