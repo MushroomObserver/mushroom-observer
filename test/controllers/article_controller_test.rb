@@ -100,24 +100,6 @@ class ArticleControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_article, id: article.id)
   end
 
-  def test_index
-    get(:index_article)
-    assert(:success)
-    assert_template(:index_article)
-  end
-
-  def test_show_article
-    # Prove that an actual article gets shown
-    get(:show_article, id: articles(:premier_article).id)
-    assert_response(:success)
-    assert_template(:show_article)
-
-    # Prove that trying to show non-existent article provokes error & redirect
-    get(:show_article, id: -1)
-    assert_flash_error
-    assert_response(:redirect)
-  end
-
   def test_destroy_article
     article = articles(:premier_article)
     params  = { id: article.id }
@@ -134,5 +116,27 @@ class ArticleControllerTest < FunctionalTestCase
     get(:destroy_article, params)
     refute(Article.exists?(article.id),
            "Failed to destroy Article #{article.id}, '#{article.title}'")
+  end
+
+  def test_index
+    get(:index_article)
+    assert(:success)
+  end
+
+  def test_list_articles
+    get(:list_articles)
+    assert(:success)
+  end
+
+  def test_show_article
+    # Prove that an actual article gets shown
+    get(:show_article, id: articles(:premier_article).id)
+    assert_response(:success)
+    assert_template(:show_article)
+
+    # Prove that trying to show non-existent article provokes error & redirect
+    get(:show_article, id: -1)
+    assert_flash_error
+    assert_response(:redirect)
   end
 end

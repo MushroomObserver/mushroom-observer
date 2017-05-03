@@ -16,11 +16,13 @@ class ArticleController < ApplicationController
   ### Callbacks
   before_action :login_required, except: [
     :index_article,
+    :list_articles,
     :show_article
   ]
   before_action :store_location
   before_action :ignore_request_unless_permitted, except: [
     :index_article,
+    :list_articles,
     :show_article
   ]
 
@@ -69,11 +71,39 @@ class ArticleController < ApplicationController
     end
   end
 
-  # List all articles in inverse order of creation
-  def index_article
-    @articles = Article.all.order(created_at: :desc)
-    @canonical_url = "#{MO.http_domain}/article/index_article"
+  # List selected articles, based on current Query.
+  def index_article # :nologin: :norobots:
+    query = find_or_create_query(:Article, by: params[:by])
+    show_selected_articles(query, id: params[:id].to_s, always_index: true)
   end
+
+  # List all articles
+  def list_articles # :nologin:
+    query = create_query(:Article, :all, by: :created_at)
+    show_selected_articles(query)
+  end
+
+  # Show selected list of articles.
+  def show_selected_articles(query, args = {})
+    args = {
+      action: :list_articles,
+      letters: "articles.title",
+      num_per_page: 50
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :sort_by_user.t],
+      ["title",       :sort_by_title.t],
+    ]
+
+    show_index_of_objects(query, args)
+  end
+
 
   # Display one Article
   def show_article

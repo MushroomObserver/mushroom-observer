@@ -1,8 +1,0 @@
-<%
-  @title = :ARTICLES.t
-  @tabsets = { right: draw_tab_set(index_tabs) }
-%>
-
-<table class="table table-striped">
-  <%= render partial: "article", collection: @articles %>
-</table>
