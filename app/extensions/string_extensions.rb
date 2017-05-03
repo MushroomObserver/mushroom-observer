@@ -523,6 +523,15 @@ class String
     length > 0 ? self[0].upcase + self[1..-1] : ""
   end
 
+  # Uncamelizes and converts string to pluralized title. E.g.:
+  # "Observation"  => "Observations"
+  # "SpeciesList"  => "Species Lists"
+  # "GlossaryTerm" => "Glossary Terms"
+  # "good dog"     => "Good Dogs"
+  def pluralized_title
+    pluralize.underscore.humanize.titleize
+  end
+
   # Generate a string of random characters of length +len+.  By default it
   # chooses from among the lowercase letters and digits, however you can give
   # it an arbitrary set of characters to choose from.  (And they don't have to
