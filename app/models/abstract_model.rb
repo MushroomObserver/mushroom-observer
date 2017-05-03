@@ -576,6 +576,11 @@ class AbstractModel < ActiveRecord::Base
     end
   end
 
+  # The label which is displayed for the model's tab in the RssLog tabset
+  def self.rss_log_tab_label
+    self.to_s.pluralize.underscore.humanize.titleize
+  end
+
   # Add a note
   def add_note(note)
     if notes

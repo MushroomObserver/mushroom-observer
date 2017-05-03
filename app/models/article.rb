@@ -13,10 +13,11 @@
 #
 # == methods
 #  author::             user.name + user.login
+#  can_edit?            Can the user create, edit, or delete Articles?
 #  display_name::       name boldfaced
 #  format_name          name
+#  rss_log_tab_label    label displayed in the RssLog tabset
 #  unique_format_name   name + id
-#  can_edit?            Can the user create, edit, or delete Articles?
 #
 class Article < AbstractModel
   belongs_to :user
@@ -43,6 +44,11 @@ class Article < AbstractModel
   # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
     title + " (#{id || "?"})"
+  end
+
+  # The label which is displayed for this model's tab in the RssLog tabset
+  def self.rss_log_tab_label
+    "News"
   end
 
   # wrapper around class method of same name
