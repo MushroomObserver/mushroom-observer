@@ -58,12 +58,15 @@ class Article < AbstractModel
 
   # Can the user create, edit, or delete Articles?
   def self.can_edit?(user)
-    news_article_project.is_member?(user)
+    # To avoid throwing errors, deny permission if the Project which controls
+    #   Article write permission does not yet exist or was deleted.
+    return false unless news_articles_project
+    news_articles_project.is_member?(user)
   end
 
   # Project used to administer Article write permission.
   # User of this project may create, edit, or delete Articles.
-  def self.news_article_project
-    Project.find_by(title: "News Article Project")
+  def self.news_articles_project
+    Project.find_by(title: "News Articles")
   end
 end

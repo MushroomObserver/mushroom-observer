@@ -14,6 +14,12 @@ class ArticleControllerTest < FunctionalTestCase
     make_admin
     get(:create_article)
     assert_form_action(action: "create_article")
+
+    # Prove that if News Articles project doesn't exist, there's no error.
+    Project.destroy(Article.news_articles_project.id)
+    get(:create_article)
+    assert_flash_text(:permission_denied.l)
+    assert_redirected_to(action: :index_article)
   end
 
   def test_create_article_post
