@@ -19,6 +19,12 @@ module Query
       def add_sort_order_to_title
         return unless params[:by]
         self.title_tag = :query_title_all_by
+
+        # May 4th 2017 - Scott
+        if params[:by].start_with?('reverse_')
+          params[:by].sub!(/^reverse_/, '')
+        end
+
         title_args[:order] = :"sort_by_#{params[:by]}"
       end
     end
