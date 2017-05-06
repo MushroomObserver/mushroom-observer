@@ -2066,6 +2066,8 @@
   #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
+  article_body_required: "[:article_body] [:REQUIRED]"
+  article_title_required: "[:article_title] [:REQUIRED]"
 
   # article/show_article
   show_article: "[:show_object(type=:article)]"

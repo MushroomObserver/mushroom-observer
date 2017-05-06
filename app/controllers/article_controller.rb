@@ -101,11 +101,20 @@ class ArticleController < ApplicationController
   # :norobots:
   def create_article
     return unless request.method == "POST"
+
+    return if flash_missing_title?
     article = Article.new(title:   params[:article][:title],
                           body:    params[:article][:body],
                           user_id: @user.id)
     article.save
     redirect_to(action: "show_article", id: article.id)
+  end
+
+  # add flash message if title missing
+  def flash_missing_title?
+    return if params[:article][:title].present?
+    flash_error(:article_title_required.t)
+    true
   end
 
   # Edit existing article
@@ -115,6 +124,7 @@ class ArticleController < ApplicationController
     @article = find_or_goto_index(Article, params[:id])
     return unless request.method == "POST"
 
+    return if flash_missing_title?
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
     @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)

@@ -28,23 +28,32 @@ class ArticleControllerTest < FunctionalTestCase
     title  = "Test article"
     body   = "The body of a new test article."
     params = {
-      article: {
-        title: title,
-        body:  body
-      }
+      article: { title: title, body: body }
     }
     old_count = Article.count
 
-    # Prove unauthorized user cannot create article
+    # Prove unauthorized user cannot create Article
     login(users(:zero_user).login)
     post(:create_article, params)
     assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Article.count)
     assert_redirected_to(action: :index_article)
 
-    # Prove authorized user can create article
+    # Prove authorized user cannot create title-less Article
     login(user.login)
     make_admin
+    params = {
+      article: { title: "", body: body }
+    }
+    post(:create_article, params)
+    assert_equal(old_count, Article.count)
+    assert_flash_text(:article_title_required.l)
+    assert_template(:create_article)
+
+    # Prove authorized user can create Article
+    params = {
+      article: { title: title, body: body }
+    }
     post(:create_article, params)
     assert_equal(old_count + 1, Article.count)
     article = Article.last
@@ -86,7 +95,7 @@ class ArticleControllerTest < FunctionalTestCase
     assert_flash_text(:permission_denied.l)
     assert_redirected_to(action: :index_article)
 
-    # Prove authorized user can create article
+    # Prove authorized user can edit article
     login(users(:article_writer).login)
     make_admin
     post(:edit_article, params)
@@ -101,9 +110,14 @@ class ArticleControllerTest < FunctionalTestCase
     # save it again without changes
     post(:edit_article, params)
     article.reload
-
     assert_flash_warning
     assert_redirected_to(action: :show_article, id: article.id)
+
+    # Prove removing title provokes warning
+    params[:article][:title] = ""
+    post(:edit_article, params)
+    assert_flash_text(:article_title_required.l)
+    assert_template(:edit_article)
   end
 
   def test_destroy_article
