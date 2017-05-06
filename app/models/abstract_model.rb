@@ -462,8 +462,10 @@ class AbstractModel < ActiveRecord::Base
   #    obj.log(:log_observation_updated)
   #
   def log(*args)
-    init_rss_log unless rss_log
-    rss_log.add_with_date(*args)
+    if has_rss_log?
+      init_rss_log unless rss_log
+      rss_log.add_with_date(*args)
+    end
   end
 
   # Add message to RssLog if you're about to destroy this object, creating new

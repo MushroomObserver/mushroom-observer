@@ -31,6 +31,24 @@ class CommentControllerTest < FunctionalTestCase
     assert_form_action(action: "add_comment", id: obs_id, type: "Observation")
   end
 
+
+
+  def test_save_comment_location_description
+    loc = locations(:albion)
+    comment_count = loc.description.comments.size
+    params = { id: loc.description_id,
+               type: :location_description,
+               comment: { summary: "A Summary", comment: "Some text." } }
+
+    post_requires_login(:add_comment, params)
+    assert_redirected_to(controller: :location, action: :show_location_description, id: loc.description_id)
+    loc.reload
+    assert_equal(comment_count + 1, loc.description.comments.size)
+    comment = Comment.last
+    assert_equal("A Summary", comment.summary)
+    assert_equal("Some text.", comment.comment)
+  end
+
   def test_edit_comment
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
