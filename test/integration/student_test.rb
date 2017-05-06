@@ -68,7 +68,7 @@ class StudentTest < IntegrationTestCase
     # Navigate to show name (no descriptions) and create draft.
     def create_draft(name, gen_desc, project)
       get("/")
-      click(label: /index a.*z/i)
+      click(label: "Names", in: :left_panel)
       click(label: name.text_name)
       url = request.url
       assert_match(/there are no descriptions/i, response.body)

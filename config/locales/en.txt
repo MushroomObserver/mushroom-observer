@@ -246,6 +246,8 @@
   images: images
   ignore: ignore
   IGNORE: Ignore
+  GLOSSARY: Glossary
+  glossary: glossary
   herbaria: herbaria
   HERBARIA: Herbaria
   herbarium: herbarium
@@ -284,6 +286,8 @@
   naming: proposed name
   NAMINGS: Proposed Names
   namings: proposed names
+  NEWS: News
+  news: news
   NOTIFICATION: Notification
   notification: notification
   NOTIFICATIONS: Notifications
@@ -1065,7 +1069,6 @@
   app_latest_changes: Changes by Users
   app_newest_images: "[:IMAGES]"
   app_comments: "[:COMMENTS]"
-  app_news: Release
   app_observations_left: "[:OBSERVATIONS]"
   app_create_observation: "[:create_object(type=:observation)]"
   app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
@@ -1101,7 +1104,6 @@
   app_powered_by: Powered by
   app_preferred_browser: Preferred browser
   app_feature_tracker: Feature Tracker
-  app_glossary: Glossary
   app_publications: Publications
   app_more: More
   app_other: Other
