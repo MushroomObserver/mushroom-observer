@@ -2068,6 +2068,7 @@
   create_article_title: "[:create_object(type=:article)]"
   article_body_required: "[:article_body] [:REQUIRED]"
   article_title_required: "[:article_title] [:REQUIRED]"
+  form_article_title_help: "This field will appear in the Activity Feed."
 
   # article/show_article
   show_article: "[:show_object(type=:article)]"
