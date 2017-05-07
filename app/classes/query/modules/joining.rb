@@ -2,8 +2,8 @@ module Query::Modules::Joining
 
   JOIN_CONDITIONS = {
     articles: {
-     rss_logs: :rss_log_id,
-     users: :user_id
+      rss_logs: :rss_log_id,
+      users: :user_id
     },
     comments: {
       location_descriptions: :target,
@@ -170,7 +170,7 @@ module Query::Modules::Joining
       observations: :observation_id,
       users: :user_id
     }
-  }
+  }.freeze
 
   # Create SQL "JOIN ON" clause to join two tables.  Tack on an exclamation to
   # make it an outer join.  Tack on ".field" to specify alternate association.

@@ -24,7 +24,6 @@ class ArticleControllerTest < FunctionalTestCase
 
   def test_create_article_post
     user   = users(:article_writer)
-    author = user.name
     title  = "Test article"
     body   = "The body of a new test article."
     params = {
@@ -82,7 +81,7 @@ class ArticleControllerTest < FunctionalTestCase
 
   def test_edit_article_post
     # Prove unauthorized user cannot edit article
-    article  = articles(:premier_article)
+    article = articles(:premier_article)
     new_title = "Edited Article Title"
     new_body = "Edited body"
     params = {

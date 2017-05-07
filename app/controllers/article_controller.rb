@@ -66,23 +66,26 @@ class ArticleController < ApplicationController
 
   # Show selected list of articles.
   def show_selected_articles(query, args = {})
-    args = {
-      action: :list_articles,
-      letters: "articles.title",
-      num_per_page: 50
+    args = { action: :list_articles,
+             letters: "articles.title",
+             num_per_page: 50
     }.merge(args)
 
     @links ||= []
 
     # Add some alternate sorting criteria.
-    args[:sorting_links] = [
+    args[:sorting_links] = show_article_sorts
+
+    show_index_of_objects(query, args)
+  end
+
+  def show_article_sorts
+    [
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t],
       ["user",        :sort_by_user.t],
-      ["title",       :sort_by_title.t],
+      ["title",       :sort_by_title.t]
     ]
-
-    show_index_of_objects(query, args)
   end
 
   ##############################################################################
@@ -93,7 +96,7 @@ class ArticleController < ApplicationController
 
   # Display one Article
   def show_article
-    return false unless @article = find_or_goto_index(Article, params[:id])
+    return false unless (@article = find_or_goto_index(Article, params[:id]))
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
 
@@ -132,11 +135,9 @@ class ArticleController < ApplicationController
   end
 
   def save_edits
-    if @article.save
-      flash_notice(:runtime_edit_article_success.t(id: @article.id))
-    else
-      raise(:runtime_unable_to_save_changes.t)
-    end
+    raise(:runtime_unable_to_save_changes.t) unless @article.save
+
+    flash_notice(:runtime_edit_article_success.t(id: @article.id))
   end
 
   # Destroy one article

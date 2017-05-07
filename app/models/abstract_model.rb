@@ -579,7 +579,7 @@ class AbstractModel < ActiveRecord::Base
   # The label which is displayed for the model's tab in the RssLog tabset
   # e.g. "Names", "Species Lists"
   def self.rss_log_tab_label
-    self.to_s.pluralized_title
+    to_s.pluralized_title
   end
 
   # Add a note
