@@ -68,8 +68,7 @@ class ArticleController < ApplicationController
   def show_selected_articles(query, args = {})
     args = { action: :list_articles,
              letters: "articles.title",
-             num_per_page: 50
-    }.merge(args)
+             num_per_page: 50 }.merge(args)
 
     @links ||= []
 

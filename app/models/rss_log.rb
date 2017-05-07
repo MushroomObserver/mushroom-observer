@@ -1,5 +1,3 @@
-# encoding: utf-8
-#
 #  = RSS Log Model
 #
 #  This model handles the RSS feed.  Every object we care about gets an RssLog
@@ -102,7 +100,9 @@
 #    20091214035011 log_observation_destroyed user douglas
 #    20090722075919 log_image_created name 51164 user douglas
 #    20090722075919 log_image_created name 51163 user douglas
-#    20090722075919 log_consensus_changed new **__Russula%20chloroides__**%20Krbh. old **__Fungi%20sp.__**%20L.
+#    20090722075919 log_consensus_changed
+#      new **__Russula%20chloroides__**%20Krbh.
+#      old **__Fungi%20sp.__**%20L.
 #    20090722075918 log_observation_created user douglas
 #
 #  *NOTE*: All non-alphanumeric characters are escaped via private class
