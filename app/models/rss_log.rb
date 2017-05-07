@@ -282,8 +282,7 @@ class RssLog < AbstractModel
       sprintf("/glossary/show_glossary_term/%d?time=%d",
               glossary_term_id, updated_at.tv_sec)
     elsif article_id
-      sprintf("/observer/show_rss_log/%d?time=%d", article_id,
-              updated_at.tv_sec)
+      sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
       sprintf("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
