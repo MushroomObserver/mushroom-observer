@@ -17,8 +17,8 @@ module RssLogHelper
   # A single tab in Activity Feed tabset
   def tab_for_type(type)
     label = :rss_one.t(type: type.classify.constantize.rss_log_tab_label)
-    link = {action: :index_rss_log, type: type}
-    help = {title: :rss_one_help.t(type: type.to_sym)}
+    link = { action: :index_rss_log, type: type }
+    help = { title: :rss_one_help.t(type: type.to_sym) }
     @types == [type] ? label : link_with_query(label, link, help)
   end
 end
