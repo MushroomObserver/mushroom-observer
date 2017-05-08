@@ -35,16 +35,16 @@ class CommentControllerTest < FunctionalTestCase
     loc = locations(:albion)
     comment_count = loc.description.comments.size
     params = {
-        id: loc.description_id,
-        type: :location_description,
-        comment:
-            {
-                summary: "A Summary",
-                comment: "Some text."
-            }
+      id: loc.description_id,
+      type: :location_description,
+      comment:
+          {
+            summary: "A Summary",
+            comment: "Some text."
+          }
     }
 
-    post_requires_login( :add_comment, params)
+    post_requires_login(:add_comment, params)
     assert_redirected_to(controller: :location,
                          action: :show_location_description,
                          id: loc.description_id)
@@ -62,9 +62,9 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     requires_user(:edit_comment,
                   {
-                      controller: :observer,
-                      action: :show_observation,
-                      id: obs.id
+                    controller: :observer,
+                    action: :show_observation,
+                    id: obs.id
                   },
                   params)
     assert_form_action(action: "edit_comment", id: comment.id.to_s)
@@ -80,9 +80,9 @@ class CommentControllerTest < FunctionalTestCase
     params = { id: comment.id.to_s }
     requires_user(:destroy_comment,
                   {
-                      controller: :observer,
-                      action: :show_observation,
-                      id: obs.id
+                    controller: :observer,
+                    action: :show_observation,
+                    id: obs.id
                   },
                   params)
 
@@ -97,9 +97,9 @@ class CommentControllerTest < FunctionalTestCase
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size
     params = {
-        id: obs.id,
-        type: "Observation",
-        comment: { summary: "A Summary", comment: "Some text." }
+      id: obs.id,
+      type: "Observation",
+      comment: { summary: "A Summary", comment: "Some text." }
     }
     post_requires_login(:add_comment, params)
     assert_redirected_to(controller: "observer",
@@ -116,19 +116,20 @@ class CommentControllerTest < FunctionalTestCase
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
     params = {
-        id: comment.id,
-        comment: {
-            summary: "New Summary",
-            comment: "New text."
+      id: comment.id,
+      comment:
+        {
+          summary: "New Summary",
+          comment: "New text."
         }
     }
     assert("rolf" == comment.user.login)
 
     post_requires_user(:edit_comment,
                        {
-                           controller: :observer,
-                           action: :show_observation,
-                           id: obs.id
+                         controller: :observer,
+                         action: :show_observation,
+                         id: obs.id
                        },
                        params)
 
