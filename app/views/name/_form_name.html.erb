@@ -33,7 +33,9 @@
 <label for="name_citation"><%= :Citation.t %>:</label>
 <%= form.text_field(:citation, class: "form-control") %>
 <p class="help-block"><%= :form_names_citation_help.t %></p>
-<p class="help-block"><%= :form_names_citation_textilize_note.t %></p>
+<p class="help-block"><%= :form_names_citation_textilize_note.t %> <%= link_to(:shared_textile_link.t,
+                                                                               {controller: :observer, action: :textile_sandbox},
+                                                                               {target: "_new"}) %></p>
 
 <% if !@misspelling.nil? %>
   <%= form.check_box(:misspelling, :checked => @misspelling) %>
