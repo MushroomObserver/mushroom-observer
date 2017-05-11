@@ -1,6 +1,32 @@
+# RuboCop configuration
+# Uses Rubcop's default configuration, except as specified below
+# For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
+
+###################### Metrics #################################################
+
+# Relaxed metrics based on CodeClimages default .rubocop.yml
+
+Metrics/ClassLength:
+# Max: 100
+  Max: 250
+
+Metrics/MethodLength:
+# Max: 10
+  Max: 30
+
+Metrics/ModuleLength:
+# Max: 100
+  Max: 250
+
+###################### Style ###################################################
+
+# Cops where Rubocop supports multiple styles and MO uses a non-default.
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
+
 Style/DotPosition:
   EnforcedStyle: trailing
+
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
