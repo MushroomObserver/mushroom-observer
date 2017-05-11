@@ -65,11 +65,11 @@ exclude_paths:
 - app/assets/javascripts/jquery.js
 - app/assets/javascripts/jstz.js
 - app/assets/javascripts/lightbox.js
+# This file makes CodeClimate error in the Duplcation engine
 - app/classes/query/modules/serialization.rb
 # Prevent analysis of migrations
 - db/
 - log/
-# This file causes a CodeClimate error, halting the analysis
 - public/design_test/jquery-1.5.2.min.js
 - tmp/
 
@@ -79,7 +79,7 @@ exclude_paths:
 #
 #####################
 #
-# These file get a letter grade (A-F) and are included in overall
+# Files which get a letter grade (A-F) and are included in overall
 # CodeClimate numerical score
 ratings:
   paths:
@@ -92,7 +92,24 @@ ratings:
 
 ############################################################################
 #
-# CodeClimate's "inferred .codeclimate.yml
+# Classic configuration
+# Kept for convenience in case we decide to drop Engine-Based configuration
+#
+############################################################################
+# languages:
+#  JavaScript: true
+#  Ruby: true
+# exclude_paths:
+# - public/design_test/jquery-1.5.2.min.js
+# - app/assets/javascripts/bootstrap.js
+# - app/assets/javascripts/jquery.js
+# - app/assets/javascripts/jstz.js
+# - app/assets/javascripts/lightbox.js
+# - app/classes/query/modules/serialization.rb
+#
+############################################################################
+#
+# CodeClimate's generated "inferred .codeclimate.yml"
 # based on the Classic configuration
 #
 ############################################################################
@@ -170,19 +187,3 @@ ratings:
 #  - public/design_test/jquery-1.5.2.min.js
 #  - app/assets/javascripts/bootstrap.js"
 #
-############################################################################
-#
-# Classic configuration
-# Kept for convenience in case we decide to drop Engine-Based configuration
-#
-############################################################################
-# languages:
-#  JavaScript: true
-#  Ruby: true
-# exclude_paths:
-# - public/design_test/jquery-1.5.2.min.js
-# - app/assets/javascripts/bootstrap.js
-# - app/assets/javascripts/jquery.js
-# - app/assets/javascripts/jstz.js
-# - app/assets/javascripts/lightbox.js
-# - app/classes/query/modules/serialization.rb
