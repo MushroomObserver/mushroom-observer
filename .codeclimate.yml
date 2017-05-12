@@ -16,27 +16,39 @@ engines:
 # check Rails apps for security vulnerabilities
   brakeman:
     enabled: true
+
 # helps find security vulnerabilities in Ruby dependencies
   bundler-audit:
     enabled: true
+
 # style-checking for CSS stylesheets
   csslint:
     enabled: true
+
+# report similar code blocks over a configurable mass threshold
   duplication:
     enabled: true
     config:
       languages:
       - ruby
       - javascript
+
 # linting, complexity analysis, & style checking for EcmaScript/JavaScript
   eslint:
     enabled: true
+
 # case-sensitive search for the following strings:
 # TODO, FIXME, HACK, XXX, BUG
 # Can be configured to search for any strings
   fixme:
     enabled: true
+# We use "xxx" in numerous places, e.g., theme templates
+    checks:
+      XXX:
+        enabled: false
+
 # style and quality checks for Ruby code
+# configuration details are in .rubocop.yml files, rather than here.
   rubocop:
     enabled: true
 
