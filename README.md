@@ -21,7 +21,7 @@ and is hosted on github. The URL for the MO source repository is
 <https://github.com/MushroomObserver/mushroom-observer>.
 
 To get started developing we recommend that you head over to
-<https://github.com/MushroomObserver/developer-startup >which provides
+<https://github.com/MushroomObserver/developer-startup> which provides
 instructions for getting a development environment setup on Mac, Linux
 and Windows machines.
 
