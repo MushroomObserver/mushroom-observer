@@ -89,10 +89,11 @@ ratings:
   - Gemfile.lock
   - "**.css"
   - "**.erb"
+  - "**.js"
   - "**.md"
   - "**.rake"
   - "**.rb"
-  - "**.js"
+  - "**.scss"
 
 ######################## Classic configuration ##########################
 # Kept for convenience in case we decide to drop Engine-Based configuration
