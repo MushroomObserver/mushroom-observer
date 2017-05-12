@@ -87,7 +87,6 @@ this should delete all your observations from a given location:
 
 * DELETE <http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&locations=Madison+Heights>
 
-
 API Keys
 -------------
 
@@ -120,7 +119,7 @@ API key for them and post observations.
 
 All of this is still very unsecure.  If anyone gets a hold of a user's API key
 they can readily POST things in their name.  Various users have suggested we
-look into using more secure authorization methods such as OAuth and <https.>
+look into using more secure authorization methods such as OAuth and https.
 Anyone interested in hooking us up is welcome to contribute.  We'd be happy to
 help.
 

@@ -5,7 +5,7 @@ Last Revised: July 26, 2015
 
 This README provides a quick overview of the tools used by Mushroom Observer
 (MO) and an overview of the other READMEs that accompany this file.  See
-http://mushroomobserver.org/observer/intro for an introduction to the website
+<http://mushroomobserver.org/observer/intro> for an introduction to the website
 itself.
 
 [![Continuous Integration Status][1]][2]
@@ -18,10 +18,10 @@ Tools
 
 Source code control: The source code for MO is currently managed using git
 and is hosted on github. The URL for the MO source repository is
-https://github.com/MushroomObserver/mushroom-observer.
+<https://github.com/MushroomObserver/mushroom-observer>.
 
 To get started developing we recommend that you head over to
-https://github.com/MushroomObserver/developer-startup which provides
+<https://github.com/MushroomObserver/developer-startup >which provides
 instructions for getting a development environment setup on Mac, Linux
 and Windows machines.
 
@@ -37,7 +37,7 @@ README_CODE: Provides a snapshot of the major components of Mushroom Observer.
 
 README_DEVELOPMENT_INSTALL: Describes the steps needed for a developer to get
 the code running locally. Though we recommend following the process outlined
-at https://github.com/MushroomObserver/developer-startup.
+at <https://github.com/MushroomObserver/developer-startup>.
 You are encouraged to update this document with your own experience.
 
 README_PRODUCTION_INSTALL: Describes the steps needed to setup our production
