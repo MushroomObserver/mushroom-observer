@@ -21,10 +21,6 @@ engines:
   bundler-audit:
     enabled: true
 
-# style-checking for CSS stylesheets
-  csslint:
-    enabled: true
-
 # report similar code blocks over a configurable mass threshold
   duplication:
     enabled: true
@@ -53,6 +49,11 @@ engines:
 # style and quality checks for Ruby code
 # configuration details are in .rubocop.yml files, rather than here.
   rubocop:
+    enabled: true
+
+# scss style checker
+engines:
+ scss-lint:
     enabled: true
 
 #### exclude_paths ####
@@ -87,7 +88,6 @@ exclude_paths:
 ratings:
   paths:
   - Gemfile.lock
-  - "**.css"
   - "**.erb"
   - "**.js"
   - "**.md"
