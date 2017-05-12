@@ -37,8 +37,7 @@ engines:
   eslint:
     enabled: true
 
-# case-sensitive search for the following strings:
-# TODO, FIXME, HACK, XXX, BUG
+# case-sensitive search for the following strings: TODO, FIXME, HACK, XXX, BUG
 # Can be configured to search for any strings
   fixme:
     enabled: true
@@ -46,6 +45,10 @@ engines:
     checks:
       XXX:
         enabled: false
+
+# markdown style check
+  markdownlint:
+    enabled: true
 
 # style and quality checks for Ruby code
 # configuration details are in .rubocop.yml files, rather than here.
@@ -86,6 +89,7 @@ ratings:
   - Gemfile.lock
   - "**.css"
   - "**.erb"
+  - "**.md"
   - "**.rake"
   - "**.rb"
   - "**.js"
