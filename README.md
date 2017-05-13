@@ -3,9 +3,9 @@ Mushroom Observer
 
 Last Revised: July 26, 2015
 
-This README provides a quick overview of the tools used by Mushroom Observer 
+This README provides a quick overview of the tools used by Mushroom Observer
 (MO) and an overview of the other READMEs that accompany this file.  See
-http://mushroomobserver.org/observer/intro for an introduction to the website
+<http://mushroomobserver.org/observer/intro> for an introduction to the website
 itself.
 
 [![Continuous Integration Status][1]][2]
@@ -18,10 +18,10 @@ Tools
 
 Source code control: The source code for MO is currently managed using git
 and is hosted on github. The URL for the MO source repository is
-https://github.com/MushroomObserver/mushroom-observer. 
+<https://github.com/MushroomObserver/mushroom-observer>.
 
-To get started developing we recommend that you head over to 
-https://github.com/MushroomObserver/developer-startup which provides
+To get started developing we recommend that you head over to
+<https://github.com/MushroomObserver/developer-startup> which provides
 instructions for getting a development environment setup on Mac, Linux
 and Windows machines.
 
@@ -37,7 +37,7 @@ README_CODE: Provides a snapshot of the major components of Mushroom Observer.
 
 README_DEVELOPMENT_INSTALL: Describes the steps needed for a developer to get
 the code running locally. Though we recommend following the process outlined
-at https://github.com/MushroomObserver/developer-startup.
+at <https://github.com/MushroomObserver/developer-startup>.
 You are encouraged to update this document with your own experience.
 
 README_PRODUCTION_INSTALL: Describes the steps needed to setup our production
@@ -49,18 +49,18 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
 
-Copyright (c) . [Nathan Wilson][9],[Jason Hollinger][10],
-[Joseph Cohen][11] See [LICENSE][12] for further details.
+Copyright (c) 2017. [Nathan Wilson][9], [Jason Hollinger][10], [Joseph Cohen][11]
+See [LICENSE][12] for further details.
 
-[1]: https://secure.travis-ci.org/MushroomObserver/mushroom-observer.png
-[2]: http://travis-ci.org/MushroomObserver/mushroom-observer
-[3]: https://coveralls.io/repos/MushroomObserver/mushroom-observer/badge.png?branch=master
-[4]: https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master
-[5]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
-[6]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
-[7]: https://gemnasium.com/MushroomObserver/mushroom-observer.png
-[8]: https://gemnasium.com/MushroomObserver/mushroom-observer
-[9]: https://github.com/mo-nathan
-[10]: https://github.com/pellaea
-[11]: https://github.com/JoeCohen
-[12]: https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE
+[1]: <https://secure.travis-ci.org/MushroomObserver/mushroom-observer.png>
+[2]: <http://travis-ci.org/MushroomObserver/mushroom-observer>
+[3]: <https://coveralls.io/repos/MushroomObserver/mushroom-observer/badge.png?branch=master>
+[4]: <https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master>
+[5]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer.png>
+[6]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer>
+[7]: <https://gemnasium.com/MushroomObserver/mushroom-observer.png>
+[8]: <https://gemnasium.com/MushroomObserver/mushroom-observer>
+[9]: <https://github.com/mo-nathan>
+[10]: <https://github.com/pellaea>
+[11]: <https://github.com/JoeCohen>
+[12]: <https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE>
