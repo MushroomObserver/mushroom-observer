@@ -202,6 +202,11 @@ class NameControllerTest < FunctionalTestCase
     @@emails = []
   end
 
+  def test_index_name
+    get_with_dump(:index_name)
+    assert_template(:list_names)
+  end
+
   def test_name_index
     get_with_dump(:list_names)
     assert_template(:list_names)
@@ -209,6 +214,11 @@ class NameControllerTest < FunctionalTestCase
 
   def test_name_description_index
     get_with_dump(:list_name_descriptions)
+    assert_template(:list_name_descriptions)
+  end
+
+  def test_index_description_index
+    get_with_dump(:index_name_description)
     assert_template(:list_name_descriptions)
   end
 
@@ -284,6 +294,35 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_past_name, partial: "_name")
   end
 
+  def test_show_past_name_with_misspelling
+    get_with_dump(:show_past_name, id: names(:petigera).id)
+    assert_template(:show_past_name, partial: "_name")
+  end
+
+  def test_next_description
+    description = name_descriptions(:coprinus_comatus_desc)
+    id = description.id
+    object = NameDescription.find(id)
+    params = @controller.find_query_and_next_object(object, :next, id)
+    get(:next_name_description, id: description.id)
+    q = @controller.query_params(QueryRecord.last)
+    assert_redirected_to(action: :show_name_description,
+                         id: params[:id],
+                         params: q)
+  end
+
+  def test_prev_description
+    description = name_descriptions(:coprinus_comatus_desc)
+    id = description.id
+    object = NameDescription.find(id)
+    params = @controller.find_query_and_next_object(object, :prev, id)
+    get(:prev_name_description, id: description.id)
+    q = @controller.query_params(QueryRecord.last)
+    assert_redirected_to(action: :show_name_description,
+                         id: params[:id],
+                         params: q)
+  end
+
   def test_next_and_prev
     names = Name.all.order("text_name, author").to_a
     name12 = names[12]
@@ -348,6 +387,11 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:list_names)
   end
 
+  def test_needed_descriptions
+    get_with_dump(:needed_descriptions)
+    assert_template(:list_names)
+  end
+
   def test_name_descriptions_by_author
     get_with_dump(:name_descriptions_by_author, id: rolf.id)
     assert_template(:list_name_descriptions)
@@ -361,10 +405,9 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_name_search
-    get_with_dump(:name_search, pattern: "56")
-    assert_template(:list_names)
-    assert_equal(:query_title_pattern_search.t(types: "Names", pattern: "56"),
-                 @controller.instance_variable_get("@title"))
+    id = names(:agaricus).id
+    get_with_dump(:name_search, pattern: id)
+    assert_redirected_to(action: :show_name, id: id)
   end
 
   def test_name_search_with_spelling_correction
@@ -392,6 +435,20 @@ class NameControllerTest < FunctionalTestCase
                                  )
     get(:advanced_search, @controller.query_params(query))
     assert_template(:list_names)
+  end
+
+  def test_advanced_search_with_deleted_query
+    query = Query.lookup_and_save(:Name, :advanced_search,
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma"
+                                 )
+    params = @controller.query_params(query)
+    query.record.delete
+    get(:advanced_search, params)
+    assert_redirected_to(controller: "observer",
+                         action: "advanced_search_form")
   end
 
   def test_edit_name
