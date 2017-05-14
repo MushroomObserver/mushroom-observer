@@ -42,6 +42,26 @@ coprinus_comatus:
   search_name: Coprinus comatus (O.F. Müll.) Pers.
   sort_name: Coprinus comatus  (O.F. Müll.) Pers.
 
+stereum_hirsutum:
+  <<: *DEFAULTS
+  text_name: Stereum hirsutum
+  author: '(Willd.) Pers.'
+  display_name: '**__Stereum hirsutum__** (Willd.) Pers.'
+  search_name: Stereum hirsutum (Willd.) Pers.
+  sort_name: Stereum hirsutum (Willd.) Pers.
+  created_at: 2007-06-23 20:00:00
+  updated_at: 2007-06-23 20:00:00
+
+tubaria_furfuracea:
+  <<: *DEFAULTS
+  text_name: Tubaria furfuracea
+  author: '(Pers.) Gillet'
+  display_name: '**__Tubaria furfuracea__** (Pers.) Gillet'
+  search_name: Tubaria furfuracea (Pers.) Gillet
+  sort_name: Tubaria furfuracea (Pers.) Gillet
+  created_at: 2007-06-23 20:00:00
+  updated_at: 2007-06-23 20:00:00
+
 agaricus_campestris:
   <<: *DEFAULTS
   user: rolf
