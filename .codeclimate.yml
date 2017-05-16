@@ -74,11 +74,10 @@ exclude_paths:
 # This file causes a CodeClimate error in the Duplication engine
 - app/classes/query/modules/serialization.rb
 # Prevent analysis of migrations
-- db/
-- log/
+- "db/"
+- "log/"
 - public/design_test/jquery-1.5.2.min.js
-- tmp/
-
+- "tmp/"
 
 #### ratings ####
 
