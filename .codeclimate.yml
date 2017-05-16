@@ -12,7 +12,7 @@
 # For configuration of specific engines, see CodeClimate documentation
 #   for that engine.
 
-engines:
+ engines:
 # check Rails apps for security vulnerabilities
   brakeman:
     enabled: true
@@ -52,7 +52,7 @@ engines:
     enabled: true
 
 # scss style checker
- scss-lint:
+  scss-lint:
     enabled: true
 
 #### exclude_paths ####
