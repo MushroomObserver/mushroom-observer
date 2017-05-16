@@ -1,8 +1,24 @@
-# RuboCop configuration for use on /test files
+# RuboCop configuration for /test files
 
-# dafault rules
+# Use default rules ...
 inherit_from: ../.rubocop.yml
 
-# with following modifications
+# ... with following modifications, disabling metrics which make
+# less sense in test files and which we routinely ignore
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
 Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
   Enabled: false
