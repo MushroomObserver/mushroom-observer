@@ -1,10 +1,13 @@
-# RuboCop configuration for /test files
-
+# RuboCop non-default configuration for tests
 # Use default rules ...
 inherit_from: ../.rubocop.yml
 
-# ... with following modifications, disabling metrics which make
-# less sense in test files and which we routinely ignore
+# ... with the following modifications
+
+#################### Metrics ###############################
+
+# Disable Cops which make less sense in tests, and which we regularly ignore.
+
 Metrics/AbcSize:
   Enabled: false
 
