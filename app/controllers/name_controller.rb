@@ -509,8 +509,9 @@ class NameController < ApplicationController
         end
       end
     end
-  rescue RuntimeError => err
-    reload_edit_name_form_on_error(err)
+  rescue RuntimeError, ArgumentError => err
+    flash_error(:runtime_edit_name_no_change.t)
+    redirect_to_show_name
   end
 
   def init_create_name_form
@@ -539,17 +540,6 @@ class NameController < ApplicationController
       @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
     @name_string = @name.real_text_name
-  end
-
-  def reload_edit_name_form_on_error(err)
-    flash_error(err.to_s) unless err.blank?
-    flash_object_errors(@name)
-    @name.rank = params[:name][:rank]
-    @name.author = params[:name][:author]
-    @name.citation = params[:name][:citation]
-    @name.notes = params[:name][:notes]
-    @name.deprecated = (params[:name][:deprecated] == "true")
-    @name_string = params[:name][:text_name]
   end
 
   # Only allowed to make substantive changes to name if you own all the references to it.
@@ -1212,19 +1202,11 @@ class NameController < ApplicationController
     )
   end
 
-  ##############################################################################
+  ############################################################################
   #
   #  :section: EOL Feed
   #
-  ##############################################################################
-
-  # Send stuff to eol.
-  def eol_old # :nologin: :norobots:
-    @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @timer_start = Time.now
-    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
-    render_xml(action: "eol", layout: false)
-  end
+  ############################################################################
 
   # Show the data getting sent to EOL
   def eol_preview # :nologin: :norobots:
@@ -1240,13 +1222,6 @@ class NameController < ApplicationController
                  "gen_desc IS NOT NULL AND " \
                  "ok_for_export = 1 AND " \
                  "public = 1"
-  end
-
-  # Show the data not getting sent to EOL
-  def eol_need_review # :norobots:
-    eol_data(NameDescription.review_statuses.values_at(unreviewed))
-    @title = :eol_need_review_title.t
-    render(action: "eol_preview")
   end
 
   # Gather data for EOL feed.
@@ -1330,64 +1305,6 @@ class NameController < ApplicationController
     @timer_start = Time.now
     @data = EolData.new
     render_xml(layout: false)
-  end
-
-  def refresh_links_to_eol
-    data = get_eol_collection_data
-    clear_eol_data
-    load_eol_data(data)
-  end
-
-  def eol_for_taxon
-    store_location
-
-    # need name_id and review_status_list
-    id = params[:id].to_s
-    @name = Name.find(id)
-    @layout = calc_layout_params
-
-    # Get corresponding images.
-    ids = Name.connection.select_values(%(
-      SELECT images.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache >= 2
-      AND images.ok_for_export
-      ORDER BY images.vote_cache DESC
-    ))
-
-    # @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
-    @images = Image.includes(:image_votes).where(images.id => ids).to_a
-
-    ids = Name.connection.select_values(%(
-      SELECT images.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache IS NULL
-      AND images.ok_for_export
-      ORDER BY observations.vote_cache
-    ))
-    # @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
-    @voteless_images = Image.includes(:image_votes).where(images.id => ids)
-
-    ids = Name.connection.select_values(%(
-      SELECT DISTINCT observations.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache IS NULL
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.ok_for_export
-      ORDER BY observations.id
-    ))
-    # @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids]) # Rails 3
-    @voteless_obs = Observation.where(images.id => ids).to_a
   end
 
   ################################################################################

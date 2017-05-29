@@ -522,6 +522,10 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "approve_name", id: name.id)
   end
 
+  def test_eol_expanded_review
+    requires_login(:eol_expanded_review)
+  end
+
   def test_eol
     get("eol")
   end
@@ -897,6 +901,23 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
+  end
+
+  def test_edit_name_bad_post
+    name = names(:conocybe_filaris)
+    # params = {id: name.id, name: [1,2,3]}
+    params = {
+      id: name.id,
+      name: {
+        text_name: "Conocybe filaris",
+        author: "(Fr.) Kühner",
+        rank: :Xyz,
+        citation: "__Le Genera Galera__, 139. 1935.",
+        deprecated: (name.deprecated ? "true" : "false")
+      }
+    }
+    post_requires_login(:edit_name, params)
+    assert_flash_error
   end
 
   # This catches a bug that was happening when editing a name that was in use.
@@ -3224,6 +3245,14 @@ class NameControllerTest < FunctionalTestCase
     notification = Notification.
                    find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
+  end
+
+  # ----------------------------
+  #  Mushroom App
+  # ----------------------------
+
+  def test_names_for_mushroom_app
+    requires_login(:names_for_mushroom_app)
   end
 
   # ----------------------------

@@ -8,13 +8,15 @@ class ChecklistTest < UnitTestCase
 
   def rolfs_species
     [
-      "Agaricus campestras", # these are not synonymized
-      "Agaricus campestris",
-      "Agaricus campestros",
-      "Agaricus campestrus",
-      "Boletus edulis",
-      "Coprinus comatus",
-      "Strobilurus diminutivus"
+     "Agaricus campestras", # these are not synonymized
+     "Agaricus campestris",
+     "Agaricus campestros",
+     "Agaricus campestrus",
+     "Boletus edulis",
+     "Coprinus comatus",
+     "Stereum hirsutum",
+     "Strobilurus diminutivus",
+     "Tubaria furfuracea"
     ]
   end
 
@@ -52,7 +54,7 @@ class ChecklistTest < UnitTestCase
     assert_equal(katrinas_species, data.species)
 
     data = Checklist::ForUser.new(rolf)
-    assert_equal(4, data.num_genera)
+    assert_equal(6, data.num_genera)
 
     expect = Name.joins(observations: :user).
                   where("observations.user_id = #{users(:rolf).id}
