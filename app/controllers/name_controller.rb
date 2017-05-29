@@ -165,13 +165,10 @@ class NameController < ApplicationController
       LIMIT 100
     )
     @help = :needed_descriptions_help
-    query = create_query(:Name, :in_set, ids: data.map(&:first),
-                                         title: :needed_descriptions_title.l)
-    show_selected_names(query, num_per_page: 100) do |name|
-      # Add number of observations (parenthetically).
-      row = data.find { |id, _count| id == name.id }
-      row ? "(#{count} #{:observations.t})" : ""
-    end
+    query = create_query(:Name, :in_set,
+                         ids: data.map(&:first),
+                         title: :needed_descriptions_title.l)
+    show_selected_names(query, num_per_page: 100)
   end
 
   # Display list of names that match a string.
@@ -253,6 +250,8 @@ class NameController < ApplicationController
         end
       end
     else
+      # Note: if show_selected_name is called with a block
+      # it will *not* get passed to show_index_of_objects.
       show_index_of_objects(query, args)
     end
   end
