@@ -2,23 +2,67 @@
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
 
+###################### Exclusions ##############################################
+
+# Completely ignore the following
+AllCops:
+  Exclude:
+    - app/assets/javascripts/bootstrap.js
+    - app/assets/javascripts/jquery.js
+    - app/assets/javascripts/jstz.js
+    - app/assets/javascripts/lightbox.js
+    - "db/**/*"
+    - "log/**/*"
+    - public/design_test/jquery-1.5.2.min.js
+    - "tmp/**/*"
+
 ###################### Metrics #################################################
 
-# Relaxed metrics based on CodeClimages default .rubocop.yml
+
+Metrics/AbcSize:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/ClassLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 100
   Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/MethodLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 10
   Max: 30
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/ModuleLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 100
   Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 ###################### Style ###################################################
+
+# Allow non-ascii characters in comments; we need to use accented chars
+Style/AsciiComments:
+  Enabled: false
 
 # Cops where Rubocop supports multiple styles and MO uses a non-default.
 
