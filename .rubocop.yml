@@ -20,6 +20,10 @@ Metrics/ModuleLength:
 
 ###################### Style ###################################################
 
+# Allow non-ascii characters in comments wo we can use accented chars
+Style/AsciiComments:
+  Enabled: false
+
 # Cops where Rubocop supports multiple styles and MO uses a non-default.
 
 Style/StringLiterals:
