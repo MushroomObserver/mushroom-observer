@@ -24,6 +24,10 @@
 # report similar code blocks over a configurable mass threshold
   duplication:
     enabled: true
+    checks:
+      # Disable Similar code (temporarily?) due to excessive false positives
+      Similar code:
+        enabled: false
     config:
       languages:
       - ruby
@@ -38,7 +42,6 @@
     - public/design_test/jquery-1.5.2.min.js
     - "tmp/"
     - "test/"
-
 
 # linting, complexity analysis, & style checking for EcmaScript/JavaScript
   eslint:
