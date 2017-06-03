@@ -18,19 +18,45 @@ AllCops:
 
 ###################### Metrics #################################################
 
-# Relaxed metrics based on CodeClimages default .rubocop.yml
+
+Metrics/AbcSize:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/ClassLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 100
   Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/MethodLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 10
   Max: 30
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 Metrics/ModuleLength:
+# Relaxed metrics based on CodeClimages default .rubocop.yml
 # Max: 100
   Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
 
 ###################### Style ###################################################
 
