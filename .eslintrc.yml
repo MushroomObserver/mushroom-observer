@@ -1,4 +1,6 @@
 ---
+# ESLint configuration. See http://eslint.org/docs/user-guide/configuring
+# This file created by CodeClimate
 parserOptions:
   sourceType: module
   ecmaFeatures:
