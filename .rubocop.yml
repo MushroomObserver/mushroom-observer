@@ -20,7 +20,7 @@ Metrics/ModuleLength:
 
 ###################### Style ###################################################
 
-# Allow non-ascii characters in comments wo we can use accented chars
+# Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
 
