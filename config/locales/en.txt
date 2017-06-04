@@ -321,6 +321,10 @@
   rss_log: activity log
   RSS_LOGS: Activity Logs
   rss_logs: activity logs
+  SEQUENCE:  Sequence
+  Sequence:  sequence
+  SEQUENCES: Sequences
+  Sequences: sequences
   SOURCE: Source
   source: source
   SOURCES: Sources
@@ -1865,6 +1869,7 @@
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
   show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
+  show_observation_add_sequence: "Add [:SEQUENCE]"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
