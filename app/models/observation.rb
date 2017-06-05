@@ -66,6 +66,7 @@
 #
 #  comments::               List of Comment's attached to this Observation.
 #  interests::              List of Interest's attached to this Observation.
+#  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
 #
 #  ==== Name Formats
@@ -129,6 +130,7 @@ class Observation < AbstractModel
   has_many :votes
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
+  has_many :sequences, dependent: :destroy
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!
