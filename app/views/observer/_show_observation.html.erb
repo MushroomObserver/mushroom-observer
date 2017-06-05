@@ -29,8 +29,9 @@
     <div id="observation_sequences">
       <span class="bold">
         <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
-      </span><br>
-    </div>
+      </span>
+      <%= add_sequence_link(observation) %><br>
+   </div>
 
     <%= if !observation.notes.blank?
       Textile.clear_textile_cache
