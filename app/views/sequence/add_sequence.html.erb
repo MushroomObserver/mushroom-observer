@@ -1,0 +1,14 @@
+<%
+  @title = :sequence_add_title.t(name: @observation.unique_format_name)
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args),
+    link_with_query(:sequence_add_edit.t, controller: :observer,
+                    action: :edit_observation, id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<%= form_for(:sequence, url: {action: :add_sequence}) do |form| %>
+  <%= render(partial: "form_sequence", locals: {form: form}) %>
+<% end %>
