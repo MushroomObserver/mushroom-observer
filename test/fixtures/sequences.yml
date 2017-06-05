@@ -1,0 +1,10 @@
+# Read about fixtures at
+#   http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# one:
+#   observation: MyObservationLabel
+#   locus: MyText
+#   bases: MyText
+#   archive: MyString
+#   accession: MyString
+#   notes: MyText
