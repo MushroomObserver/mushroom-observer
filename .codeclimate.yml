@@ -12,7 +12,7 @@
 # For configuration of specific engines, see CodeClimate documentation
 #   for that engine.
 
- engines:
+engines:
 # check Rails apps for security vulnerabilities
   brakeman:
     enabled: true
