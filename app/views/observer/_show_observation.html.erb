@@ -25,6 +25,13 @@
     <div id="observation_specimen_info">
       <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
     </div>
+
+    <div id="observation_sequences">
+      <span class="bold">
+        <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
+      </span><br>
+    </div>
+
     <%= if !observation.notes.blank?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))
