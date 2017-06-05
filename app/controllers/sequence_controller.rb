@@ -14,11 +14,12 @@ class SequenceController < ApplicationController
   before_action :store_location
 
   def add_sequence
-    return unless (@obs = find_or_goto_index(Observation, params[:id].to_s))
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless @observation
 
-    if !check_permission(@obs)
+    if !check_permission(@observation)
       redirect_with_query(controller: "observer",
-                          action: "show_observation", id: @obs.id)
+                          action: "show_observation", id: @observation.id)
     else
     end
 
