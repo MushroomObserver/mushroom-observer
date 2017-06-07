@@ -10,6 +10,13 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("Abc", "abc".capitalize_first)
   end
 
+  def test_pluralized_title
+    assert_equal("Good Dogs", "good dog".pluralized_title)
+    assert_equal("Observations", "Observation".pluralized_title)
+    assert_equal("Glossary Terms", "GlossaryTerm".pluralized_title)
+    assert_equal("Species Lists", "SpeciesList".pluralized_title)
+  end
+
   def test_dealphabetize
     # convert_base62_to_decimal
     assert_equal(0, "0".dealphabetize)

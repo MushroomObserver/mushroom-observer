@@ -406,17 +406,13 @@ class String
   #
   # Convert string (assumed to be in UTF-8) to plain ASCII.
   def to_ascii
-    to_s.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
-      UTF8_TO_ASCII[c] || " "
-    end
+    to_s.gsub(/[^\t\n\r\x20-\x7E]/) { |c| UTF8_TO_ASCII[c] || " " }
   end
 
   # Convert string (assumed to be in UTF-8) to any other charset.  All invalid
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
-    encode(charset, fallback: lambda do |c|
-      UTF8_TO_ASCII[c] || "?"
-    end)
+    encode(charset, fallback: lambda { |c| UTF8_TO_ASCII[c] || "?" })
   end
 
   # Escape a string to be safe to place in double-quotes inside javascript.
@@ -521,6 +517,15 @@ class String
   # Capitalize the first (and _DO_ _NOT_ downcase the rest like +capitalize+).
   def capitalize_first
     length > 0 ? self[0].upcase + self[1..-1] : ""
+  end
+
+  # Uncamelizes and converts string to pluralized title. E.g.:
+  # "Observation"  => "Observations"
+  # "SpeciesList"  => "Species Lists"
+  # "GlossaryTerm" => "Glossary Terms"
+  # "good dog"     => "Good Dogs"
+  def pluralized_title
+    pluralize.underscore.humanize.titleize
   end
 
   # Generate a string of random characters of length +len+.  By default it

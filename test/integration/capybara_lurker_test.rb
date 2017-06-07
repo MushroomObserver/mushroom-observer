@@ -70,7 +70,7 @@ class CapybarLurkerTest < IntegrationTestCase
     assert_equal("#{:app_title.l }: List of Contributors",
                  page.title, "Wrong page")
 
-    click_on("List Projects")
+    click_on("Projects")
     assert_equal("#{:app_title.l }: Projects by Title", page.title, "Wrong page")
 
     click_on("Comments")

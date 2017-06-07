@@ -1297,6 +1297,36 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
+  def test_article_all
+    assert_query(Article.all, :Article, :all)
+  end
+
+  def test_article_by_rss_log
+    assert_query(Article.joins(:rss_log).distinct,
+                 :Article, :by_rss_log)
+  end
+
+  def test_article_in_set
+    assert_query([articles(:premier_article).id], :Article,
+                 :in_set, ids: [articles(:premier_article).id])
+    assert_query([], :Article, :in_set, ids: [])
+  end
+
+  def test_article_pattern_search
+   assert_query([],
+                :Article, :pattern_search, pattern: "no article has this")
+   # title
+   assert_query(Article.where("title LIKE '%premier_article%'
+                              OR body LIKE '%premier_article%'"),
+                :Article, :pattern_search, pattern: "premier_article")
+   # body
+   assert_query(Article.where("title LIKE '%Body of Article%'
+                              OR body LIKE '%Body of Article%'"),
+                :Article, :pattern_search, pattern: "Body of Article")
+   assert_query(Article.all,
+                :Article, :pattern_search, pattern: "")
+  end
+
   def test_comment_all
     expect = Comment.all.reverse
     assert_query(expect, :Comment, :all)

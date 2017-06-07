@@ -220,6 +220,10 @@
   api_key: API key
   API_KEYS: API Keys
   api_keys: API keys
+  ARTICLE: Article
+  article: article
+  ARTICLES: Articles
+  articles: articles
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -242,6 +246,8 @@
   images: images
   ignore: ignore
   IGNORE: Ignore
+  GLOSSARY: Glossary
+  glossary: glossary
   herbaria: herbaria
   HERBARIA: Herbaria
   herbarium: herbarium
@@ -280,6 +286,8 @@
   naming: proposed name
   NAMINGS: Proposed Names
   namings: proposed names
+  NEWS: News
+  news: news
   NOTIFICATION: Notification
   notification: notification
   NOTIFICATIONS: Notifications
@@ -355,7 +363,7 @@
   admin_group: admin group
   ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
-  # ("Author" is person who wrote a book or description.)
+  # ("Author" is person(s) who wrote a book, description, or news Article.)
   AUTHOR: Author
   author: author
   AUTHORS: Authors
@@ -710,6 +718,7 @@
   and_num_more: And [num] more...
   are_you_sure: Are you sure?
   click_for_map: Click for map
+  EDITING: Editing
   google_images: Google Images
   show_on_map: Show on map
   many_times: "[num] times"
@@ -979,6 +988,9 @@
   log_updated_by: Updated by [user].
 
   # These should not need any translation.
+  log_article_created_at: "[:log_object_created_by_user(type=:article)]"
+  log_article_destroyed:  "[:log_object_destroyed_by_user(type=:article)]"
+  log_article_updated_at: "[:log_object_updated_by_user(type=:article)]"
   log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
   log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
   log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
@@ -1057,7 +1069,6 @@
   app_latest_changes: Changes by Users
   app_newest_images: "[:IMAGES]"
   app_comments: "[:COMMENTS]"
-  app_news: Release
   app_observations_left: "[:OBSERVATIONS]"
   app_create_observation: "[:create_object(type=:observation)]"
   app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
@@ -1093,7 +1104,6 @@
   app_powered_by: Powered by
   app_preferred_browser: Preferred browser
   app_feature_tracker: Feature Tracker
-  app_glossary: Glossary
   app_publications: Publications
   app_more: More
   app_other: Other
@@ -1707,6 +1717,8 @@
   shared_textile_link: More details here.
   shared_textile_help: Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
+  field_textile_link: This field can be formatted with <a href="/observer/textile" target="_new">Textile</a>.
+
   # comment/_show_comments
   show_comments_add_comment: "[:add_object(type=:comment)]"
   show_comments_no_comments_yet: No one has commented yet.
@@ -2047,6 +2059,24 @@
   edit_glossary_term_title: "Editing Glossary Term: [name]"
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
+
+  ### news Article ###
+  #   news Article Fields
+  article_title: Title
+  article_body:  Body
+
+  #   news Article Actions
+  # article/create_article
+  create_article_title: "[:create_object(type=:article)]"
+  article_body_required: "[:article_body] [:REQUIRED]"
+  article_title_required: "[:article_title] [:REQUIRED]"
+  form_article_title_help: "This field will appear in the Activity Feed."
+
+  # article/show_article
+  show_article: "[:show_object(type=:article)]"
+
+  # article/index_article
+  index_article: "[:ARTICLE] Index"
 
   # ConferenceEvent Fields
   conference_event_name: Name
@@ -3281,6 +3311,7 @@
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
 
   # These shouldn't need translating, but you are free to override if you need to.
+  runtime_edit_article_success: "[:runtime_updated_id(type=:article,value=id)]"
   runtime_ask_observation_question_success: "[:runtime_delivered_question]"
   runtime_ask_user_question_success: "[:runtime_delivered_question]"
   runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"

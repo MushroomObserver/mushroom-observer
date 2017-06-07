@@ -1,5 +1,3 @@
-# encoding: utf-8
-#
 #  = RSS Log Model
 #
 #  This model handles the RSS feed.  Every object we care about gets an RssLog
@@ -20,6 +18,8 @@
 #  * Observation
 #  * Project
 #  * SpeciesList
+#  * GlossaryTerm
+#  * Article
 #
 #  == Adding RssLog to Model
 #
@@ -63,6 +63,14 @@
 #         ]
 #       }
 #
+#  Above is somewhat dated. Also:
+#  Inform model which events to log:
+#        self.autolog_events = [:created_at!, :updated_at!]
+#  Inform model how to display its name when logging created_at and destroyed
+#         def unique_format_name
+#         def format_name
+#
+#
 #  == Usage
 #
 #  AbstractModel provides a standardized interface for all models that handle
@@ -92,7 +100,9 @@
 #    20091214035011 log_observation_destroyed user douglas
 #    20090722075919 log_image_created name 51164 user douglas
 #    20090722075919 log_image_created name 51163 user douglas
-#    20090722075919 log_consensus_changed new **__Russula%20chloroides__**%20Krbh. old **__Fungi%20sp.__**%20L.
+#    20090722075919 log_consensus_changed
+#      new **__Russula%20chloroides__**%20Krbh.
+#      old **__Fungi%20sp.__**%20L.
 #    20090722075918 log_observation_created user douglas
 #
 #  *NOTE*: All non-alphanumeric characters are escaped via private class
@@ -145,6 +155,7 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
   belongs_to :glossary_term
+  belongs_to :article
 
   # Override the default show_controller
   def self.show_controller
@@ -154,12 +165,18 @@ class RssLog < AbstractModel
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
   def self.all_types
-    %w(observation name location species_list project glossary_term)
+    %w(observation name location species_list project glossary_term article)
   end
 
   # Returns the associated object, or nil if it's an orphan.
   def target
-    location || name || observation || project || species_list || glossary_term
+    location ||
+      name ||
+      observation ||
+      project ||
+      species_list ||
+      glossary_term ||
+      article
   end
 
   # Returns the associated object's id, or nil if it's an orphan.
@@ -169,13 +186,14 @@ class RssLog < AbstractModel
       observation_id ||
       project_id ||
       species_list_id ||
-      glossary_term_id
+      glossary_term_id ||
+      article_id
   end
 
   # Return the type of object of the target, e.g., :observation.
   def target_type
     location_id ? :location : name_id ? :name : observation_id ? :observation : project_id ? :project : species_list_id ? :species_list :
-    glossary_term_id ? :glossary_term : nil
+    glossary_term_id ? :glossary_term : article_id ? :article : nil
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an
@@ -248,18 +266,23 @@ class RssLog < AbstractModel
   # URL.
   def url
     if location_id
-      sprintf("/location/show_location/%d?time=%d", location_id, updated_at.tv_sec)
+      sprintf("/location/show_location/%d?time=%d", location_id,
+              updated_at.tv_sec)
     elsif name_id
       sprintf("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observer/show_observation/%d?time=%d", observation_id, updated_at.tv_sec)
+      sprintf("/observer/show_observation/%d?time=%d", observation_id,
+              updated_at.tv_sec)
     elsif project_id
       sprintf("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/observer/show_species_list/%d?time=%d", species_list_id, updated_at.tv_sec)
+      sprintf("/observer/show_species_list/%d?time=%d", species_list_id,
+              updated_at.tv_sec)
     elsif glossary_term_id
       sprintf("/glossary/show_glossary_term/%d?time=%d",
               glossary_term_id, updated_at.tv_sec)
+    elsif article_id
+      sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
       sprintf("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
