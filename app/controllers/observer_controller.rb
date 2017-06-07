@@ -8,8 +8,6 @@ class ObserverController < ApplicationController
   # These need to be moved into the files where they are actually used.
   require "find"
   require "set"
-  require_dependency "observation_report"
-  require_dependency "pattern_search"
 
   # These will mostly form the new ObservationController:
   require_dependency "observer_controller/show_observation"
