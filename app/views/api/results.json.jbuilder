@@ -1,8 +1,6 @@
 json.version @api.version
 json.run_date @start_time
-if @api.user
-  json.user @api.user.id
-end
+json.user @api.user.id if @api.user
 
 unless @api.errors.any?(&:fatal)
   if @api.query
@@ -21,12 +19,12 @@ unless @api.errors.any?(&:fatal)
   end
 end
 
-if @api.errors.length > 0
+unless @api.errors.empty?
   json.errors @api.errors do |error|
     json.code    error.class.name
     json.details error.to_s
     json.fatal   error.fatal ? "true" : "false"
-    unless Rails.env == "production" or !error.backtrace
+    if Rails.env != "production" && error.backtrace
       json.trace error.backtrace.join("\n")
     end
   end
