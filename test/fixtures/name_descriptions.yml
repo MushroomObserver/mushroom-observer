@@ -3,82 +3,46 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# Name with notes (not mergeable)
-agaricus_campestras_desc: # old id: 1
-  name: agaricus_campestras
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  user: rolf
-  version: 1
-  notes: This should... ¡prevent me from merging!
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
+DEFAULTS: &DEFAULTS
+  admin_groups:  reviewers
+  public:        1
   reader_groups: all_users
+  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
+  source_type:   <%= NameDescription.source_types[:public] %>
+  user:          rolf
+  version:       1
   writer_groups: all_users
+
+# Name with notes (not mergeable)
+agaricus_campestras_desc:
+  <<: *DEFAULTS
+  name: agaricus_campestras
+  notes: This should... ¡prevent me from merging!
 
 # Another name with notes (not mergeable)
-agaricus_campestros_desc: # old id: 2
+agaricus_campestros_desc:
+  <<: *DEFAULTS
   name: agaricus_campestros
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  user: rolf
-  version: 1
   notes: Need two to get an error
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
-russula_brevipes_author_notes_desc: # old id: 3
+russula_brevipes_author_notes_desc:
+  <<: *DEFAULTS
   name: russula_brevipes_author_notes
-  created_at: 2008-03-10 22:33:00
-  updated_at: 2008-03-10 22:33:05
-  user: rolf
-  version: 1
   notes: Here are some notes
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
-russula_cremoricolor_no_author_notes_desc: # old id: 4
+russula_cremoricolor_no_author_notes_desc:
+  <<: *DEFAULTS
   name: russula_cremoricolor_no_author_notes
-  created_at: 2008-03-12 20:53:08
-  updated_at: 2008-03-12 20:53:18
-  user: rolf
-  version: 1
   notes: Here are some notes
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
-russula_cremoricolor_author_notes_desc: # old id: 5
+russula_cremoricolor_author_notes_desc:
+  <<: *DEFAULTS
   name: russula_cremoricolor_author_notes
-  created_at: 2008-03-12 20:53:36
-  updated_at: 2008-03-12 20:53:40
-  user: rolf
-  version: 1
   notes: Some different notes
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
-peltigera_desc: # old id: 6
+peltigera_desc:
+  <<: *DEFAULTS
   name: peltigera
-  created_at: 2009-01-01 01:01:01
-  updated_at: 2009-01-02 01:01:01
   user: dick
   version: 2
   reviewer: rolf
@@ -94,35 +58,19 @@ peltigera_desc: # old id: 6
   habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
-suillus_desc: # old id: 7
+suillus_desc:
+  <<: *DEFAULTS
   name: suillus
-  created_at: 2009-10-12 21:30:01
-  updated_at: 2009-10-12 21:30:01
   user: dick
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
   gen_desc: A __Suillus__ by any other name would smell as sweet...
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
-  reader_groups: all_users
-  writer_groups: all_users
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
-draft_coprinus_comatus: # old id: 8
+draft_coprinus_comatus:
+  <<: *DEFAULTS
   name: coprinus_comatus
   user: katrina
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
   gen_desc: This is a general description of __C. comatus__.
-  created_at: 2008-10-05 12:31:10
-  updated_at: 2008-10-05 12:31:12
   source_type: <%= NameDescription.source_types[:project] %>
   source_name: EOL Project
   project: eol_project
@@ -133,30 +81,23 @@ draft_coprinus_comatus: # old id: 8
   writer_groups: eol_admins, katrina_only
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
-draft_agaricus_campestris: # old id: 9
+draft_agaricus_campestris:
+  <<: *DEFAULTS
   name: agaricus_campestris
   user: mary
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  created_at: 2008-10-05 12:37:33
-  updated_at: 2008-10-05 12:37:35
   source_type: <%= NameDescription.source_types[:project] %>
   source_name: EOL Project
   project: eol_project
-  public: 1
   admin_groups: eol_admins, mary_only
   authors: mary
   reader_groups: eol_users, mary_only
   writer_groups: eol_admins, mary_only
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
-draft_boletus_edulis: # old id: 10
+draft_boletus_edulis:
+  <<: *DEFAULTS
   name: boletus_edulis
   user: dick
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  created_at: 2008-10-05 16:19:45
-  updated_at: 2008-10-05 16:19:45
   source_type: <%= NameDescription.source_types[:project] %>
   source_name: Bolete Project
   project: bolete_project
@@ -167,13 +108,10 @@ draft_boletus_edulis: # old id: 10
   writer_groups: bolete_admins, dick_only
 
 # A draft of Lactarius alpinus with a bad classification field
-draft_lactarius_alpinus: # old id: 11
+draft_lactarius_alpinus:
+  <<: *DEFAULTS
   name: lactarius_alpinus
   user: katrina
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  created_at: 2009-05-04 16:19:45
-  updated_at: 2009-05-04 19:56:25
   classification: "**Domain**: Eukarya"
   source_type: <%= NameDescription.source_types[:project] %>
   source_name: EOL Project
@@ -184,29 +122,17 @@ draft_lactarius_alpinus: # old id: 11
   reader_groups: eol_users, katrina_only
   writer_groups: eol_admins, katrina_only
 
-peltigera_alt_desc: # old id: 12
+peltigera_alt_desc:
+  <<: *DEFAULTS
   name: peltigera
-  created_at: 2010-01-01 01:01:01
-  updated_at: 2010-01-01 01:01:01
-  user: rolf
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
   ok_for_export: 1
   gen_desc: "Another general description of _Peltigera_."
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
   authors: rolf
-  reader_groups: all_users
-  writer_groups: all_users
 
-peltigera_user_desc: # old id: 13
+peltigera_user_desc:
+  <<: *DEFAULTS
   name: peltigera
-  created_at: 2010-01-02 01:01:01
-  updated_at: 2010-01-02 01:01:01
   user: mary
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
   ok_for_export: 1
   gen_desc: "Mary's general description of _Peltigera_."
   source_type: <%= NameDescription.source_types[:user] %>
@@ -216,34 +142,28 @@ peltigera_user_desc: # old id: 13
   reader_groups: mary_only, dick_only
   writer_groups: mary_only, dick_only
 
-peltigera_source_desc: # old id: 14
+peltigera_source_desc:
+  <<: *DEFAULTS
   name: peltigera
-  created_at: 2010-01-03 01:01:01
-  updated_at: 2010-01-03 01:01:01
   user: katrina
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
   ok_for_export: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
   source_type: <%= NameDescription.source_types[:source] %>
   source_name: Lichens of North America
-  public: 1
   admin_groups: katrina_only
   authors: katrina
-  reader_groups: all_users
   writer_groups: katrina_only
 
-coprinus_comatus_desc: # old id: 15
+coprinus_comatus_desc:
+  <<: *DEFAULTS
   name: coprinus_comatus
-  created_at: 2007-06-23 20:04:00
-  updated_at: 2007-06-23 20:04:00
-  user: rolf
-  version: 1
-  review_status: <%= NameDescription.review_statuses[:unreviewed] %>
-  source_type: <%= NameDescription.source_types[:public] %>
-  public: 1
-  admin_groups: reviewers
   authors: rolf
   editors: rolf, mary
-  reader_groups: all_users
-  writer_groups: all_users
+
+mergeable_description_notes_desc:
+  name:  mergeable_description_notes
+  notes: Notes for $LABEL
+
+mergeable_second_description_notes_desc:
+  name:  mergeable_second_description_notes
+  notes: Notes for $LABEL

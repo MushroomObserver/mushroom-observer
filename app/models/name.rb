@@ -153,17 +153,19 @@
 #                              fills in authors if supplied.
 #  find_or_create_name_and_parents:: Look up Name, create it,
 #                              return it and parents.
-#  parse_name::              Parse arbitrary taxon, return parts.
-#  parse_author::            Grab the author from the end of a name.
-#  parse_group::             Parse "Whatever group" or "whatever clade".
-#  parse_genus_or_up::       Parse "Xxx".
-#  parse_subgenus::          Parse "Xxx subgenus yyy".
-#  parse_section::           Parse "Xxx sect. yyy".
-#  parse_stirps::            Parse "Xxx stirps yyy".
-#  parse_species::           Parse "Xxx yyy".
-#  parse_subspecies::        Parse "Xxx yyy subsp. zzz".
-#  parse_variety::           Parse "Xxx yyy var. zzz".
-#  parse_form::              Parse "Xxx yyy f. zzz".
+#  extant_match_to_parsed_name :: 1st existing Name matching ParsedName
+#  new_name_from_parsed_name:: Make new Name instance from a ParsedName
+#  parse_name::               Parse arbitrary taxon, return parts.
+#  parse_author::             Grab the author from the end of a name.
+#  parse_group::              Parse "Whatever group" or "whatever clade".
+#  parse_genus_or_up::        Parse "Xxx".
+#  parse_subgenus::           Parse "Xxx subgenus yyy".
+#  parse_section::            Parse "Xxx sect. yyy".
+#  parse_stirps::             Parse "Xxx stirps yyy".
+#  parse_species::            Parse "Xxx yyy".
+#  parse_subspecies::         Parse "Xxx yyy subsp. zzz".
+#  parse_variety::            Parse "Xxx yyy var. zzz".
+#  parse_form::               Parse "Xxx yyy f. zzz".
 #
 #  ==== Other
 #  primer::                  List of names used for priming auto-completer.
@@ -236,6 +238,9 @@
 #  ==== Merging
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
+#
+#  ==== Editing
+#  changeable?(user) ::      May user change this Name?
 #
 #  == Callbacks
 #
@@ -1398,129 +1403,6 @@ class Name < AbstractModel
     true
   end
 
-  ################################################################################
-  #
-  #  :section: Merging
-  #
-  ################################################################################
-
-  # Is it safe to merge this Name with another?  If any information will get
-  # lost we return false.  In practice only if it has Namings.
-  def mergeable?
-    namings.length == 0
-  end
-
-  # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
-  # changes are made to +self+, however it might update the +classification+
-  # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
-  # destroyed; all the things that referred to +old_name+ are updated and
-  # saved.
-  def merge(old_name)
-    xargs = {}
-
-    # Move all observations over to the new name.
-    for obs in old_name.observations
-      obs.name = self
-      obs.save
-    end
-
-    # Move all namings over to the new name.
-    for name in old_name.namings
-      name.name = self
-      name.save
-    end
-
-    # Move all misspellings over to the new name.
-    for name in old_name.misspellings
-      if name == self
-        name.correct_spelling = nil
-      else
-        name.correct_spelling = self
-      end
-      name.save
-    end
-
-    # Move over any interest in the old name.
-    # for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
-    for int in Interest.where(target_type: "Name", target_id: old_name.id)
-      int.target = self
-      int.save
-    end
-
-    # Move over any notifications on the old name.
-    Notification.where(flavor: Notification.flavors[:name],
-                       obj_id: old_name.id).each do |note|
-      note.obj_id = id
-      note.save
-    end
-
-    #     # Merge the two "main" descriptions if it can.
-    #     if self.description and old_name.description and
-    #        (self.description.source_type == :public) and
-    #        (old_name.description.source_type == :public)
-    #       self.description.merge(old_name.description, true)
-    #     end
-
-    # If this one doesn't have a primary description and the other does,
-    # then make it this one's.
-    if !description && old_name.description
-      self.description = old_name.description
-    end
-
-    # Update the classification cache if that changed in the process.
-    if description &&
-       (classification != description.classification)
-      self.classification = description.classification
-    end
-
-    # Move over any remaining descriptions.
-    for desc in old_name.descriptions
-      xargs = {
-        id: desc,
-        set_name: self
-      }
-      desc.name_id = id
-      desc.save
-    end
-
-    # Log the action.
-    old_name.rss_log.orphan(old_name.display_name, :log_name_merged,
-                            this: old_name.display_name, that: display_name) if old_name.rss_log
-
-    # Destroy past versions.
-    editors = []
-    for ver in old_name.versions
-      editors << ver.user_id
-      ver.destroy
-    end
-
-    # Update contributions for editors.
-    editors.delete(old_name.user_id)
-    for user_id in editors.uniq
-      SiteData.update_contribution(:del, :names_versions, user_id)
-    end
-
-    # Fill in citation if new name is missing one.
-    if citation.blank? && !old_name.citation.blank?
-      self.citation = old_name.citation.strip_squeeze
-    end
-
-    # Save any notes the old name had.
-    if old_name.has_notes? && (old_name.notes != notes)
-      if has_notes?
-        self.notes += "\n\nThese notes come from #{old_name.format_name} when it was merged with this name:\n\n" +
-                      old_name.notes
-      else
-        self.notes = old_name.notes
-      end
-      log(:log_name_updated, touch: true)
-      save
-    end
-
-    # Finally destroy the name.
-    old_name.destroy
-  end
-
   ##############################################################################
   #
   #  :section: Parsing Names
@@ -2210,7 +2092,8 @@ class Name < AbstractModel
   end
 
   # make a Name given all the various name formats, etc.
-  # Used only by +make_name+, and +create_test_name+ in unit test.
+  # Used only by +make_name+, +new_name_from_parsed_name+, and
+  # +create_test_name+ in unit test.
   # Returns a Name instance, *UNSAVED*!!
   def self.new_name(params)
     result = Name.new(params)
@@ -2219,11 +2102,61 @@ class Name < AbstractModel
     result
   end
 
+  # Make a Name instance from a ParsedName
+  # Used by NameController#create_new_name
+  # Returns a Name instance, *UNSAVED*!!
+  def self.new_name_from_parsed_name(parsed_name)
+    new_name(parsed_name.params)
+  end
+
+  # Return extant Names matching a desired new Name
+  # Used by NameController#create_name
+  def self.names_matching_desired_new_name(parsed_name)
+    # authored :Group ParsedName must be matched exactly
+    if parsed_name.rank == :Group
+      Name.where(search_name: parsed_name.search_name)
+    # unauthored ParsedName matches Names with or w/o authors
+    elsif parsed_name.author.empty?
+      Name.where(text_name: parsed_name.text_name)
+    # authored non-:Group ParsedName matched by exact & authorless extant Names
+    else
+      Name.
+        where(text_name: parsed_name.text_name).
+        where(author: [parsed_name.author, ""])
+    end
+  end
+
   ################################################################################
   #
   #  :section: Changing Name
   #
   ################################################################################
+
+  # May user edit this name?
+  def changeable?(user = @user)
+    noone_else_owns_references_to_name?(user)
+  end
+
+  def noone_else_owns_references_to_name?(user)
+    all_references.each { |obj| return false if obj.user_id != user.id }
+    true
+  end
+
+  # The references which a User must own in order to edit name
+  def all_references
+    namings + observations
+  end
+
+  # Return extant Names matching a desired changed Name
+  # When matching a desired changed name, get exact matches.
+  # This allows authored/unauthored pairs at all Ranks.
+  # We assume than when editing a Name, a User is making a deliberate choice.
+  # This contrasts with creating a Name, where we assume that the User may be
+  # overlooking an extant Name.
+  # Used by NameController#edit_name
+  def self.names_matching_desired_changed_name(parsed_name)
+    Name.where(search_name: parsed_name.search_name)
+  end
 
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
@@ -2283,6 +2216,129 @@ class Name < AbstractModel
     self.display_name = name
     self.deprecated = deprecated
     # synonym.choose_accepted_name if synonym
+  end
+
+  ################################################################################
+  #
+  #  :section: Merging
+  #
+  ################################################################################
+
+  # Is it safe to merge this Name with another?  If any information will get
+  # lost we return false.  In practice only if it has Namings.
+  def mergeable?
+    namings.length == 0
+  end
+
+  # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
+  # changes are made to +self+, however it might update the +classification+
+  # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
+  # destroyed; all the things that referred to +old_name+ are updated and
+  # saved.
+  def merge(old_name)
+    xargs = {}
+
+    # Move all observations over to the new name.
+    for obs in old_name.observations
+      obs.name = self
+      obs.save
+    end
+
+    # Move all namings over to the new name.
+    for name in old_name.namings
+      name.name = self
+      name.save
+    end
+
+    # Move all misspellings over to the new name.
+    for name in old_name.misspellings
+      if name == self
+        name.correct_spelling = nil
+      else
+        name.correct_spelling = self
+      end
+      name.save
+    end
+
+    # Move over any interest in the old name.
+    # for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
+    for int in Interest.where(target_type: "Name", target_id: old_name.id)
+      int.target = self
+      int.save
+    end
+
+    # Move over any notifications on the old name.
+    Notification.where(flavor: Notification.flavors[:name],
+                       obj_id: old_name.id).each do |note|
+      note.obj_id = id
+      note.save
+    end
+
+    #     # Merge the two "main" descriptions if it can.
+    #     if self.description and old_name.description and
+    #        (self.description.source_type == :public) and
+    #        (old_name.description.source_type == :public)
+    #       self.description.merge(old_name.description, true)
+    #     end
+
+    # If this one doesn't have a primary description and the other does,
+    # then make it this one's.
+    if !description && old_name.description
+      self.description = old_name.description
+    end
+
+    # Update the classification cache if that changed in the process.
+    if description &&
+       (classification != description.classification)
+      self.classification = description.classification
+    end
+
+    # Move over any remaining descriptions.
+    for desc in old_name.descriptions
+      xargs = {
+        id: desc,
+        set_name: self
+      }
+      desc.name_id = id
+      desc.save
+    end
+
+    # Log the action.
+    old_name.rss_log.orphan(old_name.display_name, :log_name_merged,
+                            this: old_name.display_name, that: display_name) if old_name.rss_log
+
+    # Destroy past versions.
+    editors = []
+    for ver in old_name.versions
+      editors << ver.user_id
+      ver.destroy
+    end
+
+    # Update contributions for editors.
+    editors.delete(old_name.user_id)
+    for user_id in editors.uniq
+      SiteData.update_contribution(:del, :names_versions, user_id)
+    end
+
+    # Fill in citation if new name is missing one.
+    if citation.blank? && !old_name.citation.blank?
+      self.citation = old_name.citation.strip_squeeze
+    end
+
+    # Save any notes the old name had.
+    if old_name.has_notes? && (old_name.notes != notes)
+      if has_notes?
+        self.notes += "\n\nThese notes come from #{old_name.format_name} when it was merged with this name:\n\n" +
+                      old_name.notes
+      else
+        self.notes = old_name.notes
+      end
+      log(:log_name_updated, touch: true)
+      save
+    end
+
+    # Finally destroy the name.
+    old_name.destroy
   end
 
   ################################################################################

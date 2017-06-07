@@ -105,3 +105,37 @@ all_namings_deprecated_other_naming:
   observation: all_namings_deprecated_obs
   name:        namings_deprecated_2
   vote_cache:  <%= Vote.next_best_vote %>
+
+authored_with_naming_obs_authored_naming:
+  user:        rolf
+  observation: authored_with_naming_obs
+  name:        authored_with_naming
+  vote_cache:  <%= Vote.maximum_vote %>
+
+authored_with_naming_obs_unauthored_naming:
+  user:        dick
+  observation: authored_with_naming_obs
+  name:        unauthored_with_naming
+  vote_cache:  <%= Vote.next_best_vote %>
+
+# dick owns the Name and Observation, but mary owns a Naming
+other_user_owns_naming:
+  user:        mary
+  observation: other_user_owns_naming_obs
+  name:        other_user_owns_naming_name
+  vote_cache:  <%= Vote.next_best_vote %>
+
+# dick owns the Name and Naming, but mary owns an Observation
+other_user_owns_obs_naming:
+  user:        dick
+  observation: other_user_owns_obs
+  name:        other_user_owns_observation
+  vote_cache:  <%= Vote.next_best_vote %>
+
+# dick owns the Name and the only Observation and Naming
+same_user_owns_name_and_observation:
+  user:        dick
+  observation: same_user_owns_name_and_naming_obs
+  name:        same_user_owns_naming_and_observation
+  vote_cache:  <%= Vote.next_best_vote %>
+
