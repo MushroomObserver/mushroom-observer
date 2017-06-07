@@ -64,6 +64,13 @@ class ApiControllerTest < FunctionalTestCase
     end
   end
 
+  # Test that the number of pages is being correctly calculated
+  def test_num_of_pages
+    get(:observations, detail: :high, format: :json)
+    json = JSON.parse(response.body)
+    assert_equal(4, json["number_of_pages"], "Number of pages was not correctly calculated")
+  end
+
   def test_post_minimal_observation
     post(:observations,
          api_key: api_keys(:rolfs_api_key).key,

@@ -13,3 +13,6 @@ lactarius_alpinus_synonym:
 
 peltigera_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:peltigera_synonym) %>
+
+namings_deprecated_synonym:
+  id: <%= ActiveRecord::FixtureSet.identify(:namings_deprecated_synonym) %>

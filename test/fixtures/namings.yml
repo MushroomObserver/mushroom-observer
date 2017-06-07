@@ -3,23 +3,16 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 minimal_unknown_naming:
-  # id: 1
   user: mary
   name: fungi
   observation: minimal_unknown_obs
 
 detailed_unknown_naming:
-  # id: 2
-  created_at: 2006-05-12 17:20:00
-  updated_at: 2006-05-12 17:21:00
   user: mary
   name: fungi
   observation: detailed_unknown_obs
 
 coprinus_comatus_naming:
-  # id: 3
-  created_at: 2007-02-27 20:20:00
-  updated_at: 2007-02-27 20:21:00
   user: rolf
   name: coprinus_comatus
   observation: coprinus_comatus_obs
@@ -27,48 +20,33 @@ coprinus_comatus_naming:
   reasons: "---\n1: Isn't it obvious?\n"
 
 agaricus_campestris_naming:
-  # id: 4
-  created_at: 2007-03-19 20:20:00
-  updated_at: 2007-03-19 20:21:00
   user: rolf
   name: agaricus_campestris
   observation: agaricus_campestris_obs
 
 agaricus_campestrus_naming:
-  # id: 5
-  created_at: 2007-06-23 20:00:00
-  updated_at: 2007-06-23 20:00:00
   user: rolf
   name: agaricus_campestrus
   observation: agaricus_campestrus_obs
 
 agaricus_campestras_naming:
-  # id: 6
-  created_at: 2007-06-24 12:00:00
-  updated_at: 2007-06-24 12:00:00
   user: rolf
   name: agaricus_campestras
   observation: agaricus_campestras_obs
 
 agaricus_campestros_naming:
-  # id: 7
-  created_at: 2007-06-24 12:00:00
-  updated_at: 2007-06-24 12:00:00
   user: rolf
   name: agaricus_campestros
   observation: agaricus_campestros_obs
 
 strobilurus_diminutivus_naming:
-  # id: 8
-  created_at: 2007-07-20 20:54:45
-  updated_at: 2007-07-20 20:54:45
   user: rolf
   name: strobilurus_diminutivus_no_author
   observation: strobilurus_diminutivus_obs
   vote_cache: 0
 
+# dates are hard-coded expects in AccountMailerTest test_name_proposal_email
 coprinus_comatus_other_naming:
-  # id: 9
   created_at: 2007-02-28 20:20:00
   updated_at: 2007-02-28 20:21:00
   user: mary
@@ -77,49 +55,53 @@ coprinus_comatus_other_naming:
   reasons: "---\n1: \"\"\n2: I asked *Uncle Herb*\n"
 
 boletus_edulis_naming:
-  # id: 10
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: dick
   name: boletus_edulis
   observation: owner_only_favorite_eq_consensus
 
 tremella_naming:
-  # id: 11
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: junk
   name: tremella
   observation: owner_only_favorite_ne_consensus
 
 tremella_mesenterica_naming:
-  # id: 12
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: dick
   name: tremella_mesenterica
   observation: owner_only_favorite_ne_consensus
 
 owner_multiple_favorites_first_naming:
-  # id: 13
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: dick
   name: tremella
   observation: owner_multiple_favorites
 
 owner_multiple_favorites_second_naming:
-  # id: 14
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: dick
   name: tremella_mesenterica
   observation: owner_multiple_favorites
 
 owner_uncertain_favorite_naming:
-  # id: 15
-  created_at: 2015-10-08 15:41:00
-  updated_at: 2015-10-08 15:41:00
   user: dick
   name: tremella_mesenterica
   observation: owner_uncertain_favorite
+
+unequal_positive_namings_top_naming:
+  user: dick
+  name: tremella_mesenterica
+  observation: unequal_positive_namings_obs
+
+unequal_positive_namings_2nd_naming:
+  user: dick
+  name: tremella
+  observation: unequal_positive_namings_obs
+
+all_namings_deprecated_winning_naming:
+  user:        dick
+  observation: all_namings_deprecated_obs
+  name:        namings_deprecated_1
+  vote_cache:  <%= Vote.maximum_vote %>
+
+all_namings_deprecated_other_naming:
+  user:        rolf
+  observation: all_namings_deprecated_obs
+  name:        namings_deprecated_2
+  vote_cache:  <%= Vote.next_best_vote %>

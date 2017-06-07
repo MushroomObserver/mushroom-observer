@@ -306,3 +306,15 @@ unlisted_rolf_obs:
   location: point_reyes
   user: rolf
   when: 2017-01-20
+
+# default user (dick) has unequal positive namings
+# used for testing change vote
+unequal_positive_namings_obs:
+  <<: *DEFAULTS
+  when: 2017-03-29
+
+# used for testing calc_consensus
+all_namings_deprecated_obs:
+  <<: *DEFAULTS
+  when: 2017-03-29
+  name: namings_deprecated

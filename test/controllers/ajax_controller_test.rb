@@ -163,8 +163,8 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
     assert_equal(expect, @response.body.split("\n"))
 
-    good_ajax_request(:auto_complete, type: :name, id: "Xystus")
-    assert_equal(["X"], @response.body.split("\n"))
+    good_ajax_request(:auto_complete, type: :name, id: "Umbilicaria")
+    assert_equal(["U"], @response.body.split("\n"))
   end
 
   def test_auto_complete_project
