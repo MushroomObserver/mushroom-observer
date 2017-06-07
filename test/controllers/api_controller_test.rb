@@ -11,8 +11,8 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def format_api_errors(api, msg)
-    lines = [ msg, "Caught API Errors:" ]
-    lines += @api.errors.map do |error|
+    lines = [msg, "Caught API Errors:"]
+    lines += api.errors.map do |error|
       error.to_s + "\n" + error.trace.join("\n")
     end
     lines.reject(&:blank?).join("\n")
@@ -64,7 +64,7 @@ class ApiControllerTest < FunctionalTestCase
       Project,
       SpeciesList,
       User
-    ].each {|model| do_basic_get_request_for_model(model)}
+    ].each { |model| do_basic_get_request_for_model(model) }
   end
 
   def do_basic_get_request_for_model(model)
