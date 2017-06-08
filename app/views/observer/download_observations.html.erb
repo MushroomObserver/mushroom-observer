@@ -28,6 +28,10 @@
       <%= radio_button_tag(:format, :symbiota, @format == "symbiota") %>
       <%= :download_observations_symbiota.t %>
     </li>
+    <li>
+      <%= radio_button_tag(:format, :mycoflora, @format == "mycoflora") %>
+      <%= :download_observations_mycoflora.t %>
+    </li>
   </ul>
 
   <p><%= :download_observations_encoding.t %>:</p>
