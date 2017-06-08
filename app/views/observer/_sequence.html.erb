@@ -3,10 +3,14 @@
   <% if sequence.archive.present? %>
     <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>
     <%= truncate(sequence.archive, length: 16).t %>
-    <%= truncate(sequence.accession, length: 16).t  %>
+    <%= truncate(sequence.accession, length: 16).t %>
   <% else %>
     <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>:
     <%= truncate(sequence.bases, length: 32) %>
+  <% end %>
+  <%= link_with_query(:SHOW.t, sequence.show_link_args) %>
+  <% if check_permission(@observation) || check_permission(sequence) %>
+    <%= link_with_query(:EDIT.t, sequence.show_link_args) %>
   <% end %>
   <br>
 </div>
