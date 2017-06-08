@@ -83,10 +83,8 @@
             <%= link_to(:species_list_show_print_labels.t,
                         controller: :species_list, action: :print_labels,
                         id: @species_list.id) %> |
-            <%= link_to(:DOWNLOAD.t,
-                        add_query_param({ controller: :observer,
-                                          action: :download_observations },
-                                        @query)) %>
+            <%= link_with_query(:DOWNLOAD.t, controller: :observer,
+                                            action: :download_observations) %>
           </div>
 
           <% if @objects.any? %>
