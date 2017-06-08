@@ -20,4 +20,48 @@ class SequenceControllerTest < FunctionalTestCase
     get(:add_sequence, id: obs.id)
     assert_response(:success)
   end
+
+  def test_add_sequence_post
+    obs   = observations(:coprinus_comatus_obs)
+    owner = obs.user
+    locus = "ITS"
+    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"\
+            "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac"\
+            "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac"\
+            "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt"\
+            "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg"\
+            "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt"\
+            "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga"\
+            "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga"\
+            "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
+            "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    params = {
+               id: obs.id,
+               sequence: { locus: locus,
+                           bases: bases }
+             }
+
+    # Prove unauthorized User cannot add Sequence
+    old_count = Sequence.count
+    login(users(:zero_user).login)
+
+    post(:add_sequence, params)
+    assert_flash_text(:permission_denied.l)
+    assert_equal(old_count, Sequence.count)
+    assert_empty(obs.sequences)
+    assert_redirected_to(controller: :observer, action: :show_observation)
+
+    # Prove authorized user can create non-repository Sequence
+    login(owner.login)
+    post(:add_sequence, params)
+    assert_equal(old_count + 1, Sequence.count)
+    sequence = Sequence.last
+    assert_equal(obs, sequence.observation)
+    assert_equal(locus, sequence.locus)
+    assert_equal(bases, sequence.bases)
+    assert_empty(sequence.archive)
+    assert_empty(sequence.accession)
+    assert_redirected_to(controller: :observer, action: :show_observation)
+
+  end
 end
