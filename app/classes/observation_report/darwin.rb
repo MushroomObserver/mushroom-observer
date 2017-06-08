@@ -1,4 +1,5 @@
 module ObservationReport
+  # Darwin format.
   class Darwin < ObservationReport::CSV
     def labels
       %w(
