@@ -29,8 +29,10 @@
     <div id="observation_sequences">
       <span class="bold">
         <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
-      </span>
-      <%= add_sequence_link(observation) %><br>
+      </span><%= add_sequence_link(observation) %><br>
+      <div class="list-group")>
+        <%= render(partial: "sequence", collection: observation.sequences) %>
+      </div>
    </div>
 
     <%= if !observation.notes.blank?

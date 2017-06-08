@@ -1,0 +1,12 @@
+<!-- list sequences in show_observeration -->
+<div class="indent">
+  <% if sequence.archive.present? %>
+    <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>
+    <%= truncate(sequence.archive, length: 16).t %>
+    <%= truncate(sequence.accession, length: 16).t  %>
+  <% else %>
+    <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>:
+    <%= truncate(sequence.bases, length: 32) %>
+  <% end %>
+  <br>
+</div>
