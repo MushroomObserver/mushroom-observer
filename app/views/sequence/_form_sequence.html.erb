@@ -1,37 +1,38 @@
-<!--[form:article]-->
-<div class="form-group push-down">
-  <%= label_tag(:sequence_locus, :form_sequence_locus.t + ":") %>
-  <%= text_area(:sequence, :locus, rows: 1, class: "form-control") %>
-  <div class="help-block">
-    <%= :form_sequence_locus_help.t %>
-  </div>
-</div>
-<div class="form-group push-down">
-  <%= label_tag(:sequence_bases, :form_sequence_bases.t + ":") %>
-  <%= text_area(:sequence, :bases, rows: 3, class: "form-control") %>
-  <div class="help-block">
-    <%= :form_sequence_bases_help.t %>
-  </div>
-</div>
-<div class="form-group push-down">
-  <%= label_tag(:sequence_archive, :form_sequence_archive.t + ":") %>
-  <%= form.text_field(:archive, class: "form-control") %>
-  <div class="help-block">
-    <%= :form_sequence_archive_help.t %>
-  </div>
-</div>
-<div class="form-group push-down">
-  <%= label_tag(:sequence_accession, :form_sequence_accession.t + ":") %>
-  <%= form.text_field(:accession, class: "form-control") %>
-  <div class="help-block">
-    <%= :form_sequence_accession_help.t %>
-  </div>
-</div>
-<div class="form-group push-down">
-  <%= label_tag(:sequence_notes, :NOTES.t + ":") %>
-  <%= text_area(:sequence, :notes, rows: 3, class: "form-control") %>
-  <p class="help-block">
-    <%= :field_textile_link.t %>
-  </p>
-</div>
+<!--[form:sequence]-->
 <%= submit_tag(:SUBMIT.t, class: "btn center-block push-down") %>
+
+<div class="form-group push-down">
+  <%= label_tag(:sequence_locus, :form_sequence_locus.t) %>
+  <%= text_area(:sequence, :locus, rows: 1, class: "form-control") %>
+  <%= :form_sequence_locus_help.t %>
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:sequence_bases, :form_sequence_bases.t) %>
+  <%= text_area(:sequence, :bases, rows: 3, class: "form-control") %>
+  <%= :form_sequence_bases_help.t %>
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:sequence_archive, :ARCHIVE.t) %>:
+  <%= form.select(:archive,
+                  [["GenBank", "GenBank"],
+                   ["ENA",     "ENA"],
+                   ["UNITE",   "UNITE"]]) %>
+  <span class="bold"> &nbsp;(<%= :form_sequence_both_required.t %>) </span>
+  <br>
+  <span class="bold"><%= :form_sequence_accession.t %>:</span>
+  <%= form.text_field(:accession, class: "form-control") %>
+  <%= :form_sequence_accession_help.t %>
+</div>
+
+<div class="form-group push-down">
+  <div>
+    <%= label_tag(:sequence_notes, :NOTES.t) %> (<%= :field_textile_link.t %>)
+    <%= text_area(:sequence, :notes, rows: 3, class: "form-control") %>
+  </div>
+</div>
+
+<div class="form-group push-down row">
+<%= submit_tag(:SUBMIT.t, class: "btn center-block push-down") %>
+</div>

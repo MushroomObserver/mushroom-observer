@@ -2020,9 +2020,9 @@
   # sequence/form_sequence
   form_sequence_locus:      "[:LOCUS] (required)"
   form_sequence_locus_help: "[:LOCUS] of this [:SEQUENCE], starting with a short abbreviation. Examples:<br>&nbsp;&nbsp; ITS<br>&nbsp;&nbsp; ITS1 internal transcribed spacer 1, partial sequence <br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence \nOnly 24 characters will be displayed in the [:OBSERVATION]."
-  form_sequence_bases:      "[:BASES] ([:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required)"
+  form_sequence_bases:      "[:BASES] ([:form_sequence_both_required])"
+  form_sequence_both_required: "[:BASES] or both [:ARCHIVE]/[:ACCESSION] required"
   form_sequence_bases_help: "[:BASES] (nucleic acids) in FASTA format (description line optional)."
-  form_sequence_archive:      "[:ARCHIVE] ([:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required)"
   form_sequence_archive_help: "On-line, public database with [:sequence] data for this [:OBSERVATION]."
   form_sequence_accession:      "[:ACCESSION]"
   form_sequence_accession_help: "[:ACCESSION] number/code for the [:ARCHIVE]. Examples:<br>&nbsp;&nbsp; KT968655 <br>&nbsp;&nbsp; UDB024324"
