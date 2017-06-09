@@ -1,15 +1,14 @@
-# encoding: utf-8
-#
 #  = Application Helpers
 #
 #  These methods are available to all templates in the application:
 #
 ################################################################################
-
+#
 module ApplicationHelper
   include AutocompleteHelper
   include DescriptionHelper
   include ExporterHelper
+  include ExternalLinkHelper
   include FooterHelper
   include JavascriptHelper
   include LocalizationHelper
