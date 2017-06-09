@@ -8,9 +8,11 @@
 #
 module ExternalLinkHelper
   # Create link for name to MyCoPortal website.
-  def mycoportal_url(name)
-    "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" +
-      name.text_name.tr(" ", "+")
+  def link_to_mycoportal_search(name, link_text = "MycoPortal")
+    link_to(link_text,
+            "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" +
+              name.text_name.tr(" ", "+"),
+            target: "_blank")
   end
 
   ##### MycoBank (nomenclature) #####
