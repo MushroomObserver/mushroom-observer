@@ -1,0 +1,15 @@
+<!-- table of sequences in show_observation -->
+<table class="table-namings">
+  <thead>
+    <tr>
+      <th><%= :LOCUS.t %></th>
+      <th><%= :ARCHIVE.t + ": " + :ACCESSION.t %></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render(partial: "observer/sequence",
+               collection: observation.sequences) %>
+  </tbody>
+</table>

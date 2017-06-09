@@ -1,16 +1,22 @@
-<!-- list sequences in show_observeration -->
-<div class="indent">
-  <% if sequence.archive.present? %>
-    <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>
-    <%= truncate(sequence.archive, length: 16).t %>
-    <%= truncate(sequence.accession, length: 16).t %>
-  <% else %>
-    <span class="bold"><%= truncate(sequence.locus, length: 16) %></span>:
-    <%= truncate(sequence.bases, length: 32) %>
-  <% end %>
-  <%= link_with_query(:SHOW.t, sequence.show_link_args) %>
-  <% if check_permission(@observation) || check_permission(sequence) %>
-    <%= link_with_query(:EDIT.t, sequence.show_link_args) %>
-  <% end %>
-  <br>
-</div>
+<!-- row listing a sequence in show_observeration -->
+<tr>
+  <td>
+    <%= truncate(sequence.locus, length: 24) %>
+  </td>
+  <td>
+    <% if sequence.archive.present? %>
+      <%= sequence.archive.t %>:
+      <%= link_to(truncate(sequence.accession, length: 12).t,
+                  search_for_accession_url(sequence.archive,
+                                           sequence.accession),
+                  target: "_blank") %>
+    <% end %>
+  </td>
+  <td>
+    <%= link_with_query(:SHOW.t, sequence.show_link_args) %>  </td>
+  <td>
+    <% if check_permission(@observation) || check_permission(sequence) %>
+      <%= link_with_query(:EDIT.t, sequence.show_link_args) %>
+    <% end %>
+  </td>
+</tr>

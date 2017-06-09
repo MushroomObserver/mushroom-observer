@@ -15,10 +15,7 @@
 
 <div class="form-group push-down">
   <%= label_tag(:sequence_archive, :ARCHIVE.t) %>:
-  <%= form.select(:archive,
-                  [["GenBank", "GenBank"],
-                   ["ENA",     "ENA"],
-                   ["UNITE",   "UNITE"]]) %>
+  <%= form.select(:archive, archive_dropdown, { include_blank: true }) %>
   <span class="bold"> &nbsp;(<%= :form_sequence_both_required.t %>) </span>
   <br>
   <span class="bold"><%= :form_sequence_accession.t %>:</span>
