@@ -2,16 +2,32 @@
 #
 # Helpers for view links to external websites
 # Ideally, all those links go through this helper to keep them consisent,
-#   resuable, and DRY
+#   reusable, and DRY
 #
 ################################################################################
 #
 module ExternalLinkHelper
+  ##### EOL (Encyclopedia of Life) #####
+  #
+  # Create link which results in an EOL search for named taxon
+  # Note: args are reversed from link_to, so that link_text can be optional
+  def link_to_eol_search(name, link_text = "EOL")
+    link_to(link_text, name.eol_url, target: "_blank")
+  end
 
+  ##### GoogleImages #####
+  #
+  # Create link which results in a Google search for images of name
+  # Note: args are reversed from link_to, so that link_text can be optional
+  def link_to_google_images_search(name, link_text = :google_images.t)
+    link_to(link_text,
+            "http://images.google.com/images?q=#{name.real_text_name}",
+            target: "_blank")
+  end
 
   ##### MycoBank (nomenclature) #####
   #
-  # Create link which result in a MycoBank search for name
+  # Create link which results in a MycoBank search for name
   # Note: args are reversed from link_to, so that link_text can be optional
   def link_to_mycobank_search(name, link_text = "MycoBank")
     link_to(link_text,
