@@ -15,13 +15,13 @@ module ExternalLinkHelper
 
   ##### MycoBank (nomenclature) #####
   #
-  # Create link for name to search in MycoBank
-  def mycobank_url(name)
-    unescaped_str = (mycobank_path + mycobank_taxon(name) +
-                     mycobank_language_suffix(locale).to_s)
-    # CGI::escape.html(unescaped_str) should work, but throws error
-    #   ActionView::Template::Error: wrong number of arguments (0 for 1)
-    unescaped_str.gsub(" ", "%20")
+  # Create link which result in a MycoBank search for name
+  # Note: args are reversed from link_to, so that link_text can be optional
+  def link_to_mycobank_search(name, link_text = "MycoBank")
+    link_to(link_text,
+            mycobank_path + mycobank_taxon(name) +
+              mycobank_language_suffix(locale).to_s,
+            target: "_blank")
   end
 
   def mycobank_path
@@ -37,7 +37,7 @@ module ExternalLinkHelper
   # return html parameter of official Mycobank translation,
   # if such translation exists, else return pseudo-English parameter
   # Although MycoBank doesn't recognize &Lang=Eng, this (or another language
-  # parameter else which MycoBank does not recognize) must be be included when
+  # parameter which MycoBank does **not** recognize) must be be included when
   # switching to the default MycoBank language (English); otherwise MycoBank
   # keeps using the last language it did recognize.
   def mycobank_language_suffix(lang)
