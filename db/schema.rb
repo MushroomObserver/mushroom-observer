@@ -553,6 +553,7 @@ ActiveRecord::Schema.define(version: 20170513222059) do
 
   create_table "sequences", force: :cascade do |t|
     t.integer  "observation_id", limit: 4
+    t.integer  "user_id",        limit: 4
     t.text     "locus",          limit: 65535
     t.text     "bases",          limit: 65535
     t.string   "archive",        limit: 255

@@ -48,6 +48,7 @@ class SequenceController < ApplicationController
   def process_create_sequence
     @sequence = @observation.sequences.new()
     @sequence.attributes = whitelisted_sequence_params
+    @sequence.user = @user
     @sequence.save
     redirect_to_show_observation
   end

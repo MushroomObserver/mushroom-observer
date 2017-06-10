@@ -7,13 +7,15 @@
 #  == Attributes
 #
 #  id::               unique numerical id, starting at 1.
-#  observation_id::   id of the associated Observation
-#  locus::            description of the locus
-#  bases::            nucleotides
-#  archive::          on-line database to which the sequence was submitted
+#  observation::      id of the associated Observation
+#  user::             user who created the Sequence
+#  locus::            description of the locus (region) of the Sequence
+#  bases::            nucleotides in FASTA format (description lines optional)
+#  archive::          on-line database in which Sequence is archived
 #  accession::        accession # in the Archive
-#  notes::
+#  notes::            free-form notes
 #
 class Sequence < AbstractModel
   belongs_to :observation
+  belongs_to :user
 end

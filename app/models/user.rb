@@ -293,6 +293,7 @@ class User < AbstractModel
   has_many :projects_created, class_name: "Project"
   has_many :publications
   has_many :queued_emails
+  has_many :sequences
   has_many :species_lists
   has_many :specimens
   has_many :test_add_image_logs

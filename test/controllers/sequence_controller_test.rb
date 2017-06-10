@@ -52,11 +52,13 @@ class SequenceControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :show_observation)
 
     # Prove authorized user can create non-repository Sequence
+    old_count = Sequence.count
     login(owner.login)
     post(:add_sequence, params)
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
+    assert_equal(owner, sequence.user)
     assert_equal(locus, sequence.locus)
     assert_equal(bases, sequence.bases)
     assert_empty(sequence.archive)
@@ -73,10 +75,10 @@ class SequenceControllerTest < FunctionalTestCase
                            archive: archive,
                            accession: accession }
              }
+    old_count = Sequence.count
     post(:add_sequence, params)
-    assert_equal(old_count + 2, Sequence.count)
+    assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
-    assert_equal(obs, sequence.observation)
     assert_equal(locus, sequence.locus)
     assert_empty(sequence.bases)
     assert_equal(archive, sequence.archive)
