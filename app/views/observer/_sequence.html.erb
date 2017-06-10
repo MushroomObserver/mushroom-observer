@@ -1,12 +1,12 @@
 <!-- row listing a sequence in show_observeration -->
 <tr>
   <td>
-    <%= truncate(sequence.locus, length: 24) %>
+    <%= truncate(sequence.locus, length: locus_width) %>
   </td>
   <td>
     <% if sequence.archive.present? %>
       <%= sequence.archive.t %>:
-      <%= link_to(truncate(sequence.accession, length: 12).t,
+      <%= link_to(truncate(sequence.accession, length: locus_width/2).t,
                   search_for_accession_url(sequence.archive,
                                            sequence.accession),
                   target: "_blank") %>

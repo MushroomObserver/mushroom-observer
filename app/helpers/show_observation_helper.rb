@@ -31,4 +31,9 @@ module ShowObservationHelper
       concat(obs.owner_favorite_or_explanation.t)
     end
   end
+
+  # Number of Locus characters displayed on Observation page
+  def locus_width
+    24
+  end
 end
