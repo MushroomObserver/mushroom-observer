@@ -63,5 +63,24 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.accession)
     assert_redirected_to(controller: :observer, action: :show_observation)
 
+    # Prove authorized user can create repository Sequence
+    locus =     "ITS"
+    archive =   "GenBank"
+    accession = "KY366491.1"
+    params = {
+               id: obs.id,
+               sequence: { locus: locus,
+                           archive: archive,
+                           accession: accession }
+             }
+    post(:add_sequence, params)
+    assert_equal(old_count + 2, Sequence.count)
+    sequence = Sequence.last
+    assert_equal(obs, sequence.observation)
+    assert_equal(locus, sequence.locus)
+    assert_empty(sequence.bases)
+    assert_equal(archive, sequence.archive)
+    assert_equal(accession, sequence.accession)
+    assert_redirected_to(controller: :observer, action: :show_observation)
   end
 end
