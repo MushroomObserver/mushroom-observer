@@ -65,13 +65,14 @@
             <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
             <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
             <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
+            <%= content_tag(:div, link_with_query(:show_name_distribution_map.t,
+                                                  action: 'map', id: @name.id)) %>
           </div>
           <div class="col-sm-6">
-            <%= content_tag(:div, link_to('EOL', @name.eol_url)) if @name.eol_url %>
-            <%= content_tag(:div, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
-            <%= content_tag(:div, link_to("MyCoPortal", mycoportal_url(@name))) %>
-            <%= content_tag(:div, link_to("MycoBank", mycobank_url(@name))) %>
-            <%= content_tag(:div, link_with_query(:show_name_distribution_map.t, action: 'map', id: @name.id)) %>
+            <%= content_tag(:div, link_to_eol_search(@name)) if @name.eol_url %>
+            <%= content_tag(:div, link_to_google_images_search(@name)) %>
+            <%= content_tag(:div, link_to_mycoportal_search(@name)) %>
+            <%= content_tag(:div, link_to_mycobank_search(@name)) %>
           </div>
         </div>
       </div>

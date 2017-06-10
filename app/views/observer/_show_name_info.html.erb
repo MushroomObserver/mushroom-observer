@@ -4,10 +4,10 @@
   if name = observation.name
     lines << link_to(:show_name.t(name: name.display_name), controller: :name,
                      action: :show_name, id: name.id)
-    lines << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
-                     mycoportal_url(name))
-    lines << link_to(name.text_name.t + " " + :show_name_on_mycobank.t,
-                     mycobank_url(name))
+    lines << link_to_mycoportal_search(name, name.text_name.t + " " +
+                                             :show_name_on_mycoportal.t)
+    lines << link_to_mycobank_search(name, name.text_name.t + " " +
+                                           :show_name_on_mycobank.t)
  end
 
   if name && !name.unknown? && !browser.bot?
