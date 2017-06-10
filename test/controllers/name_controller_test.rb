@@ -273,7 +273,7 @@ class NameControllerTest < FunctionalTestCase
       assert_select("a[href *= '/Coprinus comatus']")
       assert_select("a[href *= 'Lang=Eng']")
     end
-   end
+  end
 
   def test_show_past_name
     get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
