@@ -8,15 +8,15 @@ class ChecklistTest < UnitTestCase
 
   def rolfs_species
     [
-     "Agaricus campestras", # these are not synonymized
-     "Agaricus campestris",
-     "Agaricus campestros",
-     "Agaricus campestrus",
-     "Boletus edulis",
-     "Coprinus comatus",
-     "Stereum hirsutum",
-     "Strobilurus diminutivus",
-     "Tubaria furfuracea"
+      "Agaricus campestras", # these are not synonymized
+      "Agaricus campestris",
+      "Agaricus campestros",
+      "Agaricus campestrus",
+      "Boletus edulis",
+      "Coprinus comatus",
+      "Stereum hirsutum",
+      "Strobilurus diminutivus",
+      "Tubaria furfuracea"
     ]
   end
 
