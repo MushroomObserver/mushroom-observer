@@ -428,8 +428,7 @@ class NameControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma"
-                                 )
+                                  location: "Eastern Oklahoma")
     get(:advanced_search, @controller.query_params(query))
     assert_template(:list_names)
   end
@@ -439,8 +438,7 @@ class NameControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma"
-                                 )
+                                  location: "Eastern Oklahoma")
     params = @controller.query_params(query)
     query.record.delete
     get(:advanced_search, params)
