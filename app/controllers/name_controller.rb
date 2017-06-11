@@ -583,14 +583,6 @@ class NameController < ApplicationController
     @name_string = @name.real_text_name
   end
 
-<<<<<<< HEAD
-  # Only allowed to make substantive changes to name if you own all the references to it.
-  def can_make_changes?
-    unless in_admin_mode?
-      for obj in @name.namings + @name.observations
-        return false if obj.user_id != @user.id
-      end
-=======
   def reload_edit_name_form_on_error(err)
     flash_error(err.to_s) unless err.blank?
     flash_object_errors(@name)
@@ -610,7 +602,6 @@ class NameController < ApplicationController
     else
       new_name = matches.first || @name
       should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
->>>>>>> master
     end
   end
 

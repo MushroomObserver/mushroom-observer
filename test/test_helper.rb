@@ -10,9 +10,17 @@
 #
 ################################################################################
 
-# Coveralls.wear! must occur before any of your application code is required
+# Code to allow both local and coveralls coverage.  From:
+# https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+require "simplecov"
 require "coveralls"
-Coveralls.wear!("rails")
+
+# Coveralls.wear!("rails")
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start
 
 # Allows test results to be reported back to runner IDEs
 require "minitest/reporters"

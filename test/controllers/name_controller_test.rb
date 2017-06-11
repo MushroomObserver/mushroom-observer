@@ -1018,22 +1018,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(rolf, name.user)
   end
 
-  def test_edit_name_bad_post
-    name = names(:conocybe_filaris)
-    # params = {id: name.id, name: [1,2,3]}
-    params = {
-      id: name.id,
-      name: {
-        text_name: "Conocybe filaris",
-        author: "(Fr.) Kühner",
-        rank: :Xyz,
-        citation: "__Le Genera Galera__, 139. 1935.",
-        deprecated: (name.deprecated ? "true" : "false")
-      }
-    }
-    post_requires_login(:edit_name, params)
-    assert_flash_error
-
   def test_edit_name_no_changes
     name = names(:conocybe_filaris)
     text_name  = name.text_name
@@ -1065,7 +1049,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(deprecated, name.deprecated)
     assert_equal(user, name.user)
     assert_equal(contribution, user.contribution)
->>>>>>> master
   end
 
   # This catches a bug that was happening when editing a name that was in use.
