@@ -35,7 +35,7 @@ class LurkerTest < IntegrationTestCase
     click(label: "Français",      in: :left_panel)
     click(label: "Contributeurs", in: :left_panel)
     click(label: "English",       in: :left_panel)
-    click(label: "List Projects", in: :left_panel)
+    click(label: "Projects",      in: :left_panel)
     click(label: "Comments",      in: :left_panel)
     click(label: "Site Stats",    in: :left_panel)
   end

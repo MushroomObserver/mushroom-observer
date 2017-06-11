@@ -461,11 +461,11 @@ class NameController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create and Edit Names
+  #  :section: Create Names
   #
   ##############################################################################
 
-  # Create a new name; accessible from name indexes.
+  ### Create a new name; accessible from name indexes.
   def create_name # :prefetch: :norobots:
     store_location
     pass_query_params
@@ -473,44 +473,11 @@ class NameController < ApplicationController
       init_create_name_form
     else
       @parse = parse_name
-      @name, @parents = find_or_create_name_and_parents
-      make_sure_name_doesnt_exist
+      return unless new_name_allowable?
       create_new_name
-      redirect_to_show_name
     end
   rescue RuntimeError => err
     reload_create_name_form_on_error(err)
-  end
-
-  # Make changes to name; accessible from show_name page.
-  def edit_name # :prefetch: :norobots:
-    store_location
-    pass_query_params
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      init_edit_name_form
-      if request.method == "POST"
-        @parse = parse_name
-        new_name, @parents = find_or_create_name_and_parents
-        if new_name.new_record? || new_name == @name
-          email_admin_name_change unless can_make_changes? || minor_name_change?
-          update_correct_spelling
-          any_changes = update_existing_name
-          unless redirect_to_approve_or_deprecate
-            flash_warning(:runtime_edit_name_no_change.t) unless any_changes
-            redirect_to_show_name
-          end
-        elsif in_admin_mode? || @name.mergeable? || new_name.mergeable?
-          merge_name_into(new_name)
-          redirect_to_show_name
-        else
-          send_name_merge_email(new_name)
-          redirect_to_show_name
-        end
-      end
-    end
-  rescue RuntimeError, ArgumentError => err
-    flash_error(:runtime_edit_name_no_change.t)
-    redirect_to_show_name
   end
 
   def init_create_name_form
@@ -523,53 +490,11 @@ class NameController < ApplicationController
     flash_error(err.to_s) unless err.blank?
     flash_object_errors(@name)
     init_create_name_form
-    @name.rank = params[:name][:rank]
-    @name.author = params[:name][:author]
+    @name.rank =     params[:name][:rank]
+    @name.author =   params[:name][:author]
     @name.citation = params[:name][:citation]
-    @name.notes = params[:name][:notes]
-    @name_string = params[:name][:text_name]
-  end
-
-  def init_edit_name_form
-    if !params[:name]
-      @misspelling = @name.is_misspelling?
-      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ""
-    else
-      @misspelling = (params[:name][:misspelling] == "1")
-      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
-    end
-    @name_string = @name.real_text_name
-  end
-
-  # Only allowed to make substantive changes to name if you own all the references to it.
-  def can_make_changes?
-    unless in_admin_mode?
-      for obj in @name.namings + @name.observations
-        return false if obj.user_id != @user.id
-      end
-    end
-    true
-  end
-
-  def minor_name_change?
-    old_name = @name.real_search_name
-    new_name = @parse.real_search_name
-    new_name.percent_match(old_name) > 0.9
-  end
-
-  def email_admin_name_change
-    unless @name.author.blank? && @parse.real_text_name == @name.real_text_name
-      content = :email_name_change.l(
-        user: @user.login,
-        old: @name.real_search_name,
-        new: @parse.real_search_name,
-        observations: @name.observations.length,
-        namings: @name.namings.length,
-        url: "#{MO.http_domain}/name/show_name/#{@name.id}"
-      )
-      WebmasterEmail.build(@user.email, content).deliver_now
-      NameControllerTest.report_email(content) if Rails.env == "test"
-    end
+    @name.notes =    params[:name][:notes]
+    @name_string =   params[:name][:text_name]
   end
 
   def parse_name
@@ -587,63 +512,259 @@ class NameController < ApplicationController
     parse
   end
 
-  def find_or_create_name_and_parents
-    parents = Name.find_or_create_parsed_name_and_parents(@parse)
-    unless name = parents.pop
-      if params[:action] == "create_name"
-        fail(:create_name_multiple_names_match.t(str: @parse.real_search_name))
-      else
-        others = Name.where(text_name: @parse.text_name)
-        fail(:edit_name_multiple_names_match.t(str: @parse.real_search_name,
-                                               matches: others.map(&:search_name).join(" / ")))
-      end
+  def new_name_allowable?
+    matches = names_matching_desired_new_name
+    return true if matches.none?
+    if matches.one?
+      raise(:runtime_name_create_already_exists.
+              t(name: matches.first.display_name))
+    else
+      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
     end
-    [name, parents]
   end
 
-  def make_sure_name_doesnt_exist
-    unless @name.new_record?
-      fail(:runtime_name_create_already_exists.t(name: @name.display_name))
-    end
+  def names_matching_desired_new_name
+    Name.names_matching_desired_new_name(@parse)
   end
 
   def create_new_name
-    @name.attributes = @parse.params
-    @name.change_deprecated(true) if params[:name][:deprecated] == "true"
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes = params[:name][:notes].to_s.strip
-    for name in @parents + [@name]
-      name.save_with_log(:log_name_created_at) if name && name.new_record?
+    @name = Name.new_name_from_parsed_name(@parse)
+    adjust_name_attributes_from_params
+    if @name.save_with_log(:log_name_updated)
+      flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+      update_ancestors
+      redirect_to_show_name
+    else
+      raise(:runtime_unable_to_save_changes.t)
     end
-    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
   end
 
-  def update_existing_name
-    @name.attributes = @parse.params
+  def adjust_name_attributes_from_params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
+  end
+
+  def update_ancestors
+    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
+      name.save_with_log(:log_name_created_at) if name && name.new_record?
+    end
+  end
+
+  def redirect_to_show_name
+    redirect_with_query(action: :show_name, id: @name.id)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Edit Names
+  #
+  ##############################################################################
+
+  ### Make changes to name; accessible from show_name page.
+  def edit_name # :prefetch: :norobots:
+    store_location
+    pass_query_params
+    if (@name = find_or_goto_index(Name, params[:id].to_s))
+      init_edit_name_form
+      save_edits if request.method == "POST"
+    end
+  rescue RuntimeError => err
+    reload_edit_name_form_on_error(err)
+  end
+
+  def init_edit_name_form
+    if !params[:name]
+      @misspelling = @name.is_misspelling?
+      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ""
+    else
+      @misspelling = (params[:name][:misspelling] == "1")
+      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
+    end
+    @name_string = @name.real_text_name
+  end
+
+<<<<<<< HEAD
+  # Only allowed to make substantive changes to name if you own all the references to it.
+  def can_make_changes?
+    unless in_admin_mode?
+      for obj in @name.namings + @name.observations
+        return false if obj.user_id != @user.id
+      end
+=======
+  def reload_edit_name_form_on_error(err)
+    flash_error(err.to_s) unless err.blank?
+    flash_object_errors(@name)
+    @name.rank = params[:name][:rank]
+    @name.author = params[:name][:author]
+    @name.citation = params[:name][:citation]
+    @name.notes = params[:name][:notes]
+    @name.deprecated = (params[:name][:deprecated] == "true")
+    @name_string = params[:name][:text_name]
+  end
+
+  def save_edits
+    @parse = parse_name
+    matches = names_matching_desired_changed_name - [@name]
+    if matches.many?
+      edit_multiple_match_exception(new_name)
+    else
+      new_name = matches.first || @name
+      should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
+>>>>>>> master
+    end
+  end
+
+  def names_matching_desired_changed_name
+    Name.names_matching_desired_changed_name(@parse)
+  end
+
+  def edit_multiple_match_exception(new_name)
+    raise(:edit_name_multiple_names_match.
+            t(str: @parse.real_search_name,
+              matches: new_name.map(&:search_name).join(" / ")
+             )
+         )
+  end
+
+  def should_be_merged?(new_name)
+    new_name != @name && Name.exists?(new_name.id)
+  end
+
+  #### user's changes affect only one existing name ####
+  def try_to_change_name
+    email_admin_name_change unless insignificant_change?
+    update_correct_spelling
+    any_changes = update_existing_name
+    if status_changing?
+      redirect_to_approve_or_deprecate
+    else
+      flash_warning(:runtime_edit_name_no_change.t) unless any_changes
+      redirect_to_show_name
+    end
+  end
+
+  def insignificant_change?
+    ok_to_make_any_change? || minor_change? || just_adding_author?
+  end
+
+  def ok_to_make_any_change?
+    in_admin_mode? || @name.changeable?(@user)
+  end
+
+  def minor_change?
+    old_name = @name.real_search_name
+    new_name = @parse.real_search_name
+    new_name.percent_match(old_name) > 0.9
+  end
+
+  def just_adding_author?
+    @name.author.blank? && @parse.real_text_name == @name.real_text_name
+  end
+
+  def email_admin_name_change
+    content = :email_name_change.l(
+      user: @user.login,
+      old:  @name.real_search_name,
+      new:  @parse.real_search_name,
+      observations: @name.observations.length,
+      namings: @name.namings.length,
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+    )
+    WebmasterEmail.build(@user.email, content).deliver_now
+    NameControllerTest.report_email(content) if Rails.env == "test"
+  end
+
+  # Update the misspelling status.
+  #
+  # @name::             Name whose status we're changing.
+  # @misspelling::      Boolean: is the "this is misspelt" box checked?
+  # @correct_spelling:: String: the correct name, as entered by the user.
+  #
+  # 1) If the checkbox is unchecked, and name used to be misspelt, then it
+  #    clears correct_spelling_id.
+  # 2) Otherwise, if the text field is filled in it looks up the name and
+  #    sets correct_spelling_id.
+  #
+  # All changes are made (but not saved) to +name+.  It returns true if
+  # everything went well.  If it couldn't recognize the correct name, it
+  # changes nothing and raises a RuntimeError.
+  #
+  def update_correct_spelling
+    if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
+      # Clear status if checkbox unchecked.
+      @name.correct_spelling = nil
+    elsif @correct_spelling.present?
+      set_correct_spelling
+    end
+  end
+
+  def set_correct_spelling
+    correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
+    raise(:runtime_form_names_misspelling_bad.t) unless correct_name
+    raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
+
+    @name.correct_spelling = correct_name
+    @name.merge_synonyms(correct_name)
+    @name.change_deprecated(true)
+    fix_correct_name(correct_name) if correct_name.is_misspelling?
+  end
+
+  def fix_correct_name(correct_name)
+    correct_name.correct_spelling = nil
+    correct_name.save_with_log(:log_name_unmisspelled,
+                               other: @name.display_name)
+  end
+
+  # Updates Name
+  # Returns truthy if name changed && changes saved, else falsy
+  def update_existing_name
+    update_name_without_saving
     if !@name.changed?
       any_changes = false
     elsif !@name.save_with_log(:log_name_updated)
-      fail(:runtime_unable_to_save_changes.t)
+      raise(:runtime_unable_to_save_changes.t)
     else
       flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
       any_changes = true
     end
-    # This name itself might have been a parent when we called
-    # find_or_create... last time(!)
-    for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      name.save_with_log(:log_name_created_at) if name && name.new_record?
-    end
+    # Update ancestors regardless whether name changed; maybe this will add
+    # missing ancestors in case database is messed up
+    update_ancestors
     any_changes
+  end
+
+  def update_name_without_saving
+    @name.attributes = @parse.params
+    adjust_name_attributes_from_params
+  end
+
+  def status_changing?
+    params[:name][:deprecated].to_s != @name.deprecated.to_s
+  end
+
+  # Chain on to approve/deprecate name if changed status.
+  def redirect_to_approve_or_deprecate
+    if params[:name][:deprecated].to_s == "true"
+      redirect_with_query(action: :deprecate_name, id: @name.id)
+    else
+      redirect_with_query(action: :approve_name, id: @name.id)
+    end
+    return true
+  end
+
+  #### Changes require merger of two existing names ####
+  def try_to_merge(new_name)
+    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
+      merge_name_into(new_name)
+    else
+      send_name_merge_email(new_name)
+    end
+    redirect_to_show_name
   end
 
   def merge_name_into(new_name)
     old_display_name_for_log = @name[:display_name]
-    # First update this name (without saving).
-    @name.attributes = @parse.params
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes = params[:name][:notes].to_s.strip
+    update_name_without_saving
     # Only change deprecation status if user explicity requested it.
     if @name.deprecated != (params[:name][:deprecated] == "true")
       change_deprecated = !@name.deprecated
@@ -677,62 +798,6 @@ class NameController < ApplicationController
     )
     WebmasterEmail.build(@user.email, content).deliver_now
     NameControllerTest.report_email(content) if Rails.env == "test"
-  end
-
-  # Chain on to approve/deprecate name if changed status.
-  def redirect_to_approve_or_deprecate
-    if params[:name][:deprecated].to_s == "true" && !@name.deprecated
-      redirect_with_query(action: :deprecate_name, id: @name.id)
-      return true
-    elsif params[:name][:deprecated].to_s == "false" && @name.deprecated
-      redirect_with_query(action: :approve_name, id: @name.id)
-      return true
-    else
-      false
-    end
-  end
-
-  def redirect_to_show_name
-    redirect_with_query(action: :show_name, id: @name.id)
-  end
-
-  # Update the misspelling status.
-  #
-  # @name::             Name whose status we're changing.
-  # @misspelling::      Boolean: is the "this is misspelt" box checked?
-  # @correct_spelling:: String: the correct name, as entered by the user.
-  #
-  # 1) If the checkbox is unchecked, and name used to be misspelt, then it
-  #    clears correct_spelling_id.
-  # 2) Otherwise, if the text field is filled in it looks up the name and
-  #    sets correct_spelling_id.
-  #
-  # All changes are made (but not saved) to +name+.  It returns true if
-  # everything went well.  If it couldn't recognize the correct name, it
-  # changes nothing and raises a RuntimeError.
-  #
-  def update_correct_spelling
-    if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
-      # Clear status if checkbox unchecked.
-      @name.correct_spelling = nil
-    elsif !@correct_spelling.blank?
-      # Set correct_spelling if one given.
-      name2 = Name.find_names_filling_in_authors(@correct_spelling).first
-      if !name2
-        fail(:runtime_form_names_misspelling_bad.t)
-      elsif name2.id == @name.id
-        fail(:runtime_form_names_misspelling_same.t)
-      else
-        @name.correct_spelling = name2
-        @name.merge_synonyms(name2)
-        @name.change_deprecated(true)
-        # Make sure the "correct" name isn't also a misspelled name!
-        if name2.is_misspelling?
-          name2.correct_spelling = nil
-          name2.save_with_log(:log_name_unmisspelled, other: @name.display_name)
-        end
-      end
-    end
   end
 
   ##############################################################################

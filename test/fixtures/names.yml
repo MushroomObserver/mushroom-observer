@@ -5,12 +5,19 @@
 
 # WARNINGS on adding names
 # Do not add a Name starting with A or B.
-#  This will likely break NameControllerTest#test_next_and_prev
+#   This will likely break NameControllerTest#test_next_and_prev
 # Do not add a Name starting with U or Z.
-#  AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
-#  NameControllerTest pagination tests expect 0 Names staring with Z.
-# If adding a Name breaks ScriptTest#test_refresh_name_lister_cache,
-#   then update mushroom-observer/test/reports/name_list_data.js
+#   AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
+#   NameControllerTest pagination tests expect 0 Names staring with Z.
+# Do not use the following as part of Names
+#   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
+#   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
+#   Verpa -- See :suggested_by_verpa_authored below.
+# Adding almost any Name will break ScriptTest#test_refresh_name_lister_cache.
+#   Fix this by updating mushroom-observer/test/reports/name_list_data.js
+#   Suggestion: whenever adding a Name, run:
+#     $ rake test test/models/script_test.rb test_refresh_name_lister_cache
+#     If that fails, update name_list_data.js from the Actual results
 
 DEFAULTS: &DEFAULTS
   author:   ""
@@ -570,7 +577,7 @@ amanita_boudieri_var_beillei:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Variety] %>
   text_name: Amanita boudieri var. beillei
-  search_name: Amanita boudieri var. beille
+  search_name: Amanita boudieri var. beillei
   sort_name: Amanita boudieri var. beillei
   display_name: '**__Amanita boudieri__ var. __beillei__**'
 
@@ -578,10 +585,10 @@ amanita_boudieri_var_beillei:
 boletus_edulis_group:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Group] %>
-  text_name: Boletus edulis group
+  text_name:         Boletus edulis group
+  search_name:       Boletus edulis group
+  sort_name:         Boletus edulis   group
   display_name: '**__Boletus edulis__** group'
-  search_name: Boletus edulis group
-  sort_name: Boletus edulis   group
 
 imageless:
   <<: *DEFAULTS
@@ -592,7 +599,7 @@ imageless:
   sort_name: Imageless
 
 # Next two names are used by test of lookup_name.
-# They are spelling suggested by lookup_name("Verpa").
+# They are spellings suggested by lookup_name("Verpa").
 # NOTE: Verpa must not be used for any name, else the test will fail
 # because the lookup will find a match and not look for suggestions.
 suggested_by_verpa_authored:
@@ -647,3 +654,112 @@ namings_deprecated_2:
   sort_name:    Xa deprecatedtwo
   synonym:      namings_deprecated_synonym
   deprecated:   true
+
+# For test of edit forcing creating of two ancestors
+two_ancestors:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Variety] %>
+  text_name:         Coprinellus micaceus var. phony
+  display_name: "**__Coprinellus micaceus__ var. __phony__**"
+  search_name:       Coprinellus micaceus var. phony
+  sort_name:         Coprinellus micaceus var. phony
+
+mergeable_no_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable noteless
+  search_name:       Mergeable noteless
+  sort_name:         Mergeable noteless
+  display_name: "**__Mergeable noteless__**"
+
+mergeable_description_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable description-notes
+  search_name:       Mergeable description-notes
+  sort_name:         Mergeable description-notes
+  display_name: "**__Mergeable description-notes__**"
+  description:       mergeable_description_notes_desc
+
+mergeable_second_description_notes:
+  <<: *DEFAULTS
+  text_name:         Mergeable second-description-notes
+  search_name:       Mergeable second-description-notes
+  sort_name:         Mergeable second-description-notes
+  display_name: "**__Mergeable second-description-notes__**"
+  description:       mergeable_second_description_notes_desc
+
+mergeable_epithet_unauthored:
+  <<: *DEFAULTS
+  text_name:         Mergeable epithet
+  search_name:       Mergeable epithet
+  sort_name:         Mergeable epithet
+  display_name: "**__Mergeable epithet__**"
+
+mergeable_epithet_authored:
+  <<: *DEFAULTS
+  author:            Authored
+  text_name:         Mergeable epithet
+  search_name:       Mergeable epithet Authored
+  sort_name:         Mergeable epithet  Authored
+  display_name: "**__Mergeable epithet__** Authored"
+
+authored_with_naming:
+  <<: *DEFAULTS
+  text_name:         With naming
+  search_name:       With naming Authored
+  sort_name:         With naming  Authored
+  display_name: "**__With naming__** Authored"
+
+unauthored_with_naming:
+  <<: *DEFAULTS
+  text_name:         With naming
+  search_name:       With naming
+  sort_name:         With naming
+  display_name: "**__With naming__**"
+
+# dick owns the Name and Observation, but mary owns a Naming
+other_user_owns_naming_name:
+  <<: *DEFAULTS
+  text_name:         Other-user-owns-naming
+  search_name:       Other-user-owns-naming
+  sort_name:         Other-user-owns-naming
+  display_name: "**__Other-user-owns-naming__**"
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
+# dick owns the Name and Naming, but mary owns an Observation
+other_user_owns_observation:
+  <<: *DEFAULTS
+  text_name:         Other-user-owns-obs
+  search_name:       Other-user-owns-obs
+  sort_name:         Other-user-owns-obs
+  display_name: "**__Other-user-owns-obs__**"
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
+# dick owns the Name and the only Observation and Naming
+same_user_owns_naming_and_observation:
+  <<: *DEFAULTS
+  text_name:         Same-user-owns-naming-and-observation
+  search_name:       Same-user-owns-naming-and-observation
+  sort_name:         Same-user-owns-naming-and-observation
+  display_name: '**__Same-user-owns-naming-and-observation__**'
+  rank:              <%= Name.ranks[:Genus] %>
+  user:              dick
+
+authored_group:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Group] %>
+  text_name:         Group-authored group
+  search_name:       Group-authored group Author
+  sort_name:         Group-unauthored  Author   group
+  display_name: '**__Group-unauthored__** group Author'
+
+unauthored_group:
+  <<: *DEFAULTS
+  rank:              <%= Name.ranks[:Group] %>
+  text_name:         Group-unauthored group
+  search_name:       Group-unauthored group
+  sort_name:         Group-unauthored   group
+  display_name: '**__Group-unauthored__** group'
+
+

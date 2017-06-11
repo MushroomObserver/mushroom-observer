@@ -67,3 +67,10 @@ rss_log_project:
 one_genus_two_species_project:
   <<: *DEFAULTS
   observations: peltigera_obs, agaricus_campestris_obs, boletus_edulis_obs
+
+news_articles_project:
+  <<: *DEFAULTS
+  title:       News Articles
+  admin_group: article_writers
+  user_group:  article_writers
+  summary:     Project members can create and modify News Articles.
