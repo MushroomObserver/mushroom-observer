@@ -1,8 +1,38 @@
 module ObservationReport
-  # Row in raw data table.
+  # Row in raw data table.  Initialization values array comes directly from a
+  # sequel query (model.connection.select_values).  Columns are:
+  #
+  # 0:: observations.id
+  # 1:: observations.when
+  # 2:: observations.lat
+  # 3:: observations.long
+  # 4:: observations.alt
+  # 5:: observations.specimen
+  # 6:: observations.is_collection_location
+  # 7:: observations.vote_cache
+  # 8:: observations.thumb_image_id
+  # 9:: observations.notes
+  # 10:: observations.updated_at
+  # 11:: users.id
+  # 12:: users.login
+  # 13:: users.name
+  # 14:: names.id
+  # 15:: names.text_name
+  # 16:: names.author
+  # 17:: names.rank
+  # 18:: locations.id
+  # 19:: locations.name
+  # 20:: locations.north
+  # 21:: locations.south
+  # 22:: locations.east
+  # 23:: locations.west
+  # 24:: locations.high
+  # 25:: locations.low
+  #
+  # Subclasses of ObservationReport::Base can add/access added columns with
+  # +row.val(N) = "valN"+ where N is 1, 2, and so on.
+  #
   class Row
-    attr_reader :vals
-
     def initialize(vals)
       @vals = vals
     end
