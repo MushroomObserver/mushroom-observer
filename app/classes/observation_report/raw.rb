@@ -1,6 +1,7 @@
 module ObservationReport
   # Default CSV report.
   class Raw < ObservationReport::CSV
+    # rubocop:disable Metrics/MethodLength
     def labels
       %w(
         observation_id
@@ -35,6 +36,7 @@ module ObservationReport
       )
     end
 
+    # rubocop:disable Metrics/AbcSize Metrics/MethodLength
     def format_row(row)
       [
         row.obs_id,

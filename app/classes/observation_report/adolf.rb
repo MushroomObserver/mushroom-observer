@@ -3,6 +3,7 @@ module ObservationReport
   class Adolf < ObservationReport::CSV
     self.mime_type = "application/vnd.ms-excel"
 
+    # rubocop:disable Metrics/MethodLength
     def labels
       [
         "Database Field",
@@ -48,6 +49,7 @@ module ObservationReport
       ]
     end
 
+    # rubocop:disable Metrics/AbcSize Metrics/MethodLength
     def format_row(row)
       notes, orig_label = parse_orig_label(row)
       [
