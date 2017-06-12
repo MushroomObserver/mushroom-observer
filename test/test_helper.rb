@@ -16,10 +16,10 @@ require "simplecov"
 require "coveralls"
 
 # Coveralls.wear!("rails")
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
   Coveralls::SimpleCov::Formatter
-]
+])
 SimpleCov.start
 
 # Allows test results to be reported back to runner IDEs
