@@ -1,6 +1,8 @@
 module ObservationReport
   # Row in raw data table.
   class Row
+    attr_reader :vals
+
     def initialize(vals)
       @vals = vals
     end
@@ -92,6 +94,10 @@ module ObservationReport
 
     def loc_name
       @vals[19].blank? ? nil : @vals[19].to_s
+    end
+
+    def loc_name_sci
+      @vals[19].blank? ? nil : Location.reverse_name(@vals[19].to_s)
     end
 
     def loc_north(prec = 4)

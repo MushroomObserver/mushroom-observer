@@ -29,7 +29,7 @@ module ObservationReport
         row.name_rank,
         row.user_name_or_login,
         row.obs_when,
-        row.loc_name,
+        row.loc_name_sci,
         row.best_lat,
         row.best_long,
         row.best_low,
@@ -42,7 +42,7 @@ module ObservationReport
     end
 
     def image_urls(row)
-      row.val(1).to_s.split(", ").
+      row.val(1).to_s.split(", ").sort_by(&:to_i).
         map { |id| "#{MO.http_domain}/#{Image.url(:full_size, id)}" }.
         join(" ")
     end
