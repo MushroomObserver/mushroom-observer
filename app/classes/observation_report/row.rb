@@ -211,18 +211,21 @@ module ObservationReport
     end
 
     def locality_with_county
-      county ? "#{county} Co., #{locality}" : locality
+      val = Location.reverse_name(loc_name)
+      return nil if val.blank?
+      country, state, county_and_locality = val.split(", ", 3)
+      county_and_locality
     end
 
     def split_location
       val = Location.reverse_name(loc_name)
       return [nil, nil, nil, nil] if val.blank?
-      country, state, county, location = val.split(", ", 4)
-      if !county || !county.sub!(/ Co\.$/, "")
-        location = county
+      country, state, county, locality = val.split(", ", 4)
+      if county && !county.sub!(/ (Co\.|Parish)$/, "")
+        locality = locality.blank? ? county : "#{county}, #{locality}"
         county = nil
       end
-      [country, state, county, location]
+      [country, state, county, locality]
     end
 
     # --------------------
@@ -327,7 +330,7 @@ module ObservationReport
 
     def split_name
       name = name_text_name
-      cf = name.sub!(/ cf\. /, " ") ? "cf." : nil
+      cf = name.sub!(/ cfr?\.( |$)/, "\\1") ? "cf." : nil
       gen, sp, ssp, var, f = split_name_string(name)
       sp_auth, ssp_auth, var_auth, f_auth = which_author(sp)
       [gen, sp, ssp, var, f, sp_auth, ssp_auth, var_auth, f_auth, cf]
