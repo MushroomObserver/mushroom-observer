@@ -208,18 +208,92 @@ class ObservationReportTest < UnitTestCase
     assert_equal("3", row.day)
   end
 
-  # This is not working yet...
-  # def test_split_location
-  #   row = ObservationReport::Row.new(vals = [])
-  #   vals[19] = "Park, City, Some, Alameda Co., California, USA"
-  #   assert_equal("USA", row.country)
-  #   assert_equal("California", row.state)
-  #   assert_equal("Alameda", row.county)
-  #   assert_equal("Some, City, Park", row.locality)
-  #   vals[19] = "Central Park, Los Angeles, California, USA"
-  #   assert_equal("USA", row.country)
-  #   assert_equal("California", row.state)
-  #   assert_equal(nil, row.county)
-  #   assert_equal("Los Angeles, Central Park", row.locality)
-  # end
+  def test_split_location
+    row = ObservationReport::Row.new(vals = [])
+    vals[19] = "Park, Random, Some, Alameda Co., California, USA"
+    assert_equal("USA", row.country)
+    assert_equal("California", row.state)
+    assert_equal("Alameda", row.county)
+    assert_equal("Some, Random, Park", row.locality)
+    assert_equal("Alameda Co., Some, Random, Park", row.county_and_locality)
+
+    row = ObservationReport::Row.new(vals = [])
+    vals[19] = "Big Branch, Saint Tammany Parish, Louisiana, USA"
+    assert_equal("USA", row.country)
+    assert_equal("Louisiana", row.state)
+    assert_equal("Saint Tammany", row.county)
+    assert_equal("Big Branch", row.locality)
+    assert_equal("Saint Tammany Parrish, Big Branch", row.county_and_locality)
+
+    row = ObservationReport::Row.new(vals = [])
+    vals[19] = "Central Park, Los Angeles, California, USA"
+    assert_equal("USA", row.country)
+    assert_equal("California", row.state)
+    assert_nil(row.county)
+    assert_equal("Los Angeles, Central Park", row.locality)
+    assert_equal("Los Angeles, Central Park", row.county_and_locality)
+  end
+
+  def do_split_test(name, author, rank, expect)
+    row = ObservationReport::Row.new(vals = [])
+    vals[15] = name
+    vals[16] = author
+    vals[17] = Name.ranks[rank]
+    assert_equal(expect[:genus].to_s, row.genus.to_s)
+    assert_equal(expect[:species].to_s, row.species.to_s)
+    assert_equal(expect[:subspecies].to_s, row.subspecies.to_s)
+    assert_equal(expect[:variety].to_s, row.variety.to_s)
+    assert_equal(expect[:form].to_s, row.form.to_s)
+    assert_equal(expect[:species_author].to_s, row.species_author.to_s)
+    assert_equal(expect[:subspecies_author].to_s, row.subspecies_author.to_s)
+    assert_equal(expect[:variety_author].to_s, row.variety_author.to_s)
+    assert_equal(expect[:form_author].to_s, row.form_author.to_s)
+    assert_equal(expect[:cf].to_s, row.cf.to_s)
+  end
+
+  def test_split_name
+    do_split_test("Fungi", "Bartl.", :Kingdom, genus: "Fungi")
+    do_split_test("Agaricus", "L.", :Genus, genus: "Agaricus")
+    do_split_test("Rhizocarpon geographicum group", "", :Group,
+                  genus: "Rhizocarpon",
+                  species: "geographicum group")
+    do_split_test("Rhizocarpon geographicum group", "sensu MO", :Group,
+                  genus: "Rhizocarpon",
+                  species: "geographicum group",
+                  species_author: "sensu MO")
+    do_split_test("Rhizocarpon geographicum", "", :Species,
+                  genus: "Rhizocarpon",
+                  species: "geographicum")
+    do_split_test("Rhizocarpon geographicum", "(L.) DC.", :Species,
+                  genus: "Rhizocarpon",
+                  species: "geographicum",
+                  species_author: "(L.) DC.")
+    do_split_test("Some thing ssp. else", "", :Subspecies,
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else")
+    do_split_test("Some thing ssp. else", "Seuss", :Subspecies,
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else",
+                  subspecies_author: "Seuss")
+    do_split_test("Some thing var. else", "Seuss", :Variety,
+                  genus: "Some",
+                  species: "thing",
+                  variety: "else",
+                  variety_author: "Seuss")
+    do_split_test("Some thing f. else", "Seuss", :Form,
+                  genus: "Some",
+                  species: "thing",
+                  form: "else",
+                  form_author: "Seuss")
+    do_split_test("Some thing ssp. else var. or f. other cfr.", "Seuss", :Form,
+                  genus: "Some",
+                  species: "thing",
+                  subspecies: "else",
+                  variety: "or",
+                  form: "other",
+                  form_author: "Seuss",
+                  cf: "cf.")
+  end
 end
