@@ -136,30 +136,23 @@ module ObservationReport
 
     # Do second query to get data from many-to-many joined table.
     def add_herbarium_labels!(rows, col)
-      ids = id_set(rows)
       vals = Specimen.connection.select_rows %(
         SELECT os.observation_id, s.herbarium_label
-        FROM specimens s, observations_specimens os
-        WHERE os.observation_id IN (#{ids})
+        FROM specimens s, observations_specimens os,
+              (#{query.query}) as ids
+        WHERE os.observation_id = ids.id
           AND os.specimen_id = s.id
       )
       add_column!(rows, vals, col)
     end
 
     def add_image_ids!(rows, col)
-      ids = id_set(rows)
       vals = Image.connection.select_rows %(
         SELECT io.observation_id, io.image_id
-        FROM images_observations io
-        WHERE io.observation_id IN (#{ids})
+        FROM images_observations io, (#{query.query}) as ids
+        WHERE io.observation_id = ids.id
       )
       add_column!(rows, vals, col)
-    end
-
-    def id_set(rows)
-      return rows.map(&:obs_id).join(",") if rows.length < MO.query_max_array
-      raise "Too many observations! Maximum allowed for this report type is " \
-            "#{MO.query_max_array}."
     end
 
     def add_column!(rows, vals, col)
