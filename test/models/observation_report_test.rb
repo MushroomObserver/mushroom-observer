@@ -215,7 +215,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal("California", row.state)
     assert_equal("Alameda", row.county)
     assert_equal("Some, Random, Park", row.locality)
-    assert_equal("Alameda Co., Some, Random, Park", row.county_and_locality)
+    assert_equal("Alameda Co., Some, Random, Park", row.locality_with_county)
 
     row = ObservationReport::Row.new(vals = [])
     vals[19] = "Big Branch, Saint Tammany Parish, Louisiana, USA"
@@ -223,7 +223,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal("Louisiana", row.state)
     assert_equal("Saint Tammany", row.county)
     assert_equal("Big Branch", row.locality)
-    assert_equal("Saint Tammany Parrish, Big Branch", row.county_and_locality)
+    assert_equal("Saint Tammany Parish, Big Branch", row.locality_with_county)
 
     row = ObservationReport::Row.new(vals = [])
     vals[19] = "Central Park, Los Angeles, California, USA"
@@ -231,7 +231,7 @@ class ObservationReportTest < UnitTestCase
     assert_equal("California", row.state)
     assert_nil(row.county)
     assert_equal("Los Angeles, Central Park", row.locality)
-    assert_equal("Los Angeles, Central Park", row.county_and_locality)
+    assert_equal("Los Angeles, Central Park", row.locality_with_county)
   end
 
   def do_split_test(name, author, rank, expect)

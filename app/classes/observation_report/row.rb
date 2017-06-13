@@ -213,8 +213,7 @@ module ObservationReport
     def locality_with_county
       val = Location.reverse_name(loc_name)
       return nil if val.blank?
-      country, state, county_and_locality = val.split(", ", 3)
-      county_and_locality
+      val.split(", ", 3)[2]
     end
 
     def split_location
