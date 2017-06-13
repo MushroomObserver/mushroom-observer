@@ -179,6 +179,13 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:textile_sandbox)
   end
 
+  def test_rss_with_article_in_feed
+    login("rolf")
+    article = Article.create!(title: "Really _Neat_ Feature!", body: "Does stuff.")
+    assert_equal("Really Neat Feature!", article.text_name)
+    get(:rss)
+  end
+
   def test_page_load_user_by_contribution
     get_with_dump(:users_by_contribution)
     assert_template(:users_by_contribution)

@@ -16,8 +16,10 @@
 #  can_edit?            Can the user create, edit, or delete Articles?
 #  display_name::       name boldfaced
 #  format_name          name
+#  text_name            name without formatting
 #  rss_log_tab_label    label displayed in the RssLog tabset
 #  unique_format_name   name + id
+#  unique_text_name     name + id without formatting
 #
 class Article < AbstractModel
   belongs_to :user
@@ -41,9 +43,19 @@ class Article < AbstractModel
     title
   end
 
+  # used by RSS feed
+  def text_name
+    title.to_s.t.strip_html
+  end
+
   # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
     title + " (#{id || "?"})"
+  end
+
+  # used by RSS feed
+  def unique_text_name
+    text_name + " (#{id || "?"})"
   end
 
   # The label which is displayed for this model's tab in the RssLog tabset
