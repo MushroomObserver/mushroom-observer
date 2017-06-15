@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426123736) do
+ActiveRecord::Schema.define(version: 20170614233327) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -399,7 +399,7 @@ ActiveRecord::Schema.define(version: 20170426123736) do
     t.text     "notes",               limit: 65535
     t.text     "classification",      limit: 65535
     t.boolean  "ok_for_export",                     default: true,  null: false
-    t.string   "author",              limit: 100
+    t.string   "author",              limit: 255
   end
 
   create_table "names_versions", force: :cascade do |t|
@@ -549,6 +549,18 @@ ActiveRecord::Schema.define(version: 20170426123736) do
     t.integer  "project_id",       limit: 4
     t.integer  "glossary_term_id", limit: 4
     t.integer  "article_id",       limit: 4
+  end
+
+  create_table "sequences", force: :cascade do |t|
+    t.integer  "observation_id", limit: 4
+    t.integer  "user_id",        limit: 4
+    t.text     "locus",          limit: 65535
+    t.text     "bases",          limit: 65535
+    t.string   "archive",        limit: 255
+    t.string   "accession",      limit: 255
+    t.text     "notes",          limit: 65535
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
   end
 
   create_table "species_lists", force: :cascade do |t|
