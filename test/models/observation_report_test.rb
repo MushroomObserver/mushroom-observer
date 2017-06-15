@@ -89,7 +89,7 @@ class ObservationReportTest < UnitTestCase
     do_report_test(ObservationReport::Darwin, obs, expect, &:id)
   end
 
-  def test_mycoflora
+  def test_mycoflora_no_exact_lat_long
     obs = observations(:detailed_unknown_obs)
     img1, img2 = obs.images.sort_by(&:id)
     expect = [
@@ -100,8 +100,13 @@ class ObservationReportTest < UnitTestCase
       "Mary Newbie",
       "2006-05-11",
       "USA, California, Burbank",
-      "34.185",
-      "-118.33",
+      nil,
+      nil,
+      nil,
+      "34.15",
+      "34.22",
+      "-118.37",
+      "-118.29",
       "148",
       "294",
       "2006-05-12 17:21:00 UTC",
@@ -109,6 +114,33 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg"
+    ]
+    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+  end
+
+  def test_mycoflora_with_exact_lat_long
+    obs = observations(:unknown_with_lat_long)
+    expect = [
+      obs.id.to_s,
+      "Fungi",
+      nil,
+      "Kingdom",
+      "Mary Newbie",
+      "2010-07-22",
+      "USA, California, Burbank",
+      "34.1622",
+      "-118.3521",
+      "123",
+      "34.15",
+      "34.22",
+      "-118.37",
+      "-118.29",
+      "148",
+      "294",
+      "2010-07-22 09:21:00 UTC",
+      "unknown_with_lat_long",
+      "http://mushroomobserver.org/#{obs.id}",
+      ""
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end

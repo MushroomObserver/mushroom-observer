@@ -12,6 +12,11 @@ module ObservationReport
         collectionLocation
         decimalLatitude
         decimalLongitude
+        elevationInMeters
+        minimumDecimalLatitude
+        maximumDecimalLatitude
+        minimumDecimalLongitude
+        maximumDecimalLongitude
         minimumElevationInMeters
         maximumElevationInMeters
         updatedAt
@@ -30,10 +35,15 @@ module ObservationReport
         row.user_name_or_login,
         row.obs_when,
         row.loc_name_sci,
-        row.best_lat,
-        row.best_long,
-        row.best_low,
-        row.best_high,
+        row.obs_lat(4),
+        row.obs_long(4),
+        row.obs_alt,
+        row.loc_south,
+        row.loc_north,
+        row.loc_west,
+        row.loc_east,
+        row.loc_low,
+        row.loc_high,
         row.obs_updated_at,
         row.obs_notes,
         row.obs_url,
