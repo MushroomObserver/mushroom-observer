@@ -26,6 +26,7 @@ module ObservationReport
       )
     end
 
+    # rubocop:disable Metrics/AbcSize
     def format_row(row)
       [
         row.obs_id,
