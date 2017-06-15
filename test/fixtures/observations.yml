@@ -118,6 +118,34 @@ strobilurus_diminutivus_obs:
   where: Pipi Valley, Sierra Mountains, CA
   notes: From somewhere else
 
+stereum_hirsutum_1:
+  <<: *DEFAULTS
+  when: 2017-06-23
+  location: burbank
+  user: rolf
+  name: stereum_hirsutum
+
+stereum_hirsutum_2:
+  <<: *DEFAULTS
+  when: 2017-06-24
+  location: burbank
+  user: rolf
+  name: stereum_hirsutum
+
+tubaria_furfuracea_1:
+  <<: *DEFAULTS
+  when: 2017-06-23
+  location: burbank
+  user: rolf
+  name: tubaria_furfuracea
+
+tubaria_furfuracea_2:
+  <<: *DEFAULTS
+  when: 2017-06-24
+  location: burbank
+  user: rolf
+  name: tubaria_furfuracea
+
 unknown_with_no_naming:
   <<: *DEFAULTS
   when: 2008-09-23

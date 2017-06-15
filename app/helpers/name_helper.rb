@@ -11,10 +11,6 @@
 ##############################################################################
 
 module NameHelper
-  def eol_for_taxon_link(id, name)
-    link_to(name.t, controller: "name", action: "eol_for_taxon", id: id)
-  end
-
   def classification_section(classification, parents, first_child, children_query)
     head = safe_empty
     lines = []

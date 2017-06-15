@@ -10,9 +10,16 @@
 #
 ################################################################################
 
-# Coveralls.wear! must occur before any of your application code is required
+# Code to allow both local and coveralls coverage.  From:
+# https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+require "simplecov"
 require "coveralls"
-Coveralls.wear!("rails")
+
+# Coveralls.wear!("rails")
+formatters = [SimpleCov::Formatter::HTMLFormatter,
+              Coveralls::SimpleCov::Formatter]
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
+SimpleCov.start
 
 # Allows test results to be reported back to runner IDEs
 require "minitest/reporters"
@@ -35,7 +42,7 @@ require "rails/test_help"
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
 require "mocha/mini_test"
 
-for file in %w(
+%w(
   general_extensions
   flash_extensions
   controller_extensions
@@ -50,68 +57,75 @@ for file in %w(
   unit_test_case
   functional_test_case
   integration_test_case
-)
+).each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
 
 I18n.enforce_available_locales = true
 
-class ActiveSupport::TestCase
-  ############################################################################
-  #  Transactional fixtures
-  ############################################################################
-  # Transactional fixtures accelerate your tests by wrapping each test method
-  # in a transaction that's rolled back on completion.  This ensures that the
-  # test database remains unchanged so your fixtures don't have to be reloaded
-  # between every test method.  Fewer database queries means faster tests.
-  #
-  # Read Mike Clark's excellent walkthrough at
-  #   http://clarkware.com/cgi/blosxom/2005/10/24#Rails10FastTesting
-  #
-  # Every Active Record database supports transactions except MyISAM tables
-  # in MySQL.  Turn off transactional fixtures in this case; however, if you
-  # don't care one way or the other, switching from MyISAM to InnoDB tables
-  # is recommended.
-  #
-  # The only drawback to using transactional fixtures is when you actually
-  # need to test transactions.  Since your test is bracketed by a transaction,
-  # any transactions started in your code will be automatically rolled back.
-  self.use_transactional_fixtures = true
+module ActiveSupport
+  class TestCase
+    ##########################################################################
+    #  Transactional fixtures
+    ##########################################################################
+    # Transactional fixtures accelerate your tests by wrapping each
+    # test method in a transaction that's rolled back on completion.
+    # This ensures that the test database remains unchanged so your
+    # fixtures don't have to be reloaded between every test method.
+    # Fewer database queries means faster tests.
+    #
+    # Read Mike Clark's excellent walkthrough at
+    #   http://clarkware.com/cgi/blosxom/2005/10/24#Rails10FastTesting
+    #
+    # Every Active Record database supports transactions except MyISAM
+    # tables in MySQL.  Turn off transactional fixtures in this case;
+    # however, if you don't care one way or the other, switching from
+    # MyISAM to InnoDB tables is recommended.
+    #
+    # The only drawback to using transactional fixtures is when you
+    # actually need to test transactions.  Since your test is
+    # bracketed by a transaction, any transactions started in your
+    # code will be automatically rolled back.
+    self.use_transactional_fixtures = true
 
-  # Instantiated fixtures are slow, but give you @david where otherwise you
-  # would need people(:david).  If you don't want to migrate your existing
-  # test cases which use the @david style and don't mind the speed hit (each
-  # instantiated fixtures translates to a database query per test method),
-  # then set this back to true.
-  self.use_instantiated_fixtures = false
-  ##############################################################################
+    # Instantiated fixtures are slow, but give you @david where
+    # otherwise you would need people(:david).  If you don't want to
+    # migrate your existing test cases which use the @david style and
+    # don't mind the speed hit (each instantiated fixtures translates
+    # to a database query per test method), then set this back to
+    # true.
+    self.use_instantiated_fixtures = false
+    ##########################################################################
 
-  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
-  # alphabetical order.
-  #
-  # Note: You'll currently still have to declare fixtures explicitly
-  # in integration tests -- they do not yet inherit this setting
-  fixtures :all
+    # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
+    # alphabetical order.
+    #
+    # Note: You'll currently still have to declare fixtures explicitly
+    # in integration tests -- they do not yet inherit this setting
+    fixtures :all
 
-  # Add more helper methods to be used by all tests here...
+    # Add more helper methods to be used by all tests here...
 
-  # Standard setup to run before every test.  Sets the locale, timezone,
-  # and makes sure User doesn't think a user is logged in.
-  def setup
-    I18n.locale = :en if I18n.locale != :en
-    Time.zone = "America/New_York"
-    User.current = nil
-  end
+    # Standard setup to run before every test.  Sets the locale, timezone,
+    # and makes sure User doesn't think a user is logged in.
+    def setup
+      I18n.locale = :en if I18n.locale != :en
+      Time.zone = "America/New_York"
+      User.current = nil
+    end
 
-  # Standard teardown to run after every test.  Just makes sure any
-  # images that might have been uploaded are cleared out.
-  def teardown
-    FileUtils.rm_rf(MO.local_image_files)
-    UserGroup.clear_cache_for_unit_tests
+    # Standard teardown to run after every test.  Just makes sure any
+    # images that might have been uploaded are cleared out.
+    def teardown
+      FileUtils.rm_rf(MO.local_image_files)
+      UserGroup.clear_cache_for_unit_tests
+    end
   end
 end
 
 # Make the Capybara DSL available in all integration tests
-class ActionDispatch::IntegrationTest
-  include Capybara::DSL
+module ActionDispatch
+  class IntegrationTest
+    include Capybara::DSL
+  end
 end

@@ -1234,14 +1234,14 @@ class ApplicationController < ActionController::Base
                                 }, query))
   end
 
-  private ##########
-
   def find_query_and_next_object(object, method, id)
     # prev/next in RssLog query
     query_and_next_object_rss_log_increment(object, method) ||
       # other cases (normal case or no next object)
       query_and_next_object_normal(object, method, id)
   end
+
+  private ##########
 
   def query_and_next_object_rss_log_increment(object, method)
     # Special exception for prev/next in RssLog query: If go to "next" in
