@@ -79,12 +79,12 @@
             <%= link_to(:app_checklist.t,
                         controller: :observer,
                         action: :checklist,
-                        species_list_id: @species_list.id) %>
-            <% if Rails.env == "development" || reviewer? %>
-                | <%= link_to(:species_list_show_print_labels.t,
-                              controller: :species_list, action: :print_labels,
-                              id: @species_list.id) %>
-            <% end %>
+                        species_list_id: @species_list.id) %> |
+            <%= link_to(:species_list_show_print_labels.t,
+                        controller: :species_list, action: :print_labels,
+                        id: @species_list.id) %> |
+            <%= link_with_query(:DOWNLOAD.t, controller: :observer,
+                                            action: :download_observations) %>
           </div>
 
           <% if @objects.any? %>

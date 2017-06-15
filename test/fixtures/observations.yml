@@ -136,6 +136,7 @@ unknown_with_lat_long:
   name: fungi
   lat: 34.1622
   long: -118.3521
+  alt: 123
 
 amateur_obs:
   <<: *DEFAULTS

@@ -156,7 +156,7 @@ class SpeciesList < AbstractModel
     end
   end
 
-  # Return plaint ASCII title with id appended to make unique.
+  # Return plain ASCII title with id appended to make unique.
   def unique_text_name
     unique_format_name.t.html_to_ascii
   end
