@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426123736) do
+ActiveRecord::Schema.define(version: 20170615205453) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -389,9 +389,9 @@ ActiveRecord::Schema.define(version: 20170426123736) do
     t.datetime "last_view"
     t.integer  "rank",                limit: 4
     t.string   "text_name",           limit: 100
-    t.string   "search_name",         limit: 200
-    t.string   "display_name",        limit: 200
-    t.string   "sort_name",           limit: 200
+    t.string   "search_name",         limit: 255
+    t.string   "display_name",        limit: 238
+    t.string   "sort_name",           limit: 285
     t.text     "citation",            limit: 65535
     t.boolean  "deprecated",                        default: false, null: false
     t.integer  "synonym_id",          limit: 4
@@ -399,7 +399,7 @@ ActiveRecord::Schema.define(version: 20170426123736) do
     t.text     "notes",               limit: 65535
     t.text     "classification",      limit: 65535
     t.boolean  "ok_for_export",                     default: true,  null: false
-    t.string   "author",              limit: 100
+    t.string   "author",              limit: 134
   end
 
   create_table "names_versions", force: :cascade do |t|
@@ -408,10 +408,10 @@ ActiveRecord::Schema.define(version: 20170426123736) do
     t.datetime "updated_at"
     t.integer  "user_id",             limit: 4
     t.string   "text_name",           limit: 100
-    t.string   "search_name",         limit: 200
-    t.string   "display_name",        limit: 200
-    t.string   "sort_name",           limit: 200
-    t.string   "author",              limit: 100
+    t.string   "search_name",         limit: 255
+    t.string   "display_name",        limit: 238
+    t.string   "sort_name",           limit: 285
+    t.string   "author",              limit: 134
     t.text     "citation",            limit: 65535
     t.boolean  "deprecated",                        default: false, null: false
     t.integer  "correct_spelling_id", limit: 4

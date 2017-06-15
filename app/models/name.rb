@@ -176,6 +176,12 @@
 #                              at start of parsed author.
 #  squeeze_author::          Squeeze out space between initials,
 #                              such as in "A. H. Smith".
+#  ==== Limits
+#  author_limit::            Max # of characters for author
+#  display_name_limit::      Max # of characters for display_name
+#  search_name_limit::       Max # of characters for search_name
+#  sort_name_limit::         Max # of characters for sort_name
+#  text_name_limit::         Max # of characters for text_name
 #
 #  == Instance methods
 #
@@ -2555,29 +2561,73 @@ class Name < AbstractModel
     save
   end
 
-  ################################################################################
-
   protected
 
+  ##############################################################################
+  #
+  #  :section: Limits
+  #
+  ##############################################################################
+
+  # :string field size limits in characters, based on this algorithm:
+  # Theoretical max differences between (text_name + author) and the field
+  #   search_name: 4
+  #     Adding a " sp." at the end is the worst case.
+  #   sort_name:   21
+  #     It adds " {N" and " !" (5 chars) in front of subgenus and the epithet
+  #     that goes with it. There can be up to 4 infrageneric ranks (subgenus,
+  #     section, subsection, stirps, plus the space between name and author.
+  #     That adds up to 5*4 + 1 = 21.
+  #   display_name: 41
+  #     Adds the space between name and author; "**__" and "__**" (8 chars)
+  #     around every epithet, grouping genus and species. Infrageneric ranks
+  #     win, making as many as 5 separate bold epithets or epithet pairs.
+  #     That adds up to 8*5 + 1 = 41.
+
+  # Numbers are hard-coded (rather than calculated) to make it easier to copy
+  # them to migrations.
+  def self.author_limit
+    # max if text_name_limit == 100, and we want to keep sort_name_limit < 256
+    134
+  end
+
+  def self.search_name_limit
+    238
+  end
+
+  def self.sort_name_limit
+    255
+  end
+
+  def self.display_name_limit
+    285
+  end
+
+  def self.text_name_limit
+    100
+  end
+
+  ##############################################################################
+
   validate :check_requirements
+
   def check_requirements # :nodoc:
     errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
 
-    if text_name.to_s.bytesize > 100
-      errors.add(:text_name, :validate_name_text_name_too_long.t)
+    if author.to_s.bytesize > Name.author_limit
+      errors.add(:author, :validate_name_author_too_long.t)
     end
-    if search_name.to_s.bytesize > 200
-      errors.add(:search_name, :validate_name_search_name_too_long.t)
-    end
-    if sort_name.to_s.bytesize > 200
-      errors.add(:sort_name, :validate_name_sort_name_too_long.t)
-    end
-    if display_name.to_s.bytesize > 200
+    if display_name.to_s.bytesize > Name.display_name_limit
       errors.add(:display_name, :validate_name_display_name_too_long.t)
     end
-
-    if author.to_s.bytesize > 100
-      errors.add(:author, :validate_name_author_too_long.t)
+    if search_name.to_s.bytesize > Name.search_name_limit
+      errors.add(:search_name, :validate_name_search_name_too_long.t)
+    end
+    if sort_name.to_s.bytesize > Name.sort_name_limit
+      errors.add(:sort_name, :validate_name_sort_name_too_long.t)
+    end
+    if text_name.to_s.bytesize > Name.text_name_limit
+      errors.add(:text_name, :validate_name_text_name_too_long.t)
     end
   end
 end
