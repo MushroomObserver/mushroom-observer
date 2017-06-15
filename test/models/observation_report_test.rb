@@ -202,8 +202,8 @@ class ObservationReportTest < UnitTestCase
       "Burbank",
       "34.1622",
       "-118.3521",
-      "148",
-      "294",
+      "123",
+      "123",
       "2010-07-22 09:21:00 UTC",
       "unknown_with_lat_long"
     ]
