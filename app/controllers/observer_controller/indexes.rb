@@ -228,6 +228,8 @@ class ObserverController
       ObservationReport::Darwin.new(args)
     when "symbiota"
       ObservationReport::Symbiota.new(args)
+    when "mycoflora"
+      ObservationReport::Mycoflora.new(args)
     else
       fail("Invalid download type: #{format.inspect}")
     end
