@@ -975,9 +975,7 @@ class User < AbstractModel
       errors.add(:login, :validate_user_login_taken.t)
     end
 
-    if password.to_s.blank?
-      errors.add(:password, :validate_user_password_missing.t)
-    elsif password.length < 5 || password.size > 40
+    if password.to_s.present? && (password.length < 5 || password.size > 40)
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
