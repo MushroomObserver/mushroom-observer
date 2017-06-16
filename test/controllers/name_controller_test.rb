@@ -880,7 +880,7 @@ class NameControllerTest < FunctionalTestCase
       name: {
         text_name: text_name,
         author:    author,
-        rank:      :Genus,
+        rank:      :Genus
       }
     }
     post_requires_login(:create_name, params)
