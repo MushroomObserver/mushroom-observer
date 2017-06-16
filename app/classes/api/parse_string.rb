@@ -7,7 +7,7 @@ class API
     str = get_param(key)
     return args[:default] unless str
     limit = args[:limit]
-    fail StringTooLong.new(str, limit) if limit && (str.bytesize > limit)
+    fail StringTooLong.new(str, limit) if limit && (str.size > limit)
     str
   end
 
