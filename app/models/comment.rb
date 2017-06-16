@@ -161,13 +161,13 @@ class Comment < AbstractModel
   def check_summary # :nodoc:
     if summary.to_s.blank?
       errors.add(:summary, :validate_comment_summary_missing.t)
-    elsif summary.bytesize > 100
+    elsif summary.size > 100
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
   end
 
   def check_target # :nodoc:
-    return unless target_type.to_s.bytesize > 30
+    return unless target_type.to_s.size > 30
     errors.add(:target_type, :validate_comment_object_type_too_long.t)
   end
 end

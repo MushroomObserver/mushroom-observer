@@ -969,7 +969,7 @@ class User < AbstractModel
   def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif login.length < 3 || login.bytesize > 40
+    elsif login.length < 3 || login.size > 40
       errors.add(:login, :validate_user_login_too_long.t)
     elsif (other = User.find_by_login(login)) && (other.id != id)
       errors.add(:login, :validate_user_login_taken.t)
@@ -977,20 +977,20 @@ class User < AbstractModel
 
     if password.to_s.blank?
       # errors.add(:password, :validate_user_password_missing.t)
-    elsif password.length < 5 || password.bytesize > 40
+    elsif password.length < 5 || password.size > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
     if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
-    elsif email.bytesize > 80
+    elsif email.size > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
     if theme.to_s.bytesize > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    errors.add(:name, :validate_user_name_too_long.t) if name.to_s.bytesize > 80
+    errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
   validate(:check_password, on: :create)

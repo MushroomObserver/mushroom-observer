@@ -403,13 +403,13 @@ class SpeciesList < AbstractModel
 
     if title.to_s.blank?
       errors.add(:title, :validate_species_list_title_missing.t)
-    elsif title.bytesize > 100
+    elsif title.size > 100
       errors.add(:title, :validate_species_list_title_too_long.t)
     end
 
     if place_name.to_s.blank? && !location
       errors.add(:place_name, :validate_species_list_where_missing.t)
-    elsif where.to_s.bytesize > 1024
+    elsif where.to_s.size > 1024
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 

@@ -95,7 +95,7 @@ class Interest < AbstractModel
       errors.add(:user, :validate_interest_user_missing.t)
     end
 
-    if target_type.to_s.bytesize > 30
+    if target_type.to_s.size > 30
       errors.add(:target_type, :validate_interest_object_type_too_long.t)
     end
   end

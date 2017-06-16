@@ -160,7 +160,7 @@ class AccountController < ApplicationController
           elsif password != confirmation
             @user.errors.add(:password_confirmation,
                              :validate_user_password_no_match.t)
-          elsif password.length < 5 || password.bytesize > 40
+          elsif password.length < 5 || password.size > 40
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user

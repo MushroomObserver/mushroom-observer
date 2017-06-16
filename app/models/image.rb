@@ -573,7 +573,7 @@ class Image < AbstractModel
     name.sub!(/^[a-zA-Z]:/, "")
     name.sub!(/^.*[\/\\]/, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
-    name.truncate_bytesize!(120) if name.bytesize > 120
+    name.truncate!(120) if name.size > 120
     if !name.blank? and User.current && User.current.keep_filenames != :toss
       self.original_name = name
     end
@@ -920,12 +920,12 @@ class Image < AbstractModel
     # about correcting the date later if need be.
     self.when ||= Time.now
 
-    if content_type.to_s.bytesize > 100
-      self.content_type = content_type.to_s.truncate_bytesize(100)
+    if content_type.to_s.size > 100
+      self.content_type = content_type.to_s.truncate(100)
     end
 
-    if copyright_holder.to_s.bytesize > 100
-      self.copyright_holder = copyright_holder.to_s.truncate_bytesize(100)
+    if copyright_holder.to_s.size > 100
+      self.copyright_holder = copyright_holder.to_s.truncate(100)
     end
   end
 end

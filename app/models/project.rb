@@ -273,7 +273,7 @@ class Project < AbstractModel
 
     if title.to_s.blank?
       errors.add(:title, :validate_project_title_missing.t)
-    elsif title.bytesize > 100
+    elsif title.size > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
   end

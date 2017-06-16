@@ -709,7 +709,7 @@ class Location < AbstractModel
       errors.add(:user, :validate_location_user_missing.t)
     end
 
-    if name.to_s.bytesize > 1024
+    if name.to_s.size > 1024
       errors.add(:name, :validate_location_name_too_long.t)
     elsif name.empty?
       errors.add(:name, :validate_missing.t(field: :name))
