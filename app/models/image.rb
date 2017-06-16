@@ -573,7 +573,7 @@ class Image < AbstractModel
     name.sub!(/^[a-zA-Z]:/, "")
     name.sub!(/^.*[\/\\]/, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
-    name.truncate!(120) if name.size > 120
+    name = name.truncate(120)
     if !name.blank? and User.current && User.current.keep_filenames != :toss
       self.original_name = name
     end
