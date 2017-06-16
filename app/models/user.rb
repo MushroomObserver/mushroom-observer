@@ -976,7 +976,7 @@ class User < AbstractModel
     end
 
     if password.to_s.blank?
-      # errors.add(:password, :validate_user_password_missing.t)
+      errors.add(:password, :validate_user_password_missing.t)
     elsif password.length < 5 || password.size > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
@@ -987,9 +987,7 @@ class User < AbstractModel
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
-    if theme.to_s.bytesize > 40
-      errors.add(:theme, :validate_user_theme_too_long.t)
-    end
+    errors.add(:theme, :validate_user_theme_too_long.t) if theme.to_s.size > 40
     errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
