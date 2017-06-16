@@ -24,8 +24,6 @@
 #  capitalize_first::   Capitalize first letter, leaving the rest alone.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Fixnum#alphabetize.
-#  truncate_bytesize::  Truncate so that *binary* length is within given limit
-#  truncate_bytesize!:: Truncate so that *binary* length ia within given limit
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::      Measure how closely this String matches another String.
@@ -577,30 +575,6 @@ class String
   # Find amount first line is indented and remove that from all lines.
   def unindent
     gsub /^#{self[/\A\s*/]}/, ""
-  end
-
-  # Byte truncation.  bytesize differs from length if there are accents.
-  # Very useful when validating ActiveRecord records,
-  # because mysql limits the number of bytes, not characters.
-
-  # Truncate a string so that its *binary* length is within a given limit.
-  def truncate_bytesize(len)
-    return self if bytesize <= len
-    result = self
-    if encoding == "UTF-8"
-      result = result.force_encoding("binary")[0..len]
-      result = result[0..-2] while result[-1].ord & 0xC0 == 0x80
-      result = result[0..-2].force_encoding("UTF-8")
-    else
-      result = result[0..len - 1]
-      result = result[0..-2] while result.bytesize > len
-    end
-    result
-  end
-
-  # Truncate string bytesize in place
-  def truncate_bytesize!(len)
-    replace(truncate_bytesize(len))
   end
 
   ### String Queries ###
