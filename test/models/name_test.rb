@@ -1180,6 +1180,54 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_deprecated
+    do_name_parse_test(
+      "Lecania ryaniana van den Boom",
+      {
+        text_name: "Lecania ryaniana",
+        real_text_name: "Lecania ryaniana",
+        search_name: "Lecania ryaniana van den Boom",
+        real_search_name: "Lecania ryaniana van den Boom",
+        sort_name: "Lecania ryaniana  van den Boom",
+        display_name: "__Lecania ryaniana__ van den Boom",
+        parent_name: "Lecania",
+        rank: :Species,
+        author: "van den Boom"
+      },
+      deprecated: true
+    )
+    do_name_parse_test( # binomial, no author, deprecated
+      "Agaricus campestris group",
+      {
+        text_name:        "Agaricus campestris group",
+        real_text_name:   "Agaricus campestris group",
+        search_name:      "Agaricus campestris group",
+        real_search_name: "Agaricus campestris group",
+        sort_name:        "Agaricus campestris   group",
+        display_name:     "__Agaricus campestris__ group",
+        parent_name:      "Agaricus",
+        rank:             :Group,
+        author:           "",
+      },
+      deprecated:       true
+    )
+    do_name_parse_test( # binomial, sensu author, deprecated
+      "Agaricus campestris group sensu Author",
+      {
+        text_name:        "Agaricus campestris group",
+        real_text_name:   "Agaricus campestris group",
+        search_name:      "Agaricus campestris group sensu Author",
+        real_search_name: "Agaricus campestris group sensu Author",
+        sort_name:        "Agaricus campestris   group  sensu Author",
+        display_name:     "__Agaricus campestris__ group sensu Author",
+        parent_name:      "Agaricus",
+        rank:             :Group,
+        author:           "sensu Author",
+      },
+      deprecated:       true
+   )
+  end
+
   # -----------------------------
   #  Test classification.
   # -----------------------------
