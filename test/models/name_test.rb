@@ -1207,9 +1207,9 @@ class NameTest < UnitTestCase
         display_name:     "__Agaricus campestris__ group",
         parent_name:      "Agaricus",
         rank:             :Group,
-        author:           "",
+        author:           ""
       },
-      deprecated:       true
+      deprecated: true
     )
     do_name_parse_test( # binomial, sensu author, deprecated
       "Agaricus campestris group sensu Author",
@@ -1222,10 +1222,10 @@ class NameTest < UnitTestCase
         display_name:     "__Agaricus campestris__ group sensu Author",
         parent_name:      "Agaricus",
         rank:             :Group,
-        author:           "sensu Author",
+        author:           "sensu Author"
       },
-      deprecated:       true
-   )
+      deprecated: true
+    )
   end
 
   # -----------------------------
