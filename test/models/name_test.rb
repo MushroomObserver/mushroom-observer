@@ -14,14 +14,9 @@ class NameTest < UnitTestCase
     name
   end
 
-  # Parse a string, with detailed error message. To test a deprecated string,
-  # call this with "deprecated: true" tacked on at the end.
-  def do_name_parse_test(str, args)
-    # If final key of arg is :deprecated", remove it and
-    # separately pass it to Name.parse_name as the final argument
-    deprecated = args.delete(:deprecated) || false
-    # :Genus is the default 2nd argument of Name.parse_name
-    parse = Name.parse_name(str, :Genus, deprecated)
+  # Parse a string, with detailed error message.
+  def do_name_parse_test(str, expects, deprecated: false)
+    parse = Name.parse_name(str, deprecated: deprecated)
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
@@ -36,7 +31,7 @@ class NameTest < UnitTestCase
       :rank,
       :author
     ].each do |var|
-      expect = args[var]
+      expect = expects[var]
       if var == :real_text_name
         actual = Name.display_to_real_text(parse)
       elsif var == :real_search_name
@@ -447,15 +442,17 @@ class NameTest < UnitTestCase
   def test_name_parse_1
     do_name_parse_test(
       "Lecania ryaniana van den Boom",
-      text_name: "Lecania ryaniana",
-      real_text_name: "Lecania ryaniana",
-      search_name: "Lecania ryaniana van den Boom",
-      real_search_name: "Lecania ryaniana van den Boom",
-      sort_name: "Lecania ryaniana  van den Boom",
-      display_name: "**__Lecania ryaniana__** van den Boom",
-      parent_name: "Lecania",
-      rank: :Species,
-      author: "van den Boom"
+     {
+        text_name: "Lecania ryaniana",
+        real_text_name: "Lecania ryaniana",
+        search_name: "Lecania ryaniana van den Boom",
+        real_search_name: "Lecania ryaniana van den Boom",
+        sort_name: "Lecania ryaniana  van den Boom",
+        display_name: "**__Lecania ryaniana__** van den Boom",
+        parent_name: "Lecania",
+        rank: :Species,
+        author: "van den Boom"
+      }
     )
   end
 
