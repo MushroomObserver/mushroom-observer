@@ -442,17 +442,15 @@ class NameTest < UnitTestCase
   def test_name_parse_1
     do_name_parse_test(
       "Lecania ryaniana van den Boom",
-     {
-        text_name: "Lecania ryaniana",
-        real_text_name: "Lecania ryaniana",
-        search_name: "Lecania ryaniana van den Boom",
-        real_search_name: "Lecania ryaniana van den Boom",
-        sort_name: "Lecania ryaniana  van den Boom",
-        display_name: "**__Lecania ryaniana__** van den Boom",
-        parent_name: "Lecania",
-        rank: :Species,
-        author: "van den Boom"
-      }
+      text_name: "Lecania ryaniana",
+      real_text_name: "Lecania ryaniana",
+      search_name: "Lecania ryaniana van den Boom",
+      real_search_name: "Lecania ryaniana van den Boom",
+      sort_name: "Lecania ryaniana  van den Boom",
+      display_name: "**__Lecania ryaniana__** van den Boom",
+      parent_name: "Lecania",
+      rank: :Species,
+      author: "van den Boom"
     )
   end
 
