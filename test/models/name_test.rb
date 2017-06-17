@@ -14,8 +14,14 @@ class NameTest < UnitTestCase
     name
   end
 
+  # Parse a string, with detailed error message. To test a deprecated string,
+  # call this with "deprecated: true" tacked on at the end.
   def do_name_parse_test(str, args)
-    parse = Name.parse_name(str)
+    # If final key of arg is :deprecated", remove it and
+    # separately pass it to Name.parse_name as the final argument
+    deprecated = args.delete(:deprecated) || false
+    # :Genus is the default 2nd argument of Name.parse_name
+    parse = Name.parse_name(str, :Genus, deprecated)
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
