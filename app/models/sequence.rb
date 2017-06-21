@@ -18,4 +18,16 @@
 class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
+
+  ##############################################################################
+
+  protected
+
+  validates :locus, :observation, :user, presence: true
+  validate  :bases_or_deposit
+
+  def bases_or_deposit
+    return unless bases.present? || archive.present? && accession.present?
+    errors.add(:bases, :validate_sequence_bases_or_archive.t)
+  end
 end

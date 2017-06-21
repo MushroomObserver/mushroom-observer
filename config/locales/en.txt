@@ -3197,6 +3197,7 @@
   validate_project_user_missing: "[:validate_missing(field=:user)]"
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
+  validate_sequence_bases_or_archive: "Must have [:BASES] or both [:ARCHIVE] and [:ACCESSION]"
   validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_species_list_user_missing: "[:validate_missing(field=:user)]"
   validate_species_list_where_missing: "[:validate_missing(field=:location)]"
