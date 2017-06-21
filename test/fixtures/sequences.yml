@@ -9,5 +9,14 @@ DEFAULTS: &DEFAULTS
   accession:   KY366491.1
   notes:       Notes about Sequence $LABEL
 
+local_sequence:
+  <<: *DEFAULTS
+  observation: locally_sequenced_obs
+  archive:     ""
+  accession:   ""
 
+deposited_sequence:
+  <<: *DEFAULTS
+  observation: genbanked_obs
+  bases:       ""
 

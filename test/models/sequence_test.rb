@@ -1,10 +1,8 @@
-# encoding: utf-8
-
 require "test_helper"
 
 class SequenceTest < UnitTestCase
   def test_validators
-    # Prove that Sequence with all proper fields is validated
+    # Prove that Sequence with all proper fields is valid.
     sequence = Sequence.new(
                     observation: observations(:boletus_edulis_obs),
                     user:        observations(:boletus_edulis_obs).user,
@@ -14,7 +12,7 @@ class SequenceTest < UnitTestCase
                     accession:   "KY366491.1",
                     notes:       "Random notes"
     )
-    assert(sequence.valid?)
+    assert(sequence.valid?, sequence.errors.messages)
 
     # Prove that Sequence with a blank locus is invalid.
     sequence = Sequence.new(
@@ -111,5 +109,61 @@ class SequenceTest < UnitTestCase
                     notes:       "Random notes"
     )
     assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
+
+    # Prove that Sequences Bases must be unique for an Observation
+    existing_seq = sequences(:local_sequence)
+    obs = existing_seq.observation
+    sequence = Sequence.new(
+                    observation: obs,
+                    user:        obs.user,
+                    locus:       "ITS",
+                    bases:       existing_seq.bases,
+                    archive:     "",
+                    accession:   "",
+                    notes:       "Random notes"
+    )
+    assert(sequence.invalid?, :validate_sequence_bases_unique.l)
+
+    # Prove Observation can have Sequences with non-unique, blank Bases
+    existing_seq = sequences(:deposited_sequence)
+    obs = existing_seq.observation
+    sequence = Sequence.new(
+                    observation: obs,
+                    user:        obs.user,
+                    locus:       "ITS",
+                    bases:       "",         # same as existing_seq
+                    archive:     "GenBank",
+                    accession:   existing_seq.accession + "2",
+                    notes:       "Random notes"
+    )
+    assert(sequence.valid?, :validate_sequence_accession_unique.l)
+
+    # Prove that Sequence Accessions must be unique for an Observation
+    existing_seq = sequences(:deposited_sequence)
+    obs = existing_seq.observation
+    sequence = Sequence.new(
+                    observation: obs,
+                    user:        obs.user,
+                    locus:       "ITS",
+                    bases:       "",
+                    archive:     "GenBank",
+                    accession:   existing_seq.accession,
+                    notes:       "Random notes"
+    )
+    assert(sequence.invalid?, :validate_sequence_accession_unique.l)
+
+    # Prove Observation can have Sequences with non-unique, blank Accessions
+    existing_seq = sequences(:local_sequence)
+    obs = existing_seq.observation
+    sequence = Sequence.new(
+                    observation: obs,
+                    user:        obs.user,
+                    locus:       "ITS",
+                    bases:       existing_seq.bases + "a",
+                    archive:     "",
+                    accession:   "", # same as existing_sequence
+                    notes:       "Random notes"
+    )
+    assert(sequence.valid?, :validate_sequence_accession_unique.l)
   end
 end

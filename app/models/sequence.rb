@@ -25,9 +25,34 @@ class Sequence < AbstractModel
 
   validates :locus, :observation, :user, presence: true
   validate  :bases_or_deposit
+  validate  :unique_bases_for_obs
+  validate  :unique_accession_for_obs
 
   def bases_or_deposit
-    return unless bases.present? || archive.present? && accession.present?
+    return if bases.present? || archive.present? && accession.present?
     errors.add(:bases, :validate_sequence_bases_or_archive.t)
+  end
+
+  def unique_bases_for_obs
+    return if bases.blank?
+    return unless other_sequences_same_obs.any? do |sequence|
+      sequence.bases == bases
+    end
+
+    errors.add(:bases, :validate_sequence_bases_unique.t)
+  end
+
+  def unique_accession_for_obs
+    return if accession.blank?
+    return unless other_sequences_same_obs.any? do |sequence|
+      sequence.accession == accession
+    end
+
+    errors.add(:bases, :validate_sequence_accession_unique.t)
+  end
+
+  # return array of other Sequences in same Observation, or nil if none
+  def other_sequences_same_obs
+    observation.try(:sequences) ? observation.sequences - [self] : nil
   end
 end
