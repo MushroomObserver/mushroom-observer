@@ -21,7 +21,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_add_sequence_post
+  def test_add_sequence_post_happy_paths
     obs   = observations(:coprinus_comatus_obs)
     owner = obs.user
     locus = "ITS"
@@ -40,16 +40,6 @@ class SequenceControllerTest < FunctionalTestCase
                sequence: { locus: locus,
                            bases: bases }
              }
-
-    # Prove unauthorized User cannot add Sequence
-    old_count = Sequence.count
-    login(users(:zero_user).login)
-
-    post(:add_sequence, params)
-    assert_flash_text(:permission_denied.l)
-    assert_equal(old_count, Sequence.count)
-    assert_empty(obs.sequences)
-    assert_redirected_to(controller: :observer, action: :show_observation)
 
     # Prove authorized user can create non-repository Sequence
     old_count = Sequence.count
@@ -83,6 +73,28 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.bases)
     assert_equal(archive, sequence.archive)
     assert_equal(accession, sequence.accession)
+    assert_redirected_to(controller: :observer, action: :show_observation)
+  end
+
+  def test_add_sequence_post_unhappy_paths
+    obs   = observations(:coprinus_comatus_obs)
+    owner = obs.user
+    locus = "ITS"
+    bases = "aaccggtt"
+    params = {
+               id: obs.id,
+               sequence: { locus: locus,
+                           bases: bases }
+             }
+
+    # Prove unauthorized User cannot add Sequence
+    old_count = Sequence.count
+    login(users(:zero_user).login)
+
+    post(:add_sequence, params)
+    assert_flash_text(:permission_denied.l)
+    assert_equal(old_count, Sequence.count)
+    assert_empty(obs.sequences)
     assert_redirected_to(controller: :observer, action: :show_observation)
   end
 end
