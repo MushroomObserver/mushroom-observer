@@ -49,8 +49,12 @@ class SequenceController < ApplicationController
     @sequence = @observation.sequences.new()
     @sequence.attributes = whitelisted_sequence_params
     @sequence.user = @user
-    @sequence.save
-    redirect_to_show_observation
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_to_show_observation
+    else
+      flash_object_errors(@sequence)
+    end
   end
 
   def redirect_to_show_observation

@@ -96,5 +96,21 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     assert_redirected_to(controller: :observer, action: :show_observation)
+
+    # Prove returned to form if parameters invalid
+    params = {
+              id: obs.id,
+              sequence: { locus: "",
+                          bases: bases }
+             }
+    old_count = Sequence.count
+    login(owner.login)
+
+    post(:add_sequence, params)
+    assert_equal(old_count, Sequence.count)
+    assert_empty(obs.sequences)
+    # response is 200 because it just reloads the form
+    assert_response(:success)
+  end
   end
 end
