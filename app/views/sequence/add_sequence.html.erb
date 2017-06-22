@@ -1,12 +1,8 @@
 <%
   @owner_id = owner_id_line(@observation)
   @title = add_sequence_title(@observation)
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    @observation.show_link_args),
-    link_with_query(:sequence_add_edit.t, controller: :observer,
-                    action: :edit_observation, id: @observation.id)
-  ]
+  tabs = [link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
