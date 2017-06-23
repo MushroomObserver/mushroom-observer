@@ -19,13 +19,22 @@ class SequenceController < ApplicationController
 
     if !check_permission(@observation)
       flash_warning(:permission_denied.t)
-      redirect_to_show_observation
-   else
+      redirect_to_show_observation(@observation)
+    else
       build_sequence
     end
   end
 
   def edit_sequence
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    return unless @sequence
+
+    if !check_permission(@sequence)
+      flash_warning(:permission_denied.t)
+      redirect_to_show_observation(@sequence.observation)
+    else
+      save_edits if request.method == "POST"
+    end
   end
 
   def destroy_sequence
@@ -57,9 +66,13 @@ class SequenceController < ApplicationController
     end
   end
 
-  def redirect_to_show_observation
+  def save_edits
+
+  end
+
+  def redirect_to_show_observation(observation = @observation)
     redirect_with_query(controller: "observer",
-                        action: "show_observation", id: @observation.id)
+                        action: "show_observation", id: observation.id)
   end
 
   def whitelisted_sequence_params

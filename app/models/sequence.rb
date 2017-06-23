@@ -19,6 +19,10 @@ class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
 
+  def unique_format_name
+    "Sequence #{id} (Observation #{observation.id})"
+  end
+
   ##############################################################################
 
   protected

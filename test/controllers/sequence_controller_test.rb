@@ -112,5 +112,26 @@ class SequenceControllerTest < FunctionalTestCase
     # response is 200 because it just reloads the form
     assert_response(:success)
   end
+
+  def test_edit_sequence_get
+    sequence  = sequences(:local_sequence)
+    obs       = sequence.observation
+    observer  = obs.user
+    sequencer = sequence.user
+
+    # Prove method requires login
+    requires_login(:edit_sequence, id: sequence.id)
+
+    # Prove user cannot edit Sequence he didn't create for Obs he doesn't own
+    login(users(:zero_user).login)
+    get(:edit_sequence, id: sequence.id)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
+
+    # Prove Observation owner can edit Sequence
+    login(observer.login)
+    get(:edit_sequence, id: sequence.id)
+    assert_response(:success)
+  end
   end
 end

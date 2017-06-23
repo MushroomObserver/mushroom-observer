@@ -369,20 +369,6 @@ class AbstractModel < ActiveRecord::Base
     self.class.show_action
   end
 
-  # Return the name of the "edit_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   Name.edit_action => "edit_name"
-  #   name.edit_action => "edit_name"
-  #
-  def self.edit_action
-    "edit_" + name.underscore
-  end
-
-  def edit_action
-    self.class.edit_action
-  end
-
   # Return the URL of the "show_<object>" action
   #
   #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
@@ -424,6 +410,60 @@ class AbstractModel < ActiveRecord::Base
 
   def eol_predicate
     self.class.eol_predicate
+  end
+
+  ##############################################################################
+  #
+  #  :section: Edit Controller / Action
+  #
+  ##############################################################################
+
+  def self.edit_controller
+    self.show_controller
+  end
+
+  def edit_controller
+    show_controller
+  end
+
+  # Return the name of the "edit_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.edit_action => "edit_name"
+  #   name.edit_action => "edit_name"
+  #
+  def self.edit_action
+    "edit_" + name.underscore
+  end
+
+  def edit_action
+    self.class.edit_action
+  end
+
+  # Return the URL of the "edit_<object>" action
+  #
+  #   Name.edit_url(12) => "http://mushroomobserver.org/name/edit_name/12"
+  #   name.edit_url     => "http://mushroomobserver.org/name/edit_name/12"
+  #
+  def self.edit_url(id)
+    "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
+  end
+
+  def edit_url
+    self.class.edit_url(id)
+  end
+
+  # Return the link_to args of the "edit_<object>" action
+  #
+  #   Name.edit_link_args(12) => {controller: :name, action: :edit_name, id: 12}
+  #   name.edit_link_args     => {controller: :name, action: :edit_name, id: 12}
+  #
+  def self.edit_link_args(id)
+    { controller: edit_controller, action: edit_action, id: id }
+  end
+
+  def edit_link_args
+    self.class.edit_link_args(id)
   end
 
   ##############################################################################

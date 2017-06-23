@@ -1940,6 +1940,9 @@
   show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
 
+  # sequence
+  sequence_edit_title: "Editing [name]"
+
   # account/signup
   signup_title: Account signup
   signup_name: Name (optional)
