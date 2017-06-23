@@ -133,5 +133,41 @@ class SequenceControllerTest < FunctionalTestCase
     get(:edit_sequence, id: sequence.id)
     assert_response(:success)
   end
+
+  def test_edit_sequence_post
+    sequence  = sequences(:local_sequence)
+    obs       = sequence.observation
+    observer  = obs.user
+    sequencer = sequence.user
+    locus = "LSU"
+    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"\
+            "gattggttag cgacaatttt tgttgccatg tcgtcctctg gggtctatgt tatcataaac"\
+            "cacttagtat gtcgtagaat gaagtatttg ggcctcagtg cctataaaac aaaatacaac"\
+            "tttcagcaac ggatctcttg gctctcgcat cgatgaagaa cgcagcgaaa tgcgataagt"\
+            "aatgtgaatt gcagaattca gtgaatcatc gaatctttga acgcaccttg cgctccttgg"\
+            "tattccgagg agcatgcctg tttgagtgtc attaaattct caacccctcc agcttttgtt"\
+            "gctggtcgtg gcttggatat gggagtgttt gctggtctca ttcgagatca gctctcctga"\
+            "aatacattag tggaaccgtt tgcgatccgt caccggtgtg ataattatct acgccataga"\
+            "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
+            "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
+    params = {
+               id: sequence.id,
+               sequence: { locus: locus,
+                           bases: bases }
+             }
+
+    # Prove Observation owner user can edit Sequence
+    login(observer.login)
+    post(:edit_sequence, params)
+    sequence.reload
+
+    assert_equal(obs, sequence.observation)
+    assert_equal(sequencer, sequence.user)
+    assert_equal(locus, sequence.locus)
+    assert_equal(bases, sequence.bases)
+    assert_empty(sequence.archive)
+    assert_empty(sequence.accession)
+    assert_redirected_to(controller: :sequence, action: :show_sequence,
+                         id: sequence.id)
   end
 end

@@ -67,7 +67,13 @@ class SequenceController < ApplicationController
   end
 
   def save_edits
-
+    @sequence.attributes = whitelisted_sequence_params
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_with_query(@sequence.show_link_args)
+    else
+      flash_object_errors(@sequence)
+    end
   end
 
   def redirect_to_show_observation(observation = @observation)
