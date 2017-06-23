@@ -1,0 +1,5 @@
+<%
+  @title = @sequence.unique_format_name
+  tabs = show_sequence_right_tabs(@sequence)
+  @tabsets = { right: draw_tab_set(tabs) }
+%>

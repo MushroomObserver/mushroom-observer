@@ -170,4 +170,10 @@ class SequenceControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :sequence, action: :show_sequence,
                          id: sequence.id)
   end
+
+  def test_show_sequence
+    sequence  = sequences(:local_sequence)
+    get(:show_sequence, id: sequence.id)
+    assert_response(:success)
+  end
 end

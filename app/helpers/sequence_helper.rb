@@ -12,6 +12,16 @@ module SequenceHelper
     end
   end
 
+  def show_sequence_right_tabs(sequence)
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @sequence.observation.show_link_args),
+  ]
+  retun tabs unless check_permission(@sequence)
+  tabs.push(link_with_query(:EDIT.t, @sequence.edit_link_args)).
+       push(link_with_query(:DESTROY.t, @sequence.destroy_link_args))
+  end
+
   # on-line primary-source repositories (Archives) for nucleotide sequences
   # in menu order
   #   name::    short name, used in drop-down menu

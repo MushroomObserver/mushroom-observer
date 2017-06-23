@@ -41,6 +41,8 @@ class SequenceController < ApplicationController
   end
 
   def show_sequence
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    redirect_to_show_observation(@sequence.observation) unless @sequence
   end
 
 ##############################################################################

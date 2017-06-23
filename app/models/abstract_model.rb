@@ -468,6 +468,60 @@ class AbstractModel < ActiveRecord::Base
 
   ##############################################################################
   #
+  #  :section: Destroy Controller / Action
+  #
+  ##############################################################################
+
+  def self.destroy_controller
+    self.show_controller
+  end
+
+  def destroy_controller
+    show_controller
+  end
+
+  # Return the name of the "destroy_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.destroy_action => "destroy_name"
+  #   name.destroy_action => "destroy_name"
+  #
+  def self.destroy_action
+    "destroy_" + name.underscore
+  end
+
+  def destroy_action
+    self.class.destroy_action
+  end
+
+  # Return the URL of the "destroy_<object>" action
+  #
+  #   Name.destroy_url(12) => "http://mushroomobserver.org/name/destroy_name/12"
+  #   name.destroy_url     => "http://mushroomobserver.org/name/destroy_name/12"
+  #
+  def self.destroy_url(id)
+    "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
+  end
+
+  def destroy_url
+    self.class.destroy_url(id)
+  end
+
+  # Return the link_to args of the "destroy_<object>" action
+  #
+  #   Name.destroy_link_args(12) => {controller: :name, action: :destroy_name, id: 12}
+  #   name.destroy_link_args     => {controller: :name, action: :destroy_name, id: 12}
+  #
+  def self.destroy_link_args(id)
+    { controller: destroy_controller, action: destroy_action, id: id }
+  end
+
+  def destroy_link_args
+    self.class.destroy_link_args(id)
+  end
+
+  ##############################################################################
+  #
   #  :section: RSS Log
   #
   ##############################################################################
