@@ -19,8 +19,24 @@ class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
 
+  # used in views and by MatrixBoxPresenter to show orphaned obects
+  def format_name
+    locus.truncate(locus_width, separator: " ")
+  end
+
+  # used in views and by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
-    "Sequence #{id} (Observation #{observation.id})"
+    format_name + " (Sequence #{id || "?"})"
+  end
+
+  # Default number of characters (including diaresis) for truncating locus
+  def self.locus_width
+    24
+  end
+
+  # wrapper around class method
+  def locus_width
+    Sequence.locus_width
   end
 
   ##############################################################################
