@@ -504,7 +504,7 @@ class NameController < ApplicationController
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank].to_sym
     old_deprecated = @name ? @name.deprecated : false
-    parse = Name.parse_name(in_str, in_rank, old_deprecated)
+    parse = Name.parse_name(in_str, rank: in_rank, deprecated: old_deprecated)
     if !parse || parse.rank != in_rank
       rank_tag = :"rank_#{in_rank.to_s.downcase}"
       fail(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))

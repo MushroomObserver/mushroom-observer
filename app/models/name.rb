@@ -1572,7 +1572,7 @@ class Name < AbstractModel
   end
 
   # Parse a name given no additional information.  Returns a ParsedName instance.
-  def self.parse_name(str, rank = :Genus, deprecated = false)
+  def self.parse_name(str, rank: :Genus, deprecated: false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated) ||
       parse_subgenus(str, deprecated) ||
@@ -1611,7 +1611,8 @@ class Name < AbstractModel
   def self.parse_group(str, deprecated = false)
     return unless match = GROUP_PAT.match(str)
 
-    result = parse_name(str_without_group(str))
+    result = parse_name(str_without_group(str),
+                        rank: :Group, deprecated: deprecated)
     return nil unless result
 
     # Adjust the parsed name
@@ -2166,7 +2167,7 @@ class Name < AbstractModel
   #
   def change_text_name(in_text_name, in_author, in_rank, save_parents = false)
     in_str = Name.clean_incoming_string("#{in_text_name} #{in_author}")
-    parse = Name.parse_name(in_str, in_rank, deprecated)
+    parse = Name.parse_name(in_str, rank: in_rank, deprecated: deprecated)
     if !parse || parse.rank != in_rank
       fail :runtime_invalid_for_rank.t(rank: :"rank_#{in_rank.to_s.downcase}", name: in_str)
     end
