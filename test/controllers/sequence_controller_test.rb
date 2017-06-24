@@ -172,9 +172,14 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_show_sequence
-    sequence  = sequences(:local_sequence)
+    # Prove sequence displayed if called with id of sequence in db
+    sequence = sequences(:local_sequence)
     get(:show_sequence, id: sequence.id)
     assert_response(:success)
+
+    # Prove index displayed if called with id of sequence not in db
+    get(:show_sequence, id: 666)
+    assert_redirected_to(action: :index_sequence)
   end
 
   def test_destroy_sequence

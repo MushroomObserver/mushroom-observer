@@ -39,6 +39,7 @@ class SequenceController < ApplicationController
 
   def destroy_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    return unless @sequence
     observation = @sequence.observation
 
     if check_permission(@sequence)
@@ -53,7 +54,7 @@ class SequenceController < ApplicationController
 
   def show_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    redirect_to_show_observation(@sequence.observation) unless @sequence
+    return unless @sequence
   end
 
   # List selected sequences, based on current Query.
