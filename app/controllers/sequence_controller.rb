@@ -62,29 +62,6 @@ class SequenceController < ApplicationController
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  # Show selected list of sequences.
-  def show_selected_sequences(query, args = {})
-    args = { action: :list_sequences,
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = show_sequence_sorts
-
-    show_index_of_objects(query, args)
-  end
-
-  def show_sequence_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
-    ]
-  end
-
 ##############################################################################
 
   private
@@ -121,6 +98,29 @@ class SequenceController < ApplicationController
   def redirect_to_show_observation(observation = @observation)
     redirect_with_query(controller: "observer",
                         action: "show_observation", id: observation.id)
+  end
+
+  # Show selected list of sequences.
+  def show_selected_sequences(query, args = {})
+    args = { action: :list_sequences,
+             letters: "sequences.locus",
+             num_per_page: 50 }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = show_sequence_sorts
+
+    show_index_of_objects(query, args)
+  end
+
+  def show_sequence_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :USER.t],
+      ["observation", :OBSERVATION.t]
+    ]
   end
 
   def whitelisted_sequence_params
