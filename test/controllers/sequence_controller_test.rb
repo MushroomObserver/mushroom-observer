@@ -198,4 +198,9 @@ class SequenceControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
   end
+
+  def test_index_sequence
+    get(:index_sequence)
+    assert(:success)
+  end
 end

@@ -151,6 +151,10 @@ module Query::Modules::Joining
       observations: :observation_id,
       species_lists: :species_list_id
     },
+    sequences: {
+      observations: :observation_id,
+      users: :user_id
+    },
     species_lists: {
       locations: :location_id,
       rss_logs: :rss_log_id,

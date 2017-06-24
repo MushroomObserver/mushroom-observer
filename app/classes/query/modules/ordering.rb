@@ -113,6 +113,11 @@ module Query::Modules::Ordering
         "image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC"
       end
 
+    when "observation"
+      if columns.include?("observation_id")
+        "observation_id DESC"
+      end
+
     when "contribution"
       "users.contribution DESC" if model == User
 

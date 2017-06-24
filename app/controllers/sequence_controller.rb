@@ -9,7 +9,7 @@
 #
 #
 class SequenceController < ApplicationController
-  before_action :login_required, except: :show_sequence
+  before_action :login_required, except: [:show_sequence, :index_sequence]
   before_action :pass_query_params
   before_action :store_location
 
@@ -54,6 +54,35 @@ class SequenceController < ApplicationController
   def show_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     redirect_to_show_observation(@sequence.observation) unless @sequence
+  end
+
+  # List selected sequences, based on current Query.
+  def index_sequence
+    query = find_or_create_query(:Sequence, by: params[:by])
+    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+  end
+
+  # Show selected list of sequences.
+  def show_selected_sequences(query, args = {})
+    args = { action: :list_sequences,
+             letters: "sequences.locus",
+             num_per_page: 50 }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = show_sequence_sorts
+
+    show_index_of_objects(query, args)
+  end
+
+  def show_sequence_sorts
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :USER.t],
+      ["observation", :OBSERVATION.t]
+    ]
   end
 
 ##############################################################################

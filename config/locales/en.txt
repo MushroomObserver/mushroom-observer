@@ -3718,6 +3718,7 @@
   sort_by_num_views: Popularity
   sort_by_contribution: Contribution
   sort_by_reverse: Reverse Order
+  sort_by_observation: "[:OBSERVATION]"
 
   ################################################################################
 
