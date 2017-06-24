@@ -1,5 +1,5 @@
 module Query
-  # All projects.
+  # All articles
   class ArticleAll < Query::ArticleBase
     def initialize_flavor
       add_sort_order_to_title
