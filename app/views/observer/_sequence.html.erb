@@ -4,13 +4,9 @@
     <%= sequence.locus.truncate(sequence.locus_width) %>
   </td>
   <td>
-    <% if sequence.archive.present? %>
-      <%= sequence.archive.t %>:
-      <%= link_to(truncate(sequence.accession,
-                           length: sequence.locus_width/2).t,
-                  search_for_accession_url(sequence.archive,
-                                           sequence.accession),
-                  target: "_blank") %>
+    <% if sequence.deposit? %>
+      <%= sequence_archive_link(sequence) %>:
+      <%= sequence_accession_link(sequence) %>
     <% end %>
   </td>
   <td>

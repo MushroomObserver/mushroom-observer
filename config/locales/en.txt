@@ -735,6 +735,8 @@
   and_num_more: And [num] more...
   are_you_sure: Are you sure?
   click_for_map: Click for map
+  CREATED_BY: Created by
+  DEPOSIT: Deposit
   EDITING: Editing
   google_images: Google Images
   show_on_map: Show on map

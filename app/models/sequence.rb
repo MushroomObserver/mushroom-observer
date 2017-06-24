@@ -15,9 +15,26 @@
 #  accession::        accession # in the Archive
 #  notes::            free-form notes
 #
+#  == Class Methods
+#
+#  locus_width        Default # of chars (including diaresis) to truncate locus
+#
+#  == Instance Methods
+#
+#  deposit?            Does sequence have a deposit (Archive && Accession)
+#  format_name         name for orphaned objects
+#  locus_width         Default # of chars (including diaresis) to truncate locus
+#  unique_format_name  name for unorphaned objects
+
 class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
+
+  ##############################################################################
+  #
+  #  :section: Formatting
+  #
+  ##############################################################################
 
   # used in views and by MatrixBoxPresenter to show orphaned obects
   def format_name
@@ -37,6 +54,16 @@ class Sequence < AbstractModel
   # wrapper around class method
   def locus_width
     Sequence.locus_width
+  end
+
+  ##############################################################################
+  #
+  #  :section: Other
+  #
+  ##############################################################################
+
+  def deposit?
+    archive.present? && accession.present?
   end
 
   ##############################################################################

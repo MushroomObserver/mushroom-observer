@@ -22,6 +22,20 @@ module SequenceHelper
        push(link_with_query(:DESTROY.t, @sequence.destroy_link_args))
   end
 
+  def sequence_accession_link(sequence)
+    link_to(truncate(sequence.accession,
+                               length: sequence.locus_width/2).t,
+                      search_for_accession_url(sequence.archive,
+                                               sequence.accession),
+                      target: "_blank")
+  end
+
+  def sequence_archive_link(sequence)
+    link_to(sequence.archive.t,
+            archive(sequence.archive)[:home],
+            target: "_blank")
+  end
+
   # on-line primary-source repositories (Archives) for nucleotide sequences
   # in menu order
   #   name::    short name, used in drop-down menu

@@ -3,3 +3,50 @@
   tabs = show_sequence_right_tabs(@sequence)
   @tabsets = { right: draw_tab_set(tabs) }
 %>
+
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <div>
+      <td class="bold"><%= :OBSERVATION.t %></td>:
+      <%= @sequence.observation.name.display_name.t %>
+      (<%= @sequence.observation.id %>)
+   </div>
+      <table class="table-namings">
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="bold"><%= :LOCUS.t %>:</td>
+            <td><%= @sequence.locus %></td>
+          </tr>
+          <tr>
+            <td class="bold"><%= :BASES.t %>:</td>
+            <td class="monospace" ><%= @sequence.bases %></td>
+          </tr>
+          <tr>
+            <td class="bold"><%= :DEPOSIT.t %>:</td>
+            <td>
+              <% if @sequence.deposit? %>
+                <%= sequence_archive_link(@sequence) %>:
+                <%= sequence_accession_link(@sequence) %>
+              <% end %>
+            </td>
+          </tr>
+          <tr>
+            <td class="bold"><%= :NOTES.t %>:</td>
+            <td><%= @sequence.notes %></td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+</div>
+<br>
+<div class="small">
+  <span class="bold"><%= :CREATED_BY.t %>:</span>
+  <%= user_link(@sequence.user) %>
+</div>
+<%= show_object_footer(@sequence) %>
