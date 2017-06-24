@@ -176,4 +176,26 @@ class SequenceControllerTest < FunctionalTestCase
     get(:show_sequence, id: sequence.id)
     assert_response(:success)
   end
+
+  def test_destroy_sequence
+    sequence  = sequences(:local_sequence)
+    obs       = sequence.observation
+    observer  = obs.user
+
+    # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
+    old_count = Sequence.count
+    login(users(:zero_user).login)
+    post(:destroy_sequence, id: sequence.id)
+
+    assert_equal(old_count, Sequence.count)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
+
+    # Prove Observation owner can destroy Sequence
+    login(observer.login)
+    post(:destroy_sequence, id: sequence.id)
+    assert_equal(old_count-1, Sequence.count)
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
+  end
 end

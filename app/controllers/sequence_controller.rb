@@ -38,6 +38,17 @@ class SequenceController < ApplicationController
   end
 
   def destroy_sequence
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    observation = @sequence.observation
+
+    if check_permission(@sequence)
+      @sequence.destroy
+      flash_notice(:runtime_destroyed_id.t(type: Sequence, value: params[:id]))
+    else
+      flash_warning(:permission_denied.t)
+    end
+
+    redirect_to_show_observation(observation)
   end
 
   def show_sequence
