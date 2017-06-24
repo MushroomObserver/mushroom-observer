@@ -60,13 +60,13 @@ module ObservationReport
 
     def lat_radius(row)
       return nil if row.loc_north.blank? || row.loc_south.blank?
-      (row.loc_north - row.loc_south) / 360 * 2 * 3.14159 * 6_371_000 / 2
+      (row.loc_north - row.loc_south) / 360 * 2 * Math::PI * 6_371_000 / 2
     end
 
     def long_radius(row)
       return nil if row.loc_east.blank? || row.loc_west.blank?
-      (row.loc_east - row.loc_west) / 360 * 2 * 3.14159 * 6_371_000 *
-        Math.cos(row.best_lat / 360 * 2 * 3.14159) / 2
+      (row.loc_east - row.loc_west) / 360 * 2 * Math::PI * 6_371_000 *
+        Math.cos(row.best_lat / 360 * 2 * Math::PI) / 2
     end
 
     def image_urls(row)
