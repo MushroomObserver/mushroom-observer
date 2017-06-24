@@ -410,7 +410,7 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.string   "text_name",           limit: 100
     t.string   "search_name",         limit: 255
     t.string   "display_name",        limit: 238
-    t.string   "sort_name",           limit: 285
+    t.string   "sort_name",           limit: 275
     t.string   "author",              limit: 134
     t.text     "citation",            limit: 65535
     t.boolean  "deprecated",                        default: false, null: false

@@ -10,7 +10,7 @@ class IncreaseNameAuthorLimit < ActiveRecord::Migration
     change_column :names_versions, :author,       :string, limit: 134
     change_column :names_versions, :display_name, :string, limit: 238
     change_column :names_versions, :search_name,  :string, limit: 255
-    change_column :names_versions, :sort_name,    :string, limit: 285
+    change_column :names_versions, :sort_name,    :string, limit: 275
   end
 
   def down

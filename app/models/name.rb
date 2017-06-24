@@ -2598,7 +2598,7 @@ class Name < AbstractModel
   end
 
   def self.display_name_limit
-    285
+    275
   end
 
   def self.text_name_limit
