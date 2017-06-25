@@ -2585,25 +2585,33 @@ class Name < AbstractModel
 
   # Numbers are hard-coded (rather than calculated) to make it easier to copy
   # them to migrations.
-  def self.author_limit
-    # max if text_name_limit == 100, and we want to keep sort_name_limit < 256
-    134
-  end
 
-  def self.search_name_limit
-    238
-  end
-
-  def self.sort_name_limit
-    255
-  end
-
-  def self.display_name_limit
-    275
-  end
-
+  # An arbitrary number intended to be large enough for all Names
   def self.text_name_limit
     100
+  end
+
+  # An arbitary number intended to be large enough to include all abbreviated
+  # authors. There are now some Names with > text_name_limit worth of authors.
+  # Rather than increase this limit, we will suggest that multiple authors be
+  # listed as "first_author & al." per ICN Recommendation 46C.2.
+  def self.author_limit
+    100
+  end
+
+  # text_name_limit + author_limit + 4
+  def self.search_name_limit
+    204
+  end
+
+  # text_name_limit + author_limit + 21
+  def self.sort_name_limit
+    221
+  end
+
+  # text_name_limit + author_limit + 41
+  def self.display_name_limit
+    241
   end
 
   ##############################################################################
@@ -2612,7 +2620,8 @@ class Name < AbstractModel
 
   validate :check_requirements
 
-  def check_requirements # :nodoc:
+  # :nodoc:
+  def check_requirements
     errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
 
     if author.to_s.size > Name.author_limit

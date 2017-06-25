@@ -389,9 +389,9 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.datetime "last_view"
     t.integer  "rank",                limit: 4
     t.string   "text_name",           limit: 100
-    t.string   "search_name",         limit: 255
-    t.string   "display_name",        limit: 238
-    t.string   "sort_name",           limit: 285
+    t.string   "search_name",         limit: 221
+    t.string   "display_name",        limit: 204
+    t.string   "sort_name",           limit: 241
     t.text     "citation",            limit: 65535
     t.boolean  "deprecated",                        default: false, null: false
     t.integer  "synonym_id",          limit: 4
@@ -399,7 +399,7 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.text     "notes",               limit: 65535
     t.text     "classification",      limit: 65535
     t.boolean  "ok_for_export",                     default: true,  null: false
-    t.string   "author",              limit: 134
+    t.string   "author",              limit: 100
   end
 
   create_table "names_versions", force: :cascade do |t|
@@ -408,10 +408,10 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.datetime "updated_at"
     t.integer  "user_id",             limit: 4
     t.string   "text_name",           limit: 100
-    t.string   "search_name",         limit: 255
-    t.string   "display_name",        limit: 238
-    t.string   "sort_name",           limit: 275
-    t.string   "author",              limit: 134
+    t.string   "search_name",         limit: 221
+    t.string   "display_name",        limit: 204
+    t.string   "sort_name",           limit: 241
+    t.string   "author",              limit: 100
     t.text     "citation",            limit: 65535
     t.boolean  "deprecated",                        default: false, null: false
     t.integer  "correct_spelling_id", limit: 4
