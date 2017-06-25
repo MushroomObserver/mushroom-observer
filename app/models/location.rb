@@ -71,7 +71,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-
+#
 class Location < AbstractModel
   require "acts_as_versioned"
 
@@ -84,7 +84,9 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :observations
-  has_many :herbaria # Well technically it has at most one, but we want the relationship just in the herbarium table
+  # Well technically it has at most one herbarium,
+  # but we want the relationship just in the herbarium table
+  has_many :herbaria
 
   acts_as_versioned(
     table_name: "locations_versions",
@@ -96,7 +98,8 @@ class Location < AbstractModel
       east
       high
       low
-      notes)
+      notes
+    )
   )
   non_versioned_columns.push(
     "created_at",
@@ -166,7 +169,7 @@ class Location < AbstractModel
     parse_lxxxitude(lat, "N", "S", 90)
   end
 
-  # Convert longitude string to standard decimal form with 4 places of precision.
+  # Convert longitude string to standard decimal form w/4 places of precision.
   # Returns nil if invalid.
   def self.parse_longitude(long)
     parse_lxxxitude(long, "E", "W", 180)
@@ -192,10 +195,10 @@ class Location < AbstractModel
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
     self.west = Location.parse_longitude(west) || -90
-    if north < south
-      self.north = south
-      self.south = north
-    end
+    return unless north < south
+
+    self.north = south
+    self.south = north
   end
 
   ##############################################################################
@@ -210,10 +213,10 @@ class Location < AbstractModel
   #
   def self.names_for_unknown
     @@names_for_unknown ||= begin
-      # yikes! need to make sure we always include the English words for "unknown",
-      # even when viewing the site in another language
+      # yikes! need to make sure we always include the English words
+      # for "unknown", even when viewing the site in another language
       Language.official.translation_strings.find_by_tag("unknown_locations").
-      text.split(/, */)
+        text.split(/, */)
     rescue
       []
     end
@@ -222,29 +225,25 @@ class Location < AbstractModel
 
   # Get an instance of the Name that means "unknown".
   def self.unknown
-    for name in names_for_unknown
+    names_for_unknown.each do |name|
       # location = Location.find(:first, :conditions => ['name like ?', name])
       location = Location.where("name LIKE ?", name).first
       return location if location
     end
-    fail "There is no \"unknown\" location!"
+    raise "There is no \"unknown\" location!"
   end
 
   # Is this one of the names we recognize for the "unknown" location?
   def self.is_unknown?(name)
     name = name.to_s.strip_squeeze.downcase
-    for unknown_name in names_for_unknown
+    names_for_unknown.each do |unknown_name|
       return true if name == unknown_name.downcase
     end
     false
   end
 
   def display_name
-    if User.current_location_format == :scientific
-      scientific_name
-    else
-      name
-    end
+    User.current_location_format == :scientific ? scientific_name : name
   end
 
   def display_name=(val)
@@ -358,7 +357,7 @@ class Location < AbstractModel
   UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
   OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
-  BAD_CHARS            = "({[;:|]})"
+  BAD_CHARS            = "({[;:|]})".freeze
 
   # Returns a member of understood_places if the candidate is either a member or
   # if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
@@ -370,7 +369,7 @@ class Location < AbstractModel
     else
       tokens = candidate.split
       count = 0
-      for s in tokens
+      tokens.each do |s|
         if OK_PREFIXES.member?(s)
           count += 1
         else
@@ -462,30 +461,35 @@ class Location < AbstractModel
         reasons.push(:location_dubious_unknown_country.t(country: country(name)))
       end
       if has_known_states?(a_country)
-        if understood_state?(country(name), a_country) # "Western Australia" for example
+        if understood_state?(country(name), a_country) # e.g."Western Australia"
           return true unless provide_reasons
-          reasons.push(:location_dubious_ambiguous_country.t(country: a_country))
+          reasons.push(:location_dubious_ambiguous_country.
+                         t(country: a_country))
         end
         a_state = state(name)
         if a_state && understood_state?(a_state, a_country).nil?
           return true unless provide_reasons
-          reasons.push(:location_dubious_unknown_state.t(country: a_country, state: a_state))
+          reasons.push(:location_dubious_unknown_state.t(country: a_country,
+                                                         state: a_state))
         end
       else
         a_state = state(name)
         if a_state && understood_country?(a_state)
           return true unless provide_reasons
-          reasons.push(:location_dubious_redundant_state.t(country: a_country, state: a_state))
+          reasons.push(:location_dubious_redundant_state.t(country: a_country,
+                                                           state: a_state))
         end
       end
-      for key in BAD_TERMS.keys
+      BAD_TERMS.keys.each do |key|
         if name.index(key)
           return true unless provide_reasons
-          reasons.push(:location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key]))
+          reasons.push(:location_dubious_bad_term.t(bad: key,
+                                                    good: BAD_TERMS[key]))
         end
       end
       count = 0
-      while (c = BAD_CHARS[count]) # For some reason BAD_CHARS.chars.each doesn't work
+      # For some reason BAD_CHARS.chars.each doesn't work
+      while (c = BAD_CHARS[count])
         if name.index(c)
           return true unless provide_reasons
           reasons.push(:location_dubious_bad_char.t(char: c))
@@ -516,20 +520,13 @@ class Location < AbstractModel
   def self.has_dubious_county?(name)
     tokens = name.split(", ")
     alt = [tokens[0]]
-    for t in tokens[1..-1]
-      alt.push(t) if " Co." != t[-4..-1]
-    end
+    tokens[1..-1].each { |t| alt.push(t) if " Co." != t[-4..-1] }
     result = alt.join(", ")
-    if result == name
-      nil
-    else
-      result
-    end
+    result == name ? nil : result
   end
 
   def self.fix_country(name)
     c = country(name)
-    new_country =
     name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
   end
 
@@ -542,7 +539,7 @@ class Location < AbstractModel
   # Is it safe to merge this Location with another?  If any information will
   # get lost we return false.  In practice only if it has Observations.
   def mergable?
-    observations.length == 0
+    observations.empty?
   end
 
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
@@ -550,32 +547,32 @@ class Location < AbstractModel
   # +old_loc+ are updated and saved.
   def merge(old_loc, _log = true)
     # Move observations over first.
-    for obs in old_loc.observations
+    old_loc.observations.each do |obs|
       obs.location = self
       obs.save
     end
 
     # Move species lists over.
-    for spl in SpeciesList.where(location_id: old_loc.id)
+    SpeciesList.where(location_id: old_loc.id).each do |spl|
       spl.update_attribute(:location, self)
     end
 
     # Update any users who call this location their primary location.
-    for user in User.where(location_id: old_loc.id)
+    User.where(location_id: old_loc.id).each do |user|
       user.update_attribute(:location, self)
     end
 
     # Move over any interest in the old name.
-    # for int in Interest.find_all_by_target_type_and_target_id('Location',
-    #                                                         old_loc.id)
-    for int in Interest.where(target_type: "Location", target_id: old_loc.id)
+    Interest.where(target_type: "Location", target_id: old_loc.id).each do |int|
       int.target = self
       int.save
     end
 
     # Add note to explain the merge
     # Intentionally not translated
-    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: North: #{old_loc.north}, South: #{old_loc.south}, West: #{old_loc.west}, East: #{old_loc.east}")
+    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: "\
+             "North: #{old_loc.north}, South: #{old_loc.south}, "\
+             "West: #{old_loc.west}, East: #{old_loc.east}")
 
     # Merge the two "main" descriptions if it can.
     if description && old_loc.description &&
@@ -591,7 +588,7 @@ class Location < AbstractModel
     end
 
     # Move over any remaining descriptions.
-    for desc in old_loc.descriptions
+    old_loc.descriptions.each do |desc|
       xargs = {
         id: desc,
         set_location: self
@@ -606,14 +603,14 @@ class Location < AbstractModel
 
     # Destroy past versions.
     editors = []
-    for ver in old_loc.versions
+    old_loc.versions.each do |ver|
       editors << ver.user_id
       ver.destroy
     end
 
     # Update contributions for editors.
     editors.delete(old_loc.user_id)
-    for user_id in editors.uniq
+    editors.uniq.each do |user_id|
       SiteData.update_contribution(:del, :locations_versions, user_id)
     end
 
@@ -630,55 +627,54 @@ class Location < AbstractModel
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-    if altered?
-      sender = User.current
-      recipients = []
+    return unless altered?
 
-      # Tell admins of the change.
-      for user_list in descriptions.map(&:admins)
-        for user in user_list
-          recipients.push(user) if user.email_locations_admin
-        end
-      end
+    sender = User.current
+    recipients = []
 
-      # Tell authors of the change.
-      for user_list in descriptions.map(&:authors)
-        for user in user_list
-          recipients.push(user) if user.email_locations_author
-        end
+    # Tell admins of the change.
+    descriptions.map(&:admins).each do |user_list|
+      user_list.each do |user|
+        recipients.push(user) if user.email_locations_admin
       end
+    end
 
-      # Tell editors of the change.
-      for user_list in descriptions.map(&:editors)
-        for user in user_list
-          recipients.push(user) if user.email_locations_editor
-        end
+    # Tell authors of the change.
+    descriptions.map(&:authors).each do |user_list|
+      user_list.each do |user|
+        recipients.push(user) if user.email_locations_author
       end
+    end
 
-      # Tell masochists who want to know about all location changes.
-      # for user in User.find_all_by_email_locations_all(true)
-      for user in User.where(email_locations_all: true)
-        recipients.push(user)
+    # Tell editors of the change.
+    descriptions.map(&:editors).each do |user_list|
+      user_list.each do |user|
+        recipients.push(user) if user.email_locations_editor
       end
+    end
 
-      # Send to people who have registered interest.
-      # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in interests
-        if interest.state
-          recipients.push(interest.user)
-        else
-          recipients.delete(interest.user)
-        end
-      end
+    # Tell masochists who want to know about all location changes.
+    User.where(email_locations_all: true).each do |user|
+      recipients.push(user)
+    end
 
-      # Send notification to all except the person who triggered the change.
-      for recipient in recipients.uniq - [sender]
-        QueuedEmail::LocationChange.create_email(sender, recipient, self)
+    # Send to people who have registered interest.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    interests.each do |interest|
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
       end
+    end
+
+    # Send notification to all except the person who triggered the change.
+    (recipients.uniq - [sender]).each do |recipient|
+      QueuedEmail::LocationChange.create_email(sender, recipient, self)
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 
