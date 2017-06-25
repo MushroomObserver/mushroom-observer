@@ -7,7 +7,7 @@ class API
     str = get_param(key)
     return args[:default] unless str
     limit = args[:limit]
-    fail StringTooLong.new(str, limit) if limit && (str.size > limit)
+    raise StringTooLong.new(str, limit) if limit && (str.size > limit)
     str
   end
 
@@ -17,6 +17,6 @@ class API
     return unless val
     email_pattern = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/
     return val if val.match(email_pattern)
-    fail BadParameterValue.new(val, :email)
+    raise BadParameterValue.new(val, :email)
   end
 end
