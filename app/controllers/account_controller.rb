@@ -103,7 +103,7 @@ class AccountController < ApplicationController
           flash_object_errors(@new_user)
         else
           group = UserGroup.create_user(@new_user)
-          flash_notice (:runtime_signup_success.tp + :email_spam_notice.tp)
+          flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
           VerifyEmail.build(@new_user).deliver_now
           redirect_back_or_default(action: :welcome)
         end
@@ -114,7 +114,7 @@ class AccountController < ApplicationController
   def verify # :nologin:
     id        = params["id"]
     auth_code = params["auth_code"]
-    if user = find_or_goto_index(User, id)
+    if (user = find_or_goto_index(User, id))
 
       # This will happen legitimately whenever a non-verified user tries to
       # login.  The user just gets redirected here instead of being properly
@@ -203,16 +203,16 @@ class AccountController < ApplicationController
 
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
-    if user = find_or_goto_index(User, params[:id].to_s)
+    if (user = find_or_goto_index(User, params[:id].to_s))
       VerifyEmail.build(user).deliver_now
-      flash_notice (:runtime_reverify_sent.tp + :email_spam_notice.tp)
+      flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
       redirect_back_or_default(action: :welcome)
     end
   end
 
   # This is the welcome page for new users who just created an account.
-  def welcome # :nologin:
-  end
+  # :nologin:
+  def welcome; end
 
   ##############################################################################
   #
@@ -267,8 +267,8 @@ class AccountController < ApplicationController
         password = String.random(10)
         @new_user.change_password(password)
         if @new_user.save
-          flash_notice (:runtime_email_new_password_success.tp +
-                        :email_spam_notice.tp)
+          flash_notice(:runtime_email_new_password_success.tp +
+                       :email_spam_notice.tp)
           PasswordEmail.build(@new_user, password).deliver_now
           render(action: "login")
         else
@@ -372,7 +372,7 @@ class AccountController < ApplicationController
   end
 
   def update_password
-    return unless password = params["user"]["password"]
+    return unless (password = params["user"]["password"])
     if password == params["user"]["password_confirmation"]
       @user.change_password(password)
     else
@@ -408,7 +408,7 @@ class AccountController < ApplicationController
   end
 
   def update_copyright_holder
-    return unless new_holder = @user.legal_name_change
+    return unless (new_holder = @user.legal_name_change)
     Image.update_copyright_holder(*new_holder, @user)
   end
 
@@ -657,7 +657,7 @@ class AccountController < ApplicationController
   end
 
   def activate_api_key # :login: :norobots:
-    if key = find_or_goto_index(ApiKey, params[:id].to_s)
+    if (key = find_or_goto_index(ApiKey, params[:id].to_s))
       if check_permission!(key)
         key.verify!
         flash_notice(:account_api_keys_activated.t(notes: key.notes))
@@ -736,7 +736,7 @@ class AccountController < ApplicationController
   def create_alert # :root:
     redirect = true
     id = params[:id].to_s
-    if @user2 = find_or_goto_index(User, id)
+    if (@user2 = find_or_goto_index(User, id))
       if in_admin_mode?
         if request.method == "GET"
           # render form
@@ -787,8 +787,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   # This is used to test the autologin feature.
-  def test_autologin
-  end
+  def test_autologin; end
 
   # This is used to test the flash error mechanism in the unit tests.
   def test_flash # :nologin:
@@ -806,5 +805,5 @@ class AccountController < ApplicationController
     end
   end
 
-  ################################################################################
+  ##############################################################################
 end
