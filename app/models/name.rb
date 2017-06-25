@@ -2616,30 +2616,26 @@ class Name < AbstractModel
 
   ##############################################################################
 
-  protected
+  private
 
-  validate :check_requirements
+  validate :check_user, :check_text_name, :check_author
 
-  # :nodoc:
-  def check_requirements
+  # :stopdoc:
+  def check_author
+    return if author.to_s.size <= Name.author_limit
+    errors.add(:author,
+              (:validate_name_author_too_long.t + " " + :MAXIMUM.t +  ": " +
+               Name.author_limit.to_s + ". " +
+               :validate_name_use_first_author.t + "."))
+  end
+
+  def check_text_name
+    return if text_name.to_s.size <= Name.text_name_limit
+    errors.add(:text_name, (:validate_name_text_name_too_long.t +
+      " " + :MAXIMUM.t + ": " + Name.text_name_limit.to_s))
+  end
+
+  def check_user
     errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
-
-    if author.to_s.size > Name.author_limit
-      errors.add(:author, (:validate_name_author_too_long.t +
-        " " + :MAXIMUM.t + ": " + Name.author_limit.to_s))
-    end
-    if text_name.to_s.size > Name.text_name_limit
-      errors.add(:text_name, (:validate_name_text_name_too_long.t +
-        " " + :MAXIMUM.t + ": " + Name.text_name_limit.to_s))
-    end
-    if sort_name.to_s.size > Name.sort_name_limit
-      errors.add(:sort_name, :validate_name_sort_name_too_long.t)
-    end
-    if search_name.to_s.size > Name.search_name_limit
-      errors.add(:search_name, :validate_name_search_name_too_long.t)
-    end
-    if display_name.to_s.size > Name.display_name_limit
-      errors.add(:display_name, :validate_name_display_name_too_long.t)
-    end
   end
 end
