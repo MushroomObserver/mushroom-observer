@@ -98,7 +98,7 @@
 #     (If any errors occur in +script/process_image+ they get emailed to the
 #     webmasters.)
 #
-#  8. If all is successful, it sets the +transferred+ bit in the database record.
+#  8. If all is successful, it sets the +transferred+ bit in the db record.
 #     Until this bit is set, MO knows to serve the image off of the web server
 #     instead, however inefficient this may be.
 #
@@ -142,18 +142,20 @@
 #  content_type::       MIME type of original image (the rest are 'image/jpeg').
 #  copyright_holder::   Copyright holder (defaults to legal name of owner).
 #  license::            License.
-#  license_history::    Accounting history of any license changes (started using April 2012).
+#  license_history::    Accounting history of any license changes
+#                       (started using April 2012).
 #  quality::            Quality (e.g., :low, :medium, :high).
 #  reviewer::           User that reviewed it.
 #  num_views::          Number of times normal-size image has been viewed.
 #  last_view::          Last time normal-size image was viewed.
-#  transferred::        Has this image been successfully transferred to the image server yet?
+#  transferred::        Has this image been successfully transferred to the
+#                       image server yet?
 #
 #  ==== Temporary attributes
 #
-#  image_dir::          Where images are stored (default is MO.local_image_files).
+#  image_dir::          Where images are stored (default: MO.local_image_files).
 #  upload_handle::      File or IO handle of upload stream.
-#  upload_temp_file::   Path of the tempfile holding the upload until we process it.
+#  upload_temp_file::   Path of tempfile holding the upload until we process it.
 #  upload_length::      Length of the upload (if available).
 #  upload_type::        Mime type of the upload (if available).
 #  upload_md5sum::      MD5 hash of the upload (if available).
@@ -162,7 +164,8 @@
 #  == Class Methods
 #
 #  validate_vote::      Validate a vote value.
-#  file_name::          Filename (relative to MO.local_image_files) given size and id.
+#  file_name::          Filename (relative to MO.local_image_files)
+#                       given size and id.
 #  url::                Full URL on image server given size and id.
 #  all_sizes::          All image sizes from +:thumbnail+ to +:full_size+.
 #  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
@@ -207,7 +210,7 @@
 #  log_destroy::        Log destroy in assocaited Observation's.
 #
 ################################################################################
-
+#
 class Image < AbstractModel
   require "fileutils"
   require "net/http"
@@ -215,13 +218,15 @@ class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :glossary_terms
-  has_many :thumb_clients, class_name: "Observation", foreign_key: "thumb_image_id"
+  has_many :thumb_clients, class_name: "Observation",
+           foreign_key: "thumb_image_id"
   has_many :image_votes
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
   has_many :subjects, class_name: "User", foreign_key: "image_id"
-  has_many :best_glossary_terms, class_name: "GlossaryTerm", foreign_key: "thumb_image_id"
+  has_many :best_glossary_terms, class_name: "GlossaryTerm",
+           foreign_key: "thumb_image_id"
   has_many :copyright_changes, as: :target, dependent: :destroy
 
   before_destroy :update_thumbnails
@@ -295,7 +300,8 @@ class Image < AbstractModel
   # referred to as +nil+ here, however the actual content type should be stored
   # in the image.  It's just that we haven't seen any other types yet.)
   def self.all_content_types
-    ["image/jpeg", "image/gif", "image/png", "image/tiff", "image/x-ms-bmp", nil]
+    ["image/jpeg", "image/gif", "image/png", "image/tiff", "image/x-ms-bmp",
+     nil]
   end
 
   def image_url(size)
@@ -398,7 +404,7 @@ class Image < AbstractModel
             when "large" then 960
             when "huge" then 1280
             else; 1e10
-      end
+            end
       if max < d
         w = w * max / d
         h = h * max / d
@@ -513,8 +519,11 @@ class Image < AbstractModel
   def validate_image_length
     if upload_length || save_to_temp_file
       if upload_length > MO.image_upload_max_size
-        errors.add(:image, :validate_image_file_too_big.t(size: upload_length,
-                                                          max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb")))
+        errors.add(:image,
+                   :validate_image_file_too_big.t(
+                     size: upload_length,
+                     max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb")
+                   ))
         result = false
       else
         result = true
@@ -592,11 +601,13 @@ class Image < AbstractModel
          upload_handle.is_a?(StringIO) ||
          defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
         begin
-          @file = Tempfile.new("image_upload") # Using an instance variable so the temp file last as long as the reference to the path.
+          # Using an instance variable so the temp file lasts as long as
+          # the reference to the path.
+          @file = Tempfile.new("image_upload")
           File.open(@file, "wb") do |write_handle|
             loop do
               str = upload_handle.read(16_384)
-              break if str.to_s.length == 0
+              break if str.to_s.empty?
               write_handle.write(str)
             end
           end
@@ -606,7 +617,9 @@ class Image < AbstractModel
           self.upload_length = @file.size
           result = true
         rescue => e
-          errors.add(:image, "Unexpected error while copying attached file to temp file. Error class #{e.class}: #{e}")
+          errors.add(:image,
+                     "Unexpected error while copying attached file "\
+                     "to temp file. Error class #{e.class}: #{e}")
           result = false
         end
 
@@ -654,9 +667,9 @@ class Image < AbstractModel
   # field and returns false.
   def move_original
     original_image = local_file_name(:original)
-    fail(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
+    raise(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
     unless File.rename(upload_temp_file, original_image)
-      fail(SystemCallError, "Try again.")
+      raise(SystemCallError, "Try again.")
     end
     FileUtils.chmod(0644, original_image)
     return true
@@ -694,11 +707,11 @@ class Image < AbstractModel
     system("script/rotate_image #{id} #{op}&") if Rails.env != "test"
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Voting
   #
-  ################################################################################
+  ##############################################################################
 
   # Returns an Array of all valid vote values.
   def self.all_votes
@@ -752,7 +765,7 @@ class Image < AbstractModel
 
     # Modify image_votes table first.
     vote = image_votes.find_by_user_id(user_id)
-    if value = self.class.validate_vote(value)
+    if (value = self.class.validate_vote(value))
       if vote
         vote.value = value
         vote.anonymous = anon
@@ -798,7 +811,7 @@ class Image < AbstractModel
   def vote_hash # :nodoc:
     unless @vote_hash
       @vote_hash = {}
-      for vote in image_votes
+      image_votes.each do |vote|
         @vote_hash[vote.user_id.to_i] = vote.value.to_i
       end
     end
@@ -810,11 +823,11 @@ class Image < AbstractModel
     super(*args)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Projects
   #
-  ################################################################################
+  ##############################################################################
 
   def has_edit_permission?(user = User.current)
     Project.has_edit_permission?(self, user)
@@ -835,16 +848,12 @@ class Image < AbstractModel
 
   # Log update in associated Observation's.
   def log_update
-    for obs in observations
-      obs.log_update_image(self)
-    end
+    observations.each { |obs| obs.log_update_image(self) }
   end
 
   # Log destruction in associated Observation's.
   def log_destroy
-    for obs in observations
-      obs.log_destroy_image(self)
-    end
+    observations.each { |obs| obs.log_destroy_image(self) }
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.
@@ -905,7 +914,7 @@ class Image < AbstractModel
     self.when.year
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 
