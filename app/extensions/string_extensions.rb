@@ -332,7 +332,7 @@ class String
       "\xC6\x8E"     => "E",    # Ǝ
       "\xC6\x8F"     => "e",    # Ə
       "\xC6\x90"     => "E"     # Ɛ
-    }
+    }.freeze
   end
 
   # Plain-text alternatives to the HTML special characters RedCloth uses.
@@ -346,8 +346,8 @@ class String
       "lt"    => "<",
       "#60"   => "<",
       "quot"  => '"',
-      '#34'   => '"',
-      '#39'   => "'",
+      "#34"   => '"',
+      "#39"   => "'",
       "#169"  => "(c)",
       "#174"  => "(r)",
       "#215"  => "x",
@@ -363,7 +363,7 @@ class String
       "#8482" => "(tm)",
       "#8594" => "->",
       "nbsp"  => " "
-    }
+    }.freeze
   end
   # :startdoc:
 
@@ -567,7 +567,7 @@ class String
     len      = alphabet.length
     str.split("").inject(0) do |num, char|
       i = alphabet.index(char)
-      fail "Character not in alphabet: '#{char}'" if i.nil?
+      raise "Character not in alphabet: '#{char}'" if i.nil?
       num = num * len + i
     end
   end
@@ -604,22 +604,22 @@ class String
     n = s.length
     m = t.length
 
-    return m if (0 == n)
-    return n if (0 == m)
+    return m if n.zero?
+    return n if m.zero?
 
     d = (0..m).to_a
     x = nil
 
-    str1.each_char.each_with_index do |char1,i|
-      e = i+1
+    str1.each_char.each_with_index do |char1, i|
+      e = i + 1
 
-      str2.each_char.each_with_index do |char2,j|
-        cost = (char1 == char2) ? 0 : 1
+      str2.each_char.each_with_index do |char2, j|
+        cost = (char1 == char2 ? 0 : 1)
         x = [
-             d[j+1] + 1, # insertion
-             e + 1,      # deletion
-             d[j] + cost # substitution
-            ].min
+          d[j + 1] + 1, # insertion
+          e + 1,        # deletion
+          d[j] + cost   # substitution
+        ].min
         d[j] = e
         e = x
       end
@@ -627,7 +627,7 @@ class String
       d[m] = x
     end
 
-    return x
+    x
   end
 
   # Returns the MD5 sum.
