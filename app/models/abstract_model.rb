@@ -333,8 +333,6 @@ class AbstractModel < ActiveRecord::Base
   #   Name.show_controller => "name"
   #   name.show_controller => "name"
   #
-  # TODO: Make this a model method!  Also it"s not clear why the default
-  # is an error rather than name.underscore.
   def self.show_controller
     name.underscore
   end
