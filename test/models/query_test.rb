@@ -2120,8 +2120,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_rss_log
-    assert_query([observations(:detailed_unknown_obs).id], :Observation,
-                 :by_rss_log)
+    expect = Observation.where.not(rss_log: nil)
+    assert_query(expect, :Observation, :by_rss_log)
   end
 
   def test_observation_by_user
