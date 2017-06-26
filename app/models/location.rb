@@ -484,7 +484,7 @@ class Location < AbstractModel
         next unless name.index(key)
         return true unless provide_reasons
         reasons.push(:location_dubious_bad_term.t(bad: key,
-                                                    good: BAD_TERMS[key]))
+                                                  good: BAD_TERMS[key]))
       end
       count = 0
       # For some reason BAD_CHARS.chars.each doesn't work

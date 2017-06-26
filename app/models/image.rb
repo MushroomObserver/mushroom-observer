@@ -598,7 +598,7 @@ class Image < AbstractModel
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
       if upload_handle.is_a?(IO) || upload_handle.is_a?(StringIO) ||
-          defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
+         defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
         begin
           # Using an instance variable so the temp file lasts as long as
           # the reference to the path.
