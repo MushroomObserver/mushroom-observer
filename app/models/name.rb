@@ -525,6 +525,10 @@ class Name < AbstractModel
     [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
   end
 
+  def self.ranks_between_kingdom_and_genus
+    [:Phylum, :Subphylum, :Class, :Subclass, :Order, :Suborder, :Family]
+  end
+
   def self.ranks_above_species
     [:Stirps, :Subsection, :Section, :Subgenus, :Genus,
      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
@@ -887,27 +891,26 @@ class Name < AbstractModel
       parse_classification(text).each do |line_rank, line_name|
         real_rank = Name.guess_rank(line_name)
         real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
-        if [:Phylum, :Subphylum, :Class, :Subclass, :Order, :Suborder,
-            :Family].include?(line_rank)
-          expect_rank = line_rank
-        else
-          expect_rank = :Genus # cannot guess Kingdom or Domain
-        end
+        expect_rank = if ranks_between_kingdom_and_genus.include?(line_rank)
+                        line_rank
+                      else
+                        :Genus # cannot guess Kingdom or Domain
+                      end
         line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
         line_rank_idx = rank_index(line_rank)
         if line_rank_idx.nil?
           raise :runtime_user_bad_rank.t(rank: line_rank_str)
         end
         if line_rank_idx <= rank_idx
-          raise :runtime_invalid_rank.t(line_rank: line_rank_str, rank: rank_str)
+          raise :runtime_invalid_rank.t(line_rank: line_rank_str,
+                                        rank: rank_str)
         end
         if parsed_names[line_rank]
           raise :runtime_duplicate_rank.t(rank: line_rank_str)
         end
         if real_rank != expect_rank && kingdom == "Fungi"
           raise :runtime_wrong_rank.t(expect: line_rank_str,
-                                     actual: real_rank_str,
-                                     name: line_name)
+                                      actual: real_rank_str, name: line_name)
         end
         parsed_names[line_rank] = line_name
         kingdom = line_name if line_rank == :Kingdom
@@ -1333,7 +1336,7 @@ class Name < AbstractModel
   # String words together replacing the one at index +i+ with +sub+.
   def self.guess_pattern(words, i, sub) # :nodoc:
     result = []
-    for j in 0..(words.length - 1)
+    (0..(words.length - 1)).each do |j|
       result << (i == j ? sub : words[j])
     end
     result.join(" ")
@@ -2203,7 +2206,8 @@ class Name < AbstractModel
     self.author = new_author.to_s
     self.search_name  = text_name + new_author2
     self.sort_name    = Name.format_sort_name(text_name, new_author)
-    self.display_name = Name.format_autonym(text_name, new_author, rank, deprecated)
+    self.display_name = Name.format_autonym(text_name, new_author, rank,
+                                            deprecated)
   end
 
   # Changes deprecated status.  Updates formatted names, as well. *UNSAVED*!!
@@ -2404,7 +2408,7 @@ class Name < AbstractModel
     end
 
     # Send notification to all except the person who triggered the change.
-    for recipient in recipients.uniq - [sender]
+    (recipients.uniq - [sender]).each do |recipient|
       QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
     end
   end
@@ -2624,16 +2628,20 @@ class Name < AbstractModel
   # :stopdoc:
   def check_author
     return if author.to_s.size <= Name.author_limit
-    errors.add(:author,
-               (:validate_name_author_too_long.t + " " + :MAXIMUM.t + ": " +
-                Name.author_limit.to_s + ". " +
-                :validate_name_use_first_author.t + "."))
+    errors.add(
+      :author,
+      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: "\
+      "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
+    )
   end
 
   def check_text_name
     return if text_name.to_s.size <= Name.text_name_limit
-    errors.add(:text_name, (:validate_name_text_name_too_long.t +
-      " " + :MAXIMUM.t + ": " + Name.text_name_limit.to_s))
+    errors.add(
+      :text_name,
+      "#{:validate_name_text_name_too_long.t} #{:MAXIMUM.t}: "\
+      "#{Name.text_name_limit}"
+    )
   end
 
   def check_user

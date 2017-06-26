@@ -219,14 +219,14 @@ class Image < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :glossary_terms
   has_many :thumb_clients, class_name: "Observation",
-           foreign_key: "thumb_image_id"
+                           foreign_key: "thumb_image_id"
   has_many :image_votes
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
   has_many :subjects, class_name: "User", foreign_key: "image_id"
   has_many :best_glossary_terms, class_name: "GlossaryTerm",
-           foreign_key: "thumb_image_id"
+                                 foreign_key: "thumb_image_id"
   has_many :copyright_changes, as: :target, dependent: :destroy
 
   before_destroy :update_thumbnails
@@ -597,9 +597,8 @@ class Image < AbstractModel
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
-      if upload_handle.is_a?(IO) ||
-         upload_handle.is_a?(StringIO) ||
-         defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
+      if upload_handle.is_a?(IO) || upload_handle.is_a?(StringIO) ||
+          defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
         begin
           # Using an instance variable so the temp file lasts as long as
           # the reference to the path.
