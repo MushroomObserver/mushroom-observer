@@ -215,7 +215,8 @@
 #  remove_image::       Ensures that this user doesn't reference this image
 #
 #  == Callbacks
-#  crypt_password::     Password attribute is encrypted before object is created.
+#  crypt_password::     Password attribute is encrypted
+#                       before object is created.
 #
 class User < AbstractModel
   require "digest/sha1"
