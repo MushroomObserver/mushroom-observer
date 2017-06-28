@@ -3,12 +3,14 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 DEFAULTS: &DEFAULTS
-  content_type: image/jpeg
-  notes: $LABEL # for debugging
-  transferred: true
-  user: rolf
+  content_type:     image/jpeg
+  copyright_holder: Nobody
+  notes:            $LABEL # for debugging
+  transferred:      true
+  user:             rolf
+  when:             <%= Time.now.strftime("%Y-%m-%d") %>
 
-in_situ_image: # old id: 1
+in_situ_image:
   <<: *DEFAULTS
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
@@ -21,7 +23,7 @@ in_situ_image: # old id: 1
   original_name: DSCN8835.JPG
   transferred: false
 
-turned_over_image: # old id: 2
+turned_over_image:
   <<: *DEFAULTS
   created_at: 2006-05-22 21:20:00
   updated_at: 2006-05-22 21:21:00
@@ -32,76 +34,76 @@ turned_over_image: # old id: 2
   original_name: 1.jpg
   transferred: false
 
-commercial_inquiry_image: # old id: 3
+commercial_inquiry_image:
   <<: *DEFAULTS
   when: 2007-02-25
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Location 2007-02-25 b.jpg
 
-disconnected_coprinus_comatus_image: # old id: 4
+disconnected_coprinus_comatus_image:
   <<: *DEFAULTS
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus.tiff
 
-connected_coprinus_comatus_image: # old id: 5
+connected_coprinus_comatus_image:
   <<: *DEFAULTS
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus close-up.tiff
 
-agaricus_campestris_image: # old id: 6
+agaricus_campestris_image:
   <<: *DEFAULTS
   when: 2007-03-19
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Name with áč€εиts.gif
 
-amateur_image: # old id: 7
+amateur_image:
   <<: *DEFAULTS
   user: katrina
   when: 2010-12-30
   notes: 'A friend took this photo.'
   copyright_holder: Nathan Wilson
 
-peltigera_image: # old id: 8
+peltigera_image:
   <<: *DEFAULTS
   when: 2012-06-07
   notes: 'Pretty lichen'
   vote_cache: 3
   copyright_holder: Nathan Wilson
 
-conic_image: # old id: 9
+conic_image:
   <<: *DEFAULTS
   when: 2013-08-04
   notes: 'A scientific illustration of Conic Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
 
-convex_image: # old id: 10
+convex_image:
   <<: *DEFAULTS
   when: 2013-08-13
   notes: 'A scientific illustration of Convex Pileus'
   copyright_holder: Insil Choi
 
-plane_image_thumb: # old id: 11
+plane_image_thumb:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: 'A scientific illustration of Plane Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
 
-plane_image_example: # old id: 12
+plane_image_example:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: 'Example image of of Plane Pileus'
   copyright_holder: Nathan Wilson
   vote_cache: 3
 
-rolf_profile_image: # old id: 13
+rolf_profile_image:
   <<: *DEFAULTS
   when: 2013-09-08
   notes: NULL        # used in test_noteless_image
@@ -109,10 +111,6 @@ rolf_profile_image: # old id: 13
 
 query_first_image:
   <<: *DEFAULTS
-  when: 2016-08-09
-  copyright_holder: Nobody
 
 query_second_image:
   <<: *DEFAULTS
-  when: 2016-08-09
-  copyright_holder: Nobody
