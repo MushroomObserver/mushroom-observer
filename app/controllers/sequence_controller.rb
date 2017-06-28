@@ -29,6 +29,7 @@ class SequenceController < ApplicationController
   def edit_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
+
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_to_show_observation(@sequence.observation)
@@ -54,7 +55,6 @@ class SequenceController < ApplicationController
 
   def show_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    return unless @sequence
   end
 
   def index_sequence
