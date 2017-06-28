@@ -359,6 +359,9 @@ same_user_owns_name_and_naming_obs:
 # has Sequence which has not been deposited in an Archive
 locally_sequenced_obs:
   <<: *DEFAULTS
+  rss_log:     $LABEL_rss_log
+  images:      locally_sequenced_obs_image
+  thumb_image: locally_sequenced_obs_image
 
 # has Sequence which is in GenBank
 genbanked_obs:

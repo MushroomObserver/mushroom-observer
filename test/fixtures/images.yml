@@ -114,3 +114,6 @@ query_first_image:
 
 query_second_image:
   <<: *DEFAULTS
+
+locally_sequenced_obs_image:
+  <<: *DEFAULTS

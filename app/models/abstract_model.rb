@@ -594,6 +594,24 @@ class AbstractModel < ActiveRecord::Base
     log_image(:log_image_destroyed, image, false)
   end
 
+  # Log addition of new Sequence to object
+  def log_add_sequence(sequence)
+    log_sequence(:log_sequence_added, sequence, true)
+  end
+
+  # Log Sequence's accession to archive
+  def log_accession_sequence(sequence)
+    log_sequence(:log_sequence_accessioned, sequence, true)
+  end
+
+  def log_update_sequence(sequence)
+    log_sequence(:log_sequence_updated, sequence, false)
+  end
+
+  def log_destroy_sequence(sequence)
+    log_sequence(:log_sequence_destroyed, sequence, true)
+  end
+
   # Callback that logs creation.
   def autolog_created_at
     autolog_event(:created_at)
@@ -708,6 +726,11 @@ class AbstractModel < ActiveRecord::Base
 
   def log_image(tag, image, touch) # :nodoc:
     name = "#{:Image.t} ##{image.id || image.was || "??"}"
+    log(tag, name: name, touch: touch)
+  end
+
+  def log_sequence(tag, sequence, touch) # :nodoc:
+    name = "#{:SEQUENCE.t} ##{sequence.id || "??"}"
     log(tag, name: name, touch: touch)
   end
 end

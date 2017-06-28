@@ -983,6 +983,7 @@
   log_name_approved_with_comment: "[:log_name_approved] [comment]"
   log_name_deprecated: Deprecated by [user] in favor of [other].
   log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
+  log_object_accessioned: "[name] accessioned by [user]"
   log_object_added_by_user: "[Type] added by [user]."
   log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
   log_object_added_no_user: "[Type] added."
@@ -1054,6 +1055,9 @@
   log_species_list_updated_at: "[:log_object_updated_by_user(type=:species_list)]"
   log_glossary_term_created_at: "[:log_object_created_by_user(type=:glossary_term)]"
   log_glossary_term_updated_at: "[:log_object_updated_by_user(type=:glossary_term)]"
+  log_sequence_added: "[name] added by [user]"
+  log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
+  log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
   log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
   log_object_added: "[:log_object_added_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"

@@ -30,6 +30,10 @@ class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
 
+  after_create  :log_add_sequence
+  after_update  :log_update_sequence
+  after_destroy :log_destroy_sequence
+
   ##############################################################################
   #
   #  :section: Formatting
@@ -55,6 +59,42 @@ class Sequence < AbstractModel
   def locus_width
     Sequence.locus_width
   end
+
+  ##############################################################################
+  #
+  #  :section: Logging
+  #
+  ##############################################################################
+
+  # Callbacks to log Sequence modifications in associated Observation
+  protected
+
+  def log_add_sequence
+    observation.log_add_sequence(self)
+  end
+
+  def log_update_sequence
+    if accession_added?
+      # Log accession and put at top of RSS feed
+      observation.log_accession_sequence(self)
+    else
+      observation.log_update_sequence(self)
+    end
+  end
+
+  def log_destroy_sequence
+    observation.log_destroy_sequence(self)
+  end
+
+  def accession_added?
+    accession.present? && accession_was_blank?
+  end
+
+  def accession_was_blank?
+    changes[:accession].first.blank?
+  end
+
+  public
 
   ##############################################################################
   #

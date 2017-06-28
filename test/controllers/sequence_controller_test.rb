@@ -22,7 +22,7 @@ class SequenceControllerTest < FunctionalTestCase
   end
 
   def test_add_sequence_post_happy_paths
-    obs   = observations(:coprinus_comatus_obs)
+    obs   = observations(:detailed_unknown_obs)
     owner = obs.user
     locus = "ITS"
     bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"\
@@ -54,6 +54,8 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
     assert_redirected_to(controller: :observer, action: :show_observation)
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
 
     # Prove authorized user can create repository Sequence
     locus =     "ITS"
@@ -160,6 +162,7 @@ class SequenceControllerTest < FunctionalTestCase
     login(observer.login)
     post(:edit_sequence, params)
     sequence.reload
+    obs.rss_log.reload
 
     assert_equal(obs, sequence.observation)
     assert_equal(sequencer, sequence.user)
@@ -169,6 +172,28 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.accession)
     assert_redirected_to(controller: :sequence, action: :show_sequence,
                          id: sequence.id)
+    assert(obs.rss_log.notes.include?("log_sequence_updated"),
+           "Failed to include Sequence updated in RssLog for Observation")
+
+    # Prove Observation owner user can accession Sequence
+    archive   = "GenBank"
+    accession = "KT968655"
+    params = {
+               id: sequence.id,
+               sequence:  { locus:     locus,
+                            bases:     bases,
+                            archive:   archive,
+                            accession: accession }
+             }
+
+    post(:edit_sequence, params)
+    sequence.reload
+    obs.rss_log.reload
+
+    assert_equal(archive, sequence.archive)
+    assert_equal(accession, sequence.accession)
+    assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
+           "Failed to include Sequence accessioned in RssLog for Observation")
   end
 
   def test_show_sequence
@@ -202,6 +227,8 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(old_count-1, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
+    assert(obs.rss_log.notes.include?("log_sequence_destroy"),
+           "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
   def test_index_sequence
