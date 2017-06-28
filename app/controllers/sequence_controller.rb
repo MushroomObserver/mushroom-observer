@@ -5,6 +5,7 @@
 #    add_sequence::      Create new sequence and add to Observation
 #    destroy_sequence::  Destroy sequence
 #    edit_sequence::     Update sequence
+#    index_sequence::    List selected sequences, based on current Query
 #    show_sequence::     Display sequence details
 #
 #
@@ -28,7 +29,6 @@ class SequenceController < ApplicationController
   def edit_sequence
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
-
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_to_show_observation(@sequence.observation)
@@ -57,7 +57,6 @@ class SequenceController < ApplicationController
     return unless @sequence
   end
 
-  # List selected sequences, based on current Query.
   def index_sequence
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
@@ -101,17 +100,12 @@ class SequenceController < ApplicationController
                         action: "show_observation", id: observation.id)
   end
 
-  # Show selected list of sequences.
   def show_selected_sequences(query, args = {})
     args = { action: :list_sequences,
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
-
     @links ||= []
-
-    # Add some alternate sorting criteria.
     args[:sorting_links] = show_sequence_sorts
-
     show_index_of_objects(query, args)
   end
 
