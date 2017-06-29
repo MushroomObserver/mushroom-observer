@@ -22,7 +22,7 @@ class SequenceController < ApplicationController
       flash_warning(:permission_denied.t)
       redirect_to_show_observation(@observation)
     else
-      build_sequence
+      build_sequence if request.method == "POST"
     end
   end
 
@@ -67,13 +67,6 @@ class SequenceController < ApplicationController
   private
 
   def build_sequence
-    request.method != "POST" ? init_create_sequence : process_create_sequence
-  end
-
-  def init_create_sequence
-  end
-
-  def process_create_sequence
     @sequence = @observation.sequences.new()
     @sequence.attributes = whitelisted_sequence_params
     @sequence.user = @user
