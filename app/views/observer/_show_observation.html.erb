@@ -1,48 +1,52 @@
 <div class="row">
   <div class="col-xs-12 max-width-text">
     <div id="observation_when">
-      <%= :WHEN.t %>:
-      <strong><%= observation.when.web_date %></strong>
+      <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
     </div>
     <div id="observation_where">
-      <%= observation.is_collection_location ? :show_observation_collection_location.t : :show_observation_seen_at.t %>:
-      <strong><%= location_link(observation.place_name, observation.location, nil, true) %></strong>
+      <%= observation.is_collection_location ?
+            :show_observation_collection_location.t :
+            :show_observation_seen_at.t %>:
+      <span class="bold">
+        <%= location_link(observation.place_name,
+                          observation.location, nil, true) %>
+      </span>
     </div>
     <div id="observation_lat_lng">
       <% if observation.lat or observation.alt %>
-      <span>(<%= observation.lat ? "#{observation.lat}° #{observation.long}° " : '' %>
-        <%= observation.alt ? "#{observation.alt}m" : '' %>)</span>
+           <%= observation.lat ?
+                  "#{observation.lat}° #{observation.long}° " : '' %>
+           <%= observation.alt ? "#{observation.alt}m" : '' %>
       <% end %>
     </div>
     <div id="observation_who">
-      <%= :WHO.t %>: <strong><%= user_link(observation.user) %></strong>
+      <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
     </div>
     <div id="observation_projects">
-      <% for project in observation.projects %>
-          <div><%= :PROJECT.t %>: <strong><%= link_to_object(project) %></strong></div>
+      <% observation.projects.each do |project| %>
+           <div><%= :PROJECT.t %>: <%= link_to_object(project) %></div>
       <% end %>
     </div>
     <div id="observation_specimen_info">
-      <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
+      <%= observation_specimen_link(observation) +
+            create_specimen_link(observation) %>
     </div>
 
     <div id="observation_sequences">
-      <span class="bold">
-        <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
-      </span><%= add_sequence_link(observation) %><br>
+      <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
+      <%= add_sequence_link(observation) %><br>
       <%= if observation.sequences.any?
             render(partial: "observer/sequence_table",
                   locals: { observation: observation })
           end %>
     </div>
-
-    <%= if !observation.notes.blank?
-      Textile.clear_textile_cache
-      Textile.register_name(*observation.namings.map(&:name))
-      Textile.register_name(observation.name)
-      content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
-                  style: "margin-top:1em; margin-bottom:-1em")
-    end %>
+    <%= if observation.notes.present?
+          Textile.clear_textile_cache
+          Textile.register_name(*observation.namings.map(&:name))
+          Textile.register_name(observation.name)
+          content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').
+                        tpl,
+                      style: "margin-top:1em; margin-bottom:-1em")
+        end %>
   </div>
 </div>
-
