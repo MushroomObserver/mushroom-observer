@@ -602,7 +602,7 @@
   # deprecate a name
   DEPRECATE: Deprecate
   deprecate: deprecate
-  # destroy an observation
+  # destroy an observation or other object
   DESTROY: Destroy
   destroy: destroy
   DISABLE: Disable

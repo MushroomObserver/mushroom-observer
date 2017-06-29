@@ -14,10 +14,14 @@
     <% end %>
   </td>
   <td>
-    <%= link_with_query(:SHOW.t, sequence.show_link_args) %>  </td>
-  <td>
-    <% if check_permission(@observation) || check_permission(sequence) %>
-      <%= link_with_query(:EDIT.t, sequence.edit_link_args) %>
-    <% end %>
+    <%= link_with_query(:SHOW.t, sequence.show_link_args) %>
   </td>
+  <% if check_permission(@observation) || check_permission(sequence) %>
+    <td>
+      <%= link_with_query(:EDIT.t, sequence.edit_link_args) %>
+    </td>
+    <td>
+      <%= link_with_query(:DESTROY.t, sequence.destroy_link_args)%>
+    </td>
+  <% end %>
 </tr>
