@@ -2032,12 +2032,13 @@
   # sequence/form_sequence
   form_sequence_locus:      "[:LOCUS] (required)"
   form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples: \n&nbsp;&nbsp; ITS<br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence <br>&nbsp;&nbsp; multi-locus"
-  form_sequence_bases:      "[:BASES] ([:form_sequence_both_required])"
+  form_sequence_bases:      "[:BASES] ([:BASES] and/or [:DEPOSIT] required.)"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
-  form_sequence_bases_help: "[:BASES] (nucleic acids) in FASTA format (description line optional)."
+  form_sequence_bases_help: "<a href='https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp'>FASTA formatted or Bare sequence</a>."
   form_sequence_archive_help: "On-line, public database with [:sequence] data for this [:OBSERVATION]."
   form_sequence_accession:      "[:ACCESSION] number/code"
-  form_sequence_accession_help: "Examples: \n&nbsp;&nbsp; KT968655\n&nbsp;&nbsp; KT968655.1\n&nbsp;&nbsp; UDB024324"
+  form_sequence_accession_help: "Examples: \n&nbsp;&nbsp; KT968655\n&nbsp;&nbsp; UDB024324"
+  form_sequence_valid_deposit: "[:DEPOSIT] requires both [:ARCHIVE] and [:ACCESSION]"
 
   # observer/users_by_contribution
   users_by_contribution_title: List of Contributors
@@ -3211,6 +3212,7 @@
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:ACCESSIONS] for an [:OBSERVATION] must be unique"
   validate_sequence_bases_or_archive: "Must have [:BASES] or [:DEPOSIT]"
+  validate_sequence_bases_invalid: "[:BASES] have invalid code(s) or format"
   validate_sequence_bases_unique: "[:BASES] for an [:OBSERVATION] must be unique"
   validate_sequence_deposit_complete: "[:DEPOSIT] must have both [:ARCHIVE] and [:ACCESSION], or neither [:ARCHIVE] nor [:ACCESSION]."
   validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
