@@ -21,7 +21,7 @@
 #
 #  == Instance Methods
 #
-#  deposit?            Does sequence have a deposit (Archive && Accession)
+#  deposit?            Does sequence have a deposit (both Archive && Accession)
 #  format_name         name for orphaned objects
 #  locus_width         Default # of chars (including diaresis) to truncate locus
 #  unique_format_name  name for unorphaned objects
@@ -112,12 +112,20 @@ class Sequence < AbstractModel
 
   validates :locus, :observation, :user, presence: true
   validate  :bases_or_deposit
+  validate  :deposit_complete_or_absent
   validate  :unique_bases_for_obs
   validate  :unique_accession_for_obs
 
   def bases_or_deposit
-    return if bases.present? || archive.present? && accession.present?
+    return if bases.present? || deposit?
     errors.add(:bases, :validate_sequence_bases_or_archive.t)
+  end
+
+  # Must have both archive && accession or neither.
+  # (One without the other is not useful.)
+  def deposit_complete_or_absent
+    return if archive.present? == accession.present?
+    errors.add(:archive, :validate_sequence_deposit_complete.t)
   end
 
   def unique_bases_for_obs

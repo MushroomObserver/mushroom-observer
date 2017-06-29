@@ -414,6 +414,8 @@
   date: date
   DATES: Dates
   dates: dates
+  # deposit of Sequence Bases in an Archive
+  DEPOSIT:  Deposit
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -736,7 +738,6 @@
   are_you_sure: Are you sure?
   click_for_map: Click for map
   CREATED_BY: Created by
-  DEPOSIT: Deposit
   EDITING: Editing
   google_images: Google Images
   show_on_map: Show on map
@@ -3209,8 +3210,9 @@
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:ACCESSIONS] for an [:OBSERVATION] must be unique"
-  validate_sequence_bases_or_archive: "Must have [:BASES] or both [:ARCHIVE] and [:ACCESSION]"
+  validate_sequence_bases_or_archive: "Must have [:BASES] or [:DEPOSIT]"
   validate_sequence_bases_unique: "[:BASES] for an [:OBSERVATION] must be unique"
+  validate_sequence_deposit_complete: "[:DEPOSIT] must have both [:ARCHIVE] and [:ACCESSION], or neither [:ARCHIVE] nor [:ACCESSION]."
   validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_species_list_user_missing: "[:validate_missing(field=:user)]"
   validate_species_list_where_missing: "[:validate_missing(field=:location)]"

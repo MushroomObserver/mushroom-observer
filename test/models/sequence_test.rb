@@ -98,7 +98,7 @@ class SequenceTest < UnitTestCase
     )
     assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
 
-    # Prove that Sequence with blank bases and accession is invalid
+    # Prove that Sequence with blank bases and blank accession is invalid
     sequence = Sequence.new(
                     observation: observations(:boletus_edulis_obs),
                     user:        observations(:boletus_edulis_obs).user,
@@ -109,6 +109,30 @@ class SequenceTest < UnitTestCase
                     notes:       "Random notes"
     )
     assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
+
+    # Prove that Sequence with archive but no accession is invalid
+    sequence = Sequence.new(
+                    observation: observations(:boletus_edulis_obs),
+                    user:        observations(:boletus_edulis_obs).user,
+                    locus:       "ITS",
+                    bases:       "acgt",
+                    archive:     "GenBank",
+                    accession:   "",
+                    notes:       "Random notes"
+    )
+    assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
+
+    # Prove that Sequence with accession but no archive is invalid
+    sequence = Sequence.new(
+                    observation: observations(:boletus_edulis_obs),
+                    user:        observations(:boletus_edulis_obs).user,
+                    locus:       "ITS",
+                    bases:       "acgt",
+                    archive:     "",
+                    accession:   "KY366491",
+                    notes:       "Random notes"
+    )
+    assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
 
     # Prove that Sequences Bases must be unique for an Observation
     existing_seq = sequences(:local_sequence)
@@ -133,7 +157,7 @@ class SequenceTest < UnitTestCase
                     locus:       "ITS",
                     bases:       "",         # same as existing_seq
                     archive:     "GenBank",
-                    accession:   existing_seq.accession + "2",
+                    accession:   "#{existing_seq.accession}2",
                     notes:       "Random notes"
     )
     assert(sequence.valid?, :validate_sequence_accession_unique.l)
@@ -159,7 +183,7 @@ class SequenceTest < UnitTestCase
                     observation: obs,
                     user:        obs.user,
                     locus:       "ITS",
-                    bases:       existing_seq.bases + "a",
+                    bases:       "#{existing_seq.bases}a",
                     archive:     "",
                     accession:   "", # same as existing_sequence
                     notes:       "Random notes"
