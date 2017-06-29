@@ -31,7 +31,7 @@
         <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
       </span><%= add_sequence_link(observation) %><br>
       <%= if observation.sequences.any?
-            render(partial: "sequence_table",
+            render(partial: "observer/sequence_table",
                   locals: { observation: observation })
           end %>
     </div>
