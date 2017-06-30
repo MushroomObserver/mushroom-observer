@@ -49,7 +49,7 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
 
-Copyright (c) 2017. [Nathan Wilson][9], [Jason Hollinger][10], [Joseph Cohen][11]
+Copyright (c) © 2006-2017 Mushroom Observer, Inc.
 See [LICENSE][12] for further details.
 
 [1]: <https://secure.travis-ci.org/MushroomObserver/mushroom-observer.png>
