@@ -21,8 +21,8 @@ class SequenceController < ApplicationController
     if !check_permission(@observation)
       flash_warning(:permission_denied.t)
       redirect_to_show_observation(@observation)
-    else
-      build_sequence if request.method == "POST"
+    elsif request.method == "POST"
+      build_sequence
     end
   end
 
@@ -33,8 +33,8 @@ class SequenceController < ApplicationController
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_to_show_observation(@sequence.observation)
-    else
-      save_edits if request.method == "POST"
+    elsif request.method == "POST"
+      save_edits
     end
   end
 
@@ -62,12 +62,12 @@ class SequenceController < ApplicationController
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-##############################################################################
+  ##############################################################################
 
   private
 
   def build_sequence
-    @sequence = @observation.sequences.new()
+    @sequence = @observation.sequences.new
     @sequence.attributes = whitelisted_sequence_params
     @sequence.user = @user
     if @sequence.save
