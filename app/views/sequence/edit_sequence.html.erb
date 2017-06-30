@@ -7,6 +7,21 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
+<br>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+      <span class="bold"><%= :OBSERVATION.t %></span>:
+      <%= @sequence.observation.name.display_name.t %>
+      (<%= @sequence.observation.id %>)
+  </div>
+</div>
+
 <%= form_for(:sequence, url: {action: :edit_sequence}) do |form| %>
   <%= render(partial: "form_sequence", locals: {form: form}) %>
 <% end %>
+
+<div class="small">
+  <span class="bold"><%= :CREATED_BY.t %>:</span>
+  <%= user_link(@sequence.user) %>
+</div>
+<%= show_object_footer(@sequence) %>
