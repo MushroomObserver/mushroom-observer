@@ -8,13 +8,8 @@
 %>
 
 <br>
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-      <span class="bold"><%= :OBSERVATION.t %></span>:
-      <%= @sequence.observation.name.display_name.t %>
-      (<%= @sequence.observation.id %>)
-  </div>
-</div>
+<%= render(partial: "observation_title",
+           locals: { observation: @sequence.observation }) %>
 
 <%= form_for(:sequence, url: {action: :edit_sequence}) do |form| %>
   <%= render(partial: "form_sequence", locals: {form: form}) %>
