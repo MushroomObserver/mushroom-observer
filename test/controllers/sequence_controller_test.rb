@@ -38,7 +38,7 @@ class SequenceControllerTest < FunctionalTestCase
     params = {
       id: obs.id,
       sequence: { locus: locus,
-                 bases: bases }
+                  bases: bases }
     }
 
     # Prove authorized user can create non-repository Sequence

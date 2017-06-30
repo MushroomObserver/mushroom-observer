@@ -509,8 +509,10 @@ class AbstractModel < ActiveRecord::Base
 
   # Return the link_to args of the "destroy_<object>" action
   #
-  #   Name.destroy_link_args(12) => {controller: :name, action: :destroy_name, id: 12}
-  #   name.destroy_link_args     => {controller: :name, action: :destroy_name, id: 12}
+  #   Name.destroy_link_args(12) =>
+  #     {controller: :name, action: :destroy_name, id: 12}
+  #   name.destroy_link_args     =>
+  #     {controller: :name, action: :destroy_name, id: 12}
   #
   def self.destroy_link_args(id)
     { controller: destroy_controller, action: destroy_action, id: id }

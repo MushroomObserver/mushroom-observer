@@ -114,9 +114,7 @@ module Query::Modules::Ordering
       end
 
     when "observation"
-      if columns.include?("observation_id")
-        "observation_id DESC"
-      end
+      "observation_id DESC" if columns.include?("observation_id")
 
     when "contribution"
       "users.contribution DESC" if model == User
