@@ -419,7 +419,7 @@ class AbstractModel < ActiveRecord::Base
   ##############################################################################
 
   def self.edit_controller
-    self.show_controller
+    show_controller
   end
 
   def edit_controller
@@ -473,7 +473,7 @@ class AbstractModel < ActiveRecord::Base
   ##############################################################################
 
   def self.destroy_controller
-    self.show_controller
+    show_controller
   end
 
   def destroy_controller
