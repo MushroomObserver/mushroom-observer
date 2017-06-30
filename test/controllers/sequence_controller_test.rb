@@ -36,10 +36,10 @@ class SequenceControllerTest < FunctionalTestCase
             "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
             "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
     params = {
-               id: obs.id,
-               sequence: { locus: locus,
-                           bases: bases }
-             }
+      id: obs.id,
+      sequence: { locus: locus,
+                 bases: bases }
+    }
 
     # Prove authorized user can create non-repository Sequence
     old_count = Sequence.count
@@ -62,11 +62,11 @@ class SequenceControllerTest < FunctionalTestCase
     archive =   "GenBank"
     accession = "KY366491.1"
     params = {
-               id: obs.id,
-               sequence: { locus: locus,
-                           archive: archive,
-                           accession: accession }
-             }
+      id: obs.id,
+      sequence: { locus: locus,
+                  archive: archive,
+                  accession: accession }
+    }
     old_count = Sequence.count
     post(:add_sequence, params)
     assert_equal(old_count + 1, Sequence.count)
@@ -84,10 +84,10 @@ class SequenceControllerTest < FunctionalTestCase
     locus = "ITS"
     bases = "aaccggtt"
     params = {
-               id: obs.id,
-               sequence: { locus: locus,
-                           bases: bases }
-             }
+      id: obs.id,
+      sequence: { locus: locus,
+                  bases: bases }
+    }
 
     # Prove unauthorized User cannot add Sequence
     old_count = Sequence.count
@@ -101,10 +101,10 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove returned to form if parameters invalid
     params = {
-              id: obs.id,
-              sequence: { locus: "",
-                          bases: bases }
-             }
+      id: obs.id,
+      sequence: { locus: "",
+                  bases: bases }
+    }
     old_count = Sequence.count
     login(owner.login)
 
@@ -119,7 +119,6 @@ class SequenceControllerTest < FunctionalTestCase
     sequence  = sequences(:local_sequence)
     obs       = sequence.observation
     observer  = obs.user
-    sequencer = sequence.user
 
     # Prove method requires login
     requires_login(:edit_sequence, id: sequence.id)
@@ -153,10 +152,10 @@ class SequenceControllerTest < FunctionalTestCase
             "ctgtgaacgc tctctgtatt gttctgcttc taactgtctt attaaaggac aacaatattg"\
             "aacttttgac ctcaaatcag gtaggactac ccgctgaact taagcatatc aataa"
     params = {
-               id: sequence.id,
-               sequence: { locus: locus,
-                           bases: bases }
-             }
+      id: sequence.id,
+      sequence: { locus: locus,
+                  bases: bases }
+    }
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
@@ -179,12 +178,12 @@ class SequenceControllerTest < FunctionalTestCase
     archive   = "GenBank"
     accession = "KT968655"
     params = {
-               id: sequence.id,
-               sequence:  { locus:     locus,
-                            bases:     bases,
-                            archive:   archive,
-                            accession: accession }
-             }
+      id: sequence.id,
+      sequence:  { locus:     locus,
+                   bases:     bases,
+                   archive:   archive,
+                   accession: accession }
+    }
 
     post(:edit_sequence, params)
     sequence.reload
@@ -224,7 +223,7 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove Observation owner can destroy Sequence
     login(observer.login)
     post(:destroy_sequence, id: sequence.id)
-    assert_equal(old_count-1, Sequence.count)
+    assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
