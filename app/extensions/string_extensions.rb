@@ -24,8 +24,6 @@
 #  capitalize_first::   Capitalize first letter, leaving the rest alone.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Fixnum#alphabetize.
-#  truncate_bytesize::  Truncate so that *binary* length is within given limit
-#  truncate_bytesize!:: Truncate so that *binary* length ia within given limit
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::      Measure how closely this String matches another String.
@@ -334,7 +332,7 @@ class String
       "\xC6\x8E"     => "E",    # Ǝ
       "\xC6\x8F"     => "e",    # Ə
       "\xC6\x90"     => "E"     # Ɛ
-    }
+    }.freeze
   end
 
   # Plain-text alternatives to the HTML special characters RedCloth uses.
@@ -348,8 +346,8 @@ class String
       "lt"    => "<",
       "#60"   => "<",
       "quot"  => '"',
-      '#34'   => '"',
-      '#39'   => "'",
+      "#34"   => '"',
+      "#39"   => "'",
       "#169"  => "(c)",
       "#174"  => "(r)",
       "#215"  => "x",
@@ -365,7 +363,7 @@ class String
       "#8482" => "(tm)",
       "#8594" => "->",
       "nbsp"  => " "
-    }
+    }.freeze
   end
   # :startdoc:
 
@@ -569,7 +567,7 @@ class String
     len      = alphabet.length
     str.split("").inject(0) do |num, char|
       i = alphabet.index(char)
-      fail "Character not in alphabet: '#{char}'" if i.nil?
+      raise "Character not in alphabet: '#{char}'" if i.nil?
       num = num * len + i
     end
   end
@@ -577,30 +575,6 @@ class String
   # Find amount first line is indented and remove that from all lines.
   def unindent
     gsub /^#{self[/\A\s*/]}/, ""
-  end
-
-  # Byte truncation.  bytesize differs from length if there are accents.
-  # Very useful when validating ActiveRecord records,
-  # because mysql limits the number of bytes, not characters.
-
-  # Truncate a string so that its *binary* length is within a given limit.
-  def truncate_bytesize(len)
-    return self if bytesize <= len
-    result = self
-    if encoding == "UTF-8"
-      result = result.force_encoding("binary")[0..len]
-      result = result[0..-2] while result[-1].ord & 0xC0 == 0x80
-      result = result[0..-2].force_encoding("UTF-8")
-    else
-      result = result[0..len - 1]
-      result = result[0..-2] while result.bytesize > len
-    end
-    result
-  end
-
-  # Truncate string bytesize in place
-  def truncate_bytesize!(len)
-    replace(truncate_bytesize(len))
   end
 
   ### String Queries ###
@@ -630,22 +604,22 @@ class String
     n = s.length
     m = t.length
 
-    return m if (0 == n)
-    return n if (0 == m)
+    return m if n.zero?
+    return n if m.zero?
 
     d = (0..m).to_a
     x = nil
 
-    str1.each_char.each_with_index do |char1,i|
-      e = i+1
+    str1.each_char.each_with_index do |char1, i|
+      e = i + 1
 
-      str2.each_char.each_with_index do |char2,j|
-        cost = (char1 == char2) ? 0 : 1
+      str2.each_char.each_with_index do |char2, j|
+        cost = (char1 == char2 ? 0 : 1)
         x = [
-             d[j+1] + 1, # insertion
-             e + 1,      # deletion
-             d[j] + cost # substitution
-            ].min
+          d[j + 1] + 1, # insertion
+          e + 1,        # deletion
+          d[j] + cost   # substitution
+        ].min
         d[j] = e
         e = x
       end
@@ -653,7 +627,7 @@ class String
       d[m] = x
     end
 
-    return x
+    x
   end
 
   # Returns the MD5 sum.

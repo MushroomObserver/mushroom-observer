@@ -872,6 +872,24 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(action: "create_name")
   end
 
+  def test_create_name_author_limit
+    # Prove author :limit is number of characters, not bytes
+    text_name = "Max-size-author"
+    # String with author_limit multi-byte characters, and > author_limit bytes
+    author    = "Á#{"æ" * (Name.author_limit - 1)}"
+    params = {
+      name: {
+        text_name: text_name,
+        author:    author,
+        rank:      :Genus
+      }
+    }
+    post_requires_login(:create_name, params)
+
+    assert(name = Name.find_by_text_name(text_name), "Failed to create name")
+    assert_equal(author, name.author)
+  end
+
   def test_create_name_alt_rank
     text_name = "Ustilaginomycetes"
     name = Name.find_by_text_name(text_name)

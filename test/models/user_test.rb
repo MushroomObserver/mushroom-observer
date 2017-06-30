@@ -135,15 +135,28 @@ class UserTest < UnitTestCase
   # characters long, but which had a few accents, so it was > 80 *bytes* long,
   # and it truncated right in the middle of a utf-8 sequence.  Broke the front
   # page of the site for several minutes.
+  #
+  # In the combination of newer versions of Ruby, Rails, MySQL,
+  # and MySQL drivers, truncate should not truncate in the middle of a
+  # multi-byte character, so this should no longer be a problem.
+  # The string was:
+  #   Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor \
+  #   de San Simón
+  # And this string is, in fact in the db as a user name, without truncation
+  # Test has been revised accordingly.
+  # 2017-06-16 JDC
   def test_myxomops_debacle
-    name = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
-    name2 = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Sim."
-    mary.name = name
+    # rubocop:disable Metrics/LineLength
+    name_79_chars_82_bytes = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
+    name_90_chars_93_bytes = "Herbario Forestal Nacional de Bolivia Martín Cárdenas de la Universidad Mayor de San Simón"
+    # rubocop:enable Metrics/LineLength
+
+    mary.name = name_90_chars_93_bytes
     assert(!mary.save)
-    mary.name = name2
+    mary.name = name_79_chars_82_bytes
     assert(mary.save)
     mary.reload
-    assert_equal(name2, mary.name)
+    assert_equal(name_79_chars_82_bytes, mary.name)
   end
 
   def test_all_editable_species_lists
