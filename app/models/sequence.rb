@@ -25,7 +25,7 @@
 #  format_name         name for orphaned objects
 #  locus_width         Default # of chars (including diaresis) to truncate locus
 #  unique_format_name  name for unorphaned objects
-
+#
 class Sequence < AbstractModel
   belongs_to :observation
   belongs_to :user
