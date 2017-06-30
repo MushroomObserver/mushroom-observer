@@ -2031,7 +2031,7 @@
 
   # sequence/form_sequence
   form_sequence_locus:      "[:LOCUS] (required)"
-  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples: \n&nbsp;&nbsp; ITS<br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence <br>&nbsp;&nbsp; multi-locus"
+  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples: \n&nbsp;&nbsp; ITS <br>&nbsp;&nbsp; multi-locus <br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence"
   form_sequence_bases:      "[:BASES] ([:BASES] and/or [:DEPOSIT] required.)"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
   form_sequence_bases_help: "<a href='https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp'>FASTA formatted or Bare sequence</a>."
