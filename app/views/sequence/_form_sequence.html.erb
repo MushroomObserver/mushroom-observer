@@ -1,10 +1,10 @@
 <!--[form:sequence]-->
 <div class="row push-down">
-  <div class="col-md-6">
-    <div class="form-group">
-      <%= label_tag(:sequence_locus, :form_sequence_locus.t) %>
-      <%= text_area(:sequence, :locus, rows: 1, class: "form-control") %>
-    </div>
+  <div class="form-group col-md-6">
+      <%= label_tag(:sequence_locus, :form_sequence_locus.t) %><br>
+      <%= text_area(:sequence, :locus, rows: 1, class: "form-control",
+                    style: "width: 100%;") %>
+                    <%  # style stops area from changing size on reload %>
   </div>
   <div class="col-md-6">
     <br><%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
@@ -20,7 +20,7 @@
         <%= :form_sequence_bases_help.t %>
       </span>
       <div class="col-md-9 monospace">
-        <%= text_area(:sequence, :bases, rows: 3, class: "form-control") %>
+        <%= text_area(:sequence, :bases, size: "80x3", class: "form-control") %>
       </div>
       <div class="col-md-3">
       </div>
