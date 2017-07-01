@@ -203,7 +203,8 @@ class SequenceTest < UnitTestCase
   end
 
   def test_accession_url
-    assert_equal("https://www.ncbi.nlm.nih.gov/nuccore/KY366491.1",
-                 sequences(:deposited_sequence).accession_url)
+    sequence = sequences(:deposited_sequence)
+    assert_equal("https://www.ncbi.nlm.nih.gov/nuccore/#{sequence.accession}",
+                 sequence.accession_url)
   end
 end
