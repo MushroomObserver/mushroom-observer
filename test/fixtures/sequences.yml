@@ -3,6 +3,7 @@
 
 DEFAULTS: &DEFAULTS
   user:        dick
+  observation: genbanked_obs
   locus:       ITS
   bases:       ACGT
   archive:     GenBank
@@ -17,6 +18,12 @@ local_sequence:
 
 deposited_sequence:
   <<: *DEFAULTS
-  observation: genbanked_obs
   bases:       ""
 
+missing_archive_sequence:
+  <<: *DEFAULTS
+  archive:    ""
+
+missing_accession_sequence:
+  <<: *DEFAULTS
+  accession:  ""
