@@ -39,9 +39,10 @@
 #  orphan_drafts::     Orphan draft descriptions whe destroyed.
 #
 ################################################################################
-
+#
 class Project < AbstractModel
-  belongs_to :admin_group, class_name: "UserGroup", foreign_key: "admin_group_id"
+  belongs_to :admin_group, class_name: "UserGroup",
+                           foreign_key: "admin_group_id"
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
@@ -67,8 +68,8 @@ class Project < AbstractModel
   end
 
   # Need these to be compatible with Comment.
-  alias_method :format_name, :text_name
-  alias_method :unique_format_name, :unique_text_name
+  alias format_name text_name
+  alias unique_format_name unique_text_name
 
   # Is +user+ a member of this Project?
   def is_member?(user)
@@ -89,7 +90,7 @@ class Project < AbstractModel
       elsif !obj.projects.empty?
         # group_ids = user.user_groups_singular_ids # Rails 3 only
         group_ids = user.user_groups.map(&:id)
-        for project in obj.projects
+        obj.projects.each do |project|
           if group_ids.member?(project.user_group_id)
             result = true
             break
@@ -131,47 +132,40 @@ class Project < AbstractModel
 
   # Remove image this project. Saves it.
   def remove_image(img)
-    if images.include?(img)
-      images.delete(img)
-      update_attribute(:updated_at, Time.now)
-    end
+    return unless images.include?(img)
+    images.delete(img)
+    update_attribute(:updated_at, Time.now)
   end
 
   # Add observation (and its images) to this project if not already done so.
   # Saves it.
   def add_observation(obs)
-    unless observations.include?(obs)
-      imgs = obs.images.select { |img| img.user_id == obs.user_id }
-      observations.push(obs)
-      for img in imgs
-        images.push(img)
-      end
-    end
+    return if observations.include?(obs)
+    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    observations.push(obs)
+    imgs.each { |img| images.push(img) }
   end
 
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
-    if observations.include?(obs)
-      imgs = obs.images.select { |img| img.user_id == obs.user_id }
-      if imgs.any?
-        img_ids = imgs.map(&:id).map(&:to_s).join(",")
-        # Leave images which are attached to other observations
-        # still attached to this project.
-        leave_these_img_ids = Image.connection.select_values(%(
-          SELECT io.image_id FROM images_observations io, observations_projects op
-          WHERE io.image_id IN (#{img_ids})
-            AND io.observation_id != #{obs.id}
-            AND io.observation_id = op.observation_id
-            AND op.project_id = #{id}
-        )).map(&:to_i)
-        imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
-      end
-      observations.delete(obs)
-      for img in imgs
-        images.delete(img)
-      end
-      update_attribute(:updated_at, Time.now)
+    return unless observations.include?(obs)
+    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    if imgs.any?
+      img_ids = imgs.map(&:id).map(&:to_s).join(",")
+      # Leave images which are attached to other observations
+      # still attached to this project.
+      leave_these_img_ids = Image.connection.select_values(%(
+        SELECT io.image_id FROM images_observations io, observations_projects op
+        WHERE io.image_id IN (#{img_ids})
+          AND io.observation_id != #{obs.id}
+          AND io.observation_id = op.observation_id
+          AND op.project_id = #{id}
+      )).map(&:to_i)
+      imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
     end
+    observations.delete(obs)
+    imgs.each { |img| images.delete(img) }
+    update_attribute(:updated_at, Time.now)
   end
 
   # Add species_list to this project if not already done so.  Saves it.
@@ -181,10 +175,9 @@ class Project < AbstractModel
 
   # Remove species_list from this project. Saves it.
   def remove_species_list(spl)
-    if species_lists.include?(spl)
-      species_lists.delete(spl)
-      update_attribute(:updated_at, Time.now)
-    end
+    return unless species_lists.include?(spl)
+    species_lists.delete(spl)
+    update_attribute(:updated_at, Time.now)
   end
 
   ##############################################################################
@@ -256,7 +249,7 @@ class Project < AbstractModel
     admin_group.destroy if admin_group
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 
@@ -273,7 +266,7 @@ class Project < AbstractModel
 
     if title.to_s.blank?
       errors.add(:title, :validate_project_title_missing.t)
-    elsif title.bytesize > 100
+    elsif title.size > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
   end

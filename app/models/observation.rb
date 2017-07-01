@@ -1103,7 +1103,7 @@ class Observation < AbstractModel
     if where.to_s.blank? && !location_id
       self.location = Location.unknown
       # errors.add(:where, :validate_observation_where_missing.t)
-    elsif where.to_s.bytesize > 1024
+    elsif where.to_s.size > 1024
       errors.add(:where, :validate_observation_where_too_long.t)
     end
 

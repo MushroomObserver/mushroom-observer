@@ -740,6 +740,7 @@
   CREATED_BY: Created by
   EDITING: Editing
   google_images: Google Images
+  MAXIMUM: Maximum
   show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
@@ -3150,6 +3151,7 @@
   validate_too_large: "[Field] should be at most [max]."
   validate_too_long: "[Field] must be less than [max] characters long."
   validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
+  validate_too_many_characters: "[Field] has too many characters."
   validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
@@ -3188,11 +3190,10 @@
   validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
   validate_location_user_missing: "[:validate_missing(field=:user)]"
   validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
-  validate_name_author_too_long: "[:validate_too_long(field=:authority,max=100)]"
-  validate_name_display_name_too_long: "[:validate_too_long(field=''display_name'',max=100)]"
-  validate_name_sort_name_too_long: "[:validate_too_long(field=''sort_name'',max=100)]"
-  validate_name_search_name_too_long: "[:validate_too_long(field=''search_name'',max=100)]"
-  validate_name_text_name_too_long: "[:validate_too_long(field=''text_name'',max=100)]"
+  validate_name_author_too_long: "[:validate_too_many_characters(field=:authority)]"
+  validate_name_shorten: "Shorten [:form_names_text_name] and/or [:AUTHORITY]."
+  validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
+  validate_name_use_first_author: "Use the first author followed by “et al.” per <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN Recommendation 46C.2</a>"
   validate_name_user_missing: "[:validate_missing(field=:user)]"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"

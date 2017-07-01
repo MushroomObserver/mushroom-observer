@@ -47,7 +47,7 @@
 #  See comments under Comment.
 #
 ################################################################################
-
+#
 class Interest < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
@@ -67,10 +67,10 @@ class Interest < AbstractModel
   # polymorphism messes it up.
   # def self.find_all_by_target(obj)
   def self.where_target(obj)
-    if obj.is_a?(ActiveRecord::Base) && obj.id
-      # find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
-      where(target_type: obj.class.to_s, target_id: obj.id)
-   end
+    return unless obj.is_a?(ActiveRecord::Base) && obj.id
+
+    # find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
+    where(target_type: obj.class.to_s, target_id: obj.id)
   end
 
   # To be compatible with Notification need to have summary string:
@@ -83,9 +83,9 @@ class Interest < AbstractModel
       target_type.underscore.to_sym.l + ": " +
       (target ? target.unique_format_name : "--")
   end
-  alias_method :text_name, :summary
+  alias text_name summary
 
-  ################################################################################
+  ##############################################################################
 
   protected
 
@@ -95,8 +95,7 @@ class Interest < AbstractModel
       errors.add(:user, :validate_interest_user_missing.t)
     end
 
-    if target_type.to_s.bytesize > 30
-      errors.add(:target_type, :validate_interest_object_type_too_long.t)
-    end
+    return unless target_type.to_s.size > 30
+    errors.add(:target_type, :validate_interest_object_type_too_long.t)
   end
 end
