@@ -106,6 +106,11 @@ class Sequence < AbstractModel
     archive.present? && accession.present?
   end
 
+  # url of a search for accession
+  def accession_url
+    Web::search_prefix(archive) << accession
+  end
+
   ##############################################################################
 
   protected

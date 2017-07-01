@@ -190,4 +190,9 @@ class SequenceTest < UnitTestCase
     )
     assert(sequence.valid?, :validate_sequence_accession_unique.l)
   end
+
+  def test_accession_url
+    assert_equal("https://www.ncbi.nlm.nih.gov/nuccore/KY366491.1",
+                 sequences(:deposited_sequence).accession_url)
+  end
 end
