@@ -45,6 +45,7 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     login(owner.login)
     post(:add_sequence, params)
+
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
@@ -54,6 +55,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
     assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_added"),
            "Failed to include Sequence added in RssLog for Observation")
 
@@ -94,10 +96,10 @@ class SequenceControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
 
     post(:add_sequence, params)
-    assert_flash_text(:permission_denied.l)
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_flash_warning
 
     # Prove returned to form if parameters invalid
     params = {
@@ -113,6 +115,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(obs.sequences)
     # response is 200 because it just reloads the form
     assert_response(:success)
+    assert_flash_error
   end
 
   def test_edit_sequence_get
@@ -171,6 +174,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_empty(sequence.accession)
     assert_redirected_to(controller: :sequence, action: :show_sequence,
                          id: sequence.id)
+    assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_updated"),
            "Failed to include Sequence updated in RssLog for Observation")
 
@@ -193,6 +197,20 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(accession, sequence.accession)
     assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
            "Failed to include Sequence accessioned in RssLog for Observation")
+
+    # Prove returned to form if parameters invalid
+    params = {
+      id: sequence.id,
+      sequence:  { locus:     locus,
+                   bases:     bases,
+                   archive:   archive,
+                   accession: "" }
+    }
+    post(:edit_sequence, params)
+
+    # response is 200 because it just reloads the form
+    assert_response(:success)
+    assert_flash_error
   end
 
   def test_show_sequence
@@ -219,6 +237,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(old_count, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
+    assert_flash_warning(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
@@ -226,6 +245,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
+    assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
