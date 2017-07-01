@@ -4,10 +4,10 @@
 DEFAULTS: &DEFAULTS
   user:        dick
   observation: genbanked_obs
-  locus:       ITS
+  locus:       LSU
   bases:       ACGT
   archive:     GenBank
-  accession:   KY366491.1
+  accession:   $LABEL # Don't duplicate accessions for an Observation
   notes:       Notes about Sequence $LABEL
 
 local_sequence:
@@ -18,12 +18,13 @@ local_sequence:
 
 deposited_sequence:
   <<: *DEFAULTS
+  accession:   KT968605
   bases:       ""
 
 missing_archive_sequence:
   <<: *DEFAULTS
-  archive:    ""
+  archive:     ""
 
 missing_accession_sequence:
   <<: *DEFAULTS
-  accession:  ""
+  accession:   ""
