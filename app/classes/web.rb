@@ -32,4 +32,9 @@ class Web
   def self.search_prefix(name)
     archive(name)[:prefix]
   end
+
+  def self.blast_format_help
+    "https://blast.ncbi.nlm.nih.gov/Blast.cgi?"\
+    "CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp"
+  end
 end
