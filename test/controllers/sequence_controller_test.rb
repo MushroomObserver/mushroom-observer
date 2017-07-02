@@ -71,6 +71,7 @@ class SequenceControllerTest < FunctionalTestCase
     }
     old_count = Sequence.count
     post(:add_sequence, params)
+
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
     assert_equal(locus, sequence.locus)
