@@ -191,6 +191,44 @@ class SequenceTest < UnitTestCase
     assert(sequence.valid?, :validate_sequence_accession_unique.l)
   end
 
+  def test_bases_validators
+    # Prove validity of accepted formats
+    sequence = sequences(:bare_formatted_sequence)
+    assert(sequence.valid?, sequence.errors.messages)
+
+    sequence = sequences(:bare_with_numbers_sequence)
+    assert(sequence.valid?, sequence.errors.messages)
+
+    sequence = sequences(:fasta_formatted_sequence)
+    assert(sequence.valid?, sequence.errors.messages)
+
+    # Prove various formats invalid
+    params = {
+      observation: observations(:boletus_edulis_obs),
+      user:        observations(:boletus_edulis_obs).user,
+      locus:       "ITS",
+      bases:       "ACGT",
+      archive:     "GenBank",
+      accession:   "KY366491.1",
+      notes:       "Random notes"
+    }
+
+    # Prove bases with blank lines in the middle are invalid
+    params[:bases] = "actg\r\n \r\n gtca"
+    sequence = Sequence.new(params)
+    assert(sequence.invalid?)
+
+    # Prove bases with invalid nucleic acid codes are invalid
+    params[:bases] = "acgt plus some BS"
+    sequence = Sequence.new(params)
+    assert(sequence.invalid?, "Bases with invalid code should be invalid")
+  end
+
+  def test_foo
+    sequence = sequences(:fasta_formatted_sequence)
+    assert(sequence.valid?, sequence.errors.messages)
+  end
+
   def test_deposit?
     # Prove it's false if neither archive nor accession
     refute(sequences(:local_sequence).deposit?)

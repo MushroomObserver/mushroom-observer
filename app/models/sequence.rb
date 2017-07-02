@@ -21,6 +21,7 @@
 #
 #  == Instance Methods
 #
+#  bases?              bases.present?
 #  deposit?            Does sequence have a deposit (both Archive && Accession)
 #  format_name         name for orphaned objects
 #  locus_width         Default # of chars (including diaresis) to truncate locus
@@ -33,6 +34,21 @@ class Sequence < AbstractModel
   after_create  :log_add_sequence
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
+
+  ##############################################################################
+  #
+  #  :section: Matchers
+  #
+  ##############################################################################
+
+  # matchers for bases
+
+  BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n # non-blank line
+                          ^\s*\n      # followed by blank line
+                          (\s*)\S/x   # and later non-whitespace character
+  DESCRIPTION   = /\A>.*$/
+  VALID_CODES   = /ACGTNU\-*\d\s/i
+  INVALID_CODES = /[^#{VALID_CODES}]/i
 
   ##############################################################################
   #
@@ -62,12 +78,35 @@ class Sequence < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Other
+  #
+  ##############################################################################
+
+  # This must be defined for use as argument to :if option of Validate
+  def bases?
+    bases.present?
+  end
+
+  def deposit?
+    archive.present? && accession.present?
+  end
+
+  # url of a search for accession
+  def accession_url
+    Web.search_prefix(archive) << accession
+  end
+
+  ##############################################################################
+
+  protected
+
+  ##############################################################################
+  #
   #  :section: Logging
   #
   ##############################################################################
 
   # Callbacks to log Sequence modifications in associated Observation
-  protected
 
   def log_add_sequence
     observation.log_add_sequence(self)
@@ -94,65 +133,76 @@ class Sequence < AbstractModel
     changes[:accession].first.blank?
   end
 
-  public
-
   ##############################################################################
   #
-  #  :section: Other
+  #  :section: Validation
   #
   ##############################################################################
 
-  def deposit?
-    archive.present? && accession.present?
-  end
-
-  # url of a search for accession
-  def accession_url
-    Web::search_prefix(archive) << accession
-  end
-
-  ##############################################################################
-
-  protected
-
+  # Validations, in order that error messages should appear in flash
   validates :locus, :observation, :user, presence: true
   validate  :bases_or_deposit
   validate  :deposit_complete_or_absent
-  validate  :unique_bases_for_obs
+  validate  :unique_bases_for_obs, if: :bases?
+  validate  :blastable, if: :bases?
   validate  :unique_accession_for_obs
 
+  # Valid Sequence must include bases &/or deposit (archive & accession)
+  # because MO-sourced sequence information should not be secret
   def bases_or_deposit
     return if bases.present? || deposit?
     errors.add(:bases, :validate_sequence_bases_or_archive.t)
   end
 
-  # Must have both archive && accession or neither.
+  # Valid deposit must have both archive && accession or neither.
   # (One without the other is not useful.)
   def deposit_complete_or_absent
     return if archive.present? == accession.present?
     errors.add(:archive, :validate_sequence_deposit_complete.t)
   end
 
+  # Valid Sequence should have unique bases
+  # Prevents duplicate Sequences for the same Observation
   def unique_bases_for_obs
-    return if bases.blank?
-    return unless other_sequences_same_obs.any? do |sequence|
-      sequence.bases == bases
+    return unless other_sequences_same_obs.any? do |other_sequence|
+      other_sequence.bases == bases
     end
-
     errors.add(:bases, :validate_sequence_bases_unique.t)
   end
 
+  # array of other Sequences in same Observation
+  def other_sequences_same_obs
+    observation.try(:sequences) ? observation.sequences - [self] : []
+  end
+
+  # Validate proper formatting of bases
+  # See BLAST documentation (shortened url: https://goo.gl/NYbptK)
+  # full url in Web::blast_format_help
+  def blastable
+    if blank_line_in_middle?
+      errors.add(:bases, :validate_sequence_bases_blank_lines.t)
+    end
+    return unless bad_code_in_data?
+    errors.add(:bases, :validate_sequence_bases_bad_codes.t)
+  end
+
+  def blank_line_in_middle?
+    bases =~ BLANK_LINE_IN_MIDDLE
+  end
+
+  def bad_code_in_data?
+    # remove any description line
+    data = bases.sub(DESCRIPTION, "")
+    data =~ INVALID_CODES
+  end
+
+  # Valid Sequence cannnot have duplicate accessions
+  # Prevents duplicate Sequences for the same Observation
   def unique_accession_for_obs
     return if accession.blank?
     return unless other_sequences_same_obs.any? do |sequence|
       sequence.accession == accession
     end
-
     errors.add(:bases, :validate_sequence_accession_unique.t)
-  end
-
-  # return array of other Sequences in same Observation, or nil if none
-  def other_sequences_same_obs
-    observation.try(:sequences) ? observation.sequences - [self] : nil
   end
 end
