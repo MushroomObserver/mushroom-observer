@@ -21,7 +21,6 @@
 #
 #  == Instance Methods
 #
-#  bases?              bases.present?
 #  deposit?            Does sequence have a deposit (both Archive && Accession)
 #  format_name         name for orphaned objects
 #  locus_width         Default # of chars (including diaresis) to truncate locus
@@ -81,11 +80,6 @@ class Sequence < AbstractModel
   #  :section: Other
   #
   ##############################################################################
-
-  # This must be defined for use as argument to :if option of Validate
-  def bases?
-    bases.present?
-  end
 
   def deposit?
     archive.present? && accession.present?
@@ -150,7 +144,7 @@ class Sequence < AbstractModel
   # Valid Sequence must include bases &/or deposit (archive & accession)
   # because MO-sourced sequence information should not be secret
   def bases_or_deposit
-    return if bases.present? || deposit?
+    return if bases? || deposit?
     errors.add(:bases, :validate_sequence_bases_or_archive.t)
   end
 
