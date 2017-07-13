@@ -12,7 +12,7 @@
 
 DEFAULTS: &DEFAULTS
   name:       boletus_edulis
-  notes:      $LABEL # sometimes useful for debugging
+  notes:      NULL
   location:   obs_default_location
   user:       dick
   vote_cache: 0.0
