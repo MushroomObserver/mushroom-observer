@@ -11,9 +11,9 @@ class NotesMigrateCommandTest < UnitTestCase
     observations   = []
     original_notes = []
 
-    # duplicates a later one as observations.first
+    # rake db:rollback currently fails with this
     observations   << observations(:agaricus_campestras_obs)
-    original_notes << %Q{\\}
+    original_notes << "High elevation (Spruce-Fir)"
 
     # nil
     nil_notes_obs   = observations(:sortable_obs_users_second_obs)
@@ -61,6 +61,10 @@ class NotesMigrateCommandTest < UnitTestCase
     observations   << observations(:updated_2013_obs)
     original_notes << %Q{ Used “North American Boletes” by Bessette and Roody for ID.\n[admin – Sat Aug 14 02:00:21 +0000 2010]: Changed location name from ‘Fairfield, Ct.’ to ‘Fairfield, Connecticut, USA’}
 
+    # Adolf's formatting, carriage return, newline
+    observations   << observations(:other_user_owns_naming_obs)
+    original_notes << %Q{Original Herbarium Label: _Annulohypoxylon multiforme_ (Fr.) Y.M. Ju, J.D. Rogers & H.M. Hsieh\r\nSyn.: _Hypoxylon multiforme_ (Fr.) Fr.\r\nHerbarium Specimen: UBC F26015}
+
     observations.each_index do |i|
       if original_notes[i].nil?
         write_notes_without_serializing(
@@ -86,7 +90,7 @@ class NotesMigrateCommandTest < UnitTestCase
     # Prove that unserialized notes are up-migrated to
     # serialized { other: original_notes },
     # Except nil notes are up-migrated to serialized empty string
-    observations.size.times do |i|
+    observations.each_index do |i|
       up_notes = observations[i].reload.notes
       if original_notes[i].nil? || original_notes[i] == ""
         assert_equal(
@@ -102,6 +106,7 @@ class NotesMigrateCommandTest < UnitTestCase
       assert_equal(original_updated[i], observations[i].updated_at)
     end
 
+
     ############################################################################
     #
     # Prove that down method works
@@ -114,7 +119,7 @@ class NotesMigrateCommandTest < UnitTestCase
     # Both will be down-migrated to empty string.
     down
 
-    observations.size.times do |i|
+    observations.each_index do |i|
       obs = observations[i]
       raw_down_notes = read_notes_without_serializing(obs)
       if original_notes[i].nil? || original_notes[i].empty?
@@ -125,57 +130,91 @@ class NotesMigrateCommandTest < UnitTestCase
     end
   end
 
+  # Read notes, skipping serialization, callbacks, validation
+  def read_notes_without_serializing(obs)
+    Observation.connection.exec_query("
+      SELECT notes FROM observations WHERE id = #{obs.id}
+    ").rows.first.first
+  end
+
   ##########################################################################
   # remainder of this file is what gets moved to the migration file
 
 
   # ***** THIS MIGRATION MUST BE RUN WITH Observation::serialize :notes ********
-  #
-  # nil notes get up-migrated to YAML serialized empty string
-  # others to a YAML serialized hash { other: old notes }
+
+  # migrate notes to a YAML serialized hash, any notes converted to the
+  # value of the serialized "other:" key
+  #   notes: "abc" => notes: { other: "abc" }
+  # If notes nil or not present, then convert them to a serialized empty string
   def up
-    Observation.all.each do |obs|
-      raw_notes = read_notes_without_serializing(obs)
-      # write them with serializing
-      obs.update_column(:notes, to_up_notes(raw_notes))
+    individually_migrate_nonempty_nonnull_notes
+    batch_migrate_empty_and_null_notes
+  end
+
+  def individually_migrate_nonempty_nonnull_notes
+    neither_empty_nor_null.each do |id, raw_notes|
+      # write them with serializing, but without callbacks or validations
+      Observation.find(id).update_column(:notes, to_up_notes(raw_notes))
     end
   end
 
-  # convert Observation notes from a YAML hash
+  # returns array of hashes of ids, notes
+  #  [ { id: 1st id, notes: notes }, { id: 2nd id, notes: notes } ...]
+  # find_by_sql does not work;
+  # it tries to deserialize the unmigrated notes (and throws an error)
+  def neither_empty_nor_null
+    Observation.connection.exec_query("
+      SELECT id, notes FROM observations
+      WHERE notes != \"\" AND notes IS NOT NULL ;
+    ").rows
+  end
+
+  def batch_migrate_empty_and_null_notes
+    Observation.connection.execute("
+      UPDATE observations
+      SET notes = \"--- ''\n\"
+      WHERE notes = \"\" OR notes IS NULL
+    ")
+  end
+
+  # revert Observation notes from YAML serialized notes, extracting the value of
+  # the serialized "other:" key
+  #   notes: { color: "red", other: "abc" } => "abc"
   def down
-    Observation.all.each do |obs|
-      serialized_notes = obs.reload.notes
-      down_notes = to_down_notes(serialized_notes)
-      write_notes_without_serializing(obs: obs, notes: down_notes)
-    end
+    individually_revert_nonempty_notes
+    batch_revert_empty_notes
   end
 
-  # Read notes, skipping serialization, callbacks, validation
-  def read_notes_without_serializing(obs)
-    ActiveRecord::Base.connection.exec_query("
-      SELECT notes FROM observations WHERE id = #{obs.id}
-    ").rows.first.first
+  def individually_revert_nonempty_notes
+    Observation.where.not(notes: "").each do |obs|
+      write_notes_without_serializing(
+        obs: obs, notes: to_down_notes(obs.notes)
+      )
+    end
   end
 
   # Write notes, skipping serialization, callbacks, validation
   def write_notes_without_serializing(obs:, notes:)
-    ActiveRecord::Base.connection.execute("
+    Observation.connection.execute("
       UPDATE observations
       SET notes = \"#{escape_for_sql(notes)}\"
       WHERE id = #{obs.id}
     ")
   end
 
-  # Return desired up-migrated notes post-serialization
-  # put non-empty notes into the "other:" field
+  def batch_revert_empty_notes
+    Observation.connection.execute("
+      UPDATE observations
+      SET notes = \"\"
+      WHERE notes = \"--- ''\n\"
+    ")
+  end
+
+  # Return desired up-migrated, serialized notes
+  # putting non-empty notes into the "other:" field
   def to_up_notes(raw_notes)
-    if raw_notes.present?
-      { other: raw_notes }
-    elsif raw_notes.nil?
-      ""
-    else
-      raw_notes
-    end
+    raw_notes.present? ? { other: raw_notes } : ""
   end
 
   # Return desired reverted notes
@@ -184,9 +223,9 @@ class NotesMigrateCommandTest < UnitTestCase
     notes.is_a?(Hash) ? (notes)[:other] : ""
   end
 
-  # returns a string suitable for inclusion in a SQL statement,
-  # escaping the characters for which MySQL requires escaping
-  # input is a double-quoted string
+  # Return a string suitable for inclusion in a SQL statement,
+  # escaping the characters for which MySQL requires escaping.
+  # Input is a double-quoted string
   # The 2nd gsub is needed because I can't figure out how to get
   # a double quote to behave properly inside character class
   # inside the capture group
