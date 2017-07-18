@@ -1,36 +1,66 @@
 class ChangeObservationNotesToYaml < ActiveRecord::Migration
-  # empty notes get up-migrated to nil
+  # ***** THIS MIGRATION MUST BE RUN WITH Observation::serialize :notes ********
+  #
+  # nil notes get up-migrated to YAML serialized empty string
   # others to a YAML serialized hash { other: old notes }
   def up
-    # individually migrate notes where notes.present?
-    fulls = Observation.where.not(notes: nil).where.not(notes: "")
-    # set column directly to vaoid validation, time-stamping
-    fulls.each { |obs| obs.update_column(:notes, to_up_notes(obs.notes)) }
-
-    # Do the rest in a single SQL statement; drastically cuts migration time
-    sql = "
-      UPDATE observations
-      SET notes = NULL
-      WHERE notes IS null OR notes = '';
-    "
-    ActiveRecord::Base.connection.execute(sql)
+    Observation.all.each do |obs|
+      raw_notes = read_notes_without_serializing(obs)
+      # write them with serializing
+      obs.update_column(:notes, to_up_notes(raw_notes))
+    end
   end
 
-  # put non-empty notes into the "other:" field
-  def to_up_notes(notes)
-    notes.empty? ? nil : { other: notes }.to_yaml
-  end
-
-  # convert Observation notes from a YAML hash, except if they're nil (which
-  # remain nil after down-migration, so we can leave them alone for speed)
+  # convert Observation notes from a YAML hash
   def down
-    non_nils = Observation.where.not(notes: nil)
-    non_nils.each { |obs| obs.update_column(:notes, to_down_notes(obs.notes)) }
+    Observation.all.each do |obs|
+      serialized_notes = obs.reload.notes
+      down_notes = to_down_notes(serialized_notes)
+      write_notes_without_serializing(obs: obs, notes: down_notes)
+    end
   end
 
-  # extract non-empty notes from the "other:" field
+  # Read notes, skipping serialization, callbacks, validation
+  def read_notes_without_serializing(obs)
+    ActiveRecord::Base.connection.exec_query("
+      SELECT notes FROM observations WHERE id = #{obs.id}
+    ").rows.first.first
+  end
+
+  # Write notes, skipping serialization, callbacks, validation
+  def write_notes_without_serializing(obs:, notes:)
+    ActiveRecord::Base.connection.execute("
+      UPDATE observations
+      SET notes = \"#{escape_for_sql(notes)}\"
+      WHERE id = #{obs.id}
+    ")
+  end
+
+  # Return desired up-migrated notes post-serialization
+  # put non-empty notes into the "other:" field
+  def to_up_notes(raw_notes)
+    if raw_notes.present?
+      { other: raw_notes }
+    elsif raw_notes.nil?
+      ""
+    else
+      raw_notes
+    end
+  end
+
+  # Return desired reverted notes
+  # Extract the "other:" field; otherwise return a blank string
   def to_down_notes(notes)
-    return nil if notes.nil?
-    YAML.load(notes).empty? ? "" : YAML.load(notes)[:other]
+    notes.is_a?(Hash) ? (notes)[:other] : ""
+  end
+
+  # returns a string suitable for inclusion in a SQL statement,
+  # escaping the characters for which MySQL requires escaping
+  # input is a double-quoted string
+  # The 2nd gsub is needed because I can't figure out how to get
+  # a double quote to behave properly inside character class
+  # inside the capture group
+  def escape_for_sql(str)
+    str.gsub(/([\0\b\n\r\t\\])/, '\\\\\1').gsub(%q{"}, %q{\\\\"})
   end
 end
