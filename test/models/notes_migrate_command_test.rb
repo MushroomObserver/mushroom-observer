@@ -1,6 +1,7 @@
-# TODO - delete this file after production db is migrated and
-# and we are totally ok with it
 require "test_helper"
+
+# TODO - delete this test file after production db is migrated and
+# and we are totally ok with it
 
 # test the up and down migration statements for observation.notes format
 class NotesMigrateCommandTest < UnitTestCase
@@ -10,10 +11,6 @@ class NotesMigrateCommandTest < UnitTestCase
     # Modify some random fixtures' notes to pre-migration form
     observations   = []
     original_notes = []
-
-    # rake db:rollback currently fails with this
-    observations   << observations(:agaricus_campestras_obs)
-    original_notes << "High elevation (Spruce-Fir)"
 
     # nil
     nil_notes_obs   = observations(:sortable_obs_users_second_obs)
@@ -87,15 +84,13 @@ class NotesMigrateCommandTest < UnitTestCase
 
     up
 
-    # Prove that unserialized notes are up-migrated to
-    # serialized { other: original_notes },
-    # Except nil notes are up-migrated to serialized empty string
+    # Prove that unserialized notes are up-migrated correctly
     observations.each_index do |i|
       up_notes = observations[i].reload.notes
       if original_notes[i].nil? || original_notes[i] == ""
         assert_equal(
-          "", up_notes,
-          "Obs #{observations[i].id} up notes should be empty string"
+          {}, up_notes,
+          "Obs #{observations[i].id} up notes should be empty hash"
           )
       else
         assert_equal(
@@ -103,6 +98,7 @@ class NotesMigrateCommandTest < UnitTestCase
           "Obs #{observations[i].id} notes not upmigrated correctly"
         )
       end
+      # and timestamps are untouched
       assert_equal(original_updated[i], observations[i].updated_at)
     end
 
@@ -113,10 +109,10 @@ class NotesMigrateCommandTest < UnitTestCase
     #
     ############################################################################
 
-    # It should restore everything except those which were originally ""
-    # because both "" and nil were up-migrated to nil.
-    # So after up-mgration there's no way to differentiate them.
-    # Both will be down-migrated to empty string.
+    # It should restore everything except those which were originally nil
+    # because both "" and nil were up-migrated to {}.
+    # So after migration there's no way to differentiate them and
+    # both are reverted to empty string.
     down
 
     observations.each_index do |i|
@@ -145,8 +141,10 @@ class NotesMigrateCommandTest < UnitTestCase
 
   # migrate notes to a YAML serialized hash, any notes converted to the
   # value of the serialized "other:" key
-  #   notes: "abc" => notes: { other: "abc" }
-  # If notes nil or not present, then convert them to a serialized empty string
+  # If notes nil or not present, then convert them to a serialized empty hash
+  #  notes: "abc" => notes: { other: "abc" }
+  #  notes: ""    => notes: { }
+  #  notes: nil   => notes: { }
   def up
     individually_migrate_nonempty_nonnull_notes
     batch_migrate_empty_and_null_notes
@@ -166,21 +164,26 @@ class NotesMigrateCommandTest < UnitTestCase
   def neither_empty_nor_null
     Observation.connection.exec_query("
       SELECT id, notes FROM observations
-      WHERE notes != \"\" AND notes IS NOT NULL ;
+      WHERE notes != #{Observation.connection.quote("")}
+      AND notes IS NOT NULL
     ").rows
   end
 
   def batch_migrate_empty_and_null_notes
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"--- ''\n\"
-      WHERE notes = \"\" OR notes IS NULL
+      SET notes = #{Observation.connection.quote({}.to_yaml)}
+      WHERE notes = #{Observation.connection.quote("")}
+      OR notes IS NULL
     ")
   end
 
-  # revert Observation notes from YAML serialized notes, extracting the value of
+  # Revert Observation notes from YAML serialized notes, extracting the value of
   # the serialized "other:" key
-  #   notes: { color: "red", other: "abc" } => "abc"
+  # If there's no such key, revert to empty string
+  #  notes: { color: "red", other: "abc" } => "abc"
+  #  notes: { color: "red" }               => ""
+  #  notes: { }                            => ""
   def down
     individually_revert_nonempty_notes
     batch_revert_empty_notes
@@ -198,7 +201,7 @@ class NotesMigrateCommandTest < UnitTestCase
   def write_notes_without_serializing(obs:, notes:)
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"#{escape_for_sql(notes)}\"
+      SET notes = #{Observation.connection.quote(notes)}
       WHERE id = #{obs.id}
     ")
   end
@@ -206,30 +209,21 @@ class NotesMigrateCommandTest < UnitTestCase
   def batch_revert_empty_notes
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"\"
-      WHERE notes = \"--- ''\n\"
+      SET notes = #{Observation.connection.quote("")}
+      WHERE notes = #{Observation.connection.quote({}.to_yaml)}
     ")
   end
 
   # Return desired up-migrated, serialized notes
   # putting non-empty notes into the "other:" field
   def to_up_notes(raw_notes)
-    raw_notes.present? ? { other: raw_notes } : ""
+    raw_notes.present? ? { other: raw_notes } : {}
   end
 
   # Return desired reverted notes
   # Extract the "other:" field; otherwise return a blank string
   def to_down_notes(notes)
-    notes.is_a?(Hash) ? (notes)[:other] : ""
-  end
-
-  # Return a string suitable for inclusion in a SQL statement,
-  # escaping the characters for which MySQL requires escaping.
-  # Input is a double-quoted string
-  # The 2nd gsub is needed because I can't figure out how to get
-  # a double quote to behave properly inside character class
-  # inside the capture group
-  def escape_for_sql(str)
-    str.gsub(/([\0\b\n\r\t\\])/, '\\\\\1').gsub(%q{"}, %q{\\\\"})
+    # notes.is_a?(Hash) ? (notes)[:other] : ""
+    notes.empty? ? "" : (notes)[:other]
   end
 end
