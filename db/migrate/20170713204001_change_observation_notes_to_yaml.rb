@@ -3,8 +3,10 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
 
   # migrate notes to a YAML serialized hash, any notes converted to the
   # value of the serialized "other:" key
-  #   notes: "abc" => notes: { other: "abc" }
-  # If notes nil or not present, then convert them to a serialized empty string
+  # If notes nil or not present, then convert them to a serialized empty hash
+  #  notes: "abc" => notes: { other: "abc" }
+  #  notes: ""    => notes: { }
+  #  notes: nil   => notes: { }
   def up
     individually_migrate_nonempty_nonnull_notes
     batch_migrate_empty_and_null_notes
@@ -24,21 +26,26 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   def neither_empty_nor_null
     Observation.connection.exec_query("
       SELECT id, notes FROM observations
-      WHERE notes != \"\" AND notes IS NOT NULL ;
+      WHERE notes != #{Observation.connection.quote("")}
+      AND notes IS NOT NULL
     ").rows
   end
 
   def batch_migrate_empty_and_null_notes
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"--- ''\n\"
-      WHERE notes = \"\" OR notes IS NULL
+      SET notes = #{Observation.connection.quote({}.to_yaml)}
+      WHERE notes = #{Observation.connection.quote("")}
+      OR notes IS NULL
     ")
   end
 
-  # revert Observation notes from YAML serialized notes, extracting the value of
+  # Revert Observation notes from YAML serialized notes, extracting the value of
   # the serialized "other:" key
-  #   notes: { color: "red", other: "abc" } => "abc"
+  # If there's no such key, revert to empty string
+  #  notes: { color: "red", other: "abc" } => "abc"
+  #  notes: { color: "red" }               => ""
+  #  notes: { }                            => ""
   def down
     individually_revert_nonempty_notes
     batch_revert_empty_notes
@@ -56,7 +63,7 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   def write_notes_without_serializing(obs:, notes:)
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"#{escape_for_sql(notes)}\"
+      SET notes = #{Observation.connection.quote(notes)}
       WHERE id = #{obs.id}
     ")
   end
@@ -64,30 +71,21 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   def batch_revert_empty_notes
     Observation.connection.execute("
       UPDATE observations
-      SET notes = \"\"
-      WHERE notes = \"--- ''\n\"
+      SET notes = #{Observation.connection.quote("")}
+      WHERE notes = #{Observation.connection.quote({}.to_yaml)}
     ")
   end
 
   # Return desired up-migrated, serialized notes
   # putting non-empty notes into the "other:" field
   def to_up_notes(raw_notes)
-    raw_notes.present? ? { other: raw_notes } : ""
+    raw_notes.present? ? { other: raw_notes } : {}
   end
 
   # Return desired reverted notes
   # Extract the "other:" field; otherwise return a blank string
   def to_down_notes(notes)
-    notes.is_a?(Hash) ? (notes)[:other] : ""
-  end
-
-  # Return a string suitable for inclusion in a SQL statement,
-  # escaping the characters for which MySQL requires escaping
-  # Input is a double-quoted string.
-  # The 2nd gsub is needed because I can't figure out how to get
-  # a double quote to behave properly inside character class
-  # inside the capture group
-  def escape_for_sql(str)
-    str.gsub(/([\0\b\n\r\t\\])/, '\\\\\1').gsub(%q{"}, %q{\\\\"})
+    # notes.is_a?(Hash) ? (notes)[:other] : ""
+    notes.empty? ? "" : (notes)[:other]
   end
 end
