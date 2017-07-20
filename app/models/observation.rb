@@ -115,7 +115,6 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-  serialize  :notes
 
   belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
   belongs_to :name # (used to cache consensus name)
@@ -240,6 +239,33 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Notes
+  #
+  ##############################################################################
+
+  serialize :notes
+
+  # Return notes with textile marked-up field captions (keys),
+  # dropping "other" if it's the only caption
+  #  notes: {} => ""
+  #  notes: { other: "abc" } => "abc"
+  #  notes: { cap: "red" }     => "+cap+: red\n"
+  #  notes: { cap: "red", stem: , other: "abc" }
+  #    => "+cap+: red\n+stem+:\n+other+: abc"
+  def self.export_formatted(notes)
+    return notes[:other] if notes.keys == [:other]
+
+    result = ""
+    notes.each_pair { | key, value| result << "+#{key}+: #{value}\n" }
+    result.chomp
+  end
+
+  def notes_export_formatted
+    Observation.export_formatted(notes)
   end
 
   ##############################################################################

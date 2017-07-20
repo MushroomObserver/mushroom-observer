@@ -78,7 +78,7 @@ module ObservationReport
     end
 
     def obs_notes
-      @vals[9].blank? ? nil : @vals[9].to_s.strip
+      @vals[9].blank? ? nil : notes_exported_formatted
     end
 
     def obs_updated_at
@@ -351,6 +351,16 @@ module ObservationReport
       return [nil, author, nil, nil] if rank == "Subspecies"
       return [author, nil, nil, nil] unless species.blank?
       [nil, nil, nil, nil]
+    end
+
+    # --------------------
+
+    def notes_exported_formatted
+      Observation.export_formatted(notes_to_hash).strip
+    end
+
+    def notes_to_hash
+      YAML.load(@vals[9])
     end
   end
 end
