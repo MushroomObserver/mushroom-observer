@@ -61,12 +61,15 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
+#  export_formatted         notes (or other hash) to string with captions (keys)
 #
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
+#  notes_export_formatted   Wraps export_formatted class method
 #  interests::              List of Interest's attached to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
+#
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
@@ -249,18 +252,17 @@ class Observation < AbstractModel
 
   serialize :notes
 
-  # Return notes with textile marked-up field captions (keys),
-  # dropping "other" if it's the only caption
+  # Return notes  (or other hash) as a string, with captions (keys),
+  # omitting "other" if it's the only caption
   #  notes: {} => ""
   #  notes: { other: "abc" } => "abc"
-  #  notes: { cap: "red" }     => "+cap+: red\n"
-  #  notes: { cap: "red", stem: , other: "abc" }
-  #    => "+cap+: red\n+stem+:\n+other+: abc"
+  #  notes: { cap: "red" }     => "cap: red\n"
+  #  notes: { cap: "red", stem: , other: "x" } => "cap: red\nstem:\nother: x"
   def self.export_formatted(notes)
     return notes[:other] if notes.keys == [:other]
 
     result = ""
-    notes.each_pair { | key, value| result << "+#{key}+: #{value}\n" }
+    notes.each_pair { | key, value| result << "#{key}: #{value}\n" }
     result.chomp
   end
 
