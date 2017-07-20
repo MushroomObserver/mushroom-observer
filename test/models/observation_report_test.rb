@@ -224,7 +224,7 @@ class ObservationReportTest < UnitTestCase
 
   def test_cleaning_of_notes
     row = ObservationReport::Row.new(vals = [])
-    vals[9] = " abc  def "
+    vals[9] = { other: " abc  def " }.to_yaml
     assert_equal("abc  def", row.obs_notes)
   end
 
