@@ -12,7 +12,7 @@
 
 DEFAULTS: &DEFAULTS
   name:       boletus_edulis
-  notes:      NULL
+  notes:      --- {}   # serialized empty hash
   location:   obs_default_location
   user:       dick
   vote_cache: 0.0
@@ -28,7 +28,6 @@ minimal_unknown_obs:
   name: fungi
   species_lists: unknown_species_list
   specimens: interesting_unknown
-  notes: ""
 
 detailed_unknown_obs:
   <<: *DEFAULTS
@@ -39,8 +38,8 @@ detailed_unknown_obs:
   user: mary
   name: fungi
   specimen: 1
-  notes: |-
-    other: Found in a strange place... & with śtrangè characters™
+  notes:
+    :other: Found in a strange place... & with śtrangè characters™
   rss_log: observation_rss_log
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
@@ -57,8 +56,8 @@ coprinus_comatus_obs:
   location:
   where: Glendale, California
   specimen: 1
-  notes: |-
-    other: Second fruiting in bark chips
+  notes:
+    :other: Second fruiting in bark chips
   vote_cache: 1
   thumb_image: connected_coprinus_comatus_image
   images: connected_coprinus_comatus_image
@@ -73,8 +72,8 @@ agaricus_campestris_obs:
   location: burbank
   user: rolf
   name: agaricus_campestris
-  notes: |-
-    other: From the lawn next door
+  notes:
+    :other: From the lawn next door
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
   species_lists: one_genus_three_species_list
@@ -88,8 +87,8 @@ agaricus_campestrus_obs:
   location: burbank
   user: rolf
   name: agaricus_campestrus
-  notes: |-
-    other: From somewhere else
+  notes:
+    :other: From somewhere else
 
 agaricus_campestras_obs:
   <<: *DEFAULTS
@@ -99,8 +98,8 @@ agaricus_campestras_obs:
   location: burbank
   user: rolf
   name: agaricus_campestras
-  notes: |-
-    other: From somewhere else
+  notes:
+    :other: From somewhere else
 
 agaricus_campestros_obs:
   <<: *DEFAULTS
@@ -110,8 +109,8 @@ agaricus_campestros_obs:
   location: burbank
   user: rolf
   name: agaricus_campestros
-  notes: |-
-    other: From somewhere else
+  notes:
+    :other: From somewhere else
 
 strobilurus_diminutivus_obs:
   <<: *DEFAULTS
@@ -122,8 +121,8 @@ strobilurus_diminutivus_obs:
   location:
   name: strobilurus_diminutivus_no_author
   where: Pipi Valley, Sierra Mountains, CA
-  notes: |-
-    other: From somewhere else
+  notes:
+    :other: From somewhere else
 
 stereum_hirsutum_1:
   <<: *DEFAULTS
@@ -172,6 +171,9 @@ unknown_with_lat_long:
   lat: 34.1622
   long: -118.3521
   alt: 123
+  notes: |
+    :other:
+      unknown_with_lat_long
 
 amateur_obs:
   <<: *DEFAULTS
@@ -183,8 +185,8 @@ amateur_obs:
   is_collection_location: 0
   name: conocybe_filaris
   specimen: 1
-  notes: |-
-    other: 'A friend showed me this.'
+  notes:
+    :other: 'A friend showed me this.'
   lat: 34.1622
   long: -118.3521
 
@@ -197,8 +199,8 @@ peltigera_obs:
   is_collection_location: 1
   name: peltigera
   specimen: 1
-  notes: |-
-    other: 'Growing on a hardwood'
+  notes:
+    :other: 'Growing on a hardwood'
   vote_cache: 3
   thumb_image: peltigera_image
   images: peltigera_image
@@ -213,8 +215,8 @@ peltigera_rolf_obs:
   is_collection_location: 1
   name: peltigera
   specimen: 1
-  notes: |-
-    other: 'Growing on a hardwood'
+  notes:
+    :other: 'Growing on a hardwood'
   vote_cache: 3
   thumb_image: rolf_profile_image
   images: rolf_profile_image
@@ -227,8 +229,8 @@ fungi_obs:
   where: 'Briceland, California, USA'
   is_collection_location: 0
   name: fungi
-  notes: |-
-    other: 'Observation for plane pileus'
+  notes:
+    :other: 'Observation for plane pileus'
   vote_cache: 3
   thumb_image: conic_image
   images: conic_image, plane_image_example
@@ -240,8 +242,8 @@ boletus_edulis_obs:
   where: 'New York, New York, USA'
   name: boletus_edulis
   is_collection_location: 0
-  notes: |-
-    other: 'A tasty bolete!'
+  notes:
+    :other: 'A tasty bolete!'
   vote_cache: 3
   species_lists: one_genus_three_species_list
 
@@ -378,3 +380,14 @@ locally_sequenced_obs:
 # has Sequence which is in GenBank
 genbanked_obs:
   <<: *DEFAULTS
+
+substrate_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    substrate: soil
+
+substrate_and_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    substrate: soil
+    other:     slimy

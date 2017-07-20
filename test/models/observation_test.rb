@@ -748,4 +748,25 @@ class ObservationTest < UnitTestCase
 
     assert_equal(votes, obs.dump_votes)
   end
+
+  # --------------------------------------------------
+  #  Notes: Test methods related to serialized notes
+  # --------------------------------------------------
+
+  def test_export_format
+    obs =  observations(:minimal_unknown_obs)
+    assert_equal("", obs.notes_export_formatted)
+
+    obs =  observations(:detailed_unknown_obs)
+    assert_equal("Found in a strange place... & with śtrangè characters™",
+                 obs.notes_export_formatted)
+
+    obs =  observations(:substrate_notes_obs)
+    assert_equal("+substrate+: soil",
+                 obs.notes_export_formatted)
+
+    obs =  observations(:substrate_and_other_notes_obs)
+    assert_equal("+substrate+: soil\n+other+: slimy",
+                 obs.notes_export_formatted)
+  end
 end
