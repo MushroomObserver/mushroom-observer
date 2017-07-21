@@ -78,8 +78,8 @@ module Query
       end
       initialize_model_do_boolean(
         :has_notes,
-        'LENGTH(COALESCE(observations.notes,"")) > 0',
-        'LENGTH(COALESCE(observations.notes,"")) = 0'
+        'observations.notes != "--- {}\n"',
+        'observations.notes  = "--- {}\n"'
       )
       add_join(:comments) if params[:has_comments]
       unless params[:comments_has].blank?
