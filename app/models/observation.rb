@@ -61,7 +61,9 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
-#  export_formatted         notes (or other hash) to string with captions (keys)
+#  export_formatted::       notes (or other hash) to string with captions (keys)
+#  no_notes::               value of observation.notes if there are no notes
+#  no_notes_persisted::     no_notes persisted in the db
 #
 #  == Instance methods
 #
@@ -252,12 +254,24 @@ class Observation < AbstractModel
 
   serialize :notes
 
-  # Return notes  (or other hash) as a string, with captions (keys),
+  # value of observation.notes if there are no notes
+  def self.no_notes
+    {}
+  end
+
+  # no_notes persisted in the db
+  def self.no_notes_persisted
+    no_notes.to_yaml
+  end
+
+  # Return notes (or other hash) as a String, with captions (keys),
   # omitting "other" if it's the only caption
-  #  notes: {} => ""
-  #  notes: { other: "abc" } => "abc"
-  #  notes: { cap: "red" }     => "cap: red\n"
-  #  notes: { cap: "red", stem: , other: "x" } => "cap: red\nstem:\nother: x"
+  #  notes: {}                                 => ""
+  #  notes: { other: "abc" }                   => "abc"
+  #  notes: { cap: "red" }                     => "cap: red"
+  #  notes: { cap: "red", stem: , other: "x" } => "cap: red
+  #                                                stem:
+  #                                                other: x"
   def self.export_formatted(notes)
     return notes[:other] if notes.keys == [:other]
 
