@@ -762,11 +762,11 @@ class ObservationTest < UnitTestCase
                  obs.notes_export_formatted)
 
     obs =  observations(:substrate_notes_obs)
-    assert_equal("+substrate+: soil",
+    assert_equal("substrate: soil",
                  obs.notes_export_formatted)
 
     obs =  observations(:substrate_and_other_notes_obs)
-    assert_equal("+substrate+: soil\n+other+: slimy",
+    assert_equal("substrate: soil\nother: slimy",
                  obs.notes_export_formatted)
   end
 end
