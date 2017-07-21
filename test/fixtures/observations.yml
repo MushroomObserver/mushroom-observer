@@ -12,7 +12,7 @@
 
 DEFAULTS: &DEFAULTS
   name:       boletus_edulis
-  notes:      --- {}   # serialized empty hash
+  notes:      <%= Observation.no_notes %>
   location:   obs_default_location
   user:       dick
   vote_cache: 0.0
