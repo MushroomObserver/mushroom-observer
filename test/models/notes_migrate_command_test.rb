@@ -89,7 +89,7 @@ class NotesMigrateCommandTest < UnitTestCase
       up_notes = observations[i].reload.notes
       if original_notes[i].nil? || original_notes[i] == ""
         assert_equal(
-          {}, up_notes,
+          Observation.no_notes, up_notes,
           "Obs #{observations[i].id} up notes should be empty hash"
           )
       else
@@ -172,7 +172,7 @@ class NotesMigrateCommandTest < UnitTestCase
   def batch_migrate_empty_and_null_notes
     Observation.connection.execute("
       UPDATE observations
-      SET notes = #{Observation.connection.quote({}.to_yaml)}
+      SET notes = #{Observation.connection.quote(Observation.no_notes_persisted)}
       WHERE notes = #{Observation.connection.quote("")}
       OR notes IS NULL
     ")
@@ -217,13 +217,12 @@ class NotesMigrateCommandTest < UnitTestCase
   # Return desired up-migrated, serialized notes
   # putting non-empty notes into the "other:" field
   def to_up_notes(raw_notes)
-    raw_notes.present? ? { other: raw_notes } : {}
+    raw_notes.present? ? { other: raw_notes } : Observation.no_notes
   end
 
   # Return desired reverted notes
   # Extract the "other:" field; otherwise return a blank string
   def to_down_notes(notes)
-    # notes.is_a?(Hash) ? (notes)[:other] : ""
     notes.empty? ? "" : (notes)[:other]
   end
 end
