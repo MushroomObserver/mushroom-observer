@@ -1893,7 +1893,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
-    new_notes = "blather blather blather"
+    new_notes = { other: "blather blather blather" }
     new_specimen = false
     img = images(:in_situ_image)
     params = {
