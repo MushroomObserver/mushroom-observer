@@ -76,11 +76,13 @@ module Query
           "observations.name_id = #{id}"
         )
       end
+      # rubocop:disable Metrics/LineLength
       initialize_model_do_boolean(
         :has_notes,
-        'observations.notes != "--- {}\n"',
-        'observations.notes  = "--- {}\n"'
+        "observations.notes != #{Observation.connection.quote(Observation.no_notes_persisted)}",
+        "observations.notes  = #{Observation.connection.quote(Observation.no_notes_persisted)}"
       )
+      # rubocop:enable Metrics/LineLength
       add_join(:comments) if params[:has_comments]
       unless params[:comments_has].blank?
         initialize_model_do_search(
