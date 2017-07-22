@@ -266,6 +266,9 @@ class ObserverController
 
       update_whitelisted_observation_attributes
 
+      # Fix notes hash keys (all Rails param keys are Strings)
+      @observation.notes = params[:observation][:notes].to_hash.symbolize_keys
+
       # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
@@ -652,7 +655,7 @@ class ObserverController
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
+     "when(3i)", { notes: [:other] }, :specimen, :thumb_image_id, :is_collection_location]
   end
 
   def whitelisted_observation_params
