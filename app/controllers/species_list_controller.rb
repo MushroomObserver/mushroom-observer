@@ -506,17 +506,19 @@ class SpeciesListController < ApplicationController
 
   # Bulk-edit observations (at least the ones editable by this user) in a (any)
   # species list.
-  def bulk_editor # :norobots:
+  # :norobots:
+  def bulk_editor
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       @query = create_query(:Observation, :in_species_list, by: :id,
                             species_list: @species_list,
                             where: "observations.user_id = #{@user.id}")
       @pages = paginate_numbers(:page, 100)
-      @observations = @query.paginate(@pages, include: [:comments, :images,
-                                                  :location, namings: :votes])
+      @observations = @query.paginate(
+        @pages, include: [:comments, :images, :location, namings: :votes]
+      )
       @observation = {}
       @votes = {}
-      for obs in @observations
+      @observations.each do |obs|
         @observation[obs.id] = obs
         vote = begin
                  obs.consensus_naming.users_vote(@user)
@@ -533,7 +535,7 @@ class SpeciesListController < ApplicationController
       elsif request.method == "POST"
         updates = 0
         stay_on_page = false
-        for obs in @observations
+        @observations.each do |obs|
           args = begin
                    params[:observation][obs.id.to_s] || {}
                  rescue
@@ -554,19 +556,18 @@ class SpeciesListController < ApplicationController
               any_changes = true
               @votes[obs.id].value = args[:value]
             else
-              flash_warning(:species_list_bulk_editor_ambiguous_namings.
-                               t(id: obs.id, name: obs.name.display_name.t))
+              flash_warning(
+                :species_list_bulk_editor_ambiguous_namings.
+                  t(id: obs.id, name: obs.name.display_name.t)
+              )
             end
           end
-          for method in [:when_str, :place_name, :notes, :lat, :long, :alt,
-                         :is_collection_location, :specimen]
+          [:when_str, :place_name, :notes, :lat, :long, :alt,
+                         :is_collection_location, :specimen].each do |method|
             unless args[method].nil?
               old_val = obs.send(method)
               old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
-              new_val = args[method]
-              if [:is_collection_location, :specimen].member?(method)
-                new_val = (new_val == "1")
-              end
+              new_val = bulk_editor_new_val(method, args[method])
               if old_val != new_val
                 obs.send("#{method}=", new_val)
                 any_changes = true
@@ -584,17 +585,31 @@ class SpeciesListController < ApplicationController
             end
           end
         end
-        unless stay_on_page
-          if updates == 0
-            flash_warning(:runtime_no_changes.t)
-          else
-            flash_notice(:species_list_bulk_editor_success.t(n: updates))
-          end
-          redirect_to(action: :show_species_list, id: @species_list.id)
+        return if stay_on_page
+
+        if updates == 0
+          flash_warning(:runtime_no_changes.t)
+        else
+          flash_notice(:species_list_bulk_editor_success.t(n: updates))
         end
+
+        redirect_to(action: :show_species_list, id: @species_list.id)
       end
     end
   end
+
+  def bulk_editor_new_val(attr, val)
+    case attr
+    when :is_collection_location, :specimen
+      val == "1"
+    when :notes
+      val.to_hash.symbolize_keys
+    else
+      val
+    end
+  end
+
+  private :bulk_editor_new_val
 
   # ----------------------------
   #  :section: Manage Projects
