@@ -267,7 +267,9 @@ class ObserverController
       update_whitelisted_observation_attributes
 
       # Fix notes hash keys (all Rails param keys are Strings)
-      @observation.notes = params[:observation][:notes].to_hash.symbolize_keys
+      if params[:observation] && params[:observation][:notes]
+        @observation.notes = params[:observation][:notes].to_hash.symbolize_keys
+      end
 
       # Validate place name
       @place_name = @observation.place_name
