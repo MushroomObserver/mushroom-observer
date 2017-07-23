@@ -1971,7 +1971,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
-    new_notes = "blather blather blather"
+    new_notes = {other: "blather blather blather" }
     new_specimen = false
     params = {
       id: obs.id.to_s,
