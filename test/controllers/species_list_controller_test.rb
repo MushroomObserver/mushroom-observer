@@ -1274,8 +1274,9 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:bulk_editor, params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_warning
-    [[obs1, old_vote1], [obs2, old_vote2],
-     [obs3, old_vote3]].each do |old_obs, old_vote|
+    [
+      [obs1, old_vote1], [obs2, old_vote2], [obs3, old_vote3]
+    ].each do |old_obs, old_vote|
       new_obs = Observation.find(old_obs.id)
       new_vote = begin
                    new_obs.namings.first.users_vote(new_obs.user).value
@@ -1301,7 +1302,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         obs1.id.to_s => obs_params1.merge(
           when_str:   now.strftime("%Y-%m-%d"),
           place_name: "new location",
-          notes:      "new notes",
+          notes:      { other: "new notes"},
           value:      Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
@@ -1334,7 +1335,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(now.to_date, new_obs1.when)
     assert_equal("new location", new_obs1.where)
     assert_nil(new_obs1.location)
-    assert_equal("new notes", new_obs1.notes)
+    assert_equal({ other: "new notes" }, new_obs1.notes)
     assert(obs1.lat == new_obs1.lat)
     assert(obs1.long == new_obs1.long)
     assert(obs1.alt == new_obs1.alt)
@@ -1356,7 +1357,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: "new notes"
+          notes: { other: "new notes" }
         )
       }
     }
@@ -1381,7 +1382,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: "new notes"
+          notes: { other: "new notes" }
         )
       }
     }
@@ -1390,7 +1391,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
-    assert_equal("new notes", new_obs3.notes)
+    assert_equal({ other: "new notes" }, new_obs3.notes)
   end
 
   def test_bulk_editor_change_vote_on_observation_with_no_votes
