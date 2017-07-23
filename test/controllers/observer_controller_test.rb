@@ -2011,7 +2011,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_bad_place_name
     obs = observations(:detailed_unknown_obs)
     new_where = "test_update_observation"
-    new_notes = "blather blather blather"
+    new_notes = {other: "blather blather blather" }
     new_specimen = false
     params = {
       id: obs.id.to_s,
