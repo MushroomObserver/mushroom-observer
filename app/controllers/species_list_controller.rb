@@ -1062,31 +1062,33 @@ class SpeciesListController < ApplicationController
 
   def init_member_vars_for_edit(spl)
     init_member_vars_for_create
-    if obs = spl.observations.last
+    spl_obss = spl.observations
+    if obs = spl_obss.last
       # TODO: Not sure how to check vote efficiently...
       @member_vote = begin
                        obs.namings.first.users_vote(@user).value
                      rescue
                        Vote.maximum_vote
                      end
-      @member_notes = obs.notes if all_obs_same?(spl, obs, :notes)
-      if all_obs_same?(spl, obs, :lat, :long, :alt)
+      @member_notes = obs.notes if all_obs_same_attr?(spl_obss, :notes)
+      if all_obs_same_attr?(spl_obss, :lat) &&
+          all_obs_same_attr?(spl_obss, :long) &&
+          all_obs_same_attr?(spl_obss, :alt)
         @member_lat  = obs.lat
         @member_long = obs.long
         @member_alt  = obs.alt
       end
-      if all_obs_same?(spl, obs, :is_collection_location)
+      if all_obs_same_attr?(spl_obss, :is_collection_location)
         @member_is_collection_location = obs.is_collection_location
       end
-      @member_specimen = obs.specimen if all_obs_same?(spl, obs, :specimen)
+      @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
     end
   end
 
-  # Do all observations in spl have same values for the given attributes?
-  def all_obs_same?(spl, obs, *attrs)
-    cond = attrs.map { |a| "observations.#{a} != ?" }.join(" OR ")
-    vals = attrs.map { |a| obs.send(a) }
-    spl.observations.where(cond, *vals).limit(1).count == 0
+  # Do all observations have same values for the single given attribute?
+  def all_obs_same_attr?(observations, attr)
+    exemplar = observations.first.send(attr)
+    observations.all? { |o| o.send(attr) == exemplar }
   end
 
   def init_member_vars_for_reload
