@@ -348,6 +348,7 @@ class AccountController < ApplicationController
       [:locale, :string],
       [:location_format, :enum],
       [:login, :string],
+      [:notes_template, :string],
       [:theme, :string],
       [:thumbnail_maps, :boolean],
       [:thumbnail_size, :enum],

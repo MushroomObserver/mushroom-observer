@@ -114,6 +114,7 @@
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
+#  notes_template::     Comma separated list of subfields for Observation Notes
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
