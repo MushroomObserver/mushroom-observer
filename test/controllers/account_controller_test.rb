@@ -303,6 +303,7 @@ class AccountControllerTest < FunctionalTestCase
         locale:                       "el-GR",
         location_format:              :scientific,
         login:                        "new_login",
+        notes_template:               "Collector's #",
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
@@ -343,6 +344,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("el-GR", user.locale)
     assert_equal(:scientific, user.location_format)
     assert_equal("new_login", user.login)
+    assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
