@@ -788,6 +788,19 @@ class User < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Notes Template
+  #
+  ##############################################################################
+
+  # Array of user defined headings for Notes when creating Observations
+  # notes_template: "odor , Nearest  tree"
+  # notes_parts # => ["odor", "Nearest tree"]
+  def notes_parts
+    (notes_template.split(",")).map(&:squish)
+  end
+
+  ##############################################################################
+  #
   #  :section: Other
   #
   ##############################################################################

@@ -171,45 +171,7 @@
 <!-- /HERBARIUM_FIELDS -->
 
 <!-- NOTES -->
-<div class="row push-down">
-  <div class="col-xs-12 col-sm-6 max-width-text">
-    <div class="form-group">
-      <%= label_tag(:observation_notes, :NOTES.t + ":") %>
-      <%= text_area(:observation, :notes, class: "form-control", rows: 10) %>
-    </div>
-  </div>
-  <div class="col-xs-12 col-sm-6 max-width-text">
-    <div class="well well-sm" id="notes_help">
-      <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_notes_help.t, class: "help-block", style: "padding-top: 0px; margin-top: 0") %>
-      <%= render(partial: "shared/textilize_help") %>
-    </div>
-  </div>
-</div>
-
-<% inject_javascript_at_end %(
-jQuery(document).ready(function() {
-    //hides the help field when the notes textarea is expanded
-
-    var $notesText = jQuery('#observation_notes');
-
-    $notesText.data('x', $notesText.outerWidth());
-    $notesText.data('y', $notesText.outerHeight());
-
-    $notesText.mouseup(function () {
-
-        var $this = jQuery(this);
-
-        if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
-            jQuery('#notes_help').hide();
-        }
-        else {
-           jQuery('#notes_help').show();
-        }
-
-    });
-});
-) %>
+<%= render "form_observation_notes" %>
 <!-- /NOTES -->
 
 <% ########################### Image Forms ############################## %>
