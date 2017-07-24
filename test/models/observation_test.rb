@@ -770,4 +770,21 @@ class ObservationTest < UnitTestCase
     assert_equal("substrate: soil\nother: slimy",
                  obs.notes_export_formatted)
   end
+
+  def test_show_format
+    obs =  observations(:minimal_unknown_obs)
+    assert_equal("", obs.notes_show_formatted)
+
+    obs =  observations(:detailed_unknown_obs)
+    assert_equal("Found in a strange place... & with śtrangè characters™",
+                 obs.notes_show_formatted)
+
+    obs =  observations(:substrate_notes_obs)
+    assert_equal("+substrate+: soil",
+                 obs.notes_show_formatted)
+
+    obs =  observations(:substrate_and_other_notes_obs)
+    assert_equal("+substrate+: soil\n+other+: slimy",
+                 obs.notes_show_formatted)
+  end
 end

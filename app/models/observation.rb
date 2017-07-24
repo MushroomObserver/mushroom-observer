@@ -266,24 +266,46 @@ class Observation < AbstractModel
     no_notes.to_yaml
   end
 
-  # Return notes (or other hash) as a String, with captions (keys),
-  # omitting "other" if it's the only caption
+  # Return notes (or other hash) as a String,
+  # captions (keys) with added formstting,
+  # omitting "other" if it's the only caption.
   #  notes: {}                                 => ""
   #  notes: { other: "abc" }                   => "abc"
   #  notes: { cap: "red" }                     => "cap: red"
   #  notes: { cap: "red", stem: , other: "x" } => "cap: red
   #                                                stem:
   #                                                other: x"
-  def self.export_formatted(notes)
+  def self.export_formatted(notes, markup = nil)
     return notes[:other] if notes.keys == [:other]
 
     result = ""
-    notes.each_pair { | key, value| result << "#{key}: #{value}\n" }
+    notes.each_pair do | key, value|
+      result << "#{markup}#{key}#{markup}: #{value}\n"
+    end
     result.chomp
   end
 
   def notes_export_formatted
     Observation.export_formatted(notes)
+  end
+
+  # Return notes (or other hash) as a String,
+  # captions (keys) with added formstting,
+  # omitting "other" if it's the only caption.
+  #
+  # Used in views which display notes
+  #  notes: {}                                 => ""
+  #  notes: { other: "abc" }                   => "abc"
+  #  notes: { cap: "red" }                     => "+cap+: red"
+  #  notes: { cap: "red", stem: , other: "x" } => "+cap+: red
+  #                                                +stem+:
+  #                                                +other+: x"
+  def self.show_formatted(notes)
+    export_formatted(notes, "+")
+  end
+
+  def notes_show_formatted
+    Observation.show_formatted(notes)
   end
 
   ##############################################################################
