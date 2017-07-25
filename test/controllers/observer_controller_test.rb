@@ -2108,7 +2108,7 @@ class ObserverControllerTest < FunctionalTestCase
       notes_nearby_trees: "?",
       notes_odor:         "farinaceous"
     }
-    # Use a defined Location to avoid issues with defining Location
+    # Use a defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes]      = "Some notes"
     notes = "Habitat: conifer forest\n"\
