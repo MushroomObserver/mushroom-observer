@@ -61,14 +61,18 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
-#  export_formatted::       notes (or other hash) to string with captions (keys)
+#  export_formatted::       notes (or any hash) to string with marked up
+#                           captions (keys)
 #  no_notes::               value of observation.notes if there are no notes
 #  no_notes_persisted::     no_notes persisted in the db
+#  ahow_formatted::         notes (or any hash) to string with plain
+#                           captions (keys)
 #
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
-#  notes_export_formatted   Wraps export_formatted class method
+#  notes_export_formatted:: notes to string with marked up captions (keys)
+#  notes_show_formatted::   notes to string with plain captions (keys)
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
