@@ -671,20 +671,10 @@ class ObserverController
   # with their filled-in values, ignoring parts with blank values
   def combined_notes_parts
     @user.notes_parts.each_with_object("") do |part, notes|
-      key   = "#{part_id(part)}".to_sym
+      key   = "#{Observation.notes_part_id(part)}".to_sym
       value = params[key]
       notes << "#{part}: #{value}\n" if value.present?
     end
-  end
-
-  # id of text area for a Notes heading
-  def part_id(notes_part)
-    "#{area_id_prefix}#{notes_part.underscorize}"
-  end
-  helper_method :part_id
-
-  def area_id_prefix
-    "notes_"
   end
 
   ##############################################################################
