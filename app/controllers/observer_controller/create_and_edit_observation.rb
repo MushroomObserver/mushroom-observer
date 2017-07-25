@@ -41,6 +41,45 @@ class ObserverController
     end
   end
 
+  def create_observation_get
+    @observation     = Observation.new
+    @naming          = Naming.new
+    @vote            = Vote.new
+    @what            = "" # can't be nil else rails tries to call @name.name
+    @names           = nil
+    @valid_names     = nil
+    @reason          = @naming.init_reasons
+    @images          = []
+    @good_images     = []
+    init_specimen_vars_for_create
+    init_project_vars_for_create
+    init_list_vars_for_create
+    defaults_from_last_observation_created
+  end
+
+  def defaults_from_last_observation_created
+    # Grab defaults for date and location from last observation the user
+    # edited if it was less than an hour ago.
+    last_observation = Observation.where(user_id: @user.id).
+                       order(:created_at).last
+    return unless last_observation && last_observation.created_at > 1.hour.ago
+    @observation.when     = last_observation.when
+    @observation.where    = last_observation.where
+    @observation.location = last_observation.location
+    @observation.lat      = last_observation.lat
+    @observation.long     = last_observation.long
+    @observation.alt      = last_observation.alt
+    last_observation.projects.each do |project|
+      @project_checks[project.id] = true
+    end
+    last_observation.species_lists.each do |list|
+      if check_permission(list)
+        @lists << list unless @lists.include?(list)
+        @list_checks[list.id] = true
+      end
+    end
+  end
+
   def create_observation_post(params)
     rough_cut(params)
     success = true
@@ -187,45 +226,6 @@ class ObserverController
     init_specimen_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
-  end
-
-  def create_observation_get
-    @observation     = Observation.new
-    @naming          = Naming.new
-    @vote            = Vote.new
-    @what            = "" # can't be nil else rails tries to call @name.name
-    @names           = nil
-    @valid_names     = nil
-    @reason          = @naming.init_reasons
-    @images          = []
-    @good_images     = []
-    init_specimen_vars_for_create
-    init_project_vars_for_create
-    init_list_vars_for_create
-    defaults_from_last_observation_created
-  end
-
-  def defaults_from_last_observation_created
-    # Grab defaults for date and location from last observation the user
-    # edited if it was less than an hour ago.
-    last_observation = Observation.where(user_id: @user.id).
-                       order(:created_at).last
-    return unless last_observation && last_observation.created_at > 1.hour.ago
-    @observation.when     = last_observation.when
-    @observation.where    = last_observation.where
-    @observation.location = last_observation.location
-    @observation.lat      = last_observation.lat
-    @observation.long     = last_observation.long
-    @observation.alt      = last_observation.alt
-    last_observation.projects.each do |project|
-      @project_checks[project.id] = true
-    end
-    last_observation.species_lists.each do |list|
-      if check_permission(list)
-        @lists << list unless @lists.include?(list)
-        @list_checks[list.id] = true
-      end
-    end
   end
 
   # Form to edit an existing observation.
