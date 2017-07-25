@@ -67,7 +67,7 @@
 #  no_notes_persisted::     no_notes persisted in the db
 #  notes_part_id::          id of textarea for a Notes heading
 #  notes_area_id_prefix     prefix for id of textarea for a Notes heading
-#  ahow_formatted::         notes (or any hash) to string with plain
+#  show_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
 #  == Instance methods
