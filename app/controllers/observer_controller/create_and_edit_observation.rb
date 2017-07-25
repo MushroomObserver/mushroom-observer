@@ -59,7 +59,8 @@ class ObserverController
 
   def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
-    # edited if it was less than an hour ago.
+    # created if it was less than an hour ago
+    # (i.e. if its creation time is larger than one hour ago)
     last_observation = Observation.where(user_id: @user.id).
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
