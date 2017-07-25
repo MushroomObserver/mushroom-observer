@@ -73,12 +73,12 @@
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
+#  form_notes_parts::       notes parts to display in create & edit form
 #  notes_export_formatted:: notes to string with marked up captions (keys)
 #  notes_show_formatted::   notes to string with plain captions (keys)
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
-#
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
@@ -321,6 +321,19 @@ class Observation < AbstractModel
 
   def self.notes_area_id_prefix
     "notes_"
+  end
+
+  # Array of note parts to display in create & edit form, in display order:
+  #   notes_template fields
+  #   orphaned fields (field in obs, but not in notes_template, not "Other")
+  #   "Other"
+  def form_notes_parts(user)
+    return user.notes_template_parts << "Other" if notes.blank?
+    user.notes_template_parts << notes_orphaned_fields(user) << "Other"
+  end
+
+  def notes_orphaned_fields(user)
+    user.notes_template_parts - (notes.keys.map(&:to_s) - ["Other"])
   end
 
   ##############################################################################
