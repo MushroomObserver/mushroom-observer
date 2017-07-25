@@ -69,6 +69,9 @@ class ObserverController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
+    if @user.notes_template?
+      @observation.notes.prepend(combined_notes_parts)
+    end
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
@@ -265,6 +268,7 @@ class ObserverController
       any_errors = false
 
       update_whitelisted_observation_attributes
+      @observation.notes = combined_notes_parts if use_notes_template?
 
       # Fix notes hash keys (all Rails param keys are Strings)
       if params[:observation] && params[:observation][:notes]
@@ -652,6 +656,38 @@ class ObserverController
     end
     redirect_with_query(action: :show_observation, id: id)
   end
+
+  ##############################################################################
+  #
+  #  Methods relating to User#notes_template
+  #
+  ##############################################################################
+
+  def use_notes_template?
+    @user.notes_template? && @observation.notes.blank?
+  end
+
+  # String combining the note parts defined in the User's notes_template
+  # with their filled-in values, ignoring parts with blank values
+  def combined_notes_parts
+    @user.notes_parts.each_with_object("") do |part, notes|
+      key   = "#{part_id(part)}".to_sym
+      value = params[key]
+      notes << "#{part}: #{value}\n" if value.present?
+    end
+  end
+
+  # id of text area for a Notes heading
+  def part_id(notes_part)
+    "#{area_id_prefix}#{notes_part.underscorize}"
+  end
+  helper_method :part_id
+
+  def area_id_prefix
+    "notes_"
+  end
+
+  ##############################################################################
 
   private
 

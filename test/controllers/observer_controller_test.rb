@@ -2110,6 +2110,109 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # --------------------------------------------------------------------
+  #  Test notes with template create_observation, and edit_observation,
+  #  both "get" and "post".
+  # --------------------------------------------------------------------
+
+  # prefix for textarea id
+  def id_prefix
+    @controller.area_id_prefix
+  end
+
+  def part_id(notes_part)
+    @controller.part_id(notes_part)
+  end
+
+  def test_create_observation_with_notes_template_get
+    user = users(:notes_templater)
+    login(user.login)
+    get(:create_observation)
+
+    # Prove Create Observation page has exactly one textarera
+    # for each part of notes_template
+    notes_areas = css_select("textarea").find_all do |area|
+      area[:id].starts_with?(id_prefix)
+    end
+    user.notes_parts.each do |part|
+      id = part_id(part)
+      assert(notes_areas.any? { |area| area[:id] == id },
+             "Missing textarea for #{part}")
+      assert(notes_areas.one? { |area| area[:id] == id },
+             "Multiple textareas for #{part}")
+    end
+    # but no other textarea uses the notes_head id prefix
+    assert_equal(user.notes_parts.size, notes_areas.size,
+                 "Wrong number of textareas with id starting with "\
+                 "#{@controller.area_id_prefix}")
+
+    # and Create Observation page also includes the general notes textarea
+    general_area = css_select("textarea").find_all do |area|
+      area[:id] == "observation_notes"
+    end
+    assert(general_area.any?, "General text area missing")
+  end
+
+  def test_create_observation_with_notes_template_post
+    user = users(:notes_templater)
+    params = {
+      observation:        sample_obs_fields,
+      notes_determiner:   "",
+      notes_habitat:      "conifer forest",
+      notes_substrate:    "soil",
+      notes_nearby_trees: "?",
+      notes_odor:         "farinaceous"
+    }
+    # Use a defined Location to avoid issues with defining Location
+    params[:observation][:place_name] = locations(:albion).name
+    params[:observation][:notes]      = "Some notes"
+    notes = "Habitat: conifer forest\n"\
+            "Substrate: soil\n"\
+            "Nearby trees: ?\n"\
+            "Odor: farinaceous\n"\
+            "Some notes"
+    o_size = Observation.count
+
+    login(user.login)
+    post(:create_observation, params)
+
+    assert_equal(o_size + 1, Observation.count)
+    obs = Observation.last.reload
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(notes, obs.notes)
+  end
+
+  def test_edit_observation_with_notes_template_post
+    # Prove notes_template works when editing Observation without notes
+    obs = observations(:templater_noteless_obs)
+    user = obs.user
+    params = {
+      id:                 obs.id,
+      notes_determiner:   "",
+      notes_habitat:      "conifer forest",
+      notes_substrate:    "soil",
+      notes_nearby_trees: "?",
+      notes_odor:         "farinaceous"
+    }
+    notes = "Habitat: conifer forest\n"\
+            "Substrate: soil\n"\
+            "Nearby trees: ?\n"\
+            "Odor: farinaceous\n"
+
+    login(user.login)
+    post(:edit_observation, params)
+
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(notes, obs.reload.notes)
+
+    # Prove notes_template ignored when editing Observation with notes
+    obs       = observations(:templater_noted_obs)
+    old_notes = obs.notes
+    post(:edit_observation, params)
+
+    assert_equal(old_notes, obs.reload.notes)
+  end
+
   # -----------------------------------
   #  Test extended observation forms.
   # -----------------------------------

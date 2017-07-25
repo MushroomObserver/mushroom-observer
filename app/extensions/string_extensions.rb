@@ -526,6 +526,12 @@ class String
     pluralize.underscore.humanize.titleize
   end
 
+  # parameterize, with underscore as separator
+  # "Donald E. Knuth".underscorize # => "donald_e_knuth"
+  def underscorize
+    parameterize.gsub("-", "_")
+  end
+
   # Generate a string of random characters of length +len+.  By default it
   # chooses from among the lowercase letters and digits, however you can give
   # it an arbitrary set of characters to choose from.  (And they don't have to
