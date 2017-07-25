@@ -39,7 +39,7 @@
                   locals: { observation: observation })
           end %>
     </div>
-    <%= if observation.notes.present?
+    <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))
       Textile.register_name(observation.name)
