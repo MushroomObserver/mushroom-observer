@@ -2125,13 +2125,6 @@ class ObserverControllerTest < FunctionalTestCase
   #  both "get" and "post".
   # --------------------------------------------------------------------
 
-  # prefix for textarea id
-  def id_prefix
-    @controller.area_id_prefix
-  end
-
-  def part_id(notes_part)
-    @controller.part_id(notes_part)
   end
 
   def test_create_observation_with_notes_template_get
