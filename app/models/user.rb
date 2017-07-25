@@ -146,8 +146,9 @@
 #  password_confirmation::  Used to confirm password during sign-up.
 #
 #  == Methods
-#  current::            Report the User that is currently logged in.
-#  current_id::         Report the User (id) that is currently logged in.
+#  current::              Report the User that is currently logged in.
+#  current_id::           Report the User (id) that is currently logged in.
+#  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
 #  text_name::          User name as: "loging" (for debugging)
@@ -789,8 +790,8 @@ class User < AbstractModel
 
   # Array of user defined headings for Notes when creating Observations
   # notes_template: "odor , Nearest  tree"
-  # notes_parts # => ["odor", "Nearest tree"]
-  def notes_parts
+  # notes_template_parts # => ["odor", "Nearest tree"]
+  def notes_template_parts
     (notes_template.split(",")).map(&:squish)
   end
 

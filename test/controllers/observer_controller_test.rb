@@ -2137,7 +2137,7 @@ class ObserverControllerTest < FunctionalTestCase
     notes_areas = css_select("textarea").find_all do |area|
       area[:id].starts_with?(Observation.notes_area_id_prefix)
     end
-    user.notes_parts.each do |part|
+    user.notes_template_parts.each do |part|
       id = Observation.notes_part_id(part)
       assert(notes_areas.any? { |area| area[:id] == id },
              "Missing textarea for #{part}")
@@ -2145,7 +2145,7 @@ class ObserverControllerTest < FunctionalTestCase
              "Multiple textareas for #{part}")
     end
     # but no other textarea uses the notes_head id prefix
-    assert_equal(user.notes_parts.size, notes_areas.size,
+    assert_equal(user.notes_template_parts.size, notes_areas.size,
                  "Wrong number of textareas with id starting with "\
                  "#{Observation.notes_area_id_prefix}")
 
