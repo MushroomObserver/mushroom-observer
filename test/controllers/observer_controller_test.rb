@@ -1190,6 +1190,16 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:specimen_herbarium_id, "")
   end
 
+  # Prove that create_observation has correct note fields
+  def test_create_observation_notes
+  skip "Under Construction"
+    user = users(:templater)
+    get (:create_observation)
+    user.notes_parts.each do |part|
+      assert_textarea_value(id, expect_val)
+    end
+  end
+
   def test_construct_observation_approved_place_name
     where = "Albion, California, USA"
     generic_construct_observation({
@@ -2090,10 +2100,10 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove Create Observation page has exactly one textarera
     # for each part of notes_template
     notes_areas = css_select("textarea").find_all do |area|
-      area[:id].starts_with?(id_prefix)
+      area[:id].starts_with?(Observation.notes_area_id_prefix)
     end
     user.notes_parts.each do |part|
-      id = part_id(part)
+      id = Observation.notes_part_id(part)
       assert(notes_areas.any? { |area| area[:id] == id },
              "Missing textarea for #{part}")
       assert(notes_areas.one? { |area| area[:id] == id },
@@ -2102,7 +2112,7 @@ class ObserverControllerTest < FunctionalTestCase
     # but no other textarea uses the notes_head id prefix
     assert_equal(user.notes_parts.size, notes_areas.size,
                  "Wrong number of textareas with id starting with "\
-                 "#{@controller.area_id_prefix}")
+                 "#{Observation.notes_area_id_prefix}")
 
     # and Create Observation page also includes the general notes textarea
     general_area = css_select("textarea").find_all do |area|

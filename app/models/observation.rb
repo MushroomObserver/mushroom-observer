@@ -65,6 +65,8 @@
 #                           captions (keys)
 #  no_notes::               value of observation.notes if there are no notes
 #  no_notes_persisted::     no_notes persisted in the db
+#  notes_part_id::          id of textarea for a Notes heading
+#  notes_area_id_prefix     prefix for id of textarea for a Notes heading
 #  ahow_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
@@ -308,6 +310,15 @@ class Observation < AbstractModel
 
   def notes_show_formatted
     Observation.show_formatted(notes)
+  end
+
+  # id of text area for a Notes heading
+  def self.notes_part_id(part)
+    "#{notes_area_id_prefix}#{part.underscorize}"
+  end
+
+ def self.notes_area_id_prefix
+    "notes_"
   end
 
   ##############################################################################
