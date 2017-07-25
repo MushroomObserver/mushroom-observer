@@ -23,11 +23,17 @@
 
   <% else %>
   <div class="col-xs-12 col-sm-6 max-width-text">
+    <div class="form-group">
+      <%= label_tag(:observation_notes, "#{:NOTES.t}:") %>
+      <%= text_area(:observation, :notes, class: "form-control", rows: 10) %>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-6 max-width-text">
     <div class="well well-sm" id="notes_help">
       <div class="arrow-left hidden-xs"></div>
       <%= content_tag(:p, :form_observations_notes_help.t,
-                      class: "help-block", style: "padding-top: 0px;
-                      margin-top: 0") %>
+                      class: "help-block",
+                      style: "padding-top: 0px; margin-top: 0") %>
       <%= render(partial: "shared/textilize_help") %>
     </div>
   </div>
