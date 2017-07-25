@@ -379,14 +379,45 @@ substrate_and_other_notes_obs:
   <<: *DEFAULTS
   notes:
     substrate: soil
-    other:     slimy
-
-templater_noted_obs:
-  <<: *DEFAULTS
-  notes:
-    other: some notes
-  user:  notes_templater
+    Other:     slimy
 
 templater_noteless_obs:
   <<: *DEFAULTS
-  user:  notes_templater
+  user: notes_templater
+
+templater_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    Other: some notes
+  user: notes_templater
+
+templater_orphaned_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    orphaned_caption: orphaned notes
+  user: notes_templater
+
+template_only_obs:
+  <<: *DEFAULTS
+  notes:
+    Cap: red
+  user: notes_templater
+
+template_and_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    Cap: red
+    Other: some notes
+  user: notes_templater
+
+template_and_orphaned_notes_obs:
+  <<: *DEFAULTS
+  # Can't use default name; there would be so many observations with that name
+  # that a filtered search would return more than one page of results,
+  # which causes an expected count of results on the first page,
+  # which makes Filter integration test fail
+  name: macrocybe_titans
+  notes:
+    Cap: red
+    orphaned_caption: orphaned notes
+  user: notes_templater
