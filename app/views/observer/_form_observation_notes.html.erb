@@ -3,7 +3,7 @@
   <% if @user.notes_template? && @observation.notes.blank? %>
     <%= content_tag(:span, "#{:NOTES.t} ", class: "bold") %>
     (<%= :general_textile_link.t %>)
-    <% @user.notes_parts.each do |part| %>
+    <% @user.notes_template_parts.each do |part| %>
       <div class="row">
         <div class="col-xs-12 col-sm-6 max-width-text">
           <div><%= "#{strip_tags(part.tl)}: "%></div>
