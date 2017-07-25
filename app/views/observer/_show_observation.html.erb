@@ -25,7 +25,7 @@
     <div id="observation_specimen_info">
       <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
     </div>
-    <%= if observation.notes.present?
+    <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))
       Textile.register_name(observation.name)
@@ -35,4 +35,3 @@
     end %>
   </div>
 </div>
-
