@@ -1190,16 +1190,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:specimen_herbarium_id, "")
   end
 
-  # Prove that create_observation has correct note fields
-  def test_create_observation_notes
-  skip "Under Construction"
-    user = users(:templater)
-    get (:create_observation)
-    user.notes_parts.each do |part|
-      assert_textarea_value(id, expect_val)
-    end
-  end
-
   def test_construct_observation_approved_place_name
     where = "Albion, California, USA"
     generic_construct_observation({
@@ -2125,8 +2115,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  both "get" and "post".
   # --------------------------------------------------------------------
 
-  end
-
+  # Prove that create_observation has correct note fields
   def test_create_observation_with_notes_template_get
     user = users(:notes_templater)
     login(user.login)
