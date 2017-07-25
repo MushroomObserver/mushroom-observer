@@ -316,10 +316,10 @@ class Observation < AbstractModel
 
   # id of text area for a Notes heading
   def self.notes_part_id(part)
-    "#{notes_area_id_prefix}#{part.underscorize}"
+    notes_area_id_prefix << part.gsub(" ", "_")
   end
 
- def self.notes_area_id_prefix
+  def self.notes_area_id_prefix
     "notes_"
   end
 
