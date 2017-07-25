@@ -381,3 +381,12 @@ substrate_and_other_notes_obs:
     substrate: soil
     other:     slimy
 
+templater_noted_obs:
+  <<: *DEFAULTS
+  notes:
+    other: some notes
+  user:  notes_templater
+
+templater_noteless_obs:
+  <<: *DEFAULTS
+  user:  notes_templater

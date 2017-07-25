@@ -1719,6 +1719,7 @@
   rss_naming_updated: "Name proposal updated by [user]: [name]"
 
   # shared/_textile_help
+  general_textile_link: Can be formatted with <a href="/observer/textile" target="_new">Textile</a>.
   shared_textile_link: More details here.
   shared_textile_help: Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
