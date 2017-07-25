@@ -8,8 +8,8 @@
         <div class="col-xs-12 col-sm-6 max-width-text">
           <div><%= "#{strip_tags(part.tl)}: "%></div>
           <div>
-            <%= text_area_tag(part_id(part), nil, class: "form-control",
-                              rows: 1) %>
+            <%= text_area_tag(Observation.notes_part_id(part), nil,
+                              class: "form-control", rows: 1) %>
           </div>
         </div>
       </div>
