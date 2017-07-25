@@ -119,4 +119,4 @@ article_writer:
 
 notes_templater:
   <<: *DEFAULTS
-  notes_template: Determiner, Habitat, Substrate, Nearby trees, Odor
+  notes_template: Cap, Nearby trees, odor
