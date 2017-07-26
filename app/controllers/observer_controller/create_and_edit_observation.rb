@@ -109,14 +109,23 @@ class ObserverController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
-    if @user.notes_template?
-      @observation.notes.prepend(combined_notes_parts)
-    end
+    @observation.notes = assermbled_notes_params
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
+  end
+
+  # Return a hash of notes_ params. Needed because
+  # the notes params are top-level (rather than part of params[:observation])
+  def assermbled_notes_params
+    params.each_with_object({}) do |param, notes|
+      if param[0].start_with?(Observation.notes_area_id_prefix)
+        notes[param[0].
+          sub(Observation.notes_area_id_prefix, "").to_sym] = param[1]
+      end
+    end
   end
 
   def validate_name(params)
@@ -406,7 +415,7 @@ class ObserverController
 
   # Roughly create observation object.  Will validate and save later
   # once we're sure everything is correct.
-  # INPUT: params[:observation] (and @user)
+  # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
