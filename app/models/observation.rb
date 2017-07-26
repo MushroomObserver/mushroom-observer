@@ -323,17 +323,32 @@ class Observation < AbstractModel
     "notes_"
   end
 
-  # Array of note parts to display in create & edit form, in display order:
+  # Array of Strings of note parts to display in create & edit form,
+  # in following (display) order. Used by views.
   #   notes_template fields
   #   orphaned fields (field in obs, but not in notes_template, not "Other")
   #   "Other"
+  # Example outputs:
+  #   ["Other"]
+  #   ["orphaned_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
   def form_notes_parts(user)
-    return user.notes_template_parts << "Other" if notes.blank?
-    user.notes_template_parts << notes_orphaned_fields(user) << "Other"
+    return user.notes_template_parts + [default_notes_part] if notes.blank?
+    user.notes_template_parts + notes_orphaned_fields(user) +
+      [default_notes_part]
   end
 
   def notes_orphaned_fields(user)
-    user.notes_template_parts - (notes.keys.map(&:to_s) - ["Other"])
+    notes.keys.map(&:to_s) - user.notes_template_parts - [default_notes_part]
+  end
+
+  def self.default_notes_part
+    "Other"
+  end
+
+  def default_notes_part
+    Observation.default_notes_part
   end
 
   ##############################################################################

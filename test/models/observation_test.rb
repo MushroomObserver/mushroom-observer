@@ -786,4 +786,56 @@ class ObservationTest < UnitTestCase
     assert_equal("+substrate+: soil\n+Other+: slimy",
                  obs.notes_show_formatted)
   end
+
+  def test_form_notes_parts
+    # no template and no notes
+    obs   = observations(:minimal_unknown_obs)
+    parts = ["Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # no template and Other notes
+    obs   = observations(:detailed_unknown_obs)
+    parts = ["Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # no template and orphaned notes
+    obs   = observations(:substrate_notes_obs)
+    parts = %w[substrate Other]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # no template, and orphaned notes and Other notes
+    obs   = observations(:substrate_and_other_notes_obs)
+    parts = %w[substrate Other]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and no notes
+    obs   = observations(:templater_noteless_obs)
+    parts = ["Cap", "Nearby trees", "odor", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and other notes
+    obs   = observations(:templater_other_notes_obs)
+    parts = ["Cap", "Nearby trees", "odor", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and orphaned notes
+    obs   = observations(:templater_orphaned_notes_obs)
+    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and notes for a template part
+    obs   = observations(:template_only_obs)
+    parts = ["Cap", "Nearby trees", "odor", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and notes for a template part and Other notes
+    obs   = observations(:template_and_other_notes_obs)
+    parts = ["Cap", "Nearby trees", "odor", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and notes for a template part and orpahed part
+    obs   = observations(:template_and_orphaned_notes_obs)
+    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+  end
 end
