@@ -282,7 +282,7 @@ class Observation < AbstractModel
   #                                                stem:
   #                                                other: x"
   def self.export_formatted(notes, markup = nil)
-    return notes[:other] if notes.keys == [:other]
+    return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = ""
     notes.each_pair do | key, value|
@@ -314,7 +314,7 @@ class Observation < AbstractModel
     Observation.show_formatted(notes)
   end
 
-  # id of text area for a Notes heading
+  # id of textarea for a Notes heading
   def self.notes_part_id(part)
     notes_area_id_prefix << part.gsub(" ", "_")
   end
@@ -334,21 +334,35 @@ class Observation < AbstractModel
   #   ["template_1st_part", "template_2nd_part", "Other"]
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
   def form_notes_parts(user)
-    return user.notes_template_parts + [default_notes_part] if notes.blank?
+    return user.notes_template_parts + [other_notes_part] if notes.blank?
     user.notes_template_parts + notes_orphaned_fields(user) +
-      [default_notes_part]
+      [other_notes_part]
   end
 
+  # Array of Strings of notes field captions which are
+  # neither in the notes_template nor the caption for other notes
   def notes_orphaned_fields(user)
-    notes.keys.map(&:to_s) - user.notes_template_parts - [default_notes_part]
+    notes.keys.map(&:to_s) - user.notes_template_parts - [other_notes_part]
   end
 
-  def self.default_notes_part
-    "Other"
+  # The key used for general Observation.notes
+  # (notes which were not entered in a notes_template field)
+  def self.other_notes_key
+    :Other
   end
 
-  def default_notes_part
-    Observation.default_notes_part
+  def other_notes_key
+    Observation.other_notes_key
+  end
+
+  # other_notes_key as a String
+  # Makes it easy to combine with notes_template
+  def self.other_notes_part
+    other_notes_key.to_s
+  end
+
+  def other_notes_part
+    Observation.other_notes_part
   end
 
   ##############################################################################
