@@ -278,11 +278,8 @@ class ObserverController
       any_errors = false
 
       update_whitelisted_observation_attributes
-      @observation.notes = combined_notes_parts if use_notes_template?
-
-      # Fix notes hash keys (all Rails param keys are Strings)
-      if params[:observation] && params[:observation][:notes]
-        @observation.notes = params[:observation][:notes].to_hash.symbolize_keys
+      if params[:notes]
+        @observation.notes = params[:notes].to_hash.symbolize_keys
       end
 
       # Validate place name
