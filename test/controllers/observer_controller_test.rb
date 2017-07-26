@@ -1893,7 +1893,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
-    new_notes = { other: "blather blather blather" }
+    new_notes  = { obs.other_notes_key => "blather blather blather" }
     new_specimen = false
     img = images(:in_situ_image)
     params = {
@@ -2865,7 +2865,7 @@ class ObserverControllerTest < FunctionalTestCase
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
         "#{'X' if o.is_collection_location},#{o.thumb_image_id}," \
-        "#{o.notes[:other]}",
+        "#{o.notes[Observation.other_notes_key]}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
     )
