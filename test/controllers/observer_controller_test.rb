@@ -1943,7 +1943,6 @@ class ObserverControllerTest < FunctionalTestCase
         "when(1i)" => "2001",
         "when(2i)" => "2",
         "when(3i)" => "3",
-        notes: new_notes,
         specimen: new_specimen,
         thumb_image_id: "0"
       },
@@ -1959,7 +1958,8 @@ class ObserverControllerTest < FunctionalTestCase
           license_id: licenses(:ccwiki30).id.to_s
         }
       },
-      log_change: { checked: "1" }
+      log_change: { checked: "1" },
+      notes:      new_notes
     }
     post_requires_user(:edit_observation, [controller: :observer,
                                            action: :show_observation],
