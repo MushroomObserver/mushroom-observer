@@ -796,7 +796,10 @@ class User < AbstractModel
   # Array of user defined headings for Notes when creating Observations
   # notes_template: "odor , Nearest  tree"
   # notes_template_parts # => ["odor", "Nearest tree"]
+  # notes_template: ""
+  # notes_template_parts # => []
   def notes_template_parts
+    return [] unless notes_template?
     (notes_template.split(",")).map(&:squish)
   end
 
