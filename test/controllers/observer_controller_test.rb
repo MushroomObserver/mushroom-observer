@@ -2194,32 +2194,20 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove notes_template works when editing Observation without notes
     obs = observations(:templater_noteless_obs)
     user = obs.user
-    params = {
-      id:                 obs.id,
-      notes_habitat:      "conifer forest",
-      notes_substrate:    "soil",
-      notes_Nearby_trees: "?",
-      notes_odor:         "farinaceous"
-    }
-    expected_notes = {
-      habitat:      "conifer forest",
-      substrate:    "soil",
+    notes = {
+      Cap:          "dark red",
       Nearby_trees: "?",
       odor:         "farinaceous"
     }
-
+    params = {
+      id:     obs.id,
+      notes:  notes
+    }
     login(user.login)
     post(:edit_observation, params)
 
     assert_redirected_to(action: :show_observation, id: obs.id)
-    assert_equal(expected_notes, obs.reload.notes)
-
-    # Prove notes_template ignored when editing Observation with notes
-    obs       = observations(:templater_noted_obs)
-    old_notes = obs.notes
-    post(:edit_observation, params)
-
-    assert_equal(old_notes, obs.reload.notes)
+    assert_equal(notes, obs.reload.notes)
   end
 
   # -----------------------------------
