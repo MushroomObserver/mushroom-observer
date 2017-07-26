@@ -672,9 +672,14 @@ module ControllerExtensions
       id = Observation.notes_part_id(key.to_s)
       assert(notes_areas.any? { |area| area[:id] == id },
              "Missing textarea for #{key}")
-      assert(notes_areas.one? { |area| area[:id] == id },
-             "Multiple textareas for #{key}")
-      assert_select("[value=?]", value)
+      assert(
+        notes_areas.one? do |area|
+          area[:id] == id &&
+          # strip leading newline inserted by Nokogiri or someone
+          area.content.sub(/^\n/, "") == value
+        end,
+        "Multiple textareas or wrong value for #{key}"
+      )
     end
   end
 end
