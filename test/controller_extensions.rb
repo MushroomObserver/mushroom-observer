@@ -661,4 +661,20 @@ module ControllerExtensions
       fail "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
+
+  # Check presence and value of notes textareas
+  # Example: assert_page_has_correct_notes(( Other: "" })
+  def assert_page_has_correct_notes_areas(expected_areas)
+    notes_areas = css_select("textarea").find_all do |area|
+      area[:id].starts_with?(Observation.notes_area_id_prefix)
+    end
+    expected_areas.each do |key, value|
+      id = Observation.notes_part_id(key.to_s)
+      assert(notes_areas.any? { |area| area[:id] == id },
+             "Missing textarea for #{key}")
+      assert(notes_areas.one? { |area| area[:id] == id },
+             "Multiple textareas for #{key}")
+      assert_select("[value=?]", value)
+    end
+  end
 end
