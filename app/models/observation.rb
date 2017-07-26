@@ -363,6 +363,13 @@ class Observation < AbstractModel
     Observation.other_notes_part
   end
 
+  # Value of notes part, where part is a String
+  #   notes: { Other: abc }
+  #   notes_part_value("Other") => "abc"
+  def notes_part_value(part)
+    notes.blank? ? "" : notes[part.to_sym]
+  end
+
   ##############################################################################
   #
   #  :section: Namings and Votes

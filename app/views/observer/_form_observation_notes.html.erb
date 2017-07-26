@@ -1,39 +1,45 @@
 <% # Notes section of create_observation form %>
 <div class="row push-down">
   <%= content_tag(:span, "#{:NOTES.t} ", class: "bold") %>
-  <% if @user.notes_template? && @observation.notes.blank? %>
+  <% if @observation.form_notes_parts(@user) == "Other" %>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-6 max-width-text">
+        <div>
+          <%= text_area(:notes, "Other", class: "form-control", rows: 10) %>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-6 max-width-text">
+        <div class="well well-sm" id="notes_help">
+          <div class="arrow-left hidden-xs"></div>
+          <%= content_tag(:p, :form_observations_notes_help.t,
+                          class: "help-block",
+                          style: "padding-top: 0px; margin-top: 0") %>
+          <%= render(partial: "shared/textilize_help") %>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+
     (<%= :general_textile_link.t %>)
     <% @observation.form_notes_parts(@user).each do |part| %>
       <div class="row">
         <div class="col-xs-12 col-sm-6 max-width-text">
           <div><%= "#{strip_tags(part.tl)}: "%></div>
           <div>
-            <%= text_area(:notes, part.gsub(" ", "_"),
-                          class: "form-control", rows: 1) %>
+            <%= text_area(
+                  :notes, part.gsub(" ", "_"),
+                  value: @observation.notes_part_value(part),
+                  class: "form-control", rows: 1
+                ) %>
           </div>
         </div>
       </div>
     <% end %>
 
-  <% else %>
-  <div class="row">
-    <div class="col-xs-12 col-sm-6 max-width-text">
-      <div>
-        <%= text_area(:notes, "Other", class: "form-control", rows: 10) %>
-      </div>
-    </div>
-    <div class="col-xs-12 col-sm-6 max-width-text">
-      <div class="well well-sm" id="notes_help">
-        <div class="arrow-left hidden-xs"></div>
-        <%= content_tag(:p, :form_observations_notes_help.t,
-                        class: "help-block",
-                        style: "padding-top: 0px; margin-top: 0") %>
-        <%= render(partial: "shared/textilize_help") %>
-      </div>
-    </div>
-  </div>
-
   <% end %>
+
 </div>
 
 <% inject_javascript_at_end %(
