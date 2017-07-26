@@ -2079,43 +2079,28 @@ class ObserverControllerTest < FunctionalTestCase
     login(user.login)
     get(:create_observation)
 
-    # Prove Create Observation page has exactly one textarera
-    # for each part of notes_template and for "Other"
-    notes_areas = css_select("textarea").find_all do |area|
-      area[:id].starts_with?(Observation.notes_area_id_prefix)
-    end
-    (user.notes_template_parts << "Other").each do |part|
-      id = Observation.notes_part_id(part)
-      assert(notes_areas.any? { |area| area[:id] == id },
-             "Missing textarea for #{part}")
-      assert(notes_areas.one? { |area| area[:id] == id },
-             "Multiple textareas for #{part}")
-    end
-
-    # and no other textarea uses the notes_head id prefix
-    assert_equal(user.notes_template_parts.size + 1, notes_areas.size,
-                 "Wrong number of textareas with id starting with "\
-                 "#{Observation.notes_area_id_prefix}")
+    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+    assert_page_has_correct_notes_areas(areas)
   end
 
   def test_create_observation_with_notes_template_post
     user = users(:notes_templater)
     params = {
       observation:        sample_obs_fields,
-      notes_determiner:   "",
       notes_habitat:      "conifer forest",
       notes_substrate:    "soil",
-      notes_nearby_trees: "?",
+      notes_Nearby_trees: "?",
       notes_odor:         "farinaceous"
     }
     # Use a defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes]      = "Some notes"
-    notes = "Habitat: conifer forest\n"\
-            "Substrate: soil\n"\
-            "Nearby trees: ?\n"\
-            "Odor: farinaceous\n"\
-            "Some notes"
+    expected_notes = {
+      habitat:      "conifer forest",
+      substrate:    "soil",
+      Nearby_trees: "?",
+      odor:         "farinaceous"
+    }
     o_size = Observation.count
 
     login(user.login)
@@ -2124,7 +2109,43 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(o_size + 1, Observation.count)
     obs = Observation.last.reload
     assert_redirected_to(action: :show_observation, id: obs.id)
-    assert_equal(notes, obs.notes)
+    assert_equal(expected_notes, obs.notes)
+  end
+
+  # Prove that edit_observation has correct note fields and content
+  def test_edit_observation_with_notes_template_get
+    obs    = observations(:templater_noteless_obs)
+    user   = obs.user
+    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+    params = {
+      id: obs.id,
+      observation: {
+        place_name: obs.location.name,
+        lat: "",
+        long: "",
+        alt: "",
+        "when(1i)" => obs.when.year,
+        "when(2i)" => obs.when.month,
+        "when(3i)" => obs.when.day,
+        specimen: "0",
+        thumb_image_id: "0",
+        notes: obs.notes
+      },
+      specimen: default_specimen_fields,
+      username: user.login,
+      vote:     { value: "3" }
+    }
+
+    login(user.login)
+    get(:edit_observation, params)
+    assert_page_has_correct_notes_areas(areas)
+
+    obs         = observations(:templater_other_notes_obs)
+    params[:id] = obs.id
+    params[:observation][:notes] = obs.notes
+    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "some notes" }
+    get(:edit_observation, params)
+    assert_page_has_correct_notes_areas(areas)
   end
 
   def test_edit_observation_with_notes_template_post
@@ -2133,22 +2154,23 @@ class ObserverControllerTest < FunctionalTestCase
     user = obs.user
     params = {
       id:                 obs.id,
-      notes_determiner:   "",
       notes_habitat:      "conifer forest",
       notes_substrate:    "soil",
-      notes_nearby_trees: "?",
+      notes_Nearby_trees: "?",
       notes_odor:         "farinaceous"
     }
-    notes = "Habitat: conifer forest\n"\
-            "Substrate: soil\n"\
-            "Nearby trees: ?\n"\
-            "Odor: farinaceous\n"
+    expected_notes = {
+      habitat:      "conifer forest",
+      substrate:    "soil",
+      Nearby_trees: "?",
+      odor:         "farinaceous"
+    }
 
     login(user.login)
     post(:edit_observation, params)
 
     assert_redirected_to(action: :show_observation, id: obs.id)
-    assert_equal(notes, obs.reload.notes)
+    assert_equal(expected_notes, obs.reload.notes)
 
     # Prove notes_template ignored when editing Observation with notes
     obs       = observations(:templater_noted_obs)
