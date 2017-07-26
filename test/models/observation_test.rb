@@ -753,7 +753,7 @@ class ObservationTest < UnitTestCase
   #  Notes: Test methods related to serialized notes
   # --------------------------------------------------
 
-  def test_export_format
+  def test_notes_export_format
     obs =  observations(:minimal_unknown_obs)
     assert_equal("", obs.notes_export_formatted)
 
@@ -770,7 +770,7 @@ class ObservationTest < UnitTestCase
                  obs.notes_export_formatted)
   end
 
-  def test_show_format
+  def test_notes_show_format
     obs =  observations(:minimal_unknown_obs)
     assert_equal("", obs.notes_show_formatted)
 
