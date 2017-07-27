@@ -102,7 +102,7 @@ class PostObservationTest < IntegrationTestCase
     assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)
-    assert_equal(expected_values[:notes], new_obs.notes.strip)
+    assert_equal(expected_values[:notes], new_obs.notes_show_formatted.strip)
   end
 
   def destroy_observation
@@ -142,7 +142,7 @@ class PostObservationTest < IntegrationTestCase
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)
     assert_equal(expected_values[:specimen], new_obs.specimen)
-    assert_equal(expected_values[:notes], new_obs.notes.strip)
+    assert_equal(expected_values[:notes], new_obs.notes_show_formatted.strip)
   end
 
   def assert_observation_has_correct_location(expected_values)
@@ -201,7 +201,7 @@ class PostObservationTest < IntegrationTestCase
     else
       refute_match(/No herbarium specimen/, response.body)
     end
-    assert_match(new_obs.notes, response.body)
+    assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing("observations_at_where")
     assert_link_exists_containing("show_location/#{new_loc.id}")
@@ -252,6 +252,10 @@ class PostObservationTest < IntegrationTestCase
     create_location_form_defaults.merge(create_location_form_first_changes)
   end
 
+  def other_notes_id
+   Observation.notes_part_id(Observation.other_notes_part)
+  end
+
   def create_observation_form_defaults
     local_now = Time.now.in_time_zone
     {
@@ -265,7 +269,7 @@ class PostObservationTest < IntegrationTestCase
       "name_name" => "",
       "is_collection_location" => true,
       "specimen" => false,
-      "observation_notes" => ""
+      "#{other_notes_id}" => ""
     }
   end
 
@@ -277,7 +281,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_place_name" => "USA, California, Pasadena", # wrong order
       "is_collection_location" => false,
       "specimen" => true,
-      "observation_notes" => "Notes for observation"
+      "#{other_notes_id}" => "Notes for observation"
     }
   end
 
@@ -289,7 +293,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_place_name" => "Pasadena, California, USA",
       "is_collection_location" => false,
       "specimen" => true,
-      "observation_notes" => "Notes for observation",
+      "#{other_notes_id}" => "Notes for observation",
       "observation_lat" => " 12deg 34.56min N ",
       "observation_long" => " 123 45 6.78 W ",
       "observation_alt" => " 56 ft. ",
@@ -346,7 +350,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_alt" => "17",
       "is_collection_location" => false,
       # 'specimen' => true,
-      "observation_notes" => "Notes for observation",
+      "#{other_notes_id}" => "Notes for observation",
       "good_image_#{img_id}_when_1i" => 2010,
       "good_image_#{img_id}_when_2i" => 3,
       "good_image_#{img_id}_when_3i" => 14,
@@ -366,7 +370,7 @@ class PostObservationTest < IntegrationTestCase
       "observation_alt" => "987m",
       "is_collection_location" => true,
       # 'specimen' => false,
-      "observation_notes" => "New notes for observation",
+      "#{other_notes_id}" => "New notes for observation",
       "good_image_#{img_id}_when_1i" => "2011",
       "good_image_#{img_id}_when_2i" => "4",
       "good_image_#{img_id}_when_3i" => "15",
