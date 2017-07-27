@@ -849,5 +849,4 @@ class ObservationTest < UnitTestCase
              "orphaned_caption_2", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
-  end
 end
