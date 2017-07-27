@@ -314,11 +314,11 @@ class Observation < AbstractModel
 
   # id of textarea for a Notes heading
   def self.notes_part_id(part)
-    notes_area_id_prefix << part.gsub(" ", "_")
+    "observation_notes_" << part.gsub(" ", "_")
   end
 
   def self.notes_area_id_prefix
-    "notes_"
+    "observation_notes_"
   end
 
   # Array of Strings of note parts to display in create & edit form,
