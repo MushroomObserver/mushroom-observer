@@ -383,7 +383,7 @@ class Observation < AbstractModel
     "observation_notes_"
   end
 
-  # Array of Strings of note parts to display in create & edit form,
+  # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
   #   notes_template fields
   #   orphaned fields (field in obs, but not in notes_template, not "Other")
@@ -399,7 +399,7 @@ class Observation < AbstractModel
       [other_notes_part]
   end
 
-  # Array of Strings of notes field captions which are
+  # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
   def notes_orphaned_parts(user)
     notes.keys.map(&:to_s) - user.notes_template_parts - [other_notes_part]
