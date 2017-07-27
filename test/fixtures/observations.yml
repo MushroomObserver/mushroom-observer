@@ -432,3 +432,15 @@ template_and_orphaned_notes_obs:
     :Cap: red
     :orphaned_caption: orphaned notes
   user: notes_templater
+
+template_and_orphaned_notes_scrambled_obs:
+  <<: *DEFAULTS
+  # Can't use default name; see above
+  name: macrocybe_titans
+  notes:
+    :Nearby_trees: pine
+    :orphaned_caption_1: orphaned notes 1
+    :Other: other notes
+    :orphaned_caption_2: orphaned notes 2
+    :Cap: red
+  user: notes_templater
