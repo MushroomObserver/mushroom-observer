@@ -787,6 +787,10 @@ class ObservationTest < UnitTestCase
                  obs.notes_show_formatted)
   end
 
+  # Prove that notes parts for Views are assembled in this order
+  #   - notes_template parts, in order listed in notes_template
+  #   - orphaned parts, in order that they appear in Observation
+  #   - Other
   def test_form_notes_parts
     # no template and no notes
     obs   = observations(:minimal_unknown_obs)
@@ -833,9 +837,17 @@ class ObservationTest < UnitTestCase
     parts = ["Cap", "Nearby trees", "odor", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
 
-    # template and notes for a template part and orpahed part
+    # template and notes for a template part and orphaned part
     obs   = observations(:template_and_orphaned_notes_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
+
+    # template and notes for a template part, orphaned part, Other,
+    # with order scrambled in the Observation
+    obs   = observations(:template_and_orphaned_notes_scrambled_obs)
+    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption_1",
+             "orphaned_caption_2", "Other"]
+    assert_equal(parts, obs.form_notes_parts(obs.user))
+  end
   end
 end
