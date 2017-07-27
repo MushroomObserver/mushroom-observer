@@ -49,7 +49,7 @@
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
-#  notes::                  Arbitrary extra notes supplied by User.
+#  notes::                  Arbitrary text supplied by User and serialized.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #
@@ -257,6 +257,55 @@ class Observation < AbstractModel
   #  :section: Notes
   #
   ##############################################################################
+  #
+  # Notes are arbitrary text supplied by the User.
+  # They are read and written as a serialized Hash.
+  #
+  # The Hash keys are:
+  #   - key(s) from the User's notes template, and
+  #   - a general Other key supplied by the system.
+  #
+  # Keys with empty values are not saved.
+  #
+  # The notes template is a comma-separated list of arbitrary keys (except for
+  # the following which are reserved for the system: "Other", "other", etc., and
+  # translations thereof.
+  # Sample observation.notes
+  #  { }                                        no notes
+  #  { Other: "rare" }                          generalized notes
+  #  { Cap: "red", stem: "white" }              With only user-supplied keys
+  #  { Cap: "red", stem: "white", Other: rare } both user-supplied and general
+  #
+  # The create Observation form displays separate fields for the keys in the
+  # following order:
+  #   - each key in the notes template, in the order listed in the template; and
+  #   - Other.
+  #
+  # The edit Observation form displays separate fields in the following order:
+  #   - each key in the notes template, in the order listed in the template;
+  #   - each "orphaned" key -- one which is neither in the template nor Other;
+  #   - Other.
+  #
+  # The show Observation view displays notes as follows, with Other underscored:
+  #   no notes - nothing shown
+  #   only generalized notes:
+  #     Notes: value
+  #   only user-supplied keys:
+  #     Notes:
+  #     First user key: value
+  #     Second user key: value
+  #     ...
+  #   both user-supplied  and general Other keys:
+  #     Notes:
+  #     First user key: value
+  #     Second user key: value
+  #     ...
+  #     Other: value
+  # Because keys with empty values are not saved in observation.notes, they are
+  # not displayed with show Observaation.
+  #
+  # Notes are exported as shown, except that the intial "Notes:" caption is
+  # omitted, and any markup is stripped from the keys.
 
   serialize :notes
 
@@ -270,15 +319,25 @@ class Observation < AbstractModel
     no_notes.to_yaml
   end
 
-  # Return notes (or other hash) as a String,
-  # captions (keys) with added formstting,
+  # Key used for general Observation.notes
+  # (notes which were not entered in a notes_template field)
+  def self.other_notes_key
+    :Other
+  end
+
+  # convenience wrapper around class method of same name
+  def other_notes_key
+    Observation.other_notes_key
+  end
+
+  # notes (or other hash) as a String, captions (keys) without added formstting,
   # omitting "other" if it's the only caption.
-  #  notes: {}                                 => ""
-  #  notes: { other: "abc" }                   => "abc"
-  #  notes: { cap: "red" }                     => "cap: red"
-  #  notes: { cap: "red", stem: , other: "x" } => "cap: red
-  #                                                stem:
-  #                                                other: x"
+  #  notes: {}                                 ::=> ""
+  #  notes: { other: "abc" }                   ::=> "abc"
+  #  notes: { cap: "red" }                     ::=> "cap: red"
+  #  notes: { cap: "red", stem: , other: "x" } ::=> "cap: red
+  #                                                  stem:
+  #                                                  other: x"
   def self.export_formatted(notes, markup = nil)
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
@@ -289,12 +348,12 @@ class Observation < AbstractModel
     result.chomp
   end
 
+  # wraps Class method with slightly different name
   def notes_export_formatted
     Observation.export_formatted(notes)
   end
 
-  # Return notes (or other hash) as a String,
-  # captions (keys) with added formstting,
+  # Notes (or other hash) as a String, captions (keys) with added formstting,
   # omitting "other" if it's the only caption.
   #
   # Used in views which display notes
@@ -308,13 +367,14 @@ class Observation < AbstractModel
     export_formatted(notes, "+")
   end
 
+  # wraps Class method with slightly different name
   def notes_show_formatted
     Observation.show_formatted(notes)
   end
 
-  # id of textarea for a Notes heading
+  # id of view textarea for a Notes heading
   def self.notes_part_id(part)
-    "observation_notes_" << part.gsub(" ", "_")
+    notes_area_id_prefix << part.gsub(" ", "_")
   end
 
   def self.notes_area_id_prefix
@@ -333,24 +393,14 @@ class Observation < AbstractModel
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
   def form_notes_parts(user)
     return user.notes_template_parts + [other_notes_part] if notes.blank?
-    user.notes_template_parts + notes_orphaned_fields(user) +
+    user.notes_template_parts + notes_orphaned_parts(user) +
       [other_notes_part]
   end
 
   # Array of Strings of notes field captions which are
   # neither in the notes_template nor the caption for other notes
-  def notes_orphaned_fields(user)
+  def notes_orphaned_parts(user)
     notes.keys.map(&:to_s) - user.notes_template_parts - [other_notes_part]
-  end
-
-  # The key used for general Observation.notes
-  # (notes which were not entered in a notes_template field)
-  def self.other_notes_key
-    :Other
-  end
-
-  def other_notes_key
-    Observation.other_notes_key
   end
 
   # other_notes_key as a String
@@ -363,9 +413,9 @@ class Observation < AbstractModel
     Observation.other_notes_part
   end
 
-  # Value of notes part, where part is a String
+  # value of notes part
   #   notes: { Other: abc }
-  #   notes_part_value("Other") => "abc"
+  #   obervation.notes_part_value("Other") #=> "abc"
   def notes_part_value(part)
     notes.blank? ? "" : notes[part.to_sym]
   end
