@@ -109,7 +109,8 @@ class ObserverController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
-    @observation.notes = assermbled_notes_params
+    @observation.notes = fixed_notes_hash
+    @observation.notes.delete_if { |key, value| value.nil? || value.empty? }
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
@@ -117,15 +118,15 @@ class ObserverController
                                         @observation, @good_images)
   end
 
-  # Return a hash of notes_ params. Needed because
-  # the notes params are top-level (rather than part of params[:observation])
-  def assermbled_notes_params
-    params.each_with_object({}) do |param, notes|
-      if param[0].start_with?(Observation.notes_area_id_prefix)
-        notes[param[0].
-          sub(Observation.notes_area_id_prefix, "").to_sym] = param[1]
-      end
-    end
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids whitelisting issues
+  def fixed_notes_hash
+    return Observation.no_notes unless notes_param?
+    params[:observation][:notes].to_hash.symbolize_keys
+  end
+
+  def notes_param?
+    params[:observation] && params[:observation][:notes].present?
   end
 
   def validate_name(params)
@@ -278,10 +279,8 @@ class ObserverController
       any_errors = false
 
       update_whitelisted_observation_attributes
-      if params[:notes]
-        @observation.notes = params[:notes].to_hash.symbolize_keys
-      end
-
+      @observation.notes = fixed_notes_hash
+      @observation.notes.delete_if { |key, value| value.nil? || value.empty? }
       # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
@@ -690,7 +689,7 @@ class ObserverController
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", { notes: [:other] }, :specimen, :thumb_image_id, :is_collection_location]
+     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
   end
 
   def whitelisted_observation_params
