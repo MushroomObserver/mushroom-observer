@@ -1899,6 +1899,7 @@ class ObserverControllerTest < FunctionalTestCase
     params = {
       id: obs.id.to_s,
       observation: {
+        notes:      new_notes,
         place_name: new_where,
         "when(1i)" => "2001",
         "when(2i)" => "2",
@@ -1919,7 +1920,6 @@ class ObserverControllerTest < FunctionalTestCase
         }
       },
       log_change: { checked: "1" },
-      notes:      new_notes
     }
     post_requires_user(:edit_observation, [controller: :observer,
                                            action: :show_observation],
@@ -2085,21 +2085,21 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_notes_template_post
     user = users(:notes_templater)
-    params = {
-      observation:        sample_obs_fields,
-      notes_habitat:      "conifer forest",
-      notes_substrate:    "soil",
-      notes_Nearby_trees: "?",
-      notes_odor:         "farinaceous"
-    }
-    # Use a defined Location to avoid issues with reloading Observation
+    params = {observation: sample_obs_fields}
+    # Use defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
-    params[:observation][:notes]      = "Some notes"
+    params[:observation][:notes] = {
+      habitat:      "conifer forest",
+      substrate:    "soil",
+      Nearby_trees: "?",
+      odor:         "",
+      Other:        "Some notes"
+    }
     expected_notes = {
       habitat:      "conifer forest",
       substrate:    "soil",
       Nearby_trees: "?",
-      odor:         "farinaceous"
+      Other:        "Some notes"
     }
     o_size = Observation.count
 
@@ -2158,8 +2158,8 @@ class ObserverControllerTest < FunctionalTestCase
       odor:         "farinaceous"
     }
     params = {
-      id:     obs.id,
-      notes:  notes
+      id: obs.id,
+      observation:  { notes: notes }
     }
     login(user.login)
     post(:edit_observation, params)
@@ -2255,7 +2255,7 @@ class ObserverControllerTest < FunctionalTestCase
            place_name: "Zzyzx, Japan",
            when: time0,
            thumb_image_id: 0, # (make new image the thumbnail)
-           notes: "blah"
+           notes: { Other: "blah" }
          },
          image: {
            "0" => {
