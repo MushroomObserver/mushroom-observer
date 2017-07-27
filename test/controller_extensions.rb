@@ -669,7 +669,7 @@ module ControllerExtensions
       area[:id].starts_with?(Observation.notes_area_id_prefix)
     end
     expected_areas.each do |key, value|
-      id = Observation.notes_part_id(key.to_s)
+      id = "#{Observation.notes_area_id_prefix}#{key.to_s}"
       assert(notes_areas.any? { |area| area[:id] == id },
              "Missing textarea for #{key}")
       assert(
