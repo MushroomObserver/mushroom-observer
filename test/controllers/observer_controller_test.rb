@@ -2115,7 +2115,8 @@ class ObserverControllerTest < FunctionalTestCase
   #  both "get" and "post".
   # --------------------------------------------------------------------
 
-  # Prove that create_observation has correct note fields
+  # Prove that create_observation renders note fields with template keys first,
+  # in the order listed in the template
   def test_create_observation_with_notes_template_get
     user = users(:notes_templater)
     login(user.login)
@@ -2125,21 +2126,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_page_has_correct_notes_areas(areas)
   end
 
+  # Prove that notes are saved with template keys first, in the order listed in
+  # the template, then Other, but without blank fields
   def test_create_observation_with_notes_template_post
     user = users(:notes_templater)
     params = {observation: sample_obs_fields}
     # Use defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes] = {
-      habitat:      "conifer forest",
-      substrate:    "soil",
       Nearby_trees: "?",
+      Other:        "Some notes",
       odor:         "",
-      Other:        "Some notes"
+      Cap:          "red",
     }
     expected_notes = {
-      habitat:      "conifer forest",
-      substrate:    "soil",
+      Cap:          "red",
       Nearby_trees: "?",
       Other:        "Some notes"
     }
@@ -2154,7 +2155,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(expected_notes, obs.notes)
   end
 
-  # Prove that edit_observation has correct note fields and content
+  # Prove that edit_observation has correct note fields and content:
+  # Template fields first, in template order; then orphaned fields in order
+  # in which they appear in observation, then Other
   def test_edit_observation_with_notes_template_get
     obs    = observations(:templater_noteless_obs)
     user   = obs.user
