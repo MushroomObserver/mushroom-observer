@@ -801,12 +801,12 @@ class ObservationTest < UnitTestCase
 
     # no template and orphaned notes
     obs   = observations(:substrate_notes_obs)
-    parts = %w[substrate Other]
+    parts = ["substrate", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
 
     # no template, and orphaned notes and Other notes
     obs   = observations(:substrate_and_other_notes_obs)
-    parts = %w[substrate Other]
+    parts = ["substrate", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
 
     # template and no notes
