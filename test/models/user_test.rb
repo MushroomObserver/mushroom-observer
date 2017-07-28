@@ -312,15 +312,19 @@ class UserTest < UnitTestCase
       password: "bobs_secure_password",
       password_confirmation: "bobs_secure_password",
     )
-    assert(u.valid?, "nil notes template should be valid")
+    assert(u.valid?, "Nil notes template should be valid")
 
     u.notes_template = ""
-    assert(u.valid?, "empty notes template should be valid")
+    assert(u.valid?, "Empty notes template should be valid")
 
     u.notes_template = "Cap, Stem"
-    assert(u.valid?, "notes template present should be valid")
+    assert(u.valid?, "Notes template present should be valid")
 
     u.notes_template = "Cap, Stem, Other"
-    assert(u.invalid?, "notes template with 'Other' should be invalid")
+    assert(u.invalid?, "Notes template with 'Other' should be invalid")
+
+    u.notes_template = "Blah, Blah"
+    assert(u.invalid?,
+           "Notes template with duplication headings should be invalid")
   end
 end

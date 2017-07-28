@@ -1027,6 +1027,17 @@ class User < AbstractModel
     end
   end
 
+  validate :notes_template_forbid_duplicates
+  # :nodoc
+  def notes_template_forbid_duplicates
+    return unless notes_template.present?
+    squished = notes_template.split(",").map(&:squish)
+    dups = squished.uniq.select { |part| squished.count(part) > 1 }
+    dups.each do |dup|
+      errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))
+    end
+  end
+
   private
 
   # :nodoc
