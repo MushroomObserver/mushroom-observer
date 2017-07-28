@@ -353,10 +353,18 @@ class AccountControllerTest < FunctionalTestCase
 
     # Prove user cannot pick "Other" as a notes_template heading
     old_notes_template = user.notes_template
+    # prior test set the locale to Greece
     # reset locale to get less incomprehensible error messages
     user.locale = "en"
     user.save
     params[:user][:notes_template] = "Size, Other"
+    post(:prefs, params)
+
+    assert_flash_error
+    assert_equal(old_notes_template, user.reload.notes_template)
+
+    # Prove user cannot have duplicate headings in notes template
+    params[:user][:notes_template] = "Yadda, Yadda"
     post(:prefs, params)
 
     assert_flash_error
