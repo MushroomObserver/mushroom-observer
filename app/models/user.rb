@@ -1018,4 +1018,39 @@ class User < AbstractModel
       end
     end
   end
+
+  validate :notes_template_forbid_other
+  # :nodoc
+  def notes_template_forbid_other
+    notes_template_bad_parts.each do | part |
+      errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
+    end
+  end
+
+  private
+
+  # :nodoc
+  def notes_template_bad_parts
+    return [] unless notes_template.present?
+    bad_parts = notes_template.split(",").each_with_object([]) do |part, a|
+      next unless notes_template_reserved_words.include?(part.squish.downcase)
+      a << part.strip
+    end
+  end
+
+  # list of words which cannot be headings in user template
+  # 'Other' is already used by MO for notes without a heading.
+  # The rest won't break the application but would be confusing.
+  #
+  # 'other' plus other words is valid, e.g.,
+  # notes_template = "Cap color, Cap size, Cap other"
+  # :nodoc
+  def notes_template_reserved_words
+    [Observation.other_notes_part.downcase].concat(notes_other_translations)
+  end
+
+  # :nodoc
+  def notes_other_translations
+    %w[andere altro altra autre autres otra otras otro otros outros]
+  end
 end

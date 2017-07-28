@@ -301,4 +301,26 @@ class UserTest < UnitTestCase
   def test_is_unsuccessful_contributor?
     assert_false(users(:spammer).is_successful_contributor?)
   end
+
+  def test_notes_template_validation
+    u = User.new(
+      login: "nonexistingbob",
+      email: "nonexistingbob@collectivesource.com",
+      theme: "NULL",
+      notes: "",
+      mailing_address: "",
+      password: "bobs_secure_password",
+      password_confirmation: "bobs_secure_password",
+    )
+    assert(u.valid?, "nil notes template should be valid")
+
+    u.notes_template = ""
+    assert(u.valid?, "empty notes template should be valid")
+
+    u.notes_template = "Cap, Stem"
+    assert(u.valid?, "notes template present should be valid")
+
+    u.notes_template = "Cap, Stem, Other"
+    assert(u.invalid?, "notes template with 'Other' should be invalid")
+  end
 end

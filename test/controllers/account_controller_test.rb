@@ -349,6 +349,17 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(:small, user.thumbnail_size)
     assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
+
+    # Prove user cannot pick "Other" as a notes_template heading
+    old_notes_template = user.notes_template
+    # reset locale to get less incomprehensible error messages
+    user.locale = "en"
+    user.save
+    params[:user][:notes_template] = "Size, Other"
+    post(:prefs, params)
+
+    assert_flash_error
+    assert_equal(old_notes_template, user.reload.notes_template)
   end
 
   def test_edit_prefs_login_already_exists
