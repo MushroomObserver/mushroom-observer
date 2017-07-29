@@ -330,6 +330,73 @@ class Observation < AbstractModel
     Observation.other_notes_key
   end
 
+  # other_notes_key as a String
+  # Makes it easy to combine with notes_template
+  def self.other_notes_part
+    other_notes_key.to_s
+  end
+
+  def other_notes_part
+    Observation.other_notes_part
+  end
+
+  # id of view textarea for a Notes heading
+  def self.notes_part_id(part)
+    notes_area_id_prefix << part.gsub(" ", "_")
+  end
+
+  def notes_part_id(part)
+    Observation.notes_part_id(part)
+  end
+
+  # prefix for id of textarea
+  def self.notes_area_id_prefix
+    "observation_notes_"
+  end
+
+  # name of view textarea for a Notes heading
+  def self.notes_part_name(part)
+    "observation[notes][#{part.gsub(" ", "_")}]"
+  end
+
+  def notes_part_name(part)
+    Observation.notes_part_name(part)
+  end
+
+  # value of notes part
+  #   notes: { Other: abc }
+  #   obervation.notes_part_value("Other") #=> "abc"
+  def notes_part_value(part)
+    notes.blank? ? "" : notes[part.to_sym]
+  end
+
+  # Array of note parts (Strings) to display in create & edit form,
+  # in following (display) order. Used by views.
+  #   notes_template fields
+  #   orphaned fields (field in obs, but not in notes_template, not "Other")
+  #   "Other"
+  # Example outputs:
+  #   ["Other"]
+  #   ["orphaned_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
+  def form_notes_parts(user)
+    return user.notes_template_parts + [other_notes_part] if notes.blank?
+    user.notes_template_parts + notes_orphaned_parts(user) +
+      [other_notes_part]
+  end
+
+  # Array of notes parts (Strings) which are
+  # neither in the notes_template nor the caption for other notes
+  def notes_orphaned_parts(user)
+    # Change spaces to nderscores in order to subtract template parts from
+    # stringified keys because keys have underscores instead of spaces
+    template_parts_underscored = user.notes_template_parts.each do |part|
+      part.gsub!(" ", "_")
+    end
+    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+  end
+
   # notes (or other hash) as a String, captions (keys) without added formstting,
   # omitting "other" if it's the only caption.
   #  notes: {}                                 ::=> ""
@@ -370,59 +437,6 @@ class Observation < AbstractModel
   # wraps Class method with slightly different name
   def notes_show_formatted
     Observation.show_formatted(notes)
-  end
-
-  # id of view textarea for a Notes heading
-  def self.notes_part_id(part)
-    notes_area_id_prefix << part.gsub(" ", "_")
-  end
-
-  def self.notes_area_id_prefix
-    "observation_notes_"
-  end
-
-  # Array of note parts (Strings) to display in create & edit form,
-  # in following (display) order. Used by views.
-  #   notes_template fields
-  #   orphaned fields (field in obs, but not in notes_template, not "Other")
-  #   "Other"
-  # Example outputs:
-  #   ["Other"]
-  #   ["orphaned_part", "Other"]
-  #   ["template_1st_part", "template_2nd_part", "Other"]
-  #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
-  def form_notes_parts(user)
-    return user.notes_template_parts + [other_notes_part] if notes.blank?
-    user.notes_template_parts + notes_orphaned_parts(user) +
-      [other_notes_part]
-  end
-
-  # Array of notes parts (Strings) which are
-  # neither in the notes_template nor the caption for other notes
-  def notes_orphaned_parts(user)
-    # Change spaces to nderscores in order to subtract template parts from
-    # stringified keys because keys have underscores instead of spaces
-    template_parts_underscored = user.notes_template_parts.each do |part|
-      part.gsub!(" ", "_")
-    end
-    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
-  end
-
-  # other_notes_key as a String
-  # Makes it easy to combine with notes_template
-  def self.other_notes_part
-    other_notes_key.to_s
-  end
-
-  def other_notes_part
-    Observation.other_notes_part
-  end
-
-  # value of notes part
-  #   notes: { Other: abc }
-  #   obervation.notes_part_value("Other") #=> "abc"
-  def notes_part_value(part)
-    notes.blank? ? "" : notes[part.to_sym]
   end
 
   ##############################################################################
