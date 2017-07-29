@@ -7,7 +7,7 @@
       <div class="col-xs-12 col-sm-6 max-width-text">
         <div>
           <textarea class="form-control" rows="10"
-          id=<%= "observation_notes_#{part}" %>
+          id=<%= @observation.notes_part_id(part) %>
           name=<%= "observation[notes][#{part}]" %>
           ><%= @observation.notes_part_value(part) %></textarea>
         </div>
@@ -32,8 +32,8 @@
           <div><%= "#{strip_tags(part.tl)}: "%></div>
           <div>
             <textarea class="form-control" rows="1"
-            id=<%= "observation_notes_#{part.gsub(" ", "_")}" %>
-            name=<%= "observation[notes][#{part}]" %>
+            id=<%= @observation.notes_part_id(part) %>
+            name=<%= @observation.notes_part_name(part) %>
             ><%= @observation.notes_part_value(part) %></textarea>
           </div>
         </div>
