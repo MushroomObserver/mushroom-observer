@@ -2080,8 +2080,9 @@ class ObserverControllerTest < FunctionalTestCase
     login(user.login)
     get(:create_observation)
 
-    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "" }
-    assert_page_has_correct_notes_areas(expect_areas: areas)
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+    )
   end
 
   # Prove that notes are saved with template keys first, in the order listed in
@@ -2119,7 +2120,6 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_notes_template_get
     obs    = observations(:templater_noteless_obs)
     user   = obs.user
-    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "" }
     params = {
       id: obs.id,
       observation: {
@@ -2141,14 +2141,17 @@ class ObserverControllerTest < FunctionalTestCase
 
     login(user.login)
     get(:edit_observation, params)
-    assert_page_has_correct_notes_areas(expect_areas: areas)
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+    )
 
     obs         = observations(:templater_other_notes_obs)
     params[:id] = obs.id
     params[:observation][:notes] = obs.notes
-    areas  = { Cap: "", Nearby_trees: "", odor: "", Other: "some notes" }
     get(:edit_observation, params)
-    assert_page_has_correct_notes_areas(expect_areas: areas)
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "some notes" }
+    )
   end
 
   def test_edit_observation_with_notes_template_post
