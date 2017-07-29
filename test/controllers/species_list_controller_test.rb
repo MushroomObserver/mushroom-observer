@@ -35,7 +35,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       },
       list: { members: "" },
       checklist_data: {},
-      member: { notes: "" }
+      member: { notes: Observation.no_notes }
     }
   end
 
@@ -449,7 +449,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
       checklist_data: {},
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -474,7 +474,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: new_name_str },
       checklist_data: {},
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -637,7 +637,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     params = {
       list: { members: "\n Warnerbros  bugs-bunny " },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: "Testing nonalphas",
