@@ -294,6 +294,30 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_form_action(action: "create_species_list")
   end
 
+  def test_create_species_list_member_notes_areas
+    # Prove that only member_notes textarea is Other
+    # for user without notes template
+    user = users(:rolf)
+    login(user.login)
+    get(:create_species_list)
+    areas  = Observation.no_notes
+    assert_page_has_correct_notes_areas(
+      klass: SpeciesList,
+      expect_areas: { Observation.other_notes_key => "" }
+    )
+
+    # Prove that member_notes textareas are those for template plus Other
+    # for user with notes template
+    user = users(:notes_templater)
+    login(user.login)
+    get(:create_species_list)
+    assert_page_has_correct_notes_areas(
+      klass: SpeciesList,
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "" }
+    )
+  end
+
   def test_unsuccessful_create_location_description
     loc = locations(:albion)
     user = login("spamspamspam")
@@ -1706,7 +1730,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # If existing observations are all the same, use their values
     # as defaults for future observations.
-    obs1.notes = obs2.notes = { other: "test notes" }
+    obs1.notes = obs2.notes = { Other: "test notes" }
     obs1.lat   = obs2.lat   = "12.3456"
     obs1.long  = obs2.long  = "-76.5432"
     obs1.alt   = obs2.alt   = "789"
@@ -1719,8 +1743,10 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     get(:edit_species_list, id: spl.id)
     assert_edit_species_list
-    # TODO fix text area display and this expectation
-    assert_textarea_value(:member_notes, { other: "test notes" })
+    assert_page_has_correct_notes_areas(
+      klass:        SpeciesList,
+      expect_areas: { Other: "test notes" }
+    )
     assert_input_value(:member_lat,   "12.3456")
     assert_input_value(:member_long,  "-76.5432")
     assert_input_value(:member_alt,   "789")
@@ -1739,7 +1765,10 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     get(:edit_species_list, id: spl.id)
     assert_edit_species_list
-    assert_textarea_value(:member_notes, "")
+    assert_page_has_correct_notes_areas(
+      klass:        SpeciesList,
+      expect_areas: { Other: "" }
+    )
     assert_input_value(:member_lat, "")
     assert_input_value(:member_long, "")
     assert_input_value(:member_alt, "")

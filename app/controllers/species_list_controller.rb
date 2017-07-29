@@ -1067,7 +1067,11 @@ class SpeciesListController < ApplicationController
 
   def init_member_vars_for_create
     @member_vote = Vote.maximum_vote
-    @member_notes = nil
+    @member_notes_parts = @user.notes_template_parts <<
+      Observation.other_notes_part
+    @member_notes = @member_notes_parts.each_with_object({}) do |part, h|
+      h[part.to_sym] = ""
+    end
     @member_lat = nil
     @member_long = nil
     @member_alt = nil
@@ -1085,7 +1089,15 @@ class SpeciesListController < ApplicationController
                      rescue
                        Vote.maximum_vote
                      end
-      @member_notes = obs.notes if all_obs_same_attr?(spl_obss, :notes)
+      if all_obs_same_attr?(spl_obss, :notes)
+        obs.form_notes_parts(@user).each do |part|
+          @member_notes[part.to_sym] = obs.notes_part_value(part)
+        end
+      else
+        @species_list.form_notes_parts(@user).each do |part|
+          @member_notes[part.to_sym] = ""
+        end
+      end
       if all_obs_same_attr?(spl_obss, :lat) &&
           all_obs_same_attr?(spl_obss, :long) &&
           all_obs_same_attr?(spl_obss, :alt)
