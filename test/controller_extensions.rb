@@ -663,10 +663,11 @@ module ControllerExtensions
   end
 
   # Check presence and value of notes textareas.  Example:
-  #   assert_page_has_correct_notes({ Other: "" })
-  #   assert_page_has_correct_notes( klass: Species_list, { Other: "" })
-  def assert_page_has_correct_notes_areas(klass = Observation, expected_areas)
-    expected_areas.each do |key, val|
+  #   assert_page_has_correct_notes( expect_areas: { Cap: "red", Other: "" } )
+  #   assert_page_has_correct_notes( klass: Species_list,
+  #                                  expect_areas: { Other: "" })
+  def assert_page_has_correct_notes_areas(klass: Observation, expect_areas: {})
+    expect_areas.each do |key, val|
       id = klass.notes_part_id(key.to_s.gsub(" ", "_"))
       assert_textarea_value(id, val)
     end

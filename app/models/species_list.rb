@@ -377,6 +377,49 @@ class SpeciesList < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Member notes
+  #
+  ##############################################################################
+
+  # id of view textarea for a member notes heading
+  def self.notes_part_id(part)
+    notes_area_id_prefix << part.gsub(" ", "_")
+  end
+
+  def notes_part_id(part)
+    SpeciesList.notes_part_id(part)
+  end
+
+  # prefix for id of textarea
+  def self.notes_area_id_prefix
+    "species_list_member_notes_"
+  end
+
+  # name of view textarea for a member notes heading
+  def self.notes_part_name(part)
+    "species_list[member_notes][#{part.gsub(" ", "_")}]"
+  end
+
+  def notes_part_name(part)
+    SpeciesList.notes_part_name(part)
+  end
+
+  # value of member_notes part
+  #   @member_notes: { Other: abc }
+  #   species_list.notes_part_value("Other") #=> "abc"
+  def notes_part_value(part)
+    @member_notes.blank? ? "" : @member_notes[part.to_sym]
+  end
+
+  # Array of member note parts (Strings) to display in create & edit form
+  # They are simply the user's notes template plus Other because
+  # member note parts are not persisted in the db (unlike Observation.notes),
+  def form_notes_parts(user)
+    user.notes_template_parts << Observation.other_notes_part
+  end
+
+  ##############################################################################
+  #
   #  :section: Projects
   #
   ##############################################################################
