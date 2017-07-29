@@ -662,21 +662,22 @@ module ControllerExtensions
     end
   end
 
-  # Check presence and value of notes textareas
-  # Example: assert_page_has_correct_notes(( Other: "" })
-  def assert_page_has_correct_notes_areas(expected_areas)
+  # Check presence and value of notes textareas.  Example:
+  #   assert_page_has_correct_notes(( Other: "" })
+  #   assert_page_has_correct_notes( klass: Species_list, ( Other: "" })
+  def assert_page_has_correct_notes_areas(klass = Observation, expected_areas)
     notes_areas = css_select("textarea").find_all do |area|
-      area[:id].starts_with?(Observation.notes_area_id_prefix)
+      area[:id].starts_with?(klass.notes_area_id_prefix)
     end
-    expected_areas.each do |key, value|
-      id = "#{Observation.notes_area_id_prefix}#{key.to_s}"
-      assert(notes_areas.any? { |area| area[:id] == id },
+    expected_areas.each do |key, expected_value|
+      expected_id = klass.notes_part_id(key.to_s.gsub(" ", "_"))
+      assert(notes_areas.any? { |area| expected_id == area[:id] },
              "Missing textarea for #{key}")
       assert(
         notes_areas.one? do |area|
-          area[:id] == id &&
+          expected_id == area[:id] &&
           # strip leading newline inserted by Nokogiri or someone
-          area.content.sub(/^\n/, "") == value
+          expected_value == area.content.sub(/^\n/, "")
         end,
         "Multiple textareas or wrong value for #{key}"
       )
