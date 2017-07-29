@@ -608,7 +608,7 @@ module ControllerExtensions
     assert(message.nil?, message)
   end
 
-  # Check default value of a form field.
+  # Check existence and value of a texarea
   def assert_textarea_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
     assert_select("textarea##{id}") do |elements|
@@ -663,24 +663,12 @@ module ControllerExtensions
   end
 
   # Check presence and value of notes textareas.  Example:
-  #   assert_page_has_correct_notes(( Other: "" })
-  #   assert_page_has_correct_notes( klass: Species_list, ( Other: "" })
+  #   assert_page_has_correct_notes({ Other: "" })
+  #   assert_page_has_correct_notes( klass: Species_list, { Other: "" })
   def assert_page_has_correct_notes_areas(klass = Observation, expected_areas)
-    notes_areas = css_select("textarea").find_all do |area|
-      area[:id].starts_with?(klass.notes_area_id_prefix)
-    end
-    expected_areas.each do |key, expected_value|
-      expected_id = klass.notes_part_id(key.to_s.gsub(" ", "_"))
-      assert(notes_areas.any? { |area| expected_id == area[:id] },
-             "Missing textarea for #{key}")
-      assert(
-        notes_areas.one? do |area|
-          expected_id == area[:id] &&
-          # strip leading newline inserted by Nokogiri or someone
-          expected_value == area.content.sub(/^\n/, "")
-        end,
-        "Multiple textareas or wrong value for #{key}"
-      )
+    expected_areas.each do |key, val|
+      id = klass.notes_part_id(key.to_s.gsub(" ", "_"))
+      assert_textarea_value(id, val)
     end
   end
 end
