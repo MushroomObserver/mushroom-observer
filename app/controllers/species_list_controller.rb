@@ -1121,7 +1121,8 @@ class SpeciesListController < ApplicationController
   def init_member_vars_for_reload
     member_params    = params[:member] || {}
     @member_vote     = member_params[:vote].to_s
-    @member_notes    = member_params[:notes].to_s
+    # cannot leave @member_notes == nil because view expects a hash
+    @member_notes    = member_params[:notes] || Observation.no_notes
     @member_lat      = member_params[:lat].to_s
     @member_long     = member_params[:long].to_s
     @member_alt      = member_params[:alt].to_s
