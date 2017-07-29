@@ -404,13 +404,6 @@ class SpeciesList < AbstractModel
     SpeciesList.notes_part_name(part)
   end
 
-  # value of member_notes part
-  #   @member_notes: { Other: abc }
-  #   species_list.notes_part_value("Other") #=> "abc"
-  def notes_part_value(part)
-    @member_notes.blank? ? "" : @member_notes[part.to_sym]
-  end
-
   # Array of member note parts (Strings) to display in create & edit form
   # They are simply the user's notes template plus Other because
   # member note parts are not persisted in the db (unlike Observation.notes),
