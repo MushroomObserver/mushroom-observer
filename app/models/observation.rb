@@ -61,12 +61,16 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
-#  export_formatted::       notes (or any hash) to string with marked up
-#                           captions (keys)
+#  ---
 #  no_notes::               value of observation.notes if there are no notes
 #  no_notes_persisted::     no_notes persisted in the db
+#  other_notes_key::        key used for general Observation notes
+#  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
 #  notes_area_id_prefix     prefix for id of textarea for a Notes heading
+#  notes_part_name::        name of textarea for a Notes heading
+#  export_formatted::       notes (or any hash) to string with marked up
+#                           captions (keys)
 #  show_formatted::         notes (or any hash) to string with plain
 #                           captions (keys)
 #
@@ -74,10 +78,17 @@
 #
 #  comments::               List of Comment's attached to this Observation.
 #  form_notes_parts::       notes parts to display in create & edit form
-#  notes_export_formatted:: notes to string with marked up captions (keys)
 #  interests::              List of Interest's attached to this Observation.
-#  notes_ahow_formatted::   notes to string with plain captions (keys)
 #  species_lists::          List of SpeciesList's that contain this Observation.
+#  ---
+#  other_notes_key::        key used for general Observation notes
+#  other_notes_part::       other_notes_key as a String
+#  notes_part_id::          id of textarea for a Notes heading
+#  notes_part_name::        name of textarea for a Notes heading
+#  notes_part_value::       value for textarea for a Notes heading
+#  form_notes_parts::       note parts to display in create & edit form
+#  notes_export_formatted:: notes to string with marked up captions (keys)
+#  notes_ahow_formatted::   notes to string with plain captions (keys)
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
