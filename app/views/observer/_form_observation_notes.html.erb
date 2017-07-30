@@ -1,7 +1,8 @@
 <% # Notes section of create_observation form %>
 <div class="row push-down">
   <%= content_tag(:span, "#{:NOTES.t} ", class: "bold") %>
-  <% if @observation.form_notes_parts(@user) == "Other" %>
+  <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
+       part = Observation.other_notes_part %>
 
     <div class="row">
       <div class="col-xs-12 col-sm-6 max-width-text">
