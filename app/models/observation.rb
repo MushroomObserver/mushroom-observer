@@ -140,7 +140,6 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel
-
   belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
   belongs_to :name # (used to cache consensus name)
   belongs_to :location
@@ -357,7 +356,7 @@ class Observation < AbstractModel
 
   # id of view textarea for a Notes heading
   def self.notes_part_id(part)
-    notes_area_id_prefix << part.gsub(" ", "_")
+    notes_area_id_prefix << part.tr(" ", "_")
   end
 
   def notes_part_id(part)
@@ -371,7 +370,7 @@ class Observation < AbstractModel
 
   # name of view textarea for a Notes heading
   def self.notes_part_name(part)
-    "observation[notes][#{part.gsub(" ", "_")}]"
+    "observation[notes][#{part.tr(" ", "_")}]"
   end
 
   def notes_part_name(part)
@@ -412,7 +411,7 @@ class Observation < AbstractModel
     notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
   end
 
-  # notes (or other hash) as a String, captions (keys) without added formstting,
+  # notes as a String, captions (keys) without added formstting,
   # omitting "Other" if it's the only caption.
   #  notes: {}                                 ::=> ""
   #  notes: { Other: "abc" }                   ::=> "abc"
@@ -423,9 +422,8 @@ class Observation < AbstractModel
   def self.export_formatted(notes, markup = nil)
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
-    result = ""
-    notes.each_pair do | key, value|
-      result << "#{markup}#{key}#{markup}: #{value}\n"
+    result = notes.each_with_object("") do |(key, value), str|
+      str << "#{markup}#{key}#{markup}: #{value}\n"
     end
     result.chomp
   end
