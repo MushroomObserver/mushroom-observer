@@ -794,8 +794,7 @@ class User < AbstractModel
   # notes_template: ""
   # notes_template_parts # => []
   def notes_template_parts
-    return [] unless notes_template?
-    (notes_template.split(",")).map(&:squish)
+    notes_template? ? notes_template.split(",").map(&:squish) : []
   end
 
   ##############################################################################
@@ -1017,7 +1016,7 @@ class User < AbstractModel
   validate :notes_template_forbid_other
   # :nodoc
   def notes_template_forbid_other
-    notes_template_bad_parts.each do | part |
+    notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
     end
   end
