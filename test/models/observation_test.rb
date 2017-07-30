@@ -755,37 +755,41 @@ class ObservationTest < UnitTestCase
   # --------------------------------------------------
 
   def test_notes_export_format
-    obs =  observations(:minimal_unknown_obs)
-    assert_equal("", obs.notes_export_formatted)
+    assert_equal(
+      "",
+      observations(:minimal_unknown_obs).notes_export_formatted
+    )
 
-    obs =  observations(:detailed_unknown_obs)
-    assert_equal("Found in a strange place... & with śtrangè characters™",
-                 obs.notes_export_formatted)
-
-    obs =  observations(:substrate_notes_obs)
-    assert_equal("substrate: soil",
-                 obs.notes_export_formatted)
-
-    obs =  observations(:substrate_and_other_notes_obs)
-    assert_equal("substrate: soil\nOther: slimy",
-                 obs.notes_export_formatted)
+    assert_equal(
+      "Found in a strange place... & with śtrangè characters™",
+      observations(:detailed_unknown_obs).notes_export_formatted
+    )
+    assert_equal(
+      "substrate: soil",
+      observations(:substrate_notes_obs).notes_export_formatted
+    )
+    assert_equal(
+      "substrate: soil\nOther: slimy",
+      observations(:substrate_and_other_notes_obs).notes_export_formatted
+    )
   end
 
   def test_notes_show_format
-    obs =  observations(:minimal_unknown_obs)
-    assert_equal("", obs.notes_show_formatted)
-
-    obs =  observations(:detailed_unknown_obs)
-    assert_equal("Found in a strange place... & with śtrangè characters™",
-                 obs.notes_show_formatted)
-
-    obs =  observations(:substrate_notes_obs)
-    assert_equal("+substrate+: soil",
-                 obs.notes_show_formatted)
-
-    obs =  observations(:substrate_and_other_notes_obs)
-    assert_equal("+substrate+: soil\n+Other+: slimy",
-                 obs.notes_show_formatted)
+    assert_equal(
+      "", observations(:minimal_unknown_obs).notes_show_formatted
+    )
+    assert_equal(
+      "Found in a strange place... & with śtrangè characters™",
+      observations(:detailed_unknown_obs).notes_show_formatted
+    )
+    assert_equal(
+      "+substrate+: soil",
+      observations(:substrate_notes_obs).notes_show_formatted
+    )
+    assert_equal(
+      "+substrate+: soil\n+Other+: slimy",
+      observations(:substrate_and_other_notes_obs).notes_show_formatted
+    )
   end
 
   # Prove that notes parts for Views are assembled in this order
