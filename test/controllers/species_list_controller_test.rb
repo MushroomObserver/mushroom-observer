@@ -23,7 +23,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def spl_params(spl)
-    params = {
+    {
       id: spl.id,
       species_list: {
         place_name: spl.place_name,
@@ -88,7 +88,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_index_species_list_by_past_bys
     get(:index_species_list, by: :modified)
@@ -300,7 +300,6 @@ class SpeciesListControllerTest < FunctionalTestCase
     user = users(:rolf)
     login(user.login)
     get(:create_species_list)
-    areas  = Observation.no_notes
     assert_page_has_correct_notes_areas(
       klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "" }
@@ -1315,7 +1314,8 @@ class SpeciesListControllerTest < FunctionalTestCase
       assert(old_obs.lat == new_obs.lat)
       assert(old_obs.long == new_obs.long)
       assert(old_obs.alt == new_obs.alt)
-      assert_equal(old_obs.is_collection_location, new_obs.is_collection_location)
+      assert_equal(old_obs.is_collection_location,
+                   new_obs.is_collection_location)
       assert_equal(old_obs.specimen, new_obs.specimen)
     end
 
@@ -1326,7 +1326,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         obs1.id.to_s => obs_params1.merge(
           when_str:   now.strftime("%Y-%m-%d"),
           place_name: "new location",
-          notes:      { Observation.other_notes_key => "new notes"},
+          notes:      { Observation.other_notes_key => "new notes" },
           value:      Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
@@ -1473,7 +1473,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:create_species_list, project: { "id_#{@proj1.id}" => "1" })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
-    # (should have different default if recently create list attached to project)
+    # should have different default if recently create list attached to project
     obs = Observation.create!
     @proj1.add_observation(obs)
     get(:create_species_list)
@@ -1497,13 +1497,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     # Mary is allowed to remove her list from a project she's not on.
     get(:edit_species_list, id: @spl2.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(:edit_species_list, id: @spl2.id,
-                             species_list: { title: "" }, # (this causes it to fail)
-                             project: {
-                               "id_#{@proj1.id}" => "1",
-                               "id_#{@proj2.id}" => "0"
-                             }
-        )
+    post(
+      :edit_species_list, id: @spl2.id,
+      species_list: { title: "" }, # causes failure
+      project: {
+        "id_#{@proj1.id}" => "1",
+        "id_#{@proj2.id}" => "0"
+      }
+    )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
@@ -1567,20 +1568,22 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_checkbox_state("projects_#{proj1.id}", :unchecked)
     assert_checkbox_state("projects_#{proj2.id}", :unchecked)
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l
-        )
+    post(
+      :manage_projects, id: list.id,
+      objects_list: "1",
+      "projects_#{proj1.id}" => "",
+      "projects_#{proj2.id}" => "",
+      commit: :ATTACH.l
+    )
     assert_flash_warning # no changes
     assert_obj_list_equal([proj2], list.projects(true))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l
+    post(
+      :manage_projects, id: list.id,
+      objects_list: "1",
+      "projects_#{proj1.id}" => "",
+      "projects_#{proj2.id}" => "1",
+      commit: :ATTACH.l
         )
     assert_flash_error # no permission
     assert_obj_list_equal([proj2], list.projects(true))
@@ -1589,8 +1592,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "1",
                            "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_success
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
@@ -1598,8 +1600,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "1",
                            "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_warning # already attached
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
@@ -1607,8 +1608,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_warning # no changes
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
@@ -1616,8 +1616,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_success
     assert_obj_list_equal([proj1], list.projects(true))
 
@@ -1625,8 +1624,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_warning # no changes
     assert_obj_list_equal([proj1], list.projects(true))
 
@@ -1634,8 +1632,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_list: "1",
                            "projects_#{proj1.id}" => "1",
                            "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_success
     assert_obj_list_equal([], list.projects(true))
   end
@@ -1655,8 +1652,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_warning # no changes
 
     post(:manage_projects, id: list.id,
@@ -1664,8 +1660,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_warning # no changes
 
     post(:manage_projects, id: list.id,
@@ -1673,8 +1668,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_error # no permission
 
     login("dick")
@@ -1683,8 +1677,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_warning # already done
 
     login("mary")
@@ -1693,8 +1686,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "1",
                            "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l
-        )
+                           commit: :ATTACH.l)
     assert_flash_success
     proj1.reload
     assert_equal(2, proj1.observations.length)
@@ -1705,8 +1697,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_success
     proj2.reload
     assert_equal(0, proj2.observations.length)
@@ -1718,8 +1709,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            objects_img: "1",
                            "projects_#{proj1.id}" => "",
                            "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l
-        )
+                           commit: :REMOVE.l)
     assert_flash_warning # already done
   end
 
@@ -1871,7 +1861,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     dup_obs = spl.observations.first
     new_obs = (Observation.all - spl.observations).first
     ids = [dup_obs.id, new_obs.id]
-    query = Query.lookup(:Observation, :in_set, :ids => ids)
+    query = Query.lookup(:Observation, :in_set, ids: ids)
     params = @controller.query_params(query).merge(
       commit: :ADD.l,
       species_list: spl.title
