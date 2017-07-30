@@ -617,12 +617,12 @@ module ControllerExtensions
       elsif elements.length == 1
         actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
                          join("")).strip
-        if actual_val != expect_val.to_s
-          message = "Input '#{id}' has wrong value, " \
+        message = if actual_val != expect_val.to_s
+                    "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
-        else
-          message = nil
-        end
+                  else
+                    nil
+                  end
       end
     end
     assert(message.nil?, message)
@@ -668,7 +668,7 @@ module ControllerExtensions
   #                                  expect_areas: { Other: "" })
   def assert_page_has_correct_notes_areas(klass: Observation, expect_areas: {})
     expect_areas.each do |key, val|
-      id = klass.notes_part_id(key.to_s.gsub(" ", "_"))
+      id = klass.notes_part_id(key.to_s.tr(" ", "_"))
       assert_textarea_value(id, val)
     end
   end
