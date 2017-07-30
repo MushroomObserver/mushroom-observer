@@ -677,7 +677,7 @@ class ObserverController
   # with their filled-in values, ignoring parts with blank values
   def combined_notes_parts
     @user.notes_template_parts.each_with_object("") do |part, notes|
-      key   = "#{Observation.notes_part_id(part)}".to_sym
+      key   = Observation.notes_part_id(part).to_sym
       value = params[key]
       notes << "#{part}: #{value}\n" if value.present?
     end
