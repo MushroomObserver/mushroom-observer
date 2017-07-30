@@ -143,7 +143,8 @@ class ExpertTest < IntegrationTestCase
       form.change("title", "List Title")
       form.change("place_name", albion_name_reverse)
       form.change("species_list_notes", "List notes.")
-      form.change("member_notes", "Member notes.")
+      form.change(SpeciesList.notes_part_id(Observation.other_notes_part),
+                  "Member notes.")
       form.check("member_is_collection_location")
       form.check("member_specimen")
       form.submit
@@ -194,7 +195,7 @@ class ExpertTest < IntegrationTestCase
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
     assert_equal(albion, obs.last.location)
-    assert_equal("Member notes.", obs.last.notes.strip)
+    assert_equal({ Other: "Member notes."}, obs.last.notes)
     assert_true(obs.last.is_collection_location)
     assert_true(obs.last.specimen)
 
@@ -205,14 +206,16 @@ class ExpertTest < IntegrationTestCase
       form.assert_value("title", "List Title")
       form.assert_value("place_name", albion_name_reverse)
       form.assert_value("species_list_notes", "List notes.")
-      form.assert_value("member_notes", "Member notes.")
+      form.assert_value(SpeciesList.notes_part_id(Observation.other_notes_part),
+                        "Member notes.")
       form.assert_value("member_is_collection_location", false) # Was true
       form.assert_value("member_specimen", false) # Was true
       form.change("list_members", "Agaricus nova\r\nAmanita baccata\r\n")
       form.change("title", "Something New")
       form.change("place_name", new_location_reverse)
       form.change("species_list_notes", "New list notes.")
-      form.change("member_notes", "New member notes.")
+      form.change(SpeciesList.notes_part_id(Observation.other_notes_part),
+                  "New member notes.")
       form.uncheck("member_is_collection_location")
       form.uncheck("member_specimen")
       form.submit
@@ -252,7 +255,7 @@ class ExpertTest < IntegrationTestCase
     assert_nil(obs.last.location)
     assert_equal(new_location, obs.last.where)
     assert_nil(obs.last.location)
-    assert_equal("New member notes.", obs.last.notes.strip)
+    assert_equal({ Other: "New member notes."}, obs.last.notes)
     assert_false(obs.last.is_collection_location)
     assert_false(obs.last.specimen)
 

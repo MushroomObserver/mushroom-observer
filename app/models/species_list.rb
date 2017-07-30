@@ -392,12 +392,12 @@ class SpeciesList < AbstractModel
 
   # prefix for id of textarea
   def self.notes_area_id_prefix
-    "species_list_member_notes_"
+    "member_notes_"
   end
 
   # name of view textarea for a member notes heading
   def self.notes_part_name(part)
-    "species_list[member_notes][#{part.gsub(" ", "_")}]"
+    "member[notes][#{part.gsub(" ", "_")}]"
   end
 
   def notes_part_name(part)
