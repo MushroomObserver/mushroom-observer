@@ -938,15 +938,14 @@ class SpeciesListController < ApplicationController
     # for namings that are deprecated, then replaces them with approved
     # synonyms which the user has chosen via radio boxes in
     # params[:chosen_approved_names].
-    if chosen_names = params[:chosen_approved_names]
-      for observation in spl.observations
-        for naming in observation.namings
+    if (chosen_names = params[:chosen_approved_names])
+     spl.observations.each do |observation|
+        observation.namings.each do |naming|
           # (compensate for gsub in _form_species_lists)
-          if alt_name_id = chosen_names[naming.name_id.to_s]
-            alt_name = Name.find(alt_name_id)
-            naming.name = alt_name
-            naming.save
-          end
+          next unless (alt_name_id = chosen_names[naming.name_id.to_s])
+          alt_name = Name.find(alt_name_id)
+          naming.name = alt_name
+          naming.save
         end
       end
     end
@@ -954,7 +953,7 @@ class SpeciesListController < ApplicationController
     # Add all names from text box into species_list.  Creates a new observation
     # for each name.  ("single names" are names that matched a single name
     # uniquely.)
-    for name, timestamp in sorter.single_names
+    sorter.single_names.each do |name, timestamp|
       sp_args[:when] = timestamp || spl.when
       spl.construct_observation(name, sp_args)
     end
@@ -962,13 +961,11 @@ class SpeciesListController < ApplicationController
     # Add checked names from LHS check boxes.  It doesn't check if they are
     # already in there; it creates new observations for each and stuffs it in.
     sp_args[:when] = spl.when
-    if params[:checklist_data]
-      for key, value in params[:checklist_data]
-        if value == "1"
-          name = find_chosen_name(key.to_i, params[:chosen_approved_names])
-          spl.construct_observation(name, sp_args)
-        end
-      end
+    return unless params[:checklist_data]
+    params[:checklist_data].each do |key, value|
+      next unless value == "1"
+      name = find_chosen_name(key.to_i, params[:chosen_approved_names])
+      spl.construct_observation(name, sp_args)
     end
   end
 
@@ -1081,34 +1078,33 @@ class SpeciesListController < ApplicationController
   def init_member_vars_for_edit(spl)
     init_member_vars_for_create
     spl_obss = spl.observations
-    if obs = spl_obss.last
-      # TODO: Not sure how to check vote efficiently...
-      @member_vote = begin
-                       obs.namings.first.users_vote(@user).value
-                     rescue
-                       Vote.maximum_vote
-                     end
-      if all_obs_same_attr?(spl_obss, :notes)
-        obs.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = obs.notes_part_value(part)
-        end
-      else
-        @species_list.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = ""
-        end
+    return unless (obs = spl_obss.last)
+    # TODO: Not sure how to check vote efficiently...
+    @member_vote = begin
+                     obs.namings.first.users_vote(@user).value
+                   rescue
+                     Vote.maximum_vote
+                   end
+    if all_obs_same_attr?(spl_obss, :notes)
+      obs.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = obs.notes_part_value(part)
       end
-      if all_obs_same_attr?(spl_obss, :lat) &&
-          all_obs_same_attr?(spl_obss, :long) &&
-          all_obs_same_attr?(spl_obss, :alt)
-        @member_lat  = obs.lat
-        @member_long = obs.long
-        @member_alt  = obs.alt
+    else
+      @species_list.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = ""
       end
-      if all_obs_same_attr?(spl_obss, :is_collection_location)
-        @member_is_collection_location = obs.is_collection_location
-      end
-      @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
     end
+    if all_obs_same_attr?(spl_obss, :lat) &&
+       all_obs_same_attr?(spl_obss, :long) &&
+       all_obs_same_attr?(spl_obss, :alt)
+      @member_lat  = obs.lat
+      @member_long = obs.long
+      @member_alt  = obs.alt
+    end
+    if all_obs_same_attr?(spl_obss, :is_collection_location)
+      @member_is_collection_location = obs.is_collection_location
+    end
+    @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
   end
 
   # Do all observations have same values for the single given attribute?
@@ -1126,7 +1122,7 @@ class SpeciesListController < ApplicationController
     @member_long     = member_params[:long].to_s
     @member_alt      = member_params[:alt].to_s
     @member_is_collection_location =
-                       member_params[:is_collection_location].to_s == "1"
+      member_params[:is_collection_location].to_s == "1"
     @member_specimen = member_params[:specimen].to_s == "1"
   end
 
