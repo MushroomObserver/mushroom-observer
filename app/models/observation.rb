@@ -398,13 +398,13 @@ class Observation < AbstractModel
   end
 
   # notes (or other hash) as a String, captions (keys) without added formstting,
-  # omitting "other" if it's the only caption.
+  # omitting "Other" if it's the only caption.
   #  notes: {}                                 ::=> ""
-  #  notes: { other: "abc" }                   ::=> "abc"
+  #  notes: { Other: "abc" }                   ::=> "abc"
   #  notes: { cap: "red" }                     ::=> "cap: red"
-  #  notes: { cap: "red", stem: , other: "x" } ::=> "cap: red
+  #  notes: { cap: "red", stem: , Other: "x" } ::=> "cap: red
   #                                                  stem:
-  #                                                  other: x"
+  #                                                  Other: x"
   def self.export_formatted(notes, markup = nil)
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
@@ -421,15 +421,15 @@ class Observation < AbstractModel
   end
 
   # Notes (or other hash) as a String, captions (keys) with added formstting,
-  # omitting "other" if it's the only caption.
+  # omitting "Other" if it's the only caption.
   #
   # Used in views which display notes
   #  notes: {}                                 => ""
-  #  notes: { other: "abc" }                   => "abc"
+  #  notes: { Other: "abc" }                   => "abc"
   #  notes: { cap: "red" }                     => "+cap+: red"
   #  notes: { cap: "red", stem: , other: "x" } => "+cap+: red
   #                                                +stem+:
-  #                                                +other+: x"
+  #                                                +Other+: x"
   def self.show_formatted(notes)
     export_formatted(notes, "+")
   end

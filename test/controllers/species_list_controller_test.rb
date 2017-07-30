@@ -331,7 +331,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     list_title = "List Title"
     params = {
       list: { members: names(:coprinus_comatus).text_name },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: "  " + list_title.sub(/ /, "  ") + "  ",
@@ -351,7 +351,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs = spl.observations.first
     assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
     assert(obs.vote_cache > 2)
-    assert_equal("", obs.notes.to_s)
+    assert_equal(Observation.no_notes, obs.notes)
     assert_nil(obs.lat)
     assert_nil(obs.long)
     assert_nil(obs.alt)
@@ -363,7 +363,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     list_title = "List Title"
     params = {
       list: { members: names(:coprinus_comatus).text_name },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "",
         title: list_title,
@@ -385,7 +385,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: "#{agaricus.rank} #{agaricus.text_name}" },
       checklist_data: {},
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -414,7 +414,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: new_list_str },
       checklist_data: {},
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -498,7 +498,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     new_name_str = "Lactarius rubidus  (Hesler and Smith) Methven"
     params = {
       list: { members: new_name_str },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -533,7 +533,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: new_name_str },
       checklist_data: {},
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -594,7 +594,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: list_members.join("\r\n") },
       checklist_data: checklist_data,
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: list_title,
@@ -661,7 +661,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     # Now re-post, having selected the other Bugs Bunny name.
     params = {
       list: { members: "Warnerbros bugs-bunny\r\n" },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       species_list: {
         place_name: "Burbank, California, USA",
         title: "Testing nonalphas",
@@ -688,7 +688,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       list: { members: names(:coprinus_comatus).text_name },
       member: {
         vote:  Vote.minimum_vote,
-        notes: "member notes",
+        notes: { Observation.other_notes_key => "member notes" },
         lat:   "12 34 56 N",
         long:  "78 9 12 W",
         alt:   "345 ft",
@@ -713,7 +713,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.name_included(names(:coprinus_comatus)))
     obs = spl.observations.first
     assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
-    assert_equal("member notes", obs.notes)
+    assert_equal({ Observation.other_notes_key => "member notes" }, obs.notes)
     assert_equal(12.5822, obs.lat)
     assert_equal(-78.1533, obs.long)
     assert_equal(105, obs.alt)
@@ -1156,7 +1156,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         title: "title",
         notes: "notes"
       },
-      member: { notes: "" },
+      member: { notes: Observation.no_notes },
       list: {}
     }
     @request.session[:user_id] = rolf.id
@@ -1326,7 +1326,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         obs1.id.to_s => obs_params1.merge(
           when_str:   now.strftime("%Y-%m-%d"),
           place_name: "new location",
-          notes:      { other: "new notes"},
+          notes:      { Observation.other_notes_key => "new notes"},
           value:      Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
@@ -1359,7 +1359,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(now.to_date, new_obs1.when)
     assert_equal("new location", new_obs1.where)
     assert_nil(new_obs1.location)
-    assert_equal({ other: "new notes" }, new_obs1.notes)
+    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs1.notes)
     assert(obs1.lat == new_obs1.lat)
     assert(obs1.long == new_obs1.long)
     assert(obs1.alt == new_obs1.alt)
@@ -1381,7 +1381,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { other: "new notes" }
+          notes: { Observation.other_notes_key => "new notes" }
         )
       }
     }
@@ -1406,7 +1406,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { other: "new notes" }
+          notes: { Observation.other_notes_key => "new notes" }
         )
       }
     }
@@ -1415,7 +1415,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
-    assert_equal({ other: "new notes" }, new_obs3.notes)
+    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs3.notes)
   end
 
   def test_bulk_editor_change_vote_on_observation_with_no_votes
@@ -1730,7 +1730,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # If existing observations are all the same, use their values
     # as defaults for future observations.
-    obs1.notes = obs2.notes = { Other: "test notes" }
+    obs1.notes = obs2.notes = { Observation.other_notes_key => "test notes" }
     obs1.lat   = obs2.lat   = "12.3456"
     obs1.long  = obs2.long  = "-76.5432"
     obs1.alt   = obs2.alt   = "789"
@@ -1745,7 +1745,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_page_has_correct_notes_areas(
       klass:        SpeciesList,
-      expect_areas: { Other: "test notes" }
+      expect_areas: { Observation.other_notes_key => "test notes" }
     )
     assert_input_value(:member_lat,   "12.3456")
     assert_input_value(:member_long,  "-76.5432")
@@ -1767,7 +1767,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_page_has_correct_notes_areas(
       klass:        SpeciesList,
-      expect_areas: { Other: "" }
+      expect_areas: { Observation.other_notes_key => "" }
     )
     assert_input_value(:member_lat, "")
     assert_input_value(:member_long, "")
