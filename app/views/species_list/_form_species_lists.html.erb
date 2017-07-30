@@ -86,14 +86,12 @@
       <%= label_tag(:member_notes, :form_species_lists_member_notes.t + ":") %>
         (<%= :general_textile_link.t %>)
         <% @species_list.form_notes_parts(@user).each do |part| %>
-          <div class="row">
-              <div><%= "#{strip_tags(part.tl)}: "%></div>
-              <div>
-                <textarea class="form-control" rows="1"
-                id=<%= @species_list.notes_part_id(part) %>
-                name=<%= @species_list.notes_part_name(part) %>
-                ><%= @member_notes[part.to_sym] %></textarea>
-              </div>
+          <div><%= "#{strip_tags(part.tl)}: "%></div>
+          <div>
+            <textarea class="form-control" rows="1"
+            id=<%= @species_list.notes_part_id(part) %>
+            name=<%= @species_list.notes_part_name(part) %>
+            ><%= @member_notes[part.to_sym] %></textarea>
           </div>
         <% end %>
     </div>
