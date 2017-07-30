@@ -318,7 +318,7 @@ class AccountController < ApplicationController
 
   # Table for converting form value to object value
   # Used by update_prefs_from_form
-  def prefs_types
+  def prefs_types # rubocop:disable Metrics/MethodLength
     [
       [:email_comments_all, :boolean],
       [:email_comments_owner, :boolean],
