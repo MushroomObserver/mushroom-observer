@@ -508,93 +508,93 @@ class SpeciesListController < ApplicationController
   # species list.
   # :norobots:
   def bulk_editor
-    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-      @query = create_query(:Observation, :in_species_list, by: :id,
-                            species_list: @species_list,
-                            where: "observations.user_id = #{@user.id}")
-      @pages = paginate_numbers(:page, 100)
-      @observations = @query.paginate(
-        @pages, include: [:comments, :images, :location, namings: :votes]
-      )
-      @observation = {}
-      @votes = {}
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless @species_list
+    @query = create_query(:Observation, :in_species_list,
+                          by: :id,
+                          species_list: @species_list,
+                          where: "observations.user_id = #{@user.id}")
+    @pages = paginate_numbers(:page, 100)
+    @observations = @query.paginate(
+      @pages, include: [:comments, :images, :location, namings: :votes]
+    )
+    @observation = {}
+    @votes = {}
+    @observations.each do |obs|
+      @observation[obs.id] = obs
+      vote = begin
+               obs.consensus_naming.users_vote(@user)
+             rescue
+               nil
+             end
+      @votes[obs.id] = vote || Vote.new
+    end
+    @no_vote = Vote.new
+    @no_vote.value = 0
+    if @observation.empty?
+      flash_error(:species_list_bulk_editor_you_own_no_observations.t)
+      redirect_to(action: "show_species_list", id: @species_list.id)
+    elsif request.method == "POST"
+      updates = 0
+      stay_on_page = false
       @observations.each do |obs|
-        @observation[obs.id] = obs
-        vote = begin
-                 obs.consensus_naming.users_vote(@user)
+        args = begin
+                 params[:observation][obs.id.to_s] || {}
                rescue
-                 nil
+                 {}
                end
-        @votes[obs.id] = vote || Vote.new
-      end
-      @no_vote = Vote.new
-      @no_vote.value = 0
-      if @observation.empty?
-        flash_error(:species_list_bulk_editor_you_own_no_observations.t)
-        redirect_to(action: "show_species_list", id: @species_list.id)
-      elsif request.method == "POST"
-        updates = 0
-        stay_on_page = false
-        @observations.each do |obs|
-          args = begin
-                   params[:observation][obs.id.to_s] || {}
-                 rescue
-                   {}
-                 end
-          any_changes = false
-          old_vote = begin
-                       @votes[obs.id].value
-                     rescue
-                       0
-                     end
-          if !args[:value].nil? && args[:value].to_s != old_vote.to_s
-            if obs.namings.empty?
-              obs.namings.create!(user: @user, name_id: obs.name_id)
-            end
-            if naming = obs.consensus_naming
-              obs.change_vote(naming, args[:value].to_i, @user)
-              any_changes = true
-              @votes[obs.id].value = args[:value]
-            else
-              flash_warning(
-                :species_list_bulk_editor_ambiguous_namings.
-                  t(id: obs.id, name: obs.name.display_name.t)
-              )
-            end
+        any_changes = false
+        old_vote = begin
+                     @votes[obs.id].value
+                   rescue
+                     0
+                   end
+        if !args[:value].nil? && args[:value].to_s != old_vote.to_s
+          if obs.namings.empty?
+            obs.namings.create!(user: @user, name_id: obs.name_id)
           end
-          [:when_str, :place_name, :notes, :lat, :long, :alt,
-                         :is_collection_location, :specimen].each do |method|
-            unless args[method].nil?
-              old_val = obs.send(method)
-              old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
-              new_val = bulk_editor_new_val(method, args[method])
-              if old_val != new_val
-                obs.send("#{method}=", new_val)
-                any_changes = true
-              end
-            end
-          end
-          if any_changes
-            if obs.save
-              updates += 1
-            else
-              flash_error("") if stay_on_page
-              flash_error("#{:Observation.t} ##{obs.id}:")
-              flash_object_errors(obs)
-              stay_on_page = true
-            end
+          if (naming = obs.consensus_naming)
+            obs.change_vote(naming, args[:value].to_i, @user)
+            any_changes = true
+            @votes[obs.id].value = args[:value]
+          else
+            flash_warning(
+              :species_list_bulk_editor_ambiguous_namings.
+                t(id: obs.id, name: obs.name.display_name.t)
+            )
           end
         end
-        return if stay_on_page
-
-        if updates == 0
-          flash_warning(:runtime_no_changes.t)
-        else
-          flash_notice(:species_list_bulk_editor_success.t(n: updates))
+        [:when_str, :place_name, :notes, :lat, :long, :alt,
+         :is_collection_location, :specimen].each do |method|
+          next if args[method].nil?
+          old_val = obs.send(method)
+          old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
+          new_val = bulk_editor_new_val(method, args[method])
+          if old_val != new_val
+            obs.send("#{method}=", new_val)
+            any_changes = true
+          end
         end
-
-        redirect_to(action: :show_species_list, id: @species_list.id)
+        if any_changes
+          if obs.save
+            updates += 1
+          else
+            flash_error("") if stay_on_page
+            flash_error("#{:Observation.t} ##{obs.id}:")
+            flash_object_errors(obs)
+            stay_on_page = true
+          end
+        end
       end
+      return if stay_on_page
+
+      if updates.zero?
+        flash_warning(:runtime_no_changes.t)
+      else
+        flash_notice(:species_list_bulk_editor_success.t(n: updates))
+      end
+
+      redirect_to(action: :show_species_list, id: @species_list.id)
     end
   end
 
@@ -903,12 +903,12 @@ class SpeciesListController < ApplicationController
       end
     end
 
+    return if redirected
+
     # Failed to create due to synonyms, unrecognized names, etc.
-    unless redirected
-      init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_reload
-      init_project_vars_for_reload(@species_list)
-    end
+    init_name_vars_from_sorter(@species_list, sorter)
+    init_member_vars_for_reload
+    init_project_vars_for_reload(@species_list)
   end
 
   # Creates observations for names written in and/or selected from checklist.
