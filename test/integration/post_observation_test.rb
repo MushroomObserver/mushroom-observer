@@ -17,7 +17,7 @@ class PostObservationTest < IntegrationTestCase
     west: -118.198139
   }
 
-  def test_posting_editing_and_destroying_a_fully_detailed_observation_in_a_new_location
+  def test_post_edit_and_destroy_a_fully_detailed_observation_in_a_new_location
     setup_image_dirs
     open_create_observation_form
     submit_observation_form_with_errors
@@ -45,7 +45,9 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(create_observation_form_first_changes)
     assert_template(CREATE_OBSERVATION_PAGE)
     assert_has_location_warning(/Unknown country/)
-    assert_form_has_correct_values(create_observation_form_values_after_first_changes)
+    assert_form_has_correct_values(
+      create_observation_form_values_after_first_changes
+    )
   end
 
   def submit_observation_form_without_errors
@@ -60,7 +62,9 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(create_location_form_first_changes)
     assert_template(CREATE_LOCATION_PAGE)
     assert_has_location_warning(/County may not be required/)
-    assert_form_has_correct_values(create_location_form_values_after_first_changes)
+    assert_form_has_correct_values(
+      create_location_form_values_after_first_changes
+    )
   end
 
   def submit_location_form_without_errors
@@ -188,8 +192,10 @@ class PostObservationTest < IntegrationTestCase
     new_loc = Location.last
     new_img = Image.last
     assert_match(new_obs.when.web_date, response.body)
-    for token in new_loc.name.split(", ") # USA ends up as <span class="caps">USA</span>,
-      assert_match(token, response.body)  # so just search for each component
+    # USA ends up as <span class="caps">USA</span>,
+    # so just search for each component
+    new_loc.name.split(", ").each do |token|
+      assert_match(token, response.body)
     end
     if new_obs.is_collection_location
       assert_match(:show_observation_collection_location.l, response.body)
@@ -233,7 +239,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def assert_has_location_warning(regex)
-    assert_select(".alert-warning", { text: regex }, "Expected there to be a warning about location.")
+    assert_select(".alert-warning", { text: regex },
+                  "Expected there to be a warning about location.")
   end
 
   def assert_exists_deleted_item_log
@@ -241,11 +248,14 @@ class PostObservationTest < IntegrationTestCase
     assert_select("a[href*=show_rss_log]") do |elems|
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
-    assert(found, 'Expected to find a "destroyed" rss log somewhere on the page.')
+    assert(found,
+           'Expected to find a "destroyed" rss log somewhere on the page.')
   end
 
   def create_observation_form_values_after_first_changes
-    create_observation_form_defaults.merge(create_observation_form_first_changes)
+    create_observation_form_defaults.merge(
+      create_observation_form_first_changes
+    )
   end
 
   def create_location_form_values_after_first_changes
@@ -269,19 +279,19 @@ class PostObservationTest < IntegrationTestCase
       "name_name" => "",
       "is_collection_location" => true,
       "specimen" => false,
-      "#{other_notes_id}" => ""
+      other_notes_id => ""
     }
   end
 
   def create_observation_form_first_changes
     {
-      "observation_when_1i" => 2010,
-      "observation_when_2i" => 3,
-      "observation_when_3i" => 14,
+      "observation_when_1i"    => 2010,
+      "observation_when_2i"    => 3,
+      "observation_when_3i"    => 14,
       "observation_place_name" => "USA, California, Pasadena", # wrong order
       "is_collection_location" => false,
-      "specimen" => true,
-      "#{other_notes_id}" => "Notes for observation"
+      "specimen"               => true,
+      other_notes_id           => "Notes for observation"
     }
   end
 
