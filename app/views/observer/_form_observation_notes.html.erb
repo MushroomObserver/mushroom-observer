@@ -8,7 +8,7 @@
         <div>
           <textarea class="form-control" rows="10"
           id=<%= @observation.notes_part_id(part) %>
-          name=<%= "observation[notes][#{part}]" %>
+          name=<%= @observation.notes_part_name(part) %>
           ><%= @observation.notes_part_value(part) %></textarea>
         </div>
       </div>
