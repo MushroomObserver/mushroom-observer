@@ -2094,14 +2094,14 @@ class ObserverControllerTest < FunctionalTestCase
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes] = {
       Nearby_trees: "?",
-      Other:        "Some notes",
+      Observation.other_notes_key => "Some notes",
       odor:         "",
       Cap:          "red",
     }
     expected_notes = {
       Cap:          "red",
       Nearby_trees: "?",
-      Other:        "Some notes"
+      Observation.other_notes_key => "Some notes"
     }
     o_size = Observation.count
 
@@ -2142,7 +2142,8 @@ class ObserverControllerTest < FunctionalTestCase
     login(user.login)
     get(:edit_observation, params)
     assert_page_has_correct_notes_areas(
-      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "" }
     )
 
     obs         = observations(:templater_other_notes_obs)
@@ -2150,7 +2151,8 @@ class ObserverControllerTest < FunctionalTestCase
     params[:observation][:notes] = obs.notes
     get(:edit_observation, params)
     assert_page_has_correct_notes_areas(
-      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "some notes" }
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "some notes" }
     )
   end
 
@@ -2261,7 +2263,7 @@ class ObserverControllerTest < FunctionalTestCase
            place_name: "Zzyzx, Japan",
            when: time0,
            thumb_image_id: 0, # (make new image the thumbnail)
-           notes: { Other: "blah" }
+           notes: { Observation.other_notes_key => "blah" }
          },
          image: {
            "0" => {
