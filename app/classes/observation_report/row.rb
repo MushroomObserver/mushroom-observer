@@ -360,7 +360,9 @@ module ObservationReport
     end
 
     def notes_to_hash
-      YAML.load(@vals[9])
+      # prefer safe_load to load for safety & to make RuboCop happy
+      # 2nd argumnet whitelists Symbols, needed because notes have symbol keys
+      YAML.safe_load(@vals[9], [Symbol])
     end
   end
 end
