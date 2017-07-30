@@ -1037,7 +1037,7 @@ class User < AbstractModel
   # :nodoc
   def notes_template_bad_parts
     return [] unless notes_template.present?
-    bad_parts = notes_template.split(",").each_with_object([]) do |part, a|
+    notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)
       a << part.strip
     end
@@ -1056,6 +1056,6 @@ class User < AbstractModel
 
   # :nodoc
   def notes_other_translations
-    %w[andere altro altra autre autres otra otras otro otros outros]
+    %w(andere altro altra autre autres otra otras otro otros outros)
   end
 end
