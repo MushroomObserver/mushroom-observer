@@ -1893,7 +1893,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
-    new_notes  = { obs.other_notes_key => "blather blather blather" }
+    new_notes = { obs.other_notes_key => "blather blather blather" }
     new_specimen = false
     img = images(:in_situ_image)
     params = {
@@ -1971,7 +1971,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
-    new_notes = {other: "blather blather blather" }
+    new_notes = { other: "blather blather blather" }
     new_specimen = false
     params = {
       id: obs.id.to_s,
@@ -2089,14 +2089,14 @@ class ObserverControllerTest < FunctionalTestCase
   # the template, then Other, but without blank fields
   def test_create_observation_with_notes_template_post
     user = users(:notes_templater)
-    params = {observation: sample_obs_fields}
+    params = { observation: sample_obs_fields }
     # Use defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes] = {
       Nearby_trees: "?",
       Observation.other_notes_key => "Some notes",
       odor:         "",
-      Cap:          "red",
+      Cap:          "red"
     }
     expected_notes = {
       Cap:          "red",
@@ -2281,8 +2281,7 @@ class ObserverControllerTest < FunctionalTestCase
            }
          },
          # (attach these two images once observation created)
-         good_images: "#{new_image_1.id} #{new_image_2.id}"
-        )
+         good_images: "#{new_image_1.id} #{new_image_2.id}")
     assert_response(:redirect) # redirected = successfully created
 
     obs = Observation.find_by_where("Zzyzx, Japan")
