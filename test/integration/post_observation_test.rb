@@ -400,7 +400,7 @@ class PostObservationTest < IntegrationTestCase
       vote: Vote.next_best_vote,
       is_collection_location: false,
       specimen: true,
-      notes: "Notes for observation",
+      notes: "Notes for observation", # string displayed in show_observation
       image_notes: "Notes for image"
     }
   end
@@ -427,7 +427,7 @@ class PostObservationTest < IntegrationTestCase
       alt: 987,
       is_collection_location: true,
       specimen: false,
-      notes: "New notes for observation",
+      notes: "New notes for observation", # string displayed in show_observation
       image_notes: "New notes for image"
     )
   end
