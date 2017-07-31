@@ -207,10 +207,10 @@ class UserTest < UnitTestCase
     group_id = UserGroup.one_user(user_id).id
     pub_id = user.publications[0].id
     User.erase_user(user_id)
-    assert_raise(ActiveRecord::RecordNotFound) { User.find(user_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { User.find(user_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
     assert(!UserGroup.all_users.user_ids.include?(user_id))
-    assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
   end
 
   def test_erase_user_with_comment_and_name_descriptions
@@ -223,7 +223,7 @@ class UserTest < UnitTestCase
     sample_name_description_id = user.name_descriptions.first.id
     User.erase_user(user.id)
     assert_equal(num_comments - 1, Comment.count)
-    assert_raise(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
     assert_equal(num_name_descriptions, NameDescription.count)
     desc = NameDescription.find(sample_name_description_id)
     assert_equal(0, desc.user_id)
@@ -309,7 +309,7 @@ class UserTest < UnitTestCase
       notes: "",
       mailing_address: "",
       password: "bobs_secure_password",
-      password_confirmation: "bobs_secure_password",
+      password_confirmation: "bobs_secure_password"
     )
     assert(u.valid?, "Nil notes template should be valid")
 
