@@ -28,11 +28,11 @@ class UserTest < UnitTestCase
     assert !u.save
     assert u.errors[:password].any?
 
-    u.password = u.password_confirmation = "hugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehuge"
+    u.password = u.password_confirmation = "huge" * 43 # size = 4 * 43 == 172
     assert !u.save
     assert u.errors[:password].any?
 
-    # This is allowed now so that API can create users without a password chosen yet.
+    # This is allowed now to let API create users without a password chosen yet.
     # u.password = u.password_confirmation = ""
     # assert !u.save
     # assert u.errors[:password].any?
@@ -54,7 +54,7 @@ class UserTest < UnitTestCase
     assert !u.save
     assert u.errors[:login].any?
 
-    u.login = "hugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhug"
+    u.login = "hugebob" * 26 # size = 7 * 26 == 182
     assert !u.save
     assert u.errors[:login].any?
 
@@ -171,14 +171,15 @@ class UserTest < UnitTestCase
     assert_obj_list_equal([spl3], proj.species_lists)
 
     assert_obj_list_equal([spl1, spl2],
-                           rolf.all_editable_species_lists.sort_by(&:id))
+                          rolf.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal(SpeciesList.where(user: mary),
                           mary.all_editable_species_lists)
     assert_obj_list_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
     dick.reload
-    assert_obj_list_equal([spl1, spl3], dick.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl3],
+                          dick.all_editable_species_lists.sort_by(&:id))
 
     proj.user_group.users.push(rolf, mary)
     proj.user_group.users.delete(dick)
@@ -188,7 +189,7 @@ class UserTest < UnitTestCase
     assert_obj_list_equal([spl1, spl2, spl3],
                           rolf.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
-                           mary.all_editable_species_lists.sort_by(&:id))
+                          mary.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([], dick.all_editable_species_lists)
   end
 
@@ -205,18 +206,16 @@ class UserTest < UnitTestCase
     assert_nil(rolf.image)
   end
 
-  # For some reason this is breaking test_meta_groups, and I can't figure out why.
-  # Hmmmm, seems to work now...
   def test_erase_user
     user = users(:spammer)
     user_id = user.id
     group_id = UserGroup.one_user(user_id).id
     pub_id = user.publications[0].id
     User.erase_user(user_id)
-    assert_raise(ActiveRecord::RecordNotFound) { User.find(user_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { User.find(user_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
     assert(!UserGroup.all_users.user_ids.include?(user_id))
-    assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
   end
 
   def test_erase_user_with_comment_and_name_descriptions
@@ -229,7 +228,7 @@ class UserTest < UnitTestCase
     sample_name_description_id = user.name_descriptions.first.id
     User.erase_user(user.id)
     assert_equal(num_comments - 1, Comment.count)
-    assert_raise(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
     assert_equal(num_name_descriptions, NameDescription.count)
     desc = NameDescription.find(sample_name_description_id)
     assert_equal(0, desc.user_id)
@@ -263,7 +262,8 @@ class UserTest < UnitTestCase
     comment.save
     comment_id = comment.id
 
-    # Fixtures have one vote for this observation, but the naming the vote refers to applies to another observation!
+    # Fixtures have one vote for this observation, but the naming the vote
+    # refers to applies to another observation!
     vote = observation.votes.first
     vote_id = vote.id
     naming = vote.naming
@@ -286,12 +286,16 @@ class UserTest < UnitTestCase
     assert_equal(num_images - 1, Image.count)
     assert_equal(num_comments - 1, Comment.count)
     assert_equal(num_publications - 1, Publication.count)
-    assert_raise(ActiveRecord::RecordNotFound) { Observation.find(observation_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Naming.find(naming_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Vote.find(vote_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Image.find(image_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Publication.find(publication_id) }
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Observation.find(observation_id)
+    end
+    assert_raises(ActiveRecord::RecordNotFound) { Naming.find(naming_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Vote.find(vote_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Image.find(image_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Publication.find(publication_id)
+    end
   end
 
   def test_is_successful_contributor?
@@ -310,7 +314,7 @@ class UserTest < UnitTestCase
       notes: "",
       mailing_address: "",
       password: "bobs_secure_password",
-      password_confirmation: "bobs_secure_password",
+      password_confirmation: "bobs_secure_password"
     )
     assert(u.valid?, "Nil notes template should be valid")
 
