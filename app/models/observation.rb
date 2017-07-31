@@ -403,10 +403,10 @@ class Observation < AbstractModel
   # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
   def notes_orphaned_parts(user)
-    # Change spaces to nderscores in order to subtract template parts from
+    # Change spaces to underscores in order to subtract template parts from
     # stringified keys because keys have underscores instead of spaces
     template_parts_underscored = user.notes_template_parts.each do |part|
-      part.gsub!(" ", "_")
+      part.tr!(" ", "_")
     end
     notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
   end
