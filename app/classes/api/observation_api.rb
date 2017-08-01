@@ -90,10 +90,9 @@ class API
       images = parse_images(:images, default: [])
       thumbnail = parse_image(:thumbnail, default: images.first)
       images.unshift(thumbnail) if thumbnail && !images.include?(thumbnail)
-
       {
         when: parse_date(:date, default: Date.today),
-        notes: parse_string(:notes, default: ""),
+        notes: parse_notes(:notes),
         place_name: loc,
         lat: lat,
         long: long,
