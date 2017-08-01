@@ -82,7 +82,7 @@ class ApiTest < UnitTestCase
     assert_equal(@date.web_date, obs.when.web_date)
     assert_users_equal(@user, obs.user)
     assert_equal(@specimen, obs.specimen)
-    assert_equal(@notes.strip, obs.notes)
+    assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
     assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
     assert_objs_equal(@loc, obs.location)
@@ -238,7 +238,7 @@ class ApiTest < UnitTestCase
     @spl = nil
     @proj = nil
     @date = Time.now.in_time_zone("GMT").to_date
-    @notes = ""
+    @notes = Observation.no_notes
     @vote = Vote.maximum_vote
     @specimen = false
     @is_col_loc = true
@@ -267,7 +267,7 @@ class ApiTest < UnitTestCase
     @spl = species_lists(:first_species_list)
     @proj = projects(:eol_project)
     @date = Date.parse("20120626")
-    @notes = "These are notes.\nThey look like this.\n"
+    @notes = { Other: "These are notes.\nThey look like this.\n" }
     @vote = 2.0
     @specimen = true
     @is_col_loc = true
@@ -279,7 +279,7 @@ class ApiTest < UnitTestCase
       action:        :observation,
       api_key:       @api_key.key,
       date:          "20120626",
-      notes:         @notes,
+      notes:         "These are notes.\nThey look like this.\n",
       location:      "USA, California, Albion",
       latitude:      "39.229°N",
       longitude:     "123.770°W",
