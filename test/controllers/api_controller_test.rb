@@ -104,7 +104,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_nil(obs.alt)
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
-    assert_equal("", obs.notes)
+    assert_equal(Observation.no_notes, obs.notes)
     assert_obj_list_equal([], obs.images)
     assert_nil(obs.thumb_image)
     assert_obj_list_equal([], obs.projects)
@@ -144,7 +144,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(376, obs.alt)
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
-    assert_equal("These are notes.\nThey look like this.", obs.notes)
+    assert_equal({Observation.other_notes_key =>
+                    "These are notes.\nThey look like this.\n"}, obs.notes)
     assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)], obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_list_equal([projects(:eol_project)], obs.projects)
