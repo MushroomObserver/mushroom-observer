@@ -1181,15 +1181,15 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/location/create_location})
     assert_equal(
       [
-       "Fungi",
-       "Agaricus",
-       "Psalliota",
-       "Chlorophyllum Author",
-       "Lepiota Author",
-       '"One"',
-       '"Two"',
-       '"Three"',
-       'Agaricus "blah"'
+        "Fungi",
+        "Agaricus",
+        "Psalliota",
+        "Chlorophyllum Author",
+        "Lepiota Author",
+        '"One"',
+        '"Two"',
+        '"Three"',
+        'Agaricus "blah"'
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort)
 
@@ -1212,16 +1212,16 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/location/create_location})
     assert_equal(
       [
-       "Fungi",
-       "Agaricus",
-       "Psalliota",
-       "Chlorophyllum Author",
-       "Lepiota Author",
-       "Lepiota Author",
-       '"One"',
-       '"Two"',
-       '"Three"',
-       'Agaricus "blah"'
+        "Fungi",
+        "Agaricus",
+        "Psalliota",
+        "Chlorophyllum Author",
+        "Lepiota Author",
+        "Lepiota Author",
+        '"One"',
+        '"Two"',
+        '"Three"',
+        'Agaricus "blah"'
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort)
   end

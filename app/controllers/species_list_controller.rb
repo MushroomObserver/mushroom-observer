@@ -1112,8 +1112,8 @@ class SpeciesListController < ApplicationController
 
   def all_obs_same_lat_Lon_alt?(observations)
     all_obs_same_attr?(observations, :lat) &&
-    all_obs_same_attr?(observations, :long) &&
-    all_obs_same_attr?(observations, :alt)
+      all_obs_same_attr?(observations, :long) &&
+      all_obs_same_attr?(observations, :alt)
   end
 
   # Do all observations have same values for the single given attribute?
