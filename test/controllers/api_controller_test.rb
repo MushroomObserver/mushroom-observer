@@ -49,9 +49,11 @@ class ApiControllerTest < FunctionalTestCase
   ################################################################################
 
   def test_basic_get_requests
-    for model_class in [Comment, Image, Location, Name, Observation, Project,
-                        SpeciesList, User]
-      for detail in [:none, :low, :high]
+    [
+      Comment, Image, Location, Name, Observation, Project, Sequence,
+      SpeciesList, User
+    ].each do |model_class|
+      [:none, :low, :high].each do |detail|
         assert_no_api_errors
         get(model_class.table_name.to_sym, detail: detail)
         assert_no_api_errors

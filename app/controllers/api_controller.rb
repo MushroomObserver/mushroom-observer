@@ -50,6 +50,10 @@ class ApiController < ApplicationController
     rest_query(:project)
   end
 
+  def sequences
+    rest_query(:sequence)
+  end
+
   def species_lists
     rest_query(:species_list)
   end
