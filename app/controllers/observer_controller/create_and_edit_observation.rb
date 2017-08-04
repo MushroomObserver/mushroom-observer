@@ -109,8 +109,7 @@ class ObserverController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
-    @observation.notes = fixed_notes_hash
-    @observation.notes.delete_if { |key, value| value.nil? || value.empty? }
+    @observation.notes = notes_to_sym_and_compact
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
@@ -120,9 +119,10 @@ class ObserverController
 
   # Symbolize keys; delete key/value pair if value blank
   # Also avoids whitelisting issues
-  def fixed_notes_hash
+  def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param?
-    params[:observation][:notes].to_hash.symbolize_keys
+    symbolized = params[:observation][:notes].to_hash.symbolize_keys
+    symbolized.delete_if { |_key, value| value.nil? || value.empty? }
   end
 
   def notes_param?
@@ -279,8 +279,7 @@ class ObserverController
       any_errors = false
 
       update_whitelisted_observation_attributes
-      @observation.notes = fixed_notes_hash
-      @observation.notes.delete_if { |key, value| value.nil? || value.empty? }
+      @observation.notes = notes_to_sym_and_compact
       # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []

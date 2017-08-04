@@ -261,7 +261,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def other_notes_id
-   Observation.notes_part_id(Observation.other_notes_part)
+    Observation.notes_part_id(Observation.other_notes_part)
   end
 
   def create_observation_form_defaults
