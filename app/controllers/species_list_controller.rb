@@ -939,7 +939,7 @@ class SpeciesListController < ApplicationController
     # synonyms which the user has chosen via radio boxes in
     # params[:chosen_approved_names].
     if (chosen_names = params[:chosen_approved_names])
-     spl.observations.each do |observation|
+      spl.observations.each do |observation|
         observation.namings.each do |naming|
           # (compensate for gsub in _form_species_lists)
           next unless (alt_name_id = chosen_names[naming.name_id.to_s])
@@ -1079,24 +1079,14 @@ class SpeciesListController < ApplicationController
     init_member_vars_for_create
     spl_obss = spl.observations
     return unless (obs = spl_obss.last)
-    # TODO: Not sure how to check vote efficiently...
+    # Not sure how to check vote efficiently...
     @member_vote = begin
                      obs.namings.first.users_vote(@user).value
                    rescue
                      Vote.maximum_vote
                    end
-    if all_obs_same_attr?(spl_obss, :notes)
-      obs.form_notes_parts(@user).each do |part|
-        @member_notes[part.to_sym] = obs.notes_part_value(part)
-      end
-    else
-      @species_list.form_notes_parts(@user).each do |part|
-        @member_notes[part.to_sym] = ""
-      end
-    end
-    if all_obs_same_attr?(spl_obss, :lat) &&
-       all_obs_same_attr?(spl_obss, :long) &&
-       all_obs_same_attr?(spl_obss, :alt)
+    init_member_notes_for_edit(spl_obss)
+    if all_obs_same_lat_Lon_alt?(spl_obss)
       @member_lat  = obs.lat
       @member_long = obs.long
       @member_alt  = obs.alt
@@ -1105,6 +1095,25 @@ class SpeciesListController < ApplicationController
       @member_is_collection_location = obs.is_collection_location
     end
     @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
+  end
+
+  def init_member_notes_for_edit(observations)
+    if all_obs_same_attr?(observations, :notes)
+      obs = observations.last
+      obs.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = obs.notes_part_value(part)
+      end
+    else
+      @species_list.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = ""
+      end
+    end
+  end
+
+  def all_obs_same_lat_Lon_alt?(observations)
+    all_obs_same_attr?(observations, :lat) &&
+    all_obs_same_attr?(observations, :long) &&
+    all_obs_same_attr?(observations, :alt)
   end
 
   # Do all observations have same values for the single given attribute?
