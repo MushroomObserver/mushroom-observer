@@ -930,7 +930,7 @@ class ApiTest < UnitTestCase
       API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"),
                             DateTime.parse("2011-02-24 02:03:59")),
       "2011/02/24 02:03"
-   )
+    )
     assert_parse(
       :parse_time_range,
       API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"),
