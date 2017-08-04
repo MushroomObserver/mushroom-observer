@@ -110,23 +110,24 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_observation
-    post(:observations,
-         api_key: api_keys(:rolfs_api_key).key,
-         date: "2012-06-26",
-         location: "Burbank, California, USA",
-         name: "Coprinus comatus",
-         vote: "2",
-         latitude: "34.5678N",
-         longitude: "123.4567W",
-         altitude: "1234 ft",
-         has_specimen: "yes",
-         is_collection_location: "yes",
-         notes: "These are notes.\nThey look like this.\n",
-         images: "#{images(:in_situ_image).id}, " \
-                 "#{images(:turned_over_image).id}",
-         thumbnail: images(:turned_over_image).id.to_s,
-         projects: "EOL Project",
-         species_lists: "Another Species List")
+    post(
+      :observations,
+      api_key: api_keys(:rolfs_api_key).key,
+      date: "2012-06-26",
+      location: "Burbank, California, USA",
+      name: "Coprinus comatus",
+      vote: "2",
+      latitude: "34.5678N",
+      longitude: "123.4567W",
+      altitude: "1234 ft",
+      has_specimen: "yes",
+      is_collection_location: "yes",
+      notes: "These are notes.\nThey look like this.\n",
+      images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
+      thumbnail: images(:turned_over_image).id.to_s,
+      projects: "EOL Project",
+      species_lists: "Another Species List"
+    )
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)

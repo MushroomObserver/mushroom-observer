@@ -800,8 +800,13 @@ class ApiTest < UnitTestCase
   # with these assertions
   def test_parse_time
     assert_parse(:parse_time, nil, nil)
+<<<<<<< 98bde8ed1cd6f9006787c36fcb79143fb44b9969
     assert_parse(:parse_time, Time.zone.parse("2012-06-25 12:34:56"), nil,
                  default: Time.zone.parse("2012-06-25 12:34:56"))
+=======
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), nil,
+                 default: DateTime.parse("2012-06-25 12:34:56"))
+>>>>>>> Simple Rubcopping in API files touched in this branch
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
                  "20120625123456")
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
@@ -940,7 +945,11 @@ class ApiTest < UnitTestCase
       API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"),
                             DateTime.parse("2011-02-24 02:03:59")),
       "2011/02/24 02:03"
+<<<<<<< 98bde8ed1cd6f9006787c36fcb79143fb44b9969
     )
+=======
+   )
+>>>>>>> Simple Rubcopping in API files touched in this branch
     assert_parse(
       :parse_time_range,
       API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"),
