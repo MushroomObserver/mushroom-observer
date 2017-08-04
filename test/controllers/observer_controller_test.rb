@@ -2445,7 +2445,7 @@ class ObserverControllerTest < FunctionalTestCase
                               "id_#{@proj1.id}" => "1",
                               "id_#{@proj2.id}" => "1"
                             }
-    )
+        )
     assert_response(:redirect)
     assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects.sort_by(&:id))
     assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects.sort_by(&:id))
