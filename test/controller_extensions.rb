@@ -620,8 +620,6 @@ module ControllerExtensions
         message = if actual_val != expect_val.to_s
                     "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
-                  else
-                    nil
                   end
       end
     end

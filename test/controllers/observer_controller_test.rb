@@ -1919,7 +1919,7 @@ class ObserverControllerTest < FunctionalTestCase
           license_id: "#{licenses(:ccwiki30).id}"
         }
       },
-      log_change: { checked: "1" },
+      log_change: { checked: "1" }
     }
     post_requires_user(:edit_observation, [controller: :observer,
                                            action: :show_observation],
@@ -1957,8 +1957,11 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "0" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(
+      :edit_observation,
+      [controller: :observer, action: :show_observation],
+      params, "mary"
+    )
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10, rolf.reload.contribution)
@@ -1986,8 +1989,11 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(
+      :edit_observation,
+      [controller: :observer, action: :show_observation],
+      params, "mary"
+    )
     assert_response(:success) # Which really means failure
   end
 
@@ -2062,9 +2068,11 @@ class ObserverControllerTest < FunctionalTestCase
     login("mary")
     post(:edit_observation, params)
 
-    assert_response(:success,
-                    "Expected 200 (OK), Got #{@response.status} (#{@response.message})")
     # 200 :success means means failure!
+    assert_response(
+      :success,
+      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
+    )
     assert_flash_error
   end
 
@@ -2403,10 +2411,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:redirect)
     get(:edit_observation, id: @obs2.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:edit_observation, id: @obs2.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-                            project: { "id_#{@proj1.id}" => "1" }
-        )
+    post(
+      :edit_observation,
+      id: @obs2.id,
+      observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+      project: { "id_#{@proj1.id}" => "1" }
+    )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     post(:edit_observation, id: @obs2.id,
                             project: { "id_#{@proj1.id}" => "1" }
@@ -2420,20 +2430,22 @@ class ObserverControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     get(:edit_observation, id: @obs1.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-                            project: {
-                              "id_#{@proj1.id}" => "1",
-                              "id_#{@proj2.id}" => "0"
-                            }
-        )
+    post(
+      :edit_observation,
+      id: @obs1.id,
+      observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+      project: {
+        "id_#{@proj1.id}" => "1",
+        "id_#{@proj2.id}" => "0"
+      }
+    )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     post(:edit_observation, id: @obs1.id,
                             project: {
                               "id_#{@proj1.id}" => "1",
                               "id_#{@proj2.id}" => "1"
                             }
-        )
+    )
     assert_response(:redirect)
     assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects.sort_by(&:id))
     assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects.sort_by(&:id))
@@ -2503,14 +2515,15 @@ class ObserverControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit_observation, id: @obs1.id)
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
-    post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" }, # (ensures it will fail)
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+    post(
+      :edit_observation,
+      id: @obs1.id,
+      observation: { place_name: "blah blah blah" }, # (ensures it will fail)
+      list: { "id_#{@spl1.id}" => "1" }
+    )
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
     post(:edit_observation, id: @obs1.id,
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+                            list: { "id_#{@spl1.id}" => "1" })
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
     get(:edit_observation, id: @obs2.id)
@@ -2562,41 +2575,47 @@ class ObserverControllerTest < FunctionalTestCase
     # <img[^>]+watch\d*.png[^>]+>[\w\s]*
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/watch\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
-    assert_image_link_in_html(/ignore\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+    assert_image_link_in_html(
+      /watch\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 1
+    )
+    assert_image_link_in_html(
+      /ignore\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: -1
+    )
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
-    assert_image_link_in_html(/ignore\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+    assert_image_link_in_html(
+      /halfopen\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 0
+    )
+    assert_image_link_in_html(
+      /ignore\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
-    assert_image_link_in_html(/watch\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
+    assert_image_link_in_html(
+      /halfopen\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 0
+    )
+    assert_image_link_in_html(
+      /watch\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 1
+    )
   end
 
   # ----------------------------
