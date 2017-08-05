@@ -224,11 +224,6 @@ class SequenceTest < UnitTestCase
     assert(sequence.invalid?, "Bases with invalid code should be invalid")
   end
 
-  def test_foo
-    sequence = sequences(:fasta_formatted_sequence)
-    assert(sequence.valid?, sequence.errors.messages)
-  end
-
   def test_deposit?
     # Prove it's false if neither archive nor accession
     refute(sequences(:local_sequence).deposit?)
