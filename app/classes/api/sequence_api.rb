@@ -22,21 +22,25 @@ class API
     end
 
     def create_params
-      observations = parse_observations(
-        :observations, default: [], must_have_edit_permission: true
-      )
       {
-        observation:  observations,
-        locus:        parse_string(:notes, default: ""),
-        bases:        parse_string(:notes, default: ""),
-        archive:      parse_string(:notes, default: ""),
-        accession:    parse_string(:notes, default: ""),
+        observation:  parse_observation(:observation, must_have_edit_permission: true),
+        user:         @user,
+        locus:        parse_string(:locus, default: ""),
+        bases:        parse_string(:bases, default: ""),
+        archive:      parse_string(:archive, default: ""),
+        accession:    parse_string(:accession, default: ""),
         notes:        parse_string(:notes, default: "")
       }
     end
 
     def update_params
-      create_params
+      {
+        locus:      :locus,
+        bases:      :bases,
+        archive:    :archive,
+        accession:  :accession,
+        notes:      :notes
+      }
     end
 
     def validate_create_params!(params)
