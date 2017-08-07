@@ -1,7 +1,6 @@
-# API for nucleotide sequences
 class API
+  # API for nucleotide sequences
   class SequenceAPI < ModelAPI
-
     self.model = Sequence
 
     self.high_detail_page_length = 100
@@ -23,7 +22,8 @@ class API
 
     def create_params
       {
-        observation:  parse_observation(:observation, must_have_edit_permission: true),
+        observation:  parse_observation(:observation,
+                                        must_have_edit_permission: true),
         user:         @user,
         locus:        parse_string(:locus, default: ""),
         bases:        parse_string(:bases, default: ""),
@@ -43,7 +43,6 @@ class API
       }
     end
 
-    def validate_create_params!(params)
-    end
+    def validate_create_params!(params); end
   end
 end
