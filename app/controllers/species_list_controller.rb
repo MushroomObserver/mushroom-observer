@@ -447,7 +447,15 @@ class SpeciesListController < ApplicationController
   def do_add_observations(species_list, query)
     ids = query.result_ids - species_list.observation_ids
     return if ids.empty?
-    species_list.observation_ids += ids
+    # This is apparently extremely inefficient.  Danny says it times out for
+    # large species_lists, such as "Neotropical Fungi".
+    # species_list.observation_ids += ids
+    Observation.connection.insert(%(
+      INSERT INTO observations_species_lists
+        (observation_id, species_list_id)
+      VALUES
+        #{ids.map { |id| "(#{id},#{species_list.id})" }.join(",")}
+    ))
     flash_notice(:species_list_add_remove_add_success.t(num: ids.length))
   end
 

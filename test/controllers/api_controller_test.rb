@@ -3,14 +3,19 @@ require "test_helper"
 require "rexml/document"
 
 class ApiControllerTest < FunctionalTestCase
-  def assert_no_api_errors
+  def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
-    if @api
-      msg = "Caught API Errors:\n" + @api.errors.map do |error|
-        error.to_s + "\n" + error.trace.join("\n")
-      end.join("\n")
-      assert(@api.errors.empty?, msg)
+    return unless @api
+    msg = format_api_errors(@api, msg)
+    assert(@api.errors.empty?, msg)
+  end
+
+  def format_api_errors(api, msg)
+    lines = [msg, "Caught API Errors:"]
+    lines += api.errors.map do |error|
+      error.to_s + "\n" + error.trace.join("\n")
     end
+    lines.reject(&:blank?).join("\n")
   end
 
   def post_and_send_file(action, file, content_type, params)
@@ -49,17 +54,35 @@ class ApiControllerTest < FunctionalTestCase
   ################################################################################
 
   def test_basic_get_requests
+    assert_no_api_errors
     [
-      Comment, Image, Location, Name, Observation, Project, Sequence,
-      SpeciesList, User
-    ].each do |model_class|
-      [:none, :low, :high].each do |detail|
-        assert_no_api_errors
-        get(model_class.table_name.to_sym, detail: detail)
-        assert_no_api_errors
-        assert_objs_equal(model_class.first, @api.results.first)
+      Comment,
+      Image,
+      Location,
+      Name,
+      Observation,
+      Project,
+      Sequence,
+      SpeciesList,
+      User
+    ].each { |model| do_basic_get_request_for_model(model) }
+  end
+
+  def do_basic_get_request_for_model(model)
+    [:none, :low, :high].each do |detail|
+      [:xml, :json].each do |format|
+        get(model.table_name.to_sym, detail: detail, format: format)
+        assert_no_api_errors("Get #{model.name} #{detail} #{format}")
+        assert_objs_equal(model.first, @api.results.first)
       end
     end
+  end
+
+  def test_num_of_pages
+    get(:observations, detail: :high, format: :json)
+    json = JSON.parse(response.body)
+    assert_equal(4, json["number_of_pages"],
+                 "Number of pages was not correctly calculated.")
   end
 
   def test_post_minimal_observation

@@ -275,7 +275,7 @@ blockquote {
         border-color: $LOGO_BORDER_COLOR;
         border-style: $LOGO_BORDER_STYLE;
         border-radius: 0px;
-        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
             margin-bottom: 5px;
         }
 
@@ -336,7 +336,7 @@ blockquote {
     }
 
     .list-group {
-        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
             margin-bottom: 15px;
         } @else {
             margin-bottom: 2px;
@@ -349,7 +349,7 @@ blockquote {
         color: $LEFT_BAR_HEADER_FG_COLOR;
         background-color: $LEFT_BAR_HEADER_BG_COLOR;
         cursor: default;
-        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
             margin-top: 10px;
         }
         padding-left: 5px;
@@ -361,7 +361,7 @@ blockquote {
         border-width: $LEFT_BAR_ITEM_BORDER_WIDTH 0px;
         border-style: $LEFT_BAR_BORDER_STYLE;
         border-radius: 0px;
-        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0px {
             padding: 1px 5px;
         }
         white-space: nowrap;

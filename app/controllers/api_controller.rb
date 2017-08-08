@@ -17,6 +17,10 @@ class ApiController < ApplicationController
 
   disable_filters
 
+  # Don't know what wrapped parameters are supposed to be for, but in practice
+  # theu just break JSON requests in the unit tests.
+  wrap_parameters false
+
   # Standard entry point for REST requests.
   def api_keys
     rest_query(:api_key)
@@ -62,6 +66,8 @@ class ApiController < ApplicationController
     rest_query(:user)
   end
 
+  private
+
   def rest_query(type)
     @start_time = Time.now
 
@@ -87,8 +93,10 @@ class ApiController < ApplicationController
           checksum:     content_md5
         )
       end
+      args.delete(:format)
     else
-      if request.method == "POST" && request.content_length > 0 && !request.media_type.blank?
+      if request.method == "POST" && request.content_length > 0 &&
+         !request.media_type.blank?
         args[:upload] = API::Upload.new(
           data:         request.body,
           length:       request.content_length,
@@ -110,14 +118,27 @@ class ApiController < ApplicationController
   def render_api_results(args)
     @api = API.execute(args)
     User.current = @user = @api.user
-    if @api.errors.any?(&:fatal)
-      render_xml(layout: "api", text: "")
-    else
-      render_xml(layout: "api", template: "/api/results")
-    end
+    do_render
   rescue => e
     @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
-    render_xml(layout: "api", text: "")
+    do_render
+  end
+
+  def do_render
+    # need to default to xml for backwards compatibility
+    request.format = "xml" if request.format == "html"
+    respond_to do |format|
+      format.xml  { do_render_xml  }
+      format.json { do_render_json }
+    end
+  end
+
+  def do_render_xml
+    render(layout: false, template: "/api/results")
+  end
+
+  def do_render_json
+    render(layout: false, template: "/api/results")
   end
 end

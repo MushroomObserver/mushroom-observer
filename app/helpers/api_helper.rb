@@ -159,15 +159,21 @@ module ApiHelper
   end
 
   def xml_detailed_object(xml, tag, object, detail = false)
-    if object
-      xml.target! << render(
-        partial: object.class.type_tag.to_s,
-        locals: {
-          tag: tag,
-          object: object,
-          detail: detail
-        }
+    render_detailed_object(xml, object, detail, tag: tag)
+  end
+
+  def json_detailed_object(json, object, detail = false)
+    render_detailed_object(json, object, detail, json: json)
+  end
+
+  def render_detailed_object(builder, object, detail, args)
+    return unless object
+    builder.target! << render(
+      partial: object.class.type_tag.to_s,
+      locals: args.merge(
+        object: object,
+        detail: detail
       )
-    end
+    )
   end
 end
