@@ -47,6 +47,10 @@
 #  == Class methods
 #
 #  define_a_location::     Update any lists using the old "where" name.
+#  ---
+#  notes_part_id::         id of view textarea for a member notes heading
+#  notes_area_id_prefix::  prefix for id of textarea
+#  notes_part_name::       name of view textarea for a member notes heading
 #
 #  == Instance methods
 #
@@ -58,6 +62,10 @@
 #  observations::          List of Observation's attached to it.
 #  names::                 Get sorted list of Names used by its Observation's.
 #  name_included::         Does this list include the given Name?
+#  ---
+#  form_notes_parts::      Array of member note parts for create & edit form
+#  notes_part_id::         id of textarea for a member notes heading
+#  notes_part_name::       name of textarea for a member notes heading
 #  ---
 #  process_file_data::     Process uploaded file according to one of
 #                          the following two methods.
@@ -373,6 +381,44 @@ class SpeciesList < AbstractModel
     end
 
     observations << obs
+  end
+
+  ##############################################################################
+  #
+  #  :section: Member notes
+  #
+  ##############################################################################
+
+  # Array of notes for Observations wich are members of a SpeciesList.
+  # Not currently persisted in the db, and is set up in the params hash as
+  # params[member][notes], not params[species_list][member][notes]
+
+  # id of view textarea for a member notes heading
+  def self.notes_part_id(part)
+    notes_area_id_prefix << part.tr(" ", "_")
+  end
+
+  def notes_part_id(part)
+    SpeciesList.notes_part_id(part)
+  end
+
+  # prefix for id of textarea
+  def self.notes_area_id_prefix
+    "member_notes_"
+  end
+
+  # name of view textarea for a member notes heading
+  def self.notes_part_name(part)
+    "member[notes][#{part.tr(" ", "_")}]"
+  end
+
+  def notes_part_name(part)
+    SpeciesList.notes_part_name(part)
+  end
+
+  # Array of member note parts (Strings) to display in create & edit form
+  def form_notes_parts(user)
+    user.notes_template_parts << Observation.other_notes_part
   end
 
   ##############################################################################

@@ -115,4 +115,8 @@ no_general_questions_user:
 
 article_writer:
   <<: *DEFAULTS
-  user_groups:  all_users, $LABEL_only,article_writers
+  user_groups:  all_users, $LABEL_only, article_writers
+
+notes_templater:
+  <<: *DEFAULTS
+  notes_template: Cap, Nearby trees, odor

@@ -12,7 +12,7 @@
 
 DEFAULTS: &DEFAULTS
   name:       boletus_edulis
-  notes:      $LABEL # sometimes useful for debugging
+  notes:      <%= Observation.no_notes %>
   location:   obs_default_location
   user:       dick
   vote_cache: 0.0
@@ -28,7 +28,6 @@ minimal_unknown_obs:
   name: fungi
   species_lists: unknown_species_list
   specimens: interesting_unknown
-  notes: ""
 
 detailed_unknown_obs:
   <<: *DEFAULTS
@@ -39,7 +38,8 @@ detailed_unknown_obs:
   user: mary
   name: fungi
   specimen: 1
-  notes: Found in a strange place... & with śtrangè characters™
+  notes:
+    :Other: Found in a strange place... & with śtrangè characters™
   rss_log: observation_rss_log
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
@@ -56,7 +56,8 @@ coprinus_comatus_obs:
   location:
   where: Glendale, California
   specimen: 1
-  notes: Second fruiting in bark chips
+  notes:
+    :Other: Second fruiting in bark chips
   vote_cache: 1
   thumb_image: connected_coprinus_comatus_image
   images: connected_coprinus_comatus_image
@@ -71,7 +72,8 @@ agaricus_campestris_obs:
   location: burbank
   user: rolf
   name: agaricus_campestris
-  notes: From the lawn next door
+  notes:
+    :Other: From the lawn next door
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
   species_lists: one_genus_three_species_list
@@ -85,7 +87,8 @@ agaricus_campestrus_obs:
   location: burbank
   user: rolf
   name: agaricus_campestrus
-  notes: From somewhere else
+  notes:
+    :Other: From somewhere else
 
 agaricus_campestras_obs:
   <<: *DEFAULTS
@@ -95,7 +98,8 @@ agaricus_campestras_obs:
   location: burbank
   user: rolf
   name: agaricus_campestras
-  notes: From somewhere else
+  notes:
+    :Other: From somewhere else
 
 agaricus_campestros_obs:
   <<: *DEFAULTS
@@ -105,7 +109,8 @@ agaricus_campestros_obs:
   location: burbank
   user: rolf
   name: agaricus_campestros
-  notes: From somewhere else
+  notes:
+    :Other: From somewhere else
 
 strobilurus_diminutivus_obs:
   <<: *DEFAULTS
@@ -116,7 +121,8 @@ strobilurus_diminutivus_obs:
   location:
   name: strobilurus_diminutivus_no_author
   where: Pipi Valley, Sierra Mountains, CA
-  notes: From somewhere else
+  notes:
+    :Other: From somewhere else
 
 stereum_hirsutum_1:
   <<: *DEFAULTS
@@ -165,6 +171,9 @@ unknown_with_lat_long:
   lat: 34.1622
   long: -118.3521
   alt: 123
+  notes: |
+    :Other:
+      unknown_with_lat_long
 
 amateur_obs:
   <<: *DEFAULTS
@@ -176,7 +185,8 @@ amateur_obs:
   is_collection_location: 0
   name: conocybe_filaris
   specimen: 1
-  notes: 'A friend showed me this.'
+  notes:
+    :Other: 'A friend showed me this.'
   lat: 34.1622
   long: -118.3521
 
@@ -189,7 +199,8 @@ peltigera_obs:
   is_collection_location: 1
   name: peltigera
   specimen: 1
-  notes: 'Growing on a hardwood'
+  notes:
+    :Other: 'Growing on a hardwood'
   vote_cache: 3
   thumb_image: peltigera_image
   images: peltigera_image
@@ -204,7 +215,8 @@ peltigera_rolf_obs:
   is_collection_location: 1
   name: peltigera
   specimen: 1
-  notes: 'Growing on a hardwood'
+  notes:
+    :Other: 'Growing on a hardwood'
   vote_cache: 3
   thumb_image: rolf_profile_image
   images: rolf_profile_image
@@ -217,7 +229,8 @@ fungi_obs:
   where: 'Briceland, California, USA'
   is_collection_location: 0
   name: fungi
-  notes: 'Observation for plane pileus'
+  notes:
+    :Other: 'Observation for plane pileus'
   vote_cache: 3
   thumb_image: conic_image
   images: conic_image, plane_image_example
@@ -229,7 +242,8 @@ boletus_edulis_obs:
   where: 'New York, New York, USA'
   name: boletus_edulis
   is_collection_location: 0
-  notes: 'A tasty bolete!'
+  notes:
+    :Other: 'A tasty bolete!'
   vote_cache: 3
   species_lists: one_genus_three_species_list
 
@@ -356,3 +370,66 @@ same_user_owns_name_and_naming_obs:
   name: same_user_owns_naming_and_observation
   user: dick
 
+substrate_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    :substrate: soil
+
+substrate_and_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    :substrate: soil
+    :Other:     slimy
+
+templater_noteless_obs:
+  <<: *DEFAULTS
+  user: notes_templater
+
+templater_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    :Other: some notes
+  user: notes_templater
+
+templater_orphaned_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    :orphaned_caption: orphaned notes
+  user: notes_templater
+
+template_only_obs:
+  <<: *DEFAULTS
+  notes:
+    :Cap: red
+  user: notes_templater
+
+template_and_other_notes_obs:
+  <<: *DEFAULTS
+  notes:
+    :Cap: red
+    :Other: some notes
+  user: notes_templater
+
+template_and_orphaned_notes_obs:
+  <<: *DEFAULTS
+  # Can't use default name; there would be so many observations with that name
+  # that a filtered search would return more than one page of results,
+  # which causes an expected count of results on the first page,
+  # which makes Filter integration test fail
+  name: macrocybe_titans
+  notes:
+    :Cap: red
+    :orphaned_caption: orphaned notes
+  user: notes_templater
+
+template_and_orphaned_notes_scrambled_obs:
+  <<: *DEFAULTS
+  # Can't use default name; see above
+  name: macrocybe_titans
+  notes:
+    :Nearby_trees: pine
+    :orphaned_caption_1: orphaned notes 1
+    :Other: other notes
+    :orphaned_caption_2: orphaned notes 2
+    :Cap: red
+  user: notes_templater

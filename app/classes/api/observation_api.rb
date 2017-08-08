@@ -1,6 +1,7 @@
 # encoding: utf-8
-
+# API for Observation model
 class API
+  # query, create, and modify an Observation
   class ObservationAPI < ModelAPI
     self.model = Observation
 
@@ -39,8 +40,10 @@ class API
         # specimen_ids: parse_strings(:specimen_ids),
         projects:       parse_strings(:projects),
         species_lists:  parse_strings(:species_lists),
-        confidence:     parse_float_range(:confidence,
-                        limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+        confidence:     parse_float_range(
+          :confidence,
+          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)
+        ),
         is_col_loc:     parse_boolean(:is_collection_location),
         has_specimen:  parse_boolean(:has_specimen),
         has_location:   parse_boolean(:has_location),
@@ -65,12 +68,18 @@ class API
       @herbarium = parse_herbarium(:herbarium, default: nil)
       @specimen_id = parse_string(:specimen_id, default: nil)
       @herbarium_label = parse_string(:herbarium_label, default: nil)
-      has_specimen = parse_boolean(:has_specimen,
-                                   default: @herbarium || @specimen_id || @herbarium_label || false)
+      has_specimen = parse_boolean(
+        :has_specimen,
+        default: @herbarium || @specimen_id || @herbarium_label || false
+      )
       unless has_specimen
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium) if @herbarium
-        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id) if @specimen_id
-        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label) if @herbarium_label
+        if @specimen_id
+          errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id)
+        end
+        if @herbarium_label
+          errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label)
+        end
       end
       errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label) \
         if @specimen_id && @herbarium_label
@@ -90,20 +99,23 @@ class API
       images = parse_images(:images, default: [])
       thumbnail = parse_image(:thumbnail, default: images.first)
       images.unshift(thumbnail) if thumbnail && !images.include?(thumbnail)
-
       {
         when: parse_date(:date, default: Date.today),
-        notes: parse_string(:notes, default: ""),
+        notes: parse_notes(:notes),
         place_name: loc,
         lat: lat,
         long: long,
         alt: alt,
         specimen: has_specimen,
-        is_collection_location: parse_boolean(:is_collection_location, default: true),
+        is_collection_location: parse_boolean(
+          :is_collection_location, default: true
+        ),
         thumb_image: thumbnail,
         images: images,
         projects: parse_projects(:projects, default: [], must_be_member: true),
-        species_lists: parse_species_lists(:species_lists, default: [], must_have_edit_permission: true),
+        species_lists: parse_species_lists(
+          :species_lists, default: [], must_have_edit_permission: true
+        ),
         name: @name
       }
     end
@@ -125,9 +137,12 @@ class API
       )
       obs.specimens << Specimen.create!(
         herbarium: @herbarium,
-        when: Time.now,
+        when: Time.zone.now,
         user: user,
-        herbarium_label: @herbarium_label || Herbarium.default_specimen_label(@name.text_name, @specimen_id || obs.id)
+        herbarium_label: @herbarium_label ||
+                         Herbarium.default_specimen_label(
+                           @name.text_name, @specimen_id || obs.id
+                         )
       )
     end
 
@@ -173,7 +188,7 @@ class API
          remove_projects.empty? &&
          add_species_lists.empty? &&
          remove_species_lists.empty?
-        fail MissingSetParameters.new
+        raise MissingSetParameters.new
       end
 
       lambda do |obj|
@@ -184,7 +199,9 @@ class API
         obj.projects.push(*add_projects) if add_projects.any?
         obj.projects.delete(*remove_projects) if remove_projects.any?
         obj.species_lists.push(*add_species_lists) if add_species_lists.any?
-        obj.species_lists.delete(*remove_species_lists) if remove_species_lists.any?
+        if remove_species_lists.any?
+          obj.species_lists.delete(*remove_species_lists)
+        end
       end
     end
   end

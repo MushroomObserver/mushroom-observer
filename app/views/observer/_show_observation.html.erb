@@ -25,13 +25,13 @@
     <div id="observation_specimen_info">
       <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
     </div>
-    <%= if !observation.notes.blank?
+    <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))
       Textile.register_name(observation.name)
-      content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
-                  style: "margin-top:1em; margin-bottom:-1em")
+      content_tag(
+        :div, observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+      )
     end %>
   </div>
 </div>
-

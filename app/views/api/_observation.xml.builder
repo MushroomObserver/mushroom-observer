@@ -18,7 +18,14 @@ xml.tag!(tag,
   xml_detailed_object(xml, :consensus_name, object.name)
   xml_confidence_level(xml, :confidence, object.vote_cache)
   if detail
-    xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+    xml.notes do
+      object.notes.each do |key, value|
+        xml.notes_part do
+          xml_string(xml, :key, key)
+          xml_html_string(xml, :value, value.tl)
+        end
+      end
+    end
     xml_datetime(xml, :created_at, object.created_at)
     xml_datetime(xml, :updated_at, object.updated_at)
     xml_integer(xml, :number_of_views, object.num_views)
