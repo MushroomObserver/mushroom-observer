@@ -1,7 +1,7 @@
 xml.tag!(tag,
-  :id => object.id,
-  :url => object.show_url,
-  :type => 'observation'
+  id: object.id,
+  url: object.show_url,
+  type: "observation"
 ) do
   xml_detailed_object(xml, :owner, object.user)
   xml_date(xml, :date, object.when)
@@ -17,15 +17,15 @@ xml.tag!(tag,
   xml_boolean(xml, :is_collection_location, true) if object.is_collection_location
   xml_detailed_object(xml, :consensus_name, object.name)
   xml_confidence_level(xml, :confidence, object.vote_cache)
+  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_datetime(xml, :created_at, object.created_at)
+  xml_datetime(xml, :updated_at, object.updated_at)
+  xml_integer(xml, :number_of_views, object.num_views)
+  xml_datetime(xml, :last_viewed, object.last_view)
   if detail
-    xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
-    xml_datetime(xml, :created_at, object.created_at)
-    xml_datetime(xml, :updated_at, object.updated_at)
-    xml_integer(xml, :number_of_views, object.num_views)
-    xml_datetime(xml, :last_viewed, object.last_view)
     xml.namings(:number => object.namings.length) do
       for naming in object.namings
-        xml_detailed_object(xml, :naming, naming)
+        xml_detailed_object(xml, :naming, naming, true)
       end
     end
     for image in object.images
@@ -46,7 +46,5 @@ xml.tag!(tag,
         xml_detailed_object(xml, :comment, comment)
       end
     end
-    # TODO: rss_logs
-    # TODO: species_lists
   end
 end
