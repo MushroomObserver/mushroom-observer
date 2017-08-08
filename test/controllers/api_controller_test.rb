@@ -51,7 +51,7 @@ class ApiControllerTest < FunctionalTestCase
     Digest::MD5.hexdigest(string)
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_basic_get_requests
     assert_no_api_errors
@@ -80,7 +80,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_num_of_pages
     get(:observations, detail: :high, format: :json)
     json = JSON.parse(response.body)
-    assert_equal(4, json["number_of_pages"],
+    assert_equal(5, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
 
