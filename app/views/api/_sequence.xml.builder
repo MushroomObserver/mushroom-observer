@@ -11,8 +11,9 @@ xml.tag!(tag,
       xml_detailed_object(xml, :user, object.user)
     end
     xml_string(xml, :locus, object.locus.truncate(object.locus_width))
-    xml_string(xml, :bases, object.bases) if detail
+    # Treat bases as html to preserve newlines and opening ">"
+    xml_html_string(xml, :bases, object.bases.tp) if detail
     xml_string(xml, :archive, object.archive)
     xml_string(xml, :accession, object.accession)
-    xml_string(xml, :notes, object.notes)
+    xml_html_string(xml, :notes, object.notes.tpl)
 end
