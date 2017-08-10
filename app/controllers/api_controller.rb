@@ -2,23 +2,21 @@
 #
 #  = API Controller
 #
-#  This controller handles the XML interface.
+#  This controller handles the JSON and XML interfaces
 #
 #  == Actions
 #
-#  xml_rpc::              Entry point for XML-RPC requests.
 #  observations, etc.::   Entry point for REST requests.
 #
 ################################################################################
-
+#
 class ApiController < ApplicationController
   require "xmlrpc/client"
   require_dependency "api"
 
   disable_filters
 
-  # Don't know what wrapped parameters are supposed to be for, but in practice
-  # theu just break JSON requests in the unit tests.
+  # wrapped parameters break JSON requests in the unit tests.
   wrap_parameters false
 
   # Standard entry point for REST requests.
@@ -66,53 +64,61 @@ class ApiController < ApplicationController
     rest_query(:user)
   end
 
+  ##############################################################################
+
   private
 
   def rest_query(type)
-    @start_time = Time.now
+    @start_time = Time.zone.now
+    args = params_to_api_args(type)
 
-    # Massage params into a proper set of args.
-    args = {}
-    for key in params.keys
-      args[key.to_sym] = params[key]
-    end
-    args.delete(:controller)
-    args[:method] = request.method
-    args[:action] = type
-
-    if Rails.env == "test"
-      post_data      = request.headers["RAW_POST_DATA"]
-      content_length = request.headers["CONTENT_LENGTH"].to_i
-      content_type   = request.headers["CONTENT_TYPE"].to_s
-      content_md5    = request.headers["CONTENT_MD5"].to_s
-      if request.method == "POST" && content_length > 0 && !content_type.blank?
-        args[:upload] = API::Upload.new(
-          data:         post_data,
-          length:       content_length,
-          content_type: content_type,
-          checksum:     content_md5
-        )
-      end
-      args.delete(:format)
-    else
-      if request.method == "POST" && request.content_length > 0 &&
-         !request.media_type.blank?
-        args[:upload] = API::Upload.new(
-          data:         request.body,
-          length:       request.content_length,
-          content_type: request.media_type,
-          checksum:     request.headers["CONTENT_MD5"].to_s
-        )
-      end
-    end
-
-    # Special exception to allow caller who creates new user to see that user's
-    # new API keys.  Otherwise there is no way to get that info via the API.
-    if request.method == "POST" && type == :user
-      @show_api_keys_for_new_user = true
+    if request.method == "POST"
+      args[:upload] = upload_api if something_to_post?
+      # Special exception to let caller who creates new user to see that user's
+      # new API keys.  Otherwise there is no way to get that info via the API.
+      @show_api_keys_for_new_user = true if type == :user
     end
 
     render_api_results(args)
+  end
+
+  # Massage params hash to proper args hash for api
+  def params_to_api_args(type)
+    args = params.to_hash.symbolize_keys.except(:controller)
+    args[:method] = request.method
+    args[:action] = type
+    args.delete(:format) if Rails.env == "test"
+    args
+  end
+
+  def something_to_post?
+    upload_length > 0 && upload_type.present?
+  end
+
+  def upload_api
+    API::Upload.new(
+      data:         upload_data,
+      length:       upload_length,
+      content_type: upload_type,
+      checksum:     request.headers["CONTENT_MD5"].to_s
+    )
+  end
+
+  def upload_length
+    testing? ? request.headers["CONTENT_LENGTH"].to_i : request.content_length
+  end
+
+  def upload_type
+    testing? ? request.headers["CONTENT_TYPE"].to_s : request.media_type
+  end
+
+  def upload_data
+    testing? ? request.headers["RAW_POST_DATA"] : request.body
+  end
+
+  # convenience method to shorten lines (also helps to trick Coveralls)
+  def testing?
+    Rails.env == "test"
   end
 
   def render_api_results(args)
