@@ -23,6 +23,11 @@ xml.tag!(tag,
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   if detail
+    xml.sequences(number: object.sequences.length) do
+      object.sequences.each do |sequence|
+        xml_detailed_object(xml, :sequence, sequence)
+      end
+    end
     xml.namings(:number => object.namings.length) do
       for naming in object.namings
         xml_detailed_object(xml, :naming, naming, true)

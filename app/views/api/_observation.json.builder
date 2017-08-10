@@ -20,6 +20,9 @@ else
   json.location_name object.where
 end
 if detail
+  json.sequences object.sequences.map do |sequence|
+    json_detailed_object(json, sequence)
+  end
   json.namings object.namings.map do |naming|
     json_detailed_object(json, naming, true)
   end
