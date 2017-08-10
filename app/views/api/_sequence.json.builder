@@ -7,7 +7,7 @@ json.id              object.id
     json.user           { json_detailed_object(json, object.user) }
   end
 json.locus              object.locus
+json.bases              object.bases if detail
 json.archive            object.archive
 json.accession          object.accession
-json.bases              object.bases
 json.notes              object.notes
