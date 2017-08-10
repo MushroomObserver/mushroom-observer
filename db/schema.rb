@@ -551,6 +551,18 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.integer  "article_id",       limit: 4
   end
 
+  create_table "sequences", force: :cascade do |t|
+    t.integer  "observation_id", limit: 4
+    t.integer  "user_id",        limit: 4
+    t.text     "locus",          limit: 65535
+    t.text     "bases",          limit: 65535
+    t.string   "archive",        limit: 255
+    t.string   "accession",      limit: 255
+    t.text     "notes",          limit: 65535
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at",                   null: false
+  end
+
   create_table "species_lists", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"

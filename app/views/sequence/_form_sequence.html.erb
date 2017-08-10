@@ -1,0 +1,63 @@
+<!--[form:sequence]-->
+<div class="row push-down">
+  <div class="form-group col-md-6">
+      <%= label_tag(:sequence_locus, :form_sequence_locus.t) %><br>
+      <%= text_area(:sequence, :locus, rows: 1, class: "form-control",
+                    style: "width: 100%;") %>
+                    <%  # style stops area from changing size on reload %>
+  </div>
+  <div class="col-md-6">
+    <br><%= :form_sequence_locus_help.t(locus_width: Sequence.locus_width) %>
+  </div>
+</div>
+
+<div class="row push-down">
+    <div class="form-group">
+      <span class="col-md-6">
+         <%= label_tag(:sequence_bases, :form_sequence_bases.t) %>
+      </span>
+      <span class="col-md-6">
+        <%= :form_sequence_bases_format.t(help_url: Web.blast_format_help) %>
+      </span>
+      <div class="col-md-9 monospace">
+        <%= text_area(:sequence, :bases, size: "80x3", class: "form-control") %>
+      </div>
+      <div class="col-md-3">
+      </div>
+    </div>
+</div>
+
+<div class="push-down">
+  <div class="bold">
+   <br><%= "#{:DEPOSIT.t} (#{:form_sequence_valid_deposit.t})" %>
+  </div>
+  <div class="form-group row push-down">
+    <div class="col-md-1">
+    </div>
+    <div class="col-md-2">
+      <%= label_tag(:sequence_archive, :ARCHIVE.t) %>
+      <%= form.select(:archive, archive_dropdown, { include_blank: true }) %>
+    </div>
+    <div class="col-md-3">
+      <span class="bold"><%= :form_sequence_accession.t %></span>
+      <%= form.text_field(:accession, class: "form-control") %>
+    </div>
+    <div class="col-md-6">
+      <br><%= :form_sequence_accession_help.t %>
+    </div>
+  </div>
+</div>
+
+<div class="row push-down">
+  <div class="form-group col-md-6">
+    <%= label_tag(:sequence_notes, :NOTES.t) %>
+    <%= text_area(:sequence, :notes, rows: 3, class: "form-control") %>
+  </div>
+  <div class="col-md-6 push-down">
+    <br><%= :field_textile_link.t %>
+  </div>
+</div>
+
+<div class="form-group row">
+  <%= submit_tag(:SUBMIT.t, class: "btn center-block push-down") %>
+</div>

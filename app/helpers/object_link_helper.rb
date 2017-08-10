@@ -150,6 +150,15 @@ module ObjectLinkHelper
     ]
   end
 
+  def add_sequence_link(obs)
+    return nil unless check_permission(obs)
+
+    link = link_with_query(:show_observation_add_sequence.t,
+                           controller: :sequence, action: :add_sequence,
+                           id: obs.id)
+    " | ".html_safe + link
+  end
+
   def observation_specimen_link(obs)
     count = obs.specimens.count
     if count > 0

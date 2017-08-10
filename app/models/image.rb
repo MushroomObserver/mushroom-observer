@@ -206,8 +206,8 @@
 #  ==== Callbacks and Logging
 #  update_thumbnails::  Change thumbnails before destroy.
 #  track_copyright_changes:: Log changes in copyright info.
-#  log_update::         Log update in assocaited Observation's.
-#  log_destroy::        Log destroy in assocaited Observation's.
+#  log_update::         Log update in associated Observation's.
+#  log_destroy::        Log destroy in associated Observation's.
 #
 ################################################################################
 #

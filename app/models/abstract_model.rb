@@ -369,20 +369,6 @@ class AbstractModel < ActiveRecord::Base
     self.class.show_action
   end
 
-  # Return the name of the "edit_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   Name.edit_action => "edit_name"
-  #   name.edit_action => "edit_name"
-  #
-  def self.edit_action
-    "edit_" + name.underscore
-  end
-
-  def edit_action
-    self.class.edit_action
-  end
-
   # Return the URL of the "show_<object>" action
   #
   #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
@@ -424,6 +410,116 @@ class AbstractModel < ActiveRecord::Base
 
   def eol_predicate
     self.class.eol_predicate
+  end
+
+  ##############################################################################
+  #
+  #  :section: Edit Controller / Action
+  #
+  ##############################################################################
+
+  def self.edit_controller
+    show_controller
+  end
+
+  def edit_controller
+    show_controller
+  end
+
+  # Return the name of the "edit_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.edit_action => "edit_name"
+  #   name.edit_action => "edit_name"
+  #
+  def self.edit_action
+    "edit_" + name.underscore
+  end
+
+  def edit_action
+    self.class.edit_action
+  end
+
+  # Return the URL of the "edit_<object>" action
+  #
+  #   Name.edit_url(12) => "http://mushroomobserver.org/name/edit_name/12"
+  #   name.edit_url     => "http://mushroomobserver.org/name/edit_name/12"
+  #
+  def self.edit_url(id)
+    "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
+  end
+
+  def edit_url
+    self.class.edit_url(id)
+  end
+
+  # Return the link_to args of the "edit_<object>" action
+  #
+  #   Name.edit_link_args(12) => {controller: :name, action: :edit_name, id: 12}
+  #   name.edit_link_args     => {controller: :name, action: :edit_name, id: 12}
+  #
+  def self.edit_link_args(id)
+    { controller: edit_controller, action: edit_action, id: id }
+  end
+
+  def edit_link_args
+    self.class.edit_link_args(id)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Destroy Controller / Action
+  #
+  ##############################################################################
+
+  def self.destroy_controller
+    show_controller
+  end
+
+  def destroy_controller
+    show_controller
+  end
+
+  # Return the name of the "destroy_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.destroy_action => "destroy_name"
+  #   name.destroy_action => "destroy_name"
+  #
+  def self.destroy_action
+    "destroy_" + name.underscore
+  end
+
+  def destroy_action
+    self.class.destroy_action
+  end
+
+  # Return the URL of the "destroy_<object>" action
+  #
+  #   Name.destroy_url(12) => "http://mushroomobserver.org/name/destroy_name/12"
+  #   name.destroy_url     => "http://mushroomobserver.org/name/destroy_name/12"
+  #
+  def self.destroy_url(id)
+    "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
+  end
+
+  def destroy_url
+    self.class.destroy_url(id)
+  end
+
+  # Return the link_to args of the "destroy_<object>" action
+  #
+  #   Name.destroy_link_args(12) =>
+  #     {controller: :name, action: :destroy_name, id: 12}
+  #   name.destroy_link_args     =>
+  #     {controller: :name, action: :destroy_name, id: 12}
+  #
+  def self.destroy_link_args(id)
+    { controller: destroy_controller, action: destroy_action, id: id }
+  end
+
+  def destroy_link_args
+    self.class.destroy_link_args(id)
   end
 
   ##############################################################################
@@ -498,6 +594,24 @@ class AbstractModel < ActiveRecord::Base
   # Logs destruction of Image.
   def log_destroy_image(image)
     log_image(:log_image_destroyed, image, false)
+  end
+
+  # Log addition of new Sequence to object
+  def log_add_sequence(sequence)
+    log_sequence(:log_sequence_added, sequence, true)
+  end
+
+  # Log Sequence's accession to archive
+  def log_accession_sequence(sequence)
+    log_sequence(:log_sequence_accessioned, sequence, true)
+  end
+
+  def log_update_sequence(sequence)
+    log_sequence(:log_sequence_updated, sequence, false)
+  end
+
+  def log_destroy_sequence(sequence)
+    log_sequence(:log_sequence_destroyed, sequence, true)
   end
 
   # Callback that logs creation.
@@ -614,6 +728,11 @@ class AbstractModel < ActiveRecord::Base
 
   def log_image(tag, image, touch) # :nodoc:
     name = "#{:Image.t} ##{image.id || image.was || "??"}"
+    log(tag, name: name, touch: touch)
+  end
+
+  def log_sequence(tag, sequence, touch) # :nodoc:
+    name = "#{:SEQUENCE.t} ##{sequence.id || "??"}"
     log(tag, name: name, touch: touch)
   end
 end

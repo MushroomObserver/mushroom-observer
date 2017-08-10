@@ -1468,6 +1468,10 @@ table.table-namings {
     vertical-align: bottom !important;
 }
 
+.align-center {
+    text-align: center;
+}
+
 .align-right {
     text-align: right;
 }
@@ -1490,6 +1494,10 @@ table.table-namings {
 
 .border-radius-none {
     border-radius: 0 !important;
+}
+
+.monospace {
+    font-family: monospace
 }
 
 .push-down {
