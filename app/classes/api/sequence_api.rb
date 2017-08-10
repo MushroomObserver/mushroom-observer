@@ -4,9 +4,19 @@ class API
     self.model = Sequence
 
     self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
+    self.low_detail_page_length  = 100
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
+
+    self.high_detail_includes = [
+      :observation,
+      :user
+    ]
+
+    self.low_detail_includes = [
+      :observation,
+      :user
+    ]
 
     def query_params
       {
