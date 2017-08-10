@@ -65,12 +65,18 @@ class API
       @herbarium = parse_herbarium(:herbarium, default: nil)
       @specimen_id = parse_string(:specimen_id, default: nil)
       @herbarium_label = parse_string(:herbarium_label, default: nil)
-      has_specimen = parse_boolean(:has_specimen,
-                                   default: @herbarium || @specimen_id || @herbarium_label || false)
+      has_specimen = parse_boolean(
+        :has_specimen,
+        default: @herbarium || @specimen_id || @herbarium_label || false
+      )
       unless has_specimen
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium) if @herbarium
-        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id) if @specimen_id
-        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label) if @herbarium_label
+        if @specimen_id
+          errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id)
+        end
+        if @herbarium_label
+          errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label)
+        end
       end
       errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label) \
         if @specimen_id && @herbarium_label
@@ -103,7 +109,9 @@ class API
         thumb_image: thumbnail,
         images: images,
         projects: parse_projects(:projects, default: [], must_be_member: true),
-        species_lists: parse_species_lists(:species_lists, default: [], must_have_edit_permission: true),
+        species_lists: parse_species_lists(
+          :species_lists, default: [], must_have_edit_permission: true
+        ),
         name: @name
       }
     end
@@ -127,7 +135,10 @@ class API
         herbarium: @herbarium,
         when: Time.now,
         user: user,
-        herbarium_label: @herbarium_label || Herbarium.default_specimen_label(@name.text_name, @specimen_id || obs.id)
+        herbarium_label: @herbarium_label ||
+                         Herbarium.default_specimen_label(
+                           @name.text_name, @specimen_id || obs.id
+                         )
       )
     end
 
@@ -184,7 +195,8 @@ class API
         obj.projects.push(*add_projects) if add_projects.any?
         obj.projects.delete(*remove_projects) if remove_projects.any?
         obj.species_lists.push(*add_species_lists) if add_species_lists.any?
-        obj.species_lists.delete(*remove_species_lists) if remove_species_lists.any?
+        return unless remove_species_lists.any?
+        obj.species_lists.delete(*remove_species_lists)
       end
     end
   end
