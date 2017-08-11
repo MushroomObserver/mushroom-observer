@@ -94,7 +94,9 @@ gem "rubocop", require: false
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
-gem "brakeman", require: false
+# We don't need the gem. We gets its functionality in CI via
+# Gemnasium and CodeClimate, each of which has Brakeman engines,
+# gem "brakeman", require: false
 
 # Amazon S3 SDK, for access to images on dreamhost S3
 gem "aws-sdk", "~> 2"
