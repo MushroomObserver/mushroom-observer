@@ -423,11 +423,6 @@ template_and_other_notes_obs:
 
 template_and_orphaned_notes_obs:
   <<: *DEFAULTS
-  # Can't use default name; there would be so many observations with that name
-  # that a filtered search would return more than one page of results,
-  # which causes an expected count of results on the first page,
-  # which makes Filter integration test fail
-  name: macrocybe_titans
   notes:
     :Cap: red
     :orphaned_caption: orphaned notes
@@ -435,8 +430,6 @@ template_and_orphaned_notes_obs:
 
 template_and_orphaned_notes_scrambled_obs:
   <<: *DEFAULTS
-  # Can't use default name; see above
-  name: macrocybe_titans
   notes:
     :Nearby_trees: pine
     :orphaned_caption_1: orphaned notes 1

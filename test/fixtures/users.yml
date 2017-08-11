@@ -76,11 +76,13 @@ zero_user:
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
+# used by integration filter test
 ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
   content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
-  layout_count: 24
+  # make this high so that there's only 1 page of observations
+  layout_count: 96
 
 # hides unvouchered Observations
 vouchered_only_user:
