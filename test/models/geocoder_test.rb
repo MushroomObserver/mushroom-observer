@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class GeocoderTest < UnitTestCase
@@ -15,6 +14,7 @@ class GeocoderTest < UnitTestCase
     assert(obj.south)
     assert(obj.east)
     assert(obj.west)
-    assert_equal("#{obj.north}\n#{obj.south}\n#{obj.east}\n#{obj.west}\n", obj.ajax_response)
+    assert_equal("#{obj.north}\n#{obj.south}\n#{obj.east}\n#{obj.west}\n",
+                 obj.ajax_response)
   end
 end

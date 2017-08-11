@@ -44,7 +44,6 @@ class GlossaryTermTest < UnitTestCase
     glossary_term = glossary_terms(:convex_glossary_term)
     assert_nil(glossary_term.thumb_image)
     assert_equal(0, glossary_term.images.length)
-    images = glossary_term.images # Seems like this conflicts with the next line
     first_image = images(:convex_image)
     glossary_term.add_image(first_image)
     assert_equal(first_image, glossary_term.thumb_image)
@@ -56,7 +55,6 @@ class GlossaryTermTest < UnitTestCase
     thumb = glossary_term.thumb_image
     assert(thumb)
     assert_equal(0, glossary_term.images.length)
-    images = glossary_term.images
     second_image = images(:convex_image)
     glossary_term.add_image(second_image)
     assert_equal(thumb, glossary_term.thumb_image)

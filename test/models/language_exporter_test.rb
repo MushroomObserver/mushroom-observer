@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class LanguageExporterTest < UnitTestCase
@@ -9,7 +8,7 @@ class LanguageExporterTest < UnitTestCase
     Language.clear_verbose_messages
     Language.override_input_files
     self.tmp_dir = "#{::Rails.root}/tmp"
-    FileUtils.mkdir_p(self.tmp_dir)
+    FileUtils.mkdir_p(tmp_dir)
     super
   end
 
@@ -30,7 +29,7 @@ class LanguageExporterTest < UnitTestCase
       fh.puts "one: ενα"
     end
     data = File.open(temp_file, "r:utf-8") do |fh|
-      data = YAML.load(fh)
+      data = YAML.safe_load(fh)
     end
     assert_equal({ "one" => "ενα" }, data)
     assert_equal("UTF-8", data["one"].encoding.to_s)
@@ -38,7 +37,7 @@ class LanguageExporterTest < UnitTestCase
       fh << data.to_yaml
     end
     data = File.open(temp_file, "r:utf-8") do |fh|
-      data = YAML.load(fh)
+      data = YAML.safe_load(fh)
     end
     assert_equal({ "one" => "ενα" }, data)
     assert_equal("UTF-8", data["one"].encoding.to_s)
@@ -88,15 +87,24 @@ class LanguageExporterTest < UnitTestCase
     assert_valid(:validate_square_brackets, "this is right")
     assert_valid(:validate_square_brackets, "this is [good] right")
     assert_valid(:validate_square_brackets, "this is [:good] right")
-    assert_valid(:validate_square_brackets, "this is [:good(var=val,var=val)] right")
-    assert_valid(:validate_square_brackets, "this is [:good(var=12345)] right")
-    assert_valid(:validate_square_brackets, "this is [:good(var=123.45)] right")
-    assert_valid(:validate_square_brackets, 'this is [:good(var=\'abc def\')] right')
-    assert_valid(:validate_square_brackets, 'this is [:good(var="#$@!")] right')
-    assert_invalid(:validate_square_brackets, "this is [:missing(val=)] intentionally wrong")
-    assert_invalid(:validate_square_brackets, "this is [:unmatched intentionally wrong")
-    assert_invalid(:validate_square_brackets, 'this is [:bad(val=\'foo")] intentionally wrong')
-    assert_invalid(:validate_square_brackets, "this is [:bad(val=%%%)] intentionally wrong")
+    assert_valid(:validate_square_brackets,
+                 "this is [:good(var=val,var=val)] right")
+    assert_valid(:validate_square_brackets,
+                 "this is [:good(var=12345)] right")
+    assert_valid(:validate_square_brackets,
+                 "this is [:good(var=123.45)] right")
+    assert_valid(:validate_square_brackets,
+                 'this is [:good(var=\'abc def\')] right')
+    assert_valid(:validate_square_brackets,
+                 'this is [:good(var="#$@!")] right')
+    assert_invalid(:validate_square_brackets,
+                   "this is [:missing(val=)] intentionally wrong")
+    assert_invalid(:validate_square_brackets,
+                   "this is [:unmatched intentionally wrong")
+    assert_invalid(:validate_square_brackets,
+                   'this is [:bad(val=\'foo")] intentionally wrong')
+    assert_invalid(:validate_square_brackets,
+                   "this is [:bad(val=%%%)] intentionally wrong")
   end
 
   def assert_valid(method, str)
@@ -143,13 +151,16 @@ class LanguageExporterTest < UnitTestCase
     assert_check_pass_or_fail(false, "fail", *args)
   end
 
-  def assert_check_pass_or_fail(expected_val, expected_str, in_tag_start, in_tag_end, str)
+  def assert_check_pass_or_fail(expected_val, expected_str,
+                                in_tag_start, in_tag_end, str)
     @official.init_check_export_line(true, in_tag_start == 1)
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
     assert pass == expected_val, msg
-    msg = assert_message("Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}")
+    msg = assert_message(
+      "Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}"
+    )
     assert !!in_tag == (in_tag_end == 1), msg
     Language.clear_verbose_messages
   end
@@ -200,12 +211,12 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_export_round_trip
-    template = "#{Rails.root}/test/templates/export_round_trip.yml"
+    template = Rails.root.join("test", "templates", "export_round_trip.yml")
     use_test_locales do
       file = @official.export_file
       FileUtils.copy(template, file)
       @official.write_export_file_lines(File.open(file, "r:utf-8").readlines)
-      data = File.open(file, "r:utf-8") { |fh| YAML.load(fh) }
+      data = File.open(file, "r:utf-8") { |fh| YAML.safe_load(fh) }
       assert(data, "File read failed for #{file}")
 
       data.each do |tag, str|
@@ -216,10 +227,10 @@ class LanguageExporterTest < UnitTestCase
       end
 
       lines = @official.send_private(:format_export_file, data, data)
-      new_data = YAML.load(lines.join)
+      new_data = YAML.safe_load(lines.join)
       seen = {}
       data.each do |tag, old_str|
-        if new_str = new_data[tag]
+        if (new_str = new_data[tag])
           old_str = @official.send_private(:clean_string, old_str)
           new_str = @official.send_private(:clean_string, new_str)
           assert_equal(old_str, new_str, "String for #{tag} got garbled.")
@@ -250,12 +261,12 @@ class LanguageExporterTest < UnitTestCase
     check_format(:format_string, '"abc def"' => "\"\\\"abc def\\\"\"\n")
     check_format(:format_string, "\n" => "\"\"\n")
     check_format(:format_string, "abc\n" => "abc\n")
-    check_format(:format_string, "abc\ndef" => "\"abc\\ndef\"\n") # ">\n  abc\\n\n  def\\n\n\n")
-    check_format(:format_string, "'abc'\ndef:" => "\"'abc'\\ndef:\"\n") # ">\n  'abc'\\n\n  def:\\n\n\n")
+    check_format(:format_string, "abc\ndef" => "\"abc\\ndef\"\n")
+    check_format(:format_string, "'abc'\ndef:" => "\"'abc'\\ndef:\"\n")
   end
 
   def check_format(method, vals)
-    for string, expect in vals
+    vals.each do |string, expect|
       actual = @official.send_private(method, string)
       assert_equal(expect, actual, "#{method}(#{string.inspect}) is wrong")
     end
@@ -299,7 +310,8 @@ class LanguageExporterTest < UnitTestCase
 
     use_test_locales do
       @official.write_export_file_lines(input_lines)
-      actual_lines = @official.send_private(:format_export_file, strings, translated)
+      actual_lines = @official.send_private(:format_export_file,
+                                            strings, translated)
       assert_equal(expect_lines, actual_lines)
     end
   end
@@ -385,7 +397,8 @@ class LanguageExporterTest < UnitTestCase
       hash = @official.localization_strings
       assert(hash.length >= 9) # Make sure we got something
       @official.write_hash(hash)
-      assert_false(@official.import_from_file, "Shouldn't have been any import changes.")
+      assert_false(@official.import_from_file,
+                   "Shouldn't have been any import changes.")
       assert_false(@official.strip, "Shouldn't have been any strip changes.")
       assert_equal(hash, @official.localization_strings)
 
@@ -398,12 +411,17 @@ class LanguageExporterTest < UnitTestCase
       final_hash.delete("TWOS")
 
       @official.write_hash(final_hash)
-      assert_true(@official.import_from_file, "Should have been two import changes.")
-      assert_equal(hash, @official.localization_strings) # Should still include deletes
+      assert_true(@official.import_from_file,
+                  "Should have been two import changes.")
+      assert_equal(hash,
+                   @official.localization_strings) # Should still have deletes
       assert_true(@official.strip, "Should have been three strip changes.")
-      assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
+      assert_equal(final_hash,
+                   @official.localization_strings) # Deletes should be gone
 
-      assert_equal(3, @official.translation_strings.select { |str| str.user == dick }.count)
+      assert_equal(
+        3, @official.translation_strings.select { |str| str.user == dick }.count
+      )
     end
   end
 
@@ -420,19 +438,20 @@ class LanguageExporterTest < UnitTestCase
 
       # This is just the template.
       @official.write_export_file_lines([
-        "  one: one\n",
-        "  two: two\n",
-        "  twos: twos\n",
-        "  TWO: Two\n",
-        "  TWOS: Twos\n",
-        "  three: three\n",
-        "  four: four\n"
-      ])
+                                          "  one: one\n",
+                                          "  two: two\n",
+                                          "  twos: twos\n",
+                                          "  TWO: Two\n",
+                                          "  TWOS: Twos\n",
+                                          "  three: three\n",
+                                          "  four: four\n"
+                                        ])
 
       greek.write_export_file_lines([
-        "  five: ignore me\n"
-      ])
-      assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
+                                      "  five: ignore me\n"
+                                    ])
+      assert_false(greek.import_from_file,
+                   "Shouldn't have been any import changes.")
       assert_false(greek.strip, "Shouldn't have been any strip changes.")
       assert_equal(hash, greek.localization_strings)
 
@@ -444,7 +463,8 @@ class LanguageExporterTest < UnitTestCase
         "  four: τέσσερα\n", # this is correct, it had better take this!
       ]
       greek.write_export_file_lines(data)
-      assert_true(greek.import_from_file, "Should have been some import changes.")
+      assert_true(greek.import_from_file,
+                  "Should have been some import changes.")
       assert_false(greek.strip, "Shouldn't have been any strip changes.")
       hash["one"] = "one"
       hash["three"] = "τρία"

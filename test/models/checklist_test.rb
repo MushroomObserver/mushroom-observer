@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 require "test_helper"
 
 class ChecklistTest < UnitTestCase
@@ -32,8 +33,7 @@ class ChecklistTest < UnitTestCase
 
   def test_checklist_for_site
     data = Checklist::ForSite.new
-    obss_of_species = Observation.joins(:name).
-                                  where("names.rank = #{Name.ranks[:Species]}")
+    obss_of_species = Observation.joins(:name).merge(Name.Species)
     all_species = obss_of_species.map { |obs| obs.name.text_name }.uniq.sort
     all_genera = genera(all_species).uniq
     assert_equal(all_genera, data.genera)
@@ -56,10 +56,9 @@ class ChecklistTest < UnitTestCase
     data = Checklist::ForUser.new(rolf)
     assert_equal(6, data.num_genera)
 
-    expect = Name.joins(observations: :user).
-                  where("observations.user_id = #{users(:rolf).id}
-                         AND names.rank = #{Name.ranks[:Species]}").
-                  uniq.size
+    expect = Name.Species.joins(observations: :user).
+             merge(Observation.where(user: rolf)).
+             uniq.size
     assert_equal(expect, data.num_species)
 
     assert_equal(genera(rolfs_species), data.genera)

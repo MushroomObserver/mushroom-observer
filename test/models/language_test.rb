@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class LanguageTest < UnitTestCase
@@ -15,16 +14,15 @@ class LanguageTest < UnitTestCase
     greek = languages(:greek)
     assert_equal([], english.top_contributors)
     french_contributors = Set.new(french.top_contributors)
-    assert_equal(Set.new([[mary.id, "mary"], [rolf.id, "rolf"]]), french_contributors)
+    assert_equal(Set.new([[mary.id, "mary"], [rolf.id, "rolf"]]),
+                 french_contributors)
     assert(french_contributors.member?([mary.id, "mary"]))
     assert_equal([[dick.id, "dick"]], greek.top_contributors)
   end
 
   def read_from_yaml(lang, symbol)
     file = lang.localization_file
-    data = File.open(file, "r:utf-8") do |fh|
-      YAML.load(fh)
-    end
+    data = File.open(file, "r:utf-8") { |fh| YAML.safe_load(fh) }
     data[lang.locale.to_s]["mo"][symbol.to_s]
   end
 
@@ -62,7 +60,7 @@ class LanguageTest < UnitTestCase
 
   def test_versioning_twice
     str = translation_strings(:version_wizard)
-    yesterday = Time.now - 1.day
+    yesterday = Time.zone.now.yesterday
     assert(str.updated_at < yesterday)
     expected_version = str.version + 1
     User.current = str.user

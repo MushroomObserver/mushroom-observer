@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 # test extensions to Ruby and Rails String Class
@@ -54,9 +53,12 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("12345", "12345".truncate_html(5))
     assert_equal("1234...", "123456".truncate_html(5))
     assert_equal("<i>1234...</i>", "<i>123456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3</b>4...</i>", "<i>12<b>3</b>456</i>".truncate_html(5))
-    assert_equal("<i>12<b>3<hr/></b>4...</i>", "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
-    assert_equal("<i>12</i>3<b>4...</b>", "<i>12</i>3<b>456</b>".truncate_html(5))
+    assert_equal("<i>12<b>3</b>4...</i>",
+                 "<i>12<b>3</b>456</i>".truncate_html(5))
+    assert_equal("<i>12<b>3<hr/></b>4...</i>",
+                 "<i>12<b>3<hr/></b>456</i>".truncate_html(5))
+    assert_equal("<i>12</i>3<b>4...</b>",
+                 "<i>12</i>3<b>456</b>".truncate_html(5))
     assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
   end
 

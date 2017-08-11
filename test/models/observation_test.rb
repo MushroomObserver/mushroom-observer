@@ -1,11 +1,10 @@
-# encoding: utf-8
 require "test_helper"
 # test Observation model
 class ObservationTest < UnitTestCase
   def create_new_objects
     @cc_obs = Observation.new
     @cc_obs.user = mary
-    @cc_obs.when = Time.now
+    @cc_obs.when = Time.zone.now
     @cc_obs.where = "Glendale, California"
     @cc_obs.notes = "New"
     @cc_obs.name = names(:fungi)
@@ -47,7 +46,8 @@ class ObservationTest < UnitTestCase
     @cc_obs.where = nil  # no longer an error, defaults to Location.unknown
     assert(!@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
-    assert_equal(:validate_observation_user_missing.t, @cc_obs.errors[:user].first)
+    assert_equal(:validate_observation_user_missing.t,
+                 @cc_obs.errors[:user].first)
   end
 
   def test_destroy
@@ -66,11 +66,16 @@ class ObservationTest < UnitTestCase
       images(:disconnected_coprinus_comatus_image),
       images(:connected_coprinus_comatus_image)
     ]
-    observations(:minimal_unknown_obs).thumb_image = images(:commercial_inquiry_image)
-    observations(:minimal_unknown_obs).remove_image(images(:commercial_inquiry_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image, images(:disconnected_coprinus_comatus_image))
-    observations(:minimal_unknown_obs).remove_image(images(:disconnected_coprinus_comatus_image))
-    assert_equal(observations(:minimal_unknown_obs).thumb_image, images(:connected_coprinus_comatus_image))
+    observations(:minimal_unknown_obs).
+      thumb_image = images(:commercial_inquiry_image)
+    observations(:minimal_unknown_obs).
+      remove_image(images(:commercial_inquiry_image))
+    assert_equal(observations(:minimal_unknown_obs).thumb_image,
+                 images(:disconnected_coprinus_comatus_image))
+    observations(:minimal_unknown_obs).
+      remove_image(images(:disconnected_coprinus_comatus_image))
+    assert_equal(observations(:minimal_unknown_obs).thumb_image,
+                 images(:connected_coprinus_comatus_image))
   end
 
   def test_name_been_proposed
@@ -111,7 +116,7 @@ class ObservationTest < UnitTestCase
   end
 
   # Prove that when user's favorite vote is deleted,
-  # user's 2nd postive vote becomes user's favorite
+  # user's 2nd positive vote becomes user's favorite
   def test_change_vote_2nd_positive_choice_becomes_favorite
     naming_top = namings(:unequal_positive_namings_top_naming)
     obs = naming_top.observation
@@ -133,10 +138,10 @@ class ObservationTest < UnitTestCase
   end
 
   def test_specimens
-    assert(!observations(:strobilurus_diminutivus_obs).specimen)
+    refute(observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
     assert(observations(:detailed_unknown_obs).specimen)
-    assert(observations(:detailed_unknown_obs).specimens.length > 0)
+    refute(observations(:detailed_unknown_obs).specimens.empty?)
   end
 
   def test_observer_accepts_general_email_questions
@@ -186,7 +191,7 @@ class ObservationTest < UnitTestCase
   # Prove that unique_format_name returns blank string on error
   def test_unique_format_name_rescue
     obs = Observation.first
-    obs.name.display_name = nil    # mess up display_name to cause error
+    obs.name.display_name = nil # mess up display_name to cause error
     assert_equal("", obs.unique_format_name)
   end
 
@@ -213,7 +218,7 @@ class ObservationTest < UnitTestCase
     # (Rolf owns coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
     # (But Mary will get a comment-response email because she has a naming.)
     User.current = rolf
-    new_comment = Comment.create(
+    Comment.create(
       summary: "This is Rolf...",
       target: obs
     )
@@ -245,7 +250,7 @@ class ObservationTest < UnitTestCase
     # Rolf should not be notified of anything here, either...
     # But Mary still will get something for having the naming.
     User.current = dick
-    new_comment = Comment.create(
+    Comment.create(
       summary: "This is Dick...",
       target: obs.reload
     )
@@ -286,7 +291,8 @@ class ObservationTest < UnitTestCase
     assert_save(rolf)
 
     # Observation owner is notified if comment added by someone else.
-    # (Rolf owns observations(:coprinus_comatus_obs), one naming, two votes, conf. around 1.5.)
+    # (Rolf owns observations(:coprinus_comatus_obs),
+    # one naming, two votes, conf. around 1.5.)
     rolf.email_comments_owner = true
     assert_save(rolf)
     User.current = mary
@@ -299,8 +305,7 @@ class ObservationTest < UnitTestCase
                  flavor: "QueuedEmail::CommentAdd",
                  from: mary,
                  to: rolf,
-                 comment: new_comment.id
-                )
+                 comment: new_comment.id)
 
     # Observation owner is notified if naming added by someone else.
     rolf.email_comments_owner = false
@@ -318,8 +323,7 @@ class ObservationTest < UnitTestCase
                  from: mary,
                  to: rolf,
                  observation: obs.id,
-                 naming: new_naming.id
-                )
+                 naming: new_naming.id)
 
     # Observation owner is notified if consensus changed by someone else.
     rolf.email_observations_naming = false
@@ -338,8 +342,7 @@ class ObservationTest < UnitTestCase
                  to: rolf,
                  observation: obs.id,
                  old_name: names(:coprinus_comatus).id,
-                 new_name: names(:agaricus_campestris).id
-                )
+                 new_name: names(:agaricus_campestris).id)
 
     # Make sure Mary gets notified if Rolf responds to her comment.
     mary.email_comments_response = true
@@ -354,8 +357,7 @@ class ObservationTest < UnitTestCase
                  flavor: "QueuedEmail::CommentAdd",
                  from: rolf,
                  to: mary,
-                 comment: new_comment.id
-                )
+                 comment: new_comment.id)
     QueuedEmail.queue_emails(false)
   end
 
@@ -394,7 +396,8 @@ class ObservationTest < UnitTestCase
     )
 
     # Watcher is notified if comment added.
-    # (Rolf owns observations(:coprinus_comatus_obs), one naming, two votes, conf. around 1.5.)
+    # (Rolf owns observations(:coprinus_comatus_obs),
+    # one naming, two votes, conf. around 1.5.)
     User.current = mary
     new_comment = Comment.create(
       summary: "This is Mary...",
@@ -405,8 +408,7 @@ class ObservationTest < UnitTestCase
                  flavor: "QueuedEmail::CommentAdd",
                  from: mary,
                  to: dick,
-                 comment: new_comment.id
-                )
+                 comment: new_comment.id)
 
     # Watcher is notified if naming added.
     User.current = mary
@@ -421,15 +423,15 @@ class ObservationTest < UnitTestCase
                  from: mary,
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
-                 naming: new_naming.id
-                )
+                 naming: new_naming.id)
 
     # Watcher is notified if consensus changed.
     # (Actually, Mary already gave this her highest possible vote,
     # so think of this as Mary changing Rolf's vote. :)
     User.current = mary
     obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
-    assert_equal(3, votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
+    assert_equal(3,
+                 votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
@@ -438,8 +440,7 @@ class ObservationTest < UnitTestCase
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
                  old_name: names(:coprinus_comatus).id,
-                 new_name: names(:agaricus_campestris).id
-                )
+                 new_name: names(:agaricus_campestris).id)
 
     # Now have Rolf make a bunch of changes...
     User.current = rolf
@@ -466,8 +467,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
-                 note: "notes,location,added_image,removed_image"
-                )
+                 note: "notes,location,added_image,removed_image")
     QueuedEmail.queue_emails(false)
   end
 
@@ -506,8 +506,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: mary,
                  observation: observations(:coprinus_comatus_obs).id,
-                 note: "notes"
-                )
+                 note: "notes")
 
     # Add image to observation.
     marys_interest.state = false
@@ -523,8 +522,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
-                 note: "added_image"
-                )
+                 note: "added_image")
 
     # Destroy observation.
     dicks_interest.state = false
@@ -541,8 +539,8 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (#{observations(:coprinus_comatus_obs).id})"
-                )
+                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
+                       "(#{observations(:coprinus_comatus_obs).id})")
     QueuedEmail.queue_emails(false)
   end
 
@@ -554,27 +552,27 @@ class ObservationTest < UnitTestCase
 
     User.current = rolf
     obs = Observation.create!(
-      :when    => Date.today,
-      :where   => "anywhere",
-      :name_id => @fungi.id
+      when:    Time.zone.today,
+      where:   "anywhere",
+      name_id: @fungi.id
     )
 
     User.current = rolf
     namg1 = Naming.create!(
-      :observation_id => obs.id,
-      :name_id => @name1.id
+      observation_id: obs.id,
+      name_id: @name1.id
     )
 
     User.current = mary
     namg2 = Naming.create!(
-      :observation_id => obs.id,
-      :name_id => @name2.id
+      observation_id: obs.id,
+      name_id: @name2.id
     )
 
     User.current = dick
     namg3 = Naming.create!(
-      :observation_id => obs.id,
-      :name_id => @name3.id
+      observation_id: obs.id,
+      name_id: @name3.id
     )
 
     namings = [namg1, namg2, namg3]
@@ -712,7 +710,8 @@ class ObservationTest < UnitTestCase
     assert_true(obs.has_edit_permission?(mary))
     assert_false(obs.has_edit_permission?(dick))
 
-    # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
+    # IS owned by Bolete project, AND owned by Mary
+    # (Dick is member of Bolete project)
     obs = observations(:detailed_unknown_obs)
     assert_false(obs.has_edit_permission?(rolf))
     assert_true(obs.has_edit_permission?(mary))
@@ -742,8 +741,10 @@ class ObservationTest < UnitTestCase
       user_id: users(:rolf).id
     )
     no_votes_naming.save!
-    votes = "#{obs.namings.first.id} Agaricus campestris L.: mary=3.0(*), rolf=-3.0\n" \
-            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: mary=1.0(*), rolf=2.0(*)\n"\
+    votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
+              "mary=3.0(*), rolf=-3.0\n" \
+            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: " \
+              "mary=1.0(*), rolf=2.0(*)\n"\
             "#{no_votes_naming.id} Fungi: no votes"
 
     assert_equal(votes, obs.dump_votes)

@@ -1,34 +1,38 @@
 # encoding: utf-8
+
 require "test_helper"
 
 class DescriptionTest < UnitTestCase
   # Make sure authors and editors are as they should be.
   def assert_authors_and_editors(obj, authors, editors, msg)
-    assert_equal(authors.sort, obj.authors.map(&:login).sort, "Authors wrong: " + msg)
-    assert_equal(editors.sort, obj.editors.map(&:login).sort, "Editors wrong: " + msg)
+    assert_equal(authors.sort, obj.authors.map(&:login).sort,
+                 "Authors wrong: #{msg}")
+    assert_equal(editors.sort, obj.editors.map(&:login).sort,
+                 "Editors wrong: #{msg}")
   end
 
   # Make sure author/editor callbacks are updating contributions right.
-  def assert_contributions(rolf_score, mary_score, dick_score, katrina_score, msg)
-    for score, user in [
+  def assert_contributions(rolf_score, mary_score, dick_score, katrina_score,
+                           msg)
+    [
       [rolf_score, rolf],
       [mary_score, mary],
       [dick_score, dick],
       [katrina_score, katrina]
-    ]
+    ].each do |score, user|
       assert_equal(10 + score, user.reload.contribution,
-                   "Contribution for #{user.login} wrong: " + msg)
+                   "Contribution for #{user.login} wrong: #{msg}")
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   # ------------------------------------------------------------------
   #  Make sure all the author/editor-related magic is working right.
   # ------------------------------------------------------------------
 
   def test_authors_and_editors
-    for model in [LocationDescription, NameDescription]
+    [LocationDescription, NameDescription].each do |model|
       case model.name
       when "LocationDescription"
         obj = model.new(location_id: locations(:albion).id,
@@ -38,7 +42,7 @@ class DescriptionTest < UnitTestCase
         set_nontrivial = "notes="
       when "NameDescription"
         obj = model.new(name_id: names(:fungi).id,
-              license_id: licenses(:ccnc25).id)
+                        license_id: licenses(:ccnc25).id)
         a = 100
         e = 10
         set_nontrivial = "gen_desc="
@@ -65,7 +69,7 @@ class DescriptionTest < UnitTestCase
 
       # Delete editors and author so we can test changes to old object that
       # is grandfathered in without any editors or authors.
-      User.current = nil # (prevents AbstractModel from screwing up contributions)
+      User.current = nil # (stops AbstractModel from screwing up contributions)
       obj.update_users_and_parent
       obj.authors.clear
       obj.editors.clear
@@ -78,7 +82,8 @@ class DescriptionTest < UnitTestCase
       User.current = mary
       obj.license_id = 1
       obj.save
-      msg = "#{model}: Mary should not be made author after trivial change to authorless object."
+      msg = "#{model}: Mary should not be made author "\
+            "after trivial change to authorless object."
       assert_authors_and_editors(obj, [], ["mary"], msg)
       assert_contributions(0, e, 0, 0, msg)
 
@@ -95,7 +100,7 @@ class DescriptionTest < UnitTestCase
       User.current = katrina
       obj.save
       msg = "#{model}: Already authors, so Katrina should become editor."
-      assert_authors_and_editors(obj, ["dick"], %w(mary katrina), msg)
+      assert_authors_and_editors(obj, ["dick"], %w[mary katrina], msg)
       assert_contributions(0, e, a, e, msg)
 
       # Now force Dick and Mary both to be both authors and editors.
@@ -105,13 +110,13 @@ class DescriptionTest < UnitTestCase
       obj.add_editor(dick)
       obj.add_editor(mary)
       msg = "#{model}: Both Dick and Mary were just made authors supposedly."
-      assert_authors_and_editors(obj, %w(dick mary), ["katrina"], msg)
+      assert_authors_and_editors(obj, %w[dick mary], ["katrina"], msg)
       assert_contributions(0, a, a, e, msg)
 
       # And demote an author to test last feature.
       obj.remove_author(dick)
       msg = "#{model}: Dick was just demoted supposedly."
-      assert_authors_and_editors(obj, ["mary"], %w(dick katrina), msg)
+      assert_authors_and_editors(obj, ["mary"], %w[dick katrina], msg)
       assert_contributions(0, a, e, e, msg)
 
       # Delete it to restore all contributions.

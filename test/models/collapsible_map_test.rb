@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 require "map_collapsible"
@@ -7,7 +6,7 @@ require "map_set"
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.
   def inspect
-    str = "%f" % self
+    str = format("%f", self)
     str.sub(/0+$/, ""). # remove trailing zeros
       sub(/\.$/, "")
   end
@@ -60,27 +59,30 @@ class CollapsibleMapTest < UnitTestCase
     errors << "south" if south.round(4) != mapset.south.round(4)
     errors << "east" if east.round(4) != mapset.east.round(4)
     errors << "west" if west.round(4) != mapset.west.round(4)
-    if errors.any?
-      expect = "N=%.4f S=%.4f E=%.4f W=%.4f" % [north, south, east, west]
-      actual = "N=%.4f S=%.4f E=%.4f W=%.4f" % [mapset.north, mapset.south, mapset.east, mapset.west]
-      message = "Extents wrong: <#{errors.join(", ")}>\nExpect: <#{expect}>\nActual: <#{actual}>"
-      flunk(message)
-    end
+    return unless errors.any?
+
+    expect = format("N=%.4f S=%.4f E=%.4f W=%.4f", north, south, east, west)
+    actual = format("N=%.4f S=%.4f E=%.4f W=%.4f",
+                    mapset.north, mapset.south, mapset.east, mapset.west)
+    message = "Extents wrong: <#{errors.join(", ")}>\n"\
+              "Expect: <#{expect}>\n"\
+              "Actual: <#{actual}>"
+    flunk(message)
   end
 
   def assert_list_of_mapsets(coll, objs)
     expect = objs.reject(&:nil?).map do |x|
       x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
     end.map do |x|
-      "%9.4f %9.4f %9.4f %9.4f" % x
+      "%9.4f %9.4f %9.4f %9.4f" % x # rubocop:disable Style/FormatString
     end.sort
     actual = coll.mapsets.map(&:edges).map do |x|
-      "%9.4f %9.4f %9.4f %9.4f" % x
+      "%9.4f %9.4f %9.4f %9.4f" % x # rubocop:disable Style/FormatString
     end.sort
     messages = []
     differ = false
-    for i in 0..(expect.length > actual.length ? expect.length : actual.length)
-      message = "%39.39s    %39.39s" % [expect[i], actual[i]]
+    (0..[expect.length, actual.length].max).each do |i|
+      message = format("%39.39s    %39.39s", expect[i], actual[i])
       if expect[i] != actual[i]
         differ = true
         message += " (*)"
@@ -304,6 +306,7 @@ class CollapsibleMapTest < UnitTestCase
     assert_mapset_is_box(mapset, n, s, e, w)
   end
 
+  # rubocop:disable Metrics/LineLength
   def test_extending_mapset_with_boxes_over_dateline
     # Neither old nor new box straddling dateline:
     do_box_extension_test(-170, -150, 150, 170, 150, -150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
@@ -337,6 +340,7 @@ class CollapsibleMapTest < UnitTestCase
     do_box_extension_test(150, -150, 170, -170, 150, -150)   # |██▀             ▀██|
     do_box_extension_test(170, -150, 150, -170, 150, -150)   # |██▀             ▄██|
   end
+  # rubocop:enable Metrics/LineLength
 
   def do_box_extension_test(w1, e1, w2, e2, w3, e3)
     loc = Location.new

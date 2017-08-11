@@ -1,11 +1,10 @@
-# encoding: utf-8
 require "test_helper"
 
 class NamingTest < UnitTestCase
   # Propose a naming for an observation.
   def test_create
     assert_kind_of Observation, observations(:coprinus_comatus_obs)
-    now = Time.now
+    now = Time.zone.now
     naming = Naming.new(
       created_at: now,
       updated_at: now,
@@ -22,18 +21,24 @@ class NamingTest < UnitTestCase
     assert_kind_of Naming, namings(:coprinus_comatus_naming)
     assert_kind_of Name, names(:coprinus_comatus)
     assert_kind_of Name, names(:agaricus_campestris)
-    assert_equal names(:coprinus_comatus), namings(:coprinus_comatus_naming).name
-    assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
-    namings(:coprinus_comatus_naming).updated_at = Time.now
+    assert_equal(names(:coprinus_comatus),
+                 namings(:coprinus_comatus_naming).name)
+    assert_equal(names(:coprinus_comatus),
+                 observations(:coprinus_comatus_obs).name)
+
+    namings(:coprinus_comatus_naming).updated_at = Time.zone.now
     namings(:coprinus_comatus_naming).name = names(:agaricus_campestris)
     assert namings(:coprinus_comatus_naming).save
+
     assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")
     namings(:coprinus_comatus_naming).reload
     observations(:coprinus_comatus_obs).reload
     User.current = rolf
     observations(:coprinus_comatus_obs).calc_consensus
-    assert_equal names(:agaricus_campestris), namings(:coprinus_comatus_naming).name
-    assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
+    assert_equal(names(:agaricus_campestris),
+                 namings(:coprinus_comatus_naming).name)
+    assert_equal(names(:agaricus_campestris),
+                 observations(:coprinus_comatus_obs).name)
   end
 
   # Make sure it fails if we screw up.
@@ -42,20 +47,23 @@ class NamingTest < UnitTestCase
     assert !naming.save
     assert_equal 3, naming.errors.count
     assert_equal :validate_naming_name_missing.t, naming.errors[:name].first
-    assert_equal :validate_naming_observation_missing.t, naming.errors[:observation].first
+    assert_equal(:validate_naming_observation_missing.t,
+                 naming.errors[:observation].first)
     assert_equal :validate_naming_user_missing.t, naming.errors[:user].first
   end
 
   # Destroy one.
   def test_destroy
-    assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
+    assert_equal(names(:coprinus_comatus),
+                 observations(:coprinus_comatus_obs).name)
     id = namings(:coprinus_comatus_naming).id
     User.current = rolf
     namings(:coprinus_comatus_naming).destroy
     observations(:coprinus_comatus_obs).reload
     observations(:coprinus_comatus_obs).calc_consensus
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(id) }
-    assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
+    assert_equal(names(:agaricus_campestris),
+                 observations(:coprinus_comatus_obs).name)
   end
 
   def test_basic_reasons
