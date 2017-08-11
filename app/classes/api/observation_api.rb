@@ -199,14 +199,8 @@ class API
         obj.projects.push(*add_projects) if add_projects.any?
         obj.projects.delete(*remove_projects) if remove_projects.any?
         obj.species_lists.push(*add_species_lists) if add_species_lists.any?
-<<<<<<< 080ed26c8da92369d6c5e550d231493509e3efef
         return unless remove_species_lists.any?
         obj.species_lists.delete(*remove_species_lists)
-=======
-        if remove_species_lists.any?
-          obj.species_lists.delete(*remove_species_lists)
-        end
->>>>>>> Simple Rubcopping in API files touched in this branch
       end
     end
   end
