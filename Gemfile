@@ -94,7 +94,10 @@ gem "rubocop", require: false
 
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
-gem "brakeman", require: false
+# We don't need the gem:
+# (1) Gemnasium periodically scans the mushroom-observer GitHub repo, and
+# (2) CodeClimate CI includes a Brakeman engine.
+# gem "brakeman", require: false
 
 # Amazon S3 SDK, for access to images on dreamhost S3
 gem "aws-sdk", "~> 2"
