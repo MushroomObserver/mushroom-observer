@@ -230,7 +230,6 @@ class User < AbstractModel
             small: 2
           },
           source: :thumbnail_size,
-          with: [],
           accessor: :whiny)
   as_enum(:image_size,
           {
@@ -242,7 +241,6 @@ class User < AbstractModel
             full_size: 6
           },
           source: :image_size,
-          with: [],
           accessor: :whiny)
   as_enum(:votes_anonymous,
           {
@@ -251,7 +249,6 @@ class User < AbstractModel
             old: 3
           },
           source: :votes_anonymous,
-          with: [],
           accessor: :whiny)
   as_enum(:location_format,
           {
@@ -259,7 +256,6 @@ class User < AbstractModel
             scientific: 2
           },
           source: :location_format,
-          with: [],
           accessor: :whiny)
   as_enum(:hide_authors,
           {
@@ -267,7 +263,6 @@ class User < AbstractModel
             above_species: 2
           },
           source: :hide_authors,
-          with: [],
           accessor: :whiny)
   as_enum(:keep_filenames,
           {
@@ -276,7 +271,6 @@ class User < AbstractModel
             keep_and_show: 3
           },
           source: :keep_filenames,
-          with: [],
           accessor: :whiny)
 
   has_many :api_keys, dependent: :destroy

@@ -62,7 +62,6 @@ class LocationDescription < Description
             user: 5
           },
           source: :source_type,
-          with: [],
           accessor: :whiny
          )
 
