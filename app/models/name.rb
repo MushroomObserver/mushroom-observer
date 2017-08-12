@@ -282,7 +282,6 @@ class Name < AbstractModel
             Group: 16 # used for both "group" and "clade"
           },
           source: :rank,
-          with: [],
           accessor: :whiny)
 
   belongs_to :correct_spelling, class_name: "Name",

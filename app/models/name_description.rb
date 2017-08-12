@@ -75,7 +75,6 @@ class NameDescription < Description
             inaccurate: 4
           },
           source: :review_status,
-          with: [],
           accessor: :whiny
          )
   as_enum(:source_type,
@@ -86,7 +85,6 @@ class NameDescription < Description
             user: 5
           },
           source: :source_type,
-          with: [],
           accessor: :whiny
          )
 
