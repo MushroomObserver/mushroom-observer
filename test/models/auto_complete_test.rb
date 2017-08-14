@@ -28,7 +28,8 @@ end
 class AutoCompleteTest < UnitTestCase
   def test_subclass
     assert_equal("AutoCompleteName", AutoComplete.subclass("name").name)
-    assert_equal("AutoCompleteMockByWord", AutoComplete.subclass("mock_by_word").name)
+    assert_equal("AutoCompleteMockByWord",
+                 AutoComplete.subclass("mock_by_word").name)
     assert_raise(RuntimeError) { AutoComplete.subclass("bogus") }
   end
 
@@ -41,7 +42,7 @@ class AutoCompleteTest < UnitTestCase
   end
 
   def test_truncate
-    list = %w( b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 )
+    list = %w(b0 b1 b2 b3 b4 b5 b6 b7 b8 b9)
     auto = AutoCompleteMock.new("blah")
     auto.matches = list
     assert_equal(list, auto.matches)
@@ -85,7 +86,7 @@ class AutoCompleteTest < UnitTestCase
       "something",          # 10
       "else",               # 11
     ]
-    for limit, expected_matches, expected_string in [
+    [
       [10, 9, "o"],
       [9, 9, "o"],
       [8, 7, "on"],
@@ -95,7 +96,7 @@ class AutoCompleteTest < UnitTestCase
       [4, 4, "one two t"],
       [3, 3, "one two th"],
       [2, 3, "one two three"]
-    ]
+    ].each do |limit, expected_matches, expected_string|
       auto = AutoCompleteMock.new(pattern)
       auto.matches = @list.sort_by { rand }
       auto.limit = limit
@@ -118,7 +119,7 @@ class AutoCompleteTest < UnitTestCase
       "something",           # 10
       "else",                # 11
     ]
-    for limit, expected_matches, expected_string in [
+    [
       [10, 9, "o"],
       [9, 9, "o"],
       [8, 7, "on"],
@@ -129,7 +130,7 @@ class AutoCompleteTest < UnitTestCase
       [3, 3, "one two s"],
       [2, 2, "one two shr"],
       [1, 2, "one two shree"]
-    ]
+    ].each do |limit, expected_matches, expected_string|
       auto = AutoCompleteMockByWord.new(pattern)
       auto.matches = @list.sort_by { rand }
       auto.limit = limit
@@ -140,9 +141,9 @@ class AutoCompleteTest < UnitTestCase
   def assert_refines_correctly(auto, expected_matches, expected_string)
     string = auto.refine_matches
     if string != expected_string || auto.matches.length != expected_matches
-      msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n"
-      msg += "Refined string: #{string.inspect}, expected: #{expected_string.inspect}\n"
-      msg += show_matches(auto)
+      msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n"\
+            "Refined string: #{string.inspect}, "\
+            "expected: #{expected_string.inspect}\n #{show_matches(auto)}"
       flunk(msg)
     else
       pass
@@ -152,7 +153,7 @@ class AutoCompleteTest < UnitTestCase
   def show_matches(auto)
     result = ""
     got = {}
-    for str in @list
+    @list.each do |str|
       if auto.matches.include?(str)
         result += "#{got.length + 1}: #{str.inspect}\n"
         got[str] = true
@@ -160,7 +161,7 @@ class AutoCompleteTest < UnitTestCase
         result += "X: #{str.inspect}\n"
       end
     end
-    for str in auto.matches
+    auto.matches.each do |str|
       result += "UNEXPECTED!! #{str.inspect}\n" unless got[str]
     end
     result

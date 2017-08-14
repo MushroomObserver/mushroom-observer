@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class CommentTest < UnitTestCase
@@ -117,7 +116,7 @@ class CommentTest < UnitTestCase
       summary: summary,
       comment: comment
     )
-    assert_equal(chg, num_emails-old, sent_emails(old))
+    assert_equal(chg, num_emails - old, sent_emails(old))
   end
 
   def num_emails

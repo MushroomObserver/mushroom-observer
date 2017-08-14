@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class ProjectTest < UnitTestCase
@@ -29,7 +28,8 @@ class ProjectTest < UnitTestCase
     minimal_unknown_obs.images << imgs.first
     proj.remove_observation(detailed_unknown_obs)
     assert_obj_list_equal([minimal_unknown_obs], proj.observations)
-    # should keep first img because it is reused by another observation still attached to project
+    # should keep first img because it is reused
+    # by another observation still attached to project
     assert_obj_list_equal([imgs.first], proj.images)
 
     proj.remove_observation(minimal_unknown_obs)

@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class NameParseTest < UnitTestCase
@@ -67,7 +66,8 @@ class NameParseTest < UnitTestCase
   end
 
   def test_explicit_coprinus_comatus_full_name
-    input_str = "#{names(:coprinus_comatus).rank} #{names(:coprinus_comatus).search_name}"
+    input_str = "#{names(:coprinus_comatus).rank} " \
+                "#{names(:coprinus_comatus).search_name}"
     name_parse = NameParse.new(input_str)
     assert_not_nil(name_parse)
     assert_equal(names(:coprinus_comatus).rank.to_sym, name_parse.rank)
@@ -88,13 +88,16 @@ class NameParseTest < UnitTestCase
   end
 
   def test_default_synonym_lepiota
-    name_parse = NameParse.new("#{names(:macrolepiota_rachodes).text_name} = #{names(:lepiota_rachodes).text_name}")
+    name_parse = NameParse.new("#{names(:macrolepiota_rachodes).text_name} = " \
+                               "#{names(:lepiota_rachodes).text_name}")
     assert_not_nil(name_parse)
     assert_nil(name_parse.rank)
-    assert_equal(names(:macrolepiota_rachodes).text_name, name_parse.search_name)
+    assert_equal(names(:macrolepiota_rachodes).text_name,
+                 name_parse.search_name)
     assert(name_parse.has_synonym)
     assert_nil(name_parse.synonym_rank)
-    assert_equal(names(:lepiota_rachodes).text_name, name_parse.synonym_search_name)
+    assert_equal(names(:lepiota_rachodes).text_name,
+                 name_parse.synonym_search_name)
     assert_equal([names(:macrolepiota_rachodes)], name_parse.find_names)
     assert_equal([names(:lepiota_rachodes)], name_parse.find_synonym_names)
   end
@@ -112,7 +115,10 @@ class NameParseTest < UnitTestCase
   end
 
   def test_genus_synonym_agaricus
-    name_parse = NameParse.new("#{names(:agaricus).rank} #{names(:agaricus).text_name} = #{names(:psalliota).rank} #{names(:psalliota).text_name}")
+    name_parse = NameParse.new(
+      "#{names(:agaricus).rank} #{names(:agaricus).text_name} = " \
+      "#{names(:psalliota).rank} #{names(:psalliota).text_name}"
+    )
     assert_not_nil(name_parse)
     assert_equal(names(:agaricus).rank.to_sym, name_parse.rank)
     assert_equal(names(:agaricus).text_name, name_parse.search_name)

@@ -1,19 +1,17 @@
-# encoding: utf-8
 require "test_helper"
 
 class LocalizationFilesTest < UnitTestCase
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)
-    msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
+    msg = "Missing #{type} translations:\n" +
+          missing.map(&:inspect).sort.join("\n") + "\n"
     assert_empty missing, msg
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_localization_files_exist
-    for lang in Language.all
-      assert File.exist?(lang.localization_file)
-    end
+    Language.all.each { |lang| assert File.exist?(lang.localization_file) }
   end
 
   def test_syntax_of_official_export_file
@@ -23,26 +21,23 @@ class LocalizationFilesTest < UnitTestCase
     lang.check_export_syntax
     errors += Language.verbose_messages
     assert_empty errors, "Bad syntax in language export files:\n" +
-      errors.join("\n")
+                         errors.join("\n")
   end
 
   # Make sure all "[:tag]" refs inside the translations exist.
   def test_embedded_refs
     errors = []
-    for lang in Language.all
+    Language.all.each do |lang|
       data = File.open(lang.localization_file, "r:utf-8") do |fh|
-        YAML.load(fh)
+        YAML.safe_load(fh)
       end
       tags = {}
-      for tag in data.keys
-        tags[tag.to_s.downcase] = true
-      end
-      for tag, str in data
-        if str.is_a?(String)
-          str.gsub(/[\[\=]:(\w+)/) do
-            unless tags.key?(Regexp.last_match(1).downcase)
-              errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
-            end
+      data.keys.each { |tag| tags[tag.to_s.downcase] = true }
+      data.each do |tag, str|
+        next unless str.is_a?(String)
+        str.gsub(/[\[\=]:(\w+)/) do
+          unless tags.key?(Regexp.last_match(1).downcase)
+            errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
           end
         end
       end
@@ -59,10 +54,13 @@ class LocalizationFilesTest < UnitTestCase
       missing_tags += missing_tags_in_file(file, tags)
       duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
-    assert_true(missing_tags.empty?, "Found #{missing_tags.length} undefined tag " \
-      "reference(s) in source files:\n" + missing_tags.join(""))
-    assert_true(duplicate_function_defs.empty?, "Found #{duplicate_function_defs.length} duplicate method " \
-      "definition(s) in source files:\n" + duplicate_function_defs.join(""))
+    assert_true(missing_tags.empty?,
+                "Found #{missing_tags.length} undefined tag reference(s) " \
+                "in source files:\n #{missing_tags.join("")}")
+    assert_true(duplicate_function_defs.empty?,
+                "Found #{duplicate_function_defs.length} duplicate method " \
+                "definition(s) in source files:\n" +
+                duplicate_function_defs.join(""))
   end
 
   def i18n_keys
@@ -72,25 +70,23 @@ class LocalizationFilesTest < UnitTestCase
 
   # Get Hash of tags we have translations for already.
   def known_tags
-    tags = {}
-    for tag in i18n_keys +
-               # these are tags only used in unit tests
-               [:one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y,
-                :_unit_test_z]
-      tags[tag.to_s.downcase] = true
-    end
-    tags
+    (i18n_keys +
+     # these are tags only used in unit tests
+     %i[one two _unit_test_a _unit_test_x _unit_test_y _unit_test_z]).
+      each.with_object({}) { |tag, h| h[tag.to_s.downcase] = true }
   end
 
-  # Get Array of error messages for tags in +file+ that we don't have translations for.
+  # Array of error msgs for tags in +file+ that we don't have translations for.
   def missing_tags_in_file(file, tags)
     errors = []
     n = 0
-    for line in File.readlines(file)
+    File.readlines(file).each do |line|
       n += 1
       line.sub!(/(^#| # ).*/, "")
       line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
-        errors << "#{file} line #{n} [:#{Regexp.last_match(1)}]\n" unless tags.key?(Regexp.last_match(1).downcase)
+        unless tags.key?(Regexp.last_match(1).downcase)
+          errors << "#{file} line #{n} [:#{Regexp.last_match(1)}]\n"
+        end
       end
     end
     errors
@@ -106,16 +102,16 @@ class LocalizationFilesTest < UnitTestCase
     defs = {}
     stack = []
     n = 0
-    for line in File.readlines(file)
+    File.readlines(file).each do |line|
       n += 1
-      if line.match(/^(\s*)(class|module)\s/)
+      if line =~ /^(\s*)(class|module)\s/
         space = Regexp.last_match(1)
         stack << [{}, space]
         defs = {}
       elsif line.match(/^(\s*)end(\W|$)/) && stack.any?
         space = Regexp.last_match(1)
         defs = stack.pop[0] if space == stack[-1][1]
-      elsif line.match(/^\s*def ([^\s()#]+)/)
+      elsif line =~ /^\s*def ([^\s()#]+)/
         if defs[Regexp.last_match(1)]
           errors << "#{file} line #{n} #{Regexp.last_match(1).inspect}\n"
         else
@@ -124,19 +120,19 @@ class LocalizationFilesTest < UnitTestCase
       end
     end
     if stack.any?
-      errors << "#{file} line #{n} [file didn't parse right, might be due to tabs?]\n"
+      errors << "#{file} line #{n} [file didn't parse right, " \
+                "might be due to tabs?]\n"
     end
     errors
   end
 
   # Traverse a directory structure looking for source files.
   def source_files(*paths, &block)
-    for path in paths
-      for file in Dir.glob("#{path}/*")
-        if file.match(/\.(rb|rhtml|rxml|erb)$/)
-          block.call(file)
-        elsif File.directory?(file) &&
-              file.match(/\/\w+$/)
+    paths.each do |path|
+      Dir.glob("#{path}/*").each do |file|
+        if file =~ /\.(rb|rhtml|rxml|erb)$/
+          yield(file)
+        elsif File.directory?(file) && file.match(%r{\/\w+$})
           source_files(file, &block)
         end
       end
@@ -148,18 +144,18 @@ class LocalizationFilesTest < UnitTestCase
     file = "#{::Rails.root}/app/classes/api/errors.rb"
     File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
-        if line.match(/^\s*class (\w+) < /) &&
-           !%w(Error ObjectError BadParameterValue).include?(Regexp.last_match(1))
-          tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
-        end
+        next unless line.match(/^\s*class (\w+) < /) &&
+                    !%w[Error ObjectError BadParameterValue].
+                    include?(Regexp.last_match(1))
+        tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
       end
     end
     file = "#{::Rails.root}/app/classes/api/parsers.rb"
     File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
-        if line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
-          tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
-        end
+        next unless line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
+
+        tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
       end
     end
     assert_no_missing_translations(tags, "API error")
@@ -201,7 +197,7 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_description_source_translations
-    tags = [:public, :foreign, :project, :source, :user].map do |source|
+    tags = %i[public foreign project source user].map do |source|
       [
         "description_full_title_#{source}".to_sym,
         "description_part_title_#{source}_with_text".to_sym

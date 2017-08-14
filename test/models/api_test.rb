@@ -64,7 +64,7 @@ class ApiTest < UnitTestCase
 
   def show_val(val)
     case val
-    when NilClass, TrueClass, FalseClass, String, Symbol, Fixnum, Float
+    when NilClass, TrueClass, FalseClass, String, Symbol, Integer, Float
       val.inspect
     when Array
       "[" + val.map { |v| show_val(v) }.join(", ") + "]"
@@ -77,12 +77,12 @@ class ApiTest < UnitTestCase
 
   def assert_last_observation_correct
     obs = Observation.last
-    assert_in_delta(Time.now, obs.created_at, 1.minute)
-    assert_in_delta(Time.now, obs.updated_at, 1.minute)
+    assert_in_delta(Time.zone.now, obs.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, obs.updated_at, 1.minute)
     assert_equal(@date.web_date, obs.when.web_date)
     assert_users_equal(@user, obs.user)
     assert_equal(@specimen, obs.specimen)
-    assert_equal(@notes, obs.notes)
+    assert_equal(@notes.strip, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
     assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
     assert_objs_equal(@loc, obs.location)
@@ -118,8 +118,8 @@ class ApiTest < UnitTestCase
     assert_objs_equal(obs, naming.observation)
     assert_users_equal(@user, naming.user)
     assert_in_delta(@vote, naming.vote_cache, 1) # vote_cache is weird
-    assert_in_delta(Time.now, naming.created_at, 1.minute)
-    assert_in_delta(Time.now, naming.updated_at, 1.minute)
+    assert_in_delta(Time.zone.now, naming.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, naming.updated_at, 1.minute)
     assert_equal(1, naming.votes.length)
     assert_objs_equal(vote, naming.votes.first)
   end
@@ -132,16 +132,16 @@ class ApiTest < UnitTestCase
     assert_objs_equal(obs, vote.observation)
     assert_users_equal(@user, vote.user)
     assert_equal(@vote, vote.value)
-    assert_in_delta(Time.now, vote.created_at, 1.minute)
-    assert_in_delta(Time.now, vote.updated_at, 1.minute)
+    assert_in_delta(Time.zone.now, vote.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, vote.updated_at, 1.minute)
     assert_true(vote.favorite)
   end
 
   def assert_last_image_correct
     img = Image.last
     assert_users_equal(@user, img.user)
-    assert_in_delta(Time.now, img.created_at, 1.minute)
-    assert_in_delta(Time.now, img.updated_at, 1.minute)
+    assert_in_delta(Time.zone.now, img.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
     assert_equal("image/jpeg", img.content_type)
     assert_equal(@date, img.when)
     assert_equal(@notes.strip, img.notes)
@@ -166,8 +166,8 @@ class ApiTest < UnitTestCase
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
     assert_equal("", user.password)
-    assert_in_delta(Time.now, user.created_at, 1.minute)
-    assert_in_delta(Time.now, user.updated_at, 1.minute)
+    assert_in_delta(Time.zone.now, user.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, user.updated_at, 1.minute)
     assert_nil(user.verified)
     assert_nil(user.last_activity)
     assert_nil(user.last_login)
@@ -191,9 +191,9 @@ class ApiTest < UnitTestCase
 
   def assert_last_api_key_correct
     api_key = ApiKey.last
-    assert_in_delta(Time.now, api_key.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
-      assert_in_delta(Time.now, api_key.verified, 1.minute)
+      assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
     else
       assert_nil(api_key.verified)
     end
@@ -237,8 +237,8 @@ class ApiTest < UnitTestCase
     @img2 = nil
     @spl = nil
     @proj = nil
-    @date = Date.today
-    @notes = Observation.no_notes
+    @date = Time.now.in_time_zone("GMT").to_date
+    @notes = ""
     @vote = Vote.maximum_vote
     @specimen = false
     @is_col_loc = true
@@ -267,7 +267,7 @@ class ApiTest < UnitTestCase
     @spl = species_lists(:first_species_list)
     @proj = projects(:eol_project)
     @date = Date.parse("20120626")
-    @notes = { Other: "These are notes.\nThey look like this.\n" }
+    @notes = "These are notes.\nThey look like this.\n"
     @vote = 2.0
     @specimen = true
     @is_col_loc = true
@@ -279,7 +279,7 @@ class ApiTest < UnitTestCase
       action:        :observation,
       api_key:       @api_key.key,
       date:          "20120626",
-      notes:         "These are notes.\nThey look like this.\n",
+      notes:         @notes,
       location:      "USA, California, Albion",
       latitude:      "39.229°N",
       longitude:     "123.770°W",
@@ -293,6 +293,7 @@ class ApiTest < UnitTestCase
       images:        "#{@img1.id},#{@img2.id}"
     }
     api = API.execute(params)
+
     assert_no_errors(api, "Errors while posting observation")
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
@@ -314,9 +315,12 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(images: "1234567"))
     assert_api_fail(params.merge(projects: "1234567"))
     # Rolf is not a member of this project
-    assert_api_fail(params.merge(projects: 2))
+    assert_api_fail(params.merge(projects: projects(:bolete_project).id))
     assert_api_fail(params.merge(species_lists: "1234567"))
-    assert_api_fail(params.merge(species_lists: 3)) # owned by Mary
+    assert_api_fail(
+      # owned by Mary
+      params.merge(species_lists: species_lists(:unknown_species_list).id)
+    )
   end
 
   def test_post_observation_with_no_log
@@ -357,7 +361,7 @@ class ApiTest < UnitTestCase
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
-    rolf.update_attribute(:location_format, :scientific)
+    User.update(rolf.id, location_format: :scientific)
     assert_equal(:scientific, rolf.reload.location_format)
 
     params[:location] = "USA, California, Somewhere Else"
@@ -412,7 +416,7 @@ class ApiTest < UnitTestCase
     setup_image_dirs
     @user = rolf
     @proj = nil
-    @date = Date.today
+    @date = Time.now.in_time_zone("GMT").to_date
     @copy = @user.legal_name
     @notes = ""
     @orig = nil
@@ -466,10 +470,11 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.remove(:upload_file))
     assert_api_fail(params.merge(original_name: "x" * 1000))
     assert_api_fail(params.merge(vote: "-5"))
-    # Katrina owns this observation
-    assert_api_fail(params.merge(observations: "11"))
+
+    obs = Observation.where(user: katrina).first
+    assert_api_fail(params.merge(observations: obs.id.to_s))
     # Rolf is not a member of this project
-    assert_api_fail(params.merge(projects: "2"))
+    assert_api_fail(params.merge(projects: projects(:bolete_project).id.to_s))
   end
 
   def test_posting_image_via_url
@@ -515,7 +520,7 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
-    params.merge!(login: "miles")
+    params[:login] = "miles"
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:login))
     assert_api_fail(params.remove(:email))
@@ -554,7 +559,7 @@ class ApiTest < UnitTestCase
     assert_no_errors(api, "Errors while posting image")
     assert_obj_list_equal([User.last], api.results)
     assert_last_user_correct
-    params.merge!(login: "miles")
+    params[:login] = "miles"
     assert_api_fail(params.merge(name: "x" * 1000))
     assert_api_fail(params.merge(locale: "xx-XX"))
     assert_api_fail(params.merge(license: "123456"))
@@ -612,9 +617,9 @@ class ApiTest < UnitTestCase
       api_key:  @api_key.key,
       location: "Anywhere"
     }
-    rolf.update_attribute(:verified, nil)
+    User.update(rolf.id, verified: nil)
     assert_api_fail(params)
-    rolf.update_attribute(:verified, Time.now)
+    User.update(rolf.id, verified: Time.zone.now)
     assert_api_pass(params)
   end
 
@@ -625,7 +630,7 @@ class ApiTest < UnitTestCase
       api_key:  @api_key.key,
       location: "Anywhere"
     }
-    @api_key.update_attribute(:verified, nil)
+    ApiKey.update(@api_key.id, verified: nil)
     assert_api_fail(params)
     @api_key.verify!
     assert_api_pass(params)
@@ -790,10 +795,13 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_date, API::BadParameterValue, "today")
   end
 
+  # rubocop:disable Rails/TimeZone
+  # Can't figure out how to make Rails TimeWithZone play nicely
+  # with these assertions
   def test_parse_time
     assert_parse(:parse_time, nil, nil)
-    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), nil,
-                 default: DateTime.parse("2012-06-25 12:34:56"))
+    assert_parse(:parse_time, Time.zone.parse("2012-06-25 12:34:56"), nil,
+                 default: Time.zone.parse("2012-06-25 12:34:56"))
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
                  "20120625123456")
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
@@ -808,6 +816,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_time, API::BadParameterValue, "2012-06/25 10:34:56")
     assert_parse(:parse_time, API::BadParameterValue, "2012/06/25 10:34:56am")
   end
+  # rubocop:enable Rails/TimeZone
 
   def test_parse_date_range
     assert_parse(:parse_date_range, nil, nil)
@@ -897,6 +906,7 @@ class ApiTest < UnitTestCase
                  API::OrderedRange.new(1225, 101, :leave_order), "12-25-1-1")
   end
 
+  # rubocop:disable Rails/TimeZone
   def test_parse_time_range
     assert_parse(:parse_time_range, nil, nil)
     assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"),
@@ -1094,6 +1104,7 @@ class ApiTest < UnitTestCase
       "2011 - 2012"
     )
   end
+  # rubocop:enable Rails/TimeZone
 
   def test_parse_latitude
     assert_parse(:parse_latitude, nil, nil)

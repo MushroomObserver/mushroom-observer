@@ -18,8 +18,12 @@ AllCops:
 
 ###################### Metrics #################################################
 
-
 Metrics/AbcSize:
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+
+Metrics/BlockLength:
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
@@ -58,19 +62,19 @@ Metrics/PerceivedComplexity:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
 
-###################### Style ###################################################
+###################### Layout and Style ########################################
 
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
 
-# Cops where Rubocop supports multiple styles and MO uses a non-default.
+# Cops where Rubocop supports multiple options and MO uses a non-default.
+
+Layout/DotPosition:
+  EnforcedStyle: trailing
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
-
-Style/DotPosition:
-  EnforcedStyle: trailing
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes

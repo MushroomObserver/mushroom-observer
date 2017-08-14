@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 # test Observation model
 class ObservationTest < UnitTestCase
@@ -117,7 +116,7 @@ class ObservationTest < UnitTestCase
   end
 
   # Prove that when user's favorite vote is deleted,
-  # user's 2nd postive vote becomes user's favorite
+  # user's 2nd positive vote becomes user's favorite
   def test_change_vote_2nd_positive_choice_becomes_favorite
     naming_top = namings(:unequal_positive_namings_top_naming)
     obs = naming_top.observation
@@ -139,10 +138,10 @@ class ObservationTest < UnitTestCase
   end
 
   def test_specimens
-    assert(!observations(:strobilurus_diminutivus_obs).specimen)
+    refute(observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
     assert(observations(:detailed_unknown_obs).specimen)
-    assert(!observations(:detailed_unknown_obs).specimens.empty?)
+    refute(observations(:detailed_unknown_obs).specimens.empty?)
   end
 
   def test_observer_accepts_general_email_questions
@@ -292,8 +291,8 @@ class ObservationTest < UnitTestCase
     assert_save(rolf)
 
     # Observation owner is notified if comment added by someone else.
-    # Rolf owns observations(:coprinus_comatus_obs),
-    # one naming, two votes, conf. around 1.5.
+    # (Rolf owns observations(:coprinus_comatus_obs),
+    # one naming, two votes, conf. around 1.5.)
     rolf.email_comments_owner = true
     assert_save(rolf)
     User.current = mary
@@ -397,8 +396,8 @@ class ObservationTest < UnitTestCase
     )
 
     # Watcher is notified if comment added.
-    # Rolf owns observations(:coprinus_comatus_obs),
-    # one naming, two votes, conf. around 1.5.
+    # (Rolf owns observations(:coprinus_comatus_obs),
+    # one naming, two votes, conf. around 1.5.)
     User.current = mary
     new_comment = Comment.create(
       summary: "This is Mary...",
@@ -540,7 +539,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. "\
+                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
     QueuedEmail.queue_emails(false)
   end
@@ -553,8 +552,8 @@ class ObservationTest < UnitTestCase
 
     User.current = rolf
     obs = Observation.create!(
-      when: Time.zone.today,
-      where: "anywhere",
+      when:    Time.zone.today,
+      where:   "anywhere",
       name_id: @fungi.id
     )
 
@@ -711,8 +710,8 @@ class ObservationTest < UnitTestCase
     assert_true(obs.has_edit_permission?(mary))
     assert_false(obs.has_edit_permission?(dick))
 
-    # IS owned by Bolete project,
-    # AND owned by Mary (Dick is member of Bolete project)
+    # IS owned by Bolete project, AND owned by Mary
+    # (Dick is member of Bolete project)
     obs = observations(:detailed_unknown_obs)
     assert_false(obs.has_edit_permission?(rolf))
     assert_true(obs.has_edit_permission?(mary))
@@ -742,117 +741,12 @@ class ObservationTest < UnitTestCase
       user_id: users(:rolf).id
     )
     no_votes_naming.save!
-    # rubocop:disable Metrics/LineLength
-    votes = "#{obs.namings.first.id} Agaricus campestris L.: mary=3.0(*), rolf=-3.0\n" \
-            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: mary=1.0(*), rolf=2.0(*)\n"\
+    votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
+              "mary=3.0(*), rolf=-3.0\n" \
+            "#{obs.namings.second.id} Coprinus comatus (O.F. Müll.) Pers.: " \
+              "mary=1.0(*), rolf=2.0(*)\n"\
             "#{no_votes_naming.id} Fungi: no votes"
-    # rubocop:enable Metrics/LineLength
 
     assert_equal(votes, obs.dump_votes)
-  end
-
-  # --------------------------------------------------
-  #  Notes: Test methods related to serialized notes
-  # --------------------------------------------------
-
-  def test_notes_export_format
-    assert_equal(
-      "",
-      observations(:minimal_unknown_obs).notes_export_formatted
-    )
-
-    assert_equal(
-      "Found in a strange place... & with śtrangè characters™",
-      observations(:detailed_unknown_obs).notes_export_formatted
-    )
-    assert_equal(
-      "substrate: soil",
-      observations(:substrate_notes_obs).notes_export_formatted
-    )
-    assert_equal(
-      "substrate: soil\nOther: slimy",
-      observations(:substrate_and_other_notes_obs).notes_export_formatted
-    )
-  end
-
-  def test_notes_show_format
-    assert_equal(
-      "", observations(:minimal_unknown_obs).notes_show_formatted
-    )
-    assert_equal(
-      "Found in a strange place... & with śtrangè characters™",
-      observations(:detailed_unknown_obs).notes_show_formatted
-    )
-    assert_equal(
-      "+substrate+: soil",
-      observations(:substrate_notes_obs).notes_show_formatted
-    )
-    assert_equal(
-      "+substrate+: soil\n+Other+: slimy",
-      observations(:substrate_and_other_notes_obs).notes_show_formatted
-    )
-  end
-
-  # Prove that notes parts for Views are assembled in this order
-  #   - notes_template parts, in order listed in notes_template
-  #   - orphaned parts, in order that they appear in Observation
-  #   - Other
-  def test_form_notes_parts
-    # no template and no notes
-    obs   = observations(:minimal_unknown_obs)
-    parts = ["Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # no template and Other notes
-    obs   = observations(:detailed_unknown_obs)
-    parts = ["Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # no template and orphaned notes
-    obs   = observations(:substrate_notes_obs)
-    parts = ["substrate", "Other"] # rubocop:disable Style/WordArray
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # no template, and orphaned notes and Other notes
-    obs   = observations(:substrate_and_other_notes_obs)
-    parts = ["substrate", "Other"] # rubocop:disable Style/WordArray
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and no notes
-    obs   = observations(:templater_noteless_obs)
-    parts = ["Cap", "Nearby trees", "odor", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and other notes
-    obs   = observations(:templater_other_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and orphaned notes
-    obs   = observations(:templater_orphaned_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and notes for a template part
-    obs   = observations(:template_only_obs)
-    parts = ["Cap", "Nearby trees", "odor", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and notes for a template part and Other notes
-    obs   = observations(:template_and_other_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and notes for a template part and orphaned part
-    obs   = observations(:template_and_orphaned_notes_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
-
-    # template and notes for a template part, orphaned part, Other,
-    # with order scrambled in the Observation
-    obs   = observations(:template_and_orphaned_notes_scrambled_obs)
-    parts = ["Cap", "Nearby trees", "odor", "orphaned_caption_1",
-             "orphaned_caption_2", "Other"]
-    assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 end

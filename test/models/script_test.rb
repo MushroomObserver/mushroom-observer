@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class ScriptTest < UnitTestCase
@@ -6,7 +5,7 @@ class ScriptTest < UnitTestCase
     "#{::Rails.root}/script/#{cmd}"
   end
 
-  ################################################################################
+  ##############################################################################
 
   test "autoreply" do
     sender = "test@email.com"
@@ -16,7 +15,8 @@ class ScriptTest < UnitTestCase
     tempfile = Tempfile.new("test").path
     script = script_file("autoreply")
     env = { "SENDER" => sender }
-    cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" > #{tempfile}"
+    cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" " \
+          "> #{tempfile}"
     assert system(env, cmd)
     expect = <<-END.unindent
       To: #{sender}
@@ -49,8 +49,10 @@ class ScriptTest < UnitTestCase
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
     assert system(cmd)
-    expect = "id login name email verified last_use\n" \
-             "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
+    expect =
+      "id login name email verified last_use\n" \
+      "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
+      "2006-03-02 21:14:00 NULL\n"
     actual = File.read(tempfile).gsub(/ +/, " ")
     assert_equal(expect, actual)
   end
@@ -59,7 +61,7 @@ class ScriptTest < UnitTestCase
     script = script_file("make_eol_xml")
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
-    assert !File.exist?(dest_file) || File.size(dest_file) == 0
+    assert !File.exist?(dest_file) || File.size(dest_file).zero?
     cmd = "#{script} #{dest_file} > #{stdout_file}"
 
     script_succeeded = system(cmd)
@@ -147,7 +149,7 @@ class ScriptTest < UnitTestCase
       assert_string_equal_file(output, fixture)
     else
       expect = File.read(fixture)
-      assert_equal(expect.tr("ü","u"), output.tr("ü","u"),
+      assert_equal(expect.tr("ü", "u"), output.tr("ü", "u"),
                    "File #{output} is wrong.")
     end
   end
