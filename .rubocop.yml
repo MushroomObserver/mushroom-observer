@@ -16,6 +16,12 @@ AllCops:
     - public/design_test/jquery-1.5.2.min.js
     - "tmp/**/*"
 
+###################### Global Disables #########################################
+
+# Disable using Rails < 5.0; it's relevant only to >= 5.0
+Rails/HttpPositionalArguments:
+  Enabled: False
+
 ###################### Metrics #################################################
 
 Metrics/AbcSize:
