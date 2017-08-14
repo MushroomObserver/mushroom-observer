@@ -608,7 +608,7 @@ module ControllerExtensions
     assert(message.nil?, message)
   end
 
-  # Check default value of a form field.
+  # Check existence and value of a texarea
   def assert_textarea_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
     assert_select("textarea##{id}") do |elements|
@@ -617,12 +617,10 @@ module ControllerExtensions
       elsif elements.length == 1
         actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).
                          join("")).strip
-        if actual_val != expect_val.to_s
-          message = "Input '#{id}' has wrong value, " \
+        message = if actual_val != expect_val.to_s
+                    "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"
-        else
-          message = nil
-        end
+                  end
       end
     end
     assert(message.nil?, message)
@@ -659,6 +657,17 @@ module ControllerExtensions
       assert_select("input##{id}", 0)
     else
       fail "Invalid state in check_project_checks: #{state.inspect}"
+    end
+  end
+
+  # Check presence and value of notes textareas.  Example:
+  #   assert_page_has_correct_notes( expect_areas: { Cap: "red", Other: "" } )
+  #   assert_page_has_correct_notes( klass: Species_list,
+  #                                  expect_areas: { Other: "" })
+  def assert_page_has_correct_notes_areas(klass: Observation, expect_areas: {})
+    expect_areas.each do |key, val|
+      id = klass.notes_part_id(key.to_s.tr(" ", "_"))
+      assert_textarea_value(id, val)
     end
   end
 end

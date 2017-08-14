@@ -1893,17 +1893,17 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
-    new_notes = "blather blather blather"
+    new_notes = { obs.other_notes_key => "blather blather blather" }
     new_specimen = false
     img = images(:in_situ_image)
     params = {
       id: obs.id.to_s,
       observation: {
+        notes:      new_notes,
         place_name: new_where,
         "when(1i)" => "2001",
         "when(2i)" => "2",
         "when(3i)" => "3",
-        notes: new_notes,
         specimen: new_specimen,
         thumb_image_id: "0"
       },
@@ -1957,8 +1957,11 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "0" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(
+      :edit_observation,
+      [controller: :observer, action: :show_observation],
+      params, "mary"
+    )
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10, rolf.reload.contribution)
@@ -1971,7 +1974,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
-    new_notes = "blather blather blather"
+    new_notes = { other: "blather blather blather" }
     new_specimen = false
     params = {
       id: obs.id.to_s,
@@ -1986,8 +1989,11 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(
+      :edit_observation,
+      [controller: :observer, action: :show_observation],
+      params, "mary"
+    )
     assert_response(:success) # Which really means failure
   end
 
@@ -2062,10 +2068,120 @@ class ObserverControllerTest < FunctionalTestCase
     login("mary")
     post(:edit_observation, params)
 
-    assert_response(:success,
-                    "Expected 200 (OK), Got #{@response.status} (#{@response.message})")
     # 200 :success means means failure!
+    assert_response(
+      :success,
+      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
+    )
     assert_flash_error
+  end
+
+  # --------------------------------------------------------------------
+  #  Test notes with template create_observation, and edit_observation,
+  #  both "get" and "post".
+  # --------------------------------------------------------------------
+
+  # Prove that create_observation renders note fields with template keys first,
+  # in the order listed in the template
+  def test_create_observation_with_notes_template_get
+    user = users(:notes_templater)
+    login(user.login)
+    get(:create_observation)
+
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "", Other: "" }
+    )
+  end
+
+  # Prove that notes are saved with template keys first, in the order listed in
+  # the template, then Other, but without blank fields
+  def test_create_observation_with_notes_template_post
+    user = users(:notes_templater)
+    params = { observation: sample_obs_fields }
+    # Use defined Location to avoid issues with reloading Observation
+    params[:observation][:place_name] = locations(:albion).name
+    params[:observation][:notes] = {
+      Nearby_trees: "?",
+      Observation.other_notes_key => "Some notes",
+      odor:         "",
+      Cap:          "red"
+    }
+    expected_notes = {
+      Cap:          "red",
+      Nearby_trees: "?",
+      Observation.other_notes_key => "Some notes"
+    }
+    o_size = Observation.count
+
+    login(user.login)
+    post(:create_observation, params)
+
+    assert_equal(o_size + 1, Observation.count)
+    obs = Observation.last.reload
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(expected_notes, obs.notes)
+  end
+
+  # Prove that edit_observation has correct note fields and content:
+  # Template fields first, in template order; then orphaned fields in order
+  # in which they appear in observation, then Other
+  def test_edit_observation_with_notes_template_get
+    obs    = observations(:templater_noteless_obs)
+    user   = obs.user
+    params = {
+      id: obs.id,
+      observation: {
+        place_name: obs.location.name,
+        lat: "",
+        long: "",
+        alt: "",
+        "when(1i)" => obs.when.year,
+        "when(2i)" => obs.when.month,
+        "when(3i)" => obs.when.day,
+        specimen: "0",
+        thumb_image_id: "0",
+        notes: obs.notes
+      },
+      specimen: default_specimen_fields,
+      username: user.login,
+      vote:     { value: "3" }
+    }
+
+    login(user.login)
+    get(:edit_observation, params)
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "" }
+    )
+
+    obs         = observations(:templater_other_notes_obs)
+    params[:id] = obs.id
+    params[:observation][:notes] = obs.notes
+    get(:edit_observation, params)
+    assert_page_has_correct_notes_areas(
+      expect_areas: { Cap: "", Nearby_trees: "", odor: "",
+                      Observation.other_notes_key => "some notes" }
+    )
+  end
+
+  def test_edit_observation_with_notes_template_post
+    # Prove notes_template works when editing Observation without notes
+    obs = observations(:templater_noteless_obs)
+    user = obs.user
+    notes = {
+      Cap:          "dark red",
+      Nearby_trees: "?",
+      odor:         "farinaceous"
+    }
+    params = {
+      id: obs.id,
+      observation:  { notes: notes }
+    }
+    login(user.login)
+    post(:edit_observation, params)
+
+    assert_redirected_to(action: :show_observation, id: obs.id)
+    assert_equal(notes, obs.reload.notes)
   end
 
   # -----------------------------------
@@ -2155,7 +2271,7 @@ class ObserverControllerTest < FunctionalTestCase
            place_name: "Zzyzx, Japan",
            when: time0,
            thumb_image_id: 0, # (make new image the thumbnail)
-           notes: "blah"
+           notes: { Observation.other_notes_key => "blah" }
          },
          image: {
            "0" => {
@@ -2173,8 +2289,7 @@ class ObserverControllerTest < FunctionalTestCase
            }
          },
          # (attach these two images once observation created)
-         good_images: "#{new_image_1.id} #{new_image_2.id}"
-        )
+         good_images: "#{new_image_1.id} #{new_image_2.id}")
     assert_response(:redirect) # redirected = successfully created
 
     obs = Observation.find_by_where("Zzyzx, Japan")
@@ -2296,10 +2411,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:redirect)
     get(:edit_observation, id: @obs2.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:edit_observation, id: @obs2.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-                            project: { "id_#{@proj1.id}" => "1" }
-        )
+    post(
+      :edit_observation,
+      id: @obs2.id,
+      observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+      project: { "id_#{@proj1.id}" => "1" }
+    )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     post(:edit_observation, id: @obs2.id,
                             project: { "id_#{@proj1.id}" => "1" }
@@ -2313,13 +2430,15 @@ class ObserverControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     get(:edit_observation, id: @obs1.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-                            project: {
-                              "id_#{@proj1.id}" => "1",
-                              "id_#{@proj2.id}" => "0"
-                            }
-        )
+    post(
+      :edit_observation,
+      id: @obs1.id,
+      observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+      project: {
+        "id_#{@proj1.id}" => "1",
+        "id_#{@proj2.id}" => "0"
+      }
+    )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     post(:edit_observation, id: @obs1.id,
                             project: {
@@ -2396,14 +2515,15 @@ class ObserverControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit_observation, id: @obs1.id)
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
-    post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" }, # (ensures it will fail)
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+    post(
+      :edit_observation,
+      id: @obs1.id,
+      observation: { place_name: "blah blah blah" }, # (ensures it will fail)
+      list: { "id_#{@spl1.id}" => "1" }
+    )
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
     post(:edit_observation, id: @obs1.id,
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+                            list: { "id_#{@spl1.id}" => "1" })
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
     get(:edit_observation, id: @obs2.id)
@@ -2455,41 +2575,47 @@ class ObserverControllerTest < FunctionalTestCase
     # <img[^>]+watch\d*.png[^>]+>[\w\s]*
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/watch\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
-    assert_image_link_in_html(/ignore\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+    assert_image_link_in_html(
+      /watch\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 1
+    )
+    assert_image_link_in_html(
+      /ignore\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: -1
+    )
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
-    assert_image_link_in_html(/ignore\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+    assert_image_link_in_html(
+      /halfopen\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 0
+    )
+    assert_image_link_in_html(
+      /ignore\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
-    assert_image_link_in_html(/watch\d*.png/,
-                              controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
+    assert_image_link_in_html(
+      /halfopen\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 0
+    )
+    assert_image_link_in_html(
+      /watch\d*.png/,
+      controller: :interest, action: :set_interest,
+      type: "Observation", id: minimal_unknown.id, state: 1
+    )
   end
 
   # ----------------------------
@@ -2775,7 +2901,7 @@ class ObserverControllerTest < FunctionalTestCase
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
         "#{'X' if o.is_collection_location},#{o.thumb_image_id}," \
-        "#{o.notes}",
+        "#{o.notes[Observation.other_notes_key]}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
     )

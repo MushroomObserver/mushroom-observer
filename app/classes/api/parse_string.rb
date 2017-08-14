@@ -11,6 +11,12 @@ class API
     str
   end
 
+  def parse_notes(key, args = {})
+    declare_parameter(key, :string, args)
+    str = params[key].to_s
+    str.empty? ? Observation.no_notes : { Observation.other_notes_key => str }
+  end
+
   def parse_email(key, args = {})
     declare_parameter(key, :email, args)
     val = parse_string(key, args)

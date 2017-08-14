@@ -30,6 +30,18 @@ xml.tag!(tag,
         xml_detailed_object(xml, :sequence, sequence)
       end
     end
+    xml.notes do
+      object.notes.each do |key, value|
+        xml.notes_part do
+          xml_string(xml, :key, key)
+          xml_html_string(xml, :value, value.tl)
+        end
+      end
+    end
+    xml_datetime(xml, :created_at, object.created_at)
+    xml_datetime(xml, :updated_at, object.updated_at)
+    xml_integer(xml, :number_of_views, object.num_views)
+    xml_datetime(xml, :last_viewed, object.last_view)
     xml.namings(number: object.namings.length) do
       object.namings.each do |naming|
         xml_detailed_object(xml, :naming, naming, true)

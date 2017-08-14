@@ -41,6 +41,46 @@ class ObserverController
     end
   end
 
+  def create_observation_get
+    @observation     = Observation.new
+    @naming          = Naming.new
+    @vote            = Vote.new
+    @what            = "" # can't be nil else rails tries to call @name.name
+    @names           = nil
+    @valid_names     = nil
+    @reason          = @naming.init_reasons
+    @images          = []
+    @good_images     = []
+    init_specimen_vars_for_create
+    init_project_vars_for_create
+    init_list_vars_for_create
+    defaults_from_last_observation_created
+  end
+
+  def defaults_from_last_observation_created
+    # Grab defaults for date and location from last observation the user
+    # created if it was less than an hour ago
+    # (i.e. if its creation time is larger than one hour ago)
+    last_observation = Observation.where(user_id: @user.id).
+                       order(:created_at).last
+    return unless last_observation && last_observation.created_at > 1.hour.ago
+    @observation.when     = last_observation.when
+    @observation.where    = last_observation.where
+    @observation.location = last_observation.location
+    @observation.lat      = last_observation.lat
+    @observation.long     = last_observation.long
+    @observation.alt      = last_observation.alt
+    last_observation.projects.each do |project|
+      @project_checks[project.id] = true
+    end
+    last_observation.species_lists.each do |list|
+      if check_permission(list)
+        @lists << list unless @lists.include?(list)
+        @list_checks[list.id] = true
+      end
+    end
+  end
+
   def create_observation_post(params)
     rough_cut(params)
     success = true
@@ -69,11 +109,24 @@ class ObserverController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
+    @observation.notes = notes_to_sym_and_compact
     @naming      = Naming.construct(params[:naming], @observation)
     @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
+  end
+
+  # Symbolize keys; delete key/value pair if value blank
+  # Also avoids whitelisting issues
+  def notes_to_sym_and_compact
+    return Observation.no_notes unless notes_param?
+    symbolized = params[:observation][:notes].to_hash.symbolize_keys
+    symbolized.delete_if { |_key, value| value.nil? || value.empty? }
+  end
+
+  def notes_param?
+    params[:observation] && params[:observation][:notes].present?
   end
 
   def validate_name(params)
@@ -186,45 +239,6 @@ class ObserverController
     init_list_vars_for_reload(@observation)
   end
 
-  def create_observation_get
-    @observation     = Observation.new
-    @naming          = Naming.new
-    @vote            = Vote.new
-    @what            = "" # can't be nil else rails tries to call @name.name
-    @names           = nil
-    @valid_names     = nil
-    @reason          = @naming.init_reasons
-    @images          = []
-    @good_images     = []
-    init_specimen_vars_for_create
-    init_project_vars_for_create
-    init_list_vars_for_create
-    defaults_from_last_observation_created
-  end
-
-  def defaults_from_last_observation_created
-    # Grab defaults for date and location from last observation the user
-    # edited if it was less than an hour ago.
-    last_observation = Observation.where(user_id: @user.id).
-                       order(:created_at).last
-    return unless last_observation && last_observation.created_at > 1.hour.ago
-    @observation.when     = last_observation.when
-    @observation.where    = last_observation.where
-    @observation.location = last_observation.location
-    @observation.lat      = last_observation.lat
-    @observation.long     = last_observation.long
-    @observation.alt      = last_observation.alt
-    last_observation.projects.each do |project|
-      @project_checks[project.id] = true
-    end
-    last_observation.species_lists.each do |list|
-      if check_permission(list)
-        @lists << list unless @lists.include?(list)
-        @list_checks[list.id] = true
-      end
-    end
-  end
-
   # Form to edit an existing observation.
   # Linked from: left panel
   #
@@ -265,7 +279,7 @@ class ObserverController
       any_errors = false
 
       update_whitelisted_observation_attributes
-
+      @observation.notes = notes_to_sym_and_compact
       # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
@@ -396,7 +410,7 @@ class ObserverController
 
   # Roughly create observation object.  Will validate and save later
   # once we're sure everything is correct.
-  # INPUT: params[:observation] (and @user)
+  # INPUT: params[:observation] (and @user) (and various notes params)
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
@@ -647,6 +661,28 @@ class ObserverController
     end
     redirect_with_query(action: :show_observation, id: id)
   end
+
+  ##############################################################################
+  #
+  #  Methods relating to User#notes_template
+  #
+  ##############################################################################
+
+  def use_notes_template?
+    @user.notes_template? && @observation.notes.blank?
+  end
+
+  # String combining the note parts defined in the User's notes_template
+  # with their filled-in values, ignoring parts with blank values
+  def combined_notes_parts
+    @user.notes_template_parts.each_with_object("") do |part, notes|
+      key   = Observation.notes_part_id(part).to_sym
+      value = params[key]
+      notes << "#{part}: #{value}\n" if value.present?
+    end
+  end
+
+  ##############################################################################
 
   private
 

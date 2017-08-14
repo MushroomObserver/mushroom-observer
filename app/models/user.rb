@@ -114,6 +114,7 @@
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  layout_count::       Number of thumbnails to show in index.
+#  notes_template::     Comma separated list of subfields for Observation Notes
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
@@ -145,8 +146,9 @@
 #  password_confirmation::  Used to confirm password during sign-up.
 #
 #  == Methods
-#  current::            Report the User that is currently logged in.
-#  current_id::         Report the User (id) that is currently logged in.
+#  current::              Report the User that is currently logged in.
+#  current_id::           Report the User (id) that is currently logged in.
+#  notes_template_parts:: Array of notes_template headings
 #
 #  ==== Names
 #  text_name::          User name as: "loging" (for debugging)
@@ -782,6 +784,21 @@ class User < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Notes Template
+  #
+  ##############################################################################
+
+  # Array of user defined headings for Notes when creating Observations
+  # notes_template: "odor , Nearest tree"
+  # notes_template_parts # => ["odor", "Nearest tree"]
+  # notes_template: ""
+  # notes_template_parts # => []
+  def notes_template_parts
+    notes_template? ? notes_template.split(",").map(&:squish) : []
+  end
+
+  ##############################################################################
+  #
   #  :section: Other
   #
   ##############################################################################
@@ -994,5 +1011,51 @@ class User < AbstractModel
         errors.add(:password, :validate_user_password_no_match.t)
       end
     end
+  end
+
+  validate :notes_template_forbid_other
+  # :nodoc
+  def notes_template_forbid_other
+    notes_template_bad_parts.each do |part|
+      errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
+    end
+  end
+
+  validate :notes_template_forbid_duplicates
+  # :nodoc
+  def notes_template_forbid_duplicates
+    return unless notes_template.present?
+    squished = notes_template.split(",").map(&:squish)
+    dups = squished.uniq.select { |part| squished.count(part) > 1 }
+    dups.each do |dup|
+      errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))
+    end
+  end
+
+  private
+
+  # :nodoc
+  def notes_template_bad_parts
+    return [] unless notes_template.present?
+    notes_template.split(",").each_with_object([]) do |part, a|
+      next unless notes_template_reserved_words.include?(part.squish.downcase)
+      a << part.strip
+    end
+  end
+
+  # list of words which cannot be headings in user template
+  # 'Other' is already used by MO for notes without a heading.
+  # The rest won't break the application but would be confusing.
+  #
+  # 'other' plus other words is valid, e.g.,
+  # notes_template = "Cap color, Cap size, Cap other"
+  # :nodoc
+  def notes_template_reserved_words
+    [Observation.other_notes_part.downcase].concat(notes_other_translations)
+  end
+
+  # :nodoc
+  def notes_other_translations
+    %w(andere altro altra autre autres otra otras otro otros outros)
   end
 end
