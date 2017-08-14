@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class ImageS3Test < UnitTestCase
@@ -14,7 +13,8 @@ class ImageS3Test < UnitTestCase
     s3.list.each do |_obj|
       break
     end
-    file = "#{Rails.root}/test/fixtures/robots.txt"
+    file = Rails.root.join("test", "fixtures", "robots.txt")
+
     s3.upload("key", file, content_type: "text/plain")
     File.open(file, "rb") do |fh|
       s3.upload("key", fh, content_type: "text/plain")

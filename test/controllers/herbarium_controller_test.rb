@@ -10,7 +10,8 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def show_herbarium_params
-    { id: herbaria(:nybg_herbarium).id,
+    {
+      id: herbaria(:nybg_herbarium).id,
       curator: { name: users(:mary).login }
     }
   end
@@ -40,14 +41,16 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def create_herbarium_params
-    { herbarium: {
-      name: "Rolf's Personal Herbarium",
-      description: "Rolf wants Melanolucas!!!",
-      email: rolf.email,
-      mailing_address: "",
-      place_name: "",
-      code: "RPH"
-    }
+    {
+      herbarium:
+      {
+        name: "Rolf's Personal Herbarium",
+        description: "Rolf wants Melanolucas!!!",
+        email: rolf.email,
+        mailing_address: "",
+        place_name: "",
+        code: "RPH"
+      }
     }
   end
 

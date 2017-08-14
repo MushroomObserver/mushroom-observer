@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class LocationControllerTest < FunctionalTestCase
@@ -22,8 +21,7 @@ class LocationControllerTest < FunctionalTestCase
         high: loc.high,
         low: loc.low,
         notes: loc.notes
-      }
-    }
+      } }
   end
 
   # A location that isn't in fixtures.
@@ -51,7 +49,7 @@ class LocationControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(page, params)
-    assert_action_partials(page.to_s, %w(_form_location _textilize_help))
+    assert_action_partials(page.to_s, %w[_form_location _textilize_help])
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -68,7 +66,7 @@ class LocationControllerTest < FunctionalTestCase
     location_error(:edit_location, params)
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_location_help
     get_with_dump(:help)
@@ -80,9 +78,8 @@ class LocationControllerTest < FunctionalTestCase
     log_updated_at = location.rss_log.updated_at
     get_with_dump(:show_location, id: location.id)
     assert_action_partials("show_location",
-                           %w(_location _show_comments
-                              _location_description)
-                          )
+                           %w[_location _show_comments
+                              _location_description])
     location.reload
     assert_equal(updated_at, location.updated_at)
     assert_equal(log_updated_at, location.rss_log.updated_at)
@@ -149,32 +146,35 @@ class LocationControllerTest < FunctionalTestCase
                                east: -116.88,
                                south: 34.1571,
                                notes: "Santa Fe",
-                               user: @mary
-                              )
+                               user: @mary)
     get(:list_by_country, country: "USA")
-    assert_obj_list_equal(usa_loc_array << loc_usa, @controller.instance_variable_get("@objects"))
+    assert_obj_list_equal(usa_loc_array << loc_usa,
+                          @controller.instance_variable_get("@objects"))
 
     get(:list_by_country, country: "Mexico")
     assert_obj_list_equal([], @controller.instance_variable_get("@objects"))
 
-    loc_mex1 = Location.create!(name: "Somewhere, Chihuahua, Mexico",
-                                north: 28.7729082,
-                                west: -106.1671059,
-                                east: -105.9612896,
-                                south: 28.5586774,
-                                notes: "somewhere Mexico",
-                                user: @mary
-                               )
-    loc_mex2 = Location.create!(name: "Oaxaca, Oaxaca, Mexico",
-                                north: 17.1332939,
-                                west: -96.7806765,
-                                east: -96.6907866,
-                                south: 17.0293023,
-                                notes: "somewhere else in Mexico or this test will not work",
-                                user: @mary
-                               )
+    loc_mex1 = Location.create!(
+      name: "Somewhere, Chihuahua, Mexico",
+      north: 28.7729082,
+      west: -106.1671059,
+      east: -105.9612896,
+      south: 28.5586774,
+      notes: "somewhere Mexico",
+      user: @mary
+    )
+    loc_mex2 = Location.create!(
+      name: "Oaxaca, Oaxaca, Mexico",
+      north: 17.1332939,
+      west: -96.7806765,
+      east: -96.6907866,
+      south: 17.0293023,
+      notes: "somewhere else in Mexico or this test will not work",
+      user: @mary
+    )
     get(:list_by_country, country: "Mexico")
-    assert_obj_list_equal([loc_mex1, loc_mex2], @controller.instance_variable_get("@objects"))
+    assert_obj_list_equal([loc_mex1, loc_mex2],
+                          @controller.instance_variable_get("@objects"))
   end
 
   def test_locations_by_user
@@ -201,7 +201,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_redirected_to(
       %r{/location/show_location_description/#{ descs.first.id }}
     )
-    end
+  end
 
   def test_location_descriptions_by_editor
     get_with_dump(:location_descriptions_by_editor, id: rolf.id)
@@ -212,7 +212,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:albion_desc)
     get_with_dump(:show_location_description, id: desc.id)
     assert_action_partials("show_location_description",
-                           %w(_show_description _location_description))
+                           %w[_show_description _location_description])
   end
 
   def test_show_past_location_description
@@ -298,7 +298,7 @@ class LocationControllerTest < FunctionalTestCase
                          id: loc.descriptions.last.id)
     refute_empty(loc.descriptions)
     assert_equal(params[:description][:notes], loc.descriptions.last.notes)
-end
+  end
 
   def test_create_location
     requires_login(:create_location)
@@ -311,8 +311,7 @@ end
     post(:create_location,
          where: "",
          approved_where: "",
-         location: { display_name: "" }
-        )
+         location: { display_name: "" })
   end
 
   # Test a simple location creation.
@@ -330,7 +329,11 @@ end
     assert_equal(10 + @new_pts, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
+
+    # rubocop:disable Rails/DynamicFindBy
+    # find_by_name_or_reverse_name is an MO method, not a Rails finder
     loc = Location.find_by_name_or_reverse_name(display_name)
+    # rubocop:enable Rails/DynamicFindBy
     assert_nil(loc.description)
     assert_not_nil(loc.rss_log)
   end
@@ -417,8 +420,7 @@ end
     loc = locations(:unknown_location)
     old_loc_display_name = loc.display_name
     params = { id: loc.id,
-               location: { display_name: "Rome, Italy" }
-             }
+               location: { display_name: "Rome, Italy" } }
     post_requires_login(:edit_location, params)
 
     assert_equal(old_loc_display_name, loc.reload.display_name,
@@ -436,8 +438,8 @@ end
     log_updated_at = loc.rss_log.updated_at
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
-    params[:location][:display_name] = Location.user_name(rolf,
-                                                          params[:location][:display_name])
+    params[:location][:display_name] =
+      Location.user_name(rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
     assert_redirected_to(controller: :location, action: :show_location,
@@ -460,7 +462,7 @@ end
     # Only compare the keys that are in both.
     bfp = barton_flats_params
     key_count = 0
-    for k in bfp.keys
+    bfp.keys.each do |k|
       if new_params[k]
         key_count += 1
         assert_equal(new_params[k], bfp[k])
@@ -598,14 +600,14 @@ end
     User.current = rolf
     albion = locations(:albion)
     obs = Observation.create!(
-      when: Time.now,
-      where: (where = "undefined location"),
+      when: Time.zone.now,
+      where: "undefined location",
       notes: "new observation"
     )
     assert_nil(obs.location)
-    where = obs.where
+
     params = {
-      where:    where,
+      where:    obs.where,
       location: albion.id
     }
     requires_login(:add_to_location, params)
@@ -618,7 +620,7 @@ end
     login("roy")
     albion = locations(:albion)
     obs = Observation.create!(
-      when:  Time.now,
+      when:  Time.zone.now,
       where: (where = "Albion, Mendocino Co., California, USA"),
       notes: "new observation"
     )
@@ -649,8 +651,8 @@ end
   end
 
   def assert_show_location
-    assert_action_partials("show_location", %w(_location _show_comments
-                                               _location_description))
+    assert_action_partials("show_location", %w[_location _show_comments
+                                               _location_description])
   end
 
   def test_interest_in_show_location
@@ -661,12 +663,10 @@ end
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1
-                             )
+                              type: "Location", id: albion.id, state: 1)
     assert_image_link_in_html(/ignore\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1
-                             )
+                              type: "Location", id: albion.id, state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
@@ -674,12 +674,10 @@ end
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0
-                             )
+                              type: "Location", id: albion.id, state: 0)
     assert_image_link_in_html(/ignore\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1
-                             )
+                              type: "Location", id: albion.id, state: -1)
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
@@ -688,12 +686,10 @@ end
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0
-                             )
+                              type: "Location", id: albion.id, state: 0)
     assert_image_link_in_html(/watch\d*.png/,
                               controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1
-                             )
+                              type: "Location", id: albion.id, state: 1)
   end
 
   def test_update_location_scientific_name

@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class ApplicationHelperTest < ActionView::TestCase
@@ -66,7 +65,7 @@ class ApplicationHelperTest < ActionView::TestCase
   def test_content_tag_if_with_content_block_with_options
     assert_equal('<div class="strong highlight">Hello world!</div>',
                  content_tag_if(true, :div, "Hello world!",
-                                class: %w(strong highlight)))
+                                class: %w[strong highlight]))
   end
 
   def test_content_tag_if_with_attribute_with_no_value

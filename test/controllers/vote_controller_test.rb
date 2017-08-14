@@ -49,7 +49,6 @@ class VoteControllerTest < FunctionalTestCase
   def test_cast_vote_rolf_change
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
-    nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
     post(:cast_vote, value: "2", id: nam1.id)
@@ -67,7 +66,6 @@ class VoteControllerTest < FunctionalTestCase
   # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
   def test_cast_vote_rolf_second_greater
     obs  = observations(:coprinus_comatus_obs)
-    nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
@@ -93,8 +91,7 @@ class VoteControllerTest < FunctionalTestCase
     login("rolf")
     post(:cast_vote,
          value: "-1",
-         id: nam2.id
-    )
+         id: nam2.id)
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -106,13 +103,15 @@ class VoteControllerTest < FunctionalTestCase
     assert_equal(2, nam2.votes.length)
   end
 
-  # Now, have Mary delete her vote against Rolf's naming.  This NO LONGER has the effect
-  # of excluding Rolf's naming from the consensus calculation due to too few votes.
-  # (Have Dick vote first... I forget what this was supposed to test for, but it's clearly
-  # superfluous now).
+  # Now, have Mary delete her vote against Rolf's naming.
+  # This NO LONGER has the effect of excluding Rolf's naming
+  # from the consensus calculation due to too few votes.
+  # (Have Dick vote first... I forget what this was supposed to test for,
+  # but it's clearly superfluous now).
   # Votes: rolf=2/-3, mary=1->x/3, dick=x/x->3
   # Summing after Dick votes,   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
-  # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75, 3 still keeps it in this voting algorithm, arg.
+  # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75,
+  # 3 still keeps it in this voting algorithm, arg.
   def test_cast_vote_mary
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
@@ -148,7 +147,7 @@ class VoteControllerTest < FunctionalTestCase
     table = namings(:coprinus_comatus_naming).calc_vote_table
     str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
     str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
-    for str in table.keys
+    table.keys.each do |str|
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
       elsif str == str1
@@ -160,5 +159,4 @@ class VoteControllerTest < FunctionalTestCase
       end
     end
   end
-
 end

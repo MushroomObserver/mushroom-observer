@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class NamingControllerTest < FunctionalTestCase
@@ -177,7 +176,6 @@ class NamingControllerTest < FunctionalTestCase
   def test_edit_thats_being_used_just_change_reasons
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
-    nam2 = namings(:coprinus_comatus_other_naming)
 
     o_count = Observation.count
     g_count = Naming.count
@@ -195,8 +193,7 @@ class NamingControllerTest < FunctionalTestCase
            "2" => { check: "1", notes: "" },
            "3" => { check: "0", notes: "Add some micro notes." },
            "4" => { check: "0", notes: "" }
-         }
-        )
+         })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
@@ -229,7 +226,6 @@ class NamingControllerTest < FunctionalTestCase
   def test_edit_thats_being_used_change_name
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
-    nam2 = namings(:coprinus_comatus_other_naming)
 
     o_count = Observation.count
     g_count = Naming.count
@@ -248,8 +244,7 @@ class NamingControllerTest < FunctionalTestCase
            "2" => { check: "0", notes: "" },
            "3" => { check: "0", notes: "" },
            "4" => { check: "0", notes: "" }
-         }
-        )
+         })
     assert_response(:redirect) # redirect indicates success
     assert_equal(12, rolf.reload.contribution)
 
@@ -309,8 +304,9 @@ class NamingControllerTest < FunctionalTestCase
     assert(namings(:coprinus_comatus_other_naming).user_voted?(mary))
     assert(!namings(:coprinus_comatus_other_naming).user_voted?(dick))
 
-    # Rolf, the owner of observations(:coprinus_comatus_obs), already has a naming, which
-    # he's 80% sure of.  Create a new one (the genus Agaricus) that he's 100%
+    # Rolf, the owner of observations(:coprinus_comatus_obs),
+    # already has a naming, which he's 80% sure of.
+    # Create a new one (the genus Agaricus) that he's 100%
     # sure of.  (Mary also has a naming with two votes.)
     params = {
       id: observations(:coprinus_comatus_obs).id,
@@ -345,7 +341,8 @@ class NamingControllerTest < FunctionalTestCase
 
     # Make sure observation was updated and referenced correctly.
     assert_equal(3, observations(:coprinus_comatus_obs).namings.length)
-    assert_equal(names(:agaricus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:agaricus).id,
+                 observations(:coprinus_comatus_obs).name_id)
 
     # Make sure naming was created correctly and referenced.
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
@@ -383,7 +380,6 @@ class NamingControllerTest < FunctionalTestCase
 
   # Now see what happens when rolf's new naming is less confident than old.
   def test_propose_uncertain_naming
-    g_count = Naming.count
     params = {
       id: observations(:coprinus_comatus_obs).id,
       name: { name: "Agaricus" },
@@ -398,11 +394,9 @@ class NamingControllerTest < FunctionalTestCase
     observations(:coprinus_comatus_obs).reload
     namings(:coprinus_comatus_naming).reload
 
-    # Get new objects.
-    naming = Naming.last
-
     # Make sure observation was updated right.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id,
+                 observations(:coprinus_comatus_obs).name_id)
 
     # Sure, check the votes, too, while we're at it.
     assert_equal(3, namings(:coprinus_comatus_naming).vote_sum) # 2+1 = 3
@@ -447,7 +441,8 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal(1, naming.votes.length)
 
     # Make sure observation was updated right.
-    assert_equal(names(:conocybe_filaris).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:conocybe_filaris).id,
+                 observations(:coprinus_comatus_obs).name_id)
   end
 
   # Test a bug in name resolution: was failing to recognize that
@@ -499,7 +494,7 @@ class NamingControllerTest < FunctionalTestCase
     login("dick")
     post(:create, params)
     assert_response(:success) # really means failed
-    assert(name = Name.find_by_text_name('Foo "bar"'))
+    assert(name = Name.find_by(text_name: 'Foo "bar"'))
     assert_equal('Foo "bar" Author', name.search_name)
   end
 
@@ -589,10 +584,11 @@ class NamingControllerTest < FunctionalTestCase
   end
 
   def assert_edit
-    assert_action("edit", %w(
-      _show_observation
-      _form_name_feedback
-      _form
-      _show_images))
+    assert_action("edit", %w[
+                    _show_observation
+                    _form_name_feedback
+                    _form
+                    _show_images
+                  ])
   end
 end

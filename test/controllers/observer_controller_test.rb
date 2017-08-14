@@ -1,12 +1,6 @@
-# encoding: utf-8
 require "test_helper"
 
 class ObserverControllerTest < FunctionalTestCase
-  ##############################################################################
-  # Helpers
-  # TODO: can helpers move to separate file?  Will this filename work:
-  # test/helpers/observer_controller_helper_test.rb
-
   def modified_generic_params(params, user)
     params[:observation] = sample_obs_fields.merge(params[:observation] || {})
     params[:vote] = { value: "3" }.merge(params[:vote] || {})
@@ -24,8 +18,7 @@ class ObserverControllerTest < FunctionalTestCase
       "when(2i)" => "10",
       "when(3i)" => "31",
       specimen: "0",
-      thumb_image_id: "0"
-    }
+      thumb_image_id: "0" }
   end
 
   def default_specimen_fields
@@ -33,7 +26,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def location_exists_or_place_name_blank(params)
-    Location.find_by_name(params[:observation][:place_name]) ||
+    Location.find_by(name: params[:observation][:place_name]) ||
       Location.is_unknown?(params[:observation][:place_name]) ||
       params[:observation][:place_name].blank?
   end
@@ -49,7 +42,7 @@ class ObserverControllerTest < FunctionalTestCase
     post_requires_login(:create_observation, params)
 
     begin
-      if o_num == 0
+      if o_num.zero?
         assert_response(:success)
       elsif location_exists_or_place_name_blank(params)
         # assert_redirected_to(action: :show_observation)
@@ -61,22 +54,27 @@ class ObserverControllerTest < FunctionalTestCase
     rescue MiniTest::Assertion => e
       flash = get_last_flash.to_s
       flash.sub!(/^(\d)/, "")
-      message = e.to_s + "\nFlash messages: (level #{Regexp.last_match(1)})\n<" + flash + ">\n"
+      message = "#{e}\n" \
+                "Flash messages: (level #{Regexp.last_match(1)})\n" \
+                "< #{flash} >\n"
       flunk(message)
     end
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num, user.reload.contribution,
+    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+                 user.reload.contribution,
                  "Wrong User score")
-    if o_num == 1
-      assert_not_equal(0,
-                       @controller.instance_variable_get("@observation").thumb_image_id,
-                       "Wrong image id")
-    end
+    return unless o_num == 1
+
+    assert_not_equal(
+      0,
+      @controller.instance_variable_get("@observation").thumb_image_id,
+      "Wrong image id"
+    )
   end
 
-  ################################################################################
+  ##############################################################################
 
   # ----------------------------
   #  General tests.
@@ -181,7 +179,8 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_rss_with_article_in_feed
     login("rolf")
-    article = Article.create!(title: "Really _Neat_ Feature!", body: "Does stuff.")
+    article = Article.create!(title: "Really _Neat_ Feature!",
+                              body: "Does stuff.")
     assert_equal("Really Neat Feature!", article.text_name)
     get(:rss)
   end
@@ -203,7 +202,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Show one.
     post(:index_rss_log,
-         show_observations: "#{observations(:minimal_unknown_obs)}")
+         show_observations: observations(:minimal_unknown_obs).to_s)
     assert_template(:list_rss_logs)
 
     # Show all.
@@ -237,7 +236,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Prove that user can change his default rss log type.
     get(:index_rss_log, type: :glossary_term, make_default: 1)
-    assert_equal("glossary_term", (rolf.reload).default_rss_type)
+    assert_equal("glossary_term", rolf.reload.default_rss_type)
   end
 
   # Prove that user content_filter works on rss_log
@@ -355,8 +354,7 @@ class ObserverControllerTest < FunctionalTestCase
              content: "Long pink stem and small pink cap",
              location: "Eastern Oklahoma"
            },
-           commit: "Search"
-          )
+           commit: "Search")
 
       # assert_redirected_to(controller: model.show_controller,
       #                      action: :advanced_search)
@@ -371,8 +369,7 @@ class ObserverControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma"
-                                 )
+                                  location: "Eastern Oklahoma")
     get(:advanced_search, @controller.query_params(query))
     assert_template(:list_observations)
   end
@@ -388,8 +385,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Fail to include notes.
     get(:advanced_search,
         name: "Fungi",
-        location: "String in notes"
-       )
+        location: "String in notes")
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(0, results.length)
@@ -398,8 +394,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:advanced_search,
         name: "Fungi",
         location: '"String in notes"',
-        search_location_notes: 1
-       )
+        search_location_notes: 1)
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(0, results.length)
@@ -415,8 +410,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Forget to include notes again.
     get(:advanced_search,
         name: "Fungi",
-        location: "String in notes"
-       )
+        location: "String in notes")
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(0, results.length)
@@ -426,8 +420,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:advanced_search,
         name: "Fungi",
         location: '"String in notes"',
-        search_location_notes: 1
-       )
+        search_location_notes: 1)
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(3, results.length)
@@ -437,7 +430,7 @@ class ObserverControllerTest < FunctionalTestCase
   # it returns to advanced search form.
   def test_advanced_search_error
     ObserverController.any_instance.stubs(:show_selected_observations).
-                       raises(RuntimeError)
+      raises(RuntimeError)
     query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
     get(:advanced_search, @controller.query_params(query))
     assert_redirected_to(action: "advanced_search_form")
@@ -471,7 +464,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "12", type: :species_list } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :species_list, action: :species_list_search,
+    assert_redirected_to(controller: :species_list,
+                         action: :species_list_search,
                          pattern: "12")
 
     params = { search: { pattern: "34", type: :user } }
@@ -482,7 +476,8 @@ class ObserverControllerTest < FunctionalTestCase
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
-    target = "https://google.com/search?q=site:mushroomobserver.org%20#{pattern}"
+    target =
+      "https://google.com/search?q=site:mushroomobserver.org%20#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
 
@@ -579,7 +574,8 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
-                       response: { controller: :observer, action: :list_rss_logs })
+                       response: { controller: :observer,
+                                   action: :list_rss_logs })
   end
 
   def test_send_webmaster_question_need_address
@@ -591,8 +587,9 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_send_webmaster_question_need_content
-    ask_webmaster_test("bogus@email.com", content: "",
-                                          flash: :runtime_ask_webmaster_need_content.t)
+    ask_webmaster_test("bogus@email.com",
+                       content: "",
+                       flash: :runtime_ask_webmaster_need_content.t)
   end
 
   def test_send_webmaster_question_antispam
@@ -605,8 +602,9 @@ class ObserverControllerTest < FunctionalTestCase
   def ask_webmaster_test(email, args)
     response = args[:response] || :success
     flash = args[:flash]
-    post(:ask_webmaster_question,       user: { email: email },
-                                        question: { content: (args[:content] || "Some content") })
+    post(:ask_webmaster_question,
+         user: { email: email },
+         question: { content: (args[:content] || "Some content") })
     assert_response(response)
     assert_flash(flash) if flash
   end
@@ -782,9 +780,10 @@ class ObserverControllerTest < FunctionalTestCase
   def test_show_observation_edit_links
     obs = observations(:detailed_unknown_obs)
     proj = projects(:bolete_project)
-    assert_equal(mary.id, obs.user_id)                        # owned by mary
-    assert(obs.projects.include?(proj))                       # owned by bolete project
-    assert_equal([dick.id], proj.user_group.users.map(&:id))  # dick is only member of bolete project
+    assert_equal(mary.id, obs.user_id)  # owned by mary
+    assert(obs.projects.include?(proj)) # owned by bolete project
+    # dick is only member of bolete project
+    assert_equal([dick.id], proj.user_group.users.map(&:id))
 
     login("rolf")
     get(:show_observation, id: obs.id)
@@ -964,8 +963,9 @@ class ObserverControllerTest < FunctionalTestCase
     note.note_template = "blah!"
     assert(note.save)
     QueuedEmail.queue_emails(true)
-    QueuedEmail::NameTracking.create_email(note,
-                                           namings(:coprinus_comatus_other_naming))
+    QueuedEmail::NameTracking.create_email(
+      note, namings(:coprinus_comatus_other_naming)
+    )
 
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.
@@ -1202,23 +1202,28 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_herbarium
-    generic_construct_observation({
-                                    observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
-                                    name: { name: "Coprinus comatus" }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        specimen: { herbarium_name:
+          herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.specimens.count == 1)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
-    generic_construct_observation({
-                                    observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name,
-                                                herbarium_id: "NYBG 1234" },
-                                    name: { name: "Cortinarius sp." }
-                                  }, 0, 0, 0)
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        specimen: { herbarium_name: herbaria(:nybg_herbarium).name,
+                    herbarium_id: "NYBG 1234" },
+        name: { name: "Cortinarius sp." }
+      }, 0, 0, 0
+    )
     assert_input_value(:specimen_herbarium_name,
                        "The New York Botanical Garden")
     assert_input_value(:specimen_herbarium_id, "NYBG 1234")
@@ -1226,11 +1231,14 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
-    generic_construct_observation({
-                                    observation: { specimen: "1" },
-                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "" },
-                                    name: { name: name }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        specimen: { herbarium_name:
+          herbaria(:nybg_herbarium).name, herbarium_id: "" },
+        name: { name: name }
+      }, 1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.specimens.count == 1)
@@ -1240,21 +1248,26 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_herbarium_but_no_specimen
-    generic_construct_observation({
-                                    specimen: { herbarium_name: herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
-                                    name: { name: "Coprinus comatus" }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        specimen: { herbarium_name:
+          herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
     obs = assigns(:observation)
     assert(!obs.specimen)
-    assert(obs.specimens.count == 0)
+    assert(obs.specimens.count.zero?)
   end
 
   def test_create_observation_with_new_herbarium
-    generic_construct_observation({
-                                    observation: { specimen: "1" },
-                                    specimen: { herbarium_name: "A Brand New Herbarium", herbarium_id: "" },
-                                    name: { name: "Coprinus comatus" }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        specimen: { herbarium_name: "A Brand New Herbarium", herbarium_id: "" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.specimens.count == 1)
@@ -1265,15 +1278,17 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_simple_observation_with_approved_unique_name
     where = "Simple, Massachusetts, USA"
-    generic_construct_observation({
-                                    observation: { place_name: where, thumb_image_id: "0" },
-                                    name: { name: "Coprinus comatus" }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        observation: { place_name: where, thumb_image_id: "0" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
     obs = assigns(:observation)
     nam = assigns(:naming)
     assert_equal(where, obs.where)
     assert_equal(names(:coprinus_comatus).id, nam.name_id)
-    assert_equal("2.03659", "%.5f" % obs.vote_cache)
+    assert_equal("2.03659", format("%.5f", obs.vote_cache))
     assert_not_nil(obs.rss_log)
     # This was getting set to zero instead of nil if no images were uploaded
     # when obs was created.
@@ -1316,10 +1331,12 @@ class ObserverControllerTest < FunctionalTestCase
     # (This is now supported nominally)
     # (Use Macrocybe because it already exists and has an author.
     # That way we know it is actually creating a name for this section.)
-    generic_construct_observation({
-                                    name: { name: "Macrocybe section Fakesection" },
-                                    approved_name: "Macrocybe section Fakesection"
-                                  }, 1, 1, 1)
+    generic_construct_observation(
+      {
+        name: { name: "Macrocybe section Fakesection" },
+        approved_name: "Macrocybe section Fakesection"
+      }, 1, 1, 1
+    )
   end
 
   def test_create_observation_with_approved_junk_name
@@ -1336,16 +1353,20 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_choosing_one_of_multiple_name_matches
-    generic_construct_observation({
-                                    name: { name: "Amanita baccata" },
-                                    chosen_name: { name_id: names(:amanita_baccata_arora).id }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        name: { name: "Amanita baccata" },
+        chosen_name: { name_id: names(:amanita_baccata_arora).id }
+      }, 1, 1, 0
+    )
   end
 
   def test_create_observation_choosing_deprecated_one_of_multiple_name_matches
-    generic_construct_observation({
-                                    name: { name: names(:pluteus_petasatus_deprecated).text_name }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        name: { name: names(:pluteus_petasatus_deprecated).text_name }
+      }, 1, 1, 0
+    )
     nam = assigns(:naming)
     assert_equal(names(:pluteus_petasatus_approved).id, nam.name_id)
   end
@@ -1357,11 +1378,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_chosen_approved_synonym_of_deprecated_name
-    generic_construct_observation({
-                                    name: { name: "Lactarius subalpinus" },
-                                    approved_name: "Lactarius subalpinus",
-                                    chosen_name: { name_id: names(:lactarius_alpinus).id }
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      {
+        name: { name: "Lactarius subalpinus" },
+        approved_name: "Lactarius subalpinus",
+        chosen_name: { name_id: names(:lactarius_alpinus).id }
+      }, 1, 1, 0
+    )
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_alpinus))
   end
@@ -1378,12 +1401,12 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_approved_new_species
     # Test an observation creation with an approved new name
-    Name.find_by_text_name("Agaricus").destroy
+    Name.find_by(text_name: "Agaricus").destroy
     generic_construct_observation({
                                     name: { name: "Agaricus novus" },
                                     approved_name: "Agaricus novus"
                                   }, 1, 1, 2)
-    name = Name.find_by_text_name("Agaricus novus")
+    name = Name.find_by(text_name: "Agaricus novus")
     assert(name)
     assert_equal("Agaricus novus", name.text_name)
   end
@@ -1394,7 +1417,8 @@ class ObserverControllerTest < FunctionalTestCase
     name = names(:agaricus_campestris)
     flavor = Notification.flavors[:name]
     notifications = Notification.where(flavor: flavor, obj_id: name.id)
-    assert_equal(2, notifications.length, "Should be 2 name notifications for name ##{name.id}")
+    assert_equal(2, notifications.length,
+                 "Should be 2 name notifications for name ##{name.id}")
 
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({
@@ -1414,10 +1438,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_decimal_geolocation_and_unknown_name
     lat = 34.1622
     long = -118.3521
-    generic_construct_observation({
-                                    observation: { place_name: "", lat: lat, long: long },
-                                    name: { name: "Unknown" }
-                                  }, 1, 0, 0)
+    generic_construct_observation(
+      {
+        observation: { place_name: "", lat: lat, long: long },
+        name: { name: "Unknown" }
+      }, 1, 0, 0
+    )
     obs = assigns(:observation)
 
     assert_equal(lat.to_s, obs.lat.to_s)
@@ -1429,10 +1455,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_dms_geolocation_and_unknown_name
     lat2 = "34°9’43.92”N"
     long2 = "118°21′7.56″W"
-    generic_construct_observation({
-                                    observation: { place_name: "", lat: lat2, long: long2 },
-                                    name: { name: "Unknown" }
-                                  }, 1, 0, 0)
+    generic_construct_observation(
+      {
+        observation: { place_name: "", lat: lat2, long: long2 },
+        name: { name: "Unknown" }
+      }, 1, 0, 0
+    )
     obs = assigns(:observation)
 
     assert_equal("34.1622", obs.lat.to_s)
@@ -1443,18 +1471,22 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_empty_geolocation_and_location
     # Make sure it doesn't accept no location AND no lat/long.
-    generic_construct_observation({
-                                    observation: { place_name: "", lat: "", long: "" },
-                                    name: { name: "Unknown" }
-                                  }, 0, 0, 0)
+    generic_construct_observation(
+      {
+        observation: { place_name: "", lat: "", long: "" },
+        name: { name: "Unknown" }
+      }, 0, 0, 0
+    )
   end
 
   def test_create_observations_with_unknown_location_and_empty_geolocation
     # But create observation if explicitly tell it "unknown" location.
-    generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
-                                    name: { name: "Unknown" }
-                                  }, 1, 0, 0)
+    generic_construct_observation(
+      {
+        observation: { place_name: "Earth", lat: "", long: "" },
+        name: { name: "Unknown" }
+      }, 1, 0, 0
+    )
   end
 
   def test_create_observation_with_various_altitude_formats
@@ -1463,13 +1495,15 @@ class ObserverControllerTest < FunctionalTestCase
       ["500m",    500],
       ["500 ft.", 152],
       [' 500\' ', 152]
-    ].each do | input, output |
+    ].each do |input, output|
       where = "Unknown, Massachusetts, USA"
 
-      generic_construct_observation({
-                                      observation: { place_name: where, alt: input },
-                                      name: { name: "Unknown" }
-                                    }, 1, 0, 0)
+      generic_construct_observation(
+        {
+          observation: { place_name: where, alt: input },
+          name: { name: "Unknown" }
+        }, 1, 0, 0
+      )
       obs = assigns(:observation)
 
       assert_equal(output, obs.alt)
@@ -1479,11 +1513,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_creating_class
-    generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
-                                    name: { name: "Lecanoromycetes L." },
-                                    approved_name: "Lecanoromycetes L."
-                                  }, 1, 1, 1)
+    generic_construct_observation(
+      {
+        observation: { place_name: "Earth", lat: "", long: "" },
+        name: { name: "Lecanoromycetes L." },
+        approved_name: "Lecanoromycetes L."
+      }, 1, 1, 1
+    )
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
@@ -1515,22 +1551,26 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
-    assert_equal(score + o_num + 2 * g_num + 10 * n_num, user.reload.contribution,
+    assert_equal(score + o_num + 2 * g_num + 10 * n_num,
+                 user.reload.contribution,
                  "Wrong User score")
-    assert_not_equal(0,
-                     @controller.instance_variable_get("@observation").thumb_image_id,
-                     "Wrong image id")
-
+    assert_not_equal(
+      0,
+      @controller.instance_variable_get("@observation").thumb_image_id,
+      "Wrong image id"
+    )
     assert_equal("Acarosporaceae", name.text_name)
     assert_equal(:Family, name.rank)
   end
 
   def test_create_observation_creating_group
-    generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
-                                    name: { name: "Morchella elata group" },
-                                    approved_name: "Morchella elata group"
-                                  }, 1, 1, 2)
+    generic_construct_observation(
+      {
+        observation: { place_name: "Earth", lat: "", long: "" },
+        name: { name: "Morchella elata group" },
+        approved_name: "Morchella elata group"
+      }, 1, 1, 2
+    )
 
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
@@ -1666,7 +1706,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = {
       observation: {
-        when: Time.now,
+        when: Time.zone.now,
         place_name: "Somewhere, Massachusetts, USA",
         specimen: "0",
         thumb_image_id: "0"
@@ -1909,21 +1949,21 @@ class ObserverControllerTest < FunctionalTestCase
       },
       good_images: "#{img.id} #{images(:turned_over_image).id}",
       good_image: {
-        "#{img.id}" => {
+        img.id.to_s => {
           notes: "new notes",
           original_name: "new name",
           copyright_holder: "someone else",
           "when(1i)" => "2012",
           "when(2i)" => "4",
           "when(3i)" => "6",
-          license_id: "#{licenses(:ccwiki30).id}"
+          license_id: licenses(:ccwiki30).id.to_s
         }
       },
       log_change: { checked: "1" }
     }
     post_requires_user(:edit_observation, [controller: :observer,
                                            action: :show_observation],
-                                           params, "mary")
+                       params, "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(/#{ url_for(controller: :location,
                                      action: :create_location) }/)
@@ -1957,8 +1997,9 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "0" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(:edit_observation,
+                       [controller: :observer,
+                        action: :show_observation], params, "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10, rolf.reload.contribution)
@@ -1969,7 +2010,6 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_edit_observation_bad_place_name
     obs = observations(:detailed_unknown_obs)
-    updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
     new_notes = "blather blather blather"
     new_specimen = false
@@ -1986,8 +2026,9 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, [controller: :observer,
-                                           action: :show_observation], params, "mary")
+    post_requires_user(:edit_observation,
+                       [controller: :observer,
+                        action: :show_observation], params, "mary")
     assert_response(:success) # Which really means failure
   end
 
@@ -2009,7 +2050,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal([img1.id, img2.id, img3.id], img_ids)
 
     old_img1_notes = img1.notes
-    old_img2_notes = img2.notes
     old_img3_notes = img3.notes
 
     params = {
@@ -2039,7 +2079,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown_obs)
     file = Rack::Test::UploadedFile.new(
-      "#{Rails.root}/test/fixtures/projects.yml", "text/plain"
+      Rails.root.join("test", "fixtures", "projects.yml").to_s, "text/plain"
     )
     params = {
       id: obs.id,
@@ -2055,15 +2095,17 @@ class ObserverControllerTest < FunctionalTestCase
       image: {
         "0" => {
           image: file,
-          when: Time.now
+          when: Time.zone.now
         }
       }
     }
     login("mary")
     post(:edit_observation, params)
 
-    assert_response(:success,
-                    "Expected 200 (OK), Got #{@response.status} (#{@response.message})")
+    assert_response(
+      :success,
+      "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
+    )
     # 200 :success means means failure!
     assert_flash_error
   end
@@ -2077,7 +2119,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # If javascript isn't enabled, then checkbox isn't required.
     post(:create_observation,
-         observation: { place_name: "Where, Japan", when: Time.now },
+         observation: { place_name: "Where, Japan", when: Time.zone.now },
          name: { name: names(:coprinus_comatus).text_name },
          vote: { value: 3 },
          reason: {
@@ -2085,8 +2127,7 @@ class ObserverControllerTest < FunctionalTestCase
            "2" => { check: "0", notes: "foo" },
            "3" => { check: "1", notes: ""    },
            "4" => { check: "1", notes: "bar" }
-         }
-        )
+         })
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
     reasons = naming.get_reasons.select(&:used?).map(&:num).sort
@@ -2094,7 +2135,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # If javascript IS enabled, then checkbox IS required.
     post(:create_observation,
-         observation: { place_name: "Where, Japan", when: Time.now },
+         observation: { place_name: "Where, Japan", when: Time.zone.now },
          name: { name: names(:coprinus_comatus).text_name },
          vote: { value: 3 },
          reason: {
@@ -2103,8 +2144,7 @@ class ObserverControllerTest < FunctionalTestCase
            "3" => { check: "1", notes: ""    },
            "4" => { check: "1", notes: "bar" }
          },
-         was_js_on: "yes"
-        )
+         was_js_on: "yes")
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
     reasons = naming.get_reasons.select(&:used?).map(&:num).sort
@@ -2126,7 +2166,7 @@ class ObserverControllerTest < FunctionalTestCase
     file2 = Rack::Test::UploadedFile.new(file, "image/jpeg")
     file3 = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
-    new_image_1 = Image.create(
+    new_image1 = Image.create(
       copyright_holder: "holder_1",
       when: time1,
       notes: "notes_1",
@@ -2134,10 +2174,10 @@ class ObserverControllerTest < FunctionalTestCase
       image: file1,
       content_type: "image/jpeg",
       created_at: week_ago,
-    # updated_at: week_ago
+      # updated_at: week_ago
     )
 
-    new_image_2 = Image.create(
+    new_image2 = Image.create(
       copyright_holder: "holder_2",
       when: time2,
       notes: "notes_2",
@@ -2145,11 +2185,11 @@ class ObserverControllerTest < FunctionalTestCase
       image: file2,
       content_type: "image/jpeg",
       created_at: week_ago,
-    # updated_at: week_ago
+      # updated_at: week_ago
     )
 
-    # assert(new_image_1.updated_at < 1.day.ago)
-    # assert(new_image_2.updated_at < 1.day.ago)
+    # assert(new_image1.updated_at < 1.day.ago)
+    # assert(new_image2.updated_at < 1.day.ago)
     post(:create_observation,
          observation: {
            place_name: "Zzyzx, Japan",
@@ -2166,28 +2206,27 @@ class ObserverControllerTest < FunctionalTestCase
            }
          },
          good_image: {
-           new_image_1.id.to_s => {
+           new_image1.id.to_s => {
            },
-           new_image_2.id.to_s => {
+           new_image2.id.to_s => {
              notes: "notes_2_new"
            }
          },
          # (attach these two images once observation created)
-         good_images: "#{new_image_1.id} #{new_image_2.id}"
-        )
+         good_images: "#{new_image1.id} #{new_image2.id}")
     assert_response(:redirect) # redirected = successfully created
 
-    obs = Observation.find_by_where("Zzyzx, Japan")
+    obs = Observation.find_by(where: "Zzyzx, Japan")
     assert_equal(rolf.id, obs.user_id)
     assert_equal(time0, obs.when)
     assert_equal("Zzyzx, Japan", obs.place_name)
 
-    new_image_1.reload
-    new_image_2.reload
+    new_image1.reload
+    new_image2.reload
     imgs = obs.images.sort_by(&:id)
     img_ids = imgs.map(&:id)
-    assert_equal([new_image_1.id, new_image_2.id, new_image_2.id + 1], img_ids)
-    assert_equal(new_image_2.id + 1, obs.thumb_image_id)
+    assert_equal([new_image1.id, new_image2.id, new_image2.id + 1], img_ids)
+    assert_equal(new_image2.id + 1, obs.thumb_image_id)
     assert_equal("holder_1", imgs[0].copyright_holder)
     assert_equal("holder_2", imgs[1].copyright_holder)
     assert_equal("holder_3", imgs[2].copyright_holder)
@@ -2211,19 +2250,18 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation,
          observation: {
            place_name: "", # will cause failure
-           when: Time.now
+           when: Time.zone.now
          },
          image: { "0" => {
            image: file,
            copyright_holder: "zuul",
-           when: Time.now
-         } }
-        )
+           when: Time.zone.now
+         } })
     assert_response(:success) # success = failure, paradoxically
 
     # Make sure image was created, but that it is unattached, and that it has
     # been kept in the @good_images array for attachment later.
-    img = Image.find_by_copyright_holder("zuul")
+    img = Image.find_by(copyright_holder: "zuul")
     assert(img)
     assert_equal([], img.observations)
     assert_equal([img.id],
@@ -2249,13 +2287,12 @@ class ObserverControllerTest < FunctionalTestCase
            image: file,
            copyright_holder: "zuul",
            when: Time.current
-         } }
-        )
+         } })
 
     # Prove that an image was created, but that it is unattached, is in the
     # @bad_images array, and has not been kept in the @good_images array
     # for attachment later.
-    img = Image.find_by_copyright_holder("zuul")
+    img = Image.find_by(copyright_holder: "zuul")
     assert(img)
     assert_equal([], img.observations)
     assert_includes(@controller.instance_variable_get("@bad_images"), img)
@@ -2283,8 +2320,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it remember state of checks if submit fails.
     post(:create_observation,
          name: { name: "Screwy Name" }, # (ensures it will fail)
-         project: { "id_#{@proj1.id}" => "0" }
-        )
+         project: { "id_#{@proj1.id}" => "0" })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
 
@@ -2297,13 +2333,12 @@ class ObserverControllerTest < FunctionalTestCase
     get(:edit_observation, id: @obs2.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:edit_observation, id: @obs2.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
-                            project: { "id_#{@proj1.id}" => "1" }
-        )
+                            # (ensures it will fail)
+                            observation: { place_name: "blah blah blah" },
+                            project: { "id_#{@proj1.id}" => "1" })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     post(:edit_observation, id: @obs2.id,
-                            project: { "id_#{@proj1.id}" => "1" }
-        )
+                            project: { "id_#{@proj1.id}" => "1" })
     assert_response(:redirect)
     assert_obj_list_equal([@proj1], @obs2.reload.projects)
     assert_obj_list_equal([@proj1], @img2.reload.projects)
@@ -2314,19 +2349,18 @@ class ObserverControllerTest < FunctionalTestCase
     get(:edit_observation, id: @obs1.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" },  # (ensures it will fail)
+                            # (ensures it will fail)
+                            observation: { place_name: "blah blah blah" },
                             project: {
                               "id_#{@proj1.id}" => "1",
                               "id_#{@proj2.id}" => "0"
-                            }
-        )
+                            })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     post(:edit_observation, id: @obs1.id,
                             project: {
                               "id_#{@proj1.id}" => "1",
                               "id_#{@proj2.id}" => "1"
-                            }
-        )
+                            })
     assert_response(:redirect)
     assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects.sort_by(&:id))
     assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects.sort_by(&:id))
@@ -2349,7 +2383,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def assert_project_checks(project_states)
-    for id, state in project_states
+    project_states.each do |id, state|
       assert_checkbox_state("project_id_#{id}", state)
     end
   end
@@ -2385,8 +2419,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it remember state of checks if submit fails.
     post(:create_observation,
          name: { name: "Screwy Name" }, # (ensures it will fail)
-         list: { "id_#{@spl2.id}" => "0" }
-        )
+         list: { "id_#{@spl2.id}" => "0" })
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
   end
 
@@ -2397,13 +2430,12 @@ class ObserverControllerTest < FunctionalTestCase
     get(:edit_observation, id: @obs1.id)
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
     post(:edit_observation, id: @obs1.id,
-                            observation: { place_name: "blah blah blah" }, # (ensures it will fail)
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+                            # (ensures it will fail)
+                            observation: { place_name: "blah blah blah" },
+                            list: { "id_#{@spl1.id}" => "1" })
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
     post(:edit_observation, id: @obs1.id,
-                            list: { "id_#{@spl1.id}" => "1" }
-        )
+                            list: { "id_#{@spl1.id}" => "1" })
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
     get(:edit_observation, id: @obs2.id)
@@ -2437,7 +2469,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def assert_list_checks(list_states)
-    for id, state in list_states
+    list_states.each do |id, state|
       assert_checkbox_state("list_id_#{id}", state)
     end
   end
@@ -2457,12 +2489,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(/watch\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: 1)
     assert_image_link_in_html(/ignore\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
@@ -2470,12 +2502,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: 0)
     assert_image_link_in_html(/ignore\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: -1
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: -1)
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
@@ -2484,12 +2516,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 0
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: 0)
     assert_image_link_in_html(/watch\d*.png/,
                               controller: :interest, action: :set_interest,
-                              type: "Observation", id: minimal_unknown.id, state: 1
-                             )
+                              type: "Observation",
+                              id: minimal_unknown.id, state: 1)
   end
 
   # ----------------------------
@@ -2521,7 +2553,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_lookup_location
     l_id = locations(:albion).id
     get(:lookup_location, id: l_id)
-    assert_redirected_to(controller: :location, action: :show_location, id: l_id)
+    assert_redirected_to(controller: :location,
+                         action: :show_location, id: l_id)
     get(:lookup_location, id: "Burbank, California")
     assert_redirected_to(controller: :location, action: :show_location,
                          id: locations(:burbank).id)
@@ -2591,7 +2624,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove that lookup_name adds flash message when it hits an error,
     # stubbing a method called by lookup_name in order to provoke an error.
     ObserverController.any_instance.stubs(:fix_name_matches).
-                       raises(RuntimeError)
+      raises(RuntimeError)
     get(:lookup_name, id: names(:fungi).text_name)
     assert_flash("RuntimeError")
   end
@@ -2626,7 +2659,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :species_list, action: :show_species_list,
                          id: species_lists(:unknown_species_list).id)
     get(:lookup_species_list, id: "species list")
-    # assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_redirected_to(%r{/species_list/index_species_list})
     assert_flash_warning
     get(:lookup_species_list, id: "Flibbertygibbets")
@@ -2684,9 +2716,9 @@ class ObserverControllerTest < FunctionalTestCase
       assert_equal("new banner", :app_banner_box.l)
 
       strs = TranslationString.where(tag: :app_banner_box)
-      for str in strs
-        assert_equal("new banner",
-                     str.text, "Didn't change text of #{str.language.locale} correctly.")
+      strs.each do |str|
+        assert_equal("new banner", str.text,
+                     "Didn't change text of #{str.language.locale} correctly.")
       end
     end
   end
@@ -2722,7 +2754,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_download_observation_index
     obs = Observation.where(user: mary)
-    assert(4 <= obs.length)
+    assert(obs.length >= 4)
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
 
     # Add specimen to fourth obs for testing purposes.
@@ -2730,7 +2762,7 @@ class ObserverControllerTest < FunctionalTestCase
     fourth = obs.fourth
     fourth.specimens << Specimen.create!(
       herbarium: herbaria(:nybg_herbarium),
-      when: Time.now,
+      when: Time.zone.now,
       user: mary,
       herbarium_label: "Mary #1234"
     )
@@ -2749,7 +2781,7 @@ class ObserverControllerTest < FunctionalTestCase
                                  encoding: "UTF-8", commit: "Download")
     rows = @response.body.split("\n")
     ids = rows.map { |s| s.sub(/,.*/, "") }
-    expected = %w(observation_id) + obs.map { |obs| obs.id.to_s }
+    expected = %w[observation_id] + obs.map { |o| o.id.to_s }
     last_expected_index = expected.length - 1
 
     assert_no_flash
@@ -2770,11 +2802,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(
       "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
         "X,#{o.try(:specimens).first.herbarium_label},"\
-        "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank.to_s},0.0," \
+        "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
-        "#{'X' if o.is_collection_location},#{o.thumb_image_id}," \
+        "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
         "#{o.notes}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
@@ -2870,7 +2902,7 @@ class ObserverControllerTest < FunctionalTestCase
     pattern = "name_sorts_user"
     get(:user_search, pattern: pattern)
     # matcher includes optional quotation mark (?.)
-    assert_match(%r{Users Matching .?#{pattern}},
+    assert_match(/Users Matching .?#{pattern}/,
                  css_select("title").text, "Wrong page")
 
     prove_sorting_links_include_contribution
@@ -2881,10 +2913,10 @@ class ObserverControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search, pattern: unmatched_pattern)
     # matcher includes optional quotation mark (?.)
-    assert_match(%r{Users Matching .?#{unmatched_pattern}},
+    assert_match(/Users Matching .?#{unmatched_pattern}/,
                  css_select("title").text, "Wrong page")
 
-    flash_text = (:runtime_no_matches.l).sub("[types]", "users")
+    flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
   end
 
@@ -2906,12 +2938,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_checklist_for_user
     user = users(:rolf)
     expect = Name.joins(observations: :user).
-                  where("observations.user_id = #{user.id}
+             where("observations.user_id = #{user.id}
                          AND names.rank = #{Name.ranks[:Species]}").
-                  uniq
+             uniq
 
     get(:checklist, id: user.id)
-    assert_match(%r{Checklist for #{user.name}}, css_select("title").text,
+    assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
 
     prove_checklist_content(expect)
@@ -2921,13 +2953,13 @@ class ObserverControllerTest < FunctionalTestCase
   def test_checklist_for_species_list
     list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :observations_species_lists).
-                        where("observations_species_lists.species_list_id
+             where("observations_species_lists.species_list_id
                                = #{list.id}
                                AND names.rank = #{Name.ranks[:Species]}").
-                        uniq
+             uniq
 
     get(:checklist, species_list_id: list.id)
-    assert_match(%r{Checklist for #{list.title}}, css_select("title").text,
+    assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
 
     prove_checklist_content(expect)
@@ -2937,12 +2969,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_checklist_for_project
     project = projects(:one_genus_two_species_project)
     expect = Name.joins(observations: :observations_projects).
-                        where("observations_projects.project_id = #{project.id}
+             where("observations_projects.project_id = #{project.id}
                                AND names.rank = #{Name.ranks[:Species]}").
-                        uniq
+             uniq
 
     get(:checklist, project_id: project.id)
-    assert_match(%r{Checklist for #{project.title}}, css_select("title").text,
+    assert_match(/Checklist for #{project.title}/, css_select("title").text,
                  "Wrong page")
 
     prove_checklist_content(expect)
@@ -2951,11 +2983,11 @@ class ObserverControllerTest < FunctionalTestCase
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     expect = Name.joins(:observations).
-                  where({ rank: Name.ranks[:Species] }).
-                  uniq
+             where(rank: Name.ranks[:Species]).
+             uniq
 
     get(:checklist)
-    assert_match(%r{Checklist for #{:app_title.l}}, css_select("title").text,
+    assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
                  "Wrong page")
 
     prove_checklist_content(expect)

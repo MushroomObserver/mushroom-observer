@@ -1,14 +1,13 @@
-# encoding: utf-8
 require "test_helper"
 require "json"
 
 class AjaxControllerTest < FunctionalTestCase
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    unless FileTest.exist?(MO.local_image_files)
-      setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
-      FileUtils.cp_r(setup_images, MO.local_image_files)
-    end
+    return if FileTest.exist?(MO.local_image_files)
+
+    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
+    FileUtils.cp_r(setup_images, MO.local_image_files)
   end
 
   def good_ajax_request(action, params = {})
@@ -36,15 +35,14 @@ class AjaxControllerTest < FunctionalTestCase
     url = "/ajax/#{action}"
     url += "/#{params[:type]}" if params[:type]
     url += "/#{params[:id]}"   if params[:id]
-    args = []
-    for var, val in params
-      args << "#{var}=#{val}" if var != :type && var != :id
+    args = params.each_with_object([]) do |var, val, memo|
+      memo << "#{var}=#{val}" if var != :type && var != :id
     end
     url += "?" + args.join("&") if args.any?
     url
   end
 
-  ################################################################################
+  ##############################################################################
 
   # This is a good place to test this stuff, since the filters are simplified.
   def test_filters
@@ -108,7 +106,7 @@ class AjaxControllerTest < FunctionalTestCase
   def test_edit_api_key
     key = ApiKey.new
     key.provide_defaults
-    key.verified = Time.now
+    key.verified = Time.zone.now
     key.user = katrina
     key.notes = "testing"
     key.save!
@@ -133,11 +131,11 @@ class AjaxControllerTest < FunctionalTestCase
   def test_auto_complete_location
     # names of Locations whose names have words starting with "m"
     m_loc_names = Location.where("name REGEXP ?", "[[:<:]]M").
-                           map(&:name)
+                  map(&:name)
     # wheres of Observations whose wheres have words starting with "m"
     # need extra "observation" to avoid confusing sql with bare "where".
     m_obs_wheres = Observation.where("observations.where REGEXP ?", "[[:<:]]M").
-                               map(&:where)
+                   map(&:where)
     m = m_loc_names + m_obs_wheres
 
     expect = m.sort
@@ -147,7 +145,8 @@ class AjaxControllerTest < FunctionalTestCase
 
     expect = m.map { |x| Location.reverse_name(x) }.sort
     expect.unshift("M")
-    good_ajax_request(:auto_complete, type: :location, id: "Modesto", format: "scientific")
+    good_ajax_request(:auto_complete,
+                      type: :location, id: "Modesto", format: "scientific")
     assert_equal(expect, @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
@@ -265,14 +264,14 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_get_pivotal_story
-    if MO.pivotal_enabled
-      good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
-      assert_match(/This is a test story/, @response.body)
-      assert_match(/Posted by.*rolf/, @response.body)
-      assert_match(/This is a test comment/, @response.body)
-      assert_match(/By:.*mary/, @response.body)
-      assert_match(/Post Comment/, @response.body)
-    end
+    return unless MO.pivotal_enabled
+
+    good_ajax_request(:pivotal, type: "story", id: MO.pivotal_test_id)
+    assert_match(/This is a test story/, @response.body)
+    assert_match(/Posted by.*rolf/, @response.body)
+    assert_match(/This is a test comment/, @response.body)
+    assert_match(/By:.*mary/, @response.body)
+    assert_match(/Post Comment/, @response.body)
   end
 
   def test_naming_vote
@@ -295,18 +294,23 @@ class AjaxControllerTest < FunctionalTestCase
   def test_image_vote
     image = images(:in_situ_image)
     assert_nil(image.users_vote(dick))
-    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
+    bad_ajax_request(:vote,
+                     type: :image, id: images(:in_situ_image).id, value: 3)
 
     login("dick")
     assert_nil(image.users_vote(dick))
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
+    good_ajax_request(:vote,
+                      type: :image, id: images(:in_situ_image).id, value: 3)
     assert_equal(3, image.reload.users_vote(dick))
 
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 0)
+    good_ajax_request(:vote,
+                      type: :image, id: images(:in_situ_image).id, value: 0)
     assert_nil(image.reload.users_vote(dick))
 
-    bad_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 99)
-    bad_ajax_request(:vote, type: :image, id: 99, value: 0)
+    bad_ajax_request(:vote,
+                     type: :image, id: images(:in_situ_image).id, value: 99)
+    bad_ajax_request(:vote,
+                     type: :image, id: 99, value: 0)
   end
 
   def test_image_vote_renders_partial
@@ -315,7 +319,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     # Act
     good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id,
-                      value: 3)
+                             value: 3)
 
     # Assert
     assert_template layout: nil
@@ -328,12 +332,21 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
+    good_ajax_request(:vote,
+                      type: :image, id: images(:in_situ_image).id, value: 3)
 
-    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']")
-    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']")
-    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']")
-    assert_select("a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']")
+    assert_select(
+      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=0']"
+    )
+    assert_select(
+      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=1']"
+    )
+    assert_select(
+      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=2']"
+    )
+    assert_select(
+      "a[href='/image/show_image/#{images(:in_situ_image).id}?vote=4']"
+    )
   end
 
   def test_image_vote_renders_correct_data_attributes
@@ -341,10 +354,13 @@ class AjaxControllerTest < FunctionalTestCase
     login("dick")
 
     # Act
-    good_ajax_request(:vote, type: :image, id: images(:in_situ_image).id, value: 3)
+    good_ajax_request(:vote, type:
+                      :image, id: images(:in_situ_image).id, value: 3)
 
-    assert_select("[data-role='image_vote']", 4) # #should show four vote links as dick already voted
-    assert_select("[data-val]", 4) # #should show four vote links as dick already voted
+    # should show four vote links as dick already voted
+    assert_select("[data-role='image_vote']", 4)
+    # should show four vote links as dick already voted
+    assert_select("[data-val]", 4)
   end
 
   def test_old_translation
@@ -358,8 +374,9 @@ class AjaxControllerTest < FunctionalTestCase
     # Arrange
     setup_image_dirs
     login("dick")
-    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg",
-                                        "image/jpeg")
+    file = Rack::Test::UploadedFile.new(
+      "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"
+    )
     copyright_holder = "Douglas Smith"
     notes = "Some notes."
 
@@ -464,8 +481,7 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_remove_external_link
     # obs owned by rolf, mary created link and is member of site's project
-    link    = ExternalLink.first
-    new_url = "http://another.valid.url"
+    link   = ExternalLink.first
     params = {
       type:  "remove",
       id:    link.id
@@ -498,7 +514,8 @@ class AjaxControllerTest < FunctionalTestCase
     @controller.instance_variable_set("@user", dick)
     assert_link_forbidden(link)
     assert_link_forbidden(obs, site)
-    dick.update_attribute("admin", true)
+
+    dick.update(admin: true)
     assert_link_allowed(link)
     assert_link_allowed(obs, site)
   end
@@ -511,7 +528,7 @@ class AjaxControllerTest < FunctionalTestCase
 
   def assert_link_forbidden(*args)
     assert_raises(RuntimeError) do
-       @controller.send(:check_link_permission!, *args)
+      @controller.send(:check_link_permission!, *args)
     end
   end
 end

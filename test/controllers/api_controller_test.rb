@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 require "rexml/document"
 
@@ -69,8 +68,8 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model)
-    [:none, :low, :high].each do |detail|
-      [:xml, :json].each do |format|
+    %i[none low high].each do |detail|
+      %i[xml json].each do |format|
         get(model.table_name.to_sym, detail: detail, format: format)
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)
@@ -88,8 +87,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_minimal_observation
     post(:observations,
          api_key: api_keys(:rolfs_api_key).key,
-         location: "Unknown"
-        )
+         location: "Unknown")
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -124,11 +122,11 @@ class ApiControllerTest < FunctionalTestCase
          has_specimen: "yes",
          is_collection_location: "yes",
          notes: "These are notes.\nThey look like this.\n",
-         images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
+         images: "#{images(:in_situ_image).id}, " \
+                 "#{images(:turned_over_image).id}",
          thumbnail: images(:turned_over_image).id.to_s,
          projects: "EOL Project",
-         species_lists: "Another Species List"
-        )
+         species_lists: "Another Species List")
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -145,7 +143,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal("These are notes.\nThey look like this.", obs.notes)
-    assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)], obs.images)
+    assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)],
+                          obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_list_equal([projects(:eol_project)], obs.projects)
     assert_obj_list_equal([species_lists(:another_species_list)],
@@ -157,8 +156,7 @@ class ApiControllerTest < FunctionalTestCase
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
     post_and_send_file(:images, file, "image/jpeg",
-                       api_key: api_keys(:rolfs_api_key).key
-                      )
+                       api_key: api_keys(:rolfs_api_key).key)
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
     img = Image.last
@@ -187,8 +185,7 @@ class ApiControllerTest < FunctionalTestCase
                        license: licenses(:ccnc30).id.to_s,
                        original_name: "Coprinus_comatus.jpg",
                        projects: (proj = rolf.projects_member.first).id,
-                       observations: (obs = rolf.observations.first).id
-                      )
+                       observations: (obs = rolf.observations.first).id)
     assert_no_api_errors
     img = Image.last
     assert_users_equal(rolf, img.user)
@@ -211,8 +208,7 @@ class ApiControllerTest < FunctionalTestCase
          login: "miles",
          email: "miles@davis.com",
          create_key: "New API Key",
-         detail: :high
-        )
+         detail: :high)
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
@@ -246,8 +242,7 @@ class ApiControllerTest < FunctionalTestCase
     rolfs_key = api_keys(:rolfs_api_key)
     post(:api_keys,
          api_key: rolfs_key.key,
-         app: "Mushroom Mapper"
-        )
+         app: "Mushroom Mapper")
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -258,8 +253,7 @@ class ApiControllerTest < FunctionalTestCase
     post(:api_keys,
          api_key: rolfs_key.key,
          app: "Mushroom Mapper",
-         for_user: mary.id
-        )
+         for_user: mary.id)
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)

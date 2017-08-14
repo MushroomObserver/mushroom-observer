@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class AccountControllerTest < FunctionalTestCase
@@ -7,7 +6,7 @@ class AccountControllerTest < FunctionalTestCase
     super
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_auth_rolf
     @request.session["return-to"] = "http://localhost/bogus/location"
@@ -138,7 +137,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
-    user.update_attribute(:verified, Time.now)
+    user.update(verified: Time.zone.now)
     post(:login, user: { login: "api", password: "" })
     assert_nil(@request.session["user_id"])
     assert_template("login")
@@ -155,7 +154,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     # Make sure cookie is not set if clear remember_me box in login.
-    post(:login, user: { login: "rolf", password: "testpassword", remember_me: "" })
+    post(:login,
+         user: { login: "rolf", password: "testpassword", remember_me: "" })
     assert(session[:user_id])
     assert(!cookies["mo_user"])
 
@@ -164,7 +164,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     # Now clear session and try again with remember_me box set.
-    post(:login, user: { login: "rolf", password: "testpassword", remember_me: "1" })
+    post(:login,
+         user: { login: "rolf", password: "testpassword", remember_me: "1" })
     assert(session[:user_id])
     assert(cookies["mo_user"])
 
@@ -182,7 +183,7 @@ class AccountControllerTest < FunctionalTestCase
       password_confirmation: "mouse",
       email: "mm@disney.com"
     )
-    assert(!user.auth_code.blank?)
+    assert(user.auth_code.present?)
     assert(user.auth_code.length > 10)
 
     get(:verify, id: user.id, auth_code: "bogus_code")
@@ -389,8 +390,9 @@ class AccountControllerTest < FunctionalTestCase
     setup_image_dirs
 
     # Open file we want to upload.
-    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/sticky.jpg",
-                                        "image/jpeg")
+    file = Rack::Test::UploadedFile.new(
+      "#{::Rails.root}/test/images/sticky.jpg", "image/jpeg"
+    )
 
     # It should create a new image: this is the current number of images.
     num_images = Image.count
@@ -421,23 +423,23 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_no_email_hooks
-    [
-      :comments_owner,
-      :comments_response,
-      :comments_all,
-      :observations_consensus,
-      :observations_naming,
-      :observations_all,
-      :names_author,
-      :names_editor,
-      :names_reviewer,
-      :names_all,
-      :locations_author,
-      :locations_editor,
-      :locations_all,
-      :general_feature,
-      :general_commercial,
-      :general_question
+    %i[
+      comments_owner
+      comments_response
+      comments_all
+      observations_consensus
+      observations_naming
+      observations_all
+      names_author
+      names_editor
+      names_reviewer
+      names_all
+      locations_author
+      locations_editor
+      locations_all
+      general_feature
+      general_commercial
+      general_question
     ].each do |type|
       assert_request(
         action: "no_email_#{type}",
@@ -569,7 +571,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:success) # means failure
 
     # Change notes correctly.
-    post(:edit_api_key, commit: :UPDATE.l, id: key.id, key: { notes: "new name" })
+    post(:edit_api_key,
+         commit: :UPDATE.l, id: key.id, key: { notes: "new name" })
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)
