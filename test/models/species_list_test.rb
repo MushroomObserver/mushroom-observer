@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class SpeciesListTest < UnitTestCase
@@ -9,7 +8,8 @@ class SpeciesListTest < UnitTestCase
     assert_false(spl.has_edit_permission?(mary))
     assert_false(spl.has_edit_permission?(dick))
 
-    # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
+    # IS owned by Bolete project,
+    # AND owned by Mary (Dick is member of Bolete project)
     spl = species_lists(:unknown_species_list)
     assert_false(spl.has_edit_permission?(rolf))
     assert_true(spl.has_edit_permission?(mary))
@@ -56,7 +56,7 @@ class SpeciesListTest < UnitTestCase
     name = Name.first
 
     # Test defaults first.
-    now = Time.now
+    now = Time.zone.now
     spl.construct_observation(name)
     o = Observation.last
     n = Naming.last
@@ -88,19 +88,20 @@ class SpeciesListTest < UnitTestCase
     assert_equal(Vote.maximum_vote, v.value)
 
     # Now override everything.
-    spl.construct_observation(name,
-                              user: mary,
-                              projects: [],
-                              when: "2012-01-13",
-                              where: "Undefined Location",
-                              notes: "notes",
-                              lat: " 12deg 34min N ",
-                              long: " 123 45 W ",
-                              alt: " 123.45 ft ",
-                              is_collection_location: false,
-                              specimen: true,
-                              vote: Vote.next_best_vote
-                             )
+    spl.construct_observation(
+      name,
+      user: mary,
+      projects: [],
+      when: "2012-01-13",
+      where: "Undefined Location",
+      notes: "notes",
+      lat: " 12deg 34min N ",
+      long: " 123 45 W ",
+      alt: " 123.45 ft ",
+      is_collection_location: false,
+      specimen: true,
+      vote: Vote.next_best_vote
+    )
     o = Observation.last
     n = Naming.last
     v = Vote.last

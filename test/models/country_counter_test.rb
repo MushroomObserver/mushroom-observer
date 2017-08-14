@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class CountryCounterTest < UnitTestCase
@@ -35,25 +34,25 @@ class CountryCounterTest < UnitTestCase
     assert(countries)
     usa = countries[0]
     assert_equal("USA", usa[0])
-    assert(10 < usa[1])
+    assert(usa[1] > 10)
   end
 
   def test_partition_with_count
     cc = CountryCounter.new
     known, unknown = cc.send(:partition_with_count)
-    assert(known.length > 0)
-    assert(unknown.length > 0)
+    assert(!known.empty?)
+    assert(!unknown.empty?)
   end
 
   def test_known_by_count
-    assert(CountryCounter.new.known_by_count.length > 0)
+    assert(!CountryCounter.new.known_by_count.empty?)
   end
 
   def test_unknown_by_count
-    assert(CountryCounter.new.unknown_by_count.length > 0)
+    assert(!CountryCounter.new.unknown_by_count.empty?)
   end
 
   def test_missing
-    assert(CountryCounter.new.missing.length > 0)
+    assert(!CountryCounter.new.missing.empty?)
   end
 end

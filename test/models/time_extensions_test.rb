@@ -1,5 +1,8 @@
-# encoding: utf-8
 require "test_helper"
+
+# rubocop:disable Rails/Date, Rails/TimeZone
+# MO time extensions wrap Date, DateTime, and Time
+# So test need to use those Classes in ways which offend RuboCop
 
 # test public interface of a class which includes date
 module DateExtensionsInterfaceTest
@@ -46,7 +49,7 @@ class DateExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
 
   def setup
-    @object = Date.today
+    @object = Date.today #
   end
 end
 

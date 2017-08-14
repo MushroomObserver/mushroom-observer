@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class ImageTest < UnitTestCase
@@ -44,8 +43,6 @@ class ImageTest < UnitTestCase
     name_two = "Robert H. Singer"
     date_one = Date.parse("2007-12-31")
     date_two = Date.parse("2008-01-01")
-
-    # Got rid of date stamp messing around due to switch from 'modified' to 'updated_at'
 
     img = Image.create(
       user: mary,
@@ -95,7 +92,8 @@ class ImageTest < UnitTestCase
     assert_false(img.has_edit_permission?(mary))
     assert_false(img.has_edit_permission?(dick))
 
-    # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
+    # IS owned by Bolete project, AND owned by Mary
+    # (Dick is member of Bolete project)
     img = images(:in_situ_image)
     assert_false(img.has_edit_permission?(rolf))
     assert_true(img.has_edit_permission?(mary))
@@ -126,9 +124,13 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert(!File.exist?("#{::Rails.root}/script/bogus_script"), "script/bogus_script should not exist!")
-    assert(File.exist?("#{::Rails.root}/script/process_image"), "Missing script/process_image!")
-    assert(File.exist?("#{::Rails.root}/script/rotate_image"), "Missing script/rotate_image!")
-    assert(File.exist?("#{::Rails.root}/script/retransfer_images"), "Missing script/retransfer_images!")
+    assert(!File.exist?("#{::Rails.root}/script/bogus_script"),
+           "script/bogus_script should not exist!")
+    assert(File.exist?("#{::Rails.root}/script/process_image"),
+           "Missing script/process_image!")
+    assert(File.exist?("#{::Rails.root}/script/rotate_image"),
+           "Missing script/rotate_image!")
+    assert(File.exist?("#{::Rails.root}/script/retransfer_images"),
+           "Missing script/retransfer_images!")
   end
 end

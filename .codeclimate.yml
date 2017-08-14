@@ -64,6 +64,7 @@ engines:
 # configuration details are in .rubocop.yml files, rather than here.
   rubocop:
     enabled: true
+    channel: rubocop-0-49
 
 # scss style checker
   scss-lint:

@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class VoteTest < UnitTestCase
@@ -6,7 +5,7 @@ class VoteTest < UnitTestCase
   def test_create
     assert_kind_of(Naming, namings(:agaricus_campestris_naming))
     assert_kind_of(User, mary)
-    now = Time.now
+    now = Time.current
     vote = Vote.new(
       created_at: now,
       updated_at: now,
@@ -24,7 +23,7 @@ class VoteTest < UnitTestCase
     assert_kind_of(User, rolf)
     assert_equal(rolf, namings(:coprinus_comatus_naming).user)
     assert_equal(rolf, votes(:coprinus_comatus_owner_vote).user)
-    votes(:coprinus_comatus_owner_vote).updated_at = Time.now
+    votes(:coprinus_comatus_owner_vote).updated_at = Time.current
     votes(:coprinus_comatus_owner_vote).value = 1
     assert(votes(:coprinus_comatus_owner_vote).save)
     assert(votes(:coprinus_comatus_owner_vote).errors.full_messages.join("; "))
@@ -56,7 +55,8 @@ class VoteTest < UnitTestCase
       value: -10
     )
     assert !vote.save
-    assert_equal(:validate_vote_value_out_of_bounds.t, vote.errors[:value].first)
+    assert_equal(:validate_vote_value_out_of_bounds.t,
+                 vote.errors[:value].first)
     assert_equal(1, vote.errors.count)
   end
 

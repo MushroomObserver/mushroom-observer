@@ -1,8 +1,7 @@
-# encoding: utf-8
 require "test_helper"
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML.load(IO.
+  DATABASE_CONFIG = YAML.safe_load(IO.
     read("#{::Rails.root}/config/database.yml"))["test"]
 
   def script_file(cmd)
@@ -21,18 +20,23 @@ class ScriptTest < UnitTestCase
   # We cannot reference the db in a tests before running a script
   # for the reason stated in test_retransfer_image below.
   # So get these IDs without refering to the db.
+  # rubocop:disable Style/NumericLiterals
   def in_situ_id
     688136226
   end
+
   def turned_over_id
     1062212448
   end
+
   def commercial_id
     566571202
   end
+
   def disconnected_id
     839420571
   end
+  # rubocop:enable Style/NumericLiterals
 
   # Ensure above definitions are correct
   def test_fixture_id_defs
@@ -51,7 +55,7 @@ class ScriptTest < UnitTestCase
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
     FileUtils.rm_rf("#{remote_root}2")
-    %w(thumb 320 640 960 1280 orig).each do |subdir|
+    %w[thumb 320 640 960 1280 orig].each do |subdir|
       FileUtils.mkpath("#{local_root}/#{subdir}")
       FileUtils.mkpath("#{remote_root}1/#{subdir}")
       FileUtils.mkpath("#{remote_root}2/#{subdir}")
@@ -95,15 +99,22 @@ class ScriptTest < UnitTestCase
       file.puts "#{local_root}/320//#{in_situ_id}.jpg"
       file.puts "#{local_root}/thumb//#{in_situ_id}.jpg"
     end
-    sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").map do |line|
+    sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").
+            map do |line|
       line[local_root.length + 1..-1].chomp
     end
-    assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0], "full-size image is wrong size")
-    assert_equal("1280//#{in_situ_id}.jpg: 1280 960", sizes[1], "huge-size image is wrong size")
-    assert_equal("960//#{in_situ_id}.jpg: 960 720", sizes[2], "large-size image is wrong size")
-    assert_equal("640//#{in_situ_id}.jpg: 640 480", sizes[3], "medium-size image is wrong size")
-    assert_equal("320//#{in_situ_id}.jpg: 320 240", sizes[4], "small-size image is wrong size")
-    assert_equal("thumb//#{in_situ_id}.jpg: 160 120", sizes[5], "thumbnail image is wrong size")
+    assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0],
+                 "full-size image is wrong size")
+    assert_equal("1280//#{in_situ_id}.jpg: 1280 960", sizes[1],
+                 "huge-size image is wrong size")
+    assert_equal("960//#{in_situ_id}.jpg: 960 720", sizes[2],
+                 "large-size image is wrong size")
+    assert_equal("640//#{in_situ_id}.jpg: 640 480", sizes[3],
+                 "medium-size image is wrong size")
+    assert_equal("320//#{in_situ_id}.jpg: 320 240", sizes[4],
+                 "small-size image is wrong size")
+    assert_equal("thumb//#{in_situ_id}.jpg: 160 120", sizes[5],
+                 "thumbnail image is wrong size")
 
     img = images(:in_situ_image)
 
@@ -111,24 +122,26 @@ class ScriptTest < UnitTestCase
     assert_equal(1920, img.height)
     assert_equal(true, img.transferred)
 
-    for file in ["thumb/#{in_situ_id}.jpg", "320/#{in_situ_id}.jpg",
-                 "640/#{in_situ_id}.jpg", "960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
-                 "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"]
+    ["thumb/#{in_situ_id}.jpg", "320/#{in_situ_id}.jpg",
+     "640/#{in_situ_id}.jpg", "960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
+     "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"].each do |file|
       file1 = "#{local_root}/#{file}"
       file2 = "#{remote_root}1/#{file}"
       assert_equal(File.size(file1), File.size(file2),
                    "Failed to transfer #{file} to server 1, size is wrong.")
     end
-    for file in ["thumb/#{in_situ_id}.jpg", "320/#{in_situ_id}.jpg", "640/#{in_situ_id}.jpg"]
+    ["thumb/#{in_situ_id}.jpg", "320/#{in_situ_id}.jpg",
+     "640/#{in_situ_id}.jpg"].each do |file|
       file1 = "#{local_root}/#{file}"
       file2 = "#{remote_root}2/#{file}"
       assert_equal(File.size(file1), File.size(file2),
                    "Failed to transfer #{file} to server 2, size is wrong.")
     end
-    for file in ["960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
-                 "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"]
+    ["960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
+     "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"].each do |file|
       file2 = "#{remote_root}2/#{file}"
-      assert(!File.exist?(file2), "Shouldn't have transferred #{file} to server 2.")
+      assert(!File.exist?(file2),
+             "Shouldn't have transferred #{file} to server 2.")
     end
   end
 
@@ -144,17 +157,39 @@ class ScriptTest < UnitTestCase
     # assert_equal(false, img1.transferred)
     # assert_equal(false, img2.transferred)
 
-    File.open("#{local_root}/orig/#{in_situ_id}.tiff", "w") { |f| f.write("A") }
-    File.open("#{local_root}/orig/#{in_situ_id}.jpg",  "w") { |f| f.write("B") }
-    File.open("#{local_root}/1280/#{in_situ_id}.jpg",  "w") { |f| f.write("C") }
-    File.open("#{local_root}/960/#{in_situ_id}.jpg",   "w") { |f| f.write("D") }
-    File.open("#{local_root}/640/#{in_situ_id}.jpg",   "w") { |f| f.write("E") }
-    File.open("#{local_root}/320/#{in_situ_id}.jpg",   "w") { |f| f.write("F") }
-    File.open("#{local_root}/thumb/#{in_situ_id}.jpg", "w") { |f| f.write("G") }
-    File.open("#{local_root}/960/#{turned_over_id}.jpg",   "w") { |f| f.write("H") }
-    File.open("#{local_root}/640/#{turned_over_id}.jpg",   "w") { |f| f.write("I") }
-    File.open("#{local_root}/320/#{turned_over_id}.jpg",   "w") { |f| f.write("J") }
-    File.open("#{local_root}/thumb/#{turned_over_id}.jpg", "w") { |f| f.write("K") }
+    File.open("#{local_root}/orig/#{in_situ_id}.tiff", "w") do |f|
+      f.write("A")
+    end
+    File.open("#{local_root}/orig/#{in_situ_id}.jpg", "w") do |f|
+      f.write("B")
+    end
+    File.open("#{local_root}/1280/#{in_situ_id}.jpg", "w") do |f|
+      f.write("C")
+    end
+    File.open("#{local_root}/960/#{in_situ_id}.jpg", "w") do |f|
+      f.write("D")
+    end
+    File.open("#{local_root}/640/#{in_situ_id}.jpg", "w") do |f|
+      f.write("E")
+    end
+    File.open("#{local_root}/320/#{in_situ_id}.jpg", "w") do |f|
+      f.write("F")
+    end
+    File.open("#{local_root}/thumb/#{in_situ_id}.jpg", "w") do |f|
+      f.write("G")
+    end
+    File.open("#{local_root}/960/#{turned_over_id}.jpg", "w") do |f|
+      f.write("H")
+    end
+    File.open("#{local_root}/640/#{turned_over_id}.jpg", "w") do |f|
+      f.write("I")
+    end
+    File.open("#{local_root}/320/#{turned_over_id}.jpg", "w") do |f|
+      f.write("J")
+    end
+    File.open("#{local_root}/thumb/#{turned_over_id}.jpg", "w") do |f|
+      f.write("K")
+    end
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
@@ -186,7 +221,7 @@ class ScriptTest < UnitTestCase
     assert_equal("K", File.read("#{remote_root}1/thumb/#{turned_over_id}.jpg"),
                  "thumb/#{turned_over_id}.jpg wrong for server 1")
     assert_equal("E", File.read("#{remote_root}2/640/#{in_situ_id}.jpg"),
-                  "640/#{in_situ_id}.jpg wrong for server 2")
+                 "640/#{in_situ_id}.jpg wrong for server 2")
     assert_equal("F", File.read("#{remote_root}2/320/#{in_situ_id}.jpg"),
                  "320/#{in_situ_id}.jpg wrong for server 2")
     assert_equal("G", File.read("#{remote_root}2/thumb/#{in_situ_id}.jpg"),
@@ -237,35 +272,94 @@ class ScriptTest < UnitTestCase
   test "verify_images" do
     script = script_file("verify_images")
     tempfile = Tempfile.new("test").path
-    File.open("#{local_root}/orig/#{turned_over_id}.tiff", "w") { |f| f.write("A") }
-    File.open("#{local_root}/orig/#{turned_over_id}.jpg",  "w") { |f| f.write("AB") }
-    File.open("#{local_root}/960/#{turned_over_id}.jpg",   "w") { |f| f.write("ABC") }
-    File.open("#{local_root}/640/#{turned_over_id}.jpg",   "w") { |f| f.write("ABCD") }
-    File.open("#{local_root}/320/#{turned_over_id}.jpg",   "w") { |f| f.write("ABCDE") }
-    File.open("#{local_root}/960/#{commercial_id}.jpg",   "w") { |f| f.write("ABCDEF") }
-    File.open("#{local_root}/640/#{commercial_id}.jpg",   "w") { |f| f.write("ABCDEFG") }
-    File.open("#{local_root}/320/#{commercial_id}.jpg",   "w") { |f| f.write("ABCDEFGH") }
-    File.open("#{local_root}/960/#{disconnected_id}.jpg",   "w") { |f| f.write("ABCDEFGHI") }
-    File.open("#{local_root}/640/#{disconnected_id}.jpg",   "w") { |f| f.write("ABCDEFGHIJ") }
-    File.open("#{local_root}/320/#{disconnected_id}.jpg",   "w") { |f| f.write("ABCDEFGHIJK") }
-    File.open("#{remote_root}1/960/#{in_situ_id}.jpg", "w") { |f| f.write("correct") }
-    File.open("#{remote_root}1/640/#{in_situ_id}.jpg", "w") { |f| f.write("correct") }
-    File.open("#{remote_root}1/320/#{in_situ_id}.jpg", "w") { |f| f.write("correct") }
-    File.open("#{remote_root}1/960/#{turned_over_id}.jpg", "w") { |f| f.write("ABC") }
-    File.open("#{remote_root}1/640/#{turned_over_id}.jpg", "w") { |f| f.write("ABCD") }
-    File.open("#{remote_root}1/320/#{turned_over_id}.jpg", "w") { |f| f.write("ABCDE") }
-    File.open("#{remote_root}1/960/#{commercial_id}.jpg", "w") { |f| f.write("ABCDEF") }
-    File.open("#{remote_root}1/640/#{commercial_id}.jpg", "w") { |f| f.write("ABCDEFG") }
-    File.open("#{remote_root}1/320/#{commercial_id}.jpg", "w") { |f| f.write("ABCDEFGH") }
-    File.open("#{remote_root}1/960/#{disconnected_id}.jpg", "w") { |f| f.write("allcorrupted!") }
-    File.open("#{remote_root}1/640/#{disconnected_id}.jpg", "w") { |f| f.write("allcorrupted!") }
-    File.open("#{remote_root}1/320/#{disconnected_id}.jpg", "w") { |f| f.write("allcorrupted!") }
-    File.open("#{remote_root}2/640/#{in_situ_id}.jpg", "w") { |f| f.write("correct") }
-    File.open("#{remote_root}2/320/#{in_situ_id}.jpg", "w") { |f| f.write("correct") }
-    File.open("#{remote_root}2/640/#{turned_over_id}.jpg", "w") { |f| f.write("ABCD") }
-    File.open("#{remote_root}2/320/#{turned_over_id}.jpg", "w") { |f| f.write("ABCDE") }
-    File.open("#{remote_root}2/640/#{commercial_id}.jpg", "w") { |f| f.write("allcorrupted!") }
-    File.open("#{remote_root}2/320/#{commercial_id}.jpg", "w") { |f| f.write("allcorrupted!") }
+    File.open("#{local_root}/orig/#{turned_over_id}.tiff", "w") do |f|
+      f.write("A")
+    end
+
+    File.open("#{local_root}/orig/#{turned_over_id}.jpg", "w") do |f|
+      f.write("AB")
+    end
+    File.open("#{local_root}/960/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABC")
+    end
+    File.open("#{local_root}/640/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCD")
+    end
+    File.open("#{local_root}/320/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCDE")
+    end
+    File.open("#{local_root}/960/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEF")
+    end
+    File.open("#{local_root}/640/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEFG")
+    end
+    File.open("#{local_root}/320/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEFGH")
+    end
+    File.open("#{local_root}/960/#{disconnected_id}.jpg", "w") do |f|
+      f.write("ABCDEFGHI")
+    end
+    File.open("#{local_root}/640/#{disconnected_id}.jpg", "w") do |f|
+      f.write("ABCDEFGHIJ")
+    end
+    File.open("#{local_root}/320/#{disconnected_id}.jpg", "w") do |f|
+      f.write("ABCDEFGHIJK")
+    end
+    File.open("#{remote_root}1/960/#{in_situ_id}.jpg", "w") do |f|
+      f.write("correct")
+    end
+    File.open("#{remote_root}1/640/#{in_situ_id}.jpg", "w") do |f|
+      f.write("correct")
+    end
+    File.open("#{remote_root}1/320/#{in_situ_id}.jpg", "w") do |f|
+      f.write("correct")
+    end
+    File.open("#{remote_root}1/960/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABC")
+    end
+    File.open("#{remote_root}1/640/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCD")
+    end
+    File.open("#{remote_root}1/320/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCDE")
+    end
+    File.open("#{remote_root}1/960/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEF")
+    end
+    File.open("#{remote_root}1/640/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEFG")
+    end
+    File.open("#{remote_root}1/320/#{commercial_id}.jpg", "w") do |f|
+      f.write("ABCDEFGH")
+    end
+    File.open("#{remote_root}1/960/#{disconnected_id}.jpg", "w") do |f|
+      f.write("allcorrupted!")
+    end
+    File.open("#{remote_root}1/640/#{disconnected_id}.jpg", "w") do |f|
+      f.write("allcorrupted!")
+    end
+    File.open("#{remote_root}1/320/#{disconnected_id}.jpg", "w") do |f|
+      f.write("allcorrupted!")
+    end
+    File.open("#{remote_root}2/640/#{in_situ_id}.jpg", "w") do |f|
+      f.write("correct")
+    end
+    File.open("#{remote_root}2/320/#{in_situ_id}.jpg", "w") do |f|
+      f.write("correct")
+    end
+    File.open("#{remote_root}2/640/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCD")
+    end
+    File.open("#{remote_root}2/320/#{turned_over_id}.jpg", "w") do |f|
+      f.write("ABCDE")
+    end
+    File.open("#{remote_root}2/640/#{commercial_id}.jpg", "w") do |f|
+      f.write("allcorrupted!")
+    end
+    File.open("#{remote_root}2/320/#{commercial_id}.jpg", "w") do |f|
+      f.write("allcorrupted!")
+    end
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
