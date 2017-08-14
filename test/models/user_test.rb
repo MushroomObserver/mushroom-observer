@@ -281,14 +281,14 @@ class UserTest < UnitTestCase
     assert_equal(num_images - 1, Image.count)
     assert_equal(num_comments - 1, Comment.count)
     assert_equal(num_publications - 1, Publication.count)
-    assert_raise(ActiveRecord::RecordNotFound) do
+    assert_raises(ActiveRecord::RecordNotFound) do
       Observation.find(observation_id)
     end
-    assert_raise(ActiveRecord::RecordNotFound) { Naming.find(naming_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Vote.find(vote_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Image.find(image_id) }
-    assert_raise(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
-    assert_raise(ActiveRecord::RecordNotFound) do
+    assert_raises(ActiveRecord::RecordNotFound) { Naming.find(naming_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Vote.find(vote_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Image.find(image_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
+    assert_raises(ActiveRecord::RecordNotFound) do
       Publication.find(publication_id)
     end
   end
