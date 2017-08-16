@@ -2,7 +2,7 @@ module ObservationReport
   # Darwin format.
   class Darwin < ObservationReport::CSV
     def labels
-      %w(
+      %w[
         DateLastModified
         InstitutionCode
         CollectionCode
@@ -27,7 +27,7 @@ module ObservationReport
         MinimumElevation
         MaximumElevation
         Notes
-      )
+      ]
     end
 
     # rubocop:disable Metrics/AbcSize

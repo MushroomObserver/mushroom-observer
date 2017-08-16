@@ -187,7 +187,7 @@ class LocationController < ApplicationController
     end
     @query = restrict_query_to_box(@query)
     @timer_start = Time.now
-    columns = %w(name north south east west).map { |x| "locations.#{x}" }
+    columns = %w[name north south east west].map { |x| "locations.#{x}" }
     args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }
     @locations = @query.select_rows(args).map do |id, name, n, s, e, w|
       MinimalMapLocation.new(id, name, n, s, e, w)

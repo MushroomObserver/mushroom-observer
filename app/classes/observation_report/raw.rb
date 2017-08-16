@@ -3,7 +3,7 @@ module ObservationReport
   class Raw < ObservationReport::CSV
     # rubocop:disable Metrics/MethodLength
     def labels
-      %w(
+      %w[
         observation_id
         user_id
         user_login
@@ -33,7 +33,7 @@ module ObservationReport
         is_collection_location
         thumbnail_image_id
         notes
-      )
+      ]
     end
 
     # rubocop:disable Metrics/AbcSize Metrics/MethodLength

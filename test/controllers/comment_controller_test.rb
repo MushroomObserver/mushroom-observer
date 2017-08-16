@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class CommentControllerTest < FunctionalTestCase
@@ -36,8 +35,11 @@ class CommentControllerTest < FunctionalTestCase
     obs = comment.target
     params = { id: comment.id.to_s }
     assert_equal("rolf", comment.user.login)
-    requires_user(:edit_comment, { controller: :observer,
-                                   action: :show_observation, id: obs.id }, params)
+    requires_user(
+      :edit_comment,
+      { controller: :observer, action: :show_observation, id: obs.id },
+      params
+    )
     assert_form_action(action: "edit_comment", id: comment.id.to_s)
   end
 
@@ -47,8 +49,11 @@ class CommentControllerTest < FunctionalTestCase
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
     params = { id: comment.id.to_s }
-    requires_user(:destroy_comment, { controller: :observer,
-                                      action: :show_observation, id: obs.id }, params)
+    requires_user(
+      :destroy_comment,
+      { controller: :observer, action: :show_observation, id: obs.id },
+      params
+    )
     assert_equal(9, rolf.reload.contribution)
     obs.reload
     assert(!obs.comments.member?(comment))
@@ -76,9 +81,12 @@ class CommentControllerTest < FunctionalTestCase
     obs = comment.target
     params = { id: comment.id,
                comment: { summary: "New Summary", comment: "New text." } }
-    assert("rolf" == comment.user.login)
-    post_requires_user(:edit_comment, { controller: :observer,
-                                        action: :show_observation, id: obs.id }, params)
+    assert_equal("rolf", comment.user.login)
+    post_requires_user(
+      :edit_comment,
+      { controller: :observer, action: :show_observation, id: obs.id },
+      params
+    )
     assert_equal(10, rolf.reload.contribution)
     comment = Comment.find(comment.id)
     assert_equal("New Summary", comment.summary)

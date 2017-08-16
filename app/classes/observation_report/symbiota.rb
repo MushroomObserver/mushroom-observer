@@ -2,7 +2,7 @@ module ObservationReport
   # Symbiota-style csv report.
   class Symbiota < ObservationReport::CSV
     def labels
-      %w(
+      %w[
         scientificName
         scientificNameAuthorship
         taxonRank
@@ -25,7 +25,7 @@ module ObservationReport
         maximumElevationInMeters
         updated_at
         fieldNotes
-      )
+      ]
     end
 
     # rubocop:disable Metrics/AbcSize

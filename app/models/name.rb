@@ -300,7 +300,7 @@ class Name < AbstractModel
 
   acts_as_versioned(
     table_name: "names_versions",
-    if_changed: %w(
+    if_changed: %w[
       rank
       text_name
       search_name
@@ -311,7 +311,7 @@ class Name < AbstractModel
       deprecated
       correct_spelling
       notes
-    )
+    ]
   )
   non_versioned_columns.push(
     "created_at",

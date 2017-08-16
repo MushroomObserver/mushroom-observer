@@ -90,7 +90,7 @@ class Location < AbstractModel
 
   acts_as_versioned(
     table_name: "locations_versions",
-    if_changed: %w(
+    if_changed: %w[
       name
       north
       south
@@ -99,7 +99,7 @@ class Location < AbstractModel
       high
       low
       notes
-    )
+    ]
   )
   non_versioned_columns.push(
     "created_at",

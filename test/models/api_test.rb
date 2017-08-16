@@ -723,7 +723,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_string, API::StringTooLong, "abcde", limit: 4)
     assert_parse(:parse_strings, nil, nil)
     assert_parse(:parse_strings, ["foo"], "foo")
-    assert_parse(:parse_strings, %w(foo bar), "foo,bar", limit: 4)
+    assert_parse(:parse_strings, %w[foo bar], "foo,bar", limit: 4)
     assert_parse(:parse_strings, API::StringTooLong, "foo,abcde", limit: 4)
   end
 

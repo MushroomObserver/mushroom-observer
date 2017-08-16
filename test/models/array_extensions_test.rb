@@ -6,7 +6,7 @@ class ArrayExtensionsTest < UnitTestCase
   def test_to_boolean_hash
     assert_equal({}, [].to_boolean_hash)
     assert_equal({ "a" => true, "b" => true, "c" => true },
-                 %w(a b c).to_boolean_hash)
+                 %w[a b c].to_boolean_hash)
   end
 
   # rubocop:disable Rails/OutputSafety

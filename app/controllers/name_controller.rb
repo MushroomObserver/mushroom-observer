@@ -1527,7 +1527,7 @@ class NameController < ApplicationController
     end
 
     report = CSV.generate(col_sep: "\t") do |csv|
-      csv << %w(name rank number_observations family)
+      csv << %w[name rank number_observations family]
       data.each do |name, rank, number|
         genus = name.split(" ").first
         family = families[genus] || ""

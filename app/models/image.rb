@@ -291,7 +291,7 @@ class Image < AbstractModel
   # Return an Array of all the extensions of all the image types we explicitly
   # support.
   def self.all_extensions
-    %w(jpg gif png tiff bmp raw)
+    %w[jpg gif png tiff bmp raw]
   end
 
   # Return an Array of all the extensions of all the image content types we

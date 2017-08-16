@@ -236,7 +236,7 @@ class SpeciesListController < ApplicationController
       raise "Unsupported CSV report charset: #{charset}"
     end
     str = CSV.generate do |csv|
-      csv << %w(scientific_name authority citation accepted)
+      csv << %w[scientific_name authority citation accepted]
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
                 name.deprecated ? "" : "1"].map { |v| v.blank? ? nil : v }

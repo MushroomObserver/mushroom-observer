@@ -72,7 +72,8 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
 
   # ***** create *****
   def convex_params
-    { glossary_term:
+    {
+      glossary_term:
       { name: "Convex", description: "Boring" },
       copyright_holder: "Me",
       date: { copyright_year: 2013 },
@@ -128,11 +129,12 @@ class GlossaryControllerEditTest < GlossaryControllerTest
   end
 
   def changes_to_conic
-    { id: conic.id,
+    {
+      id: conic.id,
       glossary_term: { name: "Convex", description: "Boring old convex" },
       copyright_holder: "Insil Choi", date: { copyright_year: 2013 },
       upload: { license_id: licenses(:ccnc25).id }
-     }
+    }
   end
 
   def post_conic_edit_changes

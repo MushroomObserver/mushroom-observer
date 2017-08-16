@@ -42,7 +42,7 @@ class AutoCompleteTest < UnitTestCase
   end
 
   def test_truncate
-    list = %w(b0 b1 b2 b3 b4 b5 b6 b7 b8 b9)
+    list = %w[b0 b1 b2 b3 b4 b5 b6 b7 b8 b9]
     auto = AutoCompleteMock.new("blah")
     auto.matches = list
     assert_equal(list, auto.matches)

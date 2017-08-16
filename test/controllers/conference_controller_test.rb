@@ -22,7 +22,8 @@ class ConferenceControllerTest < FunctionalTestCase
   end
 
   def create_event_params
-    { event: { name: "Cape Cod Foray",
+    {
+      event: { name: "Cape Cod Foray",
                location: "Cape Cod, MA, USA",
                description: "Find 555 fungal friends!",
                registration_note: "Bring $5 and a sack lunch",
@@ -83,12 +84,14 @@ class ConferenceControllerTest < FunctionalTestCase
   end
 
   def create_registration_params
-    { id: conference_events(:msa_annual_meeting).id,
+    {
+      id: conference_events(:msa_annual_meeting).id,
       registration: {
         name: "Rolf Singer",
         email: "rolf@mo.com",
         how_many: 4,
-        notes: "I like to eat meat!" }
+        notes: "I like to eat meat!"
+      }
     }
   end
 

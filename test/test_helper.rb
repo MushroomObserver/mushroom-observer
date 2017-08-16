@@ -42,7 +42,7 @@ require "rails/test_help"
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).
 require "mocha/mini_test"
 
-%w(
+%w[
   general_extensions
   flash_extensions
   controller_extensions
@@ -57,7 +57,7 @@ require "mocha/mini_test"
   unit_test_case
   functional_test_case
   integration_test_case
-).each do |file|
+].each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
 

@@ -165,7 +165,7 @@ class RssLog < AbstractModel
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
   def self.all_types
-    %w(observation name location species_list project glossary_term article)
+    %w[observation name location species_list project glossary_term article]
   end
 
   # Returns the associated object, or nil if it's an orphan.

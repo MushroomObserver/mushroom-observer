@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 
 class TranslationControllerTest < FunctionalTestCase
@@ -42,34 +41,30 @@ class TranslationControllerTest < FunctionalTestCase
   end
 
   def hashify(*args)
-    hash = {}
-    for arg in args
-      hash[arg] = true
-    end
-    hash
+    args.each_with_object({}) { |arg, h| h[arg] = true }
   end
 
   def assert_major_header(str, item)
-    assert(item.is_a? TranslationController::TranslationFormMajorHeader)
+    assert(item.is_a?(TranslationController::TranslationFormMajorHeader))
     assert_equal(str, item.string)
   end
 
   def assert_minor_header(str, item)
-    assert(item.is_a? TranslationController::TranslationFormMinorHeader)
+    assert(item.is_a?(TranslationController::TranslationFormMinorHeader))
     assert_equal(str, item.string)
   end
 
   def assert_comment(str, item)
-    assert(item.is_a? TranslationController::TranslationFormComment)
+    assert(item.is_a?(TranslationController::TranslationFormComment))
     assert_equal(str, item.string)
   end
 
   def assert_tag_field(tag, item)
-    assert(item.is_a? TranslationController::TranslationFormTagField)
+    assert(item.is_a?(TranslationController::TranslationFormTagField))
     assert_equal(tag, item.tag)
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_edit_translations_with_page
     Language.track_usage
@@ -188,8 +183,7 @@ class TranslationControllerTest < FunctionalTestCase
          locale: locale,
          tag: "one",
          tag_one: value,
-         commit: :SAVE.l
-        )
+         commit: :SAVE.l)
   end
 
   def test_edit_translation_form_post_save_z
@@ -213,8 +207,7 @@ class TranslationControllerTest < FunctionalTestCase
          locale: "en-US",
          tag: "one",
          tag_one: "ichi",
-         commit: :CANCEL.l
-        )
+         commit: :CANCEL.l)
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
@@ -227,8 +220,7 @@ class TranslationControllerTest < FunctionalTestCase
          locale: "el-GR",
          tag: "one",
          tag_one: "ichi",
-         commit: :RELOAD.l
-        )
+         commit: :RELOAD.l)
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -325,7 +317,8 @@ class TranslationControllerTest < FunctionalTestCase
     assert_no_flash
     assert_equal(2, assigns(:show_tags).length)
 
-    # Simulate page expiration: result is it will display all tags, not just the two used above.
+    # Simulate page expiration:
+    # result is it will display all tags, not just the two used above.
     get(:edit_translations, locale: "en-US", page: "xxx")
     assert_flash_error
     assert(assigns(:show_tags).length > 2)

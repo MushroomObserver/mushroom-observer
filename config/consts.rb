@@ -56,7 +56,7 @@ MushroomObserver::Application.configure do
   config.default_theme = "BlackOnWhite"
 
   # Available themes.
-  config.themes = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)
+  config.themes = %w[Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite]
 
   # Queued email only gets delivered if you have run the rake task email:send.
   # script/send_email is a cron script for running email:send.  (Delay is in
@@ -177,7 +177,7 @@ MushroomObserver::Application.configure do
   # Set of javascript and stylesheet files not included by default and
   # therefore need to be precompiled explicitly.
   if config.assets && config.assets.precompile
-    config.assets.precompile += %w(
+    config.assets.precompile += %w[
       advanced_search.js
       api_key.js
       date_select.js
@@ -198,7 +198,7 @@ MushroomObserver::Application.configure do
       BlackOnWhite.css
       Cantharellaceae.css
       Hygrocybe.css
-    )
+    ]
   end
 
   # Max number of results Query will put in "IN (...)" clauses.

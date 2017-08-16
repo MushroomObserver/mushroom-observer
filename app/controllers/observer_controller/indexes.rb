@@ -169,7 +169,7 @@ class ObserverController
 
     # Get matching observations.
     locations = {}
-    columns = %w(id lat long location_id).map { |x| "observations.#{x}" }
+    columns = %w[id lat long location_id].map { |x| "observations.#{x}" }
     args = {
       select: columns.join(", "),
       where: "observations.lat IS NOT NULL OR " \

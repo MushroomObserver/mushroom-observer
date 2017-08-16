@@ -50,7 +50,8 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_observation_with_no_specimens_index
-    get_with_dump(:observation_index, id: observations(:strobilurus_diminutivus_obs).id)
+    get_with_dump(:observation_index,
+                  id: observations(:strobilurus_diminutivus_obs).id)
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
@@ -71,7 +72,8 @@ class SpecimenControllerTest < FunctionalTestCase
       id: observations(:strobilurus_diminutivus_obs).id,
       specimen: {
         herbarium_name: rolf.preferred_herbarium_name,
-        herbarium_label: "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
+        herbarium_label:
+          "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
         "when(1i)"      => "2012",
         "when(2i)"      => "11",
         "when(3i)"      => "26",
@@ -128,13 +130,13 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
+  # I keep thinking only curators should be able to add specimens.
+  # However, for now anyone can.
   def test_add_specimen_post_not_curator
     user = login("mary")
     nybg = herbaria(:nybg_herbarium)
     assert(!nybg.curators.member?(user))
     specimen_count = Specimen.count
-    herbarium_count = Herbarium.count
     params = add_specimen_params
     params[:specimen][:herbarium_name] = nybg.name
     post(:add_specimen, params)
@@ -200,11 +202,13 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
     observations = specimen.observations
-    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
+    obs_spec_count = observations.map { |o| o.specimens.count }.
+                     reduce { |a, b| a + b }
     post(:delete_specimen, params)
     assert_equal(specimen_count - 1, Specimen.count)
     observations.map(&:reload)
-    assert_true(obs_spec_count > observations.map { |o| o.specimens.count }.reduce { |a, b| a + b })
+    assert_true(obs_spec_count > observations.map { |o| o.specimens.count }.
+                                 reduce { |a, b| a + b })
     assert_response(:redirect)
   end
 
@@ -212,9 +216,6 @@ class SpecimenControllerTest < FunctionalTestCase
     login("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
-    specimen = Specimen.find(params[:id])
-    observations = specimen.observations
-    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
     post(:delete_specimen, params)
     assert_equal(specimen_count, Specimen.count)
     assert_response(:redirect)
@@ -224,9 +225,6 @@ class SpecimenControllerTest < FunctionalTestCase
     make_admin("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
-    specimen = Specimen.find(params[:id])
-    observations = specimen.observations
-    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
     post(:delete_specimen, params)
     assert_equal(specimen_count - 1, Specimen.count)
     assert_response(:redirect)

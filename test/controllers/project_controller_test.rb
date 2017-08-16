@@ -1,8 +1,7 @@
-# encoding: utf-8
 require "test_helper"
 
 class ProjectControllerTest < FunctionalTestCase
-  ##### Helpers (which also assert) ##############################################
+  ##### Helpers (which also assert) ############################################
   def add_project_helper(title, summary)
     params = {
       project: {
@@ -29,7 +28,7 @@ class ProjectControllerTest < FunctionalTestCase
   def destroy_project_helper(project, changer)
     assert(project)
     drafts = NameDescription.where(source_name: project.title)
-    assert(drafts.length > 0)
+    assert(!drafts.empty?)
     params = { id: project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
     assert_redirected_to(action: :show_project, id: project.id)
@@ -61,7 +60,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(user_after, target_user.in_group?(eol_project.user_group.name))
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_add_project_existing
     add_project_helper(projects(:eol_project).title,
@@ -102,11 +101,11 @@ class ProjectControllerTest < FunctionalTestCase
   def test_add_project_post
     title = "Amanita Research"
     summary = "The Amanita Research Project"
-    project = Project.find_by_title(title)
+    project = Project.find_by(title: title)
     assert_nil(project)
-    user_group = UserGroup.find_by_name(title)
+    user_group = UserGroup.find_by(name: title)
     assert_nil(user_group)
-    admin_group = UserGroup.find_by_name("#{title}.admin")
+    admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert_nil(admin_group)
     params = {
       project: {
@@ -115,16 +114,16 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:add_project, params)
-    project = Project.find_by_title(title)
+    project = Project.find_by(title: title)
     assert_redirected_to(action: :show_project, id: project.id)
     assert(project)
     assert_equal(title, project.title)
     assert_equal(summary, project.summary)
     assert_equal(rolf, project.user)
-    user_group = UserGroup.find_by_name(title)
+    user_group = UserGroup.find_by(name: title)
     assert(user_group)
     assert_equal([rolf], user_group.users)
-    admin_group = UserGroup.find_by_name("#{title}.admin")
+    admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert(admin_group)
     assert_equal([rolf], admin_group.users)
   end
@@ -147,7 +146,7 @@ class ProjectControllerTest < FunctionalTestCase
   def test_edit_project_post
     title = "EOL Project"
     summary = "This has become the Entoloma On Line project"
-    project = Project.find_by_title(title)
+    project = Project.find_by(title: title)
     assert(project)
     assert_not_equal(summary, project.summary)
     params = {
@@ -158,7 +157,7 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_user(:edit_project, :show_project, params)
-    project = Project.find_by_title(title)
+    project = Project.find_by(title: title)
     assert_redirected_to(action: :show_project, id: project.id)
     assert(project)
     assert_equal(summary, project.summary)
@@ -199,20 +198,34 @@ class ProjectControllerTest < FunctionalTestCase
       SELECT COUNT(*) FROM name_descriptions_admins
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
-    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set admin privileges.")
+    assert_equal(
+      0, n,
+      "Project admin/user group has been destroyed, " \
+      "no name descriptions should refer to it to set admin privileges."
+    )
     n = Name.connection.select_value %(
       SELECT COUNT(*) FROM name_descriptions_writers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
-    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set write permissions.")
+    assert_equal(
+      0, n,
+      "Project admin/user group has been destroyed, " \
+      "no name descriptions should refer to it to set write permissions."
+    )
     n = Name.connection.select_value %(
       SELECT COUNT(*) FROM name_descriptions_readers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
-    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set read permissions.")
-    for draft in drafts
-      refute_equal(:project, draft.reload.source_type,
-                   "Project destruction failed to reset NameDescription's source_type")
+    assert_equal(
+      0, n,
+      "Project admin/user group has been destroyed, " \
+      "no name descriptions should refer to it to set read permissions."
+    )
+    drafts.each do |draft|
+      refute_equal(
+        :project, draft.reload.source_type,
+        "Project destruction failed to reset NameDescription's source_type"
+      )
     end
   end
 
@@ -253,77 +266,90 @@ class ProjectControllerTest < FunctionalTestCase
       candidate: mary.id
     }
     requires_login(:change_member_status, params)
-    assert_form_action(action: :change_member_status, candidate: mary.id, id: project.id)
+    assert_form_action(action: :change_member_status,
+                       candidate: mary.id, id: project.id)
   end
 
   # non-admin member -> non-admin member (should be a no-op)
   def test_change_member_status_member_make_member
     change_member_status_helper(rolf, katrina,
-                                :change_member_status_make_member, false, true, false, true)
+                                :change_member_status_make_member,
+                                false, true, false, true)
   end
 
   # non-admin member -> admin member
   def test_change_member_status_member_make_admin
     change_member_status_helper(mary, katrina,
-                                :change_member_status_make_admin, false, true, true, true)
+                                :change_member_status_make_admin,
+                                false, true, true, true)
   end
 
   # non-admin member -> non-member
   def test_change_member_status_member_remove_member
     change_member_status_helper(rolf, katrina,
-                                :change_member_status_remove_member, false, true, false, false)
+                                :change_member_status_remove_member,
+                                false, true, false, false)
   end
 
   # admin member -> non-admin member
   def test_change_member_status_admin_make_member
     change_member_status_helper(mary, mary,
-                                :change_member_status_make_member, true, true, false, true)
+                                :change_member_status_make_member,
+                                true, true, false, true)
   end
 
   # admin member -> admin member (should be a no-op)
   def test_change_member_status_admin_make_admin
     change_member_status_helper(rolf, mary,
-                                :change_member_status_make_admin, true, true, true, true)
+                                :change_member_status_make_admin,
+                                true, true, true, true)
   end
 
   # admin member -> non-member
   def test_change_member_status_admin_remove_member
     change_member_status_helper(mary, mary,
-                                :change_member_status_remove_member, true, true, false, false)
+                                :change_member_status_remove_member,
+                                true, true, false, false)
   end
 
   # non-member -> non-admin member
   def test_change_member_status_non_member_make_member
     change_member_status_helper(rolf, dick,
-                                :change_member_status_make_member, false, false, false, true)
+                                :change_member_status_make_member,
+                                false, false, false, true)
   end
 
   # non-member -> admin member
   def test_change_member_status_non_member_make_admin
     change_member_status_helper(mary, dick,
-                                :change_member_status_make_admin, false, false, true, true)
+                                :change_member_status_make_admin,
+                                false, false, true, true)
   end
 
   # non-member -> non-member (should be a no-op)
   def test_change_member_status_non_member_remove_member
     change_member_status_helper(rolf, dick,
-                                :change_member_status_remove_member, false, false, false, false)
+                                :change_member_status_remove_member,
+                                false, false, false, false)
   end
 
   # The following should all be no-ops
   def test_change_member_status_by_member_make_member
     change_member_status_helper(katrina, dick,
-                                :change_member_status_make_member, false, false, false, false)
+                                :change_member_status_make_member,
+                                false, false, false, false)
   end
 
   def test_change_member_status_by_non_member_make_admin
     change_member_status_helper(dick, katrina,
-                                :change_member_status_make_admin, false, true, false, true)
+                                :change_member_status_make_admin,
+                                false, true, false, true)
   end
 
   def test_change_member_status_by_member_remove_member
     change_member_status_helper(katrina, katrina,
-                                :change_member_status_remove_member, false, true, false, true)
+                                :change_member_status_remove_member,
+                                false, true, false, true)
   end
 
   # There are many other combinations that shouldn't work
@@ -378,7 +404,8 @@ class ProjectControllerTest < FunctionalTestCase
   def test_changing_project_name
     proj = projects(:eol_project)
     login("rolf")
-    post(:edit_project, id: projects(:eol_project).id,
+    post(:edit_project,
+         id: projects(:eol_project).id,
          project: { title: "New Project", summary: "New Summary" })
     assert_flash_success
     proj = proj.reload

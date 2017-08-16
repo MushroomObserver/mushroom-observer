@@ -2,7 +2,7 @@ module ObservationReport
   # Format for export to Mycoflora.
   class Mycoflora < ObservationReport::CSV
     def labels
-      %w(
+      %w[
         scientificName
         scientificNameAuthorship
         recordedBy
@@ -21,7 +21,7 @@ module ObservationReport
         year
         moUrl
         imageUrls
-      )
+      ]
     end
 
     # rubocop:disable Metrics/AbcSize
