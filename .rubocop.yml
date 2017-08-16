@@ -70,17 +70,28 @@ Metrics/PerceivedComplexity:
 
 ###################### Layout and Style ########################################
 
+# Rubocop supports multiple options and MO uses a non-default
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
 
-# Cops where Rubocop supports multiple options and MO uses a non-default.
+# Repeat the RuboCop defaults because CodeClimate silently overrides them
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: "()"
+    '%i':    "[]"
+    '%I':    "[]"
+    '%r':    "{}"
+    '%w':    "[]"
+    '%W':    "[]"
 
-Layout/DotPosition:
-  EnforcedStyle: trailing
-
+# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
+# Rubocop supports multiple options and MO uses a non-default
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
