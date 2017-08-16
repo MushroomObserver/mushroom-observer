@@ -1,12 +1,10 @@
-# encoding: utf-8
-
 require "test_helper"
 
 class NameDescriptionIntegrationTest < IntegrationTestCase
   def test_creating_public_description
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
-    @name = Name.find_by_text_name("Strobilurus diminutivus")
+    @name = Name.find_by(text_name: "Strobilurus diminutivus")
     assert_equal([], @name.descriptions)
     @description_data = {
       source_type: :public,
@@ -52,7 +50,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   def test_creating_user_description
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
-    @name = Name.find_by_text_name("Peltigera")
+    @name = Name.find_by(text_name: "Peltigera")
     assert_equal(4, @name.descriptions.length)
     @description_data = {
       source_type: :user,
@@ -131,7 +129,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     sess.group_expectations = @group_expectations
   end
 
-  ################################################################################
+  ##############################################################################
 
   module NameDescriptionDsl
     attr_accessor :user
@@ -346,12 +344,14 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_abilities
-      desc = new_name_description
       get(show_name_uri)
-      # Apparently the show_desc link is present even if not allowed to see text.
+      # Apparently the show_desc link is present
+      # even if not allowed to see text.
       # assert_link_exists(show_name_description_uri, can_see_description?)
-      assert_link_exists(edit_name_description_uri, edit_description_link_there?)
-      assert_link_exists(destroy_name_description_uri, destroy_description_link_there?)
+      assert_link_exists(edit_name_description_uri,
+                         edit_description_link_there?)
+      assert_link_exists(destroy_name_description_uri,
+                         destroy_description_link_there?)
       check_edit_description_link_behavior if edit_description_link_there?
     end
 

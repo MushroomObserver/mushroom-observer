@@ -1,9 +1,7 @@
-# encoding: utf-8
-# Test typical sessions of amateur user who just posts the occasional comment,
-# observations, or votes.
-
 require "test_helper"
 
+# Test typical sessions of amateur user who just posts the occasional comment,
+# observations, or votes.
 class AmateurTest < IntegrationTestCase
   # -------------------------------
   #  Test basic login heuristics.
@@ -12,7 +10,6 @@ class AmateurTest < IntegrationTestCase
   def test_login
     # Start at index.
     get("/")
-    save_path = path
 
     # Login.
     click(label: "Login", in: :left_panel)
@@ -206,7 +203,7 @@ class AmateurTest < IntegrationTestCase
     assert_false(obs.comments.any? { |c| c.user == namer })
     # (Make sure the name we are going to suggest doesn't exist yet.)
     text_name = "Xylaria polymorpha"
-    assert_nil(Name.find_by_text_name(text_name))
+    assert_nil(Name.find_by(text_name: text_name))
     orignal_name = obs.name
 
     namer_session.propose_then_login(namer, obs)
@@ -214,7 +211,8 @@ class AmateurTest < IntegrationTestCase
 
     voter_session = open_session.extend(VoterDsl)
     voter_session.login!(rolf)
-    assert_not_equal(namer_session.session[:session_id], voter_session.session[:session_id])
+    assert_not_equal(namer_session.session[:session_id],
+                     voter_session.session[:session_id])
     voter_session.vote_on_name(obs, naming)
     namer_session.failed_delete(obs)
     voter_session.change_mind(obs, naming)
@@ -226,7 +224,8 @@ class AmateurTest < IntegrationTestCase
     rolf_session.login!(rolf)
     mary_session = open_session.extend(VoterDsl)
     mary_session.login!(mary)
-    assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
+    assert_not_equal(mary_session.session[:session_id],
+                     rolf_session.session[:session_id])
   end
 
   # ------------------------------------------------------------------------
@@ -263,23 +262,23 @@ class AmateurTest < IntegrationTestCase
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
-    assert_select('div#map_div', 1)
+    assert_select("div#map_div", 1)
 
     click(label: "Hide thumbnail map.")
     assert_template("observer/show_observation")
-    assert_select('div#map_div', 0)
+    assert_select("div#map_div", 0)
 
     login("dick")
     assert_template("observer/show_observation")
-    assert_select('div#map_div', 1)
+    assert_select("div#map_div", 1)
 
     click(label: "Hide thumbnail map.")
     assert_template("observer/show_observation")
-    assert_select('div#map_div', 0)
+    assert_select("div#map_div", 0)
 
     get("/#{observations(:detailed_unknown_obs).id}")
     assert_template("observer/show_observation")
-    assert_select('div#map_div', 0)
+    assert_select("div#map_div", 0)
   end
 
   # -----------------------------------------------------------------------
@@ -294,15 +293,13 @@ class AmateurTest < IntegrationTestCase
     I18n.locale = mary.lang
     mary.save
 
-    data = TranslationString.translations("el") # Globalite.localization_data[:'el-GR']
+    data = TranslationString.translations("el")
     data[:test_tag1] = "test_tag1 value"
     data[:test_tag2] = "test_tag2 value"
     data[:test_flash_redirection_title] = "Testing Flash Redirection"
 
     session.run_test
   end
-
-  private
 
   module UserDsl
     def run_test
@@ -406,7 +403,7 @@ class AmateurTest < IntegrationTestCase
       assert_objs_equal(obs, assigns(:observation))
 
       obs.reload
-      name = Name.find_by_text_name(text_name)
+      name = Name.find_by(text_name: text_name)
       naming = Naming.last
       assert_names_equal(name, naming.name)
       assert_names_equal(name, obs.name)
@@ -422,7 +419,7 @@ class AmateurTest < IntegrationTestCase
       # Try changing it.
       author = "(Pers.) Grev."
       reason = "Test reason."
-      click(label: /edit/i, href: /naming\/edit/)
+      click(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", text_name)
@@ -447,7 +444,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure reason shows up, too.)
       assert_match(reason, response.body)
 
-      click(label: /edit/i, href: /naming\/edit/)
+      click(label: /edit/i, href: %r{naming/edit})
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
@@ -459,19 +456,16 @@ class AmateurTest < IntegrationTestCase
         form.assert_value("reason_3_notes", "")
       end
       click(label: /cancel.*show/i)
-      # "end create_name response.body".print_thing(response.body)
       naming
     end
 
     def failed_delete(_obs)
-      # "failed_delete response.body".print_thing(response.body)
-      click(label: /destroy/i, href: /naming\/destroy/)
+      click(label: /destroy/i, href: %r{naming/destroy})
       assert_flash(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
-      # "successful_delete response.body".print_thing(response.body)
-      click(label: /destroy/i, href: /naming\/destroy/)
+      click(label: /destroy/i, href: %r{naming/destroy})
       assert_template("observer/show_observation")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash(/success/i)

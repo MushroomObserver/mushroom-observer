@@ -2,7 +2,6 @@ require "test_helper"
 
 # Tests which supplement controller/observer_controller_test.rb
 class ObserverControllerSupplementalTest < IntegrationTestCase
-
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
@@ -18,7 +17,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     visit("/name/map/#{name.id}")
     click_link("Show Observations")
     click_link("Show Map")
-    title = page.find_by_id("title")
+    title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
 
     title.assert_text("Observations of #{name.text_name}")
   end
@@ -48,8 +47,8 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     within("div#right_tabs") { click_link("Destroy") }
 
     # MO should show next Observation.
-    title = page.find_by_id("title")
-    assert_match(%r{#{:app_title.l}: Observation #{next_obs.id}}, page.title,
+    page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
+    assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end
 
