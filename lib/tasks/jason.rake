@@ -34,7 +34,7 @@ namespace :jason do
   desc "Dump out all notes for obs, names, spls, comments to test RedCloth."
   task(dump_notes: :environment) do
     notes = []
-    for table in %w(
+    for table in %w[
       comments
       draft_names
       images
@@ -48,7 +48,7 @@ namespace :jason do
       projects
       species_lists
       users
-      votes)
+      votes]
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|

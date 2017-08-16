@@ -109,7 +109,7 @@ for id, genus, classification in Name.connection.select_rows %(
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]
-  if %w(Amoebozoa Fungi Protozoa).include?(kingdom)
+  if %w[Amoebozoa Fungi Protozoa].include?(kingdom)
     family2 = family || "Unknown Family in #{order || klass || kingdom}"
     hash = genus_to_family[genus] ||= {}
     hash[family2] = hash[family2].to_i + num_obs
@@ -182,7 +182,7 @@ end
 
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|
-  fh.puts(%w(id kingdom class order family genus num_obs).join("\t"))
+  fh.puts(%w[id kingdom class order family genus num_obs].join("\t"))
   for genus in classifications.keys.sort do
     fh.puts(classifications[genus].join("\t"))
   end

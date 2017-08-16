@@ -45,10 +45,10 @@ OFFICIAL_SERVERS = [
 DEFAULT_IMAGE_SERVER = "dreamhost"
 
 # List of all image sizes available.
-ALL_SIZES = %w(thumb 320 640 960 1280 orig)
+ALL_SIZES = %w[thumb 320 640 960 1280 orig]
 
 # List of sizes we don't want to keep on slicehost due to space constraints.
-DELETE_SIZES = %w(640 960 1280 orig)
+DELETE_SIZES = %w[640 960 1280 orig]
 
 # ----------------------------
 #  Command line parsing.

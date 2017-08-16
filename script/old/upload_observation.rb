@@ -246,7 +246,7 @@ class Observation
   def parse_name(str)
     name = str.sub(/\?$/, "")
     if name.match(/^(\S+) (\S+) (\S+)/) &&
-       !%w(ssp. var. f.).include?(Regexp.last_match(3))
+       !%w[ssp. var. f.].include?(Regexp.last_match(3))
       fail "Missing 'ssp.' or 'var.' in #{name.inspect}"
     end
     name

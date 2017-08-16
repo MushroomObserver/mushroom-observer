@@ -14,7 +14,7 @@ class AbstractModelTest < UnitTestCase
           assert(new_val > 1.hour.ago, msg + "#{key} more than one hour old")
           assert(new_val > old_val, msg + "#{key} wasn't updated") if old_val
         end
-      elsif %w(rss_log_id reasons).member?(key) && (new_val != old_val)
+      elsif %w[rss_log_id reasons].member?(key) && (new_val != old_val)
         assert(new_val)
       elsif key == "updated_at"
         assert(new_val >= old_val, msg + "#{key} is older than it was")

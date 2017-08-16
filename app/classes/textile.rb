@@ -288,12 +288,12 @@ class Textile < String
       id = Regexp.last_match(3)
       matches = [
         ["comment"],
-        %w(image img),
-        %w(location loc),
+        %w[image img],
+        %w[location loc],
         ["name"],
-        %w(observation obs ob),
-        %w(project proj),
-        %w(species_list spl),
+        %w[observation obs ob],
+        %w[project proj],
+        %w[species_list spl],
         ["user"]
       ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
       if matches.length == 1

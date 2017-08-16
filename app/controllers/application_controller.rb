@@ -505,7 +505,7 @@ class ApplicationController < ActionController::Base
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
   def unshown_notifications?(user, flavor = :naming)
     QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
-      ints = q.get_integers(%w(shown notification), true)
+      ints = q.get_integers(%w[shown notification], true)
       next if ints["shown"]
       notification = Notification.safe_find(ints["notification"].to_i)
       next unless notification && notification.note_template
