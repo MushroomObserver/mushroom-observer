@@ -1,23 +1,21 @@
-# encoding: utf-8
-
 require "test_helper"
 
 class PostObservationTest < IntegrationTestCase
-  LOGIN_PAGE = "account/login"
-  SHOW_OBSERVATION_PAGE = "observer/show_observation"
-  CREATE_OBSERVATION_PAGE = "observer/create_observation"
-  EDIT_OBSERVATION_PAGE = "observer/edit_observation"
-  CREATE_LOCATION_PAGE = "location/create_location"
-  OBSERVATION_INDEX_PAGE = "observer/list_observations"
+  LOGIN_PAGE = "account/login".freeze
+  SHOW_OBSERVATION_PAGE = "observer/show_observation".freeze
+  CREATE_OBSERVATION_PAGE = "observer/create_observation".freeze
+  EDIT_OBSERVATION_PAGE = "observer/edit_observation".freeze
+  CREATE_LOCATION_PAGE = "location/create_location".freeze
+  OBSERVATION_INDEX_PAGE = "observer/list_observations".freeze
 
   PASADENA_EXTENTS = {
     north: 34.251905,
     south: 34.1192,
     east: -118.065479,
     west: -118.198139
-  }
+  }.freeze
 
-  def test_posting_editing_and_destroying_a_fully_detailed_observation_in_a_new_location
+  def test_post_edit_and_destroy_a_fully_detailed_observation_in_a_new_location
     setup_image_dirs
     open_create_observation_form
     submit_observation_form_with_errors
@@ -45,7 +43,9 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(create_observation_form_first_changes)
     assert_template(CREATE_OBSERVATION_PAGE)
     assert_has_location_warning(/Unknown country/)
-    assert_form_has_correct_values(create_observation_form_values_after_first_changes)
+    assert_form_has_correct_values(
+      create_observation_form_values_after_first_changes
+    )
   end
 
   def submit_observation_form_without_errors
@@ -60,7 +60,9 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(create_location_form_first_changes)
     assert_template(CREATE_LOCATION_PAGE)
     assert_has_location_warning(/County may not be required/)
-    assert_form_has_correct_values(create_location_form_values_after_first_changes)
+    assert_form_has_correct_values(
+      create_location_form_values_after_first_changes
+    )
   end
 
   def submit_location_form_without_errors
@@ -97,8 +99,8 @@ class PostObservationTest < IntegrationTestCase
   def assert_edit_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
-    assert(new_obs.created_at > Time.now - 1.minute)
-    assert(new_obs.updated_at > Time.now - 1.minute)
+    assert(new_obs.created_at > Time.zone.now - 1.minute)
+    assert(new_obs.updated_at > Time.zone.now - 1.minute)
     assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)
@@ -136,8 +138,8 @@ class PostObservationTest < IntegrationTestCase
   def assert_new_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
-    assert(new_obs.created_at > Time.now - 1.minute)
-    assert(new_obs.updated_at > Time.now - 1.minute)
+    assert(new_obs.created_at > Time.zone.now - 1.minute)
+    assert(new_obs.updated_at > Time.zone.now - 1.minute)
     # assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)
@@ -188,8 +190,10 @@ class PostObservationTest < IntegrationTestCase
     new_loc = Location.last
     new_img = Image.last
     assert_match(new_obs.when.web_date, response.body)
-    for token in new_loc.name.split(", ") # USA ends up as <span class="caps">USA</span>,
-      assert_match(token, response.body)  # so just search for each component
+    # USA ends up as <span class="caps">USA</span>,
+    # so just search for each component
+    new_loc.name.split(", ").each do |token|
+      assert_match(token, response.body)
     end
     if new_obs.is_collection_location
       assert_match(:show_observation_collection_location.l, response.body)
@@ -233,7 +237,8 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def assert_has_location_warning(regex)
-    assert_select(".alert-warning", { text: regex }, "Expected there to be a warning about location.")
+    assert_select(".alert-warning", { text: regex },
+                  "Expected there to be a warning about location.")
   end
 
   def assert_exists_deleted_item_log
@@ -241,11 +246,14 @@ class PostObservationTest < IntegrationTestCase
     assert_select("a[href*=show_rss_log]") do |elems|
       found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
-    assert(found, 'Expected to find a "destroyed" rss log somewhere on the page.')
+    assert(found,
+           'Expected to find a "destroyed" rss log somewhere on the page.')
   end
 
   def create_observation_form_values_after_first_changes
-    create_observation_form_defaults.merge(create_observation_form_first_changes)
+    create_observation_form_defaults.merge(
+      create_observation_form_first_changes
+    )
   end
 
   def create_location_form_values_after_first_changes
@@ -253,7 +261,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def create_observation_form_defaults
-    local_now = Time.now.in_time_zone
+    local_now = Time.zone.now.in_time_zone
     {
       "observation_when_1i" => local_now.year,
       "observation_when_2i" => local_now.month,
@@ -295,7 +303,8 @@ class PostObservationTest < IntegrationTestCase
       "observation_alt" => " 56 ft. ",
       "name_name" => " Agaricus  campestris ",
       "vote_value" => Vote.next_best_vote,
-      "image_0_image" => JpegUpload.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg"),
+      "image_0_image" =>
+        JpegUpload.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg"),
       "image_0_when_1i" => "2010",
       "image_0_when_2i" => "3",
       "image_0_when_3i" => "14",

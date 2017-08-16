@@ -1,9 +1,6 @@
-# encoding: utf-8
-
-# Test typical sessions of user who never creates an account or contributes.
-
 require "test_helper"
 
+# Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < IntegrationTestCase
   def test_poke_around
     # Start at index.
@@ -11,7 +8,7 @@ class LurkerTest < IntegrationTestCase
     assert_template("observer/list_rss_logs")
 
     # Click on first observation.
-    click(href: /^\/\d+\?/, in: :results)
+    click(href: %r{^/\d+\?}, in: :results)
     assert_template("observer/show_observation")
 
     # Click on prev/next
@@ -79,7 +76,9 @@ class LurkerTest < IntegrationTestCase
     assert_select("a[href^='/name/show_name/#{names(:fungi).id}']", minimum: 2)
     click(label: /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
-    assert_select("a[href^='/name/create_name_description/#{names(:fungi).id}']")
+    assert_select(
+      "a[href^='/name/create_name_description/#{names(:fungi).id}']"
+    )
 
     # And lastly there are some images.
     get("/#{obs}")
@@ -97,19 +96,22 @@ class LurkerTest < IntegrationTestCase
     form.change("pattern", "Coprinus comatus")
     form.select("type", "Names")
     form.submit("Search")
-    assert_match(/^\/name\/show_name\/#{names(:coprinus_comatus).id}/,
+    assert_match(%r{^/name/show_name/#{names(:coprinus_comatus).id}},
                  @request.fullpath)
 
     # Search for observations of that name.  (Only one.)
     form.select("type", "Observations")
     form.submit("Search")
-    assert_match(/^\/#{observations(:coprinus_comatus_obs).id}\?/,
+    assert_match(%r{^/#{observations(:coprinus_comatus_obs).id}\?},
                  @request.fullpath)
 
     # Search for images of the same thing.  (Still only one.)
     form.select("type", "Images")
     form.submit("Search")
-    assert_match(/^\/image\/show_image\/#{images(:connected_coprinus_comatus_image).id}/, @request.fullpath)
+    assert_match(
+      %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
+      @request.fullpath
+    )
 
     # There should be no locations of that name, though.
     form.select("type", "Locations")
@@ -193,7 +195,7 @@ class LurkerTest < IntegrationTestCase
     query_params = parse_query_params(save_results.first.value)
 
     # Go to first observation, and try stepping back and forth.
-    click(href: /^\/\d+\?/, in: :results)
+    click(href: %r{^/\d+\?}, in: :results)
     save_path = @request.fullpath
     assert_equal(query_params, parse_query_params(save_path))
     click(label: "« Prev", in: :title)
@@ -215,8 +217,8 @@ class LurkerTest < IntegrationTestCase
     click(label: "Index", href: /index/, in: :title)
     results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(query_params, parse_query_params(results.first.value))
-    assert_equal(save_results.map {|r| r.value},
-                 results.map {|r| r.value},
+    assert_equal(save_results.map(&:value),
+                 results.map(&:value),
                  "Went to show_obs, screwed around, then back to index. " \
                  "But the results were not the same when we returned.")
   end

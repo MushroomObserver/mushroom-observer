@@ -1,15 +1,13 @@
-# encoding: utf-8
-# Test typical sessions of university student who is writing descriptions.
-
 require "test_helper"
 
+# Test typical sessions of university student who is writing descriptions.
 class StudentTest < IntegrationTestCase
   # -----------------------------------
   #  Test creating draft for project.
   # -----------------------------------
 
   def test_creating_drafts
-    name = Name.find_by_text_name("Strobilurus diminutivus")
+    name = Name.find_by(text_name: "Strobilurus diminutivus")
     gen_desc = "Mary wrote this draft text."
 
     project = projects(:eol_project)
@@ -26,15 +24,14 @@ class StudentTest < IntegrationTestCase
     katrina_session.login!(katrina)
     dick_session.login!(dick)
 
-    assert_not_equal(mary_session.session[:session_id], dick_session.session[:session_id])
+    refute_equal(mary_session.session[:session_id],
+                 dick_session.session[:session_id])
     url = mary_session.create_draft(name, gen_desc, project)
     rolf_session.check_admin(url, gen_desc, project)
     katrina_session.check_another_student(url)
     dick_session.check_another_user(url)
     lurker_session.check_another_user(url)
   end
-
-  private
 
   module AdminDsl
     def check_admin(url, gen_desc, project)

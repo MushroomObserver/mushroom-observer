@@ -1,16 +1,9 @@
-# encoding: utf-8
-
-# Test a few representative sessions of a power-user.
-
 require "test_helper"
 
+# Test a few representative sessions of a power-user.
 class ExpertTest < IntegrationTestCase
   def empty_notes
-    hash = {}
-    for f in NameDescription.all_note_fields
-      hash[f] = nil
-    end
-    hash
+    NameDescription.all_note_fields.each_with_object({}) { |f, h| h[f] = nil }
   end
 
   # --------------------------------------------------------
@@ -20,15 +13,12 @@ class ExpertTest < IntegrationTestCase
   def test_bulk_name_editor
     name1 = "Caloplaca arnoldii"
     author1 = "(Wedd.) Zahlbr."
-    full_name1 = "#{name1} #{author1}"
 
     name2 = "Caloplaca arnoldii ssp. obliterate"
     author2 = "(Pers.) Gaya"
-    full_name2 = "#{name1} #{author2}"
 
     name3 = "Acarospora nodulosa var. reagens"
     author3 = "Zahlbr."
-    full_name3 = "#{name1} #{author3}"
 
     name4 = "Lactarius subalpinus"
     name5 = "Lactarius newname"
@@ -63,7 +53,7 @@ class ExpertTest < IntegrationTestCase
     assert_flash_success
     assert_template("observer/list_rss_logs")
 
-    assert_not_nil(Name.find_by_text_name("Caloplaca"))
+    assert_not_nil(Name.find_by(text_name: "Caloplaca"))
 
     names = Name.where(text_name: name1)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
@@ -80,8 +70,8 @@ class ExpertTest < IntegrationTestCase
     assert_equal(author2, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    assert_not_nil(Name.find_by_text_name("Acarospora"))
-    assert_not_nil(Name.find_by_text_name("Acarospora nodulosa"))
+    assert_not_nil(Name.find_by(text_name: "Acarospora"))
+    assert_not_nil(Name.find_by(text_name: "Acarospora nodulosa"))
 
     names = Name.where(text_name: name3)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
@@ -121,7 +111,6 @@ class ExpertTest < IntegrationTestCase
     amanita = Name.where(text_name: "Amanita baccata")
 
     albion = locations(:albion)
-    albion_name = albion.name
     albion_name_reverse = Location.reverse_name(albion.name)
 
     new_location = "Somewhere New, California, USA"
@@ -152,15 +141,15 @@ class ExpertTest < IntegrationTestCase
     assert_response(:success)
     assert_template("species_list/create_species_list")
 
-    assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
-    assert_select('div#deprecated_names', /Lactarius alpigenes/)
-    assert_select('div#deprecated_names', /Lactarius alpinus/)
-    assert_select('div#deprecated_names', /Petigera/)
-    assert_select('div#deprecated_names', /Peltigera/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
-    assert_select('div#ambiguous_names', /Suillus.*Gray/)
-    assert_select('div#ambiguous_names', /Suillus.*White/)
+    assert_select("div#missing_names", /Caloplaca arnoldii ssp. obliterate/)
+    assert_select("div#deprecated_names", /Lactarius alpigenes/)
+    assert_select("div#deprecated_names", /Lactarius alpinus/)
+    assert_select("div#deprecated_names", /Petigera/)
+    assert_select("div#deprecated_names", /Peltigera/)
+    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Arora/)
+    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Borealis/)
+    assert_select("div#ambiguous_names", /Suillus.*Gray/)
+    assert_select("div#ambiguous_names", /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
     open_form do |form|
@@ -221,9 +210,9 @@ class ExpertTest < IntegrationTestCase
     assert_response(:success)
     assert_template("species_list/edit_species_list")
 
-    assert_select('div#missing_names', /Agaricus nova/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    assert_select("div#missing_names", /Agaricus nova/)
+    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Arora/)
+    assert_select("div#ambiguous_names", /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
     open_form do |form|
@@ -269,7 +258,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_success
     assert_template("species_list/show_species_list")
-    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
     loc = Location.last
@@ -286,7 +275,7 @@ class ExpertTest < IntegrationTestCase
     # Try adding a comment, just for kicks.
     click(href: /add_comment/)
     assert_template("comment/add_comment")
-    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("div#title", text: /#{spl.title}/)
     assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     open_form do |form|
       form.change("comment_summary", "Slartibartfast")
@@ -295,7 +284,7 @@ class ExpertTest < IntegrationTestCase
     end
     assert_flash_success
     assert_template("species_list/show_species_list")
-    assert_select('div#title', text: /#{spl.title}/)
+    assert_select("div#title", text: /#{spl.title}/)
     assert_select("div.comment", text: /Slartibartfast/)
     assert_select("div.comment", text: /Steatopygia/)
   end
