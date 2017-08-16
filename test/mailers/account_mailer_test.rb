@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "test_helper"
 require "account_mailer"
 
@@ -20,15 +19,15 @@ class AccountMailerTest < UnitTestCase
   # common form so that we don't need to continue to tweak two separate copies
   # of every email response.  But I'm failing...
   def fix_mac_vs_pc!(email)
-    email.gsub!(/<br \/>\n/, "<br/>")
+    email.gsub!(%r{<br />\n}, "<br/>")
     email.gsub!(/&#38;/, "&amp;")
-    email.gsub!(/ &#8212;/, '&#8212;')
+    email.gsub!(/ &#8212;/, "&#8212;")
     email.gsub!(/^\s+/, "")
-    email.gsub! /\r\n?/, "\n"
+    email.gsub!(/\r\n?/, "\n")
   end
 
   # Run off an email in both HTML and text form.
-  def run_mail_test(name, user = nil, &block)
+  def run_mail_test(name, user = nil)
     text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
                  reject { |x| x.match(/\.new$/) }
     html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
@@ -38,21 +37,21 @@ class AccountMailerTest < UnitTestCase
 
     if text_files.any?
       user.email_html = false if user
-      block.call
+      yield
       email = ActionMailer::Base.deliveries[0].encoded
       assert_string_equal_file(email, *text_files)
     end
 
-    if html_files.any?
-      user.email_html = true if user
-      block.call
-      email = ActionMailer::Base.deliveries.last.encoded
-      fix_mac_vs_pc!(email)
-      assert_string_equal_file(email, *html_files)
-    end
+    return unless html_files.any?
+
+    user.email_html = true if user
+    yield
+    email = ActionMailer::Base.deliveries.last.encoded
+    fix_mac_vs_pc!(email)
+    assert_string_equal_file(email, *html_files)
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_add_specimen_email
     specimen = specimens(:interesting_unknown)
@@ -65,7 +64,8 @@ class AccountMailerTest < UnitTestCase
     project = projects(:eol_project)
     run_mail_test("admin_request", rolf) do
       AdminEmail.build(katrina, rolf, project,
-                       "Please do something or other", "and this is why...").deliver_now
+                       "Please do something or other", "and this is why...").
+        deliver_now
     end
   end
 
@@ -73,7 +73,8 @@ class AccountMailerTest < UnitTestCase
     obj = names(:coprinus_comatus)
     run_mail_test("author_request", rolf) do
       AuthorEmail.build(katrina, rolf, obj.description,
-                        "Please do something or other", "and this is why...").deliver_now
+                        "Please do something or other", "and this is why...").
+        deliver_now
     end
   end
 
@@ -81,7 +82,7 @@ class AccountMailerTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_2)
     run_mail_test("comment_response", rolf) do
-      email = CommentEmail.build(dick, rolf, obs, comment).deliver_now
+      CommentEmail.build(dick, rolf, obs, comment).deliver_now
     end
   end
 
@@ -89,7 +90,7 @@ class AccountMailerTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_1)
     run_mail_test("comment", mary) do
-      email = CommentEmail.build(rolf, mary, obs, comment).deliver_now
+      CommentEmail.build(rolf, mary, obs, comment).deliver_now
     end
   end
 
@@ -144,7 +145,8 @@ class AccountMailerTest < UnitTestCase
 
     desc = name.description
     run_mail_test("name_change", mary) do
-      email = QueuedEmail::NameChange.create_email(dick, mary, name, desc, true, true)
+      email = QueuedEmail::NameChange.create_email(dick, mary,
+                                                   name, desc, true, true)
       NameChangeEmail.build(email).deliver_now
     end
   end
@@ -158,8 +160,8 @@ class AccountMailerTest < UnitTestCase
       desc.version = 1
       email = QueuedEmail::NameChange.create_email(dick, mary,
                                                    name, desc, false, true)
-      assert(email.old_name_version == 0)
-      assert(email.old_description_version == 0)
+      assert(email.old_name_version.zero?)
+      assert(email.old_description_version.zero?)
       NameChangeEmail.build(email).deliver_now
     end
   end
@@ -202,9 +204,12 @@ class AccountMailerTest < UnitTestCase
     name.display_name = name.display_name.to_ascii
 
     run_mail_test("observation_change", mary) do
-      ObservationChangeEmail.build(dick, mary, obs,
-                                   "date,location,specimen,is_collection_location,notes," \
-                                   "thumb_image_id,added_image,removed_image", obs.created_at).deliver_now
+      ObservationChangeEmail.build(
+        dick, mary, obs,
+        "date,location,specimen,is_collection_location,notes," \
+        "thumb_image_id,added_image,removed_image",
+        obs.created_at
+      ).deliver_now
     end
   end
 
@@ -217,15 +222,17 @@ class AccountMailerTest < UnitTestCase
     name.display_name = name.display_name.to_ascii
 
     run_mail_test("observation_destroy", mary) do
-      ObservationChangeEmail.build(dick, mary, nil,
-                                   "**__Coprinus comatus__** L. (123)", obs.created_at).deliver_now
+      ObservationChangeEmail.build(
+        dick, mary, nil, "**__Coprinus comatus__** L. (123)", obs.created_at
+      ).deliver_now
     end
   end
 
   def test_observation_email
     obs = observations(:detailed_unknown_obs)
     run_mail_test("observation_question", obs.user) do
-      ObservationEmail.build(rolf, obs, "Where did you find it?").deliver_now
+      ObservationEmail.build(rolf, obs, "Where did you find it?").
+        deliver_now
     end
   end
 
@@ -238,8 +245,9 @@ class AccountMailerTest < UnitTestCase
 
   def test_user_email
     run_mail_test("user_question", mary) do
-      UserEmail.build(rolf, mary,
-                      "Interesting idea", "Shall we discuss it in email?").deliver_now
+      UserEmail.build(
+        rolf, mary, "Interesting idea", "Shall we discuss it in email?"
+      ).deliver_now
     end
   end
 
@@ -257,7 +265,9 @@ class AccountMailerTest < UnitTestCase
 
   def test_registration_email
     run_mail_test("email_registration") do
-      RegistrationEmail.build(nil, conference_registrations(:njw_at_msa)).deliver_now
+      RegistrationEmail.build(
+        nil, conference_registrations(:njw_at_msa)
+      ).deliver_now
     end
   end
 
