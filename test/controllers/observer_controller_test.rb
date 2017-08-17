@@ -2013,7 +2013,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_bad_place_name
     obs = observations(:detailed_unknown_obs)
     new_where = "test_update_observation"
-    new_notes = {other: "blather blather blather" }
+    new_notes = { other: "blather blather blather" }
     new_specimen = false
     params = {
       id: obs.id.to_s,
@@ -2135,14 +2135,14 @@ class ObserverControllerTest < FunctionalTestCase
   # the template, then Other, but without blank fields
   def test_create_observation_with_notes_template_post
     user = users(:notes_templater)
-    params = {observation: sample_obs_fields}
+    params = { observation: sample_obs_fields }
     # Use defined Location to avoid issues with reloading Observation
     params[:observation][:place_name] = locations(:albion).name
     params[:observation][:notes] = {
       Nearby_trees: "?",
       Observation.other_notes_key => "Some notes",
       odor:         "",
-      Cap:          "red",
+      Cap:          "red"
     }
     expected_notes = {
       Cap:          "red",
