@@ -22,8 +22,9 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
 SimpleCov.start
 
 # Allows test results to be reported back to runner IDEs
-require "minitest/reporters"
-MiniTest::Reporters.use!
+# TODO: re-enable minitest-reporters
+# require "minitest/reporters"
+# MiniTest::Reporters.use!
 
 # Allow simuluation of user-browser interaction with capybara
 require "capybara/rails"
