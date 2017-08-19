@@ -108,7 +108,7 @@ module ControllerExtensions
   #   get_with_dump(:action, params)
   #
   def get_with_dump(page, params = {})
-    get(page, params)
+    get(page, params: params)
     html_dump(page, @response.body, params)
   end
 
@@ -121,7 +121,7 @@ module ControllerExtensions
   #   post_with_dump(:action, params)
   #
   def post_with_dump(page, params = {})
-    post(page, params)
+    post(page, params: params)
     html_dump(page, @response.body, params)
   end
 

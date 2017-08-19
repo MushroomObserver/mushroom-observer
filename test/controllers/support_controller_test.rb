@@ -33,7 +33,7 @@ class SupportControllerTest < FunctionalTestCase
     final_amount = amount == "other" ? other_amount : amount
     params = donation_params(amount, rolf, anon, recurring)
     params[:donation][:other_amount] = other_amount
-    post(:confirm, params)
+    post(:confirm, params: params)
     assert_template(:confirm)
     assert_donations(donations + 1, final_amount, false, params[:donation])
   end
@@ -73,7 +73,7 @@ class SupportControllerTest < FunctionalTestCase
     amount = 0
     params = donation_params(amount, rolf, false)
     params[:donation][:other_amount] = amount
-    post(:confirm, params)
+    post(:confirm, params: params)
     assert_flash(:confirm_positive_number_error.t)
   end
 
@@ -93,7 +93,7 @@ class SupportControllerTest < FunctionalTestCase
     amount = 100.00
     donations = Donation.count
     params = donation_params(amount, rolf, anon, recurring)
-    post(:create_donation, params)
+    post(:create_donation, params: params)
     assert_donations(donations + 1, amount, true, params[:donation])
   end
 
@@ -113,7 +113,7 @@ class SupportControllerTest < FunctionalTestCase
     unreviewed = donations(:unreviewed)
     assert_equal(false, unreviewed.reviewed)
     params = { reviewed: { unreviewed.id => true } }
-    post(:review_donations, params)
+    post(:review_donations, params: params)
     reloaded = Donation.find(unreviewed.id)
     assert(reloaded.reviewed)
   end

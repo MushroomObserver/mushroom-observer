@@ -105,14 +105,16 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_location_bounding_box
     delta = 0.001
-    get(:list_locations, north: 0, south: 0, east: 0, west: 0)
+    get(:list_locations,
+        params: { north: 0, south: 0, east: 0, west: 0 })
     query = Query.find(QueryRecord.last.id)
     assert_equal(0 + delta, query.params[:north])
     assert_equal(0 - delta, query.params[:south])
     assert_equal(0 + delta, query.params[:east])
     assert_equal(0 - delta, query.params[:west])
 
-    get(:list_locations, north: 90, south: -90, east: 180, west: -180)
+    get(:list_locations,
+        params: { north: 90, south: -90, east: 180, west: -180 })
     query = Query.find(QueryRecord.last.id)
     assert_equal(90, query.params[:north])
     assert_equal(-90, query.params[:south])
@@ -138,7 +140,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_list_by_country_regexp_ok
     login("mary")
 
-    get(:list_by_country, country: "USA")
+    get(:list_by_country, params: { country: "USA" })
     usa_loc_array = @controller.instance_variable_get("@objects")
     loc_usa = Location.create!(name: "Santa Fe, New Mexico, USA",
                                north: 34.1865,
@@ -147,11 +149,11 @@ class LocationControllerTest < FunctionalTestCase
                                south: 34.1571,
                                notes: "Santa Fe",
                                user: @mary)
-    get(:list_by_country, country: "USA")
+    get(:list_by_country, params: { country: "USA" })
     assert_obj_list_equal(usa_loc_array << loc_usa,
                           @controller.instance_variable_get("@objects"))
 
-    get(:list_by_country, country: "Mexico")
+    get(:list_by_country, params: { country: "Mexico" })
     assert_obj_list_equal([], @controller.instance_variable_get("@objects"))
 
     loc_mex1 = Location.create!(
@@ -172,7 +174,7 @@ class LocationControllerTest < FunctionalTestCase
       notes: "somewhere else in Mexico or this test will not work",
       user: @mary
     )
-    get(:list_by_country, country: "Mexico")
+    get(:list_by_country, params: { country: "Mexico" })
     assert_obj_list_equal([loc_mex1, loc_mex2],
                           @controller.instance_variable_get("@objects"))
   end
@@ -309,9 +311,9 @@ class LocationControllerTest < FunctionalTestCase
   def test_construct_location_empty_form
     login("mary")
     post(:create_location,
-         where: "",
-         approved_where: "",
-         location: { display_name: "" })
+         params: { where: "",
+                   approved_where: "",
+                   location: { display_name: "" } })
   end
 
   # Test a simple location creation.
@@ -352,11 +354,11 @@ class LocationControllerTest < FunctionalTestCase
     params.delete(:id)
 
     params[:location][:display_name] = ""
-    post(:create_location, params)
+    post(:create_location, params: params)
     assert_response(:success) # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
-    post(:create_location, params)
+    post(:create_location, params: params)
     assert_response(:redirect)
     assert_equal("Strip This, Maine, USA", Location.last.display_name)
   end
@@ -496,11 +498,11 @@ class LocationControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
 
     params[:location][:display_name] = ""
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_response(:success) # means failure!
 
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_response(:redirect)
     assert_equal("Strip This, Maine, USA", loc.reload.display_name)
   end
@@ -513,18 +515,18 @@ class LocationControllerTest < FunctionalTestCase
     normal_name = loc.name
     scientific_name = loc.display_name
     assert_not_equal(normal_name, scientific_name)
-    get(:edit_location, id: loc.id)
+    get(:edit_location, params: { id: loc.id })
     assert_input_value(:location_display_name, scientific_name)
 
     new_normal_name = "Undefined Town, California, USA"
     new_scientific_name = "USA, California, Undefined Town"
     params = update_params_from_loc(loc)
     params[:location][:display_name] = new_normal_name
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_response(:success) # means failure
 
     params[:location][:display_name] = new_scientific_name
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_response(:redirect) # means success
     loc.reload
     assert_equal(new_normal_name, loc.name)
@@ -659,7 +661,7 @@ class LocationControllerTest < FunctionalTestCase
     # No interest in this location yet.
     albion = locations(:albion)
     login("rolf")
-    get(:show_location, id: albion.id)
+    get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
                               controller: "interest", action: "set_interest",
@@ -670,7 +672,7 @@ class LocationControllerTest < FunctionalTestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(target: albion, user: rolf, state: true).save
-    get(:show_location, id: albion.id)
+    get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
@@ -682,7 +684,7 @@ class LocationControllerTest < FunctionalTestCase
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.new(target: albion, user: rolf, state: false).save
-    get(:show_location, id: albion.id)
+    get(:show_location, params: { id: albion.id })
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
@@ -704,7 +706,7 @@ class LocationControllerTest < FunctionalTestCase
     postal_name = "Missoula, Montana, USA"
     scientific_name = "USA, Montana, Missoula"
     params[:location][:display_name] = postal_name
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_flash_success
     assert_response(:redirect)
     loc.reload
@@ -716,7 +718,7 @@ class LocationControllerTest < FunctionalTestCase
     postal_name = "Santa Fe, New Mexico, USA"
     scientific_name = "USA, New Mexico, Santa Fe"
     params[:location][:display_name] = scientific_name
-    post(:edit_location, params)
+    post(:edit_location, params: params)
     assert_flash_success
     assert_response(:redirect)
     loc.reload

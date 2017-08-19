@@ -71,7 +71,7 @@ class TranslationControllerTest < FunctionalTestCase
     :name.l
     assert_equal(["name"], Language.tags_used)
     page = Language.save_tags
-    get(:edit_translations, page: page)
+    get(:edit_translations, params: { page: page })
   end
 
   def test_primary_tag
@@ -114,34 +114,34 @@ class TranslationControllerTest < FunctionalTestCase
   end
 
   def test_authorization_no_login_en
-    get(:edit_translations, locale: "en-US")
+    get(:edit_translations, params: { locale: "en-US" })
     assert_flash_error
     assert_response(:redirect)
   end
 
   def test_authorization_no_login_el
-    get(:edit_translations, locale: "el-GR")
+    get(:edit_translations, params: { locale: "el-GR" })
     assert_flash_error
     assert_response(:redirect)
   end
 
   def test_authorization_user_en
     login("mary")
-    get(:edit_translations, locale: "en-US")
+    get(:edit_translations, params: { locale: "en-US" })
     assert_flash_error
     assert_response(:redirect)
   end
 
   def test_authorization_user_el
     login("mary")
-    get(:edit_translations, locale: "el-GR")
+    get(:edit_translations, params: { locale: "el-GR" })
     assert_no_flash
     assert_response(:success)
   end
 
   def test_authorization_admin_en
     login("rolf")
-    get(:edit_translations, locale: "en-US")
+    get(:edit_translations, params: { locale: "en-US" })
     assert_no_flash
     assert_response(:success)
   end
@@ -156,7 +156,7 @@ class TranslationControllerTest < FunctionalTestCase
 
   def test_edit_translation_form_get_tag
     login("rolf")
-    get(:edit_translations, locale: "en-US", tag: "xxx")
+    get(:edit_translations, params: { locale: "en-US", tag: "xxx" })
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_select("textarea[name=tag_xxx]", 1)
     assert_textarea_value(:tag_xxx, "")
@@ -180,10 +180,10 @@ class TranslationControllerTest < FunctionalTestCase
 
   def translation_for_one(page, locale, value)
     post(page,
-         locale: locale,
-         tag: "one",
-         tag_one: value,
-         commit: :SAVE.l)
+         params: { locale: locale,
+                   tag: "one",
+                   tag_one: value,
+                   commit: :SAVE.l })
   end
 
   def test_edit_translation_form_post_save_z
@@ -204,10 +204,10 @@ class TranslationControllerTest < FunctionalTestCase
     login("rolf")
     old_one = :one.l
     post(:edit_translations,
-         locale: "en-US",
-         tag: "one",
-         tag_one: "ichi",
-         commit: :CANCEL.l)
+         params: { locale: "en-US",
+                   tag: "one",
+                   tag_one: "ichi",
+                   commit: :CANCEL.l })
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
@@ -217,10 +217,10 @@ class TranslationControllerTest < FunctionalTestCase
     login("rolf")
     old_one = :one.l
     post(:edit_translations,
-         locale: "el-GR",
-         tag: "one",
-         tag_one: "ichi",
-         commit: :RELOAD.l)
+         params: { locale: "el-GR",
+                   tag: "one",
+                   tag_one: "ichi",
+                   commit: :RELOAD.l })
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -255,7 +255,7 @@ class TranslationControllerTest < FunctionalTestCase
       I18n.locale = initial_locale
 
       login("rolf")
-      get(:edit_translations_ajax_get, locale: "en-US", tag: "two")
+      get(:edit_translations_ajax_get, params: { locale: "en-US", tag: "two" })
       assert_no_flash
       assert_response(:success)
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -277,7 +277,7 @@ class TranslationControllerTest < FunctionalTestCase
       assert_match(/str = "uno"/, @response.body)
       assert_equal("uno", :one.l)
 
-      get(:edit_translations_ajax_get, locale: "en-US", tag: "one")
+      get(:edit_translations_ajax_get, params: { locale: "en-US", tag: "one" })
       assert_no_flash
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
       assert_select("textarea[name=tag_one]", 1)
@@ -291,7 +291,7 @@ class TranslationControllerTest < FunctionalTestCase
       assert_match(/str = "ichi"/, @response.body)
       assert_equal("one", :one.l)
 
-      get(:edit_translations_ajax_get, locale: "el-GR", tag: "one")
+      get(:edit_translations_ajax_get, params: { locale: "el-GR", tag: "one" })
       assert_no_flash
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
       assert_textarea_value(:tag_one, "ichi")
@@ -313,13 +313,13 @@ class TranslationControllerTest < FunctionalTestCase
     page = Language.save_tags
 
     # Page is good, should only display the two tags used above.
-    get(:edit_translations, locale: "en-US", page: page)
+    get(:edit_translations, params: { locale: "en-US", page: page })
     assert_no_flash
     assert_equal(2, assigns(:show_tags).length)
 
     # Simulate page expiration:
     # result is it will display all tags, not just the two used above.
-    get(:edit_translations, locale: "en-US", page: "xxx")
+    get(:edit_translations, params: { locale: "en-US", page: "xxx" })
     assert_flash_error
     assert(assigns(:show_tags).length > 2)
   end

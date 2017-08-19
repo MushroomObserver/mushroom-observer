@@ -90,9 +90,9 @@ class SpeciesListControllerTest < FunctionalTestCase
   ##############################################################################
 
   def test_index_species_list_by_past_bys
-    get(:index_species_list, by: :modified)
+    get(:index_species_list, params: { by: :modified })
     assert_response(:success)
-    get(:index_species_list, by: :created)
+    get(:index_species_list, params: { by: :created })
     assert_response(:success)
   end
 
@@ -125,17 +125,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_list_equal([], spl.projects)
 
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     refute_match(proj1.title.t, @response.body)
     refute_match(proj2.title.t, @response.body)
 
     proj1.add_species_list(spl)
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     assert_match(proj1.title.t, @response.body)
     refute_match(proj2.title.t, @response.body)
 
     proj2.add_species_list(spl)
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     assert_match(proj1.title.t, @response.body)
     assert_match(proj2.title.t, @response.body)
   end
@@ -149,28 +149,28 @@ class SpeciesListControllerTest < FunctionalTestCase
                  proj.user_group.users.map(&:id)) # dick is only project member
 
     login("rolf")
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     assert_select("a[href*=edit_species_list]", count: 0)
     assert_select("a[href*=destroy_species_list]", count: 0)
-    get(:edit_species_list, id: spl.id)
+    get(:edit_species_list, params: { id: spl.id })
     assert_response(:redirect)
-    get(:destroy_species_list, id: spl.id)
+    get(:destroy_species_list, params: { id: spl.id })
     assert_flash_error
 
     login("mary")
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     assert_select("a[href*=edit_species_list]", minimum: 1)
     assert_select("a[href*=destroy_species_list]", minimum: 1)
-    get(:edit_species_list, id: spl.id)
+    get(:edit_species_list, params: { id: spl.id })
     assert_response(:success)
 
     login("dick")
-    get(:show_species_list, id: spl.id)
+    get(:show_species_list, params: { id: spl.id })
     assert_select("a[href*=edit_species_list]", minimum: 1)
     assert_select("a[href*=destroy_species_list]", minimum: 1)
-    get(:edit_species_list, id: spl.id)
+    get(:edit_species_list, params: { id: spl.id })
     assert_response(:success)
-    get(:destroy_species_list, id: spl.id)
+    get(:destroy_species_list, params: { id: spl.id })
     assert_flash_success
   end
 
@@ -263,24 +263,24 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_users_equal(rolf, spl3.user)
 
     login("dick")
-    get(:manage_species_lists, id: obs1.id)
+    get(:manage_species_lists, params: { id: obs1.id })
     assert_select("a[href*='species_list=#{spl1.id}']",
                   text: :REMOVE.t, count: 1)
     assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
 
-    get(:manage_species_lists, id: obs2.id)
+    get(:manage_species_lists, params: { id: obs2.id })
     assert_select("a[href*='species_list=#{spl1.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
     assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
 
     post(:add_observation_to_species_list,
-         observation: obs2.id, species_list: spl1.id)
+         params: { observation: obs2.id, species_list: spl1.id })
     assert_redirected_to(action: :manage_species_lists, id: obs2.id)
     assert_true(spl1.reload.observations.include?(obs2))
 
     post(:remove_observation_from_species_list,
-         observation: obs2.id, species_list: spl1.id)
+         params: { observation: obs2.id, species_list: spl1.id })
     assert_redirected_to(action: :manage_species_lists, id: obs2.id)
     assert_false(spl1.reload.observations.include?(obs2))
   end
@@ -371,7 +371,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -401,7 +401,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       approved_names: new_list_str
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -435,7 +435,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert(!synonym_name.reload.deprecated)
@@ -461,7 +461,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       approved_names: new_name_str
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert_nil(Name.find_by(text_name: new_name_str))
@@ -485,7 +485,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       approved_names: new_name_str.squeeze(" ")
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -520,7 +520,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       approved_names: new_name_str
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -589,7 +589,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       [deprecated_name.id.to_s, deprecated_checklist_name.id.to_s].join("\r\n")
 
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -624,7 +624,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert_equal("Warnerbros bugs-bunny",
@@ -649,7 +649,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       chosen_multiple_names: { bugs_names.first.id.to_s =>
                                bugs_names.second.id }
     }
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     spl = SpeciesList.last
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
@@ -731,7 +731,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_equal("rolf", owner)
 
     login("rolf")
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10, rolf.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -755,14 +755,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     owner = spl.user.login
     assert_equal("mary", owner)
     login("mary")
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_edit_species_list
 
     spl.reload
     assert_equal(sp_count, spl.observations.size)
 
     params[:approved_names] = new_name
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
 
     spl.reload
@@ -782,7 +782,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_equal("rolf", owner)
 
     login("rolf")
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10, rolf.reload.contribution)
     assert(spl.reload.observations.size == sp_count)
@@ -803,7 +803,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
     login("rolf")
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
   end
 
@@ -813,7 +813,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = spl_params(spl)
     params[:list][:members] = "New name"
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -826,7 +826,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:list][:members] = "New name"
     params[:approved_names] = "New name"
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     # Creates "New", 'New name', observations/splentry/naming.
     assert_equal(10 + v_nam * 2 + v_obs, spl.user.reload.contribution)
@@ -841,7 +841,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = spl_params(spl)
     params[:list][:members] = name.text_name
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -857,7 +857,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:list][:members] = name.text_name
     params[:chosen_multiple_names] = { name.id.to_s => name.id.to_s }
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -872,7 +872,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -888,7 +888,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:list][:members] = name.text_name
     params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -903,7 +903,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = "1"
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -918,7 +918,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = "1"
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -934,7 +934,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:checklist_data][name.id.to_s] = "1"
     params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -953,7 +953,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:chosen_approved_names] =
       { name.id.to_s => approved_name.id.to_s }
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -974,7 +974,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:chosen_approved_names] =
       { name.id.to_s => approved_name.id.to_s }
     login(spl.user.login)
-    post(:edit_species_list, params)
+    post(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
@@ -1074,13 +1074,13 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     path = "#{::Rails.root}/test/reports"
 
-    get(:make_report, id: list.id, type: "csv")
+    get(:make_report, params: { id: list.id, type: "csv" })
     assert_response_equal_file(["#{path}/test.csv", "ISO-8859-1"])
 
-    get(:make_report, id: list.id, type: "txt")
+    get(:make_report, params: { id: list.id, type: "txt" })
     assert_response_equal_file("#{path}/test.txt")
 
-    get(:make_report, id: list.id, type: "rtf")
+    get(:make_report, params: { id: list.id, type: "rtf" })
     assert_response_equal_file("#{path}/test.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, "")
     end
@@ -1102,7 +1102,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       ].join("\n")
     }
 
-    post(:name_lister, params.merge(commit: :name_lister_submit_spl.l))
+    post(:name_lister, params: params.merge(commit: :name_lister_submit_spl.l))
     ids = @controller.instance_variable_get("@names").map(&:id)
     assert_equal([names(:amanita_baccata_borealis).id,
                   names(:coprinus_comatus).id, names(:fungi).id,
@@ -1112,13 +1112,13 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     path = "#{::Rails.root}/test/reports"
 
-    post(:name_lister, params.merge(commit: :name_lister_submit_csv.l))
+    post(:name_lister, params: params.merge(commit: :name_lister_submit_csv.l))
     assert_response_equal_file(["#{path}/test2.csv", "ISO-8859-1"])
 
-    post(:name_lister, params.merge(commit: :name_lister_submit_txt.l))
+    post(:name_lister, params: params.merge(commit: :name_lister_submit_txt.l))
     assert_response_equal_file("#{path}/test2.txt")
 
-    post(:name_lister, params.merge(commit: :name_lister_submit_rtf.l))
+    post(:name_lister, params: params.merge(commit: :name_lister_submit_rtf.l))
     assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, "")
     end
@@ -1157,7 +1157,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       "Chlorophyllum Author",
       "Lepiota sp Author"
     ].join("\r\n")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
     assert_equal([
@@ -1189,7 +1189,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params[:approved_names] = [
       "Psalliota sp."
     ].join("\r\n")
-    post(:create_species_list, params)
+    post(:create_species_list, params: params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
     assert_equal([
@@ -1252,12 +1252,12 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # Dick has no observations in this list.
     login("dick")
-    get(:bulk_editor, params)
+    get(:bulk_editor, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
 
     # But both Rolf and Mary do.
     login("rolf")
-    get(:bulk_editor, params)
+    get(:bulk_editor, params: params)
     assert_template(:bulk_editor)
 
     login("mary")
@@ -1273,7 +1273,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_warning
     [[obs1, old_vote1], [obs2, old_vote2],
@@ -1317,7 +1317,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs1 = Observation.find(obs1.id)
@@ -1364,7 +1364,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_warning
     new_obs3 = Observation.find(obs3.id)
@@ -1389,7 +1389,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
@@ -1412,7 +1412,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     obs.reload
     assert_equal(vote, obs.owners_votes.first.value)
   end
@@ -1430,7 +1430,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
     login(spl.user.login)
 
-    post(:bulk_editor, params)
+    post(:bulk_editor, params: params)
     assert_flash(/#{:runtime_date_invalid.l}/)
   end
 
@@ -1448,7 +1448,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     login("rolf")
     get(:create_species_list)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:create_species_list, project: { "id_#{@proj1.id}" => "1" })
+    post(:create_species_list,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # (default should be different if recently created list attached to project)
@@ -1456,7 +1457,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     @proj1.add_observation(obs)
     get(:create_species_list)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create_species_list, project: { "id_#{@proj1.id}" => "0" })
+    post(:create_species_list,
+         params: { project: { "id_#{@proj1.id}" => "0" } })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
@@ -1464,34 +1466,34 @@ class SpeciesListControllerTest < FunctionalTestCase
     init_for_project_checkbox_tests
 
     login("rolf")
-    get(:edit_species_list, id: @spl1.id)
+    get(:edit_species_list, params: { id: @spl1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    get(:edit_species_list, id: @spl2.id)
+    get(:edit_species_list, params: { id: @spl2.id })
     assert_response(:redirect)
 
     login("mary")
-    get(:edit_species_list, id: @spl1.id)
+    get(:edit_species_list, params: { id: @spl1.id })
     assert_response(:redirect)
     # Mary is allowed to remove her list from a project she's not on.
-    get(:edit_species_list, id: @spl2.id)
+    get(:edit_species_list, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
-    post(:edit_species_list, id: @spl2.id,
-                             # (this causes it to fail)
-                             species_list: { title: "" },
-                             project: {
-                               "id_#{@proj1.id}" => "1",
-                               "id_#{@proj2.id}" => "0"
-                             })
+    post(:edit_species_list,
+         params: { id: @spl2.id,
+                   species_list: { title: "" },
+                   project: {
+                     "id_#{@proj1.id}" => "1",
+                     "id_#{@proj2.id}" => "0"
+                   } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
-    get(:edit_species_list, id: @spl1.id)
+    get(:edit_species_list, params: { id: @spl1.id })
     assert_response(:redirect)
-    get(:edit_species_list, id: @spl2.id)
+    get(:edit_species_list, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
     @proj1.add_species_list(@spl2)
     # Disk is not allowed to remove Mary's list from a project he's not on.
-    get(:edit_species_list, id: @spl2.id)
+    get(:edit_species_list, params: { id: @spl2.id })
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
   end
@@ -1504,17 +1506,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     list = species_lists(:unknown_species_list)
 
     # Requires login.
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_response(:redirect)
 
     # Must have permission to edit list.
     login("rolf")
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_response(:redirect)
 
     # Members of group that has list are good enough.
     login("dick")
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_response(:success)
 
     # Owner of list always can.
@@ -1529,7 +1531,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     list = species_lists(:unknown_species_list)
 
     login("dick")
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_checkbox_state("objects_list", :unchecked)
     assert_checkbox_state("objects_obs", :unchecked)
     assert_checkbox_state("objects_img", :unchecked)
@@ -1537,74 +1539,82 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_checkbox_state("projects_#{proj2.id}", :unchecked)
 
     login("mary")
-    get(:manage_projects, id: list.id)
+    get(:manage_projects, params: { id: list.id })
     assert_checkbox_state("objects_list", :unchecked)
     assert_checkbox_state("objects_obs", :unchecked)
     assert_checkbox_state("objects_img", :unchecked)
     assert_checkbox_state("projects_#{proj1.id}", :unchecked)
     assert_checkbox_state("projects_#{proj2.id}", :unchecked)
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "",
+                   commit: :ATTACH.l })
     assert_flash_warning # no changes
     assert_obj_list_equal([proj2], list.projects(true))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :ATTACH.l })
     assert_flash_error # no permission
     assert_obj_list_equal([proj2], list.projects(true))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "1",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "1",
+                   "projects_#{proj2.id}" => "",
+                   commit: :ATTACH.l })
     assert_flash_success
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "1",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "1",
+                   "projects_#{proj2.id}" => "",
+                   commit: :ATTACH.l })
     assert_flash_warning # already attached
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "",
+                   commit: :REMOVE.l })
     assert_flash_warning # no changes
     assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :REMOVE.l })
     assert_flash_success
     assert_obj_list_equal([proj1], list.projects(true))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :REMOVE.l })
     assert_flash_warning # no changes
     assert_obj_list_equal([proj1], list.projects(true))
 
-    post(:manage_projects, id: list.id,
-                           objects_list: "1",
-                           "projects_#{proj1.id}" => "1",
-                           "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_list: "1",
+                   "projects_#{proj1.id}" => "1",
+                   "projects_#{proj2.id}" => "",
+                   commit: :REMOVE.l })
     assert_flash_success
     assert_obj_list_equal([], list.projects(true))
   end
@@ -1619,69 +1629,76 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(2, proj2.images.length)
 
     login("mary")
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "",
+                   commit: :ATTACH.l })
     assert_flash_warning # no changes
 
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "",
+                   commit: :REMOVE.l })
     assert_flash_warning # no changes
 
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :ATTACH.l })
     assert_flash_error # no permission
 
     login("dick")
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :ATTACH.l })
     assert_flash_warning # already done
 
     login("mary")
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "1",
-                           "projects_#{proj2.id}" => "",
-                           commit: :ATTACH.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "1",
+                   "projects_#{proj2.id}" => "",
+                   commit: :ATTACH.l })
     assert_flash_success
     proj1.reload
     assert_equal(2, proj1.observations.length)
     assert_equal(2, proj1.images.length)
 
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :REMOVE.l })
     assert_flash_success
     proj2.reload
     assert_equal(0, proj2.observations.length)
     assert_equal(0, proj2.images.length)
 
     login("dick")
-    post(:manage_projects, id: list.id,
-                           objects_obs: "1",
-                           objects_img: "1",
-                           "projects_#{proj1.id}" => "",
-                           "projects_#{proj2.id}" => "1",
-                           commit: :REMOVE.l)
+    post(:manage_projects,
+         params: { id: list.id,
+                   objects_obs: "1",
+                   objects_img: "1",
+                   "projects_#{proj1.id}" => "",
+                   "projects_#{proj2.id}" => "1",
+                   commit: :REMOVE.l })
     assert_flash_warning # already done
   end
 
@@ -1703,7 +1720,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs1.save!
     obs2.save!
 
-    get(:edit_species_list, id: spl.id)
+    get(:edit_species_list, params: { id: spl.id })
     assert_edit_species_list
     assert_textarea_value(:member_notes, "test notes")
     assert_input_value(:member_lat,   "12.3456")
@@ -1722,7 +1739,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs1.specimen = false
     obs1.save!
 
-    get(:edit_species_list, id: spl.id)
+    get(:edit_species_list, params: { id: spl.id })
     assert_edit_species_list
     assert_textarea_value(:member_notes, "")
     assert_input_value(:member_lat, "")
@@ -1742,11 +1759,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/species_list/list_species_lists})
     assert_flash_error
 
-    get(:add_remove_observations, params)
+    get(:add_remove_observations, params: params)
     assert_response(:success)
     assert_input_value(:species_list, "")
 
-    get(:add_remove_observations, params.merge(species_list: "blah"))
+    get(:add_remove_observations, params: params.merge(species_list: "blah"))
     assert_response(:success)
     assert_input_value(:species_list, "blah")
   end
@@ -1773,32 +1790,34 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
-    post(:post_add_remove_observations, params)
+    post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
-    post(:post_add_remove_observations, params.merge(species_list: "blah"))
+    post(:post_add_remove_observations,
+         params: params.merge(species_list: "blah"))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
-    post(:post_add_remove_observations, species_list: spl.title)
-    assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
-    assert_flash_error
-    assert_equal(old_count, spl.reload.observations.size)
-
-    post(:post_add_remove_observations, params.merge(species_list: spl.title))
+    post(:post_add_remove_observations, params: { species_list: spl.title })
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
-         params.merge(commit: :ADD.l, species_list: spl.title))
+         params: params.merge(species_list: spl.title))
+    assert_response(:redirect)
+    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_flash_error
+    assert_equal(old_count, spl.reload.observations.size)
+
+    post(:post_add_remove_observations,
+         params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
     assert_flash_error
@@ -1806,14 +1825,14 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     login("mary")
     post(:post_add_remove_observations,
-         params.merge(commit: :ADD.l, species_list: spl.title))
+         params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
     assert_flash_success
     assert_equal(new_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
-         params.merge(commit: :REMOVE.l, species_list: spl.title))
+         params: params.merge(commit: :REMOVE.l, species_list: spl.title))
     assert_response(:redirect)
     assert_redirected_to(%r{/species_list/show_species_list})
     assert_flash_success
@@ -1836,7 +1855,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       species_list: spl.title
     )
     login(spl.user.login)
-    post(:post_add_remove_observations, params)
+    post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
     assert_flash_success
     new_obs_list = SpeciesList.connection.select_values(%(

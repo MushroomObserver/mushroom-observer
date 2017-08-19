@@ -53,7 +53,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   def test_show_past_glossary_term_prior_version_link_target
     prior_version_target = "/glossary/show_past_glossary_term/" \
                           "#{square.id}?version=#{square.version - 1}"
-    get(:show_glossary_term, id: square.id)
+    get(:show_glossary_term, params: { id: square.id })
     assert_select "a[href='#{prior_version_target}']"
   end
 
@@ -88,7 +88,7 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
 
   def login_and_post_convex
     login
-    post(:create_glossary_term, convex_params)
+    post(:create_glossary_term, params: convex_params)
   end
 
   def test_create_glossary_term_no_login
@@ -105,7 +105,7 @@ class GlossaryControllerCreateTest < GlossaryControllerTest
   def test_create_glossary_term_post
     user = login
     params = create_glossary_term_params
-    post(:create_glossary_term, params)
+    post(:create_glossary_term, params: params)
     glossary_term = GlossaryTerm.order(created_at: :desc).first
 
     assert_equal(params[:glossary_term][:name], glossary_term.name)
@@ -139,7 +139,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
   def post_conic_edit_changes
     make_admin
-    post(:edit_glossary_term, changes_to_conic)
+    post(:edit_glossary_term, params: changes_to_conic)
   end
 
   def post_conic_edit_changes_and_reload
@@ -165,7 +165,7 @@ class GlossaryControllerEditTest < GlossaryControllerTest
     params = create_glossary_term_params
     params[:id] = conic.id
 
-    post(:edit_glossary_term, params)
+    post(:edit_glossary_term, params: params)
     conic.reload
 
     assert_equal(params[:glossary_term][:name], conic.name)

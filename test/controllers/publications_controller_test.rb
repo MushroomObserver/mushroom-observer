@@ -30,13 +30,13 @@ class PublicationsControllerTest < FunctionalTestCase
     link = "http://some_journal.com/mo_rocks.html"
     help = "it exists"
     assert_difference("Publication.count",+1) do
-      post :create, publication: {
+      post :create, params: { publication: {
         full: ref,
         link: link,
         how_helped: help,
         mo_mentioned: true,
         peer_reviewed: true
-      }
+      } }
     end
     pub = Publication.last
     assert_equal(user.id, pub.user_id)
@@ -51,41 +51,41 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_not_create_publication_if_user_not_successful
     login "spamspamspam"
     assert_no_difference("Publication.count") do
-      post :create, publication: {}
+      post :create, params: { publication: {} }
     end
   end
 
   def test_should_not_create_publication_if_form_empty
     login
     assert_no_difference("Publication.count") do
-      post :create, publication: {}
+      post :create, params: { publication: {} }
     end
   end
 
   def test_should_show_publication
-    get :show, id: publications(:one_pub).id
+    get :show, params: { id: publications(:one_pub).id }
     assert_response :success
     login("rolf")
-    get :show, id: publications(:one_pub).id
+    get :show, params: { id: publications(:one_pub).id }
     assert_response :success
   end
 
   def test_should_get_edit
     login
-    get :edit, id: publications(:one_pub).id
+    get :edit, params: { id: publications(:one_pub).id }
     assert_response :success
   end
 
   def test_should_update_publication
     login
-    put :update, id: publications(:one_pub).id, publication: {}
+    put :update, params: { id: publications(:one_pub).id, publication: {} }
     assert_redirected_to publication_path(assigns(:publication))
   end
 
   def test_should_destroy_publication
     login
     assert_difference("Publication.count", -1) do
-      delete :destroy, id: publications(:one_pub).id
+      delete :destroy, params: { id: publications(:one_pub).id }
     end
 
     assert_redirected_to publications_path

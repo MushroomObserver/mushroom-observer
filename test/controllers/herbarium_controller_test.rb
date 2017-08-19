@@ -21,7 +21,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = show_herbarium_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
-    post(:show_herbarium, params)
+    post(:show_herbarium, params: params)
     assert_equal(curator_count + 1, Herbarium.find(params[:id]).curators.count)
     assert_response(:success)
   end
@@ -57,7 +57,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_herbarium_post
     login("rolf")
     params = create_herbarium_params
-    post(:create_herbarium, params)
+    post(:create_herbarium, params: params)
     herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -73,7 +73,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     params = create_herbarium_params
     params[:herbarium][:name] = herbaria(:nybg_herbarium).name
-    post(:create_herbarium, params)
+    post(:create_herbarium, params: params)
     assert_flash(/already exists/i)
     herbarium = Herbarium.order(created_at: :desc).first
     assert_not_equal(params[:herbarium][:description],
@@ -86,7 +86,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     params = create_herbarium_params
     params[:herbarium][:email] = ""
-    post(:create_herbarium, params)
+    post(:create_herbarium, params: params)
     assert_flash(/email address is required/i)
     herbarium = Herbarium.order(created_at: :desc).first
     assert_not_equal(params[:herbarium][:name], herbarium.name)
@@ -97,7 +97,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     params = create_herbarium_params
     params[:herbarium][:place_name] = locations(:nybg_location).name
-    post(:create_herbarium, params)
+    post(:create_herbarium, params: params)
 
     herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
@@ -113,7 +113,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     params = create_herbarium_params
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
-    post(:create_herbarium, params)
+    post(:create_herbarium, params: params)
     herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -148,7 +148,7 @@ class HerbariumControllerTest < FunctionalTestCase
     nybg = herbaria(:nybg_herbarium)
     params = create_herbarium_params
     params[:id] = nybg.id
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -166,7 +166,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:name] = rolf.name
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     herbarium = Herbarium.find(nybg.id)
     assert_equal(nybg.name, herbarium.name)
     assert_flash(/already exists/i)
@@ -179,7 +179,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:herbarium][:name] = nybg.name
     params[:id] = nybg.id
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -196,7 +196,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:email] = ""
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     assert_flash(/email address is required/i)
     herbarium = Herbarium.find(nybg.id)
     assert_not_equal(params[:herbarium][:email], herbarium.email)
@@ -209,7 +209,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:place_name] = locations(:salt_point).name
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -226,7 +226,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -243,7 +243,7 @@ class HerbariumControllerTest < FunctionalTestCase
     old_name = nybg.name
     params = create_herbarium_params
     params[:id] = nybg.id
-    post(:edit_herbarium, params)
+    post(:edit_herbarium, params: params)
     assert_flash(/non-curator/i)
     herbarium = Herbarium.find(nybg.id)
     assert_not_equal(params[:herbarium][:name], herbarium.name)
@@ -263,7 +263,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count - 1,
                  Herbarium.find(params[:id]).curators.count)
     assert_response(:redirect)
@@ -274,7 +274,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count, Herbarium.find(params[:id]).curators.count)
     assert_flash(/are not a curator/)
     assert_response(:redirect)
@@ -285,7 +285,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count - 1, Herbarium.find(params[:id]).curators.count)
     assert_response(:redirect)
   end
@@ -296,7 +296,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:user] = users(:mary).id
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
-    post(:delete_curator, params)
+    post(:delete_curator, params: params)
     assert_equal(curator_count, Herbarium.find(params[:id]).curators.count)
     assert_flash(/is not a curator/)
     assert_response(:redirect)

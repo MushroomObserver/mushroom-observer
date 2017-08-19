@@ -12,12 +12,12 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove user cannot add Sequence to Observation he doesn't own
     login(users(:zero_user).login)
-    get(:add_sequence, id: observations(:minimal_unknown_obs).id)
+    get(:add_sequence, params: { id: observations(:minimal_unknown_obs).id })
     assert_redirected_to(controller: :observer, action: :show_observation)
 
     # Prove Observation owner can add Sequence
     login(owner.login)
-    get(:add_sequence, id: obs.id)
+    get(:add_sequence, params: { id: obs.id })
     assert_response(:success)
   end
 
@@ -44,7 +44,7 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove authorized user can create non-repository Sequence
     old_count = Sequence.count
     login(owner.login)
-    post(:add_sequence, params)
+    post(:add_sequence, params: params)
 
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
@@ -70,7 +70,7 @@ class SequenceControllerTest < FunctionalTestCase
                   accession: accession }
     }
     old_count = Sequence.count
-    post(:add_sequence, params)
+    post(:add_sequence, params: params)
 
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
@@ -96,7 +96,7 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     login(users(:zero_user).login)
 
-    post(:add_sequence, params)
+    post(:add_sequence, params: params)
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     assert_redirected_to(controller: :observer, action: :show_observation)
@@ -111,7 +111,7 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     login(owner.login)
 
-    post(:add_sequence, params)
+    post(:add_sequence, params: params)
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     # response is 200 because it just reloads the form
@@ -129,13 +129,13 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove user cannot edit Sequence he didn't create for Obs he doesn't own
     login(users(:zero_user).login)
-    get(:edit_sequence, id: sequence.id)
+    get(:edit_sequence, params: { id: sequence.id })
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
 
     # Prove Observation owner can edit Sequence
     login(observer.login)
-    get(:edit_sequence, id: sequence.id)
+    get(:edit_sequence, params: { id: sequence.id })
     assert_response(:success)
   end
 
@@ -163,7 +163,7 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
-    post(:edit_sequence, params)
+    post(:edit_sequence, params: params)
     sequence.reload
     obs.rss_log.reload
 
@@ -190,7 +190,7 @@ class SequenceControllerTest < FunctionalTestCase
                    accession: accession }
     }
 
-    post(:edit_sequence, params)
+    post(:edit_sequence, params: params)
     sequence.reload
     obs.rss_log.reload
 
@@ -207,7 +207,7 @@ class SequenceControllerTest < FunctionalTestCase
                    archive:   archive,
                    accession: "" }
     }
-    post(:edit_sequence, params)
+    post(:edit_sequence, params: params)
 
     # response is 200 because it just reloads the form
     assert_response(:success)
@@ -217,11 +217,11 @@ class SequenceControllerTest < FunctionalTestCase
   def test_show_sequence
     # Prove sequence displayed if called with id of sequence in db
     sequence = sequences(:local_sequence)
-    get(:show_sequence, id: sequence.id)
+    get(:show_sequence, params: { id: sequence.id })
     assert_response(:success)
 
     # Prove index displayed if called with id of sequence not in db
-    get(:show_sequence, id: 666)
+    get(:show_sequence, params: { id: 666 })
     assert_redirected_to(action: :index_sequence)
   end
 
@@ -233,7 +233,7 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove user cannot destroy Sequence he didn't create for Obs he doesn't own
     old_count = Sequence.count
     login(users(:zero_user).login)
-    post(:destroy_sequence, id: sequence.id)
+    post(:destroy_sequence, params: { id: sequence.id })
 
     assert_equal(old_count, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
@@ -242,7 +242,7 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)
-    post(:destroy_sequence, id: sequence.id)
+    post(:destroy_sequence, params: { id: sequence.id })
     assert_equal(old_count - 1, Sequence.count)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)

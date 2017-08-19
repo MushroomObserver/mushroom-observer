@@ -18,7 +18,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("dick")
-    post(:cast_vote, value: "3", id: nam2.id)
+    post(:cast_vote, params: { value: "3", id: nam2.id })
     assert_equal(11, dick.reload.contribution)
 
     # Check votes.
@@ -51,7 +51,7 @@ class VoteControllerTest < FunctionalTestCase
     nam1 = namings(:coprinus_comatus_naming)
 
     login("rolf")
-    post(:cast_vote, value: "2", id: nam1.id)
+    post(:cast_vote, params: { value: "2", id: nam1.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -69,7 +69,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
-    post(:cast_vote, value: "3", id: nam2.id)
+    post(:cast_vote, params: { value: "3", id: nam2.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -89,9 +89,7 @@ class VoteControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login("rolf")
-    post(:cast_vote,
-         value: "-1",
-         id: nam2.id)
+    post(:cast_vote, params: { value: "-1", id: nam2.id })
     assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
@@ -123,7 +121,7 @@ class VoteControllerTest < FunctionalTestCase
     assert_equal(11, dick.reload.contribution)
 
     login("mary")
-    post(:cast_vote, value: Vote.delete_vote, id: nam1.id)
+    post(:cast_vote, params: { value: Vote.delete_vote, id: nam1.id })
     assert_equal(9, mary.reload.contribution)
 
     # Check votes.

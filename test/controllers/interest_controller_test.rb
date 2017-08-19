@@ -16,22 +16,23 @@ class InterestControllerTest < FunctionalTestCase
   def test_set_interest_another_user
     login("rolf")
     get(:set_interest,
-        type: "Observation", id: observations(:minimal_unknown_obs),
-        user: mary.id)
+    params: { type: "Observation",
+              id: observations(:minimal_unknown_obs),
+              user: mary.id })
     assert_flash(2)
   end
 
   def test_set_interest_no_object
     login("rolf")
     assert_raises(ActiveRecord::RecordNotFound) do
-      get(:set_interest, type: "Observation", id: 100, state: 1)
+      get(:set_interest, params: { type: "Observation", id: 100, state: 1 })
     end
   end
 
   def test_set_interest_bad_type
     login("rolf")
     assert_raises(NameError) do
-      get(:set_interest, type: "Bogus", id: 1, state: 1)
+      get(:set_interest, params: { type: "Bogus", id: 1, state: 1 })
     end
   end
 
@@ -42,8 +43,10 @@ class InterestControllerTest < FunctionalTestCase
 
     # Succeed: Turn interest on in minimal_unknown.
     login("rolf")
-    get(:set_interest, type: "Observation", id: minimal_unknown.id, state: 1,
-                       user: rolf.id)
+    get(:set_interest,
+        params: { type: "Observation",
+                  id: minimal_unknown.id, state: 1,
+                  user: rolf.id })
     assert_flash(0)
 
     # Make sure rolf now has one Interest: interested in minimal_unknown.
@@ -54,7 +57,8 @@ class InterestControllerTest < FunctionalTestCase
 
     # Succeed: Turn same interest off.
     login("rolf")
-    get(:set_interest, type: "Observation", id: minimal_unknown.id, state: -1)
+    get(:set_interest,
+        params: { type: "Observation", id: minimal_unknown.id, state: -1 })
     assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
@@ -65,7 +69,8 @@ class InterestControllerTest < FunctionalTestCase
 
     # Succeed: Turn another interest off from no interest.
     login("rolf")
-    get(:set_interest, type: "Name", id: peltigera.id, state: -1)
+    get(:set_interest,
+        params: { type: "Name", id: peltigera.id, state: -1 })
     assert_flash(0)
 
     # Make sure rolf now has two Interests.
@@ -79,13 +84,15 @@ class InterestControllerTest < FunctionalTestCase
     # Succeed: Delete interest in existing object that rolf hasn't expressed
     # interest in yet.
     login("rolf")
-    get(:set_interest, type: "Observation", id: detailed_unknown.id, state: 0)
+    get(:set_interest,
+        params: { type: "Observation", id: detailed_unknown.id, state: 0 })
     assert_flash(0)
     assert_equal(2, Interest.where(user_id: rolf.id).length)
 
     # Succeed: Delete first interest now.
     login("rolf")
-    get(:set_interest, type: "Observation", id: minimal_unknown.id, state: 0)
+    get(:set_interest,
+        params: { type: "Observation", id: minimal_unknown.id, state: 0 })
     assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in peltigera.
@@ -96,7 +103,7 @@ class InterestControllerTest < FunctionalTestCase
 
     # Succeed: Delete last interest.
     login("rolf")
-    get(:set_interest, type: "Name", id: peltigera.id, state: 0)
+    get(:set_interest, params: { type: "Name", id: peltigera.id, state: 0 })
     assert_flash(0)
     assert_equal(0, Interest.where(user_id: rolf.id).length)
   end
@@ -106,7 +113,7 @@ class InterestControllerTest < FunctionalTestCase
     n = notifications(:coprinus_comatus_notification)
     assert(n)
     id = n.id
-    get(:destroy_notification, id: id)
+    get(:destroy_notification, params: { id: id })
     assert_raises(ActiveRecord::RecordNotFound) do
       Notification.find(id)
     end

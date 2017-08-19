@@ -405,8 +405,8 @@ class ProjectControllerTest < FunctionalTestCase
     proj = projects(:eol_project)
     login("rolf")
     post(:edit_project,
-         id: projects(:eol_project).id,
-         project: { title: "New Project", summary: "New Summary" })
+         params: { id: projects(:eol_project).id,
+         project: { title: "New Project", summary: "New Summary" } })
     assert_flash_success
     proj = proj.reload
     assert_equal("New Project", proj.title)

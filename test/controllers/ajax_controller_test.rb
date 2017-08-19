@@ -19,7 +19,7 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def ajax_request(action, params, status)
-    get(action, params.dup)
+    get(action, params: params.dup)
     if @response.response_code != status
       url = ajax_request_url(action, params)
       msg = "Expected #{status} from: #{url}\n"
@@ -390,7 +390,7 @@ class AjaxControllerTest < FunctionalTestCase
     }
 
     # Act
-    post(:create_image_object, params)
+    post(:create_image_object, params: params)
     @json_response = JSON.parse(@response.body)
 
     # Assert

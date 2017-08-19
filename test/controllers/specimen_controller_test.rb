@@ -57,7 +57,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_add_specimen
-    get(:add_specimen, id: observations(:coprinus_comatus_obs).id)
+    get(:add_specimen, params: { id: observations(:coprinus_comatus_obs).id })
     assert_response(:redirect)
 
     login("rolf")
@@ -88,7 +88,7 @@ class SpecimenControllerTest < FunctionalTestCase
     params = add_specimen_params
     obs = Observation.find(params[:id])
     assert(!obs.specimen)
-    post(:add_specimen, params)
+    post(:add_specimen, params: params)
     assert_equal(specimen_count + 1, Specimen.count)
     # specimen = Specimen.find(:all, order: "created_at DESC")[0] # Rails 3
     specimen = Specimen.all.order("created_at DESC")[0]
@@ -109,7 +109,7 @@ class SpecimenControllerTest < FunctionalTestCase
     # Count the number of herbaria that mary is a curator for
     params = add_specimen_params
     params[:specimen][:herbarium_name] = mary.preferred_herbarium_name
-    post(:add_specimen, params)
+    post(:add_specimen, params: params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
     # herbarium = Herbarium.find(:all, order: "created_at DESC")[0] # Rails 3
@@ -124,7 +124,7 @@ class SpecimenControllerTest < FunctionalTestCase
     existing_specimen = specimens(:coprinus_comatus_nybg_spec)
     params[:specimen][:herbarium_name] = existing_specimen.herbarium.name
     params[:specimen][:herbarium_label] = existing_specimen.herbarium_label
-    post(:add_specimen, params)
+    post(:add_specimen, params: params)
     assert_equal(specimen_count, Specimen.count)
     assert_flash(/already exists/i)
     assert_response(:success)
@@ -139,7 +139,7 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen_count = Specimen.count
     params = add_specimen_params
     params[:specimen][:herbarium_name] = nybg.name
-    post(:add_specimen, params)
+    post(:add_specimen, params: params)
     nybg = Herbarium.find(nybg.id) # Reload herbarium
     assert(!nybg.curators.member?(user))
     assert_equal(specimen_count + 1, Specimen.count)
@@ -176,7 +176,7 @@ class SpecimenControllerTest < FunctionalTestCase
     user = nybg.user
     params = add_specimen_params
     params[:id] = nybg.id
-    post(:edit_specimen, params)
+    post(:edit_specimen, params: params)
     specimen = Specimen.find(nybg.id)
     assert_equal(herbarium, specimen.herbarium)
     assert_equal(user, specimen.user)
@@ -192,7 +192,7 @@ class SpecimenControllerTest < FunctionalTestCase
   def test_edit_specimen_post_no_specimen
     login("rolf")
     nybg = specimens(:coprinus_comatus_nybg_spec)
-    post(:edit_specimen, id: nybg.id)
+    post(:edit_specimen, params: { id: nybg.id })
     assert_edit_specimen
   end
 
@@ -204,7 +204,7 @@ class SpecimenControllerTest < FunctionalTestCase
     observations = specimen.observations
     obs_spec_count = observations.map { |o| o.specimens.count }.
                      reduce { |a, b| a + b }
-    post(:delete_specimen, params)
+    post(:delete_specimen, params: params)
     assert_equal(specimen_count - 1, Specimen.count)
     observations.map(&:reload)
     assert_true(obs_spec_count > observations.map { |o| o.specimens.count }.
@@ -216,7 +216,7 @@ class SpecimenControllerTest < FunctionalTestCase
     login("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
-    post(:delete_specimen, params)
+    post(:delete_specimen, params: params)
     assert_equal(specimen_count, Specimen.count)
     assert_response(:redirect)
   end
@@ -225,7 +225,7 @@ class SpecimenControllerTest < FunctionalTestCase
     make_admin("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
-    post(:delete_specimen, params)
+    post(:delete_specimen, params: params)
     assert_equal(specimen_count - 1, Specimen.count)
     assert_response(:redirect)
   end
@@ -239,7 +239,7 @@ class SpecimenControllerTest < FunctionalTestCase
   def test_specimen_search
     # Two specimens match this pattern.
     pattern = "Coprinus comatus"
-    get(:specimen_search, pattern: pattern)
+    get(:specimen_search, params: { pattern: pattern })
 
     assert_response(:success)
     assert_template("list_specimens")

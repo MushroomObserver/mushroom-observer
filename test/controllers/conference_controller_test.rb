@@ -39,7 +39,7 @@ class ConferenceControllerTest < FunctionalTestCase
   def test_create_event_post
     make_admin
     params = create_event_params
-    post(:create_event, params)
+    post(:create_event, params: params)
     event = ConferenceEvent.order(created_at: :desc).first
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
@@ -66,7 +66,7 @@ class ConferenceControllerTest < FunctionalTestCase
 
     params = create_event_params
     params[:id] = msa.id
-    post(:edit_event, params)
+    post(:edit_event, params: params)
     event = ConferenceEvent.order(created_at: :desc).first
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
@@ -99,7 +99,7 @@ class ConferenceControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(false)
     registrations = ConferenceRegistration.count
     params = create_registration_params
-    post(:register, params)
+    post(:register, params: params)
     assert_equal(registrations + 1, ConferenceRegistration.count)
     registration = ConferenceRegistration.order(created_at: :desc).first
     assert_equal(params[:registration][:name], registration.name)
@@ -116,7 +116,7 @@ class ConferenceControllerTest < FunctionalTestCase
     params = create_registration_params
     params[:registration][:name] = previous_registration.name
     params[:registration][:email] = previous_registration.email
-    post(:register, params)
+    post(:register, params: params)
     assert_equal(registrations, ConferenceRegistration.count)
     registration = ConferenceRegistration.order(created_at: :desc).first
     assert_equal(params[:registration][:name], registration.name)
@@ -128,7 +128,7 @@ class ConferenceControllerTest < FunctionalTestCase
 
   def test_list_registrations
     msa = conference_events(:msa_annual_meeting)
-    get(:list_registrations, id: msa.id)
+    get(:list_registrations, params: { id: msa.id })
     assert_response(:redirect)
 
     make_admin
