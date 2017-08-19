@@ -67,25 +67,6 @@ gem "cure_acts_as_versioned"
 # In Rails >= 4.1, use Rails built-in enums instead (available only in >= 4.1)
 gem "simple_enum"
 
-# Use byebug as debugging gem
-gem "byebug", group: [:development, :test]
-# Use debugger
-# gem "debugger", group: [:development, :test]
-
-# Stub and set expectations on HTTP requests in test mode
-# Allow selective disabling of internet
-gem "webmock", group: :test
-
-# Mocking and stubbing in Ruby
-gem "mocha", group: :test
-
-# Use capybara to simulate user-browser interaction
-gem "capybara"
-
-# Performance tests for Rails >= 4.0
-# See https://github.com/rails/rails-perftest
-# gem "rails-perftest", group: :test
-
 # Automatically track code test coverage
 gem "coveralls", require: false
 
@@ -107,10 +88,29 @@ gem "aws-sdk", "~> 2"
 #     https://github.com/bodrovis/jquery-slick-rails
 gem "jquery-slick-rails", "~> 1.5.0.1"
 
-# allows for test results to be reported back to test runner IDE's
-group :test do
-  gem "minitest"
-  gem "minitest-reporters", ">= 0.5.0"
-end
-
 gem "web-console", "~> 2.0", group: :development
+
+# Use byebug as debugging gem
+gem "byebug", group: [:development, :test]
+
+group :test do
+  # Stub and set expectations on HTTP requests in test mode
+  # Allow selective disabling of internet
+  gem "webmock", group: :test
+
+  # Mocking and stubbing in Ruby
+  gem "mocha", group: :test
+
+  # Use capybara to simulate user-browser interaction
+  gem "capybara"
+
+  # Performance tests for Rails >= 4.0
+  # See https://github.com/rails/rails-perftest
+  # gem "rails-perftest", group: :test
+
+  # allow test results to be reported back to test runner IDE's
+  gem "minitest-reporters", ">= 0.5.0"
+
+  # enable use of assigns and assert_template
+  gem "rails-controller-testing"
+end
