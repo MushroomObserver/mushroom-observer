@@ -53,9 +53,8 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    @publication = Publication.new(whitelisted_publication_params.merge(
-                                     user: User.current
-    ))
+    @publication = Publication.new(whitelisted_publication_params)
+    @publication.user = User.current
     respond_to do |format|
       if @publication.save
         flash_notice(:runtime_created_at.t(type: :publication))
@@ -122,7 +121,9 @@ class PublicationsController < ApplicationController
   private
 
   def whitelisted_publication_params
-    params[:publication].permit(:full, :link, :how_helped, :mo_mentioned,
-                                :peer_reviewed)
+    return { } unless params[:publication]
+    params[:publication].permit(
+      %i[full link how_helped mo_mentioned peer_reviewed]
+    )
   end
 end
