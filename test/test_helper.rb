@@ -1,6 +1,4 @@
-# encoding: utf-8
-#
-#  = Base Test Case
+#  Base Test Case
 #
 #  Does some basic site-wide configuration for all the tests.  This is part of
 #  the base class that all unit tests must derive from.
@@ -10,38 +8,9 @@
 #
 ################################################################################
 
-# Code to allow both local and coveralls coverage.  From:
-# https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
-require "simplecov"
-require "coveralls"
-
-# Coveralls.wear!("rails")
-formatters = [SimpleCov::Formatter::HTMLFormatter,
-              Coveralls::SimpleCov::Formatter]
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
-SimpleCov.start
-
-# Allows test results to be reported back to runner IDEs
-# TODO: re-enable minitest-reporters
-# require "minitest/reporters"
-# MiniTest::Reporters.use!
-
-# Allow simuluation of user-browser interaction with capybara
-require "capybara/rails"
-
-# Allow stubbing and setting expectations on HTTP, and selective
-#  disabling of internet requests.
-require "webmock/minitest"
-
-# Disable external requests while allowing localhost
-WebMock.disable_net_connect!(allow_localhost: true)
-
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
 require "rails/test_help"
-
-# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
-require "mocha/mini_test"
 
 %w[
   general_extensions
@@ -63,6 +32,53 @@ require "mocha/mini_test"
 end
 
 I18n.enforce_available_locales = true
+
+# Code to allow both local and coveralls coverage.  From:
+# https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+require "simplecov"
+require "coveralls"
+
+# Coveralls.wear!("rails")
+formatters = [SimpleCov::Formatter::HTMLFormatter,
+              Coveralls::SimpleCov::Formatter]
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
+SimpleCov.start
+
+# Allows test results to be reported back to runner IDEs
+# TODO: re-enable minitest-reporters
+# require "minitest/reporters"
+# MiniTest::Reporters.use!
+
+# -------------------
+#  Mocking, stubbing
+# -------------------
+
+# Allow stubbing and setting expectations on HTTP, and selective
+#  disabling of internet requests.
+require "webmock/minitest"
+
+# Disable external requests while allowing localhost
+WebMock.disable_net_connect!(allow_localhost: true)
+
+# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
+require "mocha/mini_test"
+
+# -------------------
+#  Capybara
+# -------------------
+
+# Other Capybara stuff placed directly in IntegrationTestCase
+
+# Allow simuluation of user-browser interaction with capybara
+require "capybara/rails"
+require 'capybara/minitest'
+
+# Make the Capybara DSL available in all integration tests
+module ActionDispatch
+  class IntegrationTest
+    include Capybara::DSL
+  end
+end
 
 module ActiveSupport
   class TestCase
@@ -121,12 +137,5 @@ module ActiveSupport
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
     end
-  end
-end
-
-# Make the Capybara DSL available in all integration tests
-module ActionDispatch
-  class IntegrationTest
-    include Capybara::DSL
   end
 end
