@@ -92,7 +92,18 @@ class ApiController < ApplicationController
   end
 
   def something_to_post?
-    upload_length > 0 && upload_type.present?
+    # in Rails 4.x was:
+    # upload_length > 0 && upload_type.present?
+    # But in 5.x, upload_type seems to always be present because
+    # request.headers["CONTENT_TYPE"] == "application/x-www-form-urlencoded"
+    # I tried the following but they didn't help:
+    #     config.action_dispatch.default_headers["CONTENT_TYPE"] = ""
+    # in config/environments/test.rb;
+    # Also, for the failing methods in ApiControllerTest,
+    #   process(:observations, ... as: nil)
+    # instead of
+    #   post(:observations ...)
+    upload_length > 0 && upload_type.present? &&!upload_data.nil?
   end
 
   def upload_api
