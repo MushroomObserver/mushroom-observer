@@ -13,11 +13,7 @@
 class ApiController < ApplicationController
   require "xmlrpc/client"
   require_dependency "api"
-
   disable_filters
-
-  # wrapped parameters break JSON requests in the unit tests.
-  wrap_parameters false
 
   # Standard entry point for REST requests.
   def api_keys
