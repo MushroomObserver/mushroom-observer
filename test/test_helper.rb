@@ -44,15 +44,6 @@ formatters = [SimpleCov::Formatter::HTMLFormatter,
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
 SimpleCov.start
 
-# Allows test results to be reported back to runner IDEs
-# TODO: see if minitest-reporters can be re-enabled, else delete gem
-# With Rails 5.x (a) there's an intractable issue with output format,
-# see https://github.com/kern/minitest-reporters/issues/230
-# and the gem is not absolutely required for the Rubymine IDE,
-# see https://www.jetbrains.com/help/ruby/minitest.html
-# require "minitest/reporters"
-# MiniTest::Reporters.use!
-
 # -------------------
 #  Mocking, stubbing
 # -------------------

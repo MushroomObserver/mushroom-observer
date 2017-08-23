@@ -108,9 +108,6 @@ group :test do
   # See https://github.com/rails/rails-perftest
   # gem "rails-perftest", group: :test
 
-  # allow test results to be reported back to test runner IDE's
-  gem "minitest-reporters", ">= 0.5.0"
-
   # enable use of assigns and assert_template
   gem "rails-controller-testing"
 end
