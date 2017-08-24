@@ -5,13 +5,12 @@ MushroomObserver::Application.configure do
   config.root = File.expand_path("../..", __FILE__)
   config.env  = ENV["RAILS_ENV"]
 
-  # List of alternate server domains.  We redirect from each of these
-  # to the real one.
-  config.bad_domains = []
-
-  config.site_name = "Mushroom Observer"
-  config.domain = "mushroomobserver.org"
+  config.site_name   = "Mushroom Observer"
+  config.domain      = "mushroomobserver.org"
   config.http_domain = "http://mushroomobserver.org"
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
+  config.bad_domains = ["www.mushroomobserver.org"]
 
   # Base URL of the source repository.
   config.code_repository = "https://github.com/MushroomObserver"
@@ -104,29 +103,31 @@ MushroomObserver::Application.configure do
   # Limit the number of objects we draw on a google map.
   config.max_map_objects = 100
 
+  ######### Images #########
+
   # Where images are kept locally until they are transferred.
   config.local_image_files = "#{config.root}/public/images"
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
   # to test for existence of file by using image#transferred flag.
-  # config.image_sources = {
-  #   :local => {
-  #     :test => "file://#{config.local_image_files}",
-  #     :read => "/images",
-  #   },
-  #   :cdmr => {
-  #     :test => :transferred_flag,
-  #     :read => "http://images.digitalmycology.com",
+  config.image_sources = {
+    local: {
+      test: "file://#{config.local_image_files}",
+      read: "/images",
+    },
+  #   cdmr: {
+  #     test: :transferred_flag,
+  #     read: "http://images.digitalmycology.com",
   #   }
-  # }
-
+  }
   # Search order when serving images.
   # Key is size, e.g., :thumbnail, :small, etc.
   # config.image_precedence = {
   #   :default => [:local, :cdmr]
   # }
-  # config.image_fallback_source = :cdmr
+
+  config.image_fallback_source = :cdmr
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
   config.keep_these_image_sizes_local = []
@@ -138,6 +139,8 @@ MushroomObserver::Application.configure do
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
   config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb
+
+  ##########################
 
   # Flag intended for controller when the debugger gets invoked.
   # Use with lines like: debugger if MO.debugger_flag

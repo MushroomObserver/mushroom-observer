@@ -6,24 +6,11 @@ MushroomObserver::Application.configure do
   #  MO configuration.
   # ----------------------------
 
-  config.domain      = "mushroomobserver.org"
-  config.http_domain = "http://mushroomobserver.org"
-
-  # List of alternate server domains.  We redirect from each of these to the real one.
-  config.bad_domains = ["www.mushroomobserver.org"]
-
-  # Disable queued email.
-  config.queue_email = false
-
   # Serve new images from local_images, old images from remote_images.
   # Transfer to two servers, both local, but one using ssh to do it.
   # Keep thumbnails locally, and only copy thumbnails to second server.
   config.local_image_files = "#{config.root}/public/test_images"
-  config.image_sources = {
-    local: {
-      test: "file://#{config.local_image_files}",
-      read: "/local_images"
-    },
+  config.image_sources.merge!(
     remote1: {
       test: :transferred_flag,
       read: "/remote_images",
@@ -35,7 +22,7 @@ MushroomObserver::Application.configure do
       # write: "ssh://vagrant@localhost:#{config.root}/public/test_server2",
       sizes: [:thumbnail, :small, :medium]
     }
-  }
+  )
   config.image_precedence = {
     default: [:local, :remote1]
   }
@@ -62,11 +49,32 @@ MushroomObserver::Application.configure do
   # preloads Rails for running tests, you may have to set it to true.
   config.eager_load = false
 
+  ##############################################################################
+  #
+  # Following 3 lines of code commented out because they cause Failures like:
+  #
+  # /vagrant/mushroom-observer/config/environments/test.rb:60:in `block in <top (required)>': undefined method `enabled=' for nil:NilClass (NoMethodError)
+  #	from /vagrant/mushroom-observer/script/config.rb:44:in `class_eval'
+  #	from /vagrant/mushroom-observer/script/config.rb:44:in `configure'
+  #	from /vagrant/mushroom-observer/config/environments/test.rb:1:in `<top (required)>'
+  #	from /vagrant/mushroom-observer/script/config.rb:89:in `require'
+  #	from /vagrant/mushroom-observer/script/config.rb:89:in `block in <main>'
+  #	from /vagrant/mushroom-observer/script/config.rb:87:in `each'
+  #	from /vagrant/mushroom-observer/script/config.rb:87:in `<main>'
+  #
+  # 1) Failure:
+  # ScriptTest#test_process_image   [/vagrant/mushroom-observer/test/models/image_script_test.rb:92]:
+  # Something went wrong with /vagrant/mushroom-observer/script/process_image:
+  #
+  # TODO: Can this be fixed to use Cache-Control?
+  #
+=begin
   # Configure public file server for tests with Cache-Control for performance.
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
     'Cache-Control' => 'public, max-age=3600'
   }
+=end
 
   # Show full error reports and disable caching.
   config.consider_all_requests_local       = true

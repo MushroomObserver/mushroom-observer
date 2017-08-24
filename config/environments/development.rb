@@ -9,36 +9,28 @@ MushroomObserver::Application.configure do
   config.domain      = "localhost"
   config.http_domain = "http://localhost:3000"
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
   config.bad_domains = ["localhost.localdomain:3000"]
 
   # Code appended to ids to make "sync_id".  Must start with letter.
   config.server_code = "XX"
 
   # Turn off email.
-  config.queue_email = false
   config.action_mailer.smtp_settings = {
     address: "localhost",
     port:    25,
     domain:  "localhost"
   }
 
-  # Serve new images locally, pre-existing images from real image server.
-  config.local_image_files = "#{config.root}/public/images"
-  config.image_sources = {
-    local: {
-      test: "file://#{config.local_image_files}",
-      read: "/images"
-    },
-    cdmr: {
-      test: :transferred_flag,
-      read: "http://images.mushroomobserver.org"
-    }
+  # Serve pre-existing images from real image server.
+  config.image_sources[:cdmr] = {
+    test: :transferred_flag,
+    read: "http://images.mushroomobserver.org"
   }
   config.image_precedence = {
     default: [:local, :cdmr]
   }
-  config.image_fallback_source = :cdmr
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
