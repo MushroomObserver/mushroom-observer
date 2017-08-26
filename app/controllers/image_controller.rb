@@ -228,8 +228,8 @@ class ImageController < ApplicationController
       end
     end
 
-    # Grab list of votes.
-    @votes = @image.image_votes(include: :user).sort_by do |v|
+    # Grab list of votes
+    @votes = ImageVote.includes(:user).where(image: @image).sort_by do |v|
       begin
         (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
       rescue
