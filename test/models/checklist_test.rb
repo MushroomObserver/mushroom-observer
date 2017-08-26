@@ -58,7 +58,7 @@ class ChecklistTest < UnitTestCase
 
     expect = Name.Species.joins(observations: :user).
              merge(Observation.where(user: rolf)).
-             uniq.size
+             distinct.size
     assert_equal(expect, data.num_species)
 
     assert_equal(genera(rolfs_species), data.genera)
