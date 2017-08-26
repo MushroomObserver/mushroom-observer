@@ -7,8 +7,8 @@
 #  ==== Debugging
 #  dump_links::       Show list of all the links on the last page rendered.
 #  save_page::        Save response from last request in a file.
-#  get::              Call get_via_redirect with extra error checking.
-#  post::             Call post_via_redirect with extra error checking.
+#  get::              Call get, following redirects, with extra error checking
+#  post::             Call post, following redirects, with extra error checking
 #  get_without_redirecting::  Call the original 'get'.
 #  post_without_redirecting:: Call the original 'post'.
 #
@@ -60,12 +60,13 @@ module SessionExtensions
     end
   end
 
-  # Call get/post_via_redirect, checking for 500 errors and missing language
-  # tags.  Saves body of all successful responses for debugging, too.
+  # Follow any redirects, checking for 500 errors and missing language tags.
+  # Saves body of all successful responses for debugging, too.
   def process_with_error_checking(method, url, *args)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send("#{method.downcase}_via_redirect", url, *args)
+    send("#{method.downcase}", url, *args)
+    follow_redirect! while status.between?(300, 399)
     if status == 500
       if error = controller.instance_variable_get("@error")
         msg = "#{error}\n#{error.backtrace.join("\n")}"
@@ -75,7 +76,8 @@ module SessionExtensions
       end
       flunk msg
     end
-    assert_equal([], Symbol.missing_tags, "Language tag(s) are missing. #{url}: #{method}")
+    assert_equal([], Symbol.missing_tags,
+                 "Language tag(s) are missing. #{url}: #{method}")
     save_page
   ensure
     @doing_with_error_checking = false
