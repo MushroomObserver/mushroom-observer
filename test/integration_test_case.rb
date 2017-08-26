@@ -51,6 +51,9 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest
   include FlashExtensions
   include IntegrationExtensions
 
+  # To silence deprecation warnings in integration tests, uncomment next line
+  # ActiveSupport::Deprecation.silenced = true
+
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
   def setup
