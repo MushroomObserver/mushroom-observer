@@ -1,5 +1,3 @@
-# encoding: utf-8
-#
 #  = Controller Test Helpers
 #
 #  Methods in this class are available to all the functional tests.
@@ -31,8 +29,8 @@
 #
 #  == HTML Assertions
 #  assert_link_in_html::        A given link exists.
-#  assert_image_link_in_html::  A given link with an image instead of text exists#
-#  assert_form_action::         A form posting to a given action exists.
+#  assert_image_link_in_html::  A given link with an image (vs text exists)
+#  assert_form_action::         A form posting for a given action exists.
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a
@@ -107,9 +105,9 @@ module ControllerExtensions
   #   # Send request, and save response in ../html/action_0.html.
   #   get_with_dump(:action, params: { } )
   #
-  def get_with_dump(page, params = {})
-    get(page, params)
-    html_dump(page, @response.body, params)
+  def get_with_dump(action, params = {})
+    get(action, params)
+    html_dump(action, @response.body, params)
   end
 
   # Send a POST request, and save the result in a file for w3c validation.
@@ -120,32 +118,32 @@ module ControllerExtensions
   #   # Send request, and save response in ../html/action_0.html.
   #   post_with_dump(:action, params: { params })
   #
-  def post_with_dump(page, params = {})
-    post(page, params)
-    html_dump(page, @response.body, params)
+  def post_with_dump(action, params = {})
+    post(action, params)
+    html_dump(action, @response.body, params)
   end
 
-  # Send GET request to a page that should require login.
+  # Send GET request for an action that should require login.
   #
-  #   # Make sure only logged-in users get to see this page.
+  #   # Make sure only logged-in users get to use this action.
   #   requires_login(:edit_name, id: 1)
   #
-  def requires_login(page, *args)
-    either_requires_either(:get, page, nil, *args)
+  def requires_login(action, *args)
+    either_requires_either(:get, action, nil, *args)
   end
 
-  # Send POST request to a page that should require login.
+  # Send POST request for an action that should require login.
   #
-  #   # Make sure only logged-in users get to post this page.
+  #   # Make sure only logged-in users get to post this action.
   #   post_requires_login(:edit_name, id: 1)
   #
-  def post_requires_login(page, *args)
-    either_requires_either(:post, page, nil, *args)
+  def post_requires_login(action, *args)
+    either_requires_either(:post, action, nil, *args)
   end
 
-  # Send GET request to a page that should require a specific user.
+  # Send GET request for an action that should require a specific user.
   #
-  #   # Make sure only reviewers can see this page (non-reviewers get
+  #   # Make sure only reviewers can use this action (non-reviewers get
   #   # redirected to "show_location").
   #   requires_user(:review_authors, :show_location, id: 1)
   #   requires_user(:review_authors, [:location, :show_location], id: 1)
@@ -154,7 +152,7 @@ module ControllerExtensions
     either_requires_either(:get, *args)
   end
 
-  # Send POST request to a page that should require login.
+  # Send POST request for an action that should require login.
   #
   #   # Make sure only owner can edit observation (non-owners get
   #   # redirected to "show_observation").
@@ -169,7 +167,7 @@ module ControllerExtensions
   # Helper used by the blah_requires_blah methods.
   # method::        [Request method: "GET" or "POST".
   #                 - Supplied automatically by all four "public" methods.]
-  # page::          Name of action.
+  # action::        Name of action.
   # altpage::       [Name of page redirected to if user wrong.
   #                 - Only include in +requires_user+ and +post_requires_user+.]
   # params::        Hash of parameters for action.
@@ -178,15 +176,15 @@ module ControllerExtensions
   # password::      Which password should it try to use
   #                 (default is "testpassword").
   #
-  #   # Make sure only logged-in users get to see this page, and that it
+  #   # Make sure only logged-in users get to use this action, and that it
   #   # renders the template of the same name when it succeeds.
   #   requires_login(:edit_name, id: 1)
   #
-  #   # Make sure only logged-in users get to post this page, but that it
+  #   # Make sure only logged-in users get to post this action, but that it
   #   # renders the template of a different name (or redirects) on success.
   #   post_requires_login(:edit_name, id: 1, false)
   #
-  #   # Make sure only reviewers can see this page (non-reviewers get
+  #   # Make sure only reviewers can use this action (non-reviewers get
   #   # redirected to "show_location"), and that it renders
   #   # the template of the same name when it succeeds.
   #   requires_user(:review_authors, {id: 1}, :show_location)
@@ -207,11 +205,11 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params = {},
+  def either_requires_either(method, action, altpage, params = {},
                              username = "rolf", password = "testpassword")
     assert_request(
       method: method,
-      action: page,
+      action: action,
       params: params,
       user: (params[:username] || username),
       password: (params[:password] || password),
@@ -414,7 +412,7 @@ module ControllerExtensions
   #     result: ["show_name"]
   #   )
   #
-  #   # Make sure only logged-in users get to post this page, and that it
+  #   # Make sure only logged-in users get to post this action, and that it
   #   # render the template of the same name when it succeeds.
   #   post_requires_login(:edit_name, id: 1)
   #
