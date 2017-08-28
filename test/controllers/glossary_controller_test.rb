@@ -35,18 +35,21 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   # ***** show *****
   def test_show_glossary_term
     glossary_term = glossary_terms(:plane_glossary_term)
-    get_with_dump(:show_glossary_term, id: glossary_term.id)
+    get_with_dump(:show_glossary_term, params: { id: glossary_term.id })
     assert_template("show_glossary_term")
   end
 
   def test_show_past_glossary_term
-    get_with_dump(:show_past_glossary_term, id: conic.id,
-                                            version: conic.version - 1)
+    get_with_dump(:show_past_glossary_term,
+                  params: {
+                    id: conic.id,
+                    version: conic.version - 1
+                  })
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 
   def test_show_past_glossary_term_no_version
-    get_with_dump(:show_past_glossary_term, id: conic.id)
+    get_with_dump(:show_past_glossary_term, params: { id: conic.id })
     assert_response(:redirect)
   end
 
@@ -149,13 +152,13 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
   ##### tests #####
   def test_edit_glossary_term_no_login
-    get_with_dump(:edit_glossary_term, id: conic.id)
+    get_with_dump(:edit_glossary_term, params: { id: conic.id })
     assert_response(:redirect)
   end
 
   def test_edit_glossary_term_logged_in
     login
-    get_with_dump(:edit_glossary_term, id: conic.id)
+    get_with_dump(:edit_glossary_term, params: { id: conic.id })
     assert_template(:edit_glossary_term)
   end
 
@@ -184,8 +187,11 @@ class GlossaryControllerEditTest < GlossaryControllerTest
 
     assert_equal(old_count + 1, glossary_term.versions.length)
 
-    get_with_dump(:show_past_glossary_term, id: glossary_term.id,
-                                            version: glossary_term.version - 1)
+    get_with_dump(:show_past_glossary_term,
+                  params: {
+                    id: glossary_term.id,
+                    version: glossary_term.version - 1
+                  })
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 end
