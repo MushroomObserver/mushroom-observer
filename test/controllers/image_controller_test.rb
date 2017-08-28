@@ -7,12 +7,13 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_images_by_user
-    get_with_dump(:images_by_user, id: rolf.id)
+    get_with_dump(:images_by_user, params: { id: rolf.id })
     assert_template("list_images", partial: "_image")
   end
 
   def test_images_for_project
-    get_with_dump(:images_for_project, id: projects(:bolete_project).id)
+    get_with_dump(:images_for_project,
+                  params: { id: projects(:bolete_project).id })
     assert_template("list_images", partial: "_image")
   end
 
@@ -22,7 +23,8 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_next_image
-    get_with_dump(:next_image, id: images(:turned_over_image).id)
+    get_with_dump(:next_image,
+                  params: { id: images(:turned_over_image).id })
     # Default sort order is inverse chronological (created_at DESC, id DESC).
     # So here, "next" image is one created immediately previously.
     assert_redirected_to(%r{show_image/#{images(:in_situ_image).id}[\b|\?]})
@@ -123,8 +125,9 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_prev_image
-    get_with_dump(:prev_image, id: images(:in_situ_image).id) # oldest image
-    # so "prev" is the 2nd oldest
+    get_with_dump(:prev_image,
+                  # oldest image, so "prev" is the 2nd oldest
+                  params: { id: images(:in_situ_image).id })
     assert_redirected_to(%r{show_image/#{images(:turned_over_image).id}[\b|\?]})
   end
 
@@ -187,14 +190,14 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_show_original
     img_id = images(:in_situ_image).id
-    get_with_dump(:show_original, id: img_id)
+    get_with_dump(:show_original, params: { id: img_id })
     assert_redirected_to(action: "show_image", size: "full_size", id: img_id)
   end
 
   def test_show_image
     image = images(:in_situ_image)
     num_views = image.num_views
-    get_with_dump(:show_image, id: image.id)
+    get_with_dump(:show_image, params: { id: image.id })
     assert_template("show_image", partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
@@ -239,35 +242,40 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_image_search
-    get_with_dump(:image_search, pattern: "Notes")
+    get_with_dump(:image_search, params: { pattern: "Notes" })
     assert_template("list_images", partial: "_image")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
-    get_with_dump(:image_search, pattern: "Notes", page: 2)
+    assert_equal(
+      :query_title_pattern_search.t(types: "Images", pattern: "Notes"),
+      @controller.instance_variable_get("@title")
+    )
+    get_with_dump(:image_search, params: { pattern: "Notes", page: 2 })
     assert_template("list_images")
-    assert_equal(:query_title_pattern_search.t(types: "Images",
-                                               pattern: "Notes"),
-                 @controller.instance_variable_get("@title"))
+    assert_equal(
+      :query_title_pattern_search.t(types: "Images", pattern: "Notes"),
+      @controller.instance_variable_get("@title")
+    )
   end
 
   def test_image_search_next
-    get_with_dump(:image_search, pattern: "Notes")
+    get_with_dump(:image_search, params: { pattern: "Notes" })
     assert_template("list_images", partial: "_image")
   end
 
   def test_image_search_by_number
     img_id = images(:commercial_inquiry_image).id
-    get_with_dump(:image_search, pattern: img_id)
+    get_with_dump(:image_search, params: { pattern: img_id })
     assert_redirected_to(action: "show_image", id: img_id)
   end
 
   def test_advanced_search
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+    query = Query.lookup_and_save(
+      :Image,
+      :advanced_search,
+      name: "Don't know",
+      user: "myself",
+      content: "Long pink stem and small pink cap",
+      location: "Eastern Oklahoma"
+    )
     get(:advanced_search, params: @controller.query_params(query))
     assert_template("list_images")
   end
@@ -277,7 +285,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(action: "add_image",
                        id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
-    get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
+    get_with_dump(:add_image,
+                  params: { id: observations(:minimal_unknown_obs).id })
     assert_redirected_to(controller: "observer", action: "show_observation")
   end
 
@@ -489,17 +498,18 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
 
     logout
-    send(:get, :reuse_image, params)
+
+    send(:get, :reuse_image, params: params)
     assert_response(:login, "No user: ")
 
     login("mary", "testpassword")
-    send(:get, :reuse_image, params)
+    send(:get, :reuse_image, params: params)
     # assert_redirected_to(%r{/#{obs.id}$})
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
 
     login("rolf", "testpassword")
-    send(:get_with_dump, :reuse_image, params)
+    send(:get_with_dump, :reuse_image, params: params)
     assert_response(:success)
     assert_form_action(action: :reuse_image, mode: "observation",
                        obs_id: obs.id)
@@ -532,7 +542,7 @@ class ImageControllerTest < FunctionalTestCase
     refute(obs.reload.images.member?(image))
 
     login(owner)
-    get_with_dump(:reuse_image, params)
+    get_with_dump(:reuse_image, params: params)
     # assert_template(controller: "observer", action: "show_observation")
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
@@ -549,7 +559,7 @@ class ImageControllerTest < FunctionalTestCase
       img_id: image.id.to_s
     }
     login("mary")
-    get_with_dump(:reuse_image_for_glossary_term, params)
+    get_with_dump(:reuse_image_for_glossary_term, params: params)
     assert_redirected_to(controller: :glossary, action: :show_glossary_term,
                          id: glossary_term.id)
     assert(glossary_term.reload.images.member?(image))
