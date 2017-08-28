@@ -102,26 +102,26 @@ module ControllerExtensions
   # Send a GET request, and save the result in a file for w3c validation.
   #
   #   # Send request, but ignore response.
-  #   get(:action, params)
+  #   get(:action, params: { params })
   #
   #   # Send request, and save response in ../html/action_0.html.
-  #   get_with_dump(:action, params)
+  #   get_with_dump(:action, params: { } )
   #
   def get_with_dump(page, params = {})
-    get(page, params: params)
+    get(page, params)
     html_dump(page, @response.body, params)
   end
 
   # Send a POST request, and save the result in a file for w3c validation.
   #
   #   # Send request, but ignore response.
-  #   post(:action, params)
+  #   post(:action, params: { params })
   #
   #   # Send request, and save response in ../html/action_0.html.
-  #   post_with_dump(:action, params)
+  #   post_with_dump(:action, params: { params })
   #
   def post_with_dump(page, params = {})
-    post(page, params: params)
+    post(page, params)
     html_dump(page, @response.body, params)
   end
 
