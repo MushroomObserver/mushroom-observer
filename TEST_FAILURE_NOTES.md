@@ -46,7 +46,7 @@ run the test, and continue (`c`) when I hit the breakpoint, then the assertion
 passes. And the test fails at the final (not the next)
 `assert(rss_log.updated_at > time)`.
 
-I have what could be causing this, or where to begin looking.
+I have no clue what causes this, or where to begin looking.
 
 (Also don't understand why the tests sometimes use `rss_log`
 and sometimes `project.rss_log`. It's the same object.
@@ -73,7 +73,7 @@ AbstractModelTest#test_name_rss_log_life_cycle [/vagrant/mushroom-observer/test/
 Expected false to be truthy.
 
 ```
-# undefine path for StringIO
+# undefined path for StringIO
 
 Error 4 is perhaps a Rails / actionpack / rack-test bug.
 Is there a work-around, i.e., Can we modify the MO test?
