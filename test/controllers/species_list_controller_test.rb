@@ -105,17 +105,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     sl_id = species_lists(:first_species_list).id
 
     # Show empty list with no one logged in.
-    get_with_dump(:show_species_list, id: sl_id)
+    get_with_dump(:show_species_list, params: { id: sl_id })
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show same list with non-owner logged in.
     login("mary")
-    get_with_dump(:show_species_list, id: sl_id)
+    get_with_dump(:show_species_list, params: { id: sl_id })
     assert_template(:show_species_list, partial: "_show_comments")
 
     # Show non-empty list with owner logged in.
     get_with_dump(:show_species_list,
-                  id: species_lists(:unknown_species_list).id)
+                  params: { id: species_lists(:unknown_species_list).id })
     assert_template(:show_species_list, partial: "_show_comments")
   end
 
@@ -180,12 +180,13 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_by_user
-    get_with_dump(:species_lists_by_user, id: rolf.id)
+    get_with_dump(:species_lists_by_user, params: { id: rolf.id })
     assert_template(:list_species_lists)
   end
 
   def test_species_lists_for_project
-    get_with_dump(:species_lists_for_project, id: projects(:bolete_project).id)
+    get_with_dump(:species_lists_for_project,
+                  params: { id: projects(:bolete_project).id })
     assert_template(:list_species_lists)
   end
 
@@ -235,7 +236,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.member?(obs))
 
     login owner
-    get_with_dump(:remove_observation_from_species_list, params)
+    get_with_dump(:remove_observation_from_species_list, params: params)
     assert_redirected_to(action: "manage_species_lists", id: obs.id)
     assert(!spl.reload.observations.member?(obs))
   end
@@ -737,7 +738,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(sp_count, spl.reload.observations.size)
 
     login owner
-    post_with_dump(:edit_species_list, params)
+    post_with_dump(:edit_species_list, params: params)
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10 + v_obs * 2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
@@ -788,7 +789,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.size == sp_count)
 
     login owner
-    post_with_dump(:edit_species_list, params)
+    post_with_dump(:edit_species_list, params: params)
     # assert_redirected_to(controller: "location", action: "create_location")
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
@@ -1261,7 +1262,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_template(:bulk_editor)
 
     login("mary")
-    get_with_dump(:bulk_editor, params)
+    get_with_dump(:bulk_editor, params: params)
     assert_template(:bulk_editor)
 
     # No changes.
@@ -1521,7 +1522,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     # Owner of list always can.
     login("mary")
-    get_with_dump(:manage_projects, id: list.id)
+    get_with_dump(:manage_projects, params: { id: list.id })
     assert_response(:success)
   end
 
@@ -1553,7 +1554,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "",
                    commit: :ATTACH.l })
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj2], list.projects(true))
+    assert_obj_list_equal([proj2], list.projects.reload)
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1562,7 +1563,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "1",
                    commit: :ATTACH.l })
     assert_flash_error # no permission
-    assert_obj_list_equal([proj2], list.projects(true))
+    assert_obj_list_equal([proj2], list.projects.reload)
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1571,7 +1572,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "",
                    commit: :ATTACH.l })
     assert_flash_success
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects.reload.sort_by(&:id))
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1580,7 +1581,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "",
                    commit: :ATTACH.l })
     assert_flash_warning # already attached
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects.reload.sort_by(&:id))
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1589,7 +1590,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "",
                    commit: :REMOVE.l })
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects.reload.sort_by(&:id))
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1598,7 +1599,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "1",
                    commit: :REMOVE.l })
     assert_flash_success
-    assert_obj_list_equal([proj1], list.projects(true))
+    assert_obj_list_equal([proj1], list.projects.reload)
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1607,7 +1608,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "1",
                    commit: :REMOVE.l })
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1], list.projects(true))
+    assert_obj_list_equal([proj1], list.projects.reload)
 
     post(:manage_projects,
          params: { id: list.id,
@@ -1616,7 +1617,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                    "projects_#{proj2.id}" => "",
                    commit: :REMOVE.l })
     assert_flash_success
-    assert_obj_list_equal([], list.projects(true))
+    assert_obj_list_equal([], list.projects.reload)
   end
 
   def test_manage_projects_obs_and_img
