@@ -5,7 +5,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_show_herbarium
     nybg = herbaria(:nybg_herbarium)
     assert(nybg)
-    get_with_dump(:show_herbarium, id: nybg.id)
+    get_with_dump(:show_herbarium, params: { id: nybg.id })
     assert_template("show_herbarium")
   end
 
@@ -114,6 +114,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
     post(:create_herbarium, params: params)
+
     herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -126,20 +127,20 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_edit_herbarium
     nybg = herbaria(:nybg_herbarium)
-    get_with_dump(:edit_herbarium, id: nybg.id)
+    get_with_dump(:edit_herbarium, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary") # Non-curator
-    get_with_dump(:edit_herbarium, id: nybg.id)
+    get_with_dump(:edit_herbarium, params: { id: nybg.id })
     assert_flash(/non-curator/i)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit_herbarium, id: nybg.id)
+    get_with_dump(:edit_herbarium, params: { id: nybg.id })
     assert_template("edit_herbarium")
 
     make_admin("mary") # Non-curator but an admin
-    get_with_dump(:edit_herbarium, id: nybg.id)
+    get_with_dump(:edit_herbarium, params: { id: nybg.id })
     assert_template("edit_herbarium")
   end
 
@@ -149,6 +150,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     post(:edit_herbarium, params: params)
+
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -167,6 +169,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:id] = nybg.id
     params[:herbarium][:name] = rolf.name
     post(:edit_herbarium, params: params)
+
     herbarium = Herbarium.find(nybg.id)
     assert_equal(nybg.name, herbarium.name)
     assert_flash(/already exists/i)
@@ -180,6 +183,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:herbarium][:name] = nybg.name
     params[:id] = nybg.id
     post(:edit_herbarium, params: params)
+
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -197,6 +201,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:id] = nybg.id
     params[:herbarium][:email] = ""
     post(:edit_herbarium, params: params)
+
     assert_flash(/email address is required/i)
     herbarium = Herbarium.find(nybg.id)
     assert_not_equal(params[:herbarium][:email], herbarium.email)
@@ -210,6 +215,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:id] = nybg.id
     params[:herbarium][:place_name] = locations(:salt_point).name
     post(:edit_herbarium, params: params)
+
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -227,6 +233,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params[:id] = nybg.id
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
     post(:edit_herbarium, params: params)
+
     herbarium = Herbarium.find(nybg.id)
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
@@ -244,6 +251,7 @@ class HerbariumControllerTest < FunctionalTestCase
     params = create_herbarium_params
     params[:id] = nybg.id
     post(:edit_herbarium, params: params)
+
     assert_flash(/non-curator/i)
     herbarium = Herbarium.find(nybg.id)
     assert_not_equal(params[:herbarium][:name], herbarium.name)
