@@ -23,12 +23,6 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.datetime "verified"
   end
 
-  create_table "ar_internal_metadata", primary_key: "key", force: :cascade do |t|
-    t.string   "value",      limit: 255
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-  end
-
   create_table "articles", force: :cascade do |t|
     t.string   "title",      limit: 255
     t.text     "body",       limit: 65535
