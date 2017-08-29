@@ -22,27 +22,21 @@ class ObserverController
   def turn_javascript_on # :nologin: :norobots:
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
+    redirect_back(fallback_location: "/")
   end
 
   # Force javascript off.
   def turn_javascript_off # :nologin: :norobots:
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
+    redirect_back(fallback_location: "/")
   end
 
   # Enable auto-detection.
   def turn_javascript_nil # :nologin: :norobots:
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
-    redirect_to(:back)
-  rescue ActionController::RedirectBackError
-    redirect_to("/")
+    redirect_back(fallback_location: "/")
   end
 
   # Simple list of all the files in public/html that are linked to the W3C

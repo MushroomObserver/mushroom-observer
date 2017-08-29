@@ -95,7 +95,9 @@
 #  calc_layout_params::          Gather User's list layout preferences.
 #  catch_errors                  (filter: catches errors for integration tests)
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
-#  default_thumbnail_size_set::  Change default thumbnail size for current user.
+#  default_thumbnail_size_set::  Change default thumbnail size for current user
+#  redirect_to::                 pass tags to next page, then redirect
+#  redirect_back::               pass tags to next page, then redirect
 #
 class ApplicationController < ActionController::Base
   require "extensions"
@@ -267,6 +269,11 @@ class ApplicationController < ActionController::Base
 
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
+    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
+    super
+  end
+
+  def redirect_back(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
     super
   end
