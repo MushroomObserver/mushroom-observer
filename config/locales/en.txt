@@ -2125,60 +2125,6 @@
   # article/index_article
   index_article: "[:ARTICLE] Index"
 
-  # ConferenceEvent Fields
-  conference_event_name: Name
-  conference_event_location: Location
-  conference_event_description: Event Description
-  conference_event_registration_note: Note for Registration Page
-  conference_event_start: Start
-  conference_event_end: End
-  conference_event_created_at: Created At
-  conference_event_updated_at: Updated At
-
-  # conference/show_event
-  show_event: Show Conference Event
-  show_event_title: "[name] Conference Event"
-  show_event_how_many: "How many attending: [how_many]"
-
-  # conference/index
-  event_index: Event Index
-  event_index_title: List of All Conference Events
-
-  # conference/create_event
-  create_event: Create New Conference Event
-  create_event_title: Create New Conference Event
-  create_event_not_allowed: Only admins can create conference events
-  create_event_add: Add
-
-  # conference/edit_event
-  edit_event: Edit
-  edit_event_title: Editing Conference Event
-  edit_event_save: Save
-  edit_event_not_allowed: Only admins can edit conference events
-
-  # conference/list_registrations
-  list_registrations: List Registrations
-  list_registrations_title: Registrations for [name]
-  list_registrations_not_allowed: Only admins can list registrations
-
-  # ConferenceRegistration Fields
-  conference_registration_email: Email
-  conference_registration_how_many: How many?
-  conference_registration_id: ID
-  conference_registration_name: Name
-  conference_registration_notes: Notes
-
-  # conference/register
-  register_event: Register
-  register_event_title: Register for
-  register_save: Save
-  register_success: Successfully registered [how_many] for [name]
-  register_update_warning: Updated previous registration for:<br/> [description]
-
-  # conference/verify
-  conference_verify_success: Registration of [registrant] for [how_many] to [event] has been verified
-  conference_verify_warning: That registration has already been verified
-
   # Publication Fields
   publication_full: Full Reference
   publication_link: Link

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170615205453) do
+ActiveRecord::Schema.define(version: 20170827000729) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -21,6 +21,12 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.string   "key",        limit: 128,               null: false
     t.text     "notes",      limit: 65535
     t.datetime "verified"
+  end
+
+  create_table "ar_internal_metadata", primary_key: "key", force: :cascade do |t|
+    t.string   "value",      limit: 255
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
   create_table "articles", force: :cascade do |t|
@@ -40,28 +46,6 @@ ActiveRecord::Schema.define(version: 20170615205453) do
     t.string   "target_type", limit: 30
     t.integer  "target_id",   limit: 4
     t.datetime "updated_at"
-  end
-
-  create_table "conference_events", force: :cascade do |t|
-    t.string   "name",              limit: 1024
-    t.string   "location",          limit: 1024
-    t.date     "start"
-    t.date     "end"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.text     "description",       limit: 65535
-    t.text     "registration_note", limit: 65535
-  end
-
-  create_table "conference_registrations", force: :cascade do |t|
-    t.integer  "conference_event_id", limit: 4
-    t.string   "name",                limit: 1024
-    t.string   "email",               limit: 1024
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "how_many",            limit: 4
-    t.datetime "verified"
-    t.text     "notes",               limit: 65535
   end
 
   create_table "copyright_changes", force: :cascade do |t|
