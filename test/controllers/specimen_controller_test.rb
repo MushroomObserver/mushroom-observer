@@ -8,50 +8,53 @@ class SpecimenControllerTest < FunctionalTestCase
   def test_show_specimen_without_notes
     specimen = specimens(:coprinus_comatus_nybg_spec)
     assert(specimen)
-    get_with_dump(:show_specimen, id: specimen.id)
+    get_with_dump(:show_specimen, params: { id: specimen.id })
     assert_template(:show_specimen, partial: "_rss_log")
   end
 
   def test_show_specimen_with_notes
     specimen = specimens(:interesting_unknown)
     assert(specimen)
-    get_with_dump(:show_specimen, id: specimen.id)
+    get_with_dump(:show_specimen, params: { id: specimen.id })
     assert_template(:show_specimen, partial: "_rss_log")
   end
 
   def test_herbarium_index
-    get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
+    get_with_dump(:herbarium_index,
+                  params: { id: herbaria(:nybg_herbarium).id })
     assert_specimen_index
   end
 
   def test_herbarium_with_one_specimen_index
-    get_with_dump(:herbarium_index, id: herbaria(:rolf_herbarium).id)
+    get_with_dump(:herbarium_index,
+                  params: { id: herbaria(:rolf_herbarium).id })
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_herbarium_with_no_specimens_index
-    get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
+    get_with_dump(:herbarium_index,
+                  params: { id: herbaria(:dick_herbarium).id })
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
 
   def test_observation_index
     get_with_dump(:observation_index,
-                  id: observations(:coprinus_comatus_obs).id)
+                  params: { id: observations(:coprinus_comatus_obs).id })
     assert_specimen_index
   end
 
   def test_observation_with_one_specimen_index
     get_with_dump(:observation_index,
-                  id: observations(:detailed_unknown_obs).id)
+                  params: { id: observations(:detailed_unknown_obs).id })
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_observation_with_no_specimens_index
     get_with_dump(:observation_index,
-                  id: observations(:strobilurus_diminutivus_obs).id)
+                  params: { id: observations(:strobilurus_diminutivus_obs).id })
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
@@ -61,7 +64,8 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:add_specimen, id: observations(:coprinus_comatus_obs).id)
+    get_with_dump(:add_specimen,
+                  params: { id: observations(:coprinus_comatus_obs).id })
     # assert_template(action: "add_specimen", partial: "_rss_log")
     assert_template("add_specimen", partial: "_rss_log")
     assert(assigns(:herbarium_label))
@@ -152,20 +156,20 @@ class SpecimenControllerTest < FunctionalTestCase
 
   def test_edit_specimen
     nybg = specimens(:coprinus_comatus_nybg_spec)
-    get_with_dump(:edit_specimen, id: nybg.id)
+    get_with_dump(:edit_specimen, params: { id: nybg.id })
     assert_response(:redirect)
 
     login("mary") # Non-curator
-    get_with_dump(:edit_specimen, id: nybg.id)
+    get_with_dump(:edit_specimen, params: { id: nybg.id })
     assert_flash(/unable to update specimen/i)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:edit_specimen, id: nybg.id)
+    get_with_dump(:edit_specimen, params: { id: nybg.id })
     assert_edit_specimen
 
     make_admin("mary") # Non-curator, but an admin
-    get_with_dump(:edit_specimen, id: nybg.id)
+    get_with_dump(:edit_specimen, params: { id: nybg.id })
     assert_edit_specimen
   end
 
