@@ -127,15 +127,16 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_action_callback :verify_authenticity_token
-    skip_action_callback :fix_bad_domains
-    skip_action_callback :autologin
-    skip_action_callback :set_timezone
-    skip_action_callback :refresh_translations
-    skip_action_callback :track_translations
-    skip_action_callback :check_user_alert
-    # skip_action_callback   :extra_gc
-    # skip_action_callback   :log_memory_usage
+    skip_before_action :verify_authenticity_token
+    skip_before_action :fix_bad_domains
+    skip_before_action :autologin
+    skip_before_action :set_timezone
+    skip_before_action :refresh_translations
+    skip_before_action :track_translations
+    skip_before_action :check_user_alert
+    # skip_before_action :extra_gc
+    # skip_after_action  :extra_gc
+    # skip_after_action  :log_memory_usage
     before_action :disable_link_prefetching
     before_action { User.current = nil }
   end
