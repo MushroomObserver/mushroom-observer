@@ -322,7 +322,7 @@ class AccountControllerTest < FunctionalTestCase
         votes_anonymous:              :yes
       }
     }
-    post_with_dump(:prefs, params)
+    post_with_dump(:prefs, params: params)
     assert_flash(:runtime_prefs_success.t)
 
     # Make sure changes were made.
@@ -386,7 +386,7 @@ class AccountControllerTest < FunctionalTestCase
         mailing_address: ""
       }
     }
-    post_with_dump(:profile, params)
+    post_with_dump(:profile, params: params)
     assert_flash(:runtime_profile_success.t)
 
     # Make sure changes were made.
