@@ -263,25 +263,6 @@ class AccountMailerTest < UnitTestCase
     end
   end
 
-  def test_registration_email
-    run_mail_test("email_registration") do
-      RegistrationEmail.build(
-        nil, conference_registrations(:njw_at_msa)
-      ).deliver_now
-    end
-  end
-
-  def test_update_registration_email
-    run_mail_test("update_registration") do
-      reg = conference_registrations(:njw_at_msa)
-      before = reg.describe
-      reg.how_many = 5
-      reg.notes = "5 is better than 4"
-      reg.save
-      UpdateRegistrationEmail.build(nil, reg, before).deliver_now
-    end
-  end
-
   def test_verify_api_key_email
     run_mail_test("verify_api_key", rolf) do
       VerifyAPIKeyEmail.build(rolf, dick, api_keys(:rolfs_api_key)).deliver_now
