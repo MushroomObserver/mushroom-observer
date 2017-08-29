@@ -36,7 +36,7 @@ We are always happy to discuss the topic.  The present code is in need of a
 great deal of work, however there are a few examples I think we can all
 agree exemplify where we're trying to move the code:
 
-controller::  app/controllers/conference_controller.rb
+controller::  app/controllers/sequence_controller.rb
 helper::      app/helpers/map_*.rb
 other::       app/classes/api/*
 unit test::   test/integration/post_observation_test.rb
@@ -56,7 +56,7 @@ a few simple rules of thumb:
 web server, the API, or a rake task.
 
 4.  Views and controllers should be unaware of whether the data is stored in a
-SQL relational database or an Excel spreadsheet. 
+SQL relational database or an Excel spreadsheet.
 
 For more infomration see http://en.wikipedia.org/wiki/Model-view-controller.
 See also the section entitled *Transactions* below.
@@ -91,7 +91,7 @@ comments, then it is named poorly.  If a method requires comments, then it is
 too complex and should be broken up.  Extensive comments are virtually
 guaranteed to end up out of date and more harmful than helpful.  However, I
 personally (Jason) think complex classes benefit from overviews.  We're still
-working out the appropriate level of compromise. 
+working out the appropriate level of compromise.
 
 Ruby provides a mechanism for extracting and compiling comments into a set of
 handy HTML documentation for your application (<tt>rake rdoc</tt>). If you do
@@ -104,7 +104,7 @@ to help us manage access to actions (+:nologin:+, +:norobots:+, +:prefetch:+,
 +:root:+).  Eventually we will write a +rake+ task that reads these and ensures
 that the +requires_login+ and +requires_root+ filters are implemented
 correctly; that +robots.txt+ is complete; and that no dangerous methods allow
-prefetching. 
+prefetching.
 
 = Optimization
 
@@ -112,7 +112,7 @@ Rails makes it very easy to write queries that bring the server grinding to a
 halt.  The practice we recommend is to write your code initially with clarity
 and readability foremost in mind.  Then do benchmark tests and start
 considering optimizations once you can demonstrate objectively whether they
-actually help. 
+actually help.
 
 The class Query has proven to be extremely effective in separating out
 optimization from data requirements.  It encourages controllers to structure
