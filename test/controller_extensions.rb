@@ -419,33 +419,30 @@ module ControllerExtensions
   def assert_request(args)
     method       = args[:method] || :get
     action       = args[:action] || fail("Missing action!")
+    params       = args[:params] || {}
     user         = args[:user] || "rolf"
     password     = args[:password] || "testpassword"
     alt_user     = args[:alt_user] || (user == "mary" ? "rolf" : "mary")
     alt_password = args[:alt_password] || "testpassword"
 
-    http_params            = args[:params] || {}
-    http_params[:user]     = user
-    http_params[:password] = password
-
     logout
     # Make sure it fails if not logged in at all.
     if result = args[:require_login]
       result = :login if result == true
-      send(method, action, { params: http_params })
+      send(method, action, { params: params })
       assert_response(result, "No user: ")
     end
 
     # Login alternate user, and make sure that also fails.
     if result = args[:require_user]
       login(alt_user, alt_password)
-      send(method, action, { params: http_params })
+      send(method, action, { params: params })
       assert_response(result, "Wrong user (#{alt_user}): ")
     end
 
     # Finally, login correct user and let it do its thing.
     login(user, password)
-    send("#{method}_with_dump", action, { params: http_params })
+    send("#{method}_with_dump", action, { params: params })
     assert_response(args[:result])
   end
 
