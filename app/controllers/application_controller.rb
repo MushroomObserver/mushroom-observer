@@ -168,7 +168,7 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(text: "Robots are not allowed on this page.", status: 403,
+    render(plain: "Robots are not allowed on this page.", status: 403,
            layout: false)
     false
   end
@@ -1787,7 +1787,7 @@ class ApplicationController < ActionController::Base
   # Bad place for this, but need proper refactor to have a good place.
   def gather_users_votes(obs, user)
     obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] = 
+      votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
