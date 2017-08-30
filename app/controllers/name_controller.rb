@@ -1543,6 +1543,6 @@ class NameController < ApplicationController
              )
 
   rescue => e
-    render(text: e.to_s, layout: false, status: 500)
+    render(plain: e.to_s, layout: false, status: 500)
   end
 end

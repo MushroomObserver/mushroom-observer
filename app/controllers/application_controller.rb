@@ -326,7 +326,7 @@ class ApplicationController < ActionController::Base
   # destroyed.
   #
   def autologin
-    # render(text: "Sorry, we've taken MO down to test something urgent."\
+    # render(plain: "Sorry, we've taken MO down to test something urgent."\
     #              "We'll be back in a few minutes. -Jason", layout: false)
     # return false
 
@@ -427,7 +427,7 @@ class ApplicationController < ActionController::Base
   end
 
   def block_user
-    render(text: "Your account has been temporarily suspended.",
+    render(plain: "Your account has been temporarily suspended.",
            layout: false)
   end
 
@@ -1727,7 +1727,7 @@ class ApplicationController < ActionController::Base
     return unless request.env["HTTP_X_MOZ"] == "prefetch"
 
     logger.debug "prefetch detected: sending 403 Forbidden"
-    render(text: "", status: 403)
+    render(plain: "", status: 403)
     false
   end
 

@@ -14,7 +14,7 @@ class ObserverController
       # (sleight of hand to prevent localization_file_text from complaining
       # about missing test_flash_redirection_title tag)
       @title = "test_flash_redirection_title".to_sym.t
-      render(layout: "application", text: "")
+      render(html: "", layout: "application")
     end
   end
 
