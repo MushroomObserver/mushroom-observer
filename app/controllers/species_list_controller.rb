@@ -811,8 +811,23 @@ class SpeciesListController < ApplicationController
 
     # Initialize NameSorter and give it all the information.
     sorter = NameSorter.new
-    sorter.add_chosen_names(params[:chosen_multiple_names])
-    sorter.add_chosen_names(params[:chosen_approved_names])
+    # Rails 4:
+    # sorter.add_chosen_names(params[:chosen_multiple_names])
+    # sorter.add_chosen_names(params[:chosen_approved_names])
+    # Need to use to_unsafe_h because
+    # params.permit(chosen_multiple_names: {}) is not working;
+    # It returns an empty hash
+    # and params[:chosen_multiple_names].permit! causes deprecation warning
+    # in add_chosen_name
+    # Need to make it conditional because cannot call .to_unsafe_h on nil.
+    # Also, I can't get onfig.raise_on_unfiltered_parameters = true
+    # to work, and that config option is deprecated in Rails 5.1
+    if params[:chosen_multiple_names]
+      sorter.add_chosen_names(params[:chosen_multiple_names].to_unsafe_h)
+    end
+    if params[:chosen_approved_names]
+      sorter.add_chosen_names(params[:chosen_approved_names].to_unsafe_h)
+    end
     sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
     sorter.check_for_deprecated_checklist(params[:checklist_data])
     sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
