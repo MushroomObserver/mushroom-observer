@@ -80,7 +80,13 @@ class ApiController < ApplicationController
 
   # Massage params hash to proper args hash for api
   def params_to_api_args(type)
-    args = params.to_hash.symbolize_keys.except(:controller)
+    # In Rails 4, was:
+    #  args = params.to_hash.symbolize_keys.except(:controller)
+    # TODO: Can it be made safer?
+    # Perhaps each model has a method with same name (e.g., `permitted`)
+    # (insteead of the current `whitelisted_x_arguments`) which method gets
+    # called here depending on type
+    args = params.to_unsafe_h.symbolize_keys.except(:controller)
     args[:method] = request.method
     args[:action] = type
     args.delete(:format) if Rails.env == "test"
