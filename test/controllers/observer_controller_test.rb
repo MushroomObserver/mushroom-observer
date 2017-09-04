@@ -2330,19 +2330,34 @@ class ObserverControllerTest < FunctionalTestCase
   def test_project_checkboxes_in_edit_observation
     init_for_project_checkbox_tests
 
+    # Prove rolf cannot edit mary's Observation
     login("rolf")
     get(:edit_observation, params: { id: @obs1.id })
     assert_response(:redirect)
+
+    # Prove rolf can edit his own Observation,
+    # there's an unchecked checkbox for a Project for which he is a member,
+    # and no checkbox for a Project for which he is not a member.
     get(:edit_observation, params: { id: @obs2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+
+    # Prove rolf can add his Observation to a Project for which he is a member,
+    # leaving checkbox for that Project checked, and
+    # no checkbox for Project which he is not a member
     post(:edit_observation,
          params: { id: @obs2.id,
+                   # (ensures it will fail)
                    observation: { place_name: "blah blah blah" },
                    project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+
+    # Form is reloaded because "blah blah blah" is not an valid Location
+    # Edit again, without changing place_name
     post(:edit_observation,
-         params: { id: @obs2.id, project: { "id_#{@proj1.id}" => "1" } })
-    assert_response(:redirect)
+         params: { id: @obs2.id,
+                   project: { "id_#{@proj1.id}" => "1" } })
+    assert_redirected_to(action: :show_observation, id: @obs2.id)
+    # and that his Observation and its Image were added to the Project
     assert_obj_list_equal([@proj1], @obs2.reload.projects)
     assert_obj_list_equal([@proj1], @img2.reload.projects)
 
@@ -2353,6 +2368,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     post(:edit_observation,
          params: { id: @obs1.id,
+                   # (ensures it will fail)
                    observation: { place_name: "blah blah blah" },
                    project: {
                      "id_#{@proj1.id}" => "1",
