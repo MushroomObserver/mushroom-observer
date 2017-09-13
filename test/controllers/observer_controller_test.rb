@@ -2330,19 +2330,19 @@ class ObserverControllerTest < FunctionalTestCase
   def test_project_checkboxes_in_edit_observation
     init_for_project_checkbox_tests
 
-    # Prove rolf cannot edit mary's Observation
+    # Prove Rolf cannot edit Mary's Observation
     login("rolf")
     get(:edit_observation, params: { id: @obs1.id })
     assert_response(:redirect)
 
-    # Prove rolf can edit his own Observation,
-    # there's an unchecked checkbox for a Project for which he is a member,
-    # and no checkbox for a Project for which he is not a member.
+    # Prove there's an unchecked checkbox for a Project for rolf is a member,
+    # and no checkbox for a Project for which he is not a member,
+    # when Rolf edits his own Observation
     get(:edit_observation, params: { id: @obs2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
 
-    # Prove rolf can add his Observation to a Project for which he is a member,
-    # leaving checkbox for that Project checked, and
+    # Prove that checkbox for a Project is checked when
+    # Rolf adds his Obs to a Project for which he is a member,
     # no checkbox for Project which he is not a member
     post(:edit_observation,
          params: { id: @obs2.id,
