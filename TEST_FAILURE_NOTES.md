@@ -107,15 +107,13 @@ NoMethodError: undefined method `path' for #<StringIO:0x0000000ae94cd8>
     /vagrant/mushroom-observer/test/controller_extensions.rb:143:in `post_requires_login'
     /vagrant/mushroom-observer/test/controllers/species_list_controller_test.rb:1011:in `test_read_species_list'
 ```
-# checkbox failure
-
-I don't understand why the following fail.
+# CHECKBOX FAILURE attribute "persists" after failed save
 
 ## commands to run these tests
 
 ```
 rails t test/controllers/observer_controller_test.rb -n test_project_checkboxes_in_edit_observation
-rails t test/controllers/observer_controller_test.rb -n test_list_checkboxes_in_edit_observation
+rake test test/controllers/observer_controller_test.rb test_list_checkboxes_in_edit_observation
 ```
 ## test output
 
@@ -172,10 +170,101 @@ Sample; fails at last line
 ```
 When it does the 2nd `post(:edit_observation)`, @obs2.where has been changed to
 "blah blah blah".  (This is not the case in master.)
-So the @observation instance variable is persisted between requests!
-Is this a caching issue?
-Is controller itself not reset? (I.e., am I getting the same controller?) Yes, it's same controller, but that's also true in master.
-Is it coming from the session?
-
 So `edit_observation` again reloads the form
 instead of redirecting to the edited Observation.
+
+In master, during 1st call to `post(:edit_observation ...)`
+in #edit_observation at its very top:
+>
+1: request.method = "POST"
+2: params = {"observation"=>{"place_name"=>"blah blah blah"}, "project"=>{"id_778455076"=>"1"}, "id"=>"432936842", "controller"=>"observer", "action"=>"edit_observation"}
+3: @observation = #<Observation id: 432936842, created_at: "2007-02-27 20:20:00", updated_at: "2007-02-27 20:21:00", when: "2007-02-27", user_id: 241228755, specimen: true, notes: "Second fruiting in bark chips", thumb_image_id: 749502112, name_id: 288002050, location_id: nil, is_collection_location: true, vote_cache: 1.0, num_views: 0, last_view: nil, rss_log_id: nil, lat: nil, long: nil, where: "Glendale, California", alt: nil>
+4: @observation.where = "Glendale, California"
+
+During 2nd call to `post(:edit_observation ...)`:
+>
+1: request.method = "POST"
+2: params = {"project"=>{"id_778455076"=>"1"}, "id"=>"432936842", "controller"=>"observer", "action"=>"edit_observation"}
+3: @observation = #<Observation id: 432936842, created_at: "2007-02-27 20:20:00", updated_at: "2007-02-27 20:21:00", when: "2007-02-27", user_id: 241228755, specimen: true, notes: "Second fruiting in bark chips", thumb_image_id: 749502112, name_id: 288002050, location_id: nil, is_collection_location: true, vote_cache: 1.0, num_views: 0, last_view: nil, rss_log_id: nil, lat: nil, long: nil, where: "blah blah blah", alt: nil>
+4: @observation.where = "blah blah blah"
+
+And @observation remains that way until call to `find_or_go_index`:
+>
+1: request.method = "POST"
+2: params = {"project"=>{"id_778455076"=>"1"}, "id"=>"432936842", "controller"=>"observer", "action"=>"edit_observation"}
+3: @observation = #<Observation id: 432936842, created_at: "2007-02-27 20:20:00", updated_at: "2007-02-27 20:21:00", when: "2007-02-27", user_id: 241228755, specimen: true, notes: "Second fruiting in bark chips", thumb_image_id: 749502112, name_id: 288002050, location_id: nil, is_collection_location: true, vote_cache: 1.0, num_views: 0, last_view: nil, rss_log_id: nil, lat: nil, long: nil, where: "Glendale, California", alt: nil>
+**4: @observation.where = "Glendale, California"**
+>
+[244, 253] in /vagrant/mushroom-observer/app/controllers/observer_controller/create_and_edit_observation.rb
+```ruby
+   244:   def edit_observation # :prefetch: :norobots:
+   245:   byebug
+   246:     pass_query_params
+   247:     includes = [:name, :images, :location]
+   248:     @observation = find_or_goto_index(Observation, params[:id].to_s)
+=> 249:     return unless @observation
+```
+
+But in ror50 @observation does not change after 2nd call to `find_or_go_index`:
+>
+(byebug) n
+1: request.method = "POST"
+2: params = <ActionController::Parameters {"project"=>{"id_778455076"=>"1"}, "id"=>"432936842", "controller"=>"observer", "action"=>"edit_observation"} permitted: false>
+3: @observation = #<Observation id: 432936842, created_at: "2007-02-27 20:20:00", updated_at: "2017-09-06 20:26:15", when: "2007-02-27", user_id: 241228755, specimen: true, notes: "Second fruiting in bark chips", thumb_image_id: 749502112, name_id: 288002050, location_id: nil, is_collection_location: true, vote_cache: 1.0, num_views: 0, last_view: nil, rss_log_id: nil, lat: nil, long: nil, where: "blah blah blah", alt: nil>
+4: **@observation.where = "blah blah blah"**
+>
+[244, 253] in /vagrant/mushroom-observer/app/controllers/observer_controller/create_and_edit_observation.rb
+```ruby
+   244:   def edit_observation # :prefetch: :norobots:
+   245:   byebug
+   246:     pass_query_params
+   247:     includes = [:name, :images, :location]
+   248:     @observation = find_or_goto_index(Observation, params[:id].to_s)
+=> 249:     return unless @observation
+```
+
+So in ror50 `find_or_goto_index` returns the attributes from the failed `save`.
+Did it actually save these?
+
+Before 1st call to `update_whitelisted_observation_attributes`:
+>
+@observation.where = "Glendale, California"
+Observation.find(432936842).where
+["Glendale, California"]
+
+After that call:
+>
+@observation.where = "blah blah blah
+Observation.find(432936842).where
+["Glendale, California"]
+
+But after call to `update_projects`
+>
+@observation.where = "blah blah blah
+Observation.find(432936842).where
+**["blah blah blah"]**
+
+In that call to `update_projects`, after `project.add_observation(obs)`:
+Observation.find(432936842).where
+**["blah blah blah"]**
+
+In `project.add_observation(obs)`
+after `146:     observations.push(obs)`
+Observation.find(432936842).where
+**["blah blah blah"]**
+
+Is it also that way in master?
+NO
+
+Here's the log for  `146:     observations.push(obs)`
+```
+   (0.3ms)  SAVEPOINT active_record_1
+  User Load (0.6ms)  SELECT  `users`.* FROM `users` WHERE `users`.`id` = 241228755 LIMIT 1
+  SQL (0.4ms)  UPDATE `observations` SET `where` = 'blah blah blah', `updated_at` = '2017-09-13 21:12:40' WHERE `observations`.`id` = 432936842
+  Interest Load (0.4ms)  SELECT `interests`.* FROM `interests` WHERE `interests`.`target_id` = 432936842 AND `interests`.`target_type` = 'Observation'
+  User Load (0.7ms)  SELECT `users`.* FROM `users` WHERE `users`.`email_observations_all` = 1
+  SQL (0.6ms)  INSERT INTO `observations_projects` (`observation_id`, `project_id`) VALUES (432936842, 778455076)
+   (0.2ms)  RELEASE SAVEPOINT active_record_1
+```
+What the heck? It's saving the Obs to the db. Why?
+
