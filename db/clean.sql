@@ -1,7 +1,5 @@
 update api_keys set `key` = 'cahja4s81achfojjlqzgkt16qgkl2hira';
 
-update conference_registrations set email = 'webmaster@mushroomobserver.org';
-
 update donations set email = 'webmaster@mushroomobserver.org';
 update donations set who = 'anonymous' where anonymous = true;
 
@@ -67,7 +65,7 @@ delete from name_descriptions where public = false;
 
 # delete from notifications;
 
-delete from queries;
+delete from query_records;
 
 delete from queued_email_integers;
 delete from queued_email_notes;
