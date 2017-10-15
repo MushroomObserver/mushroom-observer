@@ -80,7 +80,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_num_of_pages
     get(:observations, detail: :high, format: :json)
     json = JSON.parse(response.body)
-    assert_equal(5, json["number_of_pages"],
+    assert_equal((Observation.count / 10.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
 
@@ -102,7 +102,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_nil(obs.alt)
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
-    assert_equal("", obs.notes)
+    assert_equal(Observation.no_notes, obs.notes)
     assert_obj_list_equal([], obs.images)
     assert_nil(obs.thumb_image)
     assert_obj_list_equal([], obs.projects)
@@ -110,23 +110,24 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_observation
-    post(:observations,
-         api_key: api_keys(:rolfs_api_key).key,
-         date: "2012-06-26",
-         location: "Burbank, California, USA",
-         name: "Coprinus comatus",
-         vote: "2",
-         latitude: "34.5678N",
-         longitude: "123.4567W",
-         altitude: "1234 ft",
-         has_specimen: "yes",
-         is_collection_location: "yes",
-         notes: "These are notes.\nThey look like this.\n",
-         images: "#{images(:in_situ_image).id}, " \
-                 "#{images(:turned_over_image).id}",
-         thumbnail: images(:turned_over_image).id.to_s,
-         projects: "EOL Project",
-         species_lists: "Another Species List")
+    post(
+      :observations,
+      api_key: api_keys(:rolfs_api_key).key,
+      date: "2012-06-26",
+      location: "Burbank, California, USA",
+      name: "Coprinus comatus",
+      vote: "2",
+      latitude: "34.5678N",
+      longitude: "123.4567W",
+      altitude: "1234 ft",
+      has_specimen: "yes",
+      is_collection_location: "yes",
+      notes: "These are notes.\nThey look like this.\n",
+      images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
+      thumbnail: images(:turned_over_image).id.to_s,
+      projects: "EOL Project",
+      species_lists: "Another Species List"
+    )
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -142,7 +143,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(376, obs.alt)
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
-    assert_equal("These are notes.\nThey look like this.", obs.notes)
+    assert_equal({ Observation.other_notes_key =>
+                    "These are notes.\nThey look like this.\n" }, obs.notes)
     assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)],
                           obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)

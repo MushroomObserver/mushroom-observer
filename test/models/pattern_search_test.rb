@@ -456,14 +456,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.where(notes: "")
+    expect = Observation.where("notes = ?", Observation.no_notes_persisted)
     assert(expect.count > 0)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect.sort_by(&:id), x.query.results.sort_by(&:id))
   end
 
   def test_observation_search_has_notes_yes
-    expect = Observation.where('notes IS NOT NULL AND notes != ""')
+    expect = Observation.where("notes != ?", Observation.no_notes_persisted)
     assert(expect.count > 0)
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_list_equal(expect.sort_by(&:id), x.query.results.sort_by(&:id))

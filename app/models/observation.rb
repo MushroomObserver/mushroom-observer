@@ -49,7 +49,7 @@
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
-#  notes::                  Arbitrary extra notes supplied by User.
+#  notes::                  Arbitrary text supplied by User and serialized.
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #
@@ -61,13 +61,37 @@
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
 #  define_a_location::      Update any observations using the old "where" name.
+#  ---
+#  no_notes::               value of observation.notes if there are no notes
+#  no_notes_persisted::     no_notes persisted in the db
+#  other_notes_key::        key used for general Observation notes
+#  other_notes_part::       other_notes_key as a String
+#  notes_part_id::          id of textarea for a Notes heading
+#  notes_area_id_prefix     prefix for id of textarea for a Notes heading
+#  notes_part_name::        name of textarea for a Notes heading
+#  export_formatted::       notes (or any hash) to string with marked up
+#                           captions (keys)
+#  show_formatted::         notes (or any hash) to string with plain
+#                           captions (keys)
 #
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
+#  form_notes_parts::       notes parts to display in create & edit form
+#  notes_export_formatted:: notes to string with marked up captions (keys)
+#  notes_show_formatted::   notes to string with plain captions (keys)
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
+#  ---
+#  other_notes_key::        key used for general Observation notes
+#  other_notes_part::       other_notes_key as a String
+#  notes_part_id::          id of textarea for a Notes heading
+#  notes_part_name::        name of textarea for a Notes heading
+#  notes_part_value::       value for textarea for a Notes heading
+#  form_notes_parts::       note parts to display in create & edit form
+#  notes_export_formatted:: notes to string with marked up captions (keys)
+#  notes_ahow_formatted::   notes to string with plain captions (keys)
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
@@ -240,6 +264,192 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Notes
+  #
+  ##############################################################################
+  #
+  # Notes are arbitrary text supplied by the User.
+  # They are read and written as a serialized Hash.
+  #
+  # The Hash keys are:
+  #   - key(s) from the User's notes template, and
+  #   - a general Other key supplied by the system.
+  #
+  # Keys with empty values are not saved.
+  #
+  # The notes template is a comma-separated list of arbitrary keys (except for
+  # the following which are reserved for the system: "Other", "other", etc., and
+  # translations thereof.
+  # Sample observation.notes
+  #  { }                                        no notes
+  #  { Other: "rare" }                          generalized notes
+  #  { Cap: "red", stem: "white" }              With only user-supplied keys
+  #  { Cap: "red", stem: "white", Other: rare } both user-supplied and general
+  #
+  # The create Observation form displays separate fields for the keys in the
+  # following order:
+  #   - each key in the notes template, in the order listed in the template; and
+  #   - Other.
+  #
+  # The edit Observation form displays separate fields in the following order:
+  #   - each key in the notes template, in the order listed in the template;
+  #   - each "orphaned" key -- one which is neither in the template nor Other;
+  #   - Other.
+  #
+  # The show Observation view displays notes as follows, with Other underscored:
+  #   no notes - nothing shown
+  #   only generalized notes:
+  #     Notes: value
+  #   only user-supplied keys:
+  #     Notes:
+  #     First user key: value
+  #     Second user key: value
+  #     ...
+  #   both user-supplied  and general Other keys:
+  #     Notes:
+  #     First user key: value
+  #     Second user key: value
+  #     ...
+  #     Other: value
+  # Because keys with empty values are not saved in observation.notes, they are
+  # not displayed with show Observaation.
+  #
+  # Notes are exported as shown, except that the intial "Notes:" caption is
+  # omitted, and any markup is stripped from the keys.
+
+  serialize :notes
+
+  # value of observation.notes if there are no notes
+  def self.no_notes
+    {}
+  end
+
+  # no_notes persisted in the db
+  def self.no_notes_persisted
+    no_notes.to_yaml
+  end
+
+  # Key used for general Observation.notes
+  # (notes which were not entered in a notes_template field)
+  def self.other_notes_key
+    :Other
+  end
+
+  # convenience wrapper around class method of same name
+  def other_notes_key
+    Observation.other_notes_key
+  end
+
+  # other_notes_key as a String
+  # Makes it easy to combine with notes_template
+  def self.other_notes_part
+    other_notes_key.to_s
+  end
+
+  def other_notes_part
+    Observation.other_notes_part
+  end
+
+  # id of view textarea for a Notes heading
+  def self.notes_part_id(part)
+    notes_area_id_prefix << part.tr(" ", "_")
+  end
+
+  def notes_part_id(part)
+    Observation.notes_part_id(part)
+  end
+
+  # prefix for id of textarea
+  def self.notes_area_id_prefix
+    "observation_notes_"
+  end
+
+  # name of view textarea for a Notes heading
+  def self.notes_part_name(part)
+    "observation[notes][#{part.tr(" ", "_")}]"
+  end
+
+  def notes_part_name(part)
+    Observation.notes_part_name(part)
+  end
+
+  # value of notes part
+  #   notes: { Other: abc }
+  #   obervation.notes_part_value("Other") #=> "abc"
+  def notes_part_value(part)
+    notes.blank? ? "" : notes[part.to_sym]
+  end
+
+  # Array of note parts (Strings) to display in create & edit form,
+  # in following (display) order. Used by views.
+  #   notes_template fields
+  #   orphaned fields (field in obs, but not in notes_template, not "Other")
+  #   "Other"
+  # Example outputs:
+  #   ["Other"]
+  #   ["orphaned_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "Other"]
+  #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
+  def form_notes_parts(user)
+    return user.notes_template_parts + [other_notes_part] if notes.blank?
+    user.notes_template_parts + notes_orphaned_parts(user) +
+      [other_notes_part]
+  end
+
+  # Array of notes parts (Strings) which are
+  # neither in the notes_template nor the caption for other notes
+  def notes_orphaned_parts(user)
+    # Change spaces to underscores in order to subtract template parts from
+    # stringified keys because keys have underscores instead of spaces
+    template_parts_underscored = user.notes_template_parts.each do |part|
+      part.tr!(" ", "_")
+    end
+    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+  end
+
+  # notes as a String, captions (keys) without added formstting,
+  # omitting "Other" if it's the only caption.
+  #  notes: {}                                 ::=> ""
+  #  notes: { Other: "abc" }                   ::=> "abc"
+  #  notes: { cap: "red" }                     ::=> "cap: red"
+  #  notes: { cap: "red", stem: , Other: "x" } ::=> "cap: red
+  #                                                  stem:
+  #                                                  Other: x"
+  def self.export_formatted(notes, markup = nil)
+    return notes[other_notes_key] if notes.keys == [other_notes_key]
+
+    result = notes.each_with_object("") do |(key, value), str|
+      str << "#{markup}#{key}#{markup}: #{value}\n"
+    end
+    result.chomp
+  end
+
+  # wraps Class method with slightly different name
+  def notes_export_formatted
+    Observation.export_formatted(notes)
+  end
+
+  # Notes (or other hash) as a String, captions (keys) with added formstting,
+  # omitting "Other" if it's the only caption.
+  #
+  # Used in views which display notes
+  #  notes: {}                                 => ""
+  #  notes: { Other: "abc" }                   => "abc"
+  #  notes: { cap: "red" }                     => "+cap+: red"
+  #  notes: { cap: "red", stem: , other: "x" } => "+cap+: red
+  #                                                +stem+:
+  #                                                +Other+: x"
+  def self.show_formatted(notes)
+    export_formatted(notes, "+")
+  end
+
+  # wraps Class method with slightly different name
+  def notes_show_formatted
+    Observation.show_formatted(notes)
   end
 
   ##############################################################################

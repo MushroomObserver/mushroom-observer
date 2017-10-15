@@ -5,13 +5,13 @@
 
   <% partial = render(partial: "shared/form_list_feedback")
   if !partial.blank? %>
-    <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
+    <div class="col-xs-12 col-md-12 col-lg-12 max-width-text">
       <%= partial %>
     </div>
   <% end %>
 
   <% if @checklist && @checklist.any? %>
-    <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
+    <div class="col-xs-12 col-md-12 col-lg-12 max-width-text">
       <p>
         <b class="nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
       </p>
@@ -25,7 +25,7 @@
     </div>
   <% end %>
 
-  <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
+  <div class="col-xs-12 col-md-12 col-lg-12 max-width-text">
     <%= if !@new_names.blank?
       hidden_field_tag(:approved_names, @new_names.join("\n"))
     end %>
@@ -36,7 +36,7 @@
 
     <div class="form-group push-down">
       <%= label_tag(:list_members, :form_species_lists_write_in_species.t) %>
-      <%= text_area(:list, :members, value: @list_members, rows: 20, class: "form-control") %>
+      <%= text_area(:list, :members, value: @list_members, rows: 8, class: "form-control") %>
       <% turn_into_name_auto_completer(:list_members, primer: Name.primer, token: "\n") %>
     </div>
 
@@ -51,8 +51,10 @@
       <%= render(partial: "shared/textilize_help") %>
     </div>
   </div>
+</div>
 
-  <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
+<div class="row">
+  <div class="col-xs-12 col-md-12 col-lg-12 max-width-text">
     <div class="form-group form-inline">
       <%= label_tag(:species_list_when, :WHEN.t + ":") %>
       <%= date_select(:species_list, :when, date_select_opts(@species_list),
@@ -82,7 +84,16 @@
 
     <div class="form-group push-down">
       <%= label_tag(:member_notes, :form_species_lists_member_notes.t + ":") %>
-      <%= text_area(:member, :notes, value: @member_notes, rows: 3, class: "form-control") %>
+        (<%= :general_textile_link.t %>)
+        <% @species_list.form_notes_parts(@user).each do |part| %>
+          <div><%= "#{strip_tags(part.tl)}: "%></div>
+          <div>
+            <textarea class="form-control" rows="1"
+            id=<%= @species_list.notes_part_id(part) %>
+            name=<%= @species_list.notes_part_name(part) %>
+            ><%= @member_notes[part.to_sym] %></textarea>
+          </div>
+        <% end %>
     </div>
 
     <div class="form-group form-inline push-down">
