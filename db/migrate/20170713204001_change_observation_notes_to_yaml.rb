@@ -2,9 +2,9 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   # ***** THIS MIGRATION MUST BE RUN WITH Observation::serialize :notes ********
 
   # migrate notes to a YAML serialized hash, any notes converted to the
-  # value of the serialized "other:" key
+  # value of the serialized "Other:" key
   # If notes nil or not present, then convert them to a serialized empty hash
-  #  notes: "abc" => notes: { other: "abc" }
+  #  notes: "abc" => notes: { Other: "abc" }
   #  notes: ""    => notes: { }
   #  notes: nil   => notes: { }
   def up
@@ -41,9 +41,9 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   end
 
   # Revert Observation notes from YAML serialized notes, extracting the value of
-  # the serialized "other:" key
+  # the serialized "Other:" key
   # If there's no such key, revert to empty string
-  #  notes: { color: "red", other: "abc" } => "abc"
+  #  notes: { color: "red", Other: "abc" } => "abc"
   #  notes: { color: "red" }               => ""
   #  notes: { }                            => ""
   def down
@@ -77,15 +77,15 @@ class ChangeObservationNotesToYaml < ActiveRecord::Migration
   end
 
   # Return desired up-migrated, serialized notes
-  # putting non-empty notes into the "other:" field
+  # putting non-empty notes into the "Other:" field
   def to_up_notes(raw_notes)
-    raw_notes.present? ? { other: raw_notes } : {}
+    raw_notes.present? ? { Other: raw_notes } : {}
   end
 
   # Return desired reverted notes
-  # Extract the "other:" field; otherwise return a blank string
+  # Extract the "Other:" field; otherwise return a blank string
   def to_down_notes(notes)
-    # notes.is_a?(Hash) ? (notes)[:other] : ""
-    notes.empty? ? "" : (notes)[:other]
+    # notes.is_a?(Hash) ? (notes)[:Other] : ""
+    notes.empty? ? "" : (notes)[:Other]
   end
 end
