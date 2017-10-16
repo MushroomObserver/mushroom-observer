@@ -650,7 +650,8 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.text     "mailing_address",              limit: 65535
     t.integer  "layout_count"
     t.boolean  "view_owner_id",                              default: false, null: false
-    t.string   "content_filter"
+    t.string   "content_filter",               limit: 255
+    t.text     "notes_template",               limit: 65535
   end
 
   create_table "votes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

@@ -315,6 +315,7 @@ class AccountControllerTest < FunctionalTestCase
         locale:                       "el-GR",
         location_format:              :scientific,
         login:                        "new_login",
+        notes_template:               "Collector's #",
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
@@ -355,11 +356,31 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("el-GR", user.locale)
     assert_equal(:scientific, user.location_format)
     assert_equal("new_login", user.login)
+    assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
     assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
+
+    # Prove user cannot pick "Other" as a notes_template heading
+    old_notes_template = user.notes_template
+    # prior test set the locale to Greece
+    # reset locale to get less incomprehensible error messages
+    user.locale = "en"
+    user.save
+    params[:user][:notes_template] = "Size, Other"
+    post(:prefs, params)
+
+    assert_flash_error
+    assert_equal(old_notes_template, user.reload.notes_template)
+
+    # Prove user cannot have duplicate headings in notes template
+    params[:user][:notes_template] = "Yadda, Yadda"
+    post(:prefs, params)
+
+    assert_flash_error
+    assert_equal(old_notes_template, user.reload.notes_template)
   end
 
   def test_edit_prefs_login_already_exists

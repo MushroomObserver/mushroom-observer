@@ -506,95 +506,110 @@ class SpeciesListController < ApplicationController
 
   # Bulk-edit observations (at least the ones editable by this user) in a (any)
   # species list.
-  def bulk_editor # :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-      @query = create_query(:Observation, :in_species_list, by: :id,
-                            species_list: @species_list,
-                            where: "observations.user_id = #{@user.id}")
-      @pages = paginate_numbers(:page, 100)
-      @observations = @query.paginate(@pages, include: [:comments, :images,
-                                                  :location, namings: :votes])
-      @observation = {}
-      @votes = {}
-      for obs in @observations
-        @observation[obs.id] = obs
-        vote = begin
-                 obs.consensus_naming.users_vote(@user)
+  # :norobots:
+  def bulk_editor
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    return unless @species_list
+    @query = create_query(:Observation, :in_species_list,
+                          by: :id,
+                          species_list: @species_list,
+                          where: "observations.user_id = #{@user.id}")
+    @pages = paginate_numbers(:page, 100)
+    @observations = @query.paginate(
+      @pages, include: [:comments, :images, :location, namings: :votes]
+    )
+    @observation = {}
+    @votes = {}
+    @observations.each do |obs|
+      @observation[obs.id] = obs
+      vote = begin
+               obs.consensus_naming.users_vote(@user)
+             rescue
+               nil
+             end
+      @votes[obs.id] = vote || Vote.new
+    end
+    @no_vote = Vote.new
+    @no_vote.value = 0
+    if @observation.empty?
+      flash_error(:species_list_bulk_editor_you_own_no_observations.t)
+      redirect_to(action: "show_species_list", id: @species_list.id)
+    elsif request.method == "POST"
+      updates = 0
+      stay_on_page = false
+      @observations.each do |obs|
+        args = begin
+                 params[:observation][obs.id.to_s] || {}
                rescue
-                 nil
+                 {}
                end
-        @votes[obs.id] = vote || Vote.new
-      end
-      @no_vote = Vote.new
-      @no_vote.value = 0
-      if @observation.empty?
-        flash_error(:species_list_bulk_editor_you_own_no_observations.t)
-        redirect_to(action: "show_species_list", id: @species_list.id)
-      elsif request.method == "POST"
-        updates = 0
-        stay_on_page = false
-        for obs in @observations
-          args = begin
-                   params[:observation][obs.id.to_s] || {}
-                 rescue
-                   {}
-                 end
-          any_changes = false
-          old_vote = begin
-                       @votes[obs.id].value
-                     rescue
-                       0
-                     end
-          if !args[:value].nil? && args[:value].to_s != old_vote.to_s
-            if obs.namings.empty?
-              obs.namings.create!(user: @user, name_id: obs.name_id)
-            end
-            if naming = obs.consensus_naming
-              obs.change_vote(naming, args[:value].to_i, @user)
-              any_changes = true
-              @votes[obs.id].value = args[:value]
-            else
-              flash_warning(:species_list_bulk_editor_ambiguous_namings.
-                               t(id: obs.id, name: obs.name.display_name.t))
-            end
+        any_changes = false
+        old_vote = begin
+                     @votes[obs.id].value
+                   rescue
+                     0
+                   end
+        if !args[:value].nil? && args[:value].to_s != old_vote.to_s
+          if obs.namings.empty?
+            obs.namings.create!(user: @user, name_id: obs.name_id)
           end
-          for method in [:when_str, :place_name, :notes, :lat, :long, :alt,
-                         :is_collection_location, :specimen]
-            unless args[method].nil?
-              old_val = obs.send(method)
-              old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
-              new_val = args[method]
-              if [:is_collection_location, :specimen].member?(method)
-                new_val = (new_val == "1")
-              end
-              if old_val != new_val
-                obs.send("#{method}=", new_val)
-                any_changes = true
-              end
-            end
-          end
-          if any_changes
-            if obs.save
-              updates += 1
-            else
-              flash_error("") if stay_on_page
-              flash_error("#{:Observation.t} ##{obs.id}:")
-              flash_object_errors(obs)
-              stay_on_page = true
-            end
-          end
-        end
-        unless stay_on_page
-          if updates == 0
-            flash_warning(:runtime_no_changes.t)
+          if (naming = obs.consensus_naming)
+            obs.change_vote(naming, args[:value].to_i, @user)
+            any_changes = true
+            @votes[obs.id].value = args[:value]
           else
-            flash_notice(:species_list_bulk_editor_success.t(n: updates))
+            flash_warning(
+              :species_list_bulk_editor_ambiguous_namings.
+                t(id: obs.id, name: obs.name.display_name.t)
+            )
           end
-          redirect_to(action: :show_species_list, id: @species_list.id)
+        end
+        [:when_str, :place_name, :notes, :lat, :long, :alt,
+         :is_collection_location, :specimen].each do |method|
+          next if args[method].nil?
+          old_val = obs.send(method)
+          old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
+          new_val = bulk_editor_new_val(method, args[method])
+          if old_val != new_val
+            obs.send("#{method}=", new_val)
+            any_changes = true
+          end
+        end
+        if any_changes
+          if obs.save
+            updates += 1
+          else
+            flash_error("") if stay_on_page
+            flash_error("#{:Observation.t} ##{obs.id}:")
+            flash_object_errors(obs)
+            stay_on_page = true
+          end
         end
       end
+      return if stay_on_page
+
+      if updates.zero?
+        flash_warning(:runtime_no_changes.t)
+      else
+        flash_notice(:species_list_bulk_editor_success.t(n: updates))
+      end
+
+      redirect_to(action: :show_species_list, id: @species_list.id)
     end
   end
+
+  def bulk_editor_new_val(attr, val)
+    case attr
+    when :is_collection_location, :specimen
+      val == "1"
+    when :notes
+      val.to_hash.symbolize_keys
+    else
+      val
+    end
+  end
+
+  private :bulk_editor_new_val
 
   # ----------------------------
   #  :section: Manage Projects
@@ -903,12 +918,12 @@ class SpeciesListController < ApplicationController
       end
     end
 
+    return if redirected
+
     # Failed to create due to synonyms, unrecognized names, etc.
-    unless redirected
-      init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_reload
-      init_project_vars_for_reload(@species_list)
-    end
+    init_name_vars_from_sorter(@species_list, sorter)
+    init_member_vars_for_reload
+    init_project_vars_for_reload(@species_list)
   end
 
   # Creates observations for names written in and/or selected from checklist.
@@ -917,7 +932,7 @@ class SpeciesListController < ApplicationController
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(spl, sorter)
     # Put together a list of arguments to use when creating new observations.
-    member_args = params[:member] || {}
+    member_args = params[:member].to_hash.symbolize_keys || {}
     sp_args = {
       created_at: spl.updated_at,
       updated_at: spl.updated_at,
@@ -926,7 +941,7 @@ class SpeciesListController < ApplicationController
       location: spl.location,
       where:    spl.where,
       vote:     member_args[:vote],
-      notes:    member_args[:notes].to_s,
+      notes:    member_args[:notes].symbolize_keys,
       lat:      member_args[:lat].to_s,
       long:     member_args[:long].to_s,
       alt:      member_args[:alt].to_s,
@@ -938,15 +953,14 @@ class SpeciesListController < ApplicationController
     # for namings that are deprecated, then replaces them with approved
     # synonyms which the user has chosen via radio boxes in
     # params[:chosen_approved_names].
-    if chosen_names = params[:chosen_approved_names]
-      for observation in spl.observations
-        for naming in observation.namings
+    if (chosen_names = params[:chosen_approved_names])
+      spl.observations.each do |observation|
+        observation.namings.each do |naming|
           # (compensate for gsub in _form_species_lists)
-          if alt_name_id = chosen_names[naming.name_id.to_s]
-            alt_name = Name.find(alt_name_id)
-            naming.name = alt_name
-            naming.save
-          end
+          next unless (alt_name_id = chosen_names[naming.name_id.to_s])
+          alt_name = Name.find(alt_name_id)
+          naming.name = alt_name
+          naming.save
         end
       end
     end
@@ -954,7 +968,7 @@ class SpeciesListController < ApplicationController
     # Add all names from text box into species_list.  Creates a new observation
     # for each name.  ("single names" are names that matched a single name
     # uniquely.)
-    for name, timestamp in sorter.single_names
+    sorter.single_names.each do |name, timestamp|
       sp_args[:when] = timestamp || spl.when
       spl.construct_observation(name, sp_args)
     end
@@ -962,13 +976,11 @@ class SpeciesListController < ApplicationController
     # Add checked names from LHS check boxes.  It doesn't check if they are
     # already in there; it creates new observations for each and stuffs it in.
     sp_args[:when] = spl.when
-    if params[:checklist_data]
-      for key, value in params[:checklist_data]
-        if value == "1"
-          name = find_chosen_name(key.to_i, params[:chosen_approved_names])
-          spl.construct_observation(name, sp_args)
-        end
-      end
+    return unless params[:checklist_data]
+    params[:checklist_data].each do |key, value|
+      next unless value == "1"
+      name = find_chosen_name(key.to_i, params[:chosen_approved_names])
+      spl.construct_observation(name, sp_args)
     end
   end
 
@@ -1067,7 +1079,10 @@ class SpeciesListController < ApplicationController
 
   def init_member_vars_for_create
     @member_vote = Vote.maximum_vote
-    @member_notes = nil
+    @member_notes_parts = @species_list.form_notes_parts(@user)
+    @member_notes = @member_notes_parts.each_with_object({}) do |part, h|
+      h[part.to_sym] = ""
+    end
     @member_lat = nil
     @member_long = nil
     @member_alt = nil
@@ -1077,42 +1092,61 @@ class SpeciesListController < ApplicationController
 
   def init_member_vars_for_edit(spl)
     init_member_vars_for_create
-    if obs = spl.observations.last
-      # TODO: Not sure how to check vote efficiently...
-      @member_vote = begin
-                       obs.namings.first.users_vote(@user).value
-                     rescue
-                       Vote.maximum_vote
-                     end
-      @member_notes = obs.notes if all_obs_same?(spl, obs, :notes)
-      if all_obs_same?(spl, obs, :lat, :long, :alt)
-        @member_lat  = obs.lat
-        @member_long = obs.long
-        @member_alt  = obs.alt
+    spl_obss = spl.observations
+    return unless (obs = spl_obss.last)
+    # Not sure how to check vote efficiently...
+    @member_vote = begin
+                     obs.namings.first.users_vote(@user).value
+                   rescue
+                     Vote.maximum_vote
+                   end
+    init_member_notes_for_edit(spl_obss)
+    if all_obs_same_lat_Lon_alt?(spl_obss)
+      @member_lat  = obs.lat
+      @member_long = obs.long
+      @member_alt  = obs.alt
+    end
+    if all_obs_same_attr?(spl_obss, :is_collection_location)
+      @member_is_collection_location = obs.is_collection_location
+    end
+    @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
+  end
+
+  def init_member_notes_for_edit(observations)
+    if all_obs_same_attr?(observations, :notes)
+      obs = observations.last
+      obs.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = obs.notes_part_value(part)
       end
-      if all_obs_same?(spl, obs, :is_collection_location)
-        @member_is_collection_location = obs.is_collection_location
+    else
+      @species_list.form_notes_parts(@user).each do |part|
+        @member_notes[part.to_sym] = ""
       end
-      @member_specimen = obs.specimen if all_obs_same?(spl, obs, :specimen)
     end
   end
 
-  # Do all observations in spl have same values for the given attributes?
-  def all_obs_same?(spl, obs, *attrs)
-    cond = attrs.map { |a| "observations.#{a} != ?" }.join(" OR ")
-    vals = attrs.map { |a| obs.send(a) }
-    spl.observations.where(cond, *vals).limit(1).count == 0
+  def all_obs_same_lat_Lon_alt?(observations)
+    all_obs_same_attr?(observations, :lat) &&
+      all_obs_same_attr?(observations, :long) &&
+      all_obs_same_attr?(observations, :alt)
+  end
+
+  # Do all observations have same values for the single given attribute?
+  def all_obs_same_attr?(observations, attr)
+    exemplar = observations.first.send(attr)
+    observations.all? { |o| o.send(attr) == exemplar }
   end
 
   def init_member_vars_for_reload
     member_params    = params[:member] || {}
     @member_vote     = member_params[:vote].to_s
-    @member_notes    = member_params[:notes].to_s
+    # cannot leave @member_notes == nil because view expects a hash
+    @member_notes    = member_params[:notes] || Observation.no_notes
     @member_lat      = member_params[:lat].to_s
     @member_long     = member_params[:long].to_s
     @member_alt      = member_params[:alt].to_s
     @member_is_collection_location =
-                       member_params[:is_collection_location].to_s == "1"
+      member_params[:is_collection_location].to_s == "1"
     @member_specimen = member_params[:specimen].to_s == "1"
   end
 

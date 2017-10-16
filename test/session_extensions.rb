@@ -166,9 +166,7 @@ module SessionExtensions
 
   def submit_form_with_changes(changes)
     open_form do |form|
-      for key, value in changes
-        form.change(key, value)
-      end
+      changes.each { |key, value| form.change(key, value) }
       form.submit
     end
   end
