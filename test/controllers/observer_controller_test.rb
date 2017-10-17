@@ -2316,7 +2316,7 @@ class ObserverControllerTest < FunctionalTestCase
              place_name: "Zzyzx, Japan",
              when: time0,
              thumb_image_id: 0, # (make new image the thumbnail)
-             notes: "blah"
+             notes: { Other: "blah" }
            },
            image: {
              "0" => {
