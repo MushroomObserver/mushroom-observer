@@ -54,25 +54,27 @@ But that has nothing to do with this test failure.)
 
 ## commands to run these tests
 ```
-bin/rails test test/models/abstract_model_test.rb:300
 bin/rails test test/models/abstract_model_test.rb:159
 bin/rails test test/models/abstract_model_test.rb:208
+bin/rails test test/models/abstract_model_test.rb:300
 ```
 ## test output
 ```
   1) Failure:
-AbstractModelTest#test_project_rss_log_life_cycle [/vagrant/mushroom-observer/test/models/abstract_model_test.rb:325]:
-Expected false to be truthy.
-
-  2) Failure:
 AbstractModelTest#test_location_rss_log_life_cycle [/vagrant/mushroom-observer/test/models/abstract_model_test.rb:187]:
 Expected false to be truthy.
 
-  3) Failure:
+  2) Failure:
 AbstractModelTest#test_name_rss_log_life_cycle [/vagrant/mushroom-observer/test/models/abstract_model_test.rb:240]:
 Expected false to be truthy.
 
+  3) Failure:
+AbstractModelTest#test_project_rss_log_life_cycle [/vagrant/mushroom-observer/test/models/abstract_model_test.rb:325]:
+Expected false to be truthy.
+
 ```
+
+
 # undefined path for StringIO
 
 Error 4 is perhaps a Rails / actionpack / rack-test bug.
@@ -107,6 +109,8 @@ NoMethodError: undefined method `path' for #<StringIO:0x0000000ae94cd8>
     /vagrant/mushroom-observer/test/controller_extensions.rb:143:in `post_requires_login'
     /vagrant/mushroom-observer/test/controllers/species_list_controller_test.rb:1011:in `test_read_species_list'
 ```
+
+
 # CHECKBOX FAILURE attribute "persists" after failed save
 
 ## commands to run these tests
@@ -120,20 +124,20 @@ rake test test/controllers/observer_controller_test.rb test_list_checkboxes_in_e
 ```
 $ bin/rails test test/controllers/observer_controller_test.rb -d
 ...
-1) Failure:
-ObserverControllerTest#test_list_checkboxes_in_edit_observation [/vagrant/mushroom-observer/test/controllers/observer_controller_test.rb:2441]:
+  1) Failure:
+ObserverControllerTest#test_list_checkboxes_in_edit_observation [/vagrant/mushroom-observer/test/controllers/observer_controller_test.rb:2565]:
 
 
   2) Failure:
-ObserverControllerTest#test_project_checkboxes_in_edit_observation [/vagrant/mushroom-observer/test/controllers/observer_controller_test.rb:2345]:
+ObserverControllerTest#test_project_checkboxes_in_edit_observation [/vagrant/mushroom-observer/test/controllers/observer_controller_test.rb:2467]:
+Expected response to be a <3XX: redirect>, but was a <200: OK>
 
-
-137 runs, 1352 assertions, 2 failures, 0 errors, 0 skips
+141 runs, 1387 assertions, 2 failures, 0 errors, 0 skips
 
 Failed tests:
 
-bin/rails test test/controllers/observer_controller_test.rb:2428
-bin/rails test test/controllers/observer_controller_test.rb:2330
+bin/rails test test/controllers/observer_controller_test.rb:2552
+bin/rails test test/controllers/observer_controller_test.rb:2438
 ```
 Sample; fails at last line
 ```ruby
