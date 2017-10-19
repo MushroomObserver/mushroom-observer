@@ -77,13 +77,9 @@
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
-#  form_notes_parts::       notes parts to display in create & edit form
-#  notes_export_formatted:: notes to string with marked up captions (keys)
-#  notes_show_formatted::   notes to string with plain captions (keys)
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
-#  ---
 #  other_notes_key::        key used for general Observation notes
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
