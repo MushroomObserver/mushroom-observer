@@ -404,7 +404,8 @@ class Observation < AbstractModel
     template_parts_underscored = user.notes_template_parts.each do |part|
       part.tr!(" ", "_")
     end
-    notes.keys.map(&:to_s) - template_parts_underscored - [other_notes_part]
+    notes_parts = notes.blank? ? [] : notes.keys.map(&:to_s)
+    notes_parts - template_parts_underscored - [other_notes_part]
   end
 
   # notes as a String, captions (keys) without added formstting,
@@ -416,6 +417,7 @@ class Observation < AbstractModel
   #                                                  stem:
   #                                                  Other: x"
   def self.export_formatted(notes, markup = nil)
+    return "" if notes.blank?
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = notes.each_with_object("") do |(key, value), str|
