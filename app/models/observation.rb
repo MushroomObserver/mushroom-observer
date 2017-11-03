@@ -77,13 +77,9 @@
 #  == Instance methods
 #
 #  comments::               List of Comment's attached to this Observation.
-#  form_notes_parts::       notes parts to display in create & edit form
-#  notes_export_formatted:: notes to string with marked up captions (keys)
-#  notes_show_formatted::   notes to string with plain captions (keys)
 #  interests::              List of Interest's attached to this Observation.
 #  sequences::              List of Sequences which belong to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
-#  ---
 #  other_notes_key::        key used for general Observation notes
 #  other_notes_part::       other_notes_key as a String
 #  notes_part_id::          id of textarea for a Notes heading
@@ -403,6 +399,7 @@ class Observation < AbstractModel
   # Array of notes parts (Strings) which are
   # neither in the notes_template nor the caption for other notes
   def notes_orphaned_parts(user)
+    return [] if notes.blank?
     # Change spaces to underscores in order to subtract template parts from
     # stringified keys because keys have underscores instead of spaces
     template_parts_underscored = user.notes_template_parts.each do |part|
@@ -420,6 +417,7 @@ class Observation < AbstractModel
   #                                                  stem:
   #                                                  Other: x"
   def self.export_formatted(notes, markup = nil)
+    return "" if notes.blank?
     return notes[other_notes_key] if notes.keys == [other_notes_key]
 
     result = notes.each_with_object("") do |(key, value), str|

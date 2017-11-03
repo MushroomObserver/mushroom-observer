@@ -15,12 +15,9 @@ GET requests are read-only and do not require authentication.  POST (create),
 PUT (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
 
-Responses are presently in XML, although a feature-branch on Jason's github
-repo has almost finished adding the ability to request responses in JSON.  Any
-interested in this feature are welcome to take over the development and finish
-it off:
-
-* <https://github.com/pellaea/mushroom-observer/tree/json_api>
+Responses can be requested in either XML (default) or JSON. You can either
+set the appropriate HTTP request header, or you can request it explicitly with
+a parameter (see below).
 
 GET Requests
 ------------
@@ -37,6 +34,8 @@ accepted:
 * detail=none -- Return only record ids (default).
 * detail=low -- Return some basic data with each record.
 * detail=high -- Return a great deal of data with each record.
+* format=xml -- Return XML response.
+* format=json -- Return JSON response.
 
 Note that the result will be paginated for detailed responses.  High detail
 responses in particular are intended for very small data sets.  For example,

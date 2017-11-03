@@ -19,7 +19,7 @@ xml.tag!(tag,
   end
   xml_detailed_object(xml, :consensus_name, object.name)
   xml_confidence_level(xml, :confidence, object.vote_cache)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes_show_formatted.to_s.tpl_nodiv)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_integer(xml, :number_of_views, object.num_views)

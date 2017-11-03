@@ -89,7 +89,7 @@ class ApiController < ApplicationController
     args = params.to_unsafe_h.symbolize_keys.except(:controller)
     args[:method] = request.method
     args[:action] = type
-    args.delete(:format) if Rails.env == "test"
+    args.delete(:format)
     args
   end
 

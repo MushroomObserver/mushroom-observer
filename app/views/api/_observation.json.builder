@@ -7,7 +7,7 @@ json.altitude               object.alt
 json.specimen_available     object.specimen ? true : false
 json.is_collection_location object.is_collection_location ? true : false
 json.confidence             object.vote_cache
-json.notes                  object.notes.to_s.tpl_nodiv
+json.notes                  object.notes_show_formatted.to_s.tpl_nodiv
 json.created_at             object.created_at
 json.updated_at             object.updated_at
 json.number_of_views        object.num_views
