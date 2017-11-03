@@ -218,8 +218,13 @@ class SequenceTest < UnitTestCase
     sequence = Sequence.new(params)
     assert(sequence.invalid?)
 
+    # Prove we allow all IUPAC or FASTA nucleotide codes
+    params[:bases] = "ACGTURYSWKMBDHVN.-0123456789 \n\r\t"
+    sequence = Sequence.new(params)
+    assert(sequence.valid?, "Bases should allow all valid nucleotide codes")
+
     # Prove bases with invalid nucleic acid codes are invalid
-    params[:bases] = "acgt plus some BS"
+    params[:bases] = "acgt plus sOmE craP"
     sequence = Sequence.new(params)
     assert(sequence.invalid?, "Bases with invalid code should be invalid")
   end
