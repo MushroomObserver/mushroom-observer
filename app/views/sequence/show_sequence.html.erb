@@ -22,8 +22,9 @@
           <td><%= @sequence.locus %></td>
         </tr>
         <tr>
-          <td class="bold"><%= :BASES.t %>:</td>
-          <td class="monospace" ><%= @sequence.bases %></td>
+          <td class="bold align-top"><%= :BASES.t %>:</td>
+          <td class="col-md-9 monospace max-width-text">
+            <%= @sequence.bases %></td>
         </tr>
         <tr>
           <td class="bold"><%= :DEPOSIT.t %>:</td>
