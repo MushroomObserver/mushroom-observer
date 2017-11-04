@@ -854,4 +854,12 @@ class ObservationTest < UnitTestCase
              "orphaned_caption_2", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
+
+  # Prove that part value is returned for the given key,
+  # including any required normalization of the key
+  def test_notes_parts_values
+    obs = observations(:template_and_orphaned_notes_scrambled_obs)
+    assert_equal("red", obs.notes_part_value("Cap"))
+    assert_equal("pine", obs.notes_part_value("Nearby trees"))
+  end
 end
