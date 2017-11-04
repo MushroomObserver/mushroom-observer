@@ -41,13 +41,14 @@ class Sequence < AbstractModel
   ##############################################################################
 
   # matchers for bases
-
   BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n # non-blank line
                           ^\s*\n      # followed by blank line
                           (\s*)\S/x   # and later non-whitespace character
-  DESCRIPTION   = /\A>.*$/
-  VALID_CODES   = /ACGTNU\-*\d\s/i
-  INVALID_CODES = /[^#{VALID_CODES}]/i
+  DESCRIPTION        = /\A>.*$/
+  # nucleotide codes from http://www.bioinformatics.org/sms2/iupac.html
+  # FASTA allows interspersed numbers, spaces. See https://goo.gl/NYbptK
+  VALID_CODES        = /ACGTURYSWKMBDHVN.\-\d\s/i
+  INVALID_CODES      = /[^#{VALID_CODES}]/i
 
   ##############################################################################
   #
@@ -120,7 +121,11 @@ class Sequence < AbstractModel
   end
 
   def accession_added?
-    accession.present? && accession_was_blank?
+    accession_changed? && accession_was_blank? && accession.present?
+  end
+
+  def accession_changed?
+    changes[:accession].present?
   end
 
   def accession_was_blank?
