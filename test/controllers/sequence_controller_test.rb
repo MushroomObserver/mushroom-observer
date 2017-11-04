@@ -199,6 +199,22 @@ class SequenceControllerTest < FunctionalTestCase
     assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
            "Failed to include Sequence accessioned in RssLog for Observation")
 
+    # Prove Observation owner user can edit locus
+    locus  = "ITS"
+    params = {
+      id: sequence.id,
+      sequence:  { locus:     locus,
+                   bases:     bases,
+                   archive:   archive,
+                   accession: accession }
+    }
+
+    post(:edit_sequence, params)
+    sequence.reload
+    obs.rss_log.reload
+
+    assert_equal(locus, sequence.locus)
+
     # Prove returned to form if parameters invalid
     params = {
       id: sequence.id,
