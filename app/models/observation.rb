@@ -375,9 +375,17 @@ class Observation < AbstractModel
 
   # value of notes part
   #   notes: { Other: abc }
-  #   obervation.notes_part_value("Other") #=> "abc"
+  #   observation.notes_part_value("Other") #=> "abc"
+  #   observation.notes_part_value(:Other)  #=> "abc"
   def notes_part_value(part)
-    notes.blank? ? "" : notes[part.to_sym]
+    notes.blank? ? "" : notes[notes_normalized_key(part)]
+  end
+
+  # Change spaces to underscores in keys
+  #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
+  #   notes_normalized_key(:Other)         #=> :Other
+  def notes_normalized_key(part)
+    part.to_s.tr(" ", "_").to_sym
   end
 
   # Array of note parts (Strings) to display in create & edit form,
