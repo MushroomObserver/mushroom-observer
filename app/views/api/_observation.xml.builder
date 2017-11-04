@@ -19,7 +19,19 @@ xml.tag!(tag,
   end
   xml_detailed_object(xml, :consensus_name, object.name)
   xml_confidence_level(xml, :confidence, object.vote_cache)
-  xml_html_string(xml, :notes, object.notes_show_formatted.to_s.tpl_nodiv)
+  unless object.notes.blank?
+    notes_fields = object.notes.except(Observation.other_notes_key)
+    other_notes  = object.notes_part_value(Observation.other_notes_key)
+    xml.notes_fields do
+      notes_fields.each do |key, value|
+        xml.notes_field do
+          xml_string(xml, :key, key)
+          xml_html_string(xml, :value, value.tl)
+        end
+      end
+    end
+    xml_html_string(xml, :notes, other_notes.to_s.tpl_nodiv)
+  end
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_integer(xml, :number_of_views, object.num_views)
@@ -30,18 +42,6 @@ xml.tag!(tag,
         xml_detailed_object(xml, :sequence, sequence)
       end
     end
-    xml.notes do
-      object.notes.each do |key, value|
-        xml.notes_part do
-          xml_string(xml, :key, key)
-          xml_html_string(xml, :value, value.tl)
-        end
-      end
-    end
-    xml_datetime(xml, :created_at, object.created_at)
-    xml_datetime(xml, :updated_at, object.updated_at)
-    xml_integer(xml, :number_of_views, object.num_views)
-    xml_datetime(xml, :last_viewed, object.last_view)
     xml.namings(number: object.namings.length) do
       object.namings.each do |naming|
         xml_detailed_object(xml, :naming, naming, true)
