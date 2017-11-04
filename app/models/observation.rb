@@ -87,7 +87,7 @@
 #  notes_part_value::       value for textarea for a Notes heading
 #  form_notes_parts::       note parts to display in create & edit form
 #  notes_export_formatted:: notes to string with marked up captions (keys)
-#  notes_ahow_formatted::   notes to string with plain captions (keys)
+#  notes_show_formatted::   notes to string with plain captions (keys)
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
