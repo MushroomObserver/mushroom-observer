@@ -7,7 +7,7 @@
 #  == Attributes
 #
 #  id::               unique numerical id, starting at 1.
-#  observation::      id of the associated Observation
+#  observation::      associated Observation record
 #  user::             user who created the Sequence
 #  locus::            description of the locus (region) of the Sequence
 #  bases::            nucleotides in FASTA format (description lines optional)
