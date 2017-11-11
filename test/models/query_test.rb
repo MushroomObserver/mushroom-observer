@@ -2503,6 +2503,32 @@ class QueryTest < UnitTestCase
                  :Sequence, :all, accession_has: "968605")
     assert_query([sequences(:deposited_sequence)],
                  :Sequence, :all, notes_has: "deposited_sequence")
+    obs = observations(:locally_sequenced_obs)
+    assert_query([sequences(:local_sequence)],
+                 :Sequence, :all, observations: [obs.id])
+  end
+
+  def test_sequence_filters
+    sequences = Sequence.all
+    seq1 = sequences[0]
+    seq2 = sequences[1]
+    seq3 = sequences[2]
+    seq4 = sequences[3]
+    seq1.update_attribute(:observation, observations(:minimal_unknown_obs))
+    seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
+    seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
+    seq4.update_attribute(:observation, observations(:peltigera_obs))
+    assert_query([seq1, seq2], :Sequence, :all, date: ["2006", "2006"])
+    assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
+    assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
+    assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")
+    assert_query([seq1, seq2, seq3], :Sequence, :all, locations: "Burbank")
+    assert_query([seq2], :Sequence, :all, projects: "Bolete Project")
+    assert_query([seq1, seq2], :Sequence, :all,
+                 species_lists: "List of mysteries")
+    assert_query([seq4], :Sequence, :all, confidence: "2")
+    assert_query([seq1, seq2, seq3], :Sequence, :all,
+                 north: "90", south: "0", west: "-180", east: "-100")
   end
 
   def test_sequence_in_set
