@@ -780,10 +780,12 @@ class NameController < ApplicationController
 
   def send_name_merge_email(new_name)
     flash_warning(:runtime_merge_names_warning.t)
+    num1 = "o=#{@name.observations_count}, n=#{@name.namings_count}"
+    num2 = "o=#{new_name.observations_count}, n=#{new_name.namings_count}"
     content = :email_name_merge.l(
       user: @user.login,
-      this: "##{@name.id}: " + @name.real_search_name,
-      that: "##{new_name.id}: " + new_name.real_search_name,
+      this: "##{@name.id}: #{@name.real_search_name} [#{num1}]",
+      that: "##{new_name.id}: #{new_name.real_search_name} [#{num2}]",
       this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
       that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
     )
