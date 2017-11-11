@@ -12,7 +12,6 @@ module Query
         observations?:  [Observation],
         users?:         [User],
         locus_has?:     :string,
-        bases_has?:     :string,
         archive_has?:   :string,
         accession_has?: :string,
         notes_has?:     :string
@@ -24,6 +23,10 @@ module Query
       initialize_model_do_time(:updated_at)
       initialize_model_do_objects_by_id(:observations)
       initialize_model_do_objects_by_id(:users)
+      # Leaving out bases because some formats allow spaces and other "garbage"
+      # delimiters which could interrupt the subsequence the user is searching
+      # for.  Users would probably not understand why the search fails to find
+      # some sequences because of this.
       initialize_model_do_search(:locus_has, :locus)
       initialize_model_do_search(:archive_has, :archive)
       initialize_model_do_search(:accession_has, :accession)
