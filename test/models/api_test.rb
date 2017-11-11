@@ -22,18 +22,11 @@ class ApiTest < UnitTestCase
     api
   end
 
-  # TODO: review following
-  # should it return nil or API.execute(params)
   def assert_api_fail(params)
-    api = nil
-    assert(api_errors(params),
+    api = API.execute(params)
+    assert(api.errors.any?,
            "API request should have failed, params: #{params.inspect}")
     api
-  end
-
-  def api_errors(params)
-    api = API.execute(params)
-    api.errors.any?
   end
 
   def assert_api_pass(params)
