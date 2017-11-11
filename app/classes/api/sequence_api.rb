@@ -17,7 +17,7 @@ class API
     ]
 
     def query_params
-      sequence_query_params + observation_query_params
+      sequence_query_params.merge(observation_query_params)
     end
 
     def sequence_query_params
