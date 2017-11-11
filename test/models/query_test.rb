@@ -2492,6 +2492,35 @@ class QueryTest < UnitTestCase
     assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
   end
 
+  def test_sequence_all
+    expect = Sequence.all.order("created_at").to_a
+    assert_query(expect, :Sequence, :all)
+    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+                 :Sequence, :all, locus_has: "ITS")
+    assert_query([sequences(:alternate_archive)],
+                 :Sequence, :all, archive_has: "knaB")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :all, accession_has: "968605")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :all, notes_has: "deposited_sequence")
+  end
+
+  def test_sequence_in_set
+    list_set_ids = [sequences(:fasta_formatted_sequence).id,
+                    sequences(:bare_formatted_sequence).id]
+    assert_query(list_set_ids, :Sequence, :in_set, ids: list_set_ids)
+  end
+
+  def test_sequence_pattern_search
+    assert_query([], :Sequence, :pattern_search, pattern: "nonexistent")
+    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+                 :Sequence, :pattern_search, pattern: "ITS")
+    assert_query([sequences(:alternate_archive)],
+                 :Sequence, :pattern_search, pattern: "knaBneG")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :pattern_search, pattern: "deposited_sequence")
+  end
+
   def test_species_list_all
     expect = SpeciesList.all.order("title").to_a
     assert_query(expect, :SpeciesList, :all)
