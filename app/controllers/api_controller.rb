@@ -73,7 +73,7 @@ class ApiController < ApplicationController
     args = params_to_api_args(type)
 
     if request.method == "POST"
-      args[:upload] = upload_api if something_to_post?
+      args[:upload] = upload_api if upload_present?
       # Special exception to let caller who creates new user to see that user's
       # new API keys.  Otherwise there is no way to get that info via the API.
       @show_api_keys_for_new_user = true if type == :user
@@ -91,7 +91,7 @@ class ApiController < ApplicationController
     args
   end
 
-  def something_to_post?
+  def upload_present?
     upload_length > 0 && upload_type.present?
   end
 
