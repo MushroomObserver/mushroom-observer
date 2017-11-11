@@ -23,7 +23,7 @@ module Query
       initialize_model_do_time(:created_at)
       initialize_model_do_time(:updated_at)
       initialize_model_do_objects_by_id(:users)
-      initialize_model_do_bounding_box(:location)
+      initialize_model_do_location_bounding_box
       initialize_content_filters(Location)
       super
     end

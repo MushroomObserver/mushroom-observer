@@ -98,7 +98,7 @@ module Query
       if params[:north] || params[:south] || params[:east] || params[:west]
         add_join(observations: :locations)
       end
-      initialize_model_do_bounding_box(:observation)
+      initialize_model_do_observation_bounding_box
     end
 
     def default_order
