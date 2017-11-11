@@ -16,6 +16,7 @@ class API
       :location,
       :name,
       { namings: :name },
+      :sequences,
       :user
     ]
 
