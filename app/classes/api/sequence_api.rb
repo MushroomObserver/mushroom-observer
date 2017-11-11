@@ -4,7 +4,7 @@ class API
     self.model = Sequence
 
     self.high_detail_page_length = 100
-    self.low_detail_page_length  = 100
+    self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
@@ -14,8 +14,6 @@ class API
     ]
 
     self.low_detail_includes = [
-      :observation,
-      :user
     ]
 
     def query_params
@@ -24,9 +22,10 @@ class API
         created_at:    parse_time_range(:created_at),
         updated_at:    parse_time_range(:updated_at),
         users:         parse_users(:user),
-        locus_has:     parse_strings(:locus),
-        bases_has:     parse_strings(:bases),
-        accession_has: parse_strings(:accession)
+        locus_has:     parse_string(:locus),
+        archive_has:   parse_string(:archive),
+        accession_has: parse_string(:accession),
+        notes_has:     parse_string(:notes)
       }
     end
 
