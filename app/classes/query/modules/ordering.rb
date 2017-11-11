@@ -122,6 +122,9 @@ module Query::Modules::Ordering
     when "original_name"
       "images.original_name ASC" if model == Image
 
+    when "url"
+      "external_links.url ASC" if model == ExternalLink
+
     when "id" # (for testing)
       "#{table}.id ASC"
 

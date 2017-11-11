@@ -199,8 +199,8 @@ class ApiTest < UnitTestCase
   ##############################################################################
 
   def test_basic_gets
-    [Comment, Image, Location, Name, Observation, Project, Sequence,
-     SpeciesList, User].each do |model|
+    [Comment, ExternalLink, Image, Location, Name, Observation, Project,
+     Sequence, SpeciesList, User].each do |model|
       expected_object = model.first
 
       api = API.execute(method: :get, action: model.type_tag,

@@ -1550,8 +1550,23 @@ class QueryTest < UnitTestCase
   end
 
   def test_external_link_all
-    expect = ExternalLink.all.sort_by(&:id)
-    assert_query(expect, :ExternalLink, :all, by: :id)
+    assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink, :all)
+    assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
+                 :ExternalLink, :all, users: users(:mary))
+    assert_query([], :ExternalLink, :all, users: users(:dick))
+    obs = observations(:coprinus_comatus_obs)
+    assert_query(obs.external_links.sort_by(&:url),
+                 :ExternalLink, :all, observations: obs)
+    obs = observations(:detailed_unknown_obs)
+    assert_query([], :ExternalLink, :all, observations: obs)
+    site = external_sites(:mycoportal)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, external_sites: site)
+    site = external_sites(:inaturalist)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, external_sites: site)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, url: "iNaturalist")
   end
 
   def test_herbarium_all

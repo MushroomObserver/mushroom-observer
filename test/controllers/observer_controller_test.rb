@@ -2978,15 +2978,16 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_external_sites_user_can_add_links_to
-    site = external_sites(:mycoportal)
     # not logged in
     do_external_sites_test([], nil, nil)
     # dick is neither owner nor member of any site's project
     do_external_sites_test([], dick, observations(:agaricus_campestris_obs))
     # rolf is owner
-    do_external_sites_test([site], rolf, observations(:agaricus_campestris_obs))
-    # mary is member of site's project
-    do_external_sites_test([site], mary, observations(:agaricus_campestris_obs))
+    do_external_sites_test(ExternalSite.all, rolf,
+                           observations(:agaricus_campestris_obs))
+    # mary is member some sites' project
+    do_external_sites_test(mary.external_sites, mary,
+                           observations(:agaricus_campestris_obs))
     # but there is already a link on this obs
     do_external_sites_test([], mary, observations(:coprinus_comatus_obs))
   end

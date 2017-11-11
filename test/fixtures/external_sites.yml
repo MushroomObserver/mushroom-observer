@@ -5,3 +5,7 @@
 mycoportal:
   name:    MycoPortal
   project: empty_project # mary is only member and admin
+
+inaturalist:
+  name:    iNaturalist
+  project: empty_project # mary is only member and admin
