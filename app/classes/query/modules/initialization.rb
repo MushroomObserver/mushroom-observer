@@ -46,7 +46,7 @@ module Query::Modules::Initialization
       min, max = params[arg]
       @where << "#{col} >= #{min}" unless min.blank?
       @where << "#{col} <= #{max}" unless max.blank?
-      if val = args[:join]
+      if (val = args[:join])
         # TODO: convert to piecewise add_join
         @join << val if !min.blank? || !max.blank?
       end
@@ -87,7 +87,7 @@ module Query::Modules::Initialization
       col = "#{model.table_name}.#{col}" unless col.to_s.match(/\./)
       set = clean_id_set(ids)
       @where << "#{col} IN (#{set})"
-      if val = args[:join]
+      if (val = args[:join])
         # TODO: convert to piecewise add_join
         @join << val
       end
@@ -135,7 +135,7 @@ module Query::Modules::Initialization
       if filter = args[:filter]
         objs = objs.uniq.map(&filter).flatten
       end
-      if val = args[:join]
+      if (val = args[:join])
         # TODO: convert to piecewise add_join
         @join << val
       end
@@ -291,7 +291,7 @@ module Query::Modules::Initialization
         initialize_model_do_date_half(true, vals[0], col)
         initialize_model_do_date_half(false, vals[1], col)
       end
-      if val = args[:join]
+      if (val = args[:join])
         # TODO: convert to piecewise add_join
         @join << val
       end
