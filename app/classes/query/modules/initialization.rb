@@ -46,10 +46,9 @@ module Query::Modules::Initialization
       min, max = params[arg]
       @where << "#{col} >= #{min}" unless min.blank?
       @where << "#{col} <= #{max}" unless max.blank?
-      if (val = args[:join]) &&
-         (!min.blank? || !max.blank?)
-        # TODO: is this used? convert to piecewise add_join
-        @join << val
+      if val = args[:join]
+        # TODO: convert to piecewise add_join
+        @join << val if !min.blank? || !max.blank?
       end
     end
   end
@@ -82,12 +81,16 @@ module Query::Modules::Initialization
     end
   end
 
-  def initialize_model_do_objects_by_id(arg, col = nil)
+  def initialize_model_do_objects_by_id(arg, col = nil, args = {})
     if ids = params[arg]
       col ||= "#{arg.to_s.sub(/s$/, "")}_id"
       col = "#{model.table_name}.#{col}" unless col.to_s.match(/\./)
       set = clean_id_set(ids)
       @where << "#{col} IN (#{set})"
+      if val = args[:join]
+        # TODO: convert to piecewise add_join
+        @join << val
+      end
     end
   end
 
@@ -133,7 +136,7 @@ module Query::Modules::Initialization
         objs = objs.uniq.map(&filter).flatten
       end
       if val = args[:join]
-        # TODO: is this used? convert to piecewise add_join
+        # TODO: convert to piecewise add_join
         @join << val
       end
       set = clean_id_set(objs.map(&:id).uniq)
@@ -271,10 +274,11 @@ module Query::Modules::Initialization
     end
   end
 
-  def initialize_model_do_date(arg = :date, col = arg)
+  def initialize_model_do_date(arg = :date, col = arg, args = {})
     col = "#{model.table_name}.#{col}" unless col.to_s.match(/\./)
     if vals = params[arg]
-      # Ugh, special case for search by month/day where range of months wraps around from December to January.
+      # Ugh, special case for search by month/day where range of months wraps
+      # around from December to January.
       if vals[0].to_s.match(/^\d\d-\d\d$/) &&
          vals[1].to_s.match(/^\d\d-\d\d$/) &&
          vals[0].to_s > vals[1].to_s
@@ -286,6 +290,10 @@ module Query::Modules::Initialization
       else
         initialize_model_do_date_half(true, vals[0], col)
         initialize_model_do_date_half(false, vals[1], col)
+      end
+      if val = args[:join]
+        # TODO: convert to piecewise add_join
+        @join << val
       end
     end
   end
