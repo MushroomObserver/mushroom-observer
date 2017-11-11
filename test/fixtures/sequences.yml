@@ -29,10 +29,15 @@ missing_accession_sequence:
   <<: *DEFAULTS
   accession:   ""
 
+alternate_archive:
+  <<: *DEFAULTS
+  archive:     knaBneG
+
 fasta_formatted_sequence:
   <<: *DEFAULTS
   # Use YAML literal style to retain newline characters
   # See http://www.yaml.org/spec/1.2/spec.html#id2760844
+  locus: ITS1F
   bases: |
     >KT968605.1 Neournula pouchetii voucher MO-205345 18S ribosomal RNA gene, partial sequence; internal transcribed spacer 1 and 5.8S ribosomal RNA gene, complete sequence; and internal transcribed spacer 2, partial sequence
     GGAAGTAAAAGTCGTAACAAGGTTTCCGTAGGTGAACCTGCGGAAGGATCATTACACAATACTCTGTATT
@@ -50,6 +55,7 @@ bare_formatted_sequence:
   <<: *DEFAULTS
   # Use YAML literal style to retain newline characters
   # See http://www.yaml.org/spec/1.2/spec.html#id2760844
+  locus: ITS4
   bases: |
     GGAAGTAAAAGTCGTAACAAGGTTTCCGTAGGTGAACCTGCGGAAGGATCATTACACAATACTCTGTATT
     ATCCACACACACCTTCTGTGATCCATTTACCTGGTTGCTTCCCGTGGCATCTCGCTTGCTTCAGAGGCCC
@@ -67,6 +73,7 @@ bare_with_numbers_sequence:
   # Use YAML literal style to retain newline chancters
   # Use YAML indentation indicator because lines contain leading content
   # space characters. See http://www.yaml.org/spec/1.2/spec.html#id2793979
+  locus: ITS5R
   bases: |2+
       1 ggaagtaaaa gtcgtaacaa ggtttccgta ggtgaacctg cggaaggatc attacacaat
      61 actctgtatt atccacacac accttctgtg atccatttac ctggttgctt cccgtggcat
