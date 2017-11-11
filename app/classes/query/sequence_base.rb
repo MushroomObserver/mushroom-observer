@@ -7,13 +7,15 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:        [:time],
-        updated_at?:        [:time],
-        observations?:      [Observation],
-        users?:             [User],
-        locus_has?:         :string,
-        bases_has?:         :string,
-        accession_has?:     :string
+        created_at?:    [:time],
+        updated_at?:    [:time],
+        observations?:  [Observation],
+        users?:         [User],
+        locus_has?:     :string,
+        bases_has?:     :string,
+        archive_has?:   :string,
+        accession_has?: :string,
+        notes_has?:     :string
       )
     end
 
@@ -23,7 +25,9 @@ module Query
       initialize_model_do_objects_by_id(:observations)
       initialize_model_do_objects_by_id(:users)
       initialize_model_do_search(:locus_has, :locus)
+      initialize_model_do_search(:archive_has, :archive)
       initialize_model_do_search(:accession_has, :accession)
+      initialize_model_do_search(:notes_has, :notes)
       super
     end
 
