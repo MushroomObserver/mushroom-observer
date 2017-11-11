@@ -6,8 +6,12 @@ module Query
     end
 
     def parameter_declarations
-      super.merge(
-        # These apply to sequence itself:
+      super.merge(sequence_parameter_declarations).
+        merge(observation_parameter_declarations)
+    end
+
+    def sequence_parameter_declarations
+      {
         created_at?:     [:time],
         updated_at?:     [:time],
         observations?:   [Observation],
@@ -16,7 +20,11 @@ module Query
         archive_has?:    :string,
         accession_has?:  :string,
         notes_has?:      :string
-        # These apply to parent observation:
+      }
+    end
+
+    def observation_parameter_declarations
+      {
         date?:           [:date],
         observers?:      [User],
         names?:          [:string],
@@ -30,7 +38,7 @@ module Query
         south?:          :float,
         east?:           :float,
         west?:           :float
-      )
+      }
     end
 
     def initialize_flavor
