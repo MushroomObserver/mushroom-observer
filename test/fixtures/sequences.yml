@@ -31,7 +31,7 @@ missing_accession_sequence:
 
 alternate_archive:
   <<: *DEFAULTS
-  archive:     knaBneG
+  archive:     UNITE
 
 fasta_formatted_sequence:
   <<: *DEFAULTS
