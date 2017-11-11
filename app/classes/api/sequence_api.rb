@@ -17,8 +17,11 @@ class API
     ]
 
     def query_params
+      sequence_query_params + observation_query_params
+    end
+
+    def sequence_query_params
       {
-        # These apply to sequence itself:
         where:          sql_id_condition,
         created_at:     parse_time_range(:created_at),
         updated_at:     parse_time_range(:updated_at),
@@ -27,7 +30,11 @@ class API
         archive_has:    parse_string(:archive),
         accession_has:  parse_string(:accession),
         notes_has:      parse_string(:notes)
-        # These apply to parent observation:
+      }
+    end
+
+    def observation_query_params
+      {
         date:           parse_date_range(:date),
         observers:      parse_users(:observer),
         names:          parse_strings(:name),
