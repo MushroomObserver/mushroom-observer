@@ -2542,7 +2542,7 @@ class QueryTest < UnitTestCase
     assert_query(Sequence.where("locus LIKE 'ITS%'"),
                  :Sequence, :pattern_search, pattern: "ITS")
     assert_query([sequences(:alternate_archive)],
-                 :Sequence, :pattern_search, pattern: "knaBneG")
+                 :Sequence, :pattern_search, pattern: "UNITE")
     assert_query([sequences(:deposited_sequence)],
                  :Sequence, :pattern_search, pattern: "deposited_sequence")
   end
