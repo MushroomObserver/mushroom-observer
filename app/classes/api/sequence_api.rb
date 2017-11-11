@@ -4,7 +4,7 @@ class API
     self.model = Sequence
 
     self.high_detail_page_length = 100
-    self.low_detail_page_length  = 100
+    self.low_detail_page_length  = 1000
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
@@ -14,19 +14,43 @@ class API
     ]
 
     self.low_detail_includes = [
-      :observation,
-      :user
     ]
 
     def query_params
+      sequence_query_params.merge(observation_query_params)
+    end
+
+    def sequence_query_params
       {
-        where:         sql_id_condition,
-        created_at:    parse_time_range(:created_at),
-        updated_at:    parse_time_range(:updated_at),
-        users:         parse_users(:user),
-        locus_has:     parse_strings(:locus),
-        bases_has:     parse_strings(:bases),
-        accession_has: parse_strings(:accession)
+        where:          sql_id_condition,
+        created_at:     parse_time_range(:created_at),
+        updated_at:     parse_time_range(:updated_at),
+        users:          parse_users(:user),
+        locus_has:      parse_string(:locus),
+        archive_has:    parse_string(:archive),
+        accession_has:  parse_string(:accession),
+        notes_has:      parse_string(:notes)
+      }
+    end
+
+    def observation_query_params
+      {
+        date:           parse_date_range(:date),
+        observers:      parse_users(:observer),
+        names:          parse_strings(:name),
+        synonym_names:  parse_strings(:synonyms_of),
+        children_names: parse_strings(:children_of),
+        locations:      parse_strings(:locations),
+        projects:       parse_strings(:projects),
+        species_lists:  parse_strings(:species_lists),
+        confidence:     parse_float_range(
+          :confidence,
+          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)
+        ),
+        north:          parse_latitude(:north),
+        south:          parse_latitude(:south),
+        east:           parse_longitude(:east),
+        west:           parse_longitude(:west)
       }
     end
 

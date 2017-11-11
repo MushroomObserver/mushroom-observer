@@ -17,13 +17,13 @@ class API
 
     def query_params
       {
-        where: sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        users: parse_users(:user),
-        observations: parse_observations(:observations),
+        where:          sql_id_condition,
+        created_at:     parse_time_range(:created_at),
+        updated_at:     parse_time_range(:updated_at),
+        users:          parse_users(:user),
+        observations:   parse_observations(:observations),
         external_sites: parse_external_sites(:external_sites),
-        url: parse_string(:url)
+        url:            parse_string(:url)
       }
     end
 

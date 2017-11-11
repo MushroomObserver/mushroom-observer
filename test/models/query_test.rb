@@ -2492,6 +2492,61 @@ class QueryTest < UnitTestCase
     assert_query(rsslog_set_ids, :RssLog, :in_set, ids: rsslog_set_ids)
   end
 
+  def test_sequence_all
+    expect = Sequence.all.order("created_at").to_a
+    assert_query(expect, :Sequence, :all)
+    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+                 :Sequence, :all, locus_has: "ITS")
+    assert_query([sequences(:alternate_archive)],
+                 :Sequence, :all, archive_has: "UNITE")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :all, accession_has: "968605")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :all, notes_has: "deposited_sequence")
+    obs = observations(:locally_sequenced_obs)
+    assert_query([sequences(:local_sequence)],
+                 :Sequence, :all, observations: [obs.id])
+  end
+
+  def test_sequence_filters
+    sequences = Sequence.all
+    seq1 = sequences[0]
+    seq2 = sequences[1]
+    seq3 = sequences[2]
+    seq4 = sequences[3]
+    seq1.update_attribute(:observation, observations(:minimal_unknown_obs))
+    seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
+    seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
+    seq4.update_attribute(:observation, observations(:peltigera_obs))
+    assert_query([seq1, seq2], :Sequence, :all, date: ["2006", "2006"])
+    assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
+    assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
+    assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")
+    assert_query([seq1, seq2, seq3], :Sequence, :all, locations: "Burbank")
+    assert_query([seq2], :Sequence, :all, projects: "Bolete Project")
+    assert_query([seq1, seq2], :Sequence, :all,
+                 species_lists: "List of mysteries")
+    assert_query([seq4], :Sequence, :all, confidence: "2")
+    assert_query([seq1, seq2, seq3], :Sequence, :all,
+                 north: "90", south: "0", west: "-180", east: "-100")
+  end
+
+  def test_sequence_in_set
+    list_set_ids = [sequences(:fasta_formatted_sequence).id,
+                    sequences(:bare_formatted_sequence).id]
+    assert_query(list_set_ids, :Sequence, :in_set, ids: list_set_ids)
+  end
+
+  def test_sequence_pattern_search
+    assert_query([], :Sequence, :pattern_search, pattern: "nonexistent")
+    assert_query(Sequence.where("locus LIKE 'ITS%'"),
+                 :Sequence, :pattern_search, pattern: "ITS")
+    assert_query([sequences(:alternate_archive)],
+                 :Sequence, :pattern_search, pattern: "UNITE")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, :pattern_search, pattern: "deposited_sequence")
+  end
+
   def test_species_list_all
     expect = SpeciesList.all.order("title").to_a
     assert_query(expect, :SpeciesList, :all)

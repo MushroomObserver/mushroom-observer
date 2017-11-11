@@ -186,10 +186,10 @@ class NameControllerTest < FunctionalTestCase
     assert(@@emails.length == 1,
            "Was only expecting one email notification, got:\n" +
            @@emails.inspect)
-    if @@emails.first =~ /^(old|this) : #\d+: (.*)/
+    if @@emails.first =~ /^(old|this) : #\d+: (.*) \[.*/
       old_name2 = Regexp.last_match(2)
     end
-    if @@emails.first =~ /^(new|into) : #\d+: (.*)/
+    if @@emails.first =~ /^(new|into) : #\d+: (.*) \[.*/
       new_name2 = Regexp.last_match(2)
     end
     assert(old_name == old_name2 && new_name == new_name2,

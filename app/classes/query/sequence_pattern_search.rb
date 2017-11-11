@@ -17,8 +17,13 @@ module Query
 
     def search_fields
       [
-        "sequences.title",
-        "COALESCE(sequences.body,'')"
+        # I'm leaving out bases because it would be misleading.  Some formats
+        # allow # spaces and other delimiting "garbage" which could break up
+        # the subsequence the user is searching for.
+        "COALESCE(sequences.locus,'')",
+        "COALESCE(sequences.archive,'')",
+        "COALESCE(sequences.accession,'')",
+        "COALESCE(sequences.notes,'')"
       ]
     end
   end

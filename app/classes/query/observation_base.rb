@@ -91,7 +91,7 @@ module Query
         )
         add_join(:comments)
       end
-      initialize_model_do_bounding_box(:observation)
+      initialize_model_do_observation_bounding_box
       initialize_content_filters(Observation)
       super
     end
