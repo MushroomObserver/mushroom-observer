@@ -16,6 +16,10 @@ class ApiTest < UnitTestCase
     super
   end
 
+  # ----------------------------
+  #  :section: Helpers
+  # ----------------------------
+
   def assert_no_errors(api, msg = "API errors")
     assert(api.errors.empty?,
            "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>")
@@ -202,208 +206,106 @@ class ApiTest < UnitTestCase
     [Comment, ExternalLink, Image, Location, Name, Observation, Project,
      Sequence, SpeciesList, User].each do |model|
       expected_object = model.first
-
-      api = API.execute(method: :get, action: model.type_tag,
-                        id: expected_object.id)
+      api = API.execute(
+        method: :get,
+        action: model.type_tag,
+        id: expected_object.id
+      )
       assert_no_errors(api, "Errors while getting first #{model}")
       assert_obj_list_equal([expected_object], api.results,
                             "Failed to get first #{model}")
     end
   end
 
-  def test_getting_observations_from_august
-    api = API.execute(method: :get, action: :observation, date: 20_140_824)
-    assert_no_errors(api)
-  end
+  # ----------------------------
+  #  :section: ApiKey Requests
+  # ----------------------------
 
-  def test_getting_observations_updated_on_day
-    api = API.execute(method: :get, action: :observation,
-                      updated_at: "20140824")
-    assert_no_errors(api)
-  end
-
-  def test_post_minimal_observation
-    @user = rolf
-    @name = Name.unknown
-    @loc = locations(:unknown_location)
-    @img1 = nil
-    @img2 = nil
-    @spl = nil
-    @proj = nil
-    @date = Time.now.in_time_zone("GMT").to_date
-    @notes = Observation.no_notes
-    @vote = Vote.maximum_vote
-    @specimen = false
-    @is_col_loc = true
-    @lat = nil
-    @long = nil
-    @alt = nil
+  def test_posting_api_key_for_yourself
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = rolf
+    @app = "  Mushroom  Mapper  "
+    @verified = true
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
-      location: "Anywhere"
+      method:  :post,
+      action:  :api_key,
+      api_key: @api_key.key,
+      app:     @app
     }
     api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    assert_obj_list_equal([Observation.last], api.results)
-    assert_last_observation_correct
-    assert_api_fail(params.remove(:location))
-  end
-
-  def test_post_maximal_observation
-    @user = rolf
-    @name = names(:coprinus_comatus)
-    @loc = locations(:albion)
-    @img1 = images(:in_situ_image)
-    @img2 = images(:turned_over_image)
-    @spl = species_lists(:first_species_list)
-    @proj = projects(:eol_project)
-    @date = Date.parse("20120626")
-    @notes = { Other: "These are notes.\nThey look like this.\n" }
-    @vote = 2.0
-    @specimen = true
-    @is_col_loc = true
-    @lat = 39.229
-    @long = -123.77
-    @alt = 50
-    params = {
-      method:        :post,
-      action:        :observation,
-      api_key:       @api_key.key,
-      date:          "20120626",
-      notes:         "These are notes.\nThey look like this.\n",
-      location:      "USA, California, Albion",
-      latitude:      "39.229°N",
-      longitude:     "123.770°W",
-      altitude:      "50m",
-      has_specimen: "yes",
-      name:          "Coprinus comatus",
-      vote:          "2",
-      projects:      @proj.id,
-      species_lists: @spl.id,
-      thumbnail:     @img2.id,
-      images:        "#{@img1.id},#{@img2.id}"
-    }
-    api = API.execute(params)
-
-    assert_no_errors(api, "Errors while posting observation")
-    assert_obj_list_equal([Observation.last], api.results)
-    assert_last_observation_correct
-    assert_last_naming_correct
-    assert_last_vote_correct
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
     assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.merge(api_key: "this should fail"))
-    assert_api_fail(params.merge(date: "yesterday"))
-    assert_api_pass(params.merge(location: "This is a bogus location")) # ???
-    assert_api_pass(params.merge(location: "New Place, Oregon, USA")) # ???
-    assert_api_fail(params.remove(:latitude)) # need to supply both or neither
-    assert_api_fail(params.merge(longitude: "bogus"))
-    assert_api_fail(params.merge(altitude: "bogus"))
-    assert_api_fail(params.merge(has_specimen: "bogus"))
-    assert_api_fail(params.merge(name: "Unknown name"))
-    assert_api_fail(params.merge(vote: "take that"))
-    assert_api_fail(params.merge(extra: "argument"))
-    assert_api_fail(params.merge(thumbnail: "1234567"))
-    assert_api_fail(params.merge(images: "1234567"))
-    assert_api_fail(params.merge(projects: "1234567"))
-    # Rolf is not a member of this project
-    assert_api_fail(params.merge(projects: projects(:bolete_project).id))
-    assert_api_fail(params.merge(species_lists: "1234567"))
-    assert_api_fail(
-      # owned by Mary
-      params.merge(species_lists: species_lists(:unknown_species_list).id)
+    assert_api_fail(params.remove(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_for_another_user
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = katrina
+    @app = "  Mushroom  Mapper  "
+    @verified = false
+    params = {
+      method:   :post,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      app:      @app,
+      for_user: @for_user.id
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:app))
+    assert_api_fail(params.merge(app: ""))
+    assert_api_fail(params.merge(for_user: 123_456))
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+  end
+
+  # ----------------------------------
+  #  :section: ExternalLink Requests
+  # ----------------------------------
+
+  def test_external_links_get
+    expect = ExternalLink.all.sort_by(&:id)
+    params = {
+      method: :get,
+      action: :external_link
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while getting links")
+    assert_obj_list_equal(expect, api.results.sort_by(&:id))
+  end
+
+  def test_external_links_fancy_get
+    site = external_sites(:mycoportal)
+    new_link = ExternalLink.create!(
+      user:          rolf,
+      created_at:    Date.parse("2017-01-01"),
+      updated_at:    Date.parse("2017-01-01"),
+      observation:   observations(:minimal_unknown_obs),
+      external_site: site,
+      url:           "http://blah.org"
     )
-  end
-
-  def test_post_observation_with_no_log
+    expect = ExternalLink.where(external_site: site).sort_by(&:id).
+             select { |link| (2015..2016).cover?(link.updated_at.year) }
+    assert_false(expect.include?(new_link))
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
-      location: "Anywhere",
-      name:     "Agaricus campestris",
-      log:      "no"
+      method:         :get,
+      action:         :external_link,
+      external_sites: site.name,
+      updated_at:     "2015-2016"
     }
     api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
-    assert_nil(obs.rss_log_id)
+    assert_no_errors(api, "Errors while getting links")
+    assert_obj_list_equal(expect, api.results.sort_by(&:id))
   end
 
-  def test_post_observation_scientific_location
-    params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key
-    }
-
-    assert_equal(:postal, rolf.location_format)
-
-    params[:location] = "New Place, California, USA"
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
-    assert_nil(obs.location_id)
-    assert_equal("New Place, California, USA", obs.where)
-
-    params[:location] = "Burbank, California, USA"
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
-    assert_nil(obs.where)
-    assert_objs_equal(locations(:burbank), obs.location)
-
-    User.update(rolf.id, location_format: :scientific)
-    assert_equal(:scientific, rolf.reload.location_format)
-
-    params[:location] = "USA, California, Somewhere Else"
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
-    assert_nil(obs.location_id)
-    assert_equal("Somewhere Else, California, USA", obs.where)
-
-    params[:location] = "Burbank, California, USA"
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
-    assert_nil(obs.where)
-    assert_objs_equal(locations(:burbank), obs.location)
-  end
-
-  def test_post_observation_with_specimen
-    params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
-      location: locations(:burbank).name,
-      name:     names(:peltigera).text_name
-    }
-
-    assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
-    assert_api_fail(params.merge(has_specimen: "no", specimen_id: "1"))
-    assert_api_fail(params.merge(has_specimen: "no", herbarium_label: "1"))
-    assert_api_fail(params.merge(has_specimen: "yes", specimen_id: "1",
-                                 herbarium_label: "1"))
-    assert_api_fail(params.merge(has_specimen: "yes", herbarium: "bogus"))
-
-    assert_api_pass(params.merge(has_specimen: "yes"))
-    obs = Observation.last
-    spec = Specimen.last
-    assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
-    assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
-    assert_obj_list_equal([obs], spec.observations)
-
-    nybg = herbaria(:nybg_herbarium)
-    assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
-                                 specimen_id: "R. Singer 12345"))
-    obs = Observation.last
-    spec = Specimen.last
-    assert_objs_equal(nybg, spec.herbarium)
-    assert_equal("Peltigera: R. Singer 12345", spec.herbarium_label)
-    assert_obj_list_equal([obs], spec.observations)
-  end
+  # ----------------------------
+  #  :section: Image Requests
+  # ----------------------------
 
   def test_posting_minimal_image
     setup_image_dirs
@@ -490,6 +392,208 @@ class ApiTest < UnitTestCase
     assert_equal(expect, actual, "Uploaded image differs from original!")
   end
 
+  # ---------------------------------
+  #  :section: Observation Requests
+  # ---------------------------------
+
+  def test_getting_observations_from_august
+    api = API.execute(method: :get, action: :observation, date: "20140824")
+    assert_no_errors(api)
+  end
+
+  def test_getting_observations_updated_on_day
+    api = API.execute(method: :get, action: :observation,
+                      updated_at: "20140824")
+    assert_no_errors(api)
+  end
+
+  def test_post_minimal_observation
+    @user = rolf
+    @name = Name.unknown
+    @loc = locations(:unknown_location)
+    @img1 = nil
+    @img2 = nil
+    @spl = nil
+    @proj = nil
+    @date = Time.now.in_time_zone("GMT").to_date
+    @notes = Observation.no_notes
+    @vote = Vote.maximum_vote
+    @specimen = false
+    @is_col_loc = true
+    @lat = nil
+    @long = nil
+    @alt = nil
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key,
+      location: "Anywhere"
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    assert_obj_list_equal([Observation.last], api.results)
+    assert_last_observation_correct
+    assert_api_fail(params.remove(:location))
+  end
+
+  def test_post_maximal_observation
+    @user = rolf
+    @name = names(:coprinus_comatus)
+    @loc = locations(:albion)
+    @img1 = images(:in_situ_image)
+    @img2 = images(:turned_over_image)
+    @spl = species_lists(:first_species_list)
+    @proj = projects(:eol_project)
+    @date = Date.parse("20120626")
+    @notes = { Other: "These are notes.\nThey look like this.\n" }
+    @vote = 2.0
+    @specimen = true
+    @is_col_loc = true
+    @lat = 39.229
+    @long = -123.77
+    @alt = 50
+    params = {
+      method:        :post,
+      action:        :observation,
+      api_key:       @api_key.key,
+      date:          "20120626",
+      notes:         "These are notes.\nThey look like this.\n",
+      location:      "USA, California, Albion",
+      latitude:      "39.229°N",
+      longitude:     "123.770°W",
+      altitude:      "50m",
+      has_specimen: "yes",
+      name:          "Coprinus comatus",
+      vote:          "2",
+      projects:      @proj.id,
+      species_lists: @spl.id,
+      thumbnail:     @img2.id,
+      images:        "#{@img1.id},#{@img2.id}"
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    assert_obj_list_equal([Observation.last], api.results)
+    assert_last_observation_correct
+    assert_last_naming_correct
+    assert_last_vote_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(api_key: "this should fail"))
+    assert_api_fail(params.merge(date: "yesterday"))
+    assert_api_pass(params.merge(location: "This is a bogus location")) # ???
+    assert_api_pass(params.merge(location: "New Place, Oregon, USA")) # ???
+    assert_api_fail(params.remove(:latitude)) # need to supply both or neither
+    assert_api_fail(params.merge(longitude: "bogus"))
+    assert_api_fail(params.merge(altitude: "bogus"))
+    assert_api_fail(params.merge(has_specimen: "bogus"))
+    assert_api_fail(params.merge(name: "Unknown name"))
+    assert_api_fail(params.merge(vote: "take that"))
+    assert_api_fail(params.merge(extra: "argument"))
+    assert_api_fail(params.merge(thumbnail: "1234567"))
+    assert_api_fail(params.merge(images: "1234567"))
+    assert_api_fail(params.merge(projects: "1234567"))
+    # Rolf is not a member of this project
+    assert_api_fail(params.merge(projects: projects(:bolete_project).id))
+    assert_api_fail(params.merge(species_lists: "1234567"))
+    assert_api_fail(
+      # owned by Mary
+      params.merge(species_lists: species_lists(:unknown_species_list).id)
+    )
+  end
+
+  def test_post_observation_with_no_log
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key,
+      location: "Anywhere",
+      name:     "Agaricus campestris",
+      log:      "no"
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_nil(obs.rss_log_id)
+  end
+
+  def test_post_observation_scientific_location
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key
+    }
+    assert_equal(:postal, rolf.location_format)
+
+    params[:location] = "New Place, California, USA"
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_nil(obs.location_id)
+    assert_equal("New Place, California, USA", obs.where)
+
+    params[:location] = "Burbank, California, USA"
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_nil(obs.where)
+    assert_objs_equal(locations(:burbank), obs.location)
+
+    User.update(rolf.id, location_format: :scientific)
+    assert_equal(:scientific, rolf.reload.location_format)
+
+    params[:location] = "USA, California, Somewhere Else"
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_nil(obs.location_id)
+    assert_equal("Somewhere Else, California, USA", obs.where)
+
+    params[:location] = "Burbank, California, USA"
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_nil(obs.where)
+    assert_objs_equal(locations(:burbank), obs.location)
+  end
+
+  def test_post_observation_with_specimen
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key,
+      location: locations(:burbank).name,
+      name:     names(:peltigera).text_name
+    }
+
+    assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", specimen_id: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", herbarium_label: "1"))
+    assert_api_fail(params.merge(has_specimen: "yes", specimen_id: "1",
+                                 herbarium_label: "1"))
+    assert_api_fail(params.merge(has_specimen: "yes", herbarium: "bogus"))
+
+    assert_api_pass(params.merge(has_specimen: "yes"))
+
+    obs = Observation.last
+    spec = Specimen.last
+    assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
+    assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
+    assert_obj_list_equal([obs], spec.observations)
+
+    nybg = herbaria(:nybg_herbarium)
+    assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
+                                 specimen_id: "R. Singer 12345"))
+
+    obs = Observation.last
+    spec = Specimen.last
+    assert_objs_equal(nybg, spec.herbarium)
+    assert_equal("Peltigera: R. Singer 12345", spec.herbarium_label)
+    assert_obj_list_equal([obs], spec.observations)
+  end
+
+  # ----------------------------
+  #  :section: User Requests
+  # ----------------------------
+
   def test_posting_minimal_user
     @login = "stephane"
     @name = ""
@@ -562,112 +666,8 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(image: "123456"))
   end
 
-  def test_posting_api_key_for_yourself
-    email_count = ActionMailer::Base.deliveries.size
-    @for_user = rolf
-    @app = "  Mushroom  Mapper  "
-    @verified = true
-    params = {
-      method:  :post,
-      action:  :api_key,
-      api_key: @api_key.key,
-      app:     @app
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([ApiKey.last], api.results)
-    assert_last_api_key_correct
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:app))
-    assert_equal(email_count, ActionMailer::Base.deliveries.size)
-  end
-
-  def test_posting_api_key_for_another_user
-    email_count = ActionMailer::Base.deliveries.size
-    @for_user = katrina
-    @app = "  Mushroom  Mapper  "
-    @verified = false
-    params = {
-      method:   :post,
-      action:   :api_key,
-      api_key:  @api_key.key,
-      app:      @app,
-      for_user: @for_user.id
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([ApiKey.last], api.results)
-    assert_last_api_key_correct
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.remove(:app))
-    assert_api_fail(params.merge(app: ""))
-    assert_api_fail(params.merge(for_user: 123_456))
-    assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
-  end
-
-  def test_unverified_user_rejected
-    params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
-      location: "Anywhere"
-    }
-    User.update(rolf.id, verified: nil)
-    assert_api_fail(params)
-    User.update(rolf.id, verified: Time.zone.now)
-    assert_api_pass(params)
-  end
-
-  def test_unverified_api_key_rejected
-    params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
-      location: "Anywhere"
-    }
-    ApiKey.update(@api_key.id, verified: nil)
-    assert_api_fail(params)
-    @api_key.verify!
-    assert_api_pass(params)
-  end
-
-  def test_external_links_get
-    expect = ExternalLink.all.sort_by(&:id)
-    params = {
-      method: :get,
-      action: :external_link
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while getting links")
-    assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  end
-
-  def test_external_links_fancy_get
-    site = external_sites(:mycoportal)
-    new_link = ExternalLink.create!(
-      user:          rolf,
-      created_at:    Date.parse("2017-01-01"),
-      updated_at:    Date.parse("2017-01-01"),
-      observation:   observations(:minimal_unknown_obs),
-      external_site: site,
-      url:           "http://blah.org"
-    )
-    expect = ExternalLink.where(external_site: site).sort_by(&:id).
-             select { |link| (2015..2016).cover?(link.updated_at.year) }
-    assert_false(expect.include?(new_link))
-    params = {
-      method:         :get,
-      action:         :external_link,
-      external_sites: site.name,
-      updated_at:     "2015-2016"
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while getting links")
-    assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  end
-
   # ----------------------------
-  #  :section: Test Parsers
+  #  :section: Parsers
   # ----------------------------
 
   def test_parse_boolean
@@ -1366,6 +1366,36 @@ class ApiTest < UnitTestCase
                  limit: limit)
     assert_parse(:parse_objects, [obs, nam],
                  "observation #{obs.id}, name #{nam.id}", limit: limit)
+  end
+
+  # ----------------------------
+  #  :section: Authentication
+  # ----------------------------
+
+  def test_unverified_user_rejected
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key,
+      location: "Anywhere"
+    }
+    User.update(rolf.id, verified: nil)
+    assert_api_fail(params)
+    User.update(rolf.id, verified: Time.zone.now)
+    assert_api_pass(params)
+  end
+
+  def test_unverified_api_key_rejected
+    params = {
+      method:   :post,
+      action:   :observation,
+      api_key:  @api_key.key,
+      location: "Anywhere"
+    }
+    ApiKey.update(@api_key.id, verified: nil)
+    assert_api_fail(params)
+    @api_key.verify!
+    assert_api_pass(params)
   end
 
   def test_check_edit_permission
