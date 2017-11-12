@@ -1,5 +1,4 @@
-# encoding: utf-8
-
+# API
 class API
   class_attribute :model
   class_attribute :table
@@ -26,7 +25,8 @@ class API
   attr_accessor :page_number
 
   initializers << lambda do
-    self.detail = parse_enum(:detail, limit: [:none, :low, :high], default: :none)
+    self.detail = parse_enum(:detail, limit: [:none, :low, :high],
+                                      default: :none)
     self.page_number = parse_integer(:page, default: 1)
   end
 

@@ -158,7 +158,7 @@ class ApiTest < UnitTestCase
     assert_equal(@login, user.login)
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
-    assert_equal("", user.password)
+    assert_not_equal("", user.password)
     assert_in_delta(Time.zone.now, user.created_at, 1.minute)
     assert_in_delta(Time.zone.now, user.updated_at, 1.minute)
     assert_nil(user.verified)
@@ -502,11 +502,12 @@ class ApiTest < UnitTestCase
     @address = ""
     @new_key = nil
     params = {
-      method:  :post,
-      action:  :user,
-      api_key: @api_key.key,
-      login:   @login,
-      email:   @email
+      method:   :post,
+      action:   :user,
+      api_key:  @api_key.key,
+      login:    @login,
+      email:    @email,
+      password: "secret"
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting image")
@@ -540,6 +541,7 @@ class ApiTest < UnitTestCase
       login:    @login,
       name:     @name,
       email:    @email,
+      password: "supersecret",
       locale:   @locale,
       notes:    @notes,
       license:  @license.id,

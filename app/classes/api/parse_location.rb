@@ -1,17 +1,15 @@
-# encoding: utf-8
-
-# Manages the Mushroom Observer Application Programming Interface
+# API
 class API
   def location_component(key, what, args)
     declare_parameter(key, what, args)
     str = get_param(key)
     return args[:default] unless str
     case what
-    when :altitude then val = Location.parse_altitude(str)
-    when :latitude then val = Location.parse_latitude(str)
+    when :altitude  then val = Location.parse_altitude(str)
+    when :latitude  then val = Location.parse_latitude(str)
     when :longitude then val = Location.parse_longitude(str)
     end
-    fail BadParameterValue.new(str, what) unless val
+    raise BadParameterValue.new(str, what) unless val
     val
   end
 
@@ -35,11 +33,11 @@ class API
     declare_parameter(key, what, args)
     str = get_param(key)
     return args[:default] unless str
-    fail BadParameterValue.new(str, what) if str.blank?
-    val = try_parsing_id(str, Location)
-    val ||= Location.find_by_name_or_reverse_name(str)
+    raise BadParameterValue.new(str, what) if str.blank?
+    val = try_parsing_id(str, Location) ||
+          Location.find_by_name_or_reverse_name(str)
     return val if val
-    fail ObjectNotFoundByString.new(get_param(key), Location)
+    raise ObjectNotFoundByString.new(get_param(key), Location)
   end
 
   def parse_location(key, args = {})

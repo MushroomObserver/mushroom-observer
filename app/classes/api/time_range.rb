@@ -1,10 +1,9 @@
-# encoding: utf-8
-
+# API
 class API
-  # Parses and returns ranges of dates
+  # Encapsulates a range of date-times
   class TimeRange
     PARSERS = [:second_range, :minute_range, :hour_range,
-               :seconds, :minutes, :hours]
+               :seconds, :minutes, :hours].freeze
 
     def self.parse(str)
       PARSERS.each do |parser|
@@ -17,17 +16,16 @@ class API
     end
 
     def self.second_range(str)
-      Patterns.ordered_range(DateTime,
-                             Patterns.range_matcher(str,
-                                                    Patterns.second_patterns),
-                             1, 3)
+      Patterns.ordered_range(
+        DateTime, Patterns.range_matcher(str, Patterns.second_patterns), 1, 3
+      )
     end
 
-    FIRST_TIMEUNIT = "01"
-    LAST_TIMEUNIT = "59"
+    FIRST_TIMEUNIT = "01".freeze
+    LAST_TIMEUNIT = "59".freeze
 
     def self.padded_datetime(str, suffix)
-      sep = str.match(/\D/) ? ":" : ""
+      sep = str =~ /\D/ ? ":" : ""
       DateTime.parse(str + sep + suffix.join(sep))
     end
 
@@ -48,8 +46,8 @@ class API
     end
 
     def self.seconds(str)
-      DateTime.parse(str) if Patterns.list_matcher(str,
-                                                   Patterns.second_patterns)
+      return unless Patterns.list_matcher(str, Patterns.second_patterns)
+      DateTime.parse(str)
     end
 
     def self.minutes(str)

@@ -1,29 +1,31 @@
-# encoding: utf-8
-
+# API
 class API
   # Provides common regular expressions and matches
   class Patterns
-    TWO = '\d\d?'
+    TWO = '\d\d?'.freeze
     DAY = TWO
     MONTH = TWO
+    YEAR = '\d{4}'.freeze
+    SEPARATOR = '\s*-\s*'.freeze
+    HOURS_TIME = TWO
+    MINUTES_TIME = "#{TWO}:#{TWO}".freeze
+    SECONDS_TIME = "#{TWO}:#{TWO}:#{TWO}".freeze
+
     def self.month_pattern
       MONTH
     end
-    YEAR = '\d{4}'
+
     def self.year_pattern
       YEAR
     end
-    SEPARATOR = '\s*-\s*'
-    HOURS_TIME = "#{TWO}"
-    MINUTES_TIME = "#{TWO}:#{TWO}"
-    SECONDS_TIME = "#{TWO}:#{TWO}:#{TWO}"
 
     def self.month_patterns
       ['\d{6}()', "#{YEAR}(-)#{MONTH}", "#{YEAR}(\\/)#{MONTH}"]
     end
 
-    DASH_DATE = "#{YEAR}(-)#{MONTH}-#{DAY}"
-    SLASH_DATE = "#{YEAR}(\\/)#{MONTH}\\/#{DAY}"
+    DASH_DATE = "#{YEAR}(-)#{MONTH}-#{DAY}".freeze
+    SLASH_DATE = "#{YEAR}(\\/)#{MONTH}\\/#{DAY}".freeze
+
     def self.date_patterns
       ['\d{8}()', DASH_DATE, SLASH_DATE]
     end

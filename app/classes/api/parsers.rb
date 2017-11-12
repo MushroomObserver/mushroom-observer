@@ -1,6 +1,4 @@
-# encoding: utf-8
-
-# Manages the Mushroom Observer Application Programming Interface
+# API
 class API
   attr_accessor :expected_params
 
@@ -21,12 +19,19 @@ class API
   # Escape dashes and commas with backslash if necessary.
   #
   def method_missing(method, *args, &block)
-    submethod = (parse_method(method, /^(parse_\w+)s$/) ||
-                 parse_method(method, /^((parse_\w+)_range)s$/, 2))
+    submethod = parse_method(method, /^(parse_\w+)s$/) ||
+                parse_method(method, /^((parse_\w+)_range)s$/, 2)
     return do_parse_array(submethod, *args, &block) if submethod
     submethod = parse_method(method, /^(parse_\w+)_range$/)
     return do_parse_range(submethod, *args, &block) if submethod
-    super(method, *args, &block)
+    super
+  end
+
+  def respond_to_missing?(method, include_private = false)
+    parse_method(method, /^(parse_\w+)s$/) ||
+      parse_method(method, /^((parse_\w+)_range)s$/, 2) ||
+      parse_method(method, /^(parse_\w+)_range$/) ||
+      super
   end
 
   def parse_method(method, pattern, test_match = 1, return_match = 1)
@@ -82,7 +87,8 @@ class API
   # later to autodiscover the capabilities of each API request type.
   def declare_parameter(key, type, args)
     return unless key.is_a?(Symbol)
-    type = $'.to_sym if type.to_s.match(/^parse_/)
+    match = type.to_s.match(/^parse_(.*)/)
+    type = match[1].to_sym if match
     expected_params[key] ||= ParameterDeclaration.new(key, type, args)
   end
 
@@ -94,21 +100,21 @@ class API
   end
 
   def try_parsing_id(str, model)
-    return nil unless str.match(/^\d+$/)
+    return nil unless str =~ /^\d+$/
     obj = model.safe_find(str)
     return obj if obj
-    fail ObjectNotFoundById.new(str, model)
+    raise ObjectNotFoundById.new(str, model)
   end
 
   def check_edit_permission!(obj, args)
-    fail MustHaveEditPermission, obj if args[:must_have_edit_permission] &&
-                                        !obj.has_edit_permission?(@user)
+    return unless args[:must_have_edit_permission]
+    raise MustHaveEditPermission.new(obj) unless obj.has_edit_permission?(@user)
   end
 
   def done_parsing_parameters!
     unused = params.keys - expected_params.keys
-    fail HelpMessage, expected_params if unused.include?(:help)
-    fail UnexpectedUpload, "Unexpected upload" if unused.include?(:upload)
-    fail UnusedParameters, unused if unused.any?
+    raise HelpMessage.new(expected_params)          if unused.include?(:help)
+    raise UnexpectedUpload.new("Unexpected upload") if unused.include?(:upload)
+    raise UnusedParameters.new(unused)              if unused.any?
   end
 end

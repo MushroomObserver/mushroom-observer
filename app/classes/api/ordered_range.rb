@@ -1,7 +1,6 @@
-# encoding: utf-8
-
+# API
 class API
-  # Expresses a range of values of any types of objects that can be compared
+  # Encapsulates a range of values of any types of objects that can be compared
   class OrderedRange < Range
     attr_accessor :begin, :end
 
@@ -29,7 +28,7 @@ class API
       "#{@begin.inspect}..#{@end.inspect}"
     end
 
-    alias_method :to_s, :inspect
+    alias to_s inspect
 
     def ==(other)
       other.is_a?(OrderedRange) &&

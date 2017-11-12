@@ -1,5 +1,5 @@
-# encoding: utf-8
-
+# Class encapsulating an API request to query, post, update or delete records
+# to/from the database.
 class API
   API_VERSION = 1.0
 
@@ -54,7 +54,7 @@ class API
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
-      fail BadVersion.new(version)
+      raise BadVersion.new(version)
     else
       self.version = version.to_f
     end
@@ -65,13 +65,10 @@ class API
     key = ApiKey.find_by_key(key_str)
     if !key_str
       User.current = self.user = nil
-    elsif !key
-      fail BadApiKey.new(key_str)
-    elsif !key.verified
-      fail ApiKeyNotVerified.new(key)
-    elsif !key.user.verified
-      fail UserNotVerified.new(key.user)
     else
+      raise BadApiKey.new(key_str)        unless key
+      raise ApiKeyNotVerified.new(key)    unless key.verified
+      raise UserNotVerified.new(key.user) unless key.user.verified
       User.current = self.user = key.user
       key.touch!
       self.api_key = key
@@ -79,23 +76,18 @@ class API
   end
 
   def process_request
-    tmp_method = parse_string(:method)
+    tmp_method  = parse_string(:method)
     self.method = tmp_method.downcase.to_sym
-    print "The API method, #{tmp_method}, is better behaved now" if tmp_method == method
-    if !method
-      fail MissingMethod.new
-    elsif respond_to?(method)
-      send(method)
-    else
-      fail BadMethod.new(method)
-    end
+    raise MissingMethod.new     unless method
+    raise BadMethod.new(method) unless respond_to?(method)
+    send(method)
   end
 
   def abort_if_any_errors!
-    fail AbortDueToErrors.new if errors.any?
+    raise AbortDueToErrors.new if errors.any?
   end
 
   def must_authenticate!
-    fail MustAuthenticate.new unless user
+    raise MustAuthenticate.new unless user
   end
 end

@@ -1,16 +1,11 @@
-# encoding: utf-8
-
-# Manages the Mushroom Observer Application Programming Interface
+# API
 class API
   def class_parse(key, method, cls, patterns, args)
     declare_parameter(key, method, args)
     str = get_param(key)
     return args[:default] unless str
-    if Patterns.list_matcher(str, patterns)
-      return cls.parse(str)
-    else
-      fail BadParameterValue.new(str, method)
-    end
+    return cls.parse(str) if Patterns.list_matcher(str, patterns)
+    raise BadParameterValue.new(str, method)
   rescue ArgumentError
     raise BadParameterValue.new(str, method)
   end

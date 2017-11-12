@@ -1,6 +1,4 @@
-# encoding: utf-8
-
-# Manages the Mushroom Observer Application Programming Interface
+# API
 class API
   def parse_string(key, args = {})
     declare_parameter(key, :string, args)

@@ -1,6 +1,6 @@
-# encoding: utf-8
-
+# API
 class API
+  # API for User
   class UserAPI < ModelAPI
     self.model = User
 
@@ -19,7 +19,7 @@ class API
       {
         where: sql_id_condition,
         created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
+        updated_at: parse_time_range(:updated_at)
         # :login        => parse_strings(:login),
         # :name         => parse_strings(:name),
         # :locations    => parse_strings(:location),
@@ -34,45 +34,61 @@ class API
     def create_params
       @create_key = parse_string(:create_key)
       {
-        login: parse_string(:login, limit: 80),
-        name: parse_string(:name, limit: 80, default: ""),
-        email: parse_email(:email, limit: 80),
-        locale: parse_lang(:locale),
-        notes: parse_string(:notes, default: ""),
+        login:           parse_string(:login, limit: 80),
+        name:            parse_string(:name, limit: 80, default: ""),
+        email:           parse_email(:email, limit: 80),
+        password:        parse_string(:password, limit: 80),
+        locale:          parse_lang(:locale),
+        notes:           parse_string(:notes, default: ""),
         mailing_address: parse_string(:mailing_address, default: ""),
-        license: parse_license(:license, default: License.preferred),
-        location: parse_location(:location),
-        image: parse_image(:image),
-        verified: nil,
-        admin: false,
-        layout_count: 15
+        license:         parse_license(:license, default: License.preferred),
+        location:        parse_location(:location),
+        image:           parse_image(:image),
+        verified:        nil,
+        admin:           false,
+        layout_count:    15
       }
     end
 
     def validate_create_params!(params)
-      unless login = params[:login]
-        fail MissingParameter.new(arg: :login)
-      end
-      fail UserAlreadyExists.new(login) if User.find_by_login(login)
-      fail MissingParameter.new(arg: :email) unless params[:email]
+      login = params[:login]
+      raise MissingParameter.new(:login)    unless params[:login]
+      raise MissingParameter.new(:name)     unless params[:name]
+      raise MissingParameter.new(:email)    unless params[:email]
+      raise MissingParameter.new(:password) unless params[:password]
+      raise UserAlreadyExists.new(login)    if User.find_by_login(login)
+      params[:password_confirmation] = params[:password]
     end
 
     def after_create(user)
-      if @create_key
-        key = ApiKey.new(notes: @create_key, user: user)
-        key.provide_defaults
-        key.verified = nil
-        key.save
-        user.reload
-      end
+      return unless @create_key
+      key = ApiKey.new(notes: @create_key, user: user)
+      key.provide_defaults
+      key.verified = nil
+      key.save
+      user.reload
     end
 
-    def put
-      fail NoMethodForAction("PUT", action)
+    def update_params
+      {
+        login:           parse_string(:login, limit: 80),
+        name:            parse_string(:name, limit: 80, default: ""),
+        email:           parse_email(:email, limit: 80),
+        password:        parse_string(:password, limit: 80),
+        locale:          parse_lang(:locale),
+        notes:           parse_string(:notes, default: ""),
+        mailing_address: parse_string(:mailing_address, default: ""),
+        license:         parse_license(:license, default: License.preferred),
+        location:        parse_location(:location),
+        image:           parse_image(:image),
+        verified:        nil,
+        admin:           false,
+        layout_count:    15
+      }
     end
 
     def delete
-      fail NoMethodForAction("DELETE", action)
+      raise NoMethodForAction.new("DELETE", action)
     end
   end
 end

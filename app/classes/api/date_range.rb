@@ -1,19 +1,18 @@
-# encoding: utf-8
-
+# API
 class API
-  # Parses and returns ranges of dates
+  # Class encapsulating a range of dates.
   class DateRange
     PARSERS = [:date_range, :month_range, :year_range,
                :month_day_range, :just_month_range,
                :date, :month, :year,
-               :month_day, :just_month]
+               :month_day, :just_month].freeze
 
     def self.parse(str)
       PARSERS.each do |parser|
         match = send(parser, str)
         return match if match
       end
-      fail BadParameterValue.new(str, :date_range)
+      raise BadParameterValue.new(str, :date_range)
     rescue ArgumentError
       raise BadParameterValue.new(str, :date_range)
     end
@@ -36,10 +35,10 @@ class API
       match = Patterns.range_matcher(str, [Patterns.year_pattern])
       return unless match
       from, to = [match[1], match[2]].sort
-      if from > "1500" && to > "1500"
-        return OrderedRange.new(Date.parse(from + "0101"),
-                                Date.parse(to + "0101").next_year.prev_day)
-      end
+      return if from < "1500" || to < "1500"
+      from = Date.parse(from + "0101")
+      to   = Date.parse(to + "0101").next_year.prev_day
+      OrderedRange.new(from, to)
     end
 
     def self.month_day_range(str)
@@ -51,8 +50,8 @@ class API
     end
 
     def self.calc_monthday(month, day)
-      fail BadParameterValue.new(str, :date_range) if bad_month(month) ||
-                                                      bad_day(day)
+      raise BadParameterValue.new(str, :date_range) if bad_month(month) ||
+                                                       bad_day(day)
       month * 100 + day
     end
 
@@ -70,7 +69,7 @@ class API
       from = match[1].to_i
       to = match[2].to_i
       if bad_month(from) || bad_month(to)
-        fail BadParameterValue.new(str, :date_range)
+        raise BadParameterValue.new(str, :date_range)
       end
       OrderedRange.new(from, to, :leave_order)
     end
@@ -104,7 +103,7 @@ class API
     def self.just_month(str)
       return unless Patterns.list_matcher(str, [Patterns.month_pattern])
       val = str.to_i
-      fail BadParameterValue.new(str, :date_range) if bad_month(val)
+      raise BadParameterValue.new(str, :date_range) if bad_month(val)
       OrderedRange.new(val, val)
     end
   end

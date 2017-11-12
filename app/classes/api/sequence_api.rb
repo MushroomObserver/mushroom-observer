@@ -1,5 +1,6 @@
+# API
 class API
-  # API for nucleotide sequences
+  # API for Sequence
   class SequenceAPI < ModelAPI
     self.model = Sequence
 
@@ -13,23 +14,20 @@ class API
       :user
     ]
 
-    self.low_detail_includes = [
-    ]
-
     def query_params
       sequence_query_params.merge(observation_query_params)
     end
 
     def sequence_query_params
       {
-        where:          sql_id_condition,
-        created_at:     parse_time_range(:created_at),
-        updated_at:     parse_time_range(:updated_at),
-        users:          parse_users(:user),
-        locus_has:      parse_string(:locus),
-        archive_has:    parse_string(:archive),
-        accession_has:  parse_string(:accession),
-        notes_has:      parse_string(:notes)
+        where:         sql_id_condition,
+        created_at:    parse_time_range(:created_at),
+        updated_at:    parse_time_range(:updated_at),
+        users:         parse_users(:user),
+        locus_has:     parse_string(:locus),
+        archive_has:   parse_string(:archive),
+        accession_has: parse_string(:accession),
+        notes_has:     parse_string(:notes)
       }
     end
 
@@ -43,10 +41,7 @@ class API
         locations:      parse_strings(:locations),
         projects:       parse_strings(:projects),
         species_lists:  parse_strings(:species_lists),
-        confidence:     parse_float_range(
-          :confidence,
-          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)
-        ),
+        confidence:     parse_confidence,
         north:          parse_latitude(:north),
         south:          parse_latitude(:south),
         east:           parse_longitude(:east),
@@ -56,27 +51,39 @@ class API
 
     def create_params
       {
-        observation:  parse_observation(:observation,
-                                        must_have_edit_permission: true),
-        user:         @user,
-        locus:        parse_string(:locus, default: ""),
-        bases:        parse_string(:bases, default: ""),
-        archive:      parse_string(:archive, default: ""),
-        accession:    parse_string(:accession, default: ""),
-        notes:        parse_string(:notes, default: "")
+        observation: parse_observation_to_attach_to,
+        user:        @user,
+        locus:       parse_string(:locus),
+        bases:       parse_string(:bases),
+        archive:     parse_string(:archive, limit: 255),
+        accession:   parse_string(:accession, limit: 255),
+        notes:       parse_string(:notes)
       }
+    end
+
+    def validate_create_params!(params)
+      raise MissingParameter.new(:observation) unless params[:observation]
+      raise MissingParameter.new(:locus)       if params[:locus].blank?
+      # Sequence validators handle the rest, it's too complicated to repeat.
     end
 
     def update_params
       {
-        locus:      :locus,
-        bases:      :bases,
-        archive:    :archive,
-        accession:  :accession,
-        notes:      :notes
+        locus:     parse_string(:set_locus),
+        bases:     parse_string(:set_bases),
+        archive:   parse_string(:set_archive, limit: 255),
+        accession: parse_string(:set_accession, limit: 255),
+        notes:     parse_string(:set_notes)
       }
     end
 
-    def validate_create_params!(params); end
+    def parse_confidence
+      limit = Range.new(Vote.minimum_vote, Vote.maximum_vote)
+      parse_float_range(:confidence, limit: limit)
+    end
+
+    def parse_observation_to_attach_to
+      parse_observation(:observation, must_have_edit_permission: true)
+    end
   end
 end

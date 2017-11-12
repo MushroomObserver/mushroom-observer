@@ -25,6 +25,12 @@ Rails/HttpPositionalArguments:
 ###################### Metrics #################################################
 
 Metrics/AbcSize:
+# Can we try relaxing this one?  Even short simple methods sometimes exceed
+# 15 or 16.  Simplifying them further just forces us to make tons of tiny
+# trivial methods with really cumbersome names, without actually making
+# the code any better.
+# Max: 15
+  Max: 20
   Exclude:
     # This Cop makes less sense in tests, we regularly ignore it.
     - "test//**/*"
@@ -95,3 +101,11 @@ Style/StringLiterals:
 # Rubocop supports multiple options and MO uses a non-default
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+# MO uses [] not %i() or %I()
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+# I can't figure out how to get exploded to work with API.
+Style/RaiseArgs:
+  EnforcedStyle: compact

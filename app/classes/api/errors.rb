@@ -1,6 +1,6 @@
-# encoding: utf-8
-
+# API
 class API
+  # API exception base class.
   class Error < ::StandardError
     attr_accessor :tag, :args, :fatal, :trace
 
@@ -24,29 +24,35 @@ class API
     end
   end
 
+  # API exception base class for errors having to do with database records.
   class ObjectError < Error
     def initialize(obj)
       super()
+      args.merge!(type: obj.type_tag, name: display_name(obj))
+    end
+
+    def display_name(obj)
       if obj.respond_to?(:unique_text_name)
-        name = obj.unique_text_name
+        obj.unique_text_name
       elsif obj.respond_to?(:display_name)
-        name = obj.display_name
+        obj.display_name
       elsif obj.respond_to?(:name)
-        name = obj.name
+        obj.name
       elsif obj.respond_to?(:title)
-        name = obj.title
+        obj.title
       else
-        name = '#' + obj.id
+        "#" + obj.id
       end
-      args.merge!(type: obj.type_tag, name: name)
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # API request is missing request method.
   class MissingMethod < Error
   end
 
+  # API request method not implemented for this endpoint.
   class NoMethodForAction < Error
     def initialize(method, action)
       super()
@@ -54,6 +60,7 @@ class API
     end
   end
 
+  # API endpoint doesn't exist.
   class BadAction < Error
     def initialize(action)
       super()
@@ -61,6 +68,7 @@ class API
     end
   end
 
+  # API request method not recognized.
   class BadMethod < Error
     def initialize(method)
       super()
@@ -68,6 +76,7 @@ class API
     end
   end
 
+  # API request ApiKey not valid.
   class BadApiKey < Error
     def initialize(str)
       super()
@@ -75,6 +84,7 @@ class API
     end
   end
 
+  # API request ApiKey not verified yet.
   class ApiKeyNotVerified < Error
     def initialize(key)
       super()
@@ -82,6 +92,7 @@ class API
     end
   end
 
+  # API request user not verified yet.
   class UserNotVerified < Error
     def initialize(user)
       super()
@@ -89,6 +100,7 @@ class API
     end
   end
 
+  # API request version syntax wrong.
   class BadVersion < Error
     def initialize(str)
       super()
@@ -96,6 +108,7 @@ class API
     end
   end
 
+  # Error rendering API request results.
   class RenderFailed < Error
     def initialize(error)
       super()
@@ -104,8 +117,9 @@ class API
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # API request missing required parameter.
   class MissingParameter < Error
     def initialize(arg)
       super()
@@ -113,9 +127,11 @@ class API
     end
   end
 
+  # API PUT request missing all set parameters.
   class MissingSetParameters < Error
   end
 
+  # API request parameter has bad syntax.
   class BadParameterValue < Error
     def initialize(str, type)
       super()
@@ -124,6 +140,7 @@ class API
     end
   end
 
+  # API request parameter value out of range.
   class BadLimitedParameterValue < Error
     def initialize(str, limit)
       super()
@@ -131,6 +148,7 @@ class API
     end
   end
 
+  # API request string parameter too long.
   class StringTooLong < Error
     def initialize(str, length)
       super()
@@ -138,14 +156,16 @@ class API
     end
   end
 
+  # API request name parameter has multiple matches.
   class AmbiguousName < Error
     def initialize(name, others)
       super()
-      args.merge!(name: name.to_s,
-                  others: others.map(&:real_search_name).join(" / "))
+      str = others.map(&:real_search_name).join(" / ")
+      args.merge!(name: name.to_s, others: str)
     end
   end
 
+  # Error while executing API request query.
   class QueryError < Error
     def initialize(error)
       super()
@@ -153,11 +173,13 @@ class API
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # Error thrown when PUT or DELETE abort from errors before doing anything.
   class AbortDueToErrors < Error
   end
 
+  # API request included unexpected parameters.
   class UnusedParameters < Error
     def initialize(params)
       super()
@@ -165,9 +187,11 @@ class API
     end
   end
 
+  # API request inclues an unexpected upload.
   class UnexpectedUpload < Error
   end
 
+  # API help message.
   class HelpMessage < Error
     def initialize(params)
       super()
@@ -178,17 +202,21 @@ class API
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # API request requires valid ApiKey.
   class MustAuthenticate < Error
   end
 
+  # API request attempted to alter something that requires edit permission.
   class MustHaveEditPermission < ObjectError
   end
 
+  # API request attempted to view something that requires view permission.
   class MustHaveViewPermission < ObjectError
   end
 
+  # API request requires you to be project admin.
   class MustBeAdmin < Error
     def initialize(proj)
       super()
@@ -196,17 +224,21 @@ class API
     end
   end
 
+  # API request requires you to be project member.
   class MustBeMember < ObjectError
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # API request requires upload.
   class MissingUpload < Error
   end
 
+  # API request supplied too many uploads.
   class TooManyUploads < Error
   end
 
+  # API upload was supposed to be a local file, but it doesn't exist.
   class FileMissing < Error
     def initialize(file)
       super()
@@ -214,6 +246,7 @@ class API
     end
   end
 
+  # API upload was supposed to be a URL, but couldn't get download it.
   class CouldntDownloadURL < Error
     def initialize(url, error)
       super()
@@ -221,6 +254,7 @@ class API
     end
   end
 
+  # API upload didn't make it.
   class ImageUploadFailed < Error
     def initialize(img)
       super()
@@ -228,8 +262,9 @@ class API
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
+  # API POST request couldn't create object.
   class CreateFailed < ObjectError
     def initialize(obj)
       super(obj)
@@ -237,15 +272,19 @@ class API
     end
   end
 
+  # API DELETE request couldn't destroy object.
   class DestroyFailed < ObjectError
   end
 
+  # API request must supply both latitude and longitude, can't leave one out.
   class LatLongMustBothBeSet < Error
   end
 
+  # API request to create observation must supply either location or lat/long.
   class MustSupplyLocationOrGPS < Error
   end
 
+  # API request tried to create/rename a location over top of an existing one.
   class LocationAlreadyExists < Error
     def initialize(str)
       super()
@@ -253,6 +292,7 @@ class API
     end
   end
 
+  # API request tried to create/rename a name over top of an existing one.
   class NameAlreadyExists < Error
     def initialize(str, name)
       super()
@@ -260,6 +300,7 @@ class API
     end
   end
 
+  # API request species name isn't valid.
   class NameDoesntParse < Error
     def initialize(str)
       super()
@@ -267,6 +308,7 @@ class API
     end
   end
 
+  # API request tried to create user that already exists.
   class UserAlreadyExists < Error
     def initialize(str)
       super()
@@ -274,6 +316,7 @@ class API
     end
   end
 
+  # API request referenced object id doesn't exist.
   class ObjectNotFoundById < Error
     def initialize(id, model)
       super()
@@ -281,6 +324,7 @@ class API
     end
   end
 
+  # API request referenced object name doesn't exist.
   class ObjectNotFoundByString < Error
     def initialize(str, model)
       super()
@@ -288,6 +332,7 @@ class API
     end
   end
 
+  # API request tried to create project that already exists.
   class ProjectTaken < Error
     def initialize(title)
       super()
@@ -295,9 +340,11 @@ class API
     end
   end
 
+  # API request tried to change location name to one that already exists.
   class TryingToSetMultipleLocationsToSameName < Error
   end
 
+  # API request tried to create a user group that already exists.
   class UserGroupTaken < Error
     def initialize(title)
       super()
@@ -305,6 +352,7 @@ class API
     end
   end
 
+  # API request tried to set specimen info without claiming specimen present.
   class CanOnlyUseThisFieldIfHasSpecimen < Error
     def initialize(field)
       super()
@@ -312,6 +360,7 @@ class API
     end
   end
 
+  # API request to attach specimen had bpth specimen_id and herbarium_label.
   class CanOnlyUseOneOfTheseFields < Error
     def initialize(*fields)
       super()

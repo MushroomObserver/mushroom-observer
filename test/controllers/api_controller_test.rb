@@ -209,6 +209,7 @@ class ApiControllerTest < FunctionalTestCase
          api_key: rolfs_key.key,
          login: "miles",
          email: "miles@davis.com",
+         password: "sivadselim",
          create_key: "New API Key",
          detail: :high)
     assert_no_api_errors

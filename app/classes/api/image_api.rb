@@ -1,6 +1,6 @@
-# encoding: utf-8
-
+# API
 class API
+  # API for Image
   class ImageAPI < ModelAPI
     self.model = Image
 
@@ -13,6 +13,7 @@ class API
       :user
     ]
 
+    # rubocop:disable Metrics/AbcSize
     def query_params
       {
         where:                sql_id_condition,
@@ -27,67 +28,71 @@ class API
         projects:             parse_strings(:projects),
         species_lists:        parse_strings(:species_lists),
         has_observation:      parse_boolean(:has_observation, limit: true),
-        size:                 parse_enum_range(:has_size,
-                                               limit: Image.all_sizes - [:full_size]),
+        size:                 parse_size,
         content_types:        parse_string(:content_type),
         has_notes:            parse_boolean(:has_notes),
         notes_has:            parse_string(:notes_has),
         copyright_holder_has: parse_string(:copyright_holder_has),
         license:              parse_license(:license),
         has_votes:            parse_boolean(:has_votes),
-        quality:              parse_float_range(:quality,
-                                                limit: Range.new(Image.minimum_vote, Image.maximum_vote)),
-        confidence:           parse_float_range(:confidence,
-                                                limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+        quality:              parse_quality,
+        confidence:           parse_confidence,
         ok_for_export:        parse_boolean(:ok_for_export)
       }
     end
+    # rubocop:enable Metrics/AbcSize
 
     def build_object
-      observations = parse_observations(:observations,
-                                        default: [], must_have_edit_permission: true)
-      default_date = observations.any? ? observations.first.when : Date.today
-      vote = parse_enum(:vote, limit:  Image.all_votes)
-
-      params = {
-        when:             parse_date(:date, default: default_date),
-        notes:            parse_string(:notes, default: ""),
-        copyright_holder: parse_string(:copyright_holder, limit: 100,
-                                                          default: user.legal_name),
-        license:          parse_license(:license, default: user.license),
-        original_name:    parse_string(:original_name, limit: 120,
-                                                       default:  nil),
-        projects:         parse_projects(:projects, default: [],
-                                                    must_be_member: true),
-        observations:     observations
-      }
-      if upload = prepare_upload
-        params.merge!(
-          image:          upload.content,
-          upload_length:  upload.content_length,
-          upload_type:    upload.content_type,
-          upload_md5sum:  upload.content_md5
-        )
-      end
+      params = create_params
+      vote = parse_enum(:vote, limit: Image.all_votes)
+      upload = prepare_upload
+      params.merge!(upload_params(upload)) if upload
       done_parsing_parameters!
-      fail MissingUpload.new unless upload
-
-      img = model.new(params)
-      img.save || fail(CreateFailed.new(img))
-      img.process_image || fail(ImageUploadFailed.new(img))
-
-      if observations.any?
-        for obs in observations
-          obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
-          obs.log_create_image(img)
-        end
-      end
-
-      img.change_vote(@user, vote, (@user.votes_anonymous == :yes)) if vote
-
-      return img
+      raise MissingUpload.new unless upload
+      img = create_image(params)
+      change_vote(img, vote)
+      img
     ensure
       upload.clean_up if upload
+    end
+
+    def create_image(params)
+      img = model.new(params)
+      img.save          || raise(CreateFailed.new(img))
+      img.process_image || raise(ImageUploadFailed.new(img))
+      params[:observations].each do |obs|
+        obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
+        obs.log_create_image(img)
+      end
+      img
+    end
+
+    def change_vote(img, vote)
+      return unless vote
+      img.change_vote(@user, vote, (@user.votes_anonymous == :yes))
+    end
+
+    def create_params
+      observations = parse_observations_to_attach_to
+      default_date = observations.any? ? observations.first.when : Date.today
+      {
+        when:             parse_date(:date, default: default_date),
+        notes:            parse_string(:notes, default: ""),
+        copyright_holder: parse_copyright_holder,
+        license:          parse_license(:license, default: user.license),
+        original_name:    parse_original_name,
+        projects:         parse_projects_to_attach_to,
+        observations:     observations
+      }
+    end
+
+    def upload_params(upload)
+      {
+        image:          upload.content,
+        upload_length:  upload.content_length,
+        upload_type:    upload.content_type,
+        upload_md5sum:  upload.content_md5
+      }
     end
 
     def update_params
@@ -98,6 +103,37 @@ class API
         license:          parse_license(:set_license),
         original_name:    parse_string(:set_original, limit: 120)
       }
+    end
+
+    def parse_size
+      limit = Image.all_sizes - [:full_size]
+      parse_enum_range(:has_size, limit: limit)
+    end
+
+    def parse_quality
+      limit = Range.new(Image.minimum_vote, Image.maximum_vote)
+      parse_float_range(:quality, limit: limit)
+    end
+
+    def parse_confidence
+      limit = Range.new(Vote.minimum_vote, Vote.maximum_vote)
+      parse_float_range(:confidence, limit: limit)
+    end
+
+    def parse_copyright_holder
+      parse_string(:copyright_holder, limit: 100, default: user.legal_name)
+    end
+
+    def parse_original_name
+      parse_string(:original_name, limit: 120, default: nil)
+    end
+
+    def parse_observations_to_attach_to
+      parse_observations(:observations, must_have_edit_permission: true) || []
+    end
+
+    def parse_projects_to_attach_to
+      parse_projects(:projects, must_be_member: true) || []
     end
   end
 end

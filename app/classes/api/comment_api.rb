@@ -1,6 +1,6 @@
-# encoding: utf-8
-
+# API
 class API
+  # API for Comment
   class CommentAPI < ModelAPI
     self.model = Comment
 
@@ -16,14 +16,14 @@ class API
 
     def query_params
       {
-        where: sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        users: parse_users(:user),
-        types: parse_enum(:type, limit: Comment.all_type_tags),
+        where:       sql_id_condition,
+        created_at:  parse_time_range(:created_at),
+        updated_at:  parse_time_range(:updated_at),
+        users:       parse_users(:user),
+        types:       parse_enum(:type, limit: Comment.all_type_tags),
         summary_has: parse_string(:summary_has),
-        content_has: parse_string(:content_has),
-        # :targets     => parse_objects(:target, :limit => Comment.all_types),
+        content_has: parse_string(:content_has)
+        # TODO: query by target
       }
     end
 
@@ -31,14 +31,14 @@ class API
       {
         summary: parse_string(:summary, limit: 100),
         comment: parse_string(:content),
-        target: parse_object(:target, limit: Comment.all_types)
+        target:  parse_object(:target, limit: Comment.all_types)
       }
     end
 
     def validate_create_params!(params)
-      fail MissingParameter.new(:summary) if params[:summary].blank?
-      fail MissingParameter.new(:content) if params[:comment].blank?
-      fail MissingParameter.new(:target)  if params[:target].blank?
+      raise MissingParameter.new(:summary) if params[:summary].blank?
+      raise MissingParameter.new(:content) if params[:comment].blank?
+      raise MissingParameter.new(:target)  if params[:target].blank?
       must_have_view_permission!(params[:target])
     end
 

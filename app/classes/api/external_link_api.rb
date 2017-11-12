@@ -1,6 +1,6 @@
-# encoding: utf-8
+# API
 class API
-  # API queries on external_links table.
+  # API for ExternalLink
   class ExternalLinkAPI < ModelAPI
     self.model = ExternalLink
 
@@ -27,16 +27,26 @@ class API
       }
     end
 
-    def build_object
-      raise NoMethodForAction("POST", action)
+    def create_params
+      {
+        user:          @user,
+        observation:   parse_observation(:observation),
+        external_site: parse_external_site(:external_site),
+        url:           parse_string(:url)
+      }
     end
 
-    def build_setter
-      raise NoMethodForAction("PUT", action)
+    def validate_create_params!(params)
+      raise MissingParameter.new(:observation)   unless params[:observation]
+      raise MissingParameter.new(:external_site) unless params[:external_site]
+      raise MissingParameter.new(:url)           if params[:url].blank?
+      # TODO: check permissions
     end
 
-    def delete
-      raise NoMethodForAction("DELETE", action)
+    def update_params
+      {
+        url: parse_string(:set_url)
+      }
     end
   end
 end

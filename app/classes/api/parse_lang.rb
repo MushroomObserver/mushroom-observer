@@ -1,6 +1,4 @@
-# encoding: utf-8
-
-# Manages the Mushroom Observer Application Programming Interface
+# API
 class API
   def parse_lang(key, args = {})
     declare_parameter(key, :lang, args)
@@ -9,8 +7,8 @@ class API
     lang = Language.lang_from_locale(locale)
     langs = Language.all.map(&:locale)
     langs.each do |val|
-      return val if lang.downcase == val.to_s.downcase
+      return val if lang.casecmp(val.to_s).zero?
     end
-    fail BadLimitedParameterValue.new(lang, langs)
+    raise BadLimitedParameterValue.new(lang, langs)
   end
 end
