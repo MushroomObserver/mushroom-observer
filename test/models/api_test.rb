@@ -16,29 +16,25 @@ class ApiTest < UnitTestCase
     super
   end
 
-  # ----------------------------
+  # --------------------
   #  :section: Helpers
-  # ----------------------------
+  # --------------------
 
   def assert_no_errors(api, msg = "API errors")
-    assert(api.errors.empty?,
-           "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>")
-    api
+    msg = "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>"
+    assert(api.errors.empty?, msg)
   end
 
   def assert_api_fail(params)
     api = API.execute(params)
-    assert(api.errors.any?,
-           "API request should have failed, params: #{params.inspect}")
-    api
+    msg = "API request should have failed, params: #{params.inspect}"
+    assert(api.errors.any?, msg)
   end
 
   def assert_api_pass(params)
     api = API.execute(params)
-    assert_no_errors(api,
-                     "API request should have passed," \
-                     "params: #{params.inspect}")
-    api
+    msg = "API request should have passed, params: #{params.inspect}"
+    assert_no_errors(api, msg)
   end
 
   def assert_parse(method, expect, val, *args)
@@ -264,6 +260,46 @@ class ApiTest < UnitTestCase
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
   end
 
+  def test_updating_api_key
+    rolfs_key = @api_key
+    marys_key = ApiKey.create!(
+      user:     mary,
+      notes:    "marys key",
+      verified: Time.now
+    )
+    params = {
+      method:  :put,
+      action:  :api_key,
+      api_key: @api_key.key,
+      set_app: "new app"
+    }
+    assert_api_fail(params.merge(id: marys_key.id))
+    assert_api_pass(params.merge(id: rolfs_key.id))
+    assert_equal("new app", rolfs_key.reload.notes)
+  end
+
+  def test_deleting_api_key
+    rolfs_key = @api_key
+    marys_key = ApiKey.create!(
+      user:     mary,
+      notes:    "marys key",
+      verified: Time.now
+    )
+    params = {
+      method:  :delete,
+      action:  :api_key,
+      api_key: @api_key.key
+    }
+    assert_api_fail(params.merge(id: marys_key.id))
+    assert_api_pass(params.merge(id: rolfs_key.id))
+    assert_not_nil(ApiKey.safe_find(marys_key.id))
+    assert_nil(ApiKey.safe_find(@api_key.id))
+  end
+
+  # -----------------------------
+  #  :section: Comment Requests
+  # -----------------------------
+
   # ----------------------------------
   #  :section: ExternalLink Requests
   # ----------------------------------
@@ -303,9 +339,9 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal(expect, api.results.sort_by(&:id))
   end
 
-  # ----------------------------
+  # ---------------------------
   #  :section: Image Requests
-  # ----------------------------
+  # ---------------------------
 
   def test_posting_minimal_image
     setup_image_dirs
@@ -391,6 +427,14 @@ class ApiTest < UnitTestCase
     expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
     assert_equal(expect, actual, "Uploaded image differs from original!")
   end
+
+  # ------------------------------
+  #  :section: Location Requests
+  # ------------------------------
+
+  # --------------------------
+  #  :section: Name Requests
+  # --------------------------
 
   # ---------------------------------
   #  :section: Observation Requests
@@ -590,9 +634,21 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([obs], spec.observations)
   end
 
-  # ----------------------------
+  # -----------------------------
+  #  :section: Project Requests
+  # -----------------------------
+
+  # ------------------------------
+  #  :section: Sequence Requests
+  # ------------------------------
+
+  # ---------------------------------
+  #  :section: SpeciesList Requests
+  # ---------------------------------
+
+  # --------------------------
   #  :section: User Requests
-  # ----------------------------
+  # --------------------------
 
   def test_posting_minimal_user
     @login = "stephane"
@@ -666,9 +722,9 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(image: "123456"))
   end
 
-  # ----------------------------
+  # --------------------
   #  :section: Parsers
-  # ----------------------------
+  # --------------------
 
   def test_parse_boolean
     assert_parse(:parse_boolean, nil, nil)
@@ -1368,9 +1424,9 @@ class ApiTest < UnitTestCase
                  "observation #{obs.id}, name #{nam.id}", limit: limit)
   end
 
-  # ----------------------------
+  # ---------------------------
   #  :section: Authentication
-  # ----------------------------
+  # ---------------------------
 
   def test_unverified_user_rejected
     params = {
