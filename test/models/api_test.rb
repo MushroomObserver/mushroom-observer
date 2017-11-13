@@ -371,6 +371,37 @@ class ApiTest < UnitTestCase
     assert_last_comment_correct
   end
 
+  def test_updating_comments
+    com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
+    com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
+    params = {
+      method:      :put,
+      action:      :comment,
+      api_key:     @api_key.key,
+      id:          com1.id,
+      set_content: "new comment"
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: com2.id))
+    assert_api_pass(params)
+    assert_equal("new comment", com1.reload.comment)
+  end
+
+  def test_deleting_comments
+    com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
+    com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
+    params = {
+      method:      :delete,
+      action:      :comment,
+      api_key:     @api_key.key,
+      id:          com1.id
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: com2.id))
+    assert_api_pass(params)
+    assert_nil(Comment.safe_find(com1.id))
+  end
+
   # ----------------------------------
   #  :section: ExternalLink Requests
   # ----------------------------------
