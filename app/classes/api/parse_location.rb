@@ -26,7 +26,7 @@ class API
   end
 
   def parse_longitude_range(key, args = {})
-    do_parse_range(:parse_longitude, key, args.merge(leave_order: true))
+    do_parse_range(:parse_longitude, key)
   end
 
   def location_val(key, what, args)

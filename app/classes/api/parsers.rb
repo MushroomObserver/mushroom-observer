@@ -66,8 +66,7 @@ class API
     match = str.match(/^((\\.|[^-]+)+)-((\\.|[^-]+)+)$/)
     return send(method, str, args, &block) unless match
     OrderedRange.new(send(method, match[1], args, &block),
-                     send(method, match[3], args, &block),
-                     args[:leave_order])
+                     send(method, match[3], args, &block))
   end
 
   # Get value of a parameter, stripping out excess white space, and removing

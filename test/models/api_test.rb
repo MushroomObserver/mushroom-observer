@@ -315,7 +315,7 @@ class ApiTest < UnitTestCase
   #  :section: Comment Requests
   # -----------------------------
 
-  def test_comment_gets
+  def test_getting_comments
     params = { method: :get, action: :comment }
     com1 = comments(:minimal_unknown_obs_comment_1)
     com2 = comments(:minimal_unknown_obs_comment_2)
@@ -325,7 +325,7 @@ class ApiTest < UnitTestCase
     assert_api_results([com1])
 
     assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
-    assert_api_results([com2, com3])
+    assert_api_results([com2])
 
     assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
     assert_api_results([com3])
@@ -406,40 +406,45 @@ class ApiTest < UnitTestCase
   #  :section: ExternalLink Requests
   # ----------------------------------
 
-  def test_external_links_get
-    expect = ExternalLink.all.sort_by(&:id)
-    params = {
-      method: :get,
-      action: :external_link
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while getting links")
-    assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  end
-
-  def test_external_links_fancy_get
-    site = external_sites(:mycoportal)
-    new_link = ExternalLink.create!(
-      user:          rolf,
-      created_at:    Date.parse("2017-01-01"),
-      updated_at:    Date.parse("2017-01-01"),
-      observation:   observations(:minimal_unknown_obs),
-      external_site: site,
-      url:           "http://blah.org"
-    )
-    expect = ExternalLink.where(external_site: site).sort_by(&:id).
-             select { |link| (2015..2016).cover?(link.updated_at.year) }
-    assert_false(expect.include?(new_link))
-    params = {
-      method:         :get,
-      action:         :external_link,
-      external_sites: site.name,
-      updated_at:     "2015-2016"
-    }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while getting links")
-    assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  end
+#   def test_getting_external_links
+#     link1 = external_linkes(:coprinus_comatus_obs_mycoportal_link)
+#     link2 = external_linkes(:coprinus_comatus_obs_inaturalist_link)
+#     params = { method: :get, action: :external_link }
+#
+#     assert_api_pass(params.merge(id: link2.id))
+#     assert_api_results([link2])
+#
+#     assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
+#     assert_api_results([com2, com3])
+#
+#     api = API.execute(params)
+#     assert_no_errors(api, "Errors while getting links")
+#     assert_obj_list_equal(expect, api.results.sort_by(&:id))
+#   end
+#
+#   def test_external_links_fancy_get
+#     site = external_sites(:mycoportal)
+#     new_link = ExternalLink.create!(
+#       user:          rolf,
+#       created_at:    Date.parse("2017-01-01"),
+#       updated_at:    Date.parse("2017-01-01"),
+#       observation:   observations(:minimal_unknown_obs),
+#       external_site: site,
+#       url:           "http://blah.org"
+#     )
+#     expect = ExternalLink.where(external_site: site).sort_by(&:id).
+#              select { |link| (2015..2016).cover?(link.updated_at.year) }
+#     assert_false(expect.include?(new_link))
+#     params = {
+#       method:         :get,
+#       action:         :external_link,
+#       external_sites: site.name,
+#       updated_at:     "2015-2016"
+#     }
+#     api = API.execute(params)
+#     assert_no_errors(api, "Errors while getting links")
+#     assert_obj_list_equal(expect, api.results.sort_by(&:id))
+#   end
 
   # ---------------------------
   #  :section: Image Requests
@@ -896,8 +901,6 @@ class ApiTest < UnitTestCase
                  limit: 1..13)
     assert_parse(:parse_integer_range, API::OrderedRange.new(1, 13), "1-13",
                  limit: 1..13)
-    assert_parse(:parse_integer_range, API::OrderedRange.new(1, 13), "13-1",
-                 limit: 1..13)
     assert_parse(:parse_integer_range, API::BadLimitedParameterValue, "0-13",
                  limit: 1..13)
     assert_parse(:parse_integer_range, API::BadLimitedParameterValue, "1-14",
@@ -925,8 +928,6 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_float, -123.123, "-123.123")
     assert_parse(:parse_floats, nil, nil)
     assert_parse(:parse_floats, [1.2, 3.4], " 1.20, 3.40 ")
-    assert_parse(:parse_float_range,
-                 API::OrderedRange.new(-3.14, 2.72), '2.72 - \\-3.14')
     assert_parse(:parse_float_ranges,
                  [API::OrderedRange.new(1, 2), 4, 5], "1-2,4,5")
     assert_parse(:parse_float, API::BadParameterValue, "")
@@ -948,13 +949,10 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_date, API::BadParameterValue, "today")
   end
 
-  # rubocop:disable Rails/TimeZone
-  # Can't figure out how to make Rails TimeWithZone play nicely
-  # with these assertions
   def test_parse_time
     assert_parse(:parse_time, nil, nil)
-    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"), nil,
-                 default: DateTime.parse("2012-06-25 12:34:56"))
+    assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56 UTC"), nil,
+                 default: DateTime.parse("2012-06-25 12:34:56 UTC"))
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
                  "20120625123456")
     assert_parse(:parse_time, DateTime.parse("2012-06-25 12:34:56"),
@@ -969,295 +967,96 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_time, API::BadParameterValue, "2012-06/25 10:34:56")
     assert_parse(:parse_time, API::BadParameterValue, "2012/06/25 10:34:56am")
   end
-  # rubocop:enable Rails/TimeZone
 
   def test_parse_date_range
+    x = API::OrderedRange
     assert_parse(:parse_date_range, nil, nil)
-    assert_parse(:parse_date_range, Date.parse("2012-06-25"), nil,
-                 default: Date.parse("2012-06-25"))
-    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "20120626")
-    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "2012-06-26")
-    assert_parse(:parse_date_range, Date.parse("2012-06-26"), "2012/06/26")
-    assert_parse(:parse_date_range, Date.parse("2012-06-07"), "2012-6-7")
+    assert_parse(:parse_date_range, "blah", nil, default: "blah")
+    assert_parse_dr("2012-06-26", "2012-06-26", "20120626")
+    assert_parse_dr("2012-06-26", "2012-06-26", "2012-06-26")
+    assert_parse_dr("2012-06-26", "2012-06-26", "2012/06/26")
+    assert_parse_dr("2012-06-07", "2012-06-07", "2012-6-7")
     assert_parse(:parse_date_range, API::BadParameterValue, "2012-06/7")
     assert_parse(:parse_date_range, API::BadParameterValue, "2012 6/7")
     assert_parse(:parse_date_range, API::BadParameterValue, "6/26/2012")
     assert_parse(:parse_date_range, API::BadParameterValue, "today")
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")),
-      "201206"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")),
-      "2012-6"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2012-06-01"), Date.parse("2012-06-30")),
-      "2012/06"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2012-01-01"), Date.parse("2012-12-31")),
-      "2012"
-    )
-    assert_parse(:parse_date_range, API::OrderedRange.new(6, 6), "6")
-    assert_parse(:parse_date_range, API::OrderedRange.new(613, 613), "6/13")
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")),
-      "20110513-20120615"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")),
-      "2011-05-13-2012-06-15"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")),
-      "2011-5-13-2012-6-15"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-13"), Date.parse("2012-06-15")),
-      "2011/05/13 - 2012/06/15"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")),
-      "201105-201206"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")),
-      "2011-5-2012-6"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-05-01"), Date.parse("2012-06-30")),
-      "2012/06 - 2011/05"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-01-01"), Date.parse("2012-12-31")),
-      "2011-2012"
-    )
-    assert_parse(
-      :parse_date_range,
-      API::OrderedRange.new(Date.parse("2011-01-01"), Date.parse("2012-12-31")),
-      "2012-2011"
-    )
-    assert_parse(:parse_date_range, API::OrderedRange.new(2, 5), "2-5")
-    assert_parse(:parse_date_range,
-                 API::OrderedRange.new(10, 3, :leave_order), "10-3")
-    assert_parse(:parse_date_range,
-                 API::OrderedRange.new(612, 623), "0612-0623")
-    assert_parse(:parse_date_range,
-                 API::OrderedRange.new(1225, 101, :leave_order), "12-25-1-1")
+    assert_parse_dr("2012-06-01", "2012-06-30", "201206")
+    assert_parse_dr("2012-06-01", "2012-06-30", "2012-6")
+    assert_parse_dr("2012-06-01", "2012-06-30", "2012/06")
+    assert_parse_dr("2012-01-01", "2012-12-31", "2012")
+    assert_parse(:parse_date_range, x.new(6, 6), "6")
+    assert_parse(:parse_date_range, x.new(613, 613), "6/13")
+    assert_parse_dr("2011-05-13", "2012-06-15", "20110513-20120615")
+    assert_parse_dr("2011-05-13", "2012-06-15", "2011-05-13-2012-06-15")
+    assert_parse_dr("2011-05-13", "2012-06-15", "2011-5-13-2012-6-15")
+    assert_parse_dr("2011-05-13", "2012-06-15", "2011/05/13 - 2012/06/15")
+    assert_parse_dr("2011-05-01", "2012-06-30", "201105-201206")
+    assert_parse_dr("2011-05-01", "2012-06-30", "2011-5-2012-6")
+    assert_parse_dr("2011-05-01", "2012-06-30", "2011/05 - 2012/06")
+    assert_parse_dr("2011-01-01", "2012-12-31", "2011-2012")
+    assert_parse(:parse_date_range, x.new(2, 5), "2-5")
+    assert_parse(:parse_date_range, x.new(10, 3), "10-3")
+    assert_parse(:parse_date_range, x.new(612, 623), "0612-0623")
+    assert_parse(:parse_date_range, x.new(1225, 101), "12-25-1-1")
   end
 
-  # rubocop:disable Rails/TimeZone
+  def assert_parse_dr(from, to, str)
+    from = Date.parse(from)
+    to   = Date.parse(to)
+    ordered_range = API::OrderedRange.new(from, to)
+    assert_parse(:parse_date_range, ordered_range, str)
+  end
+
+  # rubocop:disable Metric/LineLength
   def test_parse_time_range
     assert_parse(:parse_time_range, nil, nil)
-    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"),
-                 "20120625123456")
-    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"),
-                 "2012-06-25 12:34:56")
-    assert_parse(:parse_time_range, DateTime.parse("2012-06-25 12:34:56"),
-                 "2012/06/25 12:34:56")
-    assert_parse(:parse_time_range, DateTime.parse("2012-06-05 02:04:06"),
-                 "2012/6/5 2:4:6")
+    assert_parse_tr("2012-06-25 12:34:56", "2012-06-25 12:34:56", "20120625123456")
+    assert_parse_tr("2012-06-25 12:34:56", "2012-06-25 12:34:56", "2012-06-25 12:34:56")
+    assert_parse_tr("2012-06-25 12:34:56", "2012-06-25 12:34:56", "2012/06/25 12:34:56")
+    assert_parse_tr("2012-06-05 02:04:06", "2012-06-05 02:04:06", "2012/6/5 2:4:6")
     assert_parse(:parse_time_range, API::BadParameterValue, "201206251234567")
     assert_parse(:parse_time_range, API::BadParameterValue, "2012/06/25 103456")
-    assert_parse(:parse_time_range, API::BadParameterValue,
-                 "2012-06/25 10:34:56")
-    assert_parse(:parse_time_range, API::BadParameterValue,
-                 "2012/06/25 10:34:56am")
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"),
-                            DateTime.parse("2011-02-24 02:03:59")),
-      "201102240203"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"),
-                            DateTime.parse("2011-02-24 02:03:59")),
-      "2011-2-24 2:3"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:03:01"),
-                            DateTime.parse("2011-02-24 02:03:59")),
-      "2011/02/24 02:03"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"),
-                            DateTime.parse("2011-02-24 02:59:59")),
-      "2011022402"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"),
-                            DateTime.parse("2011-02-24 02:59:59")),
-      "2011-2-24 2"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 02:01:01"),
-                            DateTime.parse("2011-02-24 02:59:59")),
-      "2011/02/24 02"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"),
-                            DateTime.parse("2011-02-24 23:59:59")),
-      "20110224"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"),
-                            DateTime.parse("2011-02-24 23:59:59")),
-      "2011-2-24"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-24 01:01:01"),
-                            DateTime.parse("2011-02-24 23:59:59")),
-      "2011/02/24"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"),
-                            DateTime.parse("2011-02-28 23:59:59")),
-      "201102"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"),
-                            DateTime.parse("2011-02-28 23:59:59")),
-      "2011-2"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-02-01 01:01:01"),
-                            DateTime.parse("2011-02-28 23:59:59")),
-      "2011/02"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"),
-                            DateTime.parse("2011-12-31 23:59:59")),
-      "2011"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"),
-                            DateTime.parse("2012-06-25 03:04:05")),
-      "20110524020304-20120625030405"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"),
-                            DateTime.parse("2012-06-25 03:04:05")),
-      "2011-5-24 2:3:4-2012-6-25 3:4:5"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:04"),
-                            DateTime.parse("2012-06-25 03:04:05")),
-      "2011/05/24 02:03:04 - 2012/06/25 03:04:05"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"),
-                            DateTime.parse("2012-06-25 03:04:59")),
-      "201206250304-201105240203"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"),
-                            DateTime.parse("2012-06-25 03:04:59")),
-      "2012-6-25 3:4-2011-5-24 2:3"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:03:01"),
-                            DateTime.parse("2012-06-25 03:04:59")),
-      "2012/06/25 03:04 - 2011/05/24 02:03"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"),
-                            DateTime.parse("2012-06-25 03:59:59")),
-      "2012062503-2011052402"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"),
-                            DateTime.parse("2012-06-25 03:59:59")),
-      "2012-6-25 3-2011-5-24 2"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 02:01:01"),
-                            DateTime.parse("2012-06-25 03:59:59")),
-      "2012/06/25 03 - 2011/05/24 02"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"),
-                            DateTime.parse("2012-06-25 23:59:59")),
-      "20120625-20110524"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"),
-                            DateTime.parse("2012-06-25 23:59:59")),
-      "2012-6-25-2011-5-24"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-24 01:01:01"),
-                            DateTime.parse("2012-06-25 23:59:59")),
-      "2012/06/25 - 2011/05/24"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"),
-                            DateTime.parse("2012-06-30 23:59:59")),
-      "201206-201105"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"),
-                            DateTime.parse("2012-06-30 23:59:59")),
-      "2012-6-2011-5"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-05-01 01:01:01"),
-                            DateTime.parse("2012-06-30 23:59:59")),
-      "2012/06 - 2011/05"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"),
-                            DateTime.parse("2012-12-31 23:59:59")),
-      "2012-2011"
-    )
-    assert_parse(
-      :parse_time_range,
-      API::OrderedRange.new(DateTime.parse("2011-01-01 01:01:01"),
-                            DateTime.parse("2012-12-31 23:59:59")),
-      "2011 - 2012"
-    )
+    assert_parse(:parse_time_range, API::BadParameterValue, "2012-06/25 10:34:56")
+    assert_parse(:parse_time_range, API::BadParameterValue, "2012/06/25 10:34:56am")
+    assert_parse_tr("2011-02-24 02:03:00", "2011-02-24 02:03:59", "201102240203")
+    assert_parse_tr("2011-02-24 02:03:00", "2011-02-24 02:03:59", "2011-2-24 2:3")
+    assert_parse_tr("2011-02-24 02:03:00", "2011-02-24 02:03:59", "2011/02/24 02:03")
+    assert_parse_tr("2011-02-24 02:00:00", "2011-02-24 02:59:59", "2011022402")
+    assert_parse_tr("2011-02-24 02:00:00", "2011-02-24 02:59:59", "2011-2-24 2")
+    assert_parse_tr("2011-02-24 02:00:00", "2011-02-24 02:59:59", "2011/02/24 02")
+    assert_parse_tr("2011-02-24 00:00:00", "2011-02-24 23:59:59", "20110224")
+    assert_parse_tr("2011-02-24 00:00:00", "2011-02-24 23:59:59", "2011-2-24")
+    assert_parse_tr("2011-02-24 00:00:00", "2011-02-24 23:59:59", "2011/02/24")
+    assert_parse_tr("2011-02-01 00:00:00", "2011-02-28 23:59:59", "201102")
+    assert_parse_tr("2011-02-01 00:00:00", "2011-02-28 23:59:59", "2011-2")
+    assert_parse_tr("2011-02-01 00:00:00", "2011-02-28 23:59:59", "2011/02")
+    assert_parse_tr("2011-01-01 00:00:00", "2011-12-31 23:59:59", "2011")
+    assert_parse_tr("2011-05-24 02:03:04", "2012-06-25 03:04:05", "20110524020304-20120625030405")
+    assert_parse_tr("2011-05-24 02:03:04", "2012-06-25 03:04:05", "2011-5-24 2:3:4-2012-6-25 3:4:5")
+    assert_parse_tr("2011-05-24 02:03:04", "2012-06-25 03:04:05", "2011/05/24 02:03:04 - 2012/06/25 03:04:05")
+    assert_parse_tr("2011-05-24 02:03:00", "2012-06-25 03:04:59", "201105240203-201206250304")
+    assert_parse_tr("2011-05-24 02:03:00", "2012-06-25 03:04:59", "2011-5-24 2:3-2012-6-25 3:4")
+    assert_parse_tr("2011-05-24 02:03:00", "2012-06-25 03:04:59", "2011/05/24 02:03 - 2012/06/25 03:04")
+    assert_parse_tr("2011-05-24 02:00:00", "2012-06-25 03:59:59", "2011052402-2012062503")
+    assert_parse_tr("2011-05-24 02:00:00", "2012-06-25 03:59:59", "2011-5-24 2-2012-6-25 3")
+    assert_parse_tr("2011-05-24 02:00:00", "2012-06-25 03:59:59", "2011/05/24 02 - 2012/06/25 03")
+    assert_parse_tr("2011-05-24 00:00:00", "2012-06-25 23:59:59", "20110524-20120625")
+    assert_parse_tr("2011-05-24 00:00:00", "2012-06-25 23:59:59", "2011-5-24-2012-6-25")
+    assert_parse_tr("2011-05-24 00:00:00", "2012-06-25 23:59:59", "2011/05/24 - 2012/06/25")
+    assert_parse_tr("2011-05-01 00:00:00", "2012-06-30 23:59:59", "201105-201206")
+    assert_parse_tr("2011-05-01 00:00:00", "2012-06-30 23:59:59", "2011-5-2012-6")
+    assert_parse_tr("2011-05-01 00:00:00", "2012-06-30 23:59:59", "2011/05 - 2012/06")
+    assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011-2012")
+    assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011 - 2012")
   end
-  # rubocop:enable Rails/TimeZone
+  # rubocop:enable Metric/LineLength
+
+  def assert_parse_tr(from, to, str)
+    from = DateTime.parse(from + " UTC")
+    to   = DateTime.parse(to + " UTC")
+    ordered_range = API::OrderedRange.new(from, to)
+    assert_parse(:parse_time_range, ordered_range, str)
+  end
 
   def test_parse_latitude
     assert_parse(:parse_latitude, nil, nil)
@@ -1283,10 +1082,8 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_latitude_range, nil, nil)
     assert_parse(:parse_latitude_range,
                  API::OrderedRange.new(-12, 34), "12S-34N")
-    assert_parse(:parse_latitude_range,
-                 API::OrderedRange.new(-34, 12), "12N-34S")
     assert_parse(:parse_latitude_ranges,
-                 [API::OrderedRange.new(-34, 12), 6, 7], "12N-34S,6,7")
+                 [API::OrderedRange.new(-12, 34), 6, 7], "12S-34N,6,7")
   end
 
   def test_parse_longitude
@@ -1313,8 +1110,6 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_longitude_range, nil, nil)
     assert_parse(:parse_longitude_range,
                  API::OrderedRange.new(-12, 34), "12W-34E")
-    assert_parse(:parse_longitude_range,
-                 API::OrderedRange.new(12, -34, :leave_order), "12E-34W")
     assert_parse(:parse_longitude_ranges,
                  [API::OrderedRange.new(-12, 34), 6, 7], "12W-34E,6,7")
   end
@@ -1333,10 +1128,10 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_altitudes, [123, 456], "123,456m")
     assert_parse(:parse_altitude_range, nil, nil)
     assert_parse(:parse_altitude_range, API::OrderedRange.new(12, 34), "12-34")
-    assert_parse(:parse_altitude_range, API::OrderedRange.new(54, 76), "76-54")
+    assert_parse(:parse_altitude_range, API::OrderedRange.new(54, 76), "54-76")
     assert_parse(:parse_altitude_ranges, nil, nil)
     assert_parse(:parse_altitude_ranges,
-                 [API::OrderedRange.new(54, 76), 3, 2], "76-54,3,2")
+                 [API::OrderedRange.new(54, 76), 3, 2], "54-76,3,2")
   end
 
   def test_parse_external_site
@@ -1358,7 +1153,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_image, img1, img1.id)
     assert_parse(:parse_images, [img2, img1], "#{img2.id},#{img1.id}")
     assert_parse(:parse_image_range,
-                 API::OrderedRange.new(img1, img2), "#{img2.id}-#{img1.id}")
+                 API::OrderedRange.new(img2, img1), "#{img2.id}-#{img1.id}")
     assert_parse(:parse_image, API::BadParameterValue, "")
     assert_parse(:parse_image, API::BadParameterValue, "name")
     assert_parse(:parse_image, API::ObjectNotFoundById, "12345")
@@ -1372,7 +1167,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_license, lic2, lic2.id)
     assert_parse(:parse_licenses, [lic2, lic1], "#{lic2.id},#{lic1.id}")
     assert_parse(:parse_license_range,
-                 API::OrderedRange.new(lic1, lic2), "#{lic2.id}-#{lic1.id}")
+                 API::OrderedRange.new(lic2, lic1), "#{lic2.id}-#{lic1.id}")
     assert_parse(:parse_license, API::BadParameterValue, "")
     assert_parse(:parse_license, API::BadParameterValue, "name")
     assert_parse(:parse_license, API::ObjectNotFoundById, "12345")
@@ -1387,7 +1182,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_locations,
                  [gualala, burbank], "#{gualala.id},#{burbank.id}")
     assert_parse(:parse_location_range,
-                 API::OrderedRange.new(burbank, gualala),
+                 API::OrderedRange.new(gualala, burbank),
                  "#{gualala.id}-#{burbank.id}")
     assert_parse(:parse_location, API::BadParameterValue, "")
     assert_parse(:parse_location, API::ObjectNotFoundByString, "name")
@@ -1427,7 +1222,7 @@ class ApiTest < UnitTestCase
                  [a_campestris, m_rhacodes],
                  "#{a_campestris.id},#{m_rhacodes.id}")
     assert_parse(:parse_name_range,
-                 API::OrderedRange.new(m_rhacodes, a_campestris),
+                 API::OrderedRange.new(a_campestris, m_rhacodes),
                  "#{a_campestris.id}-#{m_rhacodes.id}")
   end
 
@@ -1441,7 +1236,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_observations, [unknown_lat_lon_obs, a_campestrus_obs],
                  "#{unknown_lat_lon_obs.id},#{a_campestrus_obs.id}")
     assert_parse(:parse_observation_range,
-                 API::OrderedRange.new(a_campestrus_obs, unknown_lat_lon_obs),
+                 API::OrderedRange.new(unknown_lat_lon_obs, a_campestrus_obs),
                  "#{unknown_lat_lon_obs.id}-#{a_campestrus_obs.id}")
     assert_parse(:parse_observation, API::BadParameterValue, "")
     assert_parse(:parse_observation, API::BadParameterValue, "name")
@@ -1457,7 +1252,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_projects, [bolete_proj, eol_proj],
                  "#{bolete_proj.id},#{eol_proj.id}")
     assert_parse(:parse_project_range,
-                 API::OrderedRange.new(eol_proj, bolete_proj),
+                 API::OrderedRange.new(bolete_proj, eol_proj),
                  "#{bolete_proj.id}-#{eol_proj.id}")
     assert_parse(:parse_project, API::BadParameterValue, "")
     assert_parse(:parse_project, API::ObjectNotFoundByString, "name")
@@ -1475,7 +1270,7 @@ class ApiTest < UnitTestCase
                  [another_list, first_list],
                  "#{another_list.id},#{first_list.id}")
     assert_parse(:parse_species_list_range,
-                 API::OrderedRange.new(first_list, another_list),
+                 API::OrderedRange.new(another_list, first_list),
                  "#{another_list.id}-#{first_list.id}")
     assert_parse(:parse_species_list, API::BadParameterValue, "")
     assert_parse(:parse_species_list, API::ObjectNotFoundByString, "name")
@@ -1492,7 +1287,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_users,
                  [user_mary, user_rolf], "#{user_mary.id},#{user_rolf.id}")
     assert_parse(:parse_user_range,
-                 API::OrderedRange.new(user_rolf, user_mary),
+                 API::OrderedRange.new(user_mary, user_rolf),
                  "#{user_mary.id}-#{user_rolf.id}")
     assert_parse(:parse_user, API::BadParameterValue, "")
     assert_parse(:parse_user, API::ObjectNotFoundByString, "name")

@@ -4,20 +4,9 @@ class API
   class OrderedRange < Range
     attr_accessor :begin, :end
 
-    def initialize(from, to, leave_order = false)
-      if !leave_order && switch?(from, to)
-        @begin = to
-        @end = from
-      else
-        @begin = from
-        @end = to
-      end
-    end
-
-    def switch?(from, to)
-      from.is_a?(AbstractModel) ? from.id > to.id : from > to
-    rescue
-      false
+    def initialize(from, to)
+      @begin = from
+      @end = to
     end
 
     def include?(val)
