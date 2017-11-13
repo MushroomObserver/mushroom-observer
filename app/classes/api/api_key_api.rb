@@ -14,7 +14,12 @@ class API
     ]
 
     def query_params
-      raise NoMethodForAction.new("GET", :api_keys)
+      {
+        where:      sql_id_condition,
+        created_at: parse_time_range(:created_at),
+        updated_at: parse_time_range(:updated_at),
+        notes_has:  parse_string(:notes)
+      }
     end
 
     def create_params
@@ -37,8 +42,12 @@ class API
 
     def update_params
       {
-        notes: parse_string(:set_notes)
+        notes: parse_string(:set_app)
       }
+    end
+
+    def get
+      raise NoMethodForAction.new("GET", :api_keys)
     end
   end
 end
