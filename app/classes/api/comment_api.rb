@@ -15,7 +15,7 @@ class API
     ]
 
     def query_params
-      parse_target!
+      @target = parse_object(:target, limit: Comment.all_types)
       {
         where:       sql_id_condition,
         created_at:  parse_time_range(:created_at),
@@ -24,21 +24,9 @@ class API
         types:       parse_enum(:type, limit: Comment.all_type_tags),
         summary_has: parse_string(:summary_has),
         content_has: parse_string(:content_has),
-        target:      @target,
+        target:      @target ? @target.id : nil,
         type:        @target ? @target.class.name : nil
       }
-    end
-
-    def parse_target!
-      target_id   = parse_integer(:target_id)
-      target_type = parse_enum(:target_type, limit: Comment.all_type_tags)
-      return unless target_id || target_type
-      raise MissingParameter.new(:target_id)   unless target_id
-      raise MissingParameter.new(:target_type) unless target_type
-      target_model = target_type.to_s.classify.constantize
-      @target = target_model.find(target_id)
-    rescue ActiveRecord::RecordNotFound
-      raise ObjectNotFoundById.new(target_id, target_model)
     end
 
     def query_flavor
@@ -47,9 +35,9 @@ class API
 
     def create_params
       {
+        target:  parse_object(:target, limit: Comment.all_types),
         summary: parse_string(:summary, limit: 100),
-        comment: parse_string(:content),
-        target:  parse_object(:target, limit: Comment.all_types)
+        comment: parse_string(:content)
       }
     end
 

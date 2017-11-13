@@ -94,7 +94,7 @@ class API
       end
     end
 
-    def must_have_read_permission!(obj)
+    def must_have_view_permission!(obj)
       if obj.respond_to?(:is_reader?) &&
          !obj.is_reader?(user)
         raise MustHaveViewPermission.new(obj)

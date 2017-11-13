@@ -73,6 +73,67 @@ class ApiTest < UnitTestCase
     end
   end
 
+  def assert_last_api_key_correct
+    api_key = ApiKey.last
+    assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
+    if @verified
+      assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
+    else
+      assert_nil(api_key.verified)
+    end
+    assert_nil(api_key.last_used)
+    assert_equal(0, api_key.num_uses)
+    assert_equal(@app.strip_squeeze, api_key.notes)
+    assert_users_equal(@for_user, api_key.user)
+  end
+
+  def assert_last_comment_correct
+    com = Comment.last
+    assert_users_equal(@user, com.user)
+    assert_in_delta(Time.zone.now, com.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, com.updated_at, 1.minute)
+    assert_objs_equal(@target, com.target)
+    assert_equal(@summary.strip, com.summary)
+    assert_equal(@content.strip, com.comment)
+  end
+
+  def assert_last_image_correct
+    img = Image.last
+    assert_users_equal(@user, img.user)
+    assert_in_delta(Time.zone.now, img.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
+    assert_equal("image/jpeg", img.content_type)
+    assert_equal(@date, img.when)
+    assert_equal(@notes.strip, img.notes)
+    assert_equal(@copy.strip, img.copyright_holder)
+    assert_equal(@user.license, img.license)
+    assert_equal(0, img.num_views)
+    assert_nil(img.last_view)
+    assert_equal(@width, img.width)
+    assert_equal(@height, img.height)
+    assert(@vote == img.vote_cache)
+    assert_equal(true, img.ok_for_export)
+    assert(@orig == img.original_name)
+    assert_equal(false, img.transferred)
+    assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
+    assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
+    assert(@vote == img.users_vote(@user))
+  end
+
+  def assert_last_naming_correct
+    obs = Observation.last
+    naming = Naming.last
+    vote = Vote.last
+    assert_names_equal(@name, naming.name)
+    assert_objs_equal(obs, naming.observation)
+    assert_users_equal(@user, naming.user)
+    assert_in_delta(@vote, naming.vote_cache, 1) # vote_cache is weird
+    assert_in_delta(Time.zone.now, naming.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, naming.updated_at, 1.minute)
+    assert_equal(1, naming.votes.length)
+    assert_objs_equal(vote, naming.votes.first)
+  end
+
   def assert_last_observation_correct
     obs = Observation.last
     assert_in_delta(Time.zone.now, obs.created_at, 1.minute)
@@ -108,56 +169,6 @@ class ApiTest < UnitTestCase
     end
   end
 
-  def assert_last_naming_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
-    assert_names_equal(@name, naming.name)
-    assert_objs_equal(obs, naming.observation)
-    assert_users_equal(@user, naming.user)
-    assert_in_delta(@vote, naming.vote_cache, 1) # vote_cache is weird
-    assert_in_delta(Time.zone.now, naming.created_at, 1.minute)
-    assert_in_delta(Time.zone.now, naming.updated_at, 1.minute)
-    assert_equal(1, naming.votes.length)
-    assert_objs_equal(vote, naming.votes.first)
-  end
-
-  def assert_last_vote_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
-    assert_objs_equal(naming, vote.naming)
-    assert_objs_equal(obs, vote.observation)
-    assert_users_equal(@user, vote.user)
-    assert_equal(@vote, vote.value)
-    assert_in_delta(Time.zone.now, vote.created_at, 1.minute)
-    assert_in_delta(Time.zone.now, vote.updated_at, 1.minute)
-    assert_true(vote.favorite)
-  end
-
-  def assert_last_image_correct
-    img = Image.last
-    assert_users_equal(@user, img.user)
-    assert_in_delta(Time.zone.now, img.created_at, 1.minute)
-    assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
-    assert_equal("image/jpeg", img.content_type)
-    assert_equal(@date, img.when)
-    assert_equal(@notes.strip, img.notes)
-    assert_equal(@copy.strip, img.copyright_holder)
-    assert_equal(@user.license, img.license)
-    assert_equal(0, img.num_views)
-    assert_nil(img.last_view)
-    assert_equal(@width, img.width)
-    assert_equal(@height, img.height)
-    assert(@vote == img.vote_cache)
-    assert_equal(true, img.ok_for_export)
-    assert(@orig == img.original_name)
-    assert_equal(false, img.transferred)
-    assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
-    assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
-    assert(@vote == img.users_vote(@user))
-  end
-
   def assert_last_user_correct
     user = User.last
     assert_equal(@login, user.login)
@@ -187,18 +198,17 @@ class ApiTest < UnitTestCase
     end
   end
 
-  def assert_last_api_key_correct
-    api_key = ApiKey.last
-    assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
-    if @verified
-      assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
-    else
-      assert_nil(api_key.verified)
-    end
-    assert_nil(api_key.last_used)
-    assert_equal(0, api_key.num_uses)
-    assert_equal(@app.strip_squeeze, api_key.notes)
-    assert_users_equal(@for_user, api_key.user)
+  def assert_last_vote_correct
+    obs = Observation.last
+    naming = Naming.last
+    vote = Vote.last
+    assert_objs_equal(naming, vote.naming)
+    assert_objs_equal(obs, vote.observation)
+    assert_users_equal(@user, vote.user)
+    assert_equal(@vote, vote.value)
+    assert_in_delta(Time.zone.now, vote.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, vote.updated_at, 1.minute)
+    assert_true(vote.favorite)
   end
 
   ##############################################################################
@@ -335,8 +345,30 @@ class ApiTest < UnitTestCase
     assert_api_results([com1])
 
     obs = observations(:minimal_unknown_obs)
-    assert_api_pass(params.merge(target_id: obs.id, target_type: "Observation"))
+    assert_api_pass(params.merge(target: "observation ##{obs.id}"))
     assert_api_results(obs.comments.sort_by(&:id))
+  end
+
+  def test_posting_comments
+    @user    = rolf
+    @target  = names(:petigera)
+    @summary = "misspelling"
+    @content = "The correct one is 'Peltigera'."
+    params = {
+      method:  :post,
+      action:  :comment,
+      api_key: @api_key.key,
+      target:  "name ##{@target.id}",
+      summary: @summary,
+      content: @content
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:target))
+    assert_api_fail(params.remove(:summary))
+    assert_api_fail(params.merge(target: "foo #1"))
+    assert_api_fail(params.merge(target: "observation #1"))
+    assert_api_pass(params)
+    assert_last_comment_correct
   end
 
   # ----------------------------------
