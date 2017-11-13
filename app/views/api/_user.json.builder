@@ -4,8 +4,8 @@ json.login_name      object.login
 json.legal_name      object.legal_name
 json.joined          object.created_at.utc
 json.verified        object.verified.utc
-json.last_login      object.last_login.utc
-json.last_activity   object.last_activity.utc
+json.last_login      object.last_login.try(&:utc)
+json.last_activity   object.last_activity.try(&:utc)
 json.contribution    object.contribution
 json.notes           (object.notes || "").tpl_nodiv
 json.mailing_address (object.mailing_address || "").to_s.html_to_ascii

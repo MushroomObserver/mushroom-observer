@@ -3,5 +3,5 @@ xml.type      "api_key"
 xml.key       object.key
 xml.notes     object.notes
 xml.joined    object.created_at.utc
-xml.verified  object.last_used.utc
+xml.verified  object.last_used.try(&:utc)
 xml.num_users object.num_uses
