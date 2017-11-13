@@ -202,7 +202,7 @@ module Query::Modules::Validation
 
   def validate_time(arg, val)
     if val.acts_like?(:time)
-      val = val.in_time_zone
+      val = val.utc
       "%04d-%02d-%02d-%02d-%02d-%02d" %
         [val.year, val.mon, val.day, val.hour, val.min, val.sec]
     elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,5}$/i)
@@ -210,7 +210,7 @@ module Query::Modules::Validation
     elsif val.blank? || val.to_s == "0"
       nil
     else
-      fail("Value for :#{arg} should be a time (YYYY-MM-DD-HH-MM-SS), got: #{val.inspect}")
+      fail("Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: #{val.inspect}")
     end
   end
 

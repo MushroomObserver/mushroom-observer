@@ -2,10 +2,10 @@ json.id              object.id
 json.type            "user"
 json.login_name      object.login
 json.legal_name      object.legal_name
-json.joined          object.created_at
-json.verified        object.verified
-json.last_login      object.last_login
-json.last_activity   object.last_activity
+json.joined          object.created_at.utc
+json.verified        object.verified.utc
+json.last_login      object.last_login.utc
+json.last_activity   object.last_activity.utc
 json.contribution    object.contribution
 json.notes           (object.notes || "").tpl_nodiv
 json.mailing_address (object.mailing_address || "").to_s.html_to_ascii

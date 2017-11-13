@@ -71,7 +71,7 @@ module ApiHelper
 
   def xml_datetime(xml, tag, val)
     if val
-      str = val.api_time
+      str = val.utc.api_time
       xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
     end
   rescue

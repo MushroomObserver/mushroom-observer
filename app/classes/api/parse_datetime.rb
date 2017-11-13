@@ -4,7 +4,7 @@ class API
     declare_parameter(key, method, args)
     str = get_param(key)
     return args[:default] unless str
-    return cls.parse(str) if Patterns.list_matcher(str, patterns)
+    return cls.parse(str + " UTC") if Patterns.list_matcher(str, patterns)
     raise BadParameterValue.new(str, method)
   rescue ArgumentError
     raise BadParameterValue.new(str, method)
