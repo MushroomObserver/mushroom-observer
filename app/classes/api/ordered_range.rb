@@ -9,6 +9,11 @@ class API
       @end = to
     end
 
+    def reverse!
+      @begin, @end = @end, @begin
+      self
+    end
+
     def include?(val)
       val >= @begin && val <= @end
     end

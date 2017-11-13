@@ -19,29 +19,27 @@ class API
   # Escape dashes and commas with backslash if necessary.
   #
   def method_missing(method, *args, &block)
-    submethod = parse_method(method, /^(parse_\w+)s$/) ||
-                parse_method(method, /^((parse_\w+)_range)s$/, 2)
-    return do_parse_array(submethod, *args, &block) if submethod
+    submethod = parse_method(method, /^(parse_\w+)s$/)
+    return parse_array(submethod, *args, &block) if submethod
     submethod = parse_method(method, /^(parse_\w+)_range$/)
-    return do_parse_range(submethod, *args, &block) if submethod
+    return parse_range(submethod, *args, &block) if submethod
     super
   end
 
   def respond_to_missing?(method, include_private = false)
     parse_method(method, /^(parse_\w+)s$/) ||
-      parse_method(method, /^((parse_\w+)_range)s$/, 2) ||
       parse_method(method, /^(parse_\w+)_range$/) ||
       super
   end
 
-  def parse_method(method, pattern, test_match = 1, return_match = 1)
+  def parse_method(method, pattern)
     match = method.to_s.match(pattern)
-    return match[return_match] if match && respond_to?(match[test_match])
+    return match[1] if match && respond_to?(match[1])
   end
 
   # Parse a list of comma-separated values.  Always returns an Array if the
   # parameter was supplied, even if only one value given, else returns nil.
-  def do_parse_array(method, key, args = {}, &block)
+  def parse_array(method, key, args = {}, &block)
     declare_parameter(key, method, args)
     str = get_param(key, :leave_slashes)
     return args[:default] unless str
@@ -58,15 +56,28 @@ class API
   # Returns OrderedRange instance if range given, else parses it as a
   # normal "scalar" value, returning nil if the parameter doesn't
   # exist.
-  def do_parse_range(method, key, args = {}, &block)
+  def parse_range(method, key, args = {}, &block)
     declare_parameter(key, method, args)
     str = get_param(key, :leave_slashes)
     return args[:default] unless str
     args[:range] = true
     match = str.match(/^((\\.|[^-]+)+)-((\\.|[^-]+)+)$/)
-    return send(method, str, args, &block) unless match
-    OrderedRange.new(send(method, match[1], args, &block),
-                     send(method, match[3], args, &block))
+    if match
+      from = send(method, match[1], args, &block)
+      to   = send(method, match[3], args, &block)
+    else
+      from = to = send(method, str, args, &block)
+    end
+    create_ordered_range(method, args, from, to)
+  end
+
+  def create_ordered_range(method, args, from, to)
+    submethod = "#{method}_compact_range?"
+    return from if from == to && respond_to?(submethod)
+    val = OrderedRange.new(from, to)
+    submethod = "#{method}_swap_order?"
+    val.reverse! if respond_to?(submethod) && send(submethod, from, to, args)
+    val
   end
 
   # Get value of a parameter, stripping out excess white space, and removing
@@ -86,8 +97,7 @@ class API
   # later to autodiscover the capabilities of each API request type.
   def declare_parameter(key, type, args)
     return unless key.is_a?(Symbol)
-    match = type.to_s.match(/^parse_(.*)/)
-    type = match[1].to_sym if match
+    type = type.to_s.sub(/^parse_/, "").sub(/_range$/, "").to_sym
     expected_params[key] ||= ParameterDeclaration.new(key, type, args)
   end
 

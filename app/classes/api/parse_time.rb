@@ -91,12 +91,11 @@ class API
             str.match(/^(#{YYYYMM2})\s*-\s*(#{YYYYMM2})$/) ||
             str.match(/^(#{YYYYMM3})\s*-\s*(#{YYYYMM3})$/)
     return unless match
-    from = strip_time(match[1]) + "01"
-    to   = strip_time(match[2]) + "01"
-    to   = Date.parse(to).next_month.prev_day.to_s
-    to   = strip_time(to)
-    from = DateTime.parse(from + "000000 UTC")
-    to   = DateTime.parse(to + "235959 UTC")
+    from = strip_time(match[1])
+    to   = strip_time(match[2])
+    to   = Date.parse(to + "01").next_month.prev_day.to_s
+    from = DateTime.parse(from + "01000000 UTC")
+    to   = DateTime.parse(strip_time(to) + "235959 UTC")
     OrderedRange.new(from, to)
   end
 

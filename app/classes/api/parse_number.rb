@@ -24,4 +24,8 @@ class API
     raise BadLimitedParameterValue.new(str, limit) unless limit.include?(val)
     val
   end
+
+  def parse_integer_compact_range?; end
+
+  def parse_float_compact_range?; end
 end
