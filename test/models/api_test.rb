@@ -26,15 +26,20 @@ class ApiTest < UnitTestCase
   end
 
   def assert_api_fail(params)
-    api = API.execute(params)
+    @api = API.execute(params)
     msg = "API request should have failed, params: #{params.inspect}"
-    assert(api.errors.any?, msg)
+    assert(@api.errors.any?, msg)
   end
 
   def assert_api_pass(params)
-    api = API.execute(params)
+    @api = API.execute(params)
     msg = "API request should have passed, params: #{params.inspect}"
-    assert_no_errors(api, msg)
+    assert_no_errors(@api, msg)
+  end
+
+  def assert_api_results(expect)
+    msg = "API results wrong.  Query: #{@api.query.query}"
+    assert_obj_list_equal(expect, @api.results, msg)
   end
 
   def assert_parse(method, expect, val, *args)
@@ -299,6 +304,40 @@ class ApiTest < UnitTestCase
   # -----------------------------
   #  :section: Comment Requests
   # -----------------------------
+
+  def test_comment_gets
+    params = { method: :get, action: :comment }
+    com1 = comments(:minimal_unknown_obs_comment_1)
+    com2 = comments(:minimal_unknown_obs_comment_2)
+    com3 = comments(:detailed_unknown_obs_comment)
+
+    assert_api_pass(params.merge(id: com1.id))
+    assert_api_results([com1])
+
+    assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
+    assert_api_results([com2, com3])
+
+    assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
+    assert_api_results([com3])
+
+    assert_api_pass(params.merge(user: "rolf,dick"))
+    expect = Comment.where(user: rolf) + Comment.where(user: dick)
+    assert_api_results(expect.sort_by(&:id))
+
+    assert_api_pass(params.merge(type: "Observation"))
+    expect = Comment.where(target_type: "Observation")
+    assert_api_results(expect.sort_by(&:id))
+
+    assert_api_pass(params.merge(summary_has: "complicated"))
+    assert_api_results([com2])
+
+    assert_api_pass(params.merge(content_has: "really cool"))
+    assert_api_results([com1])
+
+    obs = observations(:minimal_unknown_obs)
+    assert_api_pass(params.merge(target_id: obs.id, target_type: "Observation"))
+    assert_api_results(obs.comments.sort_by(&:id))
+  end
 
   # ----------------------------------
   #  :section: ExternalLink Requests
