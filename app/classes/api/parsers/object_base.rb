@@ -4,13 +4,9 @@ class API
     class ObjectBase < Base
       def parse(str)
         raise BadParameterValue.new(str, model.type_tag) if str.blank?
-        val = try_finding_by_id(str)
-        if respond_to?(:try_finding_by_string)
-          val ||= try_finding_by_string(str)
-          raise ObjectNotFoundByString.new(str, model) unless val
-        else
-          raise BadParameterValue.new(str, key) unless val
-        end
+        val = try_finding_by_id(str) ||
+              try_finding_by_string(str)
+        raise ObjectNotFoundByString.new(str, model) unless val
         check_view_permission!(val) if args[:must_have_view_permission]
         check_edit_permission!(val) if args[:must_have_edit_permission]
         val
@@ -21,6 +17,10 @@ class API
         obj = model.safe_find(str.to_i)
         return obj if obj
         raise ObjectNotFoundById.new(str, model)
+      end
+
+      def try_finding_by_string(str)
+        raise BadParameterValue.new(str, key)
       end
 
       def check_view_permission!(obj)

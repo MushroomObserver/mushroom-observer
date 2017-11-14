@@ -10,9 +10,7 @@ class API
         raise BadParameterValue.new(str, model.type_tag) if str.blank?
         val = try_finding_by_id(str) ||
               try_finding_by_string(str)
-        if args[:correct_spelling] && val.correct_spelling
-          val = val.correct_spelling
-        end
+        val = correct_spelling(val) if args[:correct_spelling]
         check_view_permission!(val) if args[:must_have_view_permission]
         check_edit_permission!(val) if args[:must_have_edit_permission]
         val
@@ -28,6 +26,10 @@ class API
         end
         raise AmbiguousName.new(str, val) if val.length > 1
         val.first
+      end
+
+      def correct_spelling(val)
+        val.correct_spelling || val
       end
     end
   end
