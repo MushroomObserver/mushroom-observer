@@ -1,6 +1,10 @@
 class API
   # API subclass for all model-based endpoints
   class ModelAPI < API
+    def model_tag
+      self.class.model.type_tag
+    end
+
     def get
       self.query = build_query
       done_parsing_parameters!
@@ -16,32 +20,18 @@ class API
     def patch
       must_authenticate!
       self.query = build_query
-      setter = build_setter
-      done_parsing_parameters!
-      abort_if_any_errors!
-      results.each do |obj|
-        begin
-          setter.call(obj)
-        rescue => e
-          errors << e
-        end
-      end
+      update_objects
     end
 
     def delete
       must_authenticate!
       self.query = build_query
-      deleter = build_deleter
-      done_parsing_parameters!
-      abort_if_any_errors!
-      results.each do |obj|
-        begin
-          deleter.call(obj)
-        rescue => e
-          errors << e
-        end
-      end
+      delete_objects
     end
+
+    ############################################################################
+
+    protected
 
     def build_query
       params = query_params
@@ -56,6 +46,13 @@ class API
       :all
     end
 
+    # Stub for parsing and validating params passed to Query.
+    def query_params
+      raise "missing query_params stub!"
+    end
+
+    # ----------------------------------------
+
     def build_object
       params = create_params
       validate_create_params!(params)
@@ -67,6 +64,11 @@ class API
       obj
     end
 
+    # Stub for parsing and validating attributes passed to Model.create.
+    def create_params
+      raise "missing create_params stub!"
+    end
+
     # Stub for validating parameters before actually creating the object.
     def validate_create_params!(params); end
 
@@ -76,22 +78,63 @@ class API
     # Stub for hook after creating object.
     def after_create(obj); end
 
-    def build_setter
+    # ----------------------------------------
+
+    def update_objects
       params = update_params
       params.remove_nils!
+      validate_update_params!(params)
+      setter = build_setter(params)
+      done_parsing_parameters!
+      abort_if_any_errors!
+      results.each do |obj|
+        begin
+          setter.call(obj)
+        rescue => e
+          errors << e
+        end
+      end
+    end
+
+    # Stub for parsing and validating attributes to pass to record.update.
+    def update_params
+      raise "missing update_params stub!"
+    end
+
+    def validate_update_params!(params)
       raise MissingSetParameters.new if params.empty?
+    end
+
+    def build_setter(params)
       lambda do |obj|
         must_have_edit_permission!(obj)
         obj.update!(params)
       end
     end
 
+    # ----------------------------------------
+
+    def delete_objects
+      done_parsing_parameters!
+      deleter = build_deleter
+      abort_if_any_errors!
+      results.each do |obj|
+        begin
+          deleter.call(obj)
+        rescue => e
+          errors << e
+        end
+      end
+    end
+
     def build_deleter
       lambda do |obj|
         must_have_edit_permission!(obj)
-        obj.destroy || raise(DestroyFailed.new(obj))
+        obj.destroy!
       end
     end
+
+    # ----------------------------------------
 
     def must_have_view_permission!(obj)
       if obj.respond_to?(:is_reader?) &&
@@ -108,10 +151,6 @@ class API
       else
         raise MustHaveEditPermission.new(obj)
       end
-    end
-
-    def model_tag
-      self.class.model.type_tag
     end
 
     # This is just here until the new version of Query comes on-line.

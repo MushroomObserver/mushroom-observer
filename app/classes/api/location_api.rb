@@ -47,12 +47,6 @@ class API
       make_sure_location_doesnt_exist!(params)
     end
 
-    def make_sure_location_doesnt_exist!(params)
-      name = params[:display_name].to_s
-      return unless Location.find_by_name_or_reverse_name(name)
-      raise LocationAlreadyExists.new(name)
-    end
-
     def update_params
       validate_new_location_name!
       {
@@ -67,6 +61,22 @@ class API
       }
     end
 
+    def delete
+      raise NoMethodForAction.new("DELETE", action)
+    end
+
+    def must_have_edit_permission!(_obj); end
+
+    ############################################################################
+
+    private
+
+    def make_sure_location_doesnt_exist!(params)
+      name = params[:display_name].to_s
+      return unless Location.find_by_name_or_reverse_name(name)
+      raise LocationAlreadyExists.new(name)
+    end
+
     def validate_new_location_name!
       name = parse(:string, :set_name, limit: 1024)
       return if name.blank?
@@ -74,12 +84,6 @@ class API
       multiple_matches = query.num_results > 1
       raise LocationAlreadyExists.new(name)            if already_exists
       raise TryingToSetMultipleLocationsToSameName.new if multiple_matches
-    end
-
-    def must_have_edit_permission!(_obj); end
-
-    def delete
-      raise NoMethodForAction.new("DELETE", action)
     end
   end
 end

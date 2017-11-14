@@ -89,6 +89,35 @@ class API
       obs.log(:log_observation_created_at) if @log
     end
 
+    def build_setter
+      params = parse_parameters!
+      lambda do |obj|
+        must_have_edit_permission!(obj)
+        obj.update!(params)
+        update_images(obj)
+        update_projects(obj)
+        update_species_lists(obj)
+      end
+    end
+
+    def update_params
+      {
+        when:                   parse(:date, :set_date),
+        notes:                  parse(:string, :set_notes),
+        place_name:             parse(:place_name, :set_location, limit: 1024),
+        lat:                    @latitude,
+        long:                   @longitude,
+        alt:                    @altitude,
+        specimen:               parse(:boolean, :set_has_specimen),
+        is_collection_location: parse(:boolean, :set_is_collection_location),
+        thumb_image:            @thumbnail
+      }
+    end
+
+    ############################################################################
+
+    private
+
     def create_specimen(obs)
       provide_herbarium_default
       provide_herbarium_label_default(obs)
@@ -113,17 +142,6 @@ class API
       )
     end
 
-    def build_setter
-      params = parse_parameters!
-      lambda do |obj|
-        must_have_edit_permission!(obj)
-        obj.update!(params)
-        update_images(obj)
-        update_projects(obj)
-        update_species_lists(obj)
-      end
-    end
-
     def update_images(obj)
       obj.images.push(*@add_imgs)      if @add_imgs.any?
       obj.images.delete(*@remove_imgs) if @remove_imgs.any?
@@ -139,35 +157,18 @@ class API
       obj.species_lists.delete(*@remove_spls) if @remove_spls.any?
     end
 
-    def parse_parameters!
+    def validate_update_params!(params)
       parse_set_coordinates!
       parse_set_images!
       parse_set_projects!
       parse_set_species_lists!
-      params = update_params
-      params.remove_nils!
       raise MissingSetParameters.new if params.empty? && no_adds_or_removes?
-      params
     end
 
     def no_adds_or_removes?
       @add_imgs.empty? && @remove_imgs.empty? &&
         @add_prjs.empty? && @remove_prjs.empty? &&
         @add_spls.empty? && @remove_spls.empty?
-    end
-
-    def update_params
-      {
-        when:                   parse(:date, :set_date),
-        notes:                  parse(:string, :set_notes),
-        place_name:             parse(:place_name, :set_location, limit: 1024),
-        lat:                    @latitude,
-        long:                   @longitude,
-        alt:                    @altitude,
-        specimen:               parse(:boolean, :set_has_specimen),
-        is_collection_location: parse(:boolean, :set_is_collection_location),
-        thumb_image:            @thumbnail
-      }
     end
 
     def parse_is_collection_location

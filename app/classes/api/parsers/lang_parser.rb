@@ -5,7 +5,7 @@ class API
       def initialize(api, key, args)
         args[:default] ||= Language.official.locale
         args[:limit]   ||= Language.all.map(&:locale)
-        super(api, key, args)
+        super
       end
 
       def parse(str)

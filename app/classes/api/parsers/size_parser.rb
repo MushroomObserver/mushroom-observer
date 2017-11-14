@@ -4,7 +4,7 @@ class API
     class SizeParser < EnumParser
       def initialize(api, key, args)
         args[:limit] ||= Image.all_sizes - [:full_size]
-        super(api, key, args)
+        super
       end
     end
   end

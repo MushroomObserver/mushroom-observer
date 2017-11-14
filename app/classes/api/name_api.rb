@@ -60,6 +60,38 @@ class API
       name
     end
 
+    def create_params
+      {
+        rank:           parse(:enum, :rank, limit: Name.all_ranks),
+        citation:       parse(:string, :citation, default: ""),
+        deprecated:     parse(:boolean, :deprecated, default: false),
+        classification: parse(:string, :classification, default: ""),
+        notes:          parse(:string, :notes, default: "")
+      }
+    end
+
+    def update_params
+      {
+        rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
+        citation:       parse(:string, :set_citation),
+        classification: parse(:string, :set_classification),
+        notes:          parse(:string, :set_notes)
+        # TODO: change spelling of name and/or author
+        # TODO: mark name as misspelling
+        # TODO: change synonymy
+      }
+    end
+
+    def must_have_edit_permission!(_obj); end
+
+    def delete
+      raise NoMethodForAction.new("DELETE", action)
+    end
+
+    ############################################################################
+
+    private
+
     def make_sure_name_doesnt_exist!(name_str, author)
       match = nil
       if author.blank?
@@ -90,34 +122,6 @@ class API
       names.each do |name|
         name.save if name && name.new_record?
       end
-    end
-
-    def create_params
-      {
-        rank:           parse(:enum, :rank, limit: Name.all_ranks),
-        citation:       parse(:string, :citation, default: ""),
-        deprecated:     parse(:boolean, :deprecated, default: false),
-        classification: parse(:string, :classification, default: ""),
-        notes:          parse(:string, :notes, default: "")
-      }
-    end
-
-    def update_params
-      {
-        rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
-        citation:       parse(:string, :set_citation),
-        classification: parse(:string, :set_classification),
-        notes:          parse(:string, :set_notes)
-        # TODO: change spelling of name and/or author
-        # TODO: mark name as misspelling
-        # TODO: change synonymy
-      }
-    end
-
-    def must_have_edit_permission!(_obj); end
-
-    def delete
-      raise NoMethodForAction.new("DELETE", action)
     end
 
     def parse_misspellings

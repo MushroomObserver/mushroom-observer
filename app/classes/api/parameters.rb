@@ -23,10 +23,6 @@ class API
     parser(*args).parse_array(:parse_scalar, &block)
   end
 
-  def parser(type, key, args = {})
-    "API::Parsers::#{type.to_s.camelize}Parser".constantize.new(self, key, args)
-  end
-
   # Simplified "parser" for getting the HTTP request -- this is passed in
   # specially by ApiController: it should not be processed in any way.
   def parse_upload
@@ -39,5 +35,13 @@ class API
     raise HelpMessage.new(expected_params)          if unused.include?(:help)
     raise UnexpectedUpload.new("Unexpected upload") if unused.include?(:upload)
     raise UnusedParameters.new(unused)              if unused.any?
+  end
+
+  ##############################################################################
+
+  private
+
+  def parser(type, key, args = {})
+    "API::Parsers::#{type.to_s.camelize}Parser".constantize.new(self, key, args)
   end
 end

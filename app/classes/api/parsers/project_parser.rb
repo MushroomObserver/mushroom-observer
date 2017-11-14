@@ -11,7 +11,7 @@ class API
       end
 
       def parse(str)
-        val = super(str)
+        val = super
         check_if_admin!(val)  if args[:must_be_admin]
         check_if_member!(val) if args[:must_be_member]
         val

@@ -13,25 +13,17 @@ class API
       :user
     ]
 
+    # rubocop:disable Metrics/AbcSize
     def query_params
-      sequence_query_params.merge(observation_query_params)
-    end
-
-    def sequence_query_params
       {
-        where:         sql_id_condition,
-        created_at:    parse_range(:time, :created_at),
-        updated_at:    parse_range(:time, :updated_at),
-        users:         parse_array(:user, :user),
-        locus_has:     parse(:string, :locus),
-        archive_has:   parse(:string, :archive),
-        accession_has: parse(:string, :accession),
-        notes_has:     parse(:string, :notes)
-      }
-    end
-
-    def observation_query_params
-      {
+        where:          sql_id_condition,
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        users:          parse_array(:user, :user),
+        locus_has:      parse(:string, :locus),
+        archive_has:    parse(:string, :archive),
+        accession_has:  parse(:string, :accession),
+        notes_has:      parse(:string, :notes),
         date:           parse_range(:date, :date),
         observers:      parse_array(:user, :observer),
         names:          parse_array(:string, :name),
@@ -47,6 +39,7 @@ class API
         west:           parse(:longitude, :west)
       }
     end
+    # rubocop:enable Metrics/AbcSize
 
     def create_params
       {
@@ -75,6 +68,10 @@ class API
         notes:     parse(:string, :set_notes)
       }
     end
+
+    ############################################################################
+
+    private
 
     def parse_observation_to_attach_to
       parse(:observation, :observation, must_have_edit_permission: true)

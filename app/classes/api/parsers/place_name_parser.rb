@@ -3,7 +3,7 @@ class API
     # Parse API place names
     class PlaceNameParser < LocationParser
       def parse(str)
-        val = super(str)
+        val = super
         val.is_a?(Location) ? val.display_name : val
       rescue ObjectNotFoundByString
         str

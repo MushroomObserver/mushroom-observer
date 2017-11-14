@@ -6,7 +6,7 @@ class API
 
       # Always has to have limit argument: the set of allowed values.
       def initialize(*args)
-        super(*args)
+        super
         self.limit = self.args[:limit]
         raise("missing limit!") unless limit
       end

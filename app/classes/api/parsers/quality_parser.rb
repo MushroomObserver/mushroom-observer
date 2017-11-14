@@ -3,7 +3,7 @@ class API
     # Parse API qualities
     class QualityParser < FloatParser
       def initialize(*args)
-        super(*args)
+        super
         self.args[:limit] = Range.new(Image.minimum_vote, Image.maximum_vote)
       end
     end

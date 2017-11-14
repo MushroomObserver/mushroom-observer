@@ -55,6 +55,34 @@ class API
       upload.clean_up if upload
     end
 
+    def create_params
+      observations = parse_observations_to_attach_to
+      default_date = observations.any? ? observations.first.when : Date.today
+      {
+        when:             parse(:date, :date, default: default_date),
+        notes:            parse(:string, :notes, default: ""),
+        copyright_holder: parse_copyright_holder,
+        license:          parse(:license, :license, default: user.license),
+        original_name:    parse_original_name,
+        projects:         parse_projects_to_attach_to,
+        observations:     observations
+      }
+    end
+
+    def update_params
+      {
+        when:             parse(:date, :set_date),
+        notes:            parse(:string, :set_notes),
+        copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
+        license:          parse(:license, :set_license),
+        original_name:    parse(:string, :set_original, limit: 120)
+      }
+    end
+
+    ############################################################################
+
+    private
+
     def create_image(params)
       img = model.new(params)
       img.save          || raise(CreateFailed.new(img))
@@ -71,36 +99,12 @@ class API
       img.change_vote(@user, vote, (@user.votes_anonymous == :yes))
     end
 
-    def create_params
-      observations = parse_observations_to_attach_to
-      default_date = observations.any? ? observations.first.when : Date.today
-      {
-        when:             parse(:date, :date, default: default_date),
-        notes:            parse(:string, :notes, default: ""),
-        copyright_holder: parse_copyright_holder,
-        license:          parse(:license, :license, default: user.license),
-        original_name:    parse_original_name,
-        projects:         parse_projects_to_attach_to,
-        observations:     observations
-      }
-    end
-
     def upload_params(upload)
       {
         image:          upload.content,
         upload_length:  upload.content_length,
         upload_type:    upload.content_type,
         upload_md5sum:  upload.content_md5
-      }
-    end
-
-    def update_params
-      {
-        when:             parse(:date, :set_date),
-        notes:            parse(:string, :set_notes),
-        copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
-        license:          parse(:license, :set_license),
-        original_name:    parse(:string, :set_original, limit: 120)
       }
     end
 

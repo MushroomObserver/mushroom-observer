@@ -21,12 +21,10 @@ class API
 
   attr_accessor :query
   attr_accessor :detail
-  attr_accessor :includes
   attr_accessor :page_number
 
   initializers << lambda do
-    self.detail = parse(:enum, :detail, limit: [:none, :low, :high],
-                                        default: :none)
+    self.detail = parse(:enum, :detail, limit: [:none, :low, :high]) || :none
     self.page_number = parse(:integer, :page, default: 1)
   end
 

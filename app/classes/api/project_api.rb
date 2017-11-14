@@ -76,6 +76,21 @@ class API
       end
     end
 
+    def update_params
+      {
+        title:   parse(:string, :set_title, limit: 100),
+        summary: parse(:string, :set_summary)
+      }
+    end
+
+    def delete
+      raise NoMethodForAction.new("DELETE", action)
+    end
+
+    ############################################################################
+
+    private
+
     def update_admin_group(proj)
       proj.admin_group.users.push(@add_admins)      if @add_admins.any?
       proj.admin_group.users.delete(@remove_admins) if @remove_admins.any?
@@ -113,13 +128,6 @@ class API
       params
     end
 
-    def update_params
-      {
-        title:   parse(:string, :set_title, limit: 100),
-        summary: parse(:string, :set_summary)
-      }
-    end
-
     def parse_add_remove_admins
       @add_admins    = parse_array(:user, :add_admins) || []
       @remove_admins = parse_array(:user, :remove_admins) || []
@@ -154,10 +162,6 @@ class API
       @add_admins + @remove_admins + @add_members + @remove_members +
         @add_imgs + @remove_imgs + @add_obs + @remove_obs + @add_spls +
         @remove_spls
-    end
-
-    def delete
-      raise NoMethodForAction.new("DELETE", action)
     end
   end
 end

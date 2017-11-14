@@ -72,6 +72,10 @@ class API
       }
     end
 
+    ############################################################################
+
+    private
+
     def parse_add_remove_observations
       @add_obs    = parse_array(:observation, :add_observations) || []
       @remove_obs = parse_array(:observation, :remove_observations) || []

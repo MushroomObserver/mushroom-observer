@@ -5,7 +5,7 @@ class API
       EMAIL = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/
 
       def parse(str)
-        val = super(str) || return
+        val = super || return
         return val if val.match(EMAIL)
         raise BadParameterValue.new(val, :email)
       end
