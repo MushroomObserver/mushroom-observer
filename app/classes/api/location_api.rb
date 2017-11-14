@@ -1,4 +1,3 @@
-# API
 class API
   # API for Location
   class LocationAPI < ModelAPI
@@ -16,26 +15,26 @@ class API
     def query_params
       {
         where:      sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        users:      parse_users(:user),
-        north:      parse_latitude(:north),
-        south:      parse_latitude(:south),
-        east:       parse_longitude(:east),
-        west:       parse_longitude(:west)
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users:      parse_array(:user, :user),
+        north:      parse(:latitude, :north),
+        south:      parse(:latitude, :south),
+        east:       parse(:longitude, :east),
+        west:       parse(:longitude, :west)
       }
     end
 
     def create_params
       {
-        display_name: parse_string(:name, limit: 1024),
-        north:        parse_latitude(:north),
-        south:        parse_longitude(:south),
-        east:         parse_longitude(:east),
-        west:         parse_longitude(:west),
-        high:         parse_altitude(:high, default: nil),
-        low:          parse_altitude(:low, default: nil),
-        notes:        parse_string(:notes, default: "")
+        display_name: parse(:string, :name, limit: 1024),
+        north:        parse(:latitude, :north),
+        south:        parse(:longitude, :south),
+        east:         parse(:longitude, :east),
+        west:         parse(:longitude, :west),
+        high:         parse(:altitude, :high, default: nil),
+        low:          parse(:altitude, :low, default: nil),
+        notes:        parse(:string, :notes, default: "")
       }
     end
 
@@ -58,18 +57,18 @@ class API
       validate_new_location_name!
       {
         display_name: name,
-        north:        parse_latitude(:set_north),
-        south:        parse_longitude(:set_south),
-        east:         parse_longitude(:set_east),
-        west:         parse_longitude(:set_west),
-        high:         parse_altitude(:set_high),
-        low:          parse_altitude(:set_low),
-        notes:        parse_string(:set_notes)
+        north:        parse(:latitude, :set_north),
+        south:        parse(:longitude, :set_south),
+        east:         parse(:longitude, :set_east),
+        west:         parse(:longitude, :set_west),
+        high:         parse(:altitude, :set_high),
+        low:          parse(:altitude, :set_low),
+        notes:        parse(:string, :set_notes)
       }
     end
 
     def validate_new_location_name!
-      name = parse_string(:set_name, limit: 1024)
+      name = parse(:string, :set_name, limit: 1024)
       return if name.blank?
       already_exists   = Location.find_by_name_or_reverse_name(name)
       multiple_matches = query.num_results > 1

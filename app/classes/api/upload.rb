@@ -8,13 +8,13 @@ class API
   end
 
   def upload_from_url
-    url = parse_string(:upload_url)
+    url = parse(:string, :upload_url)
     return nil unless url
     UploadFromURL.new(url)
   end
 
   def upload_from_file
-    file = parse_string(:upload_file)
+    file = parse(:string, :upload_file)
     return nil unless file
     UploadFromFile.new(file)
   end

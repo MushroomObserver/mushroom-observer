@@ -116,26 +116,11 @@
 class API
   require_dependency "api/errors"
   require_dependency "api/base"
-  require_dependency "api/parsers"
-  require_dependency "api/datetime_patterns"
-  require_dependency "api/parse_boolean"
-  require_dependency "api/parse_date"
-  require_dependency "api/parse_enum"
-  require_dependency "api/parse_external_site"
-  require_dependency "api/parse_herbarium"
-  require_dependency "api/parse_lang"
-  require_dependency "api/parse_location"
-  require_dependency "api/parse_name"
-  require_dependency "api/parse_number"
-  require_dependency "api/parse_object"
-  require_dependency "api/parse_project"
-  require_dependency "api/parse_species_list"
-  require_dependency "api/parse_string"
-  require_dependency "api/parse_time"
-  require_dependency "api/parse_user"
+  require_dependency "api/parameters"
   require_dependency "api/results"
   require_dependency "api/upload"
   require_dependency "api/model_api"
+  require_dependency "api/parsers/base"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
   Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|

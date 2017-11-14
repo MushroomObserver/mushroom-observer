@@ -1,4 +1,3 @@
-# API
 class API
   # API for ApiKey
   class ApiKeyAPI < ModelAPI
@@ -16,16 +15,16 @@ class API
     def query_params
       {
         where:      sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        notes_has:  parse_string(:notes)
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        notes_has:  parse(:string, :notes)
       }
     end
 
     def create_params
-      @for_user = parse_user(:for_user, default: @user)
+      @for_user = parse(:user, :for_user, default: @user)
       {
-        notes:    parse_string(:app),
+        notes:    parse(:string, :app),
         user:     @for_user,
         verified: (@for_user == @user ? Time.now : nil)
       }
@@ -42,7 +41,7 @@ class API
 
     def update_params
       {
-        notes: parse_string(:set_app)
+        notes: parse(:string, :set_app)
       }
     end
 

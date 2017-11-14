@@ -1,4 +1,3 @@
-# API
 class API
   # API exception base class.
   class Error < ::StandardError

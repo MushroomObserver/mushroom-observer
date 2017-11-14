@@ -1,4 +1,3 @@
-# API
 class API
   # Information about an API parameter to provide automatic documentation
   class ParameterDeclaration

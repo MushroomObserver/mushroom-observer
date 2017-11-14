@@ -1,4 +1,3 @@
-# API
 class API
   # API for Name
   class NameAPI < ModelAPI
@@ -18,38 +17,38 @@ class API
     def query_params
       {
         where:              sql_id_condition,
-        created_at:         parse_time_range(:created_at),
-        updated_at:         parse_time_range(:updated_at),
-        users:              parse_users(:user),
-        names:              parse_strings(:name),
-        synonym_names:      parse_strings(:synonyms_of),
-        children_names:     parse_strings(:children_of),
-        is_deprecated:      parse_boolean(:is_deprecated),
+        created_at:         parse_range(:time, :created_at),
+        updated_at:         parse_range(:time, :updated_at),
+        users:              parse_array(:user, :user),
+        names:              parse_array(:string, :name),
+        synonym_names:      parse_array(:string, :synonyms_of),
+        children_names:     parse_array(:string, :children_of),
+        is_deprecated:      parse(:boolean, :is_deprecated),
         misspellings:       parse_misspellings,
-        has_synonyms:       parse_boolean(:has_synonyms),
-        locations:          parse_strings(:location),
-        species_lists:      parse_strings(:species_lists),
-        rank:               parse_enum(:rank, limit: Name.all_ranks),
-        has_author:         parse_boolean(:has_author),
-        has_citation:       parse_boolean(:has_citation),
-        has_classification: parse_boolean(:has_classification),
-        has_notes:          parse_boolean(:has_notes),
-        has_comments:       parse_boolean(:has_comments, limit: true),
-        has_default_desc:   parse_boolean(:has_description),
-        text_name_has:      parse_string(:text_name_has),
-        author_has:         parse_string(:author_has),
-        citation_has:       parse_string(:citation_has),
-        classification_has: parse_string(:classification_has),
-        notes_has:          parse_string(:notes_has),
-        comments_has:       parse_string(:comments_has),
-        ok_for_export:      parse_boolean(:ok_for_export)
+        has_synonyms:       parse(:boolean, :has_synonyms),
+        locations:          parse_array(:string, :location),
+        species_lists:      parse_array(:string, :species_lists),
+        rank:               parse(:enum, :rank, limit: Name.all_ranks),
+        has_author:         parse(:boolean, :has_author),
+        has_citation:       parse(:boolean, :has_citation),
+        has_classification: parse(:boolean, :has_classification),
+        has_notes:          parse(:boolean, :has_notes),
+        has_comments:       parse(:boolean, :has_comments, limit: true),
+        has_default_desc:   parse(:boolean, :has_description),
+        text_name_has:      parse(:string, :text_name_has),
+        author_has:         parse(:string, :author_has),
+        citation_has:       parse(:string, :citation_has),
+        classification_has: parse(:string, :classification_has),
+        notes_has:          parse(:string, :notes_has),
+        comments_has:       parse(:string, :comments_has),
+        ok_for_export:      parse(:boolean, :ok_for_export)
       }
     end
     # rubocop:enable Metrics/AbcSize
 
     def build_object
-      name_str = parse_string(:name, limit: 100)
-      author   = parse_string(:author, limit: 100)
+      name_str = parse(:string, :name, limit: 100)
+      author   = parse(:string, :author, limit: 100)
       params   = create_params
       done_parsing_parameters!
       raise MissingParameter.new(:name_str) if name_str.blank?
@@ -95,20 +94,20 @@ class API
 
     def create_params
       {
-        rank:           parse_enum(:rank, limit: Name.all_ranks),
-        citation:       parse_string(:citation, default: ""),
-        deprecated:     parse_boolean(:deprecated, default: false),
-        classification: parse_string(:classification, default: ""),
-        notes:          parse_string(:notes, default: "")
+        rank:           parse(:enum, :rank, limit: Name.all_ranks),
+        citation:       parse(:string, :citation, default: ""),
+        deprecated:     parse(:boolean, :deprecated, default: false),
+        classification: parse(:string, :classification, default: ""),
+        notes:          parse(:string, :notes, default: "")
       }
     end
 
     def update_params
       {
-        rank:           parse_enum(:set_rank, limit: Name.all_ranks),
-        citation:       parse_string(:set_citation),
-        classification: parse_string(:set_classification),
-        notes:          parse_string(:set_notes)
+        rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
+        citation:       parse(:string, :set_citation),
+        classification: parse(:string, :set_classification),
+        notes:          parse(:string, :set_notes)
         # TODO: change spelling of name and/or author
         # TODO: mark name as misspelling
         # TODO: change synonymy
@@ -122,7 +121,7 @@ class API
     end
 
     def parse_misspellings
-      parse_enum(:misspellings, default: :no, limit: [:no, :either, :only])
+      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only])
     end
   end
 end

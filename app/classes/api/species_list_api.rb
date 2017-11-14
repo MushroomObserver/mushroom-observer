@@ -1,4 +1,3 @@
-# API
 class API
   # API for SpeciesList
   class SpeciesListAPI < ModelAPI
@@ -17,30 +16,30 @@ class API
     def query_params
       {
         where:          sql_id_condition,
-        created_at:     parse_time_range(:created_at),
-        updated_at:     parse_time_range(:updated_at),
-        date:           parse_date(:date),
-        users:          parse_users(:user),
-        names:          parse_strings(:name),
-        synonym_names:  parse_strings(:synonyms_of),
-        children_names: parse_strings(:children_of),
-        locations:      parse_strings(:location),
-        projects:       parse_strings(:project),
-        has_notes:      parse_boolean(:has_notes),
-        has_comments:   parse_boolean(:has_comments, limit: true),
-        title_has:      parse_string(:title_has),
-        notes_has:      parse_string(:notes_has),
-        comments_has:   parse_string(:comments_has)
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        date:           parse(:date, :date),
+        users:          parse_array(:user, :user),
+        names:          parse_array(:string, :name),
+        synonym_names:  parse_array(:string, :synonyms_of),
+        children_names: parse_array(:string, :children_of),
+        locations:      parse_array(:string, :location),
+        projects:       parse_array(:string, :project),
+        has_notes:      parse(:boolean, :has_notes),
+        has_comments:   parse(:boolean, :has_comments, limit: true),
+        title_has:      parse(:string, :title_has),
+        notes_has:      parse(:string, :notes_has),
+        comments_has:   parse(:string, :comments_has)
       }
     end
 
     def create_params
       {
-        title:      parse_string(:title, limit: 100),
-        when:       parse_date(:date, default: Date.today),
-        place_name: parse_place_name(:location, limit: 1024,
-                                                default: Location.unknown),
-        notes:      parse_string(:notes, default: "")
+        title:      parse(:string, :title, limit: 100),
+        when:       parse(:date, :date, default: Date.today),
+        place_name: parse(:place_name, :location, limit: 1024,
+                                                  default: Location.unknown),
+        notes:      parse(:string, :notes, default: "")
       }
     end
 
@@ -66,16 +65,16 @@ class API
 
     def update_params
       {
-        title:      parse_string(:set_title, limit: 100),
-        when:       parse_date(:set_date),
-        place_name: parse_place_name(:set_location, limit: 1024),
-        notes:      parse_string(:set_notes)
+        title:      parse(:string, :set_title, limit: 100),
+        when:       parse(:date, :set_date),
+        place_name: parse(:place_name, :set_location, limit: 1024),
+        notes:      parse(:string, :set_notes)
       }
     end
 
     def parse_add_remove_observations
-      @add_obs    = parse_observations(:add_observations) || []
-      @remove_obs = parse_observations(:remove_observations) || []
+      @add_obs    = parse_array(:observation, :add_observations) || []
+      @remove_obs = parse_array(:observation, :remove_observations) || []
     end
 
     def make_sure_parameters_not_empty!

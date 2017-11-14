@@ -1,4 +1,3 @@
-# API
 class API
   # API for Project
   class ProjectAPI < ModelAPI
@@ -17,26 +16,26 @@ class API
     def query_params
       {
         where:             sql_id_condition,
-        created_at:        parse_time_range(:created_at),
-        updated_at:        parse_time_range(:updated_at),
-        users:             parse_users(:user),
-        has_images:        parse_boolean(:has_images, limit: true),
-        has_observations:  parse_boolean(:has_observations, limit: true),
-        has_species_lists: parse_boolean(:has_species_lists, limit: true),
-        has_comments:      parse_boolean(:has_comments, limit: true),
-        has_notes:         parse_boolean(:has_notes),
-        title_has:         parse_string(:title_has),
-        notes_has:         parse_string(:notes_has),
-        comments_has:      parse_string(:comments_has)
+        created_at:        parse_range(:time, :created_at),
+        updated_at:        parse_range(:time, :updated_at),
+        users:             parse_array(:user, :user),
+        has_images:        parse(:boolean, :has_images, limit: true),
+        has_observations:  parse(:boolean, :has_observations, limit: true),
+        has_species_lists: parse(:boolean, :has_species_lists, limit: true),
+        has_comments:      parse(:boolean, :has_comments, limit: true),
+        has_notes:         parse(:boolean, :has_notes),
+        title_has:         parse(:string, :title_has),
+        notes_has:         parse(:string, :notes_has),
+        comments_has:      parse(:string, :comments_has)
       }
     end
 
     def create_params
-      @admins  = parse_users(:admins, default: [user])
-      @members = parse_users(:members, default: [user])
+      @admins  = parse_array(:user, :admins, default: [user])
+      @members = parse_array(:user, :members, default: [user])
       {
-        title:   parse_string(:title, limit: 100),
-        summary: parse_string(:summary)
+        title:   parse(:string, :title, limit: 100),
+        summary: parse(:string, :summary)
       }
     end
 
@@ -116,34 +115,34 @@ class API
 
     def update_params
       {
-        title:   parse_string(:set_title, limit: 100),
-        summary: parse_string(:set_summary)
+        title:   parse(:string, :set_title, limit: 100),
+        summary: parse(:string, :set_summary)
       }
     end
 
     def parse_add_remove_admins
-      @add_admins    = parse_users(:add_admins) || []
-      @remove_admins = parse_users(:remove_admins) || []
+      @add_admins    = parse_array(:user, :add_admins) || []
+      @remove_admins = parse_array(:user, :remove_admins) || []
     end
 
     def parse_add_remove_members
-      @add_members    = parse_users(:add_members) || []
-      @remove_members = parse_users(:remove_members) || []
+      @add_members    = parse_array(:user, :add_members) || []
+      @remove_members = parse_array(:user, :remove_members) || []
     end
 
     def parse_add_remove_images
-      @add_imgs    = parse_images(:add_images) || []
-      @remove_imgs = parse_images(:remove_images) || []
+      @add_imgs    = parse_array(:image, :add_images) || []
+      @remove_imgs = parse_array(:image, :remove_images) || []
     end
 
     def parse_add_remove_observations
-      @add_obs    = parse_observations(:add_observations) || []
-      @remove_obs = parse_observations(:remove_observations) || []
+      @add_obs    = parse_array(:observation, :add_observations) || []
+      @remove_obs = parse_array(:observation, :remove_observations) || []
     end
 
     def parse_add_remove_species_lists
-      @add_spls    = parse_species_lists(:add_species_lists) || []
-      @remove_spls = parse_species_lists(:remove_species_lists) || []
+      @add_spls    = parse_array(:species_list, :add_species_lists) || []
+      @remove_spls = parse_array(:species_list, :remove_species_lists) || []
     end
 
     def make_sure_parameters_not_empty!

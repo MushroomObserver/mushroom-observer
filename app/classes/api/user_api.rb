@@ -1,4 +1,3 @@
-# API
 class API
   # API for User
   class UserAPI < ModelAPI
@@ -17,33 +16,25 @@ class API
 
     def query_params
       {
-        where: sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at)
-        # :login        => parse_strings(:login),
-        # :name         => parse_strings(:name),
-        # :locations    => parse_strings(:location),
-        # :images       => parse_images(:image),
-        # :has_location => parse_boolean(:has_location),
-        # :has_image    => parse_boolean(:has_image),
-        # :has_notes    => parse_boolean(:has_notes),
-        # :notes_has    => parse_strings(:notes_has),
+        where:      sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at)
       }
     end
 
     def create_params
-      @create_key = parse_string(:create_key)
+      @create_key = parse(:string, :create_key)
       {
-        login:           parse_string(:login, limit: 80),
-        name:            parse_string(:name, limit: 80, default: ""),
-        email:           parse_email(:email, limit: 80),
-        password:        parse_string(:password, limit: 80),
-        locale:          parse_lang(:locale),
-        notes:           parse_string(:notes, default: ""),
-        mailing_address: parse_string(:mailing_address, default: ""),
-        license:         parse_license(:license, default: License.preferred),
-        location:        parse_location(:location),
-        image:           parse_image(:image),
+        login:           parse(:string, :login, limit: 80),
+        name:            parse(:string, :name, limit: 80, default: ""),
+        email:           parse(:email, :email, limit: 80),
+        password:        parse(:string, :password, limit: 80),
+        locale:          parse(:lang, :locale),
+        notes:           parse(:string, :notes, default: ""),
+        mailing_address: parse(:string, :mailing_address, default: ""),
+        license:         parse(:license, :license, default: License.preferred),
+        location:        parse(:location, :location),
+        image:           parse(:image, :image),
         verified:        nil,
         admin:           false,
         layout_count:    15
@@ -71,16 +62,16 @@ class API
 
     def update_params
       {
-        login:           parse_string(:login, limit: 80),
-        name:            parse_string(:name, limit: 80, default: ""),
-        email:           parse_email(:email, limit: 80),
-        password:        parse_string(:password, limit: 80),
-        locale:          parse_lang(:locale),
-        notes:           parse_string(:notes, default: ""),
-        mailing_address: parse_string(:mailing_address, default: ""),
-        license:         parse_license(:license, default: License.preferred),
-        location:        parse_location(:location),
-        image:           parse_image(:image),
+        login:           parse(:string, :login, limit: 80),
+        name:            parse(:string, :name, limit: 80, default: ""),
+        email:           parse(:email, :email, limit: 80),
+        password:        parse(:string, :password, limit: 80),
+        locale:          parse(:lang, :locale),
+        notes:           parse(:string, :notes, default: ""),
+        mailing_address: parse(:string, :mailing_address, default: ""),
+        license:         parse(:license, :license, default: License.preferred),
+        location:        parse(:location, :location),
+        image:           parse(:image, :image),
         verified:        nil,
         admin:           false,
         layout_count:    15

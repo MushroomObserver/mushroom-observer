@@ -50,7 +50,7 @@ class API
   end
 
   def handle_version
-    self.version = parse_float(:version)
+    self.version = parse(:float, :version)
     if version.blank?
       self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
@@ -61,7 +61,7 @@ class API
   end
 
   def authenticate_user
-    key_str = parse_string(:api_key)
+    key_str = parse(:string, :api_key)
     key = ApiKey.find_by_key(key_str)
     if !key_str
       User.current = self.user = nil
@@ -76,7 +76,7 @@ class API
   end
 
   def process_request
-    tmp_method  = parse_string(:method)
+    tmp_method  = parse(:string, :method)
     self.method = tmp_method.downcase.to_sym
     raise MissingMethod.new     unless method
     raise BadMethod.new(method) unless respond_to?(method)

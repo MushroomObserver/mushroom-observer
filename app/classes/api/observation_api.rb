@@ -1,4 +1,3 @@
-# API
 class API
   # API for Observation
   class ObservationAPI < ModelAPI
@@ -29,46 +28,46 @@ class API
     def query_params
       {
         where:          sql_id_condition,
-        created_at:     parse_time_range(:created_at),
-        updated_at:     parse_time_range(:updated_at),
-        date:           parse_date_range(:date),
-        users:          parse_users(:user),
-        names:          parse_strings(:name),
-        synonym_names:  parse_strings(:synonyms_of),
-        children_names: parse_strings(:children_of),
-        locations:      parse_strings(:locations),
-        # herbaria:     parse_strings(:herbaria),
-        # specimen_ids: parse_strings(:specimen_ids),
-        projects:       parse_strings(:projects),
-        species_lists:  parse_strings(:species_lists),
-        confidence:     parse_confidence,
-        is_col_loc:     parse_boolean(:is_collection_location),
-        has_specimen:   parse_boolean(:has_specimen),
-        has_location:   parse_boolean(:has_location),
-        has_notes:      parse_boolean(:has_notes),
-        has_name:       parse_boolean(:has_name),
-        has_images:     parse_boolean(:has_images),
-        has_comments:   parse_boolean(:has_comments, limit: true),
-        notes_has:      parse_string(:notes_has),
-        comments_has:   parse_string(:comments_has),
-        north:          parse_latitude(:north),
-        south:          parse_latitude(:south),
-        east:           parse_longitude(:east),
-        west:           parse_longitude(:west)
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        date:           parse_range(:date, :date),
+        users:          parse_array(:user, :user),
+        names:          parse_array(:string, :name),
+        synonym_names:  parse_array(:string, :synonyms_of),
+        children_names: parse_array(:string, :children_of),
+        locations:      parse_array(:string, :locations),
+        # herbaria:     parse_array(:string, :herbaria),
+        # specimen_ids: parse_array(:string, :specimen_ids),
+        projects:       parse_array(:string, :projects),
+        species_lists:  parse_array(:string, :species_lists),
+        confidence:     parse(:confidence, :confidence),
+        is_col_loc:     parse(:boolean, :is_collection_location),
+        has_specimen:   parse(:boolean, :has_specimen),
+        has_location:   parse(:boolean, :has_location),
+        has_notes:      parse(:boolean, :has_notes),
+        has_name:       parse(:boolean, :has_name),
+        has_images:     parse(:boolean, :has_images),
+        has_comments:   parse(:boolean, :has_comments, limit: true),
+        notes_has:      parse(:string, :notes_has),
+        comments_has:   parse(:string, :comments_has),
+        north:          parse(:latitude, :north),
+        south:          parse(:latitude, :south),
+        east:           parse(:longitude, :east),
+        west:           parse(:longitude, :west)
       }
     end
     # rubocop:enable Metrics/AbcSize
 
     def create_params
-      @name = parse_name(:name, default: Name.unknown)
-      @vote = parse_float(:vote, default: Vote.maximum_vote)
-      @log  = parse_boolean(:log, default: true)
+      @name = parse(:name, :name, default: Name.unknown)
+      @vote = parse(:float, :vote, default: Vote.maximum_vote)
+      @log  = parse(:boolean, :log, default: true)
       parse_herbarium_and_specimen!
       parse_location_and_coordinates!
       parse_images_and_pick_thumbnail
       {
-        when:                   parse_date(:date, default: Date.today),
-        notes:                  parse_notes(:notes),
+        when:                   parse(:date, :date, default: Date.today),
+        notes:                  parse_notes_fields,
         place_name:             @location,
         lat:                    @latitude,
         long:                   @longitude,
@@ -159,74 +158,77 @@ class API
 
     def update_params
       {
-        when:                   parse_date(:set_date),
-        notes:                  parse_string(:set_notes),
-        place_name:             parse_place_name(:set_location, limit: 1024),
+        when:                   parse(:date, :set_date),
+        notes:                  parse(:string, :set_notes),
+        place_name:             parse(:place_name, :set_location, limit: 1024),
         lat:                    @latitude,
         long:                   @longitude,
         alt:                    @altitude,
-        specimen:               parse_boolean(:set_has_specimen),
-        is_collection_location: parse_boolean(:set_is_collection_location),
+        specimen:               parse(:boolean, :set_has_specimen),
+        is_collection_location: parse(:boolean, :set_is_collection_location),
         thumb_image:            @thumbnail
       }
     end
 
-    def parse_confidence
-      limit = Range.new(Vote.minimum_vote, Vote.maximum_vote)
-      parse_float_range(:confidence, limit: limit)
-    end
-
     def parse_is_collection_location
-      parse_boolean(:is_collection_location, default: true)
+      parse(:boolean, :is_collection_location, default: true)
     end
 
     def parse_projects_to_attach_to
-      parse_projects(:projects, must_be_member: true) || []
+      parse_array(:project, :projects, must_be_member: true) || []
     end
 
     def parse_species_lists_to_attach_to
-      parse_species_lists(:species_lists, must_have_edit_permission: true) || []
+      parse_array(:species_list, :species_lists,
+                  must_have_edit_permission: true) || []
     end
 
     def parse_images_and_pick_thumbnail
-      @images    = parse_images(:images) || []
-      @thumbnail = parse_image(:thumbnail, default: @images.first)
+      @images    = parse_array(:image, :images) || []
+      @thumbnail = parse(:image, :thumbnail, default: @images.first)
       return if !@thumbnail || @images.include?(@thumbnail)
       @images.unshift(@thumbnail)
     end
 
+    def parse_notes_fields
+      notes = Observation.no_notes
+      other = parse(:string, :notes)
+      notes[Observation.other_notes_key] = other unless other.empty?
+      notes
+    end
+
     def parse_set_coordinates!
-      @latitude  = parse_latitude(:set_latitude)
-      @longitude = parse_longitude(:set_longitude)
-      @altitude  = parse_altitude(:set_altitude)
+      @latitude  = parse(:latitude, :set_latitude)
+      @longitude = parse(:longitude, :set_longitude)
+      @altitude  = parse(:altitude, :set_altitude)
       return unless @latitude && !@longitude || @longitude && !@latitude
       errors << LatLongMustBothBeSet.new
     end
 
     def parse_set_images!
-      @thumbnail   = parse_image(:set_thumbnail)
-      @add_imgs    = parse_images(:add_images) || []
-      @remove_imgs = parse_images(:remove_images) || []
+      @thumbnail   = parse(:image, :set_thumbnail)
+      @add_imgs    = parse_array(:image, :add_images) || []
+      @remove_imgs = parse_array(:image, :remove_images) || []
       return if !@thumbnail || @add_imgs.include?(@thumbnail)
       @add_imgs.unshift(@thumbnail)
     end
 
     def parse_set_projects!
-      @add_prjs    = parse_projects(:add_projects) || []
-      @remove_prjs = parse_projects(:remove_projects) || []
+      @add_prjs    = parse_array(:project, :add_projects) || []
+      @remove_prjs = parse_array(:project, :remove_projects) || []
     end
 
     def parse_set_species_lists!
-      @add_spls    = parse_species_lists(:add_species_lists) || []
-      @remove_spls = parse_species_lists(:remove_species_lists) || []
+      @add_spls    = parse_array(:species_list, :add_species_lists) || []
+      @remove_spls = parse_array(:species_list, :remove_species_lists) || []
     end
 
     def parse_location_and_coordinates!
-      @location  = parse_place_name(:location, limit: 1024)
+      @location  = parse(:place_name, :location, limit: 1024)
       @location  = Location.unknown.name if Location.is_unknown?(@location)
-      @latitude  = parse_latitude(:latitude)
-      @longitude = parse_longitude(:longitude)
-      @altitude  = parse_altitude(:altitude)
+      @latitude  = parse(:latitude, :latitude)
+      @longitude = parse(:longitude, :longitude)
+      @altitude  = parse(:altitude, :altitude)
       make_sure_both_latitude_and_longitude!
       make_sure_location_or_coordinates!
       @location ||= :UNKNOWN.l
@@ -243,11 +245,11 @@ class API
     end
 
     def parse_herbarium_and_specimen!
-      @herbarium       = parse_herbarium(:herbarium, default: nil)
-      @specimen_id     = parse_string(:specimen_id, default: nil)
-      @herbarium_label = parse_string(:herbarium_label, default: nil)
+      @herbarium       = parse(:herbarium, :herbarium, default: nil)
+      @specimen_id     = parse(:string, :specimen_id, default: nil)
+      @herbarium_label = parse(:string, :herbarium_label, default: nil)
       default          = @herbarium || @specimen_id || @herbarium_label || false
-      @has_specimen    = parse_boolean(:has_specimen, default: default)
+      @has_specimen    = parse(:boolean, :has_specimen, default: default)
       make_sure_has_specimen_set!
       either_specimen_or_label!
     end

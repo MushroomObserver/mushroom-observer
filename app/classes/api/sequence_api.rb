@@ -1,4 +1,3 @@
-# API
 class API
   # API for Sequence
   class SequenceAPI < ModelAPI
@@ -21,31 +20,31 @@ class API
     def sequence_query_params
       {
         where:         sql_id_condition,
-        created_at:    parse_time_range(:created_at),
-        updated_at:    parse_time_range(:updated_at),
-        users:         parse_users(:user),
-        locus_has:     parse_string(:locus),
-        archive_has:   parse_string(:archive),
-        accession_has: parse_string(:accession),
-        notes_has:     parse_string(:notes)
+        created_at:    parse_range(:time, :created_at),
+        updated_at:    parse_range(:time, :updated_at),
+        users:         parse_array(:user, :user),
+        locus_has:     parse(:string, :locus),
+        archive_has:   parse(:string, :archive),
+        accession_has: parse(:string, :accession),
+        notes_has:     parse(:string, :notes)
       }
     end
 
     def observation_query_params
       {
-        date:           parse_date_range(:date),
-        observers:      parse_users(:observer),
-        names:          parse_strings(:name),
-        synonym_names:  parse_strings(:synonyms_of),
-        children_names: parse_strings(:children_of),
-        locations:      parse_strings(:locations),
-        projects:       parse_strings(:projects),
-        species_lists:  parse_strings(:species_lists),
-        confidence:     parse_confidence,
-        north:          parse_latitude(:north),
-        south:          parse_latitude(:south),
-        east:           parse_longitude(:east),
-        west:           parse_longitude(:west)
+        date:           parse_range(:date, :date),
+        observers:      parse_array(:user, :observer),
+        names:          parse_array(:string, :name),
+        synonym_names:  parse_array(:string, :synonyms_of),
+        children_names: parse_array(:string, :children_of),
+        locations:      parse_array(:string, :locations),
+        projects:       parse_array(:string, :projects),
+        species_lists:  parse_array(:string, :species_lists),
+        confidence:     parse(:confidence, :confidence),
+        north:          parse(:latitude, :north),
+        south:          parse(:latitude, :south),
+        east:           parse(:longitude, :east),
+        west:           parse(:longitude, :west)
       }
     end
 
@@ -53,11 +52,11 @@ class API
       {
         observation: parse_observation_to_attach_to,
         user:        @user,
-        locus:       parse_string(:locus),
-        bases:       parse_string(:bases),
-        archive:     parse_string(:archive, limit: 255),
-        accession:   parse_string(:accession, limit: 255),
-        notes:       parse_string(:notes)
+        locus:       parse(:string, :locus),
+        bases:       parse(:string, :bases),
+        archive:     parse(:string, :archive, limit: 255),
+        accession:   parse(:string, :accession, limit: 255),
+        notes:       parse(:string, :notes)
       }
     end
 
@@ -69,21 +68,16 @@ class API
 
     def update_params
       {
-        locus:     parse_string(:set_locus),
-        bases:     parse_string(:set_bases),
-        archive:   parse_string(:set_archive, limit: 255),
-        accession: parse_string(:set_accession, limit: 255),
-        notes:     parse_string(:set_notes)
+        locus:     parse(:string, :set_locus),
+        bases:     parse(:string, :set_bases),
+        archive:   parse(:string, :set_archive, limit: 255),
+        accession: parse(:string, :set_accession, limit: 255),
+        notes:     parse(:string, :set_notes)
       }
     end
 
-    def parse_confidence
-      limit = Range.new(Vote.minimum_vote, Vote.maximum_vote)
-      parse_float_range(:confidence, limit: limit)
-    end
-
     def parse_observation_to_attach_to
-      parse_observation(:observation, must_have_edit_permission: true)
+      parse(:observation, :observation, must_have_edit_permission: true)
     end
   end
 end

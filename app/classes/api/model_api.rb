@@ -1,4 +1,3 @@
-# API
 class API
   # API subclass for all model-based endpoints
   class ModelAPI < API
@@ -118,7 +117,7 @@ class API
     # This is just here until the new version of Query comes on-line.
     # I don't see any reason for API to know anything about SQL or tables.
     def sql_id_condition
-      ids = parse_integer_ranges(:id)
+      ids = parse_ranges(:integer, :id)
       return nil unless ids
       ids.map do |term|
         if term.is_a?(Range)

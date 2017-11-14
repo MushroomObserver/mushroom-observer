@@ -1,4 +1,3 @@
-# API
 class API
   # API for Comment
   class CommentAPI < ModelAPI
@@ -15,15 +14,15 @@ class API
     ]
 
     def query_params
-      @target = parse_object(:target, limit: Comment.all_types)
+      @target = parse(:object, :target, limit: Comment.all_types)
       {
         where:       sql_id_condition,
-        created_at:  parse_time_range(:created_at),
-        updated_at:  parse_time_range(:updated_at),
-        users:       parse_users(:user),
-        types:       parse_enum(:type, limit: Comment.all_type_tags),
-        summary_has: parse_string(:summary_has),
-        content_has: parse_string(:content_has),
+        created_at:  parse_range(:time, :created_at),
+        updated_at:  parse_range(:time, :updated_at),
+        users:       parse_array(:user, :user),
+        types:       parse(:enum, :type, limit: Comment.all_type_tags),
+        summary_has: parse(:string, :summary_has),
+        content_has: parse(:string, :content_has),
         target:      @target ? @target.id : nil,
         type:        @target ? @target.class.name : nil
       }
@@ -35,9 +34,9 @@ class API
 
     def create_params
       {
-        target:  parse_object(:target, limit: Comment.all_types),
-        summary: parse_string(:summary, limit: 100),
-        comment: parse_string(:content)
+        target:  parse(:object, :target, limit: Comment.all_types),
+        summary: parse(:string, :summary, limit: 100),
+        comment: parse(:string, :content)
       }
     end
 
@@ -54,8 +53,8 @@ class API
 
     def update_params
       {
-        summary: parse_string(:set_summary, limit: 100),
-        comment: parse_string(:set_content)
+        summary: parse(:string, :set_summary, limit: 100),
+        comment: parse(:string, :set_content)
       }
     end
   end

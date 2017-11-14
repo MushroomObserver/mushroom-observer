@@ -1,4 +1,3 @@
-# API
 class API
   # API for ExternalLink
   class ExternalLinkAPI < ModelAPI
@@ -18,21 +17,21 @@ class API
     def query_params
       {
         where:          sql_id_condition,
-        created_at:     parse_time_range(:created_at),
-        updated_at:     parse_time_range(:updated_at),
-        users:          parse_users(:user),
-        observations:   parse_observations(:observations),
-        external_sites: parse_external_sites(:external_sites),
-        url:            parse_string(:url)
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        users:          parse_array(:user, :user),
+        observations:   parse_array(:observation, :observations),
+        external_sites: parse_array(:external_site, :external_sites),
+        url:            parse(:string, :url)
       }
     end
 
     def create_params
       {
         user:          @user,
-        observation:   parse_observation(:observation),
-        external_site: parse_external_site(:external_site),
-        url:           parse_string(:url)
+        observation:   parse(:observation, :observation),
+        external_site: parse(:external_site, :external_site),
+        url:           parse(:string, :url)
       }
     end
 
@@ -45,7 +44,7 @@ class API
 
     def update_params
       {
-        url: parse_string(:set_url)
+        url: parse(:string, :set_url)
       }
     end
   end

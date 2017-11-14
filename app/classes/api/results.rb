@@ -25,9 +25,9 @@ class API
   attr_accessor :page_number
 
   initializers << lambda do
-    self.detail = parse_enum(:detail, limit: [:none, :low, :high],
-                                      default: :none)
-    self.page_number = parse_integer(:page, default: 1)
+    self.detail = parse(:enum, :detail, limit: [:none, :low, :high],
+                                        default: :none)
+    self.page_number = parse(:integer, :page, default: 1)
   end
 
   def includes
