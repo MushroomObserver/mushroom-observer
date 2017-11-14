@@ -43,7 +43,7 @@ class API
   def page_length
     if detail == :high
       high_detail_page_length
-    elsif method == "PUT"
+    elsif method == "PATCH"
       put_page_length
     elsif method == "DELETE"
       delete_page_length

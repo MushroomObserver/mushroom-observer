@@ -310,7 +310,7 @@ class ApiTest < UnitTestCase
       verified: Time.now
     )
     params = {
-      method:  :put,
+      method:  :patch,
       action:  :api_key,
       api_key: @api_key.key,
       set_app: "new app"
@@ -402,7 +402,7 @@ class ApiTest < UnitTestCase
     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
     params = {
-      method:      :put,
+      method:      :patch,
       action:      :comment,
       api_key:     @api_key.key,
       id:          com1.id,

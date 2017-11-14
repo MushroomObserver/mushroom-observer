@@ -126,7 +126,7 @@ class API
     end
   end
 
-  # API PUT request missing all set parameters.
+  # API PATCH request missing all set parameters.
   class MissingSetParameters < Error
   end
 
@@ -174,7 +174,7 @@ class API
 
   ##############################################################################
 
-  # Error thrown when PUT or DELETE abort from errors before doing anything.
+  # Error thrown when PATCH or DELETE abort from errors before doing anything.
   class AbortDueToErrors < Error
   end
 

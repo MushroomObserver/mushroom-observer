@@ -13,7 +13,7 @@ class API
       @result_ids = [object.id]
     end
 
-    def put
+    def patch
       must_authenticate!
       self.query = build_query
       setter = build_setter
