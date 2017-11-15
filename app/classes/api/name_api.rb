@@ -46,20 +46,6 @@ class API
     end
     # rubocop:enable Metrics/AbcSize
 
-    def build_object
-      name_str = parse(:string, :name, limit: 100)
-      author   = parse(:string, :author, limit: 100)
-      params   = create_params
-      done_parsing_parameters!
-      raise MissingParameter.new(:name_str) if name_str.blank?
-      raise MissingParameter.new(:rank)     if rank.blank?
-      name_str2   = make_sure_name_doesnt_exist!(name_str, author)
-      name, names = make_sure_name_parses!(name_str2)
-      fill_in_attributes(name, params, name_str, author)
-      save_names(names)
-      name
-    end
-
     def create_params
       {
         rank:           parse(:enum, :rank, limit: Name.all_ranks),
@@ -80,6 +66,20 @@ class API
         # TODO: mark name as misspelling
         # TODO: change synonymy
       }
+    end
+
+    def build_object
+      params   = create_params
+      name_str = parse(:string, :name, limit: 100)
+      author   = parse(:string, :author, limit: 100)
+      done_parsing_parameters!
+      raise MissingParameter.new(:name_str) if name_str.blank?
+      raise MissingParameter.new(:rank)     if rank.blank?
+      name_str2   = make_sure_name_doesnt_exist!(name_str, author)
+      name, names = make_sure_name_parses!(name_str2)
+      fill_in_attributes(name, params, name_str, author)
+      save_names(names)
+      name
     end
 
     def must_have_edit_permission!(_obj); end

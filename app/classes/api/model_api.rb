@@ -7,6 +7,7 @@ class API
 
     def get
       self.query = build_query
+      done_parsing_parameters!
     end
 
     def post
@@ -36,7 +37,6 @@ class API
       params = query_params
       params.remove_nils!
       params[:by] = :id
-      done_parsing_parameters!
       Query.lookup(model.name.to_sym, query_flavor, params)
     rescue RuntimeError => e
       raise QueryError.new(e)

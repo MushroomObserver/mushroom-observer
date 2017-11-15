@@ -53,12 +53,6 @@ class API
       }
     end
 
-    def validate_create_params!(params)
-      raise MissingParameter.new(:observation) unless params[:observation]
-      raise MissingParameter.new(:locus)       if params[:locus].blank?
-      # Sequence validators handle the rest, it's too complicated to repeat.
-    end
-
     def update_params
       {
         locus:     parse(:string, :set_locus),
@@ -67,6 +61,12 @@ class API
         accession: parse(:string, :set_accession, limit: 255),
         notes:     parse(:string, :set_notes)
       }
+    end
+
+    def validate_create_params!(params)
+      raise MissingParameter.new(:observation) unless params[:observation]
+      raise MissingParameter.new(:locus)       if params[:locus].blank?
+      # Sequence validators handle the rest, it's too complicated to repeat.
     end
 
     ############################################################################

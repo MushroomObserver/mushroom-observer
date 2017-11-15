@@ -28,16 +28,23 @@ class API
       }
     end
 
-    def query_flavor
-      @target ? :for_target : :all
-    end
-
     def create_params
       {
         target:  parse(:object, :target, limit: Comment.all_types),
         summary: parse(:string, :summary, limit: 100),
         comment: parse(:string, :content)
       }
+    end
+
+    def update_params
+      {
+        summary: parse(:string, :set_summary, limit: 100),
+        comment: parse(:string, :set_content)
+      }
+    end
+
+    def query_flavor
+      @target ? :for_target : :all
     end
 
     def validate_create_params!(params)
@@ -49,13 +56,6 @@ class API
 
     def after_create(comment)
       comment.log_create
-    end
-
-    def update_params
-      {
-        summary: parse(:string, :set_summary, limit: 100),
-        comment: parse(:string, :set_content)
-      }
     end
   end
 end

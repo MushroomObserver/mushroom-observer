@@ -59,12 +59,7 @@ class API
     # rubocop:enable Metrics/AbcSize
 
     def create_params
-      @name = parse(:name, :name, default: Name.unknown)
-      @vote = parse(:float, :vote, default: Vote.maximum_vote)
-      @log  = parse(:boolean, :log, default: true)
-      parse_herbarium_and_specimen!
-      parse_location_and_coordinates!
-      parse_images_and_pick_thumbnail
+      parse_create_params!
       {
         when:                   parse(:date, :date, default: Date.today),
         notes:                  parse_notes_fields,
@@ -82,24 +77,6 @@ class API
       }
     end
 
-    def after_create(obs)
-      create_specimen(obs) if obs.specimen
-      naming = obs.namings.create(name: @name)
-      obs.change_vote(naming, @vote, user)
-      obs.log(:log_observation_created_at) if @log
-    end
-
-    def build_setter
-      params = parse_parameters!
-      lambda do |obj|
-        must_have_edit_permission!(obj)
-        obj.update!(params)
-        update_images(obj)
-        update_projects(obj)
-        update_species_lists(obj)
-      end
-    end
-
     def update_params
       {
         when:                   parse(:date, :set_date),
@@ -112,6 +89,23 @@ class API
         is_collection_location: parse(:boolean, :set_is_collection_location),
         thumb_image:            @thumbnail
       }
+    end
+
+    def after_create(obs)
+      create_specimen(obs) if obs.specimen
+      naming = obs.namings.create(name: @name)
+      obs.change_vote(naming, @vote, user)
+      obs.log(:log_observation_created_at) if @log
+    end
+
+    def build_setter
+      lambda do |obj|
+        must_have_edit_permission!(obj)
+        obj.update!(params)
+        update_images(obj)
+        update_projects(obj)
+        update_species_lists(obj)
+      end
     end
 
     ############################################################################
@@ -169,6 +163,15 @@ class API
       @add_imgs.empty? && @remove_imgs.empty? &&
         @add_prjs.empty? && @remove_prjs.empty? &&
         @add_spls.empty? && @remove_spls.empty?
+    end
+
+    def parse_create_params!
+      @name = parse(:name, :name, default: Name.unknown)
+      @vote = parse(:float, :vote, default: Vote.maximum_vote)
+      @log  = parse(:boolean, :log, default: true)
+      parse_herbarium_and_specimen!
+      parse_location_and_coordinates!
+      parse_images_and_pick_thumbnail
     end
 
     def parse_is_collection_location

@@ -31,11 +31,18 @@ class API
     end
 
     def create_params
-      @admins  = parse_array(:user, :admins, default: [user])
-      @members = parse_array(:user, :members, default: [user])
+      parse_admins_and_members
       {
         title:   parse(:string, :title, limit: 100),
         summary: parse(:string, :summary)
+      }
+    end
+
+    def update_params
+      parse_update_params
+      {
+        title:   parse(:string, :set_title, limit: 100),
+        summary: parse(:string, :set_summary)
       }
     end
 
@@ -63,8 +70,12 @@ class API
       params[:admin_group] = admin_group
     end
 
+    def validate_update_params!(params)
+      return unless params.empty? && adds_and_removes.empty?
+      raise MissingSetParameters.new
+    end
+
     def build_setter
-      params = parse_setting_parameters
       lambda do |proj|
         raise MustBeAdmin.new(proj) unless proj.is_admin?(@user)
         proj.update!(params) unless params.empty?
@@ -74,13 +85,6 @@ class API
         update_observations(proj)
         update_species_lists(proj)
       end
-    end
-
-    def update_params
-      {
-        title:   parse(:string, :set_title, limit: 100),
-        summary: parse(:string, :set_summary)
-      }
     end
 
     def delete
@@ -116,16 +120,17 @@ class API
       proj.remove_species_lists(@remove_spls) if @remove_spls.any?
     end
 
-    def parse_setting_parameters
-      params = update_params
+    def parse_admins_and_members
+      @admins  = parse_array(:user, :admins, default: [user])
+      @members = parse_array(:user, :members, default: [user])
+    end
+
+    def parse_update_params
       parse_add_remove_admins
       parse_add_remove_members
       parse_add_remove_images
       parse_add_remove_observations
       parse_add_remove_species_lists
-      params.remove_nils!
-      make_sure_parameters_not_empty!
-      params
     end
 
     def parse_add_remove_admins
@@ -151,11 +156,6 @@ class API
     def parse_add_remove_species_lists
       @add_spls    = parse_array(:species_list, :add_species_lists) || []
       @remove_spls = parse_array(:species_list, :remove_species_lists) || []
-    end
-
-    def make_sure_parameters_not_empty!
-      return unless params.empty? && adds_and_removes.empty?
-      raise MissingSetParameters.new
     end
 
     def adds_and_removes

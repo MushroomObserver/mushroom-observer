@@ -41,23 +41,9 @@ class API
     end
     # rubocop:enable Metrics/AbcSize
 
-    def build_object
-      params = create_params
-      vote = parse(:enum, :vote, limit: Image.all_votes)
-      upload = prepare_upload
-      params.merge!(upload_params(upload)) if upload
-      done_parsing_parameters!
-      raise MissingUpload.new unless upload
-      img = create_image(params)
-      change_vote(img, vote)
-      img
-    ensure
-      upload.clean_up if upload
-    end
-
     def create_params
-      observations = parse_observations_to_attach_to
-      default_date = observations.any? ? observations.first.when : Date.today
+      @observations = parse_observations_to_attach_to
+      default_date = @observations.any? ? @observations.first.when : Date.today
       {
         when:             parse(:date, :date, default: default_date),
         notes:            parse(:string, :notes, default: ""),
@@ -65,7 +51,7 @@ class API
         license:          parse(:license, :license, default: user.license),
         original_name:    parse_original_name,
         projects:         parse_projects_to_attach_to,
-        observations:     observations
+        observations:     @observations
       }
     end
 
@@ -79,32 +65,39 @@ class API
       }
     end
 
+    def build_object
+      super
+    ensure
+      @upload.clean_up if @upload
+    end
+
+    def validate_create_params!(params)
+      @vote = parse(:enum, :vote, limit: Image.all_votes)
+      @upload = prepare_upload
+      raise MissingUpload.new unless @upload
+      params.merge!(upload_params)
+    end
+
+    def after_create(img)
+      img.process_image || raise(ImageUploadFailed.new(img))
+      @observations.each do |obs|
+        obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
+        obs.log_create_image(img)
+      end
+      return unless @vote
+      img.change_vote(@user, @vote, (@user.votes_anonymous == :yes))
+    end
+
     ############################################################################
 
     private
 
-    def create_image(params)
-      img = model.new(params)
-      img.save          || raise(CreateFailed.new(img))
-      img.process_image || raise(ImageUploadFailed.new(img))
-      params[:observations].each do |obs|
-        obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
-        obs.log_create_image(img)
-      end
-      img
-    end
-
-    def change_vote(img, vote)
-      return unless vote
-      img.change_vote(@user, vote, (@user.votes_anonymous == :yes))
-    end
-
-    def upload_params(upload)
+    def upload_params
       {
-        image:          upload.content,
-        upload_length:  upload.content_length,
-        upload_type:    upload.content_type,
-        upload_md5sum:  upload.content_md5
+        image:         @upload.content,
+        upload_length: @upload.content_length,
+        upload_type:   @upload.content_type,
+        upload_md5sum: @upload.content_md5
       }
     end
 

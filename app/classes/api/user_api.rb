@@ -41,6 +41,24 @@ class API
       }
     end
 
+    def update_params
+      {
+        login:           parse(:string, :login, limit: 80),
+        name:            parse(:string, :name, limit: 80, default: ""),
+        email:           parse(:email, :email, limit: 80),
+        password:        parse(:string, :password, limit: 80),
+        locale:          parse(:lang, :locale),
+        notes:           parse(:string, :notes, default: ""),
+        mailing_address: parse(:string, :mailing_address, default: ""),
+        license:         parse(:license, :license, default: License.preferred),
+        location:        parse(:location, :location),
+        image:           parse(:image, :image),
+        verified:        nil,
+        admin:           false,
+        layout_count:    15
+      }
+    end
+
     def validate_create_params!(params)
       login = params[:login]
       raise MissingParameter.new(:login)    unless params[:login]
@@ -58,24 +76,6 @@ class API
       key.verified = nil
       key.save
       user.reload
-    end
-
-    def update_params
-      {
-        login:           parse(:string, :login, limit: 80),
-        name:            parse(:string, :name, limit: 80, default: ""),
-        email:           parse(:email, :email, limit: 80),
-        password:        parse(:string, :password, limit: 80),
-        locale:          parse(:lang, :locale),
-        notes:           parse(:string, :notes, default: ""),
-        mailing_address: parse(:string, :mailing_address, default: ""),
-        license:         parse(:license, :license, default: License.preferred),
-        location:        parse(:location, :location),
-        image:           parse(:image, :image),
-        verified:        nil,
-        admin:           false,
-        layout_count:    15
-      }
     end
 
     def delete

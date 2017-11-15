@@ -38,15 +38,6 @@ class API
       }
     end
 
-    def validate_create_params!(params)
-      raise MissingParameter.new(:name)  unless params[:name]
-      raise MissingParameter.new(:north) unless params[:north]
-      raise MissingParameter.new(:south) unless params[:south]
-      raise MissingParameter.new(:east)  unless params[:east]
-      raise MissingParameter.new(:west)  unless params[:west]
-      make_sure_location_doesnt_exist!(params)
-    end
-
     def update_params
       validate_new_location_name!
       {
@@ -59,6 +50,15 @@ class API
         low:          parse(:altitude, :set_low),
         notes:        parse(:string, :set_notes)
       }
+    end
+
+    def validate_create_params!(params)
+      raise MissingParameter.new(:name)  unless params[:name]
+      raise MissingParameter.new(:north) unless params[:north]
+      raise MissingParameter.new(:south) unless params[:south]
+      raise MissingParameter.new(:east)  unless params[:east]
+      raise MissingParameter.new(:west)  unless params[:west]
+      make_sure_location_doesnt_exist!(params)
     end
 
     def delete

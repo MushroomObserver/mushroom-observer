@@ -35,17 +35,17 @@ class API
       }
     end
 
+    def update_params
+      {
+        url: parse(:string, :set_url)
+      }
+    end
+
     def validate_create_params!(params)
       raise MissingParameter.new(:observation)   unless params[:observation]
       raise MissingParameter.new(:external_site) unless params[:external_site]
       raise MissingParameter.new(:url)           if params[:url].blank?
       # TODO: check permissions
-    end
-
-    def update_params
-      {
-        url: parse(:string, :set_url)
-      }
     end
   end
 end

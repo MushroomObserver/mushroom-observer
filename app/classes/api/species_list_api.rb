@@ -43,6 +43,16 @@ class API
       }
     end
 
+    def update_params
+      parse_add_remove_observations
+      {
+        title:      parse(:string, :set_title, limit: 100),
+        when:       parse(:date, :set_date),
+        place_name: parse(:place_name, :set_location, limit: 1024),
+        notes:      parse(:string, :set_notes)
+      }
+    end
+
     def validate_create_params!(params)
       raise MissingParameter.new(:title) if params[:title].blank?
       title = params[:title].to_s
@@ -50,26 +60,18 @@ class API
       raise SpeciesListAlreadyExists.new(title)
     end
 
+    def validate_update_params!(params)
+      return unless params.empty? && @add_obs.empty? && @remove_obs.empty?
+      raise MissingSetParameters.new
+    end
+
     def build_setter
-      parse_add_remove_observations
-      params = update_params
-      params.remove_nils!
-      make_sure_parameters_not_empty!
       lambda do |spl|
         must_have_edit_permission!(spl)
         spl.update!(params)                  unless params.empty?
         spl.add_observations(@add_obs)       if @add_obs.any?
         spl.remove_observations(@remove_obs) if @remove_obs.any?
       end
-    end
-
-    def update_params
-      {
-        title:      parse(:string, :set_title, limit: 100),
-        when:       parse(:date, :set_date),
-        place_name: parse(:place_name, :set_location, limit: 1024),
-        notes:      parse(:string, :set_notes)
-      }
     end
 
     ############################################################################
@@ -79,11 +81,6 @@ class API
     def parse_add_remove_observations
       @add_obs    = parse_array(:observation, :add_observations) || []
       @remove_obs = parse_array(:observation, :remove_observations) || []
-    end
-
-    def make_sure_parameters_not_empty!
-      return unless params.empty? && @add_obs.empty? && @remove_obs.empty?
-      raise MissingSetParameters.new
     end
   end
 end

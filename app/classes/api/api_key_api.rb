@@ -30,6 +30,12 @@ class API
       }
     end
 
+    def update_params
+      {
+        notes: parse(:string, :set_app)
+      }
+    end
+
     def validate_create_params!(params)
       raise MissingParameter.new(:app) if params[:notes].blank?
     end
@@ -37,12 +43,6 @@ class API
     def after_create(api_key)
       return if @for_user == @user
       VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
-    end
-
-    def update_params
-      {
-        notes: parse(:string, :set_app)
-      }
     end
 
     def get
