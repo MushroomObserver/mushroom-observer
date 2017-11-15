@@ -3487,6 +3487,7 @@
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
+  api_dubious_location_name: "Location name is invalid: [reasons]"
   api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
@@ -3505,6 +3506,7 @@
   api_must_supply_location_or_gps: You must supply either a location or GPS coordinates.
   api_name_already_exists: The name, "[new]", already exists as "[old]"
   api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
+  api_need_all_four_edges: "Need to supply all four edges of bounding box: north, south, east and west."
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
   api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."

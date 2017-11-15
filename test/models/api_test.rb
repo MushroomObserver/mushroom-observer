@@ -147,6 +147,24 @@ class ApiTest < UnitTestCase
     assert(@vote == img.users_vote(@user))
   end
 
+  def assert_last_location_correct
+    loc = Location.last
+    assert_in_delta(Time.zone.now, loc.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, loc.updated_at, 1.minute)
+    assert_users_equal(@user, loc.user)
+    assert_equal(@name, loc.display_name)
+    assert_in_delta(@north, loc.north, 0.0001)
+    assert_in_delta(@south, loc.south, 0.0001)
+    assert_in_delta(@east, loc.east, 0.0001)
+    assert_in_delta(@west, loc.west, 0.0001)
+    assert_in_delta(@high, loc.high, 0.0001) if @high
+    assert_nil(loc.high) if !@high
+    assert_in_delta(@low, loc.low, 0.0001) if @low
+    assert_nil(loc.low) if !@low
+    assert_equal(@notes, loc.notes) if @notes
+    assert_nil(loc.notes) if !@notes
+  end
+
   def assert_last_naming_correct
     obs = Observation.last
     naming = Naming.last
@@ -259,6 +277,17 @@ class ApiTest < UnitTestCase
   #  :section: ApiKey Requests
   # ----------------------------
 
+  def test_getting_api_keys
+    params = {
+      method:   :patch,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      user:     rolf.id
+    }
+    # No GET requests allowed now.
+    assert_api_fail(params)
+  end
+
   def test_posting_api_key_for_yourself
     email_count = ActionMailer::Base.deliveries.size
     @for_user = rolf
@@ -300,6 +329,29 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(app: ""))
     assert_api_fail(params.merge(for_user: 123_456))
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_updating_api_keys
+    params = {
+      method:   :patch,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      id:       @api_key.id,
+      set_app:  "new app"
+    }
+    # No PATCH requests allowed now.
+    assert_api_fail(params)
+  end
+
+  def test_deleting_api_keys
+    params = {
+      method:   :delete,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      id:       @api_key.id,
+    }
+    # No DELETE requests allowed now.
+    assert_api_fail(params)
   end
 
   # -----------------------------
@@ -717,6 +769,130 @@ class ApiTest < UnitTestCase
   # ------------------------------
   #  :section: Location Requests
   # ------------------------------
+
+  def test_getting_locations
+    loc = Location.all.sample
+    params = { method: :get, action: :location }
+
+    assert_api_pass(params.merge(id: loc.id))
+    assert_api_results([loc])
+
+    locs = Location.where("year(created_at) = 2008")
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(created_at: "2008"))
+    assert_api_results(locs)
+
+    locs = Location.where("date(created_at) = '2012-01-01'")
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(updated_at: "2012-01-01"))
+    assert_api_results(locs)
+
+    locs = Location.where(user: rolf)
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_results(locs)
+
+    locs = Location.where("south > 39 and north < 40 and west > -124 and
+                           east < -123 and west < east")
+    assert_not_empty(locs)
+    assert_api_fail(params.merge(south: 39, east: -123, west: -124))
+    assert_api_fail(params.merge(north: 40, east: -123, west: -124))
+    assert_api_fail(params.merge(north: 40, south: 39, west: -124))
+    assert_api_fail(params.merge(north: 40, south: 39, east: -123))
+    assert_api_pass(params.merge(north: 40, south: 39, east: -123, west: -124))
+    assert_api_results(locs)
+  end
+
+  def test_posting_locations
+    name1  = "Reno, Nevada, USA"
+    name2  = "Sparks, Nevada, USA"
+    name3  = "Evil Lair, Latveria"
+    name4  = "Nowhere, East Paduka, USA"
+    name5  = "Washoe County, Nevada, USA"
+    @name  = name1
+    @north = 39.64
+    @south = 39.39
+    @east  = -119.70
+    @west  = -119.94
+    @high  = 1700
+    @low   = 1350
+    @notes = "Biggest Little City"
+    @user  = rolf
+    params = {
+      method:  :post,
+      action:  :location,
+      api_key: @api_key.key,
+      name:    @name,
+      north:   @north,
+      south:   @south,
+      east:    @east,
+      west:    @west,
+      high:    @high,
+      low:     @low,
+      notes:   @notes
+    }
+    name = params[:name]
+    assert_api_pass(params)
+    assert_last_location_correct
+    assert_api_fail(params)
+    assert_api_fail(params.merge(name: name3))
+    assert_api_fail(params.merge(name: name4))
+    assert_api_fail(params.merge(name: name5))
+    params[:name] = @name = name2
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:name))
+    assert_api_fail(params.remove(:north))
+    assert_api_fail(params.remove(:south))
+    assert_api_fail(params.remove(:east))
+    assert_api_fail(params.remove(:west))
+    assert_api_fail(params.remove(:north, :south, :east, :west))
+    assert_api_pass(params.remove(:high, :low, :notes))
+    @high = @low = @notes = nil
+    assert_last_location_correct
+  end
+
+  def test_updating_locations
+    loc = locations(:burbank)
+    params = {
+      method:    :patch,
+      action:    :location,
+      api_key:   @api_key.key,
+      id:        loc.id,
+      set_name:  "Reno, Nevada, USA",
+      set_north: 39.64,
+      set_south: 39.39,
+      set_east:  -119.70,
+      set_west:  -119.94,
+      set_high:  1700,
+      set_low:   1350,
+      set_notes: "Biggest Little City"
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
+    assert_api_fail(params.merge(set_name: locations(:albion).display_name))
+    assert_api_pass(params)
+    loc.reload
+    assert_equal("Reno, Nevada, USA", loc.display_name)
+    assert_in_delta(39.64, loc.north, 0.0001)
+    assert_in_delta(39.39, loc.south, 0.0001)
+    assert_in_delta(-119.70, loc.east, 0.0001)
+    assert_in_delta(-119.94, loc.west, 0.0001)
+    assert_in_delta(1700, loc.high, 0.0001)
+    assert_in_delta(1350, loc.low, 0.0001)
+    assert_equal("Biggest Little City", loc.notes)
+  end
+
+  def test_deleting_locations
+    loc = rolf.locations.sample
+    params = {
+      method:  :delete,
+      action:  :location,
+      api_key: @api_key.key,
+      id:      loc.id
+    }
+    # No DELETE requests should be allowed at all.
+    assert_api_fail(params)
+  end
 
   # --------------------------
   #  :section: Name Requests

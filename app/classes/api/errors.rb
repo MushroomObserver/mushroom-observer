@@ -370,4 +370,16 @@ class API
       args.merge!(fields: fields.join(", "))
     end
   end
+
+  # API request specifying bounding box is missing one or more edges of box.
+  class NeedAllFourEdges < Error
+  end
+
+  # API request to create or update location has "dubious" location name.
+  class DubiousLocationName < Error
+    def initialize(reasons)
+      super()
+      args.merge!(reasons: reasons.join("; ").gsub(/\.;/, ";"))
+    end
+  end
 end
