@@ -40,7 +40,7 @@ class API
       elsif obj.respond_to?(:title)
         obj.title
       else
-        "#" + obj.id
+        "##{obj.id}"
       end
     end
   end
@@ -225,6 +225,10 @@ class API
 
   # API request requires you to be project member.
   class MustBeMember < ObjectError
+  end
+
+  # API request to post external link requires certain permissions.
+  class ExternalLinkPermissionDenied < Error
   end
 
   ##############################################################################

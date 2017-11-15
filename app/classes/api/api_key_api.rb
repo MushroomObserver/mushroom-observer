@@ -8,31 +8,12 @@ class API
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
-    self.high_detail_includes = [
-      :user
-    ]
-
-    def query_params
-      {
-        where:      sql_id_condition,
-        created_at: parse_range(:time, :created_at),
-        updated_at: parse_range(:time, :updated_at),
-        notes_has:  parse(:string, :notes)
-      }
-    end
-
     def create_params
       @for_user = parse(:user, :for_user, default: @user)
       {
         notes:    parse(:string, :app),
         user:     @for_user,
         verified: (@for_user == @user ? Time.now : nil)
-      }
-    end
-
-    def update_params
-      {
-        notes: parse(:string, :set_app)
       }
     end
 
@@ -47,6 +28,14 @@ class API
 
     def get
       raise NoMethodForAction.new("GET", :api_keys)
+    end
+
+    def patch
+      raise NoMethodForAction.new("PATCH", :api_keys)
+    end
+
+    def delete
+      raise NoMethodForAction.new("DELETE", :api_keys)
     end
   end
 end

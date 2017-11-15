@@ -302,42 +302,6 @@ class ApiTest < UnitTestCase
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
   end
 
-  def test_updating_api_key
-    rolfs_key = @api_key
-    marys_key = ApiKey.create!(
-      user:     mary,
-      notes:    "marys key",
-      verified: Time.now
-    )
-    params = {
-      method:  :patch,
-      action:  :api_key,
-      api_key: @api_key.key,
-      set_app: "new app"
-    }
-    assert_api_fail(params.merge(id: marys_key.id))
-    assert_api_pass(params.merge(id: rolfs_key.id))
-    assert_equal("new app", rolfs_key.reload.notes)
-  end
-
-  def test_deleting_api_key
-    rolfs_key = @api_key
-    marys_key = ApiKey.create!(
-      user:     mary,
-      notes:    "marys key",
-      verified: Time.now
-    )
-    params = {
-      method:  :delete,
-      action:  :api_key,
-      api_key: @api_key.key
-    }
-    assert_api_fail(params.merge(id: marys_key.id))
-    assert_api_pass(params.merge(id: rolfs_key.id))
-    assert_not_nil(ApiKey.safe_find(marys_key.id))
-    assert_nil(ApiKey.safe_find(@api_key.id))
-  end
-
   # -----------------------------
   #  :section: Comment Requests
   # -----------------------------
@@ -406,11 +370,14 @@ class ApiTest < UnitTestCase
       action:      :comment,
       api_key:     @api_key.key,
       id:          com1.id,
+      set_summary: "new summary",
       set_content: "new comment"
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: com2.id))
     assert_api_pass(params)
+    com1.reload
+    assert_equal("new summary", com1.reload.summary)
     assert_equal("new comment", com1.reload.comment)
   end
 
@@ -433,45 +400,67 @@ class ApiTest < UnitTestCase
   #  :section: ExternalLink Requests
   # ----------------------------------
 
-  # def test_getting_external_links
-  #   link1 = external_linkes(:coprinus_comatus_obs_mycoportal_link)
-  #   link2 = external_linkes(:coprinus_comatus_obs_inaturalist_link)
-  #   params = { method: :get, action: :external_link }
-  #
-  #   assert_api_pass(params.merge(id: link2.id))
-  #   assert_api_results([link2])
-  #
-  #   assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
-  #   assert_api_results([com2, com3])
-  #
-  #   api = API.execute(params)
-  #   assert_no_errors(api, "Errors while getting links")
-  #   assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  # end
-  #
-  # def test_external_links_fancy_get
-  #   site = external_sites(:mycoportal)
-  #   new_link = ExternalLink.create!(
-  #     user:          rolf,
-  #     created_at:    date("2017-01-01"),
-  #     updated_at:    date("2017-01-01"),
-  #     observation:   observations(:minimal_unknown_obs),
-  #     external_site: site,
-  #     url:           "http://blah.org"
-  #   )
-  #   expect = ExternalLink.where(external_site: site).sort_by(&:id).
-  #            select { |link| (2015..2016).cover?(link.updated_at.year) }
-  #   assert_false(expect.include?(new_link))
-  #   params = {
-  #     method:         :get,
-  #     action:         :external_link,
-  #     external_sites: site.name,
-  #     updated_at:     "2015-2016"
-  #   }
-  #   api = API.execute(params)
-  #   assert_no_errors(api, "Errors while getting links")
-  #   assert_obj_list_equal(expect, api.results.sort_by(&:id))
-  # end
+  def test_getting_external_links
+    other_obs = observations(:agaricus_campestris_obs)
+    link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
+    link3 = ExternalLink.create!(user: rolf, observation: other_obs,
+                                 external_site: link1.external_site,
+                                 url: "http://nowhere.com")
+    params = { method: :get, action: :external_link }
+  
+    assert_api_pass(params.merge(id: link2.id))
+    assert_api_results([link2])
+  
+    assert_api_pass(params.merge(created_at: "2016-12-29"))
+    assert_api_results([link1])
+
+    assert_api_pass(params.merge(updated_at: "2016-11-11-2017-11-11"))
+    assert_api_results([link1, link2])
+
+    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_results([link3])
+
+    assert_api_pass(params.merge(observation: other_obs.id))
+    assert_api_results([link3])
+    assert_api_pass(params.merge(observation: link1.observation.id))
+    assert_api_results([link1, link2])
+
+    assert_api_pass(params.merge(external_site: "mycoportal"))
+    assert_api_results([link1, link3])
+
+    assert_api_pass(params.merge(url: link2.url))
+    assert_api_results([link2])
+  end
+
+    def test_posting_external_links
+      marys_obs = observations(:detailed_unknown_obs)
+      rolfs_obs = observations(:agaricus_campestris_obs)
+      katys_obs = observations(:amateur_obs)
+      marys_key = api_keys(:marys_api_key)
+      rolfs_key = api_keys(:rolfs_api_key)
+      params = {
+        method:        :post,
+        action:        :external_link,
+        api_key:       rolfs_key.key,
+        observation:   rolfs_obs.id,
+        external_site: external_sites(:mycoportal).id,
+        url:           "http://blah.blah"
+      }
+      assert_api_pass(params)
+      assert_api_fail(params.remove(:api_key))
+      assert_api_fail(params.remove(:observation))
+      assert_api_fail(params.remove(:external_site))
+      assert_api_fail(params.remove(:url))
+      assert_api_fail(params.merge(api_key: "spammer"))
+      assert_api_fail(params.merge(observation: "spammer"))
+      assert_api_fail(params.merge(external_site: "spammer"))
+      assert_api_fail(params.merge(url: "spammer"))
+      assert_api_fail(params.merge(observation: marys_obs.id))
+      assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
+      assert_api_pass(params.merge(api_key: marys_key.key,
+                                   observation: katys_obs.id))
+    end
 
   # ---------------------------
   #  :section: Image Requests

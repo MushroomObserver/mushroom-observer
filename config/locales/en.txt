@@ -3487,6 +3487,7 @@
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
+  api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
   api_image_upload_failed: "Failed to upload image: [error]"

@@ -20,8 +20,8 @@ class API
         created_at:     parse_range(:time, :created_at),
         updated_at:     parse_range(:time, :updated_at),
         users:          parse_array(:user, :user),
-        observations:   parse_array(:observation, :observations),
-        external_sites: parse_array(:external_site, :external_sites),
+        observations:   parse_array(:observation, :observation),
+        external_sites: parse_array(:external_site, :external_site),
         url:            parse(:string, :url)
       }
     end
@@ -45,7 +45,9 @@ class API
       raise MissingParameter.new(:observation)   unless params[:observation]
       raise MissingParameter.new(:external_site) unless params[:external_site]
       raise MissingParameter.new(:url)           if params[:url].blank?
-      # TODO: check permissions
+      return if params[:observation].has_edit_permission?(@user)
+      return if @user.external_sites.include?(params[:external_site])
+      raise ExternalLinkPermissionDenied.new
     end
   end
 end
