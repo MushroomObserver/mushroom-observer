@@ -42,7 +42,7 @@ class API
     # rubocop:enable Metrics/AbcSize
 
     def create_params
-      @observations = parse_observations_to_attach_to
+      parse_create_params!
       default_date = @observations.any? ? @observations.first.when : Date.today
       {
         when:             parse(:date, :date, default: default_date),
@@ -51,7 +51,11 @@ class API
         license:          parse(:license, :license, default: user.license),
         original_name:    parse_original_name,
         projects:         parse_projects_to_attach_to,
-        observations:     @observations
+        observations:     @observations,
+        image:            @upload.content,
+        upload_length:    @upload.content_length,
+        upload_type:      @upload.content_type,
+        upload_md5sum:    @upload.content_md5
       }
     end
 
@@ -71,13 +75,6 @@ class API
       @upload.clean_up if @upload
     end
 
-    def validate_create_params!(params)
-      @vote = parse(:enum, :vote, limit: Image.all_votes)
-      @upload = prepare_upload
-      raise MissingUpload.new unless @upload
-      params.merge!(upload_params)
-    end
-
     def after_create(img)
       img.process_image || raise(ImageUploadFailed.new(img))
       @observations.each do |obs|
@@ -91,15 +88,6 @@ class API
     ############################################################################
 
     private
-
-    def upload_params
-      {
-        image:         @upload.content,
-        upload_length: @upload.content_length,
-        upload_type:   @upload.content_type,
-        upload_md5sum: @upload.content_md5
-      }
-    end
 
     def parse_copyright_holder
       parse(:string, :copyright_holder, limit: 100, default: user.legal_name)
@@ -116,6 +104,13 @@ class API
 
     def parse_projects_to_attach_to
       parse_array(:project, :projects, must_be_member: true) || []
+    end
+
+    def parse_create_params!
+      @observations = parse_observations_to_attach_to
+      @vote = parse(:enum, :vote, limit: Image.all_votes)
+      @upload = prepare_upload
+      raise MissingUpload.new unless @upload
     end
   end
 end
