@@ -40,18 +40,19 @@ class API
       }
     end
 
-    def update_params
-      {
-        display_name: parse(:string, :set_name, limit: 1024),
-        north:        parse(:latitude, :set_north),
-        south:        parse(:longitude, :set_south),
-        east:         parse(:longitude, :set_east),
-        west:         parse(:longitude, :set_west),
-        high:         parse(:altitude, :set_high),
-        low:          parse(:altitude, :set_low),
-        notes:        parse(:string, :set_notes)
-      }
-    end
+    # I've decided this is too dangerous for the moment.
+    # def update_params
+    #   {
+    #     display_name: parse(:string, :set_name, limit: 1024),
+    #     north:        parse(:latitude, :set_north),
+    #     south:        parse(:longitude, :set_south),
+    #     east:         parse(:longitude, :set_east),
+    #     west:         parse(:longitude, :set_west),
+    #     high:         parse(:altitude, :set_high),
+    #     low:          parse(:altitude, :set_low),
+    #     notes:        parse(:string, :set_notes)
+    #   }
+    # end
 
     def validate_create_params!(params)
       name = params[:display_name]
@@ -69,6 +70,10 @@ class API
       make_sure_location_doesnt_exist!(name)
       make_sure_name_isnt_dubious!(name)
       make_sure_not_setting_name_of_multiple_locations!
+    end
+
+    def patch
+      raise NoMethodForAction.new("PATCH", action)
     end
 
     def delete

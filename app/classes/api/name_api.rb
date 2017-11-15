@@ -56,17 +56,19 @@ class API
       }
     end
 
-    def update_params
-      {
-        rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
-        citation:       parse(:string, :set_citation),
-        classification: parse(:string, :set_classification),
-        notes:          parse(:string, :set_notes)
-        # TODO: change spelling of name and/or author
-        # TODO: mark name as misspelling
-        # TODO: change synonymy
-      }
-    end
+    # I've decided this is too dangerous for the moment.
+    # def update_params
+    #   {
+    #     rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
+    #     citation:       parse(:string, :set_citation),
+    #     classification: parse(:string, :set_classification),
+    #     notes:          parse(:string, :set_notes)
+    #     # TODO: change spelling of name and/or author
+    #     # TODO: change rank
+    #     # TODO: mark name as misspelling
+    #     # TODO: change synonymy
+    #   }
+    # end
 
     def build_object
       params   = create_params
@@ -83,6 +85,10 @@ class API
     end
 
     def must_have_edit_permission!(_obj); end
+
+    def patch
+      raise NoMethodForAction.new("PATCH", action)
+    end
 
     def delete
       raise NoMethodForAction.new("DELETE", action)

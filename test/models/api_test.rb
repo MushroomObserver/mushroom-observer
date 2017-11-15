@@ -853,33 +853,45 @@ class ApiTest < UnitTestCase
 
   def test_updating_locations
     loc = locations(:burbank)
+    loc = rolf.locations.sample
     params = {
       method:    :patch,
       action:    :location,
       api_key:   @api_key.key,
       id:        loc.id,
-      set_name:  "Reno, Nevada, USA",
-      set_north: 39.64,
-      set_south: 39.39,
-      set_east:  -119.70,
-      set_west:  -119.94,
-      set_high:  1700,
-      set_low:   1350,
-      set_notes: "Biggest Little City"
+      set_notes: "change"
     }
-    assert_api_fail(params.remove(:api_key))
-    assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
-    assert_api_fail(params.merge(set_name: locations(:albion).display_name))
-    assert_api_pass(params)
-    loc.reload
-    assert_equal("Reno, Nevada, USA", loc.display_name)
-    assert_in_delta(39.64, loc.north, 0.0001)
-    assert_in_delta(39.39, loc.south, 0.0001)
-    assert_in_delta(-119.70, loc.east, 0.0001)
-    assert_in_delta(-119.94, loc.west, 0.0001)
-    assert_in_delta(1700, loc.high, 0.0001)
-    assert_in_delta(1350, loc.low, 0.0001)
-    assert_equal("Biggest Little City", loc.notes)
+    # No PATCH requests should be allowed at all.
+    assert_api_fail(params)
+
+    # I've decided this is too dangerous for the moment.
+    # params = {
+    #   method:    :patch,
+    #   action:    :location,
+    #   api_key:   @api_key.key,
+    #   id:        loc.id,
+    #   set_name:  "Reno, Nevada, USA",
+    #   set_north: 39.64,
+    #   set_south: 39.39,
+    #   set_east:  -119.70,
+    #   set_west:  -119.94,
+    #   set_high:  1700,
+    #   set_low:   1350,
+    #   set_notes: "Biggest Little City"
+    # }
+    # assert_api_fail(params.remove(:api_key))
+    # assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
+    # assert_api_fail(params.merge(set_name: locations(:albion).display_name))
+    # assert_api_pass(params)
+    # loc.reload
+    # assert_equal("Reno, Nevada, USA", loc.display_name)
+    # assert_in_delta(39.64, loc.north, 0.0001)
+    # assert_in_delta(39.39, loc.south, 0.0001)
+    # assert_in_delta(-119.70, loc.east, 0.0001)
+    # assert_in_delta(-119.94, loc.west, 0.0001)
+    # assert_in_delta(1700, loc.high, 0.0001)
+    # assert_in_delta(1350, loc.low, 0.0001)
+    # assert_equal("Biggest Little City", loc.notes)
   end
 
   def test_deleting_locations
@@ -898,19 +910,45 @@ class ApiTest < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
+  def test_getting_names
+    # XXX
+  end
+
+  def test_creating_names
+    # XXX
+  end
+
+  def test_updating_names
+    name = names(:agaricus_campestris)
+    params = {
+      method:    :patch,
+      action:    :name,
+      api_key:   @api_key.key,
+      id:        name.id,
+      set_notes: "change"
+    }
+    # No PATCH requests should be allowed at all.
+    assert_api_fail(params)
+  end
+
+  def test_deleting_names
+    name = rolf.names.sample
+    params = {
+      method:  :delete,
+      action:  :name,
+      api_key: @api_key.key,
+      id:      name.id
+    }
+    # No DELETE requests should be allowed at all.
+    assert_api_fail(params)
+  end
+
   # ---------------------------------
   #  :section: Observation Requests
   # ---------------------------------
 
-  def test_getting_observations_from_august
-    api = API.execute(method: :get, action: :observation, date: "20140824")
-    assert_no_errors(api)
-  end
-
-  def test_getting_observations_updated_on_day
-    api = API.execute(method: :get, action: :observation,
-                      updated_at: "20140824")
-    assert_no_errors(api)
+  def test_getting_observations
+    # XXX
   end
 
   def test_post_minimal_observation
@@ -1096,21 +1134,81 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([obs], spec.observations)
   end
 
+  def test_updating_observations
+    # XXX
+  end
+
+  def test_deleting_observations
+    # XXX
+  end
+
   # -----------------------------
   #  :section: Project Requests
   # -----------------------------
+
+  def test_getting_projects
+    # XXX
+  end
+
+  def test_creating_projects
+    # XXX
+  end
+
+  def test_updating_projects
+    # XXX
+  end
+
+  def test_deleting_projects
+    # XXX
+  end
 
   # ------------------------------
   #  :section: Sequence Requests
   # ------------------------------
 
+  def test_getting_sequences
+    # XXX
+  end
+
+  def test_creating_sequences
+    # XXX
+  end
+
+  def test_updating_sequences
+    # XXX
+  end
+
+  def test_deleting_sequences
+    # XXX
+  end
+
   # ---------------------------------
   #  :section: SpeciesList Requests
   # ---------------------------------
 
+  def test_getting_species_lists
+    # XXX
+  end
+
+  def test_creating_species_lists
+    # XXX
+  end
+
+  def test_updating_species_lists
+    # XXX
+  end
+
+  def test_deleting_species_lists
+    # XXX
+  end
+
   # --------------------------
   #  :section: User Requests
   # --------------------------
+
+  def test_getting_users
+    # XXX
+  end
 
   def test_posting_minimal_user
     @login = "stephane"
@@ -1182,6 +1280,14 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(license: "123456"))
     assert_api_fail(params.merge(location: "123456"))
     assert_api_fail(params.merge(image: "123456"))
+  end
+
+  def test_updating_users
+    # XXX
+  end
+
+  def test_deleting_users
+    # XXX
   end
 
   # --------------------
