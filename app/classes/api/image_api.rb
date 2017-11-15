@@ -65,7 +65,7 @@ class API
         notes:            parse(:string, :set_notes),
         copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
         license:          parse(:license, :set_license),
-        original_name:    parse(:string, :set_original, limit: 120)
+        original_name:    parse(:string, :set_original_name, limit: 120)
       }
     end
 

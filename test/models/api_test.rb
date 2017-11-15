@@ -663,6 +663,57 @@ class ApiTest < UnitTestCase
     assert_equal(expect, actual, "Uploaded image differs from original!")
   end
 
+    def test_updating_images
+      rolfs_img = images(:rolf_profile_image)
+      marys_img = images(:in_situ_image)
+      eol = projects(:eol_project)
+      pd = licenses(:publicdomain)
+      assert(rolfs_img.has_edit_permission?(rolf))
+      assert(!marys_img.has_edit_permission?(rolf))
+      params = {
+        method:               :patch,
+        action:               :image,
+        api_key:              @api_key.key,
+        set_date:             "2012-3-4",
+        set_notes:            "new notes",
+        set_copyright_holder: "new person",
+        set_license:          pd.id,
+        set_original_name:    "new name"
+      }
+      assert_api_fail(params.merge(id: marys_img.id))
+      assert_api_pass(params.merge(id: rolfs_img.id))
+      rolfs_img.reload
+      assert_equal(Date.parse("2012-3-4"), rolfs_img.when)
+      assert_equal("new notes", rolfs_img.notes)
+      assert_equal("new person", rolfs_img.copyright_holder)
+      assert_objs_equal(pd, rolfs_img.license)
+      assert_equal("new name", rolfs_img.original_name)
+      eol.images << marys_img
+      marys_img.reload
+      assert(marys_img.has_edit_permission?(rolf))
+      assert_api_pass(params.merge(id: marys_img.id))
+      marys_img.reload
+      assert_equal(Date.parse("2012-3-4"), marys_img.when)
+      assert_equal("new notes", marys_img.notes)
+      assert_equal("new person", marys_img.copyright_holder)
+      assert_objs_equal(pd, marys_img.license)
+      assert_equal("new name", marys_img.original_name)
+    end
+
+    def test_deleting_images
+      rolfs_img = rolf.images.sample
+      marys_img = mary.images.sample
+      params = {
+        method:  :delete,
+        action:  :image,
+        api_key: @api_key.key,
+      }
+      assert_api_fail(params.merge(id: marys_img.id))
+      assert_api_pass(params.merge(id: rolfs_img.id))
+      assert_not_nil(Image.safe_find(marys_img.id))
+      assert_nil(Image.safe_find(rolfs_img.id))
+    end
+
   # ------------------------------
   #  :section: Location Requests
   # ------------------------------
