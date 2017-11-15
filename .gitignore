@@ -24,6 +24,7 @@ log/
 checkpoints/
 production-logs
 .tm_properties
+**/*.swp
 
 # Ignore bundler config.
 .bundle
