@@ -24,18 +24,18 @@ class API
         synonym_names:        parse_array(:string, :synonyms_of),
         children_names:       parse_array(:string, :children_of),
         locations:            parse_array(:string, :location),
-        projects:             parse_array(:string, :projects),
-        species_lists:        parse_array(:string, :species_lists),
+        projects:             parse_array(:string, :project),
+        species_lists:        parse_array(:string, :species_list),
         has_observation:      parse(:boolean, :has_observation, limit: true),
-        size:                 parse(:size, :has_size),
-        content_types:        parse(:string, :content_type),
+        size:                 parse_image_size,
+        content_types:        parse_content_type,
         has_notes:            parse(:boolean, :has_notes),
         notes_has:            parse(:string, :notes_has),
         copyright_holder_has: parse(:string, :copyright_holder_has),
         license:              parse(:license, :license),
         has_votes:            parse(:boolean, :has_votes),
-        quality:              parse(:quality, :quality),
-        confidence:           parse(:confidence, :confidence),
+        quality:              parse_range(:quality, :quality),
+        confidence:           parse_range(:confidence, :confidence),
         ok_for_export:        parse(:boolean, :ok_for_export)
       }
     end
@@ -95,6 +95,14 @@ class API
 
     def parse_original_name
       parse(:string, :original_name, limit: 120, default: nil)
+    end
+
+    def parse_image_size
+      parse(:enum, :size, limit: Image.all_sizes - [:full_size])
+    end
+
+    def parse_content_type
+      parse_array(:enum, :content_type, limit: Image.all_extensions)
     end
 
     def parse_observations_to_attach_to

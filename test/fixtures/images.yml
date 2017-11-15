@@ -9,6 +9,10 @@ DEFAULTS: &DEFAULTS
   transferred:      true
   user:             rolf
   when:             <%= Time.now.strftime("%Y-%m-%d") %>
+  license:          ccnc30
+  width:            320
+  height:           320
+  ok_for_export:    true
 
 in_situ_image:
   <<: *DEFAULTS
@@ -68,6 +72,7 @@ amateur_image:
   when: 2010-12-30
   notes: 'A friend took this photo.'
   copyright_holder: Nathan Wilson
+  license: publicdomain
 
 peltigera_image:
   <<: *DEFAULTS
@@ -75,6 +80,7 @@ peltigera_image:
   notes: 'Pretty lichen'
   vote_cache: 3
   copyright_holder: Nathan Wilson
+  license: publicdomain
 
 conic_image:
   <<: *DEFAULTS
@@ -102,6 +108,7 @@ plane_image_example:
   notes: 'Example image of of Plane Pileus'
   copyright_holder: Nathan Wilson
   vote_cache: 3
+  license: publicdomain
 
 rolf_profile_image:
   <<: *DEFAULTS

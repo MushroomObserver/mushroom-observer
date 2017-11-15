@@ -256,13 +256,14 @@ module Query::Modules::Initialization
     return if params[:content_types].blank?
     exts  = Image.all_extensions.map(&:to_s)
     mimes = Image.all_content_types.map(&:to_s) - [""]
-    types = params[:types].to_s.strip_squeeze.split & exts
+    types = params[:content_types]
+    types = params[:content_types] & exts
     return if types.none?
     other = types.include?("raw")
     types -= ["raw"]
     types = types.map { |x| mimes[exts.index(x)] }
-    str1 = "comments.target_type IN ('#{types.join("','")}')"
-    str2 = "comments.target_type NOT IN ('#{mimes.join("','")}')"
+    str1 = "images.content_type IN ('#{types.join("','")}')"
+    str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
     @where << if types.empty?
                 str2
               elsif other

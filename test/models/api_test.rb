@@ -408,10 +408,10 @@ class ApiTest < UnitTestCase
                                  external_site: link1.external_site,
                                  url: "http://nowhere.com")
     params = { method: :get, action: :external_link }
-  
+
     assert_api_pass(params.merge(id: link2.id))
     assert_api_results([link2])
-  
+
     assert_api_pass(params.merge(created_at: "2016-12-29"))
     assert_api_results([link1])
 
@@ -465,6 +465,118 @@ class ApiTest < UnitTestCase
   # ---------------------------
   #  :section: Image Requests
   # ---------------------------
+
+  def test_getting_images
+    img = Image.all.sample
+    params = { method: :get, action: :image }
+
+    assert_api_pass(params.merge(id: img.id))
+    assert_api_results([img])
+
+    assert_api_pass(params.merge(created_at: "2006"))
+    assert_api_results(Image.where("year(created_at) = 2006"))
+
+    assert_api_pass(params.merge(updated_at: "2006-05-22"))
+    assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+
+    assert_api_pass(params.merge(date: "2007-03"))
+    assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+
+    assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
+    assert_api_results(Image.where(user: [mary, katrina]))
+
+    name = names(:agaricus_campestris)
+    imgs = name.observations.map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(name: "Agaricus campestris"))
+    assert_api_results(imgs)
+
+    name2 = names(:agaricus_campestros)
+    synonym = Synonym.create!
+    name.update_attributes!(synonym: synonym)
+    name2.update_attributes!(synonym: synonym)
+    assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
+    assert_api_results(imgs)
+
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(imgs)
+
+    burbank = locations(:burbank)
+    imgs = burbank.observations.map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(location: burbank.id))
+    assert_api_results(imgs)
+
+    project = projects(:bolete_project)
+    assert_not_empty(project.images)
+    assert_api_pass(params.merge(project: "Bolete Project"))
+    assert_api_results(project.images)
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    spl  = species_lists(:unknown_species_list)
+    assert_api_pass(params.merge(species_list: spl.title))
+    assert_api_results([img1, img2])
+
+    attached   = Image.all.select {|i| i.observations.count > 0}
+    unattached = Image.all - attached
+    assert_not_empty(attached)
+    assert_not_empty(unattached)
+    assert_api_pass(params.merge(has_observation: "yes"))
+    assert_api_results(attached)
+    # This query doesn't work, no way to negate join.
+    # assert_api_pass(params.merge(has_observation: "no"))
+    # assert_api_results(unattached)
+
+    imgs = Image.where("width >= 1280 || height >= 1280")
+    assert_empty(imgs)
+    imgs = Image.where("width >= 960 || height >= 960")
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(size: "huge"))
+    assert_api_results([])
+    assert_api_pass(params.merge(size: "large"))
+    assert_api_results(imgs)
+
+    img1.update_attributes!(content_type: "image/png")
+    assert_api_pass(params.merge(content_type: "png"))
+    assert_api_results([img1])
+
+    noteless_img = images(:rolf_profile_image)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results([noteless_img])
+
+    pretty_img = images(:peltigera_image)
+    assert_api_pass(params.merge(notes_has: "pretty"))
+    assert_api_results([pretty_img])
+
+    assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
+    assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
+    assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+
+    pd = licenses(:publicdomain)
+    assert_api_pass(params.merge(license: pd.id))
+    assert_api_results(Image.where(license: pd))
+
+    assert_api_pass(params.merge(has_votes: "yes"))
+    assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    assert_api_pass(params.merge(has_votes: "no"))
+    assert_api_results(Image.where("vote_cache IS NULL"))
+
+    assert_api_pass(params.merge(quality: "2-3"))
+    assert_api_results(Image.where("vote_cache > 2.0"))
+    assert_api_pass(params.merge(quality: "1-2"))
+    assert_api_results([])
+
+    imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(confidence: "2-3"))
+    assert_api_results(imgs)
+
+    pretty_img.update_attributes!(ok_for_export: false)
+    assert_api_pass(params.merge(ok_for_export: "no"))
+    assert_api_results([pretty_img])
+  end
 
   def test_posting_minimal_image
     setup_image_dirs
