@@ -28,3 +28,12 @@ detailed_unknown_obs_comment: # 3
   comment: ''
   target_type: Observation
   target: detailed_unknown_obs
+
+fungi_comment:
+  created_at: 2017-11-16 00:32:00
+  updated_at: 2017-11-16 00:32:00
+  user: dick
+  summary: Please do not change this name!
+  comment: It really messes things up.
+  target_type: Name
+  target: fungi
