@@ -3514,8 +3514,9 @@
   api_must_own_all_observations: You can only edit [types] if you own all its [:observations].
   api_must_own_all_species_lists: You can only edit [types] if you own all its [:species_lists].
   api_must_supply_location_or_gps: You must supply either a location or GPS coordinates.
-  api_name_already_exists: The name, "[new]", already exists as "[old]"
+  api_name_already_exists: The name "[new]" already exists.
   api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
+  api_name_wrong_for_rank: The name, "[name]", isn't valid for [rank].
   api_need_all_four_edges: "Need to supply all four edges of bounding box: north, south, east and west."
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
