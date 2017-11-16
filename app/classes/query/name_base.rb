@@ -33,7 +33,7 @@ module Query
         comments_has?:       :string,
         has_default_desc?:   :boolean,
         join_desc?:          { string: [:default, :any] },
-        desc_type?:          :string,
+        desc_type?:          [{string: [Description.all_source_types]}],
         desc_project?:       [:string],
         desc_creator?:       [User],
         desc_content?:       :string,

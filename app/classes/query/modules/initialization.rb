@@ -62,10 +62,11 @@ module Query::Modules::Initialization
   end
 
   def initialize_model_do_enum_set(arg, col, vals, type)
-    return if params[arg].blank?
+    types = params[arg]
+    return if types.empty?
     col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
-    types = params[arg].to_s.strip_squeeze.split
     if type == :string
+      types.map!(&:to_s)
       types &= vals.map(&:to_s)
       @where << "#{col} IN ('#{types.join("','")}')" if types.any?
     else
