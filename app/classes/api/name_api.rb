@@ -27,7 +27,7 @@ class API
         misspellings:       parse_misspellings,
         has_synonyms:       parse(:boolean, :has_synonyms),
         locations:          parse_array(:string, :location),
-        species_lists:      parse_array(:string, :species_lists),
+        species_lists:      parse_array(:string, :species_list),
         rank:               parse(:enum, :rank, limit: Name.all_ranks),
         has_author:         parse(:boolean, :has_author),
         has_citation:       parse(:boolean, :has_citation),
@@ -48,9 +48,7 @@ class API
 
     def create_params
       {
-        rank:           parse(:enum, :rank, limit: Name.all_ranks),
         citation:       parse(:string, :citation, default: ""),
-        deprecated:     parse(:boolean, :deprecated, default: false),
         classification: parse(:string, :classification, default: ""),
         notes:          parse(:string, :notes, default: "")
       }
@@ -67,16 +65,14 @@ class API
     end
 
     def build_object
-      params   = create_params
-      name_str = parse(:string, :name, limit: 100)
-      author   = parse(:string, :author, limit: 100)
+      params = create_params
+      parse_name_author_rank_deprecated
       done_parsing_parameters!
-      raise MissingParameter.new(:name_str) if name_str.blank?
-      raise MissingParameter.new(:rank)     if rank.blank?
-      name_str2   = make_sure_name_doesnt_exist!(name_str, author)
-      name, names = make_sure_name_parses!(name_str2)
-      fill_in_attributes(name, params, name_str, author)
-      save_new_names(names)
+      validate_create_parameters!(params)
+      parse = make_sure_name_parses!
+      make_sure_name_doesnt_exist!(parse)
+      name = create_name(parse, params)
+      save_parents(parse)
       name
     end
 
@@ -93,6 +89,13 @@ class API
         clear_synonymy(name)
         change_correct_spelling(name)
       end
+    end
+
+    def validate_create_parameters!(params)
+      raise MissingParameter.new(:name) if @name.blank?
+      raise MissingParameter.new(:rank) if @rank.blank?
+      @classification = params[:classification]
+      validate_classification!(params)
     end
 
     def validate_update_params!(params)
@@ -121,6 +124,59 @@ class API
 
     private
 
+    def parse_misspellings
+      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only])
+    end
+
+    def validate_classification!(params)
+      return unless @classification
+      params[:classification] = \
+        Name.validate_classification(:Genus, @classification)
+    rescue RuntimeError
+      raise BadClassification.new
+    end
+
+    # ----------------------------------------
+
+    def parse_name_author_rank_deprecated
+      @name       = parse(:string, :name, limit: 100)
+      @author     = parse(:string, :author, limit: 100)
+      @rank       = parse(:enum, :rank, limit: Name.all_ranks)
+      @deprecated = parse(:boolean, :deprecated, default: false)
+    end
+
+    def make_sure_name_parses!
+      str   = Name.clean_incoming_string("#{@name} #{@author}")
+      parse = Name.parse_name(str, rank: @rank, deprecated: @deprecated)
+      raise NameDoesntParse.new(@name)         unless parse
+      raise NameWrongForRank.new(@name, @rank) if parse.rank != @rank
+      parse
+    end
+
+    def make_sure_name_doesnt_exist!(parse)
+      match = Name.where(text_name: parse.text_name)
+      return if match.none?
+      return unless parse.author.blank? ||
+                    match.any? { |n| n.author.blank? } ||
+                    match.any? { |n| n.author == parse.author }
+      raise NameAlreadyExists.new(parse.search_name)
+    end
+
+    def create_name(parse, params)
+      params = params.merge(parse.params).merge(deprecated: @deprecated)
+      name = Name.new(params)
+      name.save || raise(CreateFailed.new(name))
+      name
+    end
+
+    def save_parents(parse)
+      return unless parse.parent_name
+      parents = Name.find_or_create_name_and_parents(parse.parent_name)
+      parents.each { |n| n.save if n && n.new_record? }
+    end
+
+    # ----------------------------------------
+
     def must_be_creator!(name)
       return if name.user == @user
       raise MustBeCreator.new(type: :name)
@@ -144,50 +200,6 @@ class API
     def must_own_all_namings!(name)
       return unless name.namings.any? { |x| x.user != @user }
       raise MustOwnAllNamings.new(type: :name)
-    end
-
-    def validate_classification!(params)
-      return unless @classification
-      params[:classification] = \
-        Name.validate_classification(:Genus, @classification)
-    rescue RuntimeError
-      raise BadClassification.new
-    end
-
-    def make_sure_name_doesnt_exist!(name_str, author)
-      match = nil
-      if author.blank?
-        match = Name.find_by_text_name(name_str)
-        name_str2 = name_str
-      else
-        match = Name.find_by_text_name_and_author(name_str, author)
-        name_str2 = "#{name_str} #{author}"
-      end
-      raise NameAlreadyExists.new(name_str, match) if match
-      name_str2
-    end
-
-    def make_sure_name_parses!(name_str2)
-      names = Name.find_or_create_name_and_parents(name_str2)
-      name  = names.last
-      raise NameDoesntParse.new(name_str2) if name.nil?
-      [name, names]
-    end
-
-    def fill_in_attributes(name, params, name_str, author)
-      name.attributes = params
-      name.change_text_name(name_str, author, name.rank)
-      name.change_deprecated(true) if name.deprecated
-    end
-
-    def save_new_names(names)
-      names.each do |name|
-        name.save if name && name.new_record?
-      end
-    end
-
-    def parse_misspellings
-      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only])
     end
 
     def parse_set_name!
