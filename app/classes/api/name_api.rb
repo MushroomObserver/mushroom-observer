@@ -195,8 +195,8 @@ class API
       @author = parse(:string, :set_author, limit: 100)
       @rank   = parse(:enum, :set_rank, limit: Name.all_ranks)
       return unless @name || @author || @rank
-      return if query.num_results.none?
-      raise TryingToSetMultipleNamesAtOnce.new if query.num_results > 1
+      return if query.num_results < 2
+      raise TryingToSetMultipleNamesAtOnce.new
     end
 
     def parse_set_synonymy!
