@@ -16,3 +16,6 @@ peltigera_synonym:
 
 namings_deprecated_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:namings_deprecated_synonym) %>
+
+suillus_synonym:
+  id: <%= ActiveRecord::FixtureSet.identify(:suillus_synonym) %>
