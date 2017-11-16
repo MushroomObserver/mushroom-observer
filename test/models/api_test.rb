@@ -258,719 +258,719 @@ class ApiTest < UnitTestCase
 
   ##############################################################################
 
-   def test_basic_gets
-     [Comment, ExternalLink, Image, Location, Name, Observation, Project,
-      Sequence, SpeciesList, User].each do |model|
-       expected_object = model.first
-       api = API.execute(
-         method: :get,
-         action: model.type_tag,
-         id: expected_object.id
-       )
-       assert_no_errors(api, "Errors while getting first #{model}")
-       assert_obj_list_equal([expected_object], api.results,
-                             "Failed to get first #{model}")
-     end
-   end
- 
-   # ----------------------------
-   #  :section: ApiKey Requests
-   # ----------------------------
- 
-   def test_getting_api_keys
-     params = {
-       method:   :patch,
-       action:   :api_key,
-       api_key:  @api_key.key,
-       user:     rolf.id
-     }
-     # No GET requests allowed now.
-     assert_api_fail(params)
-   end
- 
-   def test_posting_api_key_for_yourself
-     email_count = ActionMailer::Base.deliveries.size
-     @for_user = rolf
-     @app = "  Mushroom  Mapper  "
-     @verified = true
-     params = {
-       method:  :post,
-       action:  :api_key,
-       api_key: @api_key.key,
-       app:     @app
-     }
-     api = API.execute(params)
-     assert_no_errors(api, "Errors while posting image")
-     assert_obj_list_equal([ApiKey.last], api.results)
-     assert_last_api_key_correct
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.remove(:app))
-     assert_equal(email_count, ActionMailer::Base.deliveries.size)
-   end
- 
-   def test_posting_api_key_for_another_user
-     email_count = ActionMailer::Base.deliveries.size
-     @for_user = katrina
-     @app = "  Mushroom  Mapper  "
-     @verified = false
-     params = {
-       method:   :post,
-       action:   :api_key,
-       api_key:  @api_key.key,
-       app:      @app,
-       for_user: @for_user.id
-     }
-     api = API.execute(params)
-     assert_no_errors(api, "Errors while posting image")
-     assert_obj_list_equal([ApiKey.last], api.results)
-     assert_last_api_key_correct
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.remove(:app))
-     assert_api_fail(params.merge(app: ""))
-     assert_api_fail(params.merge(for_user: 123_456))
-     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
-   end
- 
-   def test_updating_api_keys
-     params = {
-       method:   :patch,
-       action:   :api_key,
-       api_key:  @api_key.key,
-       id:       @api_key.id,
-       set_app:  "new app"
-     }
-     # No PATCH requests allowed now.
-     assert_api_fail(params)
-   end
- 
-   def test_deleting_api_keys
-     params = {
-       method:   :delete,
-       action:   :api_key,
-       api_key:  @api_key.key,
-       id:       @api_key.id,
-     }
-     # No DELETE requests allowed now.
-     assert_api_fail(params)
-   end
- 
-   # -----------------------------
-   #  :section: Comment Requests
-   # -----------------------------
- 
-   def test_getting_comments
-     params = { method: :get, action: :comment }
-     com1 = comments(:minimal_unknown_obs_comment_1)
-     com2 = comments(:minimal_unknown_obs_comment_2)
-     com3 = comments(:detailed_unknown_obs_comment)
- 
-     assert_api_pass(params.merge(id: com1.id))
-     assert_api_results([com1])
- 
-     assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
-     assert_api_results([com2])
- 
-     assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
-     assert_api_results([com3])
- 
-     assert_api_pass(params.merge(user: "rolf,dick"))
-     expect = Comment.where(user: rolf) + Comment.where(user: dick)
-     assert_api_results(expect.sort_by(&:id))
- 
-     assert_api_pass(params.merge(type: "Observation"))
-     expect = Comment.where(target_type: "Observation")
-     assert_api_results(expect.sort_by(&:id))
- 
-     assert_api_pass(params.merge(summary_has: "complicated"))
-     assert_api_results([com2])
- 
-     assert_api_pass(params.merge(content_has: "really cool"))
-     assert_api_results([com1])
- 
-     obs = observations(:minimal_unknown_obs)
-     assert_api_pass(params.merge(target: "observation ##{obs.id}"))
-     assert_api_results(obs.comments.sort_by(&:id))
-   end
- 
-   def test_posting_comments
-     @user    = rolf
-     @target  = names(:petigera)
-     @summary = "misspelling"
-     @content = "The correct one is 'Peltigera'."
-     params = {
-       method:  :post,
-       action:  :comment,
-       api_key: @api_key.key,
-       target:  "name ##{@target.id}",
-       summary: @summary,
-       content: @content
-     }
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.remove(:target))
-     assert_api_fail(params.remove(:summary))
-     assert_api_fail(params.merge(target: "foo #1"))
-     assert_api_fail(params.merge(target: "observation #1"))
-     assert_api_pass(params)
-     assert_last_comment_correct
-   end
- 
-   def test_updating_comments
-     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
-     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
-     params = {
-       method:      :patch,
-       action:      :comment,
-       api_key:     @api_key.key,
-       id:          com1.id,
-       set_summary: "new summary",
-       set_content: "new comment"
-     }
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.merge(id: com2.id))
-     assert_api_pass(params)
-     com1.reload
-     assert_equal("new summary", com1.reload.summary)
-     assert_equal("new comment", com1.reload.comment)
-   end
- 
-   def test_deleting_comments
-     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
-     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
-     params = {
-       method:      :delete,
-       action:      :comment,
-       api_key:     @api_key.key,
-       id:          com1.id
-     }
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.merge(id: com2.id))
-     assert_api_pass(params)
-     assert_nil(Comment.safe_find(com1.id))
-   end
- 
-   # ----------------------------------
-   #  :section: ExternalLink Requests
-   # ----------------------------------
- 
-   def test_getting_external_links
-     other_obs = observations(:agaricus_campestris_obs)
-     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
-     link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
-     link3 = ExternalLink.create!(user: rolf, observation: other_obs,
-                                  external_site: link1.external_site,
-                                  url: "http://nowhere.com")
-     params = { method: :get, action: :external_link }
- 
-     assert_api_pass(params.merge(id: link2.id))
-     assert_api_results([link2])
- 
-     assert_api_pass(params.merge(created_at: "2016-12-29"))
-     assert_api_results([link1])
- 
-     assert_api_pass(params.merge(updated_at: "2016-11-11-2017-11-11"))
-     assert_api_results([link1, link2])
- 
-     assert_api_pass(params.merge(user: "rolf"))
-     assert_api_results([link3])
- 
-     assert_api_pass(params.merge(observation: other_obs.id))
-     assert_api_results([link3])
-     assert_api_pass(params.merge(observation: link1.observation.id))
-     assert_api_results([link1, link2])
- 
-     assert_api_pass(params.merge(external_site: "mycoportal"))
-     assert_api_results([link1, link3])
- 
-     assert_api_pass(params.merge(url: link2.url))
-     assert_api_results([link2])
-   end
- 
-     def test_posting_external_links
-       marys_obs = observations(:detailed_unknown_obs)
-       rolfs_obs = observations(:agaricus_campestris_obs)
-       katys_obs = observations(:amateur_obs)
-       marys_key = api_keys(:marys_api_key)
-       rolfs_key = api_keys(:rolfs_api_key)
-       params = {
-         method:        :post,
-         action:        :external_link,
-         api_key:       rolfs_key.key,
-         observation:   rolfs_obs.id,
-         external_site: external_sites(:mycoportal).id,
-         url:           "http://blah.blah"
-       }
-       assert_api_pass(params)
-       assert_api_fail(params.remove(:api_key))
-       assert_api_fail(params.remove(:observation))
-       assert_api_fail(params.remove(:external_site))
-       assert_api_fail(params.remove(:url))
-       assert_api_fail(params.merge(api_key: "spammer"))
-       assert_api_fail(params.merge(observation: "spammer"))
-       assert_api_fail(params.merge(external_site: "spammer"))
-       assert_api_fail(params.merge(url: "spammer"))
-       assert_api_fail(params.merge(observation: marys_obs.id))
-       assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
-       assert_api_pass(params.merge(api_key: marys_key.key,
-                                    observation: katys_obs.id))
-     end
- 
-   # ---------------------------
-   #  :section: Image Requests
-   # ---------------------------
- 
-   def test_getting_images
-     img = Image.all.sample
-     params = { method: :get, action: :image }
- 
-     assert_api_pass(params.merge(id: img.id))
-     assert_api_results([img])
- 
-     assert_api_pass(params.merge(created_at: "2006"))
-     assert_api_results(Image.where("year(created_at) = 2006"))
- 
-     assert_api_pass(params.merge(updated_at: "2006-05-22"))
-     assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
- 
-     assert_api_pass(params.merge(date: "2007-03"))
-     assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
- 
-     assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
-     assert_api_results(Image.where(user: [mary, katrina]))
- 
-     name = names(:agaricus_campestris)
-     imgs = name.observations.map(&:images).flatten
-     assert_not_empty(imgs)
-     assert_api_pass(params.merge(name: "Agaricus campestris"))
-     assert_api_results(imgs)
- 
-     name2 = names(:agaricus_campestros)
-     synonym = Synonym.create!
-     name.update_attributes!(synonym: synonym)
-     name2.update_attributes!(synonym: synonym)
-     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
-     assert_api_results(imgs)
- 
-     assert_api_pass(params.merge(children_of: "Agaricus"))
-     assert_api_results(imgs)
- 
-     burbank = locations(:burbank)
-     imgs = burbank.observations.map(&:images).flatten
-     assert_not_empty(imgs)
-     assert_api_pass(params.merge(location: burbank.id))
-     assert_api_results(imgs)
- 
-     project = projects(:bolete_project)
-     assert_not_empty(project.images)
-     assert_api_pass(params.merge(project: "Bolete Project"))
-     assert_api_results(project.images)
- 
-     img1 = images(:in_situ_image)
-     img2 = images(:turned_over_image)
-     spl  = species_lists(:unknown_species_list)
-     assert_api_pass(params.merge(species_list: spl.title))
-     assert_api_results([img1, img2])
- 
-     attached   = Image.all.select {|i| i.observations.count > 0}
-     unattached = Image.all - attached
-     assert_not_empty(attached)
-     assert_not_empty(unattached)
-     assert_api_pass(params.merge(has_observation: "yes"))
-     assert_api_results(attached)
-     # This query doesn't work, no way to negate join.
-     # assert_api_pass(params.merge(has_observation: "no"))
-     # assert_api_results(unattached)
- 
-     imgs = Image.where("width >= 1280 || height >= 1280")
-     assert_empty(imgs)
-     imgs = Image.where("width >= 960 || height >= 960")
-     assert_not_empty(imgs)
-     assert_api_pass(params.merge(size: "huge"))
-     assert_api_results([])
-     assert_api_pass(params.merge(size: "large"))
-     assert_api_results(imgs)
- 
-     img1.update_attributes!(content_type: "image/png")
-     assert_api_pass(params.merge(content_type: "png"))
-     assert_api_results([img1])
- 
-     noteless_img = images(:rolf_profile_image)
-     assert_api_pass(params.merge(has_notes: "no"))
-     assert_api_results([noteless_img])
- 
-     pretty_img = images(:peltigera_image)
-     assert_api_pass(params.merge(notes_has: "pretty"))
-     assert_api_results([pretty_img])
- 
-     assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
-     assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
-     assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
-     assert_api_results(Image.where("copyright_holder like '%nathan%'"))
- 
-     pd = licenses(:publicdomain)
-     assert_api_pass(params.merge(license: pd.id))
-     assert_api_results(Image.where(license: pd))
- 
-     assert_api_pass(params.merge(has_votes: "yes"))
-     assert_api_results(Image.where("vote_cache IS NOT NULL"))
-     assert_api_pass(params.merge(has_votes: "no"))
-     assert_api_results(Image.where("vote_cache IS NULL"))
- 
-     assert_api_pass(params.merge(quality: "2-3"))
-     assert_api_results(Image.where("vote_cache > 2.0"))
-     assert_api_pass(params.merge(quality: "1-2"))
-     assert_api_results([])
- 
-     imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
-     assert_not_empty(imgs)
-     assert_api_pass(params.merge(confidence: "2-3"))
-     assert_api_results(imgs)
- 
-     pretty_img.update_attributes!(ok_for_export: false)
-     assert_api_pass(params.merge(ok_for_export: "no"))
-     assert_api_results([pretty_img])
-   end
- 
-   def test_posting_minimal_image
-     setup_image_dirs
-     @user   = rolf
-     @proj   = nil
-     @date   = Time.now.in_time_zone("GMT").to_date
-     @copy   = @user.legal_name
-     @notes  = ""
-     @orig   = nil
-     @width  = 407
-     @height = 500
-     @vote   = nil
-     @obs    = nil
-     params  = {
-       method:      :post,
-       action:      :image,
-       api_key:     @api_key.key,
-       upload_file: "#{::Rails.root}/test/images/sticky.jpg"
-     }
-     api = API.execute(params)
-     assert_no_errors(api, "Errors while posting image")
-     assert_obj_list_equal([Image.last], api.results)
-     assert_last_image_correct
-   end
- 
-   def test_posting_maximal_image
-     setup_image_dirs
-     @user   = rolf
-     @proj   = projects(:eol_project)
-     @date   = date("20120626")
-     @copy   = "My Friend"
-     @notes  = "These are notes.\nThey look like this.\n"
-     @orig   = "sticky.png"
-     @width  = 407
-     @height = 500
-     @vote   = 3
-     @obs    = @user.observations.last
-     params  = {
-       method:           :post,
-       action:           :image,
-       api_key:          @api_key.key,
-       date:             "20120626",
-       notes:            @notes,
-       copyright_holder: " My Friend ",
-       license:          @user.license.id,
-       vote:             "3",
-       observations:     @obs.id,
-       projects:         @proj.id,
-       upload_file:      "#{::Rails.root}/test/images/sticky.jpg",
-       original_name:    @orig
-     }
-     api = API.execute(params)
-     assert_no_errors(api, "Errors while posting image")
-     assert_obj_list_equal([Image.last], api.results)
-     assert_last_image_correct
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.remove(:upload_file))
-     assert_api_fail(params.merge(original_name: "x" * 1000))
-     assert_api_fail(params.merge(vote: "-5"))
- 
-     obs = Observation.where(user: katrina).first
-     assert_api_fail(params.merge(observations: obs.id.to_s))
-     # Rolf is not a member of this project
-     assert_api_fail(params.merge(projects: projects(:bolete_project).id.to_s))
-   end
- 
-   def test_posting_image_via_url
-     setup_image_dirs
-     url = "http://mushroomobserver.org/images/thumb/459340.jpg"
-     stub_request(:any, url).
-       to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
-     params = {
-       method:     :post,
-       action:     :image,
-       api_key:    @api_key.key,
-       upload_url: url
-     }
-     api = API.execute(params)
-     assert_no_errors(api, "Errors while posting image")
-     img = Image.last
-     assert_obj_list_equal([img], api.results)
-     actual = File.read(img.local_file_name(:full_size))
-     expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
-     assert_equal(expect, actual, "Uploaded image differs from original!")
-   end
- 
-     def test_updating_images
-       rolfs_img = images(:rolf_profile_image)
-       marys_img = images(:in_situ_image)
-       eol = projects(:eol_project)
-       pd = licenses(:publicdomain)
-       assert(rolfs_img.has_edit_permission?(rolf))
-       assert(!marys_img.has_edit_permission?(rolf))
-       params = {
-         method:               :patch,
-         action:               :image,
-         api_key:              @api_key.key,
-         set_date:             "2012-3-4",
-         set_notes:            "new notes",
-         set_copyright_holder: "new person",
-         set_license:          pd.id,
-         set_original_name:    "new name"
-       }
-       assert_api_fail(params.merge(id: marys_img.id))
-       assert_api_pass(params.merge(id: rolfs_img.id))
-       rolfs_img.reload
-       assert_equal(Date.parse("2012-3-4"), rolfs_img.when)
-       assert_equal("new notes", rolfs_img.notes)
-       assert_equal("new person", rolfs_img.copyright_holder)
-       assert_objs_equal(pd, rolfs_img.license)
-       assert_equal("new name", rolfs_img.original_name)
-       eol.images << marys_img
-       marys_img.reload
-       assert(marys_img.has_edit_permission?(rolf))
-       assert_api_pass(params.merge(id: marys_img.id))
-       marys_img.reload
-       assert_equal(Date.parse("2012-3-4"), marys_img.when)
-       assert_equal("new notes", marys_img.notes)
-       assert_equal("new person", marys_img.copyright_holder)
-       assert_objs_equal(pd, marys_img.license)
-       assert_equal("new name", marys_img.original_name)
-     end
- 
-     def test_deleting_images
-       rolfs_img = rolf.images.sample
-       marys_img = mary.images.sample
-       params = {
-         method:  :delete,
-         action:  :image,
-         api_key: @api_key.key,
-       }
-       assert_api_fail(params.merge(id: marys_img.id))
-       assert_api_pass(params.merge(id: rolfs_img.id))
-       assert_not_nil(Image.safe_find(marys_img.id))
-       assert_nil(Image.safe_find(rolfs_img.id))
-     end
- 
-   # ------------------------------
-   #  :section: Location Requests
-   # ------------------------------
- 
-   def test_getting_locations
-     loc = Location.all.sample
-     params = { method: :get, action: :location }
- 
-     assert_api_pass(params.merge(id: loc.id))
-     assert_api_results([loc])
- 
-     locs = Location.where("year(created_at) = 2008")
-     assert_not_empty(locs)
-     assert_api_pass(params.merge(created_at: "2008"))
-     assert_api_results(locs)
- 
-     locs = Location.where("date(created_at) = '2012-01-01'")
-     assert_not_empty(locs)
-     assert_api_pass(params.merge(updated_at: "2012-01-01"))
-     assert_api_results(locs)
- 
-     locs = Location.where(user: rolf)
-     assert_not_empty(locs)
-     assert_api_pass(params.merge(user: "rolf"))
-     assert_api_results(locs)
- 
-     locs = Location.where("south > 39 and north < 40 and west > -124 and
-                            east < -123 and west < east")
-     assert_not_empty(locs)
-     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
-     assert_api_fail(params.merge(north: 40, east: -123, west: -124))
-     assert_api_fail(params.merge(north: 40, south: 39, west: -124))
-     assert_api_fail(params.merge(north: 40, south: 39, east: -123))
-     assert_api_pass(params.merge(north: 40, south: 39, east: -123, west: -124))
-     assert_api_results(locs)
-   end
- 
-   def test_posting_locations
-     name1  = "Reno, Nevada, USA"
-     name2  = "Sparks, Nevada, USA"
-     name3  = "Evil Lair, Latveria"
-     name4  = "Nowhere, East Paduka, USA"
-     name5  = "Washoe County, Nevada, USA"
-     @name  = name1
-     @north = 39.64
-     @south = 39.39
-     @east  = -119.70
-     @west  = -119.94
-     @high  = 1700
-     @low   = 1350
-     @notes = "Biggest Little City"
-     @user  = rolf
-     params = {
-       method:  :post,
-       action:  :location,
-       api_key: @api_key.key,
-       name:    @name,
-       north:   @north,
-       south:   @south,
-       east:    @east,
-       west:    @west,
-       high:    @high,
-       low:     @low,
-       notes:   @notes
-     }
-     name = params[:name]
-     assert_api_pass(params)
-     assert_last_location_correct
-     assert_api_fail(params)
-     assert_api_fail(params.merge(name: name3))
-     assert_api_fail(params.merge(name: name4))
-     assert_api_fail(params.merge(name: name5))
-     params[:name] = @name = name2
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.remove(:name))
-     assert_api_fail(params.remove(:north))
-     assert_api_fail(params.remove(:south))
-     assert_api_fail(params.remove(:east))
-     assert_api_fail(params.remove(:west))
-     assert_api_fail(params.remove(:north, :south, :east, :west))
-     assert_api_pass(params.remove(:high, :low, :notes))
-     @high = @low = @notes = nil
-     assert_last_location_correct
-   end
- 
-   def test_updating_locations
-     albion = locations(:albion)
-     burbank = locations(:burbank)
-     params = {
-       method:    :patch,
-       action:    :location,
-       api_key:   @api_key.key,
-       id:        albion.id,
-       set_name:  "Reno, Nevada, USA",
-       set_north: 39.64,
-       set_south: 39.39,
-       set_east:  -119.70,
-       set_west:  -119.94,
-       set_high:  1700,
-       set_low:   1350,
-       set_notes: "Biggest Little City"
-     }
- 
-     # Just to be clear about the starting point, the only objects attached to
-     # this location at first are some versions and a description, all owned by
-     # rolf, the same user who created the location.  So it should be modifiable
-     # as it is.  The plan is to temporarily attach one object at a time to make
-     # sure it is *not* modifiable if anything is wrong. 
-     assert_objs_equal(rolf, albion.user)
-     assert_not_empty(albion.versions.select {|v| v.user_id == rolf.id})
-     assert_not_empty(albion.descriptions.select {|v| v.user == rolf})
-     assert_empty(albion.versions.select {|v| v.user_id != rolf.id})
-     assert_empty(albion.descriptions.select {|v| v.user != rolf})
-     assert_empty(albion.observations)
-     assert_empty(albion.species_lists)
-     assert_empty(albion.users)
-     assert_empty(albion.herbaria)
- 
-     # Not allowed to change if anyone else has an observation there.
-     obs = observations(:minimal_unknown_obs)
-     assert_objs_equal(mary, obs.user)
-     obs.update_attributes!(location: albion)
-     assert_api_fail(params)
-     obs.update_attributes!(location: burbank)
- 
-     # But allow it if rolf owns that observation.
-     obs = observations(:coprinus_comatus_obs)
-     assert_objs_equal(rolf, obs.user)
-     obs.update_attributes!(location: albion)
- 
-     # Not allowed to change if anyone else has a species_list there.
-     spl = species_lists(:unknown_species_list)
-     assert_objs_equal(mary, spl.user)
-     spl.update_attributes!(location: albion)
-     assert_api_fail(params)
-     spl.update_attributes!(location: burbank)
- 
-     # But allow it if rolf owns that list.
-     spl = species_lists(:first_species_list)
-     assert_objs_equal(rolf, spl.user)
-     spl.update_attributes!(location: albion)
- 
-     # Not allowed to change if anyone has made this their personal location.
-     mary.update_attributes!(location: albion)
-     assert_api_fail(params)
-     mary.update_attributes!(location: burbank)
- 
-     # But allow it if rolf is that user.
-     rolf.update_attributes!(location: albion)
- 
-     # Not allowed to change if an herbarium is at that location, period.
-     nybg = herbaria(:nybg_herbarium)
-     nybg.update_attributes!(location: albion)
-     assert_api_fail(params)
-     nybg.update_attributes!(location: burbank)
- 
-     # Not allowed to change if user didn't create it.
-     albion.update_attributes!(user: mary)
-     assert_api_fail(params)
-     albion.update_attributes!(user: rolf)
- 
-     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
-     # is, make sure api key is required, and that name is valid and not already
-     # taken. 
-     assert_api_fail(params.remove(:api_key))
-     assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
-     assert_api_fail(params.merge(set_name: burbank.display_name))
-     assert_api_pass(params)
- 
-     albion.reload
-     assert_equal("Reno, Nevada, USA", albion.display_name)
-     assert_in_delta(39.64, albion.north, 0.0001)
-     assert_in_delta(39.39, albion.south, 0.0001)
-     assert_in_delta(-119.70, albion.east, 0.0001)
-     assert_in_delta(-119.94, albion.west, 0.0001)
-     assert_in_delta(1700, albion.high, 0.0001)
-     assert_in_delta(1350, albion.low, 0.0001)
-     assert_equal("Biggest Little City", albion.notes)
-   end
- 
-   def test_deleting_locations
-     loc = rolf.locations.sample
-     params = {
-       method:  :delete,
-       action:  :location,
-       api_key: @api_key.key,
-       id:      loc.id
-     }
-     # No DELETE requests should be allowed at all.
-     assert_api_fail(params)
-   end
- 
-   # --------------------------
-   #  :section: Name Requests
-   # --------------------------
- 
-   def test_getting_names
-     # XXX
-   end
- 
-   def test_creating_names
-     # XXX
-   end
+  def test_basic_gets
+    [Comment, ExternalLink, Image, Location, Name, Observation, Project,
+     Sequence, SpeciesList, User].each do |model|
+      expected_object = model.first
+      api = API.execute(
+        method: :get,
+        action: model.type_tag,
+        id: expected_object.id
+      )
+      assert_no_errors(api, "Errors while getting first #{model}")
+      assert_obj_list_equal([expected_object], api.results,
+                            "Failed to get first #{model}")
+    end
+  end
 
-  def test_updating_names
+  # ----------------------------
+  #  :section: ApiKey Requests
+  # ----------------------------
+
+  def test_getting_api_keys
+    params = {
+      method:   :patch,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      user:     rolf.id
+    }
+    # No GET requests allowed now.
+    assert_api_fail(params)
+  end
+
+  def test_posting_api_key_for_yourself
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = rolf
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method:  :post,
+      action:  :api_key,
+      api_key: @api_key.key,
+      app:     @app
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_for_another_user
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = katrina
+    @app = "  Mushroom  Mapper  "
+    @verified = false
+    params = {
+      method:   :post,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      app:      @app,
+      for_user: @for_user.id
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:app))
+    assert_api_fail(params.merge(app: ""))
+    assert_api_fail(params.merge(for_user: 123_456))
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_updating_api_keys
+    params = {
+      method:   :patch,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      id:       @api_key.id,
+      set_app:  "new app"
+    }
+    # No PATCH requests allowed now.
+    assert_api_fail(params)
+  end
+
+  def test_deleting_api_keys
+    params = {
+      method:   :delete,
+      action:   :api_key,
+      api_key:  @api_key.key,
+      id:       @api_key.id,
+    }
+    # No DELETE requests allowed now.
+    assert_api_fail(params)
+  end
+
+  # -----------------------------
+  #  :section: Comment Requests
+  # -----------------------------
+
+  def test_getting_comments
+    params = { method: :get, action: :comment }
+    com1 = comments(:minimal_unknown_obs_comment_1)
+    com2 = comments(:minimal_unknown_obs_comment_2)
+    com3 = comments(:detailed_unknown_obs_comment)
+
+    assert_api_pass(params.merge(id: com1.id))
+    assert_api_results([com1])
+
+    assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
+    assert_api_results([com2])
+
+    assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
+    assert_api_results([com3])
+
+    assert_api_pass(params.merge(user: "rolf,dick"))
+    expect = Comment.where(user: rolf) + Comment.where(user: dick)
+    assert_api_results(expect.sort_by(&:id))
+
+    assert_api_pass(params.merge(type: "Observation"))
+    expect = Comment.where(target_type: "Observation")
+    assert_api_results(expect.sort_by(&:id))
+
+    assert_api_pass(params.merge(summary_has: "complicated"))
+    assert_api_results([com2])
+
+    assert_api_pass(params.merge(content_has: "really cool"))
+    assert_api_results([com1])
+
+    obs = observations(:minimal_unknown_obs)
+    assert_api_pass(params.merge(target: "observation ##{obs.id}"))
+    assert_api_results(obs.comments.sort_by(&:id))
+  end
+
+  def test_posting_comments
+    @user    = rolf
+    @target  = names(:petigera)
+    @summary = "misspelling"
+    @content = "The correct one is 'Peltigera'."
+    params = {
+      method:  :post,
+      action:  :comment,
+      api_key: @api_key.key,
+      target:  "name ##{@target.id}",
+      summary: @summary,
+      content: @content
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:target))
+    assert_api_fail(params.remove(:summary))
+    assert_api_fail(params.merge(target: "foo #1"))
+    assert_api_fail(params.merge(target: "observation #1"))
+    assert_api_pass(params)
+    assert_last_comment_correct
+  end
+
+  def test_updating_comments
+    com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
+    com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
+    params = {
+      method:      :patch,
+      action:      :comment,
+      api_key:     @api_key.key,
+      id:          com1.id,
+      set_summary: "new summary",
+      set_content: "new comment"
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: com2.id))
+    assert_api_pass(params)
+    com1.reload
+    assert_equal("new summary", com1.reload.summary)
+    assert_equal("new comment", com1.reload.comment)
+  end
+
+  def test_deleting_comments
+    com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
+    com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
+    params = {
+      method:      :delete,
+      action:      :comment,
+      api_key:     @api_key.key,
+      id:          com1.id
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: com2.id))
+    assert_api_pass(params)
+    assert_nil(Comment.safe_find(com1.id))
+  end
+
+  # ----------------------------------
+  #  :section: ExternalLink Requests
+  # ----------------------------------
+
+  def test_getting_external_links
+    other_obs = observations(:agaricus_campestris_obs)
+    link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
+    link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
+    link3 = ExternalLink.create!(user: rolf, observation: other_obs,
+                                 external_site: link1.external_site,
+                                 url: "http://nowhere.com")
+    params = { method: :get, action: :external_link }
+
+    assert_api_pass(params.merge(id: link2.id))
+    assert_api_results([link2])
+
+    assert_api_pass(params.merge(created_at: "2016-12-29"))
+    assert_api_results([link1])
+
+    assert_api_pass(params.merge(updated_at: "2016-11-11-2017-11-11"))
+    assert_api_results([link1, link2])
+
+    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_results([link3])
+
+    assert_api_pass(params.merge(observation: other_obs.id))
+    assert_api_results([link3])
+    assert_api_pass(params.merge(observation: link1.observation.id))
+    assert_api_results([link1, link2])
+
+    assert_api_pass(params.merge(external_site: "mycoportal"))
+    assert_api_results([link1, link3])
+
+    assert_api_pass(params.merge(url: link2.url))
+    assert_api_results([link2])
+  end
+
+    def test_posting_external_links
+      marys_obs = observations(:detailed_unknown_obs)
+      rolfs_obs = observations(:agaricus_campestris_obs)
+      katys_obs = observations(:amateur_obs)
+      marys_key = api_keys(:marys_api_key)
+      rolfs_key = api_keys(:rolfs_api_key)
+      params = {
+        method:        :post,
+        action:        :external_link,
+        api_key:       rolfs_key.key,
+        observation:   rolfs_obs.id,
+        external_site: external_sites(:mycoportal).id,
+        url:           "http://blah.blah"
+      }
+      assert_api_pass(params)
+      assert_api_fail(params.remove(:api_key))
+      assert_api_fail(params.remove(:observation))
+      assert_api_fail(params.remove(:external_site))
+      assert_api_fail(params.remove(:url))
+      assert_api_fail(params.merge(api_key: "spammer"))
+      assert_api_fail(params.merge(observation: "spammer"))
+      assert_api_fail(params.merge(external_site: "spammer"))
+      assert_api_fail(params.merge(url: "spammer"))
+      assert_api_fail(params.merge(observation: marys_obs.id))
+      assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
+      assert_api_pass(params.merge(api_key: marys_key.key,
+                                   observation: katys_obs.id))
+    end
+
+  # ---------------------------
+  #  :section: Image Requests
+  # ---------------------------
+
+  def test_getting_images
+    img = Image.all.sample
+    params = { method: :get, action: :image }
+
+    assert_api_pass(params.merge(id: img.id))
+    assert_api_results([img])
+
+    assert_api_pass(params.merge(created_at: "2006"))
+    assert_api_results(Image.where("year(created_at) = 2006"))
+
+    assert_api_pass(params.merge(updated_at: "2006-05-22"))
+    assert_api_results(Image.where('date(updated_at) = "2006-05-22"'))
+
+    assert_api_pass(params.merge(date: "2007-03"))
+    assert_api_results(Image.where("year(`when`) = 2007 and month(`when`) = 3"))
+
+    assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
+    assert_api_results(Image.where(user: [mary, katrina]))
+
+    name = names(:agaricus_campestris)
+    imgs = name.observations.map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(name: "Agaricus campestris"))
+    assert_api_results(imgs)
+
+    name2 = names(:agaricus_campestros)
+    synonym = Synonym.create!
+    name.update_attributes!(synonym: synonym)
+    name2.update_attributes!(synonym: synonym)
+    assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
+    assert_api_results(imgs)
+
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(imgs)
+
+    burbank = locations(:burbank)
+    imgs = burbank.observations.map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(location: burbank.id))
+    assert_api_results(imgs)
+
+    project = projects(:bolete_project)
+    assert_not_empty(project.images)
+    assert_api_pass(params.merge(project: "Bolete Project"))
+    assert_api_results(project.images)
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    spl  = species_lists(:unknown_species_list)
+    assert_api_pass(params.merge(species_list: spl.title))
+    assert_api_results([img1, img2])
+
+    attached   = Image.all.select {|i| i.observations.count > 0}
+    unattached = Image.all - attached
+    assert_not_empty(attached)
+    assert_not_empty(unattached)
+    assert_api_pass(params.merge(has_observation: "yes"))
+    assert_api_results(attached)
+    # This query doesn't work, no way to negate join.
+    # assert_api_pass(params.merge(has_observation: "no"))
+    # assert_api_results(unattached)
+
+    imgs = Image.where("width >= 1280 || height >= 1280")
+    assert_empty(imgs)
+    imgs = Image.where("width >= 960 || height >= 960")
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(size: "huge"))
+    assert_api_results([])
+    assert_api_pass(params.merge(size: "large"))
+    assert_api_results(imgs)
+
+    img1.update_attributes!(content_type: "image/png")
+    assert_api_pass(params.merge(content_type: "png"))
+    assert_api_results([img1])
+
+    noteless_img = images(:rolf_profile_image)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results([noteless_img])
+
+    pretty_img = images(:peltigera_image)
+    assert_api_pass(params.merge(notes_has: "pretty"))
+    assert_api_results([pretty_img])
+
+    assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
+    assert_api_results(Image.where("copyright_holder like '%insil choi%'"))
+    assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
+    assert_api_results(Image.where("copyright_holder like '%nathan%'"))
+
+    pd = licenses(:publicdomain)
+    assert_api_pass(params.merge(license: pd.id))
+    assert_api_results(Image.where(license: pd))
+
+    assert_api_pass(params.merge(has_votes: "yes"))
+    assert_api_results(Image.where("vote_cache IS NOT NULL"))
+    assert_api_pass(params.merge(has_votes: "no"))
+    assert_api_results(Image.where("vote_cache IS NULL"))
+
+    assert_api_pass(params.merge(quality: "2-3"))
+    assert_api_results(Image.where("vote_cache > 2.0"))
+    assert_api_pass(params.merge(quality: "1-2"))
+    assert_api_results([])
+
+    imgs = Observation.where("vote_cache >= 2.0").map(&:images).flatten
+    assert_not_empty(imgs)
+    assert_api_pass(params.merge(confidence: "2-3"))
+    assert_api_results(imgs)
+
+    pretty_img.update_attributes!(ok_for_export: false)
+    assert_api_pass(params.merge(ok_for_export: "no"))
+    assert_api_results([pretty_img])
+  end
+
+  def test_posting_minimal_image
+    setup_image_dirs
+    @user   = rolf
+    @proj   = nil
+    @date   = Time.now.in_time_zone("GMT").to_date
+    @copy   = @user.legal_name
+    @notes  = ""
+    @orig   = nil
+    @width  = 407
+    @height = 500
+    @vote   = nil
+    @obs    = nil
+    params  = {
+      method:      :post,
+      action:      :image,
+      api_key:     @api_key.key,
+      upload_file: "#{::Rails.root}/test/images/sticky.jpg"
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([Image.last], api.results)
+    assert_last_image_correct
+  end
+
+  def test_posting_maximal_image
+    setup_image_dirs
+    @user   = rolf
+    @proj   = projects(:eol_project)
+    @date   = date("20120626")
+    @copy   = "My Friend"
+    @notes  = "These are notes.\nThey look like this.\n"
+    @orig   = "sticky.png"
+    @width  = 407
+    @height = 500
+    @vote   = 3
+    @obs    = @user.observations.last
+    params  = {
+      method:           :post,
+      action:           :image,
+      api_key:          @api_key.key,
+      date:             "20120626",
+      notes:            @notes,
+      copyright_holder: " My Friend ",
+      license:          @user.license.id,
+      vote:             "3",
+      observations:     @obs.id,
+      projects:         @proj.id,
+      upload_file:      "#{::Rails.root}/test/images/sticky.jpg",
+      original_name:    @orig
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_obj_list_equal([Image.last], api.results)
+    assert_last_image_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:upload_file))
+    assert_api_fail(params.merge(original_name: "x" * 1000))
+    assert_api_fail(params.merge(vote: "-5"))
+
+    obs = Observation.where(user: katrina).first
+    assert_api_fail(params.merge(observations: obs.id.to_s))
+    # Rolf is not a member of this project
+    assert_api_fail(params.merge(projects: projects(:bolete_project).id.to_s))
+  end
+
+  def test_posting_image_via_url
+    setup_image_dirs
+    url = "http://mushroomobserver.org/images/thumb/459340.jpg"
+    stub_request(:any, url).
+      to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
+    params = {
+      method:     :post,
+      action:     :image,
+      api_key:    @api_key.key,
+      upload_url: url
+    }
+    api = API.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    img = Image.last
+    assert_obj_list_equal([img], api.results)
+    actual = File.read(img.local_file_name(:full_size))
+    expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
+    assert_equal(expect, actual, "Uploaded image differs from original!")
+  end
+
+  def test_updating_images
+    rolfs_img = images(:rolf_profile_image)
+    marys_img = images(:in_situ_image)
+    eol = projects(:eol_project)
+    pd = licenses(:publicdomain)
+    assert(rolfs_img.has_edit_permission?(rolf))
+    assert(!marys_img.has_edit_permission?(rolf))
+    params = {
+      method:               :patch,
+      action:               :image,
+      api_key:              @api_key.key,
+      set_date:             "2012-3-4",
+      set_notes:            "new notes",
+      set_copyright_holder: "new person",
+      set_license:          pd.id,
+      set_original_name:    "new name"
+    }
+    assert_api_fail(params.merge(id: marys_img.id))
+    assert_api_pass(params.merge(id: rolfs_img.id))
+    rolfs_img.reload
+    assert_equal(Date.parse("2012-3-4"), rolfs_img.when)
+    assert_equal("new notes", rolfs_img.notes)
+    assert_equal("new person", rolfs_img.copyright_holder)
+    assert_objs_equal(pd, rolfs_img.license)
+    assert_equal("new name", rolfs_img.original_name)
+    eol.images << marys_img
+    marys_img.reload
+    assert(marys_img.has_edit_permission?(rolf))
+    assert_api_pass(params.merge(id: marys_img.id))
+    marys_img.reload
+    assert_equal(Date.parse("2012-3-4"), marys_img.when)
+    assert_equal("new notes", marys_img.notes)
+    assert_equal("new person", marys_img.copyright_holder)
+    assert_objs_equal(pd, marys_img.license)
+    assert_equal("new name", marys_img.original_name)
+  end
+
+  def test_deleting_images
+    rolfs_img = rolf.images.sample
+    marys_img = mary.images.sample
+    params = {
+      method:  :delete,
+      action:  :image,
+      api_key: @api_key.key,
+    }
+    assert_api_fail(params.merge(id: marys_img.id))
+    assert_api_pass(params.merge(id: rolfs_img.id))
+    assert_not_nil(Image.safe_find(marys_img.id))
+    assert_nil(Image.safe_find(rolfs_img.id))
+  end
+
+  # ------------------------------
+  #  :section: Location Requests
+  # ------------------------------
+
+  def test_getting_locations
+    loc = Location.all.sample
+    params = { method: :get, action: :location }
+
+    assert_api_pass(params.merge(id: loc.id))
+    assert_api_results([loc])
+
+    locs = Location.where("year(created_at) = 2008")
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(created_at: "2008"))
+    assert_api_results(locs)
+
+    locs = Location.where("date(created_at) = '2012-01-01'")
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(updated_at: "2012-01-01"))
+    assert_api_results(locs)
+
+    locs = Location.where(user: rolf)
+    assert_not_empty(locs)
+    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_results(locs)
+
+    locs = Location.where("south > 39 and north < 40 and west > -124 and
+                           east < -123 and west < east")
+    assert_not_empty(locs)
+    assert_api_fail(params.merge(south: 39, east: -123, west: -124))
+    assert_api_fail(params.merge(north: 40, east: -123, west: -124))
+    assert_api_fail(params.merge(north: 40, south: 39, west: -124))
+    assert_api_fail(params.merge(north: 40, south: 39, east: -123))
+    assert_api_pass(params.merge(north: 40, south: 39, east: -123, west: -124))
+    assert_api_results(locs)
+  end
+
+  def test_posting_locations
+    name1  = "Reno, Nevada, USA"
+    name2  = "Sparks, Nevada, USA"
+    name3  = "Evil Lair, Latveria"
+    name4  = "Nowhere, East Paduka, USA"
+    name5  = "Washoe County, Nevada, USA"
+    @name  = name1
+    @north = 39.64
+    @south = 39.39
+    @east  = -119.70
+    @west  = -119.94
+    @high  = 1700
+    @low   = 1350
+    @notes = "Biggest Little City"
+    @user  = rolf
+    params = {
+      method:  :post,
+      action:  :location,
+      api_key: @api_key.key,
+      name:    @name,
+      north:   @north,
+      south:   @south,
+      east:    @east,
+      west:    @west,
+      high:    @high,
+      low:     @low,
+      notes:   @notes
+    }
+    name = params[:name]
+    assert_api_pass(params)
+    assert_last_location_correct
+    assert_api_fail(params)
+    assert_api_fail(params.merge(name: name3))
+    assert_api_fail(params.merge(name: name4))
+    assert_api_fail(params.merge(name: name5))
+    params[:name] = @name = name2
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:name))
+    assert_api_fail(params.remove(:north))
+    assert_api_fail(params.remove(:south))
+    assert_api_fail(params.remove(:east))
+    assert_api_fail(params.remove(:west))
+    assert_api_fail(params.remove(:north, :south, :east, :west))
+    assert_api_pass(params.remove(:high, :low, :notes))
+    @high = @low = @notes = nil
+    assert_last_location_correct
+  end
+
+  def test_updating_locations
+    albion = locations(:albion)
+    burbank = locations(:burbank)
+    params = {
+      method:    :patch,
+      action:    :location,
+      api_key:   @api_key.key,
+      id:        albion.id,
+      set_name:  "Reno, Nevada, USA",
+      set_north: 39.64,
+      set_south: 39.39,
+      set_east:  -119.70,
+      set_west:  -119.94,
+      set_high:  1700,
+      set_low:   1350,
+      set_notes: "Biggest Little City"
+    }
+
+    # Just to be clear about the starting point, the only objects attached to
+    # this location at first are some versions and a description, all owned by
+    # rolf, the same user who created the location.  So it should be modifiable
+    # as it is.  The plan is to temporarily attach one object at a time to make
+    # sure it is *not* modifiable if anything is wrong.
+    assert_objs_equal(rolf, albion.user)
+    assert_not_empty(albion.versions.select {|v| v.user_id == rolf.id})
+    assert_not_empty(albion.descriptions.select {|v| v.user == rolf})
+    assert_empty(albion.versions.select {|v| v.user_id != rolf.id})
+    assert_empty(albion.descriptions.select {|v| v.user != rolf})
+    assert_empty(albion.observations)
+    assert_empty(albion.species_lists)
+    assert_empty(albion.users)
+    assert_empty(albion.herbaria)
+
+    # Not allowed to change if anyone else has an observation there.
+    obs = observations(:minimal_unknown_obs)
+    assert_objs_equal(mary, obs.user)
+    obs.update_attributes!(location: albion)
+    assert_api_fail(params)
+    obs.update_attributes!(location: burbank)
+
+    # But allow it if rolf owns that observation.
+    obs = observations(:coprinus_comatus_obs)
+    assert_objs_equal(rolf, obs.user)
+    obs.update_attributes!(location: albion)
+
+    # Not allowed to change if anyone else has a species_list there.
+    spl = species_lists(:unknown_species_list)
+    assert_objs_equal(mary, spl.user)
+    spl.update_attributes!(location: albion)
+    assert_api_fail(params)
+    spl.update_attributes!(location: burbank)
+
+    # But allow it if rolf owns that list.
+    spl = species_lists(:first_species_list)
+    assert_objs_equal(rolf, spl.user)
+    spl.update_attributes!(location: albion)
+
+    # Not allowed to change if anyone has made this their personal location.
+    mary.update_attributes!(location: albion)
+    assert_api_fail(params)
+    mary.update_attributes!(location: burbank)
+
+    # But allow it if rolf is that user.
+    rolf.update_attributes!(location: albion)
+
+    # Not allowed to change if an herbarium is at that location, period.
+    nybg = herbaria(:nybg_herbarium)
+    nybg.update_attributes!(location: albion)
+    assert_api_fail(params)
+    nybg.update_attributes!(location: burbank)
+
+    # Not allowed to change if user didn't create it.
+    albion.update_attributes!(user: mary)
+    assert_api_fail(params)
+    albion.update_attributes!(user: rolf)
+
+    # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
+    # is, make sure api key is required, and that name is valid and not already
+    # taken.
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
+    assert_api_fail(params.merge(set_name: burbank.display_name))
+    assert_api_pass(params)
+
+    albion.reload
+    assert_equal("Reno, Nevada, USA", albion.display_name)
+    assert_in_delta(39.64, albion.north, 0.0001)
+    assert_in_delta(39.39, albion.south, 0.0001)
+    assert_in_delta(-119.70, albion.east, 0.0001)
+    assert_in_delta(-119.94, albion.west, 0.0001)
+    assert_in_delta(1700, albion.high, 0.0001)
+    assert_in_delta(1350, albion.low, 0.0001)
+    assert_equal("Biggest Little City", albion.notes)
+  end
+
+  def test_deleting_locations
+    loc = rolf.locations.sample
+    params = {
+      method:  :delete,
+      action:  :location,
+      api_key: @api_key.key,
+      id:      loc.id
+    }
+    # No DELETE requests should be allowed at all.
+    assert_api_fail(params)
+  end
+
+  # --------------------------
+  #  :section: Name Requests
+  # --------------------------
+
+  def test_getting_names
+    # XXX
+  end
+
+  def test_creating_names
+    # XXX
+  end
+
+  def test_updating_name_attributes
     agaricus = names(:agaricus)
     lepiota  = names(:lepiota)
     new_classification = [
@@ -995,7 +995,7 @@ class ApiTest < UnitTestCase
     # this name at first are a version and a description, both owned by rolf,
     # the same user who created the name.  So it should be modifiable as it is.
     # The plan is to temporarily attach one object at a time to make sure it is
-    # *not* modifiable if anything is wrong. 
+    # *not* modifiable if anything is wrong.
     assert_objs_equal(rolf, agaricus.user)
     assert_not_empty(agaricus.versions.select {|v| v.user_id == rolf.id})
     assert_not_empty(agaricus.descriptions.select {|v| v.user == rolf})
@@ -1044,6 +1044,89 @@ class ApiTest < UnitTestCase
     assert_equal("new citation", agaricus.citation)
     assert_equal(Name.validate_classification(:Genus, new_classification),
                  agaricus.classification)
+  end
+
+  def test_changing_names
+    agaricus = names(:agaricus)
+    params = {
+      method:  :patch,
+      action:  :name,
+      api_key: @api_key.key,
+      id:      agaricus.id
+    }
+    assert_api_pass(params.merge(set_name: "Suciraga"))
+    assert_equal("Suciraga", agaricus.reload.text_name)
+    assert_api_pass(params.merge(set_author: "L."))
+    assert_equal("Suciraga L.", agaricus.reload.search_name)
+    assert_api_pass(params.merge(set_rank: "order"))
+    assert_equal(:Order, agaricus.reload.rank)
+    assert_api_fail(params.merge(set_rank: "species"))
+    assert_api_pass(params.merge(
+      set_name:   "Agaricus bitorquis",
+      set_author: "(Quélet) Sacc.",
+      set_rank:   "species"
+    ))
+    agaricus.reload
+    assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
+    assert_equal(:Species, agaricus.rank)
+    parent = Name.where(text_name: "Agaricus").to_a
+    assert_not_empty(parent)
+    assert_not_equal(agaricus.id, parent[0].id)
+  end
+
+  def test_changing_deprecation
+    agaricus = names(:agaricus)
+    params = {
+      method:  :patch,
+      action:  :name,
+      api_key: @api_key.key,
+      id:      agaricus.id
+    }
+    assert_api_pass(params.merge(set_deprecated: "true"))
+    assert_true(agaricus.reload.deprecated)
+    assert_equal("__Agaricus__", agaricus.display_name)
+    assert_api_pass(params.merge(set_deprecated: "false"))
+    assert_false(agaricus.reload.deprecated)
+    assert_equal("**__Agaricus__**", agaricus.display_name)
+  end
+
+  def test_changing_synonymy
+    name1 = names(:lactarius_alpigenes)
+    name2 = names(:lactarius_subalpinus)
+    name3 = names(:macrolepiota_rhacodes)
+    params = {
+      method:  :patch,
+      action:  :name,
+      api_key: @api_key.key,
+    }
+    syns = name1.synonyms
+    assert(syns.count > 2)
+    assert(syns.include?(name2))
+    assert_api_pass(params.merge(id: name1.id, clear_synonyms: "yes"))
+    assert_obj_list_equal([name1], Name.find(name1.id).synonyms)
+    assert_obj_list_equal(syns-[name1], Name.find(name2.id).synonyms)
+    assert_api_fail(params.merge(id: name2.id, synonymize_with: name1.id))
+    assert_api_pass(params.merge(id: name1.id, synonymize_with: name2.id))
+    assert_obj_list_equal(syns, Name.find(name1.id).synonyms)
+    assert_api_fail(params.merge(id: name1.id, synonymize_with: name3.id))
+  end
+
+  def test_changing_correct_spelling
+    correct  = names(:macrolepiota_rhacodes)
+    misspelt = names(:macrolepiota_rachodes)
+    params = {
+      method:  :patch,
+      action:  :name,
+      api_key: @api_key.key,
+    }
+    correct.clear_synonym
+    assert_api_pass(params.merge(id: misspelt.id,
+                                 set_correct_spelling: correct.id))
+    misspelt = Name.find(misspelt.id) # reload might not be enough
+    assert_true(misspelt.deprecated)
+    assert_names_equal(correct, misspelt.correct_spelling)
+    assert_obj_list_equal([correct, misspelt].sort_by(&:id),
+                          misspelt.synonyms.sort_by(&:id))
   end
 
   def test_deleting_names

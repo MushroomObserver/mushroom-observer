@@ -427,7 +427,7 @@ class API
     end
   end
 
-  # Cannot update location/name unless you own all its observations. 
+  # Cannot update location/name unless you own all its observations.
   class MustOwnAllObservations < Error
     def initialize(type)
       super()
@@ -449,9 +449,9 @@ class API
 
   # API request tried to both clear synonyms and add synonyms at the same time.
   class OneOrTheOther < Error
-    def initialize(arg1, arg2)
+    def initialize(args)
       super()
-      args.merge!(arg1: arg1, arg2: arg2)
+      args.merge!(args: args.map(&:to_s).join(", "))
     end
   end
 

@@ -91,13 +91,14 @@ class API
         name.save!
         add_synonym(name)
         clear_synonymy(name)
+        change_correct_spelling(name)
       end
     end
 
     def validate_update_params!(params)
       @classification = params[:classification]
       validate_classification!(params)
-      raise MissingSetParameters.new if params.empty?
+      raise MissingSetParameters.new if params.empty? && no_other_update_params?
     end
 
     def delete
@@ -149,7 +150,7 @@ class API
       return unless @classification
       params[:classification] = \
         Name.validate_classification(:Genus, @classification)
-    rescue RuntimeError => e
+    rescue RuntimeError
       raise BadClassification.new
     end
 
@@ -190,28 +191,39 @@ class API
     end
 
     def parse_set_name!
-      @name_str = parse(:string, :name, limit: 100)
-      @author   = parse(:string, :author, limit: 100)
-      @rank     = parse(:enum, :rank, limit: Name.all_ranks)
-      return unless @name_str || @author || @rank
-      return if query.num_results == 0
+      @name   = parse(:string, :set_name, limit: 100)
+      @author = parse(:string, :set_author, limit: 100)
+      @rank   = parse(:enum, :set_rank, limit: Name.all_ranks)
+      return unless @name || @author || @rank
+      return if query.num_results.none?
       raise TryingToSetMultipleNamesAtOnce.new if query.num_results > 1
     end
 
     def parse_set_synonymy!
-      @deprecated      = parse(:boolean, :set_deprecated)
-      @synonymize_with = parse(:name, :synonymize_with)
-      @clear_synonyms  = parse(:boolean, :clear_synonyms, limit: [true])
-      raise OneOrTheOther.new(:synonymize_with, :clear_synonyms) \
-        if @synonymize_with && @clear_synonyms
+      @deprecated       = parse(:boolean, :set_deprecated)
+      @synonymize_with  = parse(:name, :synonymize_with)
+      @clear_synonyms   = parse(:boolean, :clear_synonyms, limit: true)
+      @correct_spelling = parse(:name, :set_correct_spelling)
+      return if (@synonymize_with ? 1 : 0) +
+                (@clear_synonyms ? 1 : 0) +
+                (@set_correct_spelling ? 1 : 0) <= 1
+      raise OneOrTheOther.new([:synonymize_with, :clear_synonyms,
+                               :set_correct_spelling])
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
+    def no_other_update_params?
+      !@name && !@author && !@rank && @deprecated.nil? &&
+        !@synonymize_with && !@clear_synonyms && !@correct_spelling
+    end
+    # rubocop:enable Metrics/CyclomaticComplexity
+
     def change_name(name)
-      return unless @name_str || @author || @rank
-      @name_str ||= name.text_name
-      @author   ||= name.author
-      @rank     ||= name.rank
-      name.change_text_name(@name_str, @author, @rank, :save_parents)
+      return unless @name || @author || @rank
+      @name   ||= name.text_name
+      @author ||= name.author
+      @rank   ||= name.rank
+      name.change_text_name(@name, @author, @rank, :save_parents)
     end
 
     def change_deprecated(name)
@@ -228,6 +240,17 @@ class API
     def clear_synonymy(name)
       return unless @clear_synonyms
       name.clear_synonym
+    end
+
+    def change_correct_spelling(name)
+      return unless @correct_spelling
+      return if name.correct_spelling_id == @correct_spelling.id
+      raise CanOnlySynonymizeUnsynonimizedNames.new \
+        if name.synonym_id && name_synonym_id != @correct_spelling.synonym_id
+      name.change_deprecated(true) unless name.deprecated
+      name.correct_spelling = @correct_spelling
+      name.merge_synonyms(@correct_spelling)
+      name.save
     end
   end
 end

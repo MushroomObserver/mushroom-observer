@@ -3520,7 +3520,7 @@
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
   api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."
-  api_one_or_the_other: Cannot use both [arg1] and [arg2] parameters at the same time.
+  api_one_or_the_other: Can only use one of the parameters [args].
   api_project_taken: The project, "[project]", already exists.
   api_query_error: "There was an internal problem with Query: [error]"
   api_render_failed: There was a problem while rendering the results. [error]
