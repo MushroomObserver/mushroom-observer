@@ -19,12 +19,15 @@ module Query
         locations?:      [:string],
         projects?:       [:string],
         species_lists?:  [:string],
+        herbaria?:       [:string],
+        specimens?:      [:string],
         confidence?:     [:float],
         is_col_loc?:     :boolean,
         has_location?:   :boolean,
-        has_notes?:      :boolean,
         has_name?:       :boolean,
-        has_comments?:   { string: [:yes] },
+        has_notes?:      :boolean,
+        has_comments?:   { boolean: [true] },
+        has_specimen?:   :boolean,
         notes_has?:      :string,
         comments_has?:   :string,
         north?:          :float,
@@ -48,13 +51,24 @@ module Query
       )
       initialize_model_do_locations
       initialize_model_do_objects_by_name(
-        Project, :projects, "observations_projects.project_id",
+        Project, :projects,
+        "observations_projects.project_id",
         join: :observations_projects
       )
       initialize_model_do_objects_by_name(
         SpeciesList, :species_lists,
         "observations_species_lists.species_list_id",
         join: :observations_species_lists
+      )
+      initialize_model_do_objects_by_name(
+        Herbarium, :herbaria,
+        "specimens.herbarium_id",
+        join: { observations_specimens: :specimens }
+      )
+      initialize_model_do_objects_by_name(
+        Specimen, :specimens,
+        "observations_specimens.specimen_id",
+        join: :observations_specimens
       )
       initialize_model_do_range(:confidence, :vote_cache)
       initialize_model_do_search(:notes_has, :notes)
@@ -69,12 +83,14 @@ module Query
         "observations.location_id IS NULL"
       )
       unless params[:has_name].nil?
-        id = Name.unknown.id
+        genus = Name.ranks[:Genus]
+        group = Name.ranks[:Group]
         initialize_model_do_boolean(
           :has_name,
-          "observations.name_id != #{id}",
-          "observations.name_id = #{id}"
+          "names.rank <= #{genus} or names.rank = #{group}",
+          "names.rank > #{genus} and names.rank < #{group}"
         )
+        add_join(:names)
       end
       # rubocop:disable Metrics/LineLength
       initialize_model_do_boolean(

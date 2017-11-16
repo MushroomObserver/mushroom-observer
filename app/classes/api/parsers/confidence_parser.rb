@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API confidences
+    # Parse confidences for API.
     class ConfidenceParser < FloatParser
       def initialize(*args)
         super

@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API images
+    # Parse images for API.
     class ImageParser < ObjectBase
       def model
         Image

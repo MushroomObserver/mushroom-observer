@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API external sites
+    # Parse external sites for API.
     class ExternalSiteParser < ObjectBase
       def model
         ExternalSite

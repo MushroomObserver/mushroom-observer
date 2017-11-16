@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API lat/longs and altitudes
+    # Parse lat/longs and altitudes for API.
     class CoordinateParser < Base
       def parse(type, str)
         Location.send("parse_#{type}", str) ||

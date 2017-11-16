@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API latitudes
+    # Parse latitudes for API.
     class LatitudeParser < CoordinateParser
       def parse(str)
         super(:latitude, str)

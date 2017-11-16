@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API licenses
+    # Parse licenses for API.
     class LicenseParser < ObjectBase
       def model
         License

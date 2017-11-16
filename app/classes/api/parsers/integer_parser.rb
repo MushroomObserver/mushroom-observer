@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API integer
+    # Parse integer for API.
     class IntegerParser < Base
       def parse(str)
         raise BadParameterValue.new(str, :integer) unless str =~ /^-?\d+$/

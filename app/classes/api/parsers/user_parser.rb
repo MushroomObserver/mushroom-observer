@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API users
+    # Parse users for API.
     class UserParser < ObjectBase
       def model
         User

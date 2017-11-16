@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API place names
+    # Parse place names for API.
     class PlaceNameParser < LocationParser
       def parse(str)
         val = super

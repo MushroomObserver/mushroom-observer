@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API locales
+    # Parse locales for API.
     class LangParser < EnumParser
       def initialize(api, key, args)
         args[:default] ||= Language.official.locale

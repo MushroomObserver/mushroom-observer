@@ -805,8 +805,8 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.where("south > 39 and north < 40 and west > -124 and
-                           east < -123 and west < east")
+    locs = Location.where("south >= 39 and north <= 40 and
+                           west >= -124 and east <= -123 and west <= east")
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
     assert_api_fail(params.merge(north: 40, east: -123, west: -124))
@@ -1003,7 +1003,9 @@ class ApiTest < UnitTestCase
     names = Name.where(text_name: "Lentinellus ursinus").
             reject { |n| n.correct_spelling_id }
     assert_not_empty(names)
-    assert_api_pass(params.merge(name: "Lentinellus ursinus"))
+    assert_api_fail(params.merge(name: "Lentinellus ursinus"))
+    assert_api_pass(params.merge(name: "Lentinellus ursinus Kühner,
+                                        Lentinellus ursinus Kuhner"))
     assert_api_results(names)
 
     names = names(:lactarius_alpinus).synonyms.sort_by(&:id).
@@ -1407,7 +1409,167 @@ class ApiTest < UnitTestCase
   # ---------------------------------
 
   def test_getting_observations
-    # XXX
+    params = { method: :get, action: :observation }
+
+    obs = Observation.all.sample
+    assert_api_pass(params.merge(id: obs.id))
+    assert_api_results([obs])
+
+    obses = Observation.where("year(created_at) = 2010")
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(created_at: "2010"))
+    assert_api_results(obses)
+
+    obses = Observation.where("date(updated_at) = '2007-06-24'")
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(updated_at: "20070624"))
+    assert_api_results(obses)
+
+    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(date: "2012-2014"))
+    assert_api_results(obses)
+
+    obses = Observation.where(user: dick)
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(user: "dick"))
+    assert_api_results(obses)
+
+    obses = Observation.where(name: names(:fungi))
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_results(obses)
+
+    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+                        name: names(:lactarius_alpinus))
+    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+                        name: names(:lactarius_alpigenes))
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_results(obses)
+
+    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(obses)
+
+    obses = Observation.where(location: locations(:burbank))
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
+    assert_api_results(obses)
+
+    obses = Specimen.where(herbarium: herbaria(:nybg_herbarium)).
+            map(&:observations).flatten.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_results(obses)
+
+    obses = specimens(:interesting_unknown).observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(specimen: "Cortinarius sp.: NYBG 1234"))
+    assert_api_results(obses)
+
+    proj = projects(:one_genus_two_species_project)
+    obses = proj.observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(project: proj.id))
+    assert_api_results(obses)
+
+    spl = species_lists(:one_genus_three_species_list)
+    obses = spl.observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(species_list: spl.id))
+    assert_api_results(obses)
+
+    obses = Observation.where(vote_cache: 3)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(confidence: "3.0"))
+    assert_api_results(obses)
+
+    obses = Observation.where(is_collection_location: false)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(is_collection_location: "no"))
+    assert_api_results(obses)
+
+    with    = Observation.where.not(thumb_image_id: nil)
+    without = Observation.where(thumb_image_id: nil)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_images: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_images: "no"))
+    assert_api_results(without)
+
+    with    = Observation.where.not(location: nil)
+    without = Observation.where(location: nil)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_location: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_location: "no"))
+    assert_api_results(without)
+
+    genus = Name.ranks[:Genus]
+    group = Name.ranks[:Group]
+    names = Name.where("rank <= #{genus} or rank = #{group}")
+    with    = Observation.where(name: names)
+    without = Observation.where.not(name: names)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_name: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_name: "no"))
+    assert_api_results(without)
+
+    no_notes = Observation.no_notes_persisted
+    with    = Observation.where("notes != ?", no_notes)
+    without = Observation.where("notes = ?", no_notes)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results(without)
+
+    obses = Comment.where(target_type: "Observation").
+            map(&:target).uniq.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(has_comments: "yes"))
+    assert_api_results(obses)
+
+    with    = Observation.where(specimen: true)
+    without = Observation.where(specimen: false)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_specimen: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_specimen: "no"))
+    assert_api_results(without)
+
+    obses = Observation.where("notes like '%orphan%'")
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(notes_has: "orphan"))
+    assert_api_results(obses)
+
+    obses = Comment.where("concat(summary, comment) like \"%let's%\"").
+            map(&:target).uniq.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(comments_has: "let's"))
+    assert_api_results(obses)
+
+    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
+                               `long` >= -119 and `long` <= -118")
+    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
+                            east <= -118 and west <= east")
+    obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
+    assert_not_empty(obses)
+    assert_api_fail(params.merge(south: 34, east: -118, west: -119))
+    assert_api_fail(params.merge(north: 35, east: -118, west: -119))
+    assert_api_fail(params.merge(north: 35, south: 34, west: -119))
+    assert_api_fail(params.merge(north: 35, south: 34, east: -118))
+    assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
+    assert_api_results(obses)
   end
 
   def test_post_minimal_observation

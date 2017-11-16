@@ -26,34 +26,35 @@ class API
 
     # rubocop:disable Metrics/AbcSize
     def query_params
+      n, s, e, w = parse_bounding_box!
       {
         where:          sql_id_condition,
         created_at:     parse_range(:time, :created_at),
         updated_at:     parse_range(:time, :updated_at),
         date:           parse_range(:date, :date),
         users:          parse_array(:user, :user),
-        names:          parse_array(:string, :name),
-        synonym_names:  parse_array(:string, :synonyms_of),
-        children_names: parse_array(:string, :children_of),
-        locations:      parse_array(:string, :locations),
-        # herbaria:     parse_array(:string, :herbaria),
-        # specimen_ids: parse_array(:string, :specimen_ids),
-        projects:       parse_array(:string, :projects),
-        species_lists:  parse_array(:string, :species_lists),
+        names:          parse_array(:name, :name, as: :id),
+        synonym_names:  parse_array(:name, :synonyms_of, as: :id),
+        children_names: parse_array(:name, :children_of, as: :id),
+        locations:      parse_array(:location, :location, as: :id),
+        herbaria:       parse_array(:herbarium, :herbarium, as: :id),
+        specimens:      parse_array(:specimen, :specimen, as: :id),
+        projects:       parse_array(:project, :project, as: :id),
+        species_lists:  parse_array(:species_list, :species_list, as: :id),
         confidence:     parse(:confidence, :confidence),
         is_col_loc:     parse(:boolean, :is_collection_location),
-        has_specimen:   parse(:boolean, :has_specimen),
-        has_location:   parse(:boolean, :has_location),
-        has_notes:      parse(:boolean, :has_notes),
-        has_name:       parse(:boolean, :has_name),
         has_images:     parse(:boolean, :has_images),
+        has_location:   parse(:boolean, :has_location),
+        has_name:       parse(:boolean, :has_name),
+        has_notes:      parse(:boolean, :has_notes),
         has_comments:   parse(:boolean, :has_comments, limit: true),
+        has_specimen:   parse(:boolean, :has_specimen),
         notes_has:      parse(:string, :notes_has),
         comments_has:   parse(:string, :comments_has),
-        north:          parse(:latitude, :north),
-        south:          parse(:latitude, :south),
-        east:           parse(:longitude, :east),
-        west:           parse(:longitude, :west)
+        north:          n,
+        south:          s,
+        east:           e,
+        west:           w
       }
     end
     # rubocop:enable Metrics/AbcSize
@@ -269,6 +270,18 @@ class API
     def either_specimen_or_label!
       return unless @specimen_id && @herbarium_label
       errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label)
+    end
+
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
+    def parse_bounding_box!
+      n = parse(:latitude, :north)
+      s = parse(:latitude, :south)
+      e = parse(:longitude, :east)
+      w = parse(:longitude, :west)
+      return unless n || s || e || w
+      return [n, s, e, w] if n && s && e && w
+      raise NeedAllFourEdges.new
     end
   end
 end

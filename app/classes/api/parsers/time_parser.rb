@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API times
+    # Parse times for API.
     class TimeParser < Base
       include DateTimePatterns
 

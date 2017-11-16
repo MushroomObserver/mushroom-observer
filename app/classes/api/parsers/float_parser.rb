@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API floats
+    # Parse floats for API.
     class FloatParser < Base
       FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/
 

@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Patterns and helpers used by both date and time parser
+    # Patterns and helpers used by both date and time parser.
     module DateTimePatterns
       MM              = "(0?[1-9]|1[012])".freeze
       MMDD1           = '(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])'.freeze

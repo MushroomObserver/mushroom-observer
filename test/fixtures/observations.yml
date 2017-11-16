@@ -17,6 +17,7 @@ DEFAULTS: &DEFAULTS
   user:       dick
   vote_cache: 0.0
   when:       <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
+  is_collection_location: 1
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -195,7 +196,6 @@ peltigera_obs:
   user: rolf
   location:
   where: 'Briceland, California, USA'
-  is_collection_location: 1
   name: peltigera
   specimen: 1
   notes:
@@ -211,7 +211,6 @@ peltigera_rolf_obs:
   user: mary
   location:
   where: 'Briceland, California, USA'
-  is_collection_location: 1
   name: peltigera
   specimen: 1
   notes:

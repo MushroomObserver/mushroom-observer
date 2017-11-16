@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API qualities
+    # Parse qualities for API.
     class QualityParser < FloatParser
       def initialize(*args)
         super

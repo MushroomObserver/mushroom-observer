@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API observations
+    # Parse observations for API.
     class ObservationParser < ObjectBase
       def model
         Observation

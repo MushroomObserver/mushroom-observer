@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API species lists
+    # Parse species lists for API.
     class SpeciesListParser < ObjectBase
       def model
         SpeciesList

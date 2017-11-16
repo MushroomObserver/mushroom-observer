@@ -128,10 +128,12 @@ module Query::Modules::Initialization
           objs += model.where("name LIKE ?", "%#{pattern}%")
         when "Name"
           objs += initialize_model_do_name_matches(name)
-        when "ExternalSite"
+        when "ExternalSite", "Herbarium"
           objs += model.where(name: name)
         when "Project", "SpeciesList"
           objs += model.where(title: name)
+        when "Specimen"
+          objs += model.where(herbarium_label: name)
         when "User"
           name.sub(/ *<.*>/, "")
           objs += model.where(login: name)

@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API locations
+    # Parse locations for API.
     class LocationParser < ObjectBase
       def model
         Location

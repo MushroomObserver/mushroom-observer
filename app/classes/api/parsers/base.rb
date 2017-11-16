@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # API parser base class
+    # API parser base class.
     class Base
       attr_accessor :api
       attr_accessor :key
@@ -31,7 +31,7 @@ class API
         return args[:default] if str.blank?
         args[:list] = true
         result = []
-        while (match = str.match(/^((\\.|[^,]+)+),/))
+        while (match = str.match(/^((\\.|[^\\,]+)+),/))
           str = match.post_match
           @val = match[1]
           result << send(parse_scalar_or_range)
@@ -47,7 +47,7 @@ class API
         str = clean_param(:leave_slashes)
         return args[:default] if str.blank?
         args[:range] = true
-        match = str.match(/^((\\.|[^-]+)+)-((\\.|[^-]+)+)$/)
+        match = str.match(/^((\\.|[^\\-]+)+)-((\\.|[^\\-]+)+)$/)
         if match
           @val = match[1]
           from = parse_scalar

@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API email addresses
+    # Parse email addresses for API.
     class EmailParser < StringParser
       EMAIL = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/
 

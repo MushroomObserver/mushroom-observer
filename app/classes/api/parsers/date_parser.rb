@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API dates
+    # Parse dates for API.
     class DateParser < Base
       include DateTimePatterns
 

@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API objects
+    # Parse objects for API.
     class ObjectParser < ObjectBase
       attr_accessor :limit
 

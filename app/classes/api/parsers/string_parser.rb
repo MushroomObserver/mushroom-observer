@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API strings
+    # Parse strings for API.
     class StringParser < Base
       def parse(str)
         limit = args[:limit]

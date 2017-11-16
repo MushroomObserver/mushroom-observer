@@ -1,6 +1,6 @@
 class API
   module Parsers
-    # Parse API projects
+    # Parse projects for API.
     class ProjectParser < ObjectBase
       def model
         Project

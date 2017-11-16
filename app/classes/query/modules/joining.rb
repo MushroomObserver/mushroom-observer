@@ -1,6 +1,9 @@
 module Query::Modules::Joining
 
   JOIN_CONDITIONS = {
+    api_keys: {
+      users: :user_id
+    },
     articles: {
       rss_logs: :rss_log_id,
       users: :user_id
@@ -13,6 +16,34 @@ module Query::Modules::Joining
       observations: :target,
       projects: :target,
       species_lists: :target,
+      users: :user_id
+    },
+    donations: {
+      users: :user_id
+    },
+    external_links: {
+      external_site: :external_site_id,
+      observation: :observation_id,
+      users: :user_id
+    },
+    external_sites: {
+      projects: :project_id
+    },
+    glossary_terms: {
+      :"images.thumb_image" => :thumb_image_id,
+      rss_logs: :rss_log_id,
+      users: :user_id
+    },
+    glossary_terms_images: {
+      images: :image_id,
+      glossary_terms: :glossary_term_id
+    },
+    herbaria: {
+      locations: :location_id,
+      
+    },
+    herbaria_curators: {
+      herbaria: :herbarium_id,
       users: :user_id
     },
     image_votes: {
@@ -110,6 +141,9 @@ module Query::Modules::Joining
     names_versions: {
       names: :name_id
     },
+    naming_reasons: {
+      namings: :naming_id
+    },
     namings: {
       names: :name_id,
       observations: :observation_id,
@@ -135,6 +169,10 @@ module Query::Modules::Joining
       observations: :observation_id,
       species_lists: :species_list_id
     },
+    observations_specimens: {
+      observations: :observation_id,
+      specimens: :specimen_id
+    },
     projects: {
       users: :user_id,
       rss_logs: :rss_log_id,
@@ -144,6 +182,9 @@ module Query::Modules::Joining
     projects_species_lists: {
       projects: :project_id,
       species_lists: :species_list_id
+    },
+    publications: {
+      users: :user_id
     },
     rss_logs: {
       locations: :location_id,
@@ -158,6 +199,10 @@ module Query::Modules::Joining
     species_lists: {
       locations: :location_id,
       rss_logs: :rss_log_id,
+      users: :user_id
+    },
+    specimens: {
+      herbaria: :herbarium_id,
       users: :user_id
     },
     user_groups_users: {
