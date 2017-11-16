@@ -29,7 +29,7 @@ module Query
         classification_has?: :string,
         has_notes?:          :boolean,
         notes_has?:          :string,
-        has_comments?:       { string: [:yes] },
+        has_comments?:       { boolean: [true] },
         comments_has?:       :string,
         has_default_desc?:   :boolean,
         join_desc?:          { string: [:default, :any] },
@@ -115,7 +115,7 @@ module Query
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.notes)"
+          "CONCAT(comments.summary,comments.comment)"
         )
         add_join(:comments)
       end
