@@ -38,6 +38,9 @@
 #
 #  interests::          Interests in this Location.
 #  observations::       Observations at this Location.
+#  species_lists::      SpeciesLists at this Location.
+#  herbaria::           Herbaria at this location (typically no more than one).
+#  users::              Users who have claimed this as their profile location.
 #
 #  ==== Lat/long methods
 #  north_west::         [north, west]
@@ -84,9 +87,9 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :observations
-  # Well technically it has at most one herbarium,
-  # but we want the relationship just in the herbarium table
-  has_many :herbaria
+  has_many :species_lists
+  has_many :herbaria     # should be at most one, but nothing preventing more
+  has_many :users        # via profile location
 
   acts_as_versioned(
     table_name: "locations_versions",

@@ -56,19 +56,15 @@ class API
       }
     end
 
-    # I've decided this is too dangerous for the moment.
-    # def update_params
-    #   {
-    #     rank:           parse(:enum, :set_rank, limit: Name.all_ranks),
-    #     citation:       parse(:string, :set_citation),
-    #     classification: parse(:string, :set_classification),
-    #     notes:          parse(:string, :set_notes)
-    #     # TODO: change spelling of name and/or author
-    #     # TODO: change rank
-    #     # TODO: mark name as misspelling
-    #     # TODO: change synonymy
-    #   }
-    # end
+    def update_params
+      parse_set_name!
+      parse_set_synonymy!
+      {
+        notes:          parse(:string, :set_notes),
+        citation:       parse(:string, :set_citation),
+        classification: parse(:string, :set_classification)
+      }
+    end
 
     def build_object
       params   = create_params
@@ -80,23 +76,82 @@ class API
       name_str2   = make_sure_name_doesnt_exist!(name_str, author)
       name, names = make_sure_name_parses!(name_str2)
       fill_in_attributes(name, params, name_str, author)
-      save_names(names)
+      save_new_names(names)
       name
     end
 
-    def must_have_edit_permission!(_obj); end
+    def build_setter(params)
+      lambda do |name|
+        must_have_edit_permission!(name)
+        # Must re-check classification for each name, ranks may differ.
+        validate_classification!(params)
+        name.update(params)
+        change_name(name)
+        change_deprecated(name)
+        name.save!
+        add_synonym(name)
+        clear_synonymy(name)
+      end
+    end
 
-    def patch
-      raise NoMethodForAction.new("PATCH", action)
+    def validate_update_params!(params)
+      @classification = params[:classification]
+      validate_classification!(params)
+      raise MissingSetParameters.new if params.empty?
     end
 
     def delete
       raise NoMethodForAction.new("DELETE", action)
     end
 
+    # Our restrictions on edit permissions for the API are much more strict
+    # than on the website.  Revoke permission if anyone other than the creator
+    # owns any attached objects: name versions, descriptions, observations
+    # or name proposals.
+    def must_have_edit_permission!(name)
+      must_be_creator!(name)
+      must_be_only_editor!(name)
+      must_own_all_descriptions!(name)
+      must_own_all_observations!(name)
+      must_own_all_namings!(name)
+    end
+
     ############################################################################
 
     private
+
+    def must_be_creator!(name)
+      return if name.user == @user
+      raise MustBeCreator.new(type: :name)
+    end
+
+    def must_be_only_editor!(name)
+      return unless name.versions.any? { |x| x.user_id != @user.id }
+      raise MustBeOnlyEditor.new(type: :name)
+    end
+
+    def must_own_all_descriptions!(name)
+      return unless name.descriptions.any? { |x| x.user != @user }
+      raise MustOwnAllDescriptions.new(type: :name)
+    end
+
+    def must_own_all_observations!(name)
+      return unless name.observations.any? { |x| x.user != @user }
+      raise MustOwnAllObservations.new(type: :name)
+    end
+
+    def must_own_all_namings!(name)
+      return unless name.namings.any? { |x| x.user != @user }
+      raise MustOwnAllNamings.new(type: :name)
+    end
+
+    def validate_classification!(params)
+      return unless @classification
+      params[:classification] = \
+        Name.validate_classification(:Genus, @classification)
+    rescue RuntimeError => e
+      raise BadClassification.new
+    end
 
     def make_sure_name_doesnt_exist!(name_str, author)
       match = nil
@@ -124,7 +179,7 @@ class API
       name.change_deprecated(true) if name.deprecated
     end
 
-    def save_names(names)
+    def save_new_names(names)
       names.each do |name|
         name.save if name && name.new_record?
       end
@@ -132,6 +187,47 @@ class API
 
     def parse_misspellings
       parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only])
+    end
+
+    def parse_set_name!
+      @name_str = parse(:string, :name, limit: 100)
+      @author   = parse(:string, :author, limit: 100)
+      @rank     = parse(:enum, :rank, limit: Name.all_ranks)
+      return unless @name_str || @author || @rank
+      return if query.num_results == 0
+      raise TryingToSetMultipleNamesAtOnce.new if query.num_results > 1
+    end
+
+    def parse_set_synonymy!
+      @deprecated      = parse(:boolean, :set_deprecated)
+      @synonymize_with = parse(:name, :synonymize_with)
+      @clear_synonyms  = parse(:boolean, :clear_synonyms, limit: [true])
+      raise OneOrTheOther.new(:synonymize_with, :clear_synonyms) \
+        if @synonymize_with && @clear_synonyms
+    end
+
+    def change_name(name)
+      return unless @name_str || @author || @rank
+      @name_str ||= name.text_name
+      @author   ||= name.author
+      @rank     ||= name.rank
+      name.change_text_name(@name_str, @author, @rank, :save_parents)
+    end
+
+    def change_deprecated(name)
+      return if @deprecated.nil?
+      name.change_deprecated(@deprecated)
+    end
+
+    def add_synonym(name)
+      return unless @synonymize_with
+      raise CanOnlySynonymizeUnsynonimizedNames.new if name.synonym
+      name.merge_synonyms(@synonymize_with)
+    end
+
+    def clear_synonymy(name)
+      return unless @clear_synonyms
+      name.clear_synonym
     end
   end
 end

@@ -347,6 +347,10 @@ class API
   class TryingToSetMultipleLocationsToSameName < Error
   end
 
+  # API request tried to update name/author/rank of more than one name at once.
+  class TryingToSetMultipleNamesAtOnce < Error
+  end
+
   # API request tried to create a user group that already exists.
   class UserGroupTaken < Error
     def initialize(title)
@@ -381,5 +385,79 @@ class API
       super()
       args.merge!(reasons: reasons.join("; ").gsub(/\.;/, ";"))
     end
+  end
+
+  # Cannot update location if another user has made it their profile location.
+  class AnotherUsersProfileLocation < Error
+  end
+
+  # Can only update locations/names which you have created.
+  class MustBeCreator < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # Cannot update locations/names which other users have edited.
+  class MustBeOnlyEditor < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # Cannot update locations if there is an herbarium there.
+  class MustNotHaveAnyHerbaria < Error
+  end
+
+  # Can only update locations/names which you own all the desrciptions for.
+  class MustOwnAllDescriptions < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # Can only update names which no one else has proposed on any observations.
+  class MustOwnAllNamings < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # Cannot update location/name unless you own all its observations. 
+  class MustOwnAllObservations < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # Cannot update location unless you own all its species lists.
+  class MustOwnAllSpeciesLists < Error
+    def initialize(type)
+      super()
+      args.merge!(type: type)
+    end
+  end
+
+  # API request to create or update name had invalid classification string.
+  class BadClassification < Error
+  end
+
+  # API request tried to both clear synonyms and add synonyms at the same time.
+  class OneOrTheOther < Error
+    def initialize(arg1, arg2)
+      super()
+      args.merge!(arg1: arg1, arg2: arg2)
+    end
+  end
+
+  # Not allowing client to merge to sets of synonyms.  Even more, we're
+  # only allowing them to synonymize unsynonmized names with other names.
+  # (The name they synonymize it with, however, can have synonyms.)
+  class CanOnlySynonymizeUnsynonimizedNames < Error
   end
 end

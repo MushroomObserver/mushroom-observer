@@ -256,6 +256,7 @@ class API
 
   def initialize(params = {})
     self.params = params
+    self.action = params[:action]
     self.errors = []
     initializers.each { |x| instance_exec(&x) }
   end
