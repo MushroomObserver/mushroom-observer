@@ -252,10 +252,8 @@ class UserTest < UnitTestCase
     assert_equal(observation_id, image.observations.first.id)
 
     # Move some other user's comment over to make sure they get deleted, too.
-    comment = rolf.comments.first
-    comment.target_id = observation.id
-    comment.save
-    comment_id = comment.id
+    assert_equal(1, katrina.comments.length)
+    comment_id = katrina.comments.first.id
 
     # Fixtures have one vote for this observation,
     # but the naming the vote refers to applies to another observation!

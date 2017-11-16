@@ -1528,7 +1528,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_for_user
-    expect = Comment.all.reverse
+    expect = Comment.all.select { |c| c.target.user == mary }
     assert_query(expect, :Comment, :for_user, user: mary)
     assert_query([], :Comment, :for_user, user: rolf)
   end

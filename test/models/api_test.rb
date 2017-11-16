@@ -386,12 +386,12 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
     assert_api_results([com3])
 
-    assert_api_pass(params.merge(user: "rolf,dick"))
     expect = Comment.where(user: rolf) + Comment.where(user: dick)
+    assert_api_pass(params.merge(user: "rolf,dick"))
     assert_api_results(expect.sort_by(&:id))
 
-    assert_api_pass(params.merge(type: "Observation"))
     expect = Comment.where(target_type: "Observation")
+    assert_api_pass(params.merge(type: "Observation"))
     assert_api_results(expect.sort_by(&:id))
 
     assert_api_pass(params.merge(summary_has: "complicated"))
