@@ -149,17 +149,5 @@ class API
       raise TryingToSetMultipleLocationsToSameName.new \
         if query.num_results > 1
     end
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
-    def parse_bounding_box!
-      n = parse(:latitude, :north)
-      s = parse(:latitude, :south)
-      e = parse(:longitude, :east)
-      w = parse(:longitude, :west)
-      return unless n || s || e || w
-      return [n, s, e, w] if n && s && e && w
-      raise NeedAllFourEdges.new
-    end
   end
 end

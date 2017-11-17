@@ -25,51 +25,54 @@ class API
     ]
 
     # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength
     def query_params
       n, s, e, w = parse_bounding_box!
       {
-        where:          sql_id_condition,
-        created_at:     parse_range(:time, :created_at),
-        updated_at:     parse_range(:time, :updated_at),
-        date:           parse_range(:date, :date),
-        users:          parse_array(:user, :user),
-        names:          parse_array(:name, :name, as: :id),
-        synonym_names:  parse_array(:name, :synonyms_of, as: :id),
-        children_names: parse_array(:name, :children_of, as: :id),
-        locations:      parse_array(:location, :location, as: :id),
-        herbaria:       parse_array(:herbarium, :herbarium, as: :id),
-        specimens:      parse_array(:specimen, :specimen, as: :id),
-        projects:       parse_array(:project, :project, as: :id),
-        species_lists:  parse_array(:species_list, :species_list, as: :id),
-        confidence:     parse(:confidence, :confidence),
-        is_col_loc:     parse(:boolean, :is_collection_location),
-        has_images:     parse(:boolean, :has_images),
-        has_location:   parse(:boolean, :has_location),
-        has_name:       parse(:boolean, :has_name),
-        has_notes:      parse(:boolean, :has_notes),
-        has_comments:   parse(:boolean, :has_comments, limit: true),
-        has_specimen:   parse(:boolean, :has_specimen),
-        notes_has:      parse(:string, :notes_has),
-        comments_has:   parse(:string, :comments_has),
-        north:          n,
-        south:          s,
-        east:           e,
-        west:           w
+        where:            sql_id_condition,
+        created_at:       parse_range(:time, :created_at),
+        updated_at:       parse_range(:time, :updated_at),
+        date:             parse_range(:date, :date),
+        users:            parse_array(:user, :user),
+        names:            parse_array(:name, :name, as: :id),
+        synonym_names:    parse_array(:name, :synonyms_of, as: :id),
+        children_names:   parse_array(:name, :children_of, as: :id),
+        locations:        parse_array(:location, :location, as: :id),
+        herbaria:         parse_array(:herbarium, :herbarium, as: :id),
+        specimens:        parse_array(:specimen, :specimen, as: :id),
+        projects:         parse_array(:project, :project, as: :id),
+        species_lists:    parse_array(:species_list, :species_list, as: :id),
+        confidence:       parse(:confidence, :confidence),
+        is_col_loc:       parse(:boolean, :is_collection_location),
+        has_images:       parse(:boolean, :has_images),
+        has_location:     parse(:boolean, :has_location),
+        has_name:         parse(:boolean, :has_name),
+        has_comments:     parse(:boolean, :has_comments, limit: true),
+        has_specimen:     parse(:boolean, :has_specimen),
+        has_notes:        parse(:boolean, :has_notes),
+        has_notes_fields: parse_array(:string, :has_notes_field),
+        notes_has:        parse(:string, :notes_has),
+        comments_has:     parse(:string, :comments_has),
+        north:            n,
+        south:            s,
+        east:             e,
+        west:             w
       }
     end
     # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     def create_params
       parse_create_params!
       {
         when:                   parse(:date, :date, default: Date.today),
-        notes:                  parse_notes_fields,
         place_name:             @location,
         lat:                    @latitude,
         long:                   @longitude,
         alt:                    @altitude,
         specimen:               @has_specimen,
         is_collection_location: parse_is_collection_location,
+        notes:                  @notes,
         thumb_image:            @thumbnail,
         images:                 @images,
         projects:               parse_projects_to_attach_to,
@@ -167,9 +170,10 @@ class API
     end
 
     def parse_create_params!
-      @name = parse(:name, :name, default: Name.unknown)
-      @vote = parse(:float, :vote, default: Vote.maximum_vote)
-      @log  = parse(:boolean, :log, default: true)
+      @name  = parse(:name, :name, default: Name.unknown)
+      @vote  = parse(:float, :vote, default: Vote.maximum_vote)
+      @log   = parse(:boolean, :log, default: true)
+      @notes = parse_notes_fields!
       parse_herbarium_and_specimen!
       parse_location_and_coordinates!
       parse_images_and_pick_thumbnail
@@ -195,11 +199,25 @@ class API
       @images.unshift(@thumbnail)
     end
 
-    def parse_notes_fields
+    def parse_notes_fields!(keep_blanks = false)
       notes = Observation.no_notes
-      other = parse(:string, :notes)
-      notes[Observation.other_notes_key] = other unless other.empty?
+      notes[Observation.other_notes_key] = parse(:string, :notes)
+      params.each do |key, val|
+        next unless (match = key.to_s.match(/^notes\[(.*)\]$/))
+        field = parse_notes_field_parameter!(match[1])
+        notes[field] = val.to_s.strip
+        ignore_parameter(key)
+      end
+      declare_parameter(:"notes[<field>]", :string)
+      return notes if keep_blanks
+      notes.delete_if { |_key, val| val.blank? }
       notes
+    end
+
+    def parse_notes_field_parameter!(str)
+      keys = User.parse_notes_template(str)
+      return keys.first.to_sym if keys.length == 1
+      raise BadNotesFieldParameter.new(str)
     end
 
     def parse_set_coordinates!
@@ -270,18 +288,6 @@ class API
     def either_specimen_or_label!
       return unless @specimen_id && @herbarium_label
       errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label)
-    end
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
-    def parse_bounding_box!
-      n = parse(:latitude, :north)
-      s = parse(:latitude, :south)
-      e = parse(:longitude, :east)
-      w = parse(:longitude, :west)
-      return unless n || s || e || w
-      return [n, s, e, w] if n && s && e && w
-      raise NeedAllFourEdges.new
     end
   end
 end

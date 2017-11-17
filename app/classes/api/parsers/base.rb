@@ -11,7 +11,7 @@ class API
         @key  = key
         @args = args
         @val  = key.is_a?(Symbol) ? api.params[key] : key
-        declare_parameter
+        api.declare_parameter(key, type, args)
       end
 
       def type
@@ -67,15 +67,9 @@ class API
       # backslashes.  Returns String if parameter was given, otherwise nil.
       def clean_param(leave_slashes = false)
         return unless @val
-        val = @val.to_s.strip_squeeze
+        val = @val.to_s.strip
         val.gsub!(/\\(.)/, "\\1") unless leave_slashes
         val
-      end
-
-      # Keep information on each parameter we attempt to parse.  We can use
-      # this later to autodiscover the capabilities of each API request type.
-      def declare_parameter
-        api.expected_params[key] ||= ParameterDeclaration.new(key, type, args)
       end
     end
   end

@@ -1,9 +1,11 @@
 # API
 class API
   attr_accessor :expected_params
+  attr_accessor :ignore_params
 
   initializers << lambda do
     self.expected_params = {}
+    self.ignore_params   = {}
     parse(:string, :action)
   end
 
@@ -30,12 +32,36 @@ class API
     params[:upload]
   end
 
+  # These are the parameters which will show up in the help message.
+  def declare_parameter(key, type, args = {})
+    expected_params[key] ||= ParameterDeclaration.new(key, type, args)
+  end
+
+  # These parameters will be ignored in the help message.
+  def ignore_parameter(key)
+    ignore_params[key] = nil
+  end
+
   def done_parsing_parameters!
-    unused = params.keys - expected_params.keys
+    unused = params.keys - expected_params.keys - ignore_params.keys
     raise HelpMessage.new(expected_params)          if unused.include?(:help)
     raise UnexpectedUpload.new("Unexpected upload") if unused.include?(:upload)
     raise UnusedParameters.new(unused)              if unused.any?
   end
+
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
+  def parse_bounding_box!
+    n = parse(:latitude, :north)
+    s = parse(:latitude, :south)
+    e = parse(:longitude, :east)
+    w = parse(:longitude, :west)
+    return unless n || s || e || w
+    return [n, s, e, w] if n && s && e && w
+    raise NeedAllFourEdges.new
+  end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   ##############################################################################
 

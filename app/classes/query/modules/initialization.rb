@@ -347,6 +347,20 @@ module Query::Modules::Initialization
     )
   end
 
+  def notes_field_presence_condition(keys)
+    strs = keys.map do |key|
+      key = key.clone
+      if key.gsub!(/(["\\])/) { |m| '\\\1' }
+        "\":#{key}:\""
+      else
+        ":#{key}:"
+      end
+    end
+    "(" + strs.map do |str|
+      "observations.notes like \"%#{str}%\""
+    end.join(" OR ") + ")"
+  end
+
   # Make a value safe for SQL.
   def escape(val)
     model.connection.quote(val)

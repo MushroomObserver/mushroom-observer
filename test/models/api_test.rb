@@ -110,7 +110,7 @@ class ApiTest < UnitTestCase
     end
     assert_nil(api_key.last_used)
     assert_equal(0, api_key.num_uses)
-    assert_equal(@app.strip_squeeze, api_key.notes)
+    assert_equal(@app.strip, api_key.notes)
     assert_users_equal(@for_user, api_key.user)
   end
 
@@ -250,7 +250,7 @@ class ApiTest < UnitTestCase
     assert_objs_equal(@image, user.image)
     if @new_key
       assert_equal(1, user.api_keys.length)
-      assert_equal(@new_key.strip_squeeze, user.api_keys.first.notes)
+      assert_equal(@new_key.strip, user.api_keys.first.notes)
     else
       assert_equal(0, user.api_keys.length)
     end
@@ -1522,16 +1522,6 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_name: "no"))
     assert_api_results(without)
 
-    no_notes = Observation.no_notes_persisted
-    with    = Observation.where("notes != ?", no_notes)
-    without = Observation.where("notes = ?", no_notes)
-    assert(with.length > 1)
-    assert(without.length > 1)
-    assert_api_pass(params.merge(has_notes: "yes"))
-    assert_api_results(with)
-    assert_api_pass(params.merge(has_notes: "no"))
-    assert_api_results(without)
-
     obses = Comment.where(target_type: "Observation").
             map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
@@ -1546,6 +1536,22 @@ class ApiTest < UnitTestCase
     assert_api_results(with)
     assert_api_pass(params.merge(has_specimen: "no"))
     assert_api_results(without)
+
+    no_notes = Observation.no_notes_persisted
+    with    = Observation.where("notes != ?", no_notes)
+    without = Observation.where("notes = ?", no_notes)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results(without)
+
+    obses = Observation.where("notes like '%:substrate:%'").
+            reject { |o| o.notes[:substrate].blank? }
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(has_notes_field: "substrate"))
+    assert_api_results(obses)
 
     obses = Observation.where("notes like '%orphan%'")
     assert(obses.length > 1)
@@ -1610,7 +1616,12 @@ class ApiTest < UnitTestCase
     @spl = species_lists(:first_species_list)
     @proj = projects(:eol_project)
     @date = date("20120626")
-    @notes = { Other: "These are notes.\nThey look like this." }
+    @notes = {
+      Cap:   "scaly",
+      Gills: "inky",
+      Stipe: "smooth",
+      Other: "These are notes.\nThey look like this."
+    }
     @vote = 2.0
     @specimen = true
     @is_col_loc = true
@@ -1618,22 +1629,26 @@ class ApiTest < UnitTestCase
     @long = -123.77
     @alt = 50
     params = {
-      method:        :post,
-      action:        :observation,
-      api_key:       @api_key.key,
-      date:          "20120626",
-      notes:         "These are notes.\nThey look like this.\n",
-      location:      "USA, California, Albion",
-      latitude:      "39.229°N",
-      longitude:     "123.770°W",
-      altitude:      "50m",
-      has_specimen: "yes",
-      name:          "Coprinus comatus",
-      vote:          "2",
-      projects:      @proj.id,
-      species_lists: @spl.id,
-      thumbnail:     @img2.id,
-      images:        "#{@img1.id},#{@img2.id}"
+      method:         :post,
+      action:         :observation,
+      api_key:        @api_key.key,
+      date:           "20120626",
+      "notes[Cap]":   "scaly",
+      "notes[Gills]": "inky\n",
+      "notes[Veil]":  "",
+      "notes[Stipe]": "  smooth  ",
+      notes:          "These are notes.\nThey look like this.\n",
+      location:       "USA, California, Albion",
+      latitude:       "39.229°N",
+      longitude:      "123.770°W",
+      altitude:       "50m",
+      has_specimen:   "yes",
+      name:           "Coprinus comatus",
+      vote:           "2",
+      projects:       @proj.id,
+      species_lists:  @spl.id,
+      thumbnail:      @img2.id,
+      images:         "#{@img1.id},#{@img2.id}"
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")

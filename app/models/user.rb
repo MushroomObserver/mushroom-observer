@@ -794,7 +794,18 @@ class User < AbstractModel
   # notes_template: ""
   # notes_template_parts # => []
   def notes_template_parts
-    notes_template? ? notes_template.split(",").map(&:squish) : []
+    return [] if notes_template.blank?
+    User.parse_notes_template(notes_template)
+  end
+
+  def notes_template=(str)
+    str = User.parse_notes_template(str).join(", ")
+    write_attribute(:notes_template, str)
+  end
+
+  def self.parse_notes_template(str)
+    str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
+        split(",").map(&:squish).reject(&:blank?)
   end
 
   ##############################################################################

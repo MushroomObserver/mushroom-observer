@@ -9,31 +9,32 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:     [:time],
-        updated_at?:     [:time],
-        date?:           [:date],
-        users?:          [User],
-        names?:          [:string],
-        synonym_names?:  [:string],
-        children_names?: [:string],
-        locations?:      [:string],
-        projects?:       [:string],
-        species_lists?:  [:string],
-        herbaria?:       [:string],
-        specimens?:      [:string],
-        confidence?:     [:float],
-        is_col_loc?:     :boolean,
-        has_location?:   :boolean,
-        has_name?:       :boolean,
-        has_notes?:      :boolean,
-        has_comments?:   { boolean: [true] },
-        has_specimen?:   :boolean,
-        notes_has?:      :string,
-        comments_has?:   :string,
-        north?:          :float,
-        south?:          :float,
-        east?:           :float,
-        west?:           :float
+        created_at?:       [:time],
+        updated_at?:       [:time],
+        date?:             [:date],
+        users?:            [User],
+        names?:            [:string],
+        synonym_names?:    [:string],
+        children_names?:   [:string],
+        locations?:        [:string],
+        projects?:         [:string],
+        species_lists?:    [:string],
+        herbaria?:         [:string],
+        specimens?:        [:string],
+        confidence?:       [:float],
+        is_col_loc?:       :boolean,
+        has_location?:     :boolean,
+        has_name?:         :boolean,
+        has_comments?:     { boolean: [true] },
+        has_specimen?:     :boolean,
+        has_notes?:        :boolean,
+        has_notes_fields?: [:string],
+        notes_has?:        :string,
+        comments_has?:     :string,
+        north?:            :float,
+        south?:            :float,
+        east?:             :float,
+        west?:             :float
       ).merge(content_filter_parameter_declarations(Observation))
     end
 
@@ -106,6 +107,11 @@ module Query
           "CONCAT(comments.summary,comments.comment)"
         )
         add_join(:comments)
+      end
+      fields = params[:has_notes_fields] || []
+      if fields.any?
+        cond = notes_field_presence_condition(fields)
+        @where << cond
       end
       initialize_model_do_observation_bounding_box
       initialize_content_filters(Observation)
