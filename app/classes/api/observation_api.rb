@@ -1,5 +1,6 @@
 class API
   # API for Observation
+  # rubocop:disable Metrics/ClassLength
   class ObservationAPI < ModelAPI
     self.model = Observation
 
@@ -82,9 +83,9 @@ class API
     end
 
     def update_params
+      @notes = parse_notes_fields!(:keep_blanks)
       {
         when:                   parse(:date, :set_date),
-        notes:                  parse(:string, :set_notes),
         place_name:             parse(:place_name, :set_location, limit: 1024),
         lat:                    @latitude,
         long:                   @longitude,
@@ -105,6 +106,7 @@ class API
     def build_setter
       lambda do |obj|
         must_have_edit_permission!(obj)
+        update_notes_fields(obj)
         obj.update!(params)
         update_images(obj)
         update_projects(obj)
@@ -138,6 +140,16 @@ class API
       @herbarium_label ||= Herbarium.default_specimen_label(
         @name.text_name, @specimen_id || obs.id
       )
+    end
+
+    def update_notes_fields(obj)
+      @notes.each do |key, val|
+        if val.blank?
+          obj.notes.delete(key)
+        else
+          obj.notes[key] = val
+        end
+      end
     end
 
     def update_images(obj)

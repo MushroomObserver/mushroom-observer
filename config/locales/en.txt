@@ -3506,6 +3506,7 @@
   api_must_be_creator: You can only edit [types] that you have created.
   api_must_be_member: You are not a member of [type] "[name]".
   api_must_be_only_editor: You can only edit [types] if you are the only editor.
+  api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
   api_must_not_have_any_herbaria: "You can't edit this [:location] because there is an [:herbarium] there."

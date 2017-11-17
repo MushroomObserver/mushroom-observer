@@ -4,11 +4,12 @@ class API
     class ObjectBase < Base
       def parse(str)
         raise BadParameterValue.new(str, model.type_tag) if str.blank?
-        val = find_object(str)
-        raise ObjectNotFoundByString.new(str, model) unless val
-        check_view_permission!(val) if args[:must_have_view_permission]
-        check_edit_permission!(val) if args[:must_have_edit_permission]
-        args[:as] == :id ? val.id : val
+        obj = find_object(str)
+        raise ObjectNotFoundByString.new(str, model) unless obj
+        check_if_owner!(obj)        if args[:must_be_owner]
+        check_view_permission!(obj) if args[:must_have_view_permission]
+        check_edit_permission!(obj) if args[:must_have_edit_permission]
+        args[:as] == :id ? obj.id : obj
       end
 
       def find_object(str)
@@ -24,6 +25,11 @@ class API
 
       def try_finding_by_string(str)
         raise BadParameterValue.new(str, key)
+      end
+
+      def check_if_owner!(obj)
+        return if obj.user == api.user
+        raise MustBeOwner.new(obj)
       end
 
       def check_view_permission!(obj)

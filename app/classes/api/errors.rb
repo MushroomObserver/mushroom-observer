@@ -207,6 +207,10 @@ class API
   class MustAuthenticate < Error
   end
 
+  # Attempted to add object you don't own to a project.
+  class MustBeOwner < ObjectError
+  end
+
   # Attempted to alter something that requires edit permission.
   class MustHaveEditPermission < ObjectError
   end

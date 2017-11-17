@@ -227,6 +227,17 @@ class ApiTest < UnitTestCase
     end
   end
 
+  def assert_last_project_correct
+    proj = Project.last
+    assert_in_delta(Time.zone.now, proj.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, proj.updated_at, 1.minute)
+    assert_users_equal(@user, proj.user)
+    assert_equal(@title, proj.title)
+    assert_equal(@summary, proj.summary)
+    assert_user_list_equal(@admins, proj.admin_group.users)
+    assert_user_list_equal(@members, proj.user_group.users)
+  end
+
   def assert_last_user_correct
     user = User.last
     assert_equal(@login, user.login)
@@ -242,7 +253,7 @@ class ApiTest < UnitTestCase
     assert_equal(0, user.contribution)
     assert_nil(user.bonuses)
     assert_nil(user.alert)
-    assert_equal(Language.lang_from_locale(@locale), user.lang)
+    assert_equal(@locale, user.locale)
     assert_equal(@notes.strip, user.notes)
     assert_equal(@address.strip, user.mailing_address)
     assert_objs_equal(@license, user.license)
@@ -1775,7 +1786,17 @@ class ApiTest < UnitTestCase
   end
 
   def test_deleting_observations
-    # XXX
+    rolfs_obs = rolf.observations.sample
+    marys_obs = mary.observations.sample
+    params = {
+      method:  :delete,
+      action:  :observation,
+      api_key: @api_key.key,
+    }
+    assert_api_fail(params.merge(id: marys_obs.id))
+    assert_api_pass(params.merge(id: rolfs_obs.id))
+    assert_not_nil(Observation.safe_find(marys_obs.id))
+    assert_nil(Image.safe_find(rolfs_obs.id))
   end
 
   # -----------------------------
@@ -1783,19 +1804,186 @@ class ApiTest < UnitTestCase
   # -----------------------------
 
   def test_getting_projects
-    # XXX
+    params = { method: :get, action: :project }
+
+    proj = Project.all.sample
+    assert_api_pass(params.merge(id: proj.id))
+    assert_api_results([proj])
+
+    projs = Project.where("year(created_at) = 2008")
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(created_at: "2008"))
+    assert_api_results(projs)
+
+    projs = Project.where("year(updated_at) = 2008 and
+                           month(updated_at) = 9")
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(updated_at: "2008-09"))
+    assert_api_results(projs)
+
+    projs = Project.where(user: dick)
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(user: "dick"))
+    assert_api_results(projs)
+
+    projs = Project.all.select { |p| p.images.any? }
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(has_images: "yes"))
+    assert_api_results(projs)
+
+    projs = Project.all.select { |p| p.observations.any? }
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(has_observations: "yes"))
+    assert_api_results(projs)
+
+    projs = Project.all.select { |p| p.species_lists.any? }
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(has_species_lists: "yes"))
+    assert_api_results(projs)
+
+    Comment.create!(user: katrina, target: proj, summary: "blah")
+    projs = Project.all.select { |p| p.comments.any? }
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(has_comments: "yes"))
+    assert_api_results(projs)
+
+    with    = Project.where("summary is not null and summary != ''")
+    without = Project.where("summary is null or summary = ''")
+    assert_not_empty(with)
+    assert_not_empty(without)
+    assert_api_pass(params.merge(has_summary: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_summary: "no"))
+    assert_api_results(without)
+
+    projs = Project.where("title like '%bolete%'")
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(title_has: "bolete"))
+    assert_api_results(projs)
+
+    projs = Project.where("summary like '%article%'")
+    assert_not_empty(projs)
+    assert_api_pass(params.merge(summary_has: "article"))
+    assert_api_results(projs)
+
+    assert_api_pass(params.merge(comments_has: "blah"))
+    assert_api_results([proj])
   end
 
   def test_creating_projects
-    # XXX
+    @title   = "minimal project"
+    @summary = ""
+    @admins  = [rolf]
+    @members = [rolf]
+    params = {
+      method:  :post,
+      action:  :project,
+      api_key: @api_key.key,
+      title:   @title
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:title))
+    assert_api_pass(params)
+    assert_last_project_correct
+
+    @title   = "maximal project"
+    @summary = "to do things"
+    @admins  = [rolf, mary]
+    @members = [rolf, mary, dick]
+    params = {
+      method:  :post,
+      action:  :project,
+      api_key: @api_key.key,
+      title:   @title,
+      summary: @summary,
+      admins:  "mary",
+      members: "dick"
+    }
+    assert_api_pass(params)
+    assert_last_project_correct
   end
 
   def test_updating_projects
-    # XXX
+    proj = projects(:eol_project)
+    assert_user_list_equal([rolf, mary], proj.admin_group.users)
+    assert_user_list_equal([rolf, mary, katrina], proj.user_group.users)
+    assert_empty(proj.images)
+    assert_empty(proj.observations)
+    assert_empty(proj.species_lists)
+    params = {
+      method:      :patch,
+      action:      :project,
+      api_key:     @api_key.key,
+      id:          proj.id
+    }
+
+    assert_api_fail(params)
+    assert_api_fail(params.remove(:api_key))
+    @api_key.update_attributes!(user: katrina)
+    assert_api_fail(params.merge(set_title: "new title"))
+    @api_key.update_attributes!(user: rolf)
+    assert_api_pass(params.merge(set_title: "new title"))
+    assert_equal("new title", proj.reload.title)
+    assert_api_pass(params.merge(set_summary: "new summary"))
+    assert_equal("new summary", proj.reload.summary)
+
+    assert_api_pass(params.merge(add_admins: "dick, roy"))
+    assert_user_list_equal([rolf, mary, dick, roy],
+                           proj.reload.admin_group.users)
+    assert_user_list_equal([rolf, mary, katrina],
+                           proj.reload.user_group.users)
+    assert_api_pass(params.merge(remove_admins: "dick, roy"))
+    assert_user_list_equal([rolf, mary],
+                           proj.reload.admin_group.users)
+    assert_user_list_equal([rolf, mary, katrina],
+                           proj.reload.user_group.users)
+
+    assert_api_pass(params.merge(add_members: "dick, roy"))
+    assert_user_list_equal([rolf, mary],
+                           proj.reload.admin_group.users)
+    assert_user_list_equal([rolf, mary, katrina, dick, roy],
+                           proj.reload.user_group.users)
+    assert_api_pass(params.merge(remove_members: "dick, roy"))
+    assert_user_list_equal([rolf, mary],
+                           proj.reload.admin_group.users)
+    assert_user_list_equal([rolf, mary, katrina],
+                           proj.reload.user_group.users)
+
+    imgs = mary.images.first.id
+    assert_api_fail(params.merge(add_images: imgs))
+    imgs = rolf.images[0..1].map(&:id).map(&:to_s).join(",")
+    assert_api_pass(params.merge(add_images: imgs))
+    assert_obj_list_equal(rolf.images[0..1], proj.reload.images)
+    assert_api_pass(params.merge(remove_images: imgs))
+    assert_empty(proj.reload.images)
+
+    obses = mary.observations.first.id
+    assert_api_fail(params.merge(add_observations: obses))
+    obses = rolf.observations[0..1].map(&:id).map(&:to_s).join(",")
+    assert_api_pass(params.merge(add_observations: obses))
+    assert_obj_list_equal(rolf.observations[0..1], proj.reload.observations)
+    assert_api_pass(params.merge(remove_observations: obses))
+    assert_empty(proj.reload.observations)
+
+    spls = mary.species_lists.first.id
+    assert_api_fail(params.merge(add_species_lists: spls))
+    spls = rolf.species_lists[0..1].map(&:id).map(&:to_s).join(",")
+    assert_api_pass(params.merge(add_species_lists: spls))
+    assert_obj_list_equal(rolf.species_lists[0..1], proj.reload.species_lists)
+    assert_api_pass(params.merge(remove_species_lists: spls))
+    assert_empty(proj.reload.species_lists)
   end
 
   def test_deleting_projects
-    # XXX
+    proj = projects(:eol_project)
+    params = {
+      method:  :delete,
+      action:  :project,
+      api_key: @api_key.key,
+      id:      proj.id
+    }
+    # No DELETE requests should be allowed at all.
+    assert_api_fail(params)
   end
 
   # ------------------------------
@@ -1815,7 +2003,18 @@ class ApiTest < UnitTestCase
   end
 
   def test_deleting_sequences
-    # XXX
+    seq = dick.sequences.sample
+    params = {
+      method:  :delete,
+      action:  :sequence,
+      api_key: @api_key.key,
+      id:      seq.id
+    }
+    assert_api_fail(params)
+    assert_not_nil(Sequence.safe_find(seq.id))
+    @api_key.update_attributes!(user: dick)
+    assert_api_pass(params)
+    assert_nil(Sequence.safe_find(seq.id))
   end
 
   # ---------------------------------
@@ -1835,7 +2034,17 @@ class ApiTest < UnitTestCase
   end
 
   def test_deleting_species_lists
-    # XXX
+    rolfs_spl = rolf.species_lists.sample
+    marys_spl = mary.species_lists.sample
+    params = {
+      method:  :delete,
+      action:  :species_list,
+      api_key: @api_key.key,
+    }
+    assert_api_fail(params.merge(id: marys_spl.id))
+    assert_api_pass(params.merge(id: rolfs_spl.id))
+    assert_not_nil(SpeciesList.safe_find(marys_spl.id))
+    assert_nil(SpeciesList.safe_find(rolfs_spl.id))
   end
 
   # --------------------------
@@ -1843,7 +2052,10 @@ class ApiTest < UnitTestCase
   # --------------------------
 
   def test_getting_users
-    # XXX
+    params = { method: :get, action: :user }
+    user = User.all.sample
+    assert_api_pass(params.merge(id: user.id))
+    assert_api_results([user])
   end
 
   def test_posting_minimal_user
@@ -1919,11 +2131,39 @@ class ApiTest < UnitTestCase
   end
 
   def test_updating_users
-    # XXX
+    params = {
+      method:              :patch,
+      action:              :user,
+      api_key:             @api_key.key,
+      id:                  rolf.id,
+      set_locale:          "pt-PT",
+      set_notes:           "some notes",
+      set_mailing_address: "somewhere, USA",
+      set_license:         licenses(:publicdomain).id,
+      set_location:        locations(:burbank).id,
+      set_image:           images(:peltigera_image).id
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(set_image: mary.images.first.id))
+    assert_api_pass(params)
+    rolf.reload
+    assert_equal("pt-BR", rolf.locale)
+    assert_equal("some notes", rolf.notes)
+    assert_equal("somewhere, USA", rolf.mailing_address)
+    assert_objs_equal(licenses(:publicdomain), rolf.license)
+    assert_objs_equal(locations(:burbank), rolf.location)
+    assert_objs_equal(images(:peltigera_image), rolf.image)
   end
 
   def test_deleting_users
-    # XXX
+    params = {
+      method:  :delete,
+      action:  :user,
+      api_key: @api_key.key,
+      id:      rolf.id
+    }
+    # No DELETE requests should be allowed at all.
+    assert_api_fail(params)
   end
 
   # --------------------

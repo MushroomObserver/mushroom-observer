@@ -23,9 +23,9 @@ class API
         has_observations:  parse(:boolean, :has_observations, limit: true),
         has_species_lists: parse(:boolean, :has_species_lists, limit: true),
         has_comments:      parse(:boolean, :has_comments, limit: true),
-        has_notes:         parse(:boolean, :has_notes),
+        has_summary:       parse(:boolean, :has_summary),
         title_has:         parse(:string, :title_has),
-        notes_has:         parse(:string, :notes_has),
+        summary_has:       parse(:string, :summary_has),
         comments_has:      parse(:string, :comments_has)
       }
     end
@@ -34,7 +34,7 @@ class API
       parse_admins_and_members
       {
         title:   parse(:string, :title, limit: 100),
-        summary: parse(:string, :summary)
+        summary: parse(:string, :summary, default: "")
       }
     end
 
@@ -55,8 +55,8 @@ class API
       raise UserGroupTaken.new(@title2)  if UserGroup.find_by_name(@title2)
     end
 
-    def before_create
-      member_group = UserGroup.new(
+    def before_create(params)
+      user_group = UserGroup.new(
         name:  @title,
         users: @members
       )
@@ -64,9 +64,9 @@ class API
         name:  @title2,
         users: @admins
       )
-      member_group.save || raise(CreateFailed.new(member_group))
+      user_group.save   || raise(CreateFailed.new(user_group))
       admin_group.save  || raise(CreateFailed.new(admin_group))
-      params[:user_group]  = member_group
+      params[:user_group]  = user_group
       params[:admin_group] = admin_group
     end
 
@@ -75,7 +75,7 @@ class API
       raise MissingSetParameters.new
     end
 
-    def build_setter
+    def build_setter(params)
       lambda do |proj|
         raise MustBeAdmin.new(proj) unless proj.is_admin?(@user)
         proj.update!(params) unless params.empty?
@@ -106,8 +106,8 @@ class API
     end
 
     def update_images(proj)
-      proj.add_images(@add_images)       if @add_imgs.any?
-      proj.remove_images(@remove_images) if @remove_imgs.any?
+      proj.add_images(@add_imgs)       if @add_imgs.any?
+      proj.remove_images(@remove_imgs) if @remove_imgs.any?
     end
 
     def update_observations(proj)
@@ -121,8 +121,8 @@ class API
     end
 
     def parse_admins_and_members
-      @admins  = parse_array(:user, :admins, default: [user])
-      @members = parse_array(:user, :members, default: [user])
+      @admins  = ([@user] + parse_array(:user, :admins, default: [])).uniq
+      @members = (@admins + parse_array(:user, :members, default: [])).uniq
     end
 
     def parse_update_params
@@ -144,17 +144,20 @@ class API
     end
 
     def parse_add_remove_images
-      @add_imgs    = parse_array(:image, :add_images) || []
+      @add_imgs    = parse_array(:image, :add_images,
+                                 must_be_owner: true) || []
       @remove_imgs = parse_array(:image, :remove_images) || []
     end
 
     def parse_add_remove_observations
-      @add_obs    = parse_array(:observation, :add_observations) || []
+      @add_obs    = parse_array(:observation, :add_observations,
+                                must_be_owner: true) || []
       @remove_obs = parse_array(:observation, :remove_observations) || []
     end
 
     def parse_add_remove_species_lists
-      @add_spls    = parse_array(:species_list, :add_species_lists) || []
+      @add_spls    = parse_array(:species_list, :add_species_lists,
+                                 must_be_owner: true) || []
       @remove_spls = parse_array(:species_list, :remove_species_lists) || []
     end
 

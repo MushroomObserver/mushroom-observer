@@ -57,7 +57,7 @@ class API
       params = create_params
       validate_create_params!(params)
       done_parsing_parameters!
-      before_create
+      before_create(params)
       obj = model.new(params)
       obj.save || raise(CreateFailed.new(obj))
       after_create(obj)
@@ -73,7 +73,7 @@ class API
     def validate_create_params!(params); end
 
     # Stub for hook before creating object.
-    def before_create; end
+    def before_create(params); end
 
     # Stub for hook after creating object.
     def after_create(obj); end
