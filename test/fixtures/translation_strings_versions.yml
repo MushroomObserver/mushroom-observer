@@ -1,21 +1,18 @@
-greek_one_version1:
-  id: 1
+greek_one_version1: # 1
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: один
   updated_at: 2012-03-31
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
 
-greek_one_version2:
-  id: 2
+greek_one_version2: # 2
   version: 2
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: ένα
   updated_at: 2012-04-30
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
 
-version_wizard_version1:
-  id: 3
+version_wizard_version1: # 3
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.
     identify(:version_wizard) %>

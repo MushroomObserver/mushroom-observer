@@ -3,26 +3,27 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 # Specify obj association with id, not label.
+
 DEFAULTS: &DEFAULTS
   flavor: <%= Notification.flavors[:name] %>
 
-coprinus_comatus_notification:
+coprinus_comatus_notification: # 1
   <<: *DEFAULTS
   user: rolf
   obj_id: <%= ActiveRecord::FixtureSet.identify(:coprinus_comatus) %>
 
-agaricus_campestris_notification_with_note:
+agaricus_campestris_notification_with_note: # 2
   <<: *DEFAULTS
   user: mary
   obj_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
   note_template: A note about :observation for :observer. Please send to :mailing_address.
 
-agaricus_campestris_notification_without_note:
+agaricus_campestris_notification_without_note: # 3
   <<: *DEFAULTS
   user: katrina
   obj_id: <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
 
-no_observation_notification:
+no_observation_notification: # 4
   user: dick
   flavor: <%= Notification.flavors[:name] %>
   obj_id: <%= ActiveRecord::FixtureSet.identify(:notification_but_no_observation) %>
