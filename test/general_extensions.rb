@@ -184,7 +184,7 @@ module GeneralExtensions
   #   assert_obj_list_equal([img1,img2], obs.images)
   #
   def assert_obj_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg) { |o| o.nil? ? nil : "#{o.class.name} ##{o.id}" }
+    assert_list_equal(expect, got, msg) { |o| fixture_label(o) }
   end
 
   # Compare two lists of User's by comparing their logins.
@@ -249,6 +249,43 @@ module GeneralExtensions
     msg2 = obj.errors.full_messages.join("; ")
     msg2 = msg + "\n" + msg2 if msg
     flunk(msg2)
+  end
+
+  # This should make diagnostics of failed tests more useful!
+  def fixture_label(o)
+    return nil if o.nil?
+    idx = o.class.all.index(o)
+    return "#{o.class.name} ##{o.id}" unless idx
+    label = get_fixture_label(o.class.table_name, idx)
+    return "#{o.class.name} ##{idx+1}" unless label
+    return "$#{label}"
+  end
+
+  @@fixture_labels = {}
+  def get_fixture_label(table, idx)
+    @@fixture_labels[table] ||= read_fixture_labels(table) || []
+    @@fixture_labels[table][idx]
+  end
+
+  def read_fixture_labels(table)
+    result = []
+    file = "#{Rails.root}/test/fixtures/#{table}.yml"
+    raise "Can't find fixtures file for #{table}! " +
+          "Should be #{file}." unless File.exist?(file)
+    last_id = 0
+    line_num = 0
+    File.readlines(file).each do |line|
+      line_num += 1
+      match = line.match(/^(\w+):\s+#\s*(\d+)\s*$/)
+      next unless match
+      label = match[1]
+      id = match[2].to_i
+      raise "IDs are not consecutive at #{file} line #{line_num}: " +
+            "#{id} should be #{last_id+1}\n" if id != last_id + 1
+      result[id-1] = label
+      last_id = id
+    end
+    result
   end
 
   ##############################################################################
