@@ -44,16 +44,16 @@ class API
     def update_params
       {
         # These all seem too dangerous to allow for now.
-        # login:         parse(:string, :set_login, limit: 80),
-        # name:          parse(:string, :set_name, limit: 80, default: ""),
-        # email:         parse(:email, :set_email, limit: 80),
-        # password:      parse(:string, :set_password, limit: 80),
-        locale:          parse(:lang, :set_locale),
-        notes:           parse(:string, :set_notes, default: ""),
+        # login:    parse(:string, :set_login, limit: 80),
+        # name:     parse(:string, :set_name, limit: 80, default: ""),
+        # email:    parse(:email, :set_email, limit: 80),
+        # password: parse(:string, :set_password, limit: 80),
+        locale:     parse(:lang, :set_locale),
+        notes:      parse(:string, :set_notes, default: ""),
         mailing_address: parse(:string, :set_mailing_address, default: ""),
-        license:         parse(:license, :set_license, default: License.preferred),
-        location:        parse(:location, :set_location),
-        image:           parse(:image, :set_image, must_be_owner: true)
+        license:    parse(:license, :set_license, default: License.preferred),
+        location:   parse(:location, :set_location),
+        image:      parse(:image, :set_image, must_be_owner: true)
       }
     end
 

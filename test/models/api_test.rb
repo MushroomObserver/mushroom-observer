@@ -1782,7 +1782,123 @@ class ApiTest < UnitTestCase
   end
 
   def test_updating_observations
-    # XXX
+    rolfs_obs = observations(:coprinus_comatus_obs)
+    marys_obs = observations(:detailed_unknown_obs)
+    assert(rolfs_obs.has_edit_permission?(rolf))
+    assert(!marys_obs.has_edit_permission?(rolf))
+    params = {
+      method:                     :patch,
+      action:                     :observation,
+      api_key:                    @api_key.key,
+      id:                         rolfs_obs.id,
+      set_date:                   "2012-12-12",
+      set_location:               'Burbank\, California\, USA',
+      set_has_specimen:           "no",
+      set_is_collection_location: "no"
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: marys_obs.id))
+    assert_api_pass(params)
+    rolfs_obs.reload
+    assert_equal(Date.parse("2012-12-12"), rolfs_obs.when)
+    assert_objs_equal(locations(:burbank), rolfs_obs.location)
+    assert_nil(rolfs_obs.where)
+    assert_equal(false, rolfs_obs.specimen)
+    assert_equal(false, rolfs_obs.is_collection_location)
+
+    params = {
+      method:        :patch,
+      action:        :observation,
+      api_key:       @api_key.key,
+      id:            rolfs_obs.id,
+      set_latitude:  "12.34",
+      set_longitude: "-56.78",
+      set_altitude:  "901"
+    }
+    assert_api_fail(params.remove(:set_latitude))
+    assert_api_fail(params.remove(:set_longitude))
+    assert_api_pass(params)
+    rolfs_obs.reload
+    assert_in_delta(12.34, rolfs_obs.lat, 0.0001)
+    assert_in_delta(-56.78, rolfs_obs.long, 0.0001)
+    assert_in_delta(901, rolfs_obs.alt, 0.0001)
+
+    params = {
+      method:  :patch,
+      action:  :observation,
+      api_key: @api_key.key,
+      id:      rolfs_obs.id
+    }
+    assert_api_pass(params.merge(
+      :set_notes          => "wow!",
+      :"set_notes[Cap]"   => "red",
+      :"set_notes[Ring]"  => "none",
+      :"set_notes[Gills]" => ""
+    ))
+    rolfs_obs.reload
+    assert_equal({ Cap: "red", Ring: "none", Other: "wow!" }, rolfs_obs.notes)
+    assert_api_pass(params.merge(:"set_notes[Cap]" => ""))
+    rolfs_obs.reload
+    assert_equal({ Ring: "none", Other: "wow!" }, rolfs_obs.notes)
+
+    rolfs_img = (rolf.images - rolfs_obs.images).first
+    marys_img = mary.images.first
+    assert_api_fail(params.merge(set_thumbnail: marys_img.id))
+    assert_api_pass(params.merge(set_thumbnail: rolfs_img.id))
+    rolfs_obs.reload
+    assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
+    assert(rolfs_obs.images.include?(rolfs_img))
+    imgs = rolf.images.map(&:id).map(&:to_s).join(",")
+    assert_api_fail(params.merge(add_images: marys_img.id))
+    assert_api_pass(params.merge(add_images: imgs))
+    rolfs_obs.reload
+    assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
+    assert_obj_list_equal(rolf.images, rolfs_obs.images)
+    assert_api_pass(params.merge(remove_images: rolfs_img.id))
+    rolfs_obs.reload
+    assert(rolfs_obs.thumb_image != rolfs_img)
+    assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
+    imgs = rolf.images[2..6].map(&:id).map(&:to_s).join(",")
+    imgs += ",#{marys_img.id}"
+    assert_api_pass(params.merge(remove_images: imgs))
+    rolfs_obs.reload
+    assert_obj_list_equal(rolf.images - rolf.images[2..6] - [rolfs_img],
+                          rolfs_obs.images)
+
+    proj = projects(:bolete_project)
+    proj.user_group.users << rolf
+    rolf.reload
+    assert(!proj.observations.include?(rolfs_obs))
+    assert(proj.observations.include?(marys_obs))
+    assert(rolfs_obs.has_edit_permission?(rolf))
+    assert(marys_obs.has_edit_permission?(rolf))
+    assert(rolfs_obs.user == rolf)
+    assert(marys_obs.user == mary)
+    assert_api_pass(params.merge(id: rolfs_obs.id, set_date: "2013-01-01"))
+    assert_api_pass(params.merge(id: marys_obs.id, set_date: "2013-01-01"))
+    assert_equal(Date.parse("2013-01-01"), rolfs_obs.reload.when)
+    assert_equal(Date.parse("2013-01-01"), marys_obs.reload.when)
+    assert_api_pass(params.merge(id: rolfs_obs.id, add_to_project: proj.id))
+    assert_api_fail(params.merge(id: marys_obs.id, add_to_project: proj.id))
+    assert(Project.find(proj.id).observations.include?(rolfs_obs))
+    assert(Project.find(proj.id).observations.include?(marys_obs))
+    assert_api_pass(params.merge(id: rolfs_obs.id, remove_from_project: proj.id))
+    assert_api_fail(params.merge(id: marys_obs.id, remove_from_project: proj.id))
+    assert(!Project.find(proj.id).observations.include?(rolfs_obs))
+    assert(Project.find(proj.id).observations.include?(marys_obs))
+
+    spl1 = species_lists(:unknown_species_list)
+    spl2 = species_lists(:query_first_list)
+    assert(spl1.has_edit_permission?(rolf))
+    assert(!spl2.has_edit_permission?(rolf))
+    assert_api_pass(params.merge(add_to_species_list: spl1.id))
+    assert_api_fail(params.merge(add_to_species_list: spl2.id))
+    assert(spl1.reload.observations.include?(rolfs_obs))
+    assert(!spl2.reload.observations.include?(rolfs_obs))
+    assert_api_pass(params.merge(remove_from_species_list: spl1.id))
+    assert_api_fail(params.merge(remove_from_species_list: spl2.id))
+    assert(!spl1.reload.observations.include?(rolfs_obs))
+    assert(!spl2.reload.observations.include?(rolfs_obs))
   end
 
   def test_deleting_observations

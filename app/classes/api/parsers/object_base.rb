@@ -6,9 +6,7 @@ class API
         raise BadParameterValue.new(str, model.type_tag) if str.blank?
         obj = find_object(str)
         raise ObjectNotFoundByString.new(str, model) unless obj
-        check_if_owner!(obj)        if args[:must_be_owner]
-        check_view_permission!(obj) if args[:must_have_view_permission]
-        check_edit_permission!(obj) if args[:must_have_edit_permission]
+        check_permissions!(obj)
         args[:as] == :id ? obj.id : obj
       end
 
@@ -25,6 +23,12 @@ class API
 
       def try_finding_by_string(str)
         raise BadParameterValue.new(str, key)
+      end
+
+      def check_permissions!(obj)
+        check_if_owner!(obj)        if args[:must_be_owner]
+        check_view_permission!(obj) if args[:must_have_view_permission]
+        check_edit_permission!(obj) if args[:must_have_edit_permission]
       end
 
       def check_if_owner!(obj)

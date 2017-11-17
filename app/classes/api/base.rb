@@ -71,7 +71,7 @@
 #    validate_create_params!(params) Called in POST after query_params.
 #    validate_update_params!(params) Called in PATCH after update_params.
 #
-#    before_create(params) Called in POST after validation, before creating record.
+#    before_create(params) Called in POST after validation, before creating.
 #    after_create(obj)     Called in POST immediately after creating record.
 #
 #    build_setter     Returns "lambda" called on each object for PATCH.

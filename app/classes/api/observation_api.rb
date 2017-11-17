@@ -83,7 +83,11 @@ class API
     end
 
     def update_params
-      @notes = parse_notes_fields!(:keep_blanks)
+      parse_set_coordinates!
+      parse_set_images!
+      parse_set_projects!
+      parse_set_species_lists!
+      @notes = parse_notes_fields!(:set)
       {
         when:                   parse(:date, :set_date),
         place_name:             parse(:place_name, :set_location, limit: 1024),
@@ -103,7 +107,11 @@ class API
       obs.log(:log_observation_created_at) if @log
     end
 
-    def build_setter
+    def validate_update_params!(params)
+      raise MissingSetParameters.new if params.empty? && no_adds_or_removes?
+    end
+
+    def build_setter(params)
       lambda do |obj|
         must_have_edit_permission!(obj)
         update_notes_fields(obj)
@@ -153,33 +161,34 @@ class API
     end
 
     def update_images(obj)
-      obj.images.push(*@add_imgs)      if @add_imgs.any?
-      obj.images.delete(*@remove_imgs) if @remove_imgs.any?
+      @add_images.each do |img|
+        obj.images << img unless obj.images.include?(img)
+      end
+      obj.images.delete(*@remove_images)
+      return unless @remove_images.include?(obj.thumb_image)
+      obj.update_attributes!(thumb_image: obj.images.first)
     end
 
     def update_projects(obj)
-      obj.projects.push(*@add_prjs)      if @add_prjs.any?
-      obj.projects.delete(*@remove_prjs) if @remove_prjs.any?
+      return unless @add_to_project || @remove_from_project
+      raise MustBeOwner.new(obj) if obj.user != @user
+      obj.projects.push(@add_to_project) if @add_to_project
+      obj.projects.delete(@remove_from_project) if @remove_from_project
     end
 
     def update_species_lists(obj)
-      obj.species_lists.push(*@add_spls)      if @add_spls.any?
-      obj.species_lists.delete(*@remove_spls) if @remove_spls.any?
+      obj.species_lists.push(@add_to_list)        if @add_to_list
+      obj.species_lists.delete(@remove_from_list) if @remove_from_list
     end
 
-    def validate_update_params!(params)
-      parse_set_coordinates!
-      parse_set_images!
-      parse_set_projects!
-      parse_set_species_lists!
-      raise MissingSetParameters.new if params.empty? && no_adds_or_removes?
-    end
-
+    # rubocop:disable Metrics/CyclomaticComplexity
     def no_adds_or_removes?
-      @add_imgs.empty? && @remove_imgs.empty? &&
-        @add_prjs.empty? && @remove_prjs.empty? &&
-        @add_spls.empty? && @remove_spls.empty?
+      @add_images.empty? && @remove_images.empty? &&
+        !@add_to_project && !@remove_from_project &&
+        !@add_to_list && !@remove_from_list &&
+        @notes.empty?
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def parse_create_params!
       @name  = parse(:name, :name, default: Name.unknown)
@@ -211,17 +220,19 @@ class API
       @images.unshift(@thumbnail)
     end
 
-    def parse_notes_fields!(keep_blanks = false)
+    def parse_notes_fields!(set = false)
+      prefix = set ? "set_" : ""
       notes = Observation.no_notes
-      notes[Observation.other_notes_key] = parse(:string, :notes)
+      other = parse(:string, :"#{prefix}notes")
+      notes[Observation.other_notes_key] = other unless other.nil?
       params.each do |key, val|
-        next unless (match = key.to_s.match(/^notes\[(.*)\]$/))
+        next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
         field = parse_notes_field_parameter!(match[1])
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
-      declare_parameter(:"notes[<field>]", :string)
-      return notes if keep_blanks
+      declare_parameter(:"#{prefix}notes[<field>]", :string)
+      return notes if set
       notes.delete_if { |_key, val| val.blank? }
       notes
     end
@@ -241,21 +252,26 @@ class API
     end
 
     def parse_set_images!
-      @thumbnail   = parse(:image, :set_thumbnail)
-      @add_imgs    = parse_array(:image, :add_images) || []
-      @remove_imgs = parse_array(:image, :remove_images) || []
-      return if !@thumbnail || @add_imgs.include?(@thumbnail)
-      @add_imgs.unshift(@thumbnail)
+      @thumbnail     = parse(:image, :set_thumbnail,
+                             must_have_edit_permission: true)
+      @add_images    = parse_array(:image, :add_images,
+                                   must_have_edit_permission: true) || []
+      @remove_images = parse_array(:image, :remove_images) || []
+      return if !@thumbnail || @add_images.include?(@thumbnail)
+      @add_images.unshift(@thumbnail)
     end
 
     def parse_set_projects!
-      @add_prjs    = parse_array(:project, :add_projects) || []
-      @remove_prjs = parse_array(:project, :remove_projects) || []
+      @add_to_project      = parse(:project, :add_to_project,
+                                   must_be_member: true)
+      @remove_from_project = parse(:project, :remove_from_project)
     end
 
     def parse_set_species_lists!
-      @add_spls    = parse_array(:species_list, :add_species_lists) || []
-      @remove_spls = parse_array(:species_list, :remove_species_lists) || []
+      @add_to_list      = parse(:species_list, :add_to_species_list,
+                                must_have_edit_permission: true)
+      @remove_from_list = parse(:species_list, :remove_from_species_list,
+                                must_have_edit_permission: true)
     end
 
     def parse_location_and_coordinates!
