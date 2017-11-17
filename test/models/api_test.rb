@@ -2107,7 +2107,198 @@ class ApiTest < UnitTestCase
   # ------------------------------
 
   def test_getting_sequences
-    # XXX
+    params = { method: :get, action: :sequence }
+
+    seq = Sequence.all.sample
+    assert_api_pass(params.merge(id: seq.id))
+    assert_api_results([seq])
+
+    seqs = Sequence.where("date(created_at) = '2017-01-01'")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(created_at: "2017-01-01"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where("year(updated_at) = 2017 and
+                           month(updated_at) = 2")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(updated_at: "2017-02"))
+    assert_api_results(seqs)
+
+    obs = observations(:locally_sequenced_obs)
+    obs.update_attributes!(user: mary)
+    obs.sequences.each { |s| s.update_attributes!(user: mary) }
+    seqs = Sequence.where(user: mary)
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(user: "mary"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where(locus: ["ITS1F", "ITS4", "ITS5"])
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(locus: "its1f,its4,its5"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where(archive: ["GenBank", "UNITE"])
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(archive: "genbank,unite"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where(accession: "KT968605")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(accession: "KT968605"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where("locus like '%its%'")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(locus_has: "ITS"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where("accession like '%kt%'")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(accession_has: "KT"))
+    assert_api_results(seqs)
+
+    seqs = Sequence.where("notes like '%formatted%'")
+    assert_not_empty(seqs)
+    assert_api_pass(params.merge(notes_has: "formatted"))
+    assert_api_results(seqs)
+
+    # Make sure all observations have at least one sequence for the rest.
+    Observation.all.each do |obs|
+      next if obs.sequences.any?
+      Sequence.create!(observation: obs, user: obs.user, locus: "ITS1F",
+                       archive: "GenBank", accession: "MO#{obs.id}")
+    end
+
+    obses = Observation.where("year(`when`) >= 2012 and year(`when`) <= 2014")
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(obs_date: "2012-2014"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(user: dick)
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(observer: "dick"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(name: names(:fungi))
+    assert_not_empty(obses)
+    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+                        name: names(:lactarius_alpinus))
+    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+                        name: names(:lactarius_alpigenes))
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(location: locations(:burbank))
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Specimen.where(herbarium: herbaria(:nybg_herbarium)).
+            map(&:observations).flatten.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = specimens(:interesting_unknown).observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(specimen: "Cortinarius sp.: NYBG 1234"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    proj = projects(:one_genus_two_species_project)
+    obses = proj.observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(project: proj.id))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    spl = species_lists(:one_genus_three_species_list)
+    obses = spl.observations.sort_by(&:id)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(species_list: spl.id))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(vote_cache: 3)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(confidence: "3.0"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where("`lat` >= 34 and `lat` <= 35 and
+                               `long` >= -119 and `long` <= -118")
+    locs  = Location.where("south >= 34 and north <= 35 and west >= -119 and
+                            east <= -118 and west <= east")
+    obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
+    assert_not_empty(obses)
+    assert_api_fail(params.merge(south: 34, east: -118, west: -119))
+    assert_api_fail(params.merge(north: 35, east: -118, west: -119))
+    assert_api_fail(params.merge(north: 35, south: 34, west: -119))
+    assert_api_fail(params.merge(north: 35, south: 34, east: -118))
+    assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where(is_collection_location: false)
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(is_collection_location: "no"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    with    = Observation.where.not(thumb_image_id: nil)
+    without = Observation.where(thumb_image_id: nil)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_images: "yes"))
+    assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_pass(params.merge(has_images: "no"))
+    assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+
+    genus = Name.ranks[:Genus]
+    group = Name.ranks[:Group]
+    names = Name.where("rank <= #{genus} or rank = #{group}")
+    with    = Observation.where(name: names)
+    without = Observation.where.not(name: names)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_name: "yes"))
+    assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_pass(params.merge(has_name: "no"))
+    assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+
+    with    = Observation.where(specimen: true)
+    without = Observation.where(specimen: false)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_specimen: "yes"))
+    assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_pass(params.merge(has_specimen: "no"))
+    assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+
+    no_notes = Observation.no_notes_persisted
+    with    = Observation.where("notes != ?", no_notes)
+    without = Observation.where("notes = ?", no_notes)
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_obs_notes: "yes"))
+    assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_pass(params.merge(has_obs_notes: "no"))
+    assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where("notes like '%:substrate:%'").
+            reject { |o| o.notes[:substrate].blank? }
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(has_notes_field: "substrate"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+
+    obses = Observation.where("notes like '%orphan%'")
+    assert(obses.length > 1)
+    assert_api_pass(params.merge(obs_notes_has: "orphan"))
+    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
 
   def test_creating_sequences

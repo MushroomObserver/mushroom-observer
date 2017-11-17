@@ -43,6 +43,19 @@ module Query::Modules::Initialization
     @where << (params[arg] ? true_cond : false_cond)
   end
 
+  def initialize_model_do_exact_match(arg, col = arg)
+    return if params[arg].blank?
+    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    vals = params[arg]
+    vals = [vals] unless vals.is_a?(Array)
+    vals = vals.map { |v| escape(v.downcase) }
+    @where << if vals.length == 1
+      "LOWER(#{col}) = #{vals.first}"
+    else
+      "LOWER(#{col}) IN (#{vals.join(", ")})"
+    end
+  end
+
   def initialize_model_do_search(arg, col = nil)
     return if params[arg].blank?
     col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
@@ -192,10 +205,15 @@ module Query::Modules::Initialization
     )
     cond1 = cond1.join(" AND ")
     cond2 = cond2.join(" AND ")
+    @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
+    return if uses_join?(:locations)
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
-    @join << :"locations!" unless uses_join?(:locations)
-    @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
+    @join << if model.name == "Observation"
+      :"locations!"
+    else
+      { observations: :"locations!" }
+    end
   end
 
   def initialize_model_do_location_bounding_box_cond1_and_2
@@ -345,6 +363,14 @@ module Query::Modules::Initialization
       (n || (min ? 0 : 60)).to_i,
       (s || (min ? 0 : 60)).to_i
     )
+  end
+
+  def initialize_model_do_has_notes_fields(arg)
+    fields = params[arg] || []
+    if fields.any?
+      cond = notes_field_presence_condition(fields)
+      @where << cond
+    end
   end
 
   def notes_field_presence_condition(keys)

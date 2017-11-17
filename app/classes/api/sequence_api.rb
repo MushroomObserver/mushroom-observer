@@ -14,32 +14,46 @@ class API
     ]
 
     # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength
     def query_params
+      n, s, e, w = parse_bounding_box!
       {
-        where:          sql_id_condition,
-        created_at:     parse_range(:time, :created_at),
-        updated_at:     parse_range(:time, :updated_at),
-        users:          parse_array(:user, :user),
-        locus_has:      parse(:string, :locus),
-        archive_has:    parse(:string, :archive),
-        accession_has:  parse(:string, :accession),
-        notes_has:      parse(:string, :notes),
-        date:           parse_range(:date, :date),
-        observers:      parse_array(:user, :observer),
-        names:          parse_array(:name, :name, as: :id),
-        synonym_names:  parse_array(:name, :synonyms_of, as: :id),
-        children_names: parse_array(:name, :children_of, as: :id),
-        locations:      parse_array(:location, :location, as: :id),
-        projects:       parse_array(:project, :project, as: :id),
-        species_lists:  parse_array(:species_list, :species_list, as: :id),
-        confidence:     parse(:confidence, :confidence),
-        north:          parse(:latitude, :north),
-        south:          parse(:latitude, :south),
-        east:           parse(:longitude, :east),
-        west:           parse(:longitude, :west)
+        where:            sql_id_condition,
+        created_at:       parse_range(:time, :created_at),
+        updated_at:       parse_range(:time, :updated_at),
+        users:            parse_array(:user, :user),
+        locus:            parse_array(:string, :locus),
+        archive:          parse_array(:string, :archive),
+        accession:        parse_array(:string, :accession),
+        locus_has:        parse(:string, :locus_has),
+        accession_has:    parse(:string, :accession_has),
+        notes_has:        parse(:string, :notes_has),
+        obs_date:         parse_range(:date, :obs_date),
+        observers:        parse_array(:user, :observer),
+        names:            parse_array(:name, :name, as: :id),
+        synonym_names:    parse_array(:name, :synonyms_of, as: :id),
+        children_names:   parse_array(:name, :children_of, as: :id),
+        locations:        parse_array(:location, :location, as: :id),
+        herbaria:         parse_array(:herbarium, :herbarium, as: :id),
+        specimens:        parse_array(:specimen, :specimen, as: :id),
+        projects:         parse_array(:project, :project, as: :id),
+        species_lists:    parse_array(:species_list, :species_list, as: :id),
+        confidence:       parse(:confidence, :confidence),
+        north:            n,
+        south:            s,
+        east:             e,
+        west:             w,
+        is_collection_location: parse(:boolean, :is_collection_location),
+        has_images:       parse(:boolean, :has_images),
+        has_name:         parse(:boolean, :has_name),
+        has_specimen:     parse(:boolean, :has_specimen),
+        has_obs_notes:    parse(:boolean, :has_obs_notes),
+        has_notes_fields: parse(:string, :has_notes_field),
+        obs_notes_has:    parse(:string, :obs_notes_has)
       }
     end
     # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     def create_params
       {

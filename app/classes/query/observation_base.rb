@@ -22,7 +22,7 @@ module Query
         herbaria?:         [:string],
         specimens?:        [:string],
         confidence?:       [:float],
-        is_col_loc?:       :boolean,
+        is_collection_location?: :boolean,
         has_location?:     :boolean,
         has_name?:         :boolean,
         has_comments?:     { boolean: [true] },
@@ -74,7 +74,7 @@ module Query
       initialize_model_do_range(:confidence, :vote_cache)
       initialize_model_do_search(:notes_has, :notes)
       initialize_model_do_boolean(
-        :is_col_loc,
+        :is_collection_location,
         "observations.is_collection_location IS TRUE",
         "observations.is_collection_location IS FALSE"
       )
@@ -93,13 +93,11 @@ module Query
         )
         add_join(:names)
       end
-      # rubocop:disable Metrics/LineLength
       initialize_model_do_boolean(
         :has_notes,
-        "observations.notes != #{Observation.connection.quote(Observation.no_notes_persisted)}",
-        "observations.notes  = #{Observation.connection.quote(Observation.no_notes_persisted)}"
+        "observations.notes != #{escape(Observation.no_notes_persisted)}",
+        "observations.notes  = #{escape(Observation.no_notes_persisted)}"
       )
-      # rubocop:enable Metrics/LineLength
       add_join(:comments) if params[:has_comments]
       unless params[:comments_has].blank?
         initialize_model_do_search(
@@ -108,11 +106,7 @@ module Query
         )
         add_join(:comments)
       end
-      fields = params[:has_notes_fields] || []
-      if fields.any?
-        cond = notes_field_presence_condition(fields)
-        @where << cond
-      end
+      initialize_model_do_has_notes_fields(:has_notes_fields)
       initialize_model_do_observation_bounding_box
       initialize_content_filters(Observation)
       super

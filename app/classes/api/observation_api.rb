@@ -44,7 +44,7 @@ class API
         projects:         parse_array(:project, :project, as: :id),
         species_lists:    parse_array(:species_list, :species_list, as: :id),
         confidence:       parse(:confidence, :confidence),
-        is_col_loc:       parse(:boolean, :is_collection_location),
+        is_collection_location: parse(:boolean, :is_collection_location),
         has_images:       parse(:boolean, :has_images),
         has_location:     parse(:boolean, :has_location),
         has_name:         parse(:boolean, :has_name),
