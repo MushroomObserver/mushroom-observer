@@ -1,4 +1,8 @@
+# For some reason we need to keep the ids in these fixtures.  Otherwise the
+# AJAX controller breaks.  Haven't looked into it in any depth. -JPH 20171117
+
 greek_one_version1: # 1
+  id: 1
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: один
@@ -6,6 +10,7 @@ greek_one_version1: # 1
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
 
 greek_one_version2: # 2
+  id: 2
   version: 2
   translation_string_id: <%= ActiveRecord::FixtureSet.identify(:greek_one) %>
   text: ένα
@@ -13,6 +18,7 @@ greek_one_version2: # 2
   user_id: <%= ActiveRecord::FixtureSet.identify(:dick) %>
 
 version_wizard_version1: # 3
+  id: 3
   version: 1
   translation_string_id: <%= ActiveRecord::FixtureSet.
     identify(:version_wizard) %>
