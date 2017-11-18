@@ -147,6 +147,14 @@ class API
     end
   end
 
+  # Some PATCH set parameters, if supplied, cannot be blank.
+  class ParameterCantBeBlank < Error
+    def initialize(arg)
+      super()
+      args.merge!(arg: arg.to_s)
+    end
+  end
+
   # String parameter too long.
   class StringTooLong < Error
     def initialize(str, length)

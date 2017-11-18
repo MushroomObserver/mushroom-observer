@@ -3523,6 +3523,7 @@
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
   api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."
   api_one_or_the_other: Can only use one of the parameters [args].
+  api_parameter_cant_be_blank: It is okay to leave the [arg] parameter off, but if you include it in your PATCH request, it cannot be blank.  Leaving a set parameter off means it will leave that property alone and do nothing; setting it to a blank tells MO to delete or clear the property.  And some properties cannot be deleted or cleared.
   api_project_taken: The project, "[project]", already exists.
   api_query_error: "There was an internal problem with Query: [error]"
   api_render_failed: There was a problem while rendering the results. [error]

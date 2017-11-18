@@ -37,7 +37,7 @@ class API
 
     def update_params
       {
-        url: parse(:string, :set_url)
+        url: parse(:string, :set_url, not_blank: true)
       }
     end
 

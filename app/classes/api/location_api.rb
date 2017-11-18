@@ -42,7 +42,7 @@ class API
 
     def update_params
       {
-        display_name: parse(:string, :set_name, limit: 1024),
+        display_name: parse(:string, :set_name, limit: 1024, not_blank: true),
         north:        parse(:latitude, :set_north),
         south:        parse(:longitude, :set_south),
         east:         parse(:longitude, :set_east),

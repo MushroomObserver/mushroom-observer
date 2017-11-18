@@ -24,7 +24,7 @@ class API
       end
 
       def first_part_match(str)
-        str = str.split("-").first
+        str = str.split("-").first || return
         Language.all.each do |lang|
           return lang.locale_region if str.casecmp(lang.locale).zero?
         end

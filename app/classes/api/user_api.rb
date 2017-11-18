@@ -48,10 +48,10 @@ class API
         # name:     parse(:string, :set_name, limit: 80, default: ""),
         # email:    parse(:email, :set_email, limit: 80),
         # password: parse(:string, :set_password, limit: 80),
-        locale:     parse(:lang, :set_locale),
+        locale:     parse(:lang, :set_locale, not_blank: true),
         notes:      parse(:string, :set_notes, default: ""),
         mailing_address: parse(:string, :set_mailing_address, default: ""),
-        license:    parse(:license, :set_license, default: License.preferred),
+        license:    parse(:license, :set_license, not_blank: true),
         location:   parse(:location, :set_location),
         image:      parse(:image, :set_image, must_be_owner: true)
       }

@@ -69,7 +69,7 @@ class API
 
     def update_params
       {
-        locus:     parse(:string, :set_locus),
+        locus:     parse(:string, :set_locus, not_blank: true),
         bases:     parse(:string, :set_bases),
         archive:   parse(:string, :set_archive, limit: 255),
         accession: parse(:string, :set_accession, limit: 255),

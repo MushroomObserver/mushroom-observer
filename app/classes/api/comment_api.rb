@@ -38,7 +38,7 @@ class API
 
     def update_params
       {
-        summary: parse(:string, :set_summary, limit: 100),
+        summary: parse(:string, :set_summary, limit: 100, not_blank: true),
         comment: parse(:string, :set_content)
       }
     end

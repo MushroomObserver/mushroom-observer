@@ -90,7 +90,8 @@ class API
       @notes = parse_notes_fields!(:set)
       {
         when:                   parse(:date, :set_date),
-        place_name:             parse(:place_name, :set_location, limit: 1024),
+        place_name:             parse(:place_name, :set_location, limit: 1024,
+                                      not_blank: true),
         lat:                    @latitude,
         long:                   @longitude,
         alt:                    @altitude,

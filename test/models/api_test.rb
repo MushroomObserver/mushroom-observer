@@ -485,6 +485,7 @@ class ApiTest < UnitTestCase
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: com2.id))
+    assert_api_fail(params.merge(set_summary: ""))
     assert_api_pass(params)
     com1.reload
     assert_equal("new summary", com1.reload.summary)
@@ -543,33 +544,64 @@ class ApiTest < UnitTestCase
     assert_api_results([link2])
   end
 
-    def test_posting_external_links
-      marys_obs = observations(:detailed_unknown_obs)
-      rolfs_obs = observations(:agaricus_campestris_obs)
-      katys_obs = observations(:amateur_obs)
-      marys_key = api_keys(:marys_api_key)
-      rolfs_key = api_keys(:rolfs_api_key)
+  def test_posting_external_links
+    marys_obs = observations(:detailed_unknown_obs)
+    rolfs_obs = observations(:agaricus_campestris_obs)
+    katys_obs = observations(:amateur_obs)
+    marys_key = api_keys(:marys_api_key)
+    rolfs_key = api_keys(:rolfs_api_key)
+    params = {
+      method:        :post,
+      action:        :external_link,
+      api_key:       rolfs_key.key,
+      observation:   rolfs_obs.id,
+      external_site: external_sites(:mycoportal).id,
+      url:           "http://blah.blah"
+    }
+    assert_api_pass(params)
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:observation))
+    assert_api_fail(params.remove(:external_site))
+    assert_api_fail(params.remove(:url))
+    assert_api_fail(params.merge(api_key: "spammer"))
+    assert_api_fail(params.merge(observation: "spammer"))
+    assert_api_fail(params.merge(external_site: "spammer"))
+    assert_api_fail(params.merge(url: "spammer"))
+    assert_api_fail(params.merge(observation: marys_obs.id))
+    assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
+    assert_api_pass(params.merge(api_key: marys_key.key,
+                                 observation: katys_obs.id))
+  end
+
+    def test_updating_external_links
+      link = mary.external_links.first
+      new_url = "http://something.else"
       params = {
-        method:        :post,
-        action:        :external_link,
-        api_key:       rolfs_key.key,
-        observation:   rolfs_obs.id,
-        external_site: external_sites(:mycoportal).id,
-        url:           "http://blah.blah"
+        method:  :patch,
+        action:  :external_link,
+        api_key: @api_key.key,
+        id:      link.id,
+        set_url: new_url
       }
+      assert_api_fail(params)
+      @api_key.update_attributes!(user: mary)
+      assert_api_fail(params.merge(set_url: ""))
       assert_api_pass(params)
-      assert_api_fail(params.remove(:api_key))
-      assert_api_fail(params.remove(:observation))
-      assert_api_fail(params.remove(:external_site))
-      assert_api_fail(params.remove(:url))
-      assert_api_fail(params.merge(api_key: "spammer"))
-      assert_api_fail(params.merge(observation: "spammer"))
-      assert_api_fail(params.merge(external_site: "spammer"))
-      assert_api_fail(params.merge(url: "spammer"))
-      assert_api_fail(params.merge(observation: marys_obs.id))
-      assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
-      assert_api_pass(params.merge(api_key: marys_key.key,
-                                   observation: katys_obs.id))
+      assert_equal(new_url, link.reload.url)
+    end
+
+    def test_updating_external_links
+      link = mary.external_links.first
+      params = {
+        method:  :delete,
+        action:  :external_link,
+        api_key: @api_key.key,
+        id:      link.id
+      }
+      assert_api_fail(params)
+      @api_key.update_attributes!(user: mary)
+      assert_api_pass(params)
+      assert_nil(ExternalLink.safe_find(link.id))
     end
 
   # ---------------------------
@@ -791,6 +823,8 @@ class ApiTest < UnitTestCase
       set_original_name:    "new name"
     }
     assert_api_fail(params.merge(id: marys_img.id))
+    assert_api_fail(params.merge(set_date: ""))
+    assert_api_fail(params.merge(set_license: ""))
     assert_api_pass(params.merge(id: rolfs_img.id))
     rolfs_img.reload
     assert_equal(Date.parse("2012-3-4"), rolfs_img.when)
@@ -989,8 +1023,11 @@ class ApiTest < UnitTestCase
     # is, make sure api key is required, and that name is valid and not already
     # taken.
     assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(set_name: ""))
     assert_api_fail(params.merge(set_name: "Evil Lair, Latveria"))
     assert_api_fail(params.merge(set_name: burbank.display_name))
+    assert_api_fail(params.merge(set_north: "", set_south: "", set_west: "",
+                                 set_east: ""))
     assert_api_pass(params)
 
     albion.reload
@@ -1362,12 +1399,14 @@ class ApiTest < UnitTestCase
       api_key: @api_key.key,
       id:      agaricus.id
     }
+    assert_api_fail(params.merge(set_name: ""))
     assert_api_pass(params.merge(set_name: "Suciraga"))
     assert_equal("Suciraga", agaricus.reload.text_name)
     assert_api_pass(params.merge(set_author: "L."))
     assert_equal("Suciraga L.", agaricus.reload.search_name)
     assert_api_pass(params.merge(set_rank: "order"))
     assert_equal(:Order, agaricus.reload.rank)
+    assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(
       set_name:   "Agaricus bitorquis",
@@ -1832,6 +1871,8 @@ class ApiTest < UnitTestCase
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: marys_obs.id))
+    assert_api_fail(params.merge(set_date: ""))
+    assert_api_fail(params.merge(set_location: ""))
     assert_api_pass(params)
     rolfs_obs.reload
     assert_equal(Date.parse("2012-12-12"), rolfs_obs.when)
@@ -1877,6 +1918,7 @@ class ApiTest < UnitTestCase
 
     rolfs_img = (rolf.images - rolfs_obs.images).first
     marys_img = mary.images.first
+    assert_api_fail(params.merge(set_thumbnail: ""))
     assert_api_fail(params.merge(set_thumbnail: marys_img.id))
     assert_api_pass(params.merge(set_thumbnail: rolfs_img.id))
     rolfs_obs.reload
@@ -2061,10 +2103,10 @@ class ApiTest < UnitTestCase
     assert_empty(proj.observations)
     assert_empty(proj.species_lists)
     params = {
-      method:      :patch,
-      action:      :project,
-      api_key:     @api_key.key,
-      id:          proj.id
+      method:  :patch,
+      action:  :project,
+      api_key: @api_key.key,
+      id:      proj.id
     }
 
     assert_api_fail(params)
@@ -2072,6 +2114,7 @@ class ApiTest < UnitTestCase
     @api_key.update_attributes!(user: katrina)
     assert_api_fail(params.merge(set_title: "new title"))
     @api_key.update_attributes!(user: rolf)
+    assert_api_fail(params.merge(set_title: ""))
     assert_api_pass(params.merge(set_title: "new title"))
     assert_equal("new title", proj.reload.title)
     assert_api_pass(params.merge(set_summary: "new summary"))
@@ -2631,6 +2674,9 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_fail(params.merge(set_title: SpeciesList.first.title))
     assert_api_fail(params.merge(set_location: "bogus location"))
+    assert_api_fail(params.merge(set_title: ""))
+    assert_api_fail(params.merge(set_date: ""))
+    assert_api_fail(params.merge(set_location: ""))
     assert_api_pass(params)
     assert_last_species_list_correct(rolfs_spl.reload)
   end
@@ -2747,6 +2793,8 @@ class ApiTest < UnitTestCase
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(set_image: mary.images.first.id))
+    assert_api_fail(params.merge(set_locale: ""))
+    assert_api_fail(params.merge(set_license: ""))
     assert_api_pass(params)
     rolf.reload
     assert_equal("pt-BR", rolf.locale)

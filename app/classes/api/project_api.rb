@@ -41,7 +41,7 @@ class API
     def update_params
       parse_update_params
       {
-        title:   parse(:string, :set_title, limit: 100),
+        title:   parse(:string, :set_title, limit: 100, not_blank: true),
         summary: parse(:string, :set_summary)
       }
     end

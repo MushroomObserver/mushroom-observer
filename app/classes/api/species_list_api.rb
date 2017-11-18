@@ -46,9 +46,10 @@ class API
     def update_params
       parse_add_remove_observations
       {
-        title:      parse(:string, :set_title, limit: 100),
+        title:      parse(:string, :set_title, limit: 100, not_blank: true),
         when:       parse(:date, :set_date),
-        place_name: parse(:place_name, :set_location, limit: 1024),
+        place_name: parse(:place_name, :set_location, limit: 1024,
+                          not_blank: true),
         notes:      parse(:string, :set_notes)
       }
     end
@@ -82,20 +83,12 @@ class API
     private
 
     def validate_set_location!(params)
-      name = params[:place_name].to_s
-      if name.blank?
-        params.delete(:place_name)
-      else
-        make_sure_location_isnt_dubious!(name)
-      end
+      name = params[:place_name].to_s || return
+      make_sure_location_isnt_dubious!(name)
     end
 
     def validate_set_title!(params)
-      title = params[:title].to_s
-      if title.blank?
-        params.delete(:title)
-        return
-      end
+      title = params[:title].to_s || return
       return if query.num_results.zero?
       raise TryingToSetMultipleLocationsToSameName.new \
         if query.num_results > 1
