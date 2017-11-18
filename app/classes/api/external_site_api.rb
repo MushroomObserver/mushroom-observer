@@ -14,7 +14,8 @@ class API
 
     def query_params
       {
-        name: parse(:string, :name)
+        where: sql_id_condition,
+        name:  parse(:string, :name)
       }
     end
 

@@ -1,6 +1,4 @@
 # encoding: utf-8
-# TODO: external_site API (get only)
-# TODO: herbarium API (get only)
 # TODO: specimen API
 # TODO: naming API
 # TODO: vote API
@@ -314,19 +312,64 @@ class ApiTest < UnitTestCase
 
   ##############################################################################
 
-  def test_basic_gets
-    [Comment, ExternalLink, Image, Location, Name, Observation, Project,
-     Sequence, SpeciesList, User].each do |model|
-      expected_object = model.first
-      api = API.execute(
-        method: :get,
-        action: model.type_tag,
-        id: expected_object.id
-      )
-      assert_no_errors(api, "Errors while getting first #{model}")
-      assert_obj_list_equal([expected_object], api.results,
-                            "Failed to get first #{model}")
-    end
+  def test_basic_comment_get
+    do_basic_get_test(Comment)
+  end
+
+  def test_basic_external_link_get
+    do_basic_get_test(ExternalLink)
+  end
+
+  def test_basic_external_site_get
+    do_basic_get_test(ExternalSite)
+  end
+
+  def test_basic_herbarium_get
+    do_basic_get_test(Herbarium)
+  end
+
+  def test_basic_image_get
+    do_basic_get_test(Image)
+  end
+
+  def test_basic_location_get
+    do_basic_get_test(Location)
+  end
+
+  def test_basic_name_get
+    do_basic_get_test(Name)
+  end
+
+  def test_basic_observation_get
+    do_basic_get_test(Observation)
+  end
+
+  def test_basic_project_get
+    do_basic_get_test(Project)
+  end
+
+  def test_basic_sequence_get
+    do_basic_get_test(Sequence)
+  end
+
+  def test_basic_species_list_get
+    do_basic_get_test(SpeciesList)
+  end
+
+  def test_basic_user_get
+    do_basic_get_test(User)
+  end
+
+  def do_basic_get_test(model)
+    expected_object = model.first
+    api = API.execute(
+      method: :get,
+      action: model.type_tag,
+      id: expected_object.id
+    )
+    assert_no_errors(api, "Errors while getting first #{model}")
+    assert_obj_list_equal([expected_object], api.results,
+                          "Failed to get first #{model}")
   end
 
   # ----------------------------
@@ -600,6 +643,62 @@ class ApiTest < UnitTestCase
     @api_key.update_attributes!(user: mary)
     assert_api_pass(params)
     assert_nil(ExternalLink.safe_find(link.id))
+  end
+
+  # ----------------------------------
+  #  :section: ExternalSite Requests
+  # ----------------------------------
+
+  def test_getting_external_sites
+    params = {
+      method: :get,
+      action: :external_site
+    }
+    sites = ExternalSite.where("name like '%inat%'")
+    assert_not_empty(sites)
+    assert_api_pass(params.merge(name: "inat"))
+    assert_api_results(sites)
+  end
+
+  # -------------------------------
+  #  :section: Herbarium Requests
+  # -------------------------------
+
+  def test_getting_herbaria
+    params = {
+      method: :get,
+      action: :herbarium
+    }
+
+    herbs = Herbarium.where("date(created_at) = '2012-10-21'")
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(created_at: "2012-10-21"))
+    assert_api_results(herbs)
+
+    herbs = [herbaria(:nybg_herbarium)]
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(updated_at: "2012-10-21 12:14"))
+    assert_api_results(herbs)
+
+    herbs = Herbarium.where(code: "NY")
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(code: "NY"))
+    assert_api_results(herbs)
+
+    herbs = Herbarium.where("name like '%personal%'")
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(name: "personal"))
+    assert_api_results(herbs)
+
+    herbs = Herbarium.where("description like '%awesome%'")
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(description: "awesome"))
+    assert_api_results(herbs)
+
+    herbs = Herbarium.where("mailing_address like '%New York%'")
+    assert_not_empty(herbs)
+    assert_api_pass(params.merge(address: "New York"))
+    assert_api_results(herbs)
   end
 
   # ---------------------------
@@ -1802,7 +1901,7 @@ class ApiTest < UnitTestCase
     # API no longer pays attention to user's location format preference!  This
     # is supposed to make it more consistent for apps.  It would be a real
     # problem because apps don't have access to the user's prefs, so they have
-    # no way of knowing how to pass in locations on the behalf of the user. 
+    # no way of knowing how to pass in locations on the behalf of the user.
     User.update(rolf.id, location_format: :scientific)
     assert_equal(:scientific, rolf.reload.location_format)
 
