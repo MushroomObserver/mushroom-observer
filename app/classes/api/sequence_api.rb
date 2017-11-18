@@ -23,7 +23,7 @@ class API
         updated_at:       parse_range(:time, :updated_at),
         users:            parse_array(:user, :user),
         locus:            parse_array(:string, :locus),
-        archive:          parse_array(:string, :archive),
+        archive:          parse_array(:archive, :archive),
         accession:        parse_array(:string, :accession),
         locus_has:        parse(:string, :locus_has),
         accession_has:    parse(:string, :accession_has),
@@ -61,7 +61,7 @@ class API
         user:        @user,
         locus:       parse(:string, :locus),
         bases:       parse(:string, :bases),
-        archive:     parse(:string, :archive, limit: 255),
+        archive:     parse(:archive, :archive),
         accession:   parse(:string, :accession, limit: 255),
         notes:       parse(:string, :notes)
       }
@@ -71,7 +71,7 @@ class API
       {
         locus:     parse(:string, :set_locus, not_blank: true),
         bases:     parse(:string, :set_bases),
-        archive:   parse(:string, :set_archive, limit: 255),
+        archive:   parse(:archive, :set_archive),
         accession: parse(:string, :set_accession, limit: 255),
         notes:     parse(:string, :set_notes)
       }
@@ -81,6 +81,9 @@ class API
       raise MissingParameter.new(:observation) unless params[:observation]
       raise MissingParameter.new(:locus)       if params[:locus].blank?
       # Sequence validators handle the rest, it's too complicated to repeat.
+    end
+
+    def validate_update_params!(params)
     end
 
     ############################################################################

@@ -5,9 +5,7 @@
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
-# TODO: validate sequence archive
 # TODO: check how scientific location works throughout
-# TODO: make sure can't illegally set field to "" anywhere
 
 require "test_helper"
 
@@ -2406,7 +2404,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.remove(:archive))
     assert_api_fail(params.remove(:accession))
     assert_api_fail(params.merge(observation: marys_obs.id))
-    # assert_api_fail(params.merge(archive: "bogus"))
+    assert_api_fail(params.merge(archive: "bogus"))
     assert_api_fail(params.merge(bases: "funky stuff!"))
     assert_api_pass(params)
     assert_last_sequence_correct
@@ -2476,7 +2474,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params)
     @api_key.update_attributes!(user: dick)
     assert_api_fail(params.merge(set_locus: ""))
-    # assert_api_fail(params.merge(set_archive: "bogus"))
+    assert_api_fail(params.merge(set_archive: "bogus"))
     assert_api_fail(params.merge(set_archive: ""))
     assert_api_fail(params.merge(set_accession: ""))
     assert_api_pass(params)

@@ -274,10 +274,10 @@ class API
 
   def authenticate_user
     key_str = parse(:string, :api_key)
-    key = ApiKey.find_by_key(key_str)
     if !key_str
       User.current = self.user = nil
     else
+      key = ApiKey.find_by_key(key_str)
       raise BadApiKey.new(key_str)        unless key
       raise ApiKeyNotVerified.new(key)    unless key.verified
       raise UserNotVerified.new(key.user) unless key.user.verified
