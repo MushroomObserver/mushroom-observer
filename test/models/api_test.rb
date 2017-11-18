@@ -571,36 +571,36 @@ class ApiTest < UnitTestCase
                                  observation: katys_obs.id))
   end
 
-    def test_updating_external_links
-      link = mary.external_links.first
-      new_url = "http://something.else"
-      params = {
-        method:  :patch,
-        action:  :external_link,
-        api_key: @api_key.key,
-        id:      link.id,
-        set_url: new_url
-      }
-      assert_api_fail(params)
-      @api_key.update_attributes!(user: mary)
-      assert_api_fail(params.merge(set_url: ""))
-      assert_api_pass(params)
-      assert_equal(new_url, link.reload.url)
-    end
+  def test_updating_external_links
+    link = mary.external_links.first
+    new_url = "http://something.else"
+    params = {
+      method:  :patch,
+      action:  :external_link,
+      api_key: @api_key.key,
+      id:      link.id,
+      set_url: new_url
+    }
+    assert_api_fail(params)
+    @api_key.update_attributes!(user: mary)
+    assert_api_fail(params.merge(set_url: ""))
+    assert_api_pass(params)
+    assert_equal(new_url, link.reload.url)
+  end
 
-    def test_updating_external_links
-      link = mary.external_links.first
-      params = {
-        method:  :delete,
-        action:  :external_link,
-        api_key: @api_key.key,
-        id:      link.id
-      }
-      assert_api_fail(params)
-      @api_key.update_attributes!(user: mary)
-      assert_api_pass(params)
-      assert_nil(ExternalLink.safe_find(link.id))
-    end
+  def test_deleting_external_links
+    link = mary.external_links.first
+    params = {
+      method:  :delete,
+      action:  :external_link,
+      api_key: @api_key.key,
+      id:      link.id
+    }
+    assert_api_fail(params)
+    @api_key.update_attributes!(user: mary)
+    assert_api_pass(params)
+    assert_nil(ExternalLink.safe_find(link.id))
+  end
 
   # ---------------------------
   #  :section: Image Requests
