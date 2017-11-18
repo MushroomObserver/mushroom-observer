@@ -451,12 +451,15 @@ class Location < AbstractModel
   end
 
   def self.check_for_dubious_county(name)
-    return [] if name =~ /Forest,|Park,|near / || !has_dubious_county?(name)
+    return [] if name.blank?
+    return [] if name =~ /Forest,|Park,|near /
+    return [] unless has_dubious_county?(name)
     [:location_dubious_redundant_county.l]
   end
 
   def self.check_for_bad_country_or_state(name)
     reasons = []
+    return [] if name.blank?
     a_country = understood_country?(country(name))
     if a_country.nil?
       reasons << :location_dubious_unknown_country.t(country: country(name))
@@ -482,6 +485,7 @@ class Location < AbstractModel
 
   def self.check_for_bad_terms(name)
     reasons = []
+    return [] if name.blank?
     BAD_TERMS.keys.each do |key|
       next unless name.index(key)
       reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
@@ -491,6 +495,7 @@ class Location < AbstractModel
 
   def self.check_for_bad_chars(name)
     reasons = []
+    return [] if name.blank?
     # For some reason BAD_CHARS.chars.each doesn't work
     count = 0
     while (c = BAD_CHARS[count])
@@ -501,6 +506,7 @@ class Location < AbstractModel
   end
 
   def self.comma_test(name)
+    return if name.blank?
     tokens = name.split(",").map(&:strip)
     tokens.delete("")
     name != tokens.join(", ")

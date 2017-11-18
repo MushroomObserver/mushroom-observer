@@ -323,6 +323,14 @@ class API
     end
   end
 
+  # Tried to create species list that already exists.
+  class SpeciesListAlreadyExists < Error
+    def initialize(str)
+      super()
+      args.merge!(title: str)
+    end
+  end
+
   # Tried to create user that already exists.
   class UserAlreadyExists < Error
     def initialize(str)

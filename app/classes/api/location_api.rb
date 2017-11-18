@@ -61,13 +61,13 @@ class API
       raise MissingParameter.new(:east)  unless params[:east]
       raise MissingParameter.new(:west)  unless params[:west]
       make_sure_location_doesnt_exist!(name)
-      make_sure_name_isnt_dubious!(name)
+      make_sure_location_isnt_dubious!(name)
     end
 
     def validate_update_params!(params)
       name = params[:display_name]
       make_sure_location_doesnt_exist!(name)
-      make_sure_name_isnt_dubious!(name)
+      make_sure_location_isnt_dubious!(name)
       make_sure_not_setting_name_of_multiple_locations!
       raise MissingSetParameters.new if params.empty?
     end
@@ -132,17 +132,6 @@ class API
     def make_sure_location_doesnt_exist!(name)
       return unless Location.find_by_name_or_reverse_name(name)
       raise LocationAlreadyExists.new(name)
-    end
-
-    def make_sure_name_isnt_dubious!(name)
-      citations =
-        Location.check_for_empty_name(name) +
-        Location.check_for_dubious_commas(name) +
-        Location.check_for_bad_country_or_state(name) +
-        Location.check_for_bad_terms(name) +
-        Location.check_for_bad_chars(name)
-      return if citations.none?
-      raise DubiousLocationName.new(citations)
     end
 
     def make_sure_not_setting_name_of_multiple_locations!

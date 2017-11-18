@@ -37,8 +37,8 @@ class API
       {
         title:      parse(:string, :title, limit: 100),
         when:       parse(:date, :date, default: Date.today),
-        place_name: parse(:place_name, :location, limit: 1024,
-                                                  default: Location.unknown),
+        place_name: parse(:place_name, :location,
+                          limit: 1024, default: Location.unknown.display_name),
         notes:      parse(:string, :notes, default: "")
       }
     end
@@ -54,6 +54,7 @@ class API
     end
 
     def validate_create_params!(params)
+      make_sure_location_isnt_dubious!(params[:place_name])
       raise MissingParameter.new(:title) if params[:title].blank?
       title = params[:title].to_s
       return unless SpeciesList.find_by_title(title)
@@ -61,11 +62,13 @@ class API
     end
 
     def validate_update_params!(params)
+      validate_set_location!(params)
+      validate_set_title!(params)
       return unless params.empty? && @add_obs.empty? && @remove_obs.empty?
       raise MissingSetParameters.new
     end
 
-    def build_setter
+    def build_setter(params)
       lambda do |spl|
         must_have_edit_permission!(spl)
         spl.update!(params)                  unless params.empty?
@@ -77,6 +80,29 @@ class API
     ############################################################################
 
     private
+
+    def validate_set_location!(params)
+      name = params[:place_name].to_s
+      if name.blank?
+        params.delete(:place_name)
+      else
+        make_sure_location_isnt_dubious!(name)
+      end
+    end
+
+    def validate_set_title!(params)
+      title = params[:title].to_s
+      if title.blank?
+        params.delete(:title)
+        return
+      end
+      return if query.num_results.zero?
+      raise TryingToSetMultipleLocationsToSameName.new \
+        if query.num_results > 1
+      match = SpeciesList.find_by_title(title)
+      return if !match || query.results.first == match
+      raise SpeciesListAlreadyExists.new(title)
+    end
 
     def parse_add_remove_observations
       @add_obs    = parse_array(:observation, :add_observations) || []

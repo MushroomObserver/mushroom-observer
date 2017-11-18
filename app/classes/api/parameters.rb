@@ -49,6 +49,23 @@ class API
     raise UnusedParameters.new(unused)              if unused.any?
   end
 
+  # ------------------------------------------
+  #  These validators belong elsewhere.
+  #  They are shared by multiple model apis.
+  # ------------------------------------------
+
+  def make_sure_location_isnt_dubious!(name)
+    return if name.blank? || Location.where(name: name).any?
+    citations =
+      Location.check_for_empty_name(name) +
+      Location.check_for_dubious_commas(name) +
+      Location.check_for_bad_country_or_state(name) +
+      Location.check_for_bad_terms(name) +
+      Location.check_for_bad_chars(name)
+    return if citations.none?
+    raise DubiousLocationName.new(citations)
+  end
+
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
   def parse_bounding_box!

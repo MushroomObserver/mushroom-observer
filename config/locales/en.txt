@@ -3526,6 +3526,7 @@
   api_project_taken: The project, "[project]", already exists.
   api_query_error: "There was an internal problem with Query: [error]"
   api_render_failed: There was a problem while rendering the results. [error]
+  api_species_list_already_exists: The [:species_list] "[title]" already exists.
   api_string_too_long: The string, "[val]", has more than [limit] characters.
   api_too_many_uploads: Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.
   api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.

@@ -1,8 +1,13 @@
 # encoding: utf-8
-# TODO: naming API
+# TODO: external_site API (get only)
+# TODO: herbarium API (get only)
 # TODO: specimen API
+# TODO: naming API
 # TODO: vote API
+# TODO: image_vote API
 # TODO: validate sequence archive
+# TODO: check how scientific location works throughout
+# TODO: make sure can't illegally set field to "" anywhere
 
 require "test_helper"
 
@@ -253,6 +258,18 @@ class ApiTest < UnitTestCase
     assert_equal(@archive.to_s, seq.archive.to_s)
     assert_equal(@accession.to_s, seq.accession.to_s)
     assert_equal(@notes.to_s, seq.notes.to_s)
+  end
+
+  def assert_last_species_list_correct(spl = SpeciesList.last)
+    assert_in_delta(Time.zone.now, spl.created_at, 1.minute) \
+      unless spl != SpeciesList.last
+    assert_in_delta(Time.zone.now, spl.updated_at, 1.minute)
+    assert_users_equal(@user, spl.user)
+    assert_equal(@title, spl.title)
+    assert_equal(@date, spl.when)
+    assert_objs_equal(@location, spl.location)
+    assert_equal(@where.to_s, spl.where.to_s)
+    assert_equal(@notes.to_s, spl.notes.to_s)
   end
 
   def assert_last_user_correct
@@ -2538,11 +2555,84 @@ class ApiTest < UnitTestCase
   end
 
   def test_creating_species_lists
-    # XXX
+    @user     = rolf
+    @title    = "Maximal New Species List"
+    @date     = Date.parse("2017-11-17")
+    @location = locations(:burbank)
+    @where    = nil
+    @notes    = "some notes"
+    params = {
+      method:   :post,
+      action:   :species_list,
+      api_key:  @api_key.key,
+      title:    @title,
+      date:     "2017-11-17",
+      location: @location.id,
+      notes:    @notes
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:title))
+    assert_api_fail(params.merge(title: SpeciesList.first.title))
+    assert_api_fail(params.merge(location: "bogus location"))
+    assert_api_pass(params)
+    assert_last_species_list_correct
+
+    @title    = "Minimal New Species List"
+    @date     = Date.today
+    @location = Location.unknown
+    @where    = nil
+    @notes    = nil
+    params = {
+      method:   :post,
+      action:   :species_list,
+      api_key:  @api_key.key,
+      title:    @title
+    }
+    assert_api_pass(params)
+    assert_last_species_list_correct
+
+    @title    = "New Species List with Undefined Location"
+    @date     = Date.today
+    @location = nil
+    @where    = "Bogus, Arkansas, USA"
+    @notes    = nil
+    params = {
+      method:   :post,
+      action:   :species_list,
+      api_key:  @api_key.key,
+      title:    @title,
+      location: @where
+    }
+    assert_api_pass(params)
+    assert_last_species_list_correct
   end
 
   def test_updating_species_lists
-    # XXX
+    rolfs_spl = species_lists(:first_species_list)
+    marys_spl = species_lists(:unknown_species_list)
+    assert(!marys_spl.has_edit_permission?(rolf))
+    @user     = rolf
+    @title    = "New Title"
+    @date     = Date.parse("2017-11-17")
+    @location = locations(:mitrula_marsh)
+    @where    = nil
+    @notes    = "new notes"
+    params = {
+      method:       :patch,
+      action:       :species_list,
+      api_key:      @api_key.key,
+      id:           rolfs_spl.id,
+      set_title:    @title,
+      set_date:     "2017-11-17",
+      set_location: @location.display_name,
+      set_notes:    @notes
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: marys_spl.id))
+    assert_api_fail(params.merge(set_title: SpeciesList.first.title))
+    assert_api_fail(params.merge(set_location: "bogus location"))
+    assert_api_pass(params)
+    assert_last_species_list_correct(rolfs_spl.reload)
   end
 
   def test_deleting_species_lists

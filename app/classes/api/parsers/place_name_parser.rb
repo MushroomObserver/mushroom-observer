@@ -4,7 +4,7 @@ class API
     class PlaceNameParser < LocationParser
       def parse(str)
         val = super
-        val.is_a?(Location) ? val.display_name : val
+        val.is_a?(Location) ? val.display_name : str
       rescue ObjectNotFoundByString
         str
       end
