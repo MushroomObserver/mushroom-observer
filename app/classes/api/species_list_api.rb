@@ -18,7 +18,7 @@ class API
         where:          sql_id_condition,
         created_at:     parse_range(:time, :created_at),
         updated_at:     parse_range(:time, :updated_at),
-        date:           parse(:date, :date),
+        date:           parse_range(:date, :date),
         users:          parse_array(:user, :user),
         names:          parse_array(:name, :name, as: :id),
         synonym_names:  parse_array(:name, :synonyms_of, as: :id),

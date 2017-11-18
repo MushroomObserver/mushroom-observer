@@ -2329,7 +2329,98 @@ class ApiTest < UnitTestCase
   # ---------------------------------
 
   def test_getting_species_lists
-    # XXX
+    params = { method: :get, action: :species_list }
+
+    spl = SpeciesList.all.sample
+    assert_api_pass(params.merge(id: spl.id))
+    assert_api_results([spl])
+
+    spls = SpeciesList.where("date(created_at) = '2012-07-06'")
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(created_at: "2012-07-06"))
+    assert_api_results(spls)
+
+    spls = SpeciesList.where("year(updated_at) = 2008")
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(updated_at: "2008"))
+    assert_api_results(spls)
+
+    spls = SpeciesList.where(user: rolf)
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_results(spls)
+
+    spls = SpeciesList.where("`when` >= '2006-03-01' and
+                              `when` <= '2006-03-02'")
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(date: "2006-03-01-2006-03-02"))
+    assert_api_results(spls)
+
+    obses = Observation.where(name: names(:fungi))
+    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_results(spls)
+
+    obs1 = Observation.create!(user: rolf, when: Time.now,
+                               where: locations(:burbank),
+                               name: names(:lactarius_alpinus))
+    obs2 = Observation.create!(user: rolf, when: Time.now,
+                               where: locations(:burbank),
+                               name: names(:lactarius_alpigenes))
+    obs1.species_lists << species_lists(:first_species_list)
+    obs2.species_lists << species_lists(:first_species_list)
+    obs2.species_lists << species_lists(:another_species_list)
+    obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
+    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert(spls.length > 1)
+    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_results(spls)
+
+    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(spls)
+
+    spls = SpeciesList.where(location: locations(:no_mushrooms_location))
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(location: 'No Mushrooms'))
+    assert_api_results(spls)
+
+    proj1 = projects(:bolete_project)
+    proj2 = projects(:two_list_project)
+    spls = [proj1, proj2].map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(project: "#{proj1.id}, #{proj2.id}"))
+    assert_api_results(spls)
+
+    with    = SpeciesList.where("COALESCE(notes,'') != ''")
+    without = SpeciesList.where("COALESCE(notes,'') = ''")
+    assert(with.length > 1)
+    assert(without.length > 1)
+    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_results(with)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results(without)
+
+    Comment.create!(user: dick, target: spl, summary: "test",
+                    comment: "double dare you to reiterate this comment!")
+    assert_api_pass(params.merge(has_comments: "yes"))
+    assert_api_results([spl])
+
+    spls = SpeciesList.where("title like '%mysteries%'")
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(title_has: "mysteries"))
+    assert_api_results(spls)
+
+    spls = SpeciesList.where("notes like '%skunk%'")
+    assert_not_empty(spls)
+    assert_api_pass(params.merge(notes_has: "skunk"))
+    assert_api_results(spls)
+
+    assert_api_pass(params.merge(comments_has: "double dare"))
+    assert_api_results([spl])
   end
 
   def test_creating_species_lists
