@@ -58,12 +58,12 @@ class API
     def create_params
       {
         observation: parse_observation_to_attach_to,
-        user:        @user,
         locus:       parse(:string, :locus),
         bases:       parse(:string, :bases),
         archive:     parse(:archive, :archive),
         accession:   parse(:string, :accession, limit: 255),
-        notes:       parse(:string, :notes)
+        notes:       parse(:string, :notes),
+        user:        @user
       }
     end
 

@@ -5,7 +5,6 @@
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
-# TODO: check how scientific location works throughout
 
 require "test_helper"
 
@@ -1799,10 +1798,15 @@ class ApiTest < UnitTestCase
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
+    # API no longer pays attention to user's location format preference!  This
+    # is supposed to make it more consistent for apps.  It would be a real
+    # problem because apps don't have access to the user's prefs, so they have
+    # no way of knowing how to pass in locations on the behalf of the user. 
     User.update(rolf.id, location_format: :scientific)
     assert_equal(:scientific, rolf.reload.location_format)
 
-    params[:location] = "USA, California, Somewhere Else"
+    # params[:location] = "USA, California, Somewhere Else"
+    params[:location] = "Somewhere Else, California, USA"
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
@@ -2065,6 +2069,7 @@ class ApiTest < UnitTestCase
     @summary = ""
     @admins  = [rolf]
     @members = [rolf]
+    @user    = rolf
     params = {
       method:  :post,
       action:  :project,

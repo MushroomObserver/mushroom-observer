@@ -34,7 +34,8 @@ class API
       parse_admins_and_members
       {
         title:   parse(:string, :title, limit: 100),
-        summary: parse(:string, :summary, default: "")
+        summary: parse(:string, :summary, default: ""),
+        user:    @user
       }
     end
 

@@ -50,7 +50,8 @@ class API
       {
         citation:       parse(:string, :citation, default: ""),
         classification: parse(:string, :classification, default: ""),
-        notes:          parse(:string, :notes, default: "")
+        notes:          parse(:string, :notes, default: ""),
+        user:           @user
       }
     end
 
@@ -179,27 +180,27 @@ class API
 
     def must_be_creator!(name)
       return if name.user == @user
-      raise MustBeCreator.new(type: :name)
+      raise MustBeCreator.new(:name)
     end
 
     def must_be_only_editor!(name)
       return unless name.versions.any? { |x| x.user_id != @user.id }
-      raise MustBeOnlyEditor.new(type: :name)
+      raise MustBeOnlyEditor.new(:name)
     end
 
     def must_own_all_descriptions!(name)
       return unless name.descriptions.any? { |x| x.user != @user }
-      raise MustOwnAllDescriptions.new(type: :name)
+      raise MustOwnAllDescriptions.new(:name)
     end
 
     def must_own_all_observations!(name)
       return unless name.observations.any? { |x| x.user != @user }
-      raise MustOwnAllObservations.new(type: :name)
+      raise MustOwnAllObservations.new(:name)
     end
 
     def must_own_all_namings!(name)
       return unless name.namings.any? { |x| x.user != @user }
-      raise MustOwnAllNamings.new(type: :name)
+      raise MustOwnAllNamings.new(:name)
     end
 
     def parse_set_name!

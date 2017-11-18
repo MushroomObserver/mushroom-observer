@@ -78,7 +78,8 @@ class API
         images:                 @images,
         projects:               parse_projects_to_attach_to,
         species_lists:          parse_species_lists_to_attach_to,
-        name:                   @name
+        name:                   @name,
+        user:                   @user
       }
     end
 

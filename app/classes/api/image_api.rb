@@ -55,7 +55,8 @@ class API
         image:            @upload.content,
         upload_length:    @upload.content_length,
         upload_type:      @upload.content_type,
-        upload_md5sum:    @upload.content_md5
+        upload_md5sum:    @upload.content_md5,
+        user:             @user
       }
     end
 

@@ -32,7 +32,8 @@ class API
       {
         target:  parse(:object, :target, limit: Comment.all_types),
         summary: parse(:string, :summary, limit: 100),
-        comment: parse(:string, :content)
+        comment: parse(:string, :content),
+        user:    @user
       }
     end
 

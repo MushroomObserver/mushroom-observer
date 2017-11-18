@@ -39,7 +39,8 @@ class API
         when:       parse(:date, :date, default: Date.today),
         place_name: parse(:place_name, :location,
                           limit: 1024, default: Location.unknown.display_name),
-        notes:      parse(:string, :notes, default: "")
+        notes:      parse(:string, :notes, default: ""),
+        user:       @user
       }
     end
 

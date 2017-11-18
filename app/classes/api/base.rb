@@ -276,12 +276,15 @@ class API
     key_str = parse(:string, :api_key)
     if !key_str
       User.current = self.user = nil
+      User.current_location_format = :postal
     else
       key = ApiKey.find_by_key(key_str)
       raise BadApiKey.new(key_str)        unless key
       raise ApiKeyNotVerified.new(key)    unless key.verified
       raise UserNotVerified.new(key.user) unless key.user.verified
       User.current = self.user = key.user
+      User.current_location_format = :postal
+      # (that overrides user pref in order to make it more consistent for apps)
       key.touch!
       self.api_key = key
     end

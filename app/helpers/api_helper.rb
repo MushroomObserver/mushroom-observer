@@ -102,7 +102,7 @@ module ApiHelper
   end
 
   def xml_undefined_location(xml, tag, val)
-    if @user && @user.location_format == :scientific
+    if User.current_location_format == :scientific
       val = Location.reverse_name(val)
     end
     xml.tag!(tag, val, type: "string")

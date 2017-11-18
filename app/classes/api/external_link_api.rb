@@ -28,10 +28,10 @@ class API
 
     def create_params
       {
-        user:          @user,
         observation:   parse(:observation, :observation),
         external_site: parse(:external_site, :external_site),
-        url:           parse(:string, :url)
+        url:           parse(:string, :url),
+        user:          @user
       }
     end
 

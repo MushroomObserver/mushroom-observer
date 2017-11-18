@@ -28,7 +28,6 @@ class API
 
     def create_params
       {
-        user:         @user,
         display_name: parse(:string, :name, limit: 1024),
         north:        parse(:latitude, :north),
         south:        parse(:longitude, :south),
@@ -36,7 +35,8 @@ class API
         west:         parse(:longitude, :west),
         high:         parse(:altitude, :high),
         low:          parse(:altitude, :low),
-        notes:        parse(:string, :notes)
+        notes:        parse(:string, :notes),
+        user:         @user
       }
     end
 
@@ -96,27 +96,27 @@ class API
 
     def must_be_creator!(loc)
       return if loc.user == @user
-      raise MustBeCreator.new(type: :location)
+      raise MustBeCreator.new(:location)
     end
 
     def must_be_only_editor!(loc)
       return unless loc.versions.any? { |x| x.user_id != @user.id }
-      raise MustBeOnlyEditor.new(type: :location)
+      raise MustBeOnlyEditor.new(:location)
     end
 
     def must_own_all_descriptions!(loc)
       return unless loc.descriptions.any? { |x| x.user != @user }
-      raise MustOwnAllDescriptions.new(type: :location)
+      raise MustOwnAllDescriptions.new(:location)
     end
 
     def must_own_all_observations!(loc)
       return unless loc.observations.any? { |x| x.user != @user }
-      raise MustOwnAllObservations.new(type: :location)
+      raise MustOwnAllObservations.new(:location)
     end
 
     def must_own_all_species_lists!(loc)
       return unless loc.species_lists.any? { |x| x.user != @user }
-      raise MustOwnAllSpeciesLists.new(type: :location)
+      raise MustOwnAllSpeciesLists.new(:location)
     end
 
     def must_not_be_another_users_profile_location!(loc)

@@ -386,22 +386,25 @@ class User < AbstractModel
     @@user && @@user.id
   end
 
-  # Report current user's preferred location_format
-  #
-  # location_format = User.current_location_format
-  #
-  def self.current_location_format
-    if !defined?(@@user) || @@user.nil?
-      :postal
-    else
-      @@user.location_format
-    end
+  # Tell User model which User is currently logged in (if any).  This is used
+  # by the +autologin+ filter and API authentication.
+  def self.current=(x)
+    @@location_format = x ? x.location_format : :postal
+    @@user = x
   end
 
-  # Tell User model which User is currently logged in (if any).  This is used
-  # by the +autologin+ filter.
-  def self.current=(x)
-    @@user = x
+  # Report current user's preferred location_format
+  #
+  #   location_format = User.current_location_format
+  #
+  def self.current_location_format
+    @@location_format = :postal unless defined?(@@location_format)
+    @@location_format
+  end
+
+  # Set the location format to use throughout the site.
+  def self.current_location_format=(x)
+    @@location_format = x
   end
 
   # Did current user opt to view owner_id's?
