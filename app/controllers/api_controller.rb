@@ -32,6 +32,14 @@ class ApiController < ApplicationController
     rest_query(:external_link)
   end
 
+  def external_sites
+    rest_query(:external_site)
+  end
+
+  def herbaria
+    rest_query(:herbarium)
+  end
+
   def images
     rest_query(:image)
   end

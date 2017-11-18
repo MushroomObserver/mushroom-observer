@@ -52,24 +52,57 @@ class ApiControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_basic_get_requests
-    assert_no_api_errors
-    [
-      Comment,
-      Image,
-      Location,
-      Name,
-      Observation,
-      Project,
-      Sequence,
-      SpeciesList,
-      User
-    ].each { |model| do_basic_get_request_for_model(model) }
+  def test_basic_comment_get_request
+    do_basic_get_request_for_model(Comment)
+  end
+
+  def test_basic_externallink_get_request
+    do_basic_get_request_for_model(ExternalLink)
+  end
+
+  def test_basic_externalsite_get_request
+    do_basic_get_request_for_model(ExternalSite)
+  end
+
+  def test_basic_herbarium_get_request
+    do_basic_get_request_for_model(Herbarium)
+  end
+
+  def test_basic_image_get_request
+    do_basic_get_request_for_model(Image)
+  end
+
+  def test_basic_location_get_request
+    do_basic_get_request_for_model(Location)
+  end
+
+  def test_basic_name_get_request
+    do_basic_get_request_for_model(Name)
+  end
+
+  def test_basic_observation_get_request
+    do_basic_get_request_for_model(Observation)
+  end
+
+  def test_basic_project_get_request
+    do_basic_get_request_for_model(Project)
+  end
+
+  def test_basic_sequence_get_request
+    do_basic_get_request_for_model(Sequence)
+  end
+
+  def test_basic_specieslist_get_request
+    do_basic_get_request_for_model(SpeciesList)
+  end
+
+  def test_basic_user_get_request
+    do_basic_get_request_for_model(User)
   end
 
   def do_basic_get_request_for_model(model)
-    %i[none low high].each do |detail|
-      %i[xml json].each do |format|
+    [:none, :low, :high].each do |detail|
+      [:xml, :json].each do |format|
         get(model.table_name.to_sym, detail: detail, format: format)
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)

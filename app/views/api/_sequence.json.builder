@@ -1,4 +1,5 @@
 json.id         object.id
+json.type       "sequence"
 json.locus      object.locus
 json.bases      object.bases
 json.archive    object.archive

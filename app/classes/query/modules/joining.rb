@@ -22,8 +22,8 @@ module Query::Modules::Joining
       users: :user_id
     },
     external_links: {
-      external_site: :external_site_id,
-      observation: :observation_id,
+      external_sites: :external_site_id,
+      observations: :observation_id,
       users: :user_id
     },
     external_sites: {
@@ -40,7 +40,7 @@ module Query::Modules::Joining
     },
     herbaria: {
       locations: :location_id,
-      
+      users: :personal_user_id
     },
     herbaria_curators: {
       herbaria: :herbarium_id,

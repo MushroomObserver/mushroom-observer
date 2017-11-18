@@ -5,6 +5,7 @@
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
+# TODO: add help arg to parsers
 
 require "test_helper"
 

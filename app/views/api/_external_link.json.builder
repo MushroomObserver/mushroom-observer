@@ -1,5 +1,5 @@
 json.id            object.id
-json.id            "external_link"
+json.type          "external_link"
 json.url           object.url
 json.external_site object.site_name
 json.created_at    object.created_at.utc
