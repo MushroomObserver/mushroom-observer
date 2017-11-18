@@ -1,4 +1,8 @@
 # encoding: utf-8
+# TODO: naming API
+# TODO: specimen API
+# TODO: vote API
+# TODO: validate sequence archive
 
 require "test_helper"
 
@@ -236,6 +240,19 @@ class ApiTest < UnitTestCase
     assert_equal(@summary, proj.summary)
     assert_user_list_equal(@admins, proj.admin_group.users)
     assert_user_list_equal(@members, proj.user_group.users)
+  end
+
+  def assert_last_sequence_correct(seq = Sequence.last)
+    assert_in_delta(Time.zone.now, seq.created_at, 1.minute) \
+      unless seq != Sequence.last
+    assert_in_delta(Time.zone.now, seq.updated_at, 1.minute)
+    assert_users_equal(@user, seq.user)
+    assert_objs_equal(@obs, seq.observation)
+    assert_equal(@locus.to_s, seq.locus.to_s)
+    assert_equal(@bases.to_s, seq.bases.to_s)
+    assert_equal(@archive.to_s, seq.archive.to_s)
+    assert_equal(@accession.to_s, seq.accession.to_s)
+    assert_equal(@notes.to_s, seq.notes.to_s)
   end
 
   def assert_last_user_correct
@@ -2302,11 +2319,108 @@ class ApiTest < UnitTestCase
   end
 
   def test_creating_sequences
-    # XXX
+    rolfs_obs  = observations(:coprinus_comatus_obs)
+    marys_obs  = observations(:detailed_unknown_obs)
+    @obs       = rolfs_obs
+    @locus     = "ITS1F"
+    @bases     = "gattcgatcgatcgatcatctcgatgcatgactctcgatgcatctac"
+    @archive   = "UNITE"
+    @accession = "NY123456"
+    @notes     = "these are notes"
+    @user      = rolf
+    params = {
+      method:      :post,
+      action:      :sequence,
+      api_key:     @api_key.key,
+      observation: rolfs_obs.id,
+      locus:       @locus,
+      bases:       @bases,
+      archive:     @archive,
+      accession:   @accession,
+      notes:       @notes
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:observation))
+    assert_api_fail(params.remove(:locus))
+    assert_api_fail(params.remove(:observation))
+    assert_api_fail(params.remove(:archive))
+    assert_api_fail(params.remove(:accession))
+    assert_api_fail(params.merge(observation: marys_obs.id))
+    # assert_api_fail(params.merge(archive: "bogus"))
+    assert_api_fail(params.merge(bases: "funky stuff!"))
+    assert_api_pass(params)
+    assert_last_sequence_correct
+    assert_api_fail(params)
+    @accession += "b"
+    @bases     += "b"
+    assert_api_fail(params.merge(accession: @accession))
+    assert_api_fail(params.merge(bases: @bases))
+    assert_api_pass(params.merge(accession: @accession, bases: @bases))
+    assert_last_sequence_correct
+
+    @locus     = "MSU1"
+    @bases     = "gtctatcagtcgacagcatgcgccactgctaacacg"
+    @archive   = nil
+    @accession = nil
+    @notes     = nil
+    params = {
+      method:      :post,
+      action:      :sequence,
+      api_key:     @api_key.key,
+      observation: rolfs_obs.id
+    }
+    assert_api_fail(params)
+    assert_api_fail(params.merge(locus: @locus))
+    assert_api_pass(params.merge(locus: @locus, bases: @bases))
+    assert_last_sequence_correct
+
+    @locus     = "LSU"
+    @bases     = nil
+    @archive   = "GenBank"
+    @accession = "AR09876"
+    @notes     = nil
+    params = {
+      method:      :post,
+      action:      :sequence,
+      api_key:     @api_key.key,
+      observation: rolfs_obs.id
+    }
+    assert_api_fail(params)
+    assert_api_fail(params.merge(locus: @locus))
+    assert_api_fail(params.merge(locus: @locus, archive: @archive))
+    assert_api_pass(params.merge(locus: @locus, archive: @archive,
+                                 accession: @accession))
+    assert_last_sequence_correct
   end
 
   def test_updating_sequences
-    # XXX
+    seq        = sequences(:alternate_archive)
+    @user      = dick
+    @obs       = seq.observation
+    @locus     = "NEWITS"
+    @bases     = "gtac"
+    @archive   = "GenBank"
+    @accession = "XX123456"
+    @notes     = "new notes"
+    params = {
+      method:        :patch,
+      action:        :sequence,
+      api_key:       @api_key.key,
+      id:            seq.id,
+      set_locus:     @locus,
+      set_bases:     @bases,
+      set_archive:   @archive,
+      set_accession: @accession,
+      set_notes:     @notes
+    }
+    assert_api_fail(params)
+    @api_key.update_attributes!(user: dick)
+    assert_api_fail(params.merge(set_locus: ""))
+    # assert_api_fail(params.merge(set_archive: "bogus"))
+    assert_api_fail(params.merge(set_archive: ""))
+    assert_api_fail(params.merge(set_accession: ""))
+    assert_api_pass(params)
+    assert_last_sequence_correct(seq.reload)
   end
 
   def test_deleting_sequences
