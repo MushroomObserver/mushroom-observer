@@ -18,7 +18,7 @@ class API
         where:      sql_id_condition,
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users:      parse_array(:user, :user),
+        users:      parse_array(:user, :user, help: :first_user),
         north:      n,
         south:      s,
         east:       e,
@@ -28,7 +28,7 @@ class API
 
     def create_params
       {
-        display_name: parse(:string, :name, limit: 1024),
+        display_name: parse(:string, :name, limit: 1024, help: :postal),
         north:        parse(:latitude, :north),
         south:        parse(:longitude, :south),
         east:         parse(:longitude, :east),
@@ -42,7 +42,8 @@ class API
 
     def update_params
       {
-        display_name: parse(:string, :set_name, limit: 1024, not_blank: true),
+        display_name: parse(:string, :set_name, limit: 1024, not_blank: true,
+                                                help: :postal),
         north:        parse(:latitude, :set_north),
         south:        parse(:longitude, :set_south),
         east:         parse(:longitude, :set_east),

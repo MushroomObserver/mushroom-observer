@@ -19,7 +19,7 @@ class API
         where:              sql_id_condition,
         created_at:         parse_range(:time, :created_at),
         updated_at:         parse_range(:time, :updated_at),
-        users:              parse_array(:user, :user),
+        users:              parse_array(:user, :user, help: :first_user),
         names:              parse_array(:name, :name, as: :id),
         synonym_names:      parse_array(:name, :synonyms_of, as: :id),
         children_names:     parse_array(:name, :children_of, as: :id),
@@ -35,12 +35,12 @@ class API
         has_notes:          parse(:boolean, :has_notes),
         has_comments:       parse(:boolean, :has_comments, limit: true),
         has_default_desc:   parse(:boolean, :has_description),
-        text_name_has:      parse(:string, :text_name_has),
-        author_has:         parse(:string, :author_has),
-        citation_has:       parse(:string, :citation_has),
-        classification_has: parse(:string, :classification_has),
-        notes_has:          parse(:string, :notes_has),
-        comments_has:       parse(:string, :comments_has),
+        text_name_has:      parse(:string, :text_name_has, help: 1),
+        author_has:         parse(:string, :author_has, help: 1),
+        citation_has:       parse(:string, :citation_has, help: 1),
+        classification_has: parse(:string, :classification_has, help: 1),
+        notes_has:          parse(:string, :notes_has, help: 1),
+        comments_has:       parse(:string, :comments_has, help: 1),
         ok_for_export:      parse(:boolean, :ok_for_export)
       }
     end
@@ -126,7 +126,8 @@ class API
     private
 
     def parse_misspellings
-      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only])
+      parse(:enum, :misspellings, default: :no, limit: [:no, :either, :only],
+                                  help: 1)
     end
 
     def validate_classification!(params)
@@ -215,8 +216,8 @@ class API
     def parse_set_synonymy!
       @deprecated       = parse(:boolean, :set_deprecated)
       @synonymize_with  = parse(:name, :synonymize_with)
-      @clear_synonyms   = parse(:boolean, :clear_synonyms, limit: true)
-      @correct_spelling = parse(:name, :set_correct_spelling)
+      @clear_synonyms   = parse(:boolean, :clear_synonyms, limit: true, help: 1)
+      @correct_spelling = parse(:name, :set_correct_spelling, help: 1)
       return if (@synonymize_with ? 1 : 0) +
                 (@clear_synonyms ? 1 : 0) +
                 (@set_correct_spelling ? 1 : 0) <= 1

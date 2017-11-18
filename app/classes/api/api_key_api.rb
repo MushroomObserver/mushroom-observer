@@ -9,15 +9,15 @@ class API
     self.delete_page_length      = 1000
 
     def create_params
-      @for_user = parse(:user, :for_user, default: @user)
+      @for_user = parse(:user, :for_user, default: @user, help: :api_key_user)
       {
-        notes:    parse(:string, :app),
+        notes:    parse(:string, :app, help: 1),
         user:     @for_user,
         verified: (@for_user == @user ? Time.now : nil)
       }
     end
 
-    def validate_create_params!(params)
+    def before_create(params)
       raise MissingParameter.new(:app) if params[:notes].blank?
     end
 

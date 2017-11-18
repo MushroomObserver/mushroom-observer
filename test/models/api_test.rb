@@ -3,7 +3,6 @@
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
-# TODO: add help arg to parsers
 
 require "test_helper"
 
@@ -207,8 +206,8 @@ class ApiTest < UnitTestCase
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
     assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
-    assert_objs_equal(@loc, obs.location)
     assert_nil(obs.where)
+    assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
     assert_equal(@is_col_loc, obs.is_collection_location)
     assert_equal(0, obs.num_views)
@@ -3467,5 +3466,124 @@ class ApiTest < UnitTestCase
     @api.user = other
     assert_parse(:project, API::MustBeAdmin, proj.id, must_be_admin: true)
     assert_parse(:project, API::MustBeMember, proj.id, must_be_member: true)
+  end
+
+  # --------------------------
+  #  :section: Help Messages
+  # --------------------------
+
+  def test_api_key_help
+    do_help_test(:get, :api_key, :fail)
+    do_help_test(:post, :api_key)
+    do_help_test(:patch, :api_key, :fail)
+    do_help_test(:delete, :api_key, :fail)
+  end
+
+  def test_comment_help
+    do_help_test(:get, :comment)
+    do_help_test(:post, :comment)
+    do_help_test(:patch, :comment)
+    do_help_test(:delete, :comment)
+  end
+
+  def test_external_link_help
+    do_help_test(:get, :external_link)
+    do_help_test(:post, :external_link)
+    do_help_test(:patch, :external_link)
+    do_help_test(:delete, :external_link)
+  end
+
+  def test_external_site_help
+    do_help_test(:get, :external_site)
+    do_help_test(:post, :external_site, :fail)
+    do_help_test(:patch, :external_site, :fail)
+    do_help_test(:delete, :external_site, :fail)
+  end
+
+  def test_herbarium_help
+    do_help_test(:get, :herbarium)
+    do_help_test(:post, :herbarium, :fail)
+    do_help_test(:patch, :herbarium, :fail)
+    do_help_test(:delete, :herbarium, :fail)
+  end
+
+  def test_image_help
+    do_help_test(:get, :image)
+    do_help_test(:post, :image)
+    do_help_test(:patch, :image)
+    do_help_test(:delete, :image)
+  end
+
+  def test_location_help
+    do_help_test(:get, :location)
+    do_help_test(:post, :location)
+    do_help_test(:patch, :location)
+    do_help_test(:delete, :location, :fail)
+  end
+
+  def test_name_help
+    do_help_test(:get, :name)
+    do_help_test(:post, :name)
+    do_help_test(:patch, :name)
+    do_help_test(:delete, :name, :fail)
+  end
+
+  def test_observation_help
+    do_help_test(:get, :observation)
+    do_help_test(:post, :observation)
+    do_help_test(:patch, :observation)
+    do_help_test(:delete, :observation)
+  end
+
+  def test_project_help
+    do_help_test(:get, :project)
+    do_help_test(:post, :project)
+    do_help_test(:patch, :project)
+    do_help_test(:delete, :project, :fail)
+  end
+
+  def test_sequence_help
+    do_help_test(:get, :sequence)
+    do_help_test(:post, :sequence)
+    do_help_test(:patch, :sequence)
+    do_help_test(:delete, :sequence)
+  end
+
+  def test_species_list_help
+    do_help_test(:get, :species_list)
+    do_help_test(:post, :species_list)
+    do_help_test(:patch, :species_list)
+    do_help_test(:delete, :species_list)
+  end
+
+  def test_user_help
+    do_help_test(:get, :user)
+    do_help_test(:post, :user)
+    do_help_test(:patch, :user)
+    do_help_test(:delete, :user, :fail)
+  end
+
+  def do_help_test(method, action, fail = false)
+    params = {
+      method: method,
+      action: action,
+      help: :me
+    }
+    params[:api_key] = @api_key.key if method != :get
+    api = API.execute(params)
+    others = api.errors.reject { |e| e.class.name == "API::HelpMessage" }
+    assert_equal(1, api.errors.length, others.map(&:to_s))
+    if fail
+      assert_equal("API::NoMethodForAction", api.errors.first.class.name)
+    else
+      assert_equal("API::HelpMessage", api.errors.first.class.name)
+      file = "#{Rails.root}/help.txt"
+      return unless File.exists?(file)
+      File.open(file, "a") do |fh|
+        fh.puts "#{method.to_s.upcase} #{action}"
+        fh.puts api.errors.first.to_s.gsub(/; /, "\n").sub(/^Usage: /, "")
+        fh.puts
+      end
+    end
   end
 end

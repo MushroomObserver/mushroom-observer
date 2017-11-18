@@ -29,9 +29,9 @@ class API
       # Parse a list of comma-separated values.  Always returns an Array if the
       # parameter was supplied, even if only one value given, else returns nil.
       def parse_array(parse_scalar_or_range)
+        args[:list] = true
         str = clean_param(:leave_slashes)
         return args[:default] if str.blank?
-        args[:list] = true
         result = []
         while (match = str.match(/^((\\.|[^\\,]+)+),/))
           str = match.post_match
@@ -46,9 +46,9 @@ class API
       # Returns OrderedRange instance if range given, else parses it as a
       # normal "scalar" value, returning nil if the parameter doesn't exist.
       def parse_range
+        args[:range] = true
         str = clean_param(:leave_slashes)
         return args[:default] if str.blank?
-        args[:range] = true
         match = str.match(/^((\\.|[^\\-]+)+)-((\\.|[^\\-]+)+)$/)
         if match
           @val = match[1]

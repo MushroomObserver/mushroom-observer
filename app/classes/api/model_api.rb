@@ -55,8 +55,8 @@ class API
 
     def build_object
       params = create_params
-      validate_create_params!(params)
       done_parsing_parameters!
+      validate_create_params!(params)
       before_create(params)
       obj = model.new(params)
       obj.save || raise(CreateFailed.new(obj))
@@ -83,9 +83,9 @@ class API
     def update_objects
       params = update_params
       params.remove_nils!
+      done_parsing_parameters!
       validate_update_params!(params)
       setter = build_setter(params)
-      done_parsing_parameters!
       abort_if_any_errors!
       results.each do |obj|
         begin

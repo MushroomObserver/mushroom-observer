@@ -202,10 +202,13 @@ class API
   class HelpMessage < Error
     def initialize(params)
       super()
-      help = params.keys.sort_by(&:to_s).map do |arg|
+      keys = params.keys - [
+        :method, :action, :version, :api_key, :page, :detail, :format
+      ]
+      msg = keys.sort_by(&:to_s).map do |arg|
         params[arg].inspect
-      end.join("\n")
-      args.merge!(help: help)
+      end.join("; ")
+      args.merge!(help: msg)
     end
   end
 
@@ -293,10 +296,6 @@ class API
 
   # Must supply both latitude and longitude, can't leave one out.
   class LatLongMustBothBeSet < Error
-  end
-
-  # Request to create observation must supply either location or lat/long.
-  class MustSupplyLocationOrGPS < Error
   end
 
   # Tried to create/rename a location over top of an existing one.

@@ -21,14 +21,14 @@ class API
         where:            sql_id_condition,
         created_at:       parse_range(:time, :created_at),
         updated_at:       parse_range(:time, :updated_at),
-        users:            parse_array(:user, :user),
+        users:            parse_array(:user, :user, help: :creator),
         locus:            parse_array(:string, :locus),
         archive:          parse_array(:archive, :archive),
         accession:        parse_array(:string, :accession),
-        locus_has:        parse(:string, :locus_has),
-        accession_has:    parse(:string, :accession_has),
-        notes_has:        parse(:string, :notes_has),
-        obs_date:         parse_range(:date, :obs_date),
+        locus_has:        parse(:string, :locus_has, help: 1),
+        accession_has:    parse(:string, :accession_has, help: 1),
+        notes_has:        parse(:string, :notes_has, help: 1),
+        obs_date:         parse_range(:date, :obs_date, help: :obs_date),
         observers:        parse_array(:user, :observer),
         names:            parse_array(:name, :name, as: :id),
         synonym_names:    parse_array(:name, :synonyms_of, as: :id),
@@ -43,13 +43,14 @@ class API
         south:            s,
         east:             e,
         west:             w,
-        is_collection_location: parse(:boolean, :is_collection_location),
+        is_collection_location: parse(:boolean, :is_collection_location,
+                                      help: 1),
         has_images:       parse(:boolean, :has_images),
-        has_name:         parse(:boolean, :has_name),
+        has_name:         parse(:boolean, :has_name, help: :min_rank),
         has_specimen:     parse(:boolean, :has_specimen),
-        has_obs_notes:    parse(:boolean, :has_obs_notes),
-        has_notes_fields: parse(:string, :has_notes_field),
-        obs_notes_has:    parse(:string, :obs_notes_has)
+        has_obs_notes:    parse(:boolean, :has_obs_notes, help: 1),
+        has_notes_fields: parse(:string, :has_notes_field, help: 1),
+        obs_notes_has:    parse(:string, :obs_notes_has, help: 1)
       }
     end
     # rubocop:enable Metrics/AbcSize
@@ -57,7 +58,8 @@ class API
 
     def create_params
       {
-        observation: parse_observation_to_attach_to,
+        observation: parse(:observation, :observation,
+                           must_have_edit_permission: true),
         locus:       parse(:string, :locus),
         bases:       parse(:string, :bases),
         archive:     parse(:archive, :archive),
@@ -81,17 +83,6 @@ class API
       raise MissingParameter.new(:observation) unless params[:observation]
       raise MissingParameter.new(:locus)       if params[:locus].blank?
       # Sequence validators handle the rest, it's too complicated to repeat.
-    end
-
-    def validate_update_params!(params)
-    end
-
-    ############################################################################
-
-    private
-
-    def parse_observation_to_attach_to
-      parse(:observation, :observation, must_have_edit_permission: true)
     end
   end
 end

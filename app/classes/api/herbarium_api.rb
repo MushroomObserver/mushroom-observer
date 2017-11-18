@@ -21,7 +21,7 @@ class API
         code:        parse(:string, :code),
         name:        parse(:string, :name),
         description: parse(:string, :description),
-        address:     parse(:string, :address)
+        address:     parse(:string, :address, help: :mailing_address)
       }
     end
 

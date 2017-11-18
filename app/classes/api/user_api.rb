@@ -23,7 +23,7 @@ class API
     end
 
     def create_params
-      @create_key = parse(:string, :create_key)
+      @create_key = parse(:string, :create_key, help: 1)
       {
         login:           parse(:string, :login, limit: 80),
         name:            parse(:string, :name, limit: 80, default: ""),

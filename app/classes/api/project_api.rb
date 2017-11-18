@@ -18,15 +18,15 @@ class API
         where:             sql_id_condition,
         created_at:        parse_range(:time, :created_at),
         updated_at:        parse_range(:time, :updated_at),
-        users:             parse_array(:user, :user),
+        users:             parse_array(:user, :user, help: :creator),
         has_images:        parse(:boolean, :has_images, limit: true),
         has_observations:  parse(:boolean, :has_observations, limit: true),
         has_species_lists: parse(:boolean, :has_species_lists, limit: true),
         has_comments:      parse(:boolean, :has_comments, limit: true),
         has_summary:       parse(:boolean, :has_summary),
-        title_has:         parse(:string, :title_has),
-        summary_has:       parse(:string, :summary_has),
-        comments_has:      parse(:string, :comments_has)
+        title_has:         parse(:string, :title_has, help: 1),
+        summary_has:       parse(:string, :summary_has, help: 1),
+        comments_has:      parse(:string, :comments_has, help: 1)
       }
     end
 

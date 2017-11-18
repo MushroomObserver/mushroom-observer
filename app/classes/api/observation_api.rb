@@ -33,8 +33,8 @@ class API
         where:            sql_id_condition,
         created_at:       parse_range(:time, :created_at),
         updated_at:       parse_range(:time, :updated_at),
-        date:             parse_range(:date, :date),
-        users:            parse_array(:user, :user),
+        date:             parse_range(:date, :date, help: :when_seen),
+        users:            parse_array(:user, :user, help: :observer),
         names:            parse_array(:name, :name, as: :id),
         synonym_names:    parse_array(:name, :synonyms_of, as: :id),
         children_names:   parse_array(:name, :children_of, as: :id),
@@ -44,16 +44,17 @@ class API
         projects:         parse_array(:project, :project, as: :id),
         species_lists:    parse_array(:species_list, :species_list, as: :id),
         confidence:       parse(:confidence, :confidence),
-        is_collection_location: parse(:boolean, :is_collection_location),
+        is_collection_location: parse(:boolean, :is_collection_location,
+                                      help: 1),
         has_images:       parse(:boolean, :has_images),
         has_location:     parse(:boolean, :has_location),
-        has_name:         parse(:boolean, :has_name),
+        has_name:         parse(:boolean, :has_name, help: :min_rank),
         has_comments:     parse(:boolean, :has_comments, limit: true),
         has_specimen:     parse(:boolean, :has_specimen),
         has_notes:        parse(:boolean, :has_notes),
-        has_notes_fields: parse_array(:string, :has_notes_field),
-        notes_has:        parse(:string, :notes_has),
-        comments_has:     parse(:string, :comments_has),
+        has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
+        notes_has:        parse(:string, :notes_has, help: 1),
+        comments_has:     parse(:string, :comments_has, help: 1),
         north:            n,
         south:            s,
         east:             e,
@@ -66,40 +67,48 @@ class API
     def create_params
       parse_create_params!
       {
-        when:                   parse(:date, :date, default: Date.today),
-        place_name:             @location,
-        lat:                    @latitude,
-        long:                   @longitude,
-        alt:                    @altitude,
-        specimen:               @has_specimen,
-        is_collection_location: parse_is_collection_location,
-        notes:                  @notes,
-        thumb_image:            @thumbnail,
-        images:                 @images,
-        projects:               parse_projects_to_attach_to,
-        species_lists:          parse_species_lists_to_attach_to,
-        name:                   @name,
-        user:                   @user
+        when:          parse(:date, :date, default: Date.today),
+        place_name:    @location,
+        lat:           @latitude,
+        long:          @longitude,
+        alt:           @altitude,
+        specimen:      @has_specimen,
+        is_collection_location: parse(:boolean, :is_collection_location,
+                                      default: true, help: 1),
+        notes:         @notes,
+        thumb_image:   @thumbnail,
+        images:        @images,
+        projects:      parse_array(:project, :projects,
+                                   must_be_member: true) || [],
+        species_lists: parse_array(:species_list, :species_lists,
+                                   must_have_edit_permission: true) || [],
+        name:          @name,
+        user:          @user
       }
     end
 
     def update_params
-      parse_set_coordinates!
-      parse_set_images!
-      parse_set_projects!
-      parse_set_species_lists!
-      @notes = parse_notes_fields!(:set)
+      parse_update_params!
       {
         when:                   parse(:date, :set_date),
-        place_name:             parse(:place_name, :set_location, limit: 1024,
-                                      not_blank: true),
+        place_name:             parse(:place_name, :set_location,
+                                      limit: 1024, not_blank: true),
         lat:                    @latitude,
         long:                   @longitude,
         alt:                    @altitude,
         specimen:               parse(:boolean, :set_has_specimen),
-        is_collection_location: parse(:boolean, :set_is_collection_location),
+        is_collection_location: parse(:boolean, :set_is_collection_location,
+                                      help: 1),
         thumb_image:            @thumbnail
       }
+    end
+
+    def validate_create_params!(params)
+      make_sure_both_latitude_and_longitude!
+      make_sure_has_specimen_set!
+      either_specimen_or_label!
+      make_sure_location_provided!
+      check_for_unknown_location!(params)
     end
 
     def after_create(obs)
@@ -110,6 +119,7 @@ class API
     end
 
     def validate_update_params!(params)
+      check_for_unknown_location!(params)
       raise MissingSetParameters.new if params.empty? && no_adds_or_removes?
     end
 
@@ -183,36 +193,26 @@ class API
       obj.species_lists.delete(@remove_from_list) if @remove_from_list
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def no_adds_or_removes?
-      @add_images.empty? && @remove_images.empty? &&
-        !@add_to_project && !@remove_from_project &&
-        !@add_to_list && !@remove_from_list &&
-        @notes.empty?
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
+    # --------------------
+    #  Parsing
+    # --------------------
 
     def parse_create_params!
       @name  = parse(:name, :name, default: Name.unknown)
       @vote  = parse(:float, :vote, default: Vote.maximum_vote)
-      @log   = parse(:boolean, :log, default: true)
+      @log   = parse(:boolean, :log, default: true, help: 1)
       @notes = parse_notes_fields!
       parse_herbarium_and_specimen!
       parse_location_and_coordinates!
       parse_images_and_pick_thumbnail
     end
 
-    def parse_is_collection_location
-      parse(:boolean, :is_collection_location, default: true)
-    end
-
-    def parse_projects_to_attach_to
-      parse_array(:project, :projects, must_be_member: true) || []
-    end
-
-    def parse_species_lists_to_attach_to
-      parse_array(:species_list, :species_lists,
-                  must_have_edit_permission: true) || []
+    def parse_update_params!
+      parse_set_coordinates!
+      parse_set_images!
+      parse_set_projects!
+      parse_set_species_lists!
+      @notes = parse_notes_fields!(:set)
     end
 
     def parse_images_and_pick_thumbnail
@@ -233,7 +233,8 @@ class API
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
-      declare_parameter(:"#{prefix}notes[<field>]", :string)
+      declare_parameter(:"#{prefix}notes[<field>]", :string,
+                        help: :notes_field)
       return notes if set
       notes.delete_if { |_key, val| val.blank? }
       notes
@@ -250,7 +251,7 @@ class API
       @longitude = parse(:longitude, :set_longitude)
       @altitude  = parse(:altitude, :set_altitude)
       return unless @latitude && !@longitude || @longitude && !@latitude
-      errors << LatLongMustBothBeSet.new
+      raise LatLongMustBothBeSet.new
     end
 
     def parse_set_images!
@@ -278,46 +279,58 @@ class API
 
     def parse_location_and_coordinates!
       @location  = parse(:place_name, :location, limit: 1024)
-      @location  = Location.unknown.name if Location.is_unknown?(@location)
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
-      make_sure_both_latitude_and_longitude!
-      make_sure_location_or_coordinates!
-      @location ||= :UNKNOWN.l
-    end
-
-    def make_sure_both_latitude_and_longitude!
-      return if @latitude && @longitude || !@longitude && !@latitude
-      errors << LatLongMustBothBeSet.new
-    end
-
-    def make_sure_location_or_coordinates!
-      return if @latitude || @location
-      errors << MustSupplyLocationOrGPS.new
     end
 
     def parse_herbarium_and_specimen!
-      @herbarium       = parse(:herbarium, :herbarium, default: nil)
-      @specimen_id     = parse(:string, :specimen_id, default: nil)
-      @herbarium_label = parse(:string, :herbarium_label, default: nil)
+      @herbarium       = parse(:herbarium, :herbarium)
+      @specimen_id     = parse(:string, :specimen_id)
+      @herbarium_label = parse(:string, :herbarium_label, help: 1)
       default          = @herbarium || @specimen_id || @herbarium_label || false
       @has_specimen    = parse(:boolean, :has_specimen, default: default)
-      make_sure_has_specimen_set!
-      either_specimen_or_label!
+    end
+
+    # --------------------
+    #  Validation
+    # --------------------
+
+    # rubocop:disable Metrics/CyclomaticComplexity
+    def no_adds_or_removes?
+      @add_images.empty? && @remove_images.empty? &&
+        !@add_to_project && !@remove_from_project &&
+        !@add_to_list && !@remove_from_list &&
+        @notes.empty?
+    end
+    # rubocop:enable Metrics/CyclomaticComplexity
+
+    def make_sure_both_latitude_and_longitude!
+      return if @latitude && @longitude || !@longitude && !@latitude
+      raise LatLongMustBothBeSet.new
     end
 
     def make_sure_has_specimen_set!
       return if @has_specimen
       error_class = CanOnlyUseThisFieldIfHasSpecimen
-      errors << error_class.new(:herbarium)       if @herbarium
-      errors << error_class.new(:specimen_id)     if @specimen_id
-      errors << error_class.new(:herbarium_label) if @herbarium_label
+      raise error_class.new(:herbarium)       if @herbarium
+      raise error_class.new(:specimen_id)     if @specimen_id
+      raise error_class.new(:herbarium_label) if @herbarium_label
     end
 
     def either_specimen_or_label!
       return unless @specimen_id && @herbarium_label
-      errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label)
+      raise CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label)
+    end
+
+    def make_sure_location_provided!
+      raise MissingParameter.new(:location) unless @location
+    end
+
+    def check_for_unknown_location!(params)
+      place = params[:place_name]
+      return unless place && Location.is_unknown?(place)
+      params[:place_name] = Location.unknown.name
     end
   end
 end

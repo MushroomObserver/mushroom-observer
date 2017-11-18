@@ -69,10 +69,10 @@ class API
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
   def parse_bounding_box!
-    n = parse(:latitude, :north)
-    s = parse(:latitude, :south)
-    e = parse(:longitude, :east)
-    w = parse(:longitude, :west)
+    n = parse(:latitude, :north, help: 1)
+    s = parse(:latitude, :south, help: 1)
+    e = parse(:longitude, :east, help: 1)
+    w = parse(:longitude, :west, help: 1)
     return unless n || s || e || w
     return [n, s, e, w] if n && s && e && w
     raise NeedAllFourEdges.new
