@@ -52,9 +52,9 @@ class API
 
   def done_parsing_parameters!
     unused = params.keys - expected_params.keys - ignore_params.keys
-    raise HelpMessage.new(expected_params)          if unused.include?(:help)
-    raise UnexpectedUpload.new("Unexpected upload") if unused.include?(:upload)
-    raise UnusedParameters.new(unused)              if unused.any?
+    raise HelpMessage.new(expected_params) if unused.include?(:help)
+    raise UnexpectedUpload.new()           if unused.include?(:upload)
+    raise UnusedParameters.new(unused)     if unused.any?
   end
 
   # ------------------------------------------

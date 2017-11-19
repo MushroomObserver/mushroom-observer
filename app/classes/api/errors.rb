@@ -147,6 +147,14 @@ class API
     end
   end
 
+  # Notes template field didn't parse.
+  class BadNotesFieldParameter < Error
+    def initialize(str)
+      super()
+      args.merge!(val: str.to_s)
+    end
+  end
+
   # Some PATCH set parameters, if supplied, cannot be blank.
   class ParameterCantBeBlank < Error
     def initialize(arg)
@@ -314,10 +322,6 @@ class API
       super(obj)
       args.merge!(error: obj.formatted_errors.map(&:to_s).join("; "))
     end
-  end
-
-  # DELETE request couldn't destroy object.
-  class DestroyFailed < ObjectError
   end
 
   # Must supply both latitude and longitude, can't leave one out.

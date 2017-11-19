@@ -3476,6 +3476,7 @@
   api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
   api_bad_method: Invalid request method "[method]".
   api_bad_name_parameter_value: Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).
+  api_bad_notes_field_parameter: Invalid notes template field.  Pretty much anything but commas are allowed.
   api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_observation_parameter_value: Invalid or unknown observation, "[val]", accept only numerical id.
   api_bad_project_parameter_value: Invalid or unknown project, "[val]", accept numerical id or project name.

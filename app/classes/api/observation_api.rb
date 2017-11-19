@@ -235,8 +235,7 @@ class API
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
-      declare_parameter(:"#{prefix}notes[$field]", :string,
-                        help: :notes_field)
+      declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
       return notes if set
       notes.delete_if { |_key, val| val.blank? }
       notes
