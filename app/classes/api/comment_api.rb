@@ -14,15 +14,15 @@ class API
     ]
 
     def query_params
-      @target = parse(:object, :target, limit: Comment.all_types)
+      @target = parse(:object, :target, limit: Comment.all_types, help: 1)
       {
         where:       sql_id_condition,
         created_at:  parse_range(:time, :created_at),
         updated_at:  parse_range(:time, :updated_at),
-        users:       parse_array(:user, :user, help: "creator"),
+        users:       parse_array(:user, :user, help: :creator),
         types:       parse_array(:enum, :type, limit: Comment.all_type_tags),
         summary_has: parse(:string, :summary_has, help: 1),
-        content_has: parse(:string, :content_has, help: "search within body"),
+        content_has: parse(:string, :content_has, help: 1),
         target:      @target ? @target.id : nil,
         type:        @target ? @target.class.name : nil
       }

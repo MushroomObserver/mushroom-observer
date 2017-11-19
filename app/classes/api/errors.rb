@@ -200,15 +200,41 @@ class API
 
   # API auto-discover help message.
   class HelpMessage < Error
+    attr_accessor :params
+
     def initialize(params)
       super()
-      keys = params.keys - [
-        :method, :action, :version, :api_key, :page, :detail, :format
-      ]
-      msg = keys.sort_by(&:to_s).map do |arg|
+      self.params = params
+      args.merge!(help: help_message)
+    end
+
+    def help_message
+      if set_keys.any?
+        "query params: " + render_keys(get_keys) + "; " +
+          "update params: " + render_keys(set_keys)
+      else
+        render_keys(all_keys)
+      end
+    end
+
+    def render_keys(keys)
+      keys.sort_by(&:to_s).map do |arg|
         params[arg].inspect
       end.join("; ")
-      args.merge!(help: msg)
+    end
+
+    def all_keys
+      params.keys - [
+        :method, :action, :version, :api_key, :page, :detail, :format
+      ]
+    end
+
+    def get_keys
+      all_keys.reject { |k| params[k].set_parameter? }
+    end
+
+    def set_keys
+      all_keys.select { |k| params[k].set_parameter? }
     end
   end
 

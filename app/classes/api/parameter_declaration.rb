@@ -1,12 +1,16 @@
 class API
   # Information about an API parameter to provide automatic documentation
   class ParameterDeclaration
-    attr_accessor :key, :type, :args
+    attr_accessor :key, :type, :args, :set_parameter
 
     def initialize(key, type, args = {})
       self.key  = key
       self.type = type
       self.args = args
+    end
+
+    def set_parameter?
+      @set_parameter
     end
 
     def inspect
@@ -29,12 +33,13 @@ class API
     end
 
     def show_arg(key, val)
-      if key == :help
+      key = key.to_s.gsub(/_/, " ")
+      if key == "help"
         val = @key if val == 1
         tag = "api_help_#{val}".to_sym
         tag.l
-      elsif key != :limit && val == true
-        key.to_s
+      elsif key != "limit" && val == true
+        key
       else
         "#{key}=#{show_val(val)}"
       end
@@ -46,21 +51,19 @@ class API
       when String, Symbol, Integer, Float, Range
         val.to_s
       when Array
-        val.map(&:to_s).join("|")
+        val.map(&:to_s).sort.join("|")
       when TrueClass
         "true"
       when FalseClass
         "false"
       when Date
-        val.api_date
-      when Time
-        val.api_time
+        "varies"
       when License
-        val.display_name
+        "varies"
       when Name
         val.search_name
       when User
-        val.login
+        "you"
       else
         raise "Don't know how to display #{val.class.name} in api help msg."
       end

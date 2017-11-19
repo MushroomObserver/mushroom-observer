@@ -9,7 +9,7 @@ class API
     self.delete_page_length      = 1000
 
     def create_params
-      @for_user = parse(:user, :for_user, default: @user, help: :api_key_user)
+      @for_user = parse(:user, :for_user, help: :api_key_user) || @user
       {
         notes:    parse(:string, :app, help: 1),
         user:     @for_user,

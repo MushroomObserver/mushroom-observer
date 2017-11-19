@@ -67,7 +67,7 @@ class API
     def create_params
       parse_create_params!
       {
-        when:          parse(:date, :date, default: Date.today),
+        when:          parse(:date, :date) || Date.today,
         place_name:    @location,
         lat:           @latitude,
         long:          @longitude,
@@ -124,13 +124,14 @@ class API
     end
 
     def build_setter(params)
-      lambda do |obj|
-        must_have_edit_permission!(obj)
-        update_notes_fields(obj)
-        obj.update!(params)
-        update_images(obj)
-        update_projects(obj)
-        update_species_lists(obj)
+      lambda do |obs|
+        must_have_edit_permission!(obs)
+        update_notes_fields(obs)
+        obs.update!(params)
+        update_images(obs)
+        update_projects(obs)
+        update_species_lists(obs)
+        obs.log(:log_observation_updated_at) if @log
       end
     end
 
@@ -162,35 +163,35 @@ class API
       )
     end
 
-    def update_notes_fields(obj)
+    def update_notes_fields(obs)
       @notes.each do |key, val|
         if val.blank?
-          obj.notes.delete(key)
+          obs.notes.delete(key)
         else
-          obj.notes[key] = val
+          obs.notes[key] = val
         end
       end
     end
 
-    def update_images(obj)
+    def update_images(obs)
       @add_images.each do |img|
-        obj.images << img unless obj.images.include?(img)
+        obs.images << img unless obs.images.include?(img)
       end
-      obj.images.delete(*@remove_images)
-      return unless @remove_images.include?(obj.thumb_image)
-      obj.update_attributes!(thumb_image: obj.images.first)
+      obs.images.delete(*@remove_images)
+      return unless @remove_images.include?(obs.thumb_image)
+      obs.update_attributes!(thumb_image: obs.images.first)
     end
 
-    def update_projects(obj)
+    def update_projects(obs)
       return unless @add_to_project || @remove_from_project
-      raise MustBeOwner.new(obj) if obj.user != @user
-      obj.projects.push(@add_to_project) if @add_to_project
-      obj.projects.delete(@remove_from_project) if @remove_from_project
+      raise MustBeOwner.new(obs) if obs.user != @user
+      obs.projects.push(@add_to_project) if @add_to_project
+      obs.projects.delete(@remove_from_project) if @remove_from_project
     end
 
-    def update_species_lists(obj)
-      obj.species_lists.push(@add_to_list)        if @add_to_list
-      obj.species_lists.delete(@remove_from_list) if @remove_from_list
+    def update_species_lists(obs)
+      obs.species_lists.push(@add_to_list)        if @add_to_list
+      obs.species_lists.delete(@remove_from_list) if @remove_from_list
     end
 
     # --------------------
@@ -208,6 +209,7 @@ class API
     end
 
     def parse_update_params!
+      @log = parse(:boolean, :log, default: true, help: 1)
       parse_set_coordinates!
       parse_set_images!
       parse_set_projects!
@@ -217,7 +219,7 @@ class API
 
     def parse_images_and_pick_thumbnail
       @images    = parse_array(:image, :images) || []
-      @thumbnail = parse(:image, :thumbnail, default: @images.first)
+      @thumbnail = parse(:image, :thumbnail) || @images.first
       return if !@thumbnail || @images.include?(@thumbnail)
       @images.unshift(@thumbnail)
     end
@@ -233,7 +235,7 @@ class API
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
-      declare_parameter(:"#{prefix}notes[<field>]", :string,
+      declare_parameter(:"#{prefix}notes[$field]", :string,
                         help: :notes_field)
       return notes if set
       notes.delete_if { |_key, val| val.blank? }
@@ -286,10 +288,11 @@ class API
 
     def parse_herbarium_and_specimen!
       @herbarium       = parse(:herbarium, :herbarium)
-      @specimen_id     = parse(:string, :specimen_id)
+      @specimen_id     = parse(:string, :specimen_id, help: 1)
       @herbarium_label = parse(:string, :herbarium_label, help: 1)
       default          = @herbarium || @specimen_id || @herbarium_label || false
-      @has_specimen    = parse(:boolean, :has_specimen, default: default)
+      @has_specimen    = parse(:boolean, :has_specimen)
+      @has_specimen    = default if @has_specimen.nil?
     end
 
     # --------------------

@@ -3540,7 +3540,7 @@
   api_help_accession_has: search within accession number
   api_help_any_date: this date can mean anything you want
   api_help_api_key_user: user you are creating api key for
-  api_help_app: identifier used to help user distinguish which app key belongs to which app
+  api_help_app: identifier used to help user distinguish which api key belongs to which app
   api_help_author_has: search within author
   api_help_citation_has: search within citation
   api_help_classification_has: search within classification
@@ -3550,6 +3550,7 @@
   api_help_copyright_holder_has: search within copyright holder
   api_help_create_key: if you pass in your app name here it will create an api key for the user for your app to use
   api_help_creator: creator
+  api_help_east: max longitude
   api_help_first_user: creator / first to use
   api_help_has_notes_field: is given observation notes template field filled in?
   api_help_has_obs_notes: observation has notes?
@@ -3560,9 +3561,10 @@
   api_help_log: log this action on main page activity log and RSS feed?
   api_help_mailing_address: postal address
   api_help_min_rank: group or genus or better
-  api_help_min_size: either width or height at least this size
+  api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
   api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
-  api_help_notes_field: set value of the custom notes template field called "<field>"
+  api_help_north: max latitude
+  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
   api_help_notes_has: search within notes
   api_help_obs_date: observation date
   api_help_obs_notes_has: search within observation notes
@@ -3570,10 +3572,15 @@
   api_help_original_name: original file name or other private identifier
   api_help_postal: in postal format with country last regardless of user preference
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
+  api_help_set_is_collection_location: is this location where mushroom was found?
+  api_help_south: min latitude
+  api_help_specimen_id: unique specimen id for herbarium label, e.g. collectors number
   api_help_summary_has: search within summary
+  api_help_target: 'e.g. "observation #1234" or "name #5678"'
   api_help_text_name_has: search within name
   api_help_title_has: search within title
   api_help_uploader: who uploaded the photo
+  api_help_west: min longitude
   api_help_when_seen: when seen
   api_help_when_taken: when photo taken
 

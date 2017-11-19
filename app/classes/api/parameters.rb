@@ -35,6 +35,14 @@ class API
   # These are the parameters which will show up in the help message.
   def declare_parameter(key, type, args = {})
     expected_params[key] ||= ParameterDeclaration.new(key, type, args)
+    expected_params[key].set_parameter = true if @mark_the_rest_as_set_params
+  end
+
+  # This tells declare_parameter to mark all the rest of the parameters
+  # as "set" parameters.  Useful for separating "get" and "set" parameters
+  # in the help message.
+  def mark_the_rest_as_set_params
+    @mark_the_rest_as_set_params = true
   end
 
   # These parameters will be ignored in the help message.

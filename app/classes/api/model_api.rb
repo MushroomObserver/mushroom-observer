@@ -81,6 +81,7 @@ class API
     # ----------------------------------------
 
     def update_objects
+      mark_the_rest_as_set_params
       params = update_params
       params.remove_nils!
       done_parsing_parameters!

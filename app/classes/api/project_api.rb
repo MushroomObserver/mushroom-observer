@@ -122,8 +122,8 @@ class API
     end
 
     def parse_admins_and_members
-      @admins  = ([@user] + parse_array(:user, :admins, default: [])).uniq
-      @members = (@admins + parse_array(:user, :members, default: [])).uniq
+      @admins  = ([@user] + (parse_array(:user, :admins) || [])).uniq
+      @members = (@admins + (parse_array(:user, :members) || [])).uniq
     end
 
     def parse_update_params

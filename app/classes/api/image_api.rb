@@ -48,14 +48,14 @@ class API
     def create_params
       parse_create_params!
       {
-        when:             parse(:date, :date, default: @default_date,
-                                              help: :when_taken),
+        when:             parse(:date, :date, help: :when_taken) ||
+                            @default_date,
         notes:            parse(:string, :notes, default: ""),
-        copyright_holder: parse(:string, :copyright_holder,
-                                limit: 100, default: user.legal_name),
-        license:          parse(:license, :license, default: user.license),
+        copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
+                            user.legal_name,
+        license:          parse(:license, :license) || user.license,
         original_name:    parse(:string, :original_name,
-                                limit: 120, default: nil, help: :original_name),
+                                limit: 120, help: :original_name),
         projects:         parse_array(:project, :projects,
                                       must_be_member: true) || [],
         observations:     @observations,
@@ -70,7 +70,7 @@ class API
         copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
         license:          parse(:license, :set_license),
         original_name:    parse(:string, :set_original_name,
-                                limit: 120, default: nil, help: :original_name)
+                                limit: 120, help: :original_name)
       }
     end
 

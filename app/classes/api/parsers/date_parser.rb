@@ -11,6 +11,7 @@ class API
       end
 
       def parse_range
+        args[:range] = true
         str = clean_param
         return args[:default] unless str
         try_all_range_patterns(str)
