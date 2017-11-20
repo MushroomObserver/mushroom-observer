@@ -4,7 +4,8 @@ class ObserverControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
     params[:observation] = sample_obs_fields.merge(params[:observation] || {})
     params[:vote] = { value: "3" }.merge(params[:vote] || {})
-    params[:specimen] = default_specimen_fields.merge(params[:specimen] || {})
+    params[:herbarium_record] =
+      default_herbarium_record_fields.merge(params[:herbarium_record] || {})
     params[:username] = user.login
     params
   end
@@ -21,7 +22,7 @@ class ObserverControllerTest < FunctionalTestCase
       thumb_image_id: "0" }
   end
 
-  def default_specimen_fields
+  def default_herbarium_record_fields
     { herbarium_name: "", herbarium_id: "" }
   end
 
@@ -1185,9 +1186,9 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation
     requires_login(:create_observation)
     assert_form_action(action: :create_observation, approved_name: "")
-    assert_input_value(:specimen_herbarium_name,
+    assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
-    assert_input_value(:specimen_herbarium_id, "")
+    assert_input_value(:herbarium_record_herbarium_id, "")
   end
 
   def test_construct_observation_approved_place_name
@@ -1205,28 +1206,28 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation(
       {
         observation: { specimen: "1" },
-        specimen: { herbarium_name:
+        herbarium_record: { herbarium_name:
           herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
         name: { name: "Coprinus comatus" }
       }, 1, 1, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.specimens.count == 1)
+    assert(obs.herbarium_records.count == 1)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
     generic_construct_observation(
       {
         observation: { specimen: "1" },
-        specimen: { herbarium_name: herbaria(:nybg_herbarium).name,
-                    herbarium_id: "NYBG 1234" },
+        herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+                            herbarium_id: "NYBG 1234" },
         name: { name: "Cortinarius sp." }
       }, 0, 0, 0
     )
-    assert_input_value(:specimen_herbarium_name,
+    assert_input_value(:herbarium_record_herbarium_name,
                        "The New York Botanical Garden")
-    assert_input_value(:specimen_herbarium_id, "NYBG 1234")
+    assert_input_value(:herbarium_record_herbarium_id, "NYBG 1234")
   end
 
   def test_create_observation_with_herbarium_no_id
@@ -1234,45 +1235,46 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation(
       {
         observation: { specimen: "1" },
-        specimen: { herbarium_name:
-          herbaria(:nybg_herbarium).name, herbarium_id: "" },
+        herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+                            herbarium_id: "" },
         name: { name: name }
       }, 1, 1, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.specimens.count == 1)
-    specimen = obs.specimens[0]
-    assert(/#{obs.id}/ =~ specimen.herbarium_label)
-    assert(/#{name}/ =~ specimen.herbarium_label)
+    assert(obs.herbarium_records.count == 1)
+    herbarium_record = obs.herbarium_records[0]
+    assert(/#{obs.id}/ =~ herbarium_record.herbarium_label)
+    assert(/#{name}/ =~ herbarium_record.herbarium_label)
   end
 
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
       {
-        specimen: { herbarium_name:
+        herbarium_record: { herbarium_name:
           herbaria(:nybg_herbarium).name, herbarium_id: "1234" },
         name: { name: "Coprinus comatus" }
       }, 1, 1, 0
     )
     obs = assigns(:observation)
     assert(!obs.specimen)
-    assert(obs.specimens.count.zero?)
+    assert(obs.herbarium_records.count.zero?)
   end
 
   def test_create_observation_with_new_herbarium
     generic_construct_observation(
       {
         observation: { specimen: "1" },
-        specimen: { herbarium_name: "A Brand New Herbarium", herbarium_id: "" },
+        herbarium_record: { herbarium_name: "A Brand New Herbarium",
+                            herbarium_id: "" },
         name: { name: "Coprinus comatus" }
       }, 1, 1, 0
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.specimens.count == 1)
-    specimen = obs.specimens[0]
-    herbarium = specimen.herbarium
+    assert(obs.herbarium_records.count == 1)
+    herbarium_record = obs.herbarium_records[0]
+    herbarium = herbarium_record.herbarium
     assert(herbarium.is_curator?(rolf))
   end
 
@@ -2180,7 +2182,7 @@ class ObserverControllerTest < FunctionalTestCase
         thumb_image_id: "0",
         notes: obs.notes
       },
-      specimen: default_specimen_fields,
+      herbarium_record: default_herbarium_record_fields,
       username: user.login,
       vote:     { value: "3" }
     }
@@ -2881,10 +2883,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.length >= 4)
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
 
-    # Add specimen to fourth obs for testing purposes.
+    # Add herbarium_record to fourth obs for testing purposes.
     login("mary")
     fourth = obs.fourth
-    fourth.specimens << Specimen.create!(
+    fourth.herbarium_records << HerbariumRecord.create!(
       herbarium: herbaria(:nybg_herbarium),
       when: Time.zone.now,
       user: mary,
@@ -2920,12 +2922,12 @@ class ObserverControllerTest < FunctionalTestCase
     state =   l.name.split(", ")[-2]
     city =    l.name.split(", ")[-3]
 
-    # Hard coded values below (except for X for speciment) come from the actual
+    # Hard coded values below come from the actual
     # part of a test failure message.
     # If fixtures change, these may also need to be changed.
     assert_equal(
       "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,#{o.try(:specimens).first.herbarium_label},"\
+        "X,#{o.try(:herbarium_records).first.herbarium_label},"\
         "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \

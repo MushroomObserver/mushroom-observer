@@ -416,7 +416,7 @@ class API
     end
   end
 
-  # Tried to set specimen info without claiming specimen present.
+  # Tried to set herbarium_record info without claiming specimen present.
   class CanOnlyUseThisFieldIfHasSpecimen < Error
     def initialize(field)
       super()

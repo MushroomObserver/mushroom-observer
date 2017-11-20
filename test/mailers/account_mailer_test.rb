@@ -53,10 +53,10 @@ class AccountMailerTest < UnitTestCase
 
   ##############################################################################
 
-  def test_add_specimen_email
-    specimen = specimens(:interesting_unknown)
-    run_mail_test("add_specimen_not_curator", rolf) do
-      AddSpecimenEmail.build(mary, rolf, specimen).deliver_now
+  def test_add_herbarium_record_email
+    herbarium_record = herbarium_records(:interesting_unknown)
+    run_mail_test("add_herbarium_record_not_curator", rolf) do
+      AddHerbariumRecordEmail.build(mary, rolf, herbarium_record).deliver_now
     end
   end
 

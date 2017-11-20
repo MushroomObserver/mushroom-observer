@@ -1,8 +1,8 @@
 module Query
-  # Code common to all specimen searches.
-  class SpecimenBase < Query::Base
+  # Code common to all herbarium_record searches.
+  class HerbariumRecordBase < Query::Base
     def model
-      Specimen
+      HerbariumRecord
     end
 
     # def initialize_flavor

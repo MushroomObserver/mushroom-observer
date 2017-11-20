@@ -40,7 +40,8 @@ class API
         children_names:   parse_array(:name, :children_of, as: :id),
         locations:        parse_array(:location, :location, as: :id),
         herbaria:         parse_array(:herbarium, :herbarium, as: :id),
-        specimens:        parse_array(:specimen, :specimen, as: :id),
+        herbarium_records: parse_array(:herbarium_record, :herbarium_record,
+                                       as: :id),
         projects:         parse_array(:project, :project, as: :id),
         species_lists:    parse_array(:species_list, :species_list, as: :id),
         confidence:       parse(:confidence, :confidence),
@@ -112,7 +113,7 @@ class API
     end
 
     def after_create(obs)
-      create_specimen(obs) if obs.specimen
+      create_herbarium_record(obs) if obs.specimen
       naming = obs.namings.create(name: @name)
       obs.change_vote(naming, @vote, user)
       obs.log(:log_observation_created_at) if @log
@@ -139,10 +140,10 @@ class API
 
     private
 
-    def create_specimen(obs)
+    def create_herbarium_record(obs)
       provide_herbarium_default
       provide_herbarium_label_default(obs)
-      obs.specimens << Specimen.create!(
+      obs.herbarium_records << HerbariumRecord.create!(
         herbarium:       @herbarium,
         when:            Time.zone.now,
         user:            user,

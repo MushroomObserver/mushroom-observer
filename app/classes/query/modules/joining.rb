@@ -169,9 +169,9 @@ module Query::Modules::Joining
       observations: :observation_id,
       species_lists: :species_list_id
     },
-    observations_specimens: {
+    herbarium_records_observations: {
       observations: :observation_id,
-      specimens: :specimen_id
+      herbarium_records: :herbarium_record_id
     },
     projects: {
       users: :user_id,
@@ -201,7 +201,7 @@ module Query::Modules::Joining
       rss_logs: :rss_log_id,
       users: :user_id
     },
-    specimens: {
+    herbarium_records: {
       herbaria: :herbarium_id,
       users: :user_id
     },

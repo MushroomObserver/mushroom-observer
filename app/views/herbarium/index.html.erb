@@ -10,7 +10,7 @@
 <table class="table-striped table-herbarium push-down">
   <thead>
     <tr>
-      <th><%= :herbarium_specimen_count.t %></th>
+      <th><%= :herbarium_herbarium_record_count.t %></th>
       <th><%= :herbarium_code.t %></th>
       <th><%= :herbarium_name.t %></th>
     </tr>
@@ -19,7 +19,7 @@
     <% for herbarium in @herbaria.reject {|h| h.code.blank?}.sort_by(&:sort_name) %>
       <tr>
         <td align="center">
-          <%= herbarium.specimen_count %>
+          <%= herbarium.herbarium_record_count %>
         </td>
         <td style="max-width:10em; text-overflow:ellipsis; overflow:hidden">
           <%= herbarium.code.blank? ? "&mdash;".html_safe : herbarium.code %>
@@ -39,7 +39,7 @@
 <table class="table-striped table-herbarium push-down">
   <thead>
     <tr>
-      <th><%= :herbarium_specimen_count.t %>&nbsp;</th>
+      <th><%= :herbarium_herbarium_record_count.t %>&nbsp;</th>
       <th></th>
       <th><%= :herbarium_name.t %></th>
     </tr>
@@ -48,7 +48,7 @@
     <% for herbarium in @herbaria.select {|h| h.code.blank?}.sort_by(&:sort_name) %>
       <tr>
         <td align="center">
-          <%= herbarium.specimen_count %>
+          <%= herbarium.herbarium_record_count %>
         </td>
         <td></td>
         <td>

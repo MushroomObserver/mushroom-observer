@@ -27,9 +27,9 @@
            <div><%= :PROJECT.t %>: <%= link_to_object(project) %></div>
       <% end %>
     </div>
-    <div id="observation_specimen_info">
-      <%= observation_specimen_link(observation) +
-            create_specimen_link(observation) %>
+    <div id="observation_herbarium_record_info">
+      <%= observation_herbarium_record_link(observation) +
+            create_herbarium_record_link(observation) %>
     </div>
     <div id="observation_sequences">
       <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>

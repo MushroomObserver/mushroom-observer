@@ -51,7 +51,7 @@ class ObserverController
     @reason          = @naming.init_reasons
     @images          = []
     @good_images     = []
-    init_specimen_vars_for_create
+    init_herbarium_record_vars_for_create
     init_project_vars_for_create
     init_list_vars_for_create
     defaults_from_last_observation_created
@@ -87,7 +87,7 @@ class ObserverController
     success = false unless validate_name(params)
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
-    success = false unless validate_specimen(params)
+    success = false unless validate_herbarium_record(params)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !validate_object(@vote)
     success = false if @bad_images != []
@@ -151,10 +151,10 @@ class ObserverController
     success
   end
 
-  def validate_specimen(params)
+  def validate_herbarium_record(params)
     success = true
-    if params[:specimen]
-      herbarium_name = params[:specimen][:herbarium_name]
+    if params[:herbarium_record]
+      herbarium_name = params[:herbarium_record][:herbarium_name]
       if herbarium_name
         herbarium_name = herbarium_name.strip_html
         herbarium = Herbarium.where(name: herbarium_name)[0]
@@ -176,7 +176,7 @@ class ObserverController
 
   def herbarium_label_from_params(params)
     Herbarium.default_specimen_label(params[:name][:name],
-                                     params[:specimen][:herbarium_id])
+                                     params[:herbarium_record][:herbarium_id])
   end
 
   def save_everything_else(reason)
@@ -189,15 +189,15 @@ class ObserverController
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
-    save_specimen(@observation, params)
+    save_herbarium_record(@observation, params)
   end
 
-  def save_specimen(obs, params)
-    return unless params[:specimen] && obs.specimen
-    herbarium_name = params[:specimen][:herbarium_name]
+  def save_herbarium_record(obs, params)
+    return unless params[:herbarium_record] && obs.specimen
+    herbarium_name = params[:herbarium_record][:herbarium_name]
     return unless herbarium_name && !herbarium_name.empty?
-    if params[:specimen][:herbarium_id] == ""
-      params[:specimen][:herbarium_id] = obs.id.to_s
+    if params[:herbarium_record][:herbarium_id] == ""
+      params[:herbarium_record][:herbarium_id] = obs.id.to_s
     end
     herbarium_label = herbarium_label_from_params(params)
     herbarium = Herbarium.where(name: herbarium_name)[0]
@@ -209,12 +209,12 @@ class ObserverController
       herbarium.curators.push(@user)
       herbarium.save
     end
-    specimen = Specimen.new(herbarium: herbarium,
-                            herbarium_label: herbarium_label,
-                            user: @user,
-                            when: obs.when)
-    specimen.save
-    specimen.add_observation(obs)
+    herbarium_record = HerbariumRecord.new(herbarium: herbarium,
+                                   herbarium_label: herbarium_label,
+                                   user: @user,
+                                   when: obs.when)
+    herbarium_record.save
+    herbarium_record.add_observation(obs)
   end
 
   def redirect_to_next_page
@@ -234,7 +234,7 @@ class ObserverController
     @reason          = @naming.init_reasons(reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    init_specimen_vars_for_reload
+    init_herbarium_record_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
   end
@@ -431,15 +431,15 @@ class ObserverController
     observation
   end
 
-  def init_specimen_vars_for_create
+  def init_herbarium_record_vars_for_create
     @herbarium_name = @user.preferred_herbarium_name
     @herbarium_id = ""
   end
 
-  def init_specimen_vars_for_reload
+  def init_herbarium_record_vars_for_reload
     @herbarium_name, @herbarium_id =
-      if (specimen = params[:specimen])
-        [specimen[:herbarium_name], specimen[:herbarium_id]]
+      if (herbarium_record = params[:herbarium_record])
+        [herbarium_record[:herbarium_name], herbarium_record[:herbarium_id]]
       else
         [@user.preferred_herbarium_name, ""]
       end

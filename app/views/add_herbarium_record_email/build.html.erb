@@ -1,13 +1,15 @@
 <%
-	herbarium = @specimen.herbarium
-  intro = :email_add_specimen_not_curator_intro.l(:login => @user.login,
-                                                   :herbarium_name => herbarium.name,
-                                                   :herbarium_label => @specimen.herbarium_label)
+	herbarium = @herbarium_record.herbarium
+  intro = :email_add_herbarium_record_not_curator_intro.l(
+    :login => @user.login,
+    :herbarium_name => herbarium.name,
+    :herbarium_label => @herbarium_record.herbarium_label
+  )
 
   handy_links = :email_handy_links.l
 
-  links = [[:email_links_show_object.t(:type => :specimen),
-    "#{MO.http_domain}/specimen/show_specimen/#{@specimen.id}"],
+  links = [[:email_links_show_object.t(:type => :herbarium_record),
+    "#{MO.http_domain}/herbarium_record/show_herbarium_record/#{@herbarium_record.id}"],
 		[:email_links_show_object.t(:type => :herbarium),
 			"#{MO.http_domain}/herbarium/show_herbarium/#{herbarium.id}"],
 		[:email_links_show_user.t(:user => @user.login),

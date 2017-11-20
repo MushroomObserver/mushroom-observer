@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 class Herbarium < AbstractModel
-  has_many :specimens
+  has_many :herbarium_records
   belongs_to :location
   has_and_belongs_to_many :curators, class_name: "User", join_table: "herbaria_curators"
 
@@ -29,24 +29,24 @@ class Herbarium < AbstractModel
   end
 
   def label_free?(new_label)
-    # Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
-    Specimen.where(herbarium_id: id, herbarium_label: new_label).count == 0
+    HerbariumRecord.where(herbarium_id: id,
+                          herbarium_label: new_label).count.zero?
   end
 
   def self.default_specimen_label(name, id)
     "#{name}: #{id || "?"}".strip_html
   end
 
-  # Look at the most recent Specimen's the current User has created.  Return
-  # a list of the last 100 herbarium names used in those Specimens that this user
-  # is a curator for.  This list is used to prime Herbarium auto-completers.
-  #
+  # Look at the most recent HerbariumRecord's the current User has created.
+  # Return a list of the last 100 herbarium names used in those
+  # HerbariumRecords that this user is a curator for.  This list is used to
+  # prime Herbarium auto-completers. 
   def self.primer
     result = ""
     if User.current
       result = connection.select_values(%(
         SELECT DISTINCT h.name AS x
-        FROM specimens s, herbaria h, herbaria_curators c
+        FROM herbarium_records s, herbaria h, herbaria_curators c
         WHERE s.herbarium_id = h.id
         AND h.id = c.herbarium_id
         AND c.user_id = #{user_id}
@@ -57,8 +57,8 @@ class Herbarium < AbstractModel
     result
   end
 
-  def specimen_count
-    specimens.count
+  def herbarium_record_count
+    herbarium_records.count
   end
 
   def sort_name

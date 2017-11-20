@@ -160,7 +160,7 @@ class Observation < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
                                           before_remove: :remove_spl_callback
-  has_and_belongs_to_many :specimens
+  has_and_belongs_to_many :herbarium_records
 
   after_update :notify_users_after_change
   before_destroy :notify_species_lists
@@ -1113,7 +1113,7 @@ class Observation < AbstractModel
   def has_backup_data?
     !thumb_image_id.nil? ||
       species_lists.count > 0 ||
-      specimens.count > 0 ||
+      herbarium_records.count > 0 ||
       specimen ||
       notes.length >= 100
   end

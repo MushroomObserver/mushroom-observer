@@ -293,7 +293,7 @@ class User < AbstractModel
   has_many :queued_emails
   has_many :sequences
   has_many :species_lists
-  has_many :specimens
+  has_many :herbarium_records
   has_many :test_add_image_logs
   has_many :votes
 
@@ -580,7 +580,7 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     herbarium_id = Herbarium.connection.select_value(%(
-      SELECT herbarium_id, count(id) FROM specimens WHERE user_id=#{id}
+      SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
       GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
     ))
     herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)

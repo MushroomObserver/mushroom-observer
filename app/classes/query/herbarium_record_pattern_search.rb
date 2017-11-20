@@ -1,6 +1,6 @@
 module Query
-  # Simple specimen search.
-  class SpecimenPatternSearch < Query::SpecimenBase
+  # Simple herbarium_record search.
+  class HerbariumRecordPatternSearch < Query::HerbariumRecordBase
     include Query::Initializers::PatternSearch
 
     def parameter_declarations
@@ -17,8 +17,8 @@ module Query
 
     def search_fields
       [
-        "specimens.herbarium_label",
-        "COALESCE(specimens.notes,'')"
+        "herbarium_records.herbarium_label",
+        "COALESCE(herbarium_records.notes,'')"
       ]
     end
   end

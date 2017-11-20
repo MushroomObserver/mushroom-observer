@@ -1,5 +1,5 @@
 # encoding: utf-8
-# TODO: specimen API
+# TODO: herbarium_record API
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
@@ -1639,15 +1639,15 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
     assert_api_results(obses)
 
-    obses = Specimen.where(herbarium: herbaria(:nybg_herbarium)).
+    obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
     assert(obses.length > 1)
     assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses)
 
-    obses = specimens(:interesting_unknown).observations.sort_by(&:id)
+    obses = herbarium_records(:interesting_unknown).observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(specimen: "Cortinarius sp.: NYBG 1234"))
+    assert_api_pass(params.merge(herbarium_record: "Cortinarius sp.: NYBG 1234"))
     assert_api_results(obses)
 
     proj = projects(:one_genus_two_species_project)
@@ -1939,7 +1939,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "yes"))
 
     obs = Observation.last
-    spec = Specimen.last
+    spec = HerbariumRecord.last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
     assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
     assert_obj_list_equal([obs], spec.observations)
@@ -1949,7 +1949,7 @@ class ApiTest < UnitTestCase
                                  specimen_id: "R. Singer 12345"))
 
     obs = Observation.last
-    spec = Specimen.last
+    spec = HerbariumRecord.last
     assert_objs_equal(nybg, spec.herbarium)
     assert_equal("Peltigera: R. Singer 12345", spec.herbarium_label)
     assert_obj_list_equal([obs], spec.observations)
@@ -2382,15 +2382,15 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Specimen.where(herbarium: herbaria(:nybg_herbarium)).
+    obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
     assert(obses.length > 1)
     assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = specimens(:interesting_unknown).observations.sort_by(&:id)
+    obses = herbarium_records(:interesting_unknown).observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(specimen: "Cortinarius sp.: NYBG 1234"))
+    assert_api_pass(params.merge(herbarium_record: "Cortinarius sp.: NYBG 1234"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
     proj = projects(:one_genus_two_species_project)

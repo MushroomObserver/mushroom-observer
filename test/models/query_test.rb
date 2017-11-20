@@ -2640,24 +2640,24 @@ class QueryTest < UnitTestCase
                  :SpeciesList, :pattern_search, pattern: "")
   end
 
-  def test_specimen_all
-    expect = Specimen.all.order(:herbarium_label)
-    assert_query(expect, :Specimen, :all)
+  def test_herbarium_record_all
+    expect = HerbariumRecord.all.order(:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :all)
   end
 
-  def test_specimen_pattern_search
-    assert_query([],
-                 :Specimen, :pattern_search, pattern: "no specimen has this")
+  def test_herbarium_record_pattern_search
+    assert_query([], :HerbariumRecord, :pattern_search,
+                 pattern: "no herbarium record has this")
     # in label
-    assert_query(Specimen.where("herbarium_label LIKE '%Agaricus%'
+    assert_query(HerbariumRecord.where("herbarium_label LIKE '%Agaricus%'
                               OR notes LIKE '%Agaricus%'"),
-                 :Specimen, :pattern_search, pattern: "Agaricus")
+                 :HerbariumRecord, :pattern_search, pattern: "Agaricus")
     # in notes
-    assert_query(Specimen.where("herbarium_label LIKE '%rares%'
+    assert_query(HerbariumRecord.where("herbarium_label LIKE '%rares%'
                               OR notes LIKE '%rare%'"),
-                 :Specimen, :pattern_search, pattern: "rare")
-    assert_query(Specimen.all,
-                 :Specimen, :pattern_search, pattern: "")
+                 :HerbariumRecord, :pattern_search, pattern: "rare")
+    assert_query(HerbariumRecord.all,
+                 :HerbariumRecord, :pattern_search, pattern: "")
   end
 
   def test_user_all

@@ -1,6 +1,6 @@
 module Query
-  # All specimens.
-  class SpecimenAll < Query::SpecimenBase
+  # All herbarium_records.
+  class HerbariumRecordAll < Query::HerbariumRecordBase
     def initialize_flavor
       add_sort_order_to_title
       super

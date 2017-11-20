@@ -1,17 +1,17 @@
 # encoding: utf-8
 #
-#  = Specimens Model
+#  = HerbariumRecords Model
 #
-#  Specimens of Observations
+#  HerbariumRecords of Observations
 #
 #  == Attributes
 #
 #  id::               Locally unique numerical id, starting at 1.
-#  herbarium_id::     id of MO Herbarium containing the Specimen
-#  when::             date specimen was created
-#  notes::            user notes about Specimen
-#  user_id::          id of user who created Specimen
-#  herbarium_label::  text label for Specimen
+#  herbarium_id::     id of MO Herbarium containing the HerbariumRecord
+#  when::             date herbarium_record was created
+#  notes::            user notes about HerbariumRecord
+#  user_id::          id of user who created HerbariumRecord
+#  herbarium_label::  text label for HerbariumRecord
 #  created_at::       Date/time it was last updated.
 #  updated_at::       Date/time it was last updated.
 #
@@ -25,7 +25,7 @@
 #  add_observation(obs)
 #  clear_observations
 #  notify curators        email curators of Herbarium when non-curator adds
-#                         Specimen to a Herbarium
+#                         HerbariumRecord to a Herbarium
 #
 #  == Callbacks
 #
@@ -33,7 +33,7 @@
 #
 ################################################################################
 
-class Specimen < AbstractModel
+class HerbariumRecord < AbstractModel
   belongs_to :herbarium
   belongs_to :user
   has_and_belongs_to_many :observations
@@ -50,7 +50,7 @@ class Specimen < AbstractModel
   def add_observation(obs)
     observations.push(obs)
     obs.specimen = true # Hmm, this feels a little odd
-    obs.log(:log_specimen_added, name: herbarium_label, touch: true)
+    obs.log(:log_herbarium_record_added, name: herbarium_label, touch: true)
     obs.save
   end
 
@@ -59,7 +59,7 @@ class Specimen < AbstractModel
     save
   end
 
-  # Send email notifications when specimen created by non-curator.
+  # Send email notifications when herbarium_record created by non-curator.
   def notify_curators
     sender = User.current
     recipients = herbarium.curators # Should people with interest in related
@@ -67,7 +67,8 @@ class Specimen < AbstractModel
     return if recipients.member?(sender) # Only worry about non-curators
 
     for recipient in recipients
-      QueuedEmail::AddSpecimenNotCurator.create_email(sender, recipient, self)
+      QueuedEmail::AddHerbariumRecordNotCurator.create_email(sender, recipient,
+                                                             self)
     end
   end
 end

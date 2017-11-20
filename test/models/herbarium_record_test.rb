@@ -1,12 +1,12 @@
 require "test_helper"
 
-class SpecimenTest < UnitTestCase
+class HerbariumRecordTest < UnitTestCase
   def test_fields
-    refute(specimens(:interesting_unknown).observations.empty?)
-    assert(specimens(:interesting_unknown).herbarium)
-    assert(specimens(:interesting_unknown).herbarium_label)
-    assert(specimens(:interesting_unknown).when)
-    assert(specimens(:interesting_unknown).notes)
+    refute(herbarium_records(:interesting_unknown).observations.empty?)
+    assert(herbarium_records(:interesting_unknown).herbarium)
+    assert(herbarium_records(:interesting_unknown).herbarium_label)
+    assert(herbarium_records(:interesting_unknown).when)
+    assert(herbarium_records(:interesting_unknown).notes)
   end
 
   def test_personal_herbarium_name_and_languages

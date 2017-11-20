@@ -3,22 +3,23 @@
 require "test_helper"
 
 class CuratorTest < IntegrationTestCase
-  def test_first_specimen
+  def test_first_herbarium_record
     # Mary doesn't have a herbarium.
     login!("mary", "testpassword", true)
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
-    click(label: :show_observation_create_specimen.t)
-    assert_template("specimen/add_specimen")
+    click(label: :show_observation_create_herbarium_record.t)
+    assert_template("herbarium_record/add_herbarium_record")
     open_form do |form|
       form.submit("Add")
     end
     assert_template("herbarium/edit_herbarium")
   end
 
-  def test_herbarium_index_from_add_specimen
+  def test_herbarium_index_from_add_herbarium_record
     login!("mary", "testpassword", true)
-    get("/specimen/add_specimen/#{observations(:minimal_unknown_obs).id}")
+    get("/herbarium_record/add_herbarium_record/" +
+        "#{observations(:minimal_unknown_obs).id}")
     click(label: :herbarium_index.t)
     assert_template("herbarium/index")
   end
@@ -43,14 +44,14 @@ class CuratorTest < IntegrationTestCase
     assert_template("herbarium/list_herbaria")
   end
 
-  def test_specimen_search
+  def test_herbarium_record_search
     get("/")
     open_form("form[action*=search]") do |form|
       form.change("pattern", "Coprinus comatus")
-      form.select("type", :SPECIMENS.l)
+      form.select("type", :HERBARIUM_RECORDS.l)
       form.submit("Search")
     end
-    assert_template("specimen/list_specimens")
+    assert_template("herbarium_record/list_herbarium_records")
   end
 
   def test_herbarium_change_code

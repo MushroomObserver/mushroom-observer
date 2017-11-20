@@ -3,8 +3,8 @@
 require "test_helper"
 
 class HerbariumTest < UnitTestCase
-  def test_specimens
-    assert(herbaria(:nybg_herbarium).specimens.length > 1)
+  def test_herbarium_records
+    assert(herbaria(:nybg_herbarium).herbarium_records.length > 1)
   end
 
   def test_mailing_address

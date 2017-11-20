@@ -111,7 +111,7 @@
 <!-- has_specimen -->
 <% if has_specimen %>
   <div class="well well-sm push-down max-width-text">
-    <%= content_tag(:p, :form_observations_delete_specimens_help.t, class: "help-block") %>
+    <%= content_tag(:p, :form_observations_delete_herbarium_records_help.t, class: "help-block") %>
   </div>
 <% end %>
 <!-- /has_specimen -->
@@ -136,15 +136,15 @@
 <!-- HERBARIUM_FIELDS -->
 <div id="herb_info_fields" class="max-width-text <%= "hidden" if @observation.specimen %>">
   <div class="form-group">
-    <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t + ":") %>
-    <%= text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control") %>
-    <% turn_into_herbarium_auto_completer(:specimen_herbarium_name) %>
+    <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
+    <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+    <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
   </div>
   <div class="form-group">
-    <%= label_tag(:specimen_herbarium_id, :specimen_herbarium_id.t + ":") %>
-    <%= text_field(:specimen, :herbarium_id, value: @herbarium_id, class: "form-control") %>
+    <%= label_tag(:herbarium_record_herbarium_id, :herbarium_record_herbarium_id.t + ":") %>
+    <%= text_field(:herbarium_record, :herbarium_id, value: @herbarium_id, class: "form-control") %>
     <% inject_javascript_at_end %(
-         id_field = jQuery("#specimen_herbarium_id");
+         id_field = jQuery("#herbarium_record_herbarium_id");
          specimen_checkbox = jQuery("#observation_specimen");
          id_field.change(function() {
            if (id_field.val().length > 0)

@@ -28,7 +28,7 @@ minimal_unknown_obs: # 1
   location: burbank
   name: fungi
   species_lists: unknown_species_list
-  specimens: interesting_unknown
+  herbarium_records: interesting_unknown
 
 detailed_unknown_obs: # 2
   <<: *DEFAULTS
@@ -45,7 +45,7 @@ detailed_unknown_obs: # 2
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
-  specimens: interesting_unknown
+  herbarium_records: interesting_unknown
 
 coprinus_comatus_obs: # 3
   <<: *DEFAULTS
@@ -63,7 +63,7 @@ coprinus_comatus_obs: # 3
   thumb_image: connected_coprinus_comatus_image
   images: connected_coprinus_comatus_image
   species_lists: one_genus_three_species_list
-  specimens: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
+  herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
 
 agaricus_campestris_obs: # 4
   <<: *DEFAULTS
@@ -78,7 +78,7 @@ agaricus_campestris_obs: # 4
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
   species_lists: one_genus_three_species_list
-  specimens: agaricus_campestris_spec
+  herbarium_records: agaricus_campestris_spec
 
 agaricus_campestrus_obs: # 5
   <<: *DEFAULTS

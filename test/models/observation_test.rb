@@ -137,11 +137,11 @@ class ObservationTest < UnitTestCase
     assert_equal(winning_naming, obs.consensus_naming)
   end
 
-  def test_specimens
+  def test_herbarium_records
     refute(observations(:strobilurus_diminutivus_obs).specimen)
-    assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
+    assert_empty(observations(:strobilurus_diminutivus_obs).herbarium_records)
     assert(observations(:detailed_unknown_obs).specimen)
-    refute(observations(:detailed_unknown_obs).specimens.empty?)
+    refute(observations(:detailed_unknown_obs).herbarium_records.empty?)
   end
 
   def test_observer_accepts_general_email_questions

@@ -1,0 +1,48 @@
+<%
+  @title = :add_herbarium_record_title.l
+
+  tabs = [
+    link_with_query(:add_herbarium_record_cancel.t, @observation.show_link_args),
+    link_with_query(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7 max-width-text">
+    <%= form_tag(action: :add_herbarium_record, id: @observation.id) do %>
+      <%= hidden_field_tag(:id, @observation.id) %>
+    	<%= submit_tag(:add_herbarium_record_add.t, class: "btn center-block push-down") %>
+
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
+        <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+        <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_herbarium_label, :add_herbarium_record_herbarium_label.t + ":") %>
+        <span class="HelpNote"><%= :add_herbarium_record_herbarium_label_help.t %></span>
+        <%= text_field(:herbarium_record, :herbarium_label, value: @herbarium_label, class:"form-control") %>
+      </div>
+
+      <div class="form-group form-inline push-down">
+        <%= label_tag(:herbarium_record_when_1i, :WHEN.t + ":") %>
+        <%= date_select(:herbarium_record, :when, date_select_opts(@herbarium_record),
+                        {class: "form-control"}) %>
+        <% turn_into_year_auto_completer(:herbarium_record_when_1i) %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_notes, :add_herbarium_record_notes.t + ":") %>
+    		<%= text_area(:herbarium_record, :notes, class: "form-control", rows: 6) %>
+      </div>
+
+      <%= submit_tag(:add_herbarium_record_add.t, class: "btn center-block push-down") %>
+    <% end %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5 max-width-text">
+    <%= render(partial: "shared/matrix_box", locals: { object: @observation.rss_log }) %>
+  </div>
+</div>

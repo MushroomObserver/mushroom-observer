@@ -18,8 +18,8 @@
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
     <div class="push-down">
-      <%= link_to(:show_herbarium_specimen_count.t(count: @herbarium.specimens.count),
-                  controller: :specimen, action: :herbarium_index, id: @herbarium.id) %>
+      <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.count),
+                  controller: :herbarium_record, action: :herbarium_index, id: @herbarium.id) %>
     </div>
 
     <div class="push-down">

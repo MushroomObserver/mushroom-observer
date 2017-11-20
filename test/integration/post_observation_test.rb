@@ -201,9 +201,9 @@ class PostObservationTest < IntegrationTestCase
       assert_match(:show_observation_seen_at.l, response.body)
     end
     if new_obs.specimen
-      assert_match(/[0-9] specimen/, response.body)
+      assert_match(/[0-9] herbarium record/, response.body)
     else
-      refute_match(/No herbarium specimen/, response.body)
+      refute_match(/No voucher specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
