@@ -4,6 +4,8 @@ class ObserverControllerTest < FunctionalTestCase
   def modified_generic_params(params, user)
     params[:observation] = sample_obs_fields.merge(params[:observation] || {})
     params[:vote] = { value: "3" }.merge(params[:vote] || {})
+    params[:collection_number] =
+      default_collection_number_fields.merge(params[:collection_number] || {})
     params[:herbarium_record] =
       default_herbarium_record_fields.merge(params[:herbarium_record] || {})
     params[:username] = user.login
@@ -20,6 +22,10 @@ class ObserverControllerTest < FunctionalTestCase
       "when(3i)" => "31",
       specimen: "0",
       thumb_image_id: "0" }
+  end
+
+  def default_collection_number_fields
+    { name: "", number: "" }
   end
 
   def default_herbarium_record_fields
@@ -1186,6 +1192,9 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation
     requires_login(:create_observation)
     assert_form_action(action: :create_observation, approved_name: "")
+    assert_input_value(:collection_number_name,
+                       users(:rolf).legal_name)
+    assert_input_value(:collection_number_number, "")
     assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_herbarium_id, "")
@@ -1202,7 +1211,75 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(where, obs.place_name)
   end
 
-  def test_create_observation_with_herbarium
+  def test_create_observation_with_collection_number
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        collection_number: { name: "Billy Bob", number: "17-034" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.collection_numbers.count == 1)
+  end
+
+  def test_create_observation_with_used_collection_number
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        collection_number: { name: "Rolf Singer", number: "1" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.collection_numbers.count == 1)
+    assert_flash_warning
+  end
+
+  def test_create_observation_with_specimen_and_collector_but_no_number
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        collection_number: { name: "Rolf Singer", number: "" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert_empty(obs.collection_numbers)
+  end
+
+  def test_create_observation_with_collection_number_but_no_specimen
+    generic_construct_observation(
+      {
+        collection_number: { name: "Rolf Singer", number: "3141" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(!obs.specimen)
+    assert_empty(obs.collection_numbers)
+  end
+
+  def test_create_observation_with_collection_number_but_no_collector
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        collection_number: { name: "", number: "27-18A.2" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.collection_numbers.count == 1)
+    col_num = obs.collection_numbers.first
+    assert_equal(rolf.legal_name, col_num.name)
+    assert_equal("27-18A.2", col_num.number)
+  end
+
+  def test_create_observation_with_herbarium_record
     generic_construct_observation(
       {
         observation: { specimen: "1" },
@@ -1261,7 +1338,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.herbarium_records.count.zero?)
   end
 
-  def test_create_observation_with_new_herbarium
+  def test_create_observation_with_new_nonpersonal_herbarium
     generic_construct_observation(
       {
         observation: { specimen: "1" },
@@ -1272,10 +1349,26 @@ class ObserverControllerTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
+    assert_empty(obs.herbarium_records)
+  end
+
+  def test_create_observation_with_new_personal_herbarium
+    generic_construct_observation(
+      {
+        observation: { specimen: "1" },
+        herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
+                            herbarium_id: "" },
+        name: { name: "Coprinus comatus" }
+      }, 1, 1, 0, katrina
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
     assert(obs.herbarium_records.count == 1)
+    assert_not_empty(obs.herbarium_records)
     herbarium_record = obs.herbarium_records[0]
     herbarium = herbarium_record.herbarium
-    assert(herbarium.is_curator?(rolf))
+    assert(herbarium.is_curator?(katrina))
+    assert(herbarium.name.match(/Katrina/))
   end
 
   def test_create_simple_observation_with_approved_unique_name

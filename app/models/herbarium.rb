@@ -1,15 +1,55 @@
-# encoding: utf-8
-
+#
+#  = Herbarium Model
+#
+#  Represents an herbarium, either an official institution like NYBG or a more
+#  informal entity such as a user's personal herbarium.
+#
+#  == Attributes
+#
+#  id::               Locally unique numerical id, starting at 1.
+#  created_at::       Date/time this record was created.
+#  updated_at::       Date/time this record was last updated.
+#  location_id::      Location of herbarium (optional).
+#  personal_user_id:: User belongs to if it is a personal herbarium (optional).
+#  code::             Official code (e.g., "NY" for NYBG, optional).
+#  name::             Name of herbarium.
+#  email::            Email address for inquiries (optional).
+#  mailing_address::  Postal address for sending specimens to (optional)
+#  description::      Random notes (optional).
+#
+#  == Class methods
+#
+#  Herbarium.primer::                 List of names to prime autocompleter.
+#  Herbarium.default_specimen_label:: Format herbarium label.
+#
+#  == Instance methods
+#
+#  herbarium_records::         HerbariumRecord(s) belonging to this Herbarium.
+#  curators::                  User(s) allowed to add records (optional).
+#  is_curator?(user)::         Check if a User is a curator.
+#  can_delete_curator?(user):: Can't delete last curator. (??)
+#  add_curator(user)::         Add User as a curator unless already is one.
+#  delete_curator(user)::      Remove User from curators.
+#  label_free?(new_label)::    Does label already exists at this Herbarium?
+#  herbarium_record_count::    Number of HerbariumRecord's at this Herbarium.
+#  sort_name::                 Stripped-down version of name for sorting.
+#
+#  == Callbacks
+#
+#  notify curators::  Email curators of Herbarium when non-curator adds an
+#                     HerbariumRecord to an Herbarium.  Called after create.
+#
 class Herbarium < AbstractModel
   has_many :herbarium_records
   belongs_to :location
-  has_and_belongs_to_many :curators, class_name: "User", join_table: "herbaria_curators"
+  has_and_belongs_to_many :curators, class_name: "User",
+                                     join_table: "herbaria_curators"
 
   # If this is a user's personal herbarium (there should only be one?) then
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
-  # Used to allow location name to be entered as text in forms
+  # Used to allow location name to be entered as text in forms.
   attr_accessor :place_name
 
   def is_curator?(user)

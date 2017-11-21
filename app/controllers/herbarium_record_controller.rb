@@ -189,7 +189,6 @@ class HerbariumRecordController < ApplicationController
     herbarium_record = HerbariumRecord.find(params[:id].to_s)
     herbarium_id = herbarium_record.herbarium_id
     if can_delete?(herbarium_record)
-      herbarium_record.clear_observations
       herbarium_record.destroy
     end
     redirect_back_or_default(action: :herbarium_index, id: herbarium_id)

@@ -224,6 +224,10 @@
   article: article
   ARTICLES: Articles
   articles: articles
+  COLLECTION_NUMBER: Collection Number
+  collection_number: collection number
+  COLLECTION_NUMBERS: Collection Numbers
+  collection_numbers: collection numbers
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -1375,7 +1379,7 @@
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
-  form_observations_specimen_available_help: Check when there is a dried specimen available for further study.  This can either be at an official herbarium or part of a personal herbarium.  Please note where the specimen is in the notes.
+  form_observations_specimen_available_help: Check when there is a dried specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\nAlbion, Mendocino Co., California, USA\nHotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
@@ -1389,6 +1393,9 @@
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
+  form_observations_herbarium_fields_help: Enter collector's name and number as it should appear on the label.  If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
+  form_observations_create_herbarium_separately: The herbarium you entered doesn't exist.  Please create it separately and then add the herbarium record to your observation.
+  form_observations_collection_number_already_used: This collection number has already been used.  Double check your records.  If you need to fix it, you can do so from the observation page.
 
   # observer/_form_species_list
   form_species_lists_title: Title
@@ -2076,20 +2083,20 @@
   welcome_no_user_note: If you are not a spammer, please report this as an error.
   welcome_note: You are now logged into the system...
 
-  # Glossary Term Fields
-  glossary_term_created_at: Created At
-  glossary_term_updated_at: Updated At
-  glossary_term_name: Name
-  glossary_term_description: Description
-  glossary_term_copyright_holder: Copyright holder and license for this image
-  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
-
   # semantic_vernacular/delete
   delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
   semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
   semantic_vernacular_proposed: Proposed by [name] at [date_time]
   semantic_vernacular_delete: Delete
   semantic_vernacular_title: "SVD Detail: [name]"
+
+  # glossary term fields
+  glossary_term_created_at: Created At
+  glossary_term_updated_at: Updated At
+  glossary_term_name: Name
+  glossary_term_description: Description
+  glossary_term_copyright_holder: Copyright holder and license for this image
+  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # glossary/show_glossary_term
   show_glossary_term: Show Glossary Term
@@ -2117,12 +2124,10 @@
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
-  ### news Article ###
-  #   news Article Fields
+  # news article fields
   article_title: Title
   article_body:  Body
 
-  #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
   article_body_required: "[:article_body] [:REQUIRED]"
@@ -2135,7 +2140,7 @@
   # article/index_article
   index_article: "[:ARTICLE] Index"
 
-  # Publication Fields
+  # publication fields
   publication_full: Full Reference
   publication_link: Link
   publication_peer_reviewed: Publication was peer reviewed
@@ -2162,7 +2167,7 @@
   show_publication_title: Publication
   show_publication_added_by: Added by
 
-  # Herbarium Fields
+  # herbarium fields
   herbarium_name: Name
   herbarium_location: Location
   herbarium_description: Herbarium Description
@@ -2222,17 +2227,17 @@
   # herbarium/list_herbaria
   list_herbaria_title: "[:list_objects(type=:project)]"
 
-  # Specimen Fields
+  # herbarium record fields
   herbarium_record_herbarium: Herbarium
   herbarium_record_herbarium_name: Herbarium Name
   herbarium_record_herbarium_label: Herbarium Label
-  herbarium_record_herbarium_id: Herbarium Id
+  herbarium_record_herbarium_id: Accession Number
   herbarium_record_user: Specimen Recorder
   herbarium_record_when: When Submitted
   herbarium_record_notes: Notes
   herbarium_record_created_at: Created At
   herbarium_record_updated_at: Updated At
-
+  
   # herbarium_record/show_herbarium_record
   show_herbarium_record: Show Herbarium Record
 
@@ -2258,6 +2263,10 @@
 
   # herbarium_record/delete_herbarium_record
   delete_herbarium_record_cannot_delete: Attempt to delete herbarium record without permission
+
+  # collection number fields
+  collection_number_name: Collector's Name
+  collection_number_number: Collector's Number
 
   # support/donate
   donate_title: Donate to Mushroom Observer, Inc.

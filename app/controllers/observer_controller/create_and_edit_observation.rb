@@ -42,16 +42,16 @@ class ObserverController
   end
 
   def create_observation_get
-    @observation     = Observation.new
-    @naming          = Naming.new
-    @vote            = Vote.new
-    @what            = "" # can't be nil else rails tries to call @name.name
-    @names           = nil
-    @valid_names     = nil
-    @reason          = @naming.init_reasons
-    @images          = []
-    @good_images     = []
-    init_herbarium_record_vars_for_create
+    @observation = Observation.new
+    @naming      = Naming.new
+    @vote        = Vote.new
+    @what        = "" # can't be nil else rails tries to call @name.name
+    @names       = nil
+    @valid_names = nil
+    @reason      = @naming.init_reasons
+    @images      = []
+    @good_images = []
+    init_specimen_vars_for_create
     init_project_vars_for_create
     init_list_vars_for_create
     defaults_from_last_observation_created
@@ -189,32 +189,72 @@ class ObserverController
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
+    save_collection_number(@observation, params)
     save_herbarium_record(@observation, params)
+  end
+
+  def save_collection_number(obs, params)
+    return unless params[:collection_number] && obs.specimen
+    name   = params[:collection_number][:name].to_s.strip_squeeze
+    number = params[:collection_number][:number].to_s.strip_squeeze
+    name   = @user.legal_name if name.blank?
+    return if number.blank?
+    col_num = CollectionNumber.where(name: name, number: number).first
+    if col_num
+      flash_warning(:form_observations_collection_number_already_used.t)
+    else
+      col_num = CollectionNumber.create(name: name, number: number)
+    end
+    col_num.observations << obs
   end
 
   def save_herbarium_record(obs, params)
     return unless params[:herbarium_record] && obs.specimen
-    herbarium_name = params[:herbarium_record][:herbarium_name]
-    return unless herbarium_name && !herbarium_name.empty?
-    if params[:herbarium_record][:herbarium_id] == ""
-      params[:herbarium_record][:herbarium_id] = obs.id.to_s
-    end
-    herbarium_label = herbarium_label_from_params(params)
-    herbarium = Herbarium.where(name: herbarium_name)[0]
-    if herbarium.nil?
-      herbarium = Herbarium.new(name: herbarium_name, email: @user.email)
-      if herbarium_name == @user.personal_herbarium_name
-        herbarium.personal_user = @user
-      end
-      herbarium.curators.push(@user)
-      herbarium.save
-    end
-    herbarium_record = HerbariumRecord.new(herbarium: herbarium,
-                                   herbarium_label: herbarium_label,
-                                   user: @user,
-                                   when: obs.when)
-    herbarium_record.save
+    herbarium_name  = params[:herbarium_record][:herbarium_name]
+    herbarium_id    = params[:herbarium_record][:herbarium_id]
+    herbarium_id    = default_herbarium_id(obs, params) if herbarium_id.blank?
+    init_name       = initial_determination(params)
+    herbarium_label = Herbarium.default_specimen_label(init_name, herbarium_id)
+    herbarium       = lookup_herbarium(herbarium_name)
+    return unless herbarium
+    herbarium_record = HerbariumRecord.create(
+      herbarium:       herbarium,
+      herbarium_label: herbarium_label,
+      user:            @user,
+      when:            obs.when
+    )
     herbarium_record.add_observation(obs)
+  end
+
+  def initial_determination(params)
+    if !params[:name] || params[:name][:name].blank?
+      Name.unknown.text_name
+    else
+      params[:name][:name]
+    end
+  end
+
+  def default_herbarium_id(obs, params)
+    return "MO #{obs.id}" if !params[:collection_number] ||
+                             params[:collection_number][:number].blank?
+    name = params[:collection_number][:name]
+    num  = params[:collection_number][:number]
+    name.blank? ? num : "#{name} #{num}"
+  end
+
+  def lookup_herbarium(herbarium_name)
+    return if herbarium_name.blank?
+    herbarium = Herbarium.where(name: herbarium_name).first
+    return herbarium unless herbarium.nil?
+    if herbarium_name != @user.personal_herbarium_name
+      flash_warning(:form_observations_create_herbarium_separately.t)
+      return
+    end
+    herbarium = Herbarium.new(name: herbarium_name, email: @user.email)
+    herbarium.personal_user = @user
+    herbarium.curators.push(@user)
+    herbarium.save
+    herbarium
   end
 
   def redirect_to_next_page
@@ -265,8 +305,7 @@ class ObserverController
 
     # Make sure user owns this observation!
     if !check_permission!(@observation)
-      redirect_with_query(action: "show_observation",
-                          id: @observation.id)
+      redirect_with_query(action: :show_observation, id: @observation.id)
 
       # Initialize form.
     elsif request.method != "POST"
@@ -277,9 +316,9 @@ class ObserverController
 
     else
       any_errors = false
-
       update_whitelisted_observation_attributes
       @observation.notes = notes_to_sym_and_compact
+
       # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
@@ -324,13 +363,12 @@ class ObserverController
 
         # Redirect to show_observation or create_location on success.
       elsif @observation.location.nil?
-        redirect_with_query(controller: "location",
-                            action: "create_location",
+        redirect_with_query(controller: :location,
+                            action: :create_location,
                             where: @observation.place_name,
                             set_observation: @observation.id)
       else
-        redirect_with_query(action: "show_observation",
-                            id: @observation.id)
+        redirect_with_query(action: :show_observation, id: @observation.id)
       end
     end
   end
@@ -414,15 +452,13 @@ class ObserverController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
-    if args
-      observation = Observation.new(args.permit(whitelisted_observation_args))
-    else
-      observation = Observation.new
-    end
+    observation = args ?
+      Observation.new(args.permit(whitelisted_observation_args)) :
+      Observation.new
     observation.created_at = now
     observation.updated_at = now
-    observation.user = @user
-    observation.name = Name.unknown
+    observation.user       = @user
+    observation.name       = Name.unknown
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown
@@ -431,18 +467,23 @@ class ObserverController
     observation
   end
 
-  def init_herbarium_record_vars_for_create
-    @herbarium_name = @user.preferred_herbarium_name
-    @herbarium_id = ""
+  def init_specimen_vars_for_create
+    @collectors_name   = @user.legal_name
+    @collectors_number = ""
+    @herbarium_name    = @user.preferred_herbarium_name
+    @herbarium_id      = ""
   end
 
   def init_herbarium_record_vars_for_reload
-    @herbarium_name, @herbarium_id =
-      if (herbarium_record = params[:herbarium_record])
-        [herbarium_record[:herbarium_name], herbarium_record[:herbarium_id]]
-      else
-        [@user.preferred_herbarium_name, ""]
-      end
+    init_specimen_vars_for_create
+    if params[:collection_number]
+      @collectors_name   = params[:collection_number][:name]
+      @collectors_number = params[:collection_number][:number]
+    end
+    if params[:herbarium_record]
+      @herbarium_name = params[:herbarium_record][:herbarium_name]
+      @herbarium_id   = params[:herbarium_record][:herbarium_id]
+    end
   end
 
   def init_project_vars

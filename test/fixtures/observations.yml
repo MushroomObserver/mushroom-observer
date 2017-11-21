@@ -64,6 +64,7 @@ coprinus_comatus_obs: # 3
   images: connected_coprinus_comatus_image
   species_lists: one_genus_three_species_list
   herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
+  collection_numbers: coprinus_comatus_coll_num
 
 agaricus_campestris_obs: # 4
   <<: *DEFAULTS

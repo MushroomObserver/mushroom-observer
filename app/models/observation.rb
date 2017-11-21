@@ -160,6 +160,7 @@ class Observation < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
                                           before_remove: :remove_spl_callback
+  has_and_belongs_to_many :collection_numbers
   has_and_belongs_to_many :herbarium_records
 
   after_update :notify_users_after_change
