@@ -2223,6 +2223,7 @@
   add_herbarium_record_already_exists: A record with the label '[label]' already exists for herbarium '[name]'
   add_herbarium_record_not_a_curator: You are not a curator of [herbarium_name]
   add_herbarium_record_label_already_used: The label '[herbarium_label]' has already been recorded for [herbarium_name]. Note that this herbarium record is now attached to multiple observations. If this was unintentional, edit this herbarium record and detach the observations which don't apply.  Then you can create new herbarium records for those observations.
+  add_herbarium_record_label_already_used_by_someone_else: The label '[herbarium_label]' has already been recorded by someone else for [herbarium_name]. Try adding your initials to the herbarium id to distinguish labels.
   user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/list_herbaria
@@ -2248,6 +2249,12 @@
   edit_herbarium_record_save: Save
   edit_herbarium_record_back_to_index: Back to Herbarium Record Index
   edit_herbarium_record_label_blank: Herbarium label cannot be blank.
+  edit_herbarium_record_remove_observations: Remove Observations
+  edit_herbarium_record_remove_observations_help: (check boxes of observations to remove from this record)
+  edit_herbarium_record_add_observations: Add Observations
+  edit_herbarium_record_add_observations_help: (enter ids of observations to add to this record)
+  edit_herbarium_record_add_observation_not_found: Observation #[id] not found.
+  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Herbarium Record Index"

@@ -12,27 +12,54 @@
   herbarium = @herbarium_record.herbarium
 %>
 
-<div class="max-width-text">
-  <%= form_tag(action: :edit_herbarium_record, id: @herbarium_record.id) do %>
-    <%= submit_tag(:edit_herbarium_record_save.t, class: "btn center-block push-down") %>
+<div class="row">
+  <div class="col-xs-12 col-sm-7 max-width-text">
+    <%= form_tag(action: :edit_herbarium_record, id: @herbarium_record.id) do %>
+      <%= submit_tag(:edit_herbarium_record_save.t, class: "btn center-block push-down") %>
 
-    <div class="form-group push-down">
-      <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
-      <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
-      <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
-    </div>
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
+        <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+        <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+      </div>
 
-    <div class="form-group push-down">
-      <%= label_tag(:herbarium_record_herbarium_label, :add_herbarium_record_herbarium_label.t + ":") %>
-      <span class="HelpNote"><%= :add_herbarium_record_herbarium_label_help.t %></span>
-      <%= text_field(:herbarium_record, :herbarium_label, value: @herbarium_record.herbarium_label, class: "form-control") %>
-    </div>
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_herbarium_label, :add_herbarium_record_herbarium_label.t + ":") %>
+        <span class="HelpNote"><%= :add_herbarium_record_herbarium_label_help.t %></span>
+        <%= text_field(:herbarium_record, :herbarium_label, value: @herbarium_record.herbarium_label, class: "form-control") %>
+      </div>
 
-    <div class="form-group push-down">
-      <%= label_tag(:herbarium_record_notes, :add_herbarium_record_notes.t + ":") %>
-      <%= text_area(:herbarium_record, :notes, value: @herbarium_record.notes, rows: 10, class: "form-control") %>
-    </div>
+      <div class="form-group push-down">
+        <%= label_tag(:herbarium_record_notes, :add_herbarium_record_notes.t + ":") %>
+        <%= text_area(:herbarium_record, :notes, value: @herbarium_record.notes, rows: 10, class: "form-control") %>
+      </div>
 
-    <%= submit_tag(:edit_herbarium_record_save.t, class: "btn center-block push-down") %>
-  <% end %>
+      <div class="form-group push-down">
+        <%= label_tag(:remove_observations,
+                      :edit_herbarium_record_remove_observations.t) %>:<br/>
+        <span class="HelpNote"><%= :edit_herbarium_record_remove_observations_help.t %></span>
+        <div class="push-down push-up">
+          <% @herbarium_record.observations.each do |obs| %>
+            <div>
+              <%= check_box_tag("remove_observation_#{obs.id}") %>
+              <%= obs.unique_format_name.t %>
+            </div>
+          <% end %>
+        </div>
+        <div class="form-group push-down form-inline">
+          <%= label_tag(:add_observations, :edit_herbarium_record_add_observations.t) %>:
+          <%= text_field_tag(:add_observations, "", size: 8, class: "form-control") %><br/>
+          <span class="HelpNote"><%= :edit_herbarium_record_add_observations_help.t %></span>
+        </div>
+      </div>
+
+      <%= submit_tag(:edit_herbarium_record_save.t, class: "btn center-block push-down") %>
+    <% end %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5 max-width-text">
+    <% @herbarium_record.observations.each do |obs| %>
+      <%= render(partial: "shared/matrix_box", locals: { object: obs.rss_log }) %>
+    <% end %>
+  </div>
 </div>

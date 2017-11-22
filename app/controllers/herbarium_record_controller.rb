@@ -104,6 +104,7 @@ class HerbariumRecordController < ApplicationController
     @herbarium_label = @observation.default_specimen_label
     if request.method == "POST"
       save_herbarium_record(@observation, params[:herbarium_record])
+      redirect_to(action: :observation_index, id: @observation.id)
     end
   end
 
@@ -116,19 +117,24 @@ class HerbariumRecordController < ApplicationController
       herbarium:       @herbarium,
       herbarium_label: @herbarium_label
     ).first
-    if herbarium_record
+    if !herbarium_record
+      herbarium_record = HerbariumRecord.create(
+        herbarium:       @herbarium,
+        herbarium_label: @herbarium_label
+      )
+    elsif herbarium_record.can_edit?
       flash_warning :add_herbarium_record_label_already_used.t(
         herbarium_name:  @herbarium.name,
         herbarium_label: @herbarium_label
       )
     else
-      herbarium_record = HerbariumRecord.create(
-        herbarium:       @herbarium,
+      flash_warning :add_herbarium_record_label_already_used_by_someone_else.t(
+        herbarium_name:  @herbarium.name,
         herbarium_label: @herbarium_label
       )
+      return
     end
     herbarium_record.add_observation(obs)
-    redirect_to(action: :observation_index, id: obs.id)
   end
 
   def lookup_herbarium(herbarium_name)
@@ -156,17 +162,34 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record = HerbariumRecord.safe_find(params[:id].to_s)
     if !@herbarium_record
       redirect_to(action: :list_herbarium_records)
-    elsif !can_edit?(@herbarium_record)
+    elsif !can_edit_record?(@herbarium_record)
       redirect_to(action: :show_herbarium_record, id: @herbarium_record.id)
     elsif request.method == "GET"
       @herbarium_name = @herbarium_record.herbarium.name
-    elsif request.method == "POST" &&
-          params[:herbarium_record] &&
-          validate_new_herbarium!(params[:herbarium_record]) &&
-          validate_new_label!(params[:herbarium_record]) &&
-          validate_new_notes!(params[:herbarium_record])
+    elsif request.method == "POST"
+      post_edit_herbarium_record
+    end
+  end
+
+  def post_edit_herbarium_record
+    rec_params = params[:herbarium_record]
+    if rec_params
+      return unless validate_new_herbarium!(rec_params)
+      return unless validate_new_label!(rec_params)
+      return unless validate_new_notes!(rec_params)
       update_herbarium_record
     end
+    remove_observations
+    add_observations
+  end
+
+  def can_edit_record?(rec)
+    return true if in_admin_mode?
+    return true if rec.herbarium.curators.include?(@user)
+    return true if rec.observations.any?(&:has_edit_permission?)
+    return true if rec.user == @user
+    flash_error(:runtime_no_update.l(type: :herbarium_record))
+    false
   end
 
   def validate_new_herbarium!(params)
@@ -185,7 +208,9 @@ class HerbariumRecordController < ApplicationController
   end
 
   def make_sure_label_free!(herbarium, new_label)
-    return true if herbarium.label_free?(new_label)
+    match = HerbariumRecord.where(herbarium: herbarium,
+                                  herbarium_label: new_label).first
+    return true if !match || match == @herbarium_record
     flash_error(:edit_herbarium_duplicate_label.l(
       herbarium_label: new_label,
       herbarium_name: herbarium.name)
@@ -203,6 +228,39 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record.save
     @herbarium_record.notify_curators if old_herbarium != @new_herbarium
     redirect_to(action: :show_herbarium_record, id: @herbarium_record.id)
+  end
+
+  def remove_observations
+    @herbarium_record.observations.each do |obs|
+      next if params[:"remove_observation_#{obs.id}"] != "1"
+      if can_add_or_remove_observation?(obs)
+        @herbarium_record.observations.delete(obs)
+      else
+        flash_error(:edit_herbarium_record_cant_add_or_remove.t(id: obs.id))
+      end
+    end
+  end
+
+  def add_observations
+    params[:add_observations].to_s.strip_squeeze.split.each do |id|
+      obs = Observation.safe_find(id)
+      if obs.nil?
+        flash_error(:edit_herbarium_record_add_observation_not_found.t(id: id))
+      elsif !can_add_or_remove_observation?(obs)
+        flash_error(:edit_herbarium_record_cant_add_or_remove.t(id: obs.id))
+      else
+        @herbarium_record.observations << obs
+        obs.update_attributes(specimen: true) \
+          if obs.has_edit_permission? && !obs.specimen
+      end
+    end
+  end
+
+  def can_add_or_remove_observation?(obs)
+    return true if in_admin_mode?
+    return true if @herbarium_record.herbarium.curators.include?(@user)
+    return true if obs.has_edit_permission?
+    false
   end
 
   # ----------------------------

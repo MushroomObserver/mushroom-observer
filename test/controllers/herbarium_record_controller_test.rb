@@ -198,6 +198,71 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_edit_herbarium_record
   end
 
+  def test_edit_herbarium_record_add_remove_specimens
+    nybg     = herbaria(:nybg_herbarium)
+    rec      = herbarium_records(:coprinus_comatus_nybg_spec)
+    obs      = rec.observations.first
+    rolf_obs = observations(:agaricus_campestrus_obs)
+    mary_obs = observations(:unknown_with_no_naming)
+    katy_obs = observations(:amateur_obs)
+    nybg.curators.delete(rolf)
+
+    # roy is curator, rolf owns obs, mary is neither
+    assert(nybg.is_curator?(roy))
+    assert(!nybg.is_curator?(rolf))
+    assert(!nybg.is_curator?(mary))
+    assert(rec.user == rolf)
+    assert(rec.observations.first.user == rolf)
+    assert_equal(2, obs.herbarium_records.count)
+    assert_empty(rolf_obs.herbarium_records)
+    assert_empty(mary_obs.herbarium_records)
+    assert_empty(katy_obs.herbarium_records)
+
+    login("mary")
+    post(:edit_herbarium_record,
+         { id: rec.id, :"remove_observation_#{obs.id}" => "1" })
+    assert_equal(2, obs.reload.herbarium_records.count)
+    assert_flash_error
+    post(:edit_herbarium_record, { id: rec.id, add_observations: rolf_obs.id })
+    assert_empty(rolf_obs.reload.herbarium_records)
+    assert_flash_error
+    post(:edit_herbarium_record, { id: rec.id, add_observations: mary_obs.id })
+    assert_empty(mary_obs.reload.herbarium_records)
+    assert_flash_error
+    rec.observations << mary_obs
+
+    login("rolf")
+    post(:edit_herbarium_record,
+         { id: rec.id, :"remove_observation_#{mary_obs.id}" => "1" })
+    assert_not_empty(mary_obs.reload.herbarium_records)
+    assert_flash_error
+    post(:edit_herbarium_record,
+         { id: rec.id, :"remove_observation_#{obs.id}" => "1" })
+    assert_equal(1, obs.reload.herbarium_records.count)
+    assert_no_flash
+    post(:edit_herbarium_record, { id: rec.id, add_observations: katy_obs.id })
+    assert_empty(katy_obs.reload.herbarium_records)
+    assert_flash_error
+    post(:edit_herbarium_record, { id: rec.id, add_observations: rolf_obs.id })
+    assert_not_empty(rolf_obs.reload.herbarium_records)
+    assert_no_flash
+    
+    login("roy")
+    post(:edit_herbarium_record, {
+      id: rec.id,
+      :"remove_observation_#{rolf_obs.id}" => "1",
+      :"remove_observation_#{mary_obs.id}" => "1"
+    })
+    assert_empty(rolf_obs.reload.herbarium_records)
+    assert_empty(mary_obs.reload.herbarium_records)
+    assert_no_flash
+    post(:edit_herbarium_record,
+         { id: rec.id, add_observations: "#{katy_obs.id} #{obs.id}" })
+    assert_not_empty(katy_obs.reload.herbarium_records)
+    assert_equal(2, obs.reload.herbarium_records.count)
+    assert_no_flash
+  end
+
   def test_delete_herbarium_record
     login("rolf")
     params = delete_herbarium_record_params

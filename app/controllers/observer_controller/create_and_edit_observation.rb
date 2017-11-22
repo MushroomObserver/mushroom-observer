@@ -192,16 +192,22 @@ class ObserverController
       herbarium:       herbarium,
       herbarium_label: herbarium_label
     ).first
-    if herbarium_record
+    if !herbarium_record
+      herbarium_record = HerbariumRecord.create(
+        herbarium:       herbarium,
+        herbarium_label: herbarium_label
+      )
+    elsif herbarium_record.can_edit?
       flash_warning :add_herbarium_record_label_already_used.t(
         herbarium_name:  herbarium.name,
         herbarium_label: herbarium_label
       )
     else
-      herbarium_record = HerbariumRecord.create(
-        herbarium:       herbarium,
+      flash_warning :add_herbarium_record_label_already_used_by_someone_else.t(
+        herbarium_name:  herbarium.name,
         herbarium_label: herbarium_label
       )
+      return
     end
     herbarium_record.add_observation(obs)
   end

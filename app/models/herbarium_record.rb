@@ -48,7 +48,7 @@ class HerbariumRecord < AbstractModel
   after_create :notify_curators
 
   # Can a given user edit this HerbariumRecord?
-  def can_edit?(user)
+  def can_edit?(user = User.current)
     self.user == user || herbarium.is_curator?(user)
   end
 
