@@ -1,23 +1,20 @@
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<%= submit_tag(button.l, class: "btn center-block push-down") %>
 
 <div class="form-group push-down">
   <%= label_tag(:herbarium_name, :herbarium_name.t + ":") %>
-  <%= text_field(:herbarium, :name, value: @herbarium_name, class: "form-control") %>
+  <%= text_field(:herbarium, :name, class: "form-control") %>
 </div>
+
+<% if button == :CREATE %>
+  <div class="form-group push-down form-inline">
+    <%= check_box(:herbarium, :personal, class: "form-control") %>
+    <%= label_tag(:herbarium_personal, :create_herbarium_personal.t) %>
+  </div>
+<% end %>
 
 <div class="form-group push-down form-inline">
   <%= label_tag(:herbarium_code, :create_herbarium_code.t + ":") %>
   <%= text_field(:herbarium, :code, size: 8, class: "form-control") %>
-</div>
-
-<div class="form-group push-down">
-  <%= label_tag(:herbarium_email, :create_herbarium_email.t + ":") %>
-  <%= text_field(:herbarium, :email, value: @user.email, class: "form-control") %>
-</div>
-
-<div class="form-group push-down">
-  <%= label_tag(:herbarium_description, :create_herbarium_description.t) %>
-  <%= text_area(:herbarium, :description, rows: 10, class: "form-control") %>
 </div>
 
 <div class="form-group push-down">
@@ -27,8 +24,18 @@
 </div>
 
 <div class="form-group push-down">
-  <%= label_tag(:herbarium_mailing_address, :create_herbarium_mailing_address.t + ":") %>
-  <%= text_area(:herbarium, :mailing_address, rows: 10, class: "form-control") %>
+  <%= label_tag(:herbarium_email, :create_herbarium_email.t + ":") %>
+  <%= text_field(:herbarium, :email, class: "form-control") %>
 </div>
 
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<div class="form-group push-down">
+  <%= label_tag(:herbarium_mailing_address, :create_herbarium_mailing_address.t + ":") %>
+  <%= text_area(:herbarium, :mailing_address, rows: 5, class: "form-control") %>
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:herbarium_description, :create_herbarium_description.t) %>
+  <%= text_area(:herbarium, :description, rows: 10, class: "form-control") %>
+</div>
+
+<%= submit_tag(button.l, class: "btn center-block push-down") %>

@@ -27,11 +27,14 @@
       <% if @herbarium.is_curator?(@user) || in_admin_mode? %>
         <%= form_tag(action: :show_herbarium, id: @herbarium) do %>
           <div class="form-inline push-down">
-            <%= text_field(:curator, :name, class: "form-control") %>
-            <label for="curator_name"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
+            <%= text_field_tag(:add_curator, "", class: "form-control") %>
+            <label for="add_curator"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
             <% turn_into_user_auto_completer(:curator_name) %>
           </div>
         <% end %>
+      <% else %>
+        <%= link_with_query(:show_herbarium_curator_request.t,
+                           action: :request_to_be_curator, id: @herbarium.id) %>
       <% end %>
     </div>
 

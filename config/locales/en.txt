@@ -2185,8 +2185,9 @@
   show_herbarium_herbarium_record_count: This herbarium contains [count] herbarium record(s).
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'
-  delete_curator_you_not_curator: Cannot remove curator since you are not a curator
-  delete_curator_they_not_curator: "[login] is not a curator"
+  show_herbarium_curator_request: Request to be a Curator
+  show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this herbarium.  When we add curators to an MO herbarium, those curators are given exclusive rights to edit the herbarium's addresses and notes.  Curators are also allowed to create herbarium records for other users' observations.  For example, when an herbarium accessions a contributor's specimen, the herbarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your herbarium and what its accession number is.  Please ask how MO can help your herbarium IT people automate this process via our API.
+  show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbarium/index
   herbarium_index: Herbarium Index
@@ -2195,14 +2196,14 @@
   # herbarium/create_herbarium
   create_herbarium: Create New Herbarium
   create_herbarium_title: Create New Herbarium
-  create_herbarium_missing_email: Valid email address is required when creating an herbarium
-  create_herbarium_description: Optional Description of the Herbarium (include information about whether and what sort of specimens are desired)
-  create_herbarium_mailing_address: Optional Mailing Address for Specimens
-  create_herbarium_email: Required Email Address for Specimen Requests
-  create_herbarium_location: Optional Location of the Herbarium
-  create_herbarium_code: Optional Code
-  create_herbarium_add: Add
-  create_herbarium_duplicate_name: Herbarium called '[name]' already exists
+  create_herbarium_personal: Check this box if this is your personal herbarium
+  create_herbarium_code: Official Code
+  create_herbarium_location: Location
+  create_herbarium_email: Email Address (for specimen inquiries)
+  create_herbarium_mailing_address: Mailing Address (for specimens)
+  create_herbarium_description: Notes
+  create_herbarium_duplicate_name: Herbarium called '[name]' already exists.
+  create_herbarium_personal_already_exists: You've already created a personal herbarium called '[name]'.
   herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
 
   # herbarium/edit_herbarium
@@ -2253,7 +2254,7 @@
   edit_herbarium_record_remove_observations_help: (check boxes of observations to remove from this record)
   edit_herbarium_record_add_observations: Add Observations
   edit_herbarium_record_add_observations_help: (enter ids of observations to add to this record)
-  edit_herbarium_record_add_observation_not_found: Observation #[id] not found.
+  edit_herbarium_record_add_observation_not_found: "Observation #[id] not found."
   edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
 
   # herbarium_record/herbarium_record_index (not a real page)

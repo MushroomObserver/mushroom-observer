@@ -9,12 +9,13 @@
 #  id::               Locally unique numerical id, starting at 1.
 #  created_at::       Date/time this record was created.
 #  updated_at::       Date/time this record was last updated.
-#  location_id::      Location of herbarium (optional).
-#  personal_user_id:: User belongs to if it is a personal herbarium (optional).
+#  personal_user_id:: User if it is a personal herbarium (optional).
+#                     Each User can only have at most one personal herbarium.
 #  code::             Official code (e.g., "NY" for NYBG, optional).
-#  name::             Name of herbarium.
-#  email::            Email address for inquiries (optional).
-#  mailing_address::  Postal address for sending specimens to (optional)
+#  name::             Name of herbarium. (must be present and unique)
+#  email::            Email address for inquiries (optional now).
+#  location_id::      Location of herbarium (optional).
+#  mailing_address::  Postal address for sending specimens to (optional).
 #  description::      Random notes (optional).
 #
 #  == Class methods
@@ -24,21 +25,24 @@
 #
 #  == Instance methods
 #
-#  herbarium_records::         HerbariumRecord(s) belonging to this Herbarium.
-#  curators::                  User(s) allowed to add records (optional).
-#  is_curator?(user)::         Check if a User is a curator.
-#  can_delete_curator?(user):: Can't delete last curator. (??)
-#  add_curator(user)::         Add User as a curator unless already is one.
-#  delete_curator(user)::      Remove User from curators.
-#  label_free?(new_label)::    Does label already exists at this Herbarium?
-#  herbarium_record_count::    Number of HerbariumRecord's at this Herbarium.
-#  sort_name::                 Stripped-down version of name for sorting.
+#  herbarium_records::      HerbariumRecord(s) belonging to this Herbarium.
+#  curators::               User(s) allowed to add records (optional).
+#                           If no curators, then anyone can edit this record.
+#                           If there are curators, then edit is restricted
+#                           to just those users.
+#  can_edit?(user)::        Check if a User has permission to edit.
+#  is_curator?(user)::      Check if a User is a curator.
+#  add_curator(user)::      Add User as a curator unless already is one.
+#  delete_curator(user)::   Remove User from curators.
+#  herbarium_record_count:: Number of HerbariumRecord's at this Herbarium.
+#  sort_name::              Stripped-down version of name for sorting.
 #
 #  == Callbacks
 #
 #  notify curators::  Email curators of Herbarium when non-curator adds an
 #                     HerbariumRecord to an Herbarium.  Called after create.
 #
+################################################################################
 class Herbarium < AbstractModel
   has_many :herbarium_records
   belongs_to :location
@@ -49,15 +53,16 @@ class Herbarium < AbstractModel
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
-  # Used to allow location name to be entered as text in forms.
+  # Used by create/edit form.
   attr_accessor :place_name
+  attr_accessor :personal
 
-  def is_curator?(user)
-    user && curators.member?(user)
+  def can_edit?(user = User.current)
+    curators.none? || curators.member?(user)
   end
 
-  def can_delete_curator?(user)
-    is_curator?(user) && (curators.count > 1)
+  def is_curator?(user)
+    curators.member?(user)
   end
 
   def add_curator(user)
@@ -68,9 +73,12 @@ class Herbarium < AbstractModel
     curators.delete(user)
   end
 
-  def label_free?(new_label)
-    HerbariumRecord.where(herbarium_id: id,
-                          herbarium_label: new_label).count.zero?
+  def herbarium_record_count
+    herbarium_records.count
+  end
+
+  def sort_name
+    name.t.strip_html.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
   def self.default_specimen_label(name, id)
@@ -95,13 +103,5 @@ class Herbarium < AbstractModel
       )).sort
     end
     result
-  end
-
-  def herbarium_record_count
-    herbarium_records.count
-  end
-
-  def sort_name
-    name.t.strip_html.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 end
