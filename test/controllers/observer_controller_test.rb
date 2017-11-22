@@ -961,6 +961,60 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(:runtime_ask_user_question_success.t)
   end
 
+  def test_email_merge_request
+    name1 = Name.all.sample
+    name2 = Name.all.sample
+    params = {
+      type:   :Name,
+      old_id: name1.id,
+      new_id: name2.id
+    }
+
+    get(:email_merge_request, params)
+    assert_response(:redirect)
+
+    login("rolf")
+    get(:email_merge_request, params.except(:type))
+    assert_response(:redirect)
+    get(:email_merge_request, params.except(:old_id))
+    assert_response(:redirect)
+    get(:email_merge_request, params.except(:new_id))
+    assert_response(:redirect)
+    get(:email_merge_request, params.merge(type: :Bogus))
+    assert_response(:redirect)
+    get(:email_merge_request, params.merge(old_id: -123))
+    assert_response(:redirect)
+    get(:email_merge_request, params.merge(new_id: -456))
+    assert_response(:redirect)
+
+    get_with_dump(:email_merge_request, params)
+    assert_response(:success)
+    assert_names_equal(name1, assigns(:old_obj))
+    assert_names_equal(name2, assigns(:new_obj))
+  end
+
+  def test_email_merge_request_post
+    email_count = ActionMailer::Base.deliveries.count
+    name1 = Name.all.sample
+    name2 = Name.all.sample
+    params = {
+      type:   :Name,
+      old_id: name1.id,
+      new_id: name2.id,
+      notes:  "SHAZAM"
+    }
+
+    post(:email_merge_request, params)
+    assert_response(:redirect)
+    assert_equal(email_count, ActionMailer::Base.deliveries.count)
+
+    login("rolf")
+    post(:email_merge_request, params)
+    assert_response(:redirect)
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
+    assert_match(/SHAZAM/, ActionMailer::Base.deliveries.last.to_s)
+  end
+
   def test_show_notifications
     # First, create a naming notification email, making sure it has a template,
     # and making sure the person requesting the notifcation is not the same

@@ -279,6 +279,12 @@ class Location < AbstractModel
     format_name + " (#{id || "?"})"
   end
 
+  # Info to include about each location in merge requests.
+  def merge_info
+    num_obs = observations.count
+    "#{:LOCATION.l} ##{id}: #{name} [o=#{num_obs}]"
+  end
+
   # Strip out special characters, punctuation, and small words from a name.
   # This is supposed to make it easier to search for a name if you don't know
   # how it is worded.  I'm not so sure anymore...

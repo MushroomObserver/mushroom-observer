@@ -502,6 +502,13 @@ class Name < AbstractModel
     str
   end
 
+  # Info to include about each name in merge requests.
+  def merge_info
+    num_obs     = observations.count
+    num_namings = namings.count
+    "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
+  end
+
   ##############################################################################
   #
   #  :section: Taxonomy

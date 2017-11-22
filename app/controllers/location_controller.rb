@@ -632,13 +632,10 @@ class LocationController < ApplicationController
 
           # Non-admins just send email-request to admins.
           else
-            flash_warning(:runtime_merge_locations_warning.t)
-            content = :email_location_merge.l(user: @user.login,
-                                              this: "##{@location.id}: " + @location.name,
-                                              that: "##{merge.id}: " + merge.name,
-                                              this_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
-                                              that_url: "#{MO.http_domain}/location/show_location/#{merge.id}")
-            WebmasterEmail.build(@user.email, content).deliver_now
+            redirect_with_query(controller: :observer,
+                                action: :email_merge_request, type: :Location,
+                                old_id: @location.id, new_id: merge.id)
+            return
           end
 
         # Otherwise it is safe to change the name.

@@ -181,29 +181,6 @@ class NameControllerTest < FunctionalTestCase
     @@emails = []
   end
 
-  def assert_notify_email(old_name, new_name)
-    assert(@@emails.any?, "Was expecting an email notification.")
-    assert(@@emails.length == 1,
-           "Was only expecting one email notification, got:\n" +
-           @@emails.inspect)
-    if @@emails.first =~ /^(old|this) : #\d+: (.*) \[.*/
-      old_name2 = Regexp.last_match(2)
-    end
-    if @@emails.first =~ /^(new|into) : #\d+: (.*) \[.*/
-      new_name2 = Regexp.last_match(2)
-    end
-    assert(old_name == old_name2 && new_name == new_name2,
-           "Was expecting different email notification content.\n" \
-           "---- Expected: --------------------\n" \
-           "old: #nnn: #{old_name}\n" \
-           "new: #nnn: #{new_name}\n" \
-           "---- Actual: ----------------------\n" \
-           "#{@@emails.first}\n" \
-           "-----------------------------------\n")
-  ensure
-    @@emails = []
-  end
-
   def test_index_name
     get_with_dump(:index_name)
     assert_template(:list_names)
@@ -1569,12 +1546,11 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:edit_name, params)
 
-    assert_redirected_to(action: :show_name, id: old_name.id)
     # Fails because Rolf isn't in admin mode.
-    assert_flash_warning
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+    post(:edit_name, params)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(Name.find(old_name.id))
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -1693,9 +1669,8 @@ class NameControllerTest < FunctionalTestCase
 
     login("rolf")
     post(:edit_name, params)
-    assert_flash_warning
-    assert_redirected_to(action: :show_name, id: old_name.id)
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
 
     # Try again as an admin.
     make_admin
@@ -2046,9 +2021,8 @@ class NameControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     post(:edit_name, params)
-    assert_flash_warning
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
-    assert_redirected_to(action: :show_name, id: old_name.id)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(old_name.reload)
     assert(new_name.reload)
     assert_equal(1, new_name.version)

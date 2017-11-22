@@ -247,9 +247,9 @@ class HerbariumControllerTest < FunctionalTestCase
     params = herbarium_params.merge(name: other.name)
     login("rolf")
     post(:edit_herbarium, herbarium: params, id: nybg.id)
-    assert_flash(/already exists/i)
-    assert_response(:success)
     assert_equal(last_update, nybg.reload.updated_at)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: nybg.id, new_id: other.id)
   end
 
   def test_edit_herbarium_post_with_nonexisting_place_name

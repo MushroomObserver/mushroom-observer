@@ -554,6 +554,11 @@ class NameController < ApplicationController
     redirect_with_query(action: :show_name, id: @name.id)
   end
 
+  def redirect_to_merge_request(new_name)
+    redirect_with_query(controller: :observer, action: :email_merge_request,
+                        type: :Name, old_id: @name.id, new_id: new_name.id)
+  end
+
   ##############################################################################
   #
   #  :section: Edit Names
@@ -747,10 +752,10 @@ class NameController < ApplicationController
   def try_to_merge(new_name)
     if in_admin_mode? || @name.mergeable? || new_name.mergeable?
       merge_name_into(new_name)
+      redirect_to_show_name
     else
-      send_name_merge_email(new_name)
+      redirect_to_merge_request(new_name)
     end
-    redirect_to_show_name
   end
 
   def merge_name_into(new_name)
@@ -772,25 +777,11 @@ class NameController < ApplicationController
     new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
     @name.display_name = old_display_name_for_log
     new_name.merge(@name)
-    flash_notice(:runtime_edit_name_merge_success.t(this: @name.real_search_name,
-                                                    that: new_name.real_search_name))
+    flash_notice(:runtime_edit_name_merge_success.t(
+      this: @name.real_search_name, that: new_name.real_search_name
+    ))
     @name = new_name
     @name.save
-  end
-
-  def send_name_merge_email(new_name)
-    flash_warning(:runtime_merge_names_warning.t)
-    num1 = "o=#{@name.observations.size}, n=#{@name.namings.size}"
-    num2 = "o=#{new_name.observations.size}, n=#{new_name.namings.size}"
-    content = :email_name_merge.l(
-      user: @user.login,
-      this: "##{@name.id}: #{@name.real_search_name} [#{num1}]",
-      that: "##{new_name.id}: #{new_name.real_search_name} [#{num2}]",
-      this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
-      that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
-    )
-    WebmasterEmail.build(@user.email, content).deliver_now
-    NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
   ##############################################################################

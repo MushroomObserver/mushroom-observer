@@ -81,6 +81,13 @@ class Herbarium < AbstractModel
     name.t.strip_html.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
+  # Info to include about each herbarium in merge requests.
+  def merge_info
+    num_cur = curators.count
+    num_rec = herbarium_records.count
+    "#{:HERBARIUM.l} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
+  end
+
   def self.default_specimen_label(name, id)
     "#{name}: #{id || "?"}".strip_html
   end

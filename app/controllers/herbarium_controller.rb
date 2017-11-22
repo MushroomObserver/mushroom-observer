@@ -126,7 +126,13 @@ class HerbariumController < ApplicationController
   def validate_name!
     other = Herbarium.find_by_name(@herbarium.name)
     return true if !other || other == @herbarium
-    flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
+    if @herbarium.id # i.e. in edit mode
+      redirect_with_query(controller: :observer, action: :email_merge_request,
+                          type: :Herbarium, old_id: @herbarium.id,
+                          new_id: other.id)
+    else
+      flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
+    end
     false
   end
 
