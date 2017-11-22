@@ -13,7 +13,7 @@ class CuratorTest < IntegrationTestCase
     open_form do |form|
       form.submit("Add")
     end
-    assert_template("herbarium/edit_herbarium")
+    assert_template("herbarium_record/list_herbarium_records")
   end
 
   def test_herbarium_index_from_add_herbarium_record

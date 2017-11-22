@@ -488,7 +488,7 @@ class Observation < AbstractModel
   end
 
   def default_specimen_label
-    Herbarium.default_specimen_label(name.text_name, id)
+    Herbarium.default_specimen_label(name.text_name, "MO #{id}")
   end
 
   # Look up the corresponding instance in our namings association.  If we are

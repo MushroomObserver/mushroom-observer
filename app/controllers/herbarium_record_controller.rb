@@ -48,8 +48,12 @@ class HerbariumRecordController < ApplicationController
     store_location
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:id].to_s, by: :herbarium_label)
-    @links = [:add_herbarium_record.l,
-              { action: :add_herbarium_record, id: params[:id] }]
+    @links = [
+      [:show_object.l(type: :observation),
+        { controller: :observer, action: :show_observation, id: params[:id] }],
+      [:add_herbarium_record.l,
+        { action: :add_herbarium_record, id: params[:id] }]
+    ]
     show_selected_herbarium_records(query, always_index: true)
   end
 
@@ -83,6 +87,7 @@ class HerbariumRecordController < ApplicationController
   # ----------------------------
 
   def show_herbarium_record  # :nologin:
+    pass_query_params
     @herbarium_record = HerbariumRecord.find(params[:id].to_s)
     @layout = calc_layout_params
   end
@@ -92,93 +97,54 @@ class HerbariumRecordController < ApplicationController
   # ----------------------------
 
   def add_herbarium_record
-    @observation = Observation.find(params[:id].to_s)
-    @layout = calc_layout_params
-    @herbarium_name = @user.preferred_herbarium_name
-    if @observation
-      @herbarium_label = @observation.default_specimen_label
-      if request.method == "POST"
-        if valid_herbarium_record_params(params[:herbarium_record])
-          build_herbarium_record(params[:herbarium_record], @observation)
-        end
-      end
+    pass_query_params
+    @observation     = Observation.find(params[:id].to_s)
+    @layout          = calc_layout_params
+    @herbarium_name  = @user.preferred_herbarium_name
+    @herbarium_label = @observation.default_specimen_label
+    if request.method == "POST"
+      save_herbarium_record(@observation, params[:herbarium_record])
     end
   end
 
-  def valid_herbarium_record_params(params)
-    params[:herbarium_name] = params[:herbarium_name].to_s.strip_html
-    params[:herbarium_label] = params[:herbarium_label].strip_html
-    # has_curator_permission(params[:herbarium_name], @user) and
-    !herbarium_record_exists(params[:herbarium_name], params[:herbarium_label])
-  end
-
-  def has_curator_permission(herbarium_name, user)
-    result = true
-    herbarium = Herbarium.find_by_name(herbarium_name)
-    if herbarium
-      unless herbarium.curators.member?(user)
-        flash_error(:add_herbarium_record_not_a_curator.t(herbarium_name: herbarium_name))
-        result = false
-      end
-    end
-    result
-  end
-
-  def herbarium_record_exists(herbarium_name, herbarium_label)
-    for s in HerbariumRecord.where(herbarium_label: herbarium_label)
-      if s.herbarium.name == herbarium_name
-        flash_error(:add_herbarium_record_already_exists.strip_html(
-                      name: herbarium_name, label: herbarium_label))
-        return true
-      end
-    end
-    false
-  end
-
-  def build_herbarium_record(params, obs)
-    params[:user] = @user
-    new_herbarium = infer_herbarium(params)
-    herbarium_record = HerbariumRecord.new(whitelisted_herbarium_record_params)
-    herbarium_record.herbarium_id = params[:herbarium].id
-    herbarium_record.add_observation(obs)
-    herbarium_record.save
-    calc_herbarium_record_redirect(params, new_herbarium, herbarium_record) # redirect properly
-  end
-
-  def infer_herbarium(params)
-    herbarium_name = params[:herbarium_name].to_s
-    herbarium = Herbarium.find_by_name(herbarium_name)
-    result = herbarium.nil?
-    if result
-      herbarium = Herbarium.new(herbarium_params(params))
-      herbarium.personal_user = @user if herbarium.name ==
-                                         @user.personal_herbarium_name
-      herbarium.curators.push(@user)
-      herbarium.save
-    end
-    params[:herbarium] = herbarium
-    result
-  end
-
-  def herbarium_params(params)
-    {
-      name: params[:herbarium_name],
-      description: "",
-      email: @user.email,
-      mailing_address: "",
-      place_name: ""
-    }
-  end
-
-  def calc_herbarium_record_redirect(params, new_herbarium, herbarium_record)
-    if new_herbarium
-      flash_notice(:herbarium_edit.t(name: params[:herbarium_name]))
-      redirect_to(controller: :herbarium, action: :edit_herbarium,
-                  id: herbarium_record.herbarium_id)
+  def save_herbarium_record(obs, params)
+    @herbarium_name  = params[:herbarium_name].to_s.strip_html.strip_squeeze
+    @herbarium_label = params[:herbarium_label].to_s.strip_html.strip_squeeze
+    @herbarium       = lookup_herbarium(@herbarium_name)
+    return unless @herbarium
+    herbarium_record = HerbariumRecord.where(
+      herbarium:       @herbarium,
+      herbarium_label: @herbarium_label
+    ).first
+    if herbarium_record
+      flash_warning :add_herbarium_record_label_already_used.t(
+        herbarium_name:  @herbarium.name,
+        herbarium_label: @herbarium_label
+      )
     else
-      redirect_to(controller: :observer, action: :show_observation,
-                  id: herbarium_record.observations[0].id)
+      herbarium_record = HerbariumRecord.create(
+        herbarium:       @herbarium,
+        herbarium_label: @herbarium_label
+      )
     end
+    herbarium_record.add_observation(obs)
+    redirect_to(action: :observation_index, id: obs.id)
+  end
+
+  def lookup_herbarium(herbarium_name)
+    return if herbarium_name.blank?
+    herbarium = Herbarium.where(name: herbarium_name).first
+    return herbarium unless herbarium.nil?
+    if herbarium_name != @user.personal_herbarium_name
+      flash_warning(:form_observations_create_herbarium_separately.t)
+      return
+    end
+    Herbarium.create(
+      name:          herbarium_name,
+      email:         @user.email,
+      personal_user: @user,
+      curators:      [@user]
+    )
   end
 
   # ----------------------------
@@ -186,6 +152,7 @@ class HerbariumRecordController < ApplicationController
   # ----------------------------
 
   def edit_herbarium_record # :norobots:
+    pass_query_params
     @herbarium_record = HerbariumRecord.safe_find(params[:id].to_s)
     if !@herbarium_record
       redirect_to(action: :list_herbarium_records)

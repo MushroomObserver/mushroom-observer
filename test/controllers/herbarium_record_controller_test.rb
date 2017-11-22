@@ -124,15 +124,13 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = add_herbarium_record_params
-    existing_herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
-    params[:herbarium_record][:herbarium_name] =
-      existing_herbarium_record.herbarium.name
-    params[:herbarium_record][:herbarium_label] =
-      existing_herbarium_record.herbarium_label
+    existing = herbarium_records(:coprinus_comatus_nybg_spec)
+    params[:herbarium_record][:herbarium_name]  = existing.herbarium.name
+    params[:herbarium_record][:herbarium_label] = existing.herbarium_label
     post(:add_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_flash(/already exists/i)
-    assert_response(:success)
+    assert_flash(/already been recorded/i)
+    assert_response(:redirect)
   end
 
   # I keep thinking only curators should be able to add herbarium_records.

@@ -2222,6 +2222,7 @@
   add_herbarium_record_cancel: Cancel (Show Observation)
   add_herbarium_record_already_exists: A record with the label '[label]' already exists for herbarium '[name]'
   add_herbarium_record_not_a_curator: You are not a curator of [herbarium_name]
+  add_herbarium_record_label_already_used: The label '[herbarium_label]' has already been recorded for [herbarium_name]. Note that this herbarium record is now attached to multiple observations. If this was unintentional, edit this herbarium record and detach the observations which don't apply.  Then you can create new herbarium records for those observations.
   user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/list_herbaria
@@ -2245,7 +2246,7 @@
   edit_herbarium_record_cannot_edit: Attempt to edit herbarium record without permission
   edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
   edit_herbarium_record_save: Save
-  edit_herbarium_record_back_to_index: Back to herbarium record index
+  edit_herbarium_record_back_to_index: Back to Herbarium Record Index
   edit_herbarium_record_label_blank: Herbarium label cannot be blank.
 
   # herbarium_record/herbarium_record_index (not a real page)

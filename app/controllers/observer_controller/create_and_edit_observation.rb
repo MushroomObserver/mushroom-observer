@@ -87,7 +87,6 @@ class ObserverController
     success = false unless validate_name(params)
     success = false unless validate_place_name(params)
     success = false unless validate_object(@observation)
-    success = false unless validate_herbarium_record(params)
     success = false if @name && !validate_object(@naming)
     success = false if @name && !validate_object(@vote)
     success = false if @bad_images != []
@@ -151,34 +150,6 @@ class ObserverController
     success
   end
 
-  def validate_herbarium_record(params)
-    success = true
-    if params[:herbarium_record]
-      herbarium_name = params[:herbarium_record][:herbarium_name]
-      if herbarium_name
-        herbarium_name = herbarium_name.strip_html
-        herbarium = Herbarium.where(name: herbarium_name)[0]
-        if herbarium
-          herbarium_label = herbarium_label_from_params(params)
-          success = herbarium.label_free?(herbarium_label)
-          duplicate_error(herbarium_name, herbarium_label) unless success
-        end
-      end
-    end
-    success
-  end
-
-  def duplicate_error(name, label)
-    err = :edit_herbarium_duplicate_label.t(herbarium_name: name,
-                                            herbarium_label: label)
-    flash_error(err)
-  end
-
-  def herbarium_label_from_params(params)
-    Herbarium.default_specimen_label(params[:name][:name],
-                                     params[:herbarium_record][:herbarium_id])
-  end
-
   def save_everything_else(reason)
     if @name
       @naming.create_reasons(reason, params[:was_js_on] == "yes")
@@ -217,10 +188,21 @@ class ObserverController
     herbarium_label = Herbarium.default_specimen_label(init_name, herbarium_id)
     herbarium       = lookup_herbarium(herbarium_name)
     return unless herbarium
-    herbarium_record = HerbariumRecord.create(
+    herbarium_record = HerbariumRecord.where(
       herbarium:       herbarium,
       herbarium_label: herbarium_label
-    )
+    ).first
+    if herbarium_record
+      flash_warning :add_herbarium_record_label_already_used.t(
+        herbarium_name:  herbarium.name,
+        herbarium_label: herbarium_label
+      )
+    else
+      herbarium_record = HerbariumRecord.create(
+        herbarium:       herbarium,
+        herbarium_label: herbarium_label
+      )
+    end
     herbarium_record.add_observation(obs)
   end
 
@@ -248,11 +230,12 @@ class ObserverController
       flash_warning(:form_observations_create_herbarium_separately.t)
       return
     end
-    herbarium = Herbarium.new(name: herbarium_name, email: @user.email)
-    herbarium.personal_user = @user
-    herbarium.curators.push(@user)
-    herbarium.save
-    herbarium
+    Herbarium.create(
+      name:          herbarium_name,
+      email:         @user.email,
+      personal_user: @user,
+      curators:      [@user]
+    )
   end
 
   def redirect_to_next_page

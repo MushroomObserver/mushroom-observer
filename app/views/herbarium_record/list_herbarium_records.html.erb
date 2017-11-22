@@ -25,8 +25,8 @@
             <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
           </td>
           <td>
-            <%= link_to(herbarium_record.herbarium_label.t,
-                        herbarium_record.show_link_args) %>
+            <%= link_with_query(herbarium_record.herbarium_label.t,
+                                herbarium_record.show_link_args) %>
           </td>
           <td>
             <%= herbarium_record.observations.map do |obs|

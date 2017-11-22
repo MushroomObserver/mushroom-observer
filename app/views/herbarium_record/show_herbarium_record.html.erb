@@ -11,7 +11,10 @@
             id: @herbarium_record.id, data: {confirm: :are_you_sure.t}),
     link_to(:herbarium_index.t, controller: :herbarium, action: :index)
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  @tabsets = {
+    pager_for: @herbarium_record,
+    right: draw_tab_set(tabs)
+  }
 
   herbarium = @herbarium_record.herbarium
 %>
