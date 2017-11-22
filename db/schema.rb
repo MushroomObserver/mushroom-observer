@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171120145900) do
+ActiveRecord::Schema.define(version: 20171121181200) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -135,7 +135,6 @@ ActiveRecord::Schema.define(version: 20171120145900) do
 
   create_table "herbarium_records", force: :cascade do |t|
     t.integer  "herbarium_id",    limit: 4,                  null: false
-    t.date     "when",                                       null: false
     t.text     "notes",           limit: 65535
     t.datetime "created_at"
     t.datetime "updated_at"

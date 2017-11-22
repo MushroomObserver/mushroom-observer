@@ -2233,7 +2233,6 @@
   herbarium_record_herbarium_label: Herbarium Label
   herbarium_record_herbarium_id: Accession Number
   herbarium_record_user: Specimen Recorder
-  herbarium_record_when: When Submitted
   herbarium_record_notes: Notes
   herbarium_record_created_at: Created At
   herbarium_record_updated_at: Updated At
@@ -2246,6 +2245,8 @@
   edit_herbarium_record_cannot_edit: Attempt to edit herbarium record without permission
   edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
   edit_herbarium_record_save: Save
+  edit_herbarium_record_back_to_index: Back to herbarium record index
+  edit_herbarium_record_label_blank: Herbarium label cannot be blank.
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Herbarium Record Index"
@@ -3608,9 +3609,11 @@
   query_title_by_editor: "[TYPES] Edited by [USER]"
   query_title_by_rss_log: "[TYPES] in Activity Log"
   query_title_by_user: "[TYPES] created by [USER]"
+  query_title_for_observation: "[TYPES] attached to [OBSERVATION]"
   query_title_for_project: "[TYPES] attached to [PROJECT]"
   query_title_for_target: "[TYPES] on [TARGET]"
   query_title_for_user: "[TYPES] for [USER]"
+  query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
@@ -3645,6 +3648,8 @@
   query_help_comment_for_object: comments about a given object
   query_help_comment_for_user: comments sent to a given user
   query_help_comment_pattern_search: comments matching a search string
+  query_help_herbarium_record_in_herbarium: records in a given herbarium
+  query_help_herbarium_record_for_observation: records attached to a given observation
   query_help_image_advanced_search: images of observations matching advanced search criteria
   query_help_image_all: all images
   query_help_image_by_user: images created by a given user
@@ -3760,6 +3765,8 @@
   sort_by_contribution: Contribution
   sort_by_reverse: Reverse Order
   sort_by_observation: "[:OBSERVATION]"
+  sort_by_herbarium_label: Label
+  sort_by_herbarium_name: Herbarium
 
   ################################################################################
 

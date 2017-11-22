@@ -145,7 +145,6 @@ class API
       provide_herbarium_label_default(obs)
       obs.herbarium_records << HerbariumRecord.create!(
         herbarium:       @herbarium,
-        when:            Time.zone.now,
         user:            user,
         herbarium_label: @herbarium_label
       )

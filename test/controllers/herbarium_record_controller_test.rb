@@ -1,10 +1,6 @@
 require "test_helper"
 
 class HerbariumRecordControllerTest < FunctionalTestCase
-  def assert_herbarium_record_index
-    assert_template(:herbarium_record_index)
-  end
-
   def test_show_herbarium_record_without_notes
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
@@ -21,39 +17,51 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_herbarium_index
     get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
-    assert_herbarium_record_index
-  end
-
-  def test_herbarium_with_one_herbarium_record_index
-    get_with_dump(:herbarium_index, id: herbaria(:rolf_herbarium).id)
-    assert_response(:redirect)
-    assert_no_flash
+    assert_template(:list_herbarium_records)
   end
 
   def test_herbarium_with_no_herbarium_records_index
     get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
-    assert_response(:redirect)
-    assert_flash(/no herbarium records/)
+    assert_template(:list_herbarium_records)
+    assert_flash(/No matching herbarium records found/)
   end
 
   def test_observation_index
     get_with_dump(:observation_index,
                   id: observations(:coprinus_comatus_obs).id)
-    assert_herbarium_record_index
-  end
-
-  def test_observation_with_one_herbarium_record_index
-    get_with_dump(:observation_index,
-                  id: observations(:detailed_unknown_obs).id)
-    assert_response(:redirect)
-    assert_no_flash
+    assert_template(:list_herbarium_records)
   end
 
   def test_observation_with_no_herbarium_records_index
     get_with_dump(:observation_index,
                   id: observations(:strobilurus_diminutivus_obs).id)
+    assert_template(:list_herbarium_records)
+    assert_flash(/No matching herbarium records found/)
+  end
+
+  def test_herbarium_record_search
+    # Two herbarium_records match this pattern.
+    pattern = "Coprinus comatus"
+    get(:herbarium_record_search, pattern: pattern)
+    assert_response(:success)
+    assert_template("list_herbarium_records")
+    # In results, expect 1 row per herbarium_record
+    assert_select(".results tr", 2)
+  end
+
+  def test_herbarium_record_search_with_one_herbarium_record_index
+    get_with_dump(:herbarium_record_search,
+                  pattern: herbarium_records(:interesting_unknown).id)
     assert_response(:redirect)
-    assert_flash(/no herbarium records/)
+    assert_no_flash
+  end
+
+  def test_index_herbarium_record
+    get(:index_herbarium_record)
+    assert_response(:success)
+    assert_template("list_herbarium_records")
+    # In results, expect 1 row per herbarium_record
+    assert_select(".results tr", HerbariumRecord.all.size)
   end
 
   def test_add_herbarium_record
@@ -74,9 +82,6 @@ class HerbariumRecordControllerTest < FunctionalTestCase
         herbarium_name: rolf.preferred_herbarium_name,
         herbarium_label:
           "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
-        "when(1i)"      => "2012",
-        "when(2i)"      => "11",
-        "when(3i)"      => "26",
         notes: "Some notes about this herbarium record"
       }
     }
@@ -95,12 +100,6 @@ class HerbariumRecordControllerTest < FunctionalTestCase
                  herbarium_record.herbarium.name)
     assert_equal(params[:herbarium_record][:herbarium_label],
                  herbarium_record.herbarium_label)
-    assert_equal(params[:herbarium_record]["when(1i)"].to_i,
-                 herbarium_record.when.year)
-    assert_equal(params[:herbarium_record]["when(2i)"].to_i,
-                 herbarium_record.when.month)
-    assert_equal(params[:herbarium_record]["when(3i)"].to_i,
-                 herbarium_record.when.day)
     assert_equal(rolf, herbarium_record.user)
     obs = Observation.find(params[:id])
     assert(obs.specimen)
@@ -177,25 +176,20 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_edit_herbarium_record_post
     login("rolf")
-    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
-    herbarium = nybg.herbarium
-    user = nybg.user
-    params = add_herbarium_record_params
-    params[:id] = nybg.id
+    nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
+    nybg_user   = nybg_rec.user
+    rolf_herb   = rolf.personal_herbarium
+    params      = add_herbarium_record_params
+    params[:id] = nybg_rec.id
+    params[:herbarium_record][:herbarium_name] = rolf_herb.name
+    assert_not_equal(rolf_herb, nybg_rec.herbarium)
     post(:edit_herbarium_record, params)
-    herbarium_record = HerbariumRecord.find(nybg.id)
-    assert_equal(herbarium, herbarium_record.herbarium)
-    assert_equal(user, herbarium_record.user)
+    nybg_rec.reload
+    assert_equal(rolf_herb, nybg_rec.herbarium)
+    assert_equal(nybg_user, nybg_rec.user)
     assert_equal(params[:herbarium_record][:herbarium_label],
-                 herbarium_record.herbarium_label)
-    assert_equal(params[:herbarium_record]["when(1i)"].to_i,
-                 herbarium_record.when.year)
-    assert_equal(params[:herbarium_record]["when(2i)"].to_i,
-                 herbarium_record.when.month)
-    assert_equal(params[:herbarium_record]["when(3i)"].to_i,
-                 herbarium_record.when.day)
-    assert_equal(params[:herbarium_record][:notes], herbarium_record.notes)
-    assert_equal(nybg.user, herbarium_record.user)
+                 nybg_rec.herbarium_label)
+    assert_equal(params[:herbarium_record][:notes], nybg_rec.notes)
     assert_response(:redirect)
   end
 
@@ -245,24 +239,5 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     {
       id: herbarium_records(:interesting_unknown).id
     }
-  end
-
-  def test_herbarium_record_search
-    # Two herbarium_records match this pattern.
-    pattern = "Coprinus comatus"
-    get(:herbarium_record_search, pattern: pattern)
-
-    assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", 2)
-  end
-
-  def test_index_herbarium_record
-    get(:index_herbarium_record)
-    assert_response(:success)
-    assert_template("list_herbarium_records")
-    # In results, expect 1 row per herbarium_record
-    assert_select(".results tr", HerbariumRecord.all.size)
   end
 end

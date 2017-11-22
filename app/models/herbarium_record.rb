@@ -18,7 +18,6 @@
 #  created_at::       Date/time this record was created at MO.
 #  updated_at::       Date/time this record was last updated at MO.
 #  herbarium_id::     Id of Herbarium containing this record.
-#  when::             Date the record was created at the Herbarium.
 #  herbarium_label::  Label for the specimen, typically the initial
 #                     determination and the  collector's name and number.
 #  notes::            Random notes about this record (optional).

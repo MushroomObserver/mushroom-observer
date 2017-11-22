@@ -5,7 +5,6 @@ class HerbariumRecordTest < UnitTestCase
     refute(herbarium_records(:interesting_unknown).observations.empty?)
     assert(herbarium_records(:interesting_unknown).herbarium)
     assert(herbarium_records(:interesting_unknown).herbarium_label)
-    assert(herbarium_records(:interesting_unknown).when)
     assert(herbarium_records(:interesting_unknown).notes)
   end
 

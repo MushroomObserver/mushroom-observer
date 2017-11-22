@@ -1,18 +1,28 @@
 class HerbariumRecordController < ApplicationController
   before_action :login_required, except: [
+    :list_herbarium_records,
     :index_herbarium_record,
     :herbarium_record_search,
-    :list_herbarium_records,
-    :show_herbarium_record,
     :herbarium_index,
-    :observation_index
+    :observation_index,
+    :show_herbarium_record
   ]
+
+  # ----------------------------
+  #  Indexes
+  # ----------------------------
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record # :nologin: :norobots:
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
-                                    always_index: true)
+                                           always_index: true)
+  end
+
+  # Show list of herbarium_records.
+  def list_herbarium_records # :nologin:
+    query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
+    show_selected_herbarium_records(query)
   end
 
   # Display list of HerbariumRecords whose text matches a string pattern.
@@ -27,6 +37,22 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
+  def herbarium_index # :nologin:
+    store_location
+    query = create_query(:HerbariumRecord, :in_herbarium,
+                         herbarium: params[:id].to_s, by: :herbarium_label)
+    show_selected_herbarium_records(query, always_index: true)
+  end
+
+  def observation_index # :nologin:
+    store_location
+    query = create_query(:HerbariumRecord, :for_observation,
+                         observation: params[:id].to_s, by: :herbarium_label)
+    @links = [:add_herbarium_record.l,
+              { action: :add_herbarium_record, id: params[:id] }]
+    show_selected_herbarium_records(query, always_index: true)
+  end
+
   # Show selected list of herbarium_records.
   def show_selected_herbarium_records(query, args = {})
     args = {
@@ -36,12 +62,15 @@ class HerbariumRecordController < ApplicationController
     }.merge(args)
 
     @links ||= []
+    @links << [:create_herbarium.l,
+                { controller: :herbarium, action: :create_herbarium }]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ["name",        :sort_by_title.t],
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t]
+      ["herbarium_name",  :sort_by_herbarium_name.t],
+      ["herbarium_label", :sort_by_herbarium_label.t],
+      ["created_at",      :sort_by_created_at.t],
+      ["updated_at",      :sort_by_updated_at.t]
     ]
 
     args[:letters] = "herbarium_label"
@@ -49,51 +78,18 @@ class HerbariumRecordController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  # Show list of herbarium_records.
-  def list_herbarium_records # :nologin:
-    query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
-    show_selected_herbarium_records(query)
-  end
+  # ----------------------------
+  #  Show record
+  # ----------------------------
 
   def show_herbarium_record  # :nologin:
     @herbarium_record = HerbariumRecord.find(params[:id].to_s)
     @layout = calc_layout_params
   end
 
-  def herbarium_index # :nologin:
-    store_location
-    herbarium = Herbarium.find(params[:id].to_s)
-    @herbarium_records = herbarium ? herbarium.herbarium_records : []
-    @subject = herbarium.name
-    unless calc_herbarium_record_index_redirect(@herbarium_records)
-      flash_warning(:herbarium_index_no_herbarium_records.t)
-      redirect_to(controller: :herbarium, action: :show_herbarium,
-                  id: params[:id].to_s)
-    end
-  end
-
-  def calc_herbarium_record_index_redirect(herbarium_records)
-    count = herbarium_records.count
-    if count != 0
-      if count == 1
-        redirect_to(action: :show_herbarium_record, id: herbarium_records[0].id)
-      else
-        render(action: :herbarium_record_index)
-      end
-    end
-  end
-
-  def observation_index # :nologin:
-    store_location
-    observation = Observation.find(params[:id].to_s)
-    @herbarium_records = observation ? observation.herbarium_records : []
-    @subject = observation.format_name
-    unless calc_herbarium_record_index_redirect(@herbarium_records)
-      flash_warning(:observation_index_no_herbarium_records.t)
-      redirect_to(controller: :observer, action: :show_observation,
-                  id: params[:id].to_s)
-    end
-  end
+  # ----------------------------
+  #  Create record
+  # ----------------------------
 
   def add_herbarium_record
     @observation = Observation.find(params[:id].to_s)
@@ -185,6 +181,67 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
+  # ----------------------------
+  #  Edit record
+  # ----------------------------
+
+  def edit_herbarium_record # :norobots:
+    @herbarium_record = HerbariumRecord.safe_find(params[:id].to_s)
+    if !@herbarium_record
+      redirect_to(action: :list_herbarium_records)
+    elsif !can_edit?(@herbarium_record)
+      redirect_to(action: :show_herbarium_record, id: @herbarium_record.id)
+    elsif request.method == "GET"
+      @herbarium_name = @herbarium_record.herbarium.name
+    elsif request.method == "POST" &&
+          params[:herbarium_record] &&
+          validate_new_herbarium!(params[:herbarium_record]) &&
+          validate_new_label!(params[:herbarium_record]) &&
+          validate_new_notes!(params[:herbarium_record])
+      update_herbarium_record
+    end
+  end
+
+  def validate_new_herbarium!(params)
+    @herbarium_name = params[:herbarium_name].to_s.strip_squeeze
+    @new_herbarium = Herbarium.where(name: @herbarium_name).first
+  end
+
+  def validate_new_label!(params)
+    new_label = params[:herbarium_label].to_s.strip_html.strip_squeeze
+    @herbarium_record.herbarium_label = new_label
+    if new_label.blank?
+      flash_error(:edit_herbarium_record_label_blank.t)
+      return false
+    end
+    make_sure_label_free!(@new_herbarium, new_label)
+  end
+
+  def make_sure_label_free!(herbarium, new_label)
+    return true if herbarium.label_free?(new_label)
+    flash_error(:edit_herbarium_duplicate_label.l(
+      herbarium_label: new_label,
+      herbarium_name: herbarium.name)
+    )
+    false
+  end
+
+  def validate_new_notes!(params)
+    @herbarium_record.notes = params[:notes].to_s.strip
+  end
+
+  def update_herbarium_record
+    old_herbarium = @herbarium_record.herbarium
+    @herbarium_record.herbarium = @new_herbarium
+    @herbarium_record.save
+    @herbarium_record.notify_curators if old_herbarium != @new_herbarium
+    redirect_to(action: :show_herbarium_record, id: @herbarium_record.id)
+  end
+
+  # ----------------------------
+  #  Delete record
+  # ----------------------------
+
   def delete_herbarium_record
     herbarium_record = HerbariumRecord.find(params[:id].to_s)
     herbarium_id = herbarium_record.herbarium_id
@@ -198,43 +255,11 @@ class HerbariumRecordController < ApplicationController
     permission?(herbarium_record, :delete_herbarium_record_cannot_delete.l)
   end
 
-  def edit_herbarium_record # :norobots:
-    @herbarium_record = HerbariumRecord.find(params[:id].to_s)
-    redirect_to(action: :show_herbarium_record,
-                id: @herbarium_record.id) unless can_edit?(@herbarium_record)
-
-    if (request.method == "POST") && params[:herbarium_record]
-      if ok_to_update(@herbarium_record, params[:herbarium_record])
-        update_herbarium_record(@herbarium_record, params[:herbarium_record])
-      end
-    end
-  end
-
-  def ok_to_update(herbarium_record, params)
-    params[:herbarium_label] = params[:herbarium_label].strip_html
-    new_label = params[:herbarium_label]
-    (herbarium_record.herbarium_label == new_label) || label_free?(herbarium_record.herbarium,
-                                                           new_label)
-  end
-
-  def label_free?(herbarium, new_label)
-    result = herbarium.label_free?(new_label)
-    flash_error(:edit_herbarium_duplicate_label.l(herbarium_label: new_label,
-                                                  herbarium_name: herbarium.name)) unless result
-    result
-  end
-
-  def update_herbarium_record(herbarium_record, _params)
-    herbarium_record.attributes = whitelisted_herbarium_record_params
-    herbarium_record.save
-    redirect_to(action: :show_herbarium_record, id: herbarium_record.id)
-  end
-
   ##############################################################################
 
   private
 
   def whitelisted_herbarium_record_params
-    params.require(:herbarium_record).permit(:when, :notes, :herbarium_label)
+    params.require(:herbarium_record).permit(:notes, :herbarium_label)
   end
 end

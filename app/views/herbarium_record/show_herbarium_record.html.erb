@@ -21,7 +21,6 @@
     <%= :HERBARIUM.t %>: <%= link_to(herbarium.name, herbarium.show_link_args) %><br/>
     <%= :herbarium_record_herbarium_label.t %>: <%= @herbarium_record.herbarium_label %><br/>
     <%= :herbarium_record_user.t %>: <%= @herbarium_record.user.legal_name %><br/>
-    <%= :herbarium_record_when.t %>: <%= @herbarium_record.when.web_date %>
   </p>
 
   <% if !@herbarium_record.notes.blank? %>

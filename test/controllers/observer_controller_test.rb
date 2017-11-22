@@ -2981,7 +2981,6 @@ class ObserverControllerTest < FunctionalTestCase
     fourth = obs.fourth
     fourth.herbarium_records << HerbariumRecord.create!(
       herbarium: herbaria(:nybg_herbarium),
-      when: Time.zone.now,
       user: mary,
       herbarium_label: "Mary #1234"
     )

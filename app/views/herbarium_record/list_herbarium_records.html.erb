@@ -1,10 +1,9 @@
 <%
   @title ||= :list_herbarium_records_title.t
 
-  if @links.any?
-    tabs = create_links(@links)
-    @tabsets = { right: draw_tab_set(tabs) }
-  end
+  tabs = create_links(@links)
+  tabs << link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
 %>
@@ -16,9 +15,30 @@
 				herbarium = herbarium_record.herbarium %>
         <tr>
           <td>
-            <%= link_with_query(herbarium_record.herbarium_label, herbarium_record.show_link_args) %>
-            (<%= link_with_query(herbarium.name.t, herbarium.show_link_args) %>)<br/>
-            <small><%= herbarium_record.created_at.web_time %></small>
+            <%= if in_admin_mode? || herbarium_record.can_edit?(@user)
+              link_with_query(:herbarium_edit_herbarium_record.t,
+                              {action: :edit_herbarium_record, id: herbarium_record.id},
+                              class: "btn btn-xs")
+            end %>
+          </td>
+          <td>
+            <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
+          </td>
+          <td>
+            <%= link_to(herbarium_record.herbarium_label.t,
+                        herbarium_record.show_link_args) %>
+          </td>
+          <td>
+            <%= herbarium_record.observations.map do |obs|
+              link_to(obs.unique_format_name.t, obs.show_link_args)
+            end.safe_join(", ") %>
+          </td>
+          <td>
+            <%= if in_admin_mode? || herbarium_record.can_edit?(@user)
+              link_with_query(:herbarium_delete_herbarium_record.t,
+                              {action: :delete_herbarium_record, id: herbarium_record.id},
+                              data: { confirm: :are_you_sure.t }, class: "btn btn-xs")
+            end %>
           </td>
         </tr>
       <% end %>

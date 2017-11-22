@@ -219,9 +219,7 @@ class ObserverController
     return unless herbarium
     herbarium_record = HerbariumRecord.create(
       herbarium:       herbarium,
-      herbarium_label: herbarium_label,
-      user:            @user,
-      when:            obs.when
+      herbarium_label: herbarium_label
     )
     herbarium_record.add_observation(obs)
   end

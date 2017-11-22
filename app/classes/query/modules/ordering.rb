@@ -125,6 +125,10 @@ module Query::Modules::Ordering
     when "url"
       "external_links.url ASC" if model == ExternalLink
 
+    when "herbarium_name"
+      add_join(:herbaria)
+      "herbaria.name ASC"
+
     when "id" # (for testing)
       "#{table}.id ASC"
 
