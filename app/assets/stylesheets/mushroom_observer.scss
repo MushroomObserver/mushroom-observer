@@ -246,7 +246,13 @@ blockquote {
   max-width: $help-block-max-width
 }
 .tooltip-inner {
-    word-wrap: break-word;
+  word-wrap: break-word;
+}
+
+ul.tight-list {
+  list-style: none;
+  margin-bottom: 0.5em;
+  padding-left: 1em;
 }
 
 //

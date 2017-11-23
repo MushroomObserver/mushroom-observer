@@ -32,6 +32,7 @@
 #  updated_at::       Date/time this record was last updated.
 #  name::             Collector's full name, not necessarily same as creator.
 #  number::           Collector's unique number (uniqueness not enforced).
+#  format_name::      Both collector's name and number.
 #
 #  == Class methods
 #
@@ -47,4 +48,8 @@
 #
 class CollectionNumber < AbstractModel
   has_and_belongs_to_many :observations
+
+  def format_name
+    "#{name} ##{number}"
+  end
 end

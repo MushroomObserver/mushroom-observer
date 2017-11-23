@@ -13,6 +13,7 @@
 #                     Each User can only have at most one personal herbarium.
 #  code::             Official code (e.g., "NY" for NYBG, optional).
 #  name::             Name of herbarium. (must be present and unique)
+#  format_name::      "Name (CODE)", for compatibility with other models.
 #  email::            Email address for inquiries (optional now).
 #  location_id::      Location of herbarium (optional).
 #  mailing_address::  Postal address for sending specimens to (optional).
@@ -75,6 +76,10 @@ class Herbarium < AbstractModel
 
   def herbarium_record_count
     herbarium_records.count
+  end
+
+  def format_name
+    code.blank? ? name : "#{name} (#{code})"
   end
 
   def sort_name

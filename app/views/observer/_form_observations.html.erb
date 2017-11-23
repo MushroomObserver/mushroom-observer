@@ -108,16 +108,16 @@
   </div>
 </div>
 
-<!-- has_specimen -->
-<% if has_specimen %>
+<!-- no_specimen_fields -->
+<% if button_name == :SAVE_EDITS.l %>
   <div class="well well-sm push-down max-width-text">
-    <%= content_tag(:p, :form_observations_delete_herbarium_records_help.t, class: "help-block") %>
+    <%= content_tag(:p, :form_observations_edit_specimens_help.t, class: "help-block") %>
   </div>
 <% end %>
-<!-- /has_specimen -->
+<!-- /no_specimen_fields -->
 
-<!-- NO_SPECIMENS -->
-<% if !has_specimen %>
+<!-- specimen_fields -->
+<% if button_name == :CREATE.l %> %>
   <div class="row">
     <div class="col-xs-12 push-down max-width-text">
       <div class="form-inline">
@@ -130,55 +130,56 @@
       </div>
     </div>
   </div>
-<% end %>
-<!-- /NO_SPECIMENS -->
 
-<!-- HERBARIUM_FIELDS -->
-<div id="herb_info_fields" class="row <%= "hidden" if !@observation.specimen %>">
-  <div class="col-sm-6 max-width-text">
-    <div class="form-group">
-      <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
-      <%= text_field(:collection_number, :name, value: @collectors_name, class: "form-control") %>
+  <!-- HERBARIUM_FIELDS -->
+  <div id="herb_info_fields" class="row <%= "hidden" if !@observation.specimen %>">
+    <div class="col-sm-6 max-width-text">
+      <div class="form-group">
+        <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
+        <%= text_field(:collection_number, :name, value: @collectors_name, class: "form-control") %>
+      </div>
+      <div class="form-group">
+        <%= label_tag(:collection_number_number, :collection_number_number.t + ":") %>
+        <%= text_field(:collection_number, :number, value: @collectors_number, class: "form-control") %>
+      </div>
+      <div class="form-group">
+        <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
+        <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+        <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+      </div>
+      <div class="form-group">
+        <%= label_tag(:herbarium_record_herbarium_id, :herbarium_record_herbarium_id.t + ":") %>
+        <%= text_field(:herbarium_record, :herbarium_id, value: @herbarium_id, class: "form-control") %>
+      </div>
     </div>
-    <div class="form-group">
-      <%= label_tag(:collection_number_number, :collection_number_number.t + ":") %>
-      <%= text_field(:collection_number, :number, value: @collectors_number, class: "form-control") %>
-    </div>
-    <div class="form-group">
-      <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
-      <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
-      <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
-    </div>
-    <div class="form-group">
-      <%= label_tag(:herbarium_record_herbarium_id, :herbarium_record_herbarium_id.t + ":") %>
-      <%= text_field(:herbarium_record, :herbarium_id, value: @herbarium_id, class: "form-control") %>
+    <div class="col-sm-6">
+      <div class="well well-sm ">
+        <div class="arrow-left hidden-xs"></div>
+        <%= content_tag(:p, :form_observations_herbarium_fields_help.t, class: "help-block") %>
+      </div>
     </div>
   </div>
-  <div class="col-sm-6">
-    <div class="well well-sm ">
-      <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_herbarium_fields_help.t, class: "help-block") %>
-    </div>
-  </div>
-</div>
-<% inject_javascript_at_end %(
-  jQuery(document).ready(function() {
-    specimen_checkbox = jQuery("#observation_specimen");
-    if (!jQuery("#observation_specimen").is(":checked"))
-      jQuery("#herb_info_fields").hide();
-    jQuery("#observation_specimen").change(function () {
-      if (jQuery("#observation_specimen").is(":checked"))
-        jQuery("#herb_info_fields").removeClass("hidden").show();
-      else
+  <% inject_javascript_at_end %(
+    jQuery(document).ready(function() {
+      specimen_checkbox = jQuery("#observation_specimen");
+      if (!jQuery("#observation_specimen").is(":checked"))
         jQuery("#herb_info_fields").hide();
+      jQuery("#observation_specimen").change(function () {
+        if (jQuery("#observation_specimen").is(":checked"))
+          jQuery("#herb_info_fields").removeClass("hidden").show();
+        else
+          jQuery("#herb_info_fields").hide();
+      });
+      jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
+        if (jQuery(this).val().length > 0)
+          specimen_checkbox.prop("checked", true)
+      });
     });
-    jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
-      if (jQuery(this).val().length > 0)
-        specimen_checkbox.prop("checked", true)
-    });
-  });
-) %>
-<!-- /HERBARIUM_FIELDS -->
+  ) %>
+  <!-- /HERBARIUM_FIELDS -->
+
+<% end %>
+<!-- /specimen_fields -->
 
 <!-- NOTES -->
 <%= render "form_observation_notes" %>

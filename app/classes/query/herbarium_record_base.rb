@@ -27,8 +27,7 @@ module Query
       )
       if params[:observations] 
         initialize_model_do_objects_by_id(
-          Observation, :observations,
-          "herbarium_records_observations.observation_id"
+          :observations, "herbarium_records_observations.observation_id"
         )
         add_join(:herbarium_records_observations)
       end

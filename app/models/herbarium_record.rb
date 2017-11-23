@@ -21,6 +21,7 @@
 #  herbarium_label::  Label for the specimen, typically the initial
 #                     determination and the  collector's name and number.
 #  notes::            Random notes about this record (optional).
+#  format_name::      Same as herbarium_label, for compat. with other models.
 #
 #  == Class methods
 #
@@ -46,6 +47,10 @@ class HerbariumRecord < AbstractModel
   attr_accessor :herbarium_name
 
   after_create :notify_curators
+
+  def format_name
+    herbarium_label
+  end
 
   # Can a given user edit this HerbariumRecord?
   def can_edit?(user = User.current)

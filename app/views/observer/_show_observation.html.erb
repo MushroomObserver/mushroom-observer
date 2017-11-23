@@ -1,8 +1,10 @@
 <div class="row">
   <div class="col-xs-12 max-width-text">
+
     <div id="observation_when">
       <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
     </div>
+
     <div id="observation_where">
       <%= observation.is_collection_location ?
             :show_observation_collection_location.t :
@@ -12,6 +14,7 @@
                           observation.location, nil, true) %>
       </span>
     </div>
+
     <div id="observation_lat_lng">
       <% if observation.lat or observation.alt %>
            <%= observation.lat ?
@@ -19,26 +22,32 @@
            <%= observation.alt ? "#{observation.alt}m" : '' %>
       <% end %>
     </div>
+
     <div id="observation_who">
       <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
     </div>
+
     <div id="observation_projects">
       <% observation.projects.each do |project| %>
            <div><%= :PROJECT.t %>: <%= link_to_object(project) %></div>
       <% end %>
     </div>
+
+    <div id="observation_collection_numbers">
+      <%= render(partial: "observer/collection_numbers",
+                locals: { observation: observation }) %>
+    </div>
+
     <div id="observation_herbarium_record_info">
-      <%= observation_herbarium_record_link(observation) +
-            create_herbarium_record_link(observation) %>
+      <%= render(partial: "observer/herbarium_records",
+                locals: { observation: observation }) %>
     </div>
+
     <div id="observation_sequences">
-      <%= pluralize(observation.sequences.size, :SEQUENCE.t, :SEQUENCES.t) %>
-      <%= add_sequence_link(observation) %><br>
-      <%= if observation.sequences.any?
-            render(partial: "observer/sequence_table",
-                  locals: { observation: observation })
-          end %>
+      <%= render(partial: "observer/sequences",
+                locals: { observation: observation }) %>
     </div>
+
     <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))

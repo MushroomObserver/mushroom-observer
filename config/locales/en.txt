@@ -1390,7 +1390,7 @@
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
-  form_observations_delete_herbarium_records_help: This observation has one or more herbarium records. If a specimen has been destroyed, please delete the herbarium record by returning to the observation, clicking the herbarium record link and deleting from there.
+  form_observations_edit_specimens_help: Please add, edit and remove specimen data from the main observation page.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
   form_observations_gps_info: We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation.
@@ -1907,11 +1907,16 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-  show_observation_create_herbarium_record: Add Herbarium Record
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
   show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
+  show_observation_add_collection_number: "Add [:SPECIMEN]"
+  show_observation_no_collection_numbers: "No [:specimens]"
+  show_observation_create_herbarium_record: "Add [:HERBARIUM_RECORD]"
+  show_observation_no_herbarium_records: "No [:herbarium_records]"
   show_observation_add_sequence: "Add [:SEQUENCE]"
+  show_observation_no_sequences: "No [:sequences]"
+  show_observation_archive_link: Show Archive Record
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"

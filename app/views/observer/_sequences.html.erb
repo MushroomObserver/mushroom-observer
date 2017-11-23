@@ -1,0 +1,54 @@
+<%
+  sequences = observation.sequences
+  can_edit  = observation.has_edit_permission?
+
+  # This is passed in to show_sequence, allowing users to do prev,
+  # next and index from there to navigate through all the rest for this obs.
+  query = Query.lookup(:Sequence, :all, observations: observation.id)
+%>
+
+<% if sequences.any? %>
+  <div>
+    <%= :Sequences.t %>: <%=
+      link = link_with_query(:show_observation_add_sequence.t,
+                             controller: :sequence, action: :add_sequence,
+                             id: observation.id)
+      "[#{link}]".html_safe if can_edit
+    %>
+  </div>
+  <ul class="tight-list">
+    <% sequences.map do |sequence| %>
+      <li>
+        <%= locus = sequence.locus.truncate(sequence.locus_width)
+        if sequence.deposit?
+          link_to("#{locus} - #{sequence.archive.t} ##{sequence.accession.t}",
+                  add_query_param(sequence.show_link_args, query))
+        else
+          link_to("#{locus} - MO ##{sequence.id}",
+                  add_query_param(sequence.show_link_args, query))
+        end %>
+        <%=
+          links = []
+          if sequence.deposit?
+            links << link_to(:show_observation_archive_link.t,
+                             sequence.accession_url, target: "_blank")
+          end
+          if sequence.can_edit?(@user)
+            links << link_to(:EDIT.t, controller: :sequence,
+                             action: :edit_sequence, id: sequence.id)
+            links << link_to(:DESTROY.t, controller: :sequence,
+                             action: :destroy_sequence, id: sequence.id)
+          end
+          "[#{links.safe_join(' | ')}]".html_safe if links.any?
+        %>
+      </li>
+    <% end %>
+  </ul>
+
+<% elsif sequences.none? && can_edit %>
+  <%= :show_observation_no_sequences.t %> [<%=
+    link_with_query(:show_observation_add_sequence.t,
+                    controller: :sequence, action: :add_sequence,
+                    id: observation.id)
+  %>]
+<% end %>
