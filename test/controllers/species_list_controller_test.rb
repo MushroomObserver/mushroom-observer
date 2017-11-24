@@ -1312,7 +1312,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       assert_equal(old_obs.when, new_obs.when)
       assert(old_obs.where == new_obs.where)
       assert(old_obs.location_id == new_obs.location_id)
-      assert_equal(old_obs.notes, new_obs.notes)
+      assert_equal(old_obs.other_notes.to_s, new_obs.other_notes.to_s)
       assert(old_obs.lat == new_obs.lat)
       assert(old_obs.long == new_obs.long)
       assert(old_obs.alt == new_obs.alt)
@@ -1328,7 +1328,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         obs1.id.to_s => obs_params1.merge(
           when_str:   now.strftime("%Y-%m-%d"),
           place_name: "new location",
-          notes:      { Observation.other_notes_key => "new notes" },
+          other_notes: "new notes",
           value:      Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
@@ -1361,7 +1361,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(now.to_date, new_obs1.when)
     assert_equal("new location", new_obs1.where)
     assert_nil(new_obs1.location)
-    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs1.notes)
+    assert_equal("new notes", new_obs1.other_notes)
     assert(obs1.lat == new_obs1.lat)
     assert(obs1.long == new_obs1.long)
     assert(obs1.alt == new_obs1.alt)
@@ -1371,7 +1371,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(obs2.when, new_obs2.when)
     assert(obs2.where == new_obs2.where)
     assert_equal(obs2.location_id, new_obs2.location_id)
-    assert_equal(obs2.notes, new_obs2.notes)
+    assert_equal(obs2.other_notes, new_obs2.other_notes)
     assert_equal(12.5822, new_obs2.lat)
     assert_equal(-78.1533, new_obs2.long)
     assert_equal(105, new_obs2.alt)
@@ -1383,7 +1383,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { Observation.other_notes_key => "new notes" }
+          other_notes: "new notes"
         )
       }
     }
@@ -1396,7 +1396,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(obs3.when, new_obs3.when)
     assert_equal(obs3.where, new_obs3.where)
     assert(obs3.location_id == new_obs3.location_id)
-    assert_equal(obs3.notes, new_obs3.notes)
+    assert_equal(obs3.other_notes, new_obs3.other_notes)
     assert(obs3.lat == new_obs3.lat)
     assert(obs3.long == new_obs3.long)
     assert(obs3.alt == new_obs3.alt)
@@ -1408,7 +1408,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { Observation.other_notes_key => "new notes" }
+          other_notes: "new notes"
         )
       }
     }
@@ -1417,7 +1417,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
-    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs3.notes)
+    assert_equal("new notes", new_obs3.other_notes)
   end
 
   def test_bulk_editor_change_vote_on_observation_with_no_votes

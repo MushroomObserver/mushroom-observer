@@ -564,7 +564,7 @@ class SpeciesListController < ApplicationController
             )
           end
         end
-        [:when_str, :place_name, :notes, :lat, :long, :alt,
+        [:when_str, :place_name, :other_notes, :lat, :long, :alt,
          :is_collection_location, :specimen].each do |method|
           next if args[method].nil?
           old_val = obs.send(method)
@@ -602,8 +602,6 @@ class SpeciesListController < ApplicationController
     case attr
     when :is_collection_location, :specimen
       val == "1"
-    when :notes
-      val.to_hash.symbolize_keys
     else
       val
     end

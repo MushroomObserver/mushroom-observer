@@ -350,6 +350,15 @@ class Observation < AbstractModel
     Observation.other_notes_part
   end
 
+  def other_notes
+    notes ? notes[other_notes_key] : nil
+  end
+
+  def other_notes=(val)
+    self.notes ||= {}
+    notes[other_notes_key] = val
+  end
+
   # id of view textarea for a Notes heading
   def self.notes_part_id(part)
     notes_area_id_prefix << part.tr(" ", "_")
