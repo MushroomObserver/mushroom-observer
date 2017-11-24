@@ -137,11 +137,11 @@ module ObservationReport
     # Do second query to get data from many-to-many joined table.
     def add_herbarium_labels!(rows, col)
       vals = HerbariumRecord.connection.select_rows %(
-        SELECT os.observation_id, s.herbarium_label
-        FROM herbarium_records s, herbarium_records_observations os,
+        SELECT ho.observation_id, CONCAT(h.initial_det, ": ", h.accession_number)
+        FROM herbarium_records h, herbarium_records_observations ho,
               (#{query.query}) as ids
-        WHERE os.observation_id = ids.id
-          AND os.herbarium_record_id = s.id
+        WHERE ho.observation_id = ids.id
+          AND ho.herbarium_record_id = h.id
       )
       add_column!(rows, vals, col)
     end

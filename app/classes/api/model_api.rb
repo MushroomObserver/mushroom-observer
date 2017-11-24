@@ -147,8 +147,8 @@ class API
     def must_have_edit_permission!(obj)
       if obj.respond_to?(:user_id) &&
          user.id == obj.user_id
-      elsif obj.respond_to?(:has_edit_permission?) &&
-            obj.has_edit_permission?(user)
+      elsif obj.respond_to?(:can_edit?) &&
+            obj.can_edit?(user)
       else
         raise MustHaveEditPermission.new(obj)
       end

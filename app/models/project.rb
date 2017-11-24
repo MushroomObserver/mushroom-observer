@@ -23,8 +23,7 @@
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  text_name::      Alias for +title+ for debugging.
-#  Proj.has_edit_permission?:: Check if User has permission to edit an
-#                              Observation/Image/etc.
+#  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #
 #  ==== Logging
 #  log_create::        Log creation.
@@ -82,7 +81,7 @@ class Project < AbstractModel
   end
 
   # Check if user has permission to edit a given object.
-  def self.has_edit_permission?(obj, user)
+  def self.can_edit?(obj, user)
     return false unless user
     return true  if obj.user_id == user.id
     return false if obj.projects.empty?

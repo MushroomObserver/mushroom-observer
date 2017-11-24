@@ -450,8 +450,7 @@ class ApplicationController < ActionController::Base
   end
 
   def editable_by_user?(obj)
-    obj.respond_to?(:has_edit_permission?) &&
-      obj.has_edit_permission?(User.current)
+    obj.try(&:can_edit?)
   end
 
   def obj_is_user?(obj)

@@ -427,8 +427,8 @@ class SpeciesList < AbstractModel
   #
   ##############################################################################
 
-  def has_edit_permission?(user = User.current)
-    Project.has_edit_permission?(self, user)
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
   end
 
   ##############################################################################

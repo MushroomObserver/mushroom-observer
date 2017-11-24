@@ -614,7 +614,10 @@ class ApiTest < UnitTestCase
   end
 
   def test_updating_external_links
-    link = mary.external_links.first
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    assert_users_equal(mary, link.user)
+    assert_users_equal(rolf, link.observation.user)
+    assert_false(link.external_site.project.is_member?(dick))
     new_url = "http://something.else"
     params = {
       method:  :patch,
@@ -623,24 +626,51 @@ class ApiTest < UnitTestCase
       id:      link.id,
       set_url: new_url
     }
+    @api_key.update_attributes!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update_attributes!(user: rolf)
     assert_api_fail(params.merge(set_url: ""))
     assert_api_pass(params)
     assert_equal(new_url, link.reload.url)
+    @api_key.update_attributes!(user: mary)
+    assert_api_pass(params.merge(set_url: new_url + "2"))
+    assert_equal(new_url + "2", link.reload.url)
+    @api_key.update_attributes!(user: dick)
+    link.external_site.project.user_group.users << dick
+    assert_api_pass(params.merge(set_url: new_url + "3"))
+    assert_equal(new_url + "3", link.reload.url)
   end
 
   def test_deleting_external_links
-    link = mary.external_links.first
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    assert_users_equal(mary, link.user)
+    assert_users_equal(rolf, link.observation.user)
+    assert_false(link.external_site.project.is_member?(dick))
     params = {
       method:  :delete,
       action:  :external_link,
       api_key: @api_key.key,
       id:      link.id
     }
+    recreate_params = {
+      user:          mary,
+      observation:   link.observation,
+      external_site: link.external_site,
+      url:           link.url
+    }
+    @api_key.update_attributes!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update_attributes!(user: rolf)
     assert_api_pass(params)
+    assert_nil(ExternalLink.safe_find(link.id))
+    link = ExternalLink.create!(recreate_params)
+    @api_key.update_attributes!(user: mary)
+    assert_api_pass(params.merge(id: link.id))
+    assert_nil(ExternalLink.safe_find(link.id))
+    link = ExternalLink.create!(recreate_params)
+    @api_key.update_attributes!(user: dick)
+    link.external_site.project.user_group.users << dick
+    assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
   end
 
@@ -906,8 +936,8 @@ class ApiTest < UnitTestCase
     marys_img = images(:in_situ_image)
     eol = projects(:eol_project)
     pd = licenses(:publicdomain)
-    assert(rolfs_img.has_edit_permission?(rolf))
-    assert(!marys_img.has_edit_permission?(rolf))
+    assert(rolfs_img.can_edit?(rolf))
+    assert(!marys_img.can_edit?(rolf))
     params = {
       method:               :patch,
       action:               :image,
@@ -930,7 +960,7 @@ class ApiTest < UnitTestCase
     assert_equal("new name", rolfs_img.original_name)
     eol.images << marys_img
     marys_img.reload
-    assert(marys_img.has_edit_permission?(rolf))
+    assert(marys_img.can_edit?(rolf))
     assert_api_pass(params.merge(id: marys_img.id))
     marys_img.reload
     assert_equal(Date.parse("2012-3-4"), marys_img.when)
@@ -1645,9 +1675,10 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses)
 
-    obses = herbarium_records(:interesting_unknown).observations.sort_by(&:id)
+    rec = herbarium_records(:interesting_unknown)
+    obses = rec.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium_record: "Cortinarius sp.: NYBG 1234"))
+    assert_api_pass(params.merge(herbarium_record: rec.id))
     assert_api_results(obses)
 
     proj = projects(:one_genus_two_species_project)
@@ -1930,10 +1961,8 @@ class ApiTest < UnitTestCase
     }
 
     assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
-    assert_api_fail(params.merge(has_specimen: "no", specimen_id: "1"))
-    assert_api_fail(params.merge(has_specimen: "no", herbarium_label: "1"))
-    assert_api_fail(params.merge(has_specimen: "yes", specimen_id: "1",
-                                 herbarium_label: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", collection_number: "1"))
+    assert_api_fail(params.merge(has_specimen: "no", accession_number: "1"))
     assert_api_fail(params.merge(has_specimen: "yes", herbarium: "bogus"))
 
     assert_api_pass(params.merge(has_specimen: "yes"))
@@ -1941,25 +1970,25 @@ class ApiTest < UnitTestCase
     obs = Observation.last
     spec = HerbariumRecord.last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
-    assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
+    assert_equal("Peltigera: MO #{obs.id}", spec.herbarium_label)
     assert_obj_list_equal([obs], spec.observations)
 
     nybg = herbaria(:nybg_herbarium)
     assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
-                                 specimen_id: "R. Singer 12345"))
+                                 collection_number: "12345"))
 
     obs = Observation.last
     spec = HerbariumRecord.last
     assert_objs_equal(nybg, spec.herbarium)
-    assert_equal("Peltigera: R. Singer 12345", spec.herbarium_label)
+    assert_equal("Peltigera: Rolf Singer 12345", spec.herbarium_label)
     assert_obj_list_equal([obs], spec.observations)
   end
 
   def test_updating_observations
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)
-    assert(rolfs_obs.has_edit_permission?(rolf))
-    assert(!marys_obs.has_edit_permission?(rolf))
+    assert(rolfs_obs.can_edit?(rolf))
+    assert(!marys_obs.can_edit?(rolf))
     params = {
       method:                     :patch,
       action:                     :observation,
@@ -2047,8 +2076,8 @@ class ApiTest < UnitTestCase
     rolf.reload
     assert(!proj.observations.include?(rolfs_obs))
     assert(proj.observations.include?(marys_obs))
-    assert(rolfs_obs.has_edit_permission?(rolf))
-    assert(marys_obs.has_edit_permission?(rolf))
+    assert(rolfs_obs.can_edit?(rolf))
+    assert(marys_obs.can_edit?(rolf))
     assert(rolfs_obs.user == rolf)
     assert(marys_obs.user == mary)
     assert_api_pass(params.merge(id: rolfs_obs.id, set_date: "2013-01-01"))
@@ -2066,8 +2095,8 @@ class ApiTest < UnitTestCase
 
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:query_first_list)
-    assert(spl1.has_edit_permission?(rolf))
-    assert(!spl2.has_edit_permission?(rolf))
+    assert(spl1.can_edit?(rolf))
+    assert(!spl2.can_edit?(rolf))
     assert_api_pass(params.merge(add_to_species_list: spl1.id))
     assert_api_fail(params.merge(add_to_species_list: spl2.id))
     assert(spl1.reload.observations.include?(rolfs_obs))
@@ -2388,9 +2417,10 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = herbarium_records(:interesting_unknown).observations.sort_by(&:id)
+    rec = herbarium_records(:interesting_unknown)
+    obses = rec.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium_record: "Cortinarius sp.: NYBG 1234"))
+    assert_api_pass(params.merge(herbarium_record: rec.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
     proj = projects(:one_genus_two_species_project)
@@ -2755,7 +2785,7 @@ class ApiTest < UnitTestCase
   def test_updating_species_lists
     rolfs_spl = species_lists(:first_species_list)
     marys_spl = species_lists(:unknown_species_list)
-    assert(!marys_spl.has_edit_permission?(rolf))
+    assert(!marys_spl.can_edit?(rolf))
     @user     = rolf
     @title    = "New Title"
     @date     = Date.parse("2017-11-17")

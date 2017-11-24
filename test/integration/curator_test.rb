@@ -9,16 +9,16 @@ class CuratorTest < IntegrationTestCase
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
     click(label: :show_observation_create_herbarium_record.t)
-    assert_template("herbarium_record/add_herbarium_record")
+    assert_template("herbarium_record/create_herbarium_record")
     open_form do |form|
       form.submit("Add")
     end
-    assert_template("herbarium_record/list_herbarium_records")
+    assert_template("observer/show_observation")
   end
 
-  def test_herbarium_index_from_add_herbarium_record
+  def test_herbarium_index_from_create_herbarium_record
     login!("mary", "testpassword", true)
-    get("/herbarium_record/add_herbarium_record/" +
+    get("/herbarium_record/create_herbarium_record/" +
         "#{observations(:minimal_unknown_obs).id}")
     click(label: :herbarium_index.t)
     assert_template("herbarium/index")

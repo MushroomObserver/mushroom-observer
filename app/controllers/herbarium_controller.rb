@@ -1,10 +1,11 @@
-# virtual herbaria
+# Controls viewing and modifying herbaria.
 class HerbariumController < ApplicationController
   before_action :login_required, except: [
-    :herbarium_search,
+    :index,
+    :index_herbarium,
     :list_herbariums,
-    :show_herbarium,
-    :index
+    :herbarium_search,
+    :show_herbarium
   ]
 
   # ----------------------------
@@ -16,8 +17,15 @@ class HerbariumController < ApplicationController
     @herbaria = Herbarium.order(:name)
   end
 
+  # Displays selected Herbarium's (based on current Query).
+  def index_herbarium # :nologin: :norobots:
+    query = find_or_create_query(:Herbarium, by: params[:by])
+    show_selected_herbarium(query, id: params[:id].to_s)
+  end
+
   # Show list of herbaria.
   def list_herbariums # :nologin:
+    store_location
     query = create_query(:Herbarium, :all, by: :name)
     show_selected_herbaria(query)
   end
@@ -39,10 +47,12 @@ class HerbariumController < ApplicationController
     args = {
       action: :list_herbaria,
       letters: "herbaria.name",
-      num_per_page: 10
+      num_per_page: 100
     }.merge(args)
 
     @links ||= []
+    @links << [:create_herbarium.l,
+               { controller: :herbarium, action: :create_herbarium }]
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -60,8 +70,9 @@ class HerbariumController < ApplicationController
 
   def show_herbarium # :nologin:
     store_location
-    @herbarium = Herbarium.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/herbarium/show_herbarium/#{@herbarium.id}"
+    pass_query_params
+    @canonical_url = Herbarium.show_url(params[:id])
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
     return if request.method != "POST"
     return if !@user || !@herbarium.is_curator?(@user) && !in_admin_mode?
     login = params[:add_curator].to_s.sub(/ <.*/, "")
@@ -78,18 +89,13 @@ class HerbariumController < ApplicationController
   # ----------------------------
 
   def create_herbarium # :norobots:
+    pass_query_params
     if request.method == "GET"
       @herbarium = Herbarium.new
     elsif request.method == "POST"
-      @herbarium = Herbarium.new(whitelisted_herbarium_params)
-      normalize_parameters
-      if validate_name! &&
-         validate_location! &&
-         validate_personal_herbarium!
-        @herbarium.save
-        @herbarium.add_curator(@user) if @herbarium.personal_user
-        redirect_to_create_location || redirect_to_show_herbarium
-      end
+      post_create_herbarium
+    else
+      redirect_back_or_default("/")
     end
   end
 
@@ -97,8 +103,28 @@ class HerbariumController < ApplicationController
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
-    @herbarium.place_name = @herbarium.location.try(&:name)
-    return unless request.method == "POST"
+    if request.method == "GET"
+      @herbarium.place_name = @herbarium.location.try(&:name)
+    elsif request.method == "POST"
+      post_edit_herbarium
+    else
+      redirect_back_or_default("/")
+    end
+  end
+
+  def post_create_herbarium
+    @herbarium = Herbarium.new(whitelisted_herbarium_params)
+    normalize_parameters
+    if validate_name! &&
+       validate_location! &&
+       validate_personal_herbarium!
+      @herbarium.save
+      @herbarium.add_curator(@user) if @herbarium.personal_user
+      redirect_to_create_location || redirect_to_show_herbarium
+    end
+  end
+
+  def post_edit_herbarium
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
     if validate_name! &&
@@ -112,11 +138,11 @@ class HerbariumController < ApplicationController
     return true if in_admin_mode? || @herbarium.can_edit?
     flash_error :permission_denied.t
     redirect_to(@herbarium.show_link_args)
-    return
+    false
   end
 
   def normalize_parameters
-    [:name, :code, :email, :mailing_address].each do |arg|
+    [:name, :code, :email, :place_name, :mailing_address].each do |arg|
       val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
       @herbarium.send("#{arg}=", val)
     end
@@ -124,22 +150,26 @@ class HerbariumController < ApplicationController
   end
 
   def validate_name!
-    other = Herbarium.find_by_name(@herbarium.name)
+    other = Herbarium.where(name: @herbarium.name).first
     return true if !other || other == @herbarium
-    if @herbarium.id # i.e. in edit mode
+    if !@herbarium.id # i.e. in create mode
+      flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
+      return false
+    elsif in_admin_mode?
+      @herbarium = @herbarium.merge(other)
+      return true
+    else
       redirect_with_query(controller: :observer, action: :email_merge_request,
                           type: :Herbarium, old_id: @herbarium.id,
                           new_id: other.id)
-    else
-      flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
+      return false
     end
-    false
   end
 
   def validate_location!
     return true if @herbarium.place_name.blank?
-    @herbarium.location = Location.find_by_name_or_reverse_name(
-                            @herbarium.place_name)
+    @herbarium.location =
+      Location.find_by_name_or_reverse_name(@herbarium.place_name)
     true
   end
 
@@ -156,14 +186,14 @@ class HerbariumController < ApplicationController
 
   def redirect_to_create_location
     return if @herbarium.location || @herbarium.place_name.blank?
-    flash_notice(:herbarium_must_define_location.t)
+    flash_notice(:create_herbarium_must_define_location.t)
     redirect_to(controller: :location, action: :create_location,
                 where: @herbarium.place_name, set_herbarium: @herbarium.id)
     true
   end
 
   def redirect_to_show_herbarium
-    redirect_to(action: :show_herbarium, id: @herbarium.id)
+    redirect_to(@herbarium.show_link_args)
   end
 
   # ----------------------------
@@ -174,12 +204,12 @@ class HerbariumController < ApplicationController
     herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless herbarium
     user = User.safe_find(params[:user])
-    if in_admin_mode? || herbarium.is_curator?(@user)
-      if user && herbarium.is_curator?(user)
-        herbarium.delete_curator(user)
-      end
+    if !herbarium.is_curator?(@user) && !in_admin_mode?
+      flash_error(:permission_denied.t)
+    elsif user && herbarium.is_curator?(user)
+      herbarium.delete_curator(user)
     end
-    redirect_to(herbarium.show_link_args)
+    redirect_back_or_default(herbarium.show_link_args)
   end
 
   def request_to_be_curator
@@ -200,6 +230,7 @@ class HerbariumController < ApplicationController
   private
 
   def whitelisted_herbarium_params
+    return {} unless params[:herbarium]
     params.require(:herbarium).
       permit(:name, :code, :email, :mailing_address, :description,
              :place_name, :personal)

@@ -1,6 +1,6 @@
 <%
   sequences = observation.sequences
-  can_edit  = observation.has_edit_permission?
+  can_edit  = observation.can_edit?
 
   # This is passed in to show_sequence, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.

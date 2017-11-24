@@ -106,7 +106,6 @@ class ObserverController
   end
 
   def rough_cut(params)
-    # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
     @observation.notes = notes_to_sym_and_compact
     @naming      = Naming.construct(params[:naming], @observation)
@@ -165,82 +164,88 @@ class ObserverController
   end
 
   def save_collection_number(obs, params)
-    return unless params[:collection_number] && obs.specimen
-    name   = params[:collection_number][:name].to_s.strip_squeeze
-    number = params[:collection_number][:number].to_s.strip_squeeze
-    name   = @user.legal_name if name.blank?
-    return if number.blank?
+    return unless obs.specimen
+    name, number = normalize_collection_number_params(params)
+    return unless number
     col_num = CollectionNumber.where(name: name, number: number).first
     if col_num
-      flash_warning(:form_observations_collection_number_already_used.t)
+      flash_warning(:edit_collection_number_already_used.t)
     else
       col_num = CollectionNumber.create(name: name, number: number)
     end
-    col_num.observations << obs
+    col_num.add_observation(obs)
+  end
+
+  def normalize_collection_number_params(params)
+    params = params[:collection_number] || return
+    name   = params[:name].to_s.strip_html.strip_squeeze
+    number = params[:number].to_s.strip_html.strip_squeeze
+    name   = @user.legal_name if name.blank?
+    number.blank? ? [] : [name, number]
   end
 
   def save_herbarium_record(obs, params)
-    return unless params[:herbarium_record] && obs.specimen
-    herbarium_name  = params[:herbarium_record][:herbarium_name]
-    herbarium_id    = params[:herbarium_record][:herbarium_id]
-    herbarium_id    = default_herbarium_id(obs, params) if herbarium_id.blank?
-    init_name       = initial_determination(params)
-    herbarium_label = Herbarium.default_specimen_label(init_name, herbarium_id)
-    herbarium       = lookup_herbarium(herbarium_name)
+    return unless obs.specimen
+    herbarium, initial_det, accession_number =
+      normalize_herbarium_record_params(obs, params)
     return unless herbarium
-    herbarium_record = HerbariumRecord.where(
-      herbarium:       herbarium,
-      herbarium_label: herbarium_label
-    ).first
+    herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
-      herbarium_record = HerbariumRecord.create(
-        herbarium:       herbarium,
-        herbarium_label: herbarium_label
-      )
+      herbarium_record = create_herbarium_record(herbarium, initial_det,
+                                                 accession_number)
     elsif herbarium_record.can_edit?
-      flash_warning :add_herbarium_record_label_already_used.t(
-        herbarium_name:  herbarium.name,
-        herbarium_label: herbarium_label
-      )
+      flash_warning(:create_herbarium_record_already_used.t)
     else
-      flash_warning :add_herbarium_record_label_already_used_by_someone_else.t(
-        herbarium_name:  herbarium.name,
-        herbarium_label: herbarium_label
-      )
+      flash_error(:create_herbarium_record_already_used_by_someone_else.
+        t(herbarium_name: @herbarium_record.herbarium.name))
       return
     end
     herbarium_record.add_observation(obs)
   end
 
-  def initial_determination(params)
-    if !params[:name] || params[:name][:name].blank?
-      Name.unknown.text_name
-    else
-      params[:name][:name]
-    end
+  def normalize_herbarium_record_params(obs, params)
+    params    = params[:herbarium_record] || return
+    herbarium = params[:herbarium_name].to_s.strip_html.strip_squeeze
+    herbarium = lookup_herbarium(herbarium)
+    init_det  = initial_determination(obs)
+    accession = params[:herbarium_id].to_s.strip_html.strip_squeeze
+    accession = default_accession_number(obs, params) if accession.blank?
+    return [herbarium, init_det, accession]
   end
 
-  def default_herbarium_id(obs, params)
-    return "MO #{obs.id}" if !params[:collection_number] ||
-                             params[:collection_number][:number].blank?
-    name = params[:collection_number][:name]
-    num  = params[:collection_number][:number]
-    name.blank? ? num : "#{name} #{num}"
+  def initial_determination(obs)
+    (obs.name || Name.unknown).text_name
+  end
+
+  def default_accession_number(obs, params)
+    name, number = normalize_collection_number_params(params)
+    number ? "#{name} #{num}" : "MO #{obs.id}"
   end
 
   def lookup_herbarium(herbarium_name)
     return if herbarium_name.blank?
     herbarium = Herbarium.where(name: herbarium_name).first
     return herbarium unless herbarium.nil?
-    if herbarium_name != @user.personal_herbarium_name
-      flash_warning(:form_observations_create_herbarium_separately.t)
-      return
+    if herbarium_name != @user.personal_herbarium_name ||
+       @user.personal_herbarium
+      flash_warning(:create_herbarium_separately.t)
+      return nil
     end
-    Herbarium.create(
-      name:          herbarium_name,
-      email:         @user.email,
-      personal_user: @user,
-      curators:      [@user]
+    @user.create_personal_herbarium
+  end
+
+  def lookup_herbarium_record(herbarium, accession_number)
+    HerbariumRecord.where(
+      herbarium:        herbarium,
+      accession_number: accession_number
+    ).first
+  end
+
+  def create_herbarium_record(herbarium, initial_det, accession_number)
+    HerbariumRecord.create(
+      herbarium:        herbarium,
+      initial_det:      initial_det,
+      accession_number: accession_number
     )
   end
 
@@ -261,7 +266,7 @@ class ObserverController
     @reason          = @naming.init_reasons(reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    init_herbarium_record_vars_for_reload
+    init_specimen_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
   end
@@ -461,7 +466,7 @@ class ObserverController
     @herbarium_id      = ""
   end
 
-  def init_herbarium_record_vars_for_reload
+  def init_specimen_vars_for_reload
     init_specimen_vars_for_create
     if params[:collection_number]
       @collectors_name   = params[:collection_number][:name]

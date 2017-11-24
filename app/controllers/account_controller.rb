@@ -601,7 +601,8 @@ class AccountController < ApplicationController
   alias_method :no_question_email,         :no_email_general_question
 
   def no_email(type)
-    if check_permission!(params[:id].to_s)
+    user = User.safe_find(params[:id])
+    if user && check_permission!(user)
       method  = "email_#{type}="
       prefix  = "no_email_#{type}"
       success = "#{prefix}_success".to_sym

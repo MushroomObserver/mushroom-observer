@@ -1068,6 +1068,7 @@
   log_sequence_added: "[name] added by [user]"
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
+  log_collection_number_added: "[:log_object_added_by_user_with_name(type=:collection_number)]"
   log_herbarium_record_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_object_added: "[:log_object_added_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"
@@ -1398,8 +1399,6 @@
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
   form_observations_herbarium_fields_help: Enter collector's name and number as it should appear on the label.  If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
-  form_observations_create_herbarium_separately: The herbarium you entered doesn't exist.  Please create it separately and then add the herbarium record to your observation.
-  form_observations_collection_number_already_used: This collection number has already been used.  Double check your records.  If you need to fix it, you can do so from the observation page.
 
   # observer/_form_species_list
   form_species_lists_title: Title
@@ -1910,9 +1909,7 @@
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
   show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
-  show_observation_add_collection_number: "Add [:SPECIMEN]"
   show_observation_no_collection_numbers: "No [:specimens]"
-  show_observation_create_herbarium_record: "Add [:HERBARIUM_RECORD]"
   show_observation_no_herbarium_records: "No [:herbarium_records]"
   show_observation_add_sequence: "Add [:SEQUENCE]"
   show_observation_no_sequences: "No [:sequences]"
@@ -2176,116 +2173,119 @@
   show_publication_title: Publication
   show_publication_added_by: Added by
 
+
+
   # herbarium fields
-  herbarium_name: Name
-  herbarium_location: Location
-  herbarium_description: Herbarium Description
-  herbarium_created_at: Created At
-  herbarium_updated_at: Updated At
   herbarium_curator: Curator
-  herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
-  herbarium_edit: New herbarium called '[name]' created.
   herbarium_code: Code
   herbarium_herbarium_record_count: Herbarium Records
+  user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/show_herbarium
-  show_herbarium: Show Herbarium
   show_herbarium_herbarium_record_count: This herbarium contains [count] herbarium record(s).
   show_herbarium_add_curator: Add Curator
-  show_herbarium_no_user: Unable to find the user '[login]'
+  show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator
   show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this herbarium.  When we add curators to an MO herbarium, those curators are given exclusive rights to edit the herbarium's addresses and notes.  Curators are also allowed to create herbarium records for other users' observations.  For example, when an herbarium accessions a contributor's specimen, the herbarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your herbarium and what its accession number is.  Please ask how MO can help your herbarium IT people automate this process via our API.
   show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
-
-  # herbarium/index
-  herbarium_index: Herbarium Index
-  herbarium_index_title: List of All Herbaria
 
   # herbarium/create_herbarium
   create_herbarium: Create New Herbarium
   create_herbarium_title: Create New Herbarium
   create_herbarium_personal: Check this box if this is your personal herbarium
   create_herbarium_code: Official Code
-  create_herbarium_location: Location
   create_herbarium_email: Email Address (for specimen inquiries)
   create_herbarium_mailing_address: Mailing Address (for specimens)
-  create_herbarium_description: Notes
   create_herbarium_duplicate_name: Herbarium called '[name]' already exists.
   create_herbarium_personal_already_exists: You've already created a personal herbarium called '[name]'.
-  herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
+  create_herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
 
   # herbarium/edit_herbarium
-  edit_herbarium: Edit
+  edit_herbarium: Edit Herbarium
   edit_herbarium_title: Editing Herbarium
-  edit_herbarium_save: Save
-  edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
-  edit_herbarium_duplicate_label: The label '[herbarium_label]' already exists for the herbarium '[herbarium_name]'
-
-  # herbarium/add_herbarium_record
-  add_herbarium_record: Add Herbarium Record
-  add_herbarium_record_title: Add Herbarium Record
-  add_herbarium_record_add: Add
-  add_herbarium_record_herbarium_label: Original Herbarium Label
-  add_herbarium_record_herbarium_label_help: "(initial determination and unique herbarium id)"
-  add_herbarium_record_notes: Specimen Notes
-  add_herbarium_record_cancel: Cancel (Show Observation)
-  add_herbarium_record_already_exists: A record with the label '[label]' already exists for herbarium '[name]'
-  add_herbarium_record_not_a_curator: You are not a curator of [herbarium_name]
-  add_herbarium_record_label_already_used: The label '[herbarium_label]' has already been recorded for [herbarium_name]. Note that this herbarium record is now attached to multiple observations. If this was unintentional, edit this herbarium record and detach the observations which don't apply.  Then you can create new herbarium records for those observations.
-  add_herbarium_record_label_already_used_by_someone_else: The label '[herbarium_label]' has already been recorded by someone else for [herbarium_name]. Try adding your initials to the herbarium id to distinguish labels.
-  user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/list_herbaria
-  list_herbaria_title: "[:list_objects(type=:project)]"
+  list_herbaria_title: "[:list_objects(type=:herbarium)]"
+
+  # herbarium/index
+  herbarium_index: Herbarium Index
+  herbarium_index_title: List of All Herbaria
+
+
 
   # herbarium record fields
-  herbarium_record_herbarium: Herbarium
   herbarium_record_herbarium_name: Herbarium Name
-  herbarium_record_herbarium_label: Herbarium Label
-  herbarium_record_herbarium_id: Accession Number
-  herbarium_record_user: Specimen Recorder
-  herbarium_record_notes: Notes
-  herbarium_record_created_at: Created At
-  herbarium_record_updated_at: Updated At
-  
-  # herbarium_record/show_herbarium_record
-  show_herbarium_record: Show Herbarium Record
+  herbarium_record_initial_det: Initial Determination
+  herbarium_record_accession_number: Accession Number
+  herbarium_record_user: Record Creator
+
+  # herbarium_record/create_herbarium_record
+  create_herbarium_record: Add Herbarium Record
+  create_herbarium_record_title: Add Herbarium Record
+  create_herbarium_record_initial_det_help: "(initial determination)"
+  create_herbarium_record_accession_number_help: "(unique herbarium id)"
+  create_herbarium_separately: The herbarium you entered doesn't exist. Please create it separately and then add the herbarium record to your observation.
+  create_herbarium_record_missing_herbarium_name: Missing herbarium name.
+  create_herbarium_record_already_used: This herbarium record already exists. We've added this observation to it. If that isn't correct, delete it from your observation and add the correct herbarium record.
+  create_herbarium_record_already_used_by_someone_else: This accession number has already been recorded by someone else for [herbarium_name]. Try adding your initials to the accession number to distinguish labels.
 
   # herbarium_record/edit_herbarium_record
   edit_herbarium_record: Edit Herbarium Record
-  edit_herbarium_record_cannot_edit: Attempt to edit herbarium record without permission
   edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
-  edit_herbarium_record_save: Save
   edit_herbarium_record_back_to_index: Back to Herbarium Record Index
-  edit_herbarium_record_label_blank: Herbarium label cannot be blank.
   edit_herbarium_record_remove_observations: Remove Observations
   edit_herbarium_record_remove_observations_help: (check boxes of observations to remove from this record)
   edit_herbarium_record_add_observations: Add Observations
   edit_herbarium_record_add_observations_help: (enter ids of observations to add to this record)
   edit_herbarium_record_add_observation_not_found: "Observation #[id] not found."
   edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
+  edit_herbarium_record_already_used: This herbarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
+
+  # herbarium_record/delete_herbarium_record
+  delete_herbarium_record: Delete Herbarium Record
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Herbarium Record Index"
 
-  # herbarium_record/herbarium_index
-  herbarium_index_no_herbarium_records: This herbarium has no herbarium records
-  herbarium_delete_herbarium_record: Delete
-  herbarium_edit_herbarium_record: Edit
-
-  # herbarium_record/observation_index
-  observation_index_no_herbarium_records: This observation has no herbarium records
-
   # herbarium_record/list_herbarium_records
-  list_herbarium_records_title: "[:list_objects(type=:project)]"
+  list_herbarium_records_title: "[:list_objects(type=:herbarium_record)]"
 
-  # herbarium_record/delete_herbarium_record
-  delete_herbarium_record_cannot_delete: Attempt to delete herbarium record without permission
+
 
   # collection number fields
   collection_number_name: Collector's Name
   collection_number_number: Collector's Number
+  collection_number_user: Record Creator
+
+  # collection_number/create_collection_number
+  create_collection_number: Add Collection Number
+  create_collection_number_title: Add Collection Number
+  create_collection_number_missing_number: Missing collector's number.
+
+  # collection_number/edit_collection_number
+  edit_collection_number: Edit Collection Number
+  edit_collection_number_title: Edit Collection Number [name]
+  edit_collection_number_back_to_index: Back to Collection Number Index
+  edit_collection_number_remove_observations: Remove Observations
+  edit_collection_number_remove_observations_help: (check boxes of observations to remove from this specimen)
+  edit_collection_number_add_observations: Add Observations
+  edit_collection_number_add_observations_help: (enter ids of observations to add to this specimen)
+  edit_collection_number_add_observation_not_found: "Observation #[id] not found."
+  edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
+  edit_collection_number_already_used: This collection number is shared with another observation. Double check your records. If you need to fix it, delete it from your observation and add the correct one.
+  edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove one of the observations and add the correct collection number to that observation.
+
+  # collection_number/delete_collection_number
+  delete_collection_number: Delete Collection Number
+
+  # collection_number/collection_number_index (not a real page)
+  collection_number_index_title: "[subject] Collection Number Index"
+
+  # collection_number/list_collection_numbers
+  list_collection_numbers_title: "[:list_objects(type=:collection_number)]"
+
+
 
   # support/donate
   donate_title: Donate to Mushroom Observer, Inc.
@@ -3570,6 +3570,7 @@
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
 
   api_help_accession_has: search within accession number
+  api_help_accession_number: unique herbarium id
   api_help_any_date: this date can mean anything you want
   api_help_api_key_user: user you are creating api key for
   api_help_app: identifier used to help user distinguish which api key belongs to which app
@@ -3587,7 +3588,7 @@
   api_help_has_notes_field: is given observation notes template field filled in?
   api_help_has_obs_notes: observation has notes?
   api_help_has_observation: is attached to an observation?
-  api_help_herbarium_label: initial determination and unique herbarium id
+  api_help_initial_det: initial determination
   api_help_is_collection_location: is this location where mushroom was found?
   api_help_locus_has: search within locus
   api_help_log: log this action on main page activity log and RSS feed?
@@ -3606,7 +3607,6 @@
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_south: min latitude
-  api_help_specimen_id: unique specimen id for herbarium label, e.g. collectors number
   api_help_summary_has: search within summary
   api_help_target: 'e.g. "observation #1234" or "name #5678"'
   api_help_text_name_has: search within name
@@ -3758,32 +3758,33 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
-  sort_by_header: "Sort by:"
-  sort_by_id: ID
-  sort_by_name: "[:NAME]"
-  sort_by_filename: File Name
-  sort_by_title: "[:TITLE]"
-  sort_by_summary: "[:SUMMARY]"
-  sort_by_date: "[:DATE]"
-  sort_by_posted: Date Posted
-  sort_by_created_at: Date Created
-  sort_by_updated_at: Time Last Modified
-  sort_by_rss_log: "[:sort_by_updated_at]"
-  sort_by_last_login: Last Login
-  sort_by_user: "[:USER]"
-  sort_by_login: "[:LOGIN_NAME]"
-  sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
-  sort_by_where: "[:LOCATION]"
-  sort_by_location: "[:LOCATION]"
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
-  sort_by_image_quality: Image Quality
-  sort_by_thumbnail_quality: Thumbnail Quality
-  sort_by_num_views: Popularity
   sort_by_contribution: Contribution
-  sort_by_reverse: Reverse Order
-  sort_by_observation: "[:OBSERVATION]"
+  sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+  sort_by_created_at: Date Created
+  sort_by_date: "[:DATE]"
+  sort_by_filename: File Name
+  sort_by_header: "Sort by:"
   sort_by_herbarium_label: Label
   sort_by_herbarium_name: Herbarium
+  sort_by_id: ID
+  sort_by_image_quality: Image Quality
+  sort_by_last_login: Last Login
+  sort_by_location: "[:LOCATION]"
+  sort_by_login: "[:LOGIN_NAME]"
+  sort_by_name: "[:NAME]"
+  sort_by_num_views: Popularity
+  sort_by_number: Number
+  sort_by_observation: "[:OBSERVATION]"
+  sort_by_posted: Date Posted
+  sort_by_reverse: Reverse Order
+  sort_by_rss_log: "[:sort_by_updated_at]"
+  sort_by_summary: "[:SUMMARY]"
+  sort_by_thumbnail_quality: Thumbnail Quality
+  sort_by_title: "[:TITLE]"
+  sort_by_updated_at: Time Last Modified
+  sort_by_user: "[:USER]"
+  sort_by_where: "[:LOCATION]"
 
   ################################################################################
 

@@ -21,8 +21,7 @@
 #
 #  == Class methods
 #
-#  Herbarium.primer::                 List of names to prime autocompleter.
-#  Herbarium.default_specimen_label:: Format herbarium label.
+#  Herbarium.primer::       List of names to prime autocompleter.
 #
 #  == Instance methods
 #
@@ -93,8 +92,27 @@ class Herbarium < AbstractModel
     "#{:HERBARIUM.l} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
   end
 
-  def self.default_specimen_label(name, id)
-    "#{name}: #{id || "?"}".strip_html
+  def merge(other)
+    this, that = other.created_at < self.created_at ?
+                 [self, other] : [other, self]
+    [ :code, :location, :email, :mailing_address ].each do |var|
+      val1 = this.send(var)
+      val2 = that.send(var)
+      next if val2.blank? || val1.length >= val2.length
+      this.send(:"#{var}=", val2)
+    end
+    notes1 = this.description
+    notes2 = that.description
+    if notes1.blank?
+      this.description = notes2
+    elsif !notes2.blank?
+      this.description = "#{notes1}\n\n" +
+                         "[Merged at #{Time.now.utc.web_time}]\n\n"
+                         notes2
+    end
+    this.save
+    that.destroy
+    return this
   end
 
   # Look at the most recent HerbariumRecord's the current User has created.

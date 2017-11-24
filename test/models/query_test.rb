@@ -1510,6 +1510,30 @@ class QueryTest < UnitTestCase
                  :Article, :pattern_search, pattern: "")
   end
 
+  def test_collection_number_all
+    expect = CollectionNumber.all.sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :all)
+  end
+
+  def test_collection_number_for_observation
+    obs = observations(:detailed_unknown_obs)
+    expect = obs.collection_numbers.sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :for_observation,
+                 observation: obs.id)
+  end
+
+  def test_collection_number_pattern_search
+    expect = CollectionNumber.
+      where("name like '%Singer%' or number like '%Singer%'").
+      sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "Singer")
+
+    expect = CollectionNumber.
+      where("name like '%123a%' or number like '%123a%'").
+      sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "123a")
+  end
+
   def test_comment_all
     expect = Comment.all.reverse
     assert_query(expect, :Comment, :all)
@@ -1611,6 +1635,24 @@ class QueryTest < UnitTestCase
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
                  :Image, :advanced_search,
                  content: "little", location: "burbank")
+  end
+
+  def test_herbarium_record_all
+    expect = HerbariumRecord.all.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :all)
+  end
+
+  def test_herbarium_record_for_observation
+    obs = observations(:coprinus_comatus_obs)
+    expect = obs.herbarium_records.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :for_observation,
+                 observation: obs.id)
+  end
+
+  def test_herbarium_record_in_herbarium
+    nybg = herbaria(:nybg_herbarium)
+    expect = nybg.herbarium_records.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :in_herbarium, herbarium: nybg.id)
   end
 
   def test_image_all
@@ -2640,21 +2682,12 @@ class QueryTest < UnitTestCase
                  :SpeciesList, :pattern_search, pattern: "")
   end
 
-  def test_herbarium_record_all
-    expect = HerbariumRecord.all.order(:herbarium_label)
-    assert_query(expect, :HerbariumRecord, :all)
-  end
-
   def test_herbarium_record_pattern_search
     assert_query([], :HerbariumRecord, :pattern_search,
                  pattern: "no herbarium record has this")
-    # in label
-    assert_query(HerbariumRecord.where("herbarium_label LIKE '%Agaricus%'
-                              OR notes LIKE '%Agaricus%'"),
+    assert_query(HerbariumRecord.where("initial_det LIKE '%Agaricus%'"),
                  :HerbariumRecord, :pattern_search, pattern: "Agaricus")
-    # in notes
-    assert_query(HerbariumRecord.where("herbarium_label LIKE '%rares%'
-                              OR notes LIKE '%rare%'"),
+    assert_query(HerbariumRecord.where("notes LIKE '%rare%'"),
                  :HerbariumRecord, :pattern_search, pattern: "rare")
     assert_query(HerbariumRecord.all,
                  :HerbariumRecord, :pattern_search, pattern: "")

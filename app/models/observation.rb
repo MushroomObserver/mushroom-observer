@@ -94,7 +94,6 @@
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
-#  default_specimen_label::
 #
 #  ==== Namings and Votes
 #  name::                   Conensus Name instance. (never nil)
@@ -123,7 +122,7 @@
 #  remove_image::           Remove an Image.
 #
 #  ==== Projects
-#  has_edit_permission?::   Check if user has permission to edit this obs.
+#  can_edit?::              Check if user has permission to edit this obs.
 #
 #  ==== Callbacks
 #  add_spl_callback::           After add: update contribution.
@@ -485,10 +484,6 @@ class Observation < AbstractModel
     string_with_id(name.observation_name)
   rescue
     ""
-  end
-
-  def default_specimen_label
-    Herbarium.default_specimen_label(name.text_name, "MO #{id}")
   end
 
   # Look up the corresponding instance in our namings association.  If we are
@@ -1135,8 +1130,8 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
-  def has_edit_permission?(user = User.current)
-    Project.has_edit_permission?(self, user)
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
   end
 
   ##############################################################################

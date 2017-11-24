@@ -1,19 +1,17 @@
 <%
   numbers  = observation.collection_numbers
-  can_edit = observation.has_edit_permission?
+  can_edit = observation.can_edit?
 
   # This is passed in to show_collection_number, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
-  # query = Query.lookup(:CollectionNumber, :all, observations: observation)
-  query = Query.lookup(:Sequence, :all, observations: observation.id)
+  query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
 %>
 
 <% if numbers.any? && can_edit %>
   <div>
     <%= :Specimens.t %>: [<%=
-      link_to(:show_observation_add_collection_number.t,
-              controller: :collection_number, action: :add_collection_number,
-              observation: observation.id)
+      link_to(:create_collection_number.t, controller: :collection_number,
+              action: :create_collection_number, observation: observation.id)
     %>]
   </div>
   <ul class="tight-list">
@@ -37,8 +35,8 @@
       end.safe_join(", ") %>
 
 <% elsif numbers.none? && can_edit %>
-  <%= :show_observation_no_collection_numbers.t %>
-  [<%= link_to(:show_observation_add_collection_number.t,
-              controller: :collection_number, action: :add_collection_number,
-              observation: observation.id) %>]
+  <%= :show_observation_no_collection_numbers.t %> [<%=
+    link_to(:create_collection_number.t, controller: :collection_number,
+            action: :create_collection_number, observation: observation.id)
+  %>]
 <% end %>

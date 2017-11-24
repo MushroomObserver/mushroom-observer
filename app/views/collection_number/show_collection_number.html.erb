@@ -1,0 +1,34 @@
+<%
+  @title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'".strip_html
+
+  tabs = []
+  if in_admin_mode? || @collection_number.can_edit?
+    tabs << link_to(:edit_collection_number.t, action: :edit_collection_number,
+                    id: @collection_number.id)
+  end
+  tabs += [
+    link_to(:delete_collection_number.t, action: :destroy_collection_number,
+            id: @collection_number.id, data: {confirm: :are_you_sure.t})
+  ]
+  @tabsets = {
+    pager_for: @collection_number,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="max-width-text">
+  <p>
+    <%= :collection_number_name.t %>: <%= @collection_number.name %><br/>
+    <%= :collection_number_number.t %>: <%= @collection_number.number %><br/>
+    <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %><br/>
+  </p>
+
+  <%= render(partial: "shared/matrix_box", collection: @collection_number.observations, as: :object) %>
+
+  <center>
+    <p>
+      <%= :CREATED_AT.t %>: <%= @collection_number.created_at.web_date %><br/>
+      <%= :UPDATED_AT.t %>: <%= @collection_number.updated_at.web_date %><br/>
+    </p>
+  </center>
+</div>

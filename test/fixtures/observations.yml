@@ -29,6 +29,7 @@ minimal_unknown_obs: # 1
   name: fungi
   species_lists: unknown_species_list
   herbarium_records: interesting_unknown
+  collection_numbers: minimal_unknown_coll_num
 
 detailed_unknown_obs: # 2
   <<: *DEFAULTS
@@ -46,6 +47,7 @@ detailed_unknown_obs: # 2
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
   herbarium_records: interesting_unknown
+  collection_numbers: detailed_unknown_coll_num_one, detailed_unknown_coll_num_two
 
 coprinus_comatus_obs: # 3
   <<: *DEFAULTS
@@ -80,6 +82,7 @@ agaricus_campestris_obs: # 4
   images: agaricus_campestris_image
   species_lists: one_genus_three_species_list
   herbarium_records: agaricus_campestris_spec
+  collection_numbers: agaricus_campestris_coll_num
 
 agaricus_campestrus_obs: # 5
   <<: *DEFAULTS

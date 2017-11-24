@@ -6,8 +6,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
       id: observations(:strobilurus_diminutivus_obs).id,
       herbarium_record: {
         herbarium_name: rolf.preferred_herbarium_name,
-        herbarium_label:
-          "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
+        initial_det: "Strobilurus diminutivus det. Rolf Singer",
+        accession_number: "NYBG 1234567",
         notes: "Some notes about this herbarium record"
       }
     }
@@ -76,43 +76,45 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_select(".results tr", HerbariumRecord.all.size)
   end
 
-  def test_add_herbarium_record
-    get(:add_herbarium_record, id: observations(:coprinus_comatus_obs).id)
+  def test_create_herbarium_record
+    get(:create_herbarium_record, id: observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
 
     login("rolf")
-    get_with_dump(:add_herbarium_record,
+    get_with_dump(:create_herbarium_record,
                   id: observations(:coprinus_comatus_obs).id)
-    assert_template("add_herbarium_record", partial: "_rss_log")
-    assert(assigns(:herbarium_label))
+    assert_template("create_herbarium_record", partial: "_rss_log")
+    assert(assigns(:herbarium_record))
   end
 
-  def test_add_herbarium_record_post
+  def test_create_herbarium_record_post
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     obs = Observation.find(params[:id])
     assert(!obs.specimen)
-    post(:add_herbarium_record, params)
+    post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
-    herbarium_record = HerbariumRecord.all.order("created_at DESC")[0]
+    herbarium_record = HerbariumRecord.last
     assert_equal(params[:herbarium_record][:herbarium_name],
                  herbarium_record.herbarium.name)
-    assert_equal(params[:herbarium_record][:herbarium_label],
-                 herbarium_record.herbarium_label)
+    assert_equal(params[:herbarium_record][:initial_det],
+                 herbarium_record.initial_det)
+    assert_equal(params[:herbarium_record][:accession_number],
+                 herbarium_record.accession_number)
     assert_equal(rolf, herbarium_record.user)
     obs = Observation.find(params[:id])
     assert(obs.specimen)
     assert_response(:redirect)
   end
 
-  def test_add_herbarium_record_post_new_herbarium
+  def test_create_herbarium_record_post_new_herbarium
     mary = login("mary")
     herbarium_count = mary.curated_herbaria.count
     # Count the number of herbaria that mary is a curator for
     params = herbarium_record_params
     params[:herbarium_record][:herbarium_name] = mary.preferred_herbarium_name
-    post(:add_herbarium_record, params)
+    post(:create_herbarium_record, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
     # herbarium = Herbarium.find(:all, order: "created_at DESC")[0] # Rails 3
@@ -120,29 +122,30 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert(herbarium.curators.member?(mary))
   end
 
-  def test_add_herbarium_record_post_duplicate
+  def test_create_herbarium_record_post_duplicate
     login("rolf")
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     existing = herbarium_records(:coprinus_comatus_nybg_spec)
-    params[:herbarium_record][:herbarium_name]  = existing.herbarium.name
-    params[:herbarium_record][:herbarium_label] = existing.herbarium_label
-    post(:add_herbarium_record, params)
+    params[:herbarium_record][:herbarium_name]   = existing.herbarium.name
+    params[:herbarium_record][:initial_det]      = existing.initial_det
+    params[:herbarium_record][:accession_number] = existing.accession_number
+    post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_flash(/already been recorded/i)
+    assert_flash(/already exists/i)
     assert_response(:redirect)
   end
 
   # I keep thinking only curators should be able to add herbarium_records.
   # However, for now anyone can.
-  def test_add_herbarium_record_post_not_curator
+  def test_create_herbarium_record_post_not_curator
     user = login("mary")
     nybg = herbaria(:nybg_herbarium)
     assert(!nybg.curators.member?(user))
     herbarium_record_count = HerbariumRecord.count
     params = herbarium_record_params
     params[:herbarium_record][:herbarium_name] = nybg.name
-    post(:add_herbarium_record, params)
+    post(:create_herbarium_record, params)
     nybg = Herbarium.find(nybg.id) # Reload herbarium
     assert(!nybg.curators.member?(user))
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
@@ -156,7 +159,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
     login("mary") # Non-curator
     get_with_dump(:edit_herbarium_record, id: nybg.id)
-    assert_flash(/unable to update herbarium record/i)
+    assert_flash(/permission denied/i)
     assert_response(:redirect)
 
     login("rolf")
@@ -181,8 +184,10 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     nybg_rec.reload
     assert_equal(rolf_herb, nybg_rec.herbarium)
     assert_equal(nybg_user, nybg_rec.user)
-    assert_equal(params[:herbarium_record][:herbarium_label],
-                 nybg_rec.herbarium_label)
+    assert_equal(params[:herbarium_record][:initial_det],
+                 nybg_rec.initial_det)
+    assert_equal(params[:herbarium_record][:accession_number],
+                 nybg_rec.accession_number)
     assert_equal(params[:herbarium_record][:notes], nybg_rec.notes)
     assert_response(:redirect)
   end
@@ -203,63 +208,71 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     katy_obs = observations(:amateur_obs)
     nybg.curators.delete(rolf)
 
-    # roy is curator, rolf owns obs, mary is neither
+    # roy is curator, rolf owns record and obs, mary is nothing
     assert(nybg.is_curator?(roy))
     assert(!nybg.is_curator?(rolf))
     assert(!nybg.is_curator?(mary))
     assert(rec.user == rolf)
-    assert(rec.observations.first.user == rolf)
+    assert(obs.user == rolf)
     assert_equal(2, obs.herbarium_records.count)
     assert_empty(rolf_obs.herbarium_records)
     assert_empty(mary_obs.herbarium_records)
     assert_empty(katy_obs.herbarium_records)
 
+    params = {
+      id: rec.id, 
+      herbarium_record: {
+        herbarium_name:   rec.herbarium.name,
+        initial_det:      rec.initial_det,
+        accession_number: rec.accession_number
+      }
+    }
+
     login("mary")
     post(:edit_herbarium_record,
-         { id: rec.id, :"remove_observation_#{obs.id}" => "1" })
+         params.merge(:"remove_observation_#{obs.id}" => "1"))
     assert_equal(2, obs.reload.herbarium_records.count)
     assert_flash_error
-    post(:edit_herbarium_record, { id: rec.id, add_observations: rolf_obs.id })
+    post(:edit_herbarium_record, params.merge(add_observations: rolf_obs.id))
     assert_empty(rolf_obs.reload.herbarium_records)
     assert_flash_error
-    post(:edit_herbarium_record, { id: rec.id, add_observations: mary_obs.id })
+    post(:edit_herbarium_record, params.merge(add_observations: mary_obs.id))
     assert_empty(mary_obs.reload.herbarium_records)
     assert_flash_error
     rec.observations << mary_obs
 
     login("rolf")
     post(:edit_herbarium_record,
-         { id: rec.id, :"remove_observation_#{mary_obs.id}" => "1" })
+         params.merge(:"remove_observation_#{mary_obs.id}" => "1"))
     assert_not_empty(mary_obs.reload.herbarium_records)
     assert_flash_error
     post(:edit_herbarium_record,
-         { id: rec.id, :"remove_observation_#{obs.id}" => "1" })
+         params.merge(:"remove_observation_#{obs.id}" => "1"))
     assert_equal(1, obs.reload.herbarium_records.count)
     assert_no_flash
-    post(:edit_herbarium_record, { id: rec.id, add_observations: katy_obs.id })
+    post(:edit_herbarium_record, params.merge(add_observations: katy_obs.id))
     assert_empty(katy_obs.reload.herbarium_records)
     assert_flash_error
-    post(:edit_herbarium_record, { id: rec.id, add_observations: rolf_obs.id })
+    post(:edit_herbarium_record, params.merge(add_observations: rolf_obs.id))
     assert_not_empty(rolf_obs.reload.herbarium_records)
     assert_no_flash
     
     login("roy")
-    post(:edit_herbarium_record, {
-      id: rec.id,
+    post(:edit_herbarium_record, params.merge(
       :"remove_observation_#{rolf_obs.id}" => "1",
       :"remove_observation_#{mary_obs.id}" => "1"
-    })
+    ))
     assert_empty(rolf_obs.reload.herbarium_records)
     assert_empty(mary_obs.reload.herbarium_records)
     assert_no_flash
     post(:edit_herbarium_record,
-         { id: rec.id, add_observations: "#{katy_obs.id} #{obs.id}" })
+         params.merge(add_observations: "#{katy_obs.id} #{obs.id}"))
     assert_not_empty(katy_obs.reload.herbarium_records)
     assert_equal(2, obs.reload.herbarium_records.count)
     assert_no_flash
   end
 
-  def test_delete_herbarium_record
+  def test_destroy_herbarium_record
     login("rolf")
     params = { id: herbarium_records(:interesting_unknown).id }
     herbarium_record_count = HerbariumRecord.count
@@ -267,7 +280,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     observations = herbarium_record.observations
     obs_spec_count = observations.map { |o| o.herbarium_records.count }.
                      reduce { |a, b| a + b }
-    post(:delete_herbarium_record, params)
+    post(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
     assert_true(obs_spec_count > observations.
@@ -276,20 +289,20 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_delete_herbarium_record_not_curator
+  def test_destroy_herbarium_record_not_curator
     login("mary")
     params = { id: herbarium_records(:interesting_unknown).id }
     herbarium_record_count = HerbariumRecord.count
-    post(:delete_herbarium_record, params)
+    post(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
   end
 
-  def test_delete_herbarium_record_admin
+  def test_destroy_herbarium_record_admin
     make_admin("mary")
     params = { id: herbarium_records(:interesting_unknown).id }
     herbarium_record_count = HerbariumRecord.count
-    post(:delete_herbarium_record, params)
+    post(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     assert_response(:redirect)
   end

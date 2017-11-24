@@ -1,6 +1,6 @@
 module Query
-  # Simple herbarium_record search.
-  class HerbariumRecordPatternSearch < Query::HerbariumRecordBase
+  # Simple collection_number search.
+  class CollectionNumberPatternSearch < Query::CollectionNumberBase
     include Query::Initializers::PatternSearch
 
     def parameter_declarations
@@ -17,9 +17,8 @@ module Query
 
     def search_fields
       [
-        "herbarium_records.initial_det",
-        "herbarium_records.accession_number",
-        "COALESCE(herbarium_records.notes,'')"
+        "collection_numbers.name",
+        "collection_numbers.number"
       ]
     end
   end

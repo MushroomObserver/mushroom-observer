@@ -7,14 +7,17 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:   [:time],
-        updated_at?:   [:time],
-        users?:        [User],
-        herbaria?:     [:string],
-        observations?: [:string],
-        has_notes?:    :boolean,
-        notes_has?:    :string,
-        label_has?:    :string
+        created_at?:           [:time],
+        updated_at?:           [:time],
+        users?:                [User],
+        herbaria?:             [:string],
+        observations?:         [:string],
+        has_notes?:            :boolean,
+        initial_det?:          [:string],
+        accession_number?:     [:string],
+        notes_has?:            :string,
+        initial_det_has?:      :string,
+        accession_number_has?: :string
       )
     end
 
@@ -36,8 +39,11 @@ module Query
         "COALESCE(herbarium_records.notes, '') != ''",
         "COALESCE(herbarium_records.notes, '') == ''"
       )
+      initialize_model_do_exact_match(:initial_det)
+      initialize_model_do_exact_match(:accession_number)
       initialize_model_do_search(:notes_has, :notes)
-      initialize_model_do_search(:label_has, :herbarium_label)
+      initialize_model_do_search(:initial_det_has, :initial_det)
+      initialize_model_do_search(:accession_number_has, :accession_number)
       super
     end
 

@@ -1,6 +1,5 @@
 <%
-  @title = @herbarium.name.t
-  @title += " (#{@herbarium.code.t})".html_safe if !@herbarium.code.blank?
+  @title = @herbarium.format_name.t.strip_html
 
   map = @herbarium.location ? true : false
 
@@ -40,7 +39,7 @@
 
     <% if !@herbarium.description.blank? %>
       <div class="push-down">
-        <div class="bold"><%= :herbarium_description.t %>:</div>
+        <div class="bold"><%= :NOTES.t %>:</div>
         <%= @herbarium.description.tpl %>
       </div>
     <% end %>
@@ -67,14 +66,8 @@
 <div class="row">
   <div class="col-xs-12 push-down" style="max-width:<%= map ? 930 : 600 %>px">
     <center>
-      <% if @herbarium.created_at %>
-        <%= :herbarium_created_at.t %>:
-        <%= @herbarium.created_at.web_date %><br/>
-      <% end %>
-      <% if @herbarium.updated_at %>
-        <%= :herbarium_updated_at.t %>:
-        <%=  @herbarium.updated_at.web_date %><br/>
-      <% end %>
+      <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
+      <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
     </center>
   </div>
 </div>

@@ -16,11 +16,8 @@
       <% @objects.each do |herbarium| %>
         <tr>
           <td>
-            <%=
-              str = herbarium.name.t
-              str += " (#{herbarium.code.t})".html_safe if !herbarium.code.blank?
-              link_with_query(str, action: :show_herbarium, id: herbarium.id)
-            %>:<br/>
+            <%= link_with_query(herbarium.format_name.t,
+                                action: :show_herbarium, id: herbarium.id) %>:<br/>
             <small>
               <%= herbarium.created_at.web_time %>
             </small>

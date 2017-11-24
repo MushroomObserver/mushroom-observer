@@ -9,7 +9,8 @@ interesting_unknown: # 1
     updated_at: 2012-10-21 10:14:00
     herbarium: nybg_herbarium
     user: rolf
-    herbarium_label: "Cortinarius sp.: NYBG 1234"
+    initial_det: Cortinarius sp.
+    accession_number: NYBG 1234
     notes: It was cleaned & dried at 115°F
 
 # Same observation with more than one herbarium record
@@ -18,14 +19,16 @@ coprinus_comatus_nybg_spec: # 2
     updated_at: 2012-10-21 12:22:00
     herbarium: nybg_herbarium
     user: rolf
-    herbarium_label: "Coprinus comatus: NYBG 4321"
+    initial_det: Coprinus comatus
+    accession_number: NYBG 4321
 
 coprinus_comatus_rolf_spec: # 3
     created_at: 2012-12-08 14:23:00
     updated_at: 2012-12-08 14:23:00
     herbarium: rolf_herbarium
     user: rolf
-    herbarium_label: "Coprinus comatus: ROLF 1"
+    initial_det: Coprinus comatus
+    accession_number: ROLF 1
 
 # One observation with one herbarium record
 agaricus_campestris_spec: # 4
@@ -33,10 +36,14 @@ agaricus_campestris_spec: # 4
     updated_at: 2012-12-08 14:31:00
     herbarium: nybg_herbarium
     user: rolf
-    herbarium_label: "Agaricus campestris: NYBG 4322"
+    initial_det: Agaricus campestris
+    accession_number: NYBG 4322
 
 herbarium_record_with_notes: # 5
+    created_at: 2012-12-08 14:31:00
+    updated_at: 2012-12-08 14:31:00
     herbarium: nybg_herbarium
     user: rolf
-    herbarium_label: $LABEL
+    initial_det: xxx
+    accession_number: yyy
     notes: rare

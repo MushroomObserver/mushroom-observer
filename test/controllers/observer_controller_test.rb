@@ -677,10 +677,8 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, id: obs.id)
     assert_show_observation
 
-    # Make sure no queries created for show_image links.  (Well, okay, four
-    # queries are created for Darvin's new "show species" and "show similar
-    # observations" links...)
-    assert_equal(4, QueryRecord.count)
+    # Make sure no queries created for show_image links.
+    assert_empty(QueryRecord.where("description like '%model=:Image%'"))
   end
 
   def test_show_observation_change_vote_anonymity
@@ -1372,11 +1370,11 @@ class ObserverControllerTest < FunctionalTestCase
       }, 1, 1, 0
     )
     obs = assigns(:observation)
-    assert(obs.specimen)
-    assert(obs.herbarium_records.count == 1)
-    herbarium_record = obs.herbarium_records[0]
-    assert(/#{obs.id}/ =~ herbarium_record.herbarium_label)
-    assert(/#{name}/ =~ herbarium_record.herbarium_label)
+    assert_true(obs.specimen)
+    assert_equal(1, obs.herbarium_records.count)
+    herbarium_record = obs.herbarium_records.first
+    assert_match(/MO #{obs.id}/, herbarium_record.herbarium_label)
+    assert_match(/#{name}/, herbarium_record.herbarium_label)
   end
 
   def test_create_observation_with_herbarium_but_no_specimen
@@ -3036,7 +3034,8 @@ class ObserverControllerTest < FunctionalTestCase
     fourth.herbarium_records << HerbariumRecord.create!(
       herbarium: herbaria(:nybg_herbarium),
       user: mary,
-      herbarium_label: "Mary #1234"
+      initial_det: fourth.name.text_name,
+      accession_number: "Mary #1234"
     )
 
     get(:download_observations, q: query.id.alphabetize)

@@ -45,7 +45,7 @@ class API
       raise MissingParameter.new(:observation)   unless params[:observation]
       raise MissingParameter.new(:external_site) unless params[:external_site]
       raise MissingParameter.new(:url)           if params[:url].blank?
-      return if params[:observation].has_edit_permission?(@user)
+      return if params[:observation].can_edit?(@user)
       return if @user.external_sites.include?(params[:external_site])
       raise ExternalLinkPermissionDenied.new
     end

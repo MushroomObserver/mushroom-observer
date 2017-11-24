@@ -1,7 +1,7 @@
-<%= submit_tag(button.l, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn center-block push-down") %>
 
 <div class="form-group push-down">
-  <%= label_tag(:herbarium_name, :herbarium_name.t + ":") %>
+  <%= label_tag(:herbarium_name, :NAME.t + ":") %>
   <%= text_field(:herbarium, :name, class: "form-control") %>
 </div>
 
@@ -18,7 +18,7 @@
 </div>
 
 <div class="form-group push-down">
-  <%= label_tag(:herbarium_place_name, :create_herbarium_location.t + ":") %>
+  <%= label_tag(:herbarium_place_name, :LOCATION.t + ":") %>
   <%= text_field(:herbarium, :place_name, class: "form-control") %>
   <% turn_into_location_auto_completer(:herbarium_place_name) %>
 </div>
@@ -34,8 +34,8 @@
 </div>
 
 <div class="form-group push-down">
-  <%= label_tag(:herbarium_description, :create_herbarium_description.t) %>
+  <%= label_tag(:herbarium_description, :NOTES.t) %>
   <%= text_area(:herbarium, :description, rows: 10, class: "form-control") %>
 </div>
 
-<%= submit_tag(button.l, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn center-block push-down") %>

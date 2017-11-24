@@ -8,6 +8,13 @@ module Query::Modules::Joining
       rss_logs: :rss_log_id,
       users: :user_id
     },
+    collection_numbers: {
+      users: :user_id
+    },
+    collection_numbers_observations: {
+      collection_numbers: :collection_number_id,
+      observations: :observation_id
+    },
     comments: {
       location_descriptions: :target,
       locations: :target,

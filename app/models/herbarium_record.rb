@@ -18,10 +18,9 @@
 #  created_at::       Date/time this record was created at MO.
 #  updated_at::       Date/time this record was last updated at MO.
 #  herbarium_id::     Id of Herbarium containing this record.
-#  herbarium_label::  Label for the specimen, typically the initial
-#                     determination and the  collector's name and number.
+#  initial_det::      Initial determination of the specimen.
+#  accession_number:: Herbarium's unique identifier number.
 #  notes::            Random notes about this record (optional).
-#  format_name::      Same as herbarium_label, for compat. with other models.
 #
 #  == Class methods
 #
@@ -29,9 +28,11 @@
 #
 #  == Instance methods
 #
-#  observations::         Observations associated with this record.
-#  can_edit(user)::       Can a given user edit this record?
-#  add_observation(obs):: Add record to Observation, log it and save.
+#  observations::     Observations associated with this record.
+#  can_edit?::        Can a given user edit this record?
+#  add_observation::  Add record to Observation, log it and save.
+#  herbarium_label::  Initial determination + accession number.
+#  format_name::      Same as herbarium_label.
 #
 #  == Callbacks
 #
@@ -48,6 +49,11 @@ class HerbariumRecord < AbstractModel
 
   after_create :notify_curators
 
+  def herbarium_label
+    initial_det.blank? ? accession_number :
+                         "#{initial_det}: #{accession_number}"
+  end
+
   def format_name
     herbarium_label
   end
@@ -59,6 +65,7 @@ class HerbariumRecord < AbstractModel
 
   # Add this HerbariumRecord to an Observation, log the action, and save it.
   def add_observation(obs)
+    return if observations.include?(obs)
     observations.push(obs)
     obs.specimen = true
     obs.log(:log_herbarium_record_added, name: herbarium_label, touch: true)

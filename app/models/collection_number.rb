@@ -26,13 +26,12 @@
 #
 #  == Attributes
 #
-#  id::               Locally unique numerical id, starting at 1.
-#  user_id::          Id of User who created this record.
-#  created_at::       Date/time this record was created.
-#  updated_at::       Date/time this record was last updated.
-#  name::             Collector's full name, not necessarily same as creator.
-#  number::           Collector's unique number (uniqueness not enforced).
-#  format_name::      Both collector's name and number.
+#  id::          Locally unique numerical id, starting at 1.
+#  user_id::     Id of User who created this record.
+#  created_at::  Date/time this record was created.
+#  updated_at::  Date/time this record was last updated.
+#  name::        Collector's full name, not necessarily same as creator.
+#  number::      Collector's unique number (uniqueness not enforced).
 #
 #  == Class methods
 #
@@ -40,7 +39,10 @@
 #
 #  == Instance methods
 #
-#  observations::      Observation's associated with this collection number.
+#  observations::    Observation's associated with this collection number.
+#  add_observation:: Add CollectionNumber to Observation, log it and save.
+#  format_name::     Both collector's name and number.
+#  can_edit?::       Check if user can edit this record.
 #
 #  == Callbacks
 #
@@ -48,8 +50,22 @@
 #
 class CollectionNumber < AbstractModel
   has_and_belongs_to_many :observations
+  belongs_to :user
 
   def format_name
     "#{name} ##{number}"
+  end
+
+  def can_edit?(user = User.current)
+    obs.user == user
+  end
+
+  # Add this CollectionNumber to an Observation, log the action, and save it.
+  def add_observation(obs)
+    return if observations.include?(obs)
+    observations.push(obs)
+    obs.specimen = true
+    obs.log(:log_collection_number_added, name: format_name, touch: true)
+    obs.save
   end
 end

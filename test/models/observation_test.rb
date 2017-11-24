@@ -706,16 +706,16 @@ class ObservationTest < UnitTestCase
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Mary
     obs = observations(:minimal_unknown_obs)
-    assert_false(obs.has_edit_permission?(rolf))
-    assert_true(obs.has_edit_permission?(mary))
-    assert_false(obs.has_edit_permission?(dick))
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(mary))
+    assert_false(obs.can_edit?(dick))
 
     # IS owned by Bolete project, AND owned by Mary
     # (Dick is member of Bolete project)
     obs = observations(:detailed_unknown_obs)
-    assert_false(obs.has_edit_permission?(rolf))
-    assert_true(obs.has_edit_permission?(mary))
-    assert_true(obs.has_edit_permission?(dick))
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(mary))
+    assert_true(obs.can_edit?(dick))
   end
 
   def test_imageless
