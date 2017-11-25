@@ -32,11 +32,17 @@
   </ul>
 
 <% elsif records.any? && !can_add %>
-  <%= records.count > 1 ? :Herbarium_records.t : :Herbarium_record.t %>:
-  <%= records.map do |record|
-        link_to(record.accession_at_herbarium.t,
-                add_query_param(record.show_link_args, query))
-      end.safe_join(", ") %>
+  <div>
+    <%= records.count > 1 ? :Herbarium_records.t : :Herbarium_record.t %>:
+  </div>
+  <ul class="tight-list">
+    <% records.map do |record| %>
+      <li>
+        <%= link_to(record.accession_at_herbarium.t,
+                    add_query_param(record.show_link_args, query)) %>
+      </li>
+    <% end %>
+  </ul>
 
 <% elsif records.none? && can_add %>
   <%= :show_observation_no_herbarium_records.t %> [<%=

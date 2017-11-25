@@ -253,7 +253,7 @@ class HerbariumRecordController < ApplicationController
     return unless observation
     return unless make_sure_can_delete!(herbarium_record)
     herbarium_record.observations.delete(observation)
-    herbarium_record.destroy if herbarium_records.observations.empty?
+    herbarium_record.destroy if herbarium_record.observations.empty?
     redirect_to(observation.show_link_args)
   end
 

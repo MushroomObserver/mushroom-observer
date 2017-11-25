@@ -329,7 +329,7 @@ GET observation
   west:	longitude (min longitude)
 
 POST observation
-  accession_number:	string ([:api_help_accession_number(help="accession_number: string ([:api_help_accession_number])
+  accession_number:	string (unique herbarium id)
   altitude:	altitude
   collection_number:	string
   collectors_name:	string
@@ -337,47 +337,7 @@ POST observation
   has_specimen:	boolean
   herbarium:	herbarium
   images:	image list
-  initial_det:	string ([:api_help_initial_det])
-  is_collection_location:	boolean (default, is this location where mushroom was found?)
-  latitude:	latitude
-  location:	place_name (limit=1024 chars)
-  log:	boolean (default, log this action on main page activity log and RSS feed?)
-  longitude:	longitude
-  name:	name (default=Fungi)
-  notes:	string
-  notes[$field]:	string (set value of the custom notes template field, substitute field name for \"$field\")
-  projects:	project list (must be member)
-  species_lists:	species_list list (must have edit permission)
-  thumbnail:	image
-  vote:	float (default=3)")])
-  altitude:	altitude
-  collection_number:	string
-  collectors_name:	string
-  date:	date
-  has_specimen:	boolean
-  herbarium:	herbarium
-  images:	image list
-  initial_det:	string ([:api_help_initial_det(help="accession_number: string ([:api_help_accession_number])
-  altitude:	altitude
-  collection_number:	string
-  collectors_name:	string
-  date:	date
-  has_specimen:	boolean
-  herbarium:	herbarium
-  images:	image list
-  initial_det:	string ([:api_help_initial_det])
-  is_collection_location:	boolean (default, is this location where mushroom was found?)
-  latitude:	latitude
-  location:	place_name (limit=1024 chars)
-  log:	boolean (default, log this action on main page activity log and RSS feed?)
-  longitude:	longitude
-  name:	name (default=Fungi)
-  notes:	string
-  notes[$field]:	string (set value of the custom notes template field, substitute field name for \"$field\")
-  projects:	project list (must be member)
-  species_lists:	species_list list (must have edit permission)
-  thumbnail:	image
-  vote:	float (default=3)")])
+  initial_det:	string (initial determination)
   is_collection_location:	boolean (default, is this location where mushroom was found?)
   latitude:	latitude
   location:	place_name (limit=1024 chars)

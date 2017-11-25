@@ -21,10 +21,10 @@
       <li>
         <%= locus = sequence.locus.truncate(sequence.locus_width)
         if sequence.deposit?
-          link_to("#{locus} - #{sequence.archive.t} ##{sequence.accession.t}",
+          link_to("#{locus} - #{sequence.archive} ##{sequence.accession}".t,
                   add_query_param(sequence.show_link_args, query))
         else
-          link_to("#{locus} - MO ##{sequence.id}",
+          link_to("#{locus} - MO ##{sequence.id}".t,
                   add_query_param(sequence.show_link_args, query))
         end %>
         <%=
@@ -38,7 +38,7 @@
                              action: :edit_sequence, id: sequence.id)
             links << link_to(:DESTROY.t, { controller: :sequence,
                              action: :destroy_sequence, id: sequence.id },
-                             { data: { confirm: :are_you_sure } })
+                             { data: { confirm: :are_you_sure.t } })
           end
           "[#{links.safe_join(' | ')}]".html_safe if links.any?
         %>

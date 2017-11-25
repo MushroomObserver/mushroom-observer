@@ -60,8 +60,7 @@ class HerbariumRecord < AbstractModel
   end
 
   def accession_at_herbarium
-    herb = herbarium.code.blank? ? herbarium.name : herbarium.code
-    "__#{accession_number}__ @ #{herb}"
+    "__#{accession_number}__ @ #{herbarium.format_name}"
   end
 
   # Can a given user edit this HerbariumRecord?

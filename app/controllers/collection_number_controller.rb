@@ -137,6 +137,7 @@ class CollectionNumberController < ApplicationController
     else
       flash_warning(:edit_collection_number_already_used.t)
       @other_number.add_observation(@observation)
+      @collection_number = @other_number
     end
     redirect_to_observation_or_collection_number
   end
@@ -201,7 +202,7 @@ class CollectionNumberController < ApplicationController
     return unless observation
     return unless make_sure_can_delete!(collection_number)
     collection_number.observations.delete(observation)
-    collection_number.destroy if collection_numbers.observations.empty?
+    collection_number.destroy if collection_number.observations.empty?
     redirect_to(observation.show_link_args)
   end
 

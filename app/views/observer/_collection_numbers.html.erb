@@ -11,7 +11,7 @@
   <div>
     <%= :Specimens.t %>: [<%=
       link_to(:create_collection_number.t, controller: :collection_number,
-              action: :create_collection_number, observation: observation.id)
+              action: :create_collection_number, id: observation.id)
     %>]
   </div>
   <ul class="tight-list">
@@ -39,6 +39,6 @@
 <% elsif numbers.none? && can_edit %>
   <%= :show_observation_no_collection_numbers.t %> [<%=
     link_to(:create_collection_number.t, controller: :collection_number,
-            action: :create_collection_number, observation: observation.id)
+            action: :create_collection_number, id: observation.id)
   %>]
 <% end %>
