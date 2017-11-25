@@ -10,26 +10,4 @@
   <%= text_field(:collection_number, :number, class:"form-control") %>
 </div>
 
-<% if button == :SAVE %>
-  <div class="form-group push-down">
-    <%= label_tag(:remove_observations,
-                  :edit_collection_number_remove_observations.t) %>:<br/>
-    <span class="HelpNote"><%= :edit_collection_number_remove_observations_help.t %></span>
-    <div class="push-down push-up">
-      <% @collection_number.observations.each do |obs| %>
-        <div>
-          <%= check_box_tag("remove_observation_#{obs.id}") %>
-          <%= obs.unique_format_name.t %>
-        </div>
-      <% end %>
-    </div>
-
-    <div class="form-group push-down form-inline">
-      <%= label_tag(:add_observations, :edit_collection_number_add_observations.t) %>:
-      <%= text_field_tag(:add_observations, "", size: 8, class: "form-control") %><br/>
-      <span class="HelpNote"><%= :edit_collection_number_add_observations_help.t %></span>
-    </div>
-  </div>
-<% end %>
-
 <%= submit_tag(button.t, class: "btn center-block push-down") %>

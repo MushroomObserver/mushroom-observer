@@ -607,6 +607,8 @@
   close: close
   CREATE: Create
   create: create
+  DELETE: Delete
+  delete: delete
   # deprecate a name
   DEPRECATE: Deprecate
   deprecate: deprecate
@@ -2229,21 +2231,17 @@
   create_herbarium_record_missing_herbarium_name: Missing herbarium name.
   create_herbarium_record_already_used: This herbarium record already exists. We've added this observation to it. If that isn't correct, delete it from your observation and add the correct herbarium record.
   create_herbarium_record_already_used_by_someone_else: This accession number has already been recorded by someone else for [herbarium_name]. Try adding your initials to the accession number to distinguish labels.
+  create_herbarium_record_only_curator_or_owner: Only curators can add herbarium records to other users' observations.
 
   # herbarium_record/edit_herbarium_record
   edit_herbarium_record: Edit Herbarium Record
   edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
   edit_herbarium_record_back_to_index: Back to Herbarium Record Index
-  edit_herbarium_record_remove_observations: Remove Observations
-  edit_herbarium_record_remove_observations_help: (check boxes of observations to remove from this record)
-  edit_herbarium_record_add_observations: Add Observations
-  edit_herbarium_record_add_observations_help: (enter ids of observations to add to this record)
-  edit_herbarium_record_add_observation_not_found: "Observation #[id] not found."
   edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
   edit_herbarium_record_already_used: This herbarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
 
-  # herbarium_record/delete_herbarium_record
-  delete_herbarium_record: Delete Herbarium Record
+  # herbarium_record/destroy_herbarium_record
+  delete_herbarium_record: Destroy Herbarium Record
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Herbarium Record Index"
@@ -2267,17 +2265,12 @@
   edit_collection_number: Edit Collection Number
   edit_collection_number_title: Edit Collection Number [name]
   edit_collection_number_back_to_index: Back to Collection Number Index
-  edit_collection_number_remove_observations: Remove Observations
-  edit_collection_number_remove_observations_help: (check boxes of observations to remove from this specimen)
-  edit_collection_number_add_observations: Add Observations
-  edit_collection_number_add_observations_help: (enter ids of observations to add to this specimen)
-  edit_collection_number_add_observation_not_found: "Observation #[id] not found."
   edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
   edit_collection_number_already_used: This collection number is shared with another observation. Double check your records. If you need to fix it, delete it from your observation and add the correct one.
   edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove one of the observations and add the correct collection number to that observation.
 
-  # collection_number/delete_collection_number
-  delete_collection_number: Delete Collection Number
+  # collection_number/destroy_collection_number
+  delete_collection_number: Destroy Collection Number
 
   # collection_number/collection_number_index (not a real page)
   collection_number_index_title: "[subject] Collection Number Index"

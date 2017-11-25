@@ -36,8 +36,9 @@
           if sequence.can_edit?(@user)
             links << link_to(:EDIT.t, controller: :sequence,
                              action: :edit_sequence, id: sequence.id)
-            links << link_to(:DESTROY.t, controller: :sequence,
-                             action: :destroy_sequence, id: sequence.id)
+            links << link_to(:DESTROY.t, { controller: :sequence,
+                             action: :destroy_sequence, id: sequence.id },
+                             { data: { confirm: :are_you_sure } })
           end
           "[#{links.safe_join(' | ')}]".html_safe if links.any?
         %>

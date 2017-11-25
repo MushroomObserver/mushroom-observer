@@ -33,6 +33,7 @@
 #  add_observation::  Add record to Observation, log it and save.
 #  herbarium_label::  Initial determination + accession number.
 #  format_name::      Same as herbarium_label.
+#  accession_at_herbarium:: Format as "spec #nnnn @ Herbarium".
 #
 #  == Callbacks
 #
@@ -56,6 +57,11 @@ class HerbariumRecord < AbstractModel
 
   def format_name
     herbarium_label
+  end
+
+  def accession_at_herbarium
+    herb = herbarium.code.blank? ? herbarium.name : herbarium.code
+    "__#{accession_number}__ @ #{herb}"
   end
 
   # Can a given user edit this HerbariumRecord?

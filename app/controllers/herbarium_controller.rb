@@ -84,6 +84,14 @@ class HerbariumController < ApplicationController
     end
   end
 
+  def next_herbarium # :nologin: :norobots:
+    redirect_to_next_object(:next, Herbarium, params[:id].to_s)
+  end
+
+  def prev_herbarium # :nologin: :norobots:
+    redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
+  end
+
   # ----------------------------
   #  Create and edit herbarium
   # ----------------------------

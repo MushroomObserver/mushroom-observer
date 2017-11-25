@@ -5,11 +5,10 @@
   if in_admin_mode? || @collection_number.can_edit?
     tabs << link_to(:edit_collection_number.t, action: :edit_collection_number,
                     id: @collection_number.id)
+    tabs << link_to(:delete_collection_number.t, {action: :destroy_collection_number,
+                    id: @collection_number.id}, data: {confirm: :are_you_sure.t})
   end
-  tabs += [
-    link_to(:delete_collection_number.t, action: :destroy_collection_number,
-            id: @collection_number.id, data: {confirm: :are_you_sure.t})
-  ]
+
   @tabsets = {
     pager_for: @collection_number,
     right: draw_tab_set(tabs)

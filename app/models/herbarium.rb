@@ -81,6 +81,10 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{name} (#{code})"
   end
 
+  def unique_format_name
+    "#{format_name} (#{id})"
+  end
+
   def sort_name
     name.t.strip_html.gsub(/\W+/, " ").strip_squeeze.downcase
   end
@@ -110,7 +114,10 @@ class Herbarium < AbstractModel
                          "[Merged at #{Time.now.utc.web_time}]\n\n"
                          notes2
     end
+    this.personal_user ||= that.personal_user
     this.save
+    this.curators          += that.curators - this.curators
+    this.herbarium_records += that.herbarium_records - this.herbarium_records
     that.destroy
     return this
   end

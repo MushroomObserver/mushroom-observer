@@ -40,6 +40,7 @@
   <thead>
     <tr>
       <th><%= :herbarium_herbarium_record_count.t %>&nbsp;</th>
+      <th></th>
       <th><%= :NAME.t %></th>
     </tr>
   </thead>
@@ -49,6 +50,7 @@
         <td align="center">
           <%= herbarium.herbarium_record_count %>
         </td>
+        <td></td>
         <td>
           <%= link_to(herbarium.name.blank? ? content_tag(:i, "n/a") : herbarium.name.t,
                       herbarium.show_link_args) %>

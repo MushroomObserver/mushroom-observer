@@ -21,8 +21,10 @@
                     add_query_param(number.show_link_args, query)) %>
         [<%= link_to(:EDIT.t, controller: :collection_number,
                      action: :edit_collection_number, id: number.id) %> |
-         <%= link_to(:DESTROY.t, controller: :collection_number,
-                     action: :destroy_collection_number, id: number.id) %>]
+         <%= link_to(:DELETE.t,
+                     { controller: :collection_number, action: :remove_observation,
+                       id: number.id, obs: observation.id },
+                     { data: { confirm: :are_you_sure.t } }) %>]
       </li>
     <% end %>
   </ul>

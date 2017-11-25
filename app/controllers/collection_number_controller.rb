@@ -83,6 +83,14 @@ class CollectionNumberController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
+  def next_collection_number # :nologin: :norobots:
+    redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
+  end
+
+  def prev_collection_number # :nologin: :norobots:
+    redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
+  end
+
   # ----------------------------
   #  Create and edit record
   # ----------------------------
@@ -182,50 +190,34 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  # ------------------------------
-  #  Add and remove observations
-  # ------------------------------
-
-  def add_observations
-    params[:add_observations].to_s.strip_squeeze.split.each do |id|
-      obs = Observation.safe_find(id)
-      if obs.nil?
-        flash_error(:edit_collection_number_add_observation_not_found.t(id: id))
-      elsif in_admin_mode? || obs.can_edit?
-        @collection_number.add_observation(obs)
-        obs.update_attributes(specimen: true) \
-          if obs.can_edit? && !obs.specimen
-      else
-        flash_error(:edit_collection_number_cant_add_or_remove.t(id: obs.id))
-      end
-    end
-  end
-
-  def remove_observations
-    @collection_number.observations.each do |obs|
-      next if params[:"remove_observation_#{obs.id}"] != "1"
-      if in_admin_mode? || obs.can_edit?
-        @collection_number.observations.delete(obs)
-      else
-        flash_error(:edit_collection_number_cant_add_or_remove.t(id: obs.id))
-      end
-    end
-  end
-
   # ----------------------------
   #  Delete record
   # ----------------------------
 
+  def remove_observation
+    collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless collection_number
+    observation = find_or_goto_index(Observation, params[:obs])
+    return unless observation
+    return unless make_sure_can_delete!(collection_number)
+    collection_number.observations.delete(observation)
+    collection_number.destroy if collection_numbers.observations.empty?
+    redirect_to(observation.show_link_args)
+  end
+
   def destroy_collection_number
     collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless collection_number
-    next = collection_number.observations.first
-    if collection_number.can_edit? || in_admin_mode?
-      collection_number.destroy
-    else
-      flash_error(:permission_denied.t)
-    end
-    redirect_back_or_default(next.show_link_args)
+    return unless make_sure_can_delete!(collection_number)
+    collection_number.destroy
+    redirect_to(action: :index_collection_number)
+  end
+
+  def make_sure_can_delete!(collection_number)
+    return true if collection_number.can_edit?
+    flash_error(:permission_denied.t)
+    redirect_to(collection_number.show_link_args)
+    return false
   end
 
   ##############################################################################

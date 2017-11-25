@@ -1,8 +1,6 @@
 <%
   @title = @herbarium.format_name.t.strip_html
 
-  map = @herbarium.location ? true : false
-
   tabs = []
   if @herbarium.is_curator?(@user) || in_admin_mode?
     tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
@@ -11,7 +9,13 @@
     link_to(:create_herbarium.t, action: :create_herbarium),
     link_to(:herbarium_index.t, action: :index)
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+
+  @tabsets = {
+    pager_for: @herbarium,
+    right: draw_tab_set(tabs)
+  }
+
+  map = @herbarium.location ? true : false
 %>
 
 <div class="row">
@@ -28,7 +32,7 @@
           <div class="form-inline push-down">
             <%= text_field_tag(:add_curator, "", class: "form-control") %>
             <label for="add_curator"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
-            <% turn_into_user_auto_completer(:curator_name) %>
+            <% turn_into_user_auto_completer(:add_curator) %>
           </div>
         <% end %>
       <% else %>

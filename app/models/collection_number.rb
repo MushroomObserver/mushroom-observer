@@ -53,11 +53,11 @@ class CollectionNumber < AbstractModel
   belongs_to :user
 
   def format_name
-    "#{name} ##{number}"
+    "#{name} #{number}"
   end
 
   def can_edit?(user = User.current)
-    obs.user == user
+    observations.any? { |obs| obs.user == user }
   end
 
   # Add this CollectionNumber to an Observation, log the action, and save it.
