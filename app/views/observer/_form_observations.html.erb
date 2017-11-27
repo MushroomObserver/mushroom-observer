@@ -134,7 +134,7 @@
 
   <!-- HERBARIUM_FIELDS -->
   <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
-    <dic class="row">
+    <div class="row push-up">
       <div class="col-sm-6 max-width-text">
         <div class="form-group">
           <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
@@ -152,7 +152,7 @@
         </div>
       </div>
     </div>
-    <dic class="row">
+    <div class="row push-up">
       <div class="col-sm-6 max-width-text">
         <div class="form-group">
           <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
