@@ -15,14 +15,16 @@
   }
 %>
 
-<div class="max-width-text">
+<div class="max-width-text push-down">
   <p>
     <%= :collection_number_name.t %>: <%= @collection_number.name %><br/>
     <%= :collection_number_number.t %>: <%= @collection_number.number %><br/>
     <%= :collection_number_user.t %>: <%= user_link(@collection_number.user) %><br/>
   </p>
 
-  <%= render(partial: "shared/matrix_box", collection: @collection_number.observations, as: :object) %>
+  <div class="push-down">
+    <%= render(partial: "shared/matrix_box", collection: @collection_number.observations, as: :object) %>
+  </div>
 
   <center>
     <p>

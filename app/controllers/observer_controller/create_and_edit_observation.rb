@@ -169,7 +169,8 @@ class ObserverController
     return unless number
     col_num = CollectionNumber.where(name: name, number: number).first
     if col_num
-      flash_warning(:edit_collection_number_already_used.t)
+      flash_warning(:edit_collection_number_already_used.t) if
+        col_num.observations.any?
     else
       col_num = CollectionNumber.create(name: name, number: number)
     end
@@ -177,10 +178,10 @@ class ObserverController
   end
 
   def normalize_collection_number_params(params)
-    params = params[:collection_number] || return
-    name   = params[:name].to_s.strip_html.strip_squeeze
-    number = params[:number].to_s.strip_html.strip_squeeze
-    name   = @user.legal_name if name.blank?
+    params2 = params[:collection_number] || return
+    name    = params2[:name].to_s.strip_html.strip_squeeze
+    number  = params2[:number].to_s.strip_html.strip_squeeze
+    name    = @user.legal_name if name.blank?
     number.blank? ? [] : [name, number]
   end
 
@@ -194,32 +195,34 @@ class ObserverController
       herbarium_record = create_herbarium_record(herbarium, initial_det,
                                                  accession_number)
     elsif herbarium_record.can_edit?
-      flash_warning(:create_herbarium_record_already_used.t)
+      flash_warning(:create_herbarium_record_already_used.t) if
+        herbarium_record.observations.any?
     else
-      flash_error(:create_herbarium_record_already_used_by_someone_else.
-        t(herbarium_name: @herbarium_record.herbarium.name))
+      flash_error(:create_herbarium_record_already_used_by_someone_else.t(
+        herbarium_name: herbarium.name
+      ))
       return
     end
     herbarium_record.add_observation(obs)
   end
 
   def normalize_herbarium_record_params(obs, params)
-    params    = params[:herbarium_record] || return
-    herbarium = params[:herbarium_name].to_s.strip_html.strip_squeeze
+    params2   = params[:herbarium_record] || return
+    herbarium = params2[:herbarium_name].to_s.strip_html.strip_squeeze
     herbarium = lookup_herbarium(herbarium)
     init_det  = initial_determination(obs)
-    accession = params[:herbarium_id].to_s.strip_html.strip_squeeze
-    accession = default_accession_number(obs, params) if accession.blank?
-    return [herbarium, init_det, accession]
+    accession = params2[:herbarium_id].to_s.strip_html.strip_squeeze
+    accession = default_accession_number(params) if accession.blank?
+    [herbarium, init_det, accession]
   end
 
   def initial_determination(obs)
     (obs.name || Name.unknown).text_name
   end
 
-  def default_accession_number(obs, params)
+  def default_accession_number(params)
     name, number = normalize_collection_number_params(params)
-    number ? "#{name} #{num}" : ""
+    number ? "#{name} #{number}" : ""
   end
 
   def lookup_herbarium(herbarium_name)

@@ -161,6 +161,7 @@ class Observation < AbstractModel
                                           before_remove: :remove_spl_callback
   has_and_belongs_to_many :collection_numbers
   has_and_belongs_to_many :herbarium_records
+  before_destroy { destroy_orphaned_collection_numbers }
 
   after_update :notify_users_after_change
   before_destroy :notify_species_lists
@@ -260,6 +261,14 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  # There is no value to keeping a collection number record after all its
+  # observations are destroyed or removed from it.
+  def destroy_orphaned_collection_numbers
+    collection_numbers.each do |col_num|
+      col_num.destroy if col_num.observations == [self]
+    end
   end
 
   ##############################################################################

@@ -243,16 +243,20 @@ blockquote {
 }
 
 .help-block {
-  max-width: $help-block-max-width
+    max-width: $help-block-max-width
 }
 .tooltip-inner {
-  word-wrap: break-word;
+    word-wrap: break-word;
 }
 
 ul.tight-list {
-  list-style: none;
-  margin-bottom: 0.5em;
-  padding-left: 1em;
+    list-style: none;
+    margin-bottom: 0.5em;
+    padding-left: 1em;
+}
+
+.arrow-up {
+    margin-top: 3px;
 }
 
 //
@@ -1508,6 +1512,10 @@ table.table-namings {
 
 .push-down {
     margin-top: 1em;
+}
+
+.push-down-more {
+    margin-top: 1.5em;
 }
 
 .push-below-buttons {

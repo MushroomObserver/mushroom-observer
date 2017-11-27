@@ -38,9 +38,9 @@
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
-    <div class="well well-sm max-width-text">
+    <div class="well well-sm max-width-text help-block">
       <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_where_help.t, class: "help-block max-width-text") %>
+      <%= :form_observations_where_help.t %>
     </div>
   </div>
 </div>
@@ -53,9 +53,9 @@
       <%= check_box(:observation, :is_collection_location, class: "form-control-xxx") %>
       <%= label_tag(:observation_is_collection_location, :form_observations_is_collection_location.t) %>
     </div>
-    <div class="well well-sm push-down max-width-text">
+    <div class="well well-sm push-down max-width-text help-block">
       <div class="arrow-up hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_is_collection_location_help.t, class: "help-block") %>
+      <%= :form_observations_is_collection_location_help.t %>
     </div>
   </div>
 </div>
@@ -69,9 +69,9 @@
     <span class="map-clear map-btn">Clear Map</span>
   </div>
   <div class="col-sm-6">
-    <div class="well well-sm ">
+    <div class="well well-sm help-block">
       <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
+      <%= :form_observations_lat_long_help.t %>
     </div>
   </div>
 </div>
@@ -111,8 +111,8 @@
 
 <!-- no_specimen_fields -->
 <% if button_name == :SAVE_EDITS.l %>
-  <div class="well well-sm push-down max-width-text">
-    <%= content_tag(:p, :form_observations_edit_specimens_help.t, class: "help-block") %>
+  <div class="well well-sm push-down max-width-text help-block">
+    <%= :form_observations_edit_specimens_help.t %>
   </div>
 <% end %>
 <!-- /no_specimen_fields -->
@@ -125,9 +125,9 @@
         <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
         <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
       </div>
-      <div class="well well-sm push-down max-width-text">
+      <div class="well well-sm push-down max-width-text help-block">
         <div class="arrow-up"></div>
-        <%= content_tag(:p, :form_observations_specimen_available_help.t, class: "help-block") %>
+        <%= :form_observations_specimen_available_help.t %>
       </div>
     </div>
   </div>
@@ -146,9 +146,9 @@
         </div>
       </div>
       <div class="col-sm-6">
-        <div class="well well-sm ">
+        <div class="well well-sm help-block">
           <div class="arrow-left hidden-xs"></div>
-          <%= content_tag(:p, :form_observations_collection_number_help.t, class: "help-block") %>
+          <%= :form_observations_collection_number_help.t %>
         </div>
       </div>
     </div>
@@ -166,8 +166,8 @@
       </div>
       <div class="col-sm-6">
         <div class="well well-sm ">
-          <div class="arrow-left hidden-xs"></div>
-          <%= content_tag(:p, :form_observations_herbarium_record_help.t, class: "help-block") %>
+          <div class="arrow-left hidden-xs help-block"></div>
+          <%= :form_observations_herbarium_record_help.t %>
         </div>
       </div>
     </div>
@@ -344,9 +344,9 @@
   <div class="row push-down">
     <div class="col-xs-12 max-width-text-times-two">
       <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
+        <div class="well well-sm max-width-text help-block">
           <div class="arrow-left hidden-xs"></div>
-          <p class="help-block"><%= :form_observations_project_help.t %></p>
+          <%= :form_observations_project_help.t %>
         </div>
       </div>
       <strong><%= :PROJECTS.t %>:</strong>
@@ -366,9 +366,9 @@
   <div class="row push-down">
     <div class="col-xs-12 max-width-text-times-two">
       <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
+        <div class="well well-sm max-width-text help-block">
           <div class="arrow-left hidden-xs"></div>
-          <p class="help-block"><%= :form_observations_list_help.t %></p>
+          <%= :form_observations_list_help.t %>
         </div>
       </div>
       <strong><%= :SPECIES_LISTS.t %>:</strong>

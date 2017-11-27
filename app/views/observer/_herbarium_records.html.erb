@@ -22,7 +22,7 @@
         <% if record.can_edit? %>
           [<%= link_to(:EDIT.t, controller: :herbarium_record,
                        action: :edit_herbarium_record, id: record.id) %> |
-           <%= link_to(:DELETE.t,
+           <%= link_to(:REMOVE.t,
                        { controller: :herbarium_record, action: :remove_observation,
                          id: record.id, obs: observation.id },
                        { data: { confirm: :are_you_sure.t } }) %>]

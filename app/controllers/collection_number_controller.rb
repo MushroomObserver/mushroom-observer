@@ -135,7 +135,8 @@ class CollectionNumberController < ApplicationController
       @collection_number.save
       @collection_number.add_observation(@observation)
     else
-      flash_warning(:edit_collection_number_already_used.t)
+      flash_warning(:edit_collection_number_already_used.t) if
+        @other_number.observations.any?
       @other_number.add_observation(@observation)
       @collection_number = @other_number
     end

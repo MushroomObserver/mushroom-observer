@@ -154,7 +154,8 @@ class HerbariumRecordController < ApplicationController
       @herbarium_record.save
       @herbarium_record.add_observation(@observation)
     elsif @other_record.can_edit?
-      flash_warning(:create_herbarium_record_already_used.t)
+      flash_warning(:create_herbarium_record_already_used.t) if
+        @other_record.observations.any?
       @other_record.add_observation(@observation)
     else
       flash_error(:create_herbarium_record_already_used_by_someone_else.
