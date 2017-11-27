@@ -8,7 +8,7 @@ class CuratorTest < IntegrationTestCase
     login!("mary", "testpassword", true)
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
-    click(label: :show_observation_create_herbarium_record.t)
+    click(label: :create_herbarium_record.t)
     assert_template("herbarium_record/create_herbarium_record")
     open_form do |form|
       form.submit("Add")

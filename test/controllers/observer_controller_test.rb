@@ -1415,7 +1415,7 @@ class ObserverControllerTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.herbarium_records.count == 1)
+    assert_equal(1, obs.herbarium_records.count)
     assert_not_empty(obs.herbarium_records)
     herbarium_record = obs.herbarium_records[0]
     herbarium = herbarium_record.herbarium

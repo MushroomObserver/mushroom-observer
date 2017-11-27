@@ -212,7 +212,7 @@ class ObserverController
     herbarium = lookup_herbarium(herbarium)
     init_det  = initial_determination(obs)
     accession = params2[:herbarium_id].to_s.strip_html.strip_squeeze
-    accession = default_accession_number(params) if accession.blank?
+    accession = default_accession_number(obs, params) if accession.blank?
     [herbarium, init_det, accession]
   end
 
@@ -220,9 +220,9 @@ class ObserverController
     (obs.name || Name.unknown).text_name
   end
 
-  def default_accession_number(params)
+  def default_accession_number(obs, params)
     name, number = normalize_collection_number_params(params)
-    number ? "#{name} #{number}" : ""
+    number ? "#{name} #{number}" : "MO #{obs.id}"
   end
 
   def lookup_herbarium(herbarium_name)

@@ -45,7 +45,7 @@ class CollectionNumberController < ApplicationController
     @links = [
       [:show_object.l(type: :observation),
         Observation.show_link_args(params[:id])],
-      [:add_collection_number.l,
+      [:create_collection_number.l,
         { action: :add_collection_number, id: params[:id] }]
     ]
     show_selected_collection_numbers(query, always_index: true)
