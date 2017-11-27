@@ -1400,7 +1400,10 @@
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
-  form_observations_herbarium_fields_help: Enter collector's name and number as it should appear on the label.  If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
+  form_observations_collection_number_help: Enter the collector's full name and number as it should appear on the specimen label.
+  form_observations_herbarium_record_help: If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
+  form_observations_there_is_a_problem_with_location: 'There is a problem with the location. "+See message below.+":#location_messages'
+  form_observations_there_is_a_problem_with_name: 'There is a problem with the name. "+See message below.+":#name_messages'
 
   # observer/_form_species_list
   form_species_lists_title: Title

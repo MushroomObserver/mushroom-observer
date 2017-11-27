@@ -188,7 +188,7 @@ class ObserverController
     return unless obs.specimen
     herbarium, initial_det, accession_number =
       normalize_herbarium_record_params(obs, params)
-    return unless herbarium
+    return if !herbarium || accession_number.blank?
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
       herbarium_record = create_herbarium_record(herbarium, initial_det,
@@ -219,7 +219,7 @@ class ObserverController
 
   def default_accession_number(obs, params)
     name, number = normalize_collection_number_params(params)
-    number ? "#{name} #{num}" : "MO #{obs.id}"
+    number ? "#{name} #{num}" : ""
   end
 
   def lookup_herbarium(herbarium_name)

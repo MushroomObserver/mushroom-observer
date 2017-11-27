@@ -25,8 +25,7 @@
 
     <div class="form-group">
       <%= label_tag(:name_name, :WHAT.t + ":") %>
-      <%= text_field(:name, :name, value: what, data: {autofocus: true},
-                     size: 40, class: "form-control") %>
+      <%= text_field(:name, :name, value: what, size: 40, class: "form-control") %>
       <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
     </div>
 
