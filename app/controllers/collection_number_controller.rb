@@ -5,7 +5,9 @@ class CollectionNumberController < ApplicationController
     :list_collection_numbers,
     :collection_number_search,
     :observation_index,
-    :show_collection_number
+    :show_collection_number,
+    :next_collection_number,
+    :prev_collection_number
   ]
 
   # ----------------------------
@@ -100,6 +102,7 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
+    return unless make_sure_can_edit!(@observation)
     if request.method == "GET"
       @collection_number = CollectionNumber.new(name: @user.legal_name)
     elsif request.method == "POST"
@@ -114,7 +117,7 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
-    return unless make_sure_can_edit!
+    return unless make_sure_can_edit!(@collection_number)
     if request.method == "GET"
       # nothing
     elsif request.method == "POST"
@@ -124,11 +127,16 @@ class CollectionNumberController < ApplicationController
     end
   end
 
+  private
+
   def post_create_collection_number
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters
-    if @collection_number.number.blank?
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return
+    elsif @collection_number.number.blank?
       flash_error(:create_collection_number_missing_number.t)
       return
     elsif name_and_number_free?
@@ -144,16 +152,20 @@ class CollectionNumberController < ApplicationController
   end
 
   def post_edit_collection_number
+    old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
-    if @collection_number.number.blank?
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return
+    elsif @collection_number.number.blank?
       flash_error(:create_collection_number_missing_number.t)
       return
     elsif name_and_number_free?
       @collection_number.save
     else
       flash_warning(:edit_collection_numbers_merged.t(
-        this: @collection_number.format_name, that: @other_number.format_name))
+        this: old_format_name, that: @other_number.format_name))
       @other_number.observations += @collection_number.observations
       @collection_number.destroy
       @collection_number = @other_number
@@ -161,8 +173,13 @@ class CollectionNumberController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
-  def make_sure_can_edit!
-    return true if in_admin_mode? || @collection_number.can_edit?
+  def whitelisted_collection_number_params
+    return {} unless params[:collection_number]
+    params.require(:collection_number).permit(:name, :number)
+  end
+
+  def make_sure_can_edit!(obj)
+    return true if in_admin_mode? || obj.can_edit?
     flash_error :permission_denied.t
     redirect_to_observation_or_collection_number
     false
@@ -173,7 +190,6 @@ class CollectionNumberController < ApplicationController
       val = @collection_number.send(arg).to_s.strip_html.strip_squeeze
       @collection_number.send("#{arg}=", val)
     end
-    @collection_number.name = @user.legal_name if @collection_number.name.blank?
   end
 
   def name_and_number_free?
@@ -185,12 +201,16 @@ class CollectionNumberController < ApplicationController
   end
 
   def redirect_to_observation_or_collection_number
-    if @collection_number.observations.count == 1
+    if @observation
+      redirect_with_query(@observation.show_link_args)
+    elsif @collection_number.observations.count == 1
       redirect_with_query(@collection_number.observations.first.show_link_args)
     else
       redirect_with_query(@collection_number.show_link_args)
     end
   end
+
+  public
 
   # ----------------------------
   #  Delete record
@@ -215,19 +235,12 @@ class CollectionNumberController < ApplicationController
     redirect_to(action: :index_collection_number)
   end
 
+  private 
+
   def make_sure_can_delete!(collection_number)
-    return true if collection_number.can_edit?
+    return true if collection_number.can_edit? || in_admin_mode?
     flash_error(:permission_denied.t)
     redirect_to(collection_number.show_link_args)
     return false
-  end
-
-  ##############################################################################
-
-  private
-
-  def whitelisted_collection_number_params
-    return {} unless params[:collection_number]
-    params.require(:collection_number).permit(:name, :number)
   end
 end

@@ -2264,6 +2264,7 @@
   # collection_number/create_collection_number
   create_collection_number: Add Collection Number
   create_collection_number_title: Add Collection Number
+  create_collection_number_missing_name: Missing collector's name.
   create_collection_number_missing_number: Missing collector's number.
 
   # collection_number/edit_collection_number
@@ -2272,7 +2273,7 @@
   edit_collection_number_back_to_index: Back to Collection Number Index
   edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
   edit_collection_number_already_used: This collection number is shared with another observation. If you need to fix it, remove it from your observation, then add the correct one.
-  edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove one of the observations and add the correct collection number to that observation.
+  edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove the collection number from one of the observations, then add the correct one.
 
   # collection_number/destroy_collection_number
   delete_collection_number: Destroy Collection Number
