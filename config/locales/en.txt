@@ -1248,6 +1248,8 @@
   download_observations_windows: WINDOWS-1252 (best for Excel)
   download_observations_utf8: UTF-8 (most universal)
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
+  download_observations_print_labels_header: Or you can print labels for the selected observations
+  download_observations_print_labels: Print Labels
 
   # location/edit_location
   edit_location_title: "[:edit_object(type=:location)]"

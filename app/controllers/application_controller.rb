@@ -1020,12 +1020,12 @@ class ApplicationController < ActionController::Base
   end
   helper_method :add_query_param
 
-  def redirect_with_query(args)
-    redirect_to(add_query_param(args))
+  def redirect_with_query(args, query = nil)
+    redirect_to(add_query_param(args, query))
   end
 
-  def url_with_query(args)
-    url_for(add_query_param(args))
+  def url_with_query(args, query = nil)
+    url_for(add_query_param(args, query))
   end
 
   def coerced_query_link(query, model)

@@ -182,9 +182,12 @@ class SpeciesListController < ApplicationController
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
+  # For backwards compatibility.  Shouldn't be needed any more.
   def print_labels
-    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-    render(action: "print_labels", layout: "printable")
+    species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    query = Query.lookup_and_save(:SpeciesList, :in_species_list,
+                                  species_list: specices_list)
+    redirect_with_query({ controller: :observer, action: print_labels }, query)
   end
 
   ##############################################################################

@@ -196,6 +196,16 @@ class ObserverController
     @timer_end = Time.now
   end
 
+  def print_labels # :nologin: :norobots:
+    query = find_query(:Observation)
+    unless query
+      flash_error(runtime_search_has_expired.t)
+      redirect_back_or_default("/")
+    end
+    @observations = query.results
+    render(action: "print_labels", layout: "printable")
+  end
+
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
     fail "no robots!" if browser.bot?
@@ -212,6 +222,9 @@ class ObserverController
       )
       render_report(report)
       # serve form
+    elsif params[:commit] == :download_observations_print_labels.l
+      @observations = query.results
+      render(action: "print_labels", layout: "printable")
     end
   rescue => e
     flash_error("Internal error: #{e}", *e.backtrace[0..10])

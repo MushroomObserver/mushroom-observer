@@ -1,17 +1,17 @@
-<% observations = @species_list.observations
+<% 
 columns = 3
 rows = 4
 idx = 0
-while idx < observations.length %>
-  <div>
+while idx < @observations.length %>
+  <div id="labels">
     <table cellpadding="15" cellspacing="0" width="100%">
       <% row = 0
-      while idx < observations.length && row < 4
+      while idx < @observations.length && row < 4
         row += 1 %>
         <tr>
           <% col = 0
-          while idx < observations.length && col < 3
-            observation = observations[idx]
+          while idx < @observations.length && col < 3
+            observation = @observations[idx]
             col += 1
             idx += 1 %>
             <td width="<%= 100/columns %>%" valign="top">

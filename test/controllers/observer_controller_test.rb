@@ -3109,6 +3109,18 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_print_labels
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    assert_operator(query.num_results, :>=, 4)
+    get(:print_labels, q: query.id.alphabetize)
+    assert_select("div#labels td", query.num_results)
+
+    # Alternative entry point.
+    post(:download_observations, q: query.id.alphabetize,
+                                 commit: "Print Labels")
+    assert_select("div#labels td", query.num_results)
+  end
+
   def test_normal_permissions
     get :intro
     assert_equal(200, @response.status)
