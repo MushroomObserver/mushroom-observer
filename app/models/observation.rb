@@ -183,6 +183,20 @@ class Observation < AbstractModel
     true
   end
 
+  # There is no value to keeping a collection number record after all its
+  # observations are destroyed or removed from it.
+  def destroy_orphaned_collection_numbers
+    collection_numbers.each do |col_num|
+      col_num.destroy if col_num.observations == [self]
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Location Stuff
+  #
+  ##############################################################################
+
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to :postal).
@@ -263,12 +277,14 @@ class Observation < AbstractModel
     lat && location && !location.lat_long_close?(lat, long)
   end
 
-  # There is no value to keeping a collection number record after all its
-  # observations are destroyed or removed from it.
-  def destroy_orphaned_collection_numbers
-    collection_numbers.each do |col_num|
-      col_num.destroy if col_num.observations == [self]
-    end
+  def place_name_and_coordinates
+    if !lat.blank? && !long.blank?
+      lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
+      long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
+      "#{place_name} (#{lat2} #{long2})"
+    else
+      place_name
+    end 
   end
 
   ##############################################################################
