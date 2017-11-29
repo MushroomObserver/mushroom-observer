@@ -1208,22 +1208,50 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_misspelling
+    login("rolf")
+
     # Prove we can clear misspelling by unchecking "misspelt" box
     name = names(:petigera)
-    login(name.user.login)
+    assert_true(name.reload.is_misspelling?)
+    assert_names_equal(names(:peltigera), name.correct_spelling)
+    assert_true(name.deprecated)
     params = {
       id: name.id,
       name: {
         text_name:   name.text_name,
         author:      name.author,
         rank:        name.rank,
-        deprecated:  (name.deprecated ? "true" : "false")
+        deprecated:  "true",
+        misspelling: ""
       }
     }
-    login(name.user.login)
     post(:edit_name, params)
     assert_flash_success
-    refute(name.reload.is_misspelling?)
+    assert_false(name.reload.is_misspelling?)
+    assert_nil(name.correct_spelling)
+    assert_true(name.deprecated)
+    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
+
+    # Prove we can deprecated and call a name misspelt by checking box and
+    # entering correct spelling.
+    name.update_attributes(deprecated: false)
+    params = {
+      id: name.id,
+      name: {
+        text_name:        name.text_name,
+        author:           name.author,
+        rank:             name.rank,
+        deprecated:       "false",
+        misspelling:      "1",
+        correct_spelling: "Peltigera"
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_true(name.reload.is_misspelling?)
+    assert_names_equal(names(:peltigera), name.correct_spelling)
+    assert_true(name.deprecated)
+    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
 
     # Prove we cannot correct misspelling with unrecognized Name
     name = names(:suilus)

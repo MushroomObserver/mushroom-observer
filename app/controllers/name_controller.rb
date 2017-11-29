@@ -702,6 +702,7 @@ class NameController < ApplicationController
     @name.correct_spelling = correct_name
     @name.merge_synonyms(correct_name)
     @name.change_deprecated(true)
+    params[:name][:deprecated] = "true"
     fix_correct_name(correct_name) if correct_name.is_misspelling?
   end
 
