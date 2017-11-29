@@ -5,7 +5,7 @@ class WebmasterEmail < AccountMailer
     @title = subject || :email_subject_webmaster_question.l(user: sender)
     @question = question
     mo_mail(@title,
-            to: MO.webmaster_email_address,
+            to: MO.admin_group_email_address,
             from: MO.webmaster_email_address,
             reply_to: sender,
             content_style: "plain")
