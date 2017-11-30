@@ -190,7 +190,8 @@ class UserTest < UnitTestCase
 
   def test_preferred_herbarium_name
     assert_equal(herbaria(:nybg_herbarium).name, rolf.preferred_herbarium_name)
-    assert_equal(mary.personal_herbarium_name, mary.preferred_herbarium_name)
+    assert_equal(herbaria(:mycoflora_herbarium).name,
+                 mary.preferred_herbarium_name)
   end
 
   def test_remove_image

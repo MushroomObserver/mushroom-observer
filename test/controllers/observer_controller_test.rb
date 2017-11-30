@@ -3072,7 +3072,7 @@ class ObserverControllerTest < FunctionalTestCase
     # If fixtures change, these may also need to be changed.
     assert_equal(
       "#{o.id},#{mary.id},mary,Mary Newbie,#{o.when}," \
-        "X,#{o.try(:herbarium_records).first.herbarium_label},"\
+        "X,\"#{o.try(:herbarium_records).map(&:herbarium_label).join(", ")}\","\
         "#{nm.id},#{nm.text_name},#{nm.author},#{nm.rank},0.0," \
         "#{l.id},#{country},#{state},,#{city}," \
         ",,,34.22,34.15,-118.29,-118.37," \
@@ -3114,6 +3114,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>=, 4)
     get(:print_labels, q: query.id.alphabetize)
     assert_select("div#labels td", query.num_results)
+    assert_match(/314159/, @response.body) # make sure mycoflora id in there!
 
     # Alternative entry point.
     post(:download_observations, q: query.id.alphabetize,

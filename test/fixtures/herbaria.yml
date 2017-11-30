@@ -28,3 +28,8 @@ dick_herbarium: # 3
     name: "Dick's Personal Herbarium"
     personal_user: dick
     curators: dick
+
+mycoflora_herbarium: # 4
+    created_at: 2017-11-29 18:05:00
+    updated_at: 2017-11-29 18:05:00
+    name: "Mycoflora Project"

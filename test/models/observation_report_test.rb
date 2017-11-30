@@ -92,11 +92,6 @@ class ObservationReportTest < UnitTestCase
   def test_mycoflora_no_exact_lat_long
     obs = observations(:detailed_unknown_obs)
     img1, img2 = obs.images.sort_by(&:id)
-    herb = Herbarium.create!(name: "Mycoflora Project")
-    rec = HerbariumRecord.create!(herbarium: herb, user: rolf,
-                                  initial_det: "Fungi",
-                                  accession_number: "314159")
-    rec.add_observation(obs)
     expect = [
       "Fungi",
       nil,
@@ -161,7 +156,7 @@ class ObservationReportTest < UnitTestCase
       "Mary Newbie",
       "2006-05-11",
       "X",
-      "Cortinarius sp.: NYBG 1234",
+      "Cortinarius sp.: NYBG 1234, Fungi: 314159",
       obs.name.id.to_s,
       "Fungi",
       nil,

@@ -46,7 +46,7 @@ detailed_unknown_obs: # 2
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
-  herbarium_records: interesting_unknown
+  herbarium_records: interesting_unknown, mycoflora_record
   collection_numbers: detailed_unknown_coll_num_one, detailed_unknown_coll_num_two
 
 coprinus_comatus_obs: # 3

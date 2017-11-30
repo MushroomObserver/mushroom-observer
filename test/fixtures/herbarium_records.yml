@@ -47,3 +47,11 @@ herbarium_record_with_notes: # 5
     initial_det: xxx
     accession_number: yyy
     notes: rare
+
+mycoflora_record: # 6
+    created_at: 2017-11-29 18:08:00
+    updated_at: 2017-11-29 18:08:00
+    herbarium: mycoflora_herbarium
+    user: mary
+    initial_det: Fungi
+    accession_number: 314159

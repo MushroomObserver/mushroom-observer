@@ -111,13 +111,11 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_create_herbarium_record_post_new_herbarium
     mary = login("mary")
     herbarium_count = mary.curated_herbaria.count
-    # Count the number of herbaria that mary is a curator for
     params = herbarium_record_params
-    params[:herbarium_record][:herbarium_name] = mary.preferred_herbarium_name
+    params[:herbarium_record][:herbarium_name] = mary.personal_herbarium_name
     post(:create_herbarium_record, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    # herbarium = Herbarium.find(:all, order: "created_at DESC")[0] # Rails 3
     herbarium = Herbarium.all.order("created_at DESC")[0]
     assert(herbarium.curators.member?(mary))
   end
