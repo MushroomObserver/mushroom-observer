@@ -92,6 +92,11 @@ class ObservationReportTest < UnitTestCase
   def test_mycoflora_no_exact_lat_long
     obs = observations(:detailed_unknown_obs)
     img1, img2 = obs.images.sort_by(&:id)
+    herb = Herbarium.create!(name: "Mycoflora Project")
+    rec = HerbariumRecord.create!(herbarium: herb, user: rolf,
+                                  initial_det: "Fungi",
+                                  accession_number: "314159")
+    rec.add_observation(obs)
     expect = [
       "Fungi",
       nil,
@@ -113,6 +118,7 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
       "NA Mycoflora Project",
+      "314159",
       "Found in a strange place&#8230; &amp; with śtrangè characters™"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
@@ -140,6 +146,7 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org/#{obs.id}",
       "",
       "NA Mycoflora Project",
+      "",
       "unknown_with_lat_long"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
