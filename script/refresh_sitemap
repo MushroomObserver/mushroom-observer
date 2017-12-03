@@ -76,6 +76,7 @@ ROBOTS_HEADER = <<"EOB"
 # See http://www.robotstxt.org for documentation.
 Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 User-agent: *
+Crawl-Delay: 10
 Disallow: *page=*
 Disallow: *letter=*
 Disallow: *by=*
