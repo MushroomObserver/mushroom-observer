@@ -825,6 +825,234 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  def test_show_observation_specimen_stuff
+    obs1 = observations(:strobilurus_diminutivus_obs)
+    obs2 = observations(:minimal_unknown_obs)
+    obs3 = observations(:detailed_unknown_obs)
+    observations(:locally_sequenced_obs).sequences.
+      first.update_attributes(observation: obs2)
+    observations(:genbanked_obs).sequences.
+      each {|s| s.update_attributes(observation: obs3) }
+    obs2.reload
+    obs3.reload
+
+    # Obs1 has nothing, owned by rolf, not in project.
+    assert_users_equal(rolf, obs1.user)
+    assert_empty(obs1.projects)
+    assert_empty(obs1.collection_numbers)
+    assert_empty(obs1.herbarium_records)
+    assert_empty(obs1.sequences)
+
+    # Obs2 owned by mary, not in project,
+    # one collection_number owned by mary,
+    # one herbarium_record owned by rolf at NY (roy is curator),
+    # one sequence owned by rolf.
+    assert_users_equal(mary, obs2.user)
+    assert_empty(obs2.projects)
+    assert_operator(obs2.collection_numbers.count, :==, 1)
+    assert_operator(obs2.herbarium_records.count, :==, 1)
+    assert_operator(obs2.sequences.count, :==, 1)
+    assert_false(obs2.herbarium_records.first.can_edit?(mary))
+    assert_true(obs2.herbarium_records.first.can_edit?(rolf))
+    assert_true(obs2.herbarium_records.first.can_edit?(roy))
+
+    # Obs3 owned by mary, in bolete project (dick admin and member),
+    # two collection_numbers owned by mary,
+    # two herbarium_records, one owned by rolf at NY,
+    #   one owned by mary at MycoFlora,
+    # several sequences all owned by dick.
+    assert_users_equal(mary, obs3.user)
+    assert_equal("Bolete Project", obs3.projects.first.title)
+    assert_true(obs3.can_edit?(dick))
+    assert_operator(obs3.collection_numbers.count, :>, 1)
+    assert_operator(obs3.herbarium_records.count, :>, 1)
+    assert_operator(obs3.sequences.count, :>, 1)
+
+    # Can't edit anything if not logged in.
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], false)
+    assert_show_obs(:herbarium_records, [], false)
+    assert_show_obs(:sequences, [], false)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, false]], false)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, false]], false)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, false]], false)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, false] }, false)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, false] }, false)
+
+    # Katrina isn't associated in any way with any of these observations.
+    login("katrina")
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], false)
+    assert_show_obs(:herbarium_records, [], false)
+    assert_show_obs(:sequences, [], false)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, false]], false)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, false]], false)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, false]], false)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, false] }, false)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, false] }, false)
+
+    # Roy is a curator at NY, so can add herbarium records, and modify existing
+    # herbarium records attached to NY.
+    login("roy")
+    assert_true(roy.curated_herbaria.any?)
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], false)
+    assert_show_obs(:herbarium_records, [], true)
+    assert_show_obs(:sequences, [], false)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, false]], false)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, true]], true)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, false]], false)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] }, true)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, false] }, false)
+
+    # Dick owns all of the sequences, is on obs3's project, and has a personal
+    # herbarium.
+    login("dick")
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], false)
+    assert_show_obs(:herbarium_records, [], true)
+    assert_show_obs(:sequences, [], false)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, false]], false)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, false]], true)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, true]], false)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, true] }, true)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, false] }, true)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, true] }, true)
+
+    # Rolf owns obs1 and owns one herbarium record for both obs2 and obs3,
+    # and he is a curator at NYBG.
+    login("rolf")
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], true)
+    assert_show_obs(:herbarium_records, [], true)
+    assert_show_obs(:sequences, [], true)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, false]], false)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, true]], true)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, false]], false)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] }, true)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, false] }, false)
+
+    # Mary owns obs2 and obs3, but has nothing to do with obs1.
+    login("mary")
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], false)
+    assert_show_obs(:herbarium_records, [], false)
+    assert_show_obs(:sequences, [], false)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, true]], true)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, false]], true)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, false]], true)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, true] }, true)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(mary)] }, true)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, false] }, true)
+
+    # Make sure admins can do everything.
+    make_admin("katrina")
+    get(:show_observation, id: obs1.id)
+    assert_show_obs(:collection_numbers, [], true)
+    assert_show_obs(:herbarium_records, [], true)
+    assert_show_obs(:sequences, [], true)
+
+    get(:show_observation, id: obs2.id)
+    assert_show_obs(:collection_numbers,
+      [[obs2.collection_numbers.first.id, true]], true)
+    assert_show_obs(:herbarium_records,
+      [[obs2.herbarium_records.first.id, true]], true)
+    assert_show_obs(:sequences,
+      [[obs2.sequences.first.id, true]], true)
+
+    get(:show_observation, id: obs3.id)
+    assert_show_obs(:collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, true] }, true)
+    assert_show_obs(:herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, true] }, true)
+    assert_show_obs(:sequences,
+      obs3.sequences.map { |x| [x.id, true] }, true)
+  end
+
+  def assert_show_obs(types, items, can_add)
+    type = types.to_s.chop
+    selector = (types == :collection_numbers && !can_add) ? "i" : "li"
+    assert_select("#observation_#{types} #{selector}", items.count,
+      "Wrong number of #{types} shown.")
+
+    create_link = types == :sequences ? "add_#{type}" : "create_#{type}"
+    assert(response.body.match(/href="\/#{type}\/#{create_link}\//),
+      "Expected to find a create link for #{types}.") if can_add
+    assert(!response.body.match(/href="\/#{type}\/#{create_link}\//),
+      "Expected not to find a create link for #{types}.") if !can_add
+
+    items.each do |id, can_edit|
+      assert(response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
+        "Expected to find an edit link for #{type} #{id}.") if can_edit
+      assert(!response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
+        "Expected not to find an edit link for #{type} #{id}.") if !can_edit
+    end
+  end
+
   def test_show_user_no_id
     get_with_dump(:show_user)
     assert_redirected_to(action: :index_user)

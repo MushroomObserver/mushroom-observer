@@ -1,6 +1,7 @@
 <%
   records = observation.herbarium_records
-  can_add = observation.can_edit? || @user && @user.curated_herbaria.any?
+  can_add = in_admin_mode? || observation.can_edit? ||
+            @user && @user.curated_herbaria.any?
 
   # This is passed in to show_herbarium_record, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
@@ -19,7 +20,7 @@
       <li>
         <%= link_to(record.accession_at_herbarium.t,
                     add_query_param(record.show_link_args, query)) %>
-        <% if record.can_edit? %>
+        <% if in_admin_mode? || record.can_edit? %>
           [<%= link_to(:EDIT.t, controller: :herbarium_record,
                        action: :edit_herbarium_record, id: record.id) %> |
            <%= link_to(:REMOVE.t,

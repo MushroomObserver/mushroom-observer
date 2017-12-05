@@ -1,6 +1,6 @@
 <%
   numbers  = observation.collection_numbers
-  can_edit = observation.can_edit?
+  can_edit = in_admin_mode? || observation.can_edit?
 
   # This is passed in to show_collection_number, allowing users to do prev,
   # next and index from there to navigate through all the rest for this obs.
