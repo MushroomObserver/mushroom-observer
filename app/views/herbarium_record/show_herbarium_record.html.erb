@@ -3,10 +3,11 @@
 
   tabs = []
   if in_admin_mode? || @herbarium_record.can_edit?
-    tabs << link_to(:edit_herbarium_record.t, action: :edit_herbarium_record,
-                    id: @herbarium_record.id)
-    tabs << link_to(:delete_herbarium_record.t, {action: :destroy_herbarium_record,
-                    id: @herbarium_record.id }, data: {confirm: :are_you_sure.t})
+    tabs << link_with_query(:edit_herbarium_record.t,
+                            action: :edit_herbarium_record, id: @herbarium_record.id)
+    tabs << link_with_query(:delete_herbarium_record.t,
+                            {action: :destroy_herbarium_record, id: @herbarium_record.id},
+                            data: {confirm: :are_you_sure.t})
   end
   tabs << link_to(:herbarium_index.t, controller: :herbarium, action: :index)
 
