@@ -1039,10 +1039,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_select("#observation_#{types} #{selector}", items.count,
       "Wrong number of #{types} shown.")
 
-    create_link = types == :sequences ? "add_#{type}" : "create_#{type}"
-    assert(response.body.match(/href="\/#{type}\/#{create_link}\//),
+    assert(response.body.match(/href="\/#{type}\/create_#{type}\//),
       "Expected to find a create link for #{types}.") if can_add
-    assert(!response.body.match(/href="\/#{type}\/#{create_link}\//),
+    assert(!response.body.match(/href="\/#{type}\/create_#{type}\//),
       "Expected not to find a create link for #{types}.") if !can_add
 
     items.each do |id, can_edit|

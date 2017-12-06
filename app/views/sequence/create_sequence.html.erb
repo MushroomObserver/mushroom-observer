@@ -11,6 +11,6 @@
 <%= render(partial: "observation_title",
            locals: { observation: @observation }) %>
 
-<%= form_for(:sequence, url: {action: :add_sequence}) do |form| %>
+<%= form_for(:sequence, url: {action: :create_sequence}) do |form| %>
   <%= render(partial: "form_sequence", locals: { form: form }) %>
 <% end %>

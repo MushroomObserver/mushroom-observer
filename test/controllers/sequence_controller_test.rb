@@ -2,26 +2,26 @@ require "test_helper"
 
 # Controller tests for nucleotide sequences
 class SequenceControllerTest < FunctionalTestCase
-  def test_add_sequence_get
+  def test_create_sequence_get
     # obs not owned by Rolf (because `requires_login` will login Rolf)
     obs   = observations(:minimal_unknown_obs)
     owner = obs.user
 
     # Prove method requires login
-    requires_login(:add_sequence, id: obs.id)
+    requires_login(:create_sequence, id: obs.id)
 
     # Prove user cannot add Sequence to Observation he doesn't own
     login(users(:zero_user).login)
-    get(:add_sequence, id: observations(:minimal_unknown_obs).id)
+    get(:create_sequence, id: observations(:minimal_unknown_obs).id)
     assert_redirected_to(controller: :observer, action: :show_observation)
 
     # Prove Observation owner can add Sequence
     login(owner.login)
-    get(:add_sequence, id: obs.id)
+    get(:create_sequence, id: obs.id)
     assert_response(:success)
   end
 
-  def test_add_sequence_post_happy_paths
+  def test_create_sequence_post_happy_paths
     obs   = observations(:detailed_unknown_obs)
     owner = obs.user
     locus = "ITS"
@@ -44,7 +44,7 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove authorized user can create non-repository Sequence
     old_count = Sequence.count
     login(owner.login)
-    post(:add_sequence, params)
+    post(:create_sequence, params)
 
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
@@ -70,7 +70,7 @@ class SequenceControllerTest < FunctionalTestCase
                   accession: accession }
     }
     old_count = Sequence.count
-    post(:add_sequence, params)
+    post(:create_sequence, params)
 
     assert_equal(old_count + 1, Sequence.count)
     sequence = Sequence.last
@@ -81,7 +81,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :show_observation)
   end
 
-  def test_add_sequence_post_unhappy_paths
+  def test_create_sequence_post_unhappy_paths
     obs   = observations(:coprinus_comatus_obs)
     owner = obs.user
     locus = "ITS"
@@ -96,7 +96,7 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     login(users(:zero_user).login)
 
-    post(:add_sequence, params)
+    post(:create_sequence, params)
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     assert_redirected_to(controller: :observer, action: :show_observation)
@@ -111,7 +111,7 @@ class SequenceControllerTest < FunctionalTestCase
     old_count = Sequence.count
     login(owner.login)
 
-    post(:add_sequence, params)
+    post(:create_sequence, params)
     assert_equal(old_count, Sequence.count)
     assert_empty(obs.sequences)
     # response is 200 because it just reloads the form

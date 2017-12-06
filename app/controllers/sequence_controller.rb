@@ -1,18 +1,17 @@
 #  Controller for nucleotide Sequences
 #
-#  Actions
+#  Actions:
 #
-#    add_sequence::      Create new sequence and add to Observation
-#    destroy_sequence::  Destroy sequence
-#    edit_sequence::     Update sequence
-#    index_sequence::    List selected sequences, based on current Query
-#    show_sequence::     Display sequence details
-#
+#    index_sequence::    List selected sequences, based on current Query.
+#    show_sequence::     Display sequence details.
+#    create_sequence::   Create new sequence and add to Observation.
+#    destroy_sequence::  Destroy sequence.
+#    edit_sequence::     Update sequence.
 #
 class SequenceController < ApplicationController
   before_action :login_required, except: [
-    :show_sequence,
-    :index_sequence
+    :index_sequence,
+    :show_sequence
   ]
 
   def index_sequence
@@ -28,7 +27,7 @@ class SequenceController < ApplicationController
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  def add_sequence
+  def create_sequence
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation

@@ -20,7 +20,7 @@ module SequenceHelper
     link_to(sequence.archive.t, url, target: "_blank")
   end
 
-  # dropdown list for add_sequence
+  # dropdown list for create_sequence
   def archive_dropdown
     WebSequenceArchive.archives.each_with_object([]) do |archive, array|
       # append array which repeats archive[:name] twice
