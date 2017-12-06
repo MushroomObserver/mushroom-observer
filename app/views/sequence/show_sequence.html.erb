@@ -2,8 +2,8 @@
   @title = @sequence.unique_format_name
 
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    @sequence.observation.show_link_args)
+    link_to(:cancel_and_show.t(type: :observation),
+            @sequence.observation.show_link_args)
   ]
   if check_permission(@sequence)
     tabs << link_with_query(:edit_object.t(type: :sequence),
