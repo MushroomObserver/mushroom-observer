@@ -43,6 +43,7 @@ class SequenceController < ApplicationController
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
+    figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_with_query(@sequence.observation.show_link_args)
@@ -55,14 +56,14 @@ class SequenceController < ApplicationController
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
-    observation = @sequence.observation
+    figure_out_where_to_go_back_to
     if check_permission(@sequence)
       @sequence.destroy
       flash_notice(:runtime_destroyed_id.t(type: Sequence, value: params[:id]))
     else
       flash_warning(:permission_denied.t)
     end
-    redirect_with_query(observation.show_link_args)
+    redirect_with_query(@back_object.show_link_args)
   end
 
   ##############################################################################
@@ -85,10 +86,15 @@ class SequenceController < ApplicationController
     @sequence.attributes = whitelisted_sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@sequence.observation.show_link_args)
+      redirect_with_query(@back_object.show_link_args)
     else
       flash_object_errors(@sequence)
     end
+  end
+
+  def figure_out_where_to_go_back_to
+    @back = params[:back]
+    @back_object = @back == :show ? @sequence : @sequence.observation
   end
 
   def show_selected_sequences(query, args = {})

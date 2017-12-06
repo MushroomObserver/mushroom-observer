@@ -15,7 +15,7 @@
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
               link_with_query(:EDIT.t,
-                              {action: :edit_collection_number, id: collection_number.id},
+                              {action: :edit_collection_number, id: collection_number.id, back: :index},
                               class: "btn btn-xs")
             end %>
           </td>

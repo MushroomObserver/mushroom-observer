@@ -35,7 +35,8 @@
           end
           if in_admin_mode? || sequence.can_edit?(@user)
             links << link_with_query(:EDIT.t, controller: :sequence,
-                                     action: :edit_sequence, id: sequence.id)
+                                     action: :edit_sequence, id: sequence.id,
+                                     back: observation.id)
             links << link_with_query(:DESTROY.t, { controller: :sequence,
                                      action: :destroy_sequence, id: sequence.id },
                                      { data: { confirm: :are_you_sure.t } })

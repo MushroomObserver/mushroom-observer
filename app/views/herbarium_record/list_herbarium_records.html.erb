@@ -17,7 +17,7 @@
           <td>
             <%= if in_admin_mode? || herbarium_record.can_edit?
               link_with_query(:EDIT.t,
-                              {action: :edit_herbarium_record, id: herbarium_record.id},
+                              {action: :edit_herbarium_record, id: herbarium_record.id, back: :index},
                               class: "btn btn-xs")
             end %>
           </td>

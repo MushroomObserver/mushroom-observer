@@ -111,6 +111,7 @@ class HerbariumRecordController < ApplicationController
     @layout      = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return if !@observation
+    @back_object = @observation
     if request.method == "GET"
       @herbarium_record = default_herbarium_record
     elsif request.method == "POST"
@@ -126,6 +127,7 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
     return unless make_sure_can_edit!
+    figure_out_where_to_go_back_to
     if request.method == "GET"
       @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
     elsif request.method == "POST"
@@ -241,13 +243,20 @@ class HerbariumRecordController < ApplicationController
     !@other_record || @other_record == @herbarium_record
   end
 
+  def figure_out_where_to_go_back_to
+    @back = params[:back]
+    if @back == :show
+      @back_object = @herbarium_record
+    elsif @back != :index
+      @back_object = Observation.safe_find(@back) || @herbarium_record
+    end
+  end
+
   def redirect_to_observation_or_herbarium_record
-    if @observation
-      redirect_with_query(@observation.show_link_args)
-    elsif @herbarium_record.observations.count == 1
-      redirect_with_query(@herbarium_record.observations.first.show_link_args)
+    if @back_object
+      redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(@herbarium_record.show_link_args)
+      redirect_with_query(action: :index_herbarium_record)
     end
   end
 
@@ -259,23 +268,24 @@ class HerbariumRecordController < ApplicationController
 
   def remove_observation
     pass_query_params
-    herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
-    return unless herbarium_record
-    observation = find_or_goto_index(Observation, params[:obs])
-    return unless observation
-    return unless make_sure_can_delete!(herbarium_record)
-    herbarium_record.observations.delete(observation)
-    herbarium_record.destroy if herbarium_record.observations.empty?
-    redirect_with_query(observation.show_link_args)
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    return unless @herbarium_record
+    @observation = find_or_goto_index(Observation, params[:obs])
+    return unless @observation
+    return unless make_sure_can_delete!(@herbarium_record)
+    @herbarium_record.observations.delete(@observation)
+    @herbarium_record.destroy if @herbarium_record.observations.empty?
+    redirect_with_query(@observation.show_link_args)
   end
 
   def destroy_herbarium_record
     pass_query_params
-    herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
-    return unless herbarium_record
-    return unless make_sure_can_delete!(herbarium_record)
-    herbarium_record.destroy
-    redirect_with_query(action: :index_herbarium_record)
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    return unless @herbarium_record
+    return unless make_sure_can_delete!(@herbarium_record)
+    figure_out_where_to_go_back_to
+    @herbarium_record.destroy
+    redirect_to_observation_or_herbarium_record
   end
 
   private

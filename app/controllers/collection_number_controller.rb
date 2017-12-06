@@ -103,6 +103,7 @@ class CollectionNumberController < ApplicationController
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
     return unless make_sure_can_edit!(@observation)
+    @back_object = @observation
     if request.method == "GET"
       @collection_number = CollectionNumber.new(name: @user.legal_name)
     elsif request.method == "POST"
@@ -118,6 +119,7 @@ class CollectionNumberController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_edit!(@collection_number)
+    figure_out_where_to_go_back_to
     if request.method == "GET"
       # nothing
     elsif request.method == "POST"
@@ -200,13 +202,20 @@ class CollectionNumberController < ApplicationController
     !@other_number || @other_number == @collection_number
   end
 
+  def figure_out_where_to_go_back_to
+    @back = params[:back]
+    if @back == :show
+      @back_object = @collection_number
+    elsif @back != :index
+      @back_object = Observation.safe_find(@back) || @collection_number
+    end
+  end
+
   def redirect_to_observation_or_collection_number
-    if @observation
-      redirect_with_query(@observation.show_link_args)
-    elsif @collection_number.observations.count == 1
-      redirect_with_query(@collection_number.observations.first.show_link_args)
+    if @back_object
+      redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(@collection_number.show_link_args)
+      redirect_with_query(action: :index_collection_number)
     end
   end
 
@@ -218,23 +227,24 @@ class CollectionNumberController < ApplicationController
 
   def remove_observation
     pass_query_params
-    collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless collection_number
-    observation = find_or_goto_index(Observation, params[:obs])
-    return unless observation
-    return unless make_sure_can_delete!(collection_number)
-    collection_number.observations.delete(observation)
-    collection_number.destroy if collection_number.observations.empty?
-    redirect_with_query(observation.show_link_args)
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    @observation = find_or_goto_index(Observation, params[:obs])
+    return unless @observation
+    return unless make_sure_can_delete!(@collection_number)
+    @collection_number.observations.delete(@observation)
+    @collection_number.destroy if @collection_number.observations.empty?
+    redirect_with_query(@observation.show_link_args)
   end
 
   def destroy_collection_number
     pass_query_params
-    collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless collection_number
-    return unless make_sure_can_delete!(collection_number)
-    collection_number.destroy
-    redirect_with_query(action: :index_collection_number)
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    return unless make_sure_can_delete!(@collection_number)
+    figure_out_where_to_go_back_to
+    @collection_number.destroy
+    redirect_to_observation_or_collection_number
   end
 
   private 

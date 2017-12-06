@@ -1,18 +1,23 @@
 <%
   @title = :edit_herbarium_record_title.l(herbarium_label: @herbarium_record.herbarium_label)
 
-  tabs = [
-    link_with_query(:cancel_and_show.t(type: :herbarium_record), @herbarium_record.show_link_args),
-    link_with_query(:edit_herbarium_record_back_to_index.t, action: :index_herbarium_record),
-    link_with_query(:create_herbarium.t, controller: :herbarium, action: :create_herbarium),
-    link_to(:herbarium_index.t, controller: :herbarium, action: :index)
-  ]
+  tabs = []
+  if @back == :index
+    tabs << link_with_query(:edit_herbarium_record_back_to_index.t,
+                            action: :index_herbarium_record)
+  else
+    tabs << link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
+                            @back_object.show_link_args)
+  end
+  tabs << link_with_query(:create_herbarium.t, controller: :herbarium, action: :create_herbarium)
+  tabs << link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-xs-12 col-sm-7 max-width-text">
-    <%= form_tag(action: :edit_herbarium_record, id: @herbarium_record.id) do %>
+    <%= form_tag(action: :edit_herbarium_record, id: @herbarium_record.id, back: @back) do %>
       <%= render(partial: "form", locals: {button: :SAVE}) %>
     <% end %>
   </div>
