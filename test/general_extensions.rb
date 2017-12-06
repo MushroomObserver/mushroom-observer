@@ -424,26 +424,27 @@ module GeneralExtensions
     msg    = nil
 
     # Check string against each file, looking for at least one that matches.
-    processed_str  = str
-    processed_str  = yield(processed_str) if block_given?
-    processed_str.split("\n")
-    encoding = processed_str.encoding
+    str = yield(str) if block_given?
+    clean_string!(str)
+    encoding = str.encoding
 
-    for file in files
+    files.each do |file|
       filename = Array(file).first
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
       template = File.open(filename, format).read
-      template = enforce_encoding(encoding, file, template)
+      template = enforce_encoding(encoding, template)
       template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?
-      if template_match(processed_str, template)
+      clean_string!(template)
+
+      if match_ignoring_some_bits(str, template)
         # Stop soon as we find one that matches.
         result = true
         break
       elsif !msg
         # Write out expected (old) and received (new) files for debugging purposes.
         File.open(filename + ".old", "w:#{encoding}") { |fh| fh.write(template) }
-        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(processed_str) }
+        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(str) }
         msg = "File #{filename} wrong:\n" +
               `diff #{filename}.old #{filename}.new`
         File.delete(filename + ".old") if File.exist?(filename + ".old")
@@ -461,21 +462,22 @@ module GeneralExtensions
     pass
   end
 
-  def enforce_encoding(encoding, file, str)
-    result = str
-    result = str.encode(encoding) if str.encoding != encoding
-    if file.is_a?(Array) && file[1] == "ISO-8859-1"
-      print "Re-encoding no longer needed\n" if file[1] == str.encoding
-    end
-    result
+  def enforce_encoding(encoding, str)
+    return str if str.encoding == encoding
+    str.encode(encoding)
   end
 
-  # Ensure that all the lines in template are in str.
-  # Allows additional headers like 'Date' to get added to str and to vary
-  def template_match(str, template)
-    template = template.gsub /\r\n?/, "\n"
-    str = str.gsub /\r\n?/, "\n"
+  def clean_string!(str)
+    str.gsub!(/\r/, "")
+    str.sub!(/\s*\z/, "\n")
+  end
 
-    (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
+  def match_ignoring_some_bits(str, template)
+    template.split("\n").each do |line|
+      next unless line.include?("IGNORE")
+      pattern = Regexp.escape(line).gsub(/IGNORE/, ".*")
+      str.sub!(/^#{pattern}$/, line)
+    end
+    str == template
   end
 end

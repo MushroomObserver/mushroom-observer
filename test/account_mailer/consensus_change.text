@@ -3,10 +3,6 @@ Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Consensus Changed from Agaricus campestris L. to Coprinus
  comatus (O.F. Mull.) Pers.
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
 
 Consensus Change
 
@@ -14,6 +10,7 @@ Consensus has changed for observation #<%= ActiveRecord::FixtureSet.identify(:co
 
 Old name: Agaricus campestris L.
 New name: Coprinus comatus (O.F. M=C3=BCll.) Pers.
+Time: IGNORE
 By: Tricky Dick (dick)
 
 Here are some handy links:
