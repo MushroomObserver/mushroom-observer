@@ -244,10 +244,10 @@ class HerbariumRecordController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
-    if @back == :show
+    @back = params[:back].to_s
+    if @back == "show"
       @back_object = @herbarium_record
-    elsif @back != :index
+    elsif @back != "index"
       @back_object = Observation.safe_find(@back) || @herbarium_record
     end
   end

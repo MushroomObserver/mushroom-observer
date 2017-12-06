@@ -94,7 +94,7 @@ class SequenceController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
-    @back_object = @back == :show ? @sequence : @sequence.observation
+    @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 
   def show_selected_sequences(query, args = {})

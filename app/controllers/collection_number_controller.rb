@@ -204,9 +204,9 @@ class CollectionNumberController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
-    if @back == :show
+    if @back == "show"
       @back_object = @collection_number
-    elsif @back != :index
+    elsif @back != "index"
       @back_object = Observation.safe_find(@back) || @collection_number
     end
   end

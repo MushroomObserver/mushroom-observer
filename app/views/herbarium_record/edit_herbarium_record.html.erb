@@ -2,7 +2,7 @@
   @title = :edit_herbarium_record_title.l(herbarium_label: @herbarium_record.herbarium_label)
 
   tabs = []
-  if @back == :index
+  if @back == "index"
     tabs << link_with_query(:edit_herbarium_record_back_to_index.t,
                             action: :index_herbarium_record)
   else
