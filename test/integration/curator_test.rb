@@ -5,8 +5,9 @@ require "test_helper"
 class CuratorTest < IntegrationTestCase
   def test_first_herbarium_record
     # Mary doesn't have a herbarium.
+    obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
-    get("/#{observations(:minimal_unknown_obs).id}")
+    get("/#{obs.id}")
     assert_template("observer/show_observation")
     click(label: :create_herbarium_record.t)
     assert_template("herbarium_record/create_herbarium_record")
@@ -14,6 +15,8 @@ class CuratorTest < IntegrationTestCase
       form.submit("Add")
     end
     assert_template("observer/show_observation")
+    assert_match(/href="\/observer\/edit_observation\/#{obs.id}/,
+                 response.body)
   end
 
   def test_herbarium_index_from_create_herbarium_record
