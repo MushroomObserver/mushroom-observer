@@ -217,6 +217,7 @@ class CollectionNumberController < ApplicationController
   # ----------------------------
 
   def remove_observation
+    pass_query_params
     collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless collection_number
     observation = find_or_goto_index(Observation, params[:obs])
@@ -224,15 +225,16 @@ class CollectionNumberController < ApplicationController
     return unless make_sure_can_delete!(collection_number)
     collection_number.observations.delete(observation)
     collection_number.destroy if collection_number.observations.empty?
-    redirect_to(observation.show_link_args)
+    redirect_with_query(observation.show_link_args)
   end
 
   def destroy_collection_number
+    pass_query_params
     collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless collection_number
     return unless make_sure_can_delete!(collection_number)
     collection_number.destroy
-    redirect_to(action: :index_collection_number)
+    redirect_with_query(action: :index_collection_number)
   end
 
   private 

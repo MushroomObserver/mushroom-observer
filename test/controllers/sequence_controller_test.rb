@@ -173,8 +173,7 @@ class SequenceControllerTest < FunctionalTestCase
     assert_equal(bases, sequence.bases)
     assert_empty(sequence.archive)
     assert_empty(sequence.accession)
-    assert_redirected_to(controller: :sequence, action: :show_sequence,
-                         id: sequence.id)
+    assert_redirected_to(obs.show_link_args)
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_updated"),
            "Failed to include Sequence updated in RssLog for Observation")

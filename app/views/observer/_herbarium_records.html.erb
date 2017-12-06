@@ -21,12 +21,12 @@
         <%= link_to(record.accession_at_herbarium.t,
                     add_query_param(record.show_link_args, query)) %>
         <% if in_admin_mode? || record.can_edit? %>
-          [<%= link_to(:EDIT.t, controller: :herbarium_record,
-                       action: :edit_herbarium_record, id: record.id) %> |
-           <%= link_to(:REMOVE.t,
-                       { controller: :herbarium_record, action: :remove_observation,
-                         id: record.id, obs: observation.id },
-                       { data: { confirm: :are_you_sure.t } }) %>]
+          [<%= link_with_query(:EDIT.t, controller: :herbarium_record,
+                               action: :edit_herbarium_record, id: record.id) %> |
+           <%= link_with_query(:REMOVE.t,
+                               { controller: :herbarium_record, action: :remove_observation,
+                                 id: record.id, obs: observation.id },
+                               { data: { confirm: :are_you_sure.t } }) %>]
         <% end %>
       </li>
     <% end %>

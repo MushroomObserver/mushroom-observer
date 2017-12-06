@@ -135,6 +135,8 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
+  private
+
   def default_herbarium_record
     HerbariumRecord.new(
       herbarium_name:   @user.preferred_herbarium_name,
@@ -181,6 +183,12 @@ class HerbariumRecordController < ApplicationController
       return
     end
     redirect_to_observation_or_herbarium_record
+  end
+
+  def whitelisted_herbarium_record_params
+    return {} unless params[:herbarium_record]
+    params.require(:herbarium_record).
+           permit(:herbarium_name, :initial_det, :accession_number, :notes)
   end
 
   def make_sure_can_edit!
@@ -243,11 +251,14 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
+  public
+
   # ----------------------------
   #  Delete record
   # ----------------------------
 
   def remove_observation
+    pass_query_params
     herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless herbarium_record
     observation = find_or_goto_index(Observation, params[:obs])
@@ -255,16 +266,19 @@ class HerbariumRecordController < ApplicationController
     return unless make_sure_can_delete!(herbarium_record)
     herbarium_record.observations.delete(observation)
     herbarium_record.destroy if herbarium_record.observations.empty?
-    redirect_to(observation.show_link_args)
+    redirect_with_query(observation.show_link_args)
   end
 
   def destroy_herbarium_record
+    pass_query_params
     herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless herbarium_record
     return unless make_sure_can_delete!(herbarium_record)
     herbarium_record.destroy
-    redirect_to(action: :index_herbarium_record)
+    redirect_with_query(action: :index_herbarium_record)
   end
+
+  private
 
   def make_sure_can_delete!(herbarium_record)
     return true if in_admin_mode? || herbarium_record.can_edit?
@@ -272,15 +286,5 @@ class HerbariumRecordController < ApplicationController
     flash_error(:permission_denied.t)
     redirect_to(herbarium_record.show_link_args)
     return false
-  end
-
-  ##############################################################################
-
-  private
-
-  def whitelisted_herbarium_record_params
-    return {} unless params[:herbarium_record]
-    params.require(:herbarium_record).
-           permit(:herbarium_name, :initial_det, :accession_number, :notes)
   end
 end
