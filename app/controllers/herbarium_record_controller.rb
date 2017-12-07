@@ -6,7 +6,9 @@ class HerbariumRecordController < ApplicationController
     :herbarium_record_search,
     :herbarium_index,
     :observation_index,
-    :show_herbarium_record
+    :show_herbarium_record,
+    :next_herbarium_record,
+    :prev_herbarium_record
   ]
 
   # ----------------------------

@@ -13,20 +13,6 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     }
   end
 
-  def test_show_herbarium_record_without_notes
-    herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
-    assert(herbarium_record)
-    get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "_rss_log")
-  end
-
-  def test_show_herbarium_record_with_notes
-    herbarium_record = herbarium_records(:interesting_unknown)
-    assert(herbarium_record)
-    get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "_rss_log")
-  end
-
   def test_herbarium_index
     get_with_dump(:herbarium_index, id: herbaria(:nybg_herbarium).id)
     assert_template(:list_herbarium_records)
@@ -74,6 +60,34 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_template("list_herbarium_records")
     # In results, expect 1 row per herbarium_record
     assert_select(".results tr", HerbariumRecord.all.size)
+  end
+
+  def test_show_herbarium_record_without_notes
+    herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
+    assert(herbarium_record)
+    get_with_dump(:show_herbarium_record, id: herbarium_record.id)
+    assert_template(:show_herbarium_record, partial: "_rss_log")
+  end
+
+  def test_show_herbarium_record_with_notes
+    herbarium_record = herbarium_records(:interesting_unknown)
+    assert(herbarium_record)
+    get_with_dump(:show_herbarium_record, id: herbarium_record.id)
+    assert_template(:show_herbarium_record, partial: "_rss_log")
+  end
+
+  def test_next_and_prev_herbarium_record
+    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    assert_operator(query.num_results, :>, 1)
+    number1 = query.results[0]
+    number2 = query.results[1]
+    q = query.record.id.alphabetize
+
+    get(:next_herbarium_record, id: number1.id, q: q)
+    assert_redirected_to(action: :show_herbarium_record, id: number2.id, q: q)
+
+    get(:prev_herbarium_record, id: number2.id, q: q)
+    assert_redirected_to(action: :show_herbarium_record, id: number1.id, q: q)
   end
 
   def test_create_herbarium_record
@@ -162,6 +176,26 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_no_flash
   end
 
+  def test_create_herbarium_record_redirect
+    obs = observations(:coprinus_comatus_obs)
+    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    q = query.id.alphabetize
+    params = {
+      id: obs.id,
+      herbarium_record: { herbarium_name: obs.user.preferred_herbarium_name },
+      q: q
+    }
+
+    # Prove that query params are added to form action.
+    login(obs.user.login)
+    get(:create_herbarium_record, params)
+    assert_select("form[action*='create_herbarium_record/#{obs.id}?q=#{q}']")
+
+    # Prove that post keeps query params intact.
+    post(:create_herbarium_record, params)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
   def test_edit_herbarium_record
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     get_with_dump(:edit_herbarium_record, id: nybg.id)
@@ -209,18 +243,112 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_template(:edit_herbarium_record)
   end
 
+  def test_edit_herbarium_record_redirect
+    obs   = observations(:detailed_unknown_obs)
+    rec   = obs.herbarium_records.first
+    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    q     = query.id.alphabetize
+    make_admin("rolf")
+    params = {
+      id: rec.id,
+      herbarium_record: {
+        herbarium_name:   rec.herbarium.name,
+        initial_det:      rec.initial_det,
+        accession_number: rec.accession_number,
+        notes:            rec.notes
+      }
+    }
+
+    # Prove that GET passes "back" and query param through to form.
+    get(:edit_herbarium_record, params.merge(back: "foo", q: q))
+    assert_select("form[action*='herbarium_record/#{rec.id}?back=foo&q=#{q}']")
+
+    # Prove that POST keeps query param when returning to observation.
+    post(:edit_herbarium_record, params.merge(back: obs.id, q: q))
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+
+    # Prove that POST can return to show_herbarium_record with query intact.
+    post(:edit_herbarium_record, params.merge(back: "show", q: q))
+    assert_redirected_to(rec.show_link_args.merge(q: q))
+
+    # Prove that POST can return to index_herbarium_record with query intact.
+    post(:edit_herbarium_record, params.merge(back: "index", q: q))
+    assert_redirected_to(action: :index_herbarium_record, id: rec.id, q: q)
+  end
+
+  def test_remove_observation
+    obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    rec1 = obs1.herbarium_records.first
+    rec2 = obs2.herbarium_records.first
+    assert_true(obs1.herbarium_records.include?(rec1))
+    assert_true(obs2.herbarium_records.include?(rec2))
+
+    # Make sure user must be logged in.
+    get(:remove_observation, id: rec1.id, obs: obs1.id)
+    assert_true(obs1.reload.herbarium_records.include?(rec1))
+
+    # Make sure only owner obs can remove rec from it.
+    login("mary")
+    get(:remove_observation, id: rec1.id, obs: obs1.id)
+    assert_true(obs1.reload.herbarium_records.include?(rec1))
+
+    # Make sure badly-formed queries don't crash.
+    login("rolf")
+    get(:remove_observation)
+    get(:remove_observation, id: -1)
+    get(:remove_observation, id: rec1.id)
+    get(:remove_observation, id: rec1.id, obs: "bogus")
+    get(:remove_observation, id: rec1.id, obs: obs2.id)
+    assert_true(obs1.reload.herbarium_records.include?(rec1))
+    assert_true(obs2.reload.herbarium_records.include?(rec2))
+
+    # Removing rec from last obs destroys it.
+    get(:remove_observation, id: rec1.id, obs: obs1.id)
+    assert_empty(obs1.reload.herbarium_records)
+    assert_nil(HerbariumRecord.safe_find(rec1.id))
+
+    # Removing rec from one of two obs does not destroy it.
+    rec2.add_observation(obs1)
+    assert_true(obs1.reload.herbarium_records.include?(rec2))
+    assert_true(obs2.reload.herbarium_records.include?(rec2))
+    get(:remove_observation, id: rec2.id, obs: obs2.id)
+    assert_true(obs1.reload.herbarium_records.include?(rec2))
+    assert_false(obs2.reload.herbarium_records.include?(rec2))
+    assert_not_nil(HerbariumRecord.safe_find(rec2.id))
+
+    # Finally make sure admin has permission.
+    make_admin("mary")
+    get(:remove_observation, id: rec2.id, obs: obs1.id)
+    assert_empty(obs1.reload.herbarium_records)
+    assert_nil(HerbariumRecord.safe_find(rec2.id))
+  end
+
+  def test_remove_observation_redirect
+    obs   = observations(:detailed_unknown_obs)
+    recs  = obs.herbarium_records
+    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    assert_operator(recs.length, :>, 1)
+
+    # Prove that it keeps query param intact when returning to observation.
+    post(:remove_observation, id: recs[1].id, obs: obs.id, q: q)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
   def test_destroy_herbarium_record
     login("rolf")
-    params = { id: herbarium_records(:interesting_unknown).id }
+    herbarium_record = herbarium_records(:interesting_unknown)
+    params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
-    herbarium_record = HerbariumRecord.find(params[:id])
     observations = herbarium_record.observations
-    obs_spec_count = observations.map { |o| o.herbarium_records.count }.
-                     reduce { |a, b| a + b }
+    obs_rec_count = observations.map { |o| o.herbarium_records.count }.
+                    reduce { |a, b| a + b }
     get(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     observations.map(&:reload)
-    assert_true(obs_spec_count > observations.
+    assert_true(obs_rec_count > observations.
                 map { |o| o.herbarium_records.count }.
                 reduce { |a, b| a + b })
     assert_response(:redirect)
@@ -228,7 +356,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_destroy_herbarium_record_not_curator
     login("mary")
-    params = { id: herbarium_records(:interesting_unknown).id }
+    herbarium_record = herbarium_records(:interesting_unknown)
+    params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
     get(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
@@ -237,10 +366,28 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
   def test_destroy_herbarium_record_admin
     make_admin("mary")
-    params = { id: herbarium_records(:interesting_unknown).id }
+    herbarium_record = herbarium_records(:interesting_unknown)
+    params = { id: herbarium_record.id }
     herbarium_record_count = HerbariumRecord.count
     get(:destroy_herbarium_record, params)
     assert_equal(herbarium_record_count - 1, HerbariumRecord.count)
     assert_response(:redirect)
+  end
+
+  def test_destroy_herbarium_record_redirect
+    obs   = observations(:detailed_unknown_obs)
+    recs  = obs.herbarium_records
+    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    q     = query.id.alphabetize
+    assert_operator(recs.length, :>, 1)
+    make_admin("rolf")
+
+    # Prove by default it goes back to index.
+    post(:destroy_herbarium_record, id: recs[0].id)
+    assert_redirected_to(action: :index_herbarium_record)
+
+    # Prove that it keeps query param intact when returning to index.
+    post(:destroy_herbarium_record, id: recs[1].id, q: q)
+    assert_redirected_to(action: :index_herbarium_record, q: q)
   end
 end
