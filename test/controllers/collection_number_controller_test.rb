@@ -194,6 +194,26 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_includes(number.observations, obs2)
   end
 
+  def test_create_collection_number_redirect
+    obs = observations(:coprinus_comatus_obs)
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q = query.id.alphabetize
+    params = {
+      id: obs.id,
+      collection_number: { name: "John Doe", number: "31415" },
+      q: q
+    }
+
+    # Prove that query params are added to form action.
+    login(obs.user.login)
+    get(:create_collection_number, params)
+    assert_select("form[action*='number/#{obs.id}?q=#{q}']")
+
+    # Prove that post keeps query params intact.
+    post(:create_collection_number, params)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
   def test_edit_collection_number
     get(:edit_collection_number)
     get(:edit_collection_number, id: "bogus")
@@ -278,6 +298,34 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_equal("07-123a", new_num.number)
   end
 
+  def test_edit_collection_number_redirect
+    obs   = observations(:detailed_unknown_obs)
+    num   = obs.collection_numbers.first
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    params = {
+      id: num.id,
+      collection_number: { name: num.name, number: num.number }
+    }
+
+    # Prove that GET passes "back" and query param through to form.
+    get(:edit_collection_number, params.merge(back: "foo", q: q))
+    assert_select("form[action*='collection_number/#{num.id}?back=foo&q=#{q}']")
+
+    # Prove that POST keeps query param when returning to observation.
+    post(:edit_collection_number, params.merge(back: obs.id, q: q))
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+
+    # Prove that POST can return to show_collection_number with query intact.
+    post(:edit_collection_number, params.merge(back: "show", q: q))
+    assert_redirected_to(num.show_link_args.merge(q: q))
+
+    # Prove that POST can return to index_collection_number with query intact.
+    post(:edit_collection_number, params.merge(back: "index", q: q))
+    assert_redirected_to(action: :index_collection_number, id: num.id, q: q)
+  end
+
   def test_remove_observation
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
@@ -326,6 +374,19 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_nil(CollectionNumber.safe_find(num2.id))
   end
 
+  def test_remove_observation_redirect
+    obs   = observations(:detailed_unknown_obs)
+    nums  = obs.collection_numbers
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    assert_operator(nums.length, :>, 1)
+
+    # Prove that it keeps query param intact when returning to observation.
+    post(:remove_observation, id: nums[1].id, obs: obs.id, q: q)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
   def test_destroy_collection_number
     obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
@@ -362,5 +423,22 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_empty(obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num2.id))
+  end
+
+  def test_destroy_collection_number_redirect
+    obs   = observations(:detailed_unknown_obs)
+    nums  = obs.collection_numbers
+    query = Query.lookup_and_save(:CollectionNumber, :all)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    assert_operator(nums.length, :>, 1)
+
+    # Prove by default it goes back to index.
+    post(:destroy_collection_number, id: nums[0].id)
+    assert_redirected_to(action: :index_collection_number)
+
+    # Prove that it keeps query param intact when returning to index.
+    post(:destroy_collection_number, id: nums[1].id, q: q)
+    assert_redirected_to(action: :index_collection_number, q: q)
   end
 end

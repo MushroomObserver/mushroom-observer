@@ -102,8 +102,8 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
-    return unless make_sure_can_edit!(@observation)
     @back_object = @observation
+    return unless make_sure_can_edit!(@observation)
     if request.method == "GET"
       @collection_number = CollectionNumber.new(name: @user.legal_name)
     elsif request.method == "POST"
@@ -118,8 +118,8 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
-    return unless make_sure_can_edit!(@collection_number)
     figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
     if request.method == "GET"
       # nothing
     elsif request.method == "POST"
@@ -204,10 +204,17 @@ class CollectionNumberController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back]
+    @back_object = nil
     if @back == "show"
       @back_object = @collection_number
     elsif @back != "index"
-      @back_object = Observation.safe_find(@back) || @collection_number
+      @back_object = Observation.safe_find(@back)
+      return if @back_object
+      if @collection_number.observations.count == 1
+        @back_object = @collection_number.observations.first
+      else
+        @back_object = @collection_number
+      end
     end
   end
 
@@ -215,7 +222,8 @@ class CollectionNumberController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(action: :index_collection_number)
+      redirect_with_query(action: :index_collection_number,
+                          id: @collection_number.id)
     end
   end
 
@@ -242,9 +250,8 @@ class CollectionNumberController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
-    figure_out_where_to_go_back_to
     @collection_number.destroy
-    redirect_to_observation_or_collection_number
+    redirect_with_query(action: :index_collection_number)
   end
 
   private 

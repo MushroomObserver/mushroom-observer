@@ -126,8 +126,8 @@ class HerbariumRecordController < ApplicationController
     @layout = calc_layout_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
-    return unless make_sure_can_edit!
     figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!
     if request.method == "GET"
       @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
     elsif request.method == "POST"
@@ -245,10 +245,17 @@ class HerbariumRecordController < ApplicationController
 
   def figure_out_where_to_go_back_to
     @back = params[:back].to_s
+    @back_object = nil
     if @back == "show"
       @back_object = @herbarium_record
     elsif @back != "index"
-      @back_object = Observation.safe_find(@back) || @herbarium_record
+      @back_object = Observation.safe_find(@back)
+      return if @back_object
+      if @herbarium_record.observations.count == 1
+        @back_object = @herbarium_record.observations.first
+      else
+        @back_object = @herbarium_record
+      end
     end
   end
 
@@ -256,7 +263,8 @@ class HerbariumRecordController < ApplicationController
     if @back_object
       redirect_with_query(@back_object.show_link_args)
     else
-      redirect_with_query(action: :index_herbarium_record)
+      redirect_with_query(action: :index_herbarium_record,
+                          id: @herbarium_record.id)
     end
   end
 
@@ -285,7 +293,7 @@ class HerbariumRecordController < ApplicationController
     return unless make_sure_can_delete!(@herbarium_record)
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
-    redirect_to_observation_or_herbarium_record
+    redirect_with_query(action: :index_herbarium_record)
   end
 
   private

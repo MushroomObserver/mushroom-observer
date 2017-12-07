@@ -195,6 +195,26 @@ class SequenceControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_create_sequence_redirect
+    obs = observations(:genbanked_obs)
+    query = Query.lookup_and_save(:Sequence, :all)
+    q = query.id.alphabetize
+    params = {
+      id: obs.id,
+      sequence: { locus: "ITS", bases: "atgc" },
+      q: q
+    }
+
+    # Prove that query params are added to form action.
+    login(obs.user.login)
+    get(:create_sequence, params)
+    assert_select("form[action*='sequence/#{obs.id}?q=#{q}']")
+
+    # Prove that post keeps query params intact.
+    post(:create_sequence, params)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+  end
+
   def test_edit_sequence_get
     sequence = sequences(:local_sequence)
     obs      = sequence.observation
@@ -410,6 +430,22 @@ class SequenceControllerTest < FunctionalTestCase
            "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
+  def test_destroy_sequence_admin
+    old_count = Sequence.count
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove admin can destroy Sequence
+    make_admin("zero")
+    post(:destroy_sequence, id: sequence.id)
+    assert_equal(old_count - 1, Sequence.count)
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_success
+    assert(obs.rss_log.notes.include?("log_sequence_destroy"),
+           "Failed to include Sequence destroyed in RssLog for Observation")
+  end
+
   def test_destroy_sequence_redirect
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
@@ -428,21 +464,5 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove that it can return to index, too, with query intact.
     post(:destroy_sequence, id: seqs[2].id, q: q, back: "index")
     assert_redirected_to(action: :index_sequence, q: q)
-  end
-
-  def test_destroy_sequence_admin
-    old_count = Sequence.count
-    sequence = sequences(:local_sequence)
-    obs      = sequence.observation
-    observer = obs.user
-
-    # Prove admin can destroy Sequence
-    make_admin("zero")
-    post(:destroy_sequence, id: sequence.id)
-    assert_equal(old_count - 1, Sequence.count)
-    assert_redirected_to(obs.show_link_args)
-    assert_flash_success
-    assert(obs.rss_log.notes.include?("log_sequence_destroy"),
-           "Failed to include Sequence destroyed in RssLog for Observation")
   end
 end
