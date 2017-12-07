@@ -246,14 +246,14 @@ class SequenceControllerTest < FunctionalTestCase
 
     # Prove user must be logged in to edit Sequence.
     post(:edit_sequence, params)
-    assert_not_equal(locus, sequence.reload.locus)   
-    
+    assert_not_equal(locus, sequence.reload.locus)
+
     # Prove user must be owner to edit Sequence.
     login("zero")
     post(:edit_sequence, params)
-    assert_not_equal(locus, sequence.reload.locus)   
+    assert_not_equal(locus, sequence.reload.locus)
     assert_flash_warning(:permission_denied.t)
-    
+
     # Prove Observation owner user can edit Sequence
     login(observer.login)
     post(:edit_sequence, params)
@@ -351,6 +351,38 @@ class SequenceControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_edit_sequence_redirect
+    obs      = observations(:genbanked_obs)
+    sequence = obs.sequences[2]
+    assert_operator(obs.sequences.count, :>, 3)
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+    params = {
+      id: sequence.id,
+      sequence: { locus:     sequence.locus,
+                  bases:     sequence.bases,
+                  archive:   sequence.archive,
+                  accession: sequence.accession }
+    }
+
+    # Prove that GET passes "back" and query param through to form.
+    get(:edit_sequence, params.merge(back: "foo", q: q))
+    assert_select("form[action*='sequence/#{sequence.id}?back=foo&q=#{q}']")
+
+    # Prove by default POST goes back to observation.
+    post(:edit_sequence, params)
+    assert_redirected_to(obs.show_link_args)
+
+    # Prove that POST keeps query param when returning to observation.
+    post(:edit_sequence, params.merge(q: q))
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+
+    # Prove that POST can return to show_sequence, too, with query intact.
+    post(:edit_sequence, params.merge(back: "show", q: q))
+    assert_redirected_to(sequence.show_link_args.merge(q: q))
+  end
+
   def test_destroy_sequence
     old_count = Sequence.count
     sequence = sequences(:local_sequence)
@@ -376,6 +408,26 @@ class SequenceControllerTest < FunctionalTestCase
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_destroy"),
            "Failed to include Sequence destroyed in RssLog for Observation")
+  end
+
+  def test_destroy_sequence_redirect
+    obs   = observations(:genbanked_obs)
+    seqs  = obs.sequences
+    query = Query.lookup_and_save(:Sequence, :for_observation, observation: obs)
+    q     = query.id.alphabetize
+    login(obs.user.login)
+
+    # Prove by default it goes back to observation.
+    post(:destroy_sequence, id: seqs[0].id)
+    assert_redirected_to(obs.show_link_args)
+
+    # Prove that it keeps query param intact when returning to observation.
+    post(:destroy_sequence, id: seqs[1].id, q: q)
+    assert_redirected_to(obs.show_link_args.merge(q: q))
+
+    # Prove that it can return to index, too, with query intact.
+    post(:destroy_sequence, id: seqs[2].id, q: q, back: "index")
+    assert_redirected_to(action: :index_sequence, q: q)
   end
 
   def test_destroy_sequence_admin

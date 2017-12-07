@@ -49,7 +49,7 @@ class SequenceController < ApplicationController
     @links = [
       [:show_object.l(type: :observation),
         Observation.show_link_args(params[:id])],
-      [:create_sequence.l,
+      [:add_sequence.l,
         { action: :create_sequence, id: params[:id] }]
     ]
     show_selected_sequences(query, always_index: true)
@@ -105,7 +105,11 @@ class SequenceController < ApplicationController
     else
       flash_warning(:permission_denied.t)
     end
-    redirect_with_query(@back_object.show_link_args)
+    if @back == "index"
+      redirect_with_query(action: :index_sequence)
+    else
+      redirect_with_query(@back_object.show_link_args)
+    end
   end
 
   ##############################################################################

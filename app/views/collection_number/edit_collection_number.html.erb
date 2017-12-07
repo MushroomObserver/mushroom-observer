@@ -15,7 +15,7 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7 max-width-text">
-    <%= form_tag(action: :edit_collection_number, id: @collection_number.id, back: @back) do %>
+    <%= form_tag(add_query_params(action: :edit_collection_number, id: @collection_number.id, back: @back)) do %>
       <%= render(partial: "form", locals: {button: :SAVE}) %>
     <% end %>
   </div>
