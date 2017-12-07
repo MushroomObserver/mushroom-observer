@@ -1072,6 +1072,7 @@
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
   log_collection_number_added: "[:log_object_added_by_user_with_name(type=:collection_number)]"
+  log_specimen_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_object_added: "[:log_object_added_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"
