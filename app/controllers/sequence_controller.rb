@@ -11,20 +11,62 @@
 class SequenceController < ApplicationController
   before_action :login_required, except: [
     :index_sequence,
-    :show_sequence
+    :list_sequences,
+    :sequence_search,
+    :observation_index,
+    :show_sequence,
+    :next_sequence,
+    :prev_sequence
   ]
 
-  def index_sequence
-    pass_query_params
-    store_location
+  def index_sequence # :nologin: :norobots:
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def show_sequence
+  def list_sequences # :nologin: :norobots:
+    store_location
+    query = create_query(:Sequence, :all)
+    show_selected_sequences(query)
+  end
+
+  # Display list of Sequences whose text matches a string pattern.
+  def sequence_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (sequence = Sequence.safe_find(pattern))
+      redirect_to(action: :show_sequence, id: sequence.id)
+    else
+      query = create_query(:Sequence, :pattern_search, pattern: pattern)
+      show_selected_sequences(query)
+    end
+  end
+
+  def observation_index # :nologin: :norobots:
+    store_location
+    query = create_query(:Sequence, :for_observation,
+                         observation: params[:id].to_s)
+    @links = [
+      [:show_object.l(type: :observation),
+        Observation.show_link_args(params[:id])],
+      [:create_sequence.l,
+        { action: :create_sequence, id: params[:id] }]
+    ]
+    show_selected_sequences(query, always_index: true)
+  end
+
+  def show_sequence # :nologin:
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+  end
+
+  def next_sequence # :nologin: :norobots:
+    redirect_to_next_object(:next, Sequence, params[:id].to_s)
+  end
+
+  def prev_sequence # :nologin: :norobots:
+    redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
   def create_sequence
@@ -102,11 +144,11 @@ class SequenceController < ApplicationController
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
     @links ||= []
-    args[:sorting_links] = show_sequence_sorts
+    args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)
   end
 
-  def show_sequence_sorts
+  def sequence_index_sorts
     [
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t],

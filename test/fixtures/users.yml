@@ -73,6 +73,7 @@ spammer: # 7
 # anything except account
 zero_user: # 8
   <<: *DEFAULTS
+  login: zero
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed

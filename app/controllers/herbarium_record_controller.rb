@@ -54,7 +54,7 @@ class HerbariumRecordController < ApplicationController
       [:show_object.l(type: :observation),
         Observation.show_link_args(params[:id])],
       [:add_herbarium_record.l,
-        { action: :add_herbarium_record, id: params[:id] }]
+        { action: :create_herbarium_record, id: params[:id] }]
     ]
     show_selected_herbarium_records(query, always_index: true)
   end

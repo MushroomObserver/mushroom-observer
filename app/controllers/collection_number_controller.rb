@@ -22,7 +22,7 @@ class CollectionNumberController < ApplicationController
   end
 
   # Show list of collection_numbers.
-  def list_collection_numbers # :nologin:
+  def list_collection_numbers # :nologin: :norobots:
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
@@ -40,7 +40,7 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  def observation_index # :nologin:
+  def observation_index # :nologin: :norobots:
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
@@ -48,7 +48,7 @@ class CollectionNumberController < ApplicationController
       [:show_object.l(type: :observation),
         Observation.show_link_args(params[:id])],
       [:create_collection_number.l,
-        { action: :add_collection_number, id: params[:id] }]
+        { action: :create_collection_number, id: params[:id] }]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
