@@ -49,7 +49,7 @@ class SequenceController < ApplicationController
     @links = [
       [:show_object.l(type: :observation),
         Observation.show_link_args(params[:id])],
-      [:add_sequence.l,
+      [:show_observation_add_sequence.l,
         { action: :create_sequence, id: params[:id] }]
     ]
     show_selected_sequences(query, always_index: true)
