@@ -40,11 +40,13 @@
 ################################################################################
 
 module GeneralExtensions
+
   ##############################################################################
   #
   #  :section: Test unit helpers
   #
   ##############################################################################
+
   def sql_collates_accents?
     sql_sorted = u_and_umlaut_collated_by_sql.map { |x| x[:notes] }
     sql_sorted == sql_sorted.sort
@@ -144,11 +146,7 @@ module GeneralExtensions
 
   # Assert that two User instances are equal.
   def assert_objs_equal(expect, got, *msg)
-    assert_equal(
-      (expect ? "#{expect.class.name} ##{expect.id}" : "nil"),
-      (got ? "#{got.class.name} ##{got.id}" : "nil"),
-      *msg
-    )
+    assert_equal(fixture_label(expect), fixture_label(got), *msg)
   end
 
   # Assert that two User instances are equal.
@@ -169,38 +167,45 @@ module GeneralExtensions
     )
   end
 
-  # Compare two lists by mapping their elements, then sorting.  By default it
+  # Compare two lists by mapping their elements.  By default it
   # just maps their elements to strings.
   #
   #   assert_list_equal([rolf,mary], name.authors, &:login)
   #
-  def assert_list_equal(expect, got, msg = nil, &block)
+  def assert_list_equal(expect, got, *args, &block)
     block ||= :to_s.to_proc
-    assert_equal(expect.map(&block).sort, got.map(&block).sort, msg)
+    expect = expect.to_a.map(&block)
+    got    = got.to_a.map(&block)
+    if args.first == :sort
+      args.shift
+      expect.sort!
+      got.sort!
+    end
+    assert_equal(expect, got, args.first)
   end
 
   # Compare two lists of objects of the same type by comparing their ids.
   #
   #   assert_obj_list_equal([img1,img2], obs.images)
   #
-  def assert_obj_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg) { |o| fixture_label(o) }
+  def assert_obj_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args) { |o| fixture_label(o) }
   end
 
   # Compare two lists of User's by comparing their logins.
   #
   #   assert_user_list_equal([rolf,mary], name.authors)
   #
-  def assert_user_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg, &:login)
+  def assert_user_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args, &:login)
   end
 
   # Compare two lists of Name's by comparing their search_names.
   #
   #   assert_name_list_equal([old_name,new_name], old_name.synonym.names)
   #
-  def assert_name_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg, &:search_name)
+  def assert_name_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args, &:search_name)
   end
 
   GPS_CLOSE_ENOUGH = 0.001
@@ -253,12 +258,19 @@ module GeneralExtensions
 
   # This should make diagnostics of failed tests more useful!
   def fixture_label(o)
-    return nil if o.nil?
-    idx = o.class.all.index(o)
-    return "#{o.class.name} ##{o.id}" unless idx
-    label = get_fixture_label(o.class.table_name, idx)
-    return "#{o.class.name} ##{idx+1}" unless label
-    return "$#{label}"
+    return "" if o.nil?
+    table = o.class.table_name
+    @loaded_fixtures[table].fixtures.each do |name, fixture|
+      return "<#{name}>" if fixture["id"] == o.id
+    end
+    case table
+    when "names"
+      "Name: #{o.search_name}"
+    when "user"
+      "User: #{o.login}"
+    else
+      "#{o.class.name} ##{o.id}"
+    end
   end
 
   @@fixture_labels = {}

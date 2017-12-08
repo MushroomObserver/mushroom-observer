@@ -2165,13 +2165,27 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_of_parents
-    fungi = names(:fungi)
+    peltigeraceae = names(:peltigeraceae)
     peltigera = names(:peltigera)
+    assert_query([peltigeraceae], :Name, :of_parents, name: peltigera)
+
+    fungi = names(:fungi)
+    basidiomycota = names(:basidiomycota)
+    basidiomycetes = names(:basidiomycetes)
+    agaricales = names(:agaricales)
+    agaricaceae = names(:agaricaceae)
     agaricus = names(:agaricus)
     agaricus_campestris = names(:agaricus_campestris)
-    assert_query([fungi], :Name, :of_parents, name: peltigera)
-    assert_query([], :Name, :of_parents, name: agaricus)
+    assert_query([agaricaceae], :Name, :of_parents, name: agaricus)
     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
+    assert_query([
+      fungi,
+      basidiomycota,
+      basidiomycetes,
+      agaricales,
+      agaricaceae,
+      agaricus
+    ], :Name, :of_parents, name: agaricus_campestris, all: "yes")
   end
 
   def test_name_pattern_search

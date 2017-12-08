@@ -408,7 +408,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_construct_species_list_new_family
     list_title = "List Title"
     rank = :Family
-    new_name_str = "Agaricaceae"
+    new_name_str = "Lecideaceae"
     new_list_str = "#{rank} #{new_name_str}"
     assert_nil(Name.find_by(text_name: new_name_str))
     params = {
@@ -430,7 +430,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Creates Agaricaceae, spl, and obs/naming/splentry.
+    # Creates Lecideaceae, spl, and obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
@@ -514,9 +514,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Must be creating Lactarius sp as well as
-    # L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(10 + v_nam * 2 + v_spl + v_obs, rolf.reload.contribution)
+    # Creating L. rubidus (and spl and obs/splentry/naming).
+    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     obs = spl.observations.first
     assert_not_nil(obs)
@@ -528,7 +527,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_construct_species_list_rankless_taxon
     list_title = "List Title"
-    new_name_str = "Agaricaceae"
+    new_name_str = "Lecideaceae"
     assert_nil(Name.find_by(text_name: new_name_str))
     params = {
       list: { members: new_name_str },
@@ -549,7 +548,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Creates Agaricaceae, spl, obs/naming/splentry.
+    # Creates Lecideaceae, spl, obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
@@ -1598,7 +1597,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :ATTACH.l)
     assert_flash_success
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",
@@ -1606,7 +1605,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :ATTACH.l)
     assert_flash_warning # already attached
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",
@@ -1614,7 +1613,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :REMOVE.l)
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",

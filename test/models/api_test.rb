@@ -55,7 +55,7 @@ class ApiTest < UnitTestCase
 
   def assert_api_results(expect)
     msg = "API results wrong.  Query: #{@api.query.query}"
-    assert_obj_list_equal(expect, @api.results, msg)
+    assert_obj_list_equal(expect, @api.results, :sort, msg)
   end
 
   def assert_parse(*args)
@@ -2059,7 +2059,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(add_images: imgs))
     rolfs_obs.reload
     assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
-    assert_obj_list_equal(rolf.images, rolfs_obs.images)
+    assert_obj_list_equal(rolf.images, rolfs_obs.images, :sort)
     assert_api_pass(params.merge(remove_images: rolfs_img.id))
     rolfs_obs.reload
     assert(rolfs_obs.thumb_image != rolfs_img)
@@ -2069,7 +2069,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(remove_images: imgs))
     rolfs_obs.reload
     assert_obj_list_equal(rolf.images - rolf.images[2..6] - [rolfs_img],
-                          rolfs_obs.images)
+                          rolfs_obs.images, :sort)
 
     proj = projects(:bolete_project)
     proj.user_group.users << rolf

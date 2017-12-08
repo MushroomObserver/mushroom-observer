@@ -1338,7 +1338,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:review_authors, params.merge(add: mary.id))
     assert_template(:review_authors)
     desc.reload
-    assert_user_list_equal([mary, rolf], desc.authors)
+    assert_user_list_equal([mary, rolf], desc.authors, :sort)
 
     # ...and taketh with the other.
     post(:review_authors, params.merge(remove: mary.id))
@@ -1376,7 +1376,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Rolf giveth with one hand...
     post(:review_authors, params.merge(add: mary.id))
     assert_template(:review_authors)
-    assert_user_list_equal([mary, rolf], desc.reload.authors)
+    assert_user_list_equal([mary, rolf], desc.reload.authors, :sort)
 
     # ...and taketh with the other.
     post(:review_authors, params.merge(remove: mary.id))
@@ -2806,8 +2806,8 @@ class ObserverControllerTest < FunctionalTestCase
                               "id_#{@proj2.id}" => "1"
                             })
     assert_response(:redirect)
-    assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects.sort_by(&:id))
-    assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects.sort_by(&:id))
+    assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects, :sort)
+    assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects, :sort)
 
     login("dick")
     get(:edit_observation, id: @obs2.id)

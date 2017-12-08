@@ -320,37 +320,25 @@ class NameControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
-    name1 = names(:lactarius_alpigenes)
-    name2 = names(:lactarius_alpinus)
-    name3 = names(:lactarius_kuehneri)
-    name4 = names(:lactarius_subalpinus)
+    name1 = query.results[0]
+    name2 = query.results[1]
+    name3 = query.results[-2]
+    name4 = query.results[-1]
 
     get(:next_name, q.merge(id: name1.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
-                         params: q)
-    get(:next_name, q.merge(id: name2.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
-                         params: q)
+    assert_redirected_to(name2.show_link_args.merge(q))
     get(:next_name, q.merge(id: name3.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
-                         params: q)
+    assert_redirected_to(name4.show_link_args.merge(q))
     get(:next_name, q.merge(id: name4.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
-                         params: q)
+    assert_redirected_to(name4.show_link_args.merge(q))
     assert_flash(/no more/i)
 
     get(:prev_name, q.merge(id: name4.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
-                         params: q)
-    get(:prev_name, q.merge(id: name3.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
-                         params: q)
+    assert_redirected_to(name3.show_link_args.merge(q))
     get(:prev_name, q.merge(id: name2.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
-                         params: q)
+    assert_redirected_to(name1.show_link_args.merge(q))
     get(:prev_name, q.merge(id: name1.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
-                         params: q)
+    assert_redirected_to(name1.show_link_args.merge(q))
     assert_flash(/no more/i)
   end
 
@@ -716,8 +704,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
-    # Amanita baccata is there but not Amanita sp., so this creates two names.
-    assert_equal(10 + 2 * @new_pts, rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
   end
@@ -947,7 +934,7 @@ class NameControllerTest < FunctionalTestCase
     login("dick")
     params = {
       name: {
-        text_name: "Peltigeraceae",
+        text_name: "Lecideaceae",
         author: "",
         rank: :Genus,
         citation: "",
@@ -1009,7 +996,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_equal(20, rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
@@ -1053,6 +1040,7 @@ class NameControllerTest < FunctionalTestCase
   # This catches a bug that was happening when editing a name that was in use.
   # In this case text_name and author are missing, confusing edit_name.
   def test_edit_name_post_name_and_author_missing
+    names(:conocybe).destroy
     name = names(:conocybe_filaris)
     params = {
       id: name.id,
@@ -1071,8 +1059,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("", name.reload.author)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
-    assert_equal("Conocybe", Name.last.search_name)
-    assert_equal(20, rolf.reload.contribution) # created Conocybe
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_edit_name_unchangeable_plus_admin_email
@@ -1124,8 +1111,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    # It's implicitly creating Conocybe, because not in fixtures.
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts, rolf.reload.contribution)
     assert_equal(new_notes, name.reload.notes)
     assert_equal(past_names + 1, name.versions.size)
   end
@@ -1151,8 +1137,8 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     # creates Lactarius since it's not in fixtures
     assert(Name.exists?(text_name: "Lactarius"))
-    # points for new name Lactarius and for changing Lactarius alpigenes
-    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
+    # points for changing Lactarius alpigenes
+    assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
     assert(name.reload.deprecated)
     assert_equal("new citation", name.citation)
   end
@@ -1175,8 +1161,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    # It creates genus Strobilurus because there is Strobilurus fixture
-    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
+    assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
   end
@@ -1202,9 +1187,6 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_empty(name.reload.author)
     assert_no_emails
-    # It should also create genus Coprinus because there is no Coprinus fixture
-    assert_equal(old_name_count + 1, Name.count)
-    assert_equal(Name.last.text_name, "Coprinus")
   end
 
   def test_edit_name_misspelling
@@ -1332,8 +1314,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_warning
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    # (In fact, it is even implicitly creating Macrolepiota!)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts, rolf.reload.contribution)
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
   end

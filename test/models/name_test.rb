@@ -4,11 +4,11 @@ class NameTest < UnitTestCase
   def create_test_name(string, force_rank = nil)
     User.current = rolf
     parse = Name.parse_name(string)
-    assert parse, "Expected this to parse: #{string}"
+    assert(parse, "Expected this to parse: #{string}")
     params = parse.params
     params[:rank] = force_rank if force_rank
     name = Name.new_name(params)
-    assert name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]"
+    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
     name
   end
 
@@ -133,7 +133,7 @@ class NameTest < UnitTestCase
       "Coprinus comatus v. bogus (With) Author"
     )
     assert_equal 3, result.length
-    assert_nil result[0].id
+    assert_equal names(:coprinus).id, result[0].id
     assert_equal names(:coprinus_comatus).id, result[1].id
     assert_nil result[2].id
     assert_equal "Coprinus", result[0].text_name
@@ -148,7 +148,7 @@ class NameTest < UnitTestCase
       "Conocybe filaris var bogus (With) Author"
     )
     assert_equal 3, result.length
-    assert_nil result[0].id
+    assert_equal names(:conocybe).id, result[0].id
     assert_equal names(:conocybe_filaris).id, result[1].id
     assert_nil result[2].id
     assert_equal "Conocybe", result[0].text_name
@@ -1539,19 +1539,25 @@ class NameTest < UnitTestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([names(:agaricus)],
-                           names(:agaricus_campestris).all_parents)
-    assert_name_list_equal([names(:agaricus)],
-                           names(:agaricus_campestris).parents)
-    assert_name_list_equal([], names(:agaricus_campestris).children)
-    assert_name_list_equal([], names(:agaricus).all_parents)
-    assert_name_list_equal([], names(:agaricus).parents)
     assert_name_list_equal([
-                             names(:agaricus_campestras),
-                             names(:agaricus_campestris),
-                             names(:agaricus_campestros),
-                             names(:agaricus_campestrus)
-                           ], names(:agaricus).children)
+      names(:agaricus),
+      names(:agaricaceae),
+      names(:agaricales),
+      names(:basidiomycetes),
+      names(:basidiomycota),
+      names(:fungi)
+    ], names(:agaricus_campestris).all_parents)
+    assert_name_list_equal([
+      names(:agaricus)
+    ], names(:agaricus_campestris).parents)
+    assert_name_list_equal([ names(:agaricaceae) ], names(:agaricus).parents)
+    assert_name_list_equal([], names(:agaricus_campestris).children)
+    assert_name_list_equal([
+      names(:agaricus_campestras),
+      names(:agaricus_campestris),
+      names(:agaricus_campestros),
+      names(:agaricus_campestrus)
+    ], names(:agaricus).children, :sort)
   end
 
   def test_ancestors_2
@@ -1576,11 +1582,11 @@ class NameTest < UnitTestCase
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pcr, pcs], pc.children)
-    assert_name_list_equal([pcri], pcr.children)
-    assert_name_list_equal([pac, pav], pa.children)
-    assert_name_list_equal([pph, ppn], pp.children)
+    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_list_equal([pcr, pcs], pc.children, :sort)
+    assert_name_list_equal([pcri], pcr.children, :sort)
+    assert_name_list_equal([pav], pa.children, :sort)
+    assert_name_list_equal([pph, ppn], pp.children, :sort)
 
     # Oops! Petigera is misspelled, so these aren't right...
     assert_name_list_equal([], pc.all_parents)
@@ -1603,24 +1609,24 @@ class NameTest < UnitTestCase
     assert_name_list_equal([pa], pac.parents)
     assert_name_list_equal([pa], pav.parents)
     assert_name_list_equal([], pp.parents)
-    assert_name_list_equal([pp2, pp], pph.parents)
-    assert_name_list_equal([pp2, pp], ppn.parents)
+    assert_name_list_equal([pp], pph.parents)
+    assert_name_list_equal([pp], ppn.parents)
 
-    # Try it again if we clear the misspelling flag.
+    # Try it again if we clear the misspelling flag.  (Still deprecated though.)
     p.correct_spelling = nil
     p.save
 
-    assert_name_list_equal([p], pc.all_parents)
-    assert_name_list_equal([pc, p], pcr.all_parents)
-    assert_name_list_equal([pcr, pc, p], pcri.all_parents)
-    assert_name_list_equal([pc, p], pcs.all_parents)
-    assert_name_list_equal([p], pa.all_parents)
-    assert_name_list_equal([pa, p], pac.all_parents)
-    assert_name_list_equal([pa, p], pav.all_parents)
-    assert_name_list_equal([p], pp.all_parents)
-    assert_name_list_equal([p], pp2.all_parents)
-    assert_name_list_equal([pp, p], pph.all_parents)
-    assert_name_list_equal([pp, p], ppn.all_parents)
+    assert_name_list_equal([p], pc.all_parents, :sort)
+    assert_name_list_equal([pc], pcr.all_parents, :sort)
+    assert_name_list_equal([pcr, pc], pcri.all_parents, :sort)
+    assert_name_list_equal([pc], pcs.all_parents, :sort)
+    assert_name_list_equal([p], pa.all_parents, :sort)
+    assert_name_list_equal([pa], pac.all_parents, :sort)
+    assert_name_list_equal([pa], pav.all_parents, :sort)
+    assert_name_list_equal([p], pp.all_parents, :sort)
+    assert_name_list_equal([p], pp2.all_parents, :sort)
+    assert_name_list_equal([pp], pph.all_parents, :sort)
+    assert_name_list_equal([pp], ppn.all_parents, :sort)
 
     assert_name_list_equal([p], pc.parents)
     assert_name_list_equal([pc], pcr.parents)
@@ -1630,34 +1636,38 @@ class NameTest < UnitTestCase
     assert_name_list_equal([pa], pac.parents)
     assert_name_list_equal([pa], pav.parents)
     assert_name_list_equal([p], pp.parents)
-    assert_name_list_equal([pp2, pp], pph.parents)
-    assert_name_list_equal([pp2, pp], ppn.parents)
+    assert_name_list_equal([pp], pph.parents, :sort)
+    assert_name_list_equal([pp], ppn.parents, :sort)
 
     pp2.change_deprecated(true)
     pp2.save
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pp, p], pph.all_parents)
-    assert_name_list_equal([pp, p], ppn.all_parents)
-    assert_name_list_equal([pp], pph.parents)
-    assert_name_list_equal([pp], ppn.parents)
+    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_list_equal([pp], pph.all_parents, :sort)
+    assert_name_list_equal([pp], ppn.all_parents, :sort)
+    assert_name_list_equal([pp], pph.parents, :sort)
+    assert_name_list_equal([pp], ppn.parents, :sort)
 
     pp.change_deprecated(true)
     pp.save
 
-    assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pp, p], pph.all_parents)
-    assert_name_list_equal([pp, p], ppn.all_parents)
-    assert_name_list_equal([pp2, pp], pph.parents)
-    assert_name_list_equal([pp2, pp], ppn.parents)
+    assert_name_list_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_list_equal([pp, p], pph.all_parents, :sort)
+    assert_name_list_equal([pp, p], ppn.all_parents, :sort)
+    assert_name_list_equal([pp], pph.parents, :sort)
+    assert_name_list_equal([pp], ppn.parents, :sort)
   end
 
   def test_ancestors_3
+    # Make sure only Ascomycetes through Peltigera have
+    # Ascomycota in their classification at first.
+    assert_equal(4, Name.where("classification LIKE '%Ascomycota%'").count)
+
     kng = names(:fungi)
-    phy = create_test_name("Ascomycota", :Phylum)
-    cls = create_test_name("Ascomycetes", :Class)
-    ord = create_test_name("Lecanorales", :Order)
-    fam = create_test_name("Peltigeraceae", :Family)
+    phy = names(:ascomycota)
+    cls = names(:ascomycetes)
+    ord = names(:lecanorales)
+    fam = names(:peltigeraceae)
     gen = names(:peltigera)
     spc = create_test_name("Peltigera canina (L.) Willd.")
     ssp = create_test_name("Peltigera canina ssp. bogus (Bugs) Bunny")
@@ -1693,7 +1703,7 @@ class NameTest < UnitTestCase
     assert_name_list_equal([ssp], var.parents)
     assert_name_list_equal([var], frm.parents)
 
-    assert_name_list_equal([phy], kng.children)
+    assert(kng.children.include?(phy))
     assert_name_list_equal([cls], phy.children)
     assert_name_list_equal([ord], cls.children)
     assert_name_list_equal([fam], ord.children)
@@ -1704,19 +1714,20 @@ class NameTest < UnitTestCase
     assert_name_list_equal([frm], var.children)
     assert_name_list_equal([],    frm.children)
 
-    assert_name_list_equal([phy, cls, ord, fam, gen, spc, ssp, var, frm],
-                           kng.all_children)
+    assert_empty([phy, cls, ord, fam, gen, spc, ssp, var, frm] -
+                 kng.all_children)
     assert_name_list_equal([cls, ord, fam, gen, spc, ssp, var, frm],
-                           phy.all_children)
+                           phy.all_children, :sort)
     assert_name_list_equal([ord, fam, gen, spc, ssp, var, frm],
-                           cls.all_children)
-    assert_name_list_equal([fam, gen, spc, ssp, var, frm], ord.all_children)
-    assert_name_list_equal([gen, spc, ssp, var, frm], fam.all_children)
-    assert_name_list_equal([spc, ssp, var, frm], gen.all_children)
-    assert_name_list_equal([ssp, var, frm], spc.all_children)
-    assert_name_list_equal([var, frm], ssp.all_children)
-    assert_name_list_equal([frm], var.all_children)
-    assert_name_list_equal([], frm.all_children)
+                           cls.all_children, :sort)
+    assert_name_list_equal([fam, gen, spc, ssp, var, frm],
+                           ord.all_children, :sort)
+    assert_name_list_equal([gen, spc, ssp, var, frm], fam.all_children, :sort)
+    assert_name_list_equal([spc, ssp, var, frm], gen.all_children, :sort)
+    assert_name_list_equal([ssp, var, frm], spc.all_children, :sort)
+    assert_name_list_equal([var, frm], ssp.all_children, :sort)
+    assert_name_list_equal([frm], var.all_children, :sort)
+    assert_name_list_equal([], frm.all_children, :sort)
   end
 
   # --------------------------------------
@@ -2344,54 +2355,54 @@ class NameTest < UnitTestCase
     species4 = create_test_name("Lecanora grandis")
     species5 = create_test_name("Lecania grandis")
 
-    assert_obj_list_equal([genus1],
-                          Name.guess_with_errors("Lecanora", 1))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.guess_with_errors("Lecanoa", 1))
-    assert_obj_list_equal([],
-                          Name.guess_with_errors("Lecanroa", 1))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.guess_with_errors("Lecanroa", 2))
-    assert_obj_list_equal([genus1],
-                          Name.guess_with_errors("Lecanosa", 1))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.guess_with_errors("Lecanosa", 2))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.guess_with_errors("Lecanroa", 3))
-    assert_obj_list_equal([genus1],
-                          Name.guess_with_errors("Lacanora", 1))
-    assert_obj_list_equal([genus1],
-                          Name.guess_with_errors("Lacanora", 2))
-    assert_obj_list_equal([genus1],
-                          Name.guess_with_errors("Lacanora", 3))
-    assert_obj_list_equal([genus1],
-                          Name.guess_word("", "Lacanora"))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.guess_word("", "Lecanroa"))
+    assert_name_list_equal([genus1],
+                           Name.guess_with_errors("Lecanora", 1))
+    assert_name_list_equal([genus1, genus2],
+                           Name.guess_with_errors("Lecanoa", 1))
+    assert_name_list_equal([],
+                           Name.guess_with_errors("Lecanroa", 1))
+    assert_name_list_equal([genus1, genus2],
+                           Name.guess_with_errors("Lecanroa", 2))
+    assert_name_list_equal([genus1],
+                           Name.guess_with_errors("Lecanosa", 1))
+    assert_name_list_equal([genus1, genus2],
+                           Name.guess_with_errors("Lecanosa", 2))
+    assert_name_list_equal([genus1, genus2],
+                           Name.guess_with_errors("Lecanroa", 3))
+    assert_name_list_equal([genus1],
+                           Name.guess_with_errors("Lacanora", 1))
+    assert_name_list_equal([genus1],
+                           Name.guess_with_errors("Lacanora", 2))
+    assert_name_list_equal([genus1],
+                           Name.guess_with_errors("Lacanora", 3))
+    assert_name_list_equal([genus1],
+                           Name.guess_word("", "Lacanora"))
+    assert_name_list_equal([genus1, genus2],
+                           Name.guess_word("", "Lecanroa"))
 
-    assert_obj_list_equal([species1, species2],
-                          Name.guess_with_errors("Lecanora galactina", 1))
-    assert_obj_list_equal([species3],
-                          Name.guess_with_errors("Lecanora granti", 1))
-    assert_obj_list_equal([species3, species4],
-                          Name.guess_with_errors("Lecanora granti", 2))
-    assert_obj_list_equal([],
-                          Name.guess_with_errors("Lecanora gran", 3))
-    assert_obj_list_equal([species3],
-                          Name.guess_word("Lecanora", "granti"))
+    assert_name_list_equal([species1, species2],
+                           Name.guess_with_errors("Lecanora galactina", 1))
+    assert_name_list_equal([species3],
+                           Name.guess_with_errors("Lecanora granti", 1))
+    assert_name_list_equal([species3, species4],
+                           Name.guess_with_errors("Lecanora granti", 2))
+    assert_name_list_equal([],
+                           Name.guess_with_errors("Lecanora gran", 3))
+    assert_name_list_equal([species3],
+                           Name.guess_word("Lecanora", "granti"))
 
-    assert_obj_list_equal([genus1],
-                          Name.suggest_alternate_spellings("Lecanora"))
-    assert_obj_list_equal([genus1],
-                          Name.suggest_alternate_spellings('Lecanora\\'))
-    assert_obj_list_equal([genus1, genus2],
-                          Name.suggest_alternate_spellings("Lecanoa"))
-    assert_obj_list_equal([species3],
-                          Name.suggest_alternate_spellings("Lecanora granti"))
-    assert_obj_list_equal([species3, species4],
-                          Name.suggest_alternate_spellings("Lecanora grandi"))
-    assert_obj_list_equal([species4, species5],
-                          Name.suggest_alternate_spellings("Lecanoa grandis"))
+    assert_name_list_equal([names(:lecanorales), genus1],
+                           Name.suggest_alternate_spellings("Lecanora"))
+    assert_name_list_equal([names(:lecanorales), genus1],
+                           Name.suggest_alternate_spellings("Lecanora\\"))
+    assert_name_list_equal([genus1, genus2],
+                           Name.suggest_alternate_spellings("Lecanoa"))
+    assert_name_list_equal([species3],
+                           Name.suggest_alternate_spellings("Lecanora granti"))
+    assert_name_list_equal([species3, species4],
+                           Name.suggest_alternate_spellings("Lecanora grandi"))
+    assert_name_list_equal([species4, species5],
+                           Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
 
   def test_imageless
