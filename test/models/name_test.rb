@@ -2453,4 +2453,20 @@ class NameTest < UnitTestCase
     assert_equal(expect,
                  Name.names_matching_desired_new_name(parsed).order(:author))
   end
+
+  def test_clean_infrageneric_classifications
+    msgs = Name.clean_infrageneric_classifications
+    assert_empty(msgs, msgs.join("\n"))
+
+    a = names(:agaricus)
+    ac = names(:agaricus_campestris)
+    ac.update_attributes(classification: "")
+    msgs = Name.clean_infrageneric_classifications
+    assert_equal(["Updating Agaricus campestris"], msgs)
+    assert_equal(a.classification, ac.reload.classification)
+
+    a.destroy
+    msgs = Name.clean_infrageneric_classifications
+    assert(msgs.include?("Missing genus Agaricus"))
+  end
 end

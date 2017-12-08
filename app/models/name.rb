@@ -911,6 +911,42 @@ class Name < AbstractModel
     ))
   end
 
+  # This is meant to be run nightly to ensure that all the infrageneric
+  # classifications are up-to-date with respect to their genera.  This is
+  # important because there is no way to edit this on-line.  (Although there
+  # will be a "propagate classification" button on the genera, and maybe we
+  # can add that to the children, as well.)
+  def self.clean_infrageneric_classifications
+    out = []
+    errors = {}
+    genus_text_name = nil
+    genus_classification = nil
+    genus_rank = Name.ranks[:Genus]
+    # The sort_name ordering should ensure that genera always comes before
+    # the corresponding infrageneric taxa.
+    Name.connection.select_rows(%(
+      SELECT id, rank, text_name, classification FROM names
+      WHERE correct_spelling_id IS NULL
+        AND rank <= #{genus_rank}
+      ORDER BY sort_name ASC
+    )).each do |id, rank, text_name, classification|
+      if rank == genus_rank
+        genus_text_name = text_name
+        genus_classification = classification
+      elsif (x = text_name.split(" ", 2).first) != genus_text_name
+        out << "Missing genus #{x}" unless errors[x]
+        errors[x] = true
+      elsif classification != genus_classification
+        out << "Updating #{text_name}"
+        str = Name.connection.quote(genus_classification)
+        Name.connection.execute(%(
+          UPDATE names SET classification = #{str} WHERE id = #{id}
+        ))
+      end
+    end
+    return out
+  end
+
   ##############################################################################
   #
   #  :section: Lifeforms
@@ -964,22 +1000,18 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
-    raise("Name#propagate_add_lifeform only works on genera for now.") \
-      if rank != :Genus
     Name.connection.execute(%(
       UPDATE names SET lifeform = CONCAT(lifeform, "#{lifeform} ")
-      WHERE text_name LIKE "#{text_name} %"
+      WHERE id IN (#{all_children.map(&:id).join(",")})
         AND lifeform NOT LIKE "% #{lifeform} %"
     ))
   end
 
   # Remove lifeform (one word only) from all children.
   def propagate_remove_lifeform(lifeform)
-    raise("Name#propagate_remove_lifeform only works on genera for now.") \
-      if rank != :Genus
     Name.connection.execute(%(
       UPDATE names SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
-      WHERE text_name LIKE "#{text_name} %"
+      WHERE id IN (#{all_children.map(&:id).join(",")})
         AND lifeform LIKE "% #{lifeform} %"
     ))
   end
