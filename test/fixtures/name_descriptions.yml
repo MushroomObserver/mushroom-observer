@@ -159,8 +159,8 @@ peltigera_source_desc: # 14
 coprinus_desc: # 15
   <<: *DEFAULTS
   name: coprinus
-  authors: rolf
-  editors: rolf, mary
+  authors: katrina
+  editors: katrina
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 coprinus_comatus_desc: # 16
