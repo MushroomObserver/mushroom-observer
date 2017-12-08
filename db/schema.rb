@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171124004900) do
+ActiveRecord::Schema.define(version: 20171207130700) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -406,6 +406,7 @@ ActiveRecord::Schema.define(version: 20171124004900) do
     t.text     "classification",      limit: 65535
     t.boolean  "ok_for_export",                     default: true,  null: false
     t.string   "author",              limit: 100
+    t.string   "lifeform",            limit: 1024,  default: " ",   null: false
   end
 
   create_table "names_versions", force: :cascade do |t|
@@ -423,6 +424,7 @@ ActiveRecord::Schema.define(version: 20171124004900) do
     t.integer  "correct_spelling_id", limit: 4
     t.text     "notes",               limit: 65535
     t.integer  "rank",                limit: 4
+    t.string   "lifeform",            limit: 1024,  default: " ",   null: false
   end
 
   create_table "naming_reasons", force: :cascade do |t|
