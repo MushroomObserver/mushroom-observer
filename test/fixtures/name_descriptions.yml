@@ -18,12 +18,14 @@ agaricus_campestras_desc: # 1
   <<: *DEFAULTS
   name: agaricus_campestras
   notes: This should... ¡prevent me from merging!
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 # Another name with notes (not mergeable)
 agaricus_campestros_desc: # 2
   <<: *DEFAULTS
   name: agaricus_campestros
   notes: Need two to get an error
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
 russula_brevipes_author_notes_desc: # 3
   <<: *DEFAULTS
@@ -154,21 +156,29 @@ peltigera_source_desc: # 14
   authors: katrina
   writer_groups: katrina_only
 
-coprinus_comatus_desc: # 15
+coprinus_desc: # 15
+  <<: *DEFAULTS
+  name: coprinus
+  authors: rolf
+  editors: rolf, mary
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+coprinus_comatus_desc: # 16
   <<: *DEFAULTS
   name: coprinus_comatus
   authors: rolf
   editors: rolf, mary
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
 
-mergeable_description_notes_desc: # 16
+mergeable_description_notes_desc: # 17
   name:  mergeable_description_notes
   notes: Notes for $LABEL
 
-mergeable_second_description_notes_desc: # 17
+mergeable_second_description_notes_desc: # 18
   name:  mergeable_second_description_notes
   notes: Notes for $LABEL
 
-agaricus_desc: # 18
+agaricus_desc: # 19
   <<: *DEFAULTS
   name: agaricus
   gen_desc: Medium to large mushroom with ring and gills darkening from pink to brown.

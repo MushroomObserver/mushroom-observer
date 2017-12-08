@@ -2454,19 +2454,43 @@ class NameTest < UnitTestCase
                  Name.names_matching_desired_new_name(parsed).order(:author))
   end
 
-  def test_clean_infrageneric_classifications
-    msgs = Name.clean_infrageneric_classifications
+  def test_refresh_classification_caches
+    name = names(:coprinus_comatus)
+    bad  = name.classification = "Phyllum: _Ascomycota_"
+    good = name.description.classification
+    name.save
+    assert_not_equal(good, bad)
+
+    Name.refresh_classification_caches
+    assert_equal(good, name.reload.classification)
+    assert_equal(good, name.description.reload.classification)
+  end
+
+  def test_propagate_generic_classifications
+    msgs = Name.propagate_generic_classifications
     assert_empty(msgs, msgs.join("\n"))
 
     a = names(:agaricus)
     ac = names(:agaricus_campestris)
     ac.update_attributes(classification: "")
-    msgs = Name.clean_infrageneric_classifications
+    msgs = Name.propagate_generic_classifications
     assert_equal(["Updating Agaricus campestris"], msgs)
     assert_equal(a.classification, ac.reload.classification)
 
     a.destroy
-    msgs = Name.clean_infrageneric_classifications
+    msgs = Name.propagate_generic_classifications
     assert(msgs.include?("Missing genus Agaricus"))
+  end
+
+  def test_changing_classification_propagates_to_subtaxa
+    name  = names(:coprinus)
+    child = names(:coprinus_comatus)
+    new_classification = names(:peltigera).classification
+    assert_not_equal(new_classification, name.classification)
+    assert_not_equal(new_classification, child.classification)
+    name.description.classification = new_classification
+    name.description.save
+    assert_equal(new_classification, name.reload.classification)
+    assert_equal(new_classification, child.reload.classification)
   end
 end

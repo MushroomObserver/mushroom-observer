@@ -45,6 +45,10 @@
 #                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #  names_for_mushroom_app::      Display list of most common names in plain text.
+#  edit_lifeform::               Edit lifeform tags.
+#  propagate_lifeform::          Add/remove lifeform tags to/from subtaxa.
+#  propagate_classification::    Copy classification to all subtaxa.
+#  refresh_classification::      Refresh classification from genus.
 #
 #  ==== Helpers
 #  deprecate_synonym::           (used by change_synonyms)
@@ -344,46 +348,40 @@ class NameController < ApplicationController
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
-      # Get classification
-      @classification = @name.best_classification
-      @parents = nil
-      unless @classification
-        # Get list of immediate parents.
-        @parents = @name.parents
-      end
+      # Get classification.
+      @classification = @name.classification
+      @parents = @name.parent if !@classification
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)
-
-      # Create search queries for observation lists.
-      @consensus_query = create_query(:Observation, :of_name, name: @name,
-                                                              by: :confidence)
-      @consensus2_query = create_query(:Observation, :of_name, name: @name,
-                                                               synonyms: :all,
-                                                               by: :confidence)
-      @synonym_query = create_query(:Observation, :of_name, name: @name,
-                                                            synonyms: :exclusive,
-                                                            by: :confidence)
-      @other_query = create_query(:Observation, :of_name, name: @name,
-                                                          synonyms: :all, nonconsensus: :exclusive,
-                                                          by: :confidence)
-      @obs_with_images_query = create_query(:Observation, :of_name, name: @name,
-                                                                    by: :confidence, has_images: :yes)
-
       if @name.at_or_below_genus?
-        @subtaxa_query = create_query(:Observation, :of_children, name: @name,
-                                                                  all: true, by: :confidence)
+        args = { name: @name, all: true, by: :confidence }
+        @subtaxa_query = create_query(:Observation, :of_children, args)
       end
 
-      # Determine which queries actually have results and instantiate the ones we'll use
+      # Create search queries for observation lists.
+      args = { name: @name, by: :confidence }
+      @consensus_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :all, by: :confidence }
+      @consensus2_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :exclusive, by: :confidence }
+      @synonym_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :all, nonconsensus: :exclusive,
+               by: :confidence }
+      @other_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, by: :confidence, has_images: :yes }
+      @obs_with_images_query = create_query(:Observation, :of_name, args)
+
+      # Determine which queries actually have results and instantiate the ones
+      # we'll use.
       @best_description = @name.best_brief_description
-      @first_four = @obs_with_images_query.results(limit: 4)
-      @first_child = @children_query.results(limit: 1)[0]
-      @first_consensus = @consensus_query.results(limit: 1)[0]
-      @has_consensus2 = @consensus2_query.select_count
-      @has_synonym = @synonym_query.select_count
-      @has_other = @other_query.select_count
-      @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
+      @first_four       = @obs_with_images_query.results(limit: 4)
+      @first_child      = @children_query.results(limit: 1).first
+      @first_consensus  = @consensus_query.results(limit: 1).first
+      @has_consensus2   = @consensus2_query.select_count
+      @has_synonym      = @synonym_query.select_count
+      @has_other        = @other_query.select_count
+      @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
     end
   end
 
@@ -1459,6 +1457,49 @@ class NameController < ApplicationController
       flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
     end
     redirect_with_query(action: "show_name", id: name_id)
+  end
+
+  def propagate_classification # :norobots:
+    pass_query_params
+    name = find_or_goto_index(Name, params[:id])
+    return unless name
+    return if name.below_genus?
+    name.propagate_classification
+    redirect_with_query(name.show_link_args)
+  end
+
+  def refresh_classification # :norobots:
+    pass_query_params
+    name = find_or_goto_index(Name, params[:id])
+    return unless name
+    return unless name.below_genus?
+    name.update_attributes(classification: name.genus.classification)
+    redirect_with_query(name.show_link_args)
+  end
+
+  def edit_lifeform # :norobots:
+    pass_query_params
+    @name = find_or_goto_index(Name, params[:id])
+    return unless request.method == "POST"
+    words = Name.all_lifeforms.select do |word|
+      params["lifeform_#{word}"] == "1"
+    end
+    @name.update_attributes(lifeform: " #{words.join(' ')} ")
+    redirect_with_query(@name.show_link_args)
+  end
+
+  def propagate_lifeform # :norobots:
+    pass_query_params
+    @name = find_or_goto_index(Name, params[:id])
+    return unless request.method == "POST"
+    Name.all_lifeforms.each do |word|
+      if params["add_#{word}"] == "1"
+        @name.propagate_add_lifeform(word)
+      elsif params["remove_#{word}"] == "1"
+        @name.propagate_remove_lifeform(word)
+      end
+    end
+    redirect_with_query(@name.show_link_args)
   end
 
   ################################################################################

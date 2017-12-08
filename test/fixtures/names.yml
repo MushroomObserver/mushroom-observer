@@ -44,6 +44,7 @@ fungi: # 1
 
 coprinus: # 2
   <<: *DEFAULTS
+  description: coprinus_desc
   user: rolf
   text_name: Coprinus
   display_name: '**__Coprinus__**'

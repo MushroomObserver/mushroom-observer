@@ -981,6 +981,16 @@
   time_one_year_ago: last year, [date]
   time_years_ago: "[n] years ago, [date]"
 
+  # Lifeform "tags".
+  lifeform_basidiolichen: Basidiolichen
+  lifeform_lichen: Lichen
+  lifeform_lichen_ally: Lichen Ally
+  lifeform_lichenicolous: Lichenicolous
+  lifeform_help_basidiolichen: Lichen-forming fungus with a mushroom fruiting body.
+  lifeform_help_lichen: Lichen-forming fungus which grows a specialized thallus when in symbiosis with one or more green algae or cyanobacteria.
+  lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
+  lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
+
   # Rss log messages.
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
@@ -1264,6 +1274,13 @@
   # name/edit_name
   edit_name_title: Edit Name [name]
   edit_name_multiple_names_match: "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
+  edit_lifeform_title: Edit Lifeform of [name]
+  edit_lifeform_help: Check boxes of all categories which apply to this taxon.
+  edit_lifeform_save: "[:SAVE]"
+  propagate_lifeform_title: Propagate Lifeform to Subtaxa of [name]
+  propagate_lifeform_add: Check boxes of categories to add to all subtaxa.
+  propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
+  propagate_lifeform_apply: Apply
 
   # observer/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
@@ -1832,10 +1849,15 @@
   show_name_email_tracking: Email Tracking
   show_name_create_description: "[:CREATE]"
   show_name_synonyms: Synonym(s)
-  show_name_preferred_synonyms: Preferred Synonym(s)
-  show_name_deprecated_synonyms: Deprecated Synonym(s)
+  show_name_preferred_synonyms: Preferred Synonyms
+  show_name_deprecated_synonyms: Deprecated Synonyms
+  show_name_misspelled_synonyms: Misspellings
   show_name_misspelling: This name is misspelled.
   show_name_misspelling_correct: "[:CORRECT_SPELLING]"
+  show_name_refresh_classification: Refresh from Genus
+  show_name_propagate_classification: Propagate to Subtaxa
+  show_name_lifeform: Lifeform
+  show_name_propagate_lifeform: Propagate to Subtaxa
   show_name_notes: Notes on Taxonomy
   show_name_descriptions: "[:DESCRIPTIONS]"
   show_name_create_draft: Create New Draft for

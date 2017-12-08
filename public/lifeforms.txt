@@ -11,7 +11,7 @@ Adelococcus	lichenicolous
 Adelolecia	lichen
 Agonimia	lichen
 Agrestia	lichen
-Agyrium	lichen-ally
+Agyrium	lichen_ally
 Agyrophora	lichen
 Ahlesia	lichen
 Ahtiana	lichen
@@ -84,8 +84,8 @@ Bottaria	lichen
 Briancoppinsia	lichenicolous
 Brigantiaea	lichen
 Brodoa	lichen
-Brucea	lichen-ally
-Bruceomyces	lichen-ally
+Brucea	lichen_ally
+Bruceomyces	lichen_ally
 Bryobilimbia	lichen
 Bryocaulon	lichen
 Bryodina	lichen
@@ -142,7 +142,7 @@ Cetrariastrum	lichen
 Cetrariella	lichen
 Cetrelia	lichen
 Chaenotheca	lichen
-Chaenothecopsis	lichen-ally
+Chaenothecopsis	lichen_ally
 Chalara	lichenicolous
 Chapsa	lichen
 Cheiromycina	lichen
@@ -177,7 +177,7 @@ Combea	lichen
 Coniambigua	lichenicolous
 Coniarthonia	lichen
 Coniocybe	lichen
-Coniocybopsis	lichen-ally
+Coniocybopsis	lichen_ally
 Conotrema	lichen
 Cora	basidiolichen
 Coriscium	lichen
@@ -363,7 +363,7 @@ Ionaspis	lichen
 Jamesiella	lichen
 Japewia	lichen
 Jarxia	lichen
-Julella	lichen-ally
+Julella	lichen_ally
 Kaernefeltia	lichen
 Kalchbrenneriella	lichenicolous
 Karschia	lichenicolous
@@ -424,7 +424,7 @@ Lichenopeltella	lichenicolous
 Lichenopuccinia	lichenicolous
 Lichenosticta	lichenicolous
 Lichenostigma	lichenicolous
-Lichenothelia	lichen-ally
+Lichenothelia	lichen_ally
 Lichenothrix	lichen
 Lichina	lichen
 Lichinella	lichen
@@ -439,7 +439,7 @@ Lobothallia	lichen
 Lopadiopsis	lichen
 Lopadium	lichen
 Lopezaria	lichen
-Lophiostoma	lichen-ally
+Lophiostoma	lichen_ally
 Loxospora	lichen
 Loxosporopsis	lichen
 Macentina	lichen
@@ -461,7 +461,7 @@ Melanelia	lichen
 Melanelixia	lichen
 Melanohalea	lichen
 Melanolecia	lichen
-Melanomma	lichen-ally
+Melanomma	lichen_ally
 Melanophloea	lichen
 Melanotheca	lichen
 Melanotopelia	lichen
@@ -477,7 +477,7 @@ Microcalicium	lichenicolous
 Microglaena	lichen
 Microlychnus	lichen
 Microphiale	lichen
-Microthelia	lichen-ally
+Microthelia	lichen_ally
 Minutoexcipula	lichenicolous
 Miriquidica	lichen
 Mobergia	lichen
@@ -488,12 +488,12 @@ Monodictys	lichenicolous
 Montanelia	lichen
 Mosigia	lichen
 Muellerella	lichenicolous
-Multiclavula	lichen-ally
+Multiclavula	lichen_ally
 Mycobilimbia	lichen
 Mycoblastus	lichen
-Mycocalicium	lichen-ally
-Mycoglaena	lichen-ally
-Mycomicrothelia	lichen-ally
+Mycocalicium	lichen_ally
+Mycoglaena	lichen_ally
+Mycomicrothelia	lichen_ally
 Mycoporellum	lichen
 Mycoporum	lichen
 Myelochroa	lichen
@@ -502,7 +502,7 @@ Myrionora	lichen
 Myriospora	lichen
 Myriotrema	lichen
 Myxobilimbia	lichen
-Myxophora	lichen-ally
+Myxophora	lichen_ally
 Myxotrichum	lichen
 Nadvornikia	lichen
 Naetrocymbe	lichen
@@ -564,7 +564,7 @@ Peccania	lichen
 Peltigera	lichen
 Peltula	lichen
 Perforaria	lichen
-Peridiothelia	lichen-ally
+Peridiothelia	lichen_ally
 Perigrapha	lichenicolous
 Pertusaria	lichen
 Petractis	lichen
@@ -572,7 +572,7 @@ Pezizella	lichenicolous
 Phacographa	lichenicolous
 Phacopsis	lichenicolous
 Phacothecium	lichenicolous
-Phaeocalicium	lichen-ally
+Phaeocalicium	lichen_ally
 Phaeographina	lichen
 Phaeographis	lichen
 Phaeophyscia	lichen
@@ -712,7 +712,7 @@ Sarcographa	lichen
 Sarcogyne	lichen
 Sarcopyrenia	lichenicolous
 Sarcosagium	lichen
-Sarea	lichen-ally
+Sarea	lichen_ally
 Schadonia	lichen
 Schaereria	lichen
 Schismatomma	lichen
@@ -741,7 +741,7 @@ Sphaeria	lichen
 Sphaerophorus	lichen
 Sphaerulina	lichenicolous
 Sphinctrina	lichenicolous
-Sphinctrinella	lichen-ally
+Sphinctrinella	lichen_ally
 Spilonema	lichen
 Spilonemella	lichen
 Spirographa	lichenicolous
@@ -755,7 +755,7 @@ Staurothele	lichen
 Stegobolus	lichen
 Steineropsis	lichen
 Steinia	lichen
-Stenocybe	lichen-ally
+Stenocybe	lichen_ally
 Stereocaulon	lichen
 Sticta	lichen
 Stictis	lichen
@@ -842,7 +842,7 @@ Xanthopsora	lichen
 Xanthopsorella	lichen
 Xanthoria	lichen
 Xenonectriella	lichenicolous
-Xerotrema	lichen-ally
+Xerotrema	lichen_ally
 Xyleborus	lichen
 Xylographa	lichen
 Xyloschistes	lichen

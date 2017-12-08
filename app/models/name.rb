@@ -371,10 +371,6 @@ class Name < AbstractModel
     end
   end
 
-  def best_classification
-    description.classification if description
-  end
-
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
@@ -900,6 +896,7 @@ class Name < AbstractModel
     self.lifeform       ||= genus.lifeform
   end
 
+  # Copy the classification of a genus to all of its children.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
@@ -909,6 +906,13 @@ class Name < AbstractModel
       WHERE text_name LIKE "#{text_name} %"
         AND classification != #{escaped_string}
     ))
+    Name.connection.execute(%(
+      UPDATE name_descriptions nd, names n
+      SET nd.classification = #{escaped_string}
+      WHERE nd.id = n.description_id
+        AND n.text_name LIKE "#{text_name} %"
+        AND nd.classification != #{escaped_string}
+    ))
   end
 
   # This is meant to be run nightly to ensure that all the infrageneric
@@ -916,7 +920,7 @@ class Name < AbstractModel
   # important because there is no way to edit this on-line.  (Although there
   # will be a "propagate classification" button on the genera, and maybe we
   # can add that to the children, as well.)
-  def self.clean_infrageneric_classifications
+  def self.propagate_generic_classifications
     out = []
     errors = {}
     genus_text_name = nil
@@ -925,11 +929,11 @@ class Name < AbstractModel
     # The sort_name ordering should ensure that genera always comes before
     # the corresponding infrageneric taxa.
     Name.connection.select_rows(%(
-      SELECT id, rank, text_name, classification FROM names
+      SELECT id, description_id, rank, text_name, classification FROM names
       WHERE correct_spelling_id IS NULL
         AND rank <= #{genus_rank}
       ORDER BY sort_name ASC
-    )).each do |id, rank, text_name, classification|
+    )).each do |id, desc_id, rank, text_name, classification|
       if rank == genus_rank
         genus_text_name = text_name
         genus_classification = classification
@@ -942,9 +946,25 @@ class Name < AbstractModel
         Name.connection.execute(%(
           UPDATE names SET classification = #{str} WHERE id = #{id}
         ))
+        Name.connection.execute(%(
+          UPDATE name_descriptions SET classification = #{str}
+          WHERE id = #{desc_id}
+        )) unless desc_id.blank?
       end
     end
     return out
+  end
+
+  # This is meant to be run nightly to ensure that all the classification
+  # caches are up to date.  It only pays attention to genera or higher.
+  def self.refresh_classification_caches
+    Name.connection.execute(%(
+      UPDATE names n, name_descriptions nd
+      SET n.classification = nd.classification
+      WHERE nd.id = n.description_id
+        AND n.rank <= #{Name.ranks[:Genus]}
+        AND nd.classification != n.classification
+    ))
   end
 
   ##############################################################################
@@ -954,11 +974,9 @@ class Name < AbstractModel
   ##############################################################################
 
   ALL_LIFEFORMS = [
-    "mushroom",
-    "slimemold",
     "basidiolichen",
     "lichen",
-    "lichen-ally",
+    "lichen_ally",
     "lichenicolous"
   ]
 

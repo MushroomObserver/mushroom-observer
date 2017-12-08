@@ -219,8 +219,8 @@ class NameDescription < Description
   def update_classification_cache
     if (name.description_id == id) &&
        (name.classification != classification)
-      name.classification = classification
-      name.save
+      name.update_attributes(classification: classification)
+      name.propagate_classification if name.rank == :Genus
     end
   end
 

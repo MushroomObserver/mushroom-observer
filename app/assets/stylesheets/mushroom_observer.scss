@@ -1375,6 +1375,18 @@ table.table-namings {
     }
 }
 
+.table-lifeform {
+    tr td {
+        padding: .1em 1em;
+    }
+    tr:nth-child(odd) {
+        background-color: $LIST_ODD_BG_COLOR;
+    }
+    tr:nth-child(even) {
+        background-color: $LIST_EVEN_BG_COLOR;
+    }
+}
+
 .textile {
     th, td {
         padding: 0.3em;
