@@ -5,7 +5,7 @@
 
 DEFAULTS: &DEFAULTS
   user:     mary
-  where:    nil
+  where:    "Burbank, California, USA"
   location: burbank
   title:    $LABEL
 
@@ -68,7 +68,7 @@ where_no_mushrooms_list: # 7
   created_at: 2008-05-03 21:14:00
   updated_at: 2008-05-03 21:14:00
   when: 2006-03-09
-  where: no mushrooms
+  where: No Mushrooms
   location: no_mushrooms_location
 
 # used by QueryTest

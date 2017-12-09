@@ -2516,7 +2516,7 @@ class QueryTest < UnitTestCase
 
     # name
     expect = Observation.
-             where("text_name LIKE 'agaricus%'").includes(:name).
+             where("names.text_name LIKE 'agaricus%'").includes(:name).
              order("names.text_name, names.author, observations.id DESC")
     assert_query(expect.map(&:id),
                  :Observation, :pattern_search, pattern: "agaricus", by: :name)

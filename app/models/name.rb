@@ -327,9 +327,9 @@ class Name < AbstractModel
     "classification" # (versioned in the default desc)
   )
 
-  after_update :notify_users
-
   before_create :inherit_stuff
+  before_update :update_observation_cache
+  after_update :notify_users
 
   # Notify webmaster that a new name was created.
   after_create do |name|
@@ -903,6 +903,16 @@ class Name < AbstractModel
     self.lifeform       ||= genus.lifeform
   end
 
+  # Let attached observations update their cache if these fields changed.
+  def update_observation_cache
+    Observation.update_cache("name", "lifeform", id, lifeform) \
+      if lifeform_changed?
+    Observation.update_cache("name", "text_name", id, text_name) \
+      if text_name_changed?
+    Observation.update_cache("name", "classification", id, classification) \
+      if classification_changed?
+  end
+
   # Copy the classification of a genus to all of its children.  Does not change
   # updated_at or rss_log or anything.  Just changes the classification field
   # in the name and default description records. 
@@ -921,6 +931,12 @@ class Name < AbstractModel
       WHERE nd.id = n.description_id
         AND n.text_name LIKE "#{text_name} %"
         AND nd.classification != #{escaped_string}
+    ))
+    Name.connection.execute(%(
+      UPDATE observations
+      SET classification = #{escaped_string}
+      WHERE text_name LIKE "#{text_name} %"
+        AND classification != #{escaped_string}
     ))
   end
 
@@ -959,6 +975,9 @@ class Name < AbstractModel
           UPDATE name_descriptions SET classification = #{str}
           WHERE id = #{desc_id}
         )) unless desc_id.blank?
+        Name.connection.execute(%(
+          UPDATE observations SET classification = #{str} WHERE name_id = #{id}
+        ))
       end
     end
     return out
@@ -974,6 +993,7 @@ class Name < AbstractModel
         AND n.rank <= #{Name.ranks[:Genus]}
         AND nd.classification != n.classification
     ))
+    []
   end
 
   ##############################################################################
@@ -1032,6 +1052,11 @@ class Name < AbstractModel
       WHERE id IN (#{all_children.map(&:id).join(",")})
         AND lifeform NOT LIKE "% #{lifeform} %"
     ))
+    Name.connection.execute(%(
+      UPDATE observations SET lifeform = CONCAT(lifeform, "#{lifeform} ")
+      WHERE name_id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform NOT LIKE "% #{lifeform} %"
+    ))
   end
 
   # Remove lifeform (one word only) from all children.
@@ -1039,6 +1064,11 @@ class Name < AbstractModel
     Name.connection.execute(%(
       UPDATE names SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
       WHERE id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform LIKE "% #{lifeform} %"
+    ))
+    Name.connection.execute(%(
+      UPDATE observations SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
+      WHERE name_id IN (#{all_children.map(&:id).join(",")})
         AND lifeform LIKE "% #{lifeform} %"
     ))
   end

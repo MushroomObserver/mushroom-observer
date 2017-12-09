@@ -206,7 +206,7 @@ class ApiTest < UnitTestCase
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
     assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
-    assert_nil(obs.where)
+    assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
     assert_equal(@is_col_loc, obs.is_collection_location)
@@ -1925,7 +1925,7 @@ class ApiTest < UnitTestCase
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
-    assert_nil(obs.where)
+    assert_equal("Burbank, California, USA", obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
     # API no longer pays attention to user's location format preference!  This
@@ -1947,7 +1947,7 @@ class ApiTest < UnitTestCase
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")
     obs = Observation.last
-    assert_nil(obs.where)
+    assert_equal("Burbank, California, USA", obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
   end
 
@@ -2007,7 +2007,7 @@ class ApiTest < UnitTestCase
     rolfs_obs.reload
     assert_equal(Date.parse("2012-12-12"), rolfs_obs.when)
     assert_objs_equal(locations(:burbank), rolfs_obs.location)
-    assert_nil(rolfs_obs.where)
+    assert_equal("Burbank, California, USA", rolfs_obs.where)
     assert_equal(false, rolfs_obs.specimen)
     assert_equal(false, rolfs_obs.is_collection_location)
 
@@ -2734,7 +2734,7 @@ class ApiTest < UnitTestCase
     @title    = "Maximal New Species List"
     @date     = Date.parse("2017-11-17")
     @location = locations(:burbank)
-    @where    = nil
+    @where    = locations(:burbank).name
     @notes    = "some notes"
     params = {
       method:   :post,
@@ -2755,7 +2755,7 @@ class ApiTest < UnitTestCase
     @title    = "Minimal New Species List"
     @date     = Date.today
     @location = Location.unknown
-    @where    = nil
+    @where    = Location.unknown.name
     @notes    = nil
     params = {
       method:   :post,
@@ -2790,7 +2790,7 @@ class ApiTest < UnitTestCase
     @title    = "New Title"
     @date     = Date.parse("2017-11-17")
     @location = locations(:mitrula_marsh)
-    @where    = nil
+    @where    = locations(:mitrula_marsh).name
     @notes    = "new notes"
     params = {
       method:       :patch,

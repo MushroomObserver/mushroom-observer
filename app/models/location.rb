@@ -114,6 +114,7 @@ class Location < AbstractModel
     "description_id"
   )
 
+  before_update :update_observation_cache
   after_update :notify_users
 
   # Automatically log standard events.
@@ -129,6 +130,11 @@ class Location < AbstractModel
        )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
+  end
+
+  # Let attached observations update their cache if these fields changed.
+  def update_observation_cache
+    Observation.update_cache("location", "where", id, name) if name_changed?
   end
 
   ##############################################################################

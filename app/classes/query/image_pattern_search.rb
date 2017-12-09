@@ -24,7 +24,7 @@ module Query
         "COALESCE(images.original_name,'')",
         "COALESCE(images.copyright_holder,'')",
         "COALESCE(images.notes,'')",
-        "IF(locations.id,locations.name,observations.where)"
+        "observations.where"
       )
     end
   end

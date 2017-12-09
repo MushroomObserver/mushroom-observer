@@ -16,10 +16,9 @@ class ContentFilter
       # version.  This allows all lifeforms containing the word "lichen" to be
       # selected for in the positive version, but only excudes the one lifeform
       # in the negative. 
-      cond = val ? "names.lifeform LIKE '%lichen%'" :
-                   "names.lifeform NOT LIKE '% lichen %'"
-      return cond if model == Name
-      "observations.name_id IN (SELECT id FROM names WHERE #{cond})"
+      table = (model == Name) ? "names" : "observations"
+      val ? "#{table}.lifeform LIKE '%lichen%'" :
+            "#{table}.lifeform NOT LIKE '% lichen %'"
     end
   end
 end

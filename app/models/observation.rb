@@ -163,6 +163,7 @@ class Observation < AbstractModel
   has_and_belongs_to_many :herbarium_records
   before_destroy { destroy_orphaned_collection_numbers }
 
+  before_save :cache_content_filter_data
   after_update :notify_users_after_change
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -189,6 +190,55 @@ class Observation < AbstractModel
     collection_numbers.each do |col_num|
       col_num.destroy if col_num.observations == [self]
     end
+  end
+
+  # Cache location and name data used by content filters.
+  def cache_content_filter_data
+    if name && name_id_changed?
+      self.lifeform = name.lifeform
+      self.text_name = name.text_name
+      self.classification = name.classification
+    end
+    if location && location_id_changed?
+      self.where = location.name
+    end
+  end
+
+  # This is meant to be run nightly to ensure that the cached name
+  # and location data used by content filters is kept in sync.
+  def self.refresh_content_filter_caches
+    update_cached_column("name", "lifeform") +
+    update_cached_column("name", "text_name") +
+    update_cached_column("name", "classification") +
+    update_cached_column("location", "name", "where")
+  end
+
+  def self.update_cached_column(type, foreign, local = foreign)
+    msgs = []
+    Observation.connection.select_rows(%(
+      SELECT o.id, x.#{foreign}
+      FROM observations o, #{type}s x
+      WHERE x.id = o.#{type}_id
+        AND x.#{foreign} != o.%{local}
+    )).each do |id, str|
+      msgs << "Fixing #{type} #{foreign} for observation ##{id}."
+      Observation.connection.execute(%(
+        UPDATE observations
+        SET `#{local}` = #{Observation.connection.quote(str)}
+        WHERE id = #{id}
+      ))
+    end
+    msgs
+  end
+
+  # Used by Name and Location to update the observation cache when a cached
+  # field value is changed.
+  def self.update_cache(type, field, id, val)
+    Observation.connection.execute(%(
+      UPDATE observations
+      SET `#{field}` = #{Observation.connection.quote(val)}
+      WHERE #{type}_id = #{id}
+    ))
   end
 
   ##############################################################################
@@ -222,7 +272,7 @@ class Observation < AbstractModel
             end
     loc = Location.find_by_name(where)
     if loc
-      self.where = nil
+      self.where = loc.name
       self.location = loc
     else
       self.where = where
@@ -1310,9 +1360,12 @@ class Observation < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
+    old_name = connection.quote(old_name)
+    new_name = connection.quote(location.name)
     connection.update(%(
-      UPDATE observations SET `where` = NULL, location_id = #{location.id}
-      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+      UPDATE observations
+      SET `where` = #{new_name}, location_id = #{location.id}
+      WHERE `where` = #{old_name}
     ))
   end
 

@@ -174,8 +174,8 @@ no_mushrooms_location: # 13
 collection_location: # 14
   user_id: 0
   version: 1
-  name: $LABEL
-  scientific_name: $LABEL
+  name: Collection Location
+  scientific_name: Collection Location
   north: 90
   west: -180
   east: 180
@@ -184,8 +184,8 @@ collection_location: # 14
 display_location: # 15
   user_id: 0
   version: 1
-  name: $LABEL
-  scientific_name: $LABEL
+  name: Display Location
+  scientific_name: Display Location
   north: 90
   west: -180
   east: 180

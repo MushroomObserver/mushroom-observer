@@ -153,7 +153,7 @@ class PostObservationTest < IntegrationTestCase
       assert_equal(expected_values[:where], new_obs.where)
       assert_nil(new_obs.location)
     else
-      assert_nil(new_obs.where)
+      assert_equal(expected_values[:location], new_obs.where)
       assert_equal(expected_values[:location], new_obs.location.display_name)
     end
     assert_gps_equal(expected_values[:lat], new_obs.lat)
