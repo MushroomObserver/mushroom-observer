@@ -691,7 +691,7 @@ class Name < AbstractModel
       name = words.join(" ")
       words.pop
       next if name == text_name || name[-1] == "."
-      parent = get_best_name(name)
+      parent = Name.best_match(name)
       parents << parent if parent
       return [parent] if !all && parent && !parent.deprecated
     end
@@ -699,7 +699,7 @@ class Name < AbstractModel
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
     lines.reverse.each do |rank, name|
-      parent = get_best_name(name)
+      parent = Name.best_match(name)
       parents << parent if parent
       return [parent] if !all && !parent.deprecated
     end
@@ -713,7 +713,14 @@ class Name < AbstractModel
     [parents.first]
   end
 
-  def get_best_name(name)
+  # Handy method which searches for a plain old text name and picks the "best"
+  # version available.  That is, it ignores misspellings, chooses accepted,
+  # non-"sensu" names where possible, and finally picks the first one
+  # arbitrarily where there is still ambiguity.  Useful if you just need a
+  # name and it's not so critical that it be the exactly correct one.
+  def self.best_match(name)
+    matches  = Name.where(search_name: name, correct_spelling_id: nil)
+    return matches.first if matches.any?
     matches  = Name.where(text_name: name, correct_spelling_id: nil)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
@@ -1635,22 +1642,23 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ (group|clade)$/) ? :Group :
-    text_name.include?(" f. ") ? :Form :
-    text_name.include?(" var. ") ? :Variety :
-    text_name.include?(" subsp. ") ? :Subspecies :
-    text_name.include?(" stirps ") ? :Stirps : text_name.include?(" subsect. ") ? :Subsection :
-    text_name.include?(" sect. ") ? :Section :
-    text_name.include?(" subgenus ") ? :Subgenus :
-    text_name.include?(" ") ? :Species :
-    text_name.match(/^\w+aceae$/) ? :Family :
-    text_name.match(/^\w+ineae$/) ? :Family : # :Suborder
-    text_name.match(/^\w+ales$/) ? :Order :
-    text_name.match(/^\w+mycetidae$/) ? :Order : # :Subclass
-    text_name.match(/^\w+mycetes$/) ? :Class :
-    text_name.match(/^\w+mycotina$/) ? :Class : # :Subphylum
-    text_name.match(/^\w+mycota$/) ? :Phylum :
-                                        :Genus
+    text_name.match(/ (group|clade)$/) ? :Group      :
+    text_name.include?(" f. ")         ? :Form       :
+    text_name.include?(" var. ")       ? :Variety    :
+    text_name.include?(" subsp. ")     ? :Subspecies :
+    text_name.include?(" stirps ")     ? :Stirps     :
+    text_name.include?(" subsect. ")   ? :Subsection :
+    text_name.include?(" sect. ")      ? :Section    :
+    text_name.include?(" subgenus ")   ? :Subgenus   :
+    text_name.include?(" ")            ? :Species    :
+    text_name.match(/^\w+aceae$/)      ? :Family     :
+    text_name.match(/^\w+ineae$/)      ? :Family     : # :Suborder
+    text_name.match(/^\w+ales$/)       ? :Order      :
+    text_name.match(/^\w+mycetidae$/)  ? :Order      : # :Subclass
+    text_name.match(/^\w+mycetes$/)    ? :Class      :
+    text_name.match(/^\w+mycotina$/)   ? :Class      : # :Subphylum
+    text_name.match(/^\w+mycota$/)     ? :Phylum     :
+                                         :Genus
   end
 
   def self.parse_author(str)

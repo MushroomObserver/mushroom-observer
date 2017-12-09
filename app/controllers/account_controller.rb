@@ -401,8 +401,8 @@ class AccountController < ApplicationController
   def update_content_filter(pref, val)
     filter = ContentFilter.find(pref)
     @user.content_filter[pref] =
-      if filter.type == :boolean
-        val == "1" ? filter.checked_val : filter.off_val
+      if filter.type == :boolean && filter.prefs_vals.count == 1
+        val == "1" ? filter.prefs_vals.first : filter.off_val
       else
         val.to_s
       end

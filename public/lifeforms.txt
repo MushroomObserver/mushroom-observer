@@ -40,7 +40,6 @@ Arctocetraria	lichen
 Arctomia	lichen
 Arctoparmelia	lichen
 Arctopeltis	lichen
-Arrhenia	lichenicolous
 Arthonia	lichen
 Arthophacopsis	lichenicolous
 Arthopyrenia	lichen
@@ -56,7 +55,6 @@ Asterophoma	lichenicolous
 Asterothyrium	lichen
 Astrothelium	lichen
 Athallia	lichen
-Athelia	lichenicolous
 Aulaxina	lichen
 Bachmanniomyces	lichenicolous
 Bacidia	lichen
@@ -266,7 +264,6 @@ Evernia	lichen
 Everniastrum	lichen
 Everniicola	lichenicolous
 Farnoldia	lichen
-Fayodia	lichenicolous
 Fellhanera	lichen
 Fellhaneropsis	lichen
 Fibrillithecis	lichen
@@ -507,7 +504,6 @@ Myxotrichum	lichen
 Nadvornikia	lichen
 Naetrocymbe	lichen
 Nanostictis	lichenicolous
-Nectria	lichenicolous
 Nectriella	lichenicolous
 Nectriopsis	lichenicolous
 Neobarya	lichenicolous
@@ -803,7 +799,6 @@ Tornabea	lichen
 Trapelia	lichen
 Trapeliopsis	lichen
 Trematosphaeriopsis	lichenicolous
-Tremella	lichenicolous
 Tremolecia	lichen
 Tricharia	lichen
 Trichonectria	lichenicolous
