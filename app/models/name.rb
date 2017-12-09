@@ -1064,7 +1064,7 @@ class Name < AbstractModel
   # Remove lifeform (one word only) from all children.
   def propagate_remove_lifeform(lifeform)
     replace_str = Name.connection.quote(" #{lifeform} ")
-    search_Str  = Name.connection.quote("% #{lifeform} %")
+    search_str  = Name.connection.quote("% #{lifeform} %")
     Name.connection.execute(%(
       UPDATE names SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
       WHERE id IN (#{all_children.map(&:id).join(",")})

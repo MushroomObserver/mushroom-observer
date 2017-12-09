@@ -86,6 +86,7 @@ class ObserverController
 
   def email_merge_request
     @model = validate_merge_model!(params[:type])
+    return unless @model
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
     if !@old_obj || !@new_obj
