@@ -226,8 +226,8 @@ class HerbariumController < ApplicationController
     user_url = "#{MO.http_domain}/observer/show_user/#{@user.id}"
     herb_url = "#{MO.http_domain}/herbarium/show_herbarium/#{@herbarium.id}"
     content =
-      "User: ##{@user.id}, #{@user.login}, #{user_url}\n" +
-      "Herbarium: ##{@herbarium.id}, #{@herbarium.name}, #{herb_url}\n" +
+      "User: ##{@user.id}, #{@user.login}, #{user_url}\n" \
+      "Herbarium: ##{@herbarium.id}, #{@herbarium.name}, #{herb_url}\n" \
       "Notes: #{params[:notes]}"
     WebmasterEmail.build(@user.email, content).deliver_now
     flash_notice(:show_herbarium_request_sent.t)

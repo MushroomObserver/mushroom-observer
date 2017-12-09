@@ -85,12 +85,8 @@ class ObserverController
   end
 
   def email_merge_request
-    begin
-      @model = params[:type].to_s.constantize
-    rescue
-      redirect_back_or_default(action: :index)
-      return
-    end
+    @model = validate_merge_model!(params[:type])
+    return unless @model
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
     if !@old_obj || !@new_obj
@@ -99,7 +95,22 @@ class ObserverController
     end
     send_request if request.method == "POST"
   end
-    
+
+  def validate_merge_model!(val)
+    case val
+    when "Herbarium"
+      Herbarium
+    when "Location"
+      Location
+    when "Name"
+      Name
+    else
+      flash_error("Invalid type param: #{val.inspect}.")
+      redirect_back_or_default(action: :index)
+      nil
+    end
+  end
+
   def send_request
     change_locale_if_needed(MO.default_locale)
     content = :email_merge_objects.l(

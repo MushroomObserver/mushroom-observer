@@ -186,7 +186,7 @@ class SpeciesListController < ApplicationController
   def print_labels
     species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     query = Query.lookup_and_save(:SpeciesList, :in_species_list,
-                                  species_list: specices_list)
+                                  species_list: species_list)
     redirect_with_query({ controller: :observer, action: print_labels }, query)
   end
 

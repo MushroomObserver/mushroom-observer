@@ -18,7 +18,7 @@ class CollectionNumberController < ApplicationController
   def index_collection_number # :nologin: :norobots:
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
-                                           always_index: true)
+                                            always_index: true)
   end
 
   # Show list of collection_numbers.
@@ -46,9 +46,9 @@ class CollectionNumberController < ApplicationController
                          observation: params[:id].to_s)
     @links = [
       [:show_object.l(type: :observation),
-        Observation.show_link_args(params[:id])],
+       Observation.show_link_args(params[:id])],
       [:create_collection_number.l,
-        { action: :create_collection_number, id: params[:id] }]
+       { action: :create_collection_number, id: params[:id] }]
     ]
     show_selected_collection_numbers(query, always_index: true)
   end
@@ -78,7 +78,7 @@ class CollectionNumberController < ApplicationController
   #  Show record
   # ----------------------------
 
-  def show_collection_number  # :nologin:
+  def show_collection_number # :nologin:
     store_location
     pass_query_params
     @canonical_url = CollectionNumber.show_url(params[:id])
@@ -167,7 +167,8 @@ class CollectionNumberController < ApplicationController
       @collection_number.save
     else
       flash_warning(:edit_collection_numbers_merged.t(
-        this: old_format_name, that: @other_number.format_name))
+                      this: old_format_name, that: @other_number.format_name
+                    ))
       @other_number.observations += @collection_number.observations
       @collection_number.destroy
       @collection_number = @other_number
@@ -254,12 +255,12 @@ class CollectionNumberController < ApplicationController
     redirect_with_query(action: :index_collection_number)
   end
 
-  private 
+  private
 
   def make_sure_can_delete!(collection_number)
     return true if collection_number.can_edit? || in_admin_mode?
     flash_error(:permission_denied.t)
     redirect_to(collection_number.show_link_args)
-    return false
+    false
   end
 end

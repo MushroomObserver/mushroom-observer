@@ -670,7 +670,7 @@ class Name < AbstractModel
   # Returns an Array of all Name's in the rank above that contain this Name.
   # If there are multiple names at a given rank, it prefers accepted, non-sensu
   # names, but beyond that it chooses the first one arbitrarily.  It ignores
-  # misspellings. 
+  # misspellings.
   #
   #    child = Name.find_by_text_name('Letharia vulpina')
   #    child.parents.each do |parent|
@@ -698,12 +698,12 @@ class Name < AbstractModel
 
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
-    lines.reverse.each do |rank, name|
-      parent = Name.best_match(name)
+    lines.reverse.each do |_line_rank, line_name|
+      parent = Name.best_match(line_name)
       parents << parent if parent
       return [parent] if !all && !parent.deprecated
     end
-    
+
     # Get rid of deprecated names unless all the results are deprecated.
     parents.reject!(&:deprecated) unless parents.all?(&:deprecated)
 
@@ -724,7 +724,7 @@ class Name < AbstractModel
     matches  = Name.where(text_name: name, correct_spelling_id: nil)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
-    nonsensu = matches.reject { |name| name.author =~ /^sensu / }
+    nonsensu = matches.reject { |match| match.author =~ /^sensu / }
     matches  = nonsensu if nonsensu.any?
     matches.first
   end
@@ -756,11 +756,9 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    sql = if at_or_below_genus?
-      "text_name LIKE '#{text_name} %'"
-    else
-      "classification LIKE '%#{rank}: _#{text_name}_%'"
-    end
+    sql = at_or_below_genus? ?
+          "text_name LIKE '#{text_name} %'" :
+          "classification LIKE '%#{rank}: _#{text_name}_%'"
     sql += " AND correct_spelling_id IS NULL"
     return Name.where(sql).to_a if all
     Name.all_ranks.reverse.each do |rank2|
@@ -768,7 +766,7 @@ class Name < AbstractModel
       matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
       return matches.to_a if matches.any?
     end
-    return []
+    []
   end
 
   # Parse the given +classification+ String, validate it, and reformat it so
@@ -915,7 +913,7 @@ class Name < AbstractModel
 
   # Copy the classification of a genus to all of its children.  Does not change
   # updated_at or rss_log or anything.  Just changes the classification field
-  # in the name and default description records. 
+  # in the name and default description records.
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
@@ -971,16 +969,18 @@ class Name < AbstractModel
         Name.connection.execute(%(
           UPDATE names SET classification = #{str} WHERE id = #{id}
         ))
-        Name.connection.execute(%(
-          UPDATE name_descriptions SET classification = #{str}
-          WHERE id = #{desc_id}
-        )) unless desc_id.blank?
+        unless desc_id.blank?
+          Name.connection.execute(%(
+            UPDATE name_descriptions SET classification = #{str}
+            WHERE id = #{desc_id}
+          ))
+        end
         Name.connection.execute(%(
           UPDATE observations SET classification = #{str} WHERE name_id = #{id}
         ))
       end
     end
-    return out
+    out
   end
 
   # This is meant to be run nightly to ensure that all the classification
@@ -1021,7 +1021,7 @@ class Name < AbstractModel
 
   # This excludes "lichen" but includes "mushroom" (so that truly lichenized
   # basidiolichens with mushroom fruiting bodies are included).
-  def is_not_lichen?
+  def not_lichen?
     !lifeform.include?(" lichen ")
   end
 
@@ -1030,10 +1030,10 @@ class Name < AbstractModel
   # Sorts and uniquifies the lifeform words, and complains about any that are
   # not recognized.  It adds an extra space before and after to ensure that it
   # is easy to search for entire words instead of just substrings.  That is,
-  # one can do this: 
+  # one can do this:
   #
   #   lifeform.include(" word ")
-  # 
+  #
   # and be confident that it will not skip "word" at the beginning or end,
   # and will not match "compoundword".
   def validate_lifeform
@@ -1047,29 +1047,33 @@ class Name < AbstractModel
 
   # Add lifeform (one word only) to all children.
   def propagate_add_lifeform(lifeform)
+    concat_str = Name.connection.quote("#{lifeform} ")
+    search_str = Name.connection.quote("% #{lifeform} %")
     Name.connection.execute(%(
-      UPDATE names SET lifeform = CONCAT(lifeform, "#{lifeform} ")
+      UPDATE names SET lifeform = CONCAT(lifeform, #{concat_str})
       WHERE id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform NOT LIKE "% #{lifeform} %"
+        AND lifeform NOT LIKE #{search_str}
     ))
     Name.connection.execute(%(
-      UPDATE observations SET lifeform = CONCAT(lifeform, "#{lifeform} ")
+      UPDATE observations SET lifeform = CONCAT(lifeform, #{concat_str})
       WHERE name_id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform NOT LIKE "% #{lifeform} %"
+        AND lifeform NOT LIKE #{search_str}
     ))
   end
 
   # Remove lifeform (one word only) from all children.
   def propagate_remove_lifeform(lifeform)
+    replace_str = Name.connection.quote(" #{lifeform} ")
+    search_str  = Name.connection.quote("% #{lifeform} %")
     Name.connection.execute(%(
-      UPDATE names SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
+      UPDATE names SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
       WHERE id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform LIKE "% #{lifeform} %"
+        AND lifeform LIKE #{search_str}
     ))
     Name.connection.execute(%(
-      UPDATE observations SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
+      UPDATE observations SET lifeform = REPLACE(lifeform, #{replace_str}, " ")
       WHERE name_id IN (#{all_children.map(&:id).join(",")})
-        AND lifeform LIKE "% #{lifeform} %"
+        AND lifeform LIKE #{search_str}
     ))
   end
 
@@ -1401,7 +1405,7 @@ class Name < AbstractModel
     conds = patterns.map do |pat|
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(" OR ")
-    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds}) " +
+    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds}) " \
             "AND correct_spelling_id IS NULL"
     names = where(conds).limit(10).to_a
 

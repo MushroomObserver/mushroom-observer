@@ -51,8 +51,11 @@ class HerbariumRecord < AbstractModel
   after_create :notify_curators
 
   def herbarium_label
-    initial_det.blank? ? accession_number :
-                         "#{initial_det}: #{accession_number}"
+    if initial_det.blank?
+      accession_number
+    else
+      "#{initial_det}: #{accession_number}"
+    end
   end
 
   def format_name
