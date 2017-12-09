@@ -153,7 +153,7 @@ class PostObservationTest < IntegrationTestCase
       assert_equal(expected_values[:where], new_obs.where)
       assert_nil(new_obs.location)
     else
-      assert_nil(new_obs.where)
+      assert_equal(expected_values[:location], new_obs.where)
       assert_equal(expected_values[:location], new_obs.location.display_name)
     end
     assert_gps_equal(expected_values[:lat], new_obs.lat)
@@ -201,9 +201,9 @@ class PostObservationTest < IntegrationTestCase
       assert_match(:show_observation_seen_at.l, response.body)
     end
     if new_obs.specimen
-      assert_match(/[0-9] specimen/, response.body)
+      assert_match(/show_herbarium_record/, response.body)
     else
-      refute_match(/No herbarium specimen/, response.body)
+      refute_match(/No voucher specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)

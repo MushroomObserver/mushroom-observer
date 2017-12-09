@@ -1,0 +1,47 @@
+<%
+  @title ||= :list_herbarium_records_title.t
+
+  tabs = create_links(@links)
+  tabs << link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table table-striped">
+      <% for herbarium_record in @objects
+				herbarium = herbarium_record.herbarium %>
+        <tr>
+          <td>
+            <%= if in_admin_mode? || herbarium_record.can_edit?
+              link_with_query(:EDIT.t,
+                              {action: :edit_herbarium_record, id: herbarium_record.id, back: :index},
+                              class: "btn btn-xs")
+            end %>
+          </td>
+          <td>
+            <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
+          </td>
+          <td>
+            <%= link_with_query(herbarium_record.herbarium_label.t,
+                                herbarium_record.show_link_args) %>
+          </td>
+          <td>
+            <%= herbarium_record.observations.map do |obs|
+              link_to(obs.unique_format_name.t, obs.show_link_args)
+            end.safe_join(", ") %>
+          </td>
+          <td>
+            <%= if in_admin_mode? || herbarium_record.can_edit?
+              link_with_query(:DESTROY.t,
+                              {action: :destroy_herbarium_record, id: herbarium_record.id},
+                              data: { confirm: :are_you_sure.t }, class: "btn btn-xs")
+            end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

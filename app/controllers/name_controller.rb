@@ -45,6 +45,10 @@
 #                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #  names_for_mushroom_app::      Display list of most common names in plain text.
+#  edit_lifeform::               Edit lifeform tags.
+#  propagate_lifeform::          Add/remove lifeform tags to/from subtaxa.
+#  propagate_classification::    Copy classification to all subtaxa.
+#  refresh_classification::      Refresh classification from genus.
 #
 #  ==== Helpers
 #  deprecate_synonym::           (used by change_synonyms)
@@ -344,46 +348,40 @@ class NameController < ApplicationController
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
-      # Get classification
-      @classification = @name.best_classification
-      @parents = nil
-      unless @classification
-        # Get list of immediate parents.
-        @parents = @name.parents
-      end
+      # Get classification.
+      @classification = @name.classification
+      @parents = @name.parent if !@classification
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)
-
-      # Create search queries for observation lists.
-      @consensus_query = create_query(:Observation, :of_name, name: @name,
-                                                              by: :confidence)
-      @consensus2_query = create_query(:Observation, :of_name, name: @name,
-                                                               synonyms: :all,
-                                                               by: :confidence)
-      @synonym_query = create_query(:Observation, :of_name, name: @name,
-                                                            synonyms: :exclusive,
-                                                            by: :confidence)
-      @other_query = create_query(:Observation, :of_name, name: @name,
-                                                          synonyms: :all, nonconsensus: :exclusive,
-                                                          by: :confidence)
-      @obs_with_images_query = create_query(:Observation, :of_name, name: @name,
-                                                                    by: :confidence, has_images: :yes)
-
       if @name.at_or_below_genus?
-        @subtaxa_query = create_query(:Observation, :of_children, name: @name,
-                                                                  all: true, by: :confidence)
+        args = { name: @name, all: true, by: :confidence }
+        @subtaxa_query = create_query(:Observation, :of_children, args)
       end
 
-      # Determine which queries actually have results and instantiate the ones we'll use
+      # Create search queries for observation lists.
+      args = { name: @name, by: :confidence }
+      @consensus_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :all, by: :confidence }
+      @consensus2_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :exclusive, by: :confidence }
+      @synonym_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, synonyms: :all, nonconsensus: :exclusive,
+               by: :confidence }
+      @other_query = create_query(:Observation, :of_name, args)
+      args = { name: @name, by: :confidence, has_images: :yes }
+      @obs_with_images_query = create_query(:Observation, :of_name, args)
+
+      # Determine which queries actually have results and instantiate the ones
+      # we'll use.
       @best_description = @name.best_brief_description
-      @first_four = @obs_with_images_query.results(limit: 4)
-      @first_child = @children_query.results(limit: 1)[0]
-      @first_consensus = @consensus_query.results(limit: 1)[0]
-      @has_consensus2 = @consensus2_query.select_count
-      @has_synonym = @synonym_query.select_count
-      @has_other = @other_query.select_count
-      @has_subtaxa = @subtaxa_query.select_count if @subtaxa_query
+      @first_four       = @obs_with_images_query.results(limit: 4)
+      @first_child      = @children_query.results(limit: 1).first
+      @first_consensus  = @consensus_query.results(limit: 1).first
+      @has_consensus2   = @consensus2_query.select_count
+      @has_synonym      = @synonym_query.select_count
+      @has_other        = @other_query.select_count
+      @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
     end
   end
 
@@ -554,6 +552,11 @@ class NameController < ApplicationController
     redirect_with_query(action: :show_name, id: @name.id)
   end
 
+  def redirect_to_merge_request(new_name)
+    redirect_with_query(controller: :observer, action: :email_merge_request,
+                        type: :Name, old_id: @name.id, new_id: new_name.id)
+  end
+
   ##############################################################################
   #
   #  :section: Edit Names
@@ -697,6 +700,7 @@ class NameController < ApplicationController
     @name.correct_spelling = correct_name
     @name.merge_synonyms(correct_name)
     @name.change_deprecated(true)
+    params[:name][:deprecated] = "true"
     fix_correct_name(correct_name) if correct_name.is_misspelling?
   end
 
@@ -747,10 +751,10 @@ class NameController < ApplicationController
   def try_to_merge(new_name)
     if in_admin_mode? || @name.mergeable? || new_name.mergeable?
       merge_name_into(new_name)
+      redirect_to_show_name
     else
-      send_name_merge_email(new_name)
+      redirect_to_merge_request(new_name)
     end
-    redirect_to_show_name
   end
 
   def merge_name_into(new_name)
@@ -772,25 +776,11 @@ class NameController < ApplicationController
     new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
     @name.display_name = old_display_name_for_log
     new_name.merge(@name)
-    flash_notice(:runtime_edit_name_merge_success.t(this: @name.real_search_name,
-                                                    that: new_name.real_search_name))
+    flash_notice(:runtime_edit_name_merge_success.t(
+      this: @name.real_search_name, that: new_name.real_search_name
+    ))
     @name = new_name
     @name.save
-  end
-
-  def send_name_merge_email(new_name)
-    flash_warning(:runtime_merge_names_warning.t)
-    num1 = "o=#{@name.observations.size}, n=#{@name.namings.size}"
-    num2 = "o=#{new_name.observations.size}, n=#{new_name.namings.size}"
-    content = :email_name_merge.l(
-      user: @user.login,
-      this: "##{@name.id}: #{@name.real_search_name} [#{num1}]",
-      that: "##{new_name.id}: #{new_name.real_search_name} [#{num2}]",
-      this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
-      that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
-    )
-    WebmasterEmail.build(@user.email, content).deliver_now
-    NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
   ##############################################################################
@@ -823,10 +813,9 @@ class NameController < ApplicationController
         @description.save
 
         # Make this the "default" description if there isn't one and this is
-        # publicly readable.
-
+        # publicly readable and writable.
         if !@name.description &&
-           @description.public
+           @description.fully_public
           @name.description = @description
         end
 
@@ -910,7 +899,7 @@ class NameController < ApplicationController
           v = @description.versions.latest
           v.merge_source_id = old_desc.versions.latest.id
           v.save
-          if !old_desc.is_admin?(@user)
+          if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
@@ -932,7 +921,7 @@ class NameController < ApplicationController
   def destroy_name_description # :norobots:
     pass_query_params
     @description = NameDescription.find(params[:id].to_s)
-    if @description.is_admin?(@user)
+    if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
                             user: @user.login, touch: true,
@@ -941,7 +930,7 @@ class NameController < ApplicationController
       redirect_with_query(action: "show_name", id: @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_name_description",
                             id: @description.id)
       else
@@ -1467,6 +1456,73 @@ class NameController < ApplicationController
       flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
     end
     redirect_with_query(action: "show_name", id: name_id)
+  end
+
+  def propagate_classification # :norobots:
+    pass_query_params
+    name = find_or_goto_index(Name, params[:id])
+    return unless name
+    return unless make_sure_name_is_a_genus!(name)
+    name.propagate_classification
+    redirect_with_query(name.show_link_args)
+  end
+
+  def refresh_classification # :norobots:
+    pass_query_params
+    name = find_or_goto_index(Name, params[:id])
+    return unless name
+    return unless make_sure_name_below_genus!(name)
+    return unless make_sure_genus_has_classification!(name)
+    name.update_attributes(classification: name.genus.classification)
+    desc = name.description
+    desc.update_attributes(classification: name.genus.classification) if desc
+    redirect_with_query(name.show_link_args)
+  end
+
+  def make_sure_name_is_a_genus!(name)
+    return true if name.rank == :Genus
+    flash_error("only works on genera!")
+    redirect_with_query(name.show_link_args)
+    return false
+  end
+
+  def make_sure_name_below_genus!(name)
+    return true if name.below_genus?
+    flash_error("only works on taxa below genus!")
+    redirect_with_query(name.show_link_args)
+    return false
+  end
+
+  def make_sure_genus_has_classification!(name)
+    return true if name.genus && name.genus.classification.present?
+    flash_error(:edit_name_fill_in_classification_for_genus_first.t)
+    redirect_with_query(name.show_link_args)
+    return false
+  end
+
+  def edit_lifeform # :norobots:
+    pass_query_params
+    @name = find_or_goto_index(Name, params[:id])
+    return unless request.method == "POST"
+    words = Name.all_lifeforms.select do |word|
+      params["lifeform_#{word}"] == "1"
+    end
+    @name.update_attributes(lifeform: " #{words.join(' ')} ")
+    redirect_with_query(@name.show_link_args)
+  end
+
+  def propagate_lifeform # :norobots:
+    pass_query_params
+    @name = find_or_goto_index(Name, params[:id])
+    return unless request.method == "POST"
+    Name.all_lifeforms.each do |word|
+      if params["add_#{word}"] == "1"
+        @name.propagate_add_lifeform(word)
+      elsif params["remove_#{word}"] == "1"
+        @name.propagate_remove_lifeform(word)
+      end
+    end
+    redirect_with_query(@name.show_link_args)
   end
 
   ################################################################################

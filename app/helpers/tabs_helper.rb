@@ -1,4 +1,3 @@
-# encoding: utf-8
 # html used in tabsets
 module TabsHelper
   # Short-hand to render shared tab_set partial for a given set of links.
@@ -9,24 +8,21 @@ module TabsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
   def show_observation_tabset(obs, user)
-    tabs = [show_obs_google_links_for(obs.name),
-            general_questions_link(obs, user),
-            notifications_link(obs, user),
-            manage_lists_link(obs, user),
-            map_link,
-            obs_change_links(obs),
-            draw_interest_icons(obs)].reject(&:empty?)
-
+    tabs = [
+      show_obs_google_links_for(obs.name),
+      general_questions_link(obs, user),
+      notifications_link(obs, user),
+      manage_lists_link(obs, user),
+      map_link,
+      obs_change_links(obs),
+      draw_interest_icons(obs)
+    ].flatten.reject(&:empty?)
     { pager_for: obs, right: draw_tab_set(tabs) }
   end
 
   def show_obs_google_links_for(obs_name)
     return unless obs_name.known?
-    capture do
-      concat google_images_for(obs_name)
-      concat safe_br
-      concat google_distribution_map_for(obs_name)
-    end
+    [google_images_for(obs_name), google_distribution_map_for(obs_name)]
   end
 
   def google_images_for(obs_name)
@@ -70,27 +66,28 @@ module TabsHelper
 
   def obs_change_links(obs)
     return unless check_permission(obs)
-    capture do
-      concat link_with_query(
-        :show_observation_edit_observation.t,
-        controller: :observer, action: :edit_observation, id: obs.id) + safe_br
-      concat link_with_query(
-        :DESTROY.t,
-        { controller: :observer, action: :destroy_observation, id: obs.id },
-        class: "text-danger", data: { confirm: :are_you_sure.l })
-    end
+    [
+      link_with_query(:show_observation_edit_observation.t,
+                      controller: :observer, action: :edit_observation,
+                      id: obs.id),
+      link_with_query(:DESTROY.t,
+                      { controller: :observer, action: :destroy_observation,
+                        id: obs.id },
+                      class: "text-danger", data: { confirm: :are_you_sure.l })
+    ]
   end
 
   def prefs_tabset
-    tabs = [link_to(:bulk_license_link.t,
-                    controller: :image, action: :license_updater),
-            link_to(:prefs_change_image_vote_anonymity.t,
-                    controller: :image, action: :bulk_vote_anonymity_updater),
-            link_to(:profile_link.t, action: :profile),
-            link_to(:show_user_your_notifications.t,
-                    controller: :interest, action: :list_interests),
-            link_to(:account_api_keys_link.t, action: :api_keys)]
-
+    tabs = [
+      link_to(:bulk_license_link.t,
+              controller: :image, action: :license_updater),
+      link_to(:prefs_change_image_vote_anonymity.t,
+              controller: :image, action: :bulk_vote_anonymity_updater),
+      link_to(:profile_link.t, action: :profile),
+      link_to(:show_user_your_notifications.t,
+              controller: :interest, action: :list_interests),
+      link_to(:account_api_keys_link.t, action: :api_keys)
+    ]
     { right: draw_tab_set(tabs) }
   end
 end

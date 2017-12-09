@@ -450,8 +450,7 @@ class ApplicationController < ActionController::Base
   end
 
   def editable_by_user?(obj)
-    obj.respond_to?(:has_edit_permission?) &&
-      obj.has_edit_permission?(User.current)
+    obj.try(&:can_edit?)
   end
 
   def obj_is_user?(obj)
@@ -1021,12 +1020,12 @@ class ApplicationController < ActionController::Base
   end
   helper_method :add_query_param
 
-  def redirect_with_query(args)
-    redirect_to(add_query_param(args))
+  def redirect_with_query(args, query = nil)
+    redirect_to(add_query_param(args, query))
   end
 
-  def url_with_query(args)
-    url_for(add_query_param(args))
+  def url_with_query(args, query = nil)
+    url_for(add_query_param(args, query))
   end
 
   def coerced_query_link(query, model)

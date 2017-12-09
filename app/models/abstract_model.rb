@@ -715,7 +715,7 @@ class AbstractModel < ActiveRecord::Base
     }
   end
 
-  def can_edit?(user)
+  def can_edit?(user = User.current)
     !respond_to?("user") || (user && (self.user == user))
   end
 

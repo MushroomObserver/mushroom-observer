@@ -353,7 +353,7 @@ class LocationController < ApplicationController
       if desc_id.blank?
         @description = nil
       elsif @description = LocationDescription.safe_find(desc_id)
-        @description = nil unless @description.is_reader?(@user)
+        @description = nil unless in_admin_mode? || @description.is_reader?(@user)
       else
         flash_error(:runtime_object_not_found.t(type: :description,
                                                 id: desc_id))
@@ -377,7 +377,7 @@ class LocationController < ApplicationController
       @canonical_url = "#{MO.http_domain}/location/show_location_description/#{@description.id}"
 
       # Public or user has permission.
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         @location = @description.location
         update_view_stats(@description)
 
@@ -632,13 +632,10 @@ class LocationController < ApplicationController
 
           # Non-admins just send email-request to admins.
           else
-            flash_warning(:runtime_merge_locations_warning.t)
-            content = :email_location_merge.l(user: @user.login,
-                                              this: "##{@location.id}: " + @location.name,
-                                              that: "##{merge.id}: " + merge.name,
-                                              this_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
-                                              that_url: "#{MO.http_domain}/location/show_location/#{merge.id}")
-            WebmasterEmail.build(@user.email, content).deliver_now
+            redirect_with_query(controller: :observer,
+                                action: :email_merge_request, type: :Location,
+                                old_id: @location.id, new_id: merge.id)
+            return
           end
 
         # Otherwise it is safe to change the name.
@@ -762,7 +759,7 @@ class LocationController < ApplicationController
           v = @description.versions.latest
           v.merge_source_id = old_desc.versions.latest.id
           v.save
-          if !old_desc.is_admin?(@user)
+          if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
@@ -784,7 +781,7 @@ class LocationController < ApplicationController
   def destroy_location_description # :norobots:
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
-    if @description.is_admin?(@user)
+    if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.location.log(:log_description_destroyed,
                                 user: @user.login, touch: true,
@@ -794,7 +791,7 @@ class LocationController < ApplicationController
                           id: @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_location_description",
                             id: @description.id)
       else

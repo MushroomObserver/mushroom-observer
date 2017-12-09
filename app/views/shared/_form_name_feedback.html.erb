@@ -1,7 +1,8 @@
 <% # Section for handling deprecated, new and multiple names on naming creation and edit pages
 if !what.blank?
-  if valid_names %>
-    <div class="alert-warning">
+  if valid_names
+    flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-warning max-width-text" id="name_messages">
       <span class="Data"><%= if suggest_corrections
         :form_naming_not_recognized.t(:name => what)
       elsif parent_deprecated
@@ -28,8 +29,9 @@ if !what.blank?
         <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
       <% end %>
     </div>
-  <% elsif names && names.length == 0 %>
-    <div class="Errors">
+  <% elsif names && names.length == 0
+    flash_error(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
         <%= :form_naming_not_recognized.t(:name => what) %>
       </span><br/>
@@ -37,8 +39,9 @@ if !what.blank?
         <%= :form_naming_not_recognized_help.t(:button => button_name) %>
       </span><br/>
     </div>
-  <% elsif names && names.length > 1 %>
-    <div class="Errors">
+  <% elsif names && names.length > 1
+    flash_error(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
         <%= :form_naming_multiple_names.t(:name => what) %>:<br/>
         <% for n in names %>

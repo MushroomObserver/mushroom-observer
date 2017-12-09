@@ -43,7 +43,9 @@ class ContentFilter
     @@filters ||= [
       HasImages.new,
       HasSpecimen.new,
-      Region.new
+      Lichen.new,
+      Region.new,
+      Clade.new
     ]
   end
 

@@ -93,7 +93,7 @@ module Query
           "IF(locations.id,CONCAT(locations.name,locations.notes)," \
           "observations.where)"
         else
-          "IF(locations.id,locations.name,observations.where)"
+          "observations.where"
         end
       end
 

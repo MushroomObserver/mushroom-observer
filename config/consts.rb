@@ -72,7 +72,7 @@ MushroomObserver::Application.configure do
   config.noreply_email_address = "no-reply@" + config.domain
   config.accounts_email_address = "webmaster@" + config.domain
   config.error_email_address = "webmaster@" + config.domain
-  config.webmaster_email_address = "webmaster@" + config.domain
+  config.webmaster_email_address = "mo-admin@googlegroups.com"
   config.exception_recipients = "webmaster@" + config.domain
   config.donation_business = "UQ23P3G6FBYKN"
 

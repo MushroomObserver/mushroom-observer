@@ -19,6 +19,8 @@
 
 <% if synonyms
   approved_synonyms, deprecated_synonyms = name.sort_synonyms
+  misspellings = deprecated_synonyms.select(&:correct_spelling_id)
+  deprecated_synonyms.reject!(&:correct_spelling_id)
   if approved_synonyms != []
     links = approved_synonyms.map do |n|
       link_with_query(n.display_name.t, :action => "show_name", :id => n.id,)
@@ -32,6 +34,13 @@
       link_with_query(n.display_name.t, :action => "show_name", :id => n.id)
     end %>
     <%= :show_name_deprecated_synonyms.t %>:
+      <%= links.safe_join(', ') %><br/>
+  <% end
+  if misspellings
+    links = misspellings.map do |n|
+      link_with_query(n.display_name.t, :action => "show_name", :id => n.id)
+    end %>
+    <%= :show_name_misspelled_synonyms.t %>:
       <%= links.safe_join(', ') %><br/>
   <% end
 end %>

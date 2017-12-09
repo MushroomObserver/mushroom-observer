@@ -34,7 +34,7 @@ module Query
         children_names?:   [:string],
         locations?:        [:string],
         herbaria?:         [:string],
-        specimens?:        [:string],
+        herbarium_records?: [:string],
         projects?:         [:string],
         species_lists?:    [:string],
         confidence?:       [:float],
@@ -98,13 +98,15 @@ module Query
       )
       initialize_model_do_objects_by_name(
         Herbarium, :herbaria,
-        "specimens.herbarium_id",
-        join: { observations: { observations_specimens: :specimens } }
+        "herbarium_records.herbarium_id",
+        join: { observations: {
+          herbarium_records_observations: :herbarium_records
+        } }
       )
       initialize_model_do_objects_by_name(
-        Specimen, :specimens,
-        "observations_specimens.specimen_id",
-        join: { observations: :observations_specimens }
+        HerbariumRecord, :herbarium_records,
+        "herbarium_records_observations.herbarium_record_id",
+        join: { observations: :herbarium_records_observations }
       )
       initialize_model_do_objects_by_name(
         Project, :projects, "observations_projects.project_id",

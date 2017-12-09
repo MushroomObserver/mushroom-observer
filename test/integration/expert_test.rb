@@ -272,9 +272,9 @@ class ExpertTest < IntegrationTestCase
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
-    assert_nil(spl.where)
+    assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
-    assert_nil(obs.last.where)
+    assert_equal(loc.name, obs.last.where)
     assert_equal(loc, obs.last.location)
 
     # Try adding a comment, just for kicks.

@@ -313,6 +313,7 @@ GET observation
   has_notes_field:	string list (is given observation notes template field filled in?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -322,19 +323,21 @@ GET observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
   west:	longitude (min longitude)
 
 POST observation
+  accession_number:	string (unique herbarium id)
   altitude:	altitude
+  collection_number:	string
+  collectors_name:	string
   date:	date
   has_specimen:	boolean
   herbarium:	herbarium
-  herbarium_label:	string (initial determination and unique herbarium id)
   images:	image list
+  initial_det:	string (initial determination)
   is_collection_location:	boolean (default, is this location where mushroom was found?)
   latitude:	latitude
   location:	place_name (limit=1024 chars)
@@ -345,7 +348,6 @@ POST observation
   notes[$field]:	string (set value of the custom notes template field, substitute field name for "$field")
   projects:	project list (must be member)
   species_lists:	species_list list (must have edit permission)
-  specimen_id:	string (unique specimen id for herbarium label, e.g. collectors number)
   thumbnail:	image
   vote:	float (default=3)
 
@@ -365,6 +367,7 @@ PATCH observation
   has_notes_field:	string list (is given observation notes template field filled in?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -374,7 +377,6 @@ PATCH observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
@@ -413,6 +415,7 @@ DELETE observation
   has_notes_field:	string list (is given observation notes template field filled in?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -422,7 +425,6 @@ DELETE observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
@@ -490,6 +492,7 @@ GET sequence
   has_obs_notes:	boolean (observation has notes?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -504,7 +507,6 @@ GET sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)
@@ -533,6 +535,7 @@ PATCH sequence
   has_obs_notes:	boolean (observation has notes?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -547,7 +550,6 @@ PATCH sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)
@@ -573,6 +575,7 @@ DELETE sequence
   has_obs_notes:	boolean (observation has notes?)
   has_specimen:	boolean
   herbarium:	herbarium list
+  herbarium_record:	herbarium_record list
   id:	integer list
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
@@ -587,7 +590,6 @@ DELETE sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  specimen:	specimen list
   synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)

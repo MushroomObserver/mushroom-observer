@@ -1,0 +1,27 @@
+<% 
+columns = 3
+rows = 4
+idx = 0
+while idx < @labels.length %>
+  <div id="labels">
+    <table cellpadding="15" cellspacing="0" width="100%">
+      <% row = 0
+      while idx < @labels.length && row < 4
+        row += 1 %>
+        <tr>
+          <% col = 0
+          while idx < @labels.length && col < 3
+            label_data = @labels[idx]
+            col += 1
+            idx += 1 %>
+            <td width="<%= (100/columns).round %>%" valign="top">
+              <%= label_data.map do |label, value|
+                content_tag(:b, label + ":") + " " + value.to_s + safe_br
+              end.safe_join %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+<% end %>

@@ -37,12 +37,12 @@ class API
       end
 
       def check_view_permission!(obj)
-        return if obj.has_view_permission?(api.user)
+        return if obj.can_view?(api.user)
         raise MustHaveViewPermission.new(obj)
       end
 
       def check_edit_permission!(obj)
-        return if obj.has_edit_permission?(api.user)
+        return if obj.can_edit?(api.user)
         raise MustHaveEditPermission.new(obj)
       end
     end

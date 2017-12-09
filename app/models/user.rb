@@ -293,7 +293,7 @@ class User < AbstractModel
   has_many :queued_emails
   has_many :sequences
   has_many :species_lists
-  has_many :specimens
+  has_many :herbarium_records
   has_many :test_add_image_logs
   has_many :votes
 
@@ -422,7 +422,7 @@ class User < AbstractModel
   end
 
   # User is the only one allowed to edit their own account info.
-  def has_edit_permission?(user)
+  def can_edit?(user = User.current)
     user == self
   end
 
@@ -580,7 +580,7 @@ class User < AbstractModel
   # TODO: Make this a user preference.
   def preferred_herbarium
     herbarium_id = Herbarium.connection.select_value(%(
-      SELECT herbarium_id, count(id) FROM specimens WHERE user_id=#{id}
+      SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
       GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
     ))
     herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
@@ -593,8 +593,16 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
     Herbarium.where(personal_user_id: id).first
+  end
+
+  def create_personal_herbarium
+    Herbarium.create(
+      name:          personal_herbarium_name,
+      email:         email,
+      personal_user: self,
+      curators:      [self]
+    )
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a

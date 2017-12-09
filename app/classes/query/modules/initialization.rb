@@ -145,7 +145,7 @@ module Query::Modules::Initialization
           objs += model.where(name: name)
         when "Project", "SpeciesList"
           objs += model.where(title: name)
-        when "Specimen"
+        when "HerbariumRecord"
           objs += model.where(herbarium_label: name)
         when "User"
           name.sub(/ *<.*>/, "")

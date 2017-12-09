@@ -40,7 +40,8 @@ class API
         children_names:   parse_array(:name, :children_of, as: :id),
         locations:        parse_array(:location, :location, as: :id),
         herbaria:         parse_array(:herbarium, :herbarium, as: :id),
-        specimens:        parse_array(:specimen, :specimen, as: :id),
+        herbarium_records: parse_array(:herbarium_record, :herbarium_record,
+                                       as: :id),
         projects:         parse_array(:project, :project, as: :id),
         species_lists:    parse_array(:species_list, :species_list, as: :id),
         confidence:       parse(:confidence, :confidence),
@@ -106,13 +107,12 @@ class API
     def validate_create_params!(params)
       make_sure_both_latitude_and_longitude!
       make_sure_has_specimen_set!
-      either_specimen_or_label!
       make_sure_location_provided!
       check_for_unknown_location!(params)
     end
 
     def after_create(obs)
-      create_specimen(obs) if obs.specimen
+      create_specimen_records(obs) if obs.specimen
       naming = obs.namings.create(name: @name)
       obs.change_vote(naming, @vote, user)
       obs.log(:log_observation_created_at) if @log
@@ -139,28 +139,33 @@ class API
 
     private
 
-    def create_specimen(obs)
-      provide_herbarium_default
-      provide_herbarium_label_default(obs)
-      obs.specimens << Specimen.create!(
-        herbarium:       @herbarium,
-        when:            Time.zone.now,
-        user:            user,
-        herbarium_label: @herbarium_label
-      )
+    def create_specimen_records(obs)
+      provide_specimen_defaults(obs)
+      if @collection_number
+        CollectionNumber.create!(
+          user:   user,
+          name:   @collectors_name,
+          number: @collection_number
+        ).add_observation(obs)
+      end
+      if @herbarium
+        HerbariumRecord.create!(
+          herbarium:        @herbarium,
+          user:             user,
+          initial_det:      @initial_det,
+          accession_number: @accession_number
+        ).add_observation(obs)
+      end
     end
 
-    def provide_herbarium_default
-      @herbarium ||= user.personal_herbarium || Herbarium.create!(
-        name: user.personal_herbarium_name,
-        personal_user: user
-      )
-    end
-
-    def provide_herbarium_label_default(obs)
-      @herbarium_label ||= Herbarium.default_specimen_label(
-        @name.text_name, @specimen_id || obs.id
-      )
+    def provide_specimen_defaults(obs)
+      @herbarium        ||= user.personal_herbarium ||
+                            user.create_personal_herbarium
+      @collectors_name  ||= user.legal_name
+      @initial_det      ||= @name.text_name
+      @accession_number ||= @collection_number ?
+                              "#{@collectors_name} #{@collection_number}" :
+                              "MO #{obs.id}"
     end
 
     def update_notes_fields(obs)
@@ -286,12 +291,14 @@ class API
     end
 
     def parse_herbarium_and_specimen!
-      @herbarium       = parse(:herbarium, :herbarium)
-      @specimen_id     = parse(:string, :specimen_id, help: 1)
-      @herbarium_label = parse(:string, :herbarium_label, help: 1)
-      default          = @herbarium || @specimen_id || @herbarium_label || false
-      @has_specimen    = parse(:boolean, :has_specimen)
-      @has_specimen    = default if @has_specimen.nil?
+      @herbarium         = parse(:herbarium, :herbarium)
+      @collectors_name   = parse(:string, :collectors_name)
+      @collection_number = parse(:string, :collection_number)
+      @initial_det       = parse(:string, :initial_det, help: 1)
+      @accession_number  = parse(:string, :accession_number, help: 1)
+      default            = @herbarium || @collection_number || @accession_number || false
+      @has_specimen      = parse(:boolean, :has_specimen)
+      @has_specimen      = default if @has_specimen.nil?
     end
 
     # --------------------
@@ -315,14 +322,11 @@ class API
     def make_sure_has_specimen_set!
       return if @has_specimen
       error_class = CanOnlyUseThisFieldIfHasSpecimen
-      raise error_class.new(:herbarium)       if @herbarium
-      raise error_class.new(:specimen_id)     if @specimen_id
-      raise error_class.new(:herbarium_label) if @herbarium_label
-    end
-
-    def either_specimen_or_label!
-      return unless @specimen_id && @herbarium_label
-      raise CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label)
+      raise error_class.new(:herbarium)         if @herbarium
+      raise error_class.new(:collectors_name)   if @collectors_name
+      raise error_class.new(:collection_number) if @collection_number
+      raise error_class.new(:initial_det)       if @initial_det
+      raise error_class.new(:accession_number)  if @accession_number
     end
 
     def make_sure_location_provided!

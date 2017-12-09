@@ -58,7 +58,7 @@ module Query::Modules::Ordering
         "#{table}.title ASC"
       end
 
-    when "title", "login", "summary", "copyright_holder", "where", "herbarium_label"
+    when "title", "login", "summary", "copyright_holder", "where", "initial_det", "accession_number"
       "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
@@ -124,6 +124,16 @@ module Query::Modules::Ordering
 
     when "url"
       "external_links.url ASC" if model == ExternalLink
+
+    when "herbarium_name"
+      add_join(:herbaria)
+      "herbaria.name ASC"
+
+    when "herbarium_label"
+      "herbarium_records.initial_det ASC, herbarium_records.accession_number ASC"
+
+    when "name_and_number"
+      "collection_numbers.name ASC, collection_numbers.number ASC"
 
     when "id" # (for testing)
       "#{table}.id ASC"

@@ -595,8 +595,12 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
+        e = elements.first.to_s
+        match = e.match(/value=('[^']*'|"[^"]*")/)
         actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
+        # Not sure rails always puts "checked" at the end, but this is safer
+        # than expecting the word "checked" never to match anything else...
+        actual_val = "" if e =~ /type=['"]?checkbox/ && e !~ / checked>/
         if actual_val != expect_val.to_s
           message = "Input '#{id}' has wrong value, " \
                     "expected <#{expect_val}>, got <#{actual_val}>"

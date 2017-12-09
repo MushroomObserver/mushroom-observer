@@ -3,7 +3,8 @@ module Query
   class NameOfParents < Query::NameBase
     def parameter_declarations
       super.merge(
-        name: Name
+        name: Name,
+        all?: :boolean
       )
     end
 

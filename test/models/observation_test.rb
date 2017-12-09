@@ -137,11 +137,11 @@ class ObservationTest < UnitTestCase
     assert_equal(winning_naming, obs.consensus_naming)
   end
 
-  def test_specimens
+  def test_herbarium_records
     refute(observations(:strobilurus_diminutivus_obs).specimen)
-    assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
+    assert_empty(observations(:strobilurus_diminutivus_obs).herbarium_records)
     assert(observations(:detailed_unknown_obs).specimen)
-    refute(observations(:detailed_unknown_obs).specimens.empty?)
+    refute(observations(:detailed_unknown_obs).herbarium_records.empty?)
   end
 
   def test_observer_accepts_general_email_questions
@@ -706,16 +706,16 @@ class ObservationTest < UnitTestCase
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Mary
     obs = observations(:minimal_unknown_obs)
-    assert_false(obs.has_edit_permission?(rolf))
-    assert_true(obs.has_edit_permission?(mary))
-    assert_false(obs.has_edit_permission?(dick))
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(mary))
+    assert_false(obs.can_edit?(dick))
 
     # IS owned by Bolete project, AND owned by Mary
     # (Dick is member of Bolete project)
     obs = observations(:detailed_unknown_obs)
-    assert_false(obs.has_edit_permission?(rolf))
-    assert_true(obs.has_edit_permission?(mary))
-    assert_true(obs.has_edit_permission?(dick))
+    assert_false(obs.can_edit?(rolf))
+    assert_true(obs.can_edit?(mary))
+    assert_true(obs.can_edit?(dick))
   end
 
   def test_imageless

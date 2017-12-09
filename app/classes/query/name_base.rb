@@ -1,6 +1,8 @@
 module Query
   # Common code shared by all name queries.
   class NameBase < Query::Base
+    include Query::Initializers::ContentFilters
+
     def model
       Name
     end
@@ -38,7 +40,7 @@ module Query
         desc_creator?:       [User],
         desc_content?:       :string,
         ok_for_export?:      :boolean
-      )
+      ).merge(content_filter_parameter_declarations(Name))
     end
 
     def initialize_flavor
@@ -148,6 +150,7 @@ module Query
       fields = NameDescription.all_note_fields
       fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
       initialize_model_do_search(:desc_content, "CONCAT(#{fields.join(",")})")
+      initialize_content_filters(Name)
       super
     end
 

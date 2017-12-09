@@ -23,7 +23,7 @@ class ObserverController
     when :observation, :user
       ctrlr = :observer
     when :comment, :herbarium, :image, :location,
-      :name, :project, :species_list, :specimen
+      :name, :project, :species_list, :herbarium_record
       ctrlr = type
     when :google
       if pattern.blank?

@@ -137,7 +137,7 @@ class SpeciesList < AbstractModel
               place_name
             end
     if (loc = Location.find_by_name(where))
-      self.where = nil
+      self.where = loc.name
       self.location = loc
     else
       self.where = where
@@ -217,9 +217,12 @@ class SpeciesList < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
+    old_name = connection.quote(old_name)
+    new_name = connection.quote(location.name)
     connection.update(%(
-      UPDATE species_lists SET `where` = NULL, location_id = #{location.id}
-      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+      UPDATE species_lists
+      SET `where` = #{new_name}, location_id = #{location.id}
+      WHERE `where` = #{old_name}
     ))
   end
 
@@ -347,7 +350,7 @@ class SpeciesList < AbstractModel
     args[:notes] ||= ""
     args[:projects] ||= projects
     if !args[:where] && !args[:location]
-      args[:where]    = where
+      args[:where]    = location ? location.name : where
       args[:location] = location
     end
     args[:is_collection_location] = true if args[:is_collection_location].nil?
@@ -427,8 +430,8 @@ class SpeciesList < AbstractModel
   #
   ##############################################################################
 
-  def has_edit_permission?(user = User.current)
-    Project.has_edit_permission?(self, user)
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
   end
 
   ##############################################################################

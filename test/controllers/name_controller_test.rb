@@ -181,29 +181,6 @@ class NameControllerTest < FunctionalTestCase
     @@emails = []
   end
 
-  def assert_notify_email(old_name, new_name)
-    assert(@@emails.any?, "Was expecting an email notification.")
-    assert(@@emails.length == 1,
-           "Was only expecting one email notification, got:\n" +
-           @@emails.inspect)
-    if @@emails.first =~ /^(old|this) : #\d+: (.*) \[.*/
-      old_name2 = Regexp.last_match(2)
-    end
-    if @@emails.first =~ /^(new|into) : #\d+: (.*) \[.*/
-      new_name2 = Regexp.last_match(2)
-    end
-    assert(old_name == old_name2 && new_name == new_name2,
-           "Was expecting different email notification content.\n" \
-           "---- Expected: --------------------\n" \
-           "old: #nnn: #{old_name}\n" \
-           "new: #nnn: #{new_name}\n" \
-           "---- Actual: ----------------------\n" \
-           "#{@@emails.first}\n" \
-           "-----------------------------------\n")
-  ensure
-    @@emails = []
-  end
-
   def test_index_name
     get_with_dump(:index_name)
     assert_template(:list_names)
@@ -343,37 +320,25 @@ class NameControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
-    name1 = names(:lactarius_alpigenes)
-    name2 = names(:lactarius_alpinus)
-    name3 = names(:lactarius_kuehneri)
-    name4 = names(:lactarius_subalpinus)
+    name1 = query.results[0]
+    name2 = query.results[1]
+    name3 = query.results[-2]
+    name4 = query.results[-1]
 
     get(:next_name, q.merge(id: name1.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
-                         params: q)
-    get(:next_name, q.merge(id: name2.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
-                         params: q)
+    assert_redirected_to(name2.show_link_args.merge(q))
     get(:next_name, q.merge(id: name3.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
-                         params: q)
+    assert_redirected_to(name4.show_link_args.merge(q))
     get(:next_name, q.merge(id: name4.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
-                         params: q)
+    assert_redirected_to(name4.show_link_args.merge(q))
     assert_flash(/no more/i)
 
     get(:prev_name, q.merge(id: name4.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
-                         params: q)
-    get(:prev_name, q.merge(id: name3.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
-                         params: q)
+    assert_redirected_to(name3.show_link_args.merge(q))
     get(:prev_name, q.merge(id: name2.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
-                         params: q)
+    assert_redirected_to(name1.show_link_args.merge(q))
     get(:prev_name, q.merge(id: name1.id))
-    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
-                         params: q)
+    assert_redirected_to(name1.show_link_args.merge(q))
     assert_flash(/no more/i)
   end
 
@@ -739,8 +704,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert(name = Name.find_by(text_name: text_name))
     assert_redirected_to(action: :show_name, id: name.id)
-    # Amanita baccata is there but not Amanita sp., so this creates two names.
-    assert_equal(10 + 2 * @new_pts, rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     assert_equal(author, name.author)
     assert_equal(rolf, name.user)
   end
@@ -970,7 +934,7 @@ class NameControllerTest < FunctionalTestCase
     login("dick")
     params = {
       name: {
-        text_name: "Peltigeraceae",
+        text_name: "Lecideaceae",
         author: "",
         rank: :Genus,
         citation: "",
@@ -1032,7 +996,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_equal(20, rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
@@ -1076,6 +1040,7 @@ class NameControllerTest < FunctionalTestCase
   # This catches a bug that was happening when editing a name that was in use.
   # In this case text_name and author are missing, confusing edit_name.
   def test_edit_name_post_name_and_author_missing
+    names(:conocybe).destroy
     name = names(:conocybe_filaris)
     params = {
       id: name.id,
@@ -1094,8 +1059,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("", name.reload.author)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
-    assert_equal("Conocybe", Name.last.search_name)
-    assert_equal(20, rolf.reload.contribution) # created Conocybe
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_edit_name_unchangeable_plus_admin_email
@@ -1147,8 +1111,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    # It's implicitly creating Conocybe, because not in fixtures.
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts, rolf.reload.contribution)
     assert_equal(new_notes, name.reload.notes)
     assert_equal(past_names + 1, name.versions.size)
   end
@@ -1174,8 +1137,8 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     # creates Lactarius since it's not in fixtures
     assert(Name.exists?(text_name: "Lactarius"))
-    # points for new name Lactarius and for changing Lactarius alpigenes
-    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
+    # points for changing Lactarius alpigenes
+    assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
     assert(name.reload.deprecated)
     assert_equal("new citation", name.citation)
   end
@@ -1198,8 +1161,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    # It creates genus Strobilurus because there is Strobilurus fixture
-    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
+    assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
   end
@@ -1225,28 +1187,53 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_success
     assert_empty(name.reload.author)
     assert_no_emails
-    # It should also create genus Coprinus because there is no Coprinus fixture
-    assert_equal(old_name_count + 1, Name.count)
-    assert_equal(Name.last.text_name, "Coprinus")
   end
 
   def test_edit_name_misspelling
+    login("rolf")
+
     # Prove we can clear misspelling by unchecking "misspelt" box
     name = names(:petigera)
-    login(name.user.login)
+    assert_true(name.reload.is_misspelling?)
+    assert_names_equal(names(:peltigera), name.correct_spelling)
+    assert_true(name.deprecated)
     params = {
       id: name.id,
       name: {
         text_name:   name.text_name,
         author:      name.author,
         rank:        name.rank,
-        deprecated:  (name.deprecated ? "true" : "false")
+        deprecated:  "true",
+        misspelling: ""
       }
     }
-    login(name.user.login)
     post(:edit_name, params)
     assert_flash_success
-    refute(name.reload.is_misspelling?)
+    assert_false(name.reload.is_misspelling?)
+    assert_nil(name.correct_spelling)
+    assert_true(name.deprecated)
+    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
+
+    # Prove we can deprecated and call a name misspelt by checking box and
+    # entering correct spelling.
+    name.update_attributes(deprecated: false)
+    params = {
+      id: name.id,
+      name: {
+        text_name:        name.text_name,
+        author:           name.author,
+        rank:             name.rank,
+        deprecated:       "false",
+        misspelling:      "1",
+        correct_spelling: "Peltigera"
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_true(name.reload.is_misspelling?)
+    assert_names_equal(names(:peltigera), name.correct_spelling)
+    assert_true(name.deprecated)
+    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
 
     # Prove we cannot correct misspelling with unrecognized Name
     name = names(:suilus)
@@ -1327,8 +1314,7 @@ class NameControllerTest < FunctionalTestCase
     assert_flash_warning
     assert_redirected_to(action: :show_name, id: name.id)
     assert_no_emails
-    # (In fact, it is even implicitly creating Macrolepiota!)
-    assert_equal(10 + @new_pts, rolf.reload.contribution)
+    assert_equal(@new_pts, rolf.reload.contribution)
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
   end
@@ -1569,12 +1555,11 @@ class NameControllerTest < FunctionalTestCase
       }
     }
     login("rolf")
-    post(:edit_name, params)
 
-    assert_redirected_to(action: :show_name, id: old_name.id)
     # Fails because Rolf isn't in admin mode.
-    assert_flash_warning
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+    post(:edit_name, params)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(Name.find(old_name.id))
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -1693,9 +1678,8 @@ class NameControllerTest < FunctionalTestCase
 
     login("rolf")
     post(:edit_name, params)
-    assert_flash_warning
-    assert_redirected_to(action: :show_name, id: old_name.id)
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
 
     # Try again as an admin.
     make_admin
@@ -2046,9 +2030,8 @@ class NameControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     post(:edit_name, params)
-    assert_flash_warning
-    assert_notify_email(old_name.real_search_name, new_name.real_search_name)
-    assert_redirected_to(action: :show_name, id: old_name.id)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(old_name.reload)
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -3631,8 +3614,7 @@ class NameControllerTest < FunctionalTestCase
     refute(project.is_member?(dick))
     login(dick.login)
     get_with_dump(:show_name_description, id: draft.id)
-    assert_redirected_to(controller: :project, action: "show_project",
-                         id: project.id)
+    assert_redirected_to(project.show_link_args)
   end
 
   def test_create_draft_member
@@ -3664,7 +3646,7 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_draft_member
     assert(projects(:eol_project).is_member?(katrina))
     assert_equal("EOL Project",
-                 name_descriptions(:draft_coprinus_comatus).source_name)
+                 name_descriptions(:draft_agaricus_campestris).source_name)
     edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
                       katrina, false)
   end
@@ -3673,7 +3655,7 @@ class NameControllerTest < FunctionalTestCase
     refute(projects(:eol_project).is_member?(dick))
     assert_equal("EOL Project",
                  name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus),
                       dick, false, false)
   end
 
@@ -3985,5 +3967,149 @@ class NameControllerTest < FunctionalTestCase
     assert_obj_list_equal([UserGroup.one_user(dick)], desc.admin_groups)
     assert_obj_list_equal([UserGroup.one_user(dick)], desc.writer_groups)
     assert_obj_list_equal([UserGroup.one_user(dick)], desc.reader_groups)
+  end
+
+  # -----------------------------------
+  #  Test classification propagation.
+  # -----------------------------------
+
+  def test_refresh_classification
+    genus = names(:coprinus)
+    child = names(:coprinus_comatus)
+    val   = genus.classification
+    time  = genus.updated_at
+    assert_equal(val, child.classification)
+    assert_equal(val, child.description.classification)
+    assert_equal(time, child.updated_at)
+    assert_equal(time, child.description.updated_at)
+
+    # Make sure bogus requests don't crash.
+    login("rolf")
+    get(:refresh_classification)
+    get(:refresh_classification, id: 666)
+    get(:refresh_classification, id: "bogus")
+    get(:refresh_classification, id: genus.id)
+    get(:refresh_classification, id: child.id) # no change!
+    assert_equal(val, genus.reload.classification)
+    assert_equal(val, genus.description.reload.classification)
+    assert_equal(val, child.reload.classification)
+    assert_equal(val, child.description.reload.classification)
+    assert_equal(time, genus.updated_at)
+    assert_equal(time, genus.description.updated_at)
+    assert_equal(time, child.updated_at)
+    assert_equal(time, child.description.updated_at)
+
+    # Make sure have to be logged in. (update_column should avoid callbacks)
+    new_val = names(:peltigera).classification
+    child.update_columns(classification: new_val)
+    child.description.update_columns(classification: new_val)
+    logout
+    get(:refresh_classification, id: child.id)
+    assert_equal(new_val, child.reload.classification)
+    assert_equal(time, child.updated_at)
+
+    # Now finally do it right and make sure it makes correct changes.
+    login("rolf")
+    get(:refresh_classification, id: child.id)
+    assert_equal(val, child.reload.classification)
+    assert_not_equal(time, child.updated_at)
+  end
+
+  def test_propagate_classification
+    genus = names(:coprinus)
+    child = names(:coprinus_comatus)
+    val   = genus.classification
+    assert_equal(val, child.classification)
+    assert_equal(val, child.description.classification)
+
+    # Make sure bogus requests don't crash.
+    login("rolf")
+    get(:propagate_classification)
+    get(:propagate_classification, id: 666)
+    get(:propagate_classification, id: "bogus")
+    get(:propagate_classification, id: child.id)
+    get(:propagate_classification, id: names(:ascomycota).id)
+    assert_equal(val, genus.reload.classification)
+    assert_equal(val, genus.description.reload.classification)
+    assert_equal(val, child.reload.classification)
+    assert_equal(val, child.description.reload.classification)
+
+    # Make sure have to be logged in. (update_column should avoid callbacks)
+    new_val = names(:peltigera).classification
+    genus.update_columns(classification: new_val)
+    logout
+    get(:propagate_classification, id: genus.id)
+    assert_equal(val, child.reload.classification)
+
+    # Now finally do it right and make sure it makes correct changes.
+    login("rolf")
+    get(:propagate_classification, id: genus.id)
+    assert_equal(new_val, child.reload.classification)
+    assert_equal(new_val, child.description.reload.classification)
+  end
+
+  # -----------------------
+  #  Test lifeform stuff.
+  # -----------------------
+
+  def test_edit_lifeform
+    # Prove that anyone logged in can edit lifeform, and that the form starts
+    # off with the correct current state.
+    name = names(:peltigera)
+    assert_equal(" lichen ", name.lifeform)
+    requires_login(:edit_lifeform, id: name.id)
+    assert_template(:edit_lifeform)
+    Name.all_lifeforms.each do |word|
+      assert_input_value("lifeform_#{word}", word == "lichen" ? "1" : "")
+    end
+
+    # Make sure user can both add and remove lifeform categories.
+    params = { id: name.id }
+    Name.all_lifeforms.each do |word|
+      params["lifeform_#{word}"] = (word == "lichenicolous" ? "1" : "")
+    end
+    post(:edit_lifeform, params)
+    assert_equal(" lichenicolous ", name.reload.lifeform)
+  end
+
+  def test_propagate_lifeform
+    name = names(:lecanorales)
+    children = name.all_children
+    name.update_columns(lifeform: " lichen ")
+
+    # Prove that getting to the form requires a login, and that it starts off
+    # with all boxes unchecked.
+    requires_login(:propagate_lifeform, id: name.id)
+    assert_template(:propagate_lifeform)
+    Name.all_lifeforms.each do |word|
+      if word == "lichen"
+        assert_input_value("add_#{word}", "")
+      else
+        assert_input_value("remove_#{word}", "")
+      end
+    end
+
+    # Make sure we can add "lichen" to all children.
+    post(:propagate_lifeform, id: name.id, add_lichen: "1")
+    assert_redirected_to(name.show_link_args)
+    children.each do |child|
+      assert(child.reload.lifeform.include?(" lichen "),
+             "Child, #{child.search_name}, is missing 'lichen'.")
+    end
+
+    # Make sure we can remove "lichen" from all children, too.
+    post(:propagate_lifeform, id: name.id, remove_lichen: "1")
+    assert_redirected_to(name.show_link_args)
+    children.each do |child|
+      assert(!child.reload.lifeform.include?(" lichen "),
+             "Child, #{child.search_name}, still has 'lichen'.")
+    end
+  end
+
+  def test_why_danny_cant_edit_lentinus_description
+    desc = name_descriptions(:boletus_edulis_desc)
+    get(:show_name_description, id: desc.id)
+    assert_no_flash
+    assert_template(:show_name_description)
   end
 end

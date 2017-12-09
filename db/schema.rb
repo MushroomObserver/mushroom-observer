@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170827000729) do
+ActiveRecord::Schema.define(version: 20171209004800) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -23,12 +23,6 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.datetime "verified"
   end
 
-  create_table "ar_internal_metadata", primary_key: "key", force: :cascade do |t|
-    t.string   "value",      limit: 255
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-  end
-
   create_table "articles", force: :cascade do |t|
     t.string   "title",      limit: 255
     t.text     "body",       limit: 65535
@@ -36,6 +30,19 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.integer  "rss_log_id", limit: 4
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
+  end
+
+  create_table "collection_numbers", force: :cascade do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id",    limit: 4
+    t.string   "name",       limit: 255
+    t.string   "number",     limit: 255
+  end
+
+  create_table "collection_numbers_observations", id: false, force: :cascade do |t|
+    t.integer "collection_number_id", limit: 4
+    t.integer "observation_id",       limit: 4
   end
 
   create_table "comments", force: :cascade do |t|
@@ -124,6 +131,21 @@ ActiveRecord::Schema.define(version: 20170827000729) do
   create_table "herbaria_curators", id: false, force: :cascade do |t|
     t.integer "user_id",      limit: 4, default: 0, null: false
     t.integer "herbarium_id", limit: 4, default: 0, null: false
+  end
+
+  create_table "herbarium_records", force: :cascade do |t|
+    t.integer  "herbarium_id",     limit: 4,     null: false
+    t.text     "notes",            limit: 65535
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id",          limit: 4,     null: false
+    t.string   "initial_det",      limit: 221,   null: false
+    t.string   "accession_number", limit: 80,    null: false
+  end
+
+  create_table "herbarium_records_observations", id: false, force: :cascade do |t|
+    t.integer "observation_id",      limit: 4, default: 0, null: false
+    t.integer "herbarium_record_id", limit: 4, default: 0, null: false
   end
 
   create_table "image_votes", force: :cascade do |t|
@@ -384,6 +406,7 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.text     "classification",      limit: 65535
     t.boolean  "ok_for_export",                     default: true,  null: false
     t.string   "author",              limit: 100
+    t.string   "lifeform",            limit: 1024,  default: " ",   null: false
   end
 
   create_table "names_versions", force: :cascade do |t|
@@ -401,6 +424,7 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.integer  "correct_spelling_id", limit: 4
     t.text     "notes",               limit: 65535
     t.integer  "rank",                limit: 4
+    t.string   "lifeform",            limit: 1024,  default: " ",   null: false
   end
 
   create_table "naming_reasons", force: :cascade do |t|
@@ -447,6 +471,9 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.decimal  "long",                                 precision: 15, scale: 10
     t.string   "where",                  limit: 1024
     t.integer  "alt",                    limit: 4
+    t.string   "lifeform",               limit: 1024
+    t.string   "text_name",              limit: 100
+    t.text     "classification",         limit: 65535
   end
 
   create_table "observations_projects", id: false, force: :cascade do |t|
@@ -457,11 +484,6 @@ ActiveRecord::Schema.define(version: 20170827000729) do
   create_table "observations_species_lists", id: false, force: :cascade do |t|
     t.integer "observation_id",  limit: 4, default: 0, null: false
     t.integer "species_list_id", limit: 4, default: 0, null: false
-  end
-
-  create_table "observations_specimens", id: false, force: :cascade do |t|
-    t.integer "observation_id", limit: 4, default: 0, null: false
-    t.integer "specimen_id",    limit: 4, default: 0, null: false
   end
 
   create_table "projects", force: :cascade do |t|
@@ -519,7 +541,7 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.integer  "user_id",      limit: 4
     t.datetime "queued"
     t.integer  "num_attempts", limit: 4
-    t.string   "flavor",       limit: 40
+    t.string   "flavor",       limit: 50
     t.integer  "to_user_id",   limit: 4
   end
 
@@ -557,16 +579,6 @@ ActiveRecord::Schema.define(version: 20170827000729) do
     t.text     "notes",       limit: 65535
     t.integer  "rss_log_id",  limit: 4
     t.integer  "location_id", limit: 4
-  end
-
-  create_table "specimens", force: :cascade do |t|
-    t.integer  "herbarium_id",    limit: 4,                  null: false
-    t.date     "when",                                       null: false
-    t.text     "notes",           limit: 65535
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "user_id",         limit: 4,                  null: false
-    t.string   "herbarium_label", limit: 80,    default: "", null: false
   end
 
   create_table "synonyms", force: :cascade do |t|

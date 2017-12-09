@@ -154,27 +154,28 @@ module ObjectLinkHelper
     return nil unless check_permission(obs)
 
     link = link_with_query(:show_observation_add_sequence.t,
-                           controller: :sequence, action: :add_sequence,
+                           controller: :sequence, action: :create_sequence,
                            id: obs.id)
     " | ".html_safe + link
   end
 
-  def observation_specimen_link(obs)
-    count = obs.specimens.count
+  def observation_herbarium_record_link(obs)
+    count = obs.herbarium_records.count
     if count > 0
-      link_to(pluralize(count, :specimen.t),
-              controller: :specimen, action: :observation_index, id: obs.id)
+      link_to(pluralize(count, :herbarium_record.t),
+              controller: :herbarium_record, action: :observation_index,
+              id: obs.id)
     else
       return :show_observation_specimen_available.t if obs.specimen
       :show_observation_specimen_not_available.t
     end
   end
 
-  def create_specimen_link(obs)
+  def create_herbarium_record_link(obs)
     if check_permission(obs) || @user && @user.curated_herbaria.length > 0
-      link = link_with_query(:show_observation_create_specimen.t,
-                             controller: :specimen, action: :add_specimen,
-                             id: obs.id)
+      link = link_with_query(:show_observation_create_herbarium_record.t,
+                             controller: :herbarium_record,
+                             action: :add_herbarium_record, id: obs.id)
       " | ".html_safe + link
     end
   end

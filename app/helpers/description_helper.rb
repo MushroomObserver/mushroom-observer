@@ -64,10 +64,10 @@ module DescriptionHelper
     type = desc.type_tag
     title = description_title(desc)
     links = []
-    if @user && desc.is_writer?(@user)
+    if @user && desc.is_writer?(@user) || in_admin_mode?
       links << link_with_query(:EDIT.t, action: "edit_#{type}", id: desc.id)
     end
-    if @user && desc.is_admin?(@user)
+    if @user && desc.is_admin?(@user) || in_admin_mode?
       links << link_with_query(:DESTROY.t, { action: "destroy_#{type}",
                                              id: desc.id }, data: { confirm: :are_you_sure.l })
     end
@@ -219,7 +219,7 @@ module DescriptionHelper
                :default.l
              elsif desc.public
                :public.l
-             elsif desc.is_reader?(@user)
+             elsif desc.is_reader?(@user) || in_admin_mode?
                :restricted.l
              else
                :private.l

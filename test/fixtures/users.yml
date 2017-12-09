@@ -69,10 +69,11 @@ spammer: # 7
   login: spamspamspam
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
-# observations, projects, publications, species lists, specimens, or anything
-# except account
+# observations, projects, publications, species lists, herbarium_records, or
+# anything except account
 zero_user: # 8
   <<: *DEFAULTS
+  login: zero
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed

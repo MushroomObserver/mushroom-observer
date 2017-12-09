@@ -49,7 +49,7 @@ class GlossaryTerm < AbstractModel
     "#{name} (#{id})"
   end
 
-  def has_edit_permission?(_user)
+  def can_edit?(_user = User.current)
     true
   end
 

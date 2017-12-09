@@ -14,18 +14,6 @@ class AccountMailerTest < UnitTestCase
     super
   end
 
-  # At the moment at least Redcloth produces slightly different output on
-  # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
-  # common form so that we don't need to continue to tweak two separate copies
-  # of every email response.  But I'm failing...
-  def fix_mac_vs_pc!(email)
-    email.gsub!(%r{<br />\n}, "<br/>")
-    email.gsub!(/&#38;/, "&amp;")
-    email.gsub!(/ &#8212;/, "&#8212;")
-    email.gsub!(/^\s+/, "")
-    email.gsub!(/\r\n?/, "\n")
-  end
-
   # Run off an email in both HTML and text form.
   def run_mail_test(name, user = nil)
     text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
@@ -38,25 +26,56 @@ class AccountMailerTest < UnitTestCase
     if text_files.any?
       user.email_html = false if user
       yield
-      email = ActionMailer::Base.deliveries[0].encoded
+      email = ActionMailer::Base.deliveries.last.encoded
+      email = remove_extraneous_email_headers(email)
       assert_string_equal_file(email, *text_files)
     end
 
-    return unless html_files.any?
+    if html_files.any?
+      user.email_html = true if user
+      yield
+      email = ActionMailer::Base.deliveries.last.encoded
+      email = remove_extraneous_email_headers(email)
+      fix_mac_vs_pc!(email)
+      assert_string_equal_file(email, *html_files)
+    end
+  end
 
-    user.email_html = true if user
-    yield
-    email = ActionMailer::Base.deliveries.last.encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, *html_files)
+  # At the moment at least Redcloth produces slightly different output on
+  # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
+  # common form so that we don't need to continue to tweak two separate copies
+  # of every email response.  But I'm failing...
+  def fix_mac_vs_pc!(email)
+    email.gsub!(%r{<br />\n}, "<br/>")
+    email.gsub!(/&#38;/, "&amp;")
+    email.gsub!(/ &#8212;/, "&#8212;")
+    email.gsub!(/^\s+/, "")
+    email.gsub!(/\r\n?/, "\n")
+  end
+
+  def remove_extraneous_email_headers(str)
+    in_header = true
+    keep_wrapped_line = false
+    str.split("\n").select do |line|
+      in_header = false if line =~ /^\s*$|<html>/
+      if !in_header
+        true
+      elsif line =~ /^(To|From|Reply-To|Cc|Bcc|Subject):/
+        keep_wrapped_line = true
+      elsif keep_wrapped_line && line !~ /^[A-Z][\w\-]+:/
+        true
+      else
+        keep_wrapped_line = false
+      end
+    end.join("\n")
   end
 
   ##############################################################################
 
-  def test_add_specimen_email
-    specimen = specimens(:interesting_unknown)
-    run_mail_test("add_specimen_not_curator", rolf) do
-      AddSpecimenEmail.build(mary, rolf, specimen).deliver_now
+  def test_add_herbarium_record_email
+    herbarium_record = herbarium_records(:interesting_unknown)
+    run_mail_test("add_herbarium_record_not_curator", rolf) do
+      AddHerbariumRecordEmail.build(mary, rolf, herbarium_record).deliver_now
     end
   end
 
@@ -142,7 +161,6 @@ class AccountMailerTest < UnitTestCase
 
   def test_name_change_email
     name = names(:peltigera)
-
     desc = name.description
     run_mail_test("name_change", mary) do
       email = QueuedEmail::NameChange.create_email(dick, mary,

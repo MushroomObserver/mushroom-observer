@@ -139,3 +139,11 @@ peltigera_source_desc_version_1: # 15
   version: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
 
+boletus_edulis_desc_version_1: # 16
+  name_description_id: <%= ActiveRecord::FixtureSet.
+   identify(:boletus_edulis_desc) %>
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+  license_id: <%= ActiveRecord::FixtureSet.identify(:ccnc30) %>
+  updated_at: 2012-07-12 06:32:18
+  user_id: <%= ActiveRecord::FixtureSet.identify(:roy) %>
+  version: 1

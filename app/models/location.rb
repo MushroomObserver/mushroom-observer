@@ -114,6 +114,7 @@ class Location < AbstractModel
     "description_id"
   )
 
+  before_update :update_observation_cache
   after_update :notify_users
 
   # Automatically log standard events.
@@ -129,6 +130,11 @@ class Location < AbstractModel
        )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
+  end
+
+  # Let attached observations update their cache if these fields changed.
+  def update_observation_cache
+    Observation.update_cache("location", "where", id, name) if name_changed?
   end
 
   ##############################################################################
@@ -277,6 +283,12 @@ class Location < AbstractModel
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
     format_name + " (#{id || "?"})"
+  end
+
+  # Info to include about each location in merge requests.
+  def merge_info
+    num_obs = observations.count
+    "#{:LOCATION.l} ##{id}: #{name} [o=#{num_obs}]"
   end
 
   # Strip out special characters, punctuation, and small words from a name.

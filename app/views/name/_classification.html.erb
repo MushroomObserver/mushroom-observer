@@ -1,0 +1,25 @@
+<% if @classification %>
+  <%= @classification.tpl %>
+<% else %>
+  <p>
+    <% @parents.each do |p| %>
+      <%= rank_as_string(p.rank) %>:
+        <%= link_with_query(p.display_name.t, p.show_link_args) %>
+    <% end %>
+  </p>
+<% end %>
+
+<% if @first_child %>
+  <%= link_to(:show_object.t(type: :"RANK_PLURAL_#{@first_child.rank.to_s.upcase}"),
+              add_query_param({ action: :index_name }, @children_query)) %><br/>
+<% end %>
+<% if @name.below_genus? && @name.genus.classification != @name.classification %>
+  <%= link_with_query(:show_name_refresh_classification.t,
+                      controller: :name, action: :refresh_classification,
+                      id: @name.id) %><br/>
+<% end %>
+<% if @name.rank == :Genus && @first_child%>
+  <%= link_with_query(:show_name_propagate_classification.t,
+                      controller: :name, action: :propagate_classification,
+                      id: @name.id) %><br/>
+<% end %>

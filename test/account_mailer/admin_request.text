@@ -2,10 +2,6 @@ From: news@mushroomobserver.org
 Reply-To: katrina@collectivesource.com
 To: rolf@collectivesource.com
 Subject: [MO] Please do something or other
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
 Admin Request
 
@@ -17,7 +13,8 @@ and this is why...
 
 Here are some handy links:
 
+Change user's status: http://mushroomobserver.org/project/change_user_status/<%= ActiveRecord::FixtureSet.identify(:eol_project) %>?candidate=<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Show user's profile: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
-If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
+If you feel this user is abusing this service please forward this entire email message to: mo-admin@googlegroups.com

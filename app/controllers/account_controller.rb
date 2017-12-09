@@ -401,8 +401,8 @@ class AccountController < ApplicationController
   def update_content_filter(pref, val)
     filter = ContentFilter.find(pref)
     @user.content_filter[pref] =
-      if filter.type == :boolean
-        val == "1" ? filter.checked_val : filter.off_val
+      if filter.type == :boolean && filter.prefs_vals.count == 1
+        val == "1" ? filter.prefs_vals.first : filter.off_val
       else
         val.to_s
       end
@@ -601,7 +601,8 @@ class AccountController < ApplicationController
   alias_method :no_question_email,         :no_email_general_question
 
   def no_email(type)
-    if check_permission!(params[:id].to_s)
+    user = User.safe_find(params[:id])
+    if user && check_permission!(user)
       method  = "email_#{type}="
       prefix  = "no_email_#{type}"
       success = "#{prefix}_success".to_sym

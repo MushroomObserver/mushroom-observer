@@ -21,7 +21,7 @@ module Query
       [
         "names.search_name",
         "COALESCE(observations.notes,'')",
-        "IF(locations.id,locations.name,observations.where)"
+        "observations.where"
       ]
     end
 

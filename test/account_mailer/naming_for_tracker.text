@@ -2,10 +2,6 @@ From: news@mushroomobserver.org
 Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Naming Notification - <%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>: Agaricus campestris L.
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
 Tracking Alert
 
@@ -13,7 +9,7 @@ An observation on the Mushroom Observer website has been given the name Agaricus
 
 Observer: Rolf Singer
 Identifier: Rolf Singer
-No herbarium specimen
+No voucher specimen
 Image count: 1
 
 Here are some handy links:
@@ -24,4 +20,4 @@ Disable tracking for this name: http://mushroomobserver.org/name/email_tracking/
 Review your notifications: http://mushroomobserver.org/interest/list_interests
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
-If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
+If you feel this user is abusing this service please forward this entire email message to: mo-admin@googlegroups.com

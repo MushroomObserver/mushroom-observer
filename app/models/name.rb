@@ -311,6 +311,7 @@ class Name < AbstractModel
       deprecated
       correct_spelling
       notes
+      lifeform
     ]
   )
   non_versioned_columns.push(
@@ -320,12 +321,14 @@ class Name < AbstractModel
     "last_view",
     "ok_for_export",
     "rss_log_id",
-    # 'accepted_name_id',
+    # "accepted_name_id",
     "synonym_id",
     "description_id",
     "classification" # (versioned in the default desc)
   )
 
+  before_create :inherit_stuff
+  before_update :update_observation_cache
   after_update :notify_users
 
   # Notify webmaster that a new name was created.
@@ -368,10 +371,6 @@ class Name < AbstractModel
     end
   end
 
-  def best_classification
-    description.classification if description
-  end
-
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
@@ -410,6 +409,19 @@ class Name < AbstractModel
       result = file.readlines.map(&:chomp)
       file.close
     end
+    result
+  end
+
+  # Used by show_name.
+  def self.count_observations(names)
+    ids = names.map(&:id)
+    counts_and_ids = Name.connection.select_rows(%(
+        SELECT count(*) c, names.id i FROM observations, names
+        WHERE observations.name_id = names.id
+        AND names.id IN (#{ids.join(", ")}) group by names.id
+    ))
+    result = {}
+    counts_and_ids.each { |row| result[row[1]] = row[0] }
     result
   end
 
@@ -502,6 +514,13 @@ class Name < AbstractModel
     str
   end
 
+  # Info to include about each name in merge requests.
+  def merge_info
+    num_obs     = observations.count
+    num_namings = namings.count
+    "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
+  end
+
   ##############################################################################
   #
   #  :section: Taxonomy
@@ -571,16 +590,6 @@ class Name < AbstractModel
     all_ranks.index(a.to_sym) <=> all_ranks.index(b.to_sym)
   end
 
-  def is_lichen?
-    # Check both this name and genus, just in case I'm missing some species.
-    return true if Triple.where(subject: ":name/#{id}",
-                                predicate: ":lichenAuthority").count > 0
-    return false unless below_genus?
-    genus_id = Name.where(text_name: text_name.split.first).select(:id).first
-    Triple.where(subject: ":name/#{genus_id}",
-                 predicate: ":lichenAuthority").count > 0
-  end
-
   def has_eol_data?
     if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
       observations.each do |o|
@@ -643,18 +652,25 @@ class Name < AbstractModel
   end
 
   # Returns the Name of the genus above this taxon.  If there are multiple
-  # matching genera, it chooses the first accepted one arbitrarily.  If this
-  # name is at or above genus already, it returns nil.
+  # matching genera, it prefers accepted ones that are not "sensu xxx".
+  # Beyond that it just chooses the first one arbitrarily.
   def genus
-    return unless below_genus?
-    genus_name = text_name.split(" ").first
-    Name.where(text_name: genus_name).reject(&:deprecated).first
+    @genus ||= begin
+      return unless text_name.include?(" ")
+      genus_name = text_name.split(" ", 2).first
+      genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
+      accepted   = genera.reject(&:deprecated)
+      genera     = accepted if accepted.any?
+      nonsensu   = genera.reject { |n| n.author =~ /^sensu / }
+      genera     = nonsensu if nonsensu.any?
+      genera.first
+    end
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.
-  # It _can_ return multiple names, if there are multiple genera, for example,
-  # with the same name but different authors.  If any parent is approved, then
-  # it only returns approved names.  It ignores misspellings.
+  # If there are multiple names at a given rank, it prefers accepted, non-sensu
+  # names, but beyond that it chooses the first one arbitrarily.  It ignores
+  # misspellings. 
   #
   #    child = Name.find_by_text_name('Letharia vulpina')
   #    child.parents.each do |parent|
@@ -666,75 +682,51 @@ class Name < AbstractModel
   #    Letharia (Another) One
   #
   def parents(all = false)
-    results   = []
-    lines     = nil
-    next_rank = rank
+    parents = []
 
-    # Try ranks above ours one at a time until we find a parent.
-    while all || results.empty?
-      next_rank = Name.all_ranks[rank_index(next_rank) + 1]
-      break if !next_rank || next_rank == :Group
-      these = []
-
-      # Once we go past genus we need to search the classification string.
-      if Name.ranks_above_genus.include?(next_rank)
-
-        unless lines
-          # Check this name's classification first.
-          str = classification
-          if str.blank? && results.last
-            # Next try the last genus's classification from subgeneric results.
-            str = results.last.classification
-          end
-          if str.blank?
-            # Finally try searching for any classification that includes this
-            # name in it!
-            str = Name.connection.select_value %(
-              SELECT classification FROM names
-              WHERE classification LIKE '%#{rank}: _#{text_name}%'
-              LIMIT 1
-            )
-          end
-          lines = begin
-                    parse_classification(str)
-                  rescue
-                    []
-                  end
-          break if lines.empty?
-        end
-
-        # Grab name for 'next_rank' from classification string.
-        lines.each do |line_rank, line_name|
-          these += Name.where(text_name: line_name) if line_rank == next_rank
-        end
-
-      # At and below genus, we do a database query on part of our name, e.g.,
-      # if our name is "Xxx yyy var. zzz", we search first for species named
-      # "Xxx yyy", then genera named "Xxx".)
-      elsif next_rank == :Variety && text_name.match(/^(.* var\. \S+)/) ||
-            next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
-            next_rank == :Species && text_name.match(/^(\S+ \S+)/) ||
-            next_rank == :Genus && text_name.match(/^(\S+)/)
-        str = Regexp.last_match(1)
-        these = Name.where(correct_spelling_id: nil,
-                           rank: Name.ranks[next_rank],
-                           text_name: str).to_a
-      end
-
-      # Get rid of deprecated names unless all the results are deprecated.
-      unless these.empty?
-        unless these.count(&:deprecated) == these.length
-          these = these.reject(&:deprecated)
-        end
-        if all
-          results << these.first
-        else
-          results = these
-        end
-      end
+    # Start with infrageneric and genus names.
+    # Get rid of quoted words and ssp., var., f., etc.
+    words = text_name.split(" ")
+    until words.empty?
+      name = words.join(" ")
+      words.pop
+      next if name == text_name || name[-1] == "."
+      parent = Name.best_match(name)
+      parents << parent if parent
+      return [parent] if !all && parent && !parent.deprecated
     end
 
-    results
+    # Next grab the names out of the classification string.
+    lines = try(&:parse_classification) || []
+    lines.reverse.each do |rank, name|
+      parent = Name.best_match(name)
+      parents << parent if parent
+      return [parent] if !all && !parent.deprecated
+    end
+    
+    # Get rid of deprecated names unless all the results are deprecated.
+    parents.reject!(&:deprecated) unless parents.all?(&:deprecated)
+
+    # Return single parent as an array for backwards compatibility.
+    return parents if all
+    return [] unless parents.any?
+    [parents.first]
+  end
+
+  # Handy method which searches for a plain old text name and picks the "best"
+  # version available.  That is, it ignores misspellings, chooses accepted,
+  # non-"sensu" names where possible, and finally picks the first one
+  # arbitrarily where there is still ambiguity.  Useful if you just need a
+  # name and it's not so critical that it be the exactly correct one.
+  def self.best_match(name)
+    matches  = Name.where(search_name: name, correct_spelling_id: nil)
+    return matches.first if matches.any?
+    matches  = Name.where(text_name: name, correct_spelling_id: nil)
+    accepted = matches.reject(&:deprecated)
+    matches  = accepted if accepted.any?
+    nonsensu = matches.reject { |name| name.author =~ /^sensu / }
+    matches  = nonsensu if nonsensu.any?
+    matches.first
   end
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
@@ -764,101 +756,19 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    results = []
-    our_rank = rank
-    our_index = rank_index(our_rank)
-
-    # If we're above genus we need to rely on classification strings.
-    if Name.ranks_above_genus.include?(our_rank)
-
-      # Querying every genus that refers to this ancestor could potentially get
-      # expensive -- think of doing children for Eukarya!! -- but I'm not sure
-      # how else to do it.  (There are currently 1927 genera in the database.)
-      rows = Name.connection.select_rows %(
-        SELECT classification, search_name FROM names
-        WHERE rank = #{Name.ranks[:Genus]}
-          AND classification LIKE '%#{rank}: _#{text_name}_%'
-      )
-
-      # Genus should not be included in classifications.
-      names = []
-      if our_rank == :Family
-        rows.each do |cstr, sname|
-          results += Name.where(search_name: sname).to_a
-        end
-
-      # Grab all names below our rank.
-      elsif all
-        # Get set of ranks between ours and genus.
-        accept_ranks = Name.ranks_above_genus.
-                       reject { |x| Name.all_ranks.index(x) >= our_index }.
-                       map(&:to_s)
-        # Search for names in each classification string.
-        rows.each do |cstr, sname|
-          while cstr.sub!(/(\w+): _([^_]+)_\s*\Z/, "")
-            line_rank = Regexp.last_match(1)
-            line_name = Regexp.last_match(2)
-            # Grab names from end, one line at a time, until reach our rank
-            # or a name we've already seen (assume all the higher names are
-            # the same as what we saw before).
-            if accept_ranks.include?(line_rank) &&
-               !names.include?(line_name)
-              names << line_name
-            else
-              break
-            end
-          end
-          # (include genus, too)
-          results += Name.where(search_name: sname).to_a
-        end
-
-      # Grab all names at next lower rank.
-      else
-        next_rank = Name.all_ranks[our_index - 1]
-        match_str = "#{next_rank}: _"
-        rows.each do |cstr, sname|
-          if (i = cstr.index(match_str)) && cstr[i..-1].match(/_([^_]+)_/)
-            names << Regexp.last_match(1)
-          end
-        end
-      end
-
-      # Convert these name strings into Names.
-      results += names.uniq.map { |n| Name.where(text_name: n) }.flatten
-      results.uniq!
-
-      # Add subgeneric names for all genera in the results.
-      if all
-        results2 = []
-        results.each do |name|
-          if name.rank == :Genus
-            results2 += Name.where("correct_spelling_id IS NULL AND " \
-                                   "text_name LIKE ? ' %'", name.text_name).to_a
-          end
-        end
-        results += results2
-      end
-
-    # Get everything below our rank.
+    sql = if at_or_below_genus?
+      "text_name LIKE '#{text_name} %'"
     else
-      results = Name.where("correct_spelling_id IS NULL AND " \
-                           "text_name LIKE ? ' %'", text_name).to_a
-
-      # Remove subchildren if not getting all children.  This is trickier than
-      # I originally expected because we want the children of G. species to
-      # include the first two of these, but not the last:
-      #   G. species var. variety            YES!!
-      #   G. species f. form                 YES!!
-      #   G. species var. variety f. form    NO!!
-      unless all
-        x = text_name.length
-        results.reject! do |name|
-          name.text_name[x..-1].match(/ .* .* /)
-        end
-      end
+      "classification LIKE '%#{rank}: _#{text_name}_%'"
     end
-
-    results
+    sql += " AND correct_spelling_id IS NULL"
+    return Name.where(sql).to_a if all
+    Name.all_ranks.reverse.each do |rank2|
+      next if rank_index(rank2) >= rank_index(rank)
+      matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
+      return matches.to_a if matches.any?
+    end
+    return []
   end
 
   # Parse the given +classification+ String, validate it, and reformat it so
@@ -881,9 +791,9 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      rank_idx = rank_index(rank)
+      raise :runtime_user_bad_rank.t(rank: rank) if rank_index(rank).nil?
+      rank_idx = [rank_index(:Genus), rank_index(rank)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
-      raise :runtime_user_bad_rank.t(rank: rank) if rank_idx.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
       kingdom = "Fungi"
@@ -983,6 +893,184 @@ class Name < AbstractModel
 
   def text_before_rank
     text_name.split(" " + rank.to_s.downcase).first
+  end
+
+  # This is called before a name is created to let us populate things like
+  # classification and lifeform from the parent (if infrageneric only).
+  def inherit_stuff
+    return unless genus # this sets the name instance @genus as side-effect
+    self.classification ||= genus.classification
+    self.lifeform       ||= genus.lifeform
+  end
+
+  # Let attached observations update their cache if these fields changed.
+  def update_observation_cache
+    Observation.update_cache("name", "lifeform", id, lifeform) \
+      if lifeform_changed?
+    Observation.update_cache("name", "text_name", id, text_name) \
+      if text_name_changed?
+    Observation.update_cache("name", "classification", id, classification) \
+      if classification_changed?
+  end
+
+  # Copy the classification of a genus to all of its children.  Does not change
+  # updated_at or rss_log or anything.  Just changes the classification field
+  # in the name and default description records. 
+  def propagate_classification
+    raise("Name#propagate_classification only works on genera for now.") \
+      if rank != :Genus
+    escaped_string = Name.connection.quote(classification)
+    Name.connection.execute(%(
+      UPDATE names SET classification = #{escaped_string}
+      WHERE text_name LIKE "#{text_name} %"
+        AND classification != #{escaped_string}
+    ))
+    Name.connection.execute(%(
+      UPDATE name_descriptions nd, names n
+      SET nd.classification = #{escaped_string}
+      WHERE nd.id = n.description_id
+        AND n.text_name LIKE "#{text_name} %"
+        AND nd.classification != #{escaped_string}
+    ))
+    Name.connection.execute(%(
+      UPDATE observations
+      SET classification = #{escaped_string}
+      WHERE text_name LIKE "#{text_name} %"
+        AND classification != #{escaped_string}
+    ))
+  end
+
+  # This is meant to be run nightly to ensure that all the infrageneric
+  # classifications are up-to-date with respect to their genera.  This is
+  # important because there is no way to edit this on-line.  (Although there
+  # will be a "propagate classification" button on the genera, and maybe we
+  # can add that to the children, as well.)
+  def self.propagate_generic_classifications
+    out = []
+    errors = {}
+    genus_text_name = nil
+    genus_classification = nil
+    genus_rank = Name.ranks[:Genus]
+    # The sort_name ordering should ensure that genera always comes before
+    # the corresponding infrageneric taxa.
+    Name.connection.select_rows(%(
+      SELECT id, description_id, rank, text_name, classification FROM names
+      WHERE correct_spelling_id IS NULL
+        AND rank <= #{genus_rank}
+      ORDER BY sort_name ASC
+    )).each do |id, desc_id, rank, text_name, classification|
+      if rank == genus_rank
+        genus_text_name = text_name
+        genus_classification = classification
+      elsif (x = text_name.split(" ", 2).first) != genus_text_name
+        out << "Missing genus #{x}" unless errors[x]
+        errors[x] = true
+      elsif classification != genus_classification
+        out << "Updating #{text_name}"
+        str = Name.connection.quote(genus_classification)
+        Name.connection.execute(%(
+          UPDATE names SET classification = #{str} WHERE id = #{id}
+        ))
+        Name.connection.execute(%(
+          UPDATE name_descriptions SET classification = #{str}
+          WHERE id = #{desc_id}
+        )) unless desc_id.blank?
+        Name.connection.execute(%(
+          UPDATE observations SET classification = #{str} WHERE name_id = #{id}
+        ))
+      end
+    end
+    return out
+  end
+
+  # This is meant to be run nightly to ensure that all the classification
+  # caches are up to date.  It only pays attention to genera or higher.
+  def self.refresh_classification_caches
+    Name.connection.execute(%(
+      UPDATE names n, name_descriptions nd
+      SET n.classification = nd.classification
+      WHERE nd.id = n.description_id
+        AND n.rank <= #{Name.ranks[:Genus]}
+        AND nd.classification != n.classification
+    ))
+    []
+  end
+
+  ##############################################################################
+  #
+  #  :section: Lifeforms
+  #
+  ##############################################################################
+
+  ALL_LIFEFORMS = [
+    "basidiolichen",
+    "lichen",
+    "lichen_ally",
+    "lichenicolous"
+  ]
+
+  def self.all_lifeforms
+    ALL_LIFEFORMS
+  end
+
+  # This will include "lichen", "lichenicolous" and "lichen-ally" -- the usual
+  # set of taxa lichenologists are interested in.
+  def is_lichen?
+    lifeform.include?("lichen")
+  end
+
+  # This excludes "lichen" but includes "mushroom" (so that truly lichenized
+  # basidiolichens with mushroom fruiting bodies are included).
+  def is_not_lichen?
+    !lifeform.include?(" lichen ")
+  end
+
+  validate :validate_lifeform
+
+  # Sorts and uniquifies the lifeform words, and complains about any that are
+  # not recognized.  It adds an extra space before and after to ensure that it
+  # is easy to search for entire words instead of just substrings.  That is,
+  # one can do this: 
+  #
+  #   lifeform.include(" word ")
+  # 
+  # and be confident that it will not skip "word" at the beginning or end,
+  # and will not match "compoundword".
+  def validate_lifeform
+    words = lifeform.to_s.split(" ").sort.uniq
+    self.lifeform = words.any? ? " #{words.join(' ')} " : " "
+    unknown_words = words - ALL_LIFEFORMS
+    return unless unknown_words.any?
+    unknown_words = unknown_words.map(&:inspect).join(", ")
+    errors.add(:lifeform, :validate_invalid_lifeform.t(words: unknown_words))
+  end
+
+  # Add lifeform (one word only) to all children.
+  def propagate_add_lifeform(lifeform)
+    Name.connection.execute(%(
+      UPDATE names SET lifeform = CONCAT(lifeform, "#{lifeform} ")
+      WHERE id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform NOT LIKE "% #{lifeform} %"
+    ))
+    Name.connection.execute(%(
+      UPDATE observations SET lifeform = CONCAT(lifeform, "#{lifeform} ")
+      WHERE name_id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform NOT LIKE "% #{lifeform} %"
+    ))
+  end
+
+  # Remove lifeform (one word only) from all children.
+  def propagate_remove_lifeform(lifeform)
+    Name.connection.execute(%(
+      UPDATE names SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
+      WHERE id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform LIKE "% #{lifeform} %"
+    ))
+    Name.connection.execute(%(
+      UPDATE observations SET lifeform = REPLACE(lifeform, " #{lifeform} ", " ")
+      WHERE name_id IN (#{all_children.map(&:id).join(",")})
+        AND lifeform LIKE "% #{lifeform} %"
+    ))
   end
 
   ##############################################################################
@@ -1270,18 +1358,6 @@ class Name < AbstractModel
     results
   end
 
-  def self.count_observations(names)
-    ids = names.map(&:id)
-    counts_and_ids = Name.connection.select_rows(%(
-        SELECT count(*) c, names.id i FROM observations, names
-        WHERE observations.name_id = names.id
-        AND names.id IN (#{ids.join(", ")}) group by names.id
-    ))
-    result = {}
-    counts_and_ids.each { |row| result[row[1]] = row[0] }
-    result
-  end
-
   private
 
   # Guess correct name of partial string.
@@ -1325,7 +1401,8 @@ class Name < AbstractModel
     conds = patterns.map do |pat|
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(" OR ")
-    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
+    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds}) " +
+            "AND correct_spelling_id IS NULL"
     names = where(conds).limit(10).to_a
 
     # Screen out ones way too different.
@@ -1427,6 +1504,7 @@ class Name < AbstractModel
   SENSU_ABBR   = / sensu?\.? /xi
   NOV_ABBR     = / nova | novum | nov\.? /xi
   PROV_ABBR    = / provisional | prov\.? /xi
+  CRYPT_ABBR   = / crypt\.? \s temp\.? /xi
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
                       #{STIRPS_ABBR} /x
@@ -1434,7 +1512,8 @@ class Name < AbstractModel
   ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
                       #{GROUP_ABBR} /x
   ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
-                          #{COMB_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
+                          #{COMB_ABBR} | #{SENSU_ABBR} | #{CRYPT_ABBR} )
+                      (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
@@ -1593,22 +1672,23 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ (group|clade)$/) ? :Group :
-    text_name.include?(" f. ") ? :Form :
-    text_name.include?(" var. ") ? :Variety :
-    text_name.include?(" subsp. ") ? :Subspecies :
-    text_name.include?(" stirps ") ? :Stirps : text_name.include?(" subsect. ") ? :Subsection :
-    text_name.include?(" sect. ") ? :Section :
-    text_name.include?(" subgenus ") ? :Subgenus :
-    text_name.include?(" ") ? :Species :
-    text_name.match(/^\w+aceae$/) ? :Family :
-    text_name.match(/^\w+ineae$/) ? :Family : # :Suborder
-    text_name.match(/^\w+ales$/) ? :Order :
-    text_name.match(/^\w+mycetidae$/) ? :Order : # :Subclass
-    text_name.match(/^\w+mycetes$/) ? :Class :
-    text_name.match(/^\w+mycotina$/) ? :Class : # :Subphylum
-    text_name.match(/^\w+mycota$/) ? :Phylum :
-                                        :Genus
+    text_name.match(/ (group|clade)$/) ? :Group      :
+    text_name.include?(" f. ")         ? :Form       :
+    text_name.include?(" var. ")       ? :Variety    :
+    text_name.include?(" subsp. ")     ? :Subspecies :
+    text_name.include?(" stirps ")     ? :Stirps     :
+    text_name.include?(" subsect. ")   ? :Subsection :
+    text_name.include?(" sect. ")      ? :Section    :
+    text_name.include?(" subgenus ")   ? :Subgenus   :
+    text_name.include?(" ")            ? :Species    :
+    text_name.match(/^\w+aceae$/)      ? :Family     :
+    text_name.match(/^\w+ineae$/)      ? :Family     : # :Suborder
+    text_name.match(/^\w+ales$/)       ? :Order      :
+    text_name.match(/^\w+mycetidae$/)  ? :Order      : # :Subclass
+    text_name.match(/^\w+mycetes$/)    ? :Class      :
+    text_name.match(/^\w+mycotina$/)   ? :Class      : # :Subphylum
+    text_name.match(/^\w+mycota$/)     ? :Phylum     :
+                                         :Genus
   end
 
   def self.parse_author(str)
@@ -2539,7 +2619,9 @@ class Name < AbstractModel
       names = find_or_create_name_and_parents(input_what)
       if names.last
         names.each do |n|
-          n.save_with_log(:log_updated_by) if n && n.new_record?
+          next unless n && n.new_record?
+          n.inherit_stuff
+          n.save_with_log(:log_updated_by)
         end
       end
     end
@@ -2556,10 +2638,10 @@ class Name < AbstractModel
       end
     end
     names.each do |n|
-      if n && n.new_record?
-        n.change_deprecated(deprecate) if deprecate
-        n.save_with_log(log)
-      end
+      next unless n && n.new_record?
+      n.change_deprecated(deprecate) if deprecate
+      n.inherit_stuff
+      n.save_with_log(log)
     end
   end
 

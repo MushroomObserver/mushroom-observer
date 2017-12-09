@@ -94,7 +94,6 @@
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
-#  default_specimen_label::
 #
 #  ==== Namings and Votes
 #  name::                   Conensus Name instance. (never nil)
@@ -123,7 +122,7 @@
 #  remove_image::           Remove an Image.
 #
 #  ==== Projects
-#  has_edit_permission?::   Check if user has permission to edit this obs.
+#  can_edit?::              Check if user has permission to edit this obs.
 #
 #  ==== Callbacks
 #  add_spl_callback::           After add: update contribution.
@@ -160,8 +159,11 @@ class Observation < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
                                           before_remove: :remove_spl_callback
-  has_and_belongs_to_many :specimens
+  has_and_belongs_to_many :collection_numbers
+  has_and_belongs_to_many :herbarium_records
+  before_destroy { destroy_orphaned_collection_numbers }
 
+  before_save :cache_content_filter_data
   after_update :notify_users_after_change
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -181,6 +183,69 @@ class Observation < AbstractModel
   def is_observation?
     true
   end
+
+  # There is no value to keeping a collection number record after all its
+  # observations are destroyed or removed from it.
+  def destroy_orphaned_collection_numbers
+    collection_numbers.each do |col_num|
+      col_num.destroy if col_num.observations == [self]
+    end
+  end
+
+  # Cache location and name data used by content filters.
+  def cache_content_filter_data
+    if name && name_id_changed?
+      self.lifeform = name.lifeform
+      self.text_name = name.text_name
+      self.classification = name.classification
+    end
+    if location && location_id_changed?
+      self.where = location.name
+    end
+  end
+
+  # This is meant to be run nightly to ensure that the cached name
+  # and location data used by content filters is kept in sync.
+  def self.refresh_content_filter_caches
+    update_cached_column("name", "lifeform") +
+    update_cached_column("name", "text_name") +
+    update_cached_column("name", "classification") +
+    update_cached_column("location", "name", "where")
+  end
+
+  def self.update_cached_column(type, foreign, local = foreign)
+    msgs = []
+    Observation.connection.select_rows(%(
+      SELECT o.id, x.#{foreign}
+      FROM observations o, #{type}s x
+      WHERE x.id = o.#{type}_id
+        AND x.#{foreign} != o.%{local}
+    )).each do |id, str|
+      msgs << "Fixing #{type} #{foreign} for observation ##{id}."
+      Observation.connection.execute(%(
+        UPDATE observations
+        SET `#{local}` = #{Observation.connection.quote(str)}
+        WHERE id = #{id}
+      ))
+    end
+    msgs
+  end
+
+  # Used by Name and Location to update the observation cache when a cached
+  # field value is changed.
+  def self.update_cache(type, field, id, val)
+    Observation.connection.execute(%(
+      UPDATE observations
+      SET `#{field}` = #{Observation.connection.quote(val)}
+      WHERE #{type}_id = #{id}
+    ))
+  end
+
+  ##############################################################################
+  #
+  #  :section: Location Stuff
+  #
+  ##############################################################################
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
@@ -207,7 +272,7 @@ class Observation < AbstractModel
             end
     loc = Location.find_by_name(where)
     if loc
-      self.where = nil
+      self.where = loc.name
       self.location = loc
     else
       self.where = where
@@ -260,6 +325,16 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  def place_name_and_coordinates
+    if !lat.blank? && !long.blank?
+      lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
+      long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
+      "#{place_name} (#{lat2} #{long2})"
+    else
+      place_name
+    end 
   end
 
   ##############################################################################
@@ -348,6 +423,15 @@ class Observation < AbstractModel
 
   def other_notes_part
     Observation.other_notes_part
+  end
+
+  def other_notes
+    notes ? notes[other_notes_key] : nil
+  end
+
+  def other_notes=(val)
+    self.notes ||= {}
+    notes[other_notes_key] = val
   end
 
   # id of view textarea for a Notes heading
@@ -484,10 +568,6 @@ class Observation < AbstractModel
     string_with_id(name.observation_name)
   rescue
     ""
-  end
-
-  def default_specimen_label
-    Herbarium.default_specimen_label(name.text_name, id)
   end
 
   # Look up the corresponding instance in our namings association.  If we are
@@ -1113,7 +1193,7 @@ class Observation < AbstractModel
   def has_backup_data?
     !thumb_image_id.nil? ||
       species_lists.count > 0 ||
-      specimens.count > 0 ||
+      herbarium_records.count > 0 ||
       specimen ||
       notes.length >= 100
   end
@@ -1134,8 +1214,8 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
-  def has_edit_permission?(user = User.current)
-    Project.has_edit_permission?(self, user)
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
   end
 
   ##############################################################################
@@ -1280,9 +1360,12 @@ class Observation < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
+    old_name = connection.quote(old_name)
+    new_name = connection.quote(location.name)
     connection.update(%(
-      UPDATE observations SET `where` = NULL, location_id = #{location.id}
-      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+      UPDATE observations
+      SET `where` = #{new_name}, location_id = #{location.id}
+      WHERE `where` = #{old_name}
     ))
   end
 

@@ -17,7 +17,8 @@
 
 <!-- WHERE_REASONS -->
 <% if @dubious_where_reasons.any? %>
-  <div class="alert-warning max-width-text">
+  <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
+  <div class="alert alert-warning max-width-text" id="location_messages">
     <%= @dubious_where_reasons.safe_join(safe_br) %>
     <p class="help-block max-width-text">
       <%= :form_observations_dubious_help.t(button: button_name) %>
@@ -31,15 +32,15 @@
   <div class="col-xs-12 col-sm-6 max-width-text">
     <div class="form-group">
       <%= label_tag(:observation_place_name, "#{:WHERE.t}: (#{:required.t})") %>
-      <%= text_field(:observation, :place_name, class: "form-control", data: {autofocus: true}) %>
+      <%= text_field(:observation, :place_name, class: "form-control") %>
       <% turn_into_location_auto_completer(:observation_place_name, primer: Location.primer) %>
       <span class="map-locate map-btn">Locate on Map</span>
     </div>
   </div>
   <div class="col-xs-12 col-sm-6">
-    <div class="well well-sm max-width-text">
+    <div class="well well-sm max-width-text help-block">
       <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_where_help.t, class: "help-block max-width-text") %>
+      <%= :form_observations_where_help.t %>
     </div>
   </div>
 </div>
@@ -52,9 +53,9 @@
       <%= check_box(:observation, :is_collection_location, class: "form-control-xxx") %>
       <%= label_tag(:observation_is_collection_location, :form_observations_is_collection_location.t) %>
     </div>
-    <div class="well well-sm push-down max-width-text">
+    <div class="well well-sm push-down max-width-text help-block">
       <div class="arrow-up hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_is_collection_location_help.t, class: "help-block") %>
+      <%= :form_observations_is_collection_location_help.t %>
     </div>
   </div>
 </div>
@@ -68,9 +69,9 @@
     <span class="map-clear map-btn">Clear Map</span>
   </div>
   <div class="col-sm-6">
-    <div class="well well-sm ">
+    <div class="well well-sm help-block">
       <div class="arrow-left hidden-xs"></div>
-      <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
+      <%= :form_observations_lat_long_help.t %>
     </div>
   </div>
 </div>
@@ -108,67 +109,91 @@
   </div>
 </div>
 
-<!-- has_specimen -->
-<% if has_specimen %>
-  <div class="well well-sm push-down max-width-text">
-    <%= content_tag(:p, :form_observations_delete_specimens_help.t, class: "help-block") %>
+<!-- no_specimen_fields -->
+<% if button_name == :SAVE_EDITS.l %>
+  <div class="well well-sm push-down max-width-text help-block">
+    <%= :form_observations_edit_specimens_help.t %>
   </div>
 <% end %>
-<!-- /has_specimen -->
+<!-- /no_specimen_fields -->
 
-<!-- NO_SPECIMENS -->
-<% if !has_specimen %>
+<!-- specimen_fields -->
+<% if button_name == :CREATE.l %>
   <div class="row">
     <div class="col-xs-12 push-down max-width-text">
       <div class="form-inline">
         <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
         <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
       </div>
-      <div class="well well-sm push-down max-width-text">
+      <div class="well well-sm push-down max-width-text help-block">
         <div class="arrow-up"></div>
-        <%= content_tag(:p, :form_observations_specimen_available_help.t, class: "help-block") %>
+        <%= :form_observations_specimen_available_help.t %>
       </div>
     </div>
   </div>
-<% end %>
-<!-- /NO_SPECIMENS -->
 
-<!-- HERBARIUM_FIELDS -->
-<div id="herb_info_fields" class="max-width-text <%= "hidden" if @observation.specimen %>">
-  <div class="form-group">
-    <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t + ":") %>
-    <%= text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control") %>
-    <% turn_into_herbarium_auto_completer(:specimen_herbarium_name) %>
+  <!-- HERBARIUM_FIELDS -->
+  <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
+    <div class="row push-up">
+      <div class="col-sm-6 max-width-text">
+        <div class="form-group">
+          <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
+          <%= text_field(:collection_number, :name, value: @collectors_name, class: "form-control") %>
+        </div>
+        <div class="form-group">
+          <%= label_tag(:collection_number_number, :collection_number_number.t + ":") %>
+          <%= text_field(:collection_number, :number, value: @collectors_number, class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="well well-sm help-block">
+          <div class="arrow-left hidden-xs"></div>
+          <%= :form_observations_collection_number_help.t %>
+        </div>
+      </div>
+    </div>
+    <div class="row push-up">
+      <div class="col-sm-6 max-width-text">
+        <div class="form-group">
+          <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
+          <%= text_field(:herbarium_record, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+          <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+        </div>
+        <div class="form-group">
+          <%= label_tag(:herbarium_record_herbarium_id, :herbarium_record_accession_number.t + ":") %>
+          <%= text_field(:herbarium_record, :herbarium_id, value: @herbarium_id, class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="well well-sm ">
+          <div class="arrow-left hidden-xs help-block"></div>
+          <%= :form_observations_herbarium_record_help.t %>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="form-group">
-    <%= label_tag(:specimen_herbarium_id, :specimen_herbarium_id.t + ":") %>
-    <%= text_field(:specimen, :herbarium_id, value: @herbarium_id, class: "form-control") %>
-    <% inject_javascript_at_end %(
-         id_field = jQuery("#specimen_herbarium_id");
-         specimen_checkbox = jQuery("#observation_specimen");
-         id_field.change(function() {
-           if (id_field.val().length > 0)
-             specimen_checkbox.prop("checked", true)
-         });
-       ) %>
-  </div>
-</div>
-<% inject_javascript_at_end %(
-  jQuery(document).ready(function() {
-//hide initially if has specimine box isn't checked
-  if (!jQuery("#observation_specimen").is(":checked"))
-    jQuery("#herb_info_fields").hide();
 
-    jQuery("#observation_specimen").change(
-    function () {
-         if (jQuery("#observation_specimen").is(":checked"))
-       jQuery("#herb_info_fields").show();
-     else
-       jQuery("#herb_info_fields").hide();
+  <% inject_javascript_at_end %(
+    jQuery(document).ready(function() {
+      specimen_checkbox = jQuery("#observation_specimen");
+      hide_show_herb_fields = function () {
+        if (specimen_checkbox.is(":checked"))
+          jQuery("#herb_info_fields").removeClass("hidden").show();
+        else
+          jQuery("#herb_info_fields").hide();
+      };
+      hide_show_herb_fields();
+      specimen_checkbox.change(hide_show_herb_fields);
+      jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
+        if (jQuery(this).val().length > 0)
+          specimen_checkbox.prop("checked", true)
+      });
     });
-  });
-) %>
-<!-- /HERBARIUM_FIELDS -->
+  ) %>
+  <!-- /HERBARIUM_FIELDS -->
+
+<% end %>
+<!-- /specimen_fields -->
 
 <!-- NOTES -->
 <%= render "form_observation_notes" %>
@@ -319,9 +344,9 @@
   <div class="row push-down">
     <div class="col-xs-12 max-width-text-times-two">
       <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
+        <div class="well well-sm max-width-text help-block">
           <div class="arrow-left hidden-xs"></div>
-          <p class="help-block"><%= :form_observations_project_help.t %></p>
+          <%= :form_observations_project_help.t %>
         </div>
       </div>
       <strong><%= :PROJECTS.t %>:</strong>
@@ -341,9 +366,9 @@
   <div class="row push-down">
     <div class="col-xs-12 max-width-text-times-two">
       <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
+        <div class="well well-sm max-width-text help-block">
           <div class="arrow-left hidden-xs"></div>
-          <p class="help-block"><%= :form_observations_list_help.t %></p>
+          <%= :form_observations_list_help.t %>
         </div>
       </div>
       <strong><%= :SPECIES_LISTS.t %>:</strong>
