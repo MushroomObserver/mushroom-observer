@@ -1361,29 +1361,27 @@ class NameTest < UnitTestCase
       Phylum: Basidiomycota\r
       Class: Basidiomycetes\r
       Order: Agaricales\r
-      Family: Amanitaceae\r
-      Genus: Amanita),
+      Family: Amanitaceae),
                                  [[:Kingdom, "Fungi"],
                                   [:Phylum, "Basidiomycota"],
                                   [:Class, "Basidiomycetes"],
                                   [:Order, "Agaricales"],
-                                  [:Family, "Amanitaceae"],
-                                  [:Genus, "Amanita"]])
+                                  [:Family, "Amanitaceae"]])
   end
 
   def test_parse_classification_3
     do_parse_classification_test(%(Kingdom: Fungi\r
       \r
-      Genus: Amanita),
+      Family: Amanitaceae),
                                  [[:Kingdom, "Fungi"],
-                                  [:Genus, "Amanita"]])
+                                  [:Family, "Amanitaceae"]])
   end
 
   def test_parse_classification_4
     do_parse_classification_test(%(Kingdom: _Fungi_\r
-      Genus: _Amanita_),
+      Family: _Amanitaceae_),
                                  [[:Kingdom, "Fungi"],
-                                  [:Genus, "Amanita"]])
+                                  [:Family, "Amanitaceae"]])
   end
 
   def test_parse_classification_5
@@ -1413,28 +1411,26 @@ class NameTest < UnitTestCase
         Phylum: Basidiomycota\r
         Class: Basidiomycetes\r
         Order: Agaricales\r
-        Family: Amanitaceae\r
-        Genus: Amanita),
+        Family: Amanitaceae),
       "Kingdom: _Fungi_\r\n" \
       "Phylum: _Basidiomycota_\r\n" \
       "Class: _Basidiomycetes_\r\n" \
       "Order: _Agaricales_\r\n" \
-      "Family: _Amanitaceae_\r\n" \
-      "Genus: _Amanita_"
+      "Family: _Amanitaceae_"
     )
   end
 
   def test_validate_classification_3
     do_validate_classification_test(:Species, %(Kingdom: Fungi\r
       \r
-      Genus: Amanita),
-                                    "Kingdom: _Fungi_\r\nGenus: _Amanita_")
+      Family: Amanitaceae),
+                                    "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_4
     do_validate_classification_test(:Species, %(Kingdom: _Fungi_\r
-      Genus: _Amanita_),
-                                    "Kingdom: _Fungi_\r\nGenus: _Amanita_")
+      Family: _Amanitaceae_),
+                                    "Kingdom: _Fungi_\r\nFamily: _Amanitaceae_")
   end
 
   def test_validate_classification_5
@@ -1451,12 +1447,12 @@ class NameTest < UnitTestCase
 
   def test_validate_classification_8
     do_validate_classification_test(
-      :Species, "Genus: Amanita", "Genus: _Amanita_"
+      :Species, "Family: Amanitaceae", "Family: _Amanitaceae_"
     )
   end
 
   def test_validate_classification_9
-    do_validate_classification_test(:Queendom, "Genus: Amanita", false)
+    do_validate_classification_test(:Queendom, "Family: Amanitaceae", false)
   end
 
   def test_validate_classification_10

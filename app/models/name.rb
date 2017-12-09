@@ -784,9 +784,9 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      rank_idx = rank_index(rank)
+      raise :runtime_user_bad_rank.t(rank: rank) if rank_index(rank).nil?
+      rank_idx = [rank_index(:Genus), rank_index(rank)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
-      raise :runtime_user_bad_rank.t(rank: rank) if rank_idx.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
       kingdom = "Fungi"
