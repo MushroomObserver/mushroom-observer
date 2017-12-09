@@ -107,6 +107,7 @@ class ObserverController
     else
       flash_error("Invalid type param: #{val.inspect}.")
       redirect_back_or_default(action: :index)
+      nil
     end
   end
 
