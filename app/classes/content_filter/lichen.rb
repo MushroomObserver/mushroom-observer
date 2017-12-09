@@ -4,7 +4,7 @@ class ContentFilter
     def initialize
       super(
         sym:         :lichen,
-        models:      [Observation],
+        models:      [Observation, Name],
         on_vals:     ["no", "yes"],
         prefs_vals:  ["no", "yes"],
         off_val:     nil
@@ -16,13 +16,10 @@ class ContentFilter
       # version.  This allows all lifeforms containing the word "lichen" to be
       # selected for in the positive version, but only excudes the one lifeform
       # in the negative. 
-      expr = val ? "names.lifeform LIKE '%lichen%'" :
+      cond = val ? "names.lifeform LIKE '%lichen%'" :
                    "names.lifeform NOT LIKE '% lichen %'"
-      %(
-        observations.name_id IN (
-          SELECT id FROM names WHERE #{expr}
-        )
-      )
+      return cond if model == Name
+      "observations.name_id IN (SELECT id FROM names WHERE #{cond})"
     end
   end
 end
