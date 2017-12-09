@@ -1274,6 +1274,7 @@
   # name/edit_name
   edit_name_title: Edit Name [name]
   edit_name_multiple_names_match: "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
+  edit_name_fill_in_classification_for_genus_first: "You need to fill in a classification for the genus first."
   edit_lifeform_title: Edit Lifeform of [name]
   edit_lifeform_help: Check boxes of all categories which apply to this taxon.
   edit_lifeform_save: "[:SAVE]"

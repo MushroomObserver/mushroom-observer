@@ -3969,4 +3969,141 @@ class NameControllerTest < FunctionalTestCase
     assert_obj_list_equal([UserGroup.one_user(dick)], desc.writer_groups)
     assert_obj_list_equal([UserGroup.one_user(dick)], desc.reader_groups)
   end
+
+  # -----------------------------------
+  #  Test classification propagation.
+  # -----------------------------------
+
+  def test_refresh_classification
+    genus = names(:coprinus)
+    child = names(:coprinus_comatus)
+    val   = genus.classification
+    time  = genus.updated_at
+    assert_equal(val, child.classification)
+    assert_equal(val, child.description.classification)
+    assert_equal(time, child.updated_at)
+    assert_equal(time, child.description.updated_at)
+
+    # Make sure bogus requests don't crash.
+    login("rolf")
+    get(:refresh_classification)
+    get(:refresh_classification, id: 666)
+    get(:refresh_classification, id: "bogus")
+    get(:refresh_classification, id: genus.id)
+    get(:refresh_classification, id: child.id) # no change!
+    assert_equal(val, genus.reload.classification)
+    assert_equal(val, genus.description.reload.classification)
+    assert_equal(val, child.reload.classification)
+    assert_equal(val, child.description.reload.classification)
+    assert_equal(time, genus.updated_at)
+    assert_equal(time, genus.description.updated_at)
+    assert_equal(time, child.updated_at)
+    assert_equal(time, child.description.updated_at)
+
+    # Make sure have to be logged in. (update_column should avoid callbacks)
+    new_val = names(:peltigera).classification
+    child.update_columns(classification: new_val)
+    child.description.update_columns(classification: new_val)
+    logout
+    get(:refresh_classification, id: child.id)
+    assert_equal(new_val, child.reload.classification)
+    assert_equal(time, child.updated_at)
+
+    # Now finally do it right and make sure it makes correct changes.
+    login("rolf")
+    get(:refresh_classification, id: child.id)
+    assert_equal(val, child.reload.classification)
+    assert_not_equal(time, child.updated_at)
+  end
+
+  def test_propagate_classification
+    genus = names(:coprinus)
+    child = names(:coprinus_comatus)
+    val   = genus.classification
+    assert_equal(val, child.classification)
+    assert_equal(val, child.description.classification)
+
+    # Make sure bogus requests don't crash.
+    login("rolf")
+    get(:propagate_classification)
+    get(:propagate_classification, id: 666)
+    get(:propagate_classification, id: "bogus")
+    get(:propagate_classification, id: child.id)
+    get(:propagate_classification, id: names(:ascomycota).id)
+    assert_equal(val, genus.reload.classification)
+    assert_equal(val, genus.description.reload.classification)
+    assert_equal(val, child.reload.classification)
+    assert_equal(val, child.description.reload.classification)
+
+    # Make sure have to be logged in. (update_column should avoid callbacks)
+    new_val = names(:peltigera).classification
+    genus.update_columns(classification: new_val)
+    logout
+    get(:propagate_classification, id: genus.id)
+    assert_equal(val, child.reload.classification)
+
+    # Now finally do it right and make sure it makes correct changes.
+    login("rolf")
+    get(:propagate_classification, id: genus.id)
+    assert_equal(new_val, child.reload.classification)
+    assert_equal(new_val, child.description.reload.classification)
+  end
+
+  # -----------------------
+  #  Test lifeform stuff.
+  # -----------------------
+
+  def test_edit_lifeform
+    # Prove that anyone logged in can edit lifeform, and that the form starts
+    # off with the correct current state.
+    name = names(:peltigera)
+    assert_equal(" lichen ", name.lifeform)
+    requires_login(:edit_lifeform, id: name.id)
+    assert_template(:edit_lifeform)
+    Name.all_lifeforms.each do |word|
+      assert_input_value("lifeform_#{word}", word == "lichen" ? "1" : "")
+    end
+
+    # Make sure user can both add and remove lifeform categories.
+    params = { id: name.id }
+    Name.all_lifeforms.each do |word|
+      params["lifeform_#{word}"] = (word == "lichenicolous" ? "1" : "")
+    end
+    post(:edit_lifeform, params)
+    assert_equal(" lichenicolous ", name.reload.lifeform)
+  end
+
+  def test_propagate_lifeform
+    name = names(:lecanorales)
+    children = name.all_children
+    name.update_columns(lifeform: " lichen ")
+
+    # Prove that getting to the form requires a login, and that it starts off
+    # with all boxes unchecked.
+    requires_login(:propagate_lifeform, id: name.id)
+    assert_template(:propagate_lifeform)
+    Name.all_lifeforms.each do |word|
+      if word == "lichen"
+        assert_input_value("add_#{word}", "")
+      else
+        assert_input_value("remove_#{word}", "")
+      end
+    end
+
+    # Make sure we can add "lichen" to all children.
+    post(:propagate_lifeform, id: name.id, add_lichen: "1")
+    assert_redirected_to(name.show_link_args)
+    children.each do |child|
+      assert(child.reload.lifeform.include?(" lichen "),
+             "Child, #{child.search_name}, is missing 'lichen'.")
+    end
+
+    # Make sure we can remove "lichen" from all children, too.
+    post(:propagate_lifeform, id: name.id, remove_lichen: "1")
+    assert_redirected_to(name.show_link_args)
+    children.each do |child|
+      assert(!child.reload.lifeform.include?(" lichen "),
+             "Child, #{child.search_name}, still has 'lichen'.")
+    end
+  end
 end

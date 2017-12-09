@@ -896,7 +896,9 @@ class Name < AbstractModel
     self.lifeform       ||= genus.lifeform
   end
 
-  # Copy the classification of a genus to all of its children.
+  # Copy the classification of a genus to all of its children.  Does not change
+  # updated_at or rss_log or anything.  Just changes the classification field
+  # in the name and default description records. 
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
