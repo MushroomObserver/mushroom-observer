@@ -57,7 +57,7 @@ POST Requests
 -------------
 
 Most tables accept POST requests for creating new records.  Include data for
-the new record in parameters.  Example: 
+the new record in parameters.  Example:
 
 * POST <http://mushroomobserver.org/api/observations?api_key=xxx&name=Agaricus&location=Pasadena,+California,+USA&date=2016-08-06&notes=growing+in+lawn>
 
@@ -72,7 +72,7 @@ PATCH Requests
 Structure your PATCH query the same as for GET requests, but also include
 "set_xxx" parameters to tell MO how to modify the matching records.  For
 example, this would be a way to change the location of a set of your
-observations: 
+observations:
 
 * PATCH <http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&id=12300-12400&set_location=Pasadena,+California,+USA>
 
@@ -81,7 +81,7 @@ DELETE Requests
 
 Structure the query the same as for GET requests.  MO will destroy all matching
 records (that you have permission to destroy).  For example, this should delete
-all your observations from a given location: 
+all your observations from a given location:
 
 * DELETE <http://mushroomobserver.org/api/observations?api_key=xxx&user=jason&locations=Madison+Heights>
 
@@ -90,7 +90,7 @@ API Keys
 
 Authorization is currently done using an API key.  Just include your API key in
 any POST, PATCH and DELETE requests.  An API key belongs uniquely to a single
-user, so MO will know who you are. 
+user, so MO will know who you are.
 
 The easiest way for an individual user to obtain an API key is to create one
 directly via the website:
@@ -108,7 +108,7 @@ new API key for another user.  The user will then receive an email asking them
 to confirm that it's okay for your app to post observations and images and such
 in their name.  The app will then use the user's new API key for all subsequent
 POST requests.  The app will be responsible for remembering and keeping secure
-each user's API key. 
+each user's API key.
 
 Apparently, it should also be possible for an app to create an account for a
 new user, too.  I don't remember writing this, but it apparently has extensive

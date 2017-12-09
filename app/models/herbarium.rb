@@ -99,7 +99,7 @@ class Herbarium < AbstractModel
   def merge(other)
     this, that = other.created_at < self.created_at ?
                  [self, other] : [other, self]
-    [ :code, :location, :email, :mailing_address ].each do |var|
+    [:code, :location, :email, :mailing_address].each do |var|
       val1 = this.send(var)
       val2 = that.send(var)
       next if val2.blank? || val1.length >= val2.length
@@ -110,8 +110,8 @@ class Herbarium < AbstractModel
     if notes1.blank?
       this.description = notes2
     elsif !notes2.blank?
-      this.description = "#{notes1}\n\n" +
-                         "[Merged at #{Time.now.utc.web_time}]\n\n"
+      this.description = "#{notes1}\n\n" \
+                         "[Merged at #{Time.now.utc.web_time}]\n\n" +
                          notes2
     end
     this.personal_user ||= that.personal_user
@@ -119,13 +119,13 @@ class Herbarium < AbstractModel
     this.curators          += that.curators - this.curators
     this.herbarium_records += that.herbarium_records - this.herbarium_records
     that.destroy
-    return this
+    this
   end
 
   # Look at the most recent HerbariumRecord's the current User has created.
   # Return a list of the last 100 herbarium names used in those
   # HerbariumRecords that this user is a curator for.  This list is used to
-  # prime Herbarium auto-completers. 
+  # prime Herbarium auto-completers.
   def self.primer
     result = ""
     if User.current

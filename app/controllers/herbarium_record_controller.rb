@@ -54,9 +54,9 @@ class HerbariumRecordController < ApplicationController
                          observation: params[:id].to_s, by: :herbarium_label)
     @links = [
       [:show_object.l(type: :observation),
-        Observation.show_link_args(params[:id])],
+       Observation.show_link_args(params[:id])],
       [:add_herbarium_record.l,
-        { action: :create_herbarium_record, id: params[:id] }]
+       { action: :create_herbarium_record, id: params[:id] }]
     ]
     show_selected_herbarium_records(query, always_index: true)
   end
@@ -88,7 +88,7 @@ class HerbariumRecordController < ApplicationController
   #  Show record
   # ----------------------------
 
-  def show_herbarium_record  # :nologin:
+  def show_herbarium_record # :nologin:
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -112,7 +112,7 @@ class HerbariumRecordController < ApplicationController
     pass_query_params
     @layout      = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
-    return if !@observation
+    return unless @observation
     @back_object = @observation
     if request.method == "GET"
       @herbarium_record = default_herbarium_record
@@ -192,7 +192,7 @@ class HerbariumRecordController < ApplicationController
   def whitelisted_herbarium_record_params
     return {} unless params[:herbarium_record]
     params.require(:herbarium_record).
-           permit(:herbarium_name, :initial_det, :accession_number, :notes)
+      permit(:herbarium_name, :initial_det, :accession_number, :notes)
   end
 
   def make_sure_can_edit!
@@ -234,7 +234,7 @@ class HerbariumRecordController < ApplicationController
     return true if @herbarium_record.herbarium.is_curator?(@user)
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
     redirect_to_observation_or_herbarium_record
-    return false
+    false
   end
 
   def herbarium_label_free?
@@ -305,6 +305,6 @@ class HerbariumRecordController < ApplicationController
     return true if herbarium_record.herbarium.curators.include?(@user)
     flash_error(:permission_denied.t)
     redirect_to(herbarium_record.show_link_args)
-    return false
+    false
   end
 end

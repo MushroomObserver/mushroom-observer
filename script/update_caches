@@ -9,12 +9,12 @@
 #  This is a nightly cronjob that checks to make sure the classification string
 #  of each infrageneric taxon is the same as the classification string for the
 #  parent genus.  It checks for missing genera while it's at it.  It prints out
-#  a line for each taxon it finds that it has to fix. 
+#  a line for each taxon it finds that it has to fix.
 #
 #  It also makes sure the classification section of the default description
 #  matches the classification string cached in the name, preferring the
 #  description version above genus, and preferring the cached version below
-#  genus. 
+#  genus.
 #
 ################################################################################
 

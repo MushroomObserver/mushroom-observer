@@ -208,9 +208,9 @@ class Observation < AbstractModel
   # and location data used by content filters is kept in sync.
   def self.refresh_content_filter_caches
     update_cached_column("name", "lifeform") +
-    update_cached_column("name", "text_name") +
-    update_cached_column("name", "classification") +
-    update_cached_column("location", "name", "where")
+      update_cached_column("name", "text_name") +
+      update_cached_column("name", "classification") +
+      update_cached_column("location", "name", "where")
   end
 
   def self.update_cached_column(type, foreign, local = foreign)
@@ -334,7 +334,7 @@ class Observation < AbstractModel
       "#{place_name} (#{lat2} #{long2})"
     else
       place_name
-    end 
+    end
   end
 
   ##############################################################################

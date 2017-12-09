@@ -33,11 +33,15 @@ class CountryCounter
   end
 
   def wheres
-    location_lookup("SELECT `where` FROM observations WHERE location_id IS NULL")
+    location_lookup(
+      "SELECT `where` FROM observations WHERE location_id IS NULL"
+    )
   end
 
   def location_names
-    location_lookup("SELECT `where` FROM observations WHERE location_id IS NOT NULL")
+    location_lookup(
+      "SELECT `where` FROM observations WHERE location_id IS NOT NULL"
+    )
   end
 
   def location_lookup(sql)

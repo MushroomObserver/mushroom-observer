@@ -33,7 +33,7 @@ class API
     end
 
     def show_arg(key, val)
-      key = key.to_s.gsub(/_/, " ")
+      key = key.to_s.tr("_", " ")
       if key == "help"
         val = @key if val == 1
         tag = "api_help_#{val}".to_sym

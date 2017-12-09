@@ -1,5 +1,6 @@
 # encoding: utf-8
 class ContentFilter
+  # Content filter specifically to filter out or just show lichens.
   class Lichen < BooleanFilter
     def initialize
       super(
@@ -11,14 +12,17 @@ class ContentFilter
       )
     end
 
-    def sql_conditions(query, model, val)
+    def sql_conditions(_query, model, val)
       # Note the critical difference -- the extra spaces in the negative
       # version.  This allows all lifeforms containing the word "lichen" to be
       # selected for in the positive version, but only excudes the one lifeform
-      # in the negative. 
-      table = (model == Name) ? "names" : "observations"
-      val ? "#{table}.lifeform LIKE '%lichen%'" :
-            "#{table}.lifeform NOT LIKE '% lichen %'"
+      # in the negative.
+      table = model == Name ? "names" : "observations"
+      if val
+        "#{table}.lifeform LIKE '%lichen%'"
+      else
+        "#{table}.lifeform NOT LIKE '% lichen %'"
+      end
     end
   end
 end

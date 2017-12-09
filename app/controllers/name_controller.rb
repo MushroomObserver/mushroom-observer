@@ -350,7 +350,7 @@ class NameController < ApplicationController
 
       # Get classification.
       @classification = @name.classification
-      @parents = @name.parent if !@classification
+      @parents = @name.parent unless @classification
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)
@@ -777,8 +777,8 @@ class NameController < ApplicationController
     @name.display_name = old_display_name_for_log
     new_name.merge(@name)
     flash_notice(:runtime_edit_name_merge_success.t(
-      this: @name.real_search_name, that: new_name.real_search_name
-    ))
+                   this: @name.real_search_name, that: new_name.real_search_name
+                 ))
     @name = new_name
     @name.save
   end

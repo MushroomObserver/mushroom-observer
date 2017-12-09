@@ -217,9 +217,9 @@ class API
     end
 
     def help_message
-      if set_keys.any?
-        "query params: " + render_keys(get_keys) + "; " +
-          "update params: " + render_keys(set_keys)
+      if keys_for_patch.any?
+        "query params: " + render_keys(keys_for_get) +
+          "; update params: " + render_keys(keys_for_patch)
       else
         render_keys(all_keys)
       end
@@ -237,11 +237,11 @@ class API
       ]
     end
 
-    def get_keys
+    def keys_for_get
       all_keys.reject { |k| params[k].set_parameter? }
     end
 
-    def set_keys
+    def keys_for_patch
       all_keys.select { |k| params[k].set_parameter? }
     end
   end

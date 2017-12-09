@@ -50,17 +50,16 @@ def parse_options
       { |o| old_name_id = o }
     opt.on("-n", "--new NAME", "ID, text_name or search_name of new name.") \
       { |o| new_name_id = o }
-    opt.on("-c", "--comment SUMMARY/BODY", "Text of comment to add to each " +
+    opt.on("-c", "--comment SUMMARY/BODY", "Text of comment to add to each " \
            "observation that we propose the new name for.") \
       { |o| @comment = o }
-    opt.on("-r", "--refs TEXT", "Text to add to references section of each "+
+    opt.on("-r", "--refs TEXT", "Text to add to references section of each " \
            "name proposal made.") \
       { |o| @refs = o }
   end.parse!
 
   @user     = user_id.to_s =~ /\D/ ?
-              User.where(login: user_id).first :
-              User.safe_find(user_id)
+              User.where(login: user_id).first : User.safe_find(user_id)
   @old_name = Name.safe_find(old_name_id) ||
               Name.find_by_search_name(old_name_id) ||
               Name.where(text_name: old_name_id).to_a
@@ -68,19 +67,21 @@ def parse_options
               Name.find_by_search_name(new_name_id) ||
               Name.where(text_name: new_name_id).to_a
 
-  raise("Multiple matches for #{old_name_id.inspect}: " +
-        "#{@old_name.map(&:search_name).map(&:inspect).join(", ")}.\n") \
-    if @old_name.is_a?(Array) && @old_name.count > 1
-  raise("Multiple matches for #{new_name_id.inspect}: " +
-        "#{@new_name.map(&:search_name).map(&:inspect).join(", ")}.\n") \
-    if @new_name.is_a?(Array) && @new_name.count > 1
+  if @old_name.is_a?(Array) && @old_name.count > 1
+    raise("Multiple matches for #{old_name_id.inspect}: " \
+          "#{@old_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+  end
+  if @new_name.is_a?(Array) && @new_name.count > 1
+    raise("Multiple matches for #{new_name_id.inspect}: " \
+          "#{@new_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+  end
 
   @old_name = @old_name.first if @old_name.is_a?(Array)
   @new_name = @new_name.first if @new_name.is_a?(Array)
 
-  raise("Couldn't find user #{user_id.inspect}.\n")         if !@user
-  raise("Couldn't find old name #{old_name_id.inspect}.\n") if !@old_name
-  raise("Couldn't find new name #{new_name_id.inspect}.\n") if !@new_name
+  raise("Couldn't find user #{user_id.inspect}.\n")         unless @user
+  raise("Couldn't find old name #{old_name_id.inspect}.\n") unless @old_name
+  raise("Couldn't find new name #{new_name_id.inspect}.\n") unless @new_name
 
   puts "User: #{@user.login.inspect}"
   puts "Old:  #{@old_name.search_name.inspect}"
@@ -116,19 +117,20 @@ def get_initial_state(obs)
 end
 
 def print_observation(obs)
-  puts "http://mushroomobserver.org/#{obs.id} -- #{
-    obs.name == @old_name ? "(old name)" :
-    obs.name == @new_name ? "(new name)" : obs.name.search_name
-  }"
+  name = obs.name.search_name
+  name = "(old name)" if obs.name == @old_name
+  name = "(new name)" if obs.name == @new_name
+  puts "http://mushroomobserver.org/#{obs.id} -- #{name}"
 end
 
 def print_initial_state
-  puts "  avg/user: " +
-       "old=#{@old_score.inspect}/#{@old_vote.inspect}, " +
+  name = "(cur=#{@cur_score.inspect})"
+  name = "cur=#{@cur_score.inspect}/#{@cur_vote.inspect}" if
+    @cur_name != @old_name && @cur_name != @new_name
+  puts "  avg/user: " \
+       "old=#{@old_score.inspect}/#{@old_vote.inspect}, " \
        "new=#{@new_score.inspect}/#{@new_vote.inspect}, " +
-       (@cur_name != @old_name && @cur_name != @new_name ?
-         "cur=#{@cur_score.inspect}/#{@cur_vote.inspect}" :
-         "(cur=#{@cur_score.inspect})")
+       name
 end
 
 def print_result
@@ -164,7 +166,7 @@ def propose_new_name
 end
 
 def vote_on_new_name
-  return if !@new_naming
+  return unless @new_naming
   vote = @old_vote || @old_score.try(&:ceil) || 1
   puts "  > voting #{vote} on new name..."
   @observation.change_vote(@new_naming, vote, @user)
@@ -172,7 +174,7 @@ def vote_on_new_name
 end
 
 def vote_against_old_name
-  return if !@old_naming
+  return unless @old_naming
   puts "  > voting -3 on old name..."
   @observation.change_vote(@old_naming, -3, @user)
   @any_changes = true
@@ -205,7 +207,7 @@ def users_vote(naming)
   naming.votes.each do |vote|
     return vote.value if vote.user == @user
   end
-  return nil
+  nil
 end
 
 parse_options

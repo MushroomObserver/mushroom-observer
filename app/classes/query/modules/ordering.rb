@@ -58,7 +58,8 @@ module Query::Modules::Ordering
         "#{table}.title ASC"
       end
 
-    when "title", "login", "summary", "copyright_holder", "where", "initial_det", "accession_number"
+    when "title", "login", "summary", "copyright_holder", "where",
+         "initial_det", "accession_number"
       "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
@@ -110,7 +111,9 @@ module Query::Modules::Ordering
         add_join(:'images.thumb_image', :image_votes)
         where << "images.user_id = observations.user_id"
         where << "image_votes.user_id = observations.user_id"
-        "image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC"
+        "image_votes.value DESC, " \
+        "images.vote_cache DESC, " \
+        "observations.vote_cache DESC"
       end
 
     when "observation"
@@ -130,7 +133,8 @@ module Query::Modules::Ordering
       "herbaria.name ASC"
 
     when "herbarium_label"
-      "herbarium_records.initial_det ASC, herbarium_records.accession_number ASC"
+      "herbarium_records.initial_det ASC, " \
+      "herbarium_records.accession_number ASC"
 
     when "name_and_number"
       "collection_numbers.name ASC, collection_numbers.number ASC"

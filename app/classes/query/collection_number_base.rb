@@ -22,7 +22,7 @@ module Query
       initialize_model_do_time(:created_at)
       initialize_model_do_time(:updated_at)
       initialize_model_do_objects_by_id(:users)
-      if params[:observations] 
+      if params[:observations]
         initialize_model_do_objects_by_id(
           :observations, "collection_numbers_observations.observation_id"
         )

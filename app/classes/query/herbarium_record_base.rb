@@ -28,7 +28,7 @@ module Query
       initialize_model_do_objects_by_name(
         Herbarium, :herbaria, "herbarium_records.herbarium_id"
       )
-      if params[:observations] 
+      if params[:observations]
         initialize_model_do_objects_by_id(
           :observations, "herbarium_records_observations.observation_id"
         )
