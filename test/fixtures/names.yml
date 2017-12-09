@@ -679,6 +679,7 @@ boletus_edulis: # 56
   sort_name: Boletus edulis  Bull.
   created_at: 2008-10-05 16:17:08
   updated_at: 2008-10-05 16:17:08
+  description: boletus_edulis_desc
 
 peltigera: # 57
   <<: *DEFAULTS

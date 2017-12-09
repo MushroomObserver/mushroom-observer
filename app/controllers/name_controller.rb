@@ -813,10 +813,9 @@ class NameController < ApplicationController
         @description.save
 
         # Make this the "default" description if there isn't one and this is
-        # publicly readable.
-
+        # publicly readable and writable.
         if !@name.description &&
-           @description.public
+           @description.fully_public
           @name.description = @description
         end
 
@@ -900,7 +899,7 @@ class NameController < ApplicationController
           v = @description.versions.latest
           v.merge_source_id = old_desc.versions.latest.id
           v.save
-          if !old_desc.is_admin?(@user)
+          if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
@@ -922,7 +921,7 @@ class NameController < ApplicationController
   def destroy_name_description # :norobots:
     pass_query_params
     @description = NameDescription.find(params[:id].to_s)
-    if @description.is_admin?(@user)
+    if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
                             user: @user.login, touch: true,
@@ -931,7 +930,7 @@ class NameController < ApplicationController
       redirect_with_query(action: "show_name", id: @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_name_description",
                             id: @description.id)
       else

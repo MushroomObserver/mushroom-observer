@@ -3614,8 +3614,7 @@ class NameControllerTest < FunctionalTestCase
     refute(project.is_member?(dick))
     login(dick.login)
     get_with_dump(:show_name_description, id: draft.id)
-    assert_redirected_to(controller: :project, action: "show_project",
-                         id: project.id)
+    assert_redirected_to(project.show_link_args)
   end
 
   def test_create_draft_member
@@ -3647,7 +3646,7 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_draft_member
     assert(projects(:eol_project).is_member?(katrina))
     assert_equal("EOL Project",
-                 name_descriptions(:draft_coprinus_comatus).source_name)
+                 name_descriptions(:draft_agaricus_campestris).source_name)
     edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
                       katrina, false)
   end
@@ -3656,7 +3655,7 @@ class NameControllerTest < FunctionalTestCase
     refute(projects(:eol_project).is_member?(dick))
     assert_equal("EOL Project",
                  name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus),
                       dick, false, false)
   end
 
@@ -4105,5 +4104,12 @@ class NameControllerTest < FunctionalTestCase
       assert(!child.reload.lifeform.include?(" lichen "),
              "Child, #{child.search_name}, still has 'lichen'.")
     end
+  end
+
+  def test_why_danny_cant_edit_lentinus_description
+    desc = name_descriptions(:boletus_edulis_desc)
+    get(:show_name_description, id: desc.id)
+    assert_no_flash
+    assert_template(:show_name_description)
   end
 end

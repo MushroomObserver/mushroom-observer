@@ -94,6 +94,7 @@ draft_agaricus_campestris: # 9
   authors: mary
   reader_groups: eol_users, mary_only
   writer_groups: eol_admins, mary_only
+  public: 0
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
 draft_boletus_edulis: # 10
@@ -187,3 +188,20 @@ agaricus_desc: # 19
   name: agaricus
   gen_desc: Medium to large mushroom with ring and gills darkening from pink to brown.
   notes: Used in API test.
+
+# There was an identical case in the wild which Danny could not edit.
+boletus_edulis_desc: # 20
+  classification:   "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_"
+  created_at:       2012-07-12 06:32:18
+  last_view:        2017-12-09 03:38:34
+  license:          ccnc30
+  locale:           en-US
+  name:             boletus_edulis
+  num_views:        2
+  ok_for_export:    1
+  public:           1
+  review_status:    1
+  source_type:      1
+  updated_at:       2012-07-12 06:32:18
+  user:             roy # this was admin, but we don't have an admin in test
+  version:          1
