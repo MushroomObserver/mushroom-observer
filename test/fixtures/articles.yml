@@ -7,5 +7,5 @@ DEFAULTS: &DEFAULTS
   user:       rolf
   rss_log_id:
 
-premier_article:
+premier_article: # 1
   <<: *DEFAULTS

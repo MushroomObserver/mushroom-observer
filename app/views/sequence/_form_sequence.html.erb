@@ -17,7 +17,8 @@
          <%= label_tag(:sequence_bases, :form_sequence_bases.t) %>
       </span>
       <span class="col-md-6">
-        <%= :form_sequence_bases_format.t(help_url: Web.blast_format_help) %>
+        <%= url = WebSequenceArchive.blast_format_help
+            :form_sequence_bases_format.t(help_url: url) %>
       </span>
       <div class="col-md-9 monospace">
         <%= text_area(:sequence, :bases, size: "80x3", class: "form-control") %>

@@ -3455,38 +3455,44 @@
   # Api error messages
   api_abort_due_to_errors: Aborted operation due to errors.
   api_ambiguous_name: Name "[name]" is ambiguous, matches [others].
+  api_another_users_profile_location: "You can't edit this [:location] because someone has made it their profile location."
   api_api_key_not_verified: API key for "[notes]" has not been activated yet. (key = "[key]")
   api_bad_action: Invalid request type "[action]".
+  api_bad_altitude_parameter_value: "Invalid elevation, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
   api_bad_api_key: Bad key "[key]".
-  api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
-  api_bad_method: Invalid request method "[method]".
   api_bad_boolean_parameter_value: Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".
-  api_bad_integer_parameter_value: Invalid integer, "[val]".
-  api_bad_float_parameter_value: Invalid float, "[val]".
-  api_bad_email_parameter_value: Invalid email address, "[val]".
+  api_bad_classification: Invalid classification string.
   api_bad_date_parameter_value: Invalid date, "[val]", expect "YYYYMMDD".
   api_bad_date_range_parameter_value: Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
-  api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
-  api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
-  api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
-  api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
-  api_bad_altitude_parameter_value: "Invalid elevation, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
+  api_bad_email_parameter_value: Invalid email address, "[val]".
+  api_bad_float_parameter_value: Invalid float, "[val]".
   api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id, code or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
+  api_bad_integer_parameter_value: Invalid integer, "[val]".
+  api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
   api_bad_license_parameter_value: Invalid or unknown license, "[val]", accept only numerical id.
+  api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
   api_bad_location_parameter_value: Invalid or unknown location, "[val]", accept numerical id or location name.
+  api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
+  api_bad_method: Invalid request method "[method]".
   api_bad_name_parameter_value: Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).
+  api_bad_notes_field_parameter: Invalid notes template field.  Pretty much anything but commas are allowed.
+  api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_observation_parameter_value: Invalid or unknown observation, "[val]", accept only numerical id.
   api_bad_project_parameter_value: Invalid or unknown project, "[val]", accept numerical id or project name.
   api_bad_species_list_parameter_value: Invalid or unknown species list, "[val]", accept numerical id or species list title.
+  api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
+  api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
-  api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_version: Invalid version number "[version]".
-  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_synonymize_unsynonimized_names: Presently, we're only allowing API clients to synonymize unsynonmized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
+  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
+  api_dubious_location_name: "Location name is invalid: [reasons]"
+  api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
   api_image_upload_failed: "Failed to upload image: [error]"
@@ -3498,26 +3504,86 @@
   api_missing_upload: Expected an upload file.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.
   api_must_authenticate: Must authenticate with API key to perform this operation.
   api_must_be_admin: You are not an admin for [project].
+  api_must_be_creator: You can only edit [types] that you have created.
   api_must_be_member: You are not a member of [type] "[name]".
+  api_must_be_only_editor: You can only edit [types] if you are the only editor.
+  api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
-  api_must_supply_location_or_gps: You must supply either a location or GPS coordinates.
-  api_name_already_exists: The name, "[new]", already exists as "[old]"
+  api_must_not_have_any_herbaria: "You can't edit this [:location] because there is an [:herbarium] there."
+  api_must_own_all_descriptions: You can only edit [types] if you own all the [:descriptions].
+  api_must_own_all_namings: You can only edit [types] if no one else has proposed that [type].
+  api_must_own_all_observations: You can only edit [types] if you own all its [:observations].
+  api_must_own_all_species_lists: You can only edit [types] if you own all its [:species_lists].
+  api_name_already_exists: The name "[new]" already exists.
   api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
+  api_name_wrong_for_rank: The name, "[name]", isn't valid for [rank].
+  api_need_all_four_edges: "Need to supply all four edges of bounding box: north, south, east and west."
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
   api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."
+  api_one_or_the_other: Can only use one of the parameters [args].
+  api_parameter_cant_be_blank: It is okay to leave the [arg] parameter off, but if you include it in your PATCH request, it cannot be blank.  Leaving a set parameter off means it will leave that property alone and do nothing; setting it to a blank tells MO to delete or clear the property.  And some properties cannot be deleted or cleared.
   api_project_taken: The project, "[project]", already exists.
   api_query_error: "There was an internal problem with Query: [error]"
   api_render_failed: There was a problem while rendering the results. [error]
+  api_species_list_already_exists: The [:species_list] "[title]" already exists.
   api_string_too_long: The string, "[val]", has more than [limit] characters.
   api_too_many_uploads: Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.
   api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.
+  api_trying_to_set_multiple_names_at_once: You can only change the name, author and rank of one name at a time.
   api_unexpected_upload: Unexpected file attached.
   api_unused_parameters: "Unexpected parameters: [params]"
   api_user_already_exists: The user "[login]" already exists or is taken.
   api_user_group_taken: The user group "[title]" already exists.
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
+
+  api_help_accession_has: search within accession number
+  api_help_any_date: this date can mean anything you want
+  api_help_api_key_user: user you are creating api key for
+  api_help_app: identifier used to help user distinguish which api key belongs to which app
+  api_help_author_has: search within author
+  api_help_citation_has: search within citation
+  api_help_classification_has: search within classification
+  api_help_clear_synonyms: make it so this name is not synonymized with anything but leave everything it used to be synonymized with synonyms of each other
+  api_help_comments_has: search within comments summary and body
+  api_help_content_has: search within body
+  api_help_copyright_holder_has: search within copyright holder
+  api_help_create_key: if you pass in your app name here it will create an api key for the user for your app to use
+  api_help_creator: creator
+  api_help_east: max longitude
+  api_help_first_user: creator / first to use
+  api_help_has_notes_field: is given observation notes template field filled in?
+  api_help_has_obs_notes: observation has notes?
+  api_help_has_observation: is attached to an observation?
+  api_help_herbarium_label: initial determination and unique herbarium id
+  api_help_is_collection_location: is this location where mushroom was found?
+  api_help_locus_has: search within locus
+  api_help_log: log this action on main page activity log and RSS feed?
+  api_help_mailing_address: postal address
+  api_help_min_rank: group or genus or better
+  api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
+  api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
+  api_help_north: max latitude
+  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
+  api_help_notes_has: search within notes
+  api_help_obs_date: observation date
+  api_help_obs_notes_has: search within observation notes
+  api_help_observer: observer
+  api_help_original_name: original file name or other private identifier
+  api_help_postal: in postal format with country last regardless of user preference
+  api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
+  api_help_set_is_collection_location: is this location where mushroom was found?
+  api_help_south: min latitude
+  api_help_specimen_id: unique specimen id for herbarium label, e.g. collectors number
+  api_help_summary_has: search within summary
+  api_help_target: 'e.g. "observation #1234" or "name #5678"'
+  api_help_text_name_has: search within name
+  api_help_title_has: search within title
+  api_help_uploader: who uploaded the photo
+  api_help_west: min longitude
+  api_help_when_seen: when seen
+  api_help_when_taken: when photo taken
 
   # Query titles.
   query_title_advanced_search: "[:app_advanced_search]"

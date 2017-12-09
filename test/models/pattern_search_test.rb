@@ -470,7 +470,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_comments_yes
-    expect = Comment.all.map(&:target).uniq
+    expect = Comment.where(target_type: "Observation").map(&:target).uniq
     assert(expect.count > 0)
     x = PatternSearch::Observation.new("has_comments:yes")
     assert_obj_list_equal(expect.sort_by(&:id), x.query.results.sort_by(&:id))

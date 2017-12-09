@@ -16,13 +16,13 @@ module SequenceHelper
   end
 
   def sequence_archive_link(sequence)
-    link_to(sequence.archive.t, Web.archive_home(sequence.archive),
-            target: "_blank")
+    url = WebSequenceArchive.archive_home(sequence.archive)
+    link_to(sequence.archive.t, url, target: "_blank")
   end
 
   # dropdown list for add_sequence
   def archive_dropdown
-    Web.archives.each_with_object([]) do |archive, array|
+    WebSequenceArchive.archives.each_with_object([]) do |archive, array|
       # append array which repeats archive[:name] twice
       array << Array.new(2, archive[:name])
     end

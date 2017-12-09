@@ -1528,7 +1528,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_for_user
-    expect = Comment.all.reverse
+    expect = Comment.all.select { |c| c.target.user == mary }
     assert_query(expect, :Comment, :for_user, user: mary)
     assert_query([], :Comment, :for_user, user: rolf)
   end
@@ -2513,7 +2513,7 @@ class QueryTest < UnitTestCase
     assert_query(Sequence.where("locus LIKE 'ITS%'"),
                  :Sequence, :all, locus_has: "ITS")
     assert_query([sequences(:alternate_archive)],
-                 :Sequence, :all, archive_has: "UNITE")
+                 :Sequence, :all, archive: "UNITE")
     assert_query([sequences(:deposited_sequence)],
                  :Sequence, :all, accession_has: "968605")
     assert_query([sequences(:deposited_sequence)],
@@ -2533,7 +2533,7 @@ class QueryTest < UnitTestCase
     seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
     seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
     seq4.update_attribute(:observation, observations(:peltigera_obs))
-    assert_query([seq1, seq2], :Sequence, :all, date: ["2006", "2006"])
+    assert_query([seq1, seq2], :Sequence, :all, obs_date: ["2006", "2006"])
     assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
     assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
     assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")

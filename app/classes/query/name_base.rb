@@ -29,11 +29,11 @@ module Query
         classification_has?: :string,
         has_notes?:          :boolean,
         notes_has?:          :string,
-        has_comments?:       { string: [:yes] },
+        has_comments?:       { boolean: [true] },
         comments_has?:       :string,
         has_default_desc?:   :boolean,
         join_desc?:          { string: [:default, :any] },
-        desc_type?:          :string,
+        desc_type?:          [{string: [Description.all_source_types]}],
         desc_project?:       [:string],
         desc_creator?:       [User],
         desc_content?:       :string,
@@ -115,7 +115,7 @@ module Query
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.notes)"
+          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
         )
         add_join(:comments)
       end

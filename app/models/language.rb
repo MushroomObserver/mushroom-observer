@@ -45,6 +45,10 @@ class Language < AbstractModel
     where(official: false)
   end
 
+  def locale_region
+    "#{locale}-#{region}"
+  end
+
   # Returns an Array of pairs containing language name and locale.
   # Useful for building pulldown menus using <tt>select_tag</tt> helper.
   def self.menu_options

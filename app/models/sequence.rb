@@ -88,7 +88,7 @@ class Sequence < AbstractModel
 
   # url of a search for accession
   def accession_url
-    Web.search_prefix(archive) << accession
+    WebSequenceArchive.search_prefix(archive) << accession
   end
 
   ##############################################################################
@@ -140,6 +140,8 @@ class Sequence < AbstractModel
 
   # Validations, in order that error messages should appear in flash
   validates :locus, :observation, :user, presence: true
+  validates :archive, length: { maximum: 255 }
+  validates :accession, length: { maximum: 255 }
   validate  :bases_or_deposit
   validate  :deposit_complete_or_absent
   validate  :unique_bases_for_obs, if: :bases?
@@ -176,7 +178,7 @@ class Sequence < AbstractModel
 
   # Validate proper formatting of bases
   # See BLAST documentation (shortened url: https://goo.gl/NYbptK)
-  # full url in Web::blast_format_help
+  # full url in WebSequenceArchive::blast_format_help
   def blastable
     if blank_line_in_middle?
       errors.add(:bases, :validate_sequence_bases_blank_lines.t)

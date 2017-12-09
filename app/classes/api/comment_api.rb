@@ -1,6 +1,5 @@
-# encoding: utf-8
-
 class API
+  # API for Comment
   class CommentAPI < ModelAPI
     self.model = Comment
 
@@ -15,42 +14,49 @@ class API
     ]
 
     def query_params
+      @target = parse(:object, :target, limit: Comment.all_types, help: 1)
       {
-        where: sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        users: parse_users(:user),
-        types: parse_enum(:type, limit: Comment.all_type_tags),
-        summary_has: parse_string(:summary_has),
-        content_has: parse_string(:content_has),
-        # :targets     => parse_objects(:target, :limit => Comment.all_types),
+        where:       sql_id_condition,
+        created_at:  parse_range(:time, :created_at),
+        updated_at:  parse_range(:time, :updated_at),
+        users:       parse_array(:user, :user, help: :creator),
+        types:       parse_array(:enum, :type, limit: Comment.all_type_tags),
+        summary_has: parse(:string, :summary_has, help: 1),
+        content_has: parse(:string, :content_has, help: 1),
+        target:      @target ? @target.id : nil,
+        type:        @target ? @target.class.name : nil
       }
     end
 
     def create_params
       {
-        summary: parse_string(:summary, limit: 100),
-        comment: parse_string(:content),
-        target: parse_object(:target, limit: Comment.all_types)
+        target:  parse(:object, :target, limit: Comment.all_types),
+        summary: parse(:string, :summary, limit: 100),
+        comment: parse(:string, :content),
+        user:    @user
       }
     end
 
+    def update_params
+      {
+        summary: parse(:string, :set_summary, limit: 100, not_blank: true),
+        comment: parse(:string, :set_content)
+      }
+    end
+
+    def query_flavor
+      @target ? :for_target : :all
+    end
+
     def validate_create_params!(params)
-      fail MissingParameter.new(:summary) if params[:summary].blank?
-      fail MissingParameter.new(:content) if params[:comment].blank?
-      fail MissingParameter.new(:target)  if params[:target].blank?
+      raise MissingParameter.new(:summary) if params[:summary].blank?
+      raise MissingParameter.new(:content) if params[:comment].blank?
+      raise MissingParameter.new(:target)  if params[:target].blank?
       must_have_view_permission!(params[:target])
     end
 
     def after_create(comment)
       comment.log_create
-    end
-
-    def update_params
-      {
-        summary: parse_string(:set_summary, limit: 100),
-        comment: parse_string(:set_content)
-      }
     end
   end
 end

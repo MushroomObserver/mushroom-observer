@@ -1,9 +1,9 @@
 json.id            object.id
-json.id            "external_link"
+json.type          "external_link"
 json.url           object.url
 json.external_site object.site_name
-json.created_at    object.created_at
-json.updated_at    object.updated_at
+json.created_at    object.created_at.utc
+json.updated_at    object.updated_at.utc
 if !detail
   json.owner_id       object.user_id
   json.observation_id object.observation_id

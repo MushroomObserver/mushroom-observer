@@ -278,6 +278,7 @@ class User < AbstractModel
   has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
+  has_many :external_links
   has_many :images
   has_many :interests
   has_many :locations
@@ -385,22 +386,25 @@ class User < AbstractModel
     @@user && @@user.id
   end
 
-  # Report current user's preferred location_format
-  #
-  # location_format = User.current_location_format
-  #
-  def self.current_location_format
-    if !defined?(@@user) || @@user.nil?
-      :postal
-    else
-      @@user.location_format
-    end
+  # Tell User model which User is currently logged in (if any).  This is used
+  # by the +autologin+ filter and API authentication.
+  def self.current=(x)
+    @@location_format = x ? x.location_format : :postal
+    @@user = x
   end
 
-  # Tell User model which User is currently logged in (if any).  This is used
-  # by the +autologin+ filter.
-  def self.current=(x)
-    @@user = x
+  # Report current user's preferred location_format
+  #
+  #   location_format = User.current_location_format
+  #
+  def self.current_location_format
+    @@location_format = :postal unless defined?(@@location_format)
+    @@location_format
+  end
+
+  # Set the location format to use throughout the site.
+  def self.current_location_format=(x)
+    @@location_format = x
   end
 
   # Did current user opt to view owner_id's?
@@ -794,7 +798,18 @@ class User < AbstractModel
   # notes_template: ""
   # notes_template_parts # => []
   def notes_template_parts
-    notes_template? ? notes_template.split(",").map(&:squish) : []
+    return [] if notes_template.blank?
+    User.parse_notes_template(notes_template)
+  end
+
+  def notes_template=(str)
+    str = User.parse_notes_template(str).join(", ")
+    write_attribute(:notes_template, str)
+  end
+
+  def self.parse_notes_template(str)
+    str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
+        split(",").map(&:squish).reject(&:blank?)
   end
 
   ##############################################################################

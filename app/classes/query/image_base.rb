@@ -17,9 +17,9 @@ module Query
         locations?:            [:string],
         projects?:             [:string],
         species_lists?:        [:string],
-        has_observation?:      { string: [:yes] },
-        size?:                 [{ string: Image.all_sizes - [:full_size] }],
-        content_types?:        :string,
+        has_observation?:      { boolean: [true] },
+        size?:                 { string: Image.all_sizes - [:full_size] },
+        content_types?:        [{ string: Image.all_extensions }],
         has_notes?:            :boolean,
         notes_has?:            :string,
         copyright_holder_has?: :string,
@@ -76,8 +76,8 @@ module Query
       initialize_model_do_license
       initialize_model_do_boolean(
         :has_votes,
-        'LENGTH(COALESCE(images.votes,"")) > 0',
-        'LENGTH(COALESCE(images.votes,"")) = 0'
+        'LENGTH(COALESCE(images.vote_cache,"")) > 0',
+        'LENGTH(COALESCE(images.vote_cache,"")) = 0'
       )
       initialize_model_do_range(:quality, :vote_cache)
       initialize_model_do_range(

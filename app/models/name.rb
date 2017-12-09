@@ -1108,6 +1108,11 @@ class Name < AbstractModel
       self.synonym_id = nil
       save
     end
+
+    # This has to apply to names that are misspellings of this name, too.
+    Name.where(correct_spelling: self).each do |n|
+      n.update_attribute!(correct_spelling: nil)
+    end
   end
 
   # Makes two Name's synonymous.  If either Name already has a Synonym, it will

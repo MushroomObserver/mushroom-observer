@@ -2,17 +2,21 @@
 # if "id:" is omitted, Rails throws ActiveRecord::Fixture::FormatError;
 # if "id:" is included but left blank, the id is nil.
 # So use ActiveRecord to get the hashed id.
-macrolepiota_rachodes_synonym:
+
+macrolepiota_rachodes_synonym: # 1
   id: <%= ActiveRecord::FixtureSet.identify(:macrolepiota_rachodes_synonym) %>
 
-chlorophyllum_rachodes_synonym:
+chlorophyllum_rachodes_synonym: # 2
   id: <%= ActiveRecord::FixtureSet.identify(:chlorophyllum_rachodes_synonym) %>
 
-lactarius_alpinus_synonym:
+lactarius_alpinus_synonym: # 3
   id: <%= ActiveRecord::FixtureSet.identify(:lactarius_alpinus_synonym) %>
 
-peltigera_synonym:
+peltigera_synonym: # 4
   id: <%= ActiveRecord::FixtureSet.identify(:peltigera_synonym) %>
 
-namings_deprecated_synonym:
+namings_deprecated_synonym: # 5
   id: <%= ActiveRecord::FixtureSet.identify(:namings_deprecated_synonym) %>
+
+suillus_synonym: # 6
+  id: <%= ActiveRecord::FixtureSet.identify(:suillus_synonym) %>
