@@ -126,71 +126,71 @@ class FilterTest < IntegrationTestCase
     results.assert_no_text(obs.id.to_s)
   end
 
-#   def test_advanced_search_filters
-#     # has_images_filter
-#     # Login a user who filters out imageless Observations
-#     user = users(:ignore_imageless_user)
-#     obs = observations(:imageless_unvouchered_obs)
-#     visit("/account/login")
-#     fill_in("User name or Email address:", with: user.login)
-#     fill_in("Password:", with: "testpassword")
-#     click_button("Login")
-# 
-#     # Verfy Advanced Search form
-#     click_on("Advanced Search", match: :first)
-#     within("div#advanced_search_filters") do
-#       # Verify Labels.
-#       assert_text(:advanced_search_filters.t)
-#       assert_text(:advanced_search_filter_has_images.t)
-#       # Verify radio box defaults
-#       assert(find("#content_filter_has_images_yes").checked?)
-#       assert(find("#content_filter_has_specimen_").checked?)
-#     end
-# 
-#     # Fill out and submit the form
-#     # (override their default preference to ignore imageless obs)
-#     fill_in("Name", with: obs.name.text_name)
-#     page.choose("content_filter_has_images_")
-#     find("#content").click_button("Search")
-# 
-#     # Advance Search Filters should override user's { has_images: "yes" }
-#     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-#       assert_no_text(:filtered.t)
-# 
-#     results = page.find("div.results", match: :first)
-#     # Number of hits should == **total** Observations of obs.name
-#     results.assert_text(obs.name.text_name,
-#                         count: Observation.where(name: obs.name).size)
-#     # And hits should contain obs (which is imageless)
-#     results.assert_text(obs.id.to_s)
-# 
-#     ############################################################################
-#     # has_specimen filter
-#     # user who sees voucherless Observations, but hides imageless Observations
-# 
-#     # Verify additional parts of Advanced Search form
-#     click_on("Advanced Search", match: :first)
-#     filters = page.find("div#advanced_search_filters")
-#     within(filters) do
-#       assert(find("#content_filter_has_images_yes").checked?)
-#       assert(find("#content_filter_has_specimen_").checked?)
-#     end
-# 
-#     # Fill out and submit the form
-#     obs = observations(:vouchered_imged_obs)
-#     fill_in("Name", with: obs.name.text_name)
-#     choose("content_filter_has_images_")
-#     choose("content_filter_has_specimen_yes")
-#     find("#content").click_button("Search")
-# 
-#     # Advance Search Filters should override user content_filter so hits
-#     #   should == vouchered Observations of obs.name, both imaged and imageless
-#     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
-#       assert_no_text(:filtered.t)
-#     expect = Observation.where(name: obs.name).where(specimen: true)
-#     results = page.find("div.results", match: :first)
-#     results.assert_text(obs.name.text_name, count: expect.size)
-#     # And hits should contain obs (which is imaged)
-#     results.assert_text(obs.id.to_s)
-#   end
+  def test_advanced_search_filters
+    # has_images_filter
+    # Login a user who filters out imageless Observations
+    user = users(:ignore_imageless_user)
+    obs = observations(:imageless_unvouchered_obs)
+    visit("/account/login")
+    fill_in("User name or Email address:", with: user.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+
+    # Verfy Advanced Search form
+    click_on("Advanced Search", match: :first)
+    within("div#advanced_search_filters") do
+      # Verify Labels.
+      assert_text(:advanced_search_filters.t)
+      assert_text(:advanced_search_filter_has_images.t)
+      # Verify radio box defaults
+      assert(find("#content_filter_has_images_yes").checked?)
+      assert(find("#content_filter_has_specimen_").checked?)
+    end
+
+    # Fill out and submit the form
+    # (override their default preference to ignore imageless obs)
+    fill_in("Name", with: obs.name.text_name)
+    page.choose("content_filter_has_images_")
+    find("#content").click_button("Search")
+
+    # Advance Search Filters should override user's { has_images: "yes" }
+    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+      assert_no_text(:filtered.t)
+
+    results = page.find("div.results", match: :first)
+    # Number of hits should == **total** Observations of obs.name
+    results.assert_text(obs.name.text_name,
+                        count: Observation.where(name: obs.name).size)
+    # And hits should contain obs (which is imageless)
+    results.assert_text(obs.id.to_s)
+
+    ############################################################################
+    # has_specimen filter
+    # user who sees voucherless Observations, but hides imageless Observations
+
+    # Verify additional parts of Advanced Search form
+    click_on("Advanced Search", match: :first)
+    filters = page.find("div#advanced_search_filters")
+    within(filters) do
+      assert(find("#content_filter_has_images_yes").checked?)
+      assert(find("#content_filter_has_specimen_").checked?)
+    end
+
+    # Fill out and submit the form
+    obs = observations(:vouchered_imged_obs)
+    fill_in("Name", with: obs.name.text_name)
+    choose("content_filter_has_images_")
+    choose("content_filter_has_specimen_yes")
+    find("#content").click_button("Search")
+
+    # Advance Search Filters should override user content_filter so hits
+    #   should == vouchered Observations of obs.name, both imaged and imageless
+    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+      assert_no_text(:filtered.t)
+    expect = Observation.where(name: obs.name).where(specimen: true)
+    results = page.find("div.results", match: :first)
+    results.assert_text(obs.name.text_name, count: expect.size)
+    # And hits should contain obs (which is imaged)
+    results.assert_text(obs.id.to_s)
+  end
 end

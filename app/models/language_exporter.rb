@@ -178,7 +178,7 @@ module LanguageExporter
   def write_localization_file(data)
     temp_file = localization_file + "." + Process.pid.to_s
     File.open(temp_file, "w:utf-8") do |fh|
-      fh << { locale => { MO.locale_namespace => data } }.to_yaml # Apparently Rails breaks YAML::dump
+      fh << { locale => { MO.locale_namespace => data } }.to_yaml
     end
     File.rename(temp_file, localization_file)
   end
@@ -301,7 +301,8 @@ module LanguageExporter
     for line in read_export_file_lines
       if line.match(/^ *['"]?(\w+)['"]?:/)
         if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
-          verbose("#{locale} #{Regexp.last_match(1)}: tag appears more than once")
+          verbose("#{locale} #{Regexp.last_match(1)}: " \
+                  "tag appears more than once")
           twice[Regexp.last_match(1)] = true
           pass = false
         end
@@ -316,11 +317,13 @@ module LanguageExporter
     data = read_export_file
     for tag, str in data
       unless tag.is_a?(String)
-        verbose("#{locale} #{tag}: tag is a #{tag.class.name} instead of a String")
+        verbose("#{locale} #{tag}: tag is a #{tag.class.name} " \
+                "instead of a String")
         pass = false
       end
       unless str.is_a?(String)
-        verbose("#{locale} #{tag}: value is a #{str.class.name} instead of a String")
+        verbose("#{locale} #{tag}: value is a #{str.class.name} " \
+                "instead of a String")
         pass = false
       end
       unless validate_square_brackets(str)
@@ -348,7 +351,8 @@ module LanguageExporter
       quoted_tag = Regexp.last_match(2)
       tag = Regexp.last_match(3)
       str = $'
-      check_export_tag_def_line(quoted_tag, tag, str) unless (indent.length == 0) && (tag == locale) && (str.strip == "")
+      check_export_tag_def_line(quoted_tag, tag, str) \
+        unless (indent.length == 0) && (tag == locale) && (str.strip == "")
     elsif @in_tag
       check_export_multi_line(line)
     else
@@ -358,18 +362,21 @@ module LanguageExporter
 
   def check_export_tag_def_line(quoted_tag, tag, str)
     if @in_tag
-      verbose("#{locale} #{@line_number}: didn't finish multi-line string for #{@in_tag}")
+      verbose("#{locale} #{@line_number}: " \
+              "didn't finish multi-line string for #{@in_tag}")
       @in_tag = false
       @pass = false
     end
     if (quoted_tag.match(/^'/) && !quoted_tag.match(/'$/)) ||
        (quoted_tag.match(/^"/) && !quoted_tag.match(/"$/)) ||
        (quoted_tag.match(/['"]$/) && !quoted_tag.match(/^['"]/))
-      verbose("#{locale} #{@line_number}: invalid tag quotes: #{quoted_tag.inspect}")
+      verbose("#{locale} #{@line_number}: " \
+              "invalid tag quotes: #{quoted_tag.inspect}")
       @pass = false
     end
     if quoted_tag.match(/^(yes|no)$/i)
-      verbose("#{locale} #{@line_number}: 'yes' and 'no' must be quoted in YAML files")
+      verbose("#{locale} #{@line_number}: " \
+              "'yes' and 'no' must be quoted in YAML files")
       @pass = false
     elsif !validate_tag(tag)
       verbose("#{locale} #{@line_number}: invalid tag: #{tag.inspect}")
@@ -391,7 +398,8 @@ module LanguageExporter
     if !line.match(/\S/)
       @in_tag = false
     elsif !line.match(/^ /)
-      verbose("#{locale} #{@line_number}: failed to indent multi-ine string for #{@in_tag}")
+      verbose("#{locale} #{@line_number}: " \
+              "failed to indent multi-ine string for #{@in_tag}")
       @pass = false
     end
   end
@@ -400,7 +408,8 @@ module LanguageExporter
     if !line.match(/^( *)#/) &&
        !line.match(/^---\s*$/) &&
        line.match(/\S/)
-      verbose("#{locale} #{@line_number}: invalid syntax between tags: #{line.inspect}")
+      verbose("#{locale} #{@line_number}: " \
+              "invalid syntax between tags: #{line.inspect}")
       @pass = false
     end
   end
@@ -434,7 +443,8 @@ module LanguageExporter
       elsif value.sub!(/^\]\]/, "")
       elsif value.sub!(/^\[\w+\]/, "")
       elsif value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "")
-        if Regexp.last_match(1) && !validate_square_brackets_args(Regexp.last_match(1))
+        if Regexp.last_match(1) && \
+           !validate_square_brackets_args(Regexp.last_match(1))
           pass = false
           break
         end
