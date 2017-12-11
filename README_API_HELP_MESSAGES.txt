@@ -670,7 +670,7 @@ POST user
   email:	email (limit=80 chars)
   image:	image
   license:	license (default=varies)
-  locale:	lang (default=en-US, limit=el-GR|en-US|es-ES|fr-FR|pt-BR|ru-RU)
+  locale:	lang (default=en, limit=el|en|es|fr|pt|ru)
   location:	location
   login:	string (limit=80 chars)
   mailing_address:	string
@@ -686,7 +686,7 @@ PATCH user
  update params
   set_image:	image (must be owner)
   set_license:	license (not blank)
-  set_locale:	lang (not blank, default=en-US, limit=el-GR|en-US|es-ES|fr-FR|pt-BR|ru-RU)
+  set_locale:	lang (not blank, default=en, limit=el|en|es|fr|pt|ru)
   set_location:	location
   set_mailing_address:	string
   set_notes:	string

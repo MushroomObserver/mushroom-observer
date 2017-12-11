@@ -257,8 +257,8 @@ class AccountControllerTest < FunctionalTestCase
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
     Language.all.each do |lang|
-      assert_select("option[value=#{lang.locale_region}]", { count: 1 },
-                    "#{lang.locale_region} language option missing")
+      assert_select("option[value=#{lang.locale}]", { count: 1 },
+                    "#{lang.locale} language option missing")
     end
     assert_input_value(:user_login, "rolf")
     assert_input_value(:user_email, "rolf@collectivesource.com")
@@ -301,7 +301,7 @@ class AccountControllerTest < FunctionalTestCase
       keep_filenames:               :keep_but_hide,
       license_id:                   licenses(:publicdomain).id.to_s,
       layout_count:                 "100",
-      locale:                       "el-GR",
+      locale:                       "el",
       location_format:              :scientific,
       notes_template:               "Collector's #",
       theme:                        "Agaricus",
@@ -345,7 +345,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_keep_filenames, :keep_but_hide)
     assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
     assert_input_value(:user_layout_count, "100")
-    assert_input_value(:user_locale, "el-GR")
+    assert_input_value(:user_locale, "el")
     assert_input_value(:user_location_format, :scientific)
     assert_textarea_value(:user_notes_template, "Collector's #")
     assert_input_value(:user_theme, "Agaricus")
@@ -386,7 +386,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(:keep_but_hide, user.keep_filenames)
     assert_equal(100, user.layout_count)
     assert_equal(licenses(:publicdomain), user.license)
-    assert_equal("el-GR", user.locale)
+    assert_equal("el", user.locale)
     assert_equal(:scientific, user.location_format)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)

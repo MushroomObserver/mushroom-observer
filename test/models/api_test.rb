@@ -2842,7 +2842,7 @@ class ApiTest < UnitTestCase
     @login = "stephane"
     @name = ""
     @email = "stephane@grappelli.com"
-    @locale = "en-US"
+    @locale = "en"
     @notes = ""
     @license = License.preferred
     @location = nil
@@ -2875,7 +2875,7 @@ class ApiTest < UnitTestCase
     @login = "stephane"
     @name = "Stephane Grappelli"
     @email = "stephane@grappelli.com"
-    @locale = "el-GR"
+    @locale = "el"
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
     @location = Location.last
@@ -2904,7 +2904,7 @@ class ApiTest < UnitTestCase
     assert_last_user_correct
     params[:login] = "miles"
     assert_api_fail(params.merge(name: "x" * 1000))
-    assert_api_fail(params.merge(locale: "xx-XX"))
+    assert_api_fail(params.merge(locale: "xx"))
     assert_api_fail(params.merge(license: "123456"))
     assert_api_fail(params.merge(location: "123456"))
     assert_api_fail(params.merge(image: "123456"))
@@ -2916,7 +2916,7 @@ class ApiTest < UnitTestCase
       action:              :user,
       api_key:             @api_key.key,
       id:                  rolf.id,
-      set_locale:          "pt-PT",
+      set_locale:          "pt",
       set_notes:           "some notes",
       set_mailing_address: "somewhere, USA",
       set_license:         licenses(:publicdomain).id,
@@ -2929,7 +2929,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(set_license: ""))
     assert_api_pass(params)
     rolf.reload
-    assert_equal("pt-BR", rolf.locale)
+    assert_equal("pt", rolf.locale)
     assert_equal("some notes", rolf.notes)
     assert_equal("somewhere, USA", rolf.mailing_address)
     assert_objs_equal(licenses(:publicdomain), rolf.license)

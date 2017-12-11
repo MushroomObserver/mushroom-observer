@@ -29,7 +29,7 @@
   <%= locales = Language.all.map do |lang|
                   name = lang.name
                   name += " (beta)" if lang.beta
-                  [name, lang.locale_region]
+                  [name, lang.locale]
                 end
       form.select(:locale, locales, class: "form-control") %><br/>
 

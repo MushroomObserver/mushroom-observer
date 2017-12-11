@@ -41,13 +41,13 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
             value = desc.send(f)
             if !value.blank?
               xml.dataObject do
-                lang = desc.locale.sub(/-.*/, '') rescue 'en'
+                lang = desc.locale || MO.default_locale
                 xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
                 xml.dataType("http://purl.org/dc/dcmitype/Text")
                 xml.mimeType("text/html")
                 xml.agent(@data.authors(desc.id), :role => "author")
                 xml.dcterms(:modified, desc.updated_at.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
-                xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => "en")
+                xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => lang)
                 xml.dc(:language, lang)
                 xml.license(@data.license_url(desc.license_id))
                 xml.dcterms(:rightsHolder, @data.authors(desc.id))

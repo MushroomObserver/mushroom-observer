@@ -9,7 +9,7 @@ DEFAULTS: &DEFAULTS
   email:          $LABEL@collectivesource.com
   image_size:     <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  locale:         en-US
+  locale:         en
   login:          $LABEL
   name:           $LABEL
   password:       ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword

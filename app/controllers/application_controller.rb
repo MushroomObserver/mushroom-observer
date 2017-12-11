@@ -256,7 +256,7 @@ class ApplicationController < ActionController::Base
 
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by(locale: I18n.locale)
+    @language = Language.find_by_locale(I18n.locale)
     if @user && @language &&
        (!@language.official || reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -561,14 +561,6 @@ class ApplicationController < ActionController::Base
   #
   ##############################################################################
 
-  # Get sorted list of locale codes (String's) that we have translations for.
-  def all_locales
-    Dir.glob(::Rails.root.to_s + "/config/locales/*.yml").sort.map do |file|
-      file.sub(/.*?(\w+-\w+).yml/, '\\1')
-    end
-  end
-  helper_method :all_locales
-
   # Before filter: Decide which locale to use for this request.  Sets the
   # Globalite default.  Tries to get the locale from:
   #
@@ -579,16 +571,16 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    code = specified_locale || MO.default_locale
+    lang = Language.find_by_locale(specified_locale || MO.default_locale)
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    change_locale_if_needed(code)
+    change_locale_if_needed(lang.locale)
 
     # Update user preference.
-    if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update(locale: I18n.locale.to_s)
+    if @user && @user.locale != lang.locale
+      @user.update(locale: lang.locale)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
@@ -625,8 +617,7 @@ class ApplicationController < ActionController::Base
     locale
   end
 
-  def change_locale_if_needed(code)
-    new_locale = code.split("-")[0]
+  def change_locale_if_needed(new_locale)
     return if I18n.locale.to_s == new_locale
     I18n.locale = new_locale
     session[:locale] = new_locale

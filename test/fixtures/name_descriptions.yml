@@ -195,7 +195,7 @@ boletus_edulis_desc: # 20
   created_at:       2012-07-12 06:32:18
   last_view:        2017-12-09 03:38:34
   license:          ccnc30
-  locale:           en-US
+  locale:           en
   name:             boletus_edulis
   num_views:        2
   ok_for_export:    1
