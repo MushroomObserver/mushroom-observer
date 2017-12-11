@@ -3,17 +3,18 @@ require "set"
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)
+    test_ids = expect.first.is_a?(Fixnum)
     expect = expect.to_a unless expect.respond_to?(:map!)
-    expect.map!(&:id) if expect.first.is_a?(AbstractModel)
     query = Query.lookup(*args)
-    actual = query.result_ids
-    assert((Set.new(expect) == Set.new(actual)),
-           "Query results are wrong.  SQL is:\n" + query.last_query + "\n" \
-           "Expect: #{expect.inspect}\n" \
-           "Actual: #{actual.inspect}\n")
+    actual = test_ids ? query.result_ids : query.results
+    msg = "Query results are wrong. SQL is:\n" + query.last_query
+    if test_ids
+      assert_equal(expect.sort, actual.sort, msg)
+    else
+      assert_obj_list_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
+    end
     type = args[0].t.sub(/um$/, "(um|a)")
-    assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/,
-                 query.title)
+    assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
     assert(!query.title.include?("[:"),
            "Title contains undefined localizations: <#{query.title}>")
   end
@@ -1971,7 +1972,7 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_by_user
     assert_query(Location.joins(:observations).
-                          where(observations: { user: rolf }),
+                          where(observations: { user: rolf }).to_a.uniq,
                  :Location, :with_observations_by_user, user: rolf.id)
     assert_query([], :Location, :with_observations_by_user,
                  user: users(:zero_user))
@@ -2745,40 +2746,53 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_filtering_content
-    ##### image filters #####
+    ##### has_images filter #####
     expect = Observation.where.not(thumb_image_id: nil)
     assert_query(expect, :Observation, :all, has_images: "yes")
 
     expect = Observation.where(thumb_image_id: nil)
     assert_query(expect, :Observation, :all, has_images: "no")
 
-    ##### specimen filters #####
+    ##### has_specimen filter #####
     expect = Observation.where(specimen: true)
     assert_query(expect, :Observation, :all, has_specimen: "yes")
 
     expect = Observation.where(specimen: false)
     assert_query(expect, :Observation, :all, has_specimen: "no")
 
-    ##### location filter #####
+    ##### lichen filters #####
+    expect_obs = Observation.where("lifeform LIKE '%lichen%'").to_a
+    expect_names = Name.where("lifeform LIKE '%lichen%'").
+                        reject(&:correct_spelling_id).to_a
+    assert_query(expect_obs, :Observation, :all, lichen: "yes")
+    assert_query(expect_names, :Name, :all, lichen: "yes")
+
+    expect_obs = Observation.where("lifeform NOT LIKE '% lichen %'").to_a
+    expect_names = Name.where("lifeform NOT LIKE '% lichen %'").
+                        reject(&:correct_spelling_id).to_a
+    assert_query(expect_obs, :Observation, :all, lichen: "no")
+    assert_query(expect_names, :Name, :all, lichen: "no")
+
+    ##### region filter #####
     expect = Location.where("name LIKE '%California%'")
     assert_query(expect, :Location, :all, region: "California, USA")
     assert_query(expect, :Location, :all, region: "USA, California")
 
-    expect =
-      Observation.where("`where` LIKE '%California, USA'") +
-      Observation.joins(:location).where("locations.name LIKE '%California%'")
-    assert_query(expect.sort_by(&:id), :Observation, :all,
-                 region: "California, USA", by: :id)
+    expect = Observation.where("`where` LIKE '%California, USA'")
+    assert_query(expect, :Observation, :all, region: "California, USA")
 
     expect = Location.where("name LIKE '%, USA' OR name LIKE '%, Canada'")
     assert(expect.include?(locations(:albion))) # usa
     assert(expect.include?(locations(:elgin_co))) # canada
     assert_query(expect, :Location, :all, region: "North America")
 
-    ##### lichen filters #####
-    # peltigera = names(:peltigera)
-    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
-    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
+    ##### clade filter #####
+    expect_names = Name.where("classification LIKE '%Agaricales%'").
+                        reject(&:correct_spelling_id).to_a
+    expect_names << names(:agaricales)
+    expect_obs = expect_names.map(&:observations).flatten
+    assert_query(expect_obs, :Observation, :all, clade: "Agaricales")
+    assert_query(expect_names, :Name, :all, clade: "Agaricales")
   end
 
   ##############################################################################
