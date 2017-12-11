@@ -606,9 +606,6 @@ module ControllerExtensions
   end
 
   def check_select_value(elem, expect_val, id)
-puts "----------------------------"
-puts elem.to_s.inspect
-puts "----------------------------"
     if expect_val.nil?
       assert_select(elem, "option[selected]", { count: 0 },
                     "Expected :#{id} not to have any options selected")
