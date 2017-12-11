@@ -548,11 +548,6 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
-  # Name in plain text, never nil.
-  def text_name
-    name.real_search_name
-  end
-
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name
     string_with_id(name.real_search_name)

@@ -10,7 +10,7 @@
                       controller: :observer, action: :show_observation, id: obs.id),
       link_with_query(:show_object.t(type: :name),
                       controller: :name, action: :show_name, id: obs.name.id),
-      link_to(:google_images.t, "http://images.google.com/images?q=%s" % obs.text_name)
+      link_to(:google_images.t, "http://images.google.com/images?q=#{obs.name.search_name}")
     ]
   end
   if eol_url = @image.eol_url
