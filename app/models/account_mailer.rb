@@ -6,7 +6,7 @@ class AccountMailer < ActionMailer::Base
 
   def setup_user(user)
     @user = user
-    I18n.locale = (@user && @user.lang) || MO.default_locale
+    I18n.locale = @user.try(&:locale) || MO.default_locale
   end
 
   def mo_mail(title, headers = {})

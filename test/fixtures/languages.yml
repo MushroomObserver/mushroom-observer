@@ -5,7 +5,6 @@
 
 english: # 1
   locale: en
-  region: US
   name: English
   order: English
   official: true
@@ -13,7 +12,6 @@ english: # 1
 
 french: # 2
   locale: fr
-  region: FR
   name: Français
   order: Francais
   official: false
@@ -21,7 +19,6 @@ french: # 2
 
 greek: # 3
   locale: el
-  region: GR
   name: Ελληνικά
   order: Ellenika
   official: false
@@ -29,7 +26,6 @@ greek: # 3
 
 russian: # 4
   locale: ru
-  region: RU
   name: Русский
   order: Russkii
   official: false
@@ -37,7 +33,6 @@ russian: # 4
 
 spanish: # 5
   locale: es
-  region: ES
   name: Español
   order: Espanol
   official: false
@@ -45,7 +40,6 @@ spanish: # 5
 
 portuguese: # 6
   locale: pt
-  region: BR
   name: Português
   order: Português
   official: false

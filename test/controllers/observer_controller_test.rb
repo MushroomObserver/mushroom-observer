@@ -362,9 +362,6 @@ class ObserverControllerTest < FunctionalTestCase
              location: "Eastern Oklahoma"
            },
            commit: "Search")
-
-      # assert_redirected_to(controller: model.show_controller,
-      #                      action: :advanced_search)
       assert_response(:redirect)
       assert_match(%r{#{ model.show_controller }/advanced_search},
                    redirect_to_url)
@@ -431,6 +428,41 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(3, results.length)
+  end
+
+  def test_advanced_search_content_filters
+    # Make sure all the right buttons and fields are present.
+    get(:advanced_search_form)
+    assert_select("input[type=radio]#content_filter_has_images_yes")
+    assert_select("input[type=radio]#content_filter_has_images_no")
+    assert_select("input[type=radio]#content_filter_has_images_")
+    assert_select("input[type=radio]#content_filter_has_specimen_yes")
+    assert_select("input[type=radio]#content_filter_has_specimen_no")
+    assert_select("input[type=radio]#content_filter_has_specimen_")
+    assert_select("input[type=radio]#content_filter_lichen_yes")
+    assert_select("input[type=radio]#content_filter_lichen_no")
+    assert_select("input[type=radio]#content_filter_lichen_")
+    assert_select("input[type=text]#content_filter_region")
+    assert_select("input[type=text]#content_filter_clade")
+
+    params = {
+      search: {
+        model: "observation",
+        user: "rolf"
+      },
+      content_filter_has_images: "",
+      content_filter_has_specimen: "yes",
+      content_filter_lichen: "no",
+      content_filter_region: "California",
+      content_filter_clade: ""
+    }
+    post(:advanced_search_form, params)
+    query = QueryRecord.last.query
+    assert_equal("", query.params[:has_images])
+    assert_true(query.params[:has_specimen])
+    assert_false(query.params[:lichen])
+    assert_equal("California", query.params[:region])
+    assert_equal("", query.params[:clade])
   end
 
   # Prove that if advanced_search provokes exception,
