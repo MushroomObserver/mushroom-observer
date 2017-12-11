@@ -207,28 +207,42 @@ class Observation < AbstractModel
   # This is meant to be run nightly to ensure that the cached name
   # and location data used by content filters is kept in sync.
   def self.refresh_content_filter_caches
-    update_cached_column("name", "lifeform") +
-      update_cached_column("name", "text_name") +
-      update_cached_column("name", "classification") +
-      update_cached_column("location", "name", "where")
+    refresh_cached_column("name", "lifeform") +
+      refresh_cached_column("name", "text_name") +
+      refresh_cached_column("name", "classification") +
+      refresh_cached_column("location", "name", "where")
   end
 
-  def self.update_cached_column(type, foreign, local = foreign)
-    msgs = []
-    Observation.connection.select_rows(%(
-      SELECT o.id, x.#{foreign}
-      FROM observations o, #{type}s x
-      WHERE x.id = o.#{type}_id
-        AND x.#{foreign} != o.%{local}
-    )).each do |id, str|
-      msgs << "Fixing #{type} #{foreign} for observation ##{id}."
-      Observation.connection.execute(%(
-        UPDATE observations
-        SET `#{local}` = #{Observation.connection.quote(str)}
-        WHERE id = #{id}
-      ))
-    end
+  # Refresh a column which is a mirror of a foreign column.  Fixes all the
+  # errors, and reports which ids were broken.
+  def self.refresh_cached_column(type, foreign, local = foreign)
+    msgs = report_broken_caches(type, foreign, local)
+    refresh_cached_column_fix_errors(type, foreign, local)
     msgs
+  end
+
+  # Check how many entries are broken in a mirrored column.  It will be good to
+  # keep track of this at first to make sure we've caught all the ways in which
+  # the mirror can get inadvertently broken. 
+  def self.report_broken_caches(type, foreign, local)
+    Observation.connection.select_values(%(
+      SELECT o.id
+      FROM observations o, #{type}s x
+      WHERE o.#{type}_id = x.id
+        AND o.#{local} != x.#{foreign}
+    )).map do |id|
+      "Fixing #{type} #{foreign} for obs ##{id}."
+    end
+  end
+
+  # Refresh the mirror of a foreign table's column in the observations table.
+  def self.refresh_cached_column_fix_errors(type, foreign, local)
+    Observation.connection.execute(%(
+      UPDATE observations o, #{type}s x
+      SET o.#{local} = x.#{foreign}
+      WHERE o.#{type}_id = x.id
+        AND o.#{local} != x.#{foreign}
+    ))
   end
 
   # Used by Name and Location to update the observation cache when a cached
@@ -547,11 +561,6 @@ class Observation < AbstractModel
   #  :section: Namings and Votes
   #
   ##############################################################################
-
-  # Name in plain text, never nil.
-  def text_name
-    name.real_search_name
-  end
 
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name

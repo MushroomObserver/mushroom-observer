@@ -367,6 +367,11 @@ class User < AbstractModel
     User.first
   end
 
+  # Find admin's record.
+  def self.admin_id
+    User.first.id
+  end
+
   # Report which User is currently logged in. Returns +nil+ if none.  This is
   # the same instance as is in the controllers' +@user+ instance variable.
   #

@@ -122,7 +122,7 @@ class Location < AbstractModel
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
-    ver.user_id = User.current_id
+    ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
        Location.connection.select_value(%(
          SELECT COUNT(*) FROM locations_versions
