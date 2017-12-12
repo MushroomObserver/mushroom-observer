@@ -128,6 +128,7 @@ class HerbariumController < ApplicationController
        validate_personal_herbarium!
       @herbarium.save
       @herbarium.add_curator(@user) if @herbarium.personal_user
+      notify_admins_of_new_herbarium unless @herbarium.personal_user
       redirect_to_create_location || redirect_to_show_herbarium
     end
   end
@@ -204,6 +205,15 @@ class HerbariumController < ApplicationController
     redirect_to(@herbarium.show_link_args)
   end
 
+  def notify_admins_of_new_herbarium
+    subject = "New Herbarium"
+    content = "User created a new herbarium:\n" \
+              "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
+              "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
+              "Obj: #{@herbarium.show_url}\n"
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
+  end
+
   # ----------------------------
   #  Curators
   # ----------------------------
@@ -223,13 +233,12 @@ class HerbariumController < ApplicationController
   def request_to_be_curator
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
-    user_url = "#{MO.http_domain}/observer/show_user/#{@user.id}"
-    herb_url = "#{MO.http_domain}/herbarium/show_herbarium/#{@herbarium.id}"
+    subject = "Herbarium Curator Request"
     content =
-      "User: ##{@user.id}, #{@user.login}, #{user_url}\n" \
-      "Herbarium: ##{@herbarium.id}, #{@herbarium.name}, #{herb_url}\n" \
+      "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
+      "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \
       "Notes: #{params[:notes]}"
-    WebmasterEmail.build(@user.email, content).deliver_now
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:show_herbarium_request_sent.t)
   end
 
