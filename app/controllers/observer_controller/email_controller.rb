@@ -113,6 +113,7 @@ class ObserverController
 
   def send_request
     change_locale_if_needed(MO.default_locale)
+    subject = "#{@model.class.name} Merge Request"
     content = :email_merge_objects.l(
       user: @user.login,
       type: @model.type_tag,
@@ -122,7 +123,7 @@ class ObserverController
       that_url: @new_obj.show_url,
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
-    WebmasterEmail.build(@user.email, content).deliver_now
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
     redirect_to(@old_obj.show_link_args)
   end
 end
