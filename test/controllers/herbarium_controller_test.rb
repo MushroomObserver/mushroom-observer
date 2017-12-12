@@ -90,6 +90,11 @@ class HerbariumControllerTest < FunctionalTestCase
                  herbarium.mailing_address)
     assert_equal(params[:description].strip, herbarium.description)
     assert_empty(herbarium.curators)
+    email = ActionMailer::Base.deliveries.last
+    assert_equal(katrina.email, email.header["reply_to"].to_s)
+    assert_match(/new herbarium/i, email.header["subject"].to_s)
+    assert_includes(email.body.to_s, "Burbank Herbarium")
+    assert_includes(email.body.to_s, herbarium.show_url)
   end
 
   def test_create_herbarium_post_with_duplicate_name
