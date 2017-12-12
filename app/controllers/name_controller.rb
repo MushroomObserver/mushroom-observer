@@ -656,6 +656,7 @@ class NameController < ApplicationController
   end
 
   def email_admin_name_change
+    subject = "Nontrivial Name Change"
     content = :email_name_change.l(
       user: @user.login,
       old:  @name.real_search_name,
@@ -664,7 +665,7 @@ class NameController < ApplicationController
       namings: @name.namings.length,
       url: "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
-    WebmasterEmail.build(@user.email, content).deliver_now
+    WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
