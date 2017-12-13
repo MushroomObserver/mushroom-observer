@@ -24,7 +24,7 @@
 #    text_name          Amanita muscaria var. muscaria
 #                         (pure text, no accents or authors)
 #    (real_text_name)   Amanita muscaria var. muscaria
-#                          (minus authors, but with umlauts if exist)
+#                         (minus authors, but with umlauts if exist)
 #    search_name        Amanita muscaria var. muscaria (L.) Lam.
 #                         (what one would typically search for)
 #    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria
@@ -1556,7 +1556,7 @@ class Name < AbstractModel
 
   # Taxa without authors (for use by GROUP PAT)
   # rubocop:disable Metrics/LineLength
-  GENUS_OR_UP_TAXON = /("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
+  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
   SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
   SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
@@ -1685,13 +1685,14 @@ class Name < AbstractModel
     text_name.include?(" sect. ")      ? :Section    :
     text_name.include?(" subgenus ")   ? :Subgenus   :
     text_name.include?(" ")            ? :Species    :
-    text_name.match(/^\w+aceae$/)      ? :Family     :
-    text_name.match(/^\w+ineae$/)      ? :Family     : # :Suborder
-    text_name.match(/^\w+ales$/)       ? :Order      :
-    text_name.match(/^\w+mycetidae$/)  ? :Order      : # :Subclass
-    text_name.match(/^\w+mycetes$/)    ? :Class      :
-    text_name.match(/^\w+mycotina$/)   ? :Class      : # :Subphylum
-    text_name.match(/^\w+mycota$/)     ? :Phylum     :
+    text_name.match(/^\S+aceae$/)      ? :Family     :
+    text_name.match(/^\S+ineae$/)      ? :Family     : # :Suborder
+    text_name.match(/^\S+ales$/)       ? :Order      :
+    text_name.match(/^\S+mycetidae$/)  ? :Order      : # :Subclass
+    text_name.match(/^\S+mycetes$/)    ? :Class      :
+    text_name.match(/^\S+mycotina$/)   ? :Class      : # :Subphylum
+    text_name.match(/^\S+mycota$/)     ? :Phylum     :
+    text_name.match(/^Fossil-/)        ? :Phylum     :
                                          :Genus
   end
 
@@ -2010,13 +2011,13 @@ class Name < AbstractModel
           sub(" var. ",     " {6var. ").
           sub(" f. ", " {7f. ").
           strip.
-          sub(/(^\w+)aceae$/, '\1!7').
-          sub(/(^\w+)ineae$/,        '\1!6').
-          sub(/(^\w+)ales$/,         '\1!5').
-          sub(/(^\w+?)o?mycetidae$/, '\1!4').
-          sub(/(^\w+?)o?mycetes$/,   '\1!3').
-          sub(/(^\w+?)o?mycotina$/, '\1!2').
-          sub(/(^\w+?)o?mycota$/, '\1!1')
+          sub(/(^\S+)aceae$/,        '\1!7').
+          sub(/(^\S+)ineae$/,        '\1!6').
+          sub(/(^\S+)ales$/,         '\1!5').
+          sub(/(^\S+?)o?mycetidae$/, '\1!4').
+          sub(/(^\S+?)o?mycetes$/,   '\1!3').
+          sub(/(^\S+?)o?mycotina$/,  '\1!2').
+          sub(/(^\S+?)o?mycota$/,    '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
     if author.present?

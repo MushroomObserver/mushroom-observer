@@ -365,6 +365,9 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
     assert_name_match_author_optional(pat, '"Amanita"')
     assert_name_match_author_optional(pat, '"Amanita" sp.', '"Amanita"')
+    assert_name_match_author_optional(pat, 'Fossil-Okay')
+    assert_name_match_author_optional(pat, 'Fossil-Okay sp.', 'Fossil-Okay')
+    assert_no_match(pat, 'Anythingelse-Bad')
   end
 
   def test_subgenus_pat
@@ -1092,6 +1095,36 @@ class NameTest < UnitTestCase
       parent_name: nil,
       rank: :Family,
       author: "sensu Reid"
+    )
+  end
+
+  def test_name_parse_39
+    do_name_parse_test(
+      "Fossil-Ascomycetes",
+      text_name: "Fossil-Ascomycetes",
+      real_text_name: "Fossil-Ascomycetes",
+      search_name: "Fossil-Ascomycetes",
+      real_search_name: "Fossil-Ascomycetes",
+      sort_name: "Fossil-Asc!3",
+      display_name: "**__Fossil-Ascomycetes__**",
+      parent_name: nil,
+      rank: :Class,
+      author: ""
+    )
+  end
+
+  def test_name_parse_40
+    do_name_parse_test(
+      "Fossil-Fungi",
+      text_name: "Fossil-Fungi",
+      real_text_name: "Fossil-Fungi",
+      search_name: "Fossil-Fungi",
+      real_search_name: "Fossil-Fungi",
+      sort_name: "Fossil-Fungi",
+      display_name: "**__Fossil-Fungi__**",
+      parent_name: nil,
+      rank: :Phylum,
+      author: ""
     )
   end
 
@@ -2276,6 +2309,11 @@ class NameTest < UnitTestCase
     assert_equal(:Phylum, Name.guess_rank("Agaricomycota"))
     assert_equal(:Genus, Name.guess_rank("Animalia"))
     assert_equal(:Genus, Name.guess_rank("Plantae"))
+    assert_equal(:Phylum, Name.guess_rank("Fossil-Fungi"))
+    assert_equal(:Phylum, Name.guess_rank("Fossil-Ascomycota"))
+    assert_equal(:Class, Name.guess_rank("Fossil-Ascomycetes"))
+    assert_equal(:Order, Name.guess_rank("Fossil-Agaricales"))
+    assert_equal(:Phylum, Name.guess_rank("Fossil-Anythingelse"))
   end
 
   def test_parent_if_parent_deprecated
@@ -2452,7 +2490,7 @@ class NameTest < UnitTestCase
 
   def test_refresh_classification_caches
     name = names(:coprinus_comatus)
-    bad  = name.classification = "Phyllum: _Ascomycota_"
+    bad  = name.classification = "Phylum: _Ascomycota_"
     good = name.description.classification
     name.save
     assert_not_equal(good, bad)
