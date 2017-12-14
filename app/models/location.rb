@@ -374,8 +374,20 @@ class Location < AbstractModel
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})".freeze
 
-  # Returns a member of understood_places if the candidate is either a member or
-  # if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
+  def self.understood_continents
+    UNDERSTOOD_CONTINENTS
+  end
+
+  def self.understood_countries
+    UNDERSTOOD_COUNTRIES
+  end
+
+  def self.understood_states(country)
+    UNDERSTOOD_STATES[country]
+  end
+
+  # Returns a member of understood_places if the candidate is either a member
+  # or if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
   # it returns nil.
   def self.understood_with_prefixes(candidate, understood_places)
     return candidate if understood_places.member?(candidate)
