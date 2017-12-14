@@ -211,6 +211,7 @@ def users_vote(naming)
 end
 
 parse_options
+$stdout.sync = true
 Observation.where(name: @old_name).each do |obs|
   process_observation(obs)
 end
