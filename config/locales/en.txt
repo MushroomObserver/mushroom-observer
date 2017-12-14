@@ -1331,6 +1331,7 @@
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
   # location/_form_location
+  form_locations_locked: "Lock this location so users cannot change the name or coordinates?"
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
   form_locations_species: Interesting Species
@@ -1348,6 +1349,7 @@
   form_locations_dubious_help: Submit again to use this location name or edit the text below to correct any typo.
 
   # observer/_form_name
+  form_names_locked: "Lock this name so users cannot change name, author or rank?"
   form_names_text_name: Scientific Name
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
