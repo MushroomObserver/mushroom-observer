@@ -223,7 +223,7 @@ class Observation < AbstractModel
 
   # Check how many entries are broken in a mirrored column.  It will be good to
   # keep track of this at first to make sure we've caught all the ways in which
-  # the mirror can get inadvertently broken. 
+  # the mirror can get inadvertently broken.
   def self.report_broken_caches(type, foreign, local)
     Observation.connection.select_values(%(
       SELECT o.id
@@ -253,6 +253,25 @@ class Observation < AbstractModel
       SET `#{field}` = #{Observation.connection.quote(val)}
       WHERE #{type}_id = #{id}
     ))
+  end
+
+  # Check for any observations whose consensus is a misspelled name.  This can
+  # mess up the mirrors because misspelled names are "invisible", so their
+  # classification and lifeform and such will not necessarily be kept up to
+  # date.  Fixes and returns a messages for each one that was wrong.
+  def self.make_sure_no_observations_are_misspelled
+    msgs = Observation.connection.select_rows(%(
+      SELECT o.id, n.text_name FROM observations o, names n
+      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
+    )).map do |id, search_name|
+      "Observation ##{id} was misspelled: #{search_name.inspect}"
+    end
+    Observation.connection.execute(%(
+      UPDATE observations o, names n
+      SET o.name_id = n.correct_spelling_id
+      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
+    ))
+    msgs
   end
 
   ##############################################################################
@@ -1075,6 +1094,10 @@ class Observation < AbstractModel
     best = namings.first.name if !best && namings && !namings.empty?
     best = Name.unknown unless best
     result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
+
+    # Just humor me -- I'm sure there is some pathological case where we can
+    # end up after all that work with a misspelt name.
+    best = best.correct_spelling if best.correct_spelling
 
     # Make changes permanent.
     old = self.name

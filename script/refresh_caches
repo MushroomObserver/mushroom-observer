@@ -21,10 +21,12 @@
 require File.expand_path("../../config/boot.rb", __FILE__)
 require File.expand_path("../../config/environment.rb", __FILE__)
 
-msgs = []
-msgs += Name.refresh_classification_caches
-msgs += Name.propagate_generic_classifications
-msgs += Observation.refresh_content_filter_caches
+msgs =
+  Name.make_sure_names_are_bolded_correctly +
+  Name.refresh_classification_caches +
+  Name.propagate_generic_classifications +
+  Observation.refresh_content_filter_caches +
+  Observation.make_sure_no_observations_are_misspelled
 $stderr.puts msgs.join("\n") if msgs.any?
 
 exit 0

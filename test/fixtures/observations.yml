@@ -246,6 +246,8 @@ peltigera_obs: # 16
   images: peltigera_image
   species_lists: one_genus_three_species_list
   lifeform: " lichen "
+  created_at: 2014-04-04 04:04:03
+  updated_at: 2014-04-04 04:04:03
 
 peltigera_rolf_obs: # 17
   <<: *DEFAULTS
@@ -263,6 +265,8 @@ peltigera_rolf_obs: # 17
   thumb_image: rolf_profile_image
   images: rolf_profile_image
   lifeform: " lichen "
+  created_at: 2014-04-04 04:04:04
+  updated_at: 2014-04-04 04:04:04
 
 fungi_obs: # 18
   <<: *DEFAULTS

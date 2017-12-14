@@ -174,7 +174,7 @@ class ExpertTest < IntegrationTestCase
     obs = spl.observations
     assert_equal(5, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
-      "Petigera",
+      "Peltigera (Old) New Auth.", # (spelling corrected automatically)
       "Lactarius alpigenes Kühn.",
       "Suillus E.B. White",
       "Amanita baccata sensu Arora",
@@ -230,7 +230,7 @@ class ExpertTest < IntegrationTestCase
     obs = spl.observations
     assert_equal(7, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
-      "Petigera",
+      "Peltigera (Old) New Auth.",
       "Lactarius alpigenes Kühn.",
       "Suillus E.B. White",
       "Amanita baccata sensu Arora",
