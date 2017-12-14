@@ -111,7 +111,8 @@ class Location < AbstractModel
     "last_view",
     "ok_for_export",
     "rss_log_id",
-    "description_id"
+    "description_id",
+    "locked"
   )
 
   before_update :update_observation_cache

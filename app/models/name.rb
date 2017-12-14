@@ -324,7 +324,8 @@ class Name < AbstractModel
     # "accepted_name_id",
     "synonym_id",
     "description_id",
-    "classification" # (versioned in the default desc)
+    "classification", # (versioned in the default desc)
+    "locked"
   )
 
   before_create :inherit_stuff
