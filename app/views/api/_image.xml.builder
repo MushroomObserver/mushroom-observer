@@ -18,12 +18,12 @@ xml.tag!(tag,
     xml_minimal_object(xml, :owner, User, object.user_id)
   else
     xml_detailed_object(xml, :owner, object.user)
-    xml.observations(:number => object.observations.length) do
+    xml.observations(number: object.observations.length) do
       for id in object.observation_ids
         xml_minimal_object(xml, :observation, Observation, id)
       end
     end
-    xml.files(:number => Image.all_sizes.length + 1) do
+    xml.files(number: Image.all_sizes.length + 1) do
       for size in Image.all_sizes + [:original]
         xml_image_file(xml, object, size)
       end

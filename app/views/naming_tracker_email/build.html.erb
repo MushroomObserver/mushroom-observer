@@ -4,7 +4,7 @@
   observer_url    = "#{MO.http_domain}/observer/show_user/#{@observation.user_id}"
   identifier_url  = "#{MO.http_domain}/observer/show_user/#{@naming.user_id}"
 
-  intro = :email_naming_for_tracker_intro.tp(:obs => 'xxx', :name => 'yyy')
+  intro = :email_naming_for_tracker_intro.tp(obs: "xxx", name: "yyy")
   intro.gsub!(/xxx/, link_to(:observation.l, observation_url))
   intro.gsub!(/yyy/, link_to(@naming.format_name.t, name_url))
 
@@ -24,20 +24,20 @@
   handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.t(:type => :observation),
+  links.push([:email_links_show_object.t(type: :observation),
     observation_url])
   links.push([:email_links_show_observer.t,
     observer_url])
   links.push([:email_links_show_identifier.t,
     identifier_url]) if @observation.user_id != @naming.user_id
-  links.push([:email_links_disable_tracking.t(:type => :name),
+  links.push([:email_links_disable_tracking.t(type: :name),
     "#{MO.http_domain}/name/email_tracking/#{@naming.name_id}"])
   links.push([:email_links_your_interests.t,
     "#{MO.http_domain}/interest/list_interests"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
+  report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>
@@ -63,7 +63,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

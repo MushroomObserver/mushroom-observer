@@ -10,7 +10,7 @@
   <%= :show_name_misspelling_correct.t %>:
     <%= if name.correct_spelling
       link_with_query(name.correct_spelling.display_name.t,
-        :action => :show_name, :id => name.correct_spelling_id)
+        action: :show_name, id: name.correct_spelling_id)
     else
       # This can apparently happen for past_names.
       name.correct_spelling_id
@@ -23,24 +23,24 @@
   deprecated_synonyms.reject!(&:correct_spelling_id)
   if approved_synonyms != []
     links = approved_synonyms.map do |n|
-      link_with_query(n.display_name.t, :action => "show_name", :id => n.id,)
+      link_with_query(n.display_name.t, action: :show_name, id: n.id,)
     end %>
     <%= name.deprecated ? :show_name_preferred_synonyms.t :
                           :show_name_synonyms.t %>:
-      <%= links.safe_join(', ') %><br/>
+      <%= links.safe_join(", ") %><br/>
   <% end
   if deprecated_synonyms != []
     links = deprecated_synonyms.map do |n|
-      link_with_query(n.display_name.t, :action => "show_name", :id => n.id)
+      link_with_query(n.display_name.t, action: :show_name, id: n.id)
     end %>
     <%= :show_name_deprecated_synonyms.t %>:
-      <%= links.safe_join(', ') %><br/>
+      <%= links.safe_join(", ") %><br/>
   <% end
   if misspellings
     links = misspellings.map do |n|
-      link_with_query(n.display_name.t, :action => "show_name", :id => n.id)
+      link_with_query(n.display_name.t, action: :show_name, id: n.id)
     end %>
     <%= :show_name_misspelled_synonyms.t %>:
-      <%= links.safe_join(', ') %><br/>
+      <%= links.safe_join(", ") %><br/>
   <% end
 end %>

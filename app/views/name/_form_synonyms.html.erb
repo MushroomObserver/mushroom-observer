@@ -11,9 +11,9 @@
           <p class="help-block"><%= :form_synonyms_current_synonyms_help.t %></p>
           <% names.each do |n| %>
               <% if n != @name %>
-                  <%= check_box("existing_synonyms", n.id, {checked: '1'}, '1') %>
-                  <%= content_tag(:label, :for => "existing_synonyms_#{n.id}") do
-                    link_to(n.display_name.t, :action => 'show_name', :id => n.id)
+                  <%= check_box(:existing_synonyms, n.id, {checked: "1"}, "1") %>
+                  <%= content_tag(:label, for: "existing_synonyms_#{n.id}") do
+                    link_to(n.display_name.t, action: :show_name, id: n.id)
                   end %>
                   <br/>
               <% end %>
@@ -32,9 +32,9 @@
         <span class="Data">
           <% for name in @synonym_names %>
             <% if not names.member?(name) %>
-              <%= check_box("proposed_synonyms", name.id, {checked: '1'}, '1') %>
-                  <%= content_tag(:label, :for => "proposed_synonyms_#{name.id}") do
-                    link_to(name.display_name.t, :action => 'show_name', :id => name.id)
+              <%= check_box(:proposed_synonyms, name.id, {checked: "1"}, "1") %>
+                  <%= content_tag(:label, for: "proposed_synonyms_#{name.id}") do
+                    link_to(name.display_name.t, action: :show_name, id: name.id)
                   end %>
                   <br/>
             <% end %>
@@ -58,7 +58,7 @@
     <% end %>
 
     <div class="form-group">
-      <%= check_box("deprecate", "all", {checked: @deprecate_all && 'checked'}, '1') %>
+      <%= check_box(:deprecate, :all, {checked: @deprecate_all && "checked"}, "1") %>
       <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.t %></label>
 
       <p class="help-block"><%= :form_synonyms_deprecate_synonyms_help.t %></p>
@@ -67,8 +67,9 @@
     <div class="form-group">
       <label for="synonym_members"><%= :form_synonyms_names.t %>:</label>
 
-      <p class="help-block"><%= :form_synonyms_names_help.t(:name => @name.display_name) %></p>
-      <%= text_area(:synonym, :members, value: @list_members, autofocus: true, class: "form-control") %>
+      <p class="help-block"><%= :form_synonyms_names_help.t(name: @name.display_name) %></p>
+      <%= text_area(:synonym, :members, value: @list_members, class: "form-control",
+                    data: { autofocus: true }) %>
     </div>
   </div>
   <!--[eoform:observation]-->

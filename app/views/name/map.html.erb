@@ -14,8 +14,8 @@
   if @observations.any?
     gmap = make_map(@observations, query_params: query_params(@query), zoom: 2)
     finish_map(gmap)
-    gmap.div(width:"100%", height: 550).html_safe
+    gmap.div(width: "100%", height: 550).html_safe
   else
-    :name_map_no_maps.tp(:name => @name.display_name)
+    :name_map_no_maps.tp(name: @name.display_name)
   end
 %>
