@@ -862,4 +862,19 @@ class ObservationTest < UnitTestCase
     assert_equal("red", obs.notes_part_value("Cap"))
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
   end
+
+  def test_make_sure_no_observations_are_misspelled
+    good = names(:peltigera)
+    bad  = names(:petigera)
+    misspelled_obs = Observation.where(name: good)
+    misspelled_obs.each do |obs|
+      obs.update_columns(name_id: bad.id)
+      assert_operator(obs.updated_at, :<, 1.minute.ago)
+    end
+    Observation.make_sure_no_observations_are_misspelled
+    misspelled_obs.each do |obs|
+      assert_names_equal(good, obs.reload.name)
+      assert_operator(obs.updated_at, :<, 1.minute.ago)
+    end
+  end
 end

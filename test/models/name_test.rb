@@ -2527,4 +2527,59 @@ class NameTest < UnitTestCase
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
   end
+
+  def test_mark_misspelled
+    # Make sure target name has synonyms.
+    syn = Synonym.create
+    Name.connection.execute(%(
+      UPDATE names SET synonym_id = #{syn.id}
+      WHERE text_name LIKE "Agaricus camp%"
+    ))
+
+    good = names(:agaricus_campestris)
+    bad  = names(:coprinus_comatus)
+    old_obs = Observation.where(name: bad)
+    old_synonym_count = good.synonyms.count
+
+    bad.mark_misspelled(good, :save)
+    good.reload
+    bad.reload
+
+    assert_true(bad.deprecated)
+    assert_false(good.deprecated)
+    assert_equal("__#{bad.text_name}__ #{bad.author}", bad.display_name)
+    assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
+    assert_names_equal(good, bad.correct_spelling)
+    assert_nil(good.correct_spelling)
+    assert_objs_equal(syn, bad.synonym)
+    assert_equal(old_synonym_count + 1, bad.synonyms.count)
+    old_obs.each do |obs|
+      assert_names_equal(good, obs.name)
+    end
+  end
+
+  def test_clear_misspelled
+    good = names(:peltigera)
+    bad  = names(:petigera)
+    bad.clear_misspelled(:save)
+    good.reload
+    bad.reload
+
+    assert_true(bad.deprecated)
+    assert_false(good.deprecated)
+    assert_equal("__#{bad.text_name}__", bad.display_name)
+    assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
+    assert_nil(bad.correct_spelling)
+    assert_nil(good.correct_spelling)
+    assert_not_nil(good.synonym)
+    assert_objs_equal(good.synonym, bad.synonym)
+  end
+
+  def test_make_sure_names_are_bolded_correctly
+    name = names(:suilus)
+    assert_equal("**__#{name.text_name}__** #{name.author}", name.display_name)
+    Name.make_sure_names_are_bolded_correctly
+    name.reload
+    assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
 end

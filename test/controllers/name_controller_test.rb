@@ -1214,7 +1214,7 @@ class NameControllerTest < FunctionalTestCase
     assert_true(name.deprecated)
     assert_redirected_to(controller: :name, action: :show_name, id: name.id)
 
-    # Prove we can deprecated and call a name misspelt by checking box and
+    # Prove we can deprecate and call a name misspelt by checking box and
     # entering correct spelling.
     name.update_attributes(deprecated: false)
     params = {

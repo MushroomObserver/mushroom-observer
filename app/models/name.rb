@@ -521,6 +521,21 @@ class Name < AbstractModel
     "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
   end
 
+  # Make sure display names are in boldface for accepted names, and not in
+  # boldface for deprecated names.
+  def self.make_sure_names_are_bolded_correctly
+    msgs = Name.connection.select_values(%(
+      SELECT id FROM names
+      WHERE IF(deprecated, display_name LIKE "%*%", display_name NOT LIKE "%*%")
+    )).map do |id|
+      name = Name.find(id)
+      name.change_deprecated(name.deprecated)
+      name.save
+      "The name #{name.search_name.inspect} " \
+      "should #{name.deprecated && 'not '} have been in boldface."
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Taxonomy
@@ -2315,6 +2330,40 @@ class Name < AbstractModel
     self.display_name = name
     self.deprecated = deprecated
     # synonym.choose_accepted_name if synonym
+  end
+
+  # Mark this name as "misspelled", make sure it is deprecated, record what the
+  # correct spelling should be, make sure it is NOT deprecated, and make sure
+  # it is a synonym of this name.  Saves any changes it needs to make to the
+  # correct spelling, but only saves the changes to this name if you ask it to. 
+  def mark_misspelled(target_name, save = false)
+    return if deprecated && misspelling && correct_spelling == target_name
+    self.misspelling = true
+    self.correct_spelling = target_name
+    change_deprecated(true)
+    merge_synonyms(target_name)
+    target_name.clear_misspelled(:save) if target_name.is_misspelling?
+    save_with_log(:log_name_deprecated, other: target_name.display_name) \
+      if save
+    change_misspelled_consensus_names
+  end
+
+  # Mark this name as "not misspelled", and saves the changes if you ask it to.
+  def clear_misspelled(save = false)
+    return unless misspelling || correct_spelling
+    was = correct_spelling.display_name
+    self.misspelling = false
+    self.correct_spelling = nil
+    save_with_log(:log_name_unmisspelled, other: was) if save
+  end
+
+  # Super quick and low-level update to make sure no observation names are
+  # misspellings.
+  def change_misspelled_consensus_names
+    Observation.connection.execute(%(
+      UPDATE observations SET name_id = #{correct_spelling_id}
+      WHERE name_id = #{id}
+    ))
   end
 
   ##############################################################################

@@ -697,18 +697,9 @@ class NameController < ApplicationController
     correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
     raise(:runtime_form_names_misspelling_bad.t) unless correct_name
     raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
-
-    @name.correct_spelling = correct_name
-    @name.merge_synonyms(correct_name)
-    @name.change_deprecated(true)
+    @name.mark_misspelled(correct_name)
+    # (This tells it not to redirect to "approve".)
     params[:name][:deprecated] = "true"
-    fix_correct_name(correct_name) if correct_name.is_misspelling?
-  end
-
-  def fix_correct_name(correct_name)
-    correct_name.correct_spelling = nil
-    correct_name.save_with_log(:log_name_unmisspelled,
-                               other: @name.display_name)
   end
 
   # Updates Name
@@ -1116,10 +1107,7 @@ class NameController < ApplicationController
 
             # Change this name to "deprecated", set correct spelling, add note.
             @name.change_deprecated(true)
-            if @misspelling
-              @name.misspelling = true
-              @name.correct_spelling = target_name
-            end
+            @name.mark_misspelled(target_name) if @misspelling
             @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
             post_comment(:deprecate, @name, @comment) unless @comment.blank?
 
