@@ -129,6 +129,14 @@
         <%= content_tag(:b, show_location_highest.t) %>: <%= @location.high %> m<br/>
         <%= content_tag(:b, show_location_lowest.t) %>: <%= @location.low %> m<br/>
       <% end %>
+      <div class="help-block"><%= :show_location_locked.tp %></div>
+      <%= hidden_field(:location, :display_name, value: @display_name) %>
+      <%= hidden_field(:location, :north) %>
+      <%= hidden_field(:location, :south) %>
+      <%= hidden_field(:location, :east) %>
+      <%= hidden_field(:location, :west) %>
+      <%= hidden_field(:location, :high) %>
+      <%= hidden_field(:location, :low) %>
     </div>
     <div class="col-sm-6 col-md-8 col-lg-9 push-up push-down">
       <%=
