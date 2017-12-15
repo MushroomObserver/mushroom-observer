@@ -173,6 +173,12 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
+  def assert_email_generated
+    assert_not_empty(@@emails, "Was expecting an email notification.")
+  ensure
+    @@emails = []
+  end
+
   def assert_no_emails
     msg = @@emails.join("\n")
     assert(@@emails.empty?,
@@ -1134,8 +1140,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    # creates Lactarius since it's not in fixtures
+    assert_email_generated
     assert(Name.exists?(text_name: "Lactarius"))
     # points for changing Lactarius alpigenes
     assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
@@ -1186,7 +1191,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_flash_success
     assert_empty(name.reload.author)
-    assert_no_emails
+    assert_email_generated
   end
 
   def test_edit_name_misspelling
@@ -1398,7 +1403,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
+    assert_email_generated
     name.reload
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
