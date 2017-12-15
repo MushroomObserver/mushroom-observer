@@ -245,9 +245,6 @@
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
 #
-#  ==== Editing
-#  changeable?(user) ::      May user change this Name?
-#
 #  == Callbacks
 #
 #  create_description::      After create: create (empty) official
@@ -2224,20 +2221,27 @@ class Name < AbstractModel
     new_name(parsed_name.params)
   end
 
-  # Return extant Names matching a desired new Name
-  # Used by NameController#create_name
+  # Get list of Names that are potential matches when creating a new name.
+  # Takes results of Name.parse_name.  Used by NameController#create_name.
+  # Three cases:
+  #
+  #   1. group with author       - only accept exact matches
+  #   2. nongroup with author    - match names with correct author or no author
+  #   3. any name without author - ignore authors completely when matching names
+  #
+  # If the user provides an author, but the only match has no author, then we
+  # just need to add an author to the existing Name.  If the user didn't give
+  # an author, but there are matches with an author, then it already exists
+  # and we should just ignore the request.
+  #
   def self.names_matching_desired_new_name(parsed_name)
-    # authored :Group ParsedName must be matched exactly
     if parsed_name.rank == :Group
       Name.where(search_name: parsed_name.search_name)
-    # unauthored ParsedName matches Names with or w/o authors
     elsif parsed_name.author.empty?
       Name.where(text_name: parsed_name.text_name)
-    # authored non-:Group ParsedName matched by exact & authorless extant Names
     else
-      Name.
-        where(text_name: parsed_name.text_name).
-        where(author: [parsed_name.author, ""])
+      Name.where(text_name: parsed_name.text_name).
+           where(author: [parsed_name.author, ""])
     end
   end
 
@@ -2246,32 +2250,6 @@ class Name < AbstractModel
   #  :section: Changing Name
   #
   ##############################################################################
-
-  # May user edit this name?
-  def changeable?(user = @user)
-    noone_else_owns_references_to_name?(user)
-  end
-
-  def noone_else_owns_references_to_name?(user)
-    all_references.each { |obj| return false if obj.user_id != user.id }
-    true
-  end
-
-  # The references which a User must own in order to edit name
-  def all_references
-    namings + observations
-  end
-
-  # Return extant Names matching a desired changed Name
-  # When matching a desired changed name, get exact matches.
-  # This allows authored/unauthored pairs at all Ranks.
-  # We assume than when editing a Name, a User is making a deliberate choice.
-  # This contrasts with creating a Name, where we assume that the User may be
-  # overlooking an extant Name.
-  # Used by NameController#edit_name
-  def self.names_matching_desired_changed_name(parsed_name)
-    Name.where(search_name: parsed_name.search_name)
-  end
 
   # Changes the name, and creates parents as necessary.  Throws a RuntimeError
   # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
@@ -2336,7 +2314,7 @@ class Name < AbstractModel
   # Mark this name as "misspelled", make sure it is deprecated, record what the
   # correct spelling should be, make sure it is NOT deprecated, and make sure
   # it is a synonym of this name.  Saves any changes it needs to make to the
-  # correct spelling, but only saves the changes to this name if you ask it to. 
+  # correct spelling, but only saves the changes to this name if you ask it to.
   def mark_misspelled(target_name, save = false)
     return if deprecated && misspelling && correct_spelling == target_name
     self.misspelling = true
