@@ -3,8 +3,12 @@
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+DEFAULTS: &DEFAULTS
+  locked: false
+
 # no observations, 1 descsription and 2 versions all by rolf
 albion: # 1
+  <<: *DEFAULTS
   description: albion_desc
   created_at: 2007-12-27 06:41:20
   updated_at: 2007-12-27 06:41:20
@@ -22,6 +26,7 @@ albion: # 1
   notes: some notes & stuff... to test "unsafe" html
 
 burbank: # 2
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -36,6 +41,7 @@ burbank: # 2
   low: 148.0
 
 mitrula_marsh: # 3
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -49,6 +55,7 @@ mitrula_marsh: # 3
   rss_log: location_rss_log
 
 salt_point: # 4
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -64,6 +71,7 @@ salt_point: # 4
   notes: It's legal to collect in Salt Point (at least in 2010). Let's hope it stays that way!
 
 gualala: # 5
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -78,6 +86,7 @@ gualala: # 5
   low: 0.0
 
 elgin_co: # 6
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -90,6 +99,7 @@ elgin_co: # 6
   south: 42.4701
 
 brett_woods: # 7
+  <<: *DEFAULTS
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   user: rolf
@@ -102,6 +112,7 @@ brett_woods: # 7
   south: 41.1939
 
 point_reyes: # 8
+  <<: *DEFAULTS
   created_at: 2008-01-01 11:50:00
   updated_at: 2008-01-01 11:50:00
   user: rolf
@@ -115,6 +126,7 @@ point_reyes: # 8
   notes: Is it legal to collect in Point Reyes without a permit?
 
 howarth_park: # 9
+  <<: *DEFAULTS
   created_at: 2008-01-01 15:24:18
   updated_at: 2008-01-01 15:24:18
   user: rolf
@@ -127,6 +139,7 @@ howarth_park: # 9
   south: 38.4496
 
 unknown_location: # 10
+  <<: *DEFAULTS
   created_at: 2012-01-01 15:24:18
   updated_at: 2012-01-01 15:24:18
   user_id: 0
@@ -137,8 +150,10 @@ unknown_location: # 10
   west: -180
   east: 180
   south: -90
+  locked: true
 
 nybg_location: # 11
+  <<: *DEFAULTS
   created_at: 2012-10-21 06:50:00
   updated_at: 2012-10-21 06:50:00
   user: rolf
@@ -151,6 +166,7 @@ nybg_location: # 11
   south: 40.866
 
 # Do not use this location for any object
+  <<: *DEFAULTS
 unused_location: # 12
   user_id: 0
   version: 1
@@ -162,6 +178,7 @@ unused_location: # 12
   south: -90
 
 no_mushrooms_location: # 13
+  <<: *DEFAULTS
   user_id: 0
   version: 1
   name: No Mushrooms
@@ -172,6 +189,7 @@ no_mushrooms_location: # 13
   south: -90
 
 collection_location: # 14
+  <<: *DEFAULTS
   user_id: 0
   version: 1
   name: Collection Location
@@ -182,6 +200,7 @@ collection_location: # 14
   south: -90
 
 display_location: # 15
+  <<: *DEFAULTS
   user_id: 0
   version: 1
   name: Display Location
@@ -192,6 +211,7 @@ display_location: # 15
   south: -90
 
 sortable_observation_user_location: # 16
+  <<: *DEFAULTS
   user: sortable_observation_user
   version: 1
   name: Sortable Observation User, New York, USA
@@ -201,6 +221,7 @@ sortable_observation_user_location: # 16
   south: 40.866
 
 obs_default_location: # 17
+  <<: *DEFAULTS
   user: obs_default_location_user
   version: 1
   name: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
