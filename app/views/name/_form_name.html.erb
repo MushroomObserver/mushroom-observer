@@ -22,34 +22,31 @@
   </div>
 
   <div class="form-group pad-top">
-  <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
-  <% if true %>
+    <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
     <%= form.text_field(:text_name, value: @name_string, class: "form-control",
                         data: {autofocus: true}) %>
     <p class="help-block"><%= :form_names_text_name_help.t %></p>
-  <% else %>
-    <%= @name.real_text_name %>
-    <p class="help-block"><%= :form_names_text_name_locked.t %></p>
-  <% end %>
   </div>
 
   <label for="name_author"><%= :Authority.t %>:</label>
-  <% if true or @name.author.blank? %>
-    <%= form.text_field(:author, class: "form-control") %>
-    <p class="help-block"><%= :form_names_author_help.t %></p>
-  <% else %>
-    <%= h(@name.author) %><br/>
-    <p class="help-block"><%= :form_names_author_locked.t %></p>
-  <% end %>
+  <%= form.text_field(:author, class: "form-control") %>
+  <p class="help-block"><%= :form_names_author_help.t %></p>
 
 <% else %>
   <div class="push-down push-up">
     <%= content_tag(:b, :Rank.t) %>:
       <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
+    <%= content_tag(:b, :Status.t) %>:
+      <%= @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t %><br/>
     <%= content_tag(:b, :Name.t) %>:
       <%= @name.real_text_name.t %><br/>
     <%= content_tag(:b, :Authority.t) %>:
       <%= @name.author.t %><br/>
+    <div class="help-block"><%= :show_name_locked.tp %></div>
+    <%= hidden_field(:name, :rank) %>
+    <%= hidden_field(:name, :deprecated) %>
+    <%= hidden_field(:name, :text_name, value: @name_string) %>
+    <%= hidden_field(:name, :author) %>
   </div>
 <% end %>
 
@@ -58,7 +55,7 @@
 <p class="help-block"><%= :form_names_citation_help.t %></p>
 <p class="help-block"><%= :form_names_citation_textilize_note.t %></p>
 
-<% if !@misspelling.nil? %>
+<% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
   <%= form.check_box(:misspelling, checked: @misspelling) %>
   <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
   <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
