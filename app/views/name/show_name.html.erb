@@ -5,20 +5,18 @@
   Textile.register_name(@name)
 
   tabs = [
-    link_with_query(:show_name_edit_name.t, action: :edit_name,
-                    id: @name.id),
-    link_with_query(:show_name_bulk_name_edit.t,
-                    action: :bulk_name_edit),
-    link_with_query(:show_name_add_name.t, action: :create_name),
-    link_with_query(:show_name_change_synonyms.t,
-                    action: :change_synonyms, id: @name.id)
+    link_with_query(:show_name_edit_name.t, action: :edit_name, id: @name.id),
+    link_with_query(:show_name_bulk_name_edit.t, action: :bulk_name_edit),
+    link_with_query(:show_name_add_name.t, action: :create_name)
   ]
-  if @name.deprecated
-    tabs << link_with_query(:APPROVE.t, action: :approve_name,
-                            id: @name.id)
-  else
-    tabs << link_with_query(:DEPRECATE.t, action: :deprecate_name,
-                            id: @name.id)
+  if in_admin_mode? || !@name.locked
+    tabs << link_with_query(:show_name_change_synonyms.t,
+                      action: :change_synonyms, id: @name.id)
+    if @name.deprecated
+      tabs << link_with_query(:APPROVE.t, action: :approve_name, id: @name.id)
+    else
+      tabs << link_with_query(:DEPRECATE.t, action: :deprecate_name, id: @name.id)
+    end
   end
   tabs += [
     link_with_query(:show_name_email_tracking.t, action: :email_tracking,
