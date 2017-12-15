@@ -56,6 +56,7 @@
 #  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 class NameController < ApplicationController
+  require_dependency "name_controller/create_and_edit_name"
   require_dependency "name_controller/show_name_description"
 
   include DescriptionControllerHelpers
@@ -199,7 +200,7 @@ class NameController < ApplicationController
 
   # Used to test pagination.
   def test_index # :nologin: :norobots:
-    query = find_query(:Name) or fail "Missing query: #{params[:q]}"
+    query = find_query(:Name) or raise("Missing query: #{params[:q]}")
     if params[:test_anchor]
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
@@ -459,324 +460,6 @@ class NameController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Create Names
-  #
-  ##############################################################################
-
-  ### Create a new name; accessible from name indexes.
-  def create_name # :prefetch: :norobots:
-    store_location
-    pass_query_params
-    if request.method != "POST"
-      init_create_name_form
-    else
-      @parse = parse_name
-      return unless new_name_allowable?
-      create_new_name
-    end
-  rescue RuntimeError => err
-    reload_create_name_form_on_error(err)
-  end
-
-  def init_create_name_form
-    @name = Name.new
-    @name.rank = :Species
-    @name_string = ""
-  end
-
-  def reload_create_name_form_on_error(err)
-    flash_error(err.to_s) unless err.blank?
-    flash_object_errors(@name)
-    init_create_name_form
-    @name.rank =     params[:name][:rank]
-    @name.author =   params[:name][:author]
-    @name.citation = params[:name][:citation]
-    @name.notes =    params[:name][:notes]
-    @name_string =   params[:name][:text_name]
-  end
-
-  def parse_name
-    text_name = params[:name][:text_name]
-    text_name = @name.real_text_name if text_name.blank? && @name
-    author = params[:name][:author]
-    in_str = Name.clean_incoming_string("#{text_name} #{author}")
-    in_rank = params[:name][:rank].to_sym
-    old_deprecated = @name ? @name.deprecated : false
-    parse = Name.parse_name(in_str, rank: in_rank, deprecated: old_deprecated)
-    if !parse || parse.rank != in_rank
-      rank_tag = :"rank_#{in_rank.to_s.downcase}"
-      fail(:runtime_invalid_for_rank.t(rank: rank_tag, name: in_str))
-    end
-    parse
-  end
-
-  def new_name_allowable?
-    matches = names_matching_desired_new_name
-    return true if matches.none?
-    if matches.one?
-      raise(:runtime_name_create_already_exists.
-              t(name: matches.first.display_name))
-    else
-      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
-    end
-  end
-
-  def names_matching_desired_new_name
-    Name.names_matching_desired_new_name(@parse)
-  end
-
-  def create_new_name
-    @name = Name.new_name_from_parsed_name(@parse)
-    adjust_name_attributes_from_params
-    if @name.save_with_log(:log_name_updated)
-      flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
-      update_ancestors
-      redirect_to_show_name
-    else
-      raise(:runtime_unable_to_save_changes.t)
-    end
-  end
-
-  def adjust_name_attributes_from_params
-    @name.citation = params[:name][:citation].to_s.strip_squeeze
-    @name.notes = params[:name][:notes].to_s.strip
-  end
-
-  def update_ancestors
-    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
-      name.save_with_log(:log_name_created_at) if name && name.new_record?
-    end
-  end
-
-  def redirect_to_show_name
-    redirect_with_query(action: :show_name, id: @name.id)
-  end
-
-  def redirect_to_merge_request(new_name)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
-                        type: :Name, old_id: @name.id, new_id: new_name.id)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Edit Names
-  #
-  ##############################################################################
-
-  ### Make changes to name; accessible from show_name page.
-  def edit_name # :prefetch: :norobots:
-    store_location
-    pass_query_params
-    if (@name = find_or_goto_index(Name, params[:id].to_s))
-      init_edit_name_form
-      save_edits if request.method == "POST"
-    end
-  rescue RuntimeError => err
-    reload_edit_name_form_on_error(err)
-  end
-
-  def init_edit_name_form
-    if !params[:name]
-      @misspelling = @name.is_misspelling?
-      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ""
-    else
-      @misspelling = (params[:name][:misspelling] == "1")
-      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
-    end
-    @name_string = @name.real_text_name
-  end
-
-  def reload_edit_name_form_on_error(err)
-    flash_error(err.to_s) unless err.blank?
-    flash_object_errors(@name)
-    @name.rank = params[:name][:rank]
-    @name.author = params[:name][:author]
-    @name.citation = params[:name][:citation]
-    @name.notes = params[:name][:notes]
-    @name.deprecated = (params[:name][:deprecated] == "true")
-    @name_string = params[:name][:text_name]
-  end
-
-  def save_edits
-    @parse = parse_name
-    matches = names_matching_desired_changed_name - [@name]
-    if matches.many?
-      edit_multiple_match_exception(new_name)
-    else
-      new_name = matches.first || @name
-      should_be_merged?(new_name) ? try_to_merge(new_name) : try_to_change_name
-    end
-  end
-
-  def names_matching_desired_changed_name
-    Name.names_matching_desired_changed_name(@parse)
-  end
-
-  def edit_multiple_match_exception(new_name)
-    raise(:edit_name_multiple_names_match.
-            t(str: @parse.real_search_name,
-              matches: new_name.map(&:search_name).join(" / ")
-             )
-         )
-  end
-
-  def should_be_merged?(new_name)
-    new_name != @name && Name.exists?(new_name.id)
-  end
-
-  #### user's changes affect only one existing name ####
-  def try_to_change_name
-    email_admin_name_change unless insignificant_change?
-    update_correct_spelling
-    any_changes = update_existing_name
-    if status_changing?
-      redirect_to_approve_or_deprecate
-    else
-      flash_warning(:runtime_edit_name_no_change.t) unless any_changes
-      redirect_to_show_name
-    end
-  end
-
-  def insignificant_change?
-    ok_to_make_any_change? || minor_change? || just_adding_author?
-  end
-
-  def ok_to_make_any_change?
-    in_admin_mode? || @name.changeable?(@user)
-  end
-
-  def minor_change?
-    old_name = @name.real_search_name
-    new_name = @parse.real_search_name
-    new_name.percent_match(old_name) > 0.9
-  end
-
-  def just_adding_author?
-    @name.author.blank? && @parse.real_text_name == @name.real_text_name
-  end
-
-  def email_admin_name_change
-    subject = "Nontrivial Name Change"
-    content = :email_name_change.l(
-      user: @user.login,
-      old:  @name.real_search_name,
-      new:  @parse.real_search_name,
-      observations: @name.observations.length,
-      namings: @name.namings.length,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
-    )
-    WebmasterEmail.build(@user.email, content, subject).deliver_now
-    NameControllerTest.report_email(content) if Rails.env == "test"
-  end
-
-  # Update the misspelling status.
-  #
-  # @name::             Name whose status we're changing.
-  # @misspelling::      Boolean: is the "this is misspelt" box checked?
-  # @correct_spelling:: String: the correct name, as entered by the user.
-  #
-  # 1) If the checkbox is unchecked, and name used to be misspelt, then it
-  #    clears correct_spelling_id.
-  # 2) Otherwise, if the text field is filled in it looks up the name and
-  #    sets correct_spelling_id.
-  #
-  # All changes are made (but not saved) to +name+.  It returns true if
-  # everything went well.  If it couldn't recognize the correct name, it
-  # changes nothing and raises a RuntimeError.
-  #
-  def update_correct_spelling
-    if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
-      # Clear status if checkbox unchecked.
-      @name.correct_spelling = nil
-    elsif @correct_spelling.present?
-      set_correct_spelling
-    end
-  end
-
-  def set_correct_spelling
-    correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
-    raise(:runtime_form_names_misspelling_bad.t) unless correct_name
-    raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
-    @name.mark_misspelled(correct_name)
-    # (This tells it not to redirect to "approve".)
-    params[:name][:deprecated] = "true"
-  end
-
-  # Updates Name
-  # Returns truthy if name changed && changes saved, else falsy
-  def update_existing_name
-    update_name_without_saving
-    if !@name.changed?
-      any_changes = false
-    elsif !@name.save_with_log(:log_name_updated)
-      raise(:runtime_unable_to_save_changes.t)
-    else
-      flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
-      any_changes = true
-    end
-    # Update ancestors regardless whether name changed; maybe this will add
-    # missing ancestors in case database is messed up
-    update_ancestors
-    any_changes
-  end
-
-  def update_name_without_saving
-    @name.attributes = @parse.params
-    adjust_name_attributes_from_params
-  end
-
-  def status_changing?
-    params[:name][:deprecated].to_s != @name.deprecated.to_s
-  end
-
-  # Chain on to approve/deprecate name if changed status.
-  def redirect_to_approve_or_deprecate
-    if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(action: :deprecate_name, id: @name.id)
-    else
-      redirect_with_query(action: :approve_name, id: @name.id)
-    end
-    return true
-  end
-
-  #### Changes require merger of two existing names ####
-  def try_to_merge(new_name)
-    if in_admin_mode? || @name.mergeable? || new_name.mergeable?
-      merge_name_into(new_name)
-      redirect_to_show_name
-    else
-      redirect_to_merge_request(new_name)
-    end
-  end
-
-  def merge_name_into(new_name)
-    old_display_name_for_log = @name[:display_name]
-    update_name_without_saving
-    # Only change deprecation status if user explicity requested it.
-    if @name.deprecated != (params[:name][:deprecated] == "true")
-      change_deprecated = !@name.deprecated
-    end
-    # Automatically swap names if that's a safer merge.
-    if !@name.mergeable? && new_name.mergeable?
-      @name, new_name = new_name, @name
-      old_display_name_for_log = @name[:display_name]
-    end
-    # Fill in author if other has one.
-    if new_name.author.blank? && !@parse.author.blank?
-      new_name.change_author(@parse.author)
-    end
-    new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?
-    @name.display_name = old_display_name_for_log
-    new_name.merge(@name)
-    flash_notice(:runtime_edit_name_merge_success.t(
-                   this: @name.real_search_name, that: new_name.real_search_name
-                 ))
-    @name = new_name
-    @name.save
-  end
-
-  ##############################################################################
-  #
   #  :section: Create and Edit Name Descriptions
   #
   ##############################################################################
@@ -955,88 +638,93 @@ class NameController < ApplicationController
   # of a name, removing others, writing in new, etc.
   def change_synonyms # :prefetch: :norobots:
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      @list_members     = nil
-      @new_names        = nil
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = true
-      if request.method == "POST"
-        list = params[:synonym][:members].strip_squeeze
-        @deprecate_all = (params[:deprecate][:all] == "1")
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
+    return if abort_if_name_locked!(@name)
 
-        # Create any new names that have been approved.
-        construct_approved_names(list, params[:approved_names], @deprecate_all)
+    @list_members     = nil
+    @new_names        = nil
+    @synonym_name_ids = []
+    @synonym_names    = []
+    @deprecate_all    = true
 
-        # Parse the write-in list of names.
-        sorter = NameSorter.new
-        sorter.sort_names(list)
-        sorter.append_approved_synonyms(params[:approved_synonyms])
+    post_change_synonyms if request.method == "POST"
+  end
 
-        # Are any names unrecognized (only unapproved names will still be
-        # unrecognized at this point) or ambiguous?
-        if !sorter.only_single_names
-          dump_sorter(sorter)
-        # Has the user NOT had a chance to choose from among the synonyms of any
-        # names they've written in?
-        elsif !sorter.only_approved_synonyms
-          flash_notice :name_change_synonyms_confirm.t
-        else
-          now = Time.now
+  def post_change_synonyms
+    list = params[:synonym][:members].strip_squeeze
+    @deprecate_all = (params[:deprecate][:all] == "1")
 
-          # Create synonym and add this name to it if this name not already
-          # associated with a synonym.
-          unless @name.synonym_id
-            @name.synonym = Synonym.create
-            @name.save
-          end
+    # Create any new names that have been approved.
+    construct_approved_names(list, params[:approved_names], @deprecate_all)
 
-          # Go through list of all synonyms for this name and written-in names.
-          # Exclude any names that have un-checked check-boxes: newly written-in
-          # names will not have a check-box yet, names written-in in previous
-          # attempt to submit this form will have checkboxes and therefore must
-          # be checked to proceed -- the default initial state.
-          proposed_synonyms = params[:proposed_synonyms] || {}
-          for n in sorter.all_synonyms
-            # Synonymize all names that have been checked, or that don't have
-            # checkboxes.
-            if proposed_synonyms[n.id.to_s] != "0"
-              @name.transfer_synonym(n) if n.synonym_id != @name.synonym_id
-            end
-          end
+    # Parse the write-in list of names.
+    sorter = NameSorter.new
+    sorter.sort_names(list)
+    sorter.append_approved_synonyms(params[:approved_synonyms])
 
-          # De-synonymize any old synonyms in the "existing synonyms" list that
-          # have been unchecked.  This creates a new synonym to connect them if
-          # there are multiple unchecked names -- that is, it splits this
-          # synonym into two synonyms, with checked names staying in this one,
-          # and unchecked names moving to the new one.
-          check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
+    # Are any names unrecognized (only unapproved names will still be
+    # unrecognized at this point) or ambiguous?
+    if !sorter.only_single_names
+      dump_sorter(sorter)
+    # Has the user NOT had a chance to choose from among the synonyms of any
+    # names they've written in?
+    elsif !sorter.only_approved_synonyms
+      flash_notice :name_change_synonyms_confirm.t
+    else
+      now = Time.now
 
-          # Deprecate everything if that check-box has been marked.
-          success = true
-          if @deprecate_all
-            for n in sorter.all_names
-              unless deprecate_synonym(n)
-                # Already flashed error message.
-                success = false
-              end
-            end
-          end
+      # Create synonym and add this name to it if this name not already
+      # associated with a synonym.
+      unless @name.synonym_id
+        @name.synonym = Synonym.create
+        @name.save
+      end
 
-          if success
-            redirect_with_query(action: "show_name", id: @name.id)
-          else
-            flash_object_errors(@name)
-            flash_object_errors(@name.synonym)
+      # Go through list of all synonyms for this name and written-in names.
+      # Exclude any names that have un-checked check-boxes: newly written-in
+      # names will not have a check-box yet, names written-in in previous
+      # attempt to submit this form will have checkboxes and therefore must
+      # be checked to proceed -- the default initial state.
+      proposed_synonyms = params[:proposed_synonyms] || {}
+      for n in sorter.all_synonyms
+        # Synonymize all names that have been checked, or that don't have
+        # checkboxes.
+        if proposed_synonyms[n.id.to_s] != "0"
+          @name.transfer_synonym(n) if n.synonym_id != @name.synonym_id
+        end
+      end
+
+      # De-synonymize any old synonyms in the "existing synonyms" list that
+      # have been unchecked.  This creates a new synonym to connect them if
+      # there are multiple unchecked names -- that is, it splits this
+      # synonym into two synonyms, with checked names staying in this one,
+      # and unchecked names moving to the new one.
+      check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
+
+      # Deprecate everything if that check-box has been marked.
+      success = true
+      if @deprecate_all
+        for n in sorter.all_names
+          unless deprecate_synonym(n)
+            # Already flashed error message.
+            success = false
           end
         end
+      end
 
-        @list_members     = sorter.all_line_strs.join("\r\n")
-        @new_names        = sorter.new_name_strs.uniq
-        @synonym_name_ids = sorter.all_synonyms.map(&:id)
-        @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.reject(&:nil?)
+      if success
+        redirect_with_query(action: "show_name", id: @name.id)
+      else
+        flash_object_errors(@name)
+        flash_object_errors(@name.synonym)
       end
     end
+
+    @list_members     = sorter.all_line_strs.join("\r\n")
+    @new_names        = sorter.new_name_strs.uniq
+    @synonym_name_ids = sorter.all_synonyms.map(&:id)
+    @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.reject(&:nil?)
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
@@ -1045,77 +733,71 @@ class NameController < ApplicationController
     pass_query_params
 
     # These parameters aren't always provided.
-    params[:proposed] ||= {}
-    params[:comment] ||= {}
+    params[:proposed]    ||= {}
+    params[:comment]     ||= {}
     params[:chosen_name] ||= {}
-    params[:is] ||= {}
+    params[:is]          ||= {}
 
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      @what    = begin
-                   params[:proposed][:name].to_s.strip_squeeze
-                 rescue
-                   ""
-                 end
-      @comment = begin
-                   params[:comment][:comment].to_s.strip_squeeze
-                 rescue
-                   ""
-                 end
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
+    return if abort_if_name_locked!(@name)
 
-      @list_members     = nil
-      @new_names        = []
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = "1"
-      @names            = []
-      @misspelling      = (params[:is][:misspelling] == "1")
+    @what             = params[:proposed][:name].to_s.strip_squeeze
+    @comment          = params[:comment][:comment].to_s.strip_squeeze
+    @list_members     = nil
+    @new_names        = []
+    @synonym_name_ids = []
+    @synonym_names    = []
+    @deprecate_all    = "1"
+    @names            = []
+    @misspelling      = (params[:is][:misspelling] == "1")
 
-      if request.method == "POST"
-        if @what.blank?
-          flash_error :runtime_name_deprecate_must_choose.t
+    post_deprecate_name if request.method == "POST"
+  end
 
-        else
-          # Find the chosen preferred name.
-          if params[:chosen_name][:name_id] &&
-             name = Name.safe_find(params[:chosen_name][:name_id])
-            @names = [name]
-          else
-            @names = Name.find_names_filling_in_authors(@what)
-          end
-          approved_name = params[:approved_name].to_s.strip_squeeze
-          if @names.empty? &&
-             (new_name = Name.create_needed_names(approved_name, @what))
-            @names = [new_name]
-          end
-          target_name = @names.first
+  def post_deprecate_name
+    if @what.blank?
+      flash_error :runtime_name_deprecate_must_choose.t
+      return
+    end
 
-          # No matches: try to guess.
-          if @names.empty?
-            @valid_names = Name.suggest_alternate_spellings(@what)
-            @suggest_corrections = true
+    # Find the chosen preferred name.
+    if params[:chosen_name][:name_id] &&
+       name = Name.safe_find(params[:chosen_name][:name_id])
+      @names = [name]
+    else
+      @names = Name.find_names_filling_in_authors(@what)
+    end
+    approved_name = params[:approved_name].to_s.strip_squeeze
+    if @names.empty? &&
+       (new_name = Name.create_needed_names(approved_name, @what))
+      @names = [new_name]
+    end
+    target_name = @names.first
 
-          # If written-in name matches uniquely an existing name:
-          elsif target_name && @names.length == 1
-            now = Time.now
+    # No matches: try to guess.
+    if @names.empty?
+      @valid_names = Name.suggest_alternate_spellings(@what)
+      @suggest_corrections = true
 
-            # Merge this name's synonyms with the preferred name's synonyms.
-            @name.merge_synonyms(target_name)
+    # If written-in name matches uniquely an existing name:
+    elsif target_name && @names.length == 1
+      now = Time.now
 
-            # Change target name to "undeprecated".
-            target_name.change_deprecated(false)
-            target_name.save_with_log(:log_name_approved, other: @name.real_search_name)
+      # Merge this name's synonyms with the preferred name's synonyms.
+      @name.merge_synonyms(target_name)
 
-            # Change this name to "deprecated", set correct spelling, add note.
-            @name.change_deprecated(true)
-            @name.mark_misspelled(target_name) if @misspelling
-            @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
-            post_comment(:deprecate, @name, @comment) unless @comment.blank?
+      # Change target name to "undeprecated".
+      target_name.change_deprecated(false)
+      target_name.save_with_log(:log_name_approved, other: @name.real_search_name)
 
-            redirect_with_query(action: "show_name", id: @name.id)
-          end
+      # Change this name to "deprecated", set correct spelling, add note.
+      @name.change_deprecated(true)
+      @name.mark_misspelled(target_name) if @misspelling
+      @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
+      post_comment(:deprecate, @name, @comment) unless @comment.blank?
 
-        end # @what
-      end # "POST"
+      redirect_with_query(action: "show_name", id: @name.id)
     end
   end
 
@@ -1123,57 +805,63 @@ class NameController < ApplicationController
   # name, possibly deprecating its synonyms at the same time.
   def approve_name # :prefetch: :norobots:
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      @approved_names = @name.approved_synonyms
-      comment = begin
-                  params[:comment][:comment]
-                rescue
-                  ""
-                end
-      comment = comment.strip_squeeze
-      if request.method == "POST"
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
+    return if abort_if_name_locked!(@name)
+    @approved_names = @name.approved_synonyms
+    return unless request.method == "POST"
+    deprecate_others
+    approve_this_one
+    post_approval_comment
+    redirect_with_query(@name.show_link_args)
+  end
 
-        # Deprecate others first.
-        others = []
-        if params[:deprecate][:others] == "1"
-          for n in @name.approved_synonyms
-            n.change_deprecated(true)
-            n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
-            others << n.real_search_name
-          end
-        end
+  def abort_if_name_locked!(name)
+    return false if !name.locked || in_admin_mode?
+    flash_error(:permission_denied.t)
+    redirect_back_or_default("/")
+  end
 
-        # Approve this now.
-        @name.change_deprecated(false)
-        tag = :log_approved_by
-        args = {}
-        if others != []
-          tag = :log_name_approved
-          args[:other] = others.join(", ")
-        end
-        @name.save_with_log(tag, args)
-        post_comment(:approve, @name, comment) unless comment.blank?
-
-        redirect_with_query(action: "show_name", id: @name.id)
-      end
+  def deprecate_others
+    return unless params[:deprecate] && params[:deprecate][:others] == "1"
+    @others = []
+    @name.approved_synonyms.each do |n|
+      n.change_deprecated(true)
+      n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
+      @others << n.real_search_name
     end
+  end
+
+  def approve_this_one
+    @name.change_deprecated(false)
+    tag = :log_approved_by
+    args = {}
+    if @others.any?
+      tag = :log_name_approved
+      args[:other] = @others.join(", ")
+    end
+    @name.save_with_log(tag, args)
+  end
+
+  def post_approval_comment
+    return unless params[:comment]
+    comment = params[:comment][:comment]
+    return unless comment.present?
+    post_comment(:approve, @name, comment.strip_squeeze)
   end
 
   # Helper used by change_synonyms.  Deprecates a single name.  Returns true
   # if it worked.  Flashes an error and returns false if it fails for whatever
   # reason.
   def deprecate_synonym(name)
-    result = true
-    unless name.deprecated
-      begin
-        name.change_deprecated(true)
-        result = name.save_with_log(:log_deprecated_by)
-      rescue RuntimeError => err
-        flash_error(err.to_s) unless err.blank?
-        result = false
-      end
+    return true if name.deprecated
+    begin
+      name.change_deprecated(true)
+      name.save_with_log(:log_deprecated_by)
+    rescue RuntimeError => err
+      flash_error(err.to_s) unless err.blank?
+      false
     end
-    result
   end
 
   # If changing the synonyms of a name that already has synonyms, the user is
