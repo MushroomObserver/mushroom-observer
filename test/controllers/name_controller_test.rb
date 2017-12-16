@@ -2525,7 +2525,7 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(Name.find_by(search_name: new_name_str))
     synonym_name = names(:macrolepiota_rachodes)
     refute(synonym_name.deprecated)
-    target_synonym_id = synonym_name.synonym_id
+    target_synonym = synonym_name.synonym
     assert(target_synonym)
     params = {
       list: { members: "#{new_name_str} = #{synonym_name.search_name}" },
@@ -2540,7 +2540,7 @@ class NameControllerTest < FunctionalTestCase
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym_id)
     assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
-    assert_equal(target_synonym_id, approved_name.synonym_id)
+    assert_equal(target_synonym, approved_name.synonym)
   end
 
   # Test a bug fix for the case of adding a subtaxon
@@ -3227,7 +3227,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_equal(selected_version, selected_name.reload.version)
     refute(selected_name.deprecated)
-    assert_nil(selected_name.synonym_id)
+    assert_nil(selected_name.synonym)
 
     assert(split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
