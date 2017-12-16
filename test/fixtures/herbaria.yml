@@ -33,3 +33,11 @@ mycoflora_herbarium: # 4
     created_at: 2017-11-29 18:05:00
     updated_at: 2017-11-29 18:05:00
     name: "Mycoflora Project"
+
+field_museum: # 5
+    created_at: 2017-12-16 11:15:00
+    updated_at: 2017-12-16 11:15:00
+    name: The Field Museum
+    mailing_address: 1400 S. Lake Shore Drive, Chicago, IL, 60605-2496, USA
+    code: F
+    curators: rolf, thorsten

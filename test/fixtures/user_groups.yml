@@ -44,3 +44,6 @@ spammer_only: # 13
 
 article_writers: # 14
   name: article writers
+
+thorsten_only: # 15
+  name: user <%= ActiveRecord::FixtureSet.identify(:thorsten) %>

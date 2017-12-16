@@ -55,3 +55,11 @@ mycoflora_record: # 6
     user: mary
     initial_det: Fungi
     accession_number: 314159
+
+field_museum_record: # 7
+    created_at: 2017-12-16 11:20:00
+    updated_at: 2017-12-16 11:20:00
+    herbarium: field_museum
+    user: thorsten
+    initial_det: Lichen
+    accession_number: 271828
