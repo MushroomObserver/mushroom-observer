@@ -231,7 +231,7 @@ class HerbariumRecordController < ApplicationController
   def can_add_record_to_herbarium?
     return true if @observation && @observation.can_edit?
     return true if @herbarium_record.observations.any?(&:can_edit?)
-    return true if @herbarium_record.herbarium.is_curator?(@user)
+    return true if @herbarium_record.herbarium.curator?(@user)
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
     redirect_to_observation_or_herbarium_record
     false

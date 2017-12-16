@@ -74,7 +74,7 @@ class HerbariumController < ApplicationController
     @canonical_url = Herbarium.show_url(params[:id])
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return if request.method != "POST"
-    return if !@user || !@herbarium.is_curator?(@user) && !in_admin_mode?
+    return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
     login = params[:add_curator].to_s.sub(/ <.*/, "")
     user = User.find_by_login(login)
     if user
@@ -222,9 +222,9 @@ class HerbariumController < ApplicationController
     herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless herbarium
     user = User.safe_find(params[:user])
-    if !herbarium.is_curator?(@user) && !in_admin_mode?
+    if !herbarium.curator?(@user) && !in_admin_mode?
       flash_error(:permission_denied.t)
-    elsif user && herbarium.is_curator?(user)
+    elsif user && herbarium.curator?(user)
       herbarium.delete_curator(user)
     end
     redirect_back_or_default(herbarium.show_link_args)

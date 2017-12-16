@@ -27,7 +27,7 @@
         <td>
           <%= link_to(herbarium.name.blank? ? content_tag(:i, "n/a") : herbarium.name.t,
                       herbarium.show_link_args) %>
-          <% if herbarium.is_curator?(@user) || in_admin_mode? %>
+          <% if herbarium.curator?(@user) || in_admin_mode? %>
             [<%= link_to(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %>]
           <% end %>
         </td>
@@ -54,7 +54,7 @@
         <td>
           <%= link_to(herbarium.name.blank? ? content_tag(:i, "n/a") : herbarium.name.t,
                       herbarium.show_link_args) %>
-          <% if herbarium.is_curator?(@user) || in_admin_mode? %>
+          <% if herbarium.curator?(@user) || in_admin_mode? %>
             [<%= link_to(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %>]
           <% end %>
         </td>

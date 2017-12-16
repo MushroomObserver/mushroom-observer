@@ -68,7 +68,7 @@ class HerbariumRecord < AbstractModel
 
   # Can a given user edit this HerbariumRecord?
   def can_edit?(user = User.current)
-    self.user == user || herbarium.is_curator?(user)
+    self.user == user || herbarium.curator?(user)
   end
 
   # Add this HerbariumRecord to an Observation, log the action, and save it.
