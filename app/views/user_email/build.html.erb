@@ -1,17 +1,17 @@
 <%
   intro = :email_user_question_intro.l(
-    :user  => @sender.legal_name,
-    :email => @sender.email
+    user:  @sender.legal_name,
+    email: @sender.email
   )
 
   handy_links = :email_can_respond.l(
-    :name  => @sender.legal_name,
-    :email => @sender.email
+    name:  @sender.legal_name,
+    email: @sender.email
   )
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  links.push([:email_links_show_object.t(:type => :user),
+  links.push([:email_links_show_object.t(type: :user),
     "#{MO.http_domain}/observer/show_user/#{@sender.id}"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email_general_question/#{@user.id}"])
@@ -20,7 +20,7 @@
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
+  report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>
@@ -50,7 +50,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

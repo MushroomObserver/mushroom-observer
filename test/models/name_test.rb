@@ -2444,17 +2444,6 @@ class NameTest < UnitTestCase
     assert_false(names(:fungi).imageless?)
   end
 
-  def test_changeable?
-    name = names(:other_user_owns_naming_name)
-    refute(name.changeable?(name.user))
-
-    name = names(:other_user_owns_observation)
-    refute(name.changeable?(name.user))
-
-    name = names(:same_user_owns_naming_and_observation)
-    assert(name.changeable?(name.user))
-  end
-
   def test_names_matching_desired_new_name
     # Prove unauthored ParseName matches are all extant matches to text_name
     # Such as multiple authored Names
@@ -2571,7 +2560,7 @@ class NameTest < UnitTestCase
     assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
     assert_nil(bad.correct_spelling)
     assert_nil(good.correct_spelling)
-    assert_not_nil(good.synonym)
+    assert_not_nil(good.synonym_id)
     assert_objs_equal(good.synonym, bad.synonym)
   end
 

@@ -20,9 +20,9 @@ xml.tag!(tag,
       xml_minimal_object(xml, :synonym, Synonym, object.synonym_id)
     end
   else
-    if object.synonym
-      xml.synonyms(:number => object.synonym.names.length - 1) do
-        for synonym in object.synonym.names - [object]
+    if object.synonym_id
+      xml.synonyms(number: object.synonyms.length - 1) do
+        for synonym in object.synonyms - [object]
           xml_detailed_object(xml, :synonym, synonym)
         end
       end
@@ -30,7 +30,7 @@ xml.tag!(tag,
     unless object.classification.blank?
       # This is less complete but doesn't require any additional queries.
       parse = Name.parse_classification(object.classification)
-      xml.parents(:number => parse.length) do
+      xml.parents(number: parse.length) do
         for rank, name in parse
           xml.parent do
             xml_string(xml, :name, name)
@@ -40,7 +40,7 @@ xml.tag!(tag,
       end
       # This requires extra database queries.
       # all_parents = object.all_parents
-      # xml.parents(:number => all_parents.length) do
+      # xml.parents(number: all_parents.length) do
       #   for parent in all_parents
       #     xml_detailed_object(xml, :parent, parent)
       #   end

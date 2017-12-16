@@ -1,5 +1,5 @@
-xml.instruct!(:xml, :version => '1.0')
-xml.response(:xmlns => "#{MO.http_domain}/response.xsd") do
+xml.instruct!(:xml, version: "1.0")
+xml.response(xmlns: "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
   if @api.user
@@ -14,7 +14,7 @@ xml.response(:xmlns => "#{MO.http_domain}/response.xsd") do
       xml_integer(xml, :page_number, @api.page_number)
     end
 
-    xml.results(:number => @api.result_ids.length) do
+    xml.results(number: @api.result_ids.length) do
       if @api.detail == :none
         for result_id in @api.result_ids
           xml_minimal_object(xml, :result, @api.model, result_id)
@@ -28,13 +28,13 @@ xml.response(:xmlns => "#{MO.http_domain}/response.xsd") do
   end
 
   if @api.errors.length > 0
-    xml.errors(:number => @api.errors.length) do
+    xml.errors(number: @api.errors.length) do
       i = 1
       for error in @api.errors
-        xml.error(:id => i) do
+        xml.error(id: i) do
           xml.code    error.class.name
           xml.details error.to_s
-          xml.fatal   error.fatal ? 'true' : 'false'
+          xml.fatal   error.fatal ? "true" : "false"
           unless Rails.env == "production" || !error.backtrace
             xml.trace   error.backtrace.join("\n")
           end

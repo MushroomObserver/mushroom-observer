@@ -1331,6 +1331,7 @@
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
   # location/_form_location
+  form_locations_locked: "Lock this location so users cannot change the name or coordinates?"
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
   form_locations_species: Interesting Species
@@ -1348,6 +1349,7 @@
   form_locations_dubious_help: Submit again to use this location name or edit the text below to correct any typo.
 
   # observer/_form_name
+  form_names_locked: "Lock this name so users cannot change name, author or rank?"
   form_names_text_name: Scientific Name
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
@@ -1362,9 +1364,7 @@
   form_names_notes: Notes
   form_names_refs: References
   form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
-  form_names_text_name_locked: Name is in use.  Make name changes in each observation.
   form_names_author_help: "Include the author using <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
-  form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
@@ -1844,6 +1844,7 @@
   show_location_editor: "[:Editors]"
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
+  show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
 
   # name/show_name
   show_name_title: "[:NAME]: [name]"
@@ -1894,6 +1895,7 @@
   show_name_see_more: See More
   show_name_on_mycoportal: on MyCoPortal
   show_name_on_mycobank: on MycoBank
+  show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"

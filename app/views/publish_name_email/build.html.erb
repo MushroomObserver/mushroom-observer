@@ -8,7 +8,7 @@
   handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.t(:type => :name),
+  links.push([:email_links_show_object.t(type: :name),
     "#{MO.http_domain}/name/show_name/#{@name.id}"])
   links.push([:email_links_email_publisher.t,
     "#{MO.http_domain}/observer/show_user/#{@publisher.id}"])
@@ -38,7 +38,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

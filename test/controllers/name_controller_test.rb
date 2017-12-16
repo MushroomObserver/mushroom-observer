@@ -173,6 +173,12 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
+  def assert_email_generated
+    assert_not_empty(@@emails, "Was expecting an email notification.")
+  ensure
+    @@emails = []
+  end
+
   def assert_no_emails
     msg = @@emails.join("\n")
     assert(@@emails.empty?,
@@ -264,6 +270,41 @@ class NameControllerTest < FunctionalTestCase
       assert_select("a[href *= '/Coprinus%20comatus']")
       assert_select("a[href *= 'Lang=Eng']")
     end
+  end
+
+  def test_show_name_locked
+    name = Name.where(locked: true).first
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    login("rolf")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    make_admin("mary")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 1)
+    assert_select("a[href*=change_synonyms]", count: 1)
+
+    name.update_columns(deprecated: true)
+    logout
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    login("rolf")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    make_admin("mary")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 1)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 1)
   end
 
   def test_show_past_name
@@ -1134,8 +1175,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
-    # creates Lactarius since it's not in fixtures
+    assert_email_generated
     assert(Name.exists?(text_name: "Lactarius"))
     # points for changing Lactarius alpigenes
     assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
@@ -1186,7 +1226,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: name.id)
     assert_flash_success
     assert_empty(name.reload.author)
-    assert_no_emails
+    assert_email_generated
   end
 
   def test_edit_name_misspelling
@@ -1398,7 +1438,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_flash_success
     assert_redirected_to(action: :show_name, id: name.id)
-    assert_no_emails
+    assert_email_generated
     name.reload
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
@@ -1531,6 +1571,59 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(name_count + 2, Name.count)
     assert(Name.exists?(text_name: new_species), "Failed to create new species")
     assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
+  end
+
+  def test_post_edit_name_locked
+    name = names(:fungi)
+    params = {
+      id: name.id,
+      name: {
+        locked:     "0",
+        rank:       "Genus",
+        deprecated: "true",
+        text_name:  "Foo",
+        author:     "Bar",
+        citation:   "new citation",
+        notes:      "new notes"
+      }
+    }
+
+    login("rolf")
+    get(:edit_name, id: name.id)
+    assert_select("select#name_rank", count: 0)
+    assert_select("select#name_deprecated", count: 0)
+    assert_select("input[type=text]#name_text_name", count: 0)
+    assert_select("input[type=text]#name_author", count: 0)
+    assert_select("input[type=checkbox]#name_misspelling", count: 0)
+    assert_select("input[type=text]#name_correct_spelling", count: 0)
+
+    post(:edit_name, params)
+    name.reload
+    assert_true(name.locked)
+    assert_equal(:Kingdom, name.rank)
+    assert_false(name.deprecated)
+    assert_equal("Fungi", name.text_name)
+    assert_equal("", name.author)
+    assert_nil(name.correct_spelling_id)
+    assert_equal("new citation", name.citation)
+    assert_equal("new notes", name.notes)
+
+    make_admin("mary")
+    get(:edit_name, id: name.id)
+    assert_select("select#name_rank", count: 1)
+    assert_select("select#name_deprecated", count: 1)
+    assert_select("input[type=text]#name_text_name", count: 1)
+    assert_select("input[type=text]#name_author", count: 1)
+    assert_select("input[type=checkbox]#name_misspelling", count: 1)
+    assert_select("input[type=text]#name_correct_spelling", count: 1)
+
+    post(:edit_name, params)
+    name.reload
+    assert_false(name.locked)
+    assert_equal(:Genus, name.rank)
+    assert_true(name.deprecated)
+    assert_equal("Foo", name.text_name)
+    assert_equal("Bar", name.author)
   end
 
   # ----------------------------
@@ -2356,14 +2449,14 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("__#{new_synonym_str}__", synonym_name.display_name)
     assert(synonym_name.deprecated)
     assert_equal(:Species, synonym_name.rank)
-    assert_not_nil(new_name.synonym)
-    assert_equal(new_name.synonym, synonym_name.synonym)
+    assert_not_nil(new_name.synonym_id)
+    assert_equal(new_name.synonym_id, synonym_name.synonym_id)
   end
 
   def test_update_bulk_names_ee_synonym
     approved_name = names(:chlorophyllum_rachodes)
     synonym_name = names(:macrolepiota_rachodes)
-    assert_not_equal(approved_name.synonym, synonym_name.synonym)
+    assert_not_equal(approved_name.synonym_id, synonym_name.synonym_id)
     refute(synonym_name.deprecated)
     params = {
       list: {
@@ -2375,17 +2468,17 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: "list_rss_logs")
     refute(approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
-    assert_not_nil(approved_name.synonym)
-    assert_equal(approved_name.synonym, synonym_name.synonym)
+    assert_not_nil(approved_name.synonym_id)
+    assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
   end
 
   def test_update_bulk_names_eee_synonym
     approved_name = names(:lepiota_rachodes)
     synonym_name  = names(:lepiota_rhacodes)
     synonym_name2 = names(:chlorophyllum_rachodes)
-    assert_nil(approved_name.synonym)
-    assert_nil(synonym_name.synonym)
-    assert_not_nil(synonym_name2.synonym)
+    assert_nil(approved_name.synonym_id)
+    assert_nil(synonym_name.synonym_id)
+    assert_not_nil(synonym_name2.synonym_id)
     refute(approved_name.deprecated)
     refute(synonym_name.deprecated)
     refute(synonym_name2.deprecated)
@@ -2400,15 +2493,15 @@ class NameControllerTest < FunctionalTestCase
     refute(approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
     assert(synonym_name2.reload.deprecated)
-    assert_not_nil(approved_name.synonym)
-    assert_equal(approved_name.synonym, synonym_name.synonym)
-    assert_equal(approved_name.synonym, synonym_name2.synonym)
+    assert_not_nil(approved_name.synonym_id)
+    assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
+    assert_equal(approved_name.synonym_id, synonym_name2.synonym_id)
   end
 
   def test_update_bulk_names_en_synonym
     approved_name = names(:chlorophyllum_rachodes)
-    target_synonym = approved_name.synonym
-    assert(target_synonym)
+    target_synonym_id = approved_name.synonym_id
+    assert_not_nil(target_synonym_id)
     new_synonym_str = "New name Wilson"
     assert_nil(Name.find_by(search_name: new_synonym_str))
     params = {
@@ -2422,9 +2515,9 @@ class NameControllerTest < FunctionalTestCase
     assert(synonym_name = Name.find_by(search_name: new_synonym_str))
     assert(synonym_name.deprecated)
     assert_equal(:Species, synonym_name.rank)
-    assert_not_nil(approved_name.synonym)
-    assert_equal(approved_name.synonym, synonym_name.synonym)
-    assert_equal(target_synonym, approved_name.synonym)
+    assert_not_nil(approved_name.synonym_id)
+    assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
+    assert_equal(target_synonym_id, approved_name.synonym_id)
   end
 
   def test_update_bulk_names_ne_synonym
@@ -2445,8 +2538,8 @@ class NameControllerTest < FunctionalTestCase
     refute(approved_name.deprecated)
     assert_equal(:Species, approved_name.rank)
     assert(synonym_name.reload.deprecated)
-    assert_not_nil(approved_name.synonym)
-    assert_equal(approved_name.synonym, synonym_name.synonym)
+    assert_not_nil(approved_name.synonym_id)
+    assert_equal(approved_name.synonym_id, synonym_name.synonym_id)
     assert_equal(target_synonym, approved_name.synonym)
   end
 
@@ -2478,14 +2571,14 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_1_1
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
     selected_past_name_count = selected_name.versions.length
     selected_version = selected_name.version
 
     add_name = names(:lepiota_rhacodes)
     refute(add_name.deprecated)
     assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
-    assert_nil(add_name.synonym)
+    assert_nil(add_name.synonym_id)
     add_past_name_count = add_name.versions.length
     add_name_version = add_name.version
 
@@ -2519,12 +2612,12 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_1_1_nd
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
     selected_version = selected_name.version
 
     add_name = names(:lepiota_rhacodes)
     refute(add_name.deprecated)
-    assert_nil(add_name.synonym)
+    assert_nil(add_name.synonym_id)
     add_version = add_name.version
 
     params = {
@@ -2551,7 +2644,7 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_1_0_na
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
 
     params = {
       id: selected_name.id,
@@ -2562,7 +2655,7 @@ class NameControllerTest < FunctionalTestCase
     post(:change_synonyms, params)
     assert_template(:change_synonyms, partial: "_form_synonyms")
 
-    assert_nil(selected_name.reload.synonym)
+    assert_nil(selected_name.reload.synonym_id)
     refute(selected_name.deprecated)
   end
 
@@ -2571,7 +2664,7 @@ class NameControllerTest < FunctionalTestCase
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
     selected_version = selected_name.version
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
 
     params = {
       id: selected_name.id,
@@ -2597,7 +2690,7 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_1_00_a
     page_name = names(:lepiota_rachodes)
     refute(page_name.deprecated)
-    assert_nil(page_name.synonym)
+    assert_nil(page_name.synonym_id)
 
     params = {
       id: page_name.id,
@@ -2629,7 +2722,7 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_n_1
     add_name = names(:lepiota_rachodes)
     refute(add_name.deprecated)
-    assert_nil(add_name.synonym)
+    assert_nil(add_name.synonym_id)
     add_version = add_name.version
 
     selected_name = names(:chlorophyllum_rachodes)
@@ -2668,7 +2761,7 @@ class NameControllerTest < FunctionalTestCase
     add_name = names(:lepiota_rachodes)
     refute(add_name.deprecated)
     add_version = add_name.version
-    assert_nil(add_name.synonym)
+    assert_nil(add_name.synonym_id)
 
     selected_name = names(:chlorophyllum_rachodes)
     refute(selected_name.deprecated)
@@ -2719,7 +2812,7 @@ class NameControllerTest < FunctionalTestCase
   def test_transfer_synonyms_n_1_nc
     add_name = names(:lepiota_rachodes)
     refute(add_name.deprecated)
-    assert_nil(add_name.synonym)
+    assert_nil(add_name.synonym_id)
     add_version = add_name.version
 
     selected_name = names(:chlorophyllum_rachodes)
@@ -2763,7 +2856,7 @@ class NameControllerTest < FunctionalTestCase
 
     refute(split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
-    assert_nil(split_name.synonym)
+    assert_nil(split_name.synonym_id)
 
     refute(names(:lepiota).reload.deprecated)
     refute(names(:chlorophyllum).reload.deprecated)
@@ -2782,7 +2875,7 @@ class NameControllerTest < FunctionalTestCase
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
     selected_version = selected_name.version
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
 
     params = {
       id: selected_name.id,
@@ -2821,7 +2914,7 @@ class NameControllerTest < FunctionalTestCase
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
     selected_version = selected_name.version
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
 
     synonym_ids = add_synonym.names.map(&:id).join("/")
     params = {
@@ -2863,7 +2956,7 @@ class NameControllerTest < FunctionalTestCase
     selected_name = names(:lepiota_rachodes)
     refute(selected_name.deprecated)
     selected_version = selected_name.version
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.synonym_id)
 
     synonym_names = add_synonym.names.map(&:search_name).join("\r\n")
     params = {
@@ -3046,7 +3139,7 @@ class NameControllerTest < FunctionalTestCase
 
     assert(split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
-    assert_nil(split_name.synonym)
+    assert_nil(split_name.synonym_id)
 
     assert(kept_name.deprecated)
     assert_equal(kept_version, kept_name.version)
@@ -3142,6 +3235,37 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(selected_start_size - 1, split_synonym.names.size)
   end
 
+  def test_change_synonyms_locked
+    name = Name.where(locked: true).first
+    name2 = names(:agaricus_campestris)
+    synonym = Synonym.create!
+    name.update_columns(synonym_id: synonym.id)
+    name2.update_columns(synonym_id: synonym.id)
+    existing_synonyms = {}
+    name.reload.synonyms.each do |n|
+      existing_synonyms[n.id.to_s] = "0"
+    end
+    params = {
+      id: name.id,
+      synonym: { members: "" },
+      existing_synonyms: existing_synonyms,
+      deprecate: { all: "" }
+    }
+
+    login("rolf")
+    get(:change_synonyms, id: name.id)
+    assert_response(:redirect)
+    post(:change_synonyms, params)
+    assert_flash_error
+    assert_not_nil(name.reload.synonym_id)
+
+    make_admin("mary")
+    get(:change_synonyms, id: name.id)
+    assert_response(:success)
+    post(:change_synonyms, params)
+    assert_nil(name.reload.synonym_id)
+  end
+
   # ----------------------------
   #  Deprecation.
   # ----------------------------
@@ -3150,14 +3274,14 @@ class NameControllerTest < FunctionalTestCase
   def test_do_deprecation
     old_name = names(:lepiota_rachodes)
     refute(old_name.deprecated)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
     old_version = old_name.version
 
     new_name = names(:chlorophyllum_rachodes)
     refute(new_name.deprecated)
-    assert_not_nil(new_name.synonym)
-    new_synonym_length = new_name.synonym.names.size
+    assert_not_nil(new_name.synonym_id)
+    new_synonym_length = new_name.synonyms.size
     new_past_name_count = new_name.versions.length
     new_version = new_name.version
 
@@ -3193,12 +3317,12 @@ class NameControllerTest < FunctionalTestCase
   def test_do_deprecation_ambiguous
     old_name = names(:lepiota_rachodes)
     refute(old_name.deprecated)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
 
     new_name = names(:amanita_baccata_arora) # Ambiguous text name
     refute(new_name.deprecated)
-    assert_nil(new_name.synonym)
+    assert_nil(new_name.synonym_id)
     new_past_name_count = new_name.versions.length
 
     comments = Comment.count
@@ -3215,11 +3339,11 @@ class NameControllerTest < FunctionalTestCase
 
     refute(old_name.reload.deprecated)
     assert_equal(old_past_name_count, old_name.versions.length)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
 
     refute(new_name.reload.deprecated)
     assert_equal(new_past_name_count, new_name.versions.length)
-    assert_nil(new_name.synonym)
+    assert_nil(new_name.synonym_id)
 
     assert_equal(comments, Comment.count)
   end
@@ -3229,12 +3353,12 @@ class NameControllerTest < FunctionalTestCase
   def test_do_deprecation_chosen
     old_name = names(:lepiota_rachodes)
     refute(old_name.deprecated)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
 
     new_name = names(:amanita_baccata_arora) # Ambiguous text name
     refute(new_name.deprecated)
-    assert_nil(new_name.synonym)
+    assert_nil(new_name.synonym_id)
     new_past_name_count = new_name.versions.length
 
     params = {
@@ -3263,7 +3387,7 @@ class NameControllerTest < FunctionalTestCase
   def test_do_deprecation_new_name
     old_name = names(:lepiota_rachodes)
     refute(old_name.deprecated)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
 
     new_name_str = "New name"
@@ -3280,7 +3404,7 @@ class NameControllerTest < FunctionalTestCase
 
     refute(old_name.reload.deprecated)
     assert_equal(old_past_name_count, old_name.versions.length)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
   end
 
   # deprecate an existing unique name with an ambiguous name,
@@ -3288,7 +3412,7 @@ class NameControllerTest < FunctionalTestCase
   def test_do_deprecation_approved_new_name
     old_name = names(:lepiota_rachodes)
     refute(old_name.deprecated)
-    assert_nil(old_name.synonym)
+    assert_nil(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
 
     new_name_str = "New name"
@@ -3316,6 +3440,32 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(2, new_synonym.names.size)
   end
 
+  def test_deprecate_name_locked
+    name = Name.where(locked: true).first
+    name2 = names(:agaricus_campestris)
+    name.change_deprecated(false)
+    name.save
+    params = {
+      id: name.id,
+      proposed: { name: name2.search_name },
+      approved_name: name2.search_name,
+      comment: { comment: "" }
+    }
+
+    login("rolf")
+    get(:deprecate_name, id: name.id)
+    assert_response(:redirect)
+    post(:deprecate_name, params)
+    assert_flash_error
+    assert_false(name.reload.deprecated)
+
+    make_admin("mary")
+    get(:deprecate_name, id: name.id)
+    assert_response(:success)
+    post(:deprecate_name, params)
+    assert_true(name.reload.deprecated)
+  end
+
   # ----------------------------
   #  Approval.
   # ----------------------------
@@ -3324,7 +3474,7 @@ class NameControllerTest < FunctionalTestCase
   def test_do_approval_default
     old_name = names(:lactarius_alpigenes)
     assert(old_name.deprecated)
-    assert(old_name.synonym)
+    assert(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
     old_version = old_name.version
     approved_synonyms = old_name.approved_synonyms
@@ -3355,7 +3505,7 @@ class NameControllerTest < FunctionalTestCase
   def test_do_approval_no_deprecate
     old_name = names(:lactarius_alpigenes)
     assert(old_name.deprecated)
-    assert(old_name.synonym)
+    assert(old_name.synonym_id)
     old_past_name_count = old_name.versions.length
     approved_synonyms = old_name.approved_synonyms
 
@@ -3376,6 +3526,30 @@ class NameControllerTest < FunctionalTestCase
 
     approved_synonyms.each { |n| refute(n.reload.deprecated) }
     assert_equal(comments, Comment.count)
+  end
+
+  def test_approve_name_locked
+    name = Name.where(locked: true).first
+    name.change_deprecated(true)
+    name.save
+    params = {
+      id: name.id,
+      deprecate: { others: "0" },
+      comment: { comment: "" }
+    }
+
+    login("rolf")
+    get(:approve_name, id: name.id)
+    assert_response(:redirect)
+    post(:approve_name, params)
+    assert_flash_error
+    assert_true(name.reload.deprecated)
+
+    make_admin("mary")
+    get(:approve_name, id: name.id)
+    assert_response(:success)
+    post(:approve_name, params)
+    assert_false(name.reload.deprecated)
   end
 
   # ----------------------------

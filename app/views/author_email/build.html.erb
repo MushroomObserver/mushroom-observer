@@ -2,9 +2,9 @@
   type = @object.type_tag
 
   intro = :email_author_request_intro.l(
-    :user => @sender.legal_name,
-    :email => @sender.email,
-    :object => @object.parent.unique_format_name
+    user: @sender.legal_name,
+    email: @sender.email,
+    object: @object.parent.unique_format_name
   )
 
   handy_links = :email_handy_links.l
@@ -17,7 +17,7 @@
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
+  report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>
@@ -49,7 +49,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

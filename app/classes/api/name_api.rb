@@ -247,7 +247,7 @@ class API
 
     def add_synonym(name)
       return unless @synonymize_with
-      raise CanOnlySynonymizeUnsynonimizedNames.new if name.synonym
+      raise CanOnlySynonymizeUnsynonimizedNames.new if name.synonym_id
       name.merge_synonyms(@synonymize_with)
     end
 

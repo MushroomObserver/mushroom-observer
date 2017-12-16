@@ -834,7 +834,7 @@ class Observation < AbstractModel
 
     # If not, it means that a deprecated Synonym won.  Look up all Namings
     # for Synonyms of the consensus Name.
-    if matches == [] && name && name.synonym
+    if matches == [] && name && name.synonym_id
       synonyms = name.synonyms
       matches = namings.select { |n| synonyms.include?(n.name) }
     end
@@ -914,7 +914,7 @@ class Observation < AbstractModel
         # not all taxa have synonyms, I've got to create a "fake" id that
         # uses the synonym id if it exists, else uses the name id, but still
         # keeps them separate.)
-        taxon_id = if naming.name.synonym
+        taxon_id = if naming.name.synonym_id
                      "s" + naming.name.synonym_id.to_s
                    else
                      "n" + name_id.to_s
@@ -1009,7 +1009,7 @@ class Observation < AbstractModel
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
-    if best && best.synonym
+    if best && best.synonym_id
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms

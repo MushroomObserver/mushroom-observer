@@ -1,8 +1,8 @@
-xml.instruct! :xml, :version=>"1.0" 
-xml.rss(:version=>"2.0") {
+xml.instruct! :xml, version: "1.0" 
+xml.rss(version: "2.0") {
   xml.channel {
     xml.title(:rss_title.l)
-    xml.link(MO.http_domain + '/observer/list_rss_logs')
+    xml.link(MO.http_domain + "/observer/list_rss_logs")
     xml.description(:rss_description.l)
     xml.language(I18n.locale.to_s)
     for log in @logs
@@ -15,7 +15,7 @@ xml.rss(:version=>"2.0") {
         )
         xml.pubDate(log.updated_at.rfc2822)
         xml.link(MO.http_domain + log.url)
-        xml.guid(MO.http_domain + log.url, "isPermaLink" => "false")
+        xml.guid(MO.http_domain + log.url, isPermaLink: "false")
       end
     end
   }

@@ -202,7 +202,7 @@ module GeneralExtensions
 
   # Compare two lists of Name's by comparing their search_names.
   #
-  #   assert_name_list_equal([old_name,new_name], old_name.synonym.names)
+  #   assert_name_list_equal([old_name,new_name], old_name.synonyms)
   #
   def assert_name_list_equal(expect, got, *args)
     assert_list_equal(expect, got, *args, &:search_name)

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171209004800) do
+ActiveRecord::Schema.define(version: 20171214133000) do
 
   create_table "api_keys", force: :cascade do |t|
     t.datetime "created_at"
@@ -201,7 +201,6 @@ ActiveRecord::Schema.define(version: 20171209004800) do
     t.string  "order",    limit: 100
     t.boolean "official",             null: false
     t.boolean "beta",                 null: false
-    t.string  "region",   limit: 4
   end
 
   create_table "licenses", force: :cascade do |t|
@@ -289,10 +288,11 @@ ActiveRecord::Schema.define(version: 20171209004800) do
     t.float    "east",            limit: 24
     t.float    "high",            limit: 24
     t.float    "low",             limit: 24
-    t.boolean  "ok_for_export",                 default: true, null: false
+    t.boolean  "ok_for_export",                 default: true,  null: false
     t.text     "notes",           limit: 65535
     t.string   "name",            limit: 1024
     t.string   "scientific_name", limit: 1024
+    t.boolean  "locked",                        default: false, null: false
   end
 
   create_table "locations_versions", force: :cascade do |t|
@@ -407,6 +407,7 @@ ActiveRecord::Schema.define(version: 20171209004800) do
     t.boolean  "ok_for_export",                     default: true,  null: false
     t.string   "author",              limit: 100
     t.string   "lifeform",            limit: 1024,  default: " ",   null: false
+    t.boolean  "locked",                            default: false, null: false
   end
 
   create_table "names_versions", force: :cascade do |t|

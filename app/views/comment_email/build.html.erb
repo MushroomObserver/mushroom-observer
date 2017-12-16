@@ -33,13 +33,13 @@
   # print "response = #{is_response}\n"
 
   watching = @user.watching?(@target)
-  email_type = is_response ? 'response' :
-               is_owner    ? 'owner'    : 'all'
+  email_type = is_response ? "response" :
+               is_owner    ? "owner"    : "all"
 
   intro = is_owner ?    :email_comment_intro_to_owner :
           is_response ? :email_comment_intro_response :
                         :email_comment_intro_other
-  intro = intro.l(:type => type_sym, :name => @target.unique_format_name)
+  intro = intro.l(type: type_sym, name: @target.unique_format_name)
 
   fields = ""
   fields += "*#{:Created.l}:* #{@comment.created_at.email_time}\n"
@@ -50,16 +50,16 @@
   # Only give the owner of the object being commented on access to the email
   # address of the user who commented on it.
   handy_links = is_owner ?
-    :email_can_respond.l(:name => @comment.user.legal_name, :email => @comment.user.email) :
+    :email_can_respond.l(name: @comment.user.legal_name, email: @comment.user.email) :
     "*#{:email_no_respond.l}* #{:email_respond_via_comment.l}"
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  links.push([:email_links_show_object.t(:type => type_sym),
+  links.push([:email_links_show_object.t(type: type_sym),
     "#{MO.http_domain}/#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
   links.push([:email_links_post_comment.t,
     "#{MO.http_domain}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}"])
-  links.push([:email_links_not_interested.t(:type => type_sym),
+  links.push([:email_links_not_interested.t(type: type_sym),
     "#{MO.http_domain}/interest/set_interest?id=#{@comment.target_id}&type=#{@comment.target_type}&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
@@ -68,7 +68,7 @@
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
+  report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>
@@ -102,7 +102,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

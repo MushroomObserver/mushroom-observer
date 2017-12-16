@@ -1,75 +1,68 @@
-<!--[form:observation]-->
+<!--[form:synonyms]-->
 <div class="row">
   <div class="col-sm-6">
-    <% synonym = @name.synonym
-       names = []
-       if synonym
-         names = synonym.names %>
-        <div class="form-group">
-          <label><%= :form_synonyms_current_synonyms.t %>:</label>
-
-          <p class="help-block"><%= :form_synonyms_current_synonyms_help.t %></p>
-          <% names.each do |n| %>
-              <% if n != @name %>
-                  <%= check_box("existing_synonyms", n.id, {checked: '1'}, '1') %>
-                  <%= content_tag(:label, :for => "existing_synonyms_#{n.id}") do
-                    link_to(n.display_name.t, :action => 'show_name', :id => n.id)
-                  end %>
-                  <br/>
-              <% end %>
+    <% names = @name.synonyms
+    if names.count > 1 %>
+      <div class="form-group">
+        <label><%= :form_synonyms_current_synonyms.t %>:</label>
+        <p class="help-block"><%= :form_synonyms_current_synonyms_help.t %></p>
+        <% names.each do |n| %>
+          <% if n != @name %>
+            <%= check_box(:existing_synonyms, n.id, {checked: "1"}, "1") %>
+            <%= content_tag(:label, for: "existing_synonyms_#{n.id}") do
+              link_to(n.display_name.t, action: :show_name, id: n.id)
+            end %><br/>
           <% end %>
-        </div>
+        <% end %>
+      </div>
     <% end %>
 
     <% if @synonym_names && @synonym_names != [] %>
-        <% if synonym %>
-            <hr/>
-        <% end %>
-        <div class="form-group">
-          <label><%= :form_synonyms_proposed_synonyms.t %>:</label>
-
-          <p class="help-block"><%= :form_synonyms_proposed_synonyms_help.t %></p>
+      <% if names.count > 1 %>
+        <hr/>
+      <% end %>
+      <div class="form-group">
+        <label><%= :form_synonyms_proposed_synonyms.t %>:</label>
+        <p class="help-block"><%= :form_synonyms_proposed_synonyms_help.t %></p>
         <span class="Data">
-          <% for name in @synonym_names %>
-            <% if not names.member?(name) %>
-              <%= check_box("proposed_synonyms", name.id, {checked: '1'}, '1') %>
-                  <%= content_tag(:label, :for => "proposed_synonyms_#{name.id}") do
-                    link_to(name.display_name.t, :action => 'show_name', :id => name.id)
-                  end %>
-                  <br/>
+          <% @synonym_names.each do |name| %>
+            <% unless names.member?(name) %>
+              <%= check_box(:proposed_synonyms, name.id, {checked: "1"}, "1") %>
+              <%= content_tag(:label, for: "proposed_synonyms_#{name.id}") do
+                link_to(name.display_name.t, action: :show_name, id: name.id)
+              end %><br/>
             <% end %>
           <% end %>
         </span>
-        </div>
+      </div>
     <% end %>
   </div>
 
   <div class="col-sm-6">
     <% if @new_names && (@new_names != []) %>
-        <div class="alert alert-danger">
-          <%= :form_synonyms_missing_names.t %><br/>
-            <span class="indent">
-                <% @new_names.each do |n| %>
-                <%= h(n) %><br/>
-                <% end %>
-            </span>
-          <span class="HelpNote"><%= :form_synonyms_missing_names_help.t %></span>
-        </div>
+      <div class="alert alert-danger">
+        <%= :form_synonyms_missing_names.t %><br/>
+          <span class="indent">
+            <% @new_names.each do |n| %>
+            <%= h(n) %><br/>
+            <% end %>
+          </span>
+        <span class="HelpNote"><%= :form_synonyms_missing_names_help.t %></span>
+      </div>
     <% end %>
 
     <div class="form-group">
-      <%= check_box("deprecate", "all", {checked: @deprecate_all && 'checked'}, '1') %>
+      <%= check_box(:deprecate, :all, {checked: @deprecate_all && "checked"}, "1") %>
       <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.t %></label>
-
       <p class="help-block"><%= :form_synonyms_deprecate_synonyms_help.t %></p>
     </div>
 
     <div class="form-group">
       <label for="synonym_members"><%= :form_synonyms_names.t %>:</label>
-
-      <p class="help-block"><%= :form_synonyms_names_help.t(:name => @name.display_name) %></p>
-      <%= text_area(:synonym, :members, value: @list_members, autofocus: true, class: "form-control") %>
+      <p class="help-block"><%= :form_synonyms_names_help.t(name: @name.display_name) %></p>
+      <%= text_area(:synonym, :members, value: @list_members, class: "form-control",
+                    data: { autofocus: true }) %>
     </div>
   </div>
-  <!--[eoform:observation]-->
 </div>
+<!--[eoform:synonyms]-->

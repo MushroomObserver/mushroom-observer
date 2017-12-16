@@ -1,111 +1,152 @@
-<% if @dubious_where_reasons.any? %>
-  <div class="alert alert-warning push-up push-down">
-    <p>
-      <%= @dubious_where_reasons.safe_join(safe_br) %>
-    </p>
-    <p class="help-block">
-      <%= :form_locations_dubious_help.t %>
-    </p>
+<% if !@location.locked || in_admin_mode? %>
+  <% if @dubious_where_reasons.any? %>
+    <div class="alert alert-warning push-up push-down">
+      <p>
+        <%= @dubious_where_reasons.safe_join(safe_br) %>
+      </p>
+      <p class="help-block">
+        <%= :form_locations_dubious_help.t %>
+      </p>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-md-8 col-lg-6 max-width-text-plus-padding">
+
+      <div class="row">
+        <div class="col-xs-12">
+          <%= submit_tag(button.l, class: "btn center-block push-down") %>
+
+          <% if in_admin_mode? %>
+            <div class="form-inline push-down">
+              <div class="form-group">
+                <%= form.check_box(:locked) %>
+                <label for="location_locked"><%= :form_locations_locked.t %></label>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="form-group push-down">
+            <%= label_tag(:location_display_name, :WHERE.t + ":") %>
+            <%= form.text_field(:display_name, value: @display_name,
+                                class: "form-control", data: {autofocus: true}) %>
+            <div class="pull-right">
+              <span id="find_on_map" onclick="findOnMap()" class="btn">
+                <%= :form_locations_find_on_map.t %>
+              </span>
+            </div>
+            <div class="help-block"><%= :form_locations_help.t %></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row push-down vcenter">
+        <div class="col-sm-8">
+          <div class="row vcenter">
+            <div class="col-xs-4 col-xs-offset-4">
+              <center>
+                <div class="form-group">
+                  <%= label_tag(:location_north, :NORTH.t + ":") %>
+                  <%= form.text_field(:north, class: "form-control") %>
+                  <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
+                </div>
+              </center>
+            </div>
+          </div>
+          <div class="row push-down vcenter">
+            <div class="col-xs-4">
+              <center>
+                <div class="form-group">
+                  <%= label_tag(:location_west, :WEST.t + ":") %>
+                  <%= form.text_field(:west, class: "form-control") %>
+                  <% inject_javascript_at_end("jQuery('#location_west').keypress(startKeyPressTimer);") %>
+                </div>
+              </center>
+            </div>
+            <div class="col-xs-4 small" style="padding:0">
+              <center>
+                <%= :form_locations_lat_long_help.t %>
+              </center>
+            </div>
+            <div class="col-xs-4">
+              <center>
+                <div class="form-group">
+                  <%= label_tag(:location_east, :EAST.t + ":") %>
+                  <%= form.text_field(:east, class: "form-control") %>
+                  <% inject_javascript_at_end("jQuery('#location_east').keypress(startKeyPressTimer);") %>
+                </div>
+              </center>
+            </div>
+          </div>
+          <div class="row push-down vcenter">
+            <div class="col-xs-4 col-xs-offset-4">
+              <center>
+                <div class="form-group">
+                  <%= label_tag(:location_south, :SOUTH.t + ":") %>
+                  <%= form.text_field(:south, class: "form-control") %>
+                  <% inject_javascript_at_end("jQuery('#location_south').keypress(startKeyPressTimer);") %>
+                </div>
+              </center>
+            </div>
+          </div>
+        </div>    
+        <div class="col-sm-4">
+          <center>
+            <div class="form-group push-down">
+              <%= label_tag(:location_high, :show_location_highest.t + ":") %>
+              <%= form.text_field(:high, class: "form-control") %>
+            </div>
+            <div class="form-group push-down">
+              <%= label_tag(:location_low, :show_location_lowest.t + ":") %>
+              <%= form.text_field(:low, class: "form-control") %>
+              (<%= :units_meters.t %>)
+            </div>
+          </center>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 col-lg-6 push-up push-down">
+      <%=
+        javascript_include('edit_location')
+        @location.force_valid_lat_longs!
+        gmap = make_editable_map(@location)
+        finish_map(gmap)
+        gmap.div(height: 500).html_safe
+      %>
+    </div>
+  </div>
+
+<% else %>
+  <div class="row">
+    <div class="col-sm-6 col-md-4 col-lg-3 max-width-text-plus-padding">
+      <%= content_tag(:b, :WHERE.t) %>: <%= @location.display_name.t %><br/>
+      <%= content_tag(:b, :NORTH.t) %>: <%= @location.north %>°<br/>
+      <%= content_tag(:b, :SOUTH.t) %>: <%= @location.south %>°<br/>
+      <%= content_tag(:b, :EAST.t) %>: <%= @location.east %>°<br/>
+      <%= content_tag(:b, :WEST.t) %>: <%= @location.west %>°<br/>
+      <% if @location.high.present? && @location.low.present? %>
+        <%= content_tag(:b, show_location_highest.t) %>: <%= @location.high %> m<br/>
+        <%= content_tag(:b, show_location_lowest.t) %>: <%= @location.low %> m<br/>
+      <% end %>
+      <div class="help-block"><%= :show_location_locked.tp %></div>
+      <%= hidden_field(:location, :display_name, value: @display_name) %>
+      <%= hidden_field(:location, :north) %>
+      <%= hidden_field(:location, :south) %>
+      <%= hidden_field(:location, :east) %>
+      <%= hidden_field(:location, :west) %>
+      <%= hidden_field(:location, :high) %>
+      <%= hidden_field(:location, :low) %>
+    </div>
+    <div class="col-sm-6 col-md-8 col-lg-9 push-up push-down">
+      <%=
+        gmap = make_map([@location])
+        finish_map(gmap)
+        gmap.div(width: "100%", height: "500px").html_safe
+      %>
+    </div>
   </div>
 <% end %>
-
-<div class="row">
-  <div class="col-md-8 col-lg-6 max-width-text-plus-padding">
-
-    <div class="row">
-      <div class="col-xs-12">
-        <%= submit_tag(button.l, class: "btn center-block push-down") %>
-
-        <div class="form-group push-down">
-          <%= label_tag(:location_display_name, :WHERE.t + ":") %>
-          <%= form.text_field(:display_name, value: @display_name,
-                              class: "form-control", data: {autofocus: true}) %>
-          <div class="pull-right">
-            <span id="find_on_map" onclick="findOnMap()" class="btn">
-              <%= :form_locations_find_on_map.t %>
-            </span>
-          </div>
-          <div class="help-block"><%= :form_locations_help.t %></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row push-down vcenter">
-      <div class="col-sm-8">
-        <div class="row vcenter">
-          <div class="col-xs-4 col-xs-offset-4">
-            <center>
-              <div class="form-group">
-                <%= label_tag(:location_north, :NORTH.t + ":") %>
-                <%= form.text_field(:north, class: "form-control") %>
-                <% inject_javascript_at_end("jQuery('#location_north').keypress(startKeyPressTimer);") %>
-              </div>
-            </center>
-          </div>
-        </div>
-        <div class="row push-down vcenter">
-          <div class="col-xs-4">
-            <center>
-              <div class="form-group">
-                <%= label_tag(:location_west, :WEST.t + ":") %>
-                <%= form.text_field(:west, class: "form-control") %>
-                <% inject_javascript_at_end("jQuery('#location_west').keypress(startKeyPressTimer);") %>
-              </div>
-            </center>
-          </div>
-          <div class="col-xs-4 small" style="padding:0">
-            <center>
-              <%= :form_locations_lat_long_help.t %>
-            </center>
-          </div>
-          <div class="col-xs-4">
-            <center>
-              <div class="form-group">
-                <%= label_tag(:location_east, :EAST.t + ":") %>
-                <%= form.text_field(:east, class: "form-control") %>
-                <% inject_javascript_at_end("jQuery('#location_east').keypress(startKeyPressTimer);") %>
-              </div>
-            </center>
-          </div>
-        </div>
-        <div class="row push-down vcenter">
-          <div class="col-xs-4 col-xs-offset-4">
-            <center>
-              <div class="form-group">
-                <%= label_tag(:location_south, :SOUTH.t + ":") %>
-                <%= form.text_field(:south, class: "form-control") %>
-                <% inject_javascript_at_end("jQuery('#location_south').keypress(startKeyPressTimer);") %>
-              </div>
-            </center>
-          </div>
-        </div>
-      </div>    
-      <div class="col-sm-4">
-        <center>
-          <div class="form-group push-down">
-            <%= label_tag(:location_high, :show_location_highest.t + ":") %>
-            <%= form.text_field(:high, class: "form-control") %>
-          </div>
-          <div class="form-group push-down">
-            <%= label_tag(:location_low, :show_location_lowest.t + ":") %>
-            <%= form.text_field(:low, class: "form-control") %>
-            (<%= :units_meters.t %>)
-          </div>
-        </center>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4 col-lg-6 push-up push-down">
-    <%=
-      javascript_include('edit_location')
-      @location.force_valid_lat_longs!
-      gmap = make_editable_map(@location)
-      finish_map(gmap)
-      gmap.div(height: 500).html_safe
-    %>
-  </div>
-</div>
 
 <div class="row">
   <div class="col-xs-12 max-width-text">

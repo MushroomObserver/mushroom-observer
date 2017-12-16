@@ -13,36 +13,36 @@
   # least restrictive -- i.e. 'all' first, then admin, editor, author, and
   # lastly reviewer.
   email_type = if @user.email_names_all
-    'all'
+    "all"
   elsif @user.watching?(new_name)
-    'interest'
+    "interest"
   elsif !old_name || new_name.version != old_name.version
-    @user.email_names_editor   && new_name.descriptions.any? {|d| d.is_editor?(@user)} ? 'editor'   :
-    @user.email_names_author   && new_name.descriptions.any? {|d| d.is_author?(@user)} ? 'author'   :
-    @user.email_names_admin    && new_name.descriptions.any? {|d| d.is_admin?(@user)}  ? 'admin'    :
-    @user.email_names_reviewer && new_name.descriptions.any? {|d| d.reviewer == @user} ? 'reviewer' : nil
+    @user.email_names_editor   && new_name.descriptions.any? {|d| d.is_editor?(@user)} ? "editor"   :
+    @user.email_names_author   && new_name.descriptions.any? {|d| d.is_author?(@user)} ? "author"   :
+    @user.email_names_admin    && new_name.descriptions.any? {|d| d.is_admin?(@user)}  ? "admin"    :
+    @user.email_names_reviewer && new_name.descriptions.any? {|d| d.reviewer == @user} ? "reviewer" : nil
   elsif new_desc
-    @user.email_names_editor   && new_desc.is_editor?(@user) ? 'editor'   :
-    @user.email_names_author   && new_desc.is_author?(@user) ? 'author'   :
-    @user.email_names_admin    && new_desc.is_admin?(@user)  ? 'admin'    :
-    @user.email_names_reviewer && new_desc.reviewer == @user ? 'reviewer' : nil
+    @user.email_names_editor   && new_desc.is_editor?(@user) ? "editor"   :
+    @user.email_names_author   && new_desc.is_author?(@user) ? "author"   :
+    @user.email_names_admin    && new_desc.is_admin?(@user)  ? "admin"    :
+    @user.email_names_reviewer && new_desc.reviewer == @user ? "reviewer" : nil
   else
     nil # ???
   end
 
-  fields = ''
+  fields = ""
   fields += "*#{:Time.l}:* #{@time.email_time}\n"
   fields += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
-  one_liners = ''
+  one_liners = ""
   many_liners = []
   if old_name
     intro = :email_object_change_intro.l(
-      :type => :name,
-      :name => "#{old_name.display_name} (#{new_name.id})"
+      type: :name,
+      name: "#{old_name.display_name} (#{new_name.id})"
     )
 
-    new_spell = new_name.correct_spelling ? new_name.correct_spelling.display_name : '--'
+    new_spell = new_name.correct_spelling ? new_name.correct_spelling.display_name : "--"
     license   = new_desc ? new_desc.license : nil
 
     one_liners += "*#{:Name.l} #{is_now}:* #{new_name.real_text_name}\n" if new_name.real_text_name != old_name.real_text_name
@@ -61,28 +61,28 @@
       for field in NameDescription.all_note_fields
         old_val = old_desc.send(field) rescue nil
         new_val = new_desc.send(field)
-        many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+        many_liners.push([("form_names_" + field.to_s).to_sym.t, new_val]) if new_val != old_val
       end
     end
   else
     intro = :email_object_new_intro.l(
-      :type => :name,
-      :name => "#{new_name.display_name} (#{new_name.id})"
+      type: :name,
+      name: "#{new_name.display_name} (#{new_name.id})"
     )
   end
 
   handy_links = :email_handy_links.l
   if email_type
     tag = :"email_object_change_reason_#{email_type}".to_sym
-    handy_links = tag.l(:type => :name).sub(/\n*\Z/, "\n" + handy_links)
+    handy_links = tag.l(type: :name).sub(/\n*\Z/, "\n" + handy_links)
   end
 
   links = []
-  links.push([:email_links_show_object.t(:type => :name),
+  links.push([:email_links_show_object.t(type: :name),
     "#{MO.http_domain}/name/show_name/#{new_name.id}"])
-  links.push([:email_links_not_interested.t(:type => :name),
+  links.push([:email_links_not_interested.t(type: :name),
     "#{MO.http_domain}/interest/set_interest?id=#{new_name.id}&type=Name&user=#{@user.id}&state=-1"])
-  if email_type && email_type != 'interest'
+  if email_type && email_type != "interest"
     links.push([:email_links_stop_sending.t,
       "#{MO.http_domain}/account/no_email_names_#{email_type}/#{@user.id}"])
   end
@@ -122,7 +122,7 @@ if @user.email_html %>
 <%= one_liners.tp.html_to_ascii if !one_liners.blank? %>
 <% for var, val in many_liners %>
 
-<%= var + ' ' + is_now %>:
+<%= var + " " + is_now %>:
 --------------------------------------------------
 <%=
   val.to_s.tp.html_to_ascii
@@ -132,7 +132,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
