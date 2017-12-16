@@ -15,7 +15,6 @@ DEFAULTS: &DEFAULTS
   password:       ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   verified:       <%= Time.now.strftime("%F %T")%>
-  # Associations
   user_groups:    all_users, $LABEL_only
 
 # Rolf is an experienced user
@@ -123,3 +122,8 @@ article_writer: # 17
 notes_templater: # 18
   <<: *DEFAULTS
   notes_template: Cap, Nearby trees, odor
+
+thorsten: # 19
+  <<: *DEFAULTS
+  name: Thorsten Lumbsch
+  

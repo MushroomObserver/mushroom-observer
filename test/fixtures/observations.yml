@@ -248,6 +248,7 @@ peltigera_obs: # 16
   lifeform: " lichen "
   created_at: 2014-04-04 04:04:03
   updated_at: 2014-04-04 04:04:03
+  herbarium_records: field_museum_record
 
 peltigera_rolf_obs: # 17
   <<: *DEFAULTS

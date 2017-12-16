@@ -1656,7 +1656,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_empty(obs.herbarium_records)
     herbarium_record = obs.herbarium_records[0]
     herbarium = herbarium_record.herbarium
-    assert(herbarium.is_curator?(katrina))
+    assert(herbarium.curator?(katrina))
     assert(herbarium.name.match(/Katrina/))
   end
 

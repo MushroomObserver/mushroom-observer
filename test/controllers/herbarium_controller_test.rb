@@ -196,7 +196,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login("mary")
-    assert(!nybg.is_curator?(mary))
+    assert(!nybg.curator?(mary))
     get(:edit_herbarium, id: nybg.id)
     assert_flash(/Permission denied/i)
     assert_response(:redirect)
@@ -269,8 +269,8 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_delete_curator
     nybg = herbaria(:nybg_herbarium)
-    assert(nybg.is_curator?(rolf))
-    assert(nybg.is_curator?(roy))
+    assert(nybg.curator?(rolf))
+    assert(nybg.curator?(roy))
     curator_count = nybg.curators.count
     params = { id: nybg.id, user: roy.id }
 
@@ -290,13 +290,13 @@ class HerbariumControllerTest < FunctionalTestCase
 
     post(:delete_curator, params)
     assert_equal(curator_count - 1, nybg.reload.curators.count)
-    assert(!nybg.is_curator?(roy))
+    assert(!nybg.curator?(roy))
     assert_response(:redirect)
 
     make_admin("mary")
     post(:delete_curator, params.merge(user: rolf.id))
     assert_equal(curator_count - 2, nybg.reload.curators.count)
-    assert(!nybg.is_curator?(rolf))
+    assert(!nybg.curator?(rolf))
     assert_response(:redirect)
   end
 
