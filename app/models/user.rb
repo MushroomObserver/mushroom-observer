@@ -580,11 +580,13 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    herbarium_id = Herbarium.connection.select_value(%(
-      SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
-      GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
-    ))
-    herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+    @preferred_herbarium ||= begin
+      herbarium_id = Herbarium.connection.select_value(%(
+        SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
+        GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
+      ))
+      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+    end
   end
 
   def personal_herbarium_name
@@ -594,11 +596,11 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    Herbarium.where(personal_user_id: id).first
+    @personal_herbarium ||= Herbarium.where(personal_user_id: id).first
   end
 
   def create_personal_herbarium
-    Herbarium.create(
+    @personal_herbarium ||= Herbarium.create(
       name:          personal_herbarium_name,
       email:         email,
       personal_user: self,
