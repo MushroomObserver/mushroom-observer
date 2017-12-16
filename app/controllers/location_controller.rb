@@ -634,6 +634,9 @@ class LocationController < ApplicationController
   def post_edit_location_change(db_name)
     @dubious_where_reasons = []
     @location.notes = params[:location][:notes].to_s.strip
+    if in_admin_mode?
+      @location.locked = params[:location][:locked] == "1"
+    end
     if !@location.locked || in_admin_mode?
       @location.north = params[:location][:north] if params[:location][:north]
       @location.south = params[:location][:south] if params[:location][:south]
