@@ -272,6 +272,41 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
+  def test_show_name_locked
+    name = Name.where(locked: true).first
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    login("rolf")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    make_admin("mary")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 1)
+    assert_select("a[href*=change_synonyms]", count: 1)
+
+    name.update_columns(deprecated: true)
+    logout
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    login("rolf")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 0)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 0)
+    make_admin("mary")
+    get_with_dump(:show_name, id: name.id)
+    assert_select("a[href*=approve_name]", count: 1)
+    assert_select("a[href*=deprecate_name]", count: 0)
+    assert_select("a[href*=change_synonyms]", count: 1)
+  end
+
   def test_show_past_name
     get_with_dump(:show_past_name, id: names(:coprinus_comatus).id)
     assert_template(:show_past_name, partial: "_name")
@@ -1536,6 +1571,59 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(name_count + 2, Name.count)
     assert(Name.exists?(text_name: new_species), "Failed to create new species")
     assert(Name.exists?(text_name: new_genus), "Failed to create new genus")
+  end
+
+  def test_post_edit_name_locked
+    name = names(:fungi)
+    params = {
+      id: name.id,
+      name: {
+        locked:     "0",
+        rank:       "Genus",
+        deprecated: "true",
+        text_name:  "Foo",
+        author:     "Bar",
+        citation:   "new citation",
+        notes:      "new notes"
+      }
+    }
+
+    login("rolf")
+    get(:edit_name, id: name.id)
+    assert_select("select#name_rank", count: 0)
+    assert_select("select#name_deprecated", count: 0)
+    assert_select("input[type=text]#name_text_name", count: 0)
+    assert_select("input[type=text]#name_author", count: 0)
+    assert_select("input[type=checkbox]#name_misspelling", count: 0)
+    assert_select("input[type=text]#name_correct_spelling", count: 0)
+
+    post(:edit_name, params)
+    name.reload
+    assert_true(name.locked)
+    assert_equal(:Kingdom, name.rank)
+    assert_false(name.deprecated)
+    assert_equal("Fungi", name.text_name)
+    assert_equal("", name.author)
+    assert_nil(name.correct_spelling_id)
+    assert_equal("new citation", name.citation)
+    assert_equal("new notes", name.notes)
+
+    make_admin("mary")
+    get(:edit_name, id: name.id)
+    assert_select("select#name_rank", count: 1)
+    assert_select("select#name_deprecated", count: 1)
+    assert_select("input[type=text]#name_text_name", count: 1)
+    assert_select("input[type=text]#name_author", count: 1)
+    assert_select("input[type=checkbox]#name_misspelling", count: 1)
+    assert_select("input[type=text]#name_correct_spelling", count: 1)
+
+    post(:edit_name, params)
+    name.reload
+    assert_false(name.locked)
+    assert_equal(:Genus, name.rank)
+    assert_true(name.deprecated)
+    assert_equal("Foo", name.text_name)
+    assert_equal("Bar", name.author)
   end
 
   # ----------------------------
@@ -3147,6 +3235,37 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(selected_start_size - 1, split_synonym.names.size)
   end
 
+  def test_change_synonyms_locked
+    name = Name.where(locked: true).first
+    name2 = names(:agaricus_campestris)
+    synonym = Synonym.create!
+    name.update_columns(synonym_id: synonym.id)
+    name2.update_columns(synonym_id: synonym.id)
+    existing_synonyms = {}
+    name.reload.synonyms.each do |n|
+      existing_synonyms[n.id.to_s] = "0"
+    end
+    params = {
+      id: name.id,
+      synonym: { members: "" },
+      existing_synonyms: existing_synonyms,
+      deprecate: { all: "" }
+    }
+
+    login("rolf")
+    get(:change_synonyms, id: name.id)
+    assert_response(:redirect)
+    post(:change_synonyms, params)
+    assert_flash_error
+    assert_not_nil(name.reload.synonym_id)
+
+    make_admin("mary")
+    get(:change_synonyms, id: name.id)
+    assert_response(:success)
+    post(:change_synonyms, params)
+    assert_nil(name.reload.synonym_id)
+  end
+
   # ----------------------------
   #  Deprecation.
   # ----------------------------
@@ -3321,6 +3440,32 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(2, new_synonym.names.size)
   end
 
+  def test_deprecate_name_locked
+    name = Name.where(locked: true).first
+    name2 = names(:agaricus_campestris)
+    name.change_deprecated(false)
+    name.save
+    params = {
+      id: name.id,
+      proposed: { name: name2.search_name },
+      approved_name: name2.search_name,
+      comment: { comment: "" }
+    }
+
+    login("rolf")
+    get(:deprecate_name, id: name.id)
+    assert_response(:redirect)
+    post(:deprecate_name, params)
+    assert_flash_error
+    assert_false(name.reload.deprecated)
+
+    make_admin("mary")
+    get(:deprecate_name, id: name.id)
+    assert_response(:success)
+    post(:deprecate_name, params)
+    assert_true(name.reload.deprecated)
+  end
+
   # ----------------------------
   #  Approval.
   # ----------------------------
@@ -3381,6 +3526,30 @@ class NameControllerTest < FunctionalTestCase
 
     approved_synonyms.each { |n| refute(n.reload.deprecated) }
     assert_equal(comments, Comment.count)
+  end
+
+  def test_approve_name_locked
+    name = Name.where(locked: true).first
+    name.change_deprecated(true)
+    name.save
+    params = {
+      id: name.id,
+      deprecate: { others: "0" },
+      comment: { comment: "" }
+    }
+
+    login("rolf")
+    get(:approve_name, id: name.id)
+    assert_response(:redirect)
+    post(:approve_name, params)
+    assert_flash_error
+    assert_true(name.reload.deprecated)
+
+    make_admin("mary")
+    get(:approve_name, id: name.id)
+    assert_response(:success)
+    post(:approve_name, params)
+    assert_false(name.reload.deprecated)
   end
 
   # ----------------------------
