@@ -2560,7 +2560,7 @@ class NameTest < UnitTestCase
     assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
     assert_nil(bad.correct_spelling)
     assert_nil(good.correct_spelling)
-    assert_not_nil(good.synonym)
+    assert_not_nil(good.synonym_id)
     assert_objs_equal(good.synonym, bad.synonym)
   end
 

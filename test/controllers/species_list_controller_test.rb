@@ -445,7 +445,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     name = names(:macrolepiota_rachodes)
     synonym_name = names(:lepiota_rachodes)
     assert(!synonym_name.deprecated)
-    assert_nil(synonym_name.synonym)
+    assert_nil(synonym_name.synonym_id)
     params = {
       list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
       checklist_data: {},
@@ -464,7 +464,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert(!synonym_name.reload.deprecated)
-    assert_nil(synonym_name.synonym)
+    assert_nil(synonym_name.synonym_id)
   end
 
   def test_construct_species_list_junk

@@ -1,10 +1,8 @@
 <!--[form:synonyms]-->
 <div class="row">
   <div class="col-sm-6">
-    <% synonym = @name.synonym
-    names = []
-    if synonym
-      names = synonym.names %>
+    <% names = @name.synonyms
+    if names.count > 1 %>
       <div class="form-group">
         <label><%= :form_synonyms_current_synonyms.t %>:</label>
         <p class="help-block"><%= :form_synonyms_current_synonyms_help.t %></p>

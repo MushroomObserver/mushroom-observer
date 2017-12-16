@@ -1120,14 +1120,11 @@ class Name < AbstractModel
   def synonyms
     @synonyms ||= begin
       if @synonym_ids
-        # Slightly faster since id is primary index.
+        # Slightly faster than below since id is primary index.
         Name.where(id: @synonym_ids).to_a
       elsif synonym_id
-        # Takes on average 0.050 seconds.
+        # This is apparently faster than synonym.names.
         Name.where(synonym_id: synonym_id).to_a
-
-        # Involves instantiating a Synonym, something which need never happen.
-        # synonym ? synonym.names : [self]
       else
         [self]
       end
