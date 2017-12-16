@@ -31,7 +31,7 @@
 #                           If there are curators, then edit is restricted
 #                           to just those users.
 #  can_edit?(user)::        Check if a User has permission to edit.
-#  is_curator?(user)::      Check if a User is a curator.
+#  curator?(user)::         Check if a User is a curator.
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
 #  herbarium_record_count:: Number of HerbariumRecord's at this Herbarium.
@@ -61,12 +61,12 @@ class Herbarium < AbstractModel
     curators.none? || curators.member?(user)
   end
 
-  def is_curator?(user)
+  def curator?(user)
     curators.member?(user)
   end
 
   def add_curator(user)
-    curators.push(user) unless is_curator?(user)
+    curators.push(user) unless curator?(user)
   end
 
   def delete_curator(user)
@@ -96,15 +96,30 @@ class Herbarium < AbstractModel
     "#{:HERBARIUM.l} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
   end
 
-  def merge(other)
-    this, that = other.created_at < self.created_at ?
-                 [self, other] : [other, self]
+  def merge(that)
+    this = self
+    this, that = [that, this] if that.created_at < this.created_at
     [:code, :location, :email, :mailing_address].each do |var|
-      val1 = this.send(var)
-      val2 = that.send(var)
-      next if val2.blank? || val1.length >= val2.length
-      this.send(:"#{var}=", val2)
+      this.merge_field(that, var)
     end
+    this.merge_notes(that)
+    this.personal_user ||= that.personal_user
+    this.save
+    this.merge_associatied_records(that)
+    that.destroy
+    this
+  end
+
+  def merge_field(that, var)
+    this = self
+    val1 = this.send(var)
+    val2 = that.send(var)
+    return unless val1.blank?
+    this.send(:"#{var}=", val2)
+  end
+
+  def merge_notes(that)
+    this   = self
     notes1 = this.description
     notes2 = that.description
     if notes1.blank?
@@ -114,12 +129,12 @@ class Herbarium < AbstractModel
                          "[Merged at #{Time.now.utc.web_time}]\n\n" +
                          notes2
     end
-    this.personal_user ||= that.personal_user
-    this.save
+  end
+
+  def merge_associatied_records(that)
+    this = self
     this.curators          += that.curators - this.curators
     this.herbarium_records += that.herbarium_records - this.herbarium_records
-    that.destroy
-    this
   end
 
   # Look at the most recent HerbariumRecord's the current User has created.
