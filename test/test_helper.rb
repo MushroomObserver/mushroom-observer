@@ -112,10 +112,8 @@ module ActiveSupport
       I18n.locale = :en if I18n.locale != :en
       Time.zone = "America/New_York"
       User.current = nil
-      if false
-        @@times = {} if !defined?(@@times)
-        @@times[method_name] = Time.now
-      end
+      start_timer if false
+      clear_logs unless defined?(@@cleared_logs)
     end
 
     # Standard teardown to run after every test.  Just makes sure any
@@ -123,10 +121,31 @@ module ActiveSupport
     def teardown
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
-      if false
-        ellapsed = Time.now - @@times[method_name]
-        puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
+      stop_timer if false
+    end
+
+    # Record time this test started to run.
+    def start_timer
+      @@times = {} if !defined?(@@times)
+      @@times[method_name] = Time.now
+    end
+
+    # Report time this test took to run.
+    def end_timer
+      ellapsed = Time.now - @@times[method_name]
+      puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
+    end
+
+    # This will ensure that the logs stay a reasonable size.  If you forget to
+    # clear these logs periodically, they can get freaking huge, and that
+    # causes this test to take up to several minutes to complete.
+    def clear_logs
+      ["#{::Rails.root}/log/development.log",
+       "#{::Rails.root}/log/test.log"].each do |file|
+        next if !File.exists?(file)
+        File.delete(file)
       end
+      @@cleared_logs = true
     end
   end
 end
