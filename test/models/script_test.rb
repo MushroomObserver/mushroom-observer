@@ -104,6 +104,15 @@ class ScriptTest < UnitTestCase
     status = system(cmd)
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
+
+    # This will ensure that the logs stay a reasonable size.  If you forget to
+    # clear these logs periodically, they can get freaking huge, and that
+    # causes this test to take up to several minutes to complete.
+    ["#{::Rails.root}/log/development.log",
+     "#{::Rails.root}/log/test.log"].each do |file|
+      next if !File.exists?(file)
+      File.delete(file)
+    end
   end
 
   # Takes way too long, bad for the live server(!) and unreliable.
