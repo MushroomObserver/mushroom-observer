@@ -140,9 +140,9 @@ module ActiveSupport
     # clear these logs periodically, they can get freaking huge, and that
     # causes this test to take up to several minutes to complete.
     def clear_logs
-      ["#{::Rails.root}/log/development.log",
-       "#{::Rails.root}/log/test.log"].each do |file|
-        next if !File.exists?(file)
+      ["development", "test", "email-debug", "process_image"].each do |file|
+        file = "#{Rails.root}/log/#{file}.log"
+        next unless File.exists?(file)
         File.delete(file)
       end
       @@cleared_logs = true
