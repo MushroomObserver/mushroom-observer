@@ -200,16 +200,14 @@ class HerbariumController < ApplicationController
     return true if @herbarium.place_name.blank?
     @herbarium.location =
       Location.find_by_name_or_reverse_name(@herbarium.place_name)
-    return true if @herbarium.location
-    flash_error(:runtime_no_match_name.t(type: :location,
-                                         value: @herbarium.place_name))
-    false
+    # Will redirect to create location if not found.
+    true
   end
 
   def validate_personal_herbarium!
-    return true if @herbarium.personal != "1"
-    return true if already_have_personal_herbarium!
-    return true if cant_make_this_personal_herbarium!
+    return true  if @herbarium.personal != "1"
+    return false if already_have_personal_herbarium!
+    return false if cant_make_this_personal_herbarium!
     @herbarium.personal_user_id = @user.id
     true
   end
@@ -222,7 +220,7 @@ class HerbariumController < ApplicationController
   end
 
   def cant_make_this_personal_herbarium!
-    return false if @herbarium.can_make_personal?
+    return false if @herbarium.new_record? || @herbarium.can_make_personal?
     flash_error(:edit_herbarium_cant_make_personal.t)
     true
   end

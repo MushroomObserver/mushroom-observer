@@ -16,7 +16,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_index
     get_with_dump(:index)
-    assert_template(:index)
+    assert_template(:list_herbaria)
   end
 
   def test_list_herbaria
@@ -158,8 +158,8 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     assert_not_nil(rolf.personal_herbarium)
     post(:create_herbarium, herbarium: params)
-    assert_equal(herbarium_count, Herbarium.count)
     assert_flash(/already.*created.*personal herbarium/i)
+    assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success)
 
     login("mary")
@@ -250,11 +250,18 @@ class HerbariumControllerTest < FunctionalTestCase
     other = herbaria(:rolf_herbarium)
     last_update = nybg.updated_at
     params = herbarium_params.merge(name: other.name)
-    login("rolf")
+
+    # Roy can edit but does not own all the records.
+    login("roy")
     post(:edit_herbarium, herbarium: params, id: nybg.id)
     assert_equal(last_update, nybg.reload.updated_at)
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
+
+    # Rolf can both edit and does own all the records.
+    login("rolf")
+    post(:edit_herbarium, herbarium: params, id: nybg.id)
+    assert_nil(Herbarium.safe_find(nybg.id))
   end
 
   def test_edit_herbarium_post_with_nonexisting_place_name

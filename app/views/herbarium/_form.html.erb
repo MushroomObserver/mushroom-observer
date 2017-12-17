@@ -16,7 +16,7 @@
   </div>
 <% end %>
 
-<% if @herbarium.can_make_personal?(@user) %>
+<% if button == :CREATE || @herbarium.can_make_personal?(@user) %>
   <div class="row form-group">
     <div class="col-xs-12">
       <div class="form-inline">

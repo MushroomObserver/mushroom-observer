@@ -112,7 +112,7 @@ class CuratorTest < IntegrationTestCase
     get("/herbarium_record/create_herbarium_record/" +
         "#{observations(:minimal_unknown_obs).id}")
     click(label: :herbarium_index.t)
-    assert_template("herbarium/index")
+    assert_template("herbarium/list_herbaria")
   end
 
   def test_single_herbarium_search
