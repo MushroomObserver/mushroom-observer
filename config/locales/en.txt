@@ -2244,13 +2244,17 @@
   # herbarium/edit_herbarium
   edit_herbarium: Edit Herbarium
   edit_herbarium_title: Editing Herbarium
+  edit_herbarium_this_is_personal_herbarium: This is your personal herbarium. You are only allowed one personal herbarium. If you would like to change which herbarium is your personal herbarium, please contact the admins and explain the situation.
+  edit_herbarium_cant_make_personal: You can't make this your personal herbarium because you don't own all the herbarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
 
   # herbarium/list_herbaria
   list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
   # herbarium/index
   herbarium_index: Herbarium Index
-  herbarium_index_title: List of All Herbaria
+  herbarium_index_title: List of Herbaria that Aren't Personal Herbaria
+  herbarium_index_list_all_herbaria: List All Herbaria
+  herbarium_index_nonpersonal_herbaria: List Non-personal Herbaria
 
 
 
@@ -3796,6 +3800,7 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_code: "[:herbarium_code]"
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
@@ -3815,6 +3820,7 @@
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
   sort_by_posted: Date Posted
+  sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
   sort_by_rss_log: "[:sort_by_updated_at]"
   sort_by_summary: "[:SUMMARY]"

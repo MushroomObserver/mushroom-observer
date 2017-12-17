@@ -3,7 +3,7 @@ class HerbariumController < ApplicationController
   before_action :login_required, except: [
     :index,
     :index_herbarium,
-    :list_herbariums,
+    :list_herbaria,
     :herbarium_search,
     :show_herbarium
   ]
@@ -12,22 +12,30 @@ class HerbariumController < ApplicationController
   #  Indexes
   # ----------------------------
 
-  def index # :nologin:
-    store_location
-    @herbaria = Herbarium.order(:name)
-  end
-
   # Displays selected Herbarium's (based on current Query).
   def index_herbarium # :nologin: :norobots:
     query = find_or_create_query(:Herbarium, by: params[:by])
-    show_selected_herbarium(query, id: params[:id].to_s)
+    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+  end
+
+  def index # :nologin:
+    store_location
+    query = create_query(:Herbarium, :all,
+                         where: "herbaria.personal_user_id IS NULL",
+                         by: :code_then_name)
+    @title = :herbarium_index_title.t
+    @links = [[:herbarium_index_list_all_herbaria.l,
+               { controller: :herbarium, action: :list_herbaria }]]
+    show_selected_herbaria(query, always_index: true)
   end
 
   # Show list of herbaria.
-  def list_herbariums # :nologin:
+  def list_herbaria # :nologin:
     store_location
     query = create_query(:Herbarium, :all, by: :name)
-    show_selected_herbaria(query)
+    @links = [[:herbarium_index_nonpersonal_herbaria.l,
+               { controller: :herbarium, action: :index }]]
+    show_selected_herbaria(query, always_index: true)
   end
 
   # Display list of Herbaria whose text matches a string pattern.
@@ -47,7 +55,8 @@ class HerbariumController < ApplicationController
     args = {
       action: :list_herbaria,
       letters: "herbaria.name",
-      num_per_page: 100
+      num_per_page: 100,
+      include: [:curators, :herbarium_records]
     }.merge(args)
 
     @links ||= []
@@ -56,7 +65,9 @@ class HerbariumController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ["name",        :sort_by_title.t],
+      ["records",     :sort_by_records.t],
+      ["code",        :sort_by_code.t],
+      ["name",        :sort_by_name.t],
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t]
     ]
@@ -97,6 +108,7 @@ class HerbariumController < ApplicationController
   # ----------------------------
 
   def create_herbarium # :norobots:
+    store_location
     pass_query_params
     if request.method == "GET"
       @herbarium = Herbarium.new
@@ -108,11 +120,14 @@ class HerbariumController < ApplicationController
   end
 
   def edit_herbarium # :norobots:
+    store_location
+    pass_query_params
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
     if request.method == "GET"
       @herbarium.place_name = @herbarium.location.try(&:name)
+      @herbarium.personal   = @herbarium.personal_user_id.present?
     elsif request.method == "POST"
       post_edit_herbarium
     else
@@ -137,7 +152,8 @@ class HerbariumController < ApplicationController
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
     if validate_name! &&
-       validate_location!
+       validate_location! &&
+       validate_personal_herbarium!
       @herbarium.save
       redirect_to_create_location || redirect_to_show_herbarium
     end
@@ -156,6 +172,7 @@ class HerbariumController < ApplicationController
       @herbarium.send("#{arg}=", val)
     end
     @herbarium.description = @herbarium.description.to_s.strip
+    @herbarium.code = "" if @herbarium.personal_user_id
   end
 
   def validate_name!
@@ -164,8 +181,12 @@ class HerbariumController < ApplicationController
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       return false
-    elsif in_admin_mode?
+    elsif in_admin_mode? || @herbarium.can_merge_into?(other)
+      old_name = @herbarium.name_was
       @herbarium = @herbarium.merge(other)
+      flash_notice(:runtime_merge_success.t(type: :herbarium,
+                                            this: old_name,
+                                            that: @herbarium.name))
       return true
     else
       redirect_with_query(controller: :observer, action: :email_merge_request,
@@ -179,18 +200,31 @@ class HerbariumController < ApplicationController
     return true if @herbarium.place_name.blank?
     @herbarium.location =
       Location.find_by_name_or_reverse_name(@herbarium.place_name)
-    true
+    return true if @herbarium.location
+    flash_error(:runtime_no_match_name.t(type: :location,
+                                         value: @herbarium.place_name))
+    false
   end
 
   def validate_personal_herbarium!
-    return true unless @herbarium.personal == "1"
+    return true if @herbarium.personal != "1"
+    return true if already_have_personal_herbarium!
+    return true if cant_make_this_personal_herbarium!
+    @herbarium.personal_user_id = @user.id
+    true
+  end
+
+  def already_have_personal_herbarium!
     other = @user.personal_herbarium
-    if other
-      flash_error(:create_herbarium_personal_already_exists.t(name: other.name))
-      return false
-    else
-      @herbarium.personal_user = @user
-    end
+    return false if !other || other == @herbarium
+    flash_error(:create_herbarium_personal_already_exists.t(name: other.name))
+    true
+  end
+
+  def cant_make_this_personal_herbarium!
+    return false if @herbarium.can_make_personal?
+    flash_error(:edit_herbarium_cant_make_personal.t)
+    true
   end
 
   def redirect_to_create_location

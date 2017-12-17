@@ -1,10 +1,7 @@
 <%
   @title ||= :list_herbaria_title.t
 
-  tabs = [
-    link_to(:create_herbarium.t, action: :create_herbarium)
-  ]
-  tabs += create_links(@links)
+  tabs = create_links(@links)
   @tabsets = { right: draw_tab_set(tabs) }
 
   flash_error(@error) if @error && @objects.empty?
@@ -12,18 +9,33 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <table class="table table-striped">
-      <% @objects.each do |herbarium| %>
+    <table class="table-striped table-herbarium push-down">
+      <thead>
         <tr>
-          <td>
-            <%= link_with_query(herbarium.format_name.t,
-                                action: :show_herbarium, id: herbarium.id) %>:<br/>
-            <small>
-              <%= herbarium.created_at.web_time %>
-            </small>
-          </td>
+          <th><%= :herbarium_herbarium_record_count.t %></th>
+          <th><%= :herbarium_code.t %></th>
+          <th><%= :NAME.t %></th>
         </tr>
-      <% end %>
+      </thead>
+      <tbody>
+        <% @objects.each do |herbarium| %>
+          <tr>
+            <td align="center">
+              <%= herbarium.herbarium_records.length %>
+            </td>
+            <td style="max-width:10em; text-overflow:ellipsis; overflow:hidden">
+              <%= herbarium.code %>
+            </td>
+            <td>
+              <%= link_with_query(herbarium.format_name.t,
+                                  herbarium.show_link_args) %>
+              <% if herbarium.can_edit? || in_admin_mode? %>
+                [<%= link_to(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %>]
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
     </table>
   <% end %>
 <% end %>

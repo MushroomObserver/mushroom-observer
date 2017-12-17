@@ -50,7 +50,7 @@ module ObservationReport
         image_urls(row),
         "NA Mycoflora Project",
         row.val(2).to_s,
-        row.obs_notes.to_s.t.strip_html
+        row.obs_notes.to_s.t.html_to_ascii
       ]
     end
 

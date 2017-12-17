@@ -1,5 +1,5 @@
 <%
-  @title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'".strip_html
+  @title = "#{:COLLECTION_NUMBER.t} '#{@collection_number.format_name.t}'"
 
   tabs = []
   if in_admin_mode? || @collection_number.can_edit?

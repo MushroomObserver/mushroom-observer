@@ -98,6 +98,7 @@ class CollectionNumberController < ApplicationController
   # ----------------------------
 
   def create_collection_number # :norobots:
+    store_location
     pass_query_params
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
@@ -114,6 +115,7 @@ class CollectionNumberController < ApplicationController
   end
 
   def edit_collection_number # :norobots:
+    store_location
     pass_query_params
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])

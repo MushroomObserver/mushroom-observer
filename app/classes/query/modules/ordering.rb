@@ -139,6 +139,18 @@ module Query::Modules::Ordering
     when "name_and_number"
       "collection_numbers.name ASC, collection_numbers.number ASC"
 
+    when "code"
+      where << "herbaria.code != ''"
+      "herbaria.code ASC"
+
+    when "code_then_name"
+      "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
+
+    when "records"
+      add_join(:herbarium_records)
+      self.group = "herbaria.id"
+      "count(herbarium_records.id) DESC"
+
     when "id" # (for testing)
       "#{table}.id ASC"
 

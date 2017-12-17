@@ -19,8 +19,8 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_template(:index)
   end
 
-  def test_list_herbariums
-    get_with_dump(:list_herbariums)
+  def test_list_herbaria
+    get_with_dump(:list_herbaria)
   end
 
   def test_herbarium_search

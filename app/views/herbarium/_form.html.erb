@@ -8,7 +8,15 @@
   </div>
 </div>
 
-<% if button == :CREATE && !@user.personal_herbarium %>
+<% if @herbarium.personal_user_id == @user.id %>
+  <div class="row form-group">
+    <div class="col-xs-12 help-block">
+      <%= :edit_herbarium_this_is_personal_herbarium.tp %>
+    </div>
+  </div>
+<% end %>
+
+<% if @herbarium.can_make_personal?(@user) %>
   <div class="row form-group">
     <div class="col-xs-12">
       <div class="form-inline">
@@ -23,21 +31,23 @@
   </div>
 <% end %>
 
-<div class="row form-group">
-  <div class="col-xs-12">
-    <div class="form-inline">
-      <%= label_tag(:herbarium_code, :create_herbarium_code.t + ":") %>
-      <%= text_field(:herbarium, :code, size: 8, class: "form-control") %>
-      <span class="HelpNote">(<%= :optional.t %>)</span>
-    </div>
-    <div class="well well-sm push-down help-block">
-      <div class="arrow-up" style="margin-top:6px"></div>
-      <%= :create_herbarium_code_help.t %>
+<% if !@herbarium.personal_user_id %>
+  <div class="row form-group" style="margin-bottom:-1em">
+    <div class="col-xs-12">
+      <div class="form-inline">
+        <%= label_tag(:herbarium_code, :create_herbarium_code.t + ":") %>
+        <%= text_field(:herbarium, :code, size: 8, class: "form-control") %>
+        <span class="HelpNote">(<%= :optional.t %>)</span>
+      </div>
+      <div class="well well-sm push-down help-block">
+        <div class="arrow-up" style="margin-top:6px"></div>
+        <%= :create_herbarium_code_help.t %>
+      </div>
     </div>
   </div>
-</div>
+<% end %>
 
-<div class="row form-group" style="margin-top:-1em">
+<div class="row form-group">
   <div class="col-xs-12">
     <%= label_tag(:herbarium_place_name, :LOCATION.t + ":") %>
     <span class="HelpNote">(<%= :optional.t %>)</span>
