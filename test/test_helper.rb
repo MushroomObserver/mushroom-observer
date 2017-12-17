@@ -112,6 +112,10 @@ module ActiveSupport
       I18n.locale = :en if I18n.locale != :en
       Time.zone = "America/New_York"
       User.current = nil
+      if false
+        @@times = {} if !defined?(@@times)
+        @@times[method_name] = Time.now
+      end
     end
 
     # Standard teardown to run after every test.  Just makes sure any
@@ -119,6 +123,10 @@ module ActiveSupport
     def teardown
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
+      if false
+        ellapsed = Time.now - @@times[method_name]
+        puts "\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}"
+      end
     end
   end
 end
