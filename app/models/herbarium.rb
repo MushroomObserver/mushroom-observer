@@ -141,6 +141,7 @@ class Herbarium < AbstractModel
   end
 
   def can_merge_into?(other, user = User.current)
+    return false if self == other
     # Target must be user's personal herbarium.
     return false if !user || !other || other.personal_user_id != user.id
     # User must own all the records attached to the one being deleted.

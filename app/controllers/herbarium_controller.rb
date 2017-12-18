@@ -242,6 +242,7 @@ class HerbariumController < ApplicationController
       return false
     end
     flash_notice(:edit_herbarium_successfully_made_personal.t(user: user.login))
+    @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
   end
@@ -262,7 +263,7 @@ class HerbariumController < ApplicationController
   def perform_or_request_merge(this, that)
     if in_admin_mode? || this.can_merge_into?(that)
       perform_merge(this, that)
-    else
+    elsif this != that
       request_merge(this, that)
     end
   end

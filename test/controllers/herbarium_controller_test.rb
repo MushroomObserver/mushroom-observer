@@ -27,6 +27,131 @@ class HerbariumControllerTest < FunctionalTestCase
     get_with_dump(:herbarium_search, pattern: "Personal Herbarium")
   end
 
+  def test_list_herbaria_merge_source
+    herb1 = herbaria(:nybg_herbarium)
+    herb2 = herbaria(:mycoflora_herbarium)
+    herb3 = herbaria(:dick_herbarium)
+    assert_true(herb1.can_edit?(rolf))  # rolf id curator
+    assert_true(herb2.can_edit?(rolf))  # no curators
+    assert_false(herb3.can_edit?(rolf)) # someone else's personal herbarium
+
+    get(:list_herbaria)
+    assert_select("a[href*=edit_herbarium]", count: 0)
+    assert_select("a[href*=merge_herbaria]", count: 0)
+
+    login("dick")
+    get(:list_herbaria)
+    assert_select("a[href*='edit_herbarium/#{herb1.id}']", count: 0)
+    assert_select("a[href*='edit_herbarium/#{herb2.id}']", count: 1)
+    assert_select("a[href*='edit_herbarium/#{herb3.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb1.id}']", count: 0)
+    assert_select("a[href*='list_herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href*=merge_herbaria]", count: 0)
+
+    login("rolf")
+    get(:list_herbaria)
+    assert_select("a[href*='edit_herbarium/#{herb1.id}']", count: 1)
+    assert_select("a[href*='edit_herbarium/#{herb2.id}']", count: 1)
+    assert_select("a[href*='edit_herbarium/#{herb3.id}']", count: 0)
+    assert_select("a[href*='list_herbaria?merge=#{herb1.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb3.id}']", count: 0)
+    assert_select("a[href*=merge_herbaria]", count: 0)
+
+    make_admin("zero")
+    get(:list_herbaria)
+    assert_select("a[href*='edit_herbarium/#{herb1.id}']", count: 1)
+    assert_select("a[href*='edit_herbarium/#{herb2.id}']", count: 1)
+    assert_select("a[href*='edit_herbarium/#{herb3.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb1.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb2.id}']", count: 1)
+    assert_select("a[href*='list_herbaria?merge=#{herb3.id}']", count: 1)
+    assert_select("a[href*=merge_herbaria]", count: 0)
+  end
+
+  def test_list_herbaria_merge_target
+    source = herbaria(:field_museum)
+    herb1  = herbaria(:nybg_herbarium)
+    herb2  = herbaria(:mycoflora_herbarium)
+    herb3  = herbaria(:dick_herbarium)
+    assert_true(herb1.can_edit?(rolf))  # rolf id curator
+    assert_true(herb2.can_edit?(rolf))  # no curators
+    assert_false(herb3.can_edit?(rolf)) # someone else's personal herbarium
+
+    get(:list_herbaria, merge: source.id)
+    assert_select("a[href*=edit_herbarium]", count: 0)
+    assert_select("a[href*=merge_herbaria]", count: 0)
+
+    login("dick")
+    get(:list_herbaria, merge: source.id)
+    assert_select("a[href*='that=#{source.id}']", count: 0)
+    assert_select("a[href*='that=#{herb1.id}']", count: 1)
+    assert_select("a[href*='that=#{herb2.id}']", count: 1)
+    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+
+    login("rolf")
+    get(:list_herbaria, merge: source.id)
+    assert_select("a[href*='that=#{source.id}']", count: 0)
+    assert_select("a[href*='that=#{herb1.id}']", count: 1)
+    assert_select("a[href*='that=#{herb2.id}']", count: 1)
+    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+
+    make_admin("zero")
+    get(:list_herbaria, merge: source.id)
+    assert_select("a[href*='that=#{source.id}']", count: 0)
+    assert_select("a[href*='that=#{herb1.id}']", count: 1)
+    assert_select("a[href*='that=#{herb2.id}']", count: 1)
+    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+  end
+
+  def test_merge_herbaria
+    # Rule is non-admins can only merge herbaria which they own all the records
+    # at, into their own personal herbarium.  Nothing else.  Mary owns all the
+    # records at Mycoflora, randomly enough, so if we create a personal
+    # herbarium for her, she should be able to merge Mycoflora into it.
+    mycoflora = herbaria(:mycoflora_herbarium)
+    assert_true(mycoflora.herbarium_records.all? {|r| r.user == mary})
+    mary_herbarium = mary.create_personal_herbarium
+    id1 = mycoflora.id
+    id2 = mary_herbarium.id
+    id3 = herbaria(:nybg_herbarium).id
+    id4 = herbaria(:field_museum).id
+
+    get(:merge_herbaria, this: id1, that: id2)
+    assert_redirected_to(controller: :account, action: :login)
+
+    login("rolf")
+    get(:merge_herbaria, this: id1, that: id2)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id1, new_id: id2)
+
+    login("mary")
+    get(:merge_herbaria)
+    assert_flash_error
+    get(:merge_herbaria, this: id2, that: id2)
+    assert_no_flash
+    get(:merge_herbaria, this: 666)
+    assert_flash_error
+    get(:merge_herbaria, this: id1, that: 666)
+    assert_flash_error
+    get(:merge_herbaria, this: id3, that: id3)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id3, new_id: id3)
+    get(:merge_herbaria, this: id1, that: id3)
+    assert_redirected_to(controller: :observer, action: :email_merge_request,
+                         type: :Herbarium, old_id: id1, new_id: id3)
+    get(:merge_herbaria, this: id1, that: id2)
+    assert_flash_success
+    # Mycoflora ends up being the destination because it is older.
+    assert_redirected_to(mycoflora.show_link_args)
+
+    make_admin("mary")
+    get(:merge_herbaria, this: id3, that: id4)
+    assert_flash_success
+    assert_redirected_to(herbaria(:nybg_herbarium).show_link_args)
+  end
+
   def test_show_herbarium
     nybg = herbaria(:nybg_herbarium)
     get_with_dump(:show_herbarium, id: nybg.id)
@@ -272,6 +397,63 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_nil(nybg.reload.location)
     assert_redirected_to(controller: :location, action: :create_location,
                          where: "New Location", set_herbarium: nybg.id)
+  end
+
+  def test_edit_herbarium_post_admin_set_personal_user
+    herbarium = herbaria(:mycoflora_herbarium)
+    params = herbarium_params.merge(
+      name: herbarium.name,
+      personal_user_name: "mary"
+    )
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_nil(herbarium.reload.personal_user_id)
+    login("mary")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_nil(herbarium.reload.personal_user_id)
+    make_admin("rolf")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(mary, herbarium.reload.personal_user)
+    assert_user_list_equal([mary], herbarium.curators)
+  end
+
+  def test_edit_herbarium_post_admin_change_personal_user
+    herbarium = herbaria(:dick_herbarium)
+    params = herbarium_params.merge(
+      name: herbarium.name,
+      personal_user_name: "mary"
+    )
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    login("mary")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    login("dick")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    make_admin("rolf")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(mary, herbarium.reload.personal_user)
+    assert_user_list_equal([mary], herbarium.curators)
+  end
+
+  def test_edit_herbarium_post_admin_clear_personal_user
+    herbarium = herbaria(:dick_herbarium)
+    params = herbarium_params.merge(
+      name: herbarium.name,
+      personal_user_name: ""
+    )
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    login("mary")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    login("dick")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(dick, herbarium.reload.personal_user)
+    make_admin("rolf")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_nil(herbarium.reload.personal_user_id)
+    assert_empty(herbarium.curators)
   end
 
   def test_delete_curator
