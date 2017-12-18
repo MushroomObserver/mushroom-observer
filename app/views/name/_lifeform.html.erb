@@ -1,13 +1,13 @@
-<p>
-  <% if !@name.lifeform.blank? %>
+<% if !@name.lifeform.blank? %>
+  <div style="margin-bottom:0.5em">
     <% @name.lifeform.strip.split(" ").each do |word| %>
-      <%= :"lifeform_#{word}".t %><br/>
+      <p><%= :"lifeform_#{word}".t %></p>
     <% end %>
-  <% end %>
-</p>
+  </div>
+<% end %>
 
 <% if @first_child %>
-  <%= link_with_query(:show_name_propagate_lifeform.t,
-                     controller: :name, action: :propagate_lifeform,
-                     id: @name.id) %><br/>
+  <p><%= link_with_query(:show_name_propagate_lifeform.t,
+                         controller: :name, action: :propagate_lifeform,
+                         id: @name.id) %></p>
 <% end %>

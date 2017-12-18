@@ -57,19 +57,19 @@
     <div class="list-group">
       <div class="list-group-item">
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-6 name-section">
             <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
             <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
             <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
             <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
             <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
           </div>
-          <div class="col-sm-6">
-            <%= content_tag(:div, link_to("EOL", @name.eol_url)) if @name.eol_url %>
-            <%= content_tag(:div, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
-            <%= content_tag(:div, link_to("MyCoPortal", mycoportal_url(@name))) %>
-            <%= content_tag(:div, link_to("MycoBank", mycobank_url(@name))) %>
-            <%= content_tag(:div, link_with_query(:show_name_distribution_map.t, action: :map, id: @name.id)) %>
+          <div class="col-sm-6 name-section">
+            <%= content_tag(:p, link_to("EOL", @name.eol_url)) if @name.eol_url %>
+            <%= content_tag(:p, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
+            <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(@name))) %>
+            <%= content_tag(:p, link_to("MycoBank", mycobank_url(@name))) %>
+            <%= content_tag(:p, link_with_query(:show_name_distribution_map.t, action: :map, id: @name.id)) %>
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@
 
     <strong><%= :show_name_nomenclature.t %>:</strong>
     <div class="list-group">
-      <div class="list-group-item">
+      <div class="list-group-item name-section">
         <%= render(partial: "name", object: @name, locals: {synonyms: true}) %>
       </div>
     </div>
@@ -90,7 +90,7 @@
                                  id: @name.description.id) %>]
           <% end %>
         <div class="list-group">
-          <div class="list-group-item" id="classification_section">
+          <div class="list-group-item name-section" id="classification_section">
             <%= render(partial: "classification") %>
           </div>
         </div>
@@ -103,7 +103,7 @@
                                  action: :edit_lifeform, id: @name.id) %>]
           <% end %>
         <div class="list-group">
-          <div class="list-group-item" id="lifeform_section">
+          <div class="list-group-item name-section" id="lifeform_section">
             <%= render(partial: "lifeform") %>
           </div>
         </div>
