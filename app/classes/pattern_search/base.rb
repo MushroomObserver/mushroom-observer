@@ -36,7 +36,7 @@ module PatternSearch
     end
 
     def help_message
-      "#{:pattern_search_terms_help.l}\n" + params.keys.each do |arg|
+      "#{:pattern_search_terms_help.l}\n" + params.keys.map do |arg|
         "* *#{arg}*: #{ :"#{model.type_tag}_term_#{arg}".l }"
       end.join("\n")
     end
