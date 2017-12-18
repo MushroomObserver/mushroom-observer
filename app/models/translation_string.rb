@@ -69,4 +69,10 @@ class TranslationString < AbstractModel
     fail "Localization for :#{tag.to_sym} doesn't exist!" unless data[tag.to_sym]
     data[tag.to_sym] = text
   end
+
+  # Get age of official language's banner.  (Used by application layout to
+  # determine if user has dismissed it yet.)
+  def self.banner_time
+    where(tag: "app_banner_box", language: Language.official).first.updated_at
+  end
 end

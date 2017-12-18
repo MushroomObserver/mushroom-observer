@@ -3166,6 +3166,9 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_change_banner
     use_test_locales do
+      # Oops!  One of these tags actually exists now!
+      TranslationString.where(tag: "app_banner_box").each(&:destroy)
+
       str1 = TranslationString.create!(
         language: languages(:english),
         tag: :app_banner_box,

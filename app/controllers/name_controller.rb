@@ -351,7 +351,7 @@ class NameController < ApplicationController
 
       # Get classification.
       @classification = @name.classification
-      @parents = @name.parent unless @classification
+      @parents = @name.parents unless @classification
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)
