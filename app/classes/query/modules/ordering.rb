@@ -63,7 +63,7 @@ module Query::Modules::Ordering
       "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
-      if columns.include?("user_id")
+      if columns.include?("user_id") || model == Herbarium
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end

@@ -3,7 +3,11 @@
 
   tabs = []
   if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
-    tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
+    tabs += [
+      link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id),
+      link_to(:destroy_object.t(type: :herbarium), action: :destroy_herbarium,
+                                id: @herbarium.id)
+    ]
   end
   tabs += [
     link_to(:create_herbarium.t, action: :create_herbarium),

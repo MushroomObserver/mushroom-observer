@@ -71,11 +71,13 @@ class HerbariumController < ApplicationController
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
       ["records",     :sort_by_records.t],
+      ["user",        :sort_by_user.t],
       ["code",        :sort_by_code.t],
       ["name",        :sort_by_name.t],
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t]
     ]
+    args[:sorting_links].reject! { |x| x[0] == "user" } if @no_user_column
 
     show_index_of_objects(query, args)
   end
@@ -215,6 +217,7 @@ class HerbariumController < ApplicationController
     return false if already_have_personal_herbarium!
     return false if cant_make_this_personal_herbarium!
     @herbarium.personal_user_id = @user.id
+    @herbarium.add_curator(@user)
     true
   end
 
@@ -308,7 +311,7 @@ class HerbariumController < ApplicationController
   #  Curators
   # ----------------------------
 
-  def delete_curator
+  def delete_curator # :norobots:
     herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless herbarium
     user = User.safe_find(params[:user])
@@ -320,7 +323,7 @@ class HerbariumController < ApplicationController
     redirect_back_or_default(herbarium.show_link_args)
   end
 
-  def request_to_be_curator
+  def request_to_be_curator # :norobots:
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
     subject = "Herbarium Curator Request"
@@ -330,6 +333,23 @@ class HerbariumController < ApplicationController
       "Notes: #{params[:notes]}"
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     flash_notice(:show_herbarium_request_sent.t)
+  end
+
+  # ----------------------------
+  #  Destroy
+  # ----------------------------
+
+  def destroy_herbarium # :norobots:
+    pass_query_params
+    @herbarium = find_or_goto_index(Herbarium, params[:id])
+    return unless @herbarium
+    if !in_admin_mode? && !@herbarium.curator?(@user)
+      flash_error(:permission_denied.t)
+      redirect_back_or_default("/")
+    else
+      @herbarium.destroy
+      redirect_with_query(action: :index_herbarium)
+    end
   end
 
   ##############################################################################

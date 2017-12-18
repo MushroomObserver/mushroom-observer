@@ -17,15 +17,17 @@
       </div>
       <div class="well well-sm push-down help-block">
         <div class="arrow-up" style="margin-top:6px"></div>
-        <% Herbarium.connection.select_rows(%(
+        <% users = Herbarium.connection.select_rows(%(
           SELECT u.name, u.login, COUNT(u.id)
           FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
           WHERE hr.herbarium_id = #{@herbarium.id}
           GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
-        )).each do |name, login, count| %>
+        ))
+        users.each do |name, login, count| %>
           <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
                                              num: count) %><br/>
         <% end %>
+        <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
       </div>
     </div>
   </div>

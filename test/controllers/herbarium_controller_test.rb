@@ -399,6 +399,37 @@ class HerbariumControllerTest < FunctionalTestCase
                          where: "New Location", set_herbarium: nybg.id)
   end
 
+  def test_edit_herbarium_user_make_personal
+    # Make sure this herbarium is ready to be made Mary's personal herbarium.
+    herbarium = herbaria(:mycoflora_herbarium)
+    assert_empty(herbarium.curators)
+    assert_nil(herbarium.personal_user_id)
+    assert_true(herbarium.herbarium_records.all? {|r| r.user_id == mary.id })
+    assert_true(herbarium.can_make_personal?(mary))
+
+    params = herbarium_params.merge(name: herbarium.name, personal: "1")
+
+    # Rolf doesn't own all the records, so can't make it his.
+    login("rolf")
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_nil(herbarium.reload.personal_user_id)
+    assert_empty(herbarium.reload.curators)
+
+    # Make sure if Mary already has one she cannot make this one, too.
+    login("mary")
+    other = herbaria(:dick_herbarium)
+    other.update_columns(personal_user_id: mary.id)
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_nil(herbarium.reload.personal_user_id)
+    assert_empty(herbarium.reload.curators)
+
+    # But if she owns all the records and doesn't have one, then she can.
+    other.update_columns(personal_user_id: dick.id)
+    post(:edit_herbarium, id: herbarium.id, herbarium: params)
+    assert_users_equal(mary, herbarium.reload.personal_user)
+    assert_user_list_equal([mary], herbarium.reload.curators)
+  end
+
   def test_edit_herbarium_post_admin_set_personal_user
     herbarium = herbaria(:mycoflora_herbarium)
     params = herbarium_params.merge(
@@ -516,5 +547,30 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
     assert_match(/ZZYZX/, ActionMailer::Base.deliveries.last.to_s)
+  end
+
+  def test_destroy_herbarium
+    herbarium = herbaria(:nybg_herbarium)
+
+    # Must be logged in.
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # Must be curator or admin.
+    login("mary")
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # Curator can do it.
+    login("roy")
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_nil(Herbarium.safe_find(herbarium.id))
+  end
+
+  def test_destroy_herbarium_admin
+    herbarium = herbaria(:nybg_herbarium)
+    make_admin("mary")
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_nil(Herbarium.safe_find(herbarium.id))
   end
 end
