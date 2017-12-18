@@ -349,10 +349,6 @@ class NameController < ApplicationController
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
-      # Get classification.
-      @classification = @name.classification
-      @parents = @name.parents unless @classification
-
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)
       if @name.at_or_below_genus?
