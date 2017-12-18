@@ -263,7 +263,7 @@ class HerbariumController < ApplicationController
   def perform_or_request_merge(this, that)
     if in_admin_mode? || this.can_merge_into?(that)
       perform_merge(this, that)
-    elsif this != that
+    else
       request_merge(this, that)
     end
   end
