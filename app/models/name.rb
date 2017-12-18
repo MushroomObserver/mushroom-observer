@@ -1752,7 +1752,7 @@ class Name < AbstractModel
   end
 
   def self.standardized_group_abbr(str)
-    word = group_wd(str)
+    word = group_wd(str.to_s.downcase)
     word =~ /^g/ ? "group" : word
   end
 
