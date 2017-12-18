@@ -1296,6 +1296,7 @@
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
   email_merge_request_help: "By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types]."
+  email_merge_request_success: "Your request has been sent.  Thank you!"
 
   # observer/_form_comments
   form_comments_comment: "[:Comment]"
@@ -2217,7 +2218,6 @@
   herbarium_curator: Curator
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
-  herbarium_herbarium_record_count: Herbarium Records
   user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/show_herbarium
@@ -2244,14 +2244,27 @@
   # herbarium/edit_herbarium
   edit_herbarium: Edit Herbarium
   edit_herbarium_title: Editing Herbarium
+  edit_herbarium_this_is_personal_herbarium: This is your personal herbarium. You are only allowed one personal herbarium. If you would like to change which herbarium is your personal herbarium, please contact the admins and explain the situation.
+  edit_herbarium_cant_make_personal: You can't make this your personal herbarium because you don't own all the herbarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
+  edit_herbarium_admin_make_personal: Make this the personal herbarium for
+  edit_herbarium_user_records: "User \"[name]\" has [num] records in this herbarium."
+  edit_herbarium_no_herbarium_records: No herbarium records for this herbarium.
+  edit_herbarium_user_already_has_personal_herbarium: User \"[user]\" already has a personal herbarium called \"[herbarium]\".
+  edit_herbarium_successfully_made_personal: "Successfully made this the personal herbarium of \"[user]\"."
+  edit_herbarium_successfully_made_nonpersonal: "Successfully made this nobody's personal herbarium."
+
+
 
   # herbarium/list_herbaria
   list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
   # herbarium/index
   herbarium_index: Herbarium Index
-  herbarium_index_title: List of All Herbaria
-
+  herbarium_index_title: List of Herbaria that Aren't Personal Herbaria
+  herbarium_index_list_all_herbaria: List All Herbaria
+  herbarium_index_nonpersonal_herbaria: List Non-personal Herbaria
+  herbarium_index_records: Records
+  herbarium_index_merge_help: "Click on the herbarium below that you would like to merge \"[name]\" into.  This will cause \"[name]\" to be deleted and all of its records and curators to be transferred into the new herbarium.  If you do not have permission to perform the merge, it will send a request to the admins.  (\"+Cancel merge.+\":[url])"
 
 
   # herbarium record fields
@@ -3796,6 +3809,7 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
+  sort_by_code: "[:herbarium_code]"
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
@@ -3815,6 +3829,7 @@
   sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
   sort_by_posted: Date Posted
+  sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
   sort_by_rss_log: "[:sort_by_updated_at]"
   sort_by_summary: "[:SUMMARY]"

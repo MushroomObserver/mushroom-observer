@@ -1248,6 +1248,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_names_equal(name1, assigns(:old_obj))
     assert_names_equal(name2, assigns(:new_obj))
+    url = "email_merge_request?new_id=#{name2.id}&old_id=#{name1.id}&type=Name"
+    assert_select("form[action*='#{url}']", count: 1)
   end
 
   def test_email_merge_request_post

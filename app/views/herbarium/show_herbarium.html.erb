@@ -1,9 +1,13 @@
 <%
-  @title = @herbarium.format_name.t.strip_html
+  @title = @herbarium.format_name.t
 
   tabs = []
-  if @herbarium.curator?(@user) || in_admin_mode?
-    tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
+  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
+    tabs += [
+      link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id),
+      link_to(:destroy_object.t(type: :herbarium), action: :destroy_herbarium,
+                                id: @herbarium.id)
+    ]
   end
   tabs += [
     link_to(:create_herbarium.t, action: :create_herbarium),
@@ -21,7 +25,7 @@
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
     <div class="push-down">
-      <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.count),
+      <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.length),
                   controller: :herbarium_record, action: :herbarium_index, id: @herbarium.id) %>
     </div>
 

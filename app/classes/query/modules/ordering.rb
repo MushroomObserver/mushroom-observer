@@ -63,7 +63,7 @@ module Query::Modules::Ordering
       "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
-      if columns.include?("user_id")
+      if columns.include?("user_id") || model == Herbarium
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
@@ -138,6 +138,18 @@ module Query::Modules::Ordering
 
     when "name_and_number"
       "collection_numbers.name ASC, collection_numbers.number ASC"
+
+    when "code"
+      where << "herbaria.code != ''"
+      "herbaria.code ASC"
+
+    when "code_then_name"
+      "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
+
+    when "records"
+      add_join(:herbarium_records)
+      self.group = "herbaria.id"
+      "count(herbarium_records.id) DESC"
 
     when "id" # (for testing)
       "#{table}.id ASC"

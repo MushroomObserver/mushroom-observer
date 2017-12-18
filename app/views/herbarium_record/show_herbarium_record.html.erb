@@ -1,5 +1,5 @@
 <%
-  @title = "#{:HERBARIUM_RECORD.t} '#{@herbarium_record.format_name.t}'".strip_html
+  @title = :HERBARIUM_RECORD.t + " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
 
   tabs = []
   if in_admin_mode? || @herbarium_record.can_edit?

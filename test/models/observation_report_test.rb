@@ -114,7 +114,7 @@ class ObservationReportTest < UnitTestCase
         "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
       "NA Mycoflora Project",
       "314159",
-      "Found in a strange place&#8230; &amp; with śtrangè characters™"
+      "Found in a strange place... & with śtrangè characters™"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end

@@ -70,6 +70,7 @@ class SequenceController < ApplicationController
   end
 
   def create_sequence
+    store_location
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
@@ -82,6 +83,7 @@ class SequenceController < ApplicationController
   end
 
   def edit_sequence
+    store_location
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence

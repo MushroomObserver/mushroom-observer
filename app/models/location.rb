@@ -583,6 +583,8 @@ class Location < AbstractModel
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
   def merge(old_loc, _log = true)
+    return if old_loc == self
+
     # Move observations over first.
     old_loc.observations.each do |obs|
       obs.location = self

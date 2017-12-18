@@ -89,7 +89,7 @@ class ObserverController
     return unless @model
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
-    if !@old_obj || !@new_obj
+    if !@old_obj || !@new_obj || @old_jb == @new_obj
       redirect_back_or_default(action: :index)
       return
     end
@@ -124,6 +124,7 @@ class ObserverController
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
+    flash_notice(:email_merge_request_success.t)
     redirect_to(@old_obj.show_link_args)
   end
 end

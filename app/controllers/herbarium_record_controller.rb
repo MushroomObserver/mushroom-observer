@@ -109,6 +109,7 @@ class HerbariumRecordController < ApplicationController
   # ----------------------------
 
   def create_herbarium_record
+    store_location
     pass_query_params
     @layout      = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
@@ -124,6 +125,7 @@ class HerbariumRecordController < ApplicationController
   end
 
   def edit_herbarium_record # :norobots:
+    store_location
     pass_query_params
     @layout = calc_layout_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])

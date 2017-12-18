@@ -34,7 +34,6 @@
 #  curator?(user)::         Check if a User is a curator.
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
-#  herbarium_record_count:: Number of HerbariumRecord's at this Herbarium.
 #  sort_name::              Stripped-down version of name for sorting.
 #
 #  == Callbacks
@@ -56,9 +55,11 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name
   attr_accessor :personal
+  attr_accessor :personal_user_name
 
   def can_edit?(user = User.current)
-    curators.none? || curators.member?(user)
+    personal_user_id ? personal_user_id == user.try(&:id) :
+                       curators.none? || curators.member?(user)
   end
 
   def curator?(user)
@@ -73,10 +74,6 @@ class Herbarium < AbstractModel
     curators.delete(user)
   end
 
-  def herbarium_record_count
-    herbarium_records.count
-  end
-
   def format_name
     code.blank? ? name : "#{name} (#{code})"
   end
@@ -86,7 +83,23 @@ class Herbarium < AbstractModel
   end
 
   def sort_name
-    name.t.strip_html.gsub(/\W+/, " ").strip_squeeze.downcase
+    name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
+  end
+
+  def owns_all_records?(user = User.current)
+    herbarium_records.all? { |r| r.user_id == user.id }
+  end
+
+  def can_make_personal?(user = User.current)
+    user && !user.personal_herbarium && owns_all_records?(user)
+  end
+
+  def can_merge_into?(other, user = User.current)
+    return false if self == other
+    # Target must be user's personal herbarium.
+    return false if !user || !other || other.personal_user_id != user.id
+    # User must own all the records attached to the one being deleted.
+    herbarium_records.all? { |r| r.user_id == user.id }
   end
 
   # Info to include about each herbarium in merge requests.
@@ -97,6 +110,7 @@ class Herbarium < AbstractModel
   end
 
   def merge(that)
+    return that if that == self
     this = self
     this, that = [that, this] if that.created_at < this.created_at
     [:code, :location, :email, :mailing_address].each do |var|
