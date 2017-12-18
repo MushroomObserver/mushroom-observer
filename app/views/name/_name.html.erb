@@ -1,4 +1,4 @@
-<p><%= :RANK.t %>: <%= rank_as_string(name.rank) %></p>
+<p><%= :RANK.t %>: <%= name.rank ? rank_as_string(name.rank) : :unknown.t %></p>
 <p><%= :STATUS.t %>: <%= name.status %>
   <% if name.is_misspelling? %>
     (<%= :MISSPELLED.t %>)
