@@ -8,27 +8,51 @@
   </div>
 </div>
 
-<% if @herbarium.personal_user_id == @user.id %>
-  <div class="row form-group">
-    <div class="col-xs-12 help-block">
-      <%= :edit_herbarium_this_is_personal_herbarium.tp %>
-    </div>
-  </div>
-<% end %>
-
-<% if button == :CREATE || @herbarium.can_make_personal?(@user) %>
+<% if in_admin_mode? %>
   <div class="row form-group">
     <div class="col-xs-12">
       <div class="form-inline">
-        <%= check_box(:herbarium, :personal, class: "form-control-xxx") %>
-        <%= label_tag(:herbarium_personal, :create_herbarium_personal.t) %>
+        <%= label_tag(:herbarium_personal_user_name, :edit_herbarium_admin_make_personal.t) %>:
+        <%= text_field(:herbarium, :personal_user_name, class: "form-control-xxx") %>
       </div>
       <div class="well well-sm push-down help-block">
-        <div class="arrow-up"></div>
-        <%= :create_herbarium_personal_help.t(name: @user.personal_herbarium_name) %>
+        <div class="arrow-up" style="margin-top:6px"></div>
+        <% Herbarium.connection.select_rows(%(
+          SELECT u.name, u.login, COUNT(u.id)
+          FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
+          WHERE hr.herbarium_id = #{@herbarium.id}
+          GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
+        )).each do |name, login, count| %>
+          <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
+                                             num: count) %><br/>
+        <% end %>
       </div>
     </div>
   </div>
+
+<% else %>
+  <% if @herbarium.personal_user_id == @user.id %>
+    <div class="row form-group">
+      <div class="col-xs-12 help-block">
+        <%= :edit_herbarium_this_is_personal_herbarium.tp %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if button == :CREATE || @herbarium.can_make_personal?(@user) %>
+    <div class="row form-group">
+      <div class="col-xs-12">
+        <div class="form-inline">
+          <%= check_box(:herbarium, :personal, class: "form-control-xxx") %>
+          <%= label_tag(:herbarium_personal, :create_herbarium_personal.t) %>
+        </div>
+        <div class="well well-sm push-down help-block">
+          <div class="arrow-up"></div>
+          <%= :create_herbarium_personal_help.t(name: @user.personal_herbarium_name) %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 <% end %>
 
 <% if !@herbarium.personal_user_id %>

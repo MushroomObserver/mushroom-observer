@@ -7,12 +7,20 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
+<% if @merge %>
+  <div class="alert alert-warning max-width-text push-down">
+    <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
+                                       url: reload_with_args(merge: nil)) %>
+  </div>
+<% end %>
+
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
     <table class="table-striped table-herbarium push-down">
       <thead>
         <tr>
-          <th><%= :herbarium_herbarium_record_count.t %></th>
+          <th><%= :herbarium_index_records.t %></th>
+          <th><%= :USER.t unless @no_user_column %></th>
           <th><%= :herbarium_code.t %></th>
           <th><%= :NAME.t %></th>
         </tr>
@@ -20,17 +28,32 @@
       <tbody>
         <% @objects.each do |herbarium| %>
           <tr>
-            <td align="center">
+            <td>
               <%= herbarium.herbarium_records.length %>
             </td>
-            <td style="max-width:10em; text-overflow:ellipsis; overflow:hidden">
+            <td>
+              <%= if herbarium.personal_user_id.present? && !@no_user_column
+                content_tag(:span, user_link(herbarium.personal_user),
+                            title: herbarium.personal_user.unique_text_name)
+              end %>
+            </td>
+            <td>
               <%= herbarium.code %>
             </td>
             <td>
-              <%= link_with_query(herbarium.format_name.t,
-                                  herbarium.show_link_args) %>
-              <% if herbarium.can_edit? || in_admin_mode? %>
-                [<%= link_to(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %>]
+              <% if !@merge %>
+                <%= link_with_query(herbarium.name.t,
+                                    herbarium.show_link_args) %>
+              <% elsif @merge != herbarium %>
+                <%= link_with_query(herbarium.name.t,
+                                    controller: :herbarium, action: :merge_herbaria,
+                                    this: @merge.id, that: herbarium.id) %>
+              <% else %>
+                [<%= content_tag(:i, herbarium.name.t, style: "color:red") %>]
+              <% end %>
+              <% if !@merge && (herbarium.can_edit? || in_admin_mode?) %>
+                [<%= link_to(:EDIT.t, action: :edit_herbarium, id: herbarium.id) %> |
+                 <%= link_to(:MERGE.t, reload_with_args(merge: herbarium.id)) %>]
               <% end %>
             </td>
           </tr>

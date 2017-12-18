@@ -26,6 +26,7 @@ class HerbariumController < ApplicationController
     @title = :herbarium_index_title.t
     @links = [[:herbarium_index_list_all_herbaria.l,
                { controller: :herbarium, action: :list_herbaria }]]
+    @no_user_column = true
     show_selected_herbaria(query, always_index: true)
   end
 
@@ -56,12 +57,16 @@ class HerbariumController < ApplicationController
       action: :list_herbaria,
       letters: "herbaria.name",
       num_per_page: 100,
-      include: [:curators, :herbarium_records]
+      include: [:curators, :herbarium_records, :personal_user]
     }.merge(args)
 
     @links ||= []
     @links << [:create_herbarium.l,
                { controller: :herbarium, action: :create_herbarium }]
+
+    # If user clicks "merge" on an herbarium, it reloads the page and asks
+    # them to click on the destination herbarium to merge it with.
+    @merge = Herbarium.safe_find(params[:merge])
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -126,8 +131,9 @@ class HerbariumController < ApplicationController
     return unless @herbarium
     return unless make_sure_can_edit!
     if request.method == "GET"
-      @herbarium.place_name = @herbarium.location.try(&:name)
-      @herbarium.personal   = @herbarium.personal_user_id.present?
+      @herbarium.place_name         = @herbarium.location.try(&:name)
+      @herbarium.personal           = @herbarium.personal_user_id.present?
+      @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
     elsif request.method == "POST"
       post_edit_herbarium
     else
@@ -135,12 +141,20 @@ class HerbariumController < ApplicationController
     end
   end
 
+  def merge_herbaria # :norobots:
+    this = find_or_goto_index(Herbarium, params[:this]) || return
+    that = find_or_goto_index(Herbarium, params[:that]) || return
+    result = perform_or_request_merge(this, that) || return
+    redirect_to(result.show_link_args)
+  end
+
   def post_create_herbarium
     @herbarium = Herbarium.new(whitelisted_herbarium_params)
     normalize_parameters
     if validate_name! &&
        validate_location! &&
-       validate_personal_herbarium!
+       validate_personal_herbarium! &&
+       validate_admin_personal_user!
       @herbarium.save
       @herbarium.add_curator(@user) if @herbarium.personal_user
       notify_admins_of_new_herbarium unless @herbarium.personal_user
@@ -153,7 +167,8 @@ class HerbariumController < ApplicationController
     normalize_parameters
     if validate_name! &&
        validate_location! &&
-       validate_personal_herbarium!
+       validate_personal_herbarium! &&
+       validate_admin_personal_user!
       @herbarium.save
       redirect_to_create_location || redirect_to_show_herbarium
     end
@@ -181,18 +196,8 @@ class HerbariumController < ApplicationController
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       return false
-    elsif in_admin_mode? || @herbarium.can_merge_into?(other)
-      old_name = @herbarium.name_was
-      @herbarium = @herbarium.merge(other)
-      flash_notice(:runtime_merge_success.t(type: :herbarium,
-                                            this: old_name,
-                                            that: @herbarium.name))
-      return true
     else
-      redirect_with_query(controller: :observer, action: :email_merge_request,
-                          type: :Herbarium, old_id: @herbarium.id,
-                          new_id: other.id)
-      return false
+      @herbarium = perform_or_request_merge(@herbarium, other)
     end
   end
 
@@ -205,11 +210,40 @@ class HerbariumController < ApplicationController
   end
 
   def validate_personal_herbarium!
+    return true  if in_admin_mode?
     return true  if @herbarium.personal != "1"
     return false if already_have_personal_herbarium!
     return false if cant_make_this_personal_herbarium!
     @herbarium.personal_user_id = @user.id
     true
+  end
+
+  def validate_admin_personal_user!
+    return true unless in_admin_mode?
+    if @herbarium.personal_user_name.blank?
+      return true if @herbarium.personal_user_id.nil?
+      flash_notice(:edit_herbarium_successfully_made_nonpersonal.t)
+      @herbarium.personal_user_id = nil
+      @herbarium.curators.clear
+      return true
+    end
+    user = User.find_by_login(@herbarium.personal_user_name)
+    unless user
+      flash_error(:runtime_no_match_name.t(
+                    type: :user, value: @herbarium.personal_user_name
+                  ))
+      return false
+    end
+    return true if user.personal_herbarium == @herbarium
+    if user.personal_herbarium.present?
+      flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
+                    user: user.login, herbarium: user.personal_herbarium.name
+                  ))
+      return false
+    end
+    flash_notice(:edit_herbarium_successfully_made_personal.t(user: user.login))
+    @herbarium.add_curator(user)
+    @herbarium.personal_user_id = user.id
   end
 
   def already_have_personal_herbarium!
@@ -223,6 +257,29 @@ class HerbariumController < ApplicationController
     return false if @herbarium.new_record? || @herbarium.can_make_personal?
     flash_error(:edit_herbarium_cant_make_personal.t)
     true
+  end
+
+  def perform_or_request_merge(this, that)
+    if in_admin_mode? || this.can_merge_into?(that)
+      perform_merge(this, that)
+    else
+      request_merge(this, that)
+    end
+  end
+
+  def perform_merge(this, that)
+    old_name = this.name_was
+    result = this.merge(that)
+    flash_notice(:runtime_merge_success.t(type: :herbarium,
+                                          this: old_name,
+                                          that: result.name))
+    result
+  end
+
+  def request_merge(this, that)
+    redirect_with_query(controller: :observer, action: :email_merge_request,
+                        type: :Herbarium, old_id: this.id, new_id: that.id)
+    false
   end
 
   def redirect_to_create_location
@@ -282,6 +339,6 @@ class HerbariumController < ApplicationController
     return {} unless params[:herbarium]
     params.require(:herbarium).
       permit(:name, :code, :email, :mailing_address, :description,
-             :place_name, :personal)
+             :place_name, :personal, :personal_user_name)
   end
 end

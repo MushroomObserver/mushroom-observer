@@ -55,6 +55,7 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name
   attr_accessor :personal
+  attr_accessor :personal_user_name
 
   def can_edit?(user = User.current)
     personal_user_id ? personal_user_id == user.try(&:id) :
