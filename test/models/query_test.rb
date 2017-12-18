@@ -1888,7 +1888,7 @@ class QueryTest < UnitTestCase
   def test_location_by_editor
     assert_query([], :Location, :by_editor, user: rolf)
     User.current = mary
-    loc = Location.first
+    loc = Location.where.not(user: mary).first
     loc.display_name = "new name"
     loc.save
     assert_query([loc], :Location, :by_editor, user: mary)
