@@ -3168,7 +3168,7 @@ class ObserverControllerTest < FunctionalTestCase
     use_test_locales do
       str1 = TranslationString.create!(
         language: languages(:english),
-        tag: :app_banner_box,
+        tag: :random_tag,
         text: "old banner",
         user: User.admin
       )
@@ -3176,7 +3176,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       str2 = TranslationString.create!(
         language: languages(:french),
-        tag: :app_banner_box,
+        tag: :random_tag,
         text: "banner ancienne",
         user: User.admin
       )
@@ -3194,14 +3194,14 @@ class ObserverControllerTest < FunctionalTestCase
       get(:change_banner)
       assert_no_flash
       assert_response(:success)
-      assert_textarea_value(:val, :app_banner_box.l)
+      assert_textarea_value(:val, :random_tag.l)
 
       post(:change_banner, val: "new banner")
       assert_no_flash
       assert_redirected_to(action: :list_rss_logs)
-      assert_equal("new banner", :app_banner_box.l)
+      assert_equal("new banner", :random_tag.l)
 
-      strs = TranslationString.where(tag: :app_banner_box)
+      strs = TranslationString.where(tag: :random_tag)
       strs.each do |str|
         assert_equal("new banner", str.text,
                      "Didn't change text of #{str.language.locale} correctly.")
