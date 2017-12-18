@@ -147,8 +147,16 @@ class HerbariumRecordController < ApplicationController
     HerbariumRecord.new(
       herbarium_name:   @user.preferred_herbarium_name,
       initial_det:      @observation.name.text_name,
-      accession_number: "MO #{@observation.id}"
+      accession_number: default_accession_number
     )
+  end
+
+  def default_accession_number
+    if @observation.collection_numbers.length == 1
+      @observation.collection_numbers.first.format_name
+    else
+      "MO #{@observation.id}"
+    end
   end
 
   def post_create_herbarium_record

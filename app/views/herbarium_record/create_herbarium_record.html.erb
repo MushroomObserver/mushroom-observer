@@ -11,6 +11,8 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-7 max-width-text">
+    <big style="margin-bottom:1em"><%= :Observation.t %> #<%= @observation.id %></big>
+
     <%= form_tag(add_query_param(action: :create_herbarium_record, id: @observation.id)) do %>
       <%= render(partial: "form", locals: {button: :ADD}) %>
     <% end %>
