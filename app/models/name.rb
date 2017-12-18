@@ -962,7 +962,7 @@ class Name < AbstractModel
     genus_text_name = nil
     genus_classification = nil
     genus_rank = Name.ranks[:Genus]
-    # The sort_name ordering should ensure that genera always comes before
+    # The sort_name ordering should ensure that genera always come before
     # the corresponding infrageneric taxa.
     Name.connection.select_rows(%(
       SELECT id, description_id, rank, text_name, classification FROM names
