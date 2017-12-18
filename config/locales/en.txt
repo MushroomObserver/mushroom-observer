@@ -909,6 +909,10 @@
   RANK_PLURAL_GROUP: Groups or Clades
   rank_plural_group: groups or clades
 
+  # These two are used when parsing rank, e.g., in name pattern search.
+  rank_alt_phylum: "phylum, division"
+  rank_alt_group: "group, clade, complex"
+
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
   user_stats_images: "[:IMAGES]"
@@ -3165,7 +3169,55 @@
   location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful.  If you don't find anything there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
 
   # Search bar help
-  observation_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:\n* *date*: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.\n* *created*: Date observation was first posted.\n* *modified*: Date observation was last modified.\n* *name*: Consensus name is one of these names.\n* *synonym_of*: Consensus name is synonym of one of these names.\n* *child_of*: Consensus name is a subtaxon of one of these names.\n* *location*: Location mushroom was observed.\n* *project*: Observation belongs to one of these projects.\n* *list*: Observation belongs to one of these species lists.\n* *user*: Observation created by one of these users.\n* *notes*: Notes contains the given string.\n* *comments*: Comments contain the given string.\n* *confidence*: Confidence is in this range.\n* *east*: Longitude of eastern edge of search region.\n* *west*: Longitude of western edge of search region.\n* *north*: Latitude of northern edge of search region.\n* *south*: Latitude of southern edge of search region.\n* *images*: Has images? (\"yes\" or \"no\")\n* *specimen*: Has a specimen?\n* *has_name*: Has a name? (other than \"Fungi sp.\")\n* *has_notes*: Has notes?\n* *has_comments*: Has and comments?"
+  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+
+  observation_term_date: "Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay."
+  observation_term_created: "Date observation was first posted."
+  observation_term_modified: "Date observation was last modified."
+  observation_term_name: "Consensus name is one of these names."
+  observation_term_synonym_of: "Consensus name is synonym of one of these names."
+  observation_term_child_of: "Consensus name is a subtaxon of one of these names."
+  observation_term_herbarium: "Specimen at an herbarium."
+  observation_term_location: "Location mushroom was observed. Must be an exact match of entire location name. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
+  observation_term_region: "Location mushroom was observed. Partial match anchored at end, including country at least, e.g., \"California\\, USA\". Note that commas must be protected with a back-slash as shown."
+  observation_term_project: "Observation belongs to one of these projects."
+  observation_term_list: "Observation belongs to one of these species lists."
+  observation_term_user: "Observation created by one of these users."
+  observation_term_notes: "Notes contains the given string."
+  observation_term_comments: "Comments contain the given string."
+  observation_term_confidence: "Confidence is in this range."
+  observation_term_east: "Longitude of eastern edge of search region."
+  observation_term_west: "Longitude of western edge of search region."
+  observation_term_north: "Latitude of northern edge of search region."
+  observation_term_south: "Latitude of southern edge of search region."
+  observation_term_images: "Has images? (\"yes\" or \"no\")"
+  observation_term_specimen: "Has a specimen?"
+  observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
+  observation_term_has_name: "Has a name? (other than \"Fungi sp.\")"
+  observation_term_has_notes: "Has notes?"
+  observation_term_has_field: "Has a given notes template field filled in."
+  observation_term_has_comments: "Has and comments?"
+
+  name_term_created: "Date name was first used."
+  name_term_modified: "Date name was last modified."
+  name_term_rank: "Rank or range of ranks, e.g., \"genus\" or \"species-form\"."
+  name_term_synonym_of: "Synonyms of any of these names."
+  name_term_child_of: "Subtaxa of any of these names."
+  name_term_has_synonyms: "Has any synonyms?"
+  name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
+  name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
+  name_term_has_author: "Has author filled in?"
+  name_term_has_citation: "Has citation filled in?"
+  name_term_has_classification: "Has classification filled in?"
+  name_term_has_notes: "Has any taxonomic nodes?"
+  name_term_has_comments: "Has any comments?"
+  name_term_has_description: "Has a public description?"
+  name_term_author: "Author contains this string."
+  name_term_citation: "Citation contains this string."
+  name_term_classification: "Classification contains this string."
+  name_term_notes: "Taxonomic notes contains this string."
+  name_term_comments: "One of the comments contains this string."
 
   ################################################################################
 
@@ -3516,19 +3568,22 @@
 
   # Pattern search error messages.
   pattern_search_syntax_error: "Syntax error in pattern at [string]."
-  pattern_search_bad_observation_term_error: "Unexpected term in observation search: [term]. [:observation_search_terms_help]"
+  pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
   pattern_search_missing_value_error: "Missing value for the term [var]."
   pattern_search_too_many_values_error: "Search term [term] occurs more than once."
   pattern_search_bad_boolean_error: "Invalid value for [term], [value], expected \"yes\" or \"no\"."
   pattern_search_bad_yes_error: "Invalid value for [term], [value], only valid value is \"yes\"."
+  pattern_search_bad_yes_no_both_error: "Invalid value for [term], [value], expected \"yes\", \"no\" or \"either\"."
   pattern_search_bad_float_error: "Invalid value for [term], [value], expected a number between [min] and [max]."
   pattern_search_bad_confidence_error: "Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. \"0-100\"."
   pattern_search_bad_name_error: "Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched."
+  pattern_search_bad_herbarium_error: "Invalid or unrecognized value for [term], [value], expected herbarium id, code or name; nothing matched."
   pattern_search_bad_location_error: "Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched."
   pattern_search_bad_project_error: "Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched."
   pattern_search_bad_species_list_error: "Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched."
   pattern_search_bad_user_error: "Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched."
   pattern_search_bad_date_range_error: "Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD."
+  pattern_search_bad_rank_range_error: "Invalid value for [term], [value], expected rank or range of ranks, e.g., \"genus\" or \"species-form\"."
 
   ################################################################################
 
