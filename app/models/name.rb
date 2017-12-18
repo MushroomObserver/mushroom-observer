@@ -2360,6 +2360,7 @@ class Name < AbstractModel
   # destroyed; all the things that referred to +old_name+ are updated and
   # saved.
   def merge(old_name)
+    return if old_name == self
     xargs = {}
 
     # Move all observations over to the new name.

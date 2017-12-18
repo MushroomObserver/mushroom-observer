@@ -100,6 +100,7 @@ class Herbarium < AbstractModel
   end
 
   def merge(that)
+    return that if that == self
     this = self
     this, that = [that, this] if that.created_at < this.created_at
     [:code, :location, :email, :mailing_address].each do |var|
