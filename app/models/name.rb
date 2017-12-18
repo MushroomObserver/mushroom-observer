@@ -699,7 +699,8 @@ class Name < AbstractModel
 
     # Start with infrageneric and genus names.
     # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split(" ")
+    words = text_name.split(" ") - ["group", "clade", "complex"]
+    words.pop
     until words.empty?
       name = words.join(" ")
       words.pop
@@ -1510,7 +1511,7 @@ class Name < AbstractModel
   SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi
   VAR_ABBR     = / variety | var\.? | v\.? /xi
   F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi
-  GROUP_ABBR   = / group | gr\.? | gp\.? | clade /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
   AUCT_ABBR    = / auct\.? /xi
   INED_ABBR    = / in\s?ed\.? /xi
   NOM_ABBR     = / nomen | nom\.? /xi
@@ -1686,7 +1687,7 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ (group|clade)$/) ? :Group      :
+    text_name.match(/ (group|clade|complex)$/) ? :Group :
     text_name.include?(" f. ")         ? :Form       :
     text_name.include?(" var. ")       ? :Variety    :
     text_name.include?(" subsp. ")     ? :Subspecies :
@@ -1751,7 +1752,8 @@ class Name < AbstractModel
   end
 
   def self.standardized_group_abbr(str)
-    group_wd(str) == "clade" ? "clade" : "group"
+    word = group_wd(str)
+    word =~ /^g/ ? "group" : word
   end
 
   # sripped group_abbr
