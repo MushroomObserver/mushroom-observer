@@ -1296,6 +1296,7 @@
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
   email_merge_request_help: "By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types]."
+  email_merge_request_success: "Your request has been sent.  Thank you!"
 
   # observer/_form_comments
   form_comments_comment: "[:Comment]"

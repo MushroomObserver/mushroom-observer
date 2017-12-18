@@ -9,7 +9,7 @@
 
 <div class="max-width-text">
   <%= :email_merge_request_help.tp(type: @model.type_tag) %>
-  <%= form_tag do %>
+  <%= form_tag(type: @model.name, old_id: @old_obj.id, new_id: @new_obj.id) do %>
     <div class="form-group push-down">
       <%= label_tag(:old_obj, @model.type_tag.to_s.upcase.to_sym.t) %>:
           <%= @old_obj.unique_format_name.t %>

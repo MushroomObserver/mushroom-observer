@@ -124,6 +124,7 @@ class ObserverController
       notes: params[:notes].to_s.strip_html.strip_squeeze
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
+    flash_notice(:email_merge_request_success.t)
     redirect_to(@old_obj.show_link_args)
   end
 end
