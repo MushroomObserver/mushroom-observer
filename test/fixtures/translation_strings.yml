@@ -153,3 +153,11 @@ french_app_contributors: # 18
   text: Contributeurs
   updated_at: 2014-10-20
   user: rolf
+
+banner:
+  version: 1
+  language: english
+  tag: "app_banner_box"
+  text: This should show at the top of every page.
+  updated_at: 2017-12-17 21:36:00
+  user_id: 0

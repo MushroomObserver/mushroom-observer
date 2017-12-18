@@ -51,7 +51,7 @@
 
       banner_text = :app_banner_box.t
       banner_time = TranslationString.banner_time.utc.strftime("%Y%m%d%H%M%S")
-      cookie_time = cookies["hideBanner"]
+      cookie_time = cookies["hideBanner"].to_s
       dismissed   = cookie_time.match(/^\d{14}$/) &&
                     cookie_time.to_d > banner_time.to_d - 10000
       if banner_text.to_s.length > 1 && !dismissed %>
