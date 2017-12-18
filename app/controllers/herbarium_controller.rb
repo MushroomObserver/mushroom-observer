@@ -343,12 +343,14 @@ class HerbariumController < ApplicationController
     pass_query_params
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
-    if !in_admin_mode? && !@herbarium.curator?(@user)
-      flash_error(:permission_denied.t)
-      redirect_back_or_default("/")
-    else
+    if in_admin_mode? ||
+       @herbarium.curator?(@user) ||
+       @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
       @herbarium.destroy
       redirect_with_query(action: :index_herbarium)
+    else
+      flash_error(:permission_denied.t)
+      redirect_back_or_default("/")
     end
   end
 

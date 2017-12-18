@@ -86,9 +86,19 @@ class Herbarium < AbstractModel
     name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
+  def owns_all_records?(user = User.current)
+    herbarium_records.all? { |r| r.user_id == user.id }
+  end
+
   def can_make_personal?(user = User.current)
-    return false unless user
-    return false if user.personal_herbarium
+    user && !user.personal_herbarium && owns_all_records?(user)
+  end
+
+  def can_merge_into?(other, user = User.current)
+    return false if self == other
+    # Target must be user's personal herbarium.
+    return false if !user || !other || other.personal_user_id != user.id
+    # User must own all the records attached to the one being deleted.
     herbarium_records.all? { |r| r.user_id == user.id }
   end
 
@@ -139,14 +149,6 @@ class Herbarium < AbstractModel
     this = self
     this.curators          += that.curators - this.curators
     this.herbarium_records += that.herbarium_records - this.herbarium_records
-  end
-
-  def can_merge_into?(other, user = User.current)
-    return false if self == other
-    # Target must be user's personal herbarium.
-    return false if !user || !other || other.personal_user_id != user.id
-    # User must own all the records attached to the one being deleted.
-    herbarium_records.all? { |r| r.user_id == user.id }
   end
 
   # Look at the most recent HerbariumRecord's the current User has created.

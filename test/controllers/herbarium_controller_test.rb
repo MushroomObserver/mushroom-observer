@@ -111,7 +111,7 @@ class HerbariumControllerTest < FunctionalTestCase
     # records at Mycoflora, randomly enough, so if we create a personal
     # herbarium for her, she should be able to merge Mycoflora into it.
     mycoflora = herbaria(:mycoflora_herbarium)
-    assert_true(mycoflora.herbarium_records.all? {|r| r.user == mary})
+    assert_true(mycoflora.owns_all_records?(mary))
     mary_herbarium = mary.create_personal_herbarium
     id1 = mycoflora.id
     id2 = mary_herbarium.id
@@ -404,7 +404,7 @@ class HerbariumControllerTest < FunctionalTestCase
     herbarium = herbaria(:mycoflora_herbarium)
     assert_empty(herbarium.curators)
     assert_nil(herbarium.personal_user_id)
-    assert_true(herbarium.herbarium_records.all? {|r| r.user_id == mary.id })
+    assert_true(herbarium.owns_all_records?(mary))
     assert_true(herbarium.can_make_personal?(mary))
 
     params = herbarium_params.merge(name: herbarium.name, personal: "1")
@@ -564,6 +564,26 @@ class HerbariumControllerTest < FunctionalTestCase
     # Curator can do it.
     login("roy")
     get(:destroy_herbarium, id: herbarium.id)
+    assert_nil(Herbarium.safe_find(herbarium.id))
+  end
+
+  def test_destroy_herbarium_noncurator_owns_all_records
+    herbarium = herbaria(:mycoflora_herbarium)
+    assert_true(herbarium.owns_all_records?(mary))
+    assert_empty(herbarium.curators)
+
+    # Make sure noncurator can do it only if there are no curators.
+    login("mary")
+    herbarium.add_curator(dick)
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_flash_error
+    assert_not_nil(Herbarium.safe_find(herbarium.id))
+
+    # But if there are no curators and the user owns all the records.
+    # (Note that this means anyone can destroy any uncurated empty herbaria.)
+    herbarium.curators.clear
+    get(:destroy_herbarium, id: herbarium.id)
+    assert_no_flash
     assert_nil(Herbarium.safe_find(herbarium.id))
   end
 
