@@ -127,6 +127,8 @@ class CleanHerbaria < ActiveRecord::Migration
      822,823,827,830,831,851,853,854,856,858,860,862,867,884,899,906].each do |id|
       garbage_herbarium = Herbarium.safe_find(id) || next
       comment = garbage_herbarium.name
+      puts "Destroying herbarium #{comment.inspect}"
+      garbage_herbarium.destroy
       HerbariumRecord.where(herbarium_id: id).each do |herbarium_record|
         if herbarium_record.observations.none?
           puts "Destroying unused herbarium record #{herbarium_record.id}"
@@ -136,15 +138,16 @@ class CleanHerbaria < ActiveRecord::Migration
         obs = herbarium_record.observations.first
         personal_herbarium = obs.user.personal_herbarium ||
                              obs.user.create_personal_herbarium
-        new_notes = "#{comment}\n#{herbarium_record.notes}".gsub(/  +/, " ").gsub(/\s+|\s+$/, "")
+        new_notes = "[This record used to be at an herbarium called " \
+                    "\"#{comment}\". -admins 20171220]\n\n" \
+                    "#{herbarium_record.notes}".
+                    gsub(/  +/, " ").gsub(/\a\s+|\s+\z/, "")
         puts "Adding comment #{comment.inspect} to herbarium record ##{herbarium_record.id}"
-        herbarium_record.update_columns(
+        herbarium_record.update_attributes(
           herbarium_id: personal_herbarium.id,
           notes: new_notes
         )
       end
-      puts "Destroying herbarium #{comment.inspect}"
-      garbage_herbarium.destroy
     end
   end
 
