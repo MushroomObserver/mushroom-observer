@@ -1,11 +1,11 @@
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-xs-12 max-width-text name-section">
 
-    <div id="observation_when">
+    <p id="observation_when">
       <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
-    </div>
+    </p>
 
-    <div id="observation_where">
+    <p id="observation_where">
       <%= observation.is_collection_location ?
             :show_observation_collection_location.t :
             :show_observation_seen_at.t %>:
@@ -13,23 +13,23 @@
         <%= location_link(observation.place_name,
                           observation.location, nil, true) %>
       </span>
-    </div>
+    </p>
 
-    <div id="observation_lat_lng">
+    <p id="observation_lat_lng">
       <% if observation.lat or observation.alt %>
            <%= observation.lat ?
                   "#{observation.lat}° #{observation.long}° " : '' %>
            <%= observation.alt ? "#{observation.alt}m" : '' %>
       <% end %>
-    </div>
+    </p>
 
-    <div id="observation_who">
+    <p id="observation_who">
       <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
-    </div>
+    </p>
 
     <div id="observation_projects">
       <% observation.projects.each do |project| %>
-           <div><%= :PROJECT.t %>: <%= link_to_object(project) %></div>
+           <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
       <% end %>
     </div>
 
