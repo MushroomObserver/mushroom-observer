@@ -1901,6 +1901,15 @@
   show_name_on_mycoportal: on MyCoPortal
   show_name_on_mycobank: on MycoBank
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
+  show_name_inherit_classification: Copy from parent.
+  edit_classification_title: Edit Classification of [name]
+  inherit_classification_title: Copy Classification from Parent of [name]
+  inherit_classification_parent_name: Name of Parent
+  inherit_classification_parent_blank: Parent has no classification, either!
+  inherit_classification_no_matches: No names match.
+  inherit_classification_alt_spellings: No names match.  Maybe you meant one of these?
+  inherit_classification_multiple_matches: Multiple names match.  Which did you mean?
+  inherit_classification_parent_lower_rank: Parent must be higher rank than [rank].
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"

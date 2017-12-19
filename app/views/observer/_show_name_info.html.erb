@@ -6,7 +6,7 @@
                      action: :show_name, id: name.id)
     lines << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
                      mycoportal_url(name))
-    lines << link_to(name.text_name.t + " " + :show_name_on_mycobank.t,
+    lines << link_to(name.display_name.t + " " + :show_name_on_mycobank.t,
                      mycobank_url(name))
  end
 
@@ -84,9 +84,9 @@
   end
 
   lines += list_descriptions(name) if name
-
-  result = lines.safe_join(safe_br)
 %>
 <div class="small">
-  <%=result%>
+  <% lines.each do |line| %>
+    <p><%= line %></p>
+  <% end %>
 </div>
