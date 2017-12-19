@@ -932,7 +932,7 @@ class Name < AbstractModel
     raise("only do this on genera or up!") if below_genus?
     raise("parent has no classification!") if parent.classification.blank?
     str = parent.classification.to_s.sub(/\s+\z/, "")
-    str += "\r\n#{rank}: _#{parent.text_name}_\r\n"
+    str += "\r\n#{parent.rank}: _#{parent.text_name}_\r\n"
     change_classification(str)
   end
 
@@ -2305,7 +2305,6 @@ class Name < AbstractModel
   #
   def change_author(new_author)
     return if rank == :Group
-
     old_author = author
     new_author2 = new_author.blank? ? "" : " " + new_author
     self.author = new_author.to_s

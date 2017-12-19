@@ -15,7 +15,7 @@
         <%= rank = rank_as_lower_string(@name.rank)
         :"form_names_classification_help".l(rank: rank) %>
       </p>
-      <%= text_area_tag(:classification, @classification,
+      <%= text_area_tag(:classification, @name.classification,
                         rows: 10, class: "form-control",
                         data: {autofocus: true}) %>
 

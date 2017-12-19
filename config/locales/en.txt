@@ -1909,6 +1909,7 @@
   inherit_classification_no_matches: No names match.
   inherit_classification_alt_spellings: No names match.  Maybe you meant one of these?
   inherit_classification_multiple_matches: Multiple names match.  Which did you mean?
+  inherit_classification_parent_lower_rank: Parent must be higher rank than [rank].
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"

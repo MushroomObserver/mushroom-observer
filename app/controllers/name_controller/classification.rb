@@ -32,6 +32,7 @@ class NameController
     parent = resolve_name!(@parent_text_name, params[:options])
     return unless parent
     return unless make_sure_parent_has_classification!(parent)
+    return unless make_sure_parent_higher_rank!(parent)
     @name.inherit_classification(parent)
     redirect_with_query(@name.show_link_args)
   end
@@ -42,13 +43,22 @@ class NameController
     @name = find_or_goto_index(Name, params[:id])
     return unless @name
     return unless request.method == "POST"
-    @classification = params[:classification].to_s.strip_html.strip_squeeze
+    @name.classification = params[:classification].to_s.strip_html.strip_squeeze
     return unless validate_classification!
-    @name.change_classification(@classification)
+    @name.change_classification(@name.classification)
     redirect_with_query(@name.show_link_args)
   end
 
   private
+
+  def make_sure_parent_higher_rank!(parent)
+    parent_index = Name.rank_index(parent.rank)
+    our_index = Name.rank_index(@name.rank)
+    return true if our_index < parent_index
+    rank = :"rank_#{@name.rank.to_s.downcase}"
+    flash_error(:inherit_classification_parent_lower_rank.t(rank: rank))
+    false
+  end
 
   def make_sure_name_is_at_or_above_genus!(name)
     return true unless name.below_genus?
@@ -87,14 +97,15 @@ class NameController
   end
 
   def validate_classification!
-    cleaned = Name.validate_classification(@name.rank, @classification)
-    @classification = cleaned
+    cleaned = Name.validate_classification(@name.rank, @name.classification)
+    @name.classification = cleaned
   rescue => e
     flash_error(e.to_s)
     return false
   end
 
   def resolve_name!(in_str, chosen_id)
+    @options = @message = nil
     return Name.find(chosen_id) if chosen_id.present?
     name = Name.find_by_search_name(in_str)
     return name if name
@@ -112,7 +123,7 @@ class NameController
     matches = Name.where(text_name: in_str).to_a
     matches.reject!(&:deprecated) unless matches.all?(&:deprecated)
     matches.reject!(&:is_misspelling?) unless matches.all?(&:is_misspelling?)
-    matches.reject { |n| n.classification.blank? } \
+    matches.reject! { |n| n.classification.blank? } \
       unless matches.all? { |n| n.classification.blank? }
     matches
   end

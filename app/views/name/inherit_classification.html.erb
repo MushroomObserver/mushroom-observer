@@ -15,7 +15,7 @@
           <%= @message.tp %>
           <% @options.each do |name| %>
             <%= radio_button_tag(:options, name.id) %>
-            <%= name.display_name.t %><br/>
+            <%= content_tag(:span, name.display_name.t) %><br/>
           <% end %>
         </div>
       <% end %>

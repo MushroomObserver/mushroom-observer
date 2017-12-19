@@ -187,6 +187,11 @@ class NameControllerTest < FunctionalTestCase
     @@emails = []
   end
 
+  def create_name(name)
+    parse = Name.parse_name(name)
+    Name.new_name(parse.params)
+  end
+
   def test_index_name
     get_with_dump(:index_name)
     assert_template(:list_names)
@@ -4220,6 +4225,183 @@ class NameControllerTest < FunctionalTestCase
     get(:propagate_classification, id: genus.id)
     assert_equal(new_val, child.reload.classification)
     assert_equal(new_val, child.description.reload.classification)
+  end
+
+  def test_get_inherit_classification
+    name = names(:boletus)
+
+    # Make sure user has to be logged in.
+    get(:inherit_classification, id: name.id)
+    assert_redirected_to(controller: :account, action: :login)
+    login("rolf")
+
+    # Make sure it doesn't crash if id is missing.
+    get(:inherit_classification)
+    assert_flash_error
+    assert_response(:redirect)
+
+    # Make sure it doesn't crash if id is bogus.
+    get(:inherit_classification, id: "bogus")
+    assert_flash_error
+    assert_response(:redirect)
+
+    # Make sure it doesn't crash if id is bogus.
+    get_with_dump(:inherit_classification, id: name.id)
+    assert_no_flash
+    assert_response(:success)
+    assert_template("inherit_classification")
+  end
+
+  def test_post_inherit_classification
+    name = names(:boletus)
+
+    # Make sure user has to be logged in.
+    post(:inherit_classification, id: name, parent: "Agaricales")
+    assert_redirected_to(controller: :account, action: :login)
+    login("rolf")
+
+    # Make sure it doesn't crash if id is missing.
+    post(:inherit_classification, parent: "Agaricales")
+    assert_flash_error
+    assert_response(:redirect)
+
+    # Make sure it doesn't crash if id is bogus.
+    post(:inherit_classification, id: "bogus", parent: "Agaricales")
+    assert_flash_error
+    assert_response(:redirect)
+
+    # Test reload if parent field missing.
+    post(:inherit_classification, id: name.id, parent: "")
+    assert_flash_error
+    assert_response(:success)
+    assert_template(:inherit_classification)
+
+    # Test reload if parent field has no match and no alternate spellings.
+    post(:inherit_classification, id: name.id, parent: "cakjdncaksdbcsdkn")
+    assert_flash_error
+    assert_response(:success)
+    assert_template(:inherit_classification)
+    assert_input_value("parent", "cakjdncaksdbcsdkn")
+
+    # Test reload if parent field misspelled.
+    post(:inherit_classification, id: name.id, parent: "Agariclaes")
+    assert_no_flash
+    assert_response(:success)
+    assert_template(:inherit_classification)
+    assert_not_blank(assigns(:message))
+    assert_not_empty(assigns(:options))
+    assert_select("span", text: "Agaricales")
+    assert_input_value("parent", "Agariclaes")
+
+    # Test ambiguity: three names all accepted and with classifications.
+    parent1 = names(:agaricaceae)
+    parent1.change_author("Ach.")
+    parent1.save
+    parent2 = create_name("Agaricaceae Bagl.")
+    parent2.classification = "Domain: _Eukarya_"
+    parent2.save
+    parent3 = create_name("Agaricaceae Clauzade")
+    parent3.classification = "Domain: _Eukarya_"
+    parent3.save
+    post(:inherit_classification, id: name.id, parent: "Agaricaceae")
+    assert_no_flash
+    assert_response(:success)
+    assert_template(:inherit_classification)
+    assert_not_blank(assigns(:message))
+    assert_not_empty(assigns(:options))
+    assert_select("input[type=radio][value='#{parent1.id}']", count: 1)
+    assert_select("input[type=radio][value='#{parent2.id}']", count: 1)
+    assert_select("input[type=radio][value='#{parent3.id}']", count: 1)
+    assert_input_value("parent", "Agaricaceae")
+
+    # Have it select a bogus name (rank wrong in this case).
+    post(:inherit_classification, id: name.id, parent: "Agaricaceae",
+         options: names(:coprinus_comatus).id)
+    assert_flash_error
+    assert_response(:success)
+    assert_template(:inherit_classification)
+
+    # Make it less ambiguous, so it will select the original Agaricaceae.
+    parent2.update_attributes(classification: "")
+    parent3.update_attributes(deprecated: true)
+    assert_blank(name.reload.classification)
+    post(:inherit_classification, id: name.id, parent: "Agaricaceae")
+    assert_no_flash
+    assert_name_list_equal([], assigns(:options))
+    assert_blank(assigns(:message))
+    assert_redirected_to(name.show_link_args)
+    new_str = "#{parent1.classification}\r\nFamily: _Agaricaceae_\r\n"
+    assert_equal(new_str, name.reload.classification)
+    assert_equal(new_str, names(:boletus_edulis).classification)
+    assert_equal(new_str, observations(:boletus_edulis_obs).classification)
+  end
+
+  def test_get_edit_classification
+    # Make sure user has to be logged in.
+    get(:edit_classification)
+    assert_redirected_to(controller: :account, action: :login)
+    login("rolf")
+
+    # Make sure missing and bogus ids do not crash it.
+    get(:edit_classification)
+    assert_response(:redirect)
+    get(:edit_classification, id: "bogus")
+    assert_response(:redirect)
+
+    # Make sure form initialized correctly.
+    name = names(:boletus_edulis)
+    get(:edit_classification, id: name.id)
+    assert_response(:success)
+    assert_template(:edit_classification)
+    assert_textarea_value(:classification, "")
+
+    name = names(:agaricus_campestris)
+    get_with_dump(:edit_classification, id: name.id)
+    assert_response(:success)
+    assert_template(:edit_classification)
+    assert_textarea_value(:classification, name.classification)
+  end
+
+  def test_post_edit_classification
+    # Make sure user has to be logged in.
+    post(:edit_classification)
+    assert_redirected_to(controller: :account, action: :login)
+    login("rolf")
+
+    # Make sure bogus requests don't crash.
+    post(:edit_classification)
+    assert_flash_error
+    assert_response(:redirect)
+    post(:edit_classification, id: "bogus")
+    assert_flash_error
+    assert_response(:redirect)
+
+    # Make sure it is validating the classification.
+    name = names(:agaricus_campestris)
+    post(:edit_classification, id: name.id, classification: "bogus")
+    assert_flash_error
+    assert_response(:success)
+    assert_template(:edit_classification)
+    assert_textarea_value(:classification, "bogus")
+
+    # Make sure we can do simple case.
+    name = names(:agaricales)
+    new_str = "Kingdom: _Fungi_"
+    post(:edit_classification, id: name.id, classification: new_str)
+    assert_no_flash
+    assert_redirected_to(name.show_link_args)
+    assert_equal(new_str, name.reload.classification)
+
+    # Make sure we can do complex case.
+    name = names(:agaricus_campestris)
+    new_str = "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
+    post(:edit_classification, id: name.id, classification: new_str)
+    assert_no_flash
+    assert_redirected_to(name.show_link_args)
+    assert_equal(new_str, name.reload.classification)
+    assert_equal(new_str, names(:agaricus).classification)
+    assert_equal(new_str, names(:agaricus_campestras).description.classification)
+    assert_equal(new_str, observations(:agaricus_campestras_obs).classification)
   end
 
   # -----------------------
