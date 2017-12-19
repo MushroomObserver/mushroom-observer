@@ -85,9 +85,10 @@
     <div class="row">
       <div class="col-sm-6">
         <strong><%= :show_name_classification.t %>:</strong>
-          <% if @user && @name.description %>
-            [<%= link_with_query(:EDIT.t, controller: :name, action: :edit_name_description,
-                                 id: @name.description.id) %>]
+          <% if @user %>
+            [<%= link_with_query(:EDIT.t, controller: :name,
+                                 action: :edit_classification,
+                                 id: @name.id) %>]
           <% end %>
         <div class="list-group">
           <div class="list-group-item name-section" id="classification_section">
