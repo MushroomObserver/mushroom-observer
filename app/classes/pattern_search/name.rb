@@ -20,6 +20,7 @@ module PatternSearch
       has_notes:          [:has_notes,          :parse_boolean],
       has_comments:       [:has_comments,       :parse_yes],
       has_description:    [:has_default_desc,   :parse_boolean],
+      has_observations:   [:has_observations,   :parse_yes],
 
       author:             [:author_has,         :parse_string],
       citation:           [:citation_has,       :parse_string],
