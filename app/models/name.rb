@@ -977,7 +977,8 @@ class Name < AbstractModel
       elsif (x = text_name.split(" ", 2).first) != genus_text_name
         out << "Missing genus #{x}" unless errors[x]
         errors[x] = true
-      elsif classification != genus_classification
+      elsif classification != genus_classification &&
+            !genus_classification.blank?
         out << "Updating #{text_name}"
         str = Name.connection.quote(genus_classification)
         Name.connection.execute(%(
@@ -1006,6 +1007,7 @@ class Name < AbstractModel
       WHERE nd.id = n.description_id
         AND n.rank <= #{Name.ranks[:Genus]}
         AND nd.classification != n.classification
+        AND COALESCE(nd.classification, "") != ""
     ))
     []
   end
