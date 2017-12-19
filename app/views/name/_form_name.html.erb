@@ -52,17 +52,21 @@
 
 <label for="name_citation"><%= :Citation.t %>:</label>
 <%= form.text_field(:citation, class: "form-control") %>
-<p class="help-block"><%= :form_names_citation_help.t %></p>
-<p class="help-block"><%= :form_names_citation_textilize_note.t %></p>
+<p class="help-block">
+  <%= :form_names_citation_help.t %>
+  <%= :form_names_citation_textilize_note.t %>
+</p>
 
 <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
-  <%= form.check_box(:misspelling, checked: @misspelling) %>
-  <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
-  <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
-  <%= form.text_field(:correct_spelling, class: "form-control",
-                      value: @correct_spelling) %><br/>
-  <p class="help-block"><%= :form_names_misspelling_note.t %></p>
-  <% turn_into_name_auto_completer(:name_correct_spelling, primer: Name.primer) %>
+  <div style="margin:1.5em 0em">
+    <%= form.check_box(:misspelling, checked: @misspelling) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <%= form.text_field(:correct_spelling, class: "form-control",
+                        value: @correct_spelling) %>
+    <p class="help-block"><%= :form_names_misspelling_note.t %></p>
+    <% turn_into_name_auto_completer(:name_correct_spelling, primer: Name.primer) %>
+  </div>
 <% end %>
 
 <p>
