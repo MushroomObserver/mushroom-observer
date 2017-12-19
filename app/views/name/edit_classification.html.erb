@@ -1,0 +1,25 @@
+<%
+  @title = :edit_classification_title.t(name: @name.display_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row push-down">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(add_query_param(action: :edit_classification, id: @name.id)) do %>
+      <%= label_tag(:classification, :"form_names_classification".t + ":") %>
+      <p class="help-block" style="margin-top:0">
+        <%= rank = rank_as_lower_string(@name.rank)
+        :"form_names_classification_help".l(rank: rank) %>
+      </p>
+      <%= text_area_tag(:classification, @classification,
+                        rows: 10, class: "form-control",
+                        data: {autofocus: true}) %>
+
+      <%= submit_tag(:SAVE.t, class: "btn center-block push-down") %>
+    <% end %>
+  </div>
+</div>

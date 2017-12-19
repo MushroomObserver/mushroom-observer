@@ -1,0 +1,30 @@
+<%
+  @title = :inherit_classification_title.t(name: @name.display_name)
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row push-down">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(add_query_param(action: :inherit_classification, id: @name.id)) do %>
+      <% if @options %>
+        <div class="alert alert-warning">
+          <%= @message.tp %>
+          <% @options.each do |name| %>
+            <%= radio_button_tag(:options, name.id) %>
+            <%= name.display_name.t %><br/>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%= label_tag(:parent, :inherit_classification_parent_name.t + ":") %>
+      <%= text_field_tag(:parent, @parent_text_name,
+                         class: "form-control", data: {autofocus: true}) %>
+
+      <%= submit_tag(:SUBMIT.t, class: "btn center-block push-down") %>
+    <% end %>
+  </div>
+</div>

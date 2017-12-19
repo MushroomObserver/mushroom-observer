@@ -25,7 +25,7 @@
                          id: @name.id) %></p>
 <% end %>
 <% if !@name.below_genus? && @name.classification.blank? %>
-  <p><%= link_with_query(:show_name_get_classification_from_parent.t,
+  <p><%= link_with_query(:show_name_inherit_classification.t,
                          controller: :name, action: :inherit_classification,
                          id: @name.id) %></p>
 <% end %>

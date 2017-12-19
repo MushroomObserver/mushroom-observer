@@ -925,6 +925,27 @@ class Name < AbstractModel
       if classification_changed?
   end
 
+  # Copy classification from parent.  Just take parent's classification string
+  # and add the parent's name to the bottom of it.  Nice and easy.
+  def inherit_classification(parent)
+    raise("missing parent!")               if !parent
+    raise("only do this on genera or up!") if below_genus?
+    raise("parent has no classification!") if parent.classification.blank?
+    str = parent.classification.to_s.sub(/\s+\z/, "")
+    str += "\r\n#{rank}: _#{parent.text_name}_\r\n"
+    change_classification(str)
+  end
+
+  # Change this name's classification.  Change parent genus, too, if below
+  # genus.  Propagate to subtaxa if changing genus.
+  def change_classification(new_str)
+    root = below_genus? && genus || self
+    root.update_attributes(classification: new_str)
+    root.description.update_attributes(classification: new_str) if
+      root.description_id
+    root.propagate_classification if root.rank == :Genus
+  end
+
   # Copy the classification of a genus to all of its children.  Does not change
   # updated_at or rss_log or anything.  Just changes the classification field
   # in the name and default description records.

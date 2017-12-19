@@ -57,6 +57,7 @@
 #
 class NameController < ApplicationController
   require_dependency "name_controller/create_and_edit_name"
+  require_dependency "name_controller/classification"
   require_dependency "name_controller/show_name_description"
 
   include DescriptionControllerHelpers
@@ -1136,48 +1137,6 @@ class NameController < ApplicationController
       flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
     end
     redirect_with_query(action: "show_name", id: name_id)
-  end
-
-  def propagate_classification # :norobots:
-    pass_query_params
-    name = find_or_goto_index(Name, params[:id])
-    return unless name
-    return unless make_sure_name_is_a_genus!(name)
-    name.propagate_classification
-    redirect_with_query(name.show_link_args)
-  end
-
-  def refresh_classification # :norobots:
-    pass_query_params
-    name = find_or_goto_index(Name, params[:id])
-    return unless name
-    return unless make_sure_name_below_genus!(name)
-    return unless make_sure_genus_has_classification!(name)
-    name.update_attributes(classification: name.genus.classification)
-    desc = name.description
-    desc.update_attributes(classification: name.genus.classification) if desc
-    redirect_with_query(name.show_link_args)
-  end
-
-  def make_sure_name_is_a_genus!(name)
-    return true if name.rank == :Genus
-    flash_error("only works on genera!")
-    redirect_with_query(name.show_link_args)
-    return false
-  end
-
-  def make_sure_name_below_genus!(name)
-    return true if name.below_genus?
-    flash_error("only works on taxa below genus!")
-    redirect_with_query(name.show_link_args)
-    return false
-  end
-
-  def make_sure_genus_has_classification!(name)
-    return true if name.genus && name.genus.classification.present?
-    flash_error(:edit_name_fill_in_classification_for_genus_first.t)
-    redirect_with_query(name.show_link_args)
-    return false
   end
 
   def edit_lifeform # :norobots:
