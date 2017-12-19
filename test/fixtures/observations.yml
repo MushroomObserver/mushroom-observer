@@ -504,3 +504,8 @@ template_and_orphaned_notes_scrambled_obs: # 54
     :orphaned_caption_2: orphaned notes 2
     :Cap: red
   user: notes_templater
+
+california_obs: # 55
+  <<: *DEFAULTS
+  location: california
+  where: California, USA

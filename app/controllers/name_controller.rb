@@ -183,9 +183,16 @@ class NameController < ApplicationController
        (name = Name.safe_find(pattern))
       redirect_to(action: "show_name", id: name.id)
     else
-      query = create_query(:Name, :pattern_search, pattern: pattern)
-      @suggest_alternate_spellings = pattern
-      show_selected_names(query)
+      search = PatternSearch::Name.new(pattern)
+      if search.errors.any?
+        search.errors.each do |error|
+          flash_error(error.to_s)
+        end
+        render(action: :list_names)
+      else
+        @suggest_alternate_spellings = search.query.params[:pattern]
+        show_selected_names(search.query)
+      end
     end
   end
 
@@ -348,10 +355,6 @@ class NameController < ApplicationController
       @projects = @user && @user.projects_member.select do |project|
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
-
-      # Get classification.
-      @classification = @name.classification
-      @parents = @name.parents unless @classification
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, name: @name)

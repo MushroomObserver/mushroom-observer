@@ -1,46 +1,46 @@
-<%= :RANK.t %>: <%= rank_as_string(name.rank) %><br/>
-<%= :STATUS.t %>: <%= name.status %>
+<p><%= :RANK.t %>: <%= name.rank ? rank_as_string(name.rank) : :unknown.t %></p>
+<p><%= :STATUS.t %>: <%= name.status %>
   <% if name.is_misspelling? %>
     (<%= :MISSPELLED.t %>)
-  <% end %><br/>
-<%= :NAME.t %>: <%= h(name.real_text_name) %><br/>
-<%= :AUTHORITY.t %>: <%= name.author.to_s.t %><br/>
-<%= :CITATION.t %>: <%= name.citation.to_s.t %><br/>
+  <% end %></p>
+<p><%= :NAME.t %>: <%= h(name.real_text_name) %></p>
+<p><%= :AUTHORITY.t %>: <%= name.author.to_s.t %></p>
+<p><%= :CITATION.t %>: <%= name.citation.to_s.t %></p>
 <% if name.is_misspelling? %>
-  <%= :show_name_misspelling_correct.t %>:
+  <p><%= :show_name_misspelling_correct.t %>:
     <%= if name.correct_spelling
       link_with_query(name.correct_spelling.display_name.t,
         action: :show_name, id: name.correct_spelling_id)
     else
       # This can apparently happen for past_names.
       name.correct_spelling_id
-    end %><br/>
+    end %></p>
 <% end %>
 
 <% if synonyms
   approved_synonyms, deprecated_synonyms = name.sort_synonyms
   misspellings = deprecated_synonyms.select(&:correct_spelling_id)
   deprecated_synonyms.reject!(&:correct_spelling_id)
-  if approved_synonyms != []
+  if approved_synonyms.try(&:any?)
     links = approved_synonyms.map do |n|
       link_with_query(n.display_name.t, action: :show_name, id: n.id,)
     end %>
-    <%= name.deprecated ? :show_name_preferred_synonyms.t :
+    <p><%= name.deprecated ? :show_name_preferred_synonyms.t :
                           :show_name_synonyms.t %>:
-      <%= links.safe_join(", ") %><br/>
+      <%= links.safe_join(", ") %></p>
   <% end
-  if deprecated_synonyms != []
+  if deprecated_synonyms.try(&:any?)
     links = deprecated_synonyms.map do |n|
       link_with_query(n.display_name.t, action: :show_name, id: n.id)
     end %>
-    <%= :show_name_deprecated_synonyms.t %>:
-      <%= links.safe_join(", ") %><br/>
+    <p><%= :show_name_deprecated_synonyms.t %>:
+      <%= links.safe_join(", ") %></p>
   <% end
-  if misspellings
+  if misspellings.try(&:any?)
     links = misspellings.map do |n|
       link_with_query(n.display_name.t, action: :show_name, id: n.id)
     end %>
-    <%= :show_name_misspelled_synonyms.t %>:
-      <%= links.safe_join(", ") %><br/>
+    <p><%= :show_name_misspelled_synonyms.t %>:
+      <%= links.safe_join(", ") %></p>
   <% end
 end %>

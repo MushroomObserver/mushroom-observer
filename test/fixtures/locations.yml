@@ -229,3 +229,18 @@ obs_default_location: # 17
   west: -70.763
   east: -70.761
   south: 41.645
+
+california: # 18
+  <<: *DEFAULTS
+  created_at: 2017-12-18 14:39:23
+  updated_at: 2017-12-18 14:39:23
+  user: mary
+  version: 1
+  name: California, USA
+  scientific_name: USA, California
+  north: 42.00
+  west: -124.42
+  east: -114.13
+  south: 32.54
+  high: 4421
+  low: -86

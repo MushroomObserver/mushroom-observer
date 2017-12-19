@@ -33,6 +33,7 @@ module Query
         notes_has?:          :string,
         has_comments?:       { boolean: [true] },
         comments_has?:       :string,
+        has_observations?:   { boolean: [true] },
         has_default_desc?:   :boolean,
         join_desc?:          { string: [:default, :any] },
         desc_type?:          [{string: [Description.all_source_types]}],
@@ -121,6 +122,7 @@ module Query
         )
         add_join(:comments)
       end
+      add_join(:observations) if params[:has_observations]
       initialize_model_do_boolean(
         :has_default_desc,
         "names.description_id IS NOT NULL",

@@ -233,7 +233,7 @@ module DescriptionHelper
     if data && data != 0
       action = { controller: :observer, action: :index_observation }
       url = add_query_param(action, query)
-      link_to(title, url) + safe_br
+      content_tag(:p, link_to(title, url))
     end
   end
 end
