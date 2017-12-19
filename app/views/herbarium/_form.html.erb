@@ -15,20 +15,22 @@
         <%= label_tag(:herbarium_personal_user_name, :edit_herbarium_admin_make_personal.t) %>:
         <%= text_field(:herbarium, :personal_user_name, class: "form-control-xxx") %>
       </div>
-      <div class="well well-sm push-down help-block">
-        <div class="arrow-up" style="margin-top:6px"></div>
-        <% users = Herbarium.connection.select_rows(%(
-          SELECT u.name, u.login, COUNT(u.id)
-          FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
-          WHERE hr.herbarium_id = #{@herbarium.id}
-          GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
-        ))
-        users.each do |name, login, count| %>
-          <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
-                                             num: count) %><br/>
-        <% end %>
-        <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
-      </div>
+      <% if button != :CREATE %>
+        <div class="well well-sm push-down help-block">
+          <div class="arrow-up" style="margin-top:6px"></div>
+          <% users = Herbarium.connection.select_rows(%(
+            SELECT u.name, u.login, COUNT(u.id)
+            FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
+            WHERE hr.herbarium_id = #{@herbarium.id}
+            GROUP BY u.id ORDER BY COUNT(u.id) DESC LIMIT 5
+          ))
+          users.each do |name, login, count| %>
+            <%= :edit_herbarium_user_records.t(name: "#{name} (#{login})",
+                                               num: count) %><br/>
+          <% end %>
+          <%= :edit_herbarium_no_herbarium_records.t if users.empty? %>
+        </div>
+      <% end %>
     </div>
   </div>
 
