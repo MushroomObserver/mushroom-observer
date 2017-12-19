@@ -2,16 +2,16 @@
   @title = :show_herbarium_curator_request.t
 
   tabs = [
-    link_to(:cancel_and_show.t(type: :herbarium), @herbarium.show_link_args),
-    link_to(:create_herbarium.t, action: :create_herbarium),
-    link_to(:herbarium_index.t, action: :index)
+    link_with_query(:cancel_and_show.t(type: :herbarium), @herbarium.show_link_args),
+    link_with_query(:herbarium_index.t, action: :index)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text">
   <%= :show_herbarium_curator_help.tp %>
-  <%= form_tag do %>
+  <%= form_tag(add_query_param(action: :request_to_be_curator, id: @herbarium.id,
+                               back: @back)) do %>
     <div class="form-group push-down">
       <%= label_tag(:herbarium_name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
     </div>

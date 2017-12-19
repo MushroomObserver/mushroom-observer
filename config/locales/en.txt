@@ -2273,9 +2273,8 @@
 
   # herbarium/index
   herbarium_index: Herbarium Index
-  herbarium_index_title: List of Herbaria that Aren't Personal Herbaria
   herbarium_index_list_all_herbaria: List All Herbaria
-  herbarium_index_nonpersonal_herbaria: List Non-personal Herbaria
+  herbarium_index_nonpersonal_herbaria: List Institutional Herbaria
   herbarium_index_records: Records
   herbarium_index_merge_help: "Click on the herbarium below that you would like to merge \"[name]\" into.  This will cause \"[name]\" to be deleted and all of its records and curators to be transferred into the new herbarium.  If you do not have permission to perform the merge, it will send a request to the admins.  (\"+Cancel merge.+\":[url])"
 
@@ -3749,6 +3748,7 @@
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
+  query_title_nonpersonal: List of Institutional Herbaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"
   query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
@@ -3873,7 +3873,8 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
-  sort_by_code: "[:herbarium_code]"
+  sort_by_code: Code
+  sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"

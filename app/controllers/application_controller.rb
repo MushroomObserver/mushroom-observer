@@ -984,6 +984,12 @@ class ApplicationController < ActionController::Base
     Query.safe_find(id)
   end
 
+  # Get instance of Query which is being passed to subsequent pages.
+  def passed_query
+    Query.safe_find(query_params[:q].to_s.dealphabetize)
+  end
+  helper_method :passed_query
+
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query = nil)
@@ -1770,11 +1776,17 @@ class ApplicationController < ActionController::Base
   # Bad place for this, but need proper refactor to have a good place.
   def gather_users_votes(obs, user)
     obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] = 
+      votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
   end
+
+  # Return this request's URL without the transport or domain.
+  def request_action_and_params
+    request.url.sub(/^\w+:\/+[^\/]+/, "")
+  end
+  helper_method :request_action_and_params
 
   ##############################################################################
 
