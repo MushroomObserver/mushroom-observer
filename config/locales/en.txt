@@ -491,11 +491,6 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
-  # (Only used by validation errors, I think.)
-  PASSWORD_CONFIRMATION: Password Confirmation
-  password_confirmation: password confirmation
-  PASSWORD_CONFIRMATIONS: Password Confirmations
-  password_confirmations: password confirmations
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -547,6 +542,10 @@
   version: version
   VERSIONS: Versions
   versions: versions
+
+  # (Only used by validation errors, I think.)
+  email_confirmation: email confirmation
+  password_confirmation: password confirmation
 
   # Common nouns/adjectives used as labels, never pluralized.
   ALL: All
@@ -2032,6 +2031,7 @@
   signup_name: Name (optional)
   signup_login: Desired login
   signup_email_address: Email address
+  signup_email_confirmation: Confirm email
   signup_choose_password: Choose password
   signup_confirm_password: Confirm password
   signup_preferred_theme: Preferred Theme (optional)
@@ -3259,6 +3259,7 @@
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
+  validate_user_email_mismatch: Your email addresses don't match.  Please check for a typo.
   validate_user_login_taken: Sorry, that login name is already taken.
   validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
   validate_invalid_lifeform: "Invalid lifeform word(s): [words].  We are strictly enforcing which types are allowed.  If you would like us to add support to additional lifeforms, please contact the admins and make your case."
@@ -3316,6 +3317,7 @@
   validate_species_list_where_missing: "[:validate_missing(field=:location)]"
   validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
   validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
+  validate_user_email_confirmation_missing: "[:validate_missing(field=:email_confirmation)]"
   validate_user_login_missing: "[:validate_missing(field=:login_name)]"
   validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
   validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
