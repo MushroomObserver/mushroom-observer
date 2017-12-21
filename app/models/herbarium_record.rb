@@ -49,6 +49,8 @@ class HerbariumRecord < AbstractModel
   attr_accessor :herbarium_name
 
   after_create :notify_curators
+  before_update :log_update
+  before_destroy :log_destroy
 
   def herbarium_label
     if initial_det.blank?
@@ -71,15 +73,6 @@ class HerbariumRecord < AbstractModel
     self.user == user || herbarium.curator?(user)
   end
 
-  # Add this HerbariumRecord to an Observation, log the action, and save it.
-  def add_observation(obs)
-    return if observations.include?(obs)
-    observations.push(obs)
-    obs.specimen = true
-    obs.log(:log_herbarium_record_added, name: herbarium_label, touch: true)
-    obs.save
-  end
-
   # Send email notifications when herbarium_record created by non-curator.
   def notify_curators
     sender = User.current
@@ -88,6 +81,44 @@ class HerbariumRecord < AbstractModel
     recipients.each do |recipient|
       email_klass = QueuedEmail::AddHerbariumRecordNotCurator
       email_klass.create_email(sender, recipient, self)
+    end
+  end
+
+  # Add this HerbariumRecord to an Observation, make sure the observation
+  # reports a specimen available, and log the action.
+  def add_observation(obs)
+    return if observations.include?(obs)
+    observations.push(obs)
+    obs.update_attributes(specimen: true) unless obs.specimen
+    obs.log(:log_herbarium_record_added, name: accession_at_herbarium,
+            touch: true)
+  end
+
+  # Remove this HerbariumRecord from an Observation and log the action.
+  def remove_observation(obs)
+    return unless observations.include?(obs)
+    observations.delete(obs)
+    obs.log(:log_herbarium_record_removed, name: accession_at_herbarium,
+            touch: true)
+    destroy if observations.empty?
+  end
+
+  def log_update
+    observations.each do |obs|
+      if herbarium_id_was != herbarium_id
+        obs.log(:log_herbarium_record_moved, to: accession_at_herbarium,
+                touch: true)
+      else
+        obs.log(:log_herbarium_record_updated, name: accession_at_herbarium,
+                touch: true)
+      end
+    end
+  end
+
+  def log_destroy
+    observations.each do |obs|
+      obs.log(:log_herbarium_record_removed, name: accession_at_herbarium,
+              touch: true)
     end
   end
 end

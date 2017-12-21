@@ -28,7 +28,7 @@ coprinus_comatus_rolf_spec: # 3
     herbarium: rolf_herbarium
     user: rolf
     initial_det: Coprinus comatus
-    accession_number: ROLF 1
+    accession_number: Rolf Singer 1
 
 # One observation with one herbarium record
 agaricus_campestris_spec: # 4

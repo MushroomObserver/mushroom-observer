@@ -112,10 +112,10 @@ class API
     end
 
     def after_create(obs)
+      obs.log(:log_observation_created_at) if @log
       create_specimen_records(obs) if obs.specimen
       naming = obs.namings.create(name: @name)
       obs.change_vote(naming, @vote, user)
-      obs.log(:log_observation_created_at) if @log
     end
 
     def validate_update_params!(params)

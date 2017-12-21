@@ -28,7 +28,7 @@ jQuery(document).ready(function () {
     });
 
     jQuery('[data-dismiss="alert"]').click(function() {
-        setCookie('hideBanner', BANNER_TIME, 30);
+        setCookie('hideBanner2', BANNER_TIME, 30);
     });
 
     function setCookie(cname, cvalue, exdays) {

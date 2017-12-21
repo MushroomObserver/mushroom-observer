@@ -8,10 +8,6 @@ class HerbariumController < ApplicationController
     :show_herbarium
   ]
 
-  # ----------------------------
-  #  Indexes
-  # ----------------------------
-
   # Displays selected Herbarium's (based on current Query).
   def index_herbarium # :nologin: :norobots:
     query = find_or_create_query(:Herbarium, by: params[:by])
@@ -43,54 +39,6 @@ class HerbariumController < ApplicationController
     end
   end
 
-  # Show selected list of herbaria.
-  def show_selected_herbaria(query, args = {})
-    args = {
-      action: :list_herbaria,
-      letters: "herbaria.name",
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args)
-
-    @links ||= []
-    if query.flavor != :all
-      @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbarium, action: :list_herbaria }]
-    end
-    if query.flavor != :nonpersonal
-      @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbarium, action: :index }]
-    end
-    @links << [:create_herbarium.l,
-               { controller: :herbarium, action: :create_herbarium }]
-
-    # If user clicks "merge" on an herbarium, it reloads the page and asks
-    # them to click on the destination herbarium to merge it with.
-    @merge = Herbarium.safe_find(params[:merge])
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["records",     :sort_by_records.t],
-      ["user",        :sort_by_user.t],
-      ["code",        :sort_by_code.t],
-      ["name",        :sort_by_name.t],
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t]
-    ]
-
-    # Clean up display by removing user-related stuff from nonpersonal index.
-    if query.flavor == :nonpersonal
-      @no_user_column = true
-      args[:sorting_links].reject! { |x| x[0] == "user" }
-    end
-
-    show_index_of_objects(query, args)
-  end
-
-  # ----------------------------
-  #  Show herbarium
-  # ----------------------------
-
   def show_herbarium # :nologin:
     store_location
     pass_query_params
@@ -114,10 +62,6 @@ class HerbariumController < ApplicationController
   def prev_herbarium # :nologin: :norobots:
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
-
-  # ----------------------------
-  #  Create, edit, etc.
-  # ----------------------------
 
   def create_herbarium # :norobots:
     store_location
@@ -207,6 +151,49 @@ class HerbariumController < ApplicationController
   ##############################################################################
 
   private
+
+  def show_selected_herbaria(query, args = {})
+    args = {
+      action: :list_herbaria,
+      letters: "herbaria.name",
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user]
+    }.merge(args)
+
+    @links ||= []
+    if query.flavor != :all
+      @links << [:herbarium_index_list_all_herbaria.l,
+                 { controller: :herbarium, action: :list_herbaria }]
+    end
+    if query.flavor != :nonpersonal
+      @links << [:herbarium_index_nonpersonal_herbaria.l,
+                 { controller: :herbarium, action: :index }]
+    end
+    @links << [:create_herbarium.l,
+               { controller: :herbarium, action: :create_herbarium }]
+
+    # If user clicks "merge" on an herbarium, it reloads the page and asks
+    # them to click on the destination herbarium to merge it with.
+    @merge = Herbarium.safe_find(params[:merge])
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["records",     :sort_by_records.t],
+      ["user",        :sort_by_user.t],
+      ["code",        :sort_by_code.t],
+      ["name",        :sort_by_name.t],
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t]
+    ]
+
+    # Clean up display by removing user-related stuff from nonpersonal index.
+    if query.flavor == :nonpersonal
+      @no_user_column = true
+      args[:sorting_links].reject! { |x| x[0] == "user" }
+    end
+
+    show_index_of_objects(query, args)
+  end
 
   def post_create_herbarium
     @herbarium = Herbarium.new(whitelisted_herbarium_params)

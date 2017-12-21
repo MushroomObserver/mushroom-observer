@@ -94,9 +94,9 @@ class ObserverController
 
     # Once observation is saved we can save everything else.
     if success
+      @observation.log(:log_observation_created_at)
       save_everything_else(params[:reason]) # should always succeed
       flash_notice(:runtime_observation_success.t(id: @observation.id))
-      @observation.log(:log_observation_created_at)
       redirect_to_next_page
 
     # If anything failed reload the form.
