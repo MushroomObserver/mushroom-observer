@@ -30,6 +30,7 @@ module PatternSearch
 
       images:          [:has_images,       :parse_boolean],
       specimen:        [:has_specimen,     :parse_boolean],
+      sequence:        [:has_sequences,    :parse_yes],
       lichen:          [:lichen,           :parse_boolean],
       has_name:        [:has_name,         :parse_boolean],
       has_notes:       [:has_notes,        :parse_boolean],

@@ -507,6 +507,13 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
+  def test_observation_search_sequence
+    expect = Sequence.all.map(&:observation).uniq
+    assert(expect.count > 0)
+    x = PatternSearch::Observation.new("sequence:yes")
+    assert_obj_list_equal(expect, x.query.results, :sort)
+  end
+
   def test_observation_search_has_names_no
     expect = Observation.where(name: names(:fungi))
     assert(expect.count > 0)
