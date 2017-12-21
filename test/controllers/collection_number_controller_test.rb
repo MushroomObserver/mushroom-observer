@@ -238,10 +238,25 @@ class CollectionNumberControllerTest < FunctionalTestCase
   end
 
   def test_edit_collection_number_post
+    obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
+    record1 = herbarium_records(:coprinus_comatus_rolf_spec)
+    record2 = herbarium_records(:coprinus_comatus_nybg_spec)
+
+    # Verify that the observation has an herbarium record which is using the
+    # collection number.  When we change the collection number it should also
+    # update the "accession number" in the herbarium record.  (But the one
+    # at NYBG has already been accessioned, so it should not be changed.)
+    assert_includes(obs.collection_numbers, number)
+    assert_includes(obs.herbarium_records, record1)
+    assert_includes(obs.herbarium_records, record2)
+    assert_equal(number.format_name, record1.accession_number)
+    assert_not_equal(number.format_name, record2.accession_number)
+    old_nybg_accession = record2.accession_number
+
     params = {
       name:   "  New   Name <spam>  ",
-      number: "  new  number <spam>  "
+      number: "  69-abc <spam>  "
     }
 
     post(:edit_collection_number, id: number.id, collection_number: params)
@@ -256,16 +271,21 @@ class CollectionNumberControllerTest < FunctionalTestCase
                                   collection_number: params.merge(name: ""))
     assert_flash(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
+
     post(:edit_collection_number, id: number.id,
                                   collection_number: params.merge(number: ""))
     assert_flash(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
+
     post(:edit_collection_number, id: number.id, collection_number: params)
     assert_no_flash
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
-    assert_equal("new number", number.number)
+    assert_equal("69-abc", number.number)
     assert_in_delta(Time.zone.now, number.updated_at, 1.minute)
+    assert_equal("New Name 69-abc", number.reload.format_name)
+    assert_equal("New Name 69-abc", record1.reload.accession_number)
+    assert_equal(old_nybg_accession, record2.reload.accession_number)
 
     make_admin("mary")
     post(:edit_collection_number, id: number.id, collection_number: params)
@@ -296,6 +316,10 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_obj_list_equal([new_num], obs2.reload.collection_numbers)
     assert_equal("Joe Schmoe", new_num.name)
     assert_equal("07-123a", new_num.number)
+    # Make sure it updates the herbarium record which shared the old
+    # collection number.
+    assert_equal(new_num.format_name,
+      herbarium_records(:coprinus_comatus_rolf_spec).accession_number)
   end
 
   def test_edit_collection_number_redirect
@@ -417,7 +441,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_obj_list_equal([num2], obs2.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
 
-    # Admin can destroy it.   
+    # Admin can destroy it.
     make_admin("mary")
     get(:destroy_collection_number, id: num2.id)
     assert_empty(obs1.reload.collection_numbers)
