@@ -805,6 +805,7 @@ class AccountController < ApplicationController
 
   def validate_and_save_new_user!
     make_sure_password_present!
+    make_sure_email_confirmed!
     return true if @new_user.errors.none? && @new_user.save
     flash_object_errors(@new_user)
     return false
@@ -816,5 +817,18 @@ class AccountController < ApplicationController
   def make_sure_password_present!
     return unless @new_user.password.blank?
     @new_user.errors.add(:password, :validate_user_password_missing.t)
+  end
+
+  # Same with this.  When I moved this to User validates, all hell broke
+  # loose in unit tests.  This is some of the earliest code on the site,
+  # not surprising we didn't get it right!
+  def make_sure_email_confirmed!
+    if @new_user.email.blank?
+      # Already complained about this in User validates.
+    elsif @new_user.email_confirmation.blank?
+      @new_user.errors.add(:email, :validate_user_email_confirmation_missing.t)
+    elsif @new_user.email != @new_user.email_confirmation
+      @new_user.errors.add(:email, :validate_user_email_mismatch.t)
+    end
   end
 end

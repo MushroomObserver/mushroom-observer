@@ -1002,11 +1002,12 @@ class User < AbstractModel
     write_attribute("auth_code", String.random(40))
   end
 
-  protected
+################################################################################
+
+  private
 
   validate :user_requirements
   validate :check_password, on: :create
-  validate :check_email, on: :create
   validate :notes_template_forbid_other
   validate :notes_template_forbid_duplicates
 
@@ -1043,25 +1044,13 @@ class User < AbstractModel
     end
   end
 
-  def check_email # :nodoc:
-    unless email.blank?
-      if email_confirmation.to_s.blank?
-        errors.add(:email, :validate_user_email_confirmation_missing.t)
-      elsif email != email_confirmation
-        errors.add(:email, :validate_user_email_no_match.t)
-      end
-    end
-  end
-
-  # :nodoc
-  def notes_template_forbid_other
+  def notes_template_forbid_other # :nodoc
     notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
     end
   end
 
-  # :nodoc
-  def notes_template_forbid_duplicates
+  def notes_template_forbid_duplicates # :nodoc
     return unless notes_template.present?
     squished = notes_template.split(",").map(&:squish)
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
@@ -1070,10 +1059,7 @@ class User < AbstractModel
     end
   end
 
-  private
-
-  # :nodoc
-  def notes_template_bad_parts
+  def notes_template_bad_parts # :nodoc
     return [] unless notes_template.present?
     notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)
