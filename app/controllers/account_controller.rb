@@ -70,45 +70,15 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def signup # :nologin: :prefetch:
-    if request.method != "POST"
-      @new_user = User.new(theme: MO.default_theme)
-    else
-      theme = params["new_user"]["theme"]
-      login = params["new_user"]["login"]
-      valid_themes = MO.themes + ["NULL"]
-      if !valid_themes.member?(theme) || (login == "test_denied")
-        unless theme.blank?
-          # I'm guessing this has something to do with spammer/hacker trying
-          # to automate creation of accounts?
-          DeniedEmail.build(params["new_user"]).deliver_now
-        end
-        redirect_back_or_default(action: :welcome)
-      else
-        permitted = params.require(:new_user).
-                    permit(:email, :login, :name, :password,
-                           :password_confirmation, :theme)
-        @new_user = User.new(permitted)
-        @new_user.created_at = now = Time.now
-        @new_user.updated_at = now
-        @new_user.last_login = now
-        @new_user.admin = false
-        @new_user.layout_count = 15
-        @new_user.mailing_address = ""
-        @new_user.notes = ""
-        if @new_user.password.blank?
-          @new_user.errors.add(:password, :validate_user_password_missing.t)
-        end
-        if @new_user.errors.any? ||
-           !@new_user.save
-          flash_object_errors(@new_user)
-        else
-          group = UserGroup.create_user(@new_user)
-          flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
-          VerifyEmail.build(@new_user).deliver_now
-          redirect_back_or_default(action: :welcome)
-        end
-      end
-    end
+    @new_user = User.new(theme: MO.default_theme)
+    return if request.method != "POST"
+    initialize_new_user
+    return unless make_sure_theme_is_valid!
+    return unless validate_and_save_new_user!
+    group = UserGroup.create_user(@new_user)
+    flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
+    VerifyEmail.build(@new_user).deliver_now
+    redirect_back_or_default(action: :welcome)
   end
 
   def verify # :nologin:
@@ -201,8 +171,8 @@ class AccountController < ApplicationController
   end
 
   # This is the welcome page for new users who just created an account.
-  # :nologin:
-  def welcome; end
+  def welcome # :nologin:
+  end
 
   ##############################################################################
   #
@@ -779,7 +749,8 @@ class AccountController < ApplicationController
   ##############################################################################
 
   # This is used to test the autologin feature.
-  def test_autologin; end
+  def test_autologin
+  end
 
   # This is used to test the flash error mechanism in the unit tests.
   def test_flash # :nologin:
@@ -798,4 +769,52 @@ class AccountController < ApplicationController
   end
 
   ##############################################################################
+
+  private
+
+  def initialize_new_user
+    now = Time.now
+    @new_user.attributes = {
+      created_at:      now,
+      updated_at:      now,
+      last_login:      now,
+      admin:           false,
+      layout_count:    15,
+      mailing_address: "",
+      notes:           ""
+    }.merge(params.require(:new_user).permit(
+        :login, :name, :theme,
+        :email, :email_confirmation,
+        :password, :password_confirmation
+      ))
+  end
+
+  def make_sure_theme_is_valid!
+    theme = @new_user.theme
+    login = @new_user.login
+    valid_themes = MO.themes + ["NULL"]
+    return true if valid_themes.member?(theme) && login != "test_denied"
+    unless theme.blank?
+      # I'm guessing this has something to do with spammer/hacker trying
+      # to automate creation of accounts?
+      DeniedEmail.build(params["new_user"]).deliver_now
+    end
+    redirect_back_or_default(action: :welcome)
+    return false
+  end
+
+  def validate_and_save_new_user!
+    make_sure_password_present!
+    return true if @new_user.errors.none? && @new_user.save
+    flash_object_errors(@new_user)
+    return false
+  end
+
+  # I think this is not in the User model validations because of tests or
+  # something.  I can't fathom why any "real" user would ever be allowed not
+  # to have a password!
+  def make_sure_password_present!
+    return unless @new_user.password.blank?
+    @new_user.errors.add(:password, :validate_user_password_missing.t)
+  end
 end

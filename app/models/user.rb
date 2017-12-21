@@ -350,8 +350,9 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
-  # Used to let User enter location by name in prefs form.
+  # These are used by forms.
   attr_accessor :place_name
+  attr_accessor :email_confirmation
 
   # Used to let User enter password confirmation when signing up or changing
   # password.
@@ -1004,6 +1005,10 @@ class User < AbstractModel
   protected
 
   validate :user_requirements
+  validate :check_password, on: :create
+  validate :check_email, on: :create
+  validate :notes_template_forbid_other
+  validate :notes_template_forbid_duplicates
 
   def user_requirements # :nodoc:
     if login.to_s.blank?
@@ -1028,7 +1033,6 @@ class User < AbstractModel
     errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
-  validate(:check_password, on: :create)
   def check_password # :nodoc:
     unless password.blank?
       if password_confirmation.to_s.blank?
@@ -1039,7 +1043,16 @@ class User < AbstractModel
     end
   end
 
-  validate :notes_template_forbid_other
+  def check_email # :nodoc:
+    unless email.blank?
+      if email_confirmation.to_s.blank?
+        errors.add(:email, :validate_user_email_confirmation_missing.t)
+      elsif email != email_confirmation
+        errors.add(:email, :validate_user_email_no_match.t)
+      end
+    end
+  end
+
   # :nodoc
   def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
@@ -1047,7 +1060,6 @@ class User < AbstractModel
     end
   end
 
-  validate :notes_template_forbid_duplicates
   # :nodoc
   def notes_template_forbid_duplicates
     return unless notes_template.present?

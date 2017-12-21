@@ -27,6 +27,7 @@ class AccountControllerTest < FunctionalTestCase
            password: "newpassword",
            password_confirmation: "newpassword",
            email: "nathan@collectivesource.com",
+           email_confirmation: "nathan@collectivesource.com",
            name: "needs a name!",
            theme: "NULL"
          })
@@ -48,80 +49,73 @@ class AccountControllerTest < FunctionalTestCase
   def test_bad_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
 
+    params = {
+      login: "newbob",
+      password: "topsykritt",
+      password_confirmation: "topsykritt",
+      email: "blah@somewhere.org",
+      email_confirmation: "blah@somewhere.org",
+      mailing_address: "",
+      theme: "NULL",
+      notes: ""
+    }
+
     # Missing password.
-    post(:signup, new_user: {
-           login: "newbob",
-           password: "",
-           password_confirmation: "",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
+    post(:signup, new_user: params.except(:password))
+    assert_flash_error
+    assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
-    post(:signup, new_user: {
-           login: "newbob",
-           password: "newpassword",
-           password_confirmation: "wrong",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
+    post(:signup, new_user: params.merge(password_confirmation: "wrong"))
+    assert_flash_error
+    assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
-    post(:signup, new_user: {
-           login: "yo",
-           password: "newpassword",
-           password_confirmation: "newpassword",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
-    assert(assigns("new_user").errors[:login].any?)
+    post(:signup, new_user: params.except(:email))
+    assert_flash_error
+    assert_response(:success)
+    assert(assigns("new_user").errors[:email].any?, assigns("new_user").dump_errors)
 
-    # Bad password and no email
-    post(:signup, new_user: {
-           login: "yo",
-           password: "newpassword",
-           password_confirmation: "wrong",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
-    assert(assigns("new_user").errors[:password].any?)
-    assert(assigns("new_user").errors[:login].any?)
+    # Email doesn't match.
+    post(:signup, new_user: params.merge(email_confirmation: "wrong"))
+    assert_flash_error
+    assert_response(:success)
+    assert(assigns("new_user").errors[:email].any?)
+
+    # Make sure correct request would have succeeded!
+    post(:signup, new_user: params)
+    assert_flash_success
+    assert_response(:redirect)
+    assert_not_nil(User.find_by_login("newbob"))
   end
 
   def test_signup_theme_errors
-    @request.session["return-to"] = "http://localhost/bogus/location"
+    referrer = "http://localhost/bogus/location"
 
-    post(:signup, new_user: {
-           login: "spammer",
-           password: "spammer",
-           password_confirmation: "spammer",
-           email: "spam@spam.spam",
-           mailing_address: "",
-           theme: "",
-           notes: ""
-         })
-    assert(!@request.session["user_id"])
+    params = {
+      login: "spammer",
+      password: "spammer",
+      password_confirmation: "spammer",
+      email: "spam@spam.spam",
+      mailing_address: "",
+      notes: ""
+    }
 
-    # Disabled denied email in above case...
-    # assert_equal("http://localhost/bogus/location", @response.redirect_url)
+    @request.session["return-to"] = referrer
+    post(:signup, new_user: params.merge(theme: ""))
+    assert_no_flash
+    assert_nil(User.find_by_login("spammer"))
+    assert_nil(@request.session["user_id"])
+    assert_redirected_to(referrer)
 
-    post(:signup, new_user: {
-           login: "spammer",
-           password: "spammer",
-           password_confirmation: "spammer",
-           email: "spam@spam.spam",
-           mailing_address: "",
-           theme: "spammer",
-           notes: ""
-         })
-    assert(!@request.session["user_id"])
-    assert_redirected_to(action: "welcome")
+    @request.session["return-to"] = referrer
+    post(:signup, new_user: params.merge(theme: "spammer"))
+    assert_no_flash
+    assert_nil(User.find_by_login("spammer"))
+    assert_nil(@request.session["user_id"])
+    assert_redirected_to(referrer)
   end
 
   def test_invalid_login
