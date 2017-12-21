@@ -106,7 +106,7 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
-  def remove_observation
+  def remove_observation # :norobots:
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
@@ -117,7 +117,7 @@ class HerbariumRecordController < ApplicationController
     redirect_with_query(@observation.show_link_args)
   end
 
-  def destroy_herbarium_record
+  def destroy_herbarium_record # :norobots:
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
