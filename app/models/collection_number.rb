@@ -52,6 +52,9 @@ class CollectionNumber < AbstractModel
   has_and_belongs_to_many :observations
   belongs_to :user
 
+  before_update :log_update
+  before_destroy :log_destroy
+
   def format_name
     "#{name} #{number}"
   end
@@ -60,12 +63,32 @@ class CollectionNumber < AbstractModel
     observations.any? { |obs| obs.user == user }
   end
 
-  # Add this CollectionNumber to an Observation, log the action, and save it.
+  # Add this CollectionNumber to an Observation, make sure the observation
+  # reports a specimen available, and log the action.
   def add_observation(obs)
     return if observations.include?(obs)
     observations.push(obs)
-    obs.specimen = true
+    obs.update_attributes(specimen: true) unless obs.specimen
     obs.log(:log_collection_number_added, name: format_name, touch: true)
-    obs.save
+  end
+
+  # Remove this CollectionNumber from an Observation and log the action.
+  def remove_observation(obs)
+    return unless observations.include?(obs)
+    observations.delete(obs)
+    obs.log(:log_collection_number_removed, name: format_name, touch: true)
+    destroy if observations.empty?
+  end
+
+  def log_update
+    observations.each do |obs|
+      obs.log(:log_collection_number_updated, name: format_name, touch: true)
+    end
+  end
+
+  def log_destroy
+    observations.each do |obs|
+      obs.log(:log_collection_number_removed, name: format_name, touch: true)
+    end
   end
 end

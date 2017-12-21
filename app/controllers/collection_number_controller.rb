@@ -10,10 +10,6 @@ class CollectionNumberController < ApplicationController
     :prev_collection_number
   ]
 
-  # ----------------------------
-  #  Indexes
-  # ----------------------------
-
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_collection_number # :nologin: :norobots:
     query = find_or_create_query(:CollectionNumber, by: params[:by])
@@ -53,31 +49,6 @@ class CollectionNumberController < ApplicationController
     show_selected_collection_numbers(query, always_index: true)
   end
 
-  # Show selected list of collection_numbers.
-  def show_selected_collection_numbers(query, args = {})
-    args = {
-      action: :list_collection_numbers,
-      letters: "collection_numbers.name",
-      num_per_page: 100
-    }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",       :sort_by_name.t],
-      ["number",     :sort_by_number.t],
-      ["created_at", :sort_by_created_at.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ]
-
-    show_index_of_objects(query, args)
-  end
-
-  # ----------------------------
-  #  Show record
-  # ----------------------------
-
   def show_collection_number # :nologin:
     store_location
     pass_query_params
@@ -92,10 +63,6 @@ class CollectionNumberController < ApplicationController
   def prev_collection_number # :nologin: :norobots:
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
-
-  # ----------------------------
-  #  Create and edit record
-  # ----------------------------
 
   def create_collection_number # :norobots:
     store_location
@@ -131,7 +98,49 @@ class CollectionNumberController < ApplicationController
     end
   end
 
+  def remove_observation
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    @observation = find_or_goto_index(Observation, params[:obs])
+    return unless @observation
+    return unless make_sure_can_delete!(@collection_number)
+    @collection_number.remove_observation(@observation)
+    redirect_with_query(@observation.show_link_args)
+  end
+
+  def destroy_collection_number
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    return unless make_sure_can_delete!(@collection_number)
+    @collection_number.destroy
+    redirect_with_query(action: :index_collection_number)
+  end
+
+################################################################################
+
   private
+
+  def show_selected_collection_numbers(query, args = {})
+    args = {
+      action: :list_collection_numbers,
+      letters: "collection_numbers.name",
+      num_per_page: 100
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name",       :sort_by_name.t],
+      ["number",     :sort_by_number.t],
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t]
+    ]
+
+    show_index_of_objects(query, args)
+  end
 
   def post_create_collection_number
     @collection_number =
@@ -190,6 +199,13 @@ class CollectionNumberController < ApplicationController
     false
   end
 
+  def make_sure_can_delete!(collection_number)
+    return true if collection_number.can_edit? || in_admin_mode?
+    flash_error(:permission_denied.t)
+    redirect_to(collection_number.show_link_args)
+    false
+  end
+
   def normalize_parameters
     [:name, :number].each do |arg|
       val = @collection_number.send(arg).to_s.strip_html.strip_squeeze
@@ -228,41 +244,5 @@ class CollectionNumberController < ApplicationController
       redirect_with_query(action: :index_collection_number,
                           id: @collection_number.id)
     end
-  end
-
-  public
-
-  # ----------------------------
-  #  Delete record
-  # ----------------------------
-
-  def remove_observation
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-    @observation = find_or_goto_index(Observation, params[:obs])
-    return unless @observation
-    return unless make_sure_can_delete!(@collection_number)
-    @collection_number.observations.delete(@observation)
-    @collection_number.destroy if @collection_number.observations.empty?
-    redirect_with_query(@observation.show_link_args)
-  end
-
-  def destroy_collection_number
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-    return unless make_sure_can_delete!(@collection_number)
-    @collection_number.destroy
-    redirect_with_query(action: :index_collection_number)
-  end
-
-  private
-
-  def make_sure_can_delete!(collection_number)
-    return true if collection_number.can_edit? || in_admin_mode?
-    flash_error(:permission_denied.t)
-    redirect_to(collection_number.show_link_args)
-    false
   end
 end

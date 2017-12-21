@@ -11,10 +11,6 @@ class HerbariumRecordController < ApplicationController
     :prev_herbarium_record
   ]
 
-  # ----------------------------
-  #  Indexes
-  # ----------------------------
-
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_herbarium_record # :nologin: :norobots:
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
@@ -61,33 +57,6 @@ class HerbariumRecordController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  # Show selected list of herbarium_records.
-  def show_selected_herbarium_records(query, args = {})
-    args = {
-      action: :list_herbarium_records,
-      letters: "herbarium_records.initial_det",
-      num_per_page: 100
-    }.merge(args)
-
-    @links ||= []
-    @links << [:create_herbarium.l,
-               { controller: :herbarium, action: :create_herbarium }]
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["herbarium_name",  :sort_by_herbarium_name.t],
-      ["herbarium_label", :sort_by_herbarium_label.t],
-      ["created_at",      :sort_by_created_at.t],
-      ["updated_at",      :sort_by_updated_at.t]
-    ]
-
-    show_index_of_objects(query, args)
-  end
-
-  # ----------------------------
-  #  Show record
-  # ----------------------------
-
   def show_herbarium_record # :nologin:
     store_location
     pass_query_params
@@ -103,10 +72,6 @@ class HerbariumRecordController < ApplicationController
   def prev_herbarium_record # :nologin: :norobots:
     redirect_to_next_object(:prev, HerbariumRecord, params[:id].to_s)
   end
-
-  # ----------------------------
-  #  Create record
-  # ----------------------------
 
   def create_herbarium_record
     store_location
@@ -141,7 +106,52 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
+  def remove_observation
+    pass_query_params
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    return unless @herbarium_record
+    @observation = find_or_goto_index(Observation, params[:obs])
+    return unless @observation
+    return unless make_sure_can_delete!(@herbarium_record)
+    @herbarium_record.remove_observation(@observation)
+    redirect_with_query(@observation.show_link_args)
+  end
+
+  def destroy_herbarium_record
+    pass_query_params
+    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
+    return unless @herbarium_record
+    return unless make_sure_can_delete!(@herbarium_record)
+    figure_out_where_to_go_back_to
+    @herbarium_record.destroy
+    redirect_with_query(action: :index_herbarium_record)
+  end
+
+################################################################################
+
   private
+
+  def show_selected_herbarium_records(query, args = {})
+    args = {
+      action: :list_herbarium_records,
+      letters: "herbarium_records.initial_det",
+      num_per_page: 100
+    }.merge(args)
+
+    @links ||= []
+    @links << [:create_herbarium.l,
+               { controller: :herbarium, action: :create_herbarium }]
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["herbarium_name",  :sort_by_herbarium_name.t],
+      ["herbarium_label", :sort_by_herbarium_label.t],
+      ["created_at",      :sort_by_created_at.t],
+      ["updated_at",      :sort_by_updated_at.t]
+    ]
+
+    show_index_of_objects(query, args)
+  end
 
   def default_herbarium_record
     HerbariumRecord.new(
@@ -213,6 +223,14 @@ class HerbariumRecordController < ApplicationController
     false
   end
 
+  def make_sure_can_delete!(herbarium_record)
+    return true if in_admin_mode? || herbarium_record.can_edit?
+    return true if herbarium_record.herbarium.curators.include?(@user)
+    flash_error(:permission_denied.t)
+    redirect_to(herbarium_record.show_link_args)
+    false
+  end
+
   def normalize_parameters
     [:herbarium_name, :initial_det, :accession_number].each do |arg|
       val = @herbarium_record.send(arg).to_s.strip_html.strip_squeeze
@@ -278,43 +296,5 @@ class HerbariumRecordController < ApplicationController
       redirect_with_query(action: :index_herbarium_record,
                           id: @herbarium_record.id)
     end
-  end
-
-  public
-
-  # ----------------------------
-  #  Delete record
-  # ----------------------------
-
-  def remove_observation
-    pass_query_params
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
-    return unless @herbarium_record
-    @observation = find_or_goto_index(Observation, params[:obs])
-    return unless @observation
-    return unless make_sure_can_delete!(@herbarium_record)
-    @herbarium_record.observations.delete(@observation)
-    @herbarium_record.destroy if @herbarium_record.observations.empty?
-    redirect_with_query(@observation.show_link_args)
-  end
-
-  def destroy_herbarium_record
-    pass_query_params
-    @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
-    return unless @herbarium_record
-    return unless make_sure_can_delete!(@herbarium_record)
-    figure_out_where_to_go_back_to
-    @herbarium_record.destroy
-    redirect_with_query(action: :index_herbarium_record)
-  end
-
-  private
-
-  def make_sure_can_delete!(herbarium_record)
-    return true if in_admin_mode? || herbarium_record.can_edit?
-    return true if herbarium_record.herbarium.curators.include?(@user)
-    flash_error(:permission_denied.t)
-    redirect_to(herbarium_record.show_link_args)
-    false
   end
 end
