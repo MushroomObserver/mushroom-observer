@@ -74,12 +74,7 @@ class SequenceController < ApplicationController
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
-    if !check_permission(@observation)
-      flash_warning(:permission_denied.t)
-      redirect_with_query(@observation.show_link_args)
-    elsif request.method == "POST"
-      build_sequence
-    end
+    build_sequence if request.method == "POST"
   end
 
   def edit_sequence
