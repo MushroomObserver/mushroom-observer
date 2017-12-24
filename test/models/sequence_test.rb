@@ -245,4 +245,20 @@ class SequenceTest < UnitTestCase
     assert_equal("https://www.ncbi.nlm.nih.gov/nuccore/#{sequence.accession}",
                  sequence.accession_url)
   end
+
+  def test_blast_url
+    assert_equal(
+      %Q(#{Sequence. blast_url_prefix}"ACGT"),
+      sequences(:local_sequence).blast_url
+    )
+    assert_equal(
+      %Q(#{Sequence.blast_url_prefix}"KT968605"),
+      sequences(:deposited_sequence).blast_url
+    )
+    # Prove that BLAST url for UNITE sequence uses Bases instead of Accession.
+    assert_equal(
+      %Q(#{Sequence.blast_url_prefix}"ACGT"),
+      sequences(:alternate_archive).blast_url
+    )
+  end
 end
