@@ -3419,6 +3419,7 @@
   runtime_description_removed_writer: Revoked edit permission for [name].
   runtime_destroy_description_not_admin: Only a description's admins can delete that description.
   runtime_duplicate_rank: "Rank appears twice: '[rank]'"
+  runtime_herbarium_record_already_exists: "Herbarium record [number] at [herbarium] already used by someone else."
   runtime_image_updated_notes: "Updated notes on image #[id]."
   runtime_image_uploaded: Uploaded image '[name]'.
   runtime_index_no_at_location: No [types] at [location].
@@ -3692,6 +3693,7 @@
 
   api_help_accession_has: search within accession number
   api_help_accession_number: unique herbarium id
+  api_help_accession_number_has: search within accession number
   api_help_any_date: this date can mean anything you want
   api_help_api_key_user: user you are creating api key for
   api_help_app: identifier used to help user distinguish which api key belongs to which app
@@ -3699,6 +3701,8 @@
   api_help_citation_has: search within citation
   api_help_classification_has: search within classification
   api_help_clear_synonyms: make it so this name is not synonymized with anything but leave everything it used to be synonymized with synonyms of each other
+  api_help_collector: "collector's name"
+  api_help_collector_has: "search within collector's name"
   api_help_comments_has: search within comments summary and body
   api_help_content_has: search within body
   api_help_copyright_holder_has: search within copyright holder
@@ -3710,6 +3714,7 @@
   api_help_has_obs_notes: observation has notes?
   api_help_has_observation: is attached to an observation?
   api_help_initial_det: initial determination
+  api_help_initial_det_has: search within initial determination
   api_help_is_collection_location: is this location where mushroom was found?
   api_help_locus_has: search within locus
   api_help_log: log this action on main page activity log and RSS feed?
@@ -3720,6 +3725,8 @@
   api_help_north: max latitude
   api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
   api_help_notes_has: search within notes
+  api_help_number: "collector's number"
+  api_help_number_has: "search within collector's number"
   api_help_obs_date: observation date
   api_help_obs_notes_has: search within observation notes
   api_help_observer: observer

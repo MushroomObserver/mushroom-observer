@@ -76,6 +76,7 @@ class API
         spl.update!(params)                  unless params.empty?
         spl.add_observations(@add_obs)       if @add_obs.any?
         spl.remove_observations(@remove_obs) if @remove_obs.any?
+        spl
       end
     end
 

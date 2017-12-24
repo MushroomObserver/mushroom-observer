@@ -89,6 +89,7 @@ class API
         add_synonym(name)
         clear_synonymy(name)
         change_correct_spelling(name)
+        name
       end
     end
 

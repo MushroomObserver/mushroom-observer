@@ -25,6 +25,12 @@ else
   json.location_name object.where
 end
 if detail
+  json.collection_numbers object.collection_numbers.map do |collection_number|
+    json_detailed_object(json, collection_number)
+  end
+  json.herbarium_records object.herbarium_records.map do |herbarium_record|
+    json_detailed_object(json, herbarium_record)
+  end
   json.sequences object.sequences.map do |sequence|
     json_detailed_object(json, sequence)
   end

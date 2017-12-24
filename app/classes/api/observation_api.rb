@@ -15,6 +15,8 @@ class API
       :location,
       :name,
       { namings: :name },
+      :collection_numbers,
+      { herbarium_records: :herbarium },
       :sequences,
       :user
     ]
@@ -132,6 +134,7 @@ class API
         update_projects(obs)
         update_species_lists(obs)
         obs.log(:log_observation_updated_at) if @log
+        obs
       end
     end
 

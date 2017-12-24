@@ -176,39 +176,18 @@ class CollectionNumberController < ApplicationController
       return
     elsif name_and_number_free?
       @collection_number.save
-      change_corresponding_herbarium_records(old_format_name)
+      @collection_number.change_corresponding_herbarium_records(old_format_name)
     else
       flash_warning(:edit_collection_numbers_merged.t(
                       this: old_format_name, that: @other_number.format_name
                     ))
-      @collection_number.observations.each do |obs|
-        obs.log(:log_collection_number_updated,
-                name: @other_number.format_name, touch: true)
-      end
-      change_corresponding_herbarium_records(old_format_name)
-      @other_number.observations += @collection_number.observations
+      @collection_number.change_corresponding_herbarium_records(old_format_name)
+      @other_number.observations += @collection_number.observations -
+                                    @other_number.observations
       @collection_number.destroy
       @collection_number = @other_number
     end
     redirect_to_observation_or_collection_number
-  end
-
-  # Mirror changes to collection number in herbarium records.  Do this
-  # low-level to avoid redundant rss logs and other callbacks.
-  def change_corresponding_herbarium_records(old_number)
-    new_number = @collection_number.format_name
-    new_number = Observation.connection.quote(new_number)
-    old_number = Observation.connection.quote(old_number)
-    Observation.connection.execute(%(
-      UPDATE collection_numbers_observations cno,
-             herbarium_records_observations hro,
-             herbarium_records hr
-      SET hr.accession_number = #{new_number}
-      WHERE cno.collection_number_id = #{@collection_number.id}
-        AND cno.observation_id = hro.observation_id
-        AND hro.herbarium_record_id = hr.id
-        AND hr.accession_number = #{old_number}
-    ))
   end
 
   def whitelisted_collection_number_params
