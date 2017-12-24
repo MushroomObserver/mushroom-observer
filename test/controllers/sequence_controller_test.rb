@@ -61,10 +61,10 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove method requires login
     requires_login(:create_sequence, id: obs.id)
 
-    # Prove user cannot add Sequence to Observation he doesn't own
+    # Prove logged-in user can add Sequence to someone else's Observation
     login("zero")
     get(:create_sequence, id: obs.id)
-    assert_redirected_to(obs.show_link_args)
+    assert_response(:success)
 
     # Prove Observation owner can add Sequence
     login(owner.login)
@@ -103,13 +103,33 @@ class SequenceControllerTest < FunctionalTestCase
     post(:create_sequence, params)
     assert_equal(old_count, Sequence.count)
 
-    # Prove user who isn't the owner cannot create a Sequence
-    login("zero")
+    # Prove logged-in user can add sequence to someone else's Observation
+    user = users(:zero_user)
+    login(user.login)
     post(:create_sequence, params)
-    assert_equal(old_count, Sequence.count)
-    assert_flash_warning
+    assert_equal(old_count + 1, Sequence.count)
+    sequence = Sequence.last
+    assert_objs_equal(obs, sequence.observation)
+    assert_users_equal(user, sequence.user)
+    assert_equal(locus, sequence.locus)
+    assert_equal(bases, sequence.bases)
+    assert_empty(sequence.archive)
+    assert_empty(sequence.accession)
+    assert_redirected_to(obs.show_link_args)
+    assert_flash_success
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
 
-    # Prove authorized user can create non-repository Sequence
+    # Prove user can create non-repository Sequence
+    old_count = Sequence.count
+    locus = "ITS"
+    bases = "gagtatgtgc acacctgccg tctttatcta tccacctgtg cacacattgt agtcttgggg"
+    params = {
+      id: obs.id,
+      sequence: { locus: locus,
+                  bases: bases }
+    }
+
     login(owner.login)
     post(:create_sequence, params)
     assert_equal(old_count + 1, Sequence.count)

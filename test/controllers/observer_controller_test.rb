@@ -927,7 +927,8 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, id: obs1.id)
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
-    assert_show_obs(:sequences, [], false)
+    # But any logged-in user can add sequence to any observation.
+    assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
@@ -935,7 +936,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       [[obs2.herbarium_records.first.id, false]], false)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], false)
+      [[obs2.sequences.first.id, false]], true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
@@ -943,7 +944,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       obs3.herbarium_records.map { |x| [x.id, false] }, false)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, false)
+      obs3.sequences.map { |x| [x.id, false] }, true)
 
     # Roy is a curator at NY, so can add herbarium records, and modify existing
     # herbarium records attached to NY.
@@ -952,7 +953,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, id: obs1.id)
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], false)
+    assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
@@ -960,7 +961,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       [[obs2.herbarium_records.first.id, true]], true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], false)
+      [[obs2.sequences.first.id, false]], true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
@@ -968,7 +969,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] }, true)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, false)
+      obs3.sequences.map { |x| [x.id, false] }, true)
 
     # Dick owns all of the sequences, is on obs3's project, and has a personal
     # herbarium.
@@ -976,7 +977,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, id: obs1.id)
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
-    assert_show_obs(:sequences, [], false)
+    assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
@@ -984,7 +985,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       [[obs2.herbarium_records.first.id, false]], true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, true]], false)
+      [[obs2.sequences.first.id, true]], true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
@@ -1008,7 +1009,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       [[obs2.herbarium_records.first.id, true]], true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], false)
+      [[obs2.sequences.first.id, false]], true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
@@ -1016,14 +1017,14 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:herbarium_records,
       obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] }, true)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, false)
+      obs3.sequences.map { |x| [x.id, false] }, true)
 
     # Mary owns obs2 and obs3, but has nothing to do with obs1.
     login("mary")
     get(:show_observation, id: obs1.id)
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
-    assert_show_obs(:sequences, [], false)
+    assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,

@@ -7,15 +7,16 @@
   query = Query.lookup(:Sequence, :all, observations: observation.id)
 %>
 
+<div>
+  <%= :Sequences.t %>: <%=
+    link = link_with_query(:show_observation_add_sequence.t,
+                           controller: :sequence, action: :create_sequence,
+                           id: observation.id)
+    "[#{link}]".html_safe if @user
+  %>
+</div>
+
 <% if sequences.any? %>
-  <div>
-    <%= :Sequences.t %>: <%=
-      link = link_with_query(:show_observation_add_sequence.t,
-                             controller: :sequence, action: :create_sequence,
-                             id: observation.id)
-      "[#{link}]".html_safe if can_edit
-    %>
-  </div>
   <ul class="tight-list">
     <% sequences.map do |sequence| %>
       <li>
@@ -46,11 +47,4 @@
       </li>
     <% end %>
   </ul>
-
-<% elsif sequences.none? && can_edit %>
-  <%= :show_observation_no_sequences.t %> [<%=
-    link_with_query(:show_observation_add_sequence.t,
-                    controller: :sequence, action: :create_sequence,
-                    id: observation.id)
-  %>]
 <% end %>

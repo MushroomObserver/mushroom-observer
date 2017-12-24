@@ -59,8 +59,7 @@ class API
 
     def create_params
       {
-        observation: parse(:observation, :observation,
-                           must_have_edit_permission: true),
+        observation: parse(:observation, :observation),
         locus:       parse(:string, :locus),
         bases:       parse(:string, :bases),
         archive:     parse(:archive, :archive),
