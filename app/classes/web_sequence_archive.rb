@@ -8,17 +8,22 @@ class WebSequenceArchive
     #   home    home page
     #   prefix  prefix for Accession (When Accession is appended to this,
     #           it will land on the page for that Accession in the Archive.)
+    #   blastable_by_accession
+    #           Does NCBI BLAST recognize accession from this Archive?
     def archives
       [
         { name:   "GenBank",
           home:   "https://www.ncbi.nlm.nih.gov/genbank/",
-          prefix: "https://www.ncbi.nlm.nih.gov/nuccore/" },
+          prefix: "https://www.ncbi.nlm.nih.gov/nuccore/",
+          blastable_by_accession: true },
         { name:   "ENA",
           home:   "http://www.ebi.ac.uk/ena",
-          prefix: "http://www.ebi.ac.uk/ena/data/view/" },
+          prefix: "http://www.ebi.ac.uk/ena/data/view/",
+          blastable_by_accession: true },
         { name:   "UNITE",
           home:   "https://unite.ut.ee/",
-          prefix: "https://unite.ut.ee/search.php?qresult=yes&accno=" }
+          prefix: "https://unite.ut.ee/search.php?qresult=yes&accno=",
+          blastable_by_accession: false }
       ]
     end
 
@@ -40,6 +45,10 @@ class WebSequenceArchive
 
     def archive_home(name)
       archive(name)[:home]
+    end
+
+    def accession_blastable?(name)
+      archive(name)[:blastable_by_accession]
     end
 
     def search_prefix(name)

@@ -6,21 +6,25 @@
 #
 #  == Attributes
 #
-#  id::               unique numerical id, starting at 1.
-#  observation::      associated Observation record
-#  user::             user who created the Sequence
-#  locus::            description of the locus (region) of the Sequence
-#  bases::            nucleotides in FASTA format (description lines optional)
-#  archive::          on-line database in which Sequence is archived
-#  accession::        accession # in the Archive
-#  notes::            free-form notes
+#  id::                unique numerical id, starting at 1.
+#  observation::       associated Observation record
+#  user::              user who created the Sequence
+#  locus::             description of the locus (region) of the Sequence
+#  bases::             nucleotides in FASTA format (description lines optional)
+#  archive::           on-line database in which Sequence is archived
+#  accession::         accession # in the Archive
+#  notes::             free-form notes
 #
 #  == Class Methods
 #
-#  locus_width        Default # of chars (including diaresis) to truncate locus
+#  blast_url_prefix    part of url prepended to BLAST QUERY
+#  locus_width         Default # of chars (including diaresis) to truncate locus
 #
 #  == Instance Methods
 #
+#  accession_url       url of a search for accession
+#  blast_url           url of NCBI page to create a BLAST report
+#  blastable?          Can we easily create a blast_url for the Sequence?
 #  deposit?            Does sequence have a deposit (both Archive && Accession)
 #  format_name         name for orphaned objects
 #  locus_width         Default # of chars (including diaresis) to truncate locus
@@ -81,6 +85,36 @@ class Sequence < AbstractModel
   #  :section: Other
   #
   ##############################################################################
+
+  # Can we easily create a blast_url for the Sequence?
+  #   ("easily" == without using 3d party API to get the BLAST QUERY parameter)
+  def blastable?
+     blastable_by_accession? || bases.present?
+  end
+
+  # Does using Accession as BLAST's QUERY parameter give a good BLAST report?
+  # I.e., are the Archive's accession numbers == Genbank's accession numbers?
+  # (UNITE Accessions are not in GenBank.)
+  def blastable_by_accession?
+    archive.present? && WebSequenceArchive.accession_blastable?(archive)
+  end
+
+  # url of NCBI page to create BLAST report for the sequence
+  def blast_url
+    blast_query = blastable_by_accession? ? accession : bases
+    # wrap QUERY in quotes because it can contain whitespace
+    %Q[#{blast_url_prefix}"#{blast_query}"]
+  end
+
+  def self.blast_url_prefix
+    "https://blast.ncbi.nlm.nih.gov/Blast.cgi?" \
+    "CMD=Put&DATABASE=nt&PROGRAM=blastn&QUERY="
+  end
+
+  # convenience wrapper around class method of same name
+  def blast_url_prefix
+    Sequence.blast_url_prefix
+  end
 
   def deposit?
     archive.present? && accession.present?
