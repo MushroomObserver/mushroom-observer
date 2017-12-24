@@ -518,7 +518,7 @@ POST sequence
   bases:	string
   locus:	string
   notes:	string
-  observation:	observation (must have edit permission)
+  observation:	observation
 
 PATCH sequence
  query params

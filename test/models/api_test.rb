@@ -2537,7 +2537,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.remove(:observation))
     assert_api_fail(params.remove(:archive))
     assert_api_fail(params.remove(:accession))
-    assert_api_fail(params.merge(observation: marys_obs.id))
+    assert_api_pass(params.merge(observation: marys_obs.id))
     assert_api_fail(params.merge(archive: "bogus"))
     assert_api_fail(params.merge(bases: "funky stuff!"))
     assert_api_pass(params)
