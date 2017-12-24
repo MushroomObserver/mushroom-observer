@@ -27,6 +27,7 @@ module Query
         has_name?:         :boolean,
         has_comments?:     { boolean: [true] },
         has_specimen?:     :boolean,
+        has_sequences?:    { boolean: [true] },
         has_notes?:        :boolean,
         has_notes_fields?: [:string],
         notes_has?:        :string,
@@ -106,6 +107,7 @@ module Query
         )
         add_join(:comments)
       end
+      add_join(:sequences) if params[:has_sequences]
       initialize_model_do_has_notes_fields(:has_notes_fields)
       initialize_model_do_observation_bounding_box
       initialize_content_filters(Observation)
