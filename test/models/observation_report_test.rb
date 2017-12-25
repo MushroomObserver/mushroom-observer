@@ -111,7 +111,10 @@ class ObservationReportTest < UnitTestCase
       "2006",
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
-        "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg"
+        "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
+      "NA Mycoflora Project",
+      "314159",
+      "Found in a strange place... & with śtrangè characters™"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
@@ -136,7 +139,10 @@ class ObservationReportTest < UnitTestCase
       "7",
       "2010",
       "http://mushroomobserver.org/#{obs.id}",
-      ""
+      "",
+      "NA Mycoflora Project",
+      "",
+      "unknown_with_lat_long"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
@@ -150,7 +156,7 @@ class ObservationReportTest < UnitTestCase
       "Mary Newbie",
       "2006-05-11",
       "X",
-      "Cortinarius sp.: NYBG 1234",
+      "Cortinarius sp.: NYBG 1234, Fungi: 314159",
       obs.name.id.to_s,
       "Fungi",
       nil,

@@ -3,7 +3,7 @@ merges = description.parent.descriptions - [description]
 moves = description.parent.synonyms - [description.parent]
 moves.reject!(&:is_misspelling?)
 
-form_tag(:action => 'merge_descriptions', :id => description.id) do %>
+form_tag(action: :merge_descriptions, id: description.id) do %>
   <br/><br/>
 
   <p><big><%= :merge_descriptions_merge_header.t %>:</big><br/>
@@ -36,7 +36,7 @@ form_tag(:action => 'merge_descriptions', :id => description.id) do %>
   <% end %>
 
   <% if merges.any? || moves.any? %>
-    <%= check_box_tag("delete", '1', description.is_admin?(@user)) %>
+    <%= check_box_tag(:delete, "1", description.is_admin?(@user)) %>
       <%= :merge_descriptions_delete_after.t %>
     <input type="hidden" name="delete" value="0"/>
   <% end %>

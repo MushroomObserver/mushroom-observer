@@ -1,6 +1,6 @@
 <%
   case @notification.flavor.to_s
-  when 'name'
+  when "name"
     obj  = @naming.observation
     type = :observation
   else
@@ -9,30 +9,30 @@
   end
 
   intro = :email_naming_for_observer_intro.l(
-    :user  => @notification.user.legal_name,
-    :email => @notification.user.email,
-    :type  => type,
-    :name  => obj.unique_format_name
+    user:  @notification.user.legal_name,
+    email: @notification.user.email,
+    type:  type,
+    name:  obj.unique_format_name
   )
 
   message = @notification.calc_note(
-    :user => @user,
-    :naming => @naming
+    user:   @user,
+    naming: @naming
   )
 
   handy_links = :email_can_respond.l(
-    :name  => @notification.user.legal_name,
-    :email => @notification.user.email
+    name:  @notification.user.legal_name,
+    email: @notification.user.email
   )
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  links.push([:email_links_show_object.t(:type => type),
+  links.push([:email_links_show_object.t(type: type),
     "#{MO.http_domain}/#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
+  report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>
@@ -62,7 +62,7 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''.html_safe
+<%= result = "".html_safe
   for label, url in links
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end

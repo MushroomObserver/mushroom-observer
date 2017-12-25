@@ -19,8 +19,11 @@ module ObservationReport
         day
         month
         year
-        moUrl
+        eventID
         imageUrls
+        labelProject
+        fieldNumber
+        occurrenceRemarks
       ]
     end
 
@@ -44,7 +47,10 @@ module ObservationReport
         row.month,
         row.year,
         row.obs_url,
-        image_urls(row)
+        image_urls(row),
+        "NA Mycoflora Project",
+        row.val(2).to_s,
+        row.obs_notes.to_s.t.html_to_ascii
       ]
     end
 
@@ -78,12 +84,28 @@ module ObservationReport
       Image.url(:full_size, id, transferred: true)
     end
 
-    def extend_data!(rows)
-      add_image_ids!(rows, 1)
-    end
-
     def sort_before(rows)
       rows.sort_by(&:obs_id)
+    end
+
+    def extend_data!(rows)
+      add_image_ids!(rows, 1)
+      add_mycoflora_ids!(rows, 2)
+    end
+
+    def add_mycoflora_ids!(rows, col)
+      herbarium = Herbarium.where(name: "Mycoflora Project").first
+      return unless herbarium
+      vals = HerbariumRecord.connection.select_rows %(
+        SELECT ho.observation_id, h.accession_number
+        FROM herbarium_records h,
+             herbarium_records_observations ho,
+             (#{query.query}) as ids
+        WHERE ho.observation_id = ids.id AND
+              ho.herbarium_record_id = h.id AND
+              h.herbarium_id = #{herbarium.id}
+      )
+      add_column!(rows, vals, col)
     end
   end
 end

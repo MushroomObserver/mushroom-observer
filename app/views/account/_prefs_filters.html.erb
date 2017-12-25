@@ -5,8 +5,11 @@
 </div>
 
 <% ContentFilter.all.each do |filter| %>
-  <% if filter.type == :boolean %>
+  <% if filter.type == :boolean && filter.prefs_vals.count == 1 %>
     <%= render partial: "prefs_filter_checkbox",
+               locals: { filter: filter, form: form } %>
+  <% elsif filter.type == :boolean && filter.prefs_vals.count > 1 %>
+    <%= render partial: "prefs_filter_radiobox",
                locals: { filter: filter, form: form } %>
   <% elsif filter.type == :string %>
     <%= render partial: "prefs_filter_text_field",

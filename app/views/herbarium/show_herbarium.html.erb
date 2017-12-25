@@ -1,43 +1,53 @@
 <%
-  @title = @herbarium.name.t
-  @title += " (#{@herbarium.code.t})".html_safe if !@herbarium.code.blank?
-
-  map = @herbarium.location ? true : false
+  @title = @herbarium.format_name.t
 
   tabs = []
-  if @herbarium.is_curator?(@user) || in_admin_mode?
-    tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
+  if @herbarium.curators.empty? || @herbarium.curator?(@user) || in_admin_mode?
+    tabs += [
+      link_with_query(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id),
+      link_with_query(:destroy_object.t(type: :herbarium), action: :destroy_herbarium,
+                      id: @herbarium.id, back: url_after_delete(@herbarium))
+    ]
   end
   tabs += [
-    link_to(:create_herbarium.t, action: :create_herbarium),
-    link_to(:herbarium_index.t, action: :index)
+    link_with_query(:create_herbarium.t, action: :create_herbarium),
+    link_with_query(:herbarium_index.t, action: :index)
   ]
-  @tabsets = { right: draw_tab_set(tabs) }
+
+  @tabsets = {
+    pager_for: @herbarium,
+    right: draw_tab_set(tabs)
+  }
+
+  map = @herbarium.location ? true : false
 %>
 
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
     <div class="push-down">
-      <%= link_to(:show_herbarium_specimen_count.t(count: @herbarium.specimens.count),
-                  controller: :specimen, action: :herbarium_index, id: @herbarium.id) %>
+      <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.length),
+                  controller: :herbarium_record, action: :herbarium_index, id: @herbarium.id) %>
     </div>
 
     <div class="push-down">
       <%= render(partial: "curator_table", locals: {herbarium: @herbarium}) %>
-      <% if @herbarium.is_curator?(@user) || in_admin_mode? %>
-        <%= form_tag(action: :show_herbarium, id: @herbarium) do %>
+      <% if @herbarium.curator?(@user) || in_admin_mode? %>
+        <%= form_tag(add_query_param(action: :show_herbarium, id: @herbarium)) do %>
           <div class="form-inline push-down">
-            <%= text_field(:curator, :name, class: "form-control") %>
-            <label for="curator_name"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
-            <% turn_into_user_auto_completer(:curator_name) %>
+            <%= text_field_tag(:add_curator, "", class: "form-control") %>
+            <label for="add_curator"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
+            <% turn_into_user_auto_completer(:add_curator) %>
           </div>
         <% end %>
+      <% else %>
+        <%= link_with_query(:show_herbarium_curator_request.t,
+                           action: :request_to_be_curator, id: @herbarium.id) %>
       <% end %>
     </div>
 
     <% if !@herbarium.description.blank? %>
       <div class="push-down">
-        <div class="bold"><%= :herbarium_description.t %>:</div>
+        <div class="bold"><%= :NOTES.t %>:</div>
         <%= @herbarium.description.tpl %>
       </div>
     <% end %>
@@ -64,14 +74,8 @@
 <div class="row">
   <div class="col-xs-12 push-down" style="max-width:<%= map ? 930 : 600 %>px">
     <center>
-      <% if @herbarium.created_at %>
-        <%= :herbarium_created_at.t %>:
-        <%= @herbarium.created_at.web_date %><br/>
-      <% end %>
-      <% if @herbarium.updated_at %>
-        <%= :herbarium_updated_at.t %>:
-        <%=  @herbarium.updated_at.web_date %><br/>
-      <% end %>
+      <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
+      <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
     </center>
   </div>
 </div>

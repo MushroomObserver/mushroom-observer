@@ -52,24 +52,65 @@ class ApiControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_basic_get_requests
-    assert_no_api_errors
-    [
-      Comment,
-      Image,
-      Location,
-      Name,
-      Observation,
-      Project,
-      Sequence,
-      SpeciesList,
-      User
-    ].each { |model| do_basic_get_request_for_model(model) }
+  def test_basic_collection_number_get_request
+    do_basic_get_request_for_model(CollectionNumber)
+  end
+
+  def test_basic_comment_get_request
+    do_basic_get_request_for_model(Comment)
+  end
+
+  def test_basic_externallink_get_request
+    do_basic_get_request_for_model(ExternalLink)
+  end
+
+  def test_basic_externalsite_get_request
+    do_basic_get_request_for_model(ExternalSite)
+  end
+
+  def test_basic_herbarium_get_request
+    do_basic_get_request_for_model(Herbarium)
+  end
+
+  def test_basic_herbarium_record_get_request
+    do_basic_get_request_for_model(HerbariumRecord)
+  end
+
+  def test_basic_image_get_request
+    do_basic_get_request_for_model(Image)
+  end
+
+  def test_basic_location_get_request
+    do_basic_get_request_for_model(Location)
+  end
+
+  def test_basic_name_get_request
+    do_basic_get_request_for_model(Name)
+  end
+
+  def test_basic_observation_get_request
+    do_basic_get_request_for_model(Observation)
+  end
+
+  def test_basic_project_get_request
+    do_basic_get_request_for_model(Project)
+  end
+
+  def test_basic_sequence_get_request
+    do_basic_get_request_for_model(Sequence)
+  end
+
+  def test_basic_specieslist_get_request
+    do_basic_get_request_for_model(SpeciesList)
+  end
+
+  def test_basic_user_get_request
+    do_basic_get_request_for_model(User)
   end
 
   def do_basic_get_request_for_model(model)
-    %i[none low high].each do |detail|
-      %i[xml json].each do |format|
+    [:none, :low, :high].each do |detail|
+      [:xml, :json].each do |format|
         get(model.table_name.to_sym, detail: detail, format: format)
         assert_no_api_errors("Get #{model.name} #{detail} #{format}")
         assert_objs_equal(model.first, @api.results.first)
@@ -93,7 +134,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_users_equal(rolf, obs.user)
     assert_equal(Date.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
-    assert_nil(obs.where)
+    assert_equal("Unknown", obs.where)
     assert_names_equal(names(:fungi), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
@@ -133,7 +174,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_users_equal(rolf, obs.user)
     assert_equal("2012-06-26", obs.when.web_date)
     assert_objs_equal(locations(:burbank), obs.location)
-    assert_nil(obs.where)
+    assert_equal("Burbank, California, USA", obs.where)
     assert_names_equal(names(:coprinus_comatus), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
@@ -144,7 +185,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal({ Observation.other_notes_key =>
-                    "These are notes.\nThey look like this.\n" }, obs.notes)
+                   "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_list_equal([images(:in_situ_image), images(:turned_over_image)],
                           obs.images)
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
@@ -209,6 +250,7 @@ class ApiControllerTest < FunctionalTestCase
          api_key: rolfs_key.key,
          login: "miles",
          email: "miles@davis.com",
+         password: "sivadselim",
          create_key: "New API Key",
          detail: :high)
     assert_no_api_errors
@@ -235,7 +277,8 @@ class ApiControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal("New API Key", notes.to_s)
+    assert_equal("&lt;p&gt;New &lt;span class=\"caps\"&gt;API&lt;/span&gt; Key&lt;/p&gt;",
+                 notes.to_s)
   end
 
   def test_post_api_key
@@ -266,12 +309,13 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(mary.email, email.header["to"].to_s)
   end
 
+  # Prove user can add Sequence to someone else's Observation
   def test_post_sequence
     obs = observations(:coprinus_comatus_obs)
     post(
       :sequences,
       observation: obs.id,
-      api_key:     api_keys(:rolfs_api_key).key,
+      api_key:     api_keys(:marys_api_key).key,
       locus:       "ITS",
       bases:       "catg",
       archive:     "GenBank",
@@ -281,7 +325,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
-    assert_users_equal(rolf, sequence.user)
+    assert_users_equal(mary, sequence.user)
+    refute_equal(obs.user, sequence.user)
     assert_equal("ITS", sequence.locus)
     assert_equal("catg", sequence.bases)
     assert_equal("GenBank", sequence.archive)

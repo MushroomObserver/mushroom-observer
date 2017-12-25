@@ -1,17 +1,18 @@
 <%
   @title = :sequence_edit_title.t(name: @sequence.unique_format_name)
+
   tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation),
-                    @sequence.observation.show_link_args)
+    link_with_query(:cancel_and_show.t(type: @back_object.type_tag),
+                    @back_object.show_link_args)
   ]
+
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<br>
 <%= render(partial: "observation_title",
            locals: { observation: @sequence.observation }) %>
 
-<%= form_for(:sequence, url: {action: :edit_sequence}) do |form| %>
+<%= form_for(:sequence, url: add_query_param(action: :edit_sequence, back: @back)) do |form| %>
   <%= render(partial: "form_sequence", locals: {form: form}) %>
 <% end %>
 

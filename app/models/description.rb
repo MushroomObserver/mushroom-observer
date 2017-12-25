@@ -104,6 +104,11 @@ class Description < AbstractModel
     type_tag.to_s.sub("_description", "")
   end
 
+  # Shorthand for "public && public_write"
+  def fully_public
+    public && public_write
+  end
+
   # Is this group writable by the general public?
   def public_write
     @public_write ||= public_write_was
@@ -351,12 +356,12 @@ class Description < AbstractModel
 
   # Is a given user an writer for this description?
   def is_writer?(user)
-    has_permission?(writers_join_table, user)
+    public_write || has_permission?(writers_join_table, user)
   end
 
   # Is a given user an reader for this description?
   def is_reader?(user)
-    has_permission?(readers_join_table, user)
+    public || has_permission?(readers_join_table, user)
   end
 
   # Give a User or UserGroup admin privileges.
@@ -404,7 +409,7 @@ class Description < AbstractModel
   # Check if a given user has the given type of permission.
   def has_permission?(table, user)
     if user.is_a?(User)
-      user.admin || group_user_ids(table).include?(user.id)
+      group_user_ids(table).include?(user.id)
     elsif !user
       group_ids(table).include?(UserGroup.all_users.id)
     elsif user.to_i != 0

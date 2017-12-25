@@ -139,7 +139,7 @@ class LocationControllerTest < FunctionalTestCase
     login("mary")
 
     get(:list_by_country, country: "USA")
-    usa_loc_array = @controller.instance_variable_get("@objects")
+    usa_loc_array = assigns(:objects)
     loc_usa = Location.create!(name: "Santa Fe, New Mexico, USA",
                                north: 34.1865,
                                west: -116.924,
@@ -148,11 +148,10 @@ class LocationControllerTest < FunctionalTestCase
                                notes: "Santa Fe",
                                user: @mary)
     get(:list_by_country, country: "USA")
-    assert_obj_list_equal(usa_loc_array << loc_usa,
-                          @controller.instance_variable_get("@objects"))
+    assert_obj_list_equal(usa_loc_array << loc_usa, assigns(:objects), :sort)
 
     get(:list_by_country, country: "Mexico")
-    assert_obj_list_equal([], @controller.instance_variable_get("@objects"))
+    assert_obj_list_equal([], assigns(:objects))
 
     loc_mex1 = Location.create!(
       name: "Somewhere, Chihuahua, Mexico",
@@ -173,8 +172,7 @@ class LocationControllerTest < FunctionalTestCase
       user: @mary
     )
     get(:list_by_country, country: "Mexico")
-    assert_obj_list_equal([loc_mex1, loc_mex2],
-                          @controller.instance_variable_get("@objects"))
+    assert_obj_list_equal([loc_mex1, loc_mex2], assigns(:objects), :sort)
   end
 
   def test_locations_by_user
@@ -574,6 +572,69 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(past_loc_count + 1 - past_locs_to_go, Location::Version.count)
     assert_equal(past_desc_count - past_descs_to_go,
                  LocationDescription::Version.count)
+  end
+
+  def test_post_edit_location_locked
+    location = locations(:unknown_location)
+    params = {
+      id: location.id,
+      location: {
+        locked:       "",
+        display_name: "My Back Yard, Fresno, California, USA",
+        north:        "31",
+        south:        "30",
+        east:         "-118",
+        west:         "-119",
+        high:         "30",
+        low:          "10",
+        notes:        "new notes"
+      }
+    }
+
+    login("rolf")
+    get(:edit_location, id: location.id)
+    assert_select("input[type=checkbox]#location_locked", count: 0)
+    assert_select("input[type=text]#location_display_name", count: 0)
+    assert_select("input[type=text]#location_north", count: 0)
+    assert_select("input[type=text]#location_south", count: 0)
+    assert_select("input[type=text]#location_east", count: 0)
+    assert_select("input[type=text]#location_west", count: 0)
+    assert_select("input[type=text]#location_high", count: 0)
+    assert_select("input[type=text]#location_low", count: 0)
+
+    post(:edit_location, params)
+    location.reload
+    assert_true(location.locked)
+    assert_equal("Unknown", location.name)
+    assert_equal(90, location.north)
+    assert_equal(-90, location.south)
+    assert_equal(180, location.east)
+    assert_equal(-180, location.west)
+    assert_nil(location.high)
+    assert_nil(location.low)
+    assert_equal("new notes", location.notes)
+
+    make_admin("mary")
+    get(:edit_location, id: location.id)
+    assert_select("input[type=checkbox]#location_locked", count: 1)
+    assert_select("input[type=text]#location_display_name", count: 1)
+    assert_select("input[type=text]#location_north", count: 1)
+    assert_select("input[type=text]#location_south", count: 1)
+    assert_select("input[type=text]#location_east", count: 1)
+    assert_select("input[type=text]#location_west", count: 1)
+    assert_select("input[type=text]#location_high", count: 1)
+    assert_select("input[type=text]#location_low", count: 1)
+
+    post(:edit_location, params)
+    location.reload
+    assert_false(location.locked)
+    assert_equal("My Back Yard, Fresno, California, USA", location.name)
+    assert_equal(31, location.north)
+    assert_equal(30, location.south)
+    assert_equal(-118, location.east)
+    assert_equal(-119, location.west)
+    assert_equal(30, location.high)
+    assert_equal(10, location.low)
   end
 
   def test_list_merge_options

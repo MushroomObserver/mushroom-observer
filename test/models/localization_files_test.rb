@@ -150,12 +150,13 @@ class LocalizationFilesTest < UnitTestCase
         tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
       end
     end
-    file = "#{::Rails.root}/app/classes/api/parsers.rb"
-    File.open(file, "r:utf-8") do |fh|
-      fh.each_line do |line|
-        next unless line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
+    Dir.glob("#{::Rails.root}/app/classes/api/parsers/*.rb").each do |file|
+      File.open(file, "r:utf-8") do |fh|
+        fh.each_line do |line|
+          next unless line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
 
-        tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
+          tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
+        end
       end
     end
     assert_no_missing_translations(tags, "API error")

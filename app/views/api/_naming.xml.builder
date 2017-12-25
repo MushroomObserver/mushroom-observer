@@ -10,7 +10,7 @@ xml.tag!(tag,
   xml_minimal_object(xml, :owner, User, object.user_id)
   xml_minimal_object(xml, :observation, Observation, object.observation_id)
   if detail
-    xml.votes(:number => object.votes.length) do
+    xml.votes(number: object.votes.length) do
       for vote in object.votes
         xml_detailed_object(xml, :vote, vote)
       end
@@ -18,7 +18,7 @@ xml.tag!(tag,
   end
   reasons = object.get_reasons.select(&:used?)
   if reasons.any?
-    xml.reasons(:number => reasons.length) do
+    xml.reasons(number: reasons.length) do
       for reason in reasons
         xml_naming_reason(xml, :reason, reason)
       end

@@ -1,5 +1,5 @@
 <%
-  @title = :comment_add_title.t(:name => @target.unique_format_name)
+  @title = :comment_add_title.t(name: @target.unique_format_name)
 
   target_type = @comment.target_type.underscore.upcase.to_sym
   tabs = [
@@ -19,4 +19,8 @@
   </div>
 </div>
 
-<%= render(partial: "object", object: @target) %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= render(partial: "object", object: @target) %>
+  </div>
+</div>

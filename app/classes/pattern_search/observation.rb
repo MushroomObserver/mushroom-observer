@@ -2,70 +2,48 @@
 
 module PatternSearch
   class Observation < Base
-    def build_query
-      self.model  = :Observation
-      self.flavor = :all
-      self.args   = {}
-      for term in parser.terms
-        if term.var == :pattern
-          self.flavor = :pattern_search
-          args[:pattern] = term.parse_pattern
+    PARAMS = {
+      date:            [:date,             :parse_date_range],
+      created:         [:created_at,       :parse_date_range],
+      modified:        [:updated_at,       :parse_date_range],
 
-        elsif term.var == :date
-          args[:date] = term.parse_date_range
-        elsif term.var == :created
-          args[:created_at] = term.parse_date_range
-        elsif term.var == :modified
-          args[:updated_at] = term.parse_date_range
+      name:            [:names,            :parse_list_of_names],
+      synonym_of:      [:synonym_names,    :parse_list_of_names],
+      child_of:        [:children_names,   :parse_list_of_names],
 
-        elsif term.var == :name
-          args[:names] = term.parse_list_of_names
-        elsif term.var == :synonym_of
-          args[:synonym_names] = term.parse_list_of_names
-        elsif term.var == :child_of
-          args[:children_names] = term.parse_list_of_names
+      herbarium:       [:herbaria,         :parse_list_of_herbaria],
+      location:        [:locations,        :parse_list_of_locations],
+      region:          [:region,           :parse_string],
+      project:         [:projects,         :parse_list_of_projects],
+      list:            [:species_lists,    :parse_list_of_species_lists],
+      user:            [:users,            :parse_list_of_users],
 
-        elsif term.var == :location
-          args[:locations] = term.parse_list_of_locations
-        elsif term.var == :project
-          args[:projects] = term.parse_list_of_projects
-        elsif term.var == :list
-          args[:species_lists] = term.parse_list_of_species_lists
-        elsif term.var == :user
-          args[:users] = term.parse_list_of_users
+      notes:           [:notes_has,        :parse_string],
+      comments:        [:comments_has,     :parse_string],
 
-        elsif term.var == :notes
-          args[:notes_has] = term.parse_string
-        elsif term.var == :comments
-          args[:comments_has] = term.parse_string
+      confidence:      [:confidence,       :parse_confidence],
 
-        elsif term.var == :confidence
-          args[:confidence] = term.parse_confidence
+      east:            [:east,             :parse_longitude],
+      west:            [:west,             :parse_longitude],
+      north:           [:north,            :parse_latitude],
+      south:           [:south,            :parse_latitude],
 
-        elsif term.var == :east
-          args[:east] = term.parse_float(-180, 180)
-        elsif term.var == :west
-          args[:west] = term.parse_float(-180, 180)
-        elsif term.var == :north
-          args[:north] = term.parse_float(-90, 90)
-        elsif term.var == :south
-          args[:south] = term.parse_float(-90, 90)
+      images:          [:has_images,       :parse_boolean],
+      specimen:        [:has_specimen,     :parse_boolean],
+      sequence:        [:has_sequences,    :parse_yes],
+      lichen:          [:lichen,           :parse_boolean],
+      has_name:        [:has_name,         :parse_boolean],
+      has_notes:       [:has_notes,        :parse_boolean],
+      has_field:       [:has_notes_fields, :parse_string],
+      has_comments:    [:has_comments,     :parse_yes]
+    }.freeze
 
-        elsif term.var == :images
-          args[:has_images] = term.parse_boolean
-        elsif term.var == :specimen
-          args[:has_specimen] = term.parse_boolean
-        elsif term.var == :has_name
-          args[:has_name] = term.parse_boolean
-        elsif term.var == :has_notes
-          args[:has_notes] = term.parse_boolean
-        elsif term.var == :has_comments
-          args[:has_comments] = term.parse_boolean(:only_yes) && "yes"
+    def params
+      PARAMS
+    end
 
-        else
-          fail BadObservationTermError.new(term: term)
-        end
-      end
+    def model
+      ::Observation
     end
   end
 end

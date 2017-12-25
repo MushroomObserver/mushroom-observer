@@ -2,13 +2,13 @@
   @title = :create_herbarium_title.l
 
   tabs = [
-    link_to(:herbarium_index.t, action: :index)
+    link_with_query(:herbarium_index.t, action: :index)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="max-width-text">
-  <%= form_tag(action: :create_herbarium) do %>
-    <%= render(partial: "form", locals: {button: :create_herbarium_add}) %>
+  <%= form_tag(add_query_param(action: :create_herbarium, back: @back)) do %>
+    <%= render(partial: "form", locals: {button: :CREATE}) %>
   <% end %>
 </div>

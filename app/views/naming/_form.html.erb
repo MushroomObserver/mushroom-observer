@@ -1,7 +1,6 @@
 <%
    # Changing naming form html in _form_new.erb in case we want to role back
 
-
    # Prefer NamingParams, but use raw params if no params.
    what = @params.what rescue @what
    valid_names = @params.valid_names rescue @valid_name
@@ -13,21 +12,20 @@
 %>
 
 <%= render(partial: "shared/form_name_feedback", locals: {
-                                                       button_name: button_name,
-                                                       what: what,
-                                                       valid_names: valid_names,
-                                                       suggest_corrections: suggest_corrections,
-                                                       parent_deprecated: parent_deprecated,
-                                                       names: names
-                                               }) %>
+             button_name: button_name,
+             what: what,
+             valid_names: valid_names,
+             suggest_corrections: suggest_corrections,
+             parent_deprecated: parent_deprecated,
+             names: names
+           }) %>
 
 <div class="row">
   <div class="col-sm-6">
 
     <div class="form-group">
       <%= label_tag(:name_name, :WHAT.t + ":") %>
-      <%= text_field(:name, :name, value: what, data: {autofocus: true},
-                     size: 40, class: "form-control") %>
+      <%= text_field(:name, :name, value: what, size: 40, class: "form-control") %>
       <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
     </div>
 
@@ -38,18 +36,20 @@
     </div>
 
     <% reason.values.sort_by(&:order).each do |r| %>
-        <div class="form-group form-inline" style="margin:0">
-          <label>
-            <%= check_box(:reason, :check, {index: r.num, checked: r.used?,
-                                            data: {role: "collapser", target: "#reason_#{r.num}_notes"},
-                                            class: ""}, "1") %>
-            <%= r.label.t %>
-          </label>
-        </div>
-        <div class="form-group" style="margin-bottom:1em">
-          <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
-                        class: "form-control") %>
-        </div>
+      <div class="form-group form-inline" style="margin:0">
+        <label>
+          <%= check_box(:reason, :check, {
+                          index: r.num, checked: r.used?,
+                          data: {role: "collapser", target: "#reason_#{r.num}_notes"},
+                          class: ""
+                        }, "1") %>
+          <%= r.label.t %>
+        </label>
+      </div>
+      <div class="form-group <%= "collapse" if !r.used? %>" style="margin-bottom:1em">
+        <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
+                      class: "form-control") %>
+      </div>
     <% end %>
 
   </div>
@@ -58,10 +58,9 @@
     <div class="well well-sm">
       <div class="arrow-left hidden-xs"></div>
       <% if !show_reasons %>
-          <p class="help-block">
-            <%= :form_naming_name_help_create.t %>
-          </p>
-
+        <p class="help-block" style="margin-bottom:1em">
+          <%= :form_naming_name_help_create.t %>
+        </p>
       <% end %>
       <p class="help-block">
         <%= :form_naming_name_help.t %>
@@ -92,4 +91,3 @@
     });
   });
 ) %>
-

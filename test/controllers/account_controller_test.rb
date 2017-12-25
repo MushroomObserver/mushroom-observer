@@ -27,6 +27,7 @@ class AccountControllerTest < FunctionalTestCase
            password: "newpassword",
            password_confirmation: "newpassword",
            email: "nathan@collectivesource.com",
+           email_confirmation: "nathan@collectivesource.com",
            name: "needs a name!",
            theme: "NULL"
          })
@@ -48,80 +49,73 @@ class AccountControllerTest < FunctionalTestCase
   def test_bad_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
 
+    params = {
+      login: "newbob",
+      password: "topsykritt",
+      password_confirmation: "topsykritt",
+      email: "blah@somewhere.org",
+      email_confirmation: "blah@somewhere.org",
+      mailing_address: "",
+      theme: "NULL",
+      notes: ""
+    }
+
     # Missing password.
-    post(:signup, new_user: {
-           login: "newbob",
-           password: "",
-           password_confirmation: "",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
+    post(:signup, new_user: params.except(:password))
+    assert_flash_error
+    assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
-    post(:signup, new_user: {
-           login: "newbob",
-           password: "newpassword",
-           password_confirmation: "wrong",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
+    post(:signup, new_user: params.merge(password_confirmation: "wrong"))
+    assert_flash_error
+    assert_response(:success)
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
-    post(:signup, new_user: {
-           login: "yo",
-           password: "newpassword",
-           password_confirmation: "newpassword",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
-    assert(assigns("new_user").errors[:login].any?)
+    post(:signup, new_user: params.except(:email))
+    assert_flash_error
+    assert_response(:success)
+    assert(assigns("new_user").errors[:email].any?, assigns("new_user").dump_errors)
 
-    # Bad password and no email
-    post(:signup, new_user: {
-           login: "yo",
-           password: "newpassword",
-           password_confirmation: "wrong",
-           mailing_address: "",
-           theme: "NULL",
-           notes: ""
-         })
-    assert(assigns("new_user").errors[:password].any?)
-    assert(assigns("new_user").errors[:login].any?)
+    # Email doesn't match.
+    post(:signup, new_user: params.merge(email_confirmation: "wrong"))
+    assert_flash_error
+    assert_response(:success)
+    assert(assigns("new_user").errors[:email].any?)
+
+    # Make sure correct request would have succeeded!
+    post(:signup, new_user: params)
+    assert_flash_success
+    assert_response(:redirect)
+    assert_not_nil(User.find_by_login("newbob"))
   end
 
   def test_signup_theme_errors
-    @request.session["return-to"] = "http://localhost/bogus/location"
+    referrer = "http://localhost/bogus/location"
 
-    post(:signup, new_user: {
-           login: "spammer",
-           password: "spammer",
-           password_confirmation: "spammer",
-           email: "spam@spam.spam",
-           mailing_address: "",
-           theme: "",
-           notes: ""
-         })
-    assert(!@request.session["user_id"])
+    params = {
+      login: "spammer",
+      password: "spammer",
+      password_confirmation: "spammer",
+      email: "spam@spam.spam",
+      mailing_address: "",
+      notes: ""
+    }
 
-    # Disabled denied email in above case...
-    # assert_equal("http://localhost/bogus/location", @response.redirect_url)
+    @request.session["return-to"] = referrer
+    post(:signup, new_user: params.merge(theme: ""))
+    assert_no_flash
+    assert_nil(User.find_by_login("spammer"))
+    assert_nil(@request.session["user_id"])
+    assert_redirected_to(referrer)
 
-    post(:signup, new_user: {
-           login: "spammer",
-           password: "spammer",
-           password_confirmation: "spammer",
-           email: "spam@spam.spam",
-           mailing_address: "",
-           theme: "spammer",
-           notes: ""
-         })
-    assert(!@request.session["user_id"])
-    assert_redirected_to(action: "welcome")
+    @request.session["return-to"] = referrer
+    post(:signup, new_user: params.merge(theme: "spammer"))
+    assert_no_flash
+    assert_nil(User.find_by_login("spammer"))
+    assert_nil(@request.session["user_id"])
+    assert_redirected_to(referrer)
   end
 
   def test_invalid_login
@@ -253,70 +247,116 @@ class AccountControllerTest < FunctionalTestCase
     assert(!@request.session[:user_id])
   end
 
-  def test_preferences_form
-    # First make sure it can serve the form
+  def test_edit_prefs
+    # First make sure it can serve the form to start with.
     requires_login(:prefs)
-
-    # check existence of miscellaneous parts of form
     Language.all.each do |lang|
       assert_select("option[value=#{lang.locale}]", { count: 1 },
                     "#{lang.locale} language option missing")
     end
-    assert_select("input[id = 'user_thumbnail_maps']", { count: 1 },
-                  "Missing input: :prefs_thumbnail_maps.t")
-    assert_select("input[id = 'user_view_owner_id']", { count: 1 },
-                  "Missing input: #{:prefs_view_owner_id.t}")
-  end
-
-  def test_edit_prefs
-    # First make sure it can serve the form to start with.
-    requires_login(:prefs)
+    assert_input_value(:user_login, "rolf")
+    assert_input_value(:user_email, "rolf@collectivesource.com")
+    assert_input_value(:user_password, "")
+    assert_input_value(:user_password_confirmation, "")
+    assert_input_value(:user_thumbnail_maps, "1")
+    assert_input_value(:user_view_owner_id, "1")
+    assert_input_value(:user_has_images, "")
+    assert_input_value(:user_has_specimen, "")
+    assert_input_value(:user_lichen, nil)
+    assert_input_value(:user_region, "")
+    assert_input_value(:user_clade, "")
 
     # Now change everything.
     params = {
-      user: {
-        email:                        "new_email",
-        email_comments_all:           "",
-        email_comments_owner:         "1",
-        email_comments_response:      "1",
-        email_general_commercial:     "1",
-        email_general_feature:        "1",
-        email_general_question:       "1",
-        email_html:                   "1",
-        email_locations_admin:        "1",
-        email_locations_all:          "",
-        email_locations_author:       "1",
-        email_locations_editor:       "",
-        email_names_admin:            "1",
-        email_names_all:              "",
-        email_names_author:           "1",
-        email_names_editor:           "",
-        email_names_reviewer:         "1",
-        email_observations_all:       "",
-        email_observations_consensus: "1",
-        email_observations_naming:    "1",
-        hide_authors:                 :above_species,
-        image_size:                   :small,
-        keep_filenames:               :keep_but_hide,
-        license_id:                   licenses(:ccnc25).id.to_s,
-        layout_count:                 "100",
-        locale:                       "el-GR",
-        location_format:              :scientific,
-        login:                        "new_login",
-        notes_template:               "Collector's #",
-        theme:                        "Agaricus",
-        thumbnail_maps:               "",
-        thumbnail_size:               :small,
-        view_owner_id:                "",
-        votes_anonymous:              :yes
-      }
+      login:                        "rolf",
+      password:                     "new_password",
+      password_confirmation:        "new_password",
+      email:                        "new@email.com",
+      email_comments_all:           "",
+      email_comments_owner:         "1",
+      email_comments_response:      "1",
+      email_general_commercial:     "1",
+      email_general_feature:        "1",
+      email_general_question:       "1",
+      email_html:                   "1",
+      email_locations_admin:        "1",
+      email_locations_all:          "",
+      email_locations_author:       "1",
+      email_locations_editor:       "",
+      email_names_admin:            "1",
+      email_names_all:              "",
+      email_names_author:           "1",
+      email_names_editor:           "",
+      email_names_reviewer:         "1",
+      email_observations_all:       "",
+      email_observations_consensus: "1",
+      email_observations_naming:    "1",
+      hide_authors:                 :above_species,
+      keep_filenames:               :keep_but_hide,
+      license_id:                   licenses(:publicdomain).id.to_s,
+      layout_count:                 "100",
+      locale:                       "el",
+      location_format:              :scientific,
+      notes_template:               "Collector's #",
+      theme:                        "Agaricus",
+      thumbnail_maps:               "",
+      view_owner_id:                "",
+      votes_anonymous:              :yes,
+      has_images:                   "1",
+      has_specimen:                 "1",
+      lichen:                       "yes",
+      region:                       "California",
+      clade:                        "Ascomycota"
     }
-    post_with_dump(:prefs, params)
-    assert_flash(:runtime_prefs_success.t)
 
-    # Make sure changes were made.
+    # Prove that all the values are initialized correctly if reloading form.
+    post(:prefs, user: params.merge(password_confirmation: "bogus"))
+    assert_flash_error
+    assert_response(:success)
+    assert_input_value(:user_password, "")
+    assert_input_value(:user_password_confirmation, "")
+    assert_input_value(:user_email, "new@email.com")
+    assert_input_value(:user_email_comments_all, "")
+    assert_input_value(:user_email_comments_owner, "1")
+    assert_input_value(:user_email_comments_response, "1")
+    assert_input_value(:user_email_general_commercial, "1")
+    assert_input_value(:user_email_general_feature, "1")
+    assert_input_value(:user_email_general_question, "1")
+    assert_input_value(:user_email_html, "1")
+    assert_input_value(:user_email_locations_admin, "1")
+    assert_input_value(:user_email_locations_all, "")
+    assert_input_value(:user_email_locations_author, "1")
+    assert_input_value(:user_email_locations_editor, "")
+    assert_input_value(:user_email_names_admin, "1")
+    assert_input_value(:user_email_names_all, "")
+    assert_input_value(:user_email_names_author, "1")
+    assert_input_value(:user_email_names_editor, "")
+    assert_input_value(:user_email_names_reviewer, "1")
+    assert_input_value(:user_email_observations_all, "")
+    assert_input_value(:user_email_observations_consensus, "1")
+    assert_input_value(:user_email_observations_naming, "1")
+    assert_input_value(:user_hide_authors, :above_species)
+    assert_input_value(:user_keep_filenames, :keep_but_hide)
+    assert_input_value(:user_license_id, licenses(:publicdomain).id.to_s)
+    assert_input_value(:user_layout_count, "100")
+    assert_input_value(:user_locale, "el")
+    assert_input_value(:user_location_format, :scientific)
+    assert_textarea_value(:user_notes_template, "Collector's #")
+    assert_input_value(:user_theme, "Agaricus")
+    assert_input_value(:user_thumbnail_maps, "")
+    assert_input_value(:user_view_owner_id, "")
+    assert_input_value(:user_votes_anonymous, :yes)
+    assert_input_value(:user_has_images, "1")
+    assert_input_value(:user_has_specimen, "1")
+    assert_input_value(:user_lichen, "yes")
+    assert_input_value(:user_region, "California")
+    assert_input_value(:user_clade, "Ascomycota")
+
+    # Now do it correctly, and make sure changes were made.
+    post(:prefs, user: params)
+    assert_flash(:runtime_prefs_success.t)
     user = rolf.reload
-    assert_equal("new_email", user.email)
+    assert_equal("new@email.com", user.email)
     assert_equal(false, user.email_comments_all)
     assert_equal(true, user.email_comments_owner)
     assert_equal(true, user.email_comments_response)
@@ -337,19 +377,21 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(true, user.email_observations_consensus)
     assert_equal(true, user.email_observations_naming)
     assert_equal(:above_species, user.hide_authors)
-    assert_equal(:small, user.image_size)
     assert_equal(:keep_but_hide, user.keep_filenames)
     assert_equal(100, user.layout_count)
-    assert_equal(licenses(:ccnc25), user.license)
-    assert_equal("el-GR", user.locale)
+    assert_equal(licenses(:publicdomain), user.license)
+    assert_equal("el", user.locale)
     assert_equal(:scientific, user.location_format)
-    assert_equal("new_login", user.login)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
-    assert_equal(:small, user.thumbnail_size)
     assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
+    assert_equal("yes", user.content_filter[:has_images])
+    assert_equal("yes", user.content_filter[:has_specimen])
+    assert_equal("yes", user.content_filter[:lichen])
+    assert_equal("California", user.content_filter[:region])
+    assert_equal("Ascomycota", user.content_filter[:clade])
 
     # Prove user cannot pick "Other" as a notes_template heading
     old_notes_template = user.notes_template
@@ -357,28 +399,28 @@ class AccountControllerTest < FunctionalTestCase
     # reset locale to get less incomprehensible error messages
     user.locale = "en"
     user.save
-    params[:user][:notes_template] = "Size, Other"
-    post(:prefs, params)
-
+    post(:prefs, user: params.merge(notes_template: "Size, Other"))
     assert_flash_error
     assert_equal(old_notes_template, user.reload.notes_template)
 
     # Prove user cannot have duplicate headings in notes template
-    params[:user][:notes_template] = "Yadda, Yadda"
-    post(:prefs, params)
-
+    post(:prefs, user: params.merge(notes_template: "Yadda, Yadda"))
     assert_flash_error
     assert_equal(old_notes_template, user.reload.notes_template)
-  end
 
-  def test_edit_prefs_login_already_exists
-    params = {
-      user: {
-        login: "mary",
-        email: "email", # (must be defined or will barf)
-      }
-    }
-    post_requires_login(:prefs, params)
+    # Prove login can't already exist.
+    post(:prefs, user: params.merge(login: "mary"))
+    assert_flash_error
+    assert_equal("rolf", user.reload.login)
+
+    # But does work if it's new!
+    post(:prefs, user: params.merge(login: "steve"))
+    assert_equal("steve", user.reload.login)
+
+    # Prove password was changed correctly somewhere along the line.
+    logout
+    post(:login, user: { login: "steve", password: "new_password" })
+    assert_equal(rolf.id, @request.session["user_id"])
   end
 
   def test_edit_profile

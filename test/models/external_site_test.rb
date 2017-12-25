@@ -22,10 +22,10 @@ class ExternalSiteTest < UnitTestCase
   end
 
   def test_user_external_sites
-    site = external_sites(:mycoportal)
+    marys_sites = ExternalSite.all.sort_by(&:id)
     assert_obj_list_equal([], rolf.external_sites)
     assert_obj_list_equal([], dick.external_sites)
-    assert_obj_list_equal([site], mary.external_sites)
+    assert_obj_list_equal(marys_sites, mary.external_sites.sort_by(&:id))
   end
 
   def test_member

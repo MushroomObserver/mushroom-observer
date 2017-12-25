@@ -1,7 +1,7 @@
-xml.id        object.id
-xml.type      "api_key"
-xml.key       object.key
-xml.notes     object.notes
-xml.joined    object.created_at
-xml.verified  object.last_used
-xml.num_users object.num_uses
+json.id        object.id
+json.type      "api_key"
+json.key       object.key
+json.notes     object.notes.to_s.tpl_nodiv
+json.joined    object.created_at.utc
+json.verified  object.last_used.try(&:utc)
+json.num_users object.num_uses

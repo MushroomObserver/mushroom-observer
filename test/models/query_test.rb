@@ -3,17 +3,18 @@ require "set"
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)
+    test_ids = expect.first.is_a?(Fixnum)
     expect = expect.to_a unless expect.respond_to?(:map!)
-    expect.map!(&:id) if expect.first.is_a?(AbstractModel)
     query = Query.lookup(*args)
-    actual = query.result_ids
-    assert((Set.new(expect) == Set.new(actual)),
-           "Query results are wrong.  SQL is:\n" + query.last_query + "\n" \
-           "Expect: #{expect.inspect}\n" \
-           "Actual: #{actual.inspect}\n")
+    actual = test_ids ? query.result_ids : query.results
+    msg = "Query results are wrong. SQL is:\n" + query.last_query
+    if test_ids
+      assert_equal(expect.sort, actual.sort, msg)
+    else
+      assert_obj_list_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
+    end
     type = args[0].t.sub(/um$/, "(um|a)")
-    assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/,
-                 query.title)
+    assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
     assert(!query.title.include?("[:"),
            "Title contains undefined localizations: <#{query.title}>")
   end
@@ -1510,6 +1511,30 @@ class QueryTest < UnitTestCase
                  :Article, :pattern_search, pattern: "")
   end
 
+  def test_collection_number_all
+    expect = CollectionNumber.all.sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :all)
+  end
+
+  def test_collection_number_for_observation
+    obs = observations(:detailed_unknown_obs)
+    expect = obs.collection_numbers.sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :for_observation,
+                 observation: obs.id)
+  end
+
+  def test_collection_number_pattern_search
+    expect = CollectionNumber.
+      where("name like '%Singer%' or number like '%Singer%'").
+      sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "Singer")
+
+    expect = CollectionNumber.
+      where("name like '%123a%' or number like '%123a%'").
+      sort_by(&:format_name)
+    assert_query(expect, :CollectionNumber, :pattern_search, pattern: "123a")
+  end
+
   def test_comment_all
     expect = Comment.all.reverse
     assert_query(expect, :Comment, :all)
@@ -1528,7 +1553,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_for_user
-    expect = Comment.all.reverse
+    expect = Comment.all.select { |c| c.target.user == mary }
     assert_query(expect, :Comment, :for_user, user: mary)
     assert_query([], :Comment, :for_user, user: rolf)
   end
@@ -1550,8 +1575,23 @@ class QueryTest < UnitTestCase
   end
 
   def test_external_link_all
-    expect = ExternalLink.all.sort_by(&:id)
-    assert_query(expect, :ExternalLink, :all, by: :id)
+    assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink, :all)
+    assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
+                 :ExternalLink, :all, users: users(:mary))
+    assert_query([], :ExternalLink, :all, users: users(:dick))
+    obs = observations(:coprinus_comatus_obs)
+    assert_query(obs.external_links.sort_by(&:url),
+                 :ExternalLink, :all, observations: obs)
+    obs = observations(:detailed_unknown_obs)
+    assert_query([], :ExternalLink, :all, observations: obs)
+    site = external_sites(:mycoportal)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, external_sites: site)
+    site = external_sites(:inaturalist)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, external_sites: site)
+    assert_query(site.external_links.sort_by(&:url),
+                 :ExternalLink, :all, url: "iNaturalist")
   end
 
   def test_herbarium_all
@@ -1596,6 +1636,24 @@ class QueryTest < UnitTestCase
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
                  :Image, :advanced_search,
                  content: "little", location: "burbank")
+  end
+
+  def test_herbarium_record_all
+    expect = HerbariumRecord.all.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :all)
+  end
+
+  def test_herbarium_record_for_observation
+    obs = observations(:coprinus_comatus_obs)
+    expect = obs.herbarium_records.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :for_observation,
+                 observation: obs.id)
+  end
+
+  def test_herbarium_record_in_herbarium
+    nybg = herbaria(:nybg_herbarium)
+    expect = nybg.herbarium_records.sort_by(&:herbarium_label)
+    assert_query(expect, :HerbariumRecord, :in_herbarium, herbarium: nybg.id)
   end
 
   def test_image_all
@@ -1830,7 +1888,7 @@ class QueryTest < UnitTestCase
   def test_location_by_editor
     assert_query([], :Location, :by_editor, user: rolf)
     User.current = mary
-    loc = Location.first
+    loc = Location.where.not(user: mary).first
     loc.display_name = "new name"
     loc.save
     assert_query([loc], :Location, :by_editor, user: mary)
@@ -1914,7 +1972,7 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_by_user
     assert_query(Location.joins(:observations).
-                          where(observations: { user: rolf }),
+                          where(observations: { user: rolf }).to_a.uniq,
                  :Location, :with_observations_by_user, user: rolf.id)
     assert_query([], :Location, :with_observations_by_user,
                  user: users(:zero_user))
@@ -2108,13 +2166,27 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_of_parents
-    fungi = names(:fungi)
+    peltigeraceae = names(:peltigeraceae)
     peltigera = names(:peltigera)
+    assert_query([peltigeraceae], :Name, :of_parents, name: peltigera)
+
+    fungi = names(:fungi)
+    basidiomycota = names(:basidiomycota)
+    basidiomycetes = names(:basidiomycetes)
+    agaricales = names(:agaricales)
+    agaricaceae = names(:agaricaceae)
     agaricus = names(:agaricus)
     agaricus_campestris = names(:agaricus_campestris)
-    assert_query([fungi], :Name, :of_parents, name: peltigera)
-    assert_query([], :Name, :of_parents, name: agaricus)
+    assert_query([agaricaceae], :Name, :of_parents, name: agaricus)
     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
+    assert_query([
+      fungi,
+      basidiomycota,
+      basidiomycetes,
+      agaricales,
+      agaricaceae,
+      agaricus
+    ], :Name, :of_parents, name: agaricus_campestris, all: "yes")
   end
 
   def test_name_pattern_search
@@ -2445,7 +2517,7 @@ class QueryTest < UnitTestCase
 
     # name
     expect = Observation.
-             where("text_name LIKE 'agaricus%'").includes(:name).
+             where("names.text_name LIKE 'agaricus%'").includes(:name).
              order("names.text_name, names.author, observations.id DESC")
     assert_query(expect.map(&:id),
                  :Observation, :pattern_search, pattern: "agaricus", by: :name)
@@ -2498,7 +2570,7 @@ class QueryTest < UnitTestCase
     assert_query(Sequence.where("locus LIKE 'ITS%'"),
                  :Sequence, :all, locus_has: "ITS")
     assert_query([sequences(:alternate_archive)],
-                 :Sequence, :all, archive_has: "UNITE")
+                 :Sequence, :all, archive: "UNITE")
     assert_query([sequences(:deposited_sequence)],
                  :Sequence, :all, accession_has: "968605")
     assert_query([sequences(:deposited_sequence)],
@@ -2518,7 +2590,7 @@ class QueryTest < UnitTestCase
     seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
     seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
     seq4.update_attribute(:observation, observations(:peltigera_obs))
-    assert_query([seq1, seq2], :Sequence, :all, date: ["2006", "2006"])
+    assert_query([seq1, seq2], :Sequence, :all, obs_date: ["2006", "2006"])
     assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
     assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
     assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")
@@ -2625,24 +2697,15 @@ class QueryTest < UnitTestCase
                  :SpeciesList, :pattern_search, pattern: "")
   end
 
-  def test_specimen_all
-    expect = Specimen.all.order(:herbarium_label)
-    assert_query(expect, :Specimen, :all)
-  end
-
-  def test_specimen_pattern_search
-    assert_query([],
-                 :Specimen, :pattern_search, pattern: "no specimen has this")
-    # in label
-    assert_query(Specimen.where("herbarium_label LIKE '%Agaricus%'
-                              OR notes LIKE '%Agaricus%'"),
-                 :Specimen, :pattern_search, pattern: "Agaricus")
-    # in notes
-    assert_query(Specimen.where("herbarium_label LIKE '%rares%'
-                              OR notes LIKE '%rare%'"),
-                 :Specimen, :pattern_search, pattern: "rare")
-    assert_query(Specimen.all,
-                 :Specimen, :pattern_search, pattern: "")
+  def test_herbarium_record_pattern_search
+    assert_query([], :HerbariumRecord, :pattern_search,
+                 pattern: "no herbarium record has this")
+    assert_query(HerbariumRecord.where("initial_det LIKE '%Agaricus%'"),
+                 :HerbariumRecord, :pattern_search, pattern: "Agaricus")
+    assert_query(HerbariumRecord.where("notes LIKE '%rare%'"),
+                 :HerbariumRecord, :pattern_search, pattern: "rare")
+    assert_query(HerbariumRecord.all,
+                 :HerbariumRecord, :pattern_search, pattern: "")
   end
 
   def test_user_all
@@ -2683,40 +2746,53 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_filtering_content
-    ##### image filters #####
+    ##### has_images filter #####
     expect = Observation.where.not(thumb_image_id: nil)
     assert_query(expect, :Observation, :all, has_images: "yes")
 
     expect = Observation.where(thumb_image_id: nil)
     assert_query(expect, :Observation, :all, has_images: "no")
 
-    ##### specimen filters #####
+    ##### has_specimen filter #####
     expect = Observation.where(specimen: true)
     assert_query(expect, :Observation, :all, has_specimen: "yes")
 
     expect = Observation.where(specimen: false)
     assert_query(expect, :Observation, :all, has_specimen: "no")
 
-    ##### location filter #####
+    ##### lichen filters #####
+    expect_obs = Observation.where("lifeform LIKE '%lichen%'").to_a
+    expect_names = Name.where("lifeform LIKE '%lichen%'").
+                        reject(&:correct_spelling_id).to_a
+    assert_query(expect_obs, :Observation, :all, lichen: "yes")
+    assert_query(expect_names, :Name, :all, lichen: "yes")
+
+    expect_obs = Observation.where("lifeform NOT LIKE '% lichen %'").to_a
+    expect_names = Name.where("lifeform NOT LIKE '% lichen %'").
+                        reject(&:correct_spelling_id).to_a
+    assert_query(expect_obs, :Observation, :all, lichen: "no")
+    assert_query(expect_names, :Name, :all, lichen: "no")
+
+    ##### region filter #####
     expect = Location.where("name LIKE '%California%'")
     assert_query(expect, :Location, :all, region: "California, USA")
     assert_query(expect, :Location, :all, region: "USA, California")
 
-    expect =
-      Observation.where("`where` LIKE '%California, USA'") +
-      Observation.joins(:location).where("locations.name LIKE '%California%'")
-    assert_query(expect.sort_by(&:id), :Observation, :all,
-                 region: "California, USA", by: :id)
+    expect = Observation.where("`where` LIKE '%California, USA'")
+    assert_query(expect, :Observation, :all, region: "California, USA")
 
     expect = Location.where("name LIKE '%, USA' OR name LIKE '%, Canada'")
     assert(expect.include?(locations(:albion))) # usa
     assert(expect.include?(locations(:elgin_co))) # canada
     assert_query(expect, :Location, :all, region: "North America")
 
-    ##### lichen filters #####
-    # peltigera = names(:peltigera)
-    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
-    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
+    ##### clade filter #####
+    expect_names = Name.where("classification LIKE '%Agaricales%'").
+                        reject(&:correct_spelling_id).to_a
+    expect_names << names(:agaricales)
+    expect_obs = expect_names.map(&:observations).flatten
+    assert_query(expect_obs, :Observation, :all, clade: "Agaricales")
+    assert_query(expect_names, :Name, :all, clade: "Agaricales")
   end
 
   ##############################################################################

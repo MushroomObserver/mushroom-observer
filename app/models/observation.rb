@@ -94,7 +94,6 @@
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
-#  default_specimen_label::
 #
 #  ==== Namings and Votes
 #  name::                   Conensus Name instance. (never nil)
@@ -123,7 +122,7 @@
 #  remove_image::           Remove an Image.
 #
 #  ==== Projects
-#  has_edit_permission?::   Check if user has permission to edit this obs.
+#  can_edit?::              Check if user has permission to edit this obs.
 #
 #  ==== Callbacks
 #  add_spl_callback::           After add: update contribution.
@@ -160,8 +159,11 @@ class Observation < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, after_add: :add_spl_callback,
                                           before_remove: :remove_spl_callback
-  has_and_belongs_to_many :specimens
+  has_and_belongs_to_many :collection_numbers
+  has_and_belongs_to_many :herbarium_records
+  before_destroy { destroy_orphaned_collection_numbers }
 
+  before_save :cache_content_filter_data
   after_update :notify_users_after_change
   before_destroy :notify_species_lists
   after_destroy :destroy_dependents
@@ -181,6 +183,102 @@ class Observation < AbstractModel
   def is_observation?
     true
   end
+
+  # There is no value to keeping a collection number record after all its
+  # observations are destroyed or removed from it.
+  def destroy_orphaned_collection_numbers
+    collection_numbers.each do |col_num|
+      col_num.destroy if col_num.observations == [self]
+    end
+  end
+
+  # Cache location and name data used by content filters.
+  def cache_content_filter_data
+    if name && name_id_changed?
+      self.lifeform = name.lifeform
+      self.text_name = name.text_name
+      self.classification = name.classification
+    end
+    if location && location_id_changed?
+      self.where = location.name
+    end
+  end
+
+  # This is meant to be run nightly to ensure that the cached name
+  # and location data used by content filters is kept in sync.
+  def self.refresh_content_filter_caches
+    refresh_cached_column("name", "lifeform") +
+      refresh_cached_column("name", "text_name") +
+      refresh_cached_column("name", "classification") +
+      refresh_cached_column("location", "name", "where")
+  end
+
+  # Refresh a column which is a mirror of a foreign column.  Fixes all the
+  # errors, and reports which ids were broken.
+  def self.refresh_cached_column(type, foreign, local = foreign)
+    msgs = report_broken_caches(type, foreign, local)
+    refresh_cached_column_fix_errors(type, foreign, local)
+    msgs
+  end
+
+  # Check how many entries are broken in a mirrored column.  It will be good to
+  # keep track of this at first to make sure we've caught all the ways in which
+  # the mirror can get inadvertently broken.
+  def self.report_broken_caches(type, foreign, local)
+    Observation.connection.select_values(%(
+      SELECT o.id
+      FROM observations o, #{type}s x
+      WHERE o.#{type}_id = x.id
+        AND o.#{local} != x.#{foreign}
+    )).map do |id|
+      "Fixing #{type} #{foreign} for obs ##{id}."
+    end
+  end
+
+  # Refresh the mirror of a foreign table's column in the observations table.
+  def self.refresh_cached_column_fix_errors(type, foreign, local)
+    Observation.connection.execute(%(
+      UPDATE observations o, #{type}s x
+      SET o.#{local} = x.#{foreign}
+      WHERE o.#{type}_id = x.id
+        AND o.#{local} != x.#{foreign}
+    ))
+  end
+
+  # Used by Name and Location to update the observation cache when a cached
+  # field value is changed.
+  def self.update_cache(type, field, id, val)
+    Observation.connection.execute(%(
+      UPDATE observations
+      SET `#{field}` = #{Observation.connection.quote(val)}
+      WHERE #{type}_id = #{id}
+    ))
+  end
+
+  # Check for any observations whose consensus is a misspelled name.  This can
+  # mess up the mirrors because misspelled names are "invisible", so their
+  # classification and lifeform and such will not necessarily be kept up to
+  # date.  Fixes and returns a messages for each one that was wrong.
+  def self.make_sure_no_observations_are_misspelled
+    msgs = Observation.connection.select_rows(%(
+      SELECT o.id, n.text_name FROM observations o, names n
+      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
+    )).map do |id, search_name|
+      "Observation ##{id} was misspelled: #{search_name.inspect}"
+    end
+    Observation.connection.execute(%(
+      UPDATE observations o, names n
+      SET o.name_id = n.correct_spelling_id
+      WHERE o.name_id = n.id AND n.correct_spelling_id IS NOT NULL
+    ))
+    msgs
+  end
+
+  ##############################################################################
+  #
+  #  :section: Location Stuff
+  #
+  ##############################################################################
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
@@ -207,7 +305,7 @@ class Observation < AbstractModel
             end
     loc = Location.find_by_name(where)
     if loc
-      self.where = nil
+      self.where = loc.name
       self.location = loc
     else
       self.where = where
@@ -260,6 +358,16 @@ class Observation < AbstractModel
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
     lat && location && !location.lat_long_close?(lat, long)
+  end
+
+  def place_name_and_coordinates
+    if !lat.blank? && !long.blank?
+      lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
+      long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
+      "#{place_name} (#{lat2} #{long2})"
+    else
+      place_name
+    end
   end
 
   ##############################################################################
@@ -348,6 +456,15 @@ class Observation < AbstractModel
 
   def other_notes_part
     Observation.other_notes_part
+  end
+
+  def other_notes
+    notes ? notes[other_notes_key] : nil
+  end
+
+  def other_notes=(val)
+    self.notes ||= {}
+    notes[other_notes_key] = val
   end
 
   # id of view textarea for a Notes heading
@@ -464,11 +581,6 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
-  # Name in plain text, never nil.
-  def text_name
-    name.real_search_name
-  end
-
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name
     string_with_id(name.real_search_name)
@@ -484,10 +596,6 @@ class Observation < AbstractModel
     string_with_id(name.observation_name)
   rescue
     ""
-  end
-
-  def default_specimen_label
-    Herbarium.default_specimen_label(name.text_name, id)
   end
 
   # Look up the corresponding instance in our namings association.  If we are
@@ -726,7 +834,7 @@ class Observation < AbstractModel
 
     # If not, it means that a deprecated Synonym won.  Look up all Namings
     # for Synonyms of the consensus Name.
-    if matches == [] && name && name.synonym
+    if matches == [] && name && name.synonym_id
       synonyms = name.synonyms
       matches = namings.select { |n| synonyms.include?(n.name) }
     end
@@ -806,7 +914,7 @@ class Observation < AbstractModel
         # not all taxa have synonyms, I've got to create a "fake" id that
         # uses the synonym id if it exists, else uses the name id, but still
         # keeps them separate.)
-        taxon_id = if naming.name.synonym
+        taxon_id = if naming.name.synonym_id
                      "s" + naming.name.synonym_id.to_s
                    else
                      "n" + name_id.to_s
@@ -901,7 +1009,7 @@ class Observation < AbstractModel
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
-    if best && best.synonym
+    if best && best.synonym_id
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
@@ -986,6 +1094,10 @@ class Observation < AbstractModel
     best = namings.first.name if !best && namings && !namings.empty?
     best = Name.unknown unless best
     result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
+
+    # Just humor me -- I'm sure there is some pathological case where we can
+    # end up after all that work with a misspelt name.
+    best = best.correct_spelling if best.correct_spelling
 
     # Make changes permanent.
     old = self.name
@@ -1113,7 +1225,7 @@ class Observation < AbstractModel
   def has_backup_data?
     !thumb_image_id.nil? ||
       species_lists.count > 0 ||
-      specimens.count > 0 ||
+      herbarium_records.count > 0 ||
       specimen ||
       notes.length >= 100
   end
@@ -1134,8 +1246,8 @@ class Observation < AbstractModel
   #
   ##############################################################################
 
-  def has_edit_permission?(user = User.current)
-    Project.has_edit_permission?(self, user)
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
   end
 
   ##############################################################################
@@ -1280,9 +1392,12 @@ class Observation < AbstractModel
 
   # After defining a location, update any lists using old "where" name.
   def self.define_a_location(location, old_name)
+    old_name = connection.quote(old_name)
+    new_name = connection.quote(location.name)
     connection.update(%(
-      UPDATE observations SET `where` = NULL, location_id = #{location.id}
-      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+      UPDATE observations
+      SET `where` = #{new_name}, location_id = #{location.id}
+      WHERE `where` = #{old_name}
     ))
   end
 

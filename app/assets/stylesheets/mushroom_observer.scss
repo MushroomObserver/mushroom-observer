@@ -243,10 +243,20 @@ blockquote {
 }
 
 .help-block {
-  max-width: $help-block-max-width
+    max-width: $help-block-max-width
 }
 .tooltip-inner {
     word-wrap: break-word;
+}
+
+ul.tight-list {
+    list-style: none;
+    margin-bottom: 0.5em;
+    padding-left: 1em;
+}
+
+.arrow-up {
+    margin-top: 3px;
 }
 
 //
@@ -1270,8 +1280,12 @@ thead tr {
 }
 
 .table-herbarium {
-    th:nth-child(2),
-    td:nth-child(2) {
+    th:nth-child(1),
+    td:nth-child(1) {
+        text-align: center;
+    }
+    td:nth-child(2),
+    td:nth-child(3) {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1362,6 +1376,18 @@ table.table-namings {
     }
     td:last-child {
         padding-right: 1em;
+    }
+}
+
+.table-lifeform {
+    tr td {
+        padding: .1em 1em;
+    }
+    tr:nth-child(odd) {
+        background-color: $LIST_ODD_BG_COLOR;
+    }
+    tr:nth-child(even) {
+        background-color: $LIST_EVEN_BG_COLOR;
     }
 }
 
@@ -1464,6 +1490,12 @@ table.table-namings {
     padding-left: 10px !important;
 }
 
+.name-section p {
+    margin: 0px;
+    padding: 0em 0em 0em 1em;
+    text-indent: -1em;
+}
+
 .align-bottom {
     vertical-align: bottom !important;
 }
@@ -1502,6 +1534,10 @@ table.table-namings {
 
 .push-down {
     margin-top: 1em;
+}
+
+.push-down-more {
+    margin-top: 1.5em;
 }
 
 .push-below-buttons {

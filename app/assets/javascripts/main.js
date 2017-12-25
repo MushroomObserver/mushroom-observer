@@ -28,14 +28,14 @@ jQuery(document).ready(function () {
     });
 
     jQuery('[data-dismiss="alert"]').click(function() {
-        setCookie('hideBanner', banner_md5, 30);
+        setCookie('hideBanner2', BANNER_TIME, 30);
     });
 
     function setCookie(cname, cvalue, exdays) {
         var d = new Date();
         d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
         var expires = "expires=" + d.toUTCString();
-        document.cookie = cname + "=" + cvalue + "; " + expires;
+        document.cookie = cname + "=" + cvalue + "; " + expires + ";path=/";
     }
 
     jQuery('.file-field :file').on('change', function() {

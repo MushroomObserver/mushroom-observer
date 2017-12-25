@@ -36,7 +36,7 @@
     <%= link_to(:app_your_interests.t, {controller: :interest, action: :list_interests}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_your_summary.t, {controller: :observer, action: :show_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: "list-group-item visible-xs"}) %>
-    <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general', class: "list-group-item visible-xs") %>
+    <%= link_to(:app_join_mailing_list.t, "https://groups.google.com/forum/?fromgroups=#!forum/mo-general", class: "list-group-item visible-xs") %>
     <%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: "list-group-item visible-xs"}) if @user.admin && !in_admin_mode? %>
   <% end %>
 
@@ -68,6 +68,7 @@
     <%= :INDEXES.t %>
   </div>
   <%= link_to(:GLOSSARY.t, {controller: :glossary, action: :index}, {class: "list-group-item indent"}) %>
+  <%= link_to(:HERBARIA.t, {controller: :herbarium, action: :index}, {class: "list-group-item indent"}) %>
   <%= link_to(:LOCATIONS.t, {controller: :location, action: :list_locations}, {class: "list-group-item indent"}) %>
   <%= link_to(:NAMES.t, {controller: :name, action: :observation_index}, {class: "list-group-item indent"}) %>
   <%= link_to(:NEWS.t, {controller: :article, action: :list_articles}, {class: "list-group-item indent"}) %>
@@ -95,7 +96,7 @@
         </a>
         <ul class="dropdown-menu" role="menu">
           <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-            <li><%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %></li>
+            <li><%= link_to(h(lang.name), reload_with_args(user_locale: lang.locale)) %></li>
           <% end %>
         </ul>
       </div>

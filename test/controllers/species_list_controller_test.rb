@@ -408,7 +408,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_construct_species_list_new_family
     list_title = "List Title"
     rank = :Family
-    new_name_str = "Agaricaceae"
+    new_name_str = "Lecideaceae"
     new_list_str = "#{rank} #{new_name_str}"
     assert_nil(Name.find_by(text_name: new_name_str))
     params = {
@@ -430,7 +430,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Creates Agaricaceae, spl, and obs/naming/splentry.
+    # Creates Lecideaceae, spl, and obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
@@ -445,7 +445,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     name = names(:macrolepiota_rachodes)
     synonym_name = names(:lepiota_rachodes)
     assert(!synonym_name.deprecated)
-    assert_nil(synonym_name.synonym)
+    assert_nil(synonym_name.synonym_id)
     params = {
       list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
       checklist_data: {},
@@ -464,7 +464,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_create_species_list
     assert_equal(10, rolf.reload.contribution)
     assert(!synonym_name.reload.deprecated)
-    assert_nil(synonym_name.synonym)
+    assert_nil(synonym_name.synonym_id)
   end
 
   def test_construct_species_list_junk
@@ -514,9 +514,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Must be creating Lactarius sp as well as
-    # L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(10 + v_nam * 2 + v_spl + v_obs, rolf.reload.contribution)
+    # Creating L. rubidus (and spl and obs/splentry/naming).
+    assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     obs = spl.observations.first
     assert_not_nil(obs)
@@ -528,7 +527,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_construct_species_list_rankless_taxon
     list_title = "List Title"
-    new_name_str = "Agaricaceae"
+    new_name_str = "Lecideaceae"
     assert_nil(Name.find_by(text_name: new_name_str))
     params = {
       list: { members: new_name_str },
@@ -549,7 +548,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by(title: list_title)
 
     assert_redirected_to(action: :show_species_list, id: spl.id)
-    # Creates Agaricaceae, spl, obs/naming/splentry.
+    # Creates Lecideaceae, spl, obs/naming/splentry.
     assert_equal(10 + v_nam + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     new_name = Name.find_by(text_name: new_name_str)
@@ -1312,7 +1311,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       assert_equal(old_obs.when, new_obs.when)
       assert(old_obs.where == new_obs.where)
       assert(old_obs.location_id == new_obs.location_id)
-      assert_equal(old_obs.notes, new_obs.notes)
+      assert_equal(old_obs.other_notes.to_s, new_obs.other_notes.to_s)
       assert(old_obs.lat == new_obs.lat)
       assert(old_obs.long == new_obs.long)
       assert(old_obs.alt == new_obs.alt)
@@ -1328,7 +1327,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         obs1.id.to_s => obs_params1.merge(
           when_str:   now.strftime("%Y-%m-%d"),
           place_name: "new location",
-          notes:      { Observation.other_notes_key => "new notes" },
+          other_notes: "new notes",
           value:      Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
@@ -1361,7 +1360,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(now.to_date, new_obs1.when)
     assert_equal("new location", new_obs1.where)
     assert_nil(new_obs1.location)
-    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs1.notes)
+    assert_equal("new notes", new_obs1.other_notes)
     assert(obs1.lat == new_obs1.lat)
     assert(obs1.long == new_obs1.long)
     assert(obs1.alt == new_obs1.alt)
@@ -1371,7 +1370,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(obs2.when, new_obs2.when)
     assert(obs2.where == new_obs2.where)
     assert_equal(obs2.location_id, new_obs2.location_id)
-    assert_equal(obs2.notes, new_obs2.notes)
+    assert_equal(obs2.other_notes, new_obs2.other_notes)
     assert_equal(12.5822, new_obs2.lat)
     assert_equal(-78.1533, new_obs2.long)
     assert_equal(105, new_obs2.alt)
@@ -1383,7 +1382,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { Observation.other_notes_key => "new notes" }
+          other_notes: "new notes"
         )
       }
     }
@@ -1396,7 +1395,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(obs3.when, new_obs3.when)
     assert_equal(obs3.where, new_obs3.where)
     assert(obs3.location_id == new_obs3.location_id)
-    assert_equal(obs3.notes, new_obs3.notes)
+    assert_equal(obs3.other_notes, new_obs3.other_notes)
     assert(obs3.lat == new_obs3.lat)
     assert(obs3.long == new_obs3.long)
     assert(obs3.alt == new_obs3.alt)
@@ -1408,7 +1407,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs3.id.to_s => obs_params3.merge(
-          notes: { Observation.other_notes_key => "new notes" }
+          other_notes: "new notes"
         )
       }
     }
@@ -1417,7 +1416,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_redirected_to(action: "show_species_list", id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
-    assert_equal({ Observation.other_notes_key => "new notes" }, new_obs3.notes)
+    assert_equal("new notes", new_obs3.other_notes)
   end
 
   def test_bulk_editor_change_vote_on_observation_with_no_votes
@@ -1598,7 +1597,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :ATTACH.l)
     assert_flash_success
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",
@@ -1606,7 +1605,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :ATTACH.l)
     assert_flash_warning # already attached
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",
@@ -1614,7 +1613,7 @@ class SpeciesListControllerTest < FunctionalTestCase
                            "projects_#{proj2.id}" => "",
                            commit: :REMOVE.l)
     assert_flash_warning # no changes
-    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+    assert_obj_list_equal([proj1, proj2], list.projects(true), :sort)
 
     post(:manage_projects, id: list.id,
                            objects_list: "1",

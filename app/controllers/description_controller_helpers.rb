@@ -39,11 +39,12 @@ module DescriptionControllerHelpers
   #
   ################################################################################
 
-  # Make a description the default one.  Description must be public-readable.
+  # Make a description the default one.  Description must be publically
+  # readable and writable.
   def make_description_default # :norobots:
     pass_query_params
     if desc = find_description(params[:id].to_s)
-      if !desc.public
+      if !desc.fully_public
         flash_error(:runtime_description_make_default_only_public.t)
       else
         desc.parent.description_id = desc.id
@@ -67,7 +68,7 @@ module DescriptionControllerHelpers
       @description = src
 
       # Doesn't have permission to see source.
-      if !src.is_reader?(@user)
+      if !in_admin_mode? && !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
         redirect_with_query(action: src.parent.show_action, id: src.parent_id)
 
@@ -99,7 +100,7 @@ module DescriptionControllerHelpers
     src_title = src.format_name
 
     # Doesn't have permission to edit destination.
-    if !dest.is_writer?(@user)
+    if !in_admin_mode? && !dest.is_writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       @description = src
 
@@ -144,7 +145,7 @@ module DescriptionControllerHelpers
       src.parent.log(:log_object_moved_by_user, user: @user.login,
                                                 from: src_name, to: dest.unique_format_name,
                                                 touch: true)
-      if make_dest_default && src.public
+      if make_dest_default && src.fully_public
         dest.description_id = src
         dest.save
         dest.log(:log_changed_default_description, user: @user.login,
@@ -216,7 +217,7 @@ module DescriptionControllerHelpers
 
       # Must be admin on the draft in order for this to work.  (Must be able
       # to delete the draft after publishing it.)
-      if !draft.is_admin?(@user)
+      if !in_admin_mode? && !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
         redirect_with_query(action: parent.show_action, id: parent.id)
 
@@ -254,7 +255,7 @@ module DescriptionControllerHelpers
       done = false
 
       # Doesn't have permission.
-      if !@description.is_admin?(@user) && !in_admin_mode?
+      if !in_admin_mode? && !@description.is_admin?(@user)
         flash_error(:runtime_description_adjust_permissions_denied.t)
         done = true
 
@@ -421,7 +422,7 @@ module DescriptionControllerHelpers
     # Cloning an existing description.
     elsif !params[:clone].blank?
       clone = find_description(params[:clone])
-      if clone.is_reader?(@user)
+      if in_admin_mode? || clone.is_reader?(@user)
         desc.all_notes = clone.all_notes
         desc.source_type  = :user
         desc.source_name  = ""
@@ -502,9 +503,9 @@ module DescriptionControllerHelpers
     okay = true
 
     # Fail completely if they don't even have write permission.
-    unless desc.is_writer?(@user)
+    unless in_admin_mode? || desc.is_writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
-      if desc.is_reader?(@user)
+      if in_admin_mode? || desc.is_reader?(@user)
         redirect_to(action: desc.show_action, id: desc.id)
       else
         redirect_to(action: desc.parent.show_action, id: desc.parent_id)
@@ -683,7 +684,7 @@ module DescriptionControllerHelpers
 
       # Delete old description if requested.
       if delete_after
-        if !src.is_admin?(@user)
+        if !in_admin_mode? && !src.is_admin?(@user)
           flash_warning(:runtime_description_merge_delete_denied.t)
         else
           src_was_default = (src.parent.description_id == src.id)
@@ -692,7 +693,7 @@ module DescriptionControllerHelpers
           src.destroy
 
           # Make destination the default if source used to be the default.
-          if src_was_default && dest.public
+          if src_was_default && dest.fully_public
             dest.parent.description = dest
             dest.parent.save
           end

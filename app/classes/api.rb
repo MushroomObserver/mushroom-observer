@@ -23,9 +23,9 @@
 #                      etc...)
 #    new_observation = api.results.first
 #
-#    # PUT: Set the notes in all your observations from 23 May 2012:
-#    api = API.execute(method: "PUT", action: :observation, when: '2012-05-23',
-#                      set_notes: 'on rock')
+#    # PATCH: Set the notes in all your observations from 23 May 2012:
+#    api = API.execute(method: "PATCH", action: :observation, when:
+#                      '2012-05-23', set_notes: 'on rock')
 #    updated_observations = api.results
 #
 #    # DELETE: Destroy all your observations from May 2012:
@@ -53,8 +53,8 @@
 #    :user                  User's
 #    :vote                  Vote's on name proposals for observations
 #
-#  These each have a uniform interface.  GET, PUT and DELETE requests all take
-#  a variety of standard "search" parameters, e.g.:
+#  These each have a uniform interface.  GET, PATCH and DELETE requests all
+#  take a variety of standard "search" parameters, e.g.:
 #
 #    id: '12345'          Select object id #12345.
 #    id: '12345-12356'    Select objects whose ids are between 12345 and 12356,
@@ -71,7 +71,7 @@
 #  cond_1 AND cond_2 AND ...  Unions must be constructed with multiple queries.
 #
 #  GET requests return an array of matching objects.  DELETE requests attempt
-#  to destroy all matching objects.  PUT requests allow users to make one or
+#  to destroy all matching objects.  PATCH requests allow users to make one or
 #  more changes to all matching objects.  Changes are specified with "set"
 #  parameters, e.g.:
 #
@@ -86,7 +86,7 @@
 #  object.  Creating multiple objects requires multiple requests.  In this
 #  case, use only the "set" parameters above.
 #
-#  Authentication for PUT, POST, DELETE methods is accomplished by passing in
+#  Authentication for PATCH, POST, DELETE methods is accomplished by passing in
 #  an API key.  Users can create one or more API keys via the API Key Manager
 #  available on their Preferences and Profile page:
 #
@@ -96,7 +96,7 @@
 #  look at the documentation for that subclass.
 #
 #    API::UserAPI#get          Method used to GET users.
-#    API::NameAPI#put          Method used to PUT names.
+#    API::NameAPI#patch        Method used to PATCH names.
 #    API::ObservationAPI#post  Method used to POST observations.
 #    API::ImageAPI#delete      Method used to DELETE images.
 #
@@ -116,24 +116,11 @@
 class API
   require_dependency "api/errors"
   require_dependency "api/base"
-  require_dependency "api/parsers"
-  require_dependency "api/parse_boolean"
-  require_dependency "api/parse_datetime"
-  require_dependency "api/parse_enum"
-  require_dependency "api/parse_external_site"
-  require_dependency "api/parse_herbarium"
-  require_dependency "api/parse_lang"
-  require_dependency "api/parse_location"
-  require_dependency "api/parse_name"
-  require_dependency "api/parse_number"
-  require_dependency "api/parse_object"
-  require_dependency "api/parse_project"
-  require_dependency "api/parse_species_list"
-  require_dependency "api/parse_string"
-  require_dependency "api/parse_user"
+  require_dependency "api/parameters"
   require_dependency "api/results"
   require_dependency "api/upload"
   require_dependency "api/model_api"
+  require_dependency "api/parsers/base"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
   Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|

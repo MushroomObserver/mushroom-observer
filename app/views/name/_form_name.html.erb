@@ -1,54 +1,78 @@
 <!--[form:name]-->
-<div class="form-inline">
-  <div class="form-group">
-    <label for="name_rank"><%= :Rank.t %>:</label>
-    <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {}, {class: "form-control"}) %>
-  </div>
-  <div class="form-group indent">
-    <label for="name_deprecated"><%= :Status.t %>:</label>
-    <%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{class: "form-control"}) %>
-  </div>
-</div>
 
-<div class="form-group pad-top">
-<label for="name_text_name"><%= :form_names_text_name.t %>:</label>
-<% if true %>
-  <%= form.text_field(:text_name, value: @name_string, class: "form-control", autofocus: true) %>
-  <p class="help-block"><%= :form_names_text_name_help.t %></p>
-<% else %>
-  <%= @name.real_text_name %>
-  <p class="help-block"><%= :form_names_text_name_locked.t %></p>
+<% if in_admin_mode? %>
+  <div class="form-inline push-down">
+    <div class="form-group">
+      <%= form.check_box(:locked) %>
+      <label for="name_locked"><%= :form_names_locked.t %></label>
+    </div>
+  </div>
 <% end %>
-</div>
 
-<label for="name_author"><%= :Authority.t %>:</label>
-<% if true or @name.author.blank? %>
+<% if !@name.locked || in_admin_mode? %>
+  <div class="form-inline push-down">
+    <div class="form-group">
+      <label for="name_rank"><%= :Rank.t %>:</label>
+      <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {}, {class: "form-control"}) %>
+    </div>
+    <div class="form-group indent">
+      <label for="name_deprecated"><%= :Status.t %>:</label>
+      <%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]],{},{class: "form-control"}) %>
+    </div>
+  </div>
+
+  <div class="form-group pad-top">
+    <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
+    <%= form.text_field(:text_name, value: @name_string, class: "form-control",
+                        data: {autofocus: true}) %>
+    <p class="help-block"><%= :form_names_text_name_help.t %></p>
+  </div>
+
+  <label for="name_author"><%= :Authority.t %>:</label>
   <%= form.text_field(:author, class: "form-control") %>
   <p class="help-block"><%= :form_names_author_help.t %></p>
+
 <% else %>
-  <%= h(@name.author) %><br/>
-  <p class="help-block"><%= :form_names_author_locked.t %></p>
+  <div class="push-down push-up">
+    <%= content_tag(:b, :Rank.t) %>:
+      <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
+    <%= content_tag(:b, :Status.t) %>:
+      <%= @name.deprecated ? :ACCEPTED.t : :DEPRECATED.t %><br/>
+    <%= content_tag(:b, :Name.t) %>:
+      <%= @name.real_text_name.t %><br/>
+    <%= content_tag(:b, :Authority.t) %>:
+      <%= @name.author.t %><br/>
+    <div class="help-block"><%= :show_name_locked.tp %></div>
+    <%= hidden_field(:name, :rank) %>
+    <%= hidden_field(:name, :deprecated) %>
+    <%= hidden_field(:name, :text_name, value: @name_string) %>
+    <%= hidden_field(:name, :author) %>
+  </div>
 <% end %>
 
 <label for="name_citation"><%= :Citation.t %>:</label>
 <%= form.text_field(:citation, class: "form-control") %>
-<p class="help-block"><%= :form_names_citation_help.t %></p>
-<p class="help-block"><%= :form_names_citation_textilize_note.t %></p>
+<p class="help-block">
+  <%= :form_names_citation_help.t %>
+  <%= :form_names_citation_textilize_note.t %>
+</p>
 
-<% if !@misspelling.nil? %>
-  <%= form.check_box(:misspelling, :checked => @misspelling) %>
-  <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
-  <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
-  <%= form.text_field(:correct_spelling, class: "form-control",
-                      value: @correct_spelling) %><br/>
-  <p class="help-block"><%= :form_names_misspelling_note.t %></p>
-  <% turn_into_name_auto_completer('name_correct_spelling', :primer => Name.primer) %>
+<% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
+  <div style="margin:1.5em 0em">
+    <%= form.check_box(:misspelling, checked: @misspelling) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <%= form.text_field(:correct_spelling, class: "form-control",
+                        value: @correct_spelling) %>
+    <p class="help-block"><%= :form_names_misspelling_note.t %></p>
+    <% turn_into_name_auto_completer(:name_correct_spelling, primer: Name.primer) %>
+  </div>
 <% end %>
 
 <p>
   <label for="notes"><%= :form_names_taxonomic_notes.t %>:</label><br/>
   <%= form.text_area(:notes, rows: 6, class: "form-control") %>
-  <%= render(:partial => 'shared/textilize_help') %>
+  <%= render(partial: "shared/textilize_help") %>
 </p>
 
 <!--[eoform:name]-->

@@ -10,13 +10,13 @@ module Query
         created_at?:        [:time],
         updated_at?:        [:time],
         users?:             [User],
-        has_images?:        { string: [:yes] },
-        has_observations?:  { string: [:yes] },
-        has_species_lists?: { string: [:yes] },
-        has_comments?:      { string: [:yes] },
-        has_notes?:         :boolean,
+        has_images?:        { boolean: [true] },
+        has_observations?:  { boolean: [true] },
+        has_species_lists?: { boolean: [true] },
+        has_comments?:      { boolean: [true] },
+        has_summary?:       :boolean,
         title_has?:         :string,
-        notes_has?:         :string,
+        summary_has?:       :string,
         comments_has?:      :string
       )
     end
@@ -29,17 +29,17 @@ module Query
       add_join(:observations_projects) if params[:has_observations]
       add_join(:projects_species_lists) if params[:has_species_lists]
       initialize_model_do_search(:title_has, :title)
-      initialize_model_do_search(:notes_has, :notes)
+      initialize_model_do_search(:summary_has, :summary)
       initialize_model_do_boolean(
-        :has_notes,
-        'LENGTH(COALESCE(species_lists.notes,"")) > 0',
-        'LENGTH(COALESCE(species_lists.notes,"")) = 0'
+        :has_summary,
+        'LENGTH(COALESCE(projects.summary,"")) > 0',
+        'LENGTH(COALESCE(projects.summary,"")) = 0'
       )
       add_join(:comments) if params[:has_comments]
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.notes)"
+          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
         )
         add_join(:comments)
       end

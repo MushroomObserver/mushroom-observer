@@ -1,20 +1,17 @@
 <%
-  @title ||= :edit_name_title.t(:name => @name.display_name)
+  @title ||= :edit_name_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:all_objects.t(:type => :name), :action => 'list_names'),
-    link_with_query(:cancel_and_show.t(:type => :name), :action => 'show_name',
-      :id => @name.id)
+    link_to(:all_objects.t(type: :name), action: :list_names),
+    link_with_query(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:name, :url => add_query_param(:action => :edit_name,
-      :id => @name.id)) do |form| %>
+<%= form_for(:name, url: add_query_param(action: :edit_name, id: @name.id)) do |form| %>
   <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
 
-  <%= render(:partial => 'form_name', :locals =>
-             {form: form}) %>
+  <%= render(partial: "form_name", locals: { form: form }) %>
 
   <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
 <% end %>

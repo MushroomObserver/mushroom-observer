@@ -40,11 +40,13 @@
 ################################################################################
 
 module GeneralExtensions
+
   ##############################################################################
   #
   #  :section: Test unit helpers
   #
   ##############################################################################
+
   def sql_collates_accents?
     sql_sorted = u_and_umlaut_collated_by_sql.map { |x| x[:notes] }
     sql_sorted == sql_sorted.sort
@@ -144,11 +146,7 @@ module GeneralExtensions
 
   # Assert that two User instances are equal.
   def assert_objs_equal(expect, got, *msg)
-    assert_equal(
-      (expect ? "#{expect.class.name} ##{expect.id}" : "nil"),
-      (got ? "#{got.class.name} ##{got.id}" : "nil"),
-      *msg
-    )
+    assert_equal(fixture_label(expect), fixture_label(got), *msg)
   end
 
   # Assert that two User instances are equal.
@@ -169,38 +167,45 @@ module GeneralExtensions
     )
   end
 
-  # Compare two lists by mapping their elements, then sorting.  By default it
+  # Compare two lists by mapping their elements.  By default it
   # just maps their elements to strings.
   #
   #   assert_list_equal([rolf,mary], name.authors, &:login)
   #
-  def assert_list_equal(expect, got, msg = nil, &block)
+  def assert_list_equal(expect, got, *args, &block)
     block ||= :to_s.to_proc
-    assert_equal(expect.map(&block).sort, got.map(&block).sort, msg)
+    expect = expect.to_a.map(&block)
+    got    = got.to_a.map(&block)
+    if args.first == :sort
+      args.shift
+      expect.sort!
+      got.sort!
+    end
+    assert_equal(expect, got, args.first)
   end
 
   # Compare two lists of objects of the same type by comparing their ids.
   #
   #   assert_obj_list_equal([img1,img2], obs.images)
   #
-  def assert_obj_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg) { |o| o.nil? ? nil : "#{o.class.name} ##{o.id}" }
+  def assert_obj_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args) { |o| fixture_label(o) }
   end
 
   # Compare two lists of User's by comparing their logins.
   #
   #   assert_user_list_equal([rolf,mary], name.authors)
   #
-  def assert_user_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg, &:login)
+  def assert_user_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args, &:login)
   end
 
   # Compare two lists of Name's by comparing their search_names.
   #
-  #   assert_name_list_equal([old_name,new_name], old_name.synonym.names)
+  #   assert_name_list_equal([old_name,new_name], old_name.synonyms)
   #
-  def assert_name_list_equal(expect, got, msg = nil)
-    assert_list_equal(expect, got, msg, &:search_name)
+  def assert_name_list_equal(expect, got, *args)
+    assert_list_equal(expect, got, *args, &:search_name)
   end
 
   GPS_CLOSE_ENOUGH = 0.001
@@ -249,6 +254,50 @@ module GeneralExtensions
     msg2 = obj.errors.full_messages.join("; ")
     msg2 = msg + "\n" + msg2 if msg
     flunk(msg2)
+  end
+
+  # This should make diagnostics of failed tests more useful!
+  def fixture_label(o)
+    return "" if o.nil?
+    table = o.class.table_name
+    @loaded_fixtures[table].fixtures.each do |name, fixture|
+      return "<#{name}>" if fixture["id"] == o.id
+    end
+    case table
+    when "names"
+      "Name: #{o.search_name}"
+    when "user"
+      "User: #{o.login}"
+    else
+      "#{o.class.name} ##{o.id}"
+    end
+  end
+
+  @@fixture_labels = {}
+  def get_fixture_label(table, idx)
+    @@fixture_labels[table] ||= read_fixture_labels(table) || []
+    @@fixture_labels[table][idx]
+  end
+
+  def read_fixture_labels(table)
+    result = []
+    file = "#{Rails.root}/test/fixtures/#{table}.yml"
+    raise "Can't find fixtures file for #{table}! " +
+          "Should be #{file}." unless File.exist?(file)
+    last_id = 0
+    line_num = 0
+    File.readlines(file).each do |line|
+      line_num += 1
+      match = line.match(/^(\w+):\s+#\s*(\d+)\s*$/)
+      next unless match
+      label = match[1]
+      id = match[2].to_i
+      raise "IDs are not consecutive at #{file} line #{line_num}: " +
+            "#{id} should be #{last_id+1}\n" if id != last_id + 1
+      result[id-1] = label
+      last_id = id
+    end
+    result
   end
 
   ##############################################################################
@@ -387,26 +436,27 @@ module GeneralExtensions
     msg    = nil
 
     # Check string against each file, looking for at least one that matches.
-    processed_str  = str
-    processed_str  = yield(processed_str) if block_given?
-    processed_str.split("\n")
-    encoding = processed_str.encoding
+    str = yield(str) if block_given?
+    clean_string!(str)
+    encoding = str.encoding
 
-    for file in files
+    files.each do |file|
       filename = Array(file).first
       format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
       template = File.open(filename, format).read
-      template = enforce_encoding(encoding, file, template)
+      template = enforce_encoding(encoding, template)
       template = ERB.new(template).result # interpolate variables
       template = yield(template) if block_given?
-      if template_match(processed_str, template)
+      clean_string!(template)
+
+      if match_ignoring_some_bits(str, template)
         # Stop soon as we find one that matches.
         result = true
         break
       elsif !msg
         # Write out expected (old) and received (new) files for debugging purposes.
         File.open(filename + ".old", "w:#{encoding}") { |fh| fh.write(template) }
-        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(processed_str) }
+        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(str) }
         msg = "File #{filename} wrong:\n" +
               `diff #{filename}.old #{filename}.new`
         File.delete(filename + ".old") if File.exist?(filename + ".old")
@@ -424,21 +474,22 @@ module GeneralExtensions
     pass
   end
 
-  def enforce_encoding(encoding, file, str)
-    result = str
-    result = str.encode(encoding) if str.encoding != encoding
-    if file.is_a?(Array) && file[1] == "ISO-8859-1"
-      print "Re-encoding no longer needed\n" if file[1] == str.encoding
-    end
-    result
+  def enforce_encoding(encoding, str)
+    return str if str.encoding == encoding
+    str.encode(encoding)
   end
 
-  # Ensure that all the lines in template are in str.
-  # Allows additional headers like 'Date' to get added to str and to vary
-  def template_match(str, template)
-    template = template.gsub /\r\n?/, "\n"
-    str = str.gsub /\r\n?/, "\n"
+  def clean_string!(str)
+    str.gsub!(/\r/, "")
+    str.sub!(/\s*\z/, "\n")
+  end
 
-    (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
+  def match_ignoring_some_bits(str, template)
+    template.split("\n").each do |line|
+      next unless line.include?("IGNORE")
+      pattern = Regexp.escape(line).gsub(/IGNORE/, ".*")
+      str.sub!(/^#{pattern}$/, line)
+    end
+    str == template
   end
 end

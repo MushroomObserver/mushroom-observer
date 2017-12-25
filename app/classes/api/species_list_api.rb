@@ -1,6 +1,5 @@
-# encoding: utf-8
-
 class API
+  # API for SpeciesList
   class SpeciesListAPI < ModelAPI
     self.model = SpeciesList
 
@@ -16,44 +15,93 @@ class API
 
     def query_params
       {
-        where: sql_id_condition,
-        created_at: parse_time_range(:created_at),
-        updated_at: parse_time_range(:updated_at),
-        date: parse_date(:date),
-        users: parse_users(:user),
-        names: parse_strings(:name),
-        synonym_names: parse_strings(:synonyms_of),
-        children_names: parse_strings(:children_of),
-        locations: parse_strings(:location),
-        projects: parse_strings(:project),
-        has_notes: parse_boolean(:has_notes),
-        has_comments: parse_boolean(:has_comments, limit: true),
-        title_has: parse_string(:title_has),
-        notes_has: parse_string(:notes_has),
-        comments_has: parse_string(:comments_has)
+        where:          sql_id_condition,
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        date:           parse_range(:date, :date, help: :any_date),
+        users:          parse_array(:user, :user, help: :creator),
+        names:          parse_array(:name, :name, as: :id),
+        synonym_names:  parse_array(:name, :synonyms_of, as: :id),
+        children_names: parse_array(:name, :children_of, as: :id),
+        locations:      parse_array(:location, :location, as: :id),
+        projects:       parse_array(:project, :project, as: :id),
+        has_notes:      parse(:boolean, :has_notes),
+        has_comments:   parse(:boolean, :has_comments, limit: true),
+        title_has:      parse(:string, :title_has, help: 1),
+        notes_has:      parse(:string, :notes_has, help: 1),
+        comments_has:   parse(:string, :comments_has, help: 1)
       }
     end
 
     def create_params
       {
-        title: parse_string(:title, limit: 100),
-        when: parse_date(:date, default: Date.today),
-        place_name: parse_place_name(:location, limit: 1024, default: Location.unknown),
-        notes: parse_string(:notes, default: "")
+        title:      parse(:string, :title, limit: 100),
+        when:       parse(:date, :date) || Date.today,
+        place_name: parse(:place_name, :location,
+                          limit: 1024, default: Location.unknown.display_name),
+        notes:      parse(:string, :notes, default: ""),
+        user:       @user
+      }
+    end
+
+    def update_params
+      parse_add_remove_observations
+      {
+        title:      parse(:string, :set_title, limit: 100, not_blank: true),
+        when:       parse(:date, :set_date),
+        place_name: parse(:place_name, :set_location, limit: 1024,
+                                                      not_blank: true),
+        notes:      parse(:string, :set_notes)
       }
     end
 
     def validate_create_params!(params)
-      fail MissingParameter.new(:title) if params[:title].blank?
+      make_sure_location_isnt_dubious!(params[:place_name])
+      raise MissingParameter.new(:title) if params[:title].blank?
+      title = params[:title].to_s
+      return unless SpeciesList.find_by_title(title)
+      raise SpeciesListAlreadyExists.new(title)
     end
 
-    def update_params
-      {
-        title: parse_string(:set_title, limit: 100),
-        when: parse_date(:set_date),
-        place_name: parse_place_name(:set_location, limit: 1024),
-        notes: parse_string(:set_notes)
-      }
+    def validate_update_params!(params)
+      validate_set_location!(params)
+      validate_set_title!(params)
+      return unless params.empty? && @add_obs.empty? && @remove_obs.empty?
+      raise MissingSetParameters.new
+    end
+
+    def build_setter(params)
+      lambda do |spl|
+        must_have_edit_permission!(spl)
+        spl.update!(params)                  unless params.empty?
+        spl.add_observations(@add_obs)       if @add_obs.any?
+        spl.remove_observations(@remove_obs) if @remove_obs.any?
+        spl
+      end
+    end
+
+    ############################################################################
+
+    private
+
+    def validate_set_location!(params)
+      name = params[:place_name].to_s || return
+      make_sure_location_isnt_dubious!(name)
+    end
+
+    def validate_set_title!(params)
+      title = params[:title].to_s || return
+      return if query.num_results.zero?
+      raise TryingToSetMultipleLocationsToSameName.new \
+        if query.num_results > 1
+      match = SpeciesList.find_by_title(title)
+      return if !match || query.results.first == match
+      raise SpeciesListAlreadyExists.new(title)
+    end
+
+    def parse_add_remove_observations
+      @add_obs    = parse_array(:observation, :add_observations) || []
+      @remove_obs = parse_array(:observation, :remove_observations) || []
     end
   end
 end

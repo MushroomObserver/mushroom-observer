@@ -8,7 +8,7 @@ xml.tag!(tag,
   xml_html_string(xml, :bases, object.bases.tp)
   xml_string(xml, :archive, object.archive)
   xml_string(xml, :accession, object.accession)
-  xml_html_string(xml, :notes, object.notes.tpl)
+  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   if !detail

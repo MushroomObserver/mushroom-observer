@@ -57,9 +57,9 @@ class TranslationString < AbstractModel
     result
   end
 
-  def self.translations(lang)
+  def self.translations(locale)
     I18n.backend.load_translations if I18n.backend.send(:translations).empty?
-    I18n.backend.send(:translations)[lang.to_sym][MO.locale_namespace.to_sym]
+    I18n.backend.send(:translations)[locale.to_sym][MO.locale_namespace.to_sym]
   end
 
   # Update this string in the translations I18n is using.
@@ -68,5 +68,11 @@ class TranslationString < AbstractModel
     fail "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
     fail "Localization for :#{tag.to_sym} doesn't exist!" unless data[tag.to_sym]
     data[tag.to_sym] = text
+  end
+
+  # Get age of official language's banner.  (Used by application layout to
+  # determine if user has dismissed it yet.)
+  def self.banner_time
+    where(tag: "app_banner_box", language: Language.official).first.updated_at
   end
 end

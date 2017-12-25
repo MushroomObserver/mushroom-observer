@@ -11,32 +11,42 @@
 #   location:
 
 DEFAULTS: &DEFAULTS
-  name:       boletus_edulis
-  notes:      <%= Observation.no_notes %>
-  location:   obs_default_location
-  user:       dick
+  name: boletus_edulis
+  notes: <%= Observation.no_notes %>
+  location: obs_default_location
+  where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
+  user: dick
   vote_cache: 0.0
-  when:       <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
+  when: <%= Time.now.strftime("%Y-%m-%d") %> # yyyy-mm-dd
+  is_collection_location: 1
+  lifeform: " "
+  text_name: Boletus edulis
+  classification: ""
 
-minimal_unknown_obs:
+minimal_unknown_obs: # 1
   <<: *DEFAULTS
   created_at: 2005-05-12 17:20:00
   updated_at: 2005-05-12 17:21:00
   when: 2006-05-11
   user: mary
   location: burbank
+  where: Burbank, California, USA
   name: fungi
+  text_name: Fungi
   species_lists: unknown_species_list
-  specimens: interesting_unknown
+  herbarium_records: interesting_unknown
+  collection_numbers: minimal_unknown_coll_num
 
-detailed_unknown_obs:
+detailed_unknown_obs: # 2
   <<: *DEFAULTS
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   when: 2006-05-11
   location: burbank
+  where: Burbank, California, USA
   user: mary
   name: fungi
+  text_name: Fungi
   specimen: 1
   notes:
     :Other: Found in a strange place... & with śtrangè characters™
@@ -44,15 +54,18 @@ detailed_unknown_obs:
   thumb_image: in_situ_image
   images: in_situ_image, turned_over_image
   species_lists: unknown_species_list
-  specimens: interesting_unknown
+  herbarium_records: interesting_unknown, mycoflora_record
+  collection_numbers: detailed_unknown_coll_num_one, detailed_unknown_coll_num_two
 
-coprinus_comatus_obs:
+coprinus_comatus_obs: # 3
   <<: *DEFAULTS
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
   when: 2007-02-27
   user: rolf
   name: coprinus_comatus
+  text_name: Coprinus comatus
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   location:
   where: Glendale, California
   specimen: 1
@@ -62,57 +75,71 @@ coprinus_comatus_obs:
   thumb_image: connected_coprinus_comatus_image
   images: connected_coprinus_comatus_image
   species_lists: one_genus_three_species_list
-  specimens: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
+  herbarium_records: coprinus_comatus_nybg_spec, coprinus_comatus_rolf_spec
+  collection_numbers: coprinus_comatus_coll_num
 
-agaricus_campestris_obs:
+agaricus_campestris_obs: # 4
   <<: *DEFAULTS
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: agaricus_campestris
+  text_name: Agaricus campestris
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From the lawn next door
   thumb_image: agaricus_campestris_image
   images: agaricus_campestris_image
   species_lists: one_genus_three_species_list
-  specimens: agaricus_campestris_spec
+  herbarium_records: agaricus_campestris_spec
+  collection_numbers: agaricus_campestris_coll_num
 
-agaricus_campestrus_obs:
+agaricus_campestrus_obs: # 5
   <<: *DEFAULTS
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
   when: 2007-06-23
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: agaricus_campestrus
+  text_name: Agaricus campestrus
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
-agaricus_campestras_obs:
+agaricus_campestras_obs: # 6
   <<: *DEFAULTS
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: agaricus_campestras
+  text_name: Agaricus campestras
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
-agaricus_campestros_obs:
+agaricus_campestros_obs: # 7
   <<: *DEFAULTS
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: agaricus_campestros
+  text_name: Agaricus campestros
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   notes:
     :Other: From somewhere else
 
-strobilurus_diminutivus_obs:
+strobilurus_diminutivus_obs: # 8
   <<: *DEFAULTS
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
@@ -120,61 +147,73 @@ strobilurus_diminutivus_obs:
   user: rolf
   location:
   name: strobilurus_diminutivus_no_author
+  text_name: Strobilurus diminutivus
   where: Pipi Valley, Sierra Mountains, CA
   notes:
     :Other: From somewhere else
 
-stereum_hirsutum_1:
+stereum_hirsutum_1: # 9
   <<: *DEFAULTS
   when: 2017-06-23
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: stereum_hirsutum
+  text_name: Stereum hirsutum
 
-stereum_hirsutum_2:
+stereum_hirsutum_2: # 10
   <<: *DEFAULTS
   when: 2017-06-24
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: stereum_hirsutum
+  text_name: Stereum hirsutum
 
-tubaria_furfuracea_1:
+tubaria_furfuracea_1: # 11
   <<: *DEFAULTS
   when: 2017-06-23
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: tubaria_furfuracea
+  text_name: Tubaria furfuracea
 
-tubaria_furfuracea_2:
+tubaria_furfuracea_2: # 12
   <<: *DEFAULTS
   when: 2017-06-24
   location: burbank
+  where: Burbank, California, USA
   user: rolf
   name: tubaria_furfuracea
+  text_name: Tubaria furfuracea
 
-unknown_with_no_naming:
+unknown_with_no_naming: # 13
   <<: *DEFAULTS
   when: 2008-09-23
   user: mary
   location:
   where: Who knows where
   name: fungi
+  text_name: Fungi
 
-unknown_with_lat_long:
+unknown_with_lat_long: # 14
   <<: *DEFAULTS
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
   when: 2010-07-22
   location: burbank
+  where: Burbank, California, USA
   user: mary
   name: fungi
+  text_name: Fungi
   lat: 34.1622
   long: -118.3521
   alt: 123
   notes:
     :Other: 'unknown_with_lat_long'
 
-amateur_obs:
+amateur_obs: # 15
   <<: *DEFAULTS
   created_at: 2010-12-31 06:46:00
   when: 2010-12-30
@@ -183,20 +222,22 @@ amateur_obs:
   where: 'Pasadena, California, USA'
   is_collection_location: 0
   name: conocybe_filaris
+  text_name: Conocybe filaris
   specimen: 1
   notes:
     :Other: 'A friend showed me this.'
   lat: 34.1622
   long: -118.3521
 
-peltigera_obs:
+peltigera_obs: # 16
   <<: *DEFAULTS
   when: 2012-06-07
   user: rolf
   location:
   where: 'Briceland, California, USA'
-  is_collection_location: 1
   name: peltigera
+  text_name: Peltigera
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: 'Growing on a hardwood'
@@ -204,23 +245,31 @@ peltigera_obs:
   thumb_image: peltigera_image
   images: peltigera_image
   species_lists: one_genus_three_species_list
+  lifeform: " lichen "
+  created_at: 2014-04-04 04:04:03
+  updated_at: 2014-04-04 04:04:03
+  herbarium_records: field_museum_record
 
-peltigera_rolf_obs:
+peltigera_rolf_obs: # 17
   <<: *DEFAULTS
   when: 2013-09-08
   user: mary
   location:
   where: 'Briceland, California, USA'
-  is_collection_location: 1
   name: peltigera
+  text_name: Peltigera
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   specimen: 1
   notes:
     :Other: 'Growing on a hardwood'
   vote_cache: 3
   thumb_image: rolf_profile_image
   images: rolf_profile_image
+  lifeform: " lichen "
+  created_at: 2014-04-04 04:04:04
+  updated_at: 2014-04-04 04:04:04
 
-fungi_obs:
+fungi_obs: # 18
   <<: *DEFAULTS
   when: 2013-09-15
   user: rolf
@@ -228,206 +277,225 @@ fungi_obs:
   where: 'Briceland, California, USA'
   is_collection_location: 0
   name: fungi
+  text_name: Fungi
   notes:
     :Other: 'Observation for plane pileus'
   vote_cache: 3
   thumb_image: conic_image
   images: conic_image, plane_image_example
 
-boletus_edulis_obs:
+boletus_edulis_obs: # 19
   <<: *DEFAULTS
   when: 2014-04-21
   location:
   where: 'New York, New York, USA'
   name: boletus_edulis
+  text_name: Boletus edulis
   is_collection_location: 0
   notes:
     :Other: 'A tasty bolete!'
   vote_cache: 3
   species_lists: one_genus_three_species_list
 
-owner_only_favorite_eq_fungi:
+owner_only_favorite_eq_fungi: # 20
   <<: *DEFAULTS
 
-owner_only_favorite_eq_consensus:
+owner_only_favorite_eq_consensus: # 21
   <<: *DEFAULTS
 
-owner_only_favorite_ne_consensus:
+owner_only_favorite_ne_consensus: # 22
   <<: *DEFAULTS
   name: tremella
+  text_name: Tremella
+  lifeform: " lichenicolous "
 
-owner_multiple_favorites:
+owner_multiple_favorites: # 23
   <<: *DEFAULTS
 
-owner_uncertain_favorite:
+owner_uncertain_favorite: # 24
   <<: *DEFAULTS
 
-owner_accepts_general_questions:
+owner_accepts_general_questions: # 25
   <<: *DEFAULTS
   user: roy                      # roy has email_general_questions == true
 
-owner_refuses_general_questions:
+owner_refuses_general_questions: # 26
   <<: *DEFAULTS
   user: dick                     # dick has email_general_questions == false
 
-collected_at_obs:
+collected_at_obs: # 27
   <<: *DEFAULTS
   location: collection_location
+  where: Collection Location
 
-displayed_at_obs:
+displayed_at_obs: # 28
   <<: *DEFAULTS
   location: display_location
+  where: Display Location
   is_collection_location: false
 
-two_img_obs:
+two_img_obs: # 29
   <<: *DEFAULTS
   location: display_location
+  where: Display Location
   is_collection_location: false
   images: query_first_image, query_second_image
   thumb_image: query_first_image
 
-imageless_unvouchered_obs:
+imageless_unvouchered_obs: # 30
   <<: *DEFAULTS
   user: ignore_imageless_user
 
 # need >=2 imaged B edulis Obs's for filter tests
-imged_unvouchered_obs:
+imged_unvouchered_obs: # 31
   <<: *DEFAULTS
   images: query_first_image
   thumb_image: query_first_image
 
-vouchered_obs:
+vouchered_obs: # 32
   <<: *DEFAULTS
   specimen: 1
 
-vouchered_imged_obs:
+vouchered_imged_obs: # 33
   <<: *DEFAULTS
   specimen: 1
   images: query_first_image
   thumb_image: query_first_image
 
-updated_2013_obs:
+updated_2013_obs: # 34
   <<: *DEFAULTS
   when: 2013-09-08
   updated_at: 2013-09-08 17:21:00
 
 # Two Observations sortable by Name, Date, Date Posted, Time Last Modified
-sortable_obs_users_first_obs:
+sortable_obs_users_first_obs: # 35
   <<: *DEFAULTS
   created_at: 2016-01-10 17:20:00
   updated_at: 2016-01-11 17:20:00
   when: 2016-01-10
   user: sortable_obs_user
   name: tremella_justpublished
+  text_name: Tremella justpublished
   location: sortable_observation_user_location
+  where: Sortable Observation User, New York, USA
+  lifeform: " lichenicolous "
 
-sortable_obs_users_second_obs:
+sortable_obs_users_second_obs: # 36
   <<: *DEFAULTS
   created_at: 2017-01-10 17:20:00
   updated_at: 2017-01-11 17:20:00
   when: 2017-01-10
   user: sortable_obs_user
   name: tremella_mesenterica
+  text_name: Tremella mesenterica
   location: sortable_observation_user_location
+  where: Sortable Observation User, New York, USA
+  lifeform: " lichenicolous "
 
-unlisted_rolf_obs:
+unlisted_rolf_obs: # 37
   <<: *DEFAULTS
   location: point_reyes
+  where: Point Reyes National Seashore, Marin Co., California, USA
   user: rolf
 
 # default user (dick) has unequal positive namings
 # used for testing change vote
-unequal_positive_namings_obs:
+unequal_positive_namings_obs: # 38
   <<: *DEFAULTS
 
 # used for testing calc_consensus
-all_namings_deprecated_obs:
+all_namings_deprecated_obs: # 39
   <<: *DEFAULTS
   name: namings_deprecated
+  text_name: Namings deprecated
 
 # Has 2 namings
 # Has two namings, which (under current rules) makes the Names unmergeable
-authored_with_naming_obs:
+authored_with_naming_obs: # 40
   <<: *DEFAULTS
   name: authored_with_naming
+  text_name: Psalliota naming
 
 # dick owns the Name and Observation, but mary owns a Naming
-other_user_owns_naming_obs:
+other_user_owns_naming_obs: # 41
   <<: *DEFAULTS
   name: other_user_owns_naming_name
+  text_name: Otheruserownsnaming
   user: dick
 
 # dick owns the Name and Naming, but mary owns an Observation
-other_user_owns_obs:
+other_user_owns_obs: # 42
   <<: *DEFAULTS
   name: other_user_owns_observation
+  text_name: Otheruserownsobs
   user: mary
 
 # dick owns the Name and the only Observation and Naming
-same_user_owns_name_and_naming_obs:
+same_user_owns_name_and_naming_obs: # 43
   <<: *DEFAULTS
   name: same_user_owns_naming_and_observation
+  text_name: Sameuserownsnamingandobservation
   user: dick
 
 # has Sequence which has not been deposited in an Archive
-locally_sequenced_obs:
+locally_sequenced_obs: # 44
   <<: *DEFAULTS
-  rss_log:     $LABEL_rss_log
-  images:      locally_sequenced_obs_image
+  rss_log: $LABEL_rss_log
+  images: locally_sequenced_obs_image
   thumb_image: locally_sequenced_obs_image
 
 # has Sequence which is in GenBank
-genbanked_obs:
+genbanked_obs: # 45
   <<: *DEFAULTS
 
-substrate_notes_obs:
-  <<: *DEFAULTS
-  notes:
-    :substrate: soil
-
-substrate_and_other_notes_obs:
+substrate_notes_obs: # 46
   <<: *DEFAULTS
   notes:
     :substrate: soil
-    :Other:     slimy
 
-templater_noteless_obs:
+substrate_and_other_notes_obs: # 47
+  <<: *DEFAULTS
+  notes:
+    :substrate: soil
+    :Other: slimy
+
+templater_noteless_obs: # 48
   <<: *DEFAULTS
   user: notes_templater
 
-templater_other_notes_obs:
+templater_other_notes_obs: # 49
   <<: *DEFAULTS
   notes:
     :Other: some notes
   user: notes_templater
 
-templater_orphaned_notes_obs:
+templater_orphaned_notes_obs: # 50
   <<: *DEFAULTS
   notes:
     :orphaned_caption: orphaned notes
   user: notes_templater
 
-template_only_obs:
+template_only_obs: # 51
   <<: *DEFAULTS
   notes:
     :Cap: red
   user: notes_templater
 
-template_and_other_notes_obs:
+template_and_other_notes_obs: # 52
   <<: *DEFAULTS
   notes:
     :Cap: red
     :Other: some notes
   user: notes_templater
 
-template_and_orphaned_notes_obs:
+template_and_orphaned_notes_obs: # 53
   <<: *DEFAULTS
   notes:
     :Cap: red
     :orphaned_caption: orphaned notes
   user: notes_templater
 
-template_and_orphaned_notes_scrambled_obs:
+template_and_orphaned_notes_scrambled_obs: # 54
   <<: *DEFAULTS
   notes:
     :Nearby_trees: pine
@@ -436,3 +504,8 @@ template_and_orphaned_notes_scrambled_obs:
     :orphaned_caption_2: orphaned notes 2
     :Cap: red
   user: notes_templater
+
+california_obs: # 55
+  <<: *DEFAULTS
+  location: california
+  where: California, USA

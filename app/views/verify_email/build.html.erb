@@ -1,6 +1,6 @@
 <%
   url = "#{MO.http_domain}/account/verify/#{@user.id}?auth_code=#{@user.auth_code}"
-  intro = :email_verify_intro.tp(:user => @user.login, :link => 'xxx')
+  intro = :email_verify_intro.tp(user: @user.login, link: "xxx")
   intro.gsub!(/xxx/, link_to(url, url))
 
 if @user.email_html %>

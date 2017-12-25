@@ -2,25 +2,24 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-#
+
 DEFAULTS: &DEFAULTS
   auth_code:      cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   contribution:   10
   email:          $LABEL@collectivesource.com
   image_size:     <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
-  locale:         en-US
+  locale:         en
   login:          $LABEL
   name:           $LABEL
   password:       ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
   verified:       <%= Time.now.strftime("%F %T")%>
-  # Associations
   user_groups:    all_users, $LABEL_only
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures
-rolf:
+rolf: # 1
   <<: *DEFAULTS
   name: Rolf Singer
   license: ccwiki30
@@ -29,7 +28,7 @@ rolf:
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
-mary:
+mary: # 2
   <<: *DEFAULTS
   name: Mary Newbie
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
@@ -37,13 +36,13 @@ mary:
   mailing_address: 123 Some Pl., Pasadena, CA 91106
 
 # Junk gets denied
-junk:
+junk: # 3
   <<: *DEFAULTS
   name: Junk Box
 
 # Need third for testing votes
 # Also is the default user for Observation fixture set.
-dick:
+dick: # 4
   <<: *DEFAULTS
   name: Tricky Dick
   email_general_question: false
@@ -51,33 +50,34 @@ dick:
   user_groups: all_users, bolete_users, bolete_admins, dick_only
 
 # Need fourth for testing votes
-katrina:
+katrina: # 5
   <<: *DEFAULTS
   name: Katrina
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
   user_groups: all_users, eol_users, katrina_only
 
 # Roy is a scientific user
-roy:
+roy: # 6
   <<: *DEFAULTS
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
 
-spammer:
+spammer: # 7
   <<: *DEFAULTS
   login: spamspamspam
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
-# observations, projects, publications, species lists, specimens, or anything
-# except account
-zero_user:
+# observations, projects, publications, species lists, herbarium_records, or
+# anything except account
+zero_user: # 8
   <<: *DEFAULTS
+  login: zero
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
 # used by integration filter test
-ignore_imageless_user:
+ignore_imageless_user: # 9
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
   content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
@@ -85,40 +85,45 @@ ignore_imageless_user:
   layout_count: 96
 
 # hides unvouchered Observations
-vouchered_only_user:
+vouchered_only_user: # 10
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
   content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
-public_voter:
+public_voter: # 11
   <<: *DEFAULTS
 
 # Has multiple Observations whose sortable attributes are unique
 # Need for tests in which sort order is predictable, e.g.,
 # ObserverControllerIntegrationTest#test_destroy_observation_from_search
-sortable_obs_user:
+sortable_obs_user: # 12
   <<: *DEFAULTS
 
-uniquely_named_user:
+uniquely_named_user: # 13
   <<: *DEFAULTS
 
 # Owns the default Location for Observations
-obs_default_location_user:
+obs_default_location_user: # 14
   <<: *DEFAULTS
 
-small_thumbnail_user:
+small_thumbnail_user: # 15
   <<: *DEFAULTS
   thumbnail_size: small
 
-no_general_questions_user:
+no_general_questions_user: # 16
   <<: *DEFAULTS
   email_general_question: false
 
-article_writer:
+article_writer: # 17
   <<: *DEFAULTS
   user_groups:  all_users, $LABEL_only, article_writers
 
-notes_templater:
+notes_templater: # 18
   <<: *DEFAULTS
   notes_template: Cap, Nearby trees, odor
+
+thorsten: # 19
+  <<: *DEFAULTS
+  name: Thorsten Lumbsch
+  

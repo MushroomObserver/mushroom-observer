@@ -100,7 +100,7 @@ class UserTest < UnitTestCase
   def test_meta_groups
     all = User.all
     group1 = UserGroup.all_users
-    assert_user_list_equal(all, group1.users)
+    assert_user_list_equal(all, group1.users, :sort)
 
     user = User.create!(
       password: "blah!",
@@ -115,15 +115,15 @@ class UserTest < UnitTestCase
 
     group1.reload
     group2 = UserGroup.one_user(user)
-    assert_user_list_equal(all + [user], group1.users)
-    assert_user_list_equal([user], group2.users)
+    assert_user_list_equal(all + [user], group1.users, :sort)
+    assert_user_list_equal([user], group2.users, :sort)
 
     UserGroup.destroy_user(user)
     user.destroy
     group1.reload
     group2.reload # not destroyed, just empty
-    assert_user_list_equal(all, group1.users)
-    assert_user_list_equal([], group2.users)
+    assert_user_list_equal(all, group1.users, :sort)
+    assert_user_list_equal([], group2.users, :sort)
   end
 
   # Bug seen in the wild: myxomop created a username which was just under 80
@@ -159,22 +159,21 @@ class UserTest < UnitTestCase
     spl1  = species_lists(:first_species_list)
     spl2  = species_lists(:another_species_list)
     spl3  = species_lists(:unknown_species_list)
-    assert_obj_list_equal([spl1, spl2], rolf.species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl2], rolf.species_lists, :sort)
     assert_obj_list_equal(SpeciesList.where(user: mary), mary.species_lists)
     assert_obj_list_equal([], dick.species_lists)
     assert_obj_list_equal([dick], proj.user_group.users)
     assert_obj_list_equal([spl3], proj.species_lists)
 
     assert_obj_list_equal([spl1, spl2],
-                          rolf.all_editable_species_lists.sort_by(&:id))
+                          rolf.all_editable_species_lists, :sort)
     assert_obj_list_equal(SpeciesList.where(user: mary),
                           mary.all_editable_species_lists)
     assert_obj_list_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
     dick.reload
-    assert_obj_list_equal([spl1, spl3],
-                          dick.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl3], dick.all_editable_species_lists, :sort)
 
     proj.user_group.users.push(rolf, mary)
     proj.user_group.users.delete(dick)
@@ -182,15 +181,16 @@ class UserTest < UnitTestCase
     mary.reload
     dick.reload
     assert_obj_list_equal([spl1, spl2, spl3],
-                          rolf.all_editable_species_lists.sort_by(&:id))
+                          rolf.all_editable_species_lists, :sort)
     assert_obj_list_equal([spl1, SpeciesList.where(user: mary).to_a].flatten,
-                          mary.all_editable_species_lists.sort_by(&:id))
+                          mary.all_editable_species_lists, :sort)
     assert_obj_list_equal([], dick.all_editable_species_lists)
   end
 
   def test_preferred_herbarium_name
     assert_equal(herbaria(:nybg_herbarium).name, rolf.preferred_herbarium_name)
-    assert_equal(mary.personal_herbarium_name, mary.preferred_herbarium_name)
+    assert_equal(herbaria(:mycoflora_herbarium).name,
+                 mary.preferred_herbarium_name)
   end
 
   def test_remove_image
@@ -252,10 +252,8 @@ class UserTest < UnitTestCase
     assert_equal(observation_id, image.observations.first.id)
 
     # Move some other user's comment over to make sure they get deleted, too.
-    comment = rolf.comments.first
-    comment.target_id = observation.id
-    comment.save
-    comment_id = comment.id
+    assert_equal(1, katrina.comments.length)
+    comment_id = katrina.comments.first.id
 
     # Fixtures have one vote for this observation,
     # but the naming the vote refers to applies to another observation!

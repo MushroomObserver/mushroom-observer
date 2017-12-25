@@ -9,28 +9,33 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:     [:time],
-        updated_at?:     [:time],
-        date?:           [:date],
-        users?:          [User],
-        names?:          [:string],
-        synonym_names?:  [:string],
-        children_names?: [:string],
-        locations?:      [:string],
-        projects?:       [:string],
-        species_lists?:  [:string],
-        confidence?:     [:float],
-        is_col_loc?:     :boolean,
-        has_location?:   :boolean,
-        has_notes?:      :boolean,
-        has_name?:       :boolean,
-        has_comments?:   { string: [:yes] },
-        notes_has?:      :string,
-        comments_has?:   :string,
-        north?:          :float,
-        south?:          :float,
-        east?:           :float,
-        west?:           :float
+        created_at?:       [:time],
+        updated_at?:       [:time],
+        date?:             [:date],
+        users?:            [User],
+        names?:            [:string],
+        synonym_names?:    [:string],
+        children_names?:   [:string],
+        locations?:        [:string],
+        projects?:         [:string],
+        species_lists?:    [:string],
+        herbaria?:         [:string],
+        herbarium_records?: [:string],
+        confidence?:       [:float],
+        is_collection_location?: :boolean,
+        has_location?:     :boolean,
+        has_name?:         :boolean,
+        has_comments?:     { boolean: [true] },
+        has_specimen?:     :boolean,
+        has_sequences?:    { boolean: [true] },
+        has_notes?:        :boolean,
+        has_notes_fields?: [:string],
+        notes_has?:        :string,
+        comments_has?:     :string,
+        north?:            :float,
+        south?:            :float,
+        east?:             :float,
+        west?:             :float
       ).merge(content_filter_parameter_declarations(Observation))
     end
 
@@ -48,7 +53,8 @@ module Query
       )
       initialize_model_do_locations
       initialize_model_do_objects_by_name(
-        Project, :projects, "observations_projects.project_id",
+        Project, :projects,
+        "observations_projects.project_id",
         join: :observations_projects
       )
       initialize_model_do_objects_by_name(
@@ -56,10 +62,20 @@ module Query
         "observations_species_lists.species_list_id",
         join: :observations_species_lists
       )
+      initialize_model_do_objects_by_name(
+        Herbarium, :herbaria,
+        "herbarium_records.herbarium_id",
+        join: { herbarium_records_observations: :herbarium_records }
+      )
+      initialize_model_do_objects_by_name(
+        HerbariumRecord, :herbarium_records,
+        "herbarium_records_observations.herbarium_record_id",
+        join: :herbarium_records_observations
+      )
       initialize_model_do_range(:confidence, :vote_cache)
       initialize_model_do_search(:notes_has, :notes)
       initialize_model_do_boolean(
-        :is_col_loc,
+        :is_collection_location,
         "observations.is_collection_location IS TRUE",
         "observations.is_collection_location IS FALSE"
       )
@@ -69,28 +85,30 @@ module Query
         "observations.location_id IS NULL"
       )
       unless params[:has_name].nil?
-        id = Name.unknown.id
+        genus = Name.ranks[:Genus]
+        group = Name.ranks[:Group]
         initialize_model_do_boolean(
           :has_name,
-          "observations.name_id != #{id}",
-          "observations.name_id = #{id}"
+          "names.rank <= #{genus} or names.rank = #{group}",
+          "names.rank > #{genus} and names.rank < #{group}"
         )
+        add_join(:names)
       end
-      # rubocop:disable Metrics/LineLength
       initialize_model_do_boolean(
         :has_notes,
-        "observations.notes != #{Observation.connection.quote(Observation.no_notes_persisted)}",
-        "observations.notes  = #{Observation.connection.quote(Observation.no_notes_persisted)}"
+        "observations.notes != #{escape(Observation.no_notes_persisted)}",
+        "observations.notes  = #{escape(Observation.no_notes_persisted)}"
       )
-      # rubocop:enable Metrics/LineLength
       add_join(:comments) if params[:has_comments]
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.comment)"
+          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
         )
         add_join(:comments)
       end
+      add_join(:sequences) if params[:has_sequences]
+      initialize_model_do_has_notes_fields(:has_notes_fields)
       initialize_model_do_observation_bounding_box
       initialize_content_filters(Observation)
       super

@@ -591,21 +591,41 @@ module ControllerExtensions
   # Check default value of a form field.
   def assert_input_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
-    assert_select("input##{id}") do |elements|
+    assert_select("input##{id}, select##{id}") do |elements|
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
-        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
-        if actual_val != expect_val.to_s
-          message = "Input '#{id}' has wrong value, " \
-                    "expected <#{expect_val}>, got <#{actual_val}>"
+        if elements.first.to_s.match(/^<select/)
+          message = check_select_value(elements.first, expect_val, id)
         else
-          message = nil
+          message = check_input_value(elements.first.to_s, expect_val, id)
         end
       end
     end
     assert(message.nil?, message)
+  end
+
+  def check_select_value(elem, expect_val, id)
+    if expect_val.nil?
+      assert_select(elem, "option[selected]", { count: 0 },
+                    "Expected :#{id} not to have any options selected")
+      return nil
+    else
+      assert_select(elem, "option[selected]", { count: 1 },
+                    "Expected :#{id} to have one option selected") do |opts|
+        return check_input_value(opts.first.to_s, expect_val, id)
+      end
+    end
+  end
+
+  def check_input_value(elem, expect_val, id)
+    match = elem.match(/value=('[^']*'|"[^"]*")/)
+    actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
+    actual_val = "" if elem =~ /type=['"]?checkbox/ && elem !~ / checked[ >]/
+    if actual_val != expect_val.to_s
+      "Input '#{id}' has wrong value, " \
+      "expected <#{expect_val}>, got <#{actual_val}>"
+    end
   end
 
   # Check existence and value of a texarea

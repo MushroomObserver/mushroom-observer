@@ -1,28 +1,32 @@
 <%
   @title = :show_past_name_title.t(
-    :num  => @name.version,
-    :name => @name.display_name
+    num:  @name.version,
+    name: @name.display_name
   )
 
   tabs = [
-    link_to(:show_name.t(:name => @name.display_name), :action => 'show_name', :id => @name.id)
+    link_to(:show_name.t(name: @name.display_name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<table cellpadding="10">
-  <tr>
-    <td valign="top">
-      <p>
-        <%= render(:partial => 'name', :object => @name, :locals =>
-                   {synonyms: false}) %>
-      </p>
-    </td>
+<div class="row push-down">
+  <div class="col-sm-7 col-lg-9">
+    <div class="list-group">
+      <div class="list-group-item name-section">
+        <%= render(partial: "name", object: @name, locals: {synonyms: false}) %>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-5 col-lg-3">
+    <div class="list-group">
+      <div class="list-group-item name-section">
+        <%= show_past_versions(@name, bold: lambda {|v| !v.deprecated}) %>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <td valign="top" width="50%">
-      <%= show_past_versions(@name, :bold => lambda {|v| !v.deprecated}) %>
-    </td>
-  </tr>
-</table>
-
-<%= show_object_footer(@name) %>
+<div class="col-xs-12">
+  <%= show_object_footer(@name) %>
+</div>

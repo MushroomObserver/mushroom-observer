@@ -353,7 +353,7 @@ class LocationController < ApplicationController
       if desc_id.blank?
         @description = nil
       elsif @description = LocationDescription.safe_find(desc_id)
-        @description = nil unless @description.is_reader?(@user)
+        @description = nil unless in_admin_mode? || @description.is_reader?(@user)
       else
         flash_error(:runtime_object_not_found.t(type: :description,
                                                 id: desc_id))
@@ -377,7 +377,7 @@ class LocationController < ApplicationController
       @canonical_url = "#{MO.http_domain}/location/show_location_description/#{@description.id}"
 
       # Public or user has permission.
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         @location = @description.location
         update_view_stats(@description)
 
@@ -595,91 +595,70 @@ class LocationController < ApplicationController
   def edit_location # :prefetch: :norobots:
     store_location
     pass_query_params
-    if @location = find_or_goto_index(Location, params[:id].to_s)
-      @display_name = @location.display_name
-      done = false
-      if request.method == "POST"
+    @location = find_or_goto_index(Location, params[:id].to_s)
+    return unless @location
+    params[:location] ||= {}
+    @display_name = @location.display_name
+    post_edit_location if request.method == "POST"
+  end
 
-        if Location.is_unknown?(@location.name) && !in_admin_mode?
-          flash_error("This Location is protected (not editable). To change an Observation's location, edit Observation 'Where'.")
-          redirect_to(action: "show_location", id: @location.id)
-          return
-        end
+  def post_edit_location
+    @display_name = params[:location][:display_name].strip_squeeze
+    db_name = Location.user_name(@user, @display_name)
+    merge = Location.find_by_name_or_reverse_name(db_name)
+    if merge && merge != @location
+      post_edit_location_merge(merge)
+    else
+      post_edit_location_change(db_name)
+    end
+  end
 
-        @display_name = begin
-                          params[:location][:display_name].strip_squeeze
-                        rescue
-                          ""
-                        end
+  # Merge this location with another.
+  def post_edit_location_merge(merge)
+    if !@location.mergable? && merge.mergable?
+      @location, merge = merge, @location
+    end
+    if in_admin_mode? || @location.mergable?
+      merge.merge(@location)
+      merge.save if merge.changed?
+      @location = merge
+      redirect_to(@location.show_link_args)
+    else
+      redirect_with_query(controller: :observer,
+                          action: :email_merge_request, type: :Location,
+                          old_id: @location.id, new_id: merge.id)
+    end
+  end
 
-        # First check if user changed the name to one that already exists.
-        db_name = Location.user_name(@user, @display_name)
-        merge = Location.find_by_name_or_reverse_name(db_name)
-
-        # Merge with another location.
-        if merge && merge != @location
-          # Swap order if only one is mergable.
-          if !@location.mergable? && merge.mergable?
-            @location, merge = merge, @location
-          end
-
-          # Admins can actually merge them, then redirect to other location.
-          if in_admin_mode? || @location.mergable?
-            merge.merge(@location)
-            merge.save if merge.changed?
-            @location = merge
-            done = true
-
-          # Non-admins just send email-request to admins.
-          else
-            flash_warning(:runtime_merge_locations_warning.t)
-            content = :email_location_merge.l(user: @user.login,
-                                              this: "##{@location.id}: " + @location.name,
-                                              that: "##{merge.id}: " + merge.name,
-                                              this_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
-                                              that_url: "#{MO.http_domain}/location/show_location/#{merge.id}")
-            WebmasterEmail.build(@user.email, content).deliver_now
-          end
-
-        # Otherwise it is safe to change the name.
-        else
-          @location.display_name = @display_name
-        end
-
-        # Update this location.
-        unless done
-
-          # Update all fields except display_name.
-          for key, val in params[:location]
-            @location.send("#{key}=", val) if key != "display_name"
-          end
-
-          # Validate name.
-          @dubious_where_reasons = []
-          if @display_name != params[:approved_where]
-            @dubious_where_reasons = Location.dubious_name?(db_name, true)
-          end
-
-          if @dubious_where_reasons.empty?
-            # No changes made.
-            if !@location.changed?
-              flash_warning(:runtime_edit_location_no_change.t)
-              redirect_to(action: "show_location", id: @location.id)
-
-            # There were error(s).
-            elsif !@location.save
-              flash_object_errors(@location)
-
-            # Updated successfully.
-            else
-              flash_notice(:runtime_edit_location_success.t(id: @location.id))
-              done = true
-            end
-          end
-        end
+  # Just change this location in place.
+  def post_edit_location_change(db_name)
+    @dubious_where_reasons = []
+    @location.notes = params[:location][:notes].to_s.strip
+    if in_admin_mode?
+      @location.locked = params[:location][:locked] == "1"
+    end
+    if !@location.locked || in_admin_mode?
+      @location.north = params[:location][:north] if params[:location][:north]
+      @location.south = params[:location][:south] if params[:location][:south]
+      @location.east  = params[:location][:east]  if params[:location][:east]
+      @location.west  = params[:location][:west]  if params[:location][:west]
+      @location.high  = params[:location][:high]  if params[:location][:high]
+      @location.low   = params[:location][:low]   if params[:location][:low]
+      @location.display_name = @display_name
+      if @display_name != params[:approved_where]
+        @dubious_where_reasons = Location.dubious_name?(db_name, true)
       end
-
-      redirect_to(action: "show_location", id: @location.id) if done
+    end
+    if @dubious_where_reasons.empty?
+      if !@location.changed?
+        flash_warning(:runtime_edit_location_no_change.t)
+        redirect_to(action: "show_location", id: @location.id)
+      elsif !@location.save
+        flash_object_errors(@location)
+      else
+        flash_notice(:runtime_edit_location_success.t(id: @location.id))
+        redirect_to(@location.show_link_args)
+      end
     end
   end
 
@@ -762,7 +741,7 @@ class LocationController < ApplicationController
           v = @description.versions.latest
           v.merge_source_id = old_desc.versions.latest.id
           v.save
-          if !old_desc.is_admin?(@user)
+          if !in_admin_mode? && !old_desc.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
@@ -784,7 +763,7 @@ class LocationController < ApplicationController
   def destroy_location_description # :norobots:
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
-    if @description.is_admin?(@user)
+    if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.location.log(:log_description_destroyed,
                                 user: @user.login, touch: true,
@@ -794,7 +773,7 @@ class LocationController < ApplicationController
                           id: @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
-      if @description.is_reader?(@user)
+      if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_location_description",
                             id: @description.id)
       else

@@ -38,6 +38,9 @@
 #
 #  interests::          Interests in this Location.
 #  observations::       Observations at this Location.
+#  species_lists::      SpeciesLists at this Location.
+#  herbaria::           Herbaria at this location (typically no more than one).
+#  users::              Users who have claimed this as their profile location.
 #
 #  ==== Lat/long methods
 #  north_west::         [north, west]
@@ -84,9 +87,9 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
   has_many :observations
-  # Well technically it has at most one herbarium,
-  # but we want the relationship just in the herbarium table
-  has_many :herbaria
+  has_many :species_lists
+  has_many :herbaria     # should be at most one, but nothing preventing more
+  has_many :users        # via profile location
 
   acts_as_versioned(
     table_name: "locations_versions",
@@ -108,9 +111,11 @@ class Location < AbstractModel
     "last_view",
     "ok_for_export",
     "rss_log_id",
-    "description_id"
+    "description_id",
+    "locked"
   )
 
+  before_update :update_observation_cache
   after_update :notify_users
 
   # Automatically log standard events.
@@ -118,7 +123,7 @@ class Location < AbstractModel
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
-    ver.user_id = User.current_id
+    ver.user_id = User.current_id || User.admin_id
     if (ver.version != 1) &&
        Location.connection.select_value(%(
          SELECT COUNT(*) FROM locations_versions
@@ -126,6 +131,11 @@ class Location < AbstractModel
        )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
+  end
+
+  # Let attached observations update their cache if these fields changed.
+  def update_observation_cache
+    Observation.update_cache("location", "where", id, name) if name_changed?
   end
 
   ##############################################################################
@@ -276,6 +286,12 @@ class Location < AbstractModel
     format_name + " (#{id || "?"})"
   end
 
+  # Info to include about each location in merge requests.
+  def merge_info
+    num_obs = observations.count
+    "#{:LOCATION.l} ##{id}: #{name} [o=#{num_obs}]"
+  end
+
   # Strip out special characters, punctuation, and small words from a name.
   # This is supposed to make it easier to search for a name if you don't know
   # how it is worded.  I'm not so sure anymore...
@@ -359,27 +375,34 @@ class Location < AbstractModel
   BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})".freeze
 
-  # Returns a member of understood_places if the candidate is either a member or
-  # if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
+  def self.understood_continents
+    UNDERSTOOD_CONTINENTS
+  end
+
+  def self.understood_countries
+    UNDERSTOOD_COUNTRIES
+  end
+
+  def self.understood_states(country)
+    UNDERSTOOD_STATES[country]
+  end
+
+  # Returns a member of understood_places if the candidate is either a member
+  # or if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
   # it returns nil.
   def self.understood_with_prefixes(candidate, understood_places)
-    result = nil
-    if understood_places.member?(candidate)
-      result = candidate
-    else
-      tokens = candidate.split
-      count = 0
-      tokens.each do |s|
-        if OK_PREFIXES.member?(s)
-          count += 1
-        else
-          trimmed = tokens[count..-1].join(" ")
-          result = trimmed if understood_places.member?(trimmed)
-          break
-        end
+    return candidate if understood_places.member?(candidate)
+    tokens = candidate.to_s.split
+    count = 0
+    tokens.each do |s|
+      if OK_PREFIXES.member?(s)
+        count += 1
+      else
+        trimmed = tokens[count..-1].join(" ")
+        return trimmed if understood_places.member?(trimmed)
       end
     end
-    result
+    nil
   end
 
   def self.has_known_states?(a_country)
@@ -411,93 +434,107 @@ class Location < AbstractModel
   # Check if a given name (postal order) already exists as a defined
   # or undefined location.
   def self.location_exists(name)
-    if name
-      if @@location_cache.nil?
-        @@location_cache = (
-          Location.connection.select_values(%(
-            SELECT name FROM locations
-          )) +
-          Location.connection.select_values(%(
-            SELECT `where` FROM `observations`
-            WHERE `where` is not NULL
-          )) +
-          Location.connection.select_values(%(
-            SELECT `where` FROM `species_lists`
-            WHERE `where` is not NULL
-          ))
-        ).uniq
-      end
-      @@location_cache.member?(name)
-    else
-      false
-    end
-  end
-
-  def self.comma_test(name)
-    tokens = name.split(",").map(&:strip)
-    tokens.delete("")
-    name != tokens.join(", ")
+    return false unless name
+    @@location_cache ||= (
+      Location.connection.select_values(%(
+        SELECT name FROM locations
+      )) +
+      Location.connection.select_values(%(
+        SELECT `where` FROM `observations`
+        WHERE `where` is not NULL
+      )) +
+      Location.connection.select_values(%(
+        SELECT `where` FROM `species_lists`
+        WHERE `where` is not NULL
+      ))
+    ).uniq
+    @@location_cache.member?(name)
   end
 
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
     unless check_db && location_exists(name)
-      if name == ""
-        return true unless provide_reasons
-        return [:location_dubious_empty.l]
+      reasons += check_for_empty_name(name)
+      reasons += check_for_dubious_commas(name)
+      reasons += check_for_dubious_county(name)
+      reasons += check_for_bad_country_or_state(name)
+      reasons += check_for_bad_terms(name)
+      reasons += check_for_bad_chars(name)
+    end
+    provide_reasons ? reasons : reasons.any?
+  end
+
+  def self.check_for_empty_name(name)
+    return [] unless name.blank?
+    [:location_dubious_empty.l]
+  end
+
+  def self.check_for_dubious_commas(name)
+    return [] unless comma_test(name)
+    [:location_dubious_commas.l]
+  end
+
+  def self.check_for_dubious_county(name)
+    return [] if name.blank?
+    return [] if name =~ /Forest,|Park,|near /
+    return [] unless has_dubious_county?(name)
+    [:location_dubious_redundant_county.l]
+  end
+
+  def self.check_for_bad_country_or_state(name)
+    reasons = []
+    return [] if name.blank?
+    a_country = understood_country?(country(name))
+    if a_country.nil?
+      reasons << :location_dubious_unknown_country.t(country: country(name))
+    end
+    if has_known_states?(a_country)
+      if understood_state?(country(name), a_country) # e.g."Western Australia"
+        reasons << :location_dubious_ambiguous_country.t(country: a_country)
       end
-      if Location.comma_test(name)
-        return true unless provide_reasons
-        reasons.push(:location_dubious_commas.l)
+      a_state = state(name)
+      if a_state && understood_state?(a_state, a_country).nil?
+        reasons << :location_dubious_unknown_state.t(country: a_country,
+                                                     state: a_state)
       end
-      if name.index("Forest,").nil? && name.index("Park,").nil? && name.index("near ").nil? && has_dubious_county?(name)
-        return true unless provide_reasons
-        reasons.push(:location_dubious_redundant_county.l)
-      end
-      a_country = understood_country?(country(name))
-      if a_country.nil?
-        return true unless provide_reasons
-        reasons.push(:location_dubious_unknown_country.t(country: country(name)))
-      end
-      if has_known_states?(a_country)
-        if understood_state?(country(name), a_country) # e.g."Western Australia"
-          return true unless provide_reasons
-          reasons.push(:location_dubious_ambiguous_country.
-                         t(country: a_country))
-        end
-        a_state = state(name)
-        if a_state && understood_state?(a_state, a_country).nil?
-          return true unless provide_reasons
-          reasons.push(:location_dubious_unknown_state.t(country: a_country,
-                                                         state: a_state))
-        end
-      else
-        a_state = state(name)
-        if a_state && understood_country?(a_state)
-          return true unless provide_reasons
-          reasons.push(:location_dubious_redundant_state.t(country: a_country,
-                                                           state: a_state))
-        end
-      end
-      BAD_TERMS.keys.each do |key|
-        next unless name.index(key)
-        return true unless provide_reasons
-        reasons.push(:location_dubious_bad_term.t(bad: key,
-                                                  good: BAD_TERMS[key]))
-      end
-      count = 0
-      # For some reason BAD_CHARS.chars.each doesn't work
-      while (c = BAD_CHARS[count])
-        if name.index(c)
-          return true unless provide_reasons
-          reasons.push(:location_dubious_bad_char.t(char: c))
-        end
-        count += 1
+    else
+      a_state = state(name)
+      if a_state && understood_country?(a_state)
+        reasons << :location_dubious_redundant_state.t(country: a_country,
+                                                       state: a_state)
       end
     end
-    return false unless provide_reasons
     reasons
+  end
+
+  def self.check_for_bad_terms(name)
+    reasons = []
+    return [] if name.blank?
+    BAD_TERMS.keys.each do |key|
+      next unless name.index(key)
+      reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
+    end
+    reasons
+  end
+
+  def self.check_for_bad_chars(name)
+    reasons = []
+    return [] if name.blank?
+    # For some reason BAD_CHARS.chars.each doesn't work
+    count = 0
+    while (c = BAD_CHARS[count])
+      reasons << :location_dubious_bad_char.t(char: c) if name.index(c)
+      count += 1
+    end
+    reasons
+  end
+
+  def self.comma_test(name)
+    return if name.blank?
+    tokens = name.split(",").map(&:strip)
+    tokens.delete("")
+    name != tokens.join(", ")
   end
 
   def self.country(name)
@@ -518,6 +555,7 @@ class Location < AbstractModel
 
   def self.has_dubious_county?(name)
     tokens = name.split(", ")
+    return if tokens.length < 2
     alt = [tokens[0]]
     tokens[1..-1].each { |t| alt.push(t) if " Co." != t[-4..-1] }
     result = alt.join(", ")
@@ -545,6 +583,8 @@ class Location < AbstractModel
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
   def merge(old_loc, _log = true)
+    return if old_loc == self
+
     # Move observations over first.
     old_loc.observations.each do |obs|
       obs.location = self

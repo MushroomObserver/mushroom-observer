@@ -1,11 +1,12 @@
 <%
   @title = :show_past_name_description_title.t(
-    :num  => @description.version,
-    :name => description_title(@description)
+    num:  @description.version,
+    name: description_title(@description)
   )
 
   tabs = [
-    link_to(:show_name_description.t(:description => description_title(@description)), :action => 'show_name_description', :id => @description.id)
+    link_to(:show_name_description.t(description: description_title(@description)),
+            action: :show_name_description, id: @description.id)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 
@@ -14,8 +15,8 @@
 
 <%= show_past_versions(@description) %>
 
-<%= render(:partial => 'name_description', :object => @description,
-           :locals => {review: false}) %>
+<%= render(partial: "name_description", object: @description,
+           locals: { review: false }) %>
 
 <br/>
 <%= show_object_footer(@description) %>

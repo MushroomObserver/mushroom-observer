@@ -1,0 +1,14 @@
+From: news@mushroomobserver.org
+Reply-To: mary@collectivesource.com
+To: rolf@collectivesource.com
+Subject: [MO] Herbarium Record Added to The New York Botanical Garden
+
+Herbarium Record Added By Non-Curator
+
+The user, rolf, added the herbarium record, Cortinarius sp.: NYBG 1234, to the herbarium, The New York Botanical Garden, which you curate.
+
+Here are some handy links:
+
+Show this herbarium record: http://mushroomobserver.org/herbarium_record/show_herbarium_record/<%= ActiveRecord::FixtureSet.identify(:interesting_unknown) %>
+Show this herbarium: http://mushroomobserver.org/herbarium/show_herbarium/<%= ActiveRecord::FixtureSet.identify(:nybg_herbarium) %>
+Show user's profile: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>

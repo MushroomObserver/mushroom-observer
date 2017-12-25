@@ -279,7 +279,8 @@ class CommentController < ApplicationController
   # Make sure users can't see/add comments on objects they aren't allowed to
   # view!  Redirect and return +false+ if they can't, else return +true+.
   def allowed_to_see!(object)
-    if object.respond_to?(:is_reader?) && !object.is_reader?(@user)
+    if object.respond_to?(:is_reader?) && !object.is_reader?(@user) &&
+       !in_admin_mode?
       flash_error(:runtime_show_description_denied.t)
       parent = object.parent
       redirect_to(controller: parent.show_controller,

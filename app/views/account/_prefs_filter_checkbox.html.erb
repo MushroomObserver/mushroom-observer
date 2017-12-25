@@ -1,6 +1,6 @@
-<%# Render a checkbox and label for a content filter %>
+<%# Render a checkbox and label for a single-valued boolean content filter %>
 <%= content_tag(:div, class: "form-inline") do %>
-  <%= checked = @user.content_filter[filter.sym] == filter.checked_val
+  <%= checked = @user.content_filter[filter.sym] == filter.prefs_vals.first
       form.check_box(filter.sym, class: "form-control",
                      checked: checked ? "checked" : "") %>
   <%= label_tag(:"user_#{filter.sym}",

@@ -1,37 +1,36 @@
 <%
-  @title = :name_deprecate_title.t(:name => @name.display_name)
+  @title = :name_deprecate_title.t(name: @name.display_name)
 
   tabs = [
-    link_to(:cancel_and_show.t(:type => :name),
-            :action => 'show_name', :id => @name.id)
+    link_to(:cancel_and_show.t(type: :name), @name.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(:action => 'deprecate_name', :id => @name.id, :approved_name => @what) do %>
+<%= form_tag(action: :deprecate_name, id: @name.id, approved_name: @what) do %>
   <br/><center><%= submit_tag(:name_deprecate_submit.l, class: "btn") %></center><br/>
 
-  <%= render(:partial => 'shared/form_name_feedback',
-             :locals => { button_name: :name_deprecate_submit.l,
-                          what: @what,
-                          valid_names: @valid_names,
-                          suggest_corrections: @suggest_corrections,
-                          parent_deprecated: @parent_deprecated,
-                          names: @names }) %>
+  <%= render(partial: "shared/form_name_feedback",
+             locals: { button_name: :name_deprecate_submit.l,
+                       what: @what,
+                       valid_names: @valid_names,
+                       suggest_corrections: @suggest_corrections,
+                       parent_deprecated: @parent_deprecated,
+                       names: @names }) %>
 
   <p><label for="proposed_name"><%= :name_deprecate_preferred.t %>:</label>
-  <%= text_field('proposed', 'name', value: @what, autofocus: true) %></p>
+  <%= text_field(:proposed, :name, value: @what, data: {autofocus: true}) %></p>
   <div class="HelpNote">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
-  <% turn_into_name_auto_completer('proposed_name', :primer => Name.primer) %>
+  <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
 
-  <p><%= check_box('is', 'misspelling', :checked => @misspelling) %>
+  <p><%= check_box(:is, :misspelling, checked: @misspelling) %>
   <label for="misspelling"><%= :form_names_misspelling.t %></label></p>
 
   <p><label for="comment_comment"><%= :name_deprecate_comments.t %>:</label><br/>
-  <%= text_area("comment", "comment", :cols => 80, :rows => 5, :value => @comment) %></p>
+  <%= text_area(:comment, :comment, cols: 80, rows: 5, value: @comment) %></p>
   <div class="HelpNote">
-    <%= :name_deprecate_comments_help.tp(:name => @name.display_name) %>
+    <%= :name_deprecate_comments_help.tp(name: @name.display_name) %>
   </div>
 <% end %>

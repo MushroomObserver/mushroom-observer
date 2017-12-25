@@ -289,8 +289,8 @@ class AmateurTest < IntegrationTestCase
   def test_language_tracking
     session = open_session.extend(UserDsl)
     session.login(mary)
-    mary.locale = "el-GR"
-    I18n.locale = mary.lang
+    mary.locale = "el"
+    I18n.locale = "el"
     mary.save
 
     data = TranslationString.translations("el")

@@ -2,13 +2,13 @@ json.id              object.id
 json.type            "user"
 json.login_name      object.login
 json.legal_name      object.legal_name
-json.joined          object.created_at
-json.verified        object.verified
-json.last_login      object.last_login
-json.last_activity   object.last_activity
+json.joined          object.created_at.utc
+json.verified        object.verified.utc
+json.last_login      object.last_login.try(&:utc)
+json.last_activity   object.last_activity.try(&:utc)
 json.contribution    object.contribution
-json.notes           (object.notes || "").tpl_nodiv
-json.mailing_address (object.mailing_address || "").to_s.html_to_ascii
+json.notes           object.notes.to_s.tpl_nodiv
+json.mailing_address object.mailing_address
 if !detail
   json.location_id object.location_id
   json.image_id    object.image_id

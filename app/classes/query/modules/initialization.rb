@@ -43,6 +43,19 @@ module Query::Modules::Initialization
     @where << (params[arg] ? true_cond : false_cond)
   end
 
+  def initialize_model_do_exact_match(arg, col = arg)
+    return if params[arg].blank?
+    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    vals = params[arg]
+    vals = [vals] unless vals.is_a?(Array)
+    vals = vals.map { |v| escape(v.downcase) }
+    @where << if vals.length == 1
+      "LOWER(#{col}) = #{vals.first}"
+    else
+      "LOWER(#{col}) IN (#{vals.join(", ")})"
+    end
+  end
+
   def initialize_model_do_search(arg, col = nil)
     return if params[arg].blank?
     col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
@@ -62,10 +75,11 @@ module Query::Modules::Initialization
   end
 
   def initialize_model_do_enum_set(arg, col, vals, type)
-    return if params[arg].blank?
+    types = params[arg]
+    return if types.empty?
     col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
-    types = params[arg].to_s.strip_squeeze.split
     if type == :string
+      types.map!(&:to_s)
       types &= vals.map(&:to_s)
       @where << "#{col} IN ('#{types.join("','")}')" if types.any?
     else
@@ -127,10 +141,12 @@ module Query::Modules::Initialization
           objs += model.where("name LIKE ?", "%#{pattern}%")
         when "Name"
           objs += initialize_model_do_name_matches(name)
-        when "ExternalSite"
+        when "ExternalSite", "Herbarium"
           objs += model.where(name: name)
         when "Project", "SpeciesList"
           objs += model.where(title: name)
+        when "HerbariumRecord"
+          objs += model.where(herbarium_label: name)
         when "User"
           name.sub(/ *<.*>/, "")
           objs += model.where(login: name)
@@ -189,10 +205,15 @@ module Query::Modules::Initialization
     )
     cond1 = cond1.join(" AND ")
     cond2 = cond2.join(" AND ")
+    @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
+    return if uses_join?(:locations)
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
-    @join << :"locations!" unless uses_join?(:locations)
-    @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
+    @join << if model.name == "Observation"
+      :"locations!"
+    else
+      { observations: :"locations!" }
+    end
   end
 
   def initialize_model_do_location_bounding_box_cond1_and_2
@@ -256,13 +277,14 @@ module Query::Modules::Initialization
     return if params[:content_types].blank?
     exts  = Image.all_extensions.map(&:to_s)
     mimes = Image.all_content_types.map(&:to_s) - [""]
-    types = params[:types].to_s.strip_squeeze.split & exts
+    types = params[:content_types]
+    types = params[:content_types] & exts
     return if types.none?
     other = types.include?("raw")
     types -= ["raw"]
     types = types.map { |x| mimes[exts.index(x)] }
-    str1 = "comments.target_type IN ('#{types.join("','")}')"
-    str2 = "comments.target_type NOT IN ('#{mimes.join("','")}')"
+    str1 = "images.content_type IN ('#{types.join("','")}')"
+    str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
     @where << if types.empty?
                 str2
               elsif other
@@ -341,6 +363,28 @@ module Query::Modules::Initialization
       (n || (min ? 0 : 60)).to_i,
       (s || (min ? 0 : 60)).to_i
     )
+  end
+
+  def initialize_model_do_has_notes_fields(arg)
+    fields = params[arg] || []
+    if fields.any?
+      cond = notes_field_presence_condition(fields)
+      @where << cond
+    end
+  end
+
+  def notes_field_presence_condition(keys)
+    strs = keys.map do |key|
+      key = key.clone
+      if key.gsub!(/(["\\])/) { |m| '\\\1' }
+        "\":#{key}:\""
+      else
+        ":#{key}:"
+      end
+    end
+    "(" + strs.map do |str|
+      "observations.notes like \"%#{str}%\""
+    end.join(" OR ") + ")"
   end
 
   # Make a value safe for SQL.

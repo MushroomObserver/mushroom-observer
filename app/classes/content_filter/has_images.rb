@@ -6,7 +6,7 @@ class ContentFilter
         sym:         :has_images,
         models:      [Observation],
         on_vals:     ["yes", "no"],
-        checked_val: "yes",
+        prefs_vals:  ["yes"],
         off_val:     nil
       )
     end

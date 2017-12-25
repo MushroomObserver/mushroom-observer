@@ -196,6 +196,16 @@ class ObserverController
     @timer_end = Time.now
   end
 
+  def print_labels # :nologin: :norobots:
+    query = find_query(:Observation)
+    unless query
+      flash_error(runtime_search_has_expired.t)
+      redirect_back_or_default("/")
+    end
+    @labels = make_labels(query.results)
+    render(action: "print_labels", layout: "printable")
+  end
+
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
     fail "no robots!" if browser.bot?
@@ -212,10 +222,15 @@ class ObserverController
       )
       render_report(report)
       # serve form
+    elsif params[:commit] == :download_observations_print_labels.l
+      @labels = make_labels(query.results)
+      render(action: "print_labels", layout: "printable")
     end
   rescue => e
     flash_error("Internal error: #{e}", *e.backtrace[0..10])
   end
+
+  private
 
   def create_observation_report(args)
     format = args[:format].to_s
@@ -242,5 +257,38 @@ class ObserverController
       disposition: "attachment",
       filename: report.filename
     }.merge(report.header || {}))
+  end
+
+  def make_labels(observations)
+    @mycoflora_herbarium = Herbarium.where(name: "Mycoflora Project").first
+    observations.map do |observation|
+      make_label(observation)
+    end
+  end
+
+  def make_label(observation)
+    rows = label_data(observation)
+    insert_mycoflora_id(rows, observation)
+    rows
+  end
+
+  def label_data(observation)
+    [
+      ["MO #", observation.id],
+      ["When", observation.when],
+      ["Who", observation.user.name],
+      ["Where", observation.place_name_and_coordinates],
+      ["What", observation.format_name.t],
+      ["Notes", observation.notes_export_formatted.t]
+    ]
+  end
+
+  def insert_mycoflora_id(rows, observation)
+    return unless @mycoflora_herbarium
+    mycoflora_record = observation.herbarium_records.where(
+      herbarium: @mycoflora_herbarium
+    ).first
+    return unless mycoflora_record
+    rows.insert(1, ["Mycoflora #", mycoflora_record.accession_number])
   end
 end

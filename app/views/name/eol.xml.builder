@@ -1,4 +1,4 @@
-xml.instruct! :xml, :version => "1.0" 
+xml.instruct! :xml, version: "1.0" 
 xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
   "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",
   "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
@@ -17,7 +17,7 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
           end
         end
         xml.dwc(:ScientificName, taxon.real_search_name)
-        xml.dcterms(:modified, taxon.updated_at.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        xml.dcterms(:modified, taxon.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
         citation = taxon.citation
         if !citation.blank?
           xml.reference(citation.t)
@@ -41,17 +41,17 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
             value = desc.send(f)
             if !value.blank?
               xml.dataObject do
-                lang = desc.locale.sub(/-.*/, '') rescue 'en'
+                lang = desc.locale || MO.default_locale
                 xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
                 xml.dataType("http://purl.org/dc/dcmitype/Text")
                 xml.mimeType("text/html")
-                xml.agent(@data.authors(desc.id), :role => "author")
-                xml.dcterms(:modified, desc.updated_at.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
-                xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => "en")
+                xml.agent(@data.authors(desc.id), role: "author")
+                xml.dcterms(:modified, desc.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => lang)
                 xml.dc(:language, lang)
                 xml.license(@data.license_url(desc.license_id))
                 xml.dcterms(:rightsHolder, @data.authors(desc.id))
-                xml.audience('General public')
+                xml.audience("General public")
                 
                 # Note the following mapping assumes that this is being read in English
                 xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
@@ -70,11 +70,11 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
             xml.dc(:identifier, "Image-#{image.id}")
             xml.dataType("http://purl.org/dc/dcmitype/StillImage")
             xml.mimeType("image/jpeg")
-            xml.agent(user, :role => "photographer") # Illustrations need to be identified
-            xml.dcterms(:created, Time.parse(image.created_at.to_s).utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+            xml.agent(user, role: "photographer") # Illustrations need to be identified
+            xml.dcterms(:created, Time.parse(image.created_at.to_s).utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
             xml.license(@data.license_url(image.license_id))
             xml.dcterms(:rightsHolder, user)
-            xml.audience('General public')
+            xml.audience("General public")
             xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
             xml.dc(:description, "Mushroom Observer Image #{image.id}: #{@data.image_to_names(image.id)}", "xml:lang" => "en")
             xml.mediaURL("#{MO.http_domain}/images/640/#{image.id}.jpg")

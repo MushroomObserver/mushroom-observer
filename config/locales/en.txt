@@ -224,6 +224,10 @@
   article: article
   ARTICLES: Articles
   articles: articles
+  COLLECTION_NUMBER: Collection Number
+  collection_number: collection number
+  COLLECTION_NUMBERS: Collection Numbers
+  collection_numbers: collection numbers
   COMMENT: Comment
   comment: comment
   COMMENTS: Comments
@@ -248,6 +252,14 @@
   IGNORE: Ignore
   GLOSSARY: Glossary
   glossary: glossary
+  GLOSSARY_TERM: Glossary Term
+  glossary_term: glossary term
+  GLOSSARY_TERMS: Glossary Terms
+  glossary_terms: glossary terms
+  HERBARIUM_RECORD: Herbarium Record
+  herbarium_record: herbarium record
+  HERBARIUM_RECORDS: Herbarium Records
+  herbarium_records: herbarium records
   herbaria: herbaria
   HERBARIA: Herbaria
   herbarium: herbarium
@@ -337,10 +349,6 @@
   specimen: specimen
   SPECIMENS: Specimens
   specimens: specimens
-  GLOSSARY_TERM: Glossary Term
-  glossary_term: glossary term
-  GLOSSARY_TERMS: Glossary Terms
-  glossary_terms: glossary terms
   USER: User
   user: user
   USERS: Users
@@ -416,6 +424,7 @@
   dates: dates
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
+  deposit: deposit
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -482,11 +491,6 @@
   password: password
   PASSWORDS: Passwords
   passwords: passwords
-  # (Only used by validation errors, I think.)
-  PASSWORD_CONFIRMATION: Password Confirmation
-  password_confirmation: password confirmation
-  PASSWORD_CONFIRMATIONS: Password Confirmations
-  password_confirmations: password confirmations
   PREFERENCES: Preferences
   preferences: preferences
   PREFERRED_NAME: Preferred Name
@@ -538,6 +542,10 @@
   version: version
   VERSIONS: Versions
   versions: versions
+
+  # (Only used by validation errors, I think.)
+  email_confirmation: email confirmation
+  password_confirmation: password confirmation
 
   # Common nouns/adjectives used as labels, never pluralized.
   ALL: All
@@ -599,6 +607,8 @@
   close: close
   CREATE: Create
   create: create
+  DELETE: Delete
+  delete: delete
   # deprecate a name
   DEPRECATE: Deprecate
   deprecate: deprecate
@@ -898,6 +908,10 @@
   RANK_PLURAL_GROUP: Groups or Clades
   rank_plural_group: groups or clades
 
+  # These two are used when parsing rank, e.g., in name pattern search.
+  rank_alt_phylum: "phylum, division"
+  rank_alt_group: "group, clade, complex"
+
   # User statistics field names.
   user_stats_comments: "[:COMMENTS]"
   user_stats_images: "[:IMAGES]"
@@ -970,6 +984,16 @@
   time_one_year_ago: last year, [date]
   time_years_ago: "[n] years ago, [date]"
 
+  # Lifeform "tags".
+  lifeform_basidiolichen: Basidiolichen
+  lifeform_lichen: Lichen
+  lifeform_lichen_ally: Lichen Ally
+  lifeform_lichenicolous: Lichenicolous
+  lifeform_help_basidiolichen: Lichen-forming fungus with a mushroom fruiting body.
+  lifeform_help_lichen: Lichen-forming fungus which grows a specialized thallus when in symbiosis with one or more green algae or cyanobacteria.
+  lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
+  lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
+
   # Rss log messages.
   log_ancient: "[String]"
   log_approved_by: Approved by [user].
@@ -997,8 +1021,8 @@
   log_object_destroyed_no_user: "[Type] destroyed."
   log_object_merged_by_user: "[Type] merged into [that] by [user]."
   log_object_merged_no_user: "[Type] merged into [that]."
-  log_object_moved_by_user: "[Type] moved into [to] by [user]."
-  log_object_moved_no_user: "[Type] moved into [to]."
+  log_object_moved_by_user: "[Type] moved to [to] by [user]."
+  log_object_moved_no_user: "[Type] moved to [to]."
   log_object_removed_by_user: "[Type] removed by [user]."
   log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
   log_object_removed_no_user: "[Type] removed."
@@ -1013,12 +1037,21 @@
   log_article_created_at: "[:log_object_created_by_user(type=:article)]"
   log_article_destroyed: "[:log_object_destroyed_by_user(type=:article)]"
   log_article_updated_at: "[:log_object_updated_by_user(type=:article)]"
+  log_collection_number_added: "[:log_object_added_by_user_with_name(type=:collection_number)]"
+  log_collection_number_updated: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
+  log_collection_number_removed: "[:log_object_removed_by_user_with_name(type=:collection_number)]"
   log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
   log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
   log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
   log_description_created_at: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_destroyed: "[:log_object_destroyed_by_user_with_name(type=:description)]"
   log_description_updated: "[:log_object_updated_by_user_with_name(type=:description)]"
+  log_glossary_term_created_at: "[:log_object_created_by_user(type=:glossary_term)]"
+  log_glossary_term_updated_at: "[:log_object_updated_by_user(type=:glossary_term)]"
+  log_herbarium_record_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
+  log_herbarium_record_moved: "[:log_object_moved_by_user(type=:specimen)]"
+  log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
+  log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
   log_image_created_at0: "[:log_object_added_no_user(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
@@ -1055,12 +1088,10 @@
   log_species_list_created_at: "[:log_object_created_by_user(type=:species_list)]"
   log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
   log_species_list_updated_at: "[:log_object_updated_by_user(type=:species_list)]"
-  log_glossary_term_created_at: "[:log_object_created_by_user(type=:glossary_term)]"
-  log_glossary_term_updated_at: "[:log_object_updated_by_user(type=:glossary_term)]"
   log_sequence_added: "[name] added by [user]"
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
-  log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
+  log_specimen_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_object_added: "[:log_object_added_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"
   log_object_destroyed: "[:log_object_destroyed_by_user]"
@@ -1236,6 +1267,8 @@
   download_observations_windows: WINDOWS-1252 (best for Excel)
   download_observations_utf8: UTF-8 (most universal)
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
+  download_observations_print_labels_header: Or you can print labels for the selected observations
+  download_observations_print_labels: Print Labels
 
   # location/edit_location
   edit_location_title: "[:edit_object(type=:location)]"
@@ -1249,6 +1282,14 @@
   # name/edit_name
   edit_name_title: Edit Name [name]
   edit_name_multiple_names_match: "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
+  edit_name_fill_in_classification_for_genus_first: "You need to fill in a classification for the genus first."
+  edit_lifeform_title: Edit Lifeform of [name]
+  edit_lifeform_help: Check boxes of all categories which apply to this taxon.
+  edit_lifeform_save: "[:SAVE]"
+  propagate_lifeform_title: Propagate Lifeform to Subtaxa of [name]
+  propagate_lifeform_add: Check boxes of categories to add to all subtaxa.
+  propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
+  propagate_lifeform_apply: Apply
 
   # observer/edit_naming
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
@@ -1259,6 +1300,11 @@
   # account/email_new_password
   email_new_password_title: Email New Password
   email_new_password_login: Login
+
+  # observer/email_merge_request
+  email_merge_request_title: Send [TYPE] Merge Request
+  email_merge_request_help: "By changing the name of a [type] to be the same as the name of another [type] you are effectively requesting that we merge two [types].  If this is really what you want to do, please take a minute to explain why you think this is the right thing to do.  This will send a request to the admins, and if we agree with you, we will perform the merge.  Note that merging two [types] cannot be undone. It will implicitly affect all [:observations] or other objects attached to the two [types]."
+  email_merge_request_success: "Your request has been sent.  Thank you!"
 
   # observer/_form_comments
   form_comments_comment: "[:Comment]"
@@ -1294,6 +1340,7 @@
   form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
 
   # location/_form_location
+  form_locations_locked: "Lock this location so users cannot change the name or coordinates?"
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
   form_locations_species: Interesting Species
@@ -1311,6 +1358,7 @@
   form_locations_dubious_help: Submit again to use this location name or edit the text below to correct any typo.
 
   # observer/_form_name
+  form_names_locked: "Lock this name so users cannot change name, author or rank?"
   form_names_text_name: Scientific Name
   form_names_misspelling: This name is misspelt.
   form_names_misspelling_it_should_be: It should be
@@ -1325,13 +1373,11 @@
   form_names_notes: Notes
   form_names_refs: References
   form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
-  form_names_text_name_locked: Name is in use.  Make name changes in each observation.
   form_names_author_help: "Include the author using <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or status information. E.g.: <br>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
-  form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
-  form_names_classification_help: "List the higher taxa containing this [rank], one name per rank.  Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/> Genus: _Agaricus_<br/>"
+  form_names_classification_help: "List the higher taxa containing this [rank], one name per rank.  Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
   form_names_gen_desc_help: Describe the general appearance of this taxon.
   form_names_diag_desc_help: Describe what distinguishes this taxon from closely related taxa.
   form_names_look_alikes_help: What other taxa look similar to this one?
@@ -1357,8 +1403,8 @@
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
   # observer/_form_observations
-  form_observations_specimen_available: Herbarium Specimen Available
-  form_observations_is_collection_location: Is Collection Location
+  form_observations_specimen_available: Voucher Specimen Available
+  form_observations_is_collection_location: Is this location where it was collected?
   form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images
@@ -1371,20 +1417,24 @@
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
-  form_observations_specimen_available_help: Check when there is a dried specimen available for further study.  This can either be at an official herbarium or part of a personal herbarium.  Please note where the specimen is in the notes.
+  form_observations_specimen_available_help: Check when there is a dried specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\nAlbion, Mendocino Co., California, USA\nHotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
-  form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
+  form_observations_edit_specimens_help: Please add, edit and remove specimen data from the main observation page.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
   form_observations_gps_info: We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation.
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
+  form_observations_collection_number_help: Enter the collector's full name and number as it should appear on the specimen label.
+  form_observations_herbarium_record_help: If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
+  form_observations_there_is_a_problem_with_location: 'There is a problem with the location. "+See message below.+":#location_messages'
+  form_observations_there_is_a_problem_with_name: 'There is a problem with the name. "+See message below.+":#name_messages'
 
   # observer/_form_species_list
   form_species_lists_title: Title
@@ -1646,9 +1696,14 @@
 
   prefs_content_filters: Content Filters
   prefs_content_filters_explanation: Control content visibility site-wide.
-  prefs_filters_has_images: Hide Observations with no images
-  prefs_filters_has_specimen: Hide Observations with no specimens
-  prefs_filters_region: Show only Observations and Locations within this region
+  prefs_filters_has_images: Hide observations with no images
+  prefs_filters_has_specimen: Hide observations with no specimens
+  prefs_filters_lichen: Filter observations of lichens
+  prefs_filters_lichen_yes: Show only lichens
+  prefs_filters_lichen_no: Hide lichens
+  prefs_filters_region: Show only observations and locations within this region
+  prefs_filters_clade: Show only observations within this taxonomic clade
+  prefs_filter_off: filter off
 
   prefs_notes_template: Observation Notes Template
   notes_template: "[:prefs_notes_template]"
@@ -1798,6 +1853,7 @@
   show_location_editor: "[:Editors]"
   show_location_editors: "[:Editors]"
   show_location_reverse: Reverse Location
+  show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead.  Changing a location name or coordinates implicitly changes all the observations at that location, too.
 
   # name/show_name
   show_name_title: "[:NAME]: [name]"
@@ -1809,10 +1865,15 @@
   show_name_email_tracking: Email Tracking
   show_name_create_description: "[:CREATE]"
   show_name_synonyms: Synonym(s)
-  show_name_preferred_synonyms: Preferred Synonym(s)
-  show_name_deprecated_synonyms: Deprecated Synonym(s)
+  show_name_preferred_synonyms: Preferred Synonyms
+  show_name_deprecated_synonyms: Deprecated Synonyms
+  show_name_misspelled_synonyms: Misspellings
   show_name_misspelling: This name is misspelled.
   show_name_misspelling_correct: "[:CORRECT_SPELLING]"
+  show_name_refresh_classification: Refresh from Genus
+  show_name_propagate_classification: Propagate to Subtaxa
+  show_name_lifeform: Lifeform
+  show_name_propagate_lifeform: Propagate to Subtaxa
   show_name_notes: Notes on Taxonomy
   show_name_descriptions: "[:DESCRIPTIONS]"
   show_name_create_draft: Create New Draft for
@@ -1843,6 +1904,16 @@
   show_name_see_more: See More
   show_name_on_mycoportal: on MyCoPortal
   show_name_on_mycobank: on MycoBank
+  show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
+  show_name_inherit_classification: Copy from parent.
+  edit_classification_title: Edit Classification of [name]
+  inherit_classification_title: Copy Classification from Parent of [name]
+  inherit_classification_parent_name: Name of Parent
+  inherit_classification_parent_blank: Parent has no classification, either!
+  inherit_classification_no_matches: No names match.
+  inherit_classification_alt_spellings: No names match.  Maybe you meant one of these?
+  inherit_classification_multiple_matches: Multiple names match.  Which did you mean?
+  inherit_classification_parent_lower_rank: Parent must be higher rank than [rank].
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"
@@ -1881,8 +1952,8 @@
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
-  show_observation_specimen_available: Herbarium specimen reported
-  show_observation_specimen_not_available: No herbarium specimen
+  show_observation_specimen_available: Voucher specimen reported
+  show_observation_specimen_not_available: No voucher specimen
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
@@ -1892,11 +1963,14 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-  show_observation_create_specimen: Add Herbarium Specimen
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
-  show_observation_remove_link_dialog: Are you sure you want to remove this link?
-  show_observation_add_sequence: Add [:SEQUENCE]
+  show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
+  show_observation_no_collection_numbers: "No [:specimens]"
+  show_observation_no_herbarium_records: "No [:herbarium_records]"
+  show_observation_add_sequence: "Add [:SEQUENCE]"
+  show_observation_no_sequences: "No [:sequences]"
+  show_observation_archive_link: Show Archive Record
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1962,6 +2036,7 @@
   signup_name: Name (optional)
   signup_login: Desired login
   signup_email_address: Email address
+  signup_email_confirmation: Confirm email
   signup_choose_password: Choose password
   signup_confirm_password: Confirm password
   signup_preferred_theme: Preferred Theme (optional)
@@ -2032,20 +2107,19 @@
   species_list_upload_help: A species list can either be a simple text file with each name on its own line, or the 'list' format generated by the Name species listing program.
 
   # sequence/add_sequence
-  sequence_add_title: Add [:SEQUENCE]
+  sequence_add_title: "Add [:SEQUENCE]"
   sequence_add_edit: "[:image_add_edit]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
-  form_sequence_locus: "[:LOCUS] (required)"
-  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp; ITS <br>&nbsp;&nbsp; multi-locus <br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence"
-  form_sequence_bases: "[:BASES] ([:BASES] and/or [:DEPOSIT] required)"
+  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
   form_sequence_bases_format: "<a href=[help_url]>FASTA or Bare Sequence format</a>"
-  form_sequence_archive_help: On-line, public database with [:sequence] data for this [:OBSERVATION].
+  form_sequence_archive_help: "On-line, public database with [:sequence] data for this [:OBSERVATION]."
   form_sequence_accession: "[:ACCESSION] number/code"
-  form_sequence_accession_help: "Examples:\n&nbsp;&nbsp; KT968655\n&nbsp;&nbsp; UDB024324"
-  form_sequence_valid_deposit: "[:DEPOSIT] requires both [:ARCHIVE] and [:ACCESSION]"
+  form_sequence_accession_help: "Examples:\n&nbsp;&nbsp;KT968655\n&nbsp;&nbsp;UDB024324"
+  form_sequence_valid_deposit: "[:deposit] requires both [:archive] and [:accession]"
+  form_sequence_bases_or_deposit_required: bases and/or deposit required
 
   # observer/users_by_contribution
   users_by_contribution_title: List of Contributors
@@ -2072,20 +2146,20 @@
   welcome_no_user_note: If you are not a spammer, please report this as an error.
   welcome_note: You are now logged into the system...
 
-  # Glossary Term Fields
-  glossary_term_created_at: Created At
-  glossary_term_updated_at: Updated At
-  glossary_term_name: Name
-  glossary_term_description: Description
-  glossary_term_copyright_holder: Copyright holder and license for this image
-  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
-
   # semantic_vernacular/delete
   delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
   semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
   semantic_vernacular_proposed: Proposed by [name] at [date_time]
   semantic_vernacular_delete: Delete
   semantic_vernacular_title: "SVD Detail: [name]"
+
+  # glossary term fields
+  glossary_term_created_at: Created At
+  glossary_term_updated_at: Updated At
+  glossary_term_name: Name
+  glossary_term_description: Description
+  glossary_term_copyright_holder: Copyright holder and license for this image
+  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # glossary/show_glossary_term
   show_glossary_term: Show Glossary Term
@@ -2113,12 +2187,10 @@
   edit_glossary_term_save: Save
   edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
-  ### news Article ###
-  #   news Article Fields
+  # news article fields
   article_title: Title
   article_body: Body
 
-  #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
   article_body_required: "[:article_body] [:REQUIRED]"
@@ -2131,7 +2203,7 @@
   # article/index_article
   index_article: "[:ARTICLE] Index"
 
-  # Publication Fields
+  # publication fields
   publication_full: Full Reference
   publication_link: Link
   publication_peer_reviewed: Publication was peer reviewed
@@ -2158,102 +2230,124 @@
   show_publication_title: Publication
   show_publication_added_by: Added by
 
-  # Herbarium Fields
-  herbarium_name: Name
-  herbarium_location: Location
-  herbarium_description: Herbarium Description
-  herbarium_created_at: Created At
-  herbarium_updated_at: Updated At
+
+
+  # herbarium fields
   herbarium_curator: Curator
-  herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
-  herbarium_edit: New herbarium called '[name]' created.
   herbarium_code: Code
-  herbarium_specimen_count: Specimens
+  user_personal_herbarium: "[name]: Personal Herbarium"
 
   # herbarium/show_herbarium
-  show_herbarium: Show Herbarium
-  show_herbarium_specimen_count: This herbarium contains [count] specimen(s).
+  show_herbarium_herbarium_record_count: This herbarium contains [count] herbarium record(s).
   show_herbarium_add_curator: Add Curator
-  show_herbarium_no_user: Unable to find the user '[login]'
-  delete_curator_you_not_curator: Cannot remove curator since you are not a curator
-  delete_curator_they_not_curator: "[login] is not a curator"
-
-  # herbarium/index
-  herbarium_index: Herbarium Index
-  herbarium_index_title: List of All Herbaria
+  show_herbarium_no_user: Unable to find the user '[login]'.
+  show_herbarium_curator_request: Request to be a Curator
+  show_herbarium_curator_help: When you press send below, you will send a note to the admins requesting to be made an admin of this herbarium.  When we add curators to an MO herbarium, those curators are given exclusive rights to edit the herbarium's addresses and notes.  Curators are also allowed to create herbarium records for other users' observations.  For example, when an herbarium accessions a contributor's specimen, the herbarium can create a record attached to the contributor's observation on MO noting that the specimen resides at your herbarium and what its accession number is.  Please ask how MO can help your herbarium IT people automate this process via our API.
+  show_herbarium_request_sent: Request has been sent to admins.  We'll get back to you as soon as possible.
 
   # herbarium/create_herbarium
   create_herbarium: Create New Herbarium
   create_herbarium_title: Create New Herbarium
-  create_herbarium_missing_email: Valid email address is required when creating an herbarium
-  create_herbarium_description: Optional Description of the Herbarium (include information about whether and what sort of specimens are desired)
-  create_herbarium_mailing_address: Optional Mailing Address for Specimens
-  create_herbarium_email: Required Email Address for Specimen Requests
-  create_herbarium_location: Optional Location of the Herbarium
-  create_herbarium_code: Optional Code
-  create_herbarium_add: Add
-  create_herbarium_duplicate_name: Herbarium called '[name]' already exists
-  herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
+  create_herbarium_personal: Check this box if this is your personal herbarium
+  create_herbarium_personal_help: Each user can have one personal herbarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
+  create_herbarium_code: Standard Abbreviation
+  create_herbarium_code_help: Look up the standard abbreviation for an herbarium at "Index Herbariorum":http://sweetgum.nybg.org/science/ih/.
+  create_herbarium_email: Email Address
+  create_herbarium_mailing_address: Mailing Address
+  create_herbarium_duplicate_name: Herbarium called '[name]' already exists.
+  create_herbarium_personal_already_exists: You've already created a personal herbarium called '[name]'.
+  create_herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
 
   # herbarium/edit_herbarium
-  edit_herbarium: Edit
+  edit_herbarium: Edit Herbarium
   edit_herbarium_title: Editing Herbarium
-  edit_herbarium_save: Save
-  edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
-  edit_herbarium_duplicate_label: The label '[herbarium_label]' already exists for the herbarium '[herbarium_name]'
+  edit_herbarium_this_is_personal_herbarium: This is your personal herbarium. You are only allowed one personal herbarium. If you would like to change which herbarium is your personal herbarium, please contact the admins and explain the situation.
+  edit_herbarium_cant_make_personal: You can't make this your personal herbarium because you don't own all the herbarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
+  edit_herbarium_admin_make_personal: Make this the personal herbarium for
+  edit_herbarium_user_records: "User \"[name]\" has [num] records in this herbarium."
+  edit_herbarium_no_herbarium_records: No herbarium records for this herbarium.
+  edit_herbarium_user_already_has_personal_herbarium: User \"[user]\" already has a personal herbarium called \"[herbarium]\".
+  edit_herbarium_successfully_made_personal: "Successfully made this the personal herbarium of \"[user]\"."
+  edit_herbarium_successfully_made_nonpersonal: "Successfully made this nobody's personal herbarium."
 
-  # herbarium/add_specimen
-  add_specimen: Add Specimen
-  add_specimen_title: Add Specimen
-  add_specimen_add: Add
-  add_specimen_herbarium_label: Original Herbarium Label
-  add_specimen_herbarium_label_help: "(initial determination and unique herbarium id)"
-  add_specimen_notes: Specimen Notes
-  add_specimen_cancel: Cancel (Show Observation)
-  add_specimen_already_exists: A specimen with the label '[label]' already exists for herbarium '[name]'
-  add_specimen_not_a_curator: You are not a curator of [herbarium_name]
-  user_personal_herbarium: "[name]: Personal Herbarium"
+
 
   # herbarium/list_herbaria
-  list_herbaria_title: "[:list_objects(type=:project)]"
+  list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
-  # Specimen Fields
-  specimen_herbarium: Herbarium
-  specimen_herbarium_name: Herbarium Name
-  specimen_herbarium_label: Herbarium Label
-  specimen_herbarium_id: Herbarium Id
-  specimen_user: Specimen Recorder
-  specimen_when: When Submitted
-  specimen_notes: Notes
-  specimen_created_at: Created At
-  specimen_updated_at: Updated At
+  # herbarium/index
+  herbarium_index: Herbarium Index
+  herbarium_index_list_all_herbaria: List All Herbaria
+  herbarium_index_nonpersonal_herbaria: List Institutional Herbaria
+  herbarium_index_records: Records
+  herbarium_index_merge_help: "Click on the herbarium below that you would like to merge \"[name]\" into.  This will cause \"[name]\" to be deleted and all of its records and curators to be transferred into the new herbarium.  If you do not have permission to perform the merge, it will send a request to the admins.  (\"+Cancel merge.+\":[url])"
 
-  # specimen/show_specimen
-  show_specimen: Show Specimen
 
-  # specimen/edit_specimen
-  edit_specimen: Edit Specimen
-  edit_specimen_cannot_edit: Attempt to edit specimen without permission
-  edit_specimen_title: Edit Specimen [herbarium_label]
-  edit_specimen_save: Save
+  # herbarium record fields
+  herbarium_record_herbarium_name: Herbarium Name
+  herbarium_record_initial_det: Initial Determination
+  herbarium_record_accession_number: Accession Number
+  herbarium_record_user: Record Creator
 
-  # specimen/specimen_index (not a real page)
-  specimen_index_title: "[subject] Specimen Index"
+  # herbarium_record/create_herbarium_record
+  create_herbarium_record: Add Herbarium Record
+  create_herbarium_record_title: Add Herbarium Record
+  create_herbarium_record_accession_number_help: Must be a unique identifier for this herbarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013.
+  create_herbarium_separately: The herbarium you entered doesn't exist. Please create it separately and then add the herbarium record to your observation.
+  create_herbarium_record_missing_herbarium_name: Missing herbarium name.
+  create_herbarium_record_already_used: This herbarium record already exists. We've added this observation to it. If that isn't correct, remove it from your observation, then add the correct herbarium record.
+  create_herbarium_record_already_used_by_someone_else: This accession number has already been recorded by someone else for [herbarium_name]. Try adding your initials to the accession number to distinguish labels.
+  create_herbarium_record_only_curator_or_owner: Only curators can add herbarium records to other users' observations.
 
-  # specimen/herbarium_index
-  herbarium_index_no_specimens: This herbarium has no specimens
-  herbarium_delete_specimen: Delete
-  herbarium_edit_specimen: Edit
+  # herbarium_record/edit_herbarium_record
+  edit_herbarium_record: Edit Herbarium Record
+  edit_herbarium_record_title: Edit Herbarium Record [herbarium_label]
+  edit_herbarium_record_back_to_index: Back to Herbarium Record Index
+  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from an herbarium record.
+  edit_herbarium_record_already_used: This herbarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
+  edit_affects_multiple_observations: The changes you make here will affect all of the observations shown.  If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one.  That will leave the [type] unchanged for any other observations associated with it.
 
-  # specimen/observation_index
-  observation_index_no_specimens: This observation has no specimens
+  # herbarium_record/destroy_herbarium_record
+  delete_herbarium_record: Destroy Herbarium Record
 
-  # specimen/list_specimens
-  list_specimens_title: "[:list_objects(type=:project)]"
+  # herbarium_record/herbarium_record_index (not a real page)
+  herbarium_record_index_title: "[subject] Herbarium Record Index"
 
-  # specimen/delete_specimen
-  delete_specimen_cannot_delete: Attempt to delete specimen without permission
+  # herbarium_record/list_herbarium_records
+  list_herbarium_records_title: "[:list_objects(type=:herbarium_record)]"
+
+
+
+  # collection number fields
+  collection_number_name: Collector's Name
+  collection_number_number: Collector's Number
+  collection_number_user: Record Creator
+
+  # collection_number/create_collection_number
+  create_collection_number: Add Collection Number
+  create_collection_number_title: Add Collection Number
+  create_collection_number_missing_name: Missing collector's name.
+  create_collection_number_missing_number: Missing collector's number.
+
+  # collection_number/edit_collection_number
+  edit_collection_number: Edit Collection Number
+  edit_collection_number_title: Edit Collection Number [name]
+  edit_collection_number_back_to_index: Back to Collection Number Index
+  edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
+  edit_collection_number_already_used: This collection number is shared with another observation. If you need to fix it, remove it from your observation, then add the correct one.
+  edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove the collection number from one of the observations, then add the correct one.
+
+  # collection_number/destroy_collection_number
+  delete_collection_number: Destroy Collection Number
+
+  # collection_number/collection_number_index (not a real page)
+  collection_number_index_title: "[subject] Collection Number Index"
+
+  # collection_number/list_collection_numbers
+  list_collection_numbers_title: "[:list_objects(type=:collection_number)]"
+
+
 
   # support/donate
   donate_title: Donate to Mushroom Observer, Inc.
@@ -2343,15 +2437,20 @@
 
   advanced_search_filters: Search Filters
   advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter Observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless Observations
-  advanced_search_filter_has_images_yes: Exclude imageless Observations
-  advanced_search_filter_has_images_no: Exclude imaged Observations
-  advanced_search_filter_has_specimen: Filter Observations based on whether they have specimens (vouchers)
-  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
-  advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
-  advanced_search_filter_has_specimen_no: Exclude vouchered Observations
-  advanced_search_filter_region: Restrict Observations and Locations to a region, e.g., "California, USA" or "Europe"
+  advanced_search_filter_has_images: Filter observations based on whether they have images
+  advanced_search_filter_has_images_off: Include both imaged and imageless observations
+  advanced_search_filter_has_images_yes: Exclude imageless observations
+  advanced_search_filter_has_images_no: Exclude imaged observations
+  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens (vouchers)
+  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered observations
+  advanced_search_filter_has_specimen_yes: Exclude voucherless observations
+  advanced_search_filter_has_specimen_no: Exclude vouchered observations
+  advanced_search_filter_lichen: Filter observations based on whether they are lichens
+  advanced_search_filter_lichen_off: Include both lichens and nonlichens
+  advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
+  advanced_search_filter_lichen_no: Exclude lichen-forming fungi
+  advanced_search_filter_region: "Restrict observations and locations to a region, e.g., \"California, USA\" or \"Europe\""
+  advanced_search_filter_clade: "Restrict observations to a taxonomic clade, e.g., \"Ascomycota\" or \"Agaricales\""
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater
@@ -2909,7 +3008,7 @@
   # EMAIL MESSAGES
 
   # Subject lines.
-  email_subject_add_specimen_not_curator: Specimen Added to [herbarium_name]
+  email_subject_add_herbarium_record_not_curator: Herbarium Record Added to [herbarium_name]
   email_subject_comment: "[:COMMENT] About [name]"
   email_subject_commercial_inquiry: Commercial Inquiry About [Name]
   email_subject_consensus_change: Consensus Changed from [old] to [new]
@@ -2981,11 +3080,10 @@
   email_comment_intro_to_owner: "h2. *Comment on Your [Type]*\n\nThe following comment was posted on the [:app_title] website regarding your [type] <u>[name]</u>:"
   email_commercial_intro: "h2. *Commercial Inquiry*\n\n[user] ([email]) asked the [:app_title] website to forward the following commercial inquiry to you about your image [image]:"
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
-  email_add_specimen_not_curator_intro: "h2. *Specimen Added By Non-Curator*\n\nThe user, [login], added the specimen, [herbarium_label], to the herbarium, [herbarium_name], which you curate."
+  email_add_herbarium_record_not_curator_intro: "h2. *Herbarium Record Added By Non-Curator*\n\nThe user, [login], added the herbarium record, [herbarium_label], to the herbarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
-  email_location_merge: "User wants to merge two locations, both with observations:\n\nuser : [user]\nthis : [this]\ninto : [that]\nloc1 : [this_url]\nloc2 : [that_url]"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
-  email_name_merge: "User wants to merge two names, both with observations:\n\nuser : [user]\nthis : [this]\ninto : [that]\nname1 : [this_url]\nname2 : [that_url]"
+  email_merge_objects: "User wants to merge two [:types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."
@@ -3084,7 +3182,55 @@
   location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful.  If you don't find anything there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
 
   # Search bar help
-  observation_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:\n* *date*: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.\n* *created*: Date observation was first posted.\n* *modified*: Date observation was last modified.\n* *name*: Consensus name is one of these names.\n* *synonym_of*: Consensus name is synonym of one of these names.\n* *child_of*: Consensus name is a subtaxon of one of these names.\n* *location*: Location mushroom was observed.\n* *project*: Observation belongs to one of these projects.\n* *list*: Observation belongs to one of these species lists.\n* *user*: Observation created by one of these users.\n* *notes*: Notes contains the given string.\n* *comments*: Comments contain the given string.\n* *confidence*: Confidence is in this range.\n* *east*: Longitude of eastern edge of search region.\n* *west*: Longitude of western edge of search region.\n* *north*: Latitude of northern edge of search region.\n* *south*: Latitude of southern edge of search region.\n* *images*: Has images? (\"yes\" or \"no\")\n* *specimen*: Has a specimen?\n* *has_name*: Has a name? (other than \"Fungi sp.\")\n* *has_notes*: Has notes?\n* *has_comments*: Has and comments?"
+  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+
+  observation_term_date: "Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay."
+  observation_term_created: "Date observation was first posted."
+  observation_term_modified: "Date observation was last modified."
+  observation_term_name: "Consensus name is one of these names."
+  observation_term_synonym_of: "Consensus name is synonym of one of these names."
+  observation_term_child_of: "Consensus name is a subtaxon of one of these names."
+  observation_term_herbarium: "Specimen at an herbarium."
+  observation_term_location: "Location mushroom was observed. Must be an exact match of entire location name. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
+  observation_term_region: "Location mushroom was observed. Partial match anchored at end, including country at least, e.g., \"California\\, USA\". Note that commas must be protected with a back-slash as shown."
+  observation_term_project: "Observation belongs to one of these projects."
+  observation_term_list: "Observation belongs to one of these species lists."
+  observation_term_user: "Observation created by one of these users."
+  observation_term_notes: "Notes contains the given string."
+  observation_term_comments: "Comments contain the given string."
+  observation_term_confidence: "Confidence is in this range."
+  observation_term_east: "Longitude of eastern edge of search region."
+  observation_term_west: "Longitude of western edge of search region."
+  observation_term_north: "Latitude of northern edge of search region."
+  observation_term_south: "Latitude of southern edge of search region."
+  observation_term_images: "Has images? (\"yes\" or \"no\")"
+  observation_term_specimen: "Has a specimen?"
+  observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
+  observation_term_has_name: "Has a name? (other than \"Fungi sp.\")"
+  observation_term_has_notes: "Has notes?"
+  observation_term_has_field: "Has a given notes template field filled in."
+  observation_term_has_comments: "Has and comments?"
+
+  name_term_created: "Date name was first used."
+  name_term_modified: "Date name was last modified."
+  name_term_rank: "Rank or range of ranks, e.g., \"genus\" or \"species-form\"."
+  name_term_synonym_of: "Synonyms of any of these names."
+  name_term_child_of: "Subtaxa of any of these names."
+  name_term_has_synonyms: "Has any synonyms?"
+  name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
+  name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
+  name_term_has_author: "Has author filled in?"
+  name_term_has_citation: "Has citation filled in?"
+  name_term_has_classification: "Has classification filled in?"
+  name_term_has_notes: "Has any taxonomic nodes?"
+  name_term_has_comments: "Has any comments?"
+  name_term_has_description: "Has a public description?"
+  name_term_author: "Author contains this string."
+  name_term_citation: "Citation contains this string."
+  name_term_classification: "Classification contains this string."
+  name_term_notes: "Taxonomic notes contains this string."
+  name_term_comments: "One of the comments contains this string."
 
   ################################################################################
 
@@ -3118,8 +3264,10 @@
   validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
+  validate_user_email_mismatch: Your email addresses don't match.  Please check for a typo.
   validate_user_login_taken: Sorry, that login name is already taken.
   validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
+  validate_invalid_lifeform: "Invalid lifeform word(s): [words].  We are strictly enforcing which types are allowed.  If you would like us to add support to additional lifeforms, please contact the admins and make your case."
 
   # These shouldn't need translating, but you are free to override if you need to.
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
@@ -3174,6 +3322,7 @@
   validate_species_list_where_missing: "[:validate_missing(field=:location)]"
   validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
   validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
+  validate_user_email_confirmation_missing: "[:validate_missing(field=:email_confirmation)]"
   validate_user_login_missing: "[:validate_missing(field=:login_name)]"
   validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
   validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
@@ -3270,6 +3419,7 @@
   runtime_description_removed_writer: Revoked edit permission for [name].
   runtime_destroy_description_not_admin: Only a description's admins can delete that description.
   runtime_duplicate_rank: "Rank appears twice: '[rank]'"
+  runtime_herbarium_record_already_exists: "Herbarium record [number] at [herbarium] already used by someone else."
   runtime_image_updated_notes: "Updated notes on image #[id]."
   runtime_image_uploaded: Uploaded image '[name]'.
   runtime_index_no_at_location: No [types] at [location].
@@ -3433,20 +3583,23 @@
   runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
 
   # Pattern search error messages.
-  pattern_search_syntax_error: Syntax error in pattern at [string].
-  pattern_search_bad_observation_term_error: "Unexpected term in observation search: [term]. [:observation_search_terms_help]"
-  pattern_search_missing_value_error: Missing value for the term [var].
-  pattern_search_too_many_values_error: Search term [term] occurs more than once.
-  pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".
-  pattern_search_bad_yes_error: Invalid value for [term], [value], only valid value is "yes".
-  pattern_search_bad_float_error: Invalid value for [term], [value], expected a number between [min] and [max].
-  pattern_search_bad_confidence_error: Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. "0-100".
-  pattern_search_bad_name_error: Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched.
-  pattern_search_bad_location_error: Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched.
-  pattern_search_bad_project_error: Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched.
-  pattern_search_bad_species_list_error: Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched.
-  pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
-  pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
+  pattern_search_syntax_error: "Syntax error in pattern at [string]."
+  pattern_search_bad_term_error: "Unexpected term in [type] search: [term]. [help]"
+  pattern_search_missing_value_error: "Missing value for the term [var]."
+  pattern_search_too_many_values_error: "Search term [term] occurs more than once."
+  pattern_search_bad_boolean_error: "Invalid value for [term], [value], expected \"yes\" or \"no\"."
+  pattern_search_bad_yes_error: "Invalid value for [term], [value], only valid value is \"yes\"."
+  pattern_search_bad_yes_no_both_error: "Invalid value for [term], [value], expected \"yes\", \"no\" or \"either\"."
+  pattern_search_bad_float_error: "Invalid value for [term], [value], expected a number between [min] and [max]."
+  pattern_search_bad_confidence_error: "Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. \"0-100\"."
+  pattern_search_bad_name_error: "Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched."
+  pattern_search_bad_herbarium_error: "Invalid or unrecognized value for [term], [value], expected herbarium id, code or name; nothing matched."
+  pattern_search_bad_location_error: "Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched."
+  pattern_search_bad_project_error: "Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched."
+  pattern_search_bad_species_list_error: "Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched."
+  pattern_search_bad_user_error: "Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched."
+  pattern_search_bad_date_range_error: "Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD."
+  pattern_search_bad_rank_range_error: "Invalid value for [term], [value], expected rank or range of ranks, e.g., \"genus\" or \"species-form\"."
 
   ################################################################################
 
@@ -3455,40 +3608,48 @@
   # Api error messages
   api_abort_due_to_errors: Aborted operation due to errors.
   api_ambiguous_name: Name "[name]" is ambiguous, matches [others].
+  api_another_users_profile_location: "You can't edit this [:location] because someone has made it their profile location."
   api_api_key_not_verified: API key for "[notes]" has not been activated yet. (key = "[key]")
   api_bad_action: Invalid request type "[action]".
+  api_bad_altitude_parameter_value: "Invalid elevation, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
   api_bad_api_key: Bad key "[key]".
-  api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
-  api_bad_method: Invalid request method "[method]".
   api_bad_boolean_parameter_value: Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".
-  api_bad_integer_parameter_value: Invalid integer, "[val]".
-  api_bad_float_parameter_value: Invalid float, "[val]".
-  api_bad_email_parameter_value: Invalid email address, "[val]".
+  api_bad_classification: Invalid classification string.
   api_bad_date_parameter_value: Invalid date, "[val]", expect "YYYYMMDD".
   api_bad_date_range_parameter_value: Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
-  api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
-  api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
-  api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
-  api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
-  api_bad_altitude_parameter_value: "Invalid elevation, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
+  api_bad_email_parameter_value: Invalid email address, "[val]".
+  api_bad_float_parameter_value: Invalid float, "[val]".
   api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id, code or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
+  api_bad_integer_parameter_value: Invalid integer, "[val]".
+  api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
   api_bad_license_parameter_value: Invalid or unknown license, "[val]", accept only numerical id.
+  api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
   api_bad_location_parameter_value: Invalid or unknown location, "[val]", accept numerical id or location name.
+  api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
+  api_bad_method: Invalid request method "[method]".
   api_bad_name_parameter_value: Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).
+  api_bad_notes_field_parameter: Invalid notes template field.  Pretty much anything but commas are allowed.
+  api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_observation_parameter_value: Invalid or unknown observation, "[val]", accept only numerical id.
   api_bad_project_parameter_value: Invalid or unknown project, "[val]", accept numerical id or project name.
   api_bad_species_list_parameter_value: Invalid or unknown species list, "[val]", accept numerical id or species list title.
+  api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
+  api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
-  api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_version: Invalid version number "[version]".
-  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_can_only_synonymize_unsynonimized_names: Presently, we're only allowing API clients to synonymize unsynonmized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
+  api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_cant_add_herbarium_record: Only owner of observation and curators of herbarium can add herbarium records to an observation.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
+  api_dubious_location_name: "Location name is invalid: [reasons]"
+  api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
+  api_herbarium_record_already_exists: "There is already a record for [number] at [herbarium]."
   api_image_upload_failed: "Failed to upload image: [error]"
   api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
   api_location_already_exists: The location "[location]" already exists.
@@ -3498,26 +3659,92 @@
   api_missing_upload: Expected an upload file.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.
   api_must_authenticate: Must authenticate with API key to perform this operation.
   api_must_be_admin: You are not an admin for [project].
+  api_must_be_creator: You can only edit [types] that you have created.
   api_must_be_member: You are not a member of [type] "[name]".
+  api_must_be_only_editor: You can only edit [types] if you are the only editor.
+  api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
-  api_must_supply_location_or_gps: You must supply either a location or GPS coordinates.
-  api_name_already_exists: The name, "[new]", already exists as "[old]"
+  api_must_not_have_any_herbaria: "You can't edit this [:location] because there is an [:herbarium] there."
+  api_must_own_all_descriptions: You can only edit [types] if you own all the [:descriptions].
+  api_must_own_all_namings: You can only edit [types] if no one else has proposed that [type].
+  api_must_own_all_observations: You can only edit [types] if you own all its [:observations].
+  api_must_own_all_species_lists: You can only edit [types] if you own all its [:species_lists].
+  api_name_already_exists: The name "[new]" already exists.
   api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
+  api_name_wrong_for_rank: The name, "[name]", isn't valid for [rank].
+  api_need_all_four_edges: "Need to supply all four edges of bounding box: north, south, east and west."
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
   api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
   api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."
+  api_one_or_the_other: Can only use one of the parameters [args].
+  api_parameter_cant_be_blank: It is okay to leave the [arg] parameter off, but if you include it in your PATCH request, it cannot be blank.  Leaving a set parameter off means it will leave that property alone and do nothing; setting it to a blank tells MO to delete or clear the property.  And some properties cannot be deleted or cleared.
   api_project_taken: The project, "[project]", already exists.
   api_query_error: "There was an internal problem with Query: [error]"
   api_render_failed: There was a problem while rendering the results. [error]
+  api_species_list_already_exists: The [:species_list] "[title]" already exists.
   api_string_too_long: The string, "[val]", has more than [limit] characters.
   api_too_many_uploads: Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.
   api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.
+  api_trying_to_set_multiple_names_at_once: You can only change the name, author and rank of one name at a time.
   api_unexpected_upload: Unexpected file attached.
   api_unused_parameters: "Unexpected parameters: [params]"
   api_user_already_exists: The user "[login]" already exists or is taken.
   api_user_group_taken: The user group "[title]" already exists.
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
+
+  api_help_accession_has: search within accession number
+  api_help_accession_number: unique herbarium id
+  api_help_accession_number_has: search within accession number
+  api_help_any_date: this date can mean anything you want
+  api_help_api_key_user: user you are creating api key for
+  api_help_app: identifier used to help user distinguish which api key belongs to which app
+  api_help_author_has: search within author
+  api_help_citation_has: search within citation
+  api_help_classification_has: search within classification
+  api_help_clear_synonyms: make it so this name is not synonymized with anything but leave everything it used to be synonymized with synonyms of each other
+  api_help_collector: "collector's name"
+  api_help_collector_has: "search within collector's name"
+  api_help_comments_has: search within comments summary and body
+  api_help_content_has: search within body
+  api_help_copyright_holder_has: search within copyright holder
+  api_help_create_key: if you pass in your app name here it will create an api key for the user for your app to use
+  api_help_creator: creator
+  api_help_east: max longitude
+  api_help_first_user: creator / first to use
+  api_help_has_notes_field: is given observation notes template field filled in?
+  api_help_has_obs_notes: observation has notes?
+  api_help_has_observation: is attached to an observation?
+  api_help_initial_det: initial determination
+  api_help_initial_det_has: search within initial determination
+  api_help_is_collection_location: is this location where mushroom was found?
+  api_help_locus_has: search within locus
+  api_help_log: log this action on main page activity log and RSS feed?
+  api_help_mailing_address: postal address
+  api_help_min_rank: group or genus or better
+  api_help_min_size: width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge
+  api_help_misspellings: include misspellings? "either" means do not care and "only" means only show misspelt names
+  api_help_north: max latitude
+  api_help_notes_field: set value of the custom notes template field, substitute field name for "$field"
+  api_help_notes_has: search within notes
+  api_help_number: "collector's number"
+  api_help_number_has: "search within collector's number"
+  api_help_obs_date: observation date
+  api_help_obs_notes_has: search within observation notes
+  api_help_observer: observer
+  api_help_original_name: original file name or other private identifier
+  api_help_postal: in postal format with country last regardless of user preference
+  api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
+  api_help_set_is_collection_location: is this location where mushroom was found?
+  api_help_south: min latitude
+  api_help_summary_has: search within summary
+  api_help_target: 'e.g. "observation #1234" or "name #5678"'
+  api_help_text_name_has: search within name
+  api_help_title_has: search within title
+  api_help_uploader: who uploaded the photo
+  api_help_west: min longitude
+  api_help_when_seen: when seen
+  api_help_when_taken: when photo taken
 
   # Query titles.
   query_title_advanced_search: "[:app_advanced_search]"
@@ -3529,12 +3756,15 @@
   query_title_by_editor: "[TYPES] Edited by [USER]"
   query_title_by_rss_log: "[TYPES] in Activity Log"
   query_title_by_user: "[TYPES] created by [USER]"
+  query_title_for_observation: "[TYPES] attached to [OBSERVATION]"
   query_title_for_project: "[TYPES] attached to [PROJECT]"
   query_title_for_target: "[TYPES] on [TARGET]"
   query_title_for_user: "[TYPES] for [USER]"
+  query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
   query_title_in_set: Selected [TYPES]
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
+  query_title_nonpersonal: List of Institutional Herbaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"
   query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
@@ -3566,6 +3796,8 @@
   query_help_comment_for_object: comments about a given object
   query_help_comment_for_user: comments sent to a given user
   query_help_comment_pattern_search: comments matching a search string
+  query_help_herbarium_record_in_herbarium: records in a given herbarium
+  query_help_herbarium_record_for_observation: records attached to a given observation
   query_help_image_advanced_search: images of observations matching advanced search criteria
   query_help_image_all: all images
   query_help_image_by_user: images created by a given user
@@ -3657,30 +3889,36 @@
   query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
-  sort_by_header: "Sort by:"
-  sort_by_id: ID
-  sort_by_name: "[:NAME]"
-  sort_by_filename: File Name
-  sort_by_title: "[:TITLE]"
-  sort_by_summary: "[:SUMMARY]"
-  sort_by_date: "[:DATE]"
-  sort_by_posted: Date Posted
-  sort_by_created_at: Date Created
-  sort_by_updated_at: Time Last Modified
-  sort_by_rss_log: "[:sort_by_updated_at]"
-  sort_by_last_login: Last Login
-  sort_by_user: "[:USER]"
-  sort_by_login: "[:LOGIN_NAME]"
-  sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
-  sort_by_where: "[:LOCATION]"
-  sort_by_location: "[:LOCATION]"
+  sort_by_code: Code
+  sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:CONFIDENCE_LEVEL]"
-  sort_by_image_quality: Image Quality
-  sort_by_thumbnail_quality: Thumbnail Quality
-  sort_by_num_views: Popularity
   sort_by_contribution: Contribution
-  sort_by_reverse: Reverse Order
+  sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+  sort_by_created_at: Date Created
+  sort_by_date: "[:DATE]"
+  sort_by_filename: File Name
+  sort_by_header: "Sort by:"
+  sort_by_herbarium_label: Label
+  sort_by_herbarium_name: Herbarium
+  sort_by_id: ID
+  sort_by_image_quality: Image Quality
+  sort_by_last_login: Last Login
+  sort_by_location: "[:LOCATION]"
+  sort_by_login: "[:LOGIN_NAME]"
+  sort_by_name: "[:NAME]"
+  sort_by_num_views: Popularity
+  sort_by_number: Number
   sort_by_observation: "[:OBSERVATION]"
+  sort_by_posted: Date Posted
+  sort_by_records: "#Records"
+  sort_by_reverse: Reverse Order
+  sort_by_rss_log: "[:sort_by_updated_at]"
+  sort_by_summary: "[:SUMMARY]"
+  sort_by_thumbnail_quality: Thumbnail Quality
+  sort_by_title: "[:TITLE]"
+  sort_by_updated_at: Time Last Modified
+  sort_by_user: "[:USER]"
+  sort_by_where: "[:LOCATION]"
 
   ################################################################################
 

@@ -278,6 +278,7 @@ class User < AbstractModel
   has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
+  has_many :external_links
   has_many :images
   has_many :interests
   has_many :locations
@@ -292,7 +293,7 @@ class User < AbstractModel
   has_many :queued_emails
   has_many :sequences
   has_many :species_lists
-  has_many :specimens
+  has_many :herbarium_records
   has_many :test_add_image_logs
   has_many :votes
 
@@ -349,8 +350,9 @@ class User < AbstractModel
   serialize :bonuses
   serialize :alert
 
-  # Used to let User enter location by name in prefs form.
+  # These are used by forms.
   attr_accessor :place_name
+  attr_accessor :email_confirmation
 
   # Used to let User enter password confirmation when signing up or changing
   # password.
@@ -364,6 +366,11 @@ class User < AbstractModel
   # Find admin's record.
   def self.admin
     User.first
+  end
+
+  # Find admin's record.
+  def self.admin_id
+    User.first.id
   end
 
   # Report which User is currently logged in. Returns +nil+ if none.  This is
@@ -385,22 +392,25 @@ class User < AbstractModel
     @@user && @@user.id
   end
 
-  # Report current user's preferred location_format
-  #
-  # location_format = User.current_location_format
-  #
-  def self.current_location_format
-    if !defined?(@@user) || @@user.nil?
-      :postal
-    else
-      @@user.location_format
-    end
+  # Tell User model which User is currently logged in (if any).  This is used
+  # by the +autologin+ filter and API authentication.
+  def self.current=(x)
+    @@location_format = x ? x.location_format : :postal
+    @@user = x
   end
 
-  # Tell User model which User is currently logged in (if any).  This is used
-  # by the +autologin+ filter.
-  def self.current=(x)
-    @@user = x
+  # Report current user's preferred location_format
+  #
+  #   location_format = User.current_location_format
+  #
+  def self.current_location_format
+    @@location_format = :postal unless defined?(@@location_format)
+    @@location_format
+  end
+
+  # Set the location format to use throughout the site.
+  def self.current_location_format=(x)
+    @@location_format = x
   end
 
   # Did current user opt to view owner_id's?
@@ -418,17 +428,13 @@ class User < AbstractModel
   end
 
   # User is the only one allowed to edit their own account info.
-  def has_edit_permission?(user)
+  def can_edit?(user = User.current)
     user == self
   end
 
   # Improve debug and error message readability.
   def inspect
     "#<User #{id}: #{unique_text_name.inspect}>"
-  end
-
-  def lang
-    Language.lang_from_locale(locale)
   end
 
   ##############################################################################
@@ -575,11 +581,13 @@ class User < AbstractModel
   # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
-    herbarium_id = Herbarium.connection.select_value(%(
-      SELECT herbarium_id, count(id) FROM specimens WHERE user_id=#{id}
-      GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
-    ))
-    herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+    @preferred_herbarium ||= begin
+      herbarium_id = Herbarium.connection.select_value(%(
+        SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
+        GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
+      ))
+      herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
+    end
   end
 
   def personal_herbarium_name
@@ -589,8 +597,16 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
-    Herbarium.where(personal_user_id: id).first
+    @personal_herbarium ||= Herbarium.where(personal_user_id: id).first
+  end
+
+  def create_personal_herbarium
+    @personal_herbarium ||= Herbarium.create(
+      name:          personal_herbarium_name,
+      email:         email,
+      personal_user: self,
+      curators:      [self]
+    )
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
@@ -794,7 +810,18 @@ class User < AbstractModel
   # notes_template: ""
   # notes_template_parts # => []
   def notes_template_parts
-    notes_template? ? notes_template.split(",").map(&:squish) : []
+    return [] if notes_template.blank?
+    User.parse_notes_template(notes_template)
+  end
+
+  def notes_template=(str)
+    str = User.parse_notes_template(str).join(", ")
+    write_attribute(:notes_template, str)
+  end
+
+  def self.parse_notes_template(str)
+    str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
+        split(",").map(&:squish).reject(&:blank?)
   end
 
   ##############################################################################
@@ -975,9 +1002,14 @@ class User < AbstractModel
     write_attribute("auth_code", String.random(40))
   end
 
-  protected
+################################################################################
+
+  private
 
   validate :user_requirements
+  validate :check_password, on: :create
+  validate :notes_template_forbid_other
+  validate :notes_template_forbid_duplicates
 
   def user_requirements # :nodoc:
     if login.to_s.blank?
@@ -1002,7 +1034,6 @@ class User < AbstractModel
     errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
   end
 
-  validate(:check_password, on: :create)
   def check_password # :nodoc:
     unless password.blank?
       if password_confirmation.to_s.blank?
@@ -1013,17 +1044,13 @@ class User < AbstractModel
     end
   end
 
-  validate :notes_template_forbid_other
-  # :nodoc
-  def notes_template_forbid_other
+  def notes_template_forbid_other # :nodoc
     notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
     end
   end
 
-  validate :notes_template_forbid_duplicates
-  # :nodoc
-  def notes_template_forbid_duplicates
+  def notes_template_forbid_duplicates # :nodoc
     return unless notes_template.present?
     squished = notes_template.split(",").map(&:squish)
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
@@ -1032,10 +1059,7 @@ class User < AbstractModel
     end
   end
 
-  private
-
-  # :nodoc
-  def notes_template_bad_parts
+  def notes_template_bad_parts # :nodoc
     return [] unless notes_template.present?
     notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)

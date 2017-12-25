@@ -2,7 +2,8 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-conic_glossary_term: # old id: 1
+
+conic_glossary_term: # 1
   version: 1
   user: rolf
   name: Conic # Want to support translations, so this should be a symbol
@@ -11,7 +12,7 @@ conic_glossary_term: # old id: 1
   created_at: 2013-08-04 07:49:12
   updated_at: 2013-08-04 07:49:12
 
-convex_glossary_term: # old id: 2
+convex_glossary_term: # 2
   version: 1
   user: rolf
   name: Convex
@@ -20,7 +21,7 @@ convex_glossary_term: # old id: 2
   created_at: 2013-08-13 17:26:20
   updated_at: 2013-08-13 17:26:20
 
-plane_glossary_term: # old id: 3
+plane_glossary_term: # 3
   version: 2
   user: rolf
   name: Plane
@@ -30,7 +31,7 @@ plane_glossary_term: # old id: 3
   updated_at: 2013-08-17 06:35:20
   images: plane_image_example
 
-square_glossary_term: # old id: 4
+square_glossary_term: # 4
   version: 3
   user: rolf
   name: Square

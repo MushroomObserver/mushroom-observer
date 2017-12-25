@@ -5,23 +5,21 @@
   Textile.register_name(@name)
 
   tabs = [
-    link_with_query(:show_name_edit_name.t, action: 'edit_name',
-                    id: @name.id),
-    link_with_query(:show_name_bulk_name_edit.t,
-                    action: 'bulk_name_edit'),
-    link_with_query(:show_name_add_name.t, action: 'create_name'),
-    link_with_query(:show_name_change_synonyms.t,
-                    action: 'change_synonyms', id: @name.id)
+    link_with_query(:show_name_edit_name.t, action: :edit_name, id: @name.id),
+    link_with_query(:show_name_bulk_name_edit.t, action: :bulk_name_edit),
+    link_with_query(:show_name_add_name.t, action: :create_name)
   ]
-  if @name.deprecated
-    tabs << link_with_query(:APPROVE.t, action: 'approve_name',
-                            id: @name.id)
-  else
-    tabs << link_with_query(:DEPRECATE.t, action: 'deprecate_name',
-                            id: @name.id)
+  if in_admin_mode? || !@name.locked
+    tabs << link_with_query(:show_name_change_synonyms.t,
+                      action: :change_synonyms, id: @name.id)
+    if @name.deprecated
+      tabs << link_with_query(:APPROVE.t, action: :approve_name, id: @name.id)
+    else
+      tabs << link_with_query(:DEPRECATE.t, action: :deprecate_name, id: @name.id)
+    end
   end
   tabs += [
-    link_with_query(:show_name_email_tracking.t, action: 'email_tracking',
+    link_with_query(:show_name_email_tracking.t, action: :email_tracking,
                     id: @name.id),
     draw_interest_icons(@name)
   ]
@@ -59,50 +57,76 @@
     <div class="list-group">
       <div class="list-group-item">
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-6 name-section">
             <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
             <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
             <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
             <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
             <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
           </div>
-          <div class="col-sm-6">
-            <%= content_tag(:div, link_to('EOL', @name.eol_url)) if @name.eol_url %>
-            <%= content_tag(:div, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
-            <%= content_tag(:div, link_to("MyCoPortal", mycoportal_url(@name))) %>
-            <%= content_tag(:div, link_to("MycoBank", mycobank_url(@name))) %>
-            <%= content_tag(:div, link_with_query(:show_name_distribution_map.t, action: 'map', id: @name.id)) %>
+          <div class="col-sm-6 name-section">
+            <%= content_tag(:p, link_to("EOL", @name.eol_url)) if @name.eol_url %>
+            <%= content_tag(:p, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
+            <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(@name))) %>
+            <%= content_tag(:p, link_to("MycoBank", mycobank_url(@name))) %>
+            <%= content_tag(:p, link_with_query(:show_name_distribution_map.t, action: :map, id: @name.id)) %>
           </div>
         </div>
       </div>
     </div>
+
     <strong><%= :show_name_nomenclature.t %>:</strong>
-
     <div class="list-group">
-      <div class="list-group-item">
-        <%= render(partial: 'name', object: @name, locals: {synonyms: true}) %>
+      <div class="list-group-item name-section">
+        <%= render(partial: "name", object: @name, locals: {synonyms: true}) %>
       </div>
     </div>
 
-    <strong><%= :show_name_classification.t %>:</strong>
-    <div>
-      <%= link_with_query(:EDIT.t, {id: @name.description.id,
-                                    controller: 'name', action: 'edit_name_description'},
-                          {class: "pull-right"}) if @name.description %>
-    </div>
-    <div class="list-group">
-      <div class="list-group-item">
-        <%= classification_section(@classification, @parents, @first_child, @children_query) %>
+    <div class="row">
+      <div class="col-sm-6">
+        <strong><%= :show_name_classification.t %>:</strong>
+          <% if @user %>
+            [<%= link_with_query(:EDIT.t, controller: :name,
+                                 action: :edit_classification,
+                                 id: @name.id) %>]
+          <% end %>
+        <div class="list-group">
+          <div class="list-group-item name-section" id="classification_section">
+            <%= render(partial: "classification") %>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <strong><%= :show_name_lifeform.t %>:</strong>
+          <% if @user %>
+            [<%= link_with_query(:EDIT.t, controller: :name,
+                                 action: :edit_lifeform, id: @name.id) %>]
+          <% end %>
+        <div class="list-group">
+          <div class="list-group-item name-section" id="lifeform_section">
+            <%= render(partial: "lifeform") %>
+          </div>
+        </div>
       </div>
     </div>
+
+    <% inject_javascript_at_end %(
+      var d1 = jQuery("#classification_section");
+      var d2 = jQuery("#lifeform_section");
+      var h1 = d1.height();
+      var h2 = d2.height();
+      if (h1 > h2) d2.height(h1);
+      if (h1 < h2) d1.height(h2);
+    ) %>
 
     <% if @name.has_notes? %>
       <strong><%= :show_name_notes.t %>:</strong>
         [<%= link_with_query(:EDIT.t, controller: :name, action: :edit_name, id: @name.id) %>]
       <div class="list-group">
-          <div class="list-group-item">
-            <%= @name.notes.tpl %>
-          </div>
+        <div class="list-group-item">
+          <%= @name.notes.tpl %>
+        </div>
       </div>
     <% end %>
 
@@ -110,11 +134,12 @@
       <strong><%= :show_name_brief_description.t %>:</strong>
       <div>
         <span class="pull-right">
-          <%= link_with_query(:show_name_see_more.t, id: @name.description.id,
-                              controller: 'name',
-                              action: 'show_name_description') %> |
-          <%= link_with_query(:EDIT.t, {id: @name.description.id,
-                                        controller: 'name', action: 'edit_name_description'}) %>
+          <%= link_with_query(:show_name_see_more.t, controller: :name,
+                              action: :show_name_description,
+                              id: @name.description.id) %> |
+          <%= link_with_query(:EDIT.t, controller: :name,
+                              action: :edit_name_description,
+                              id: @name.description.id) %>
         </span>
       </div>
       <div class="list-group">
@@ -125,7 +150,7 @@
     <% end %>
     <strong><%= :show_name_descriptions.t %>:</strong>
       [<%= link_with_query(:show_name_create_description.t, controller: :name,
-	                        action: :create_name_description, id: @name.id) %>]
+	                         action: :create_name_description, id: @name.id) %>]
     <div class="list-group">
       <div class="list-group-item">
         <% description_links.each do |desc| %>
@@ -145,7 +170,7 @@
                                 action: :create_name_description,
                                 id: @name.id,
                                 project: project.id,
-                                source: 'project') %><br>
+                                source: :project) %><br>
           <% end %>
         </div>
       </div>
@@ -158,7 +183,7 @@
    #  Show comments
    # ----------------------------------------
 %>
-<%= render(partial: 'comment/show_comments',
+<%= render(partial: "comment/show_comments",
            locals: {object: @name, controls: true, limit: nil}) %>
 <div class="col-xs-12">
   <%= show_object_footer(@name) %>

@@ -2,30 +2,40 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-rolfs_api_key:
+
+rolfs_api_key: # 1
   created_at: 2012-06-26 12:34:56
   verified: 2012-06-26 12:34:56
   last_used: 2014-03-23 16:57:27
-  num_uses: 0
+  num_uses: 10
   user: rolf
   key: bogus_api_key
   notes: For testing purpose’s only.
 
+marys_api_key: # 2
+  created_at: 2017-11-14 18:01:17
+  verified: 2017-11-14 18:01:18
+  last_used: 2017-11-14 18:01:19
+  num_uses: 0
+  user: mary
+  key: aSFGWQWER14kjhdfasd134k1dxASrfh
+  notes: Doesn't get used very often.
+
 # The next 3 fixtures are used to test whether sql collates accented letters.
 # Has nothing to do with APIs; This is just a convenient spot to add fixtures.
-api_key_u_1:
+api_key_u_1: # 3
   id: 1
   user_id: 1
   key: sort_test
   notes: u
 
-api_key_umlaut:
+api_key_umlaut: # 4
   id: 2
   user_id: 1
   key: sort_test
   notes: ü
 
-api_key_u_2:
+api_key_u_2: # 5
   id: 3
   user_id: 1
   key: sort_test

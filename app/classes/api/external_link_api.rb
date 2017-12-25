@@ -1,6 +1,5 @@
-# encoding: utf-8
 class API
-  # API queries on external_links table.
+  # API for ExternalLink
   class ExternalLinkAPI < ModelAPI
     self.model = ExternalLink
 
@@ -11,32 +10,44 @@ class API
 
     self.high_detail_includes = [
       :external_site,
-      :object,
+      :observation,
       :user
     ]
 
     def query_params
       {
         where:          sql_id_condition,
-        created_at:     parse_time_range(:created_at),
-        updated_at:     parse_time_range(:updated_at),
-        users:          parse_users(:user),
-        observations:   parse_observations(:observations),
-        external_sites: parse_external_sites(:external_sites),
-        url:            parse_string(:url)
+        created_at:     parse_range(:time, :created_at),
+        updated_at:     parse_range(:time, :updated_at),
+        users:          parse_array(:user, :user, help: :creator),
+        observations:   parse_array(:observation, :observation),
+        external_sites: parse_array(:external_site, :external_site),
+        url:            parse(:string, :url)
       }
     end
 
-    def build_object
-      raise NoMethodForAction("POST", action)
+    def create_params
+      {
+        observation:   parse(:observation, :observation),
+        external_site: parse(:external_site, :external_site),
+        url:           parse(:string, :url),
+        user:          @user
+      }
     end
 
-    def build_setter
-      raise NoMethodForAction("PUT", action)
+    def update_params
+      {
+        url: parse(:string, :set_url, not_blank: true)
+      }
     end
 
-    def delete
-      raise NoMethodForAction("DELETE", action)
+    def validate_create_params!(params)
+      raise MissingParameter.new(:observation)   unless params[:observation]
+      raise MissingParameter.new(:external_site) unless params[:external_site]
+      raise MissingParameter.new(:url)           if params[:url].blank?
+      return if params[:observation].can_edit?(@user)
+      return if @user.external_sites.include?(params[:external_site])
+      raise ExternalLinkPermissionDenied.new
     end
   end
 end

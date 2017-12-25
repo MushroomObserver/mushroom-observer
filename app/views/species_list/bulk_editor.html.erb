@@ -25,7 +25,7 @@
             <div class="id_and_name">
               <%= obs.id %>: <%= obs.format_name.t %>
             </div>
-            <%= text_field(:observation, :notes,                 index: obs.id, object: obs, class: "form-control", style: "width:40em", data: {tooltip:true}, title: :Notes.l) %><br/>
+            <%= text_field(:observation, :other_notes,           index: obs.id, object: obs, class: "form-control", style: "width:40em", data: {tooltip:true}, title: :Notes.l) %><br/>
             <%= text_field(:observation, :when_str,              index: obs.id, object: obs, class: "form-control", style: "width:8em",  data: {tooltip:true}, title: :Date.l) %>
             <%= text_field(:observation, :place_name,            index: obs.id, object: obs, class: "form-control", style: "width:40em", data: {tooltip:true}, title: :Location.l) %>
             <%= text_field(:observation, :lat,                   index: obs.id, object: obs, class: "form-control", style: "width:6em",  data: {tooltip:true}, title: :Latitude.l) %>
@@ -130,7 +130,7 @@
 
 <% first_id = @observations.first.id
   turn_into_location_auto_completer("observation_#{first_id}_place_name", update_primer_on_blur: true)
-  turn_into_menu_auto_completer("observation_#{first_id}_notes",    primer: @observations.map(&:notes),    update_primer_on_blur: true)
+  turn_into_menu_auto_completer("observation_#{first_id}_other_notes", primer: @observations.map(&:other_notes),    update_primer_on_blur: true)
   turn_into_menu_auto_completer("observation_#{first_id}_when_str", primer: @observations.map(&:when_str), update_primer_on_blur: true)
   turn_into_menu_auto_completer("observation_#{first_id}_lat",      primer: @observations.map(&:lat),      update_primer_on_blur: true)
   turn_into_menu_auto_completer("observation_#{first_id}_long",     primer: @observations.map(&:long),     update_primer_on_blur: true)
@@ -139,7 +139,7 @@
 <% for obs in @observations %>
   <% if obs.id != first_id
     reuse_auto_completer("observation_#{first_id}_place_name", "observation_#{obs.id}_place_name")
-    reuse_auto_completer("observation_#{first_id}_notes",      "observation_#{obs.id}_notes")
+    reuse_auto_completer("observation_#{first_id}_other_notes", "observation_#{obs.id}_other_notes")
     reuse_auto_completer("observation_#{first_id}_when_str",   "observation_#{obs.id}_when_str")
     reuse_auto_completer("observation_#{first_id}_lat",        "observation_#{obs.id}_lat")
     reuse_auto_completer("observation_#{first_id}_long",       "observation_#{obs.id}_long")

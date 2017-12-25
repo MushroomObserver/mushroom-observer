@@ -11,20 +11,20 @@
   <%= :show_name_content_status.t %>: <%= review_as_string(desc.review_status) %><br/>
   <% if desc.reviewer %>
     <span class="HelpNote">
-      <%= indent + '(' + :show_name_latest_review.t(
-        :date => desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
-        :user => user_link(desc.reviewer, desc.reviewer.login)
-      ) + ')' %>
+      <%= indent + "(" + :show_name_latest_review.t(
+        date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
+        user: user_link(desc.reviewer, desc.reviewer.login)
+      ) + ")" %>
     </span><br/>
   <% end %>
 
   <% if reviewer? %>
-    <%= indent + link_with_query(:review_unvetted.t, :action => 'set_review_status',
-          :value => :unvetted, :id => desc.id) %><br/>
-    <%= indent + link_with_query(:review_vetted.t, :action => 'set_review_status',
-          :value => :vetted, :id => desc.id) %><br/>
-    <%= indent + link_with_query(:review_inaccurate.t, :action => 'set_review_status',
-          :value => :inaccurate, :id => desc.id) %><br/>
+    <%= indent + link_with_query(:review_unvetted.t, action: :set_review_status,
+          value: :unvetted, id: desc.id) %><br/>
+    <%= indent + link_with_query(:review_vetted.t, action: :set_review_status,
+          value: :vetted, id: desc.id) %><br/>
+    <%= indent + link_with_query(:review_inaccurate.t, action: :set_review_status,
+          value: :inaccurate, id: desc.id) %><br/>
   <% end %><br/>
 <% end %>
 
@@ -46,6 +46,6 @@ for field in NameDescription.all_note_fields
 <center>
   <%= show_authors_and_editors(desc) %>
   <% if desc.license %>
-    <%= render(:partial => "shared/form_#{desc.license.form_name}") %>
+    <%= render(partial: "shared/form_#{desc.license.form_name}") %>
   <% end %>
 </center>

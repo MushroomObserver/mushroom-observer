@@ -88,16 +88,16 @@ class ImageTest < UnitTestCase
   def test_project_ownership
     # NOT owned by Bolete project, but owned by Rolf
     img = images(:commercial_inquiry_image)
-    assert_true(img.has_edit_permission?(rolf))
-    assert_false(img.has_edit_permission?(mary))
-    assert_false(img.has_edit_permission?(dick))
+    assert_true(img.can_edit?(rolf))
+    assert_false(img.can_edit?(mary))
+    assert_false(img.can_edit?(dick))
 
     # IS owned by Bolete project, AND owned by Mary
     # (Dick is member of Bolete project)
     img = images(:in_situ_image)
-    assert_false(img.has_edit_permission?(rolf))
-    assert_true(img.has_edit_permission?(mary))
-    assert_true(img.has_edit_permission?(dick))
+    assert_false(img.can_edit?(rolf))
+    assert_true(img.can_edit?(mary))
+    assert_true(img.can_edit?(dick))
   end
 
   def test_validation

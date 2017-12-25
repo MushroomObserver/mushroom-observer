@@ -1,0 +1,218 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/bulk_name_change --user <user> --old <name> --new <name>
+#
+#  DESCRIPTION::
+#
+#    This is a prototype script for testing heuristics for an eventual bulk
+#    name change tool on the website.
+#
+#    It makes sure the new name is proposed for all observations for which
+#    the old name is the consensus name.  If not, the new name is proposed
+#    on behalf of the given user.
+#
+#    If the user has already voted on the old name, then the new name is
+#    given that vote.  Otherwise it gives it a vote at or just above the
+#    current consensus vote.  Then it votes down the old name to As If!
+#
+#    It totally ignores synonymy and any other considerations at present.
+#    It prints out a list of observations and the following:
+#
+#      obs_id
+#      users_vote_for_old_name
+#      users_vote_for_new_name
+#      consensus_for_old_name
+#      consensus_for_new_name
+#      consensus_for_new_consensus_name
+#      new_consensus_name
+#
+#    I may decide to prevent voting down the old name if it results in the
+#    new consensus name being neither the old nor the new name.
+#
+################################################################################
+
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
+require File.expand_path("../../app/extensions/extensions.rb", __FILE__)
+require "optparse"
+
+def parse_options
+  user_id     = nil
+  old_name_id = nil
+  new_name_id = nil
+
+  OptionParser.new do |opt|
+    opt.on("-u", "--user USER", "ID or login of user who is changing name.") \
+      { |o| user_id = o }
+    opt.on("-o", "--old NAME", "ID, text_name or search_name of old name.") \
+      { |o| old_name_id = o }
+    opt.on("-n", "--new NAME", "ID, text_name or search_name of new name.") \
+      { |o| new_name_id = o }
+    opt.on("-c", "--comment SUMMARY/BODY", "Text of comment to add to each " \
+           "observation that we propose the new name for.") \
+      { |o| @comment = o }
+    opt.on("-r", "--refs TEXT", "Text to add to references section of each " \
+           "name proposal made.") \
+      { |o| @refs = o }
+  end.parse!
+
+  @user     = user_id.to_s =~ /\D/ ?
+              User.where(login: user_id).first : User.safe_find(user_id)
+  @old_name = Name.safe_find(old_name_id) ||
+              Name.find_by_search_name(old_name_id) ||
+              Name.where(text_name: old_name_id).to_a
+  @new_name = Name.safe_find(new_name_id) ||
+              Name.find_by_search_name(new_name_id) ||
+              Name.where(text_name: new_name_id).to_a
+
+  if @old_name.is_a?(Array) && @old_name.count > 1
+    raise("Multiple matches for #{old_name_id.inspect}: " \
+          "#{@old_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+  end
+  if @new_name.is_a?(Array) && @new_name.count > 1
+    raise("Multiple matches for #{new_name_id.inspect}: " \
+          "#{@new_name.map(&:search_name).map(&:inspect).join(", ")}.\n")
+  end
+
+  @old_name = @old_name.first if @old_name.is_a?(Array)
+  @new_name = @new_name.first if @new_name.is_a?(Array)
+
+  raise("Couldn't find user #{user_id.inspect}.\n")         unless @user
+  raise("Couldn't find old name #{old_name_id.inspect}.\n") unless @old_name
+  raise("Couldn't find new name #{new_name_id.inspect}.\n") unless @new_name
+
+  puts "User: #{@user.login.inspect}"
+  puts "Old:  #{@old_name.search_name.inspect}"
+  puts "New:  #{@new_name.search_name.inspect}"
+  puts
+end
+
+def process_observation(obs)
+  print_observation(obs)
+  get_initial_state(obs)
+  @any_changes = false
+  print_initial_state
+  add_comment           unless @new_naming
+  propose_new_name      unless @new_naming
+  vote_on_new_name      unless @new_vote
+  vote_against_old_name unless @old_vote == -3.0
+  obs.calc_consensus    if @any_changes
+  print_result
+end
+
+def get_initial_state(obs)
+  @observation = obs
+  @cur_name    = obs.name
+  @old_naming  = obs.namings.select { |n| n.name == @old_name }.first
+  @new_naming  = obs.namings.select { |n| n.name == @new_name }.first
+  @cur_naming  = obs.namings.select { |n| n.name == @cur_name }.first
+  @old_score   = average_votes(@old_naming)
+  @new_score   = average_votes(@new_naming)
+  @cur_score   = obs.vote_cache
+  @old_vote    = users_vote(@old_naming)
+  @new_vote    = users_vote(@new_naming)
+  @cur_vote    = users_vote(@cur_naming)
+end
+
+def print_observation(obs)
+  name = obs.name.search_name
+  name = "(old name)" if obs.name == @old_name
+  name = "(new name)" if obs.name == @new_name
+  puts "http://mushroomobserver.org/#{obs.id} -- #{name}"
+end
+
+def print_initial_state
+  name = "(cur=#{@cur_score.inspect})"
+  name = "cur=#{@cur_score.inspect}/#{@cur_vote.inspect}" if
+    @cur_name != @old_name && @cur_name != @new_name
+  puts "  avg/user: " \
+       "old=#{@old_score.inspect}/#{@old_vote.inspect}, " \
+       "new=#{@new_score.inspect}/#{@new_vote.inspect}, " +
+       name
+end
+
+def print_result
+  name = @observation.name
+  if name != @cur_name && name == @new_name
+    puts "  SUCCESS -- changed to new name"
+  elsif name != @cur_name && name == @old_name
+    puts "  FAILED -- accidentally changed to old name!!"
+  elsif name != @cur_name
+    puts "  FAILED -- accidentally changed to #{name.search_name.inspect}"
+  elsif name == @old_name
+    puts "  FAILED -- consensus is stuck on old name"
+  elsif name != @new_name
+    puts "  FAILED -- consensus is stuck on #{name.search_name.inspect}"
+  else
+    puts "  SUCCESS -- stayed on new name"
+  end
+  puts
+end
+
+def propose_new_name
+  return if @new_naming
+  puts "  > proposing new name..."
+  @new_naming = Naming.new(
+    observation: @observation,
+    name: @new_name,
+    user: @user
+  )
+  @new_naming.set_reasons(2 => @refs) if @refs
+  @new_naming.save
+  @observation.reload
+  @any_changes = true
+end
+
+def vote_on_new_name
+  return unless @new_naming
+  vote = @old_vote || @old_score.try(&:ceil) || 1
+  puts "  > voting #{vote} on new name..."
+  @observation.change_vote(@new_naming, vote, @user)
+  @any_changes = true
+end
+
+def vote_against_old_name
+  return unless @old_naming
+  puts "  > voting -3 on old name..."
+  @observation.change_vote(@old_naming, -3, @user)
+  @any_changes = true
+end
+
+def add_comment
+  summary, body = @comment.split(/\//, 2)
+  puts "  > adding comment #{summary.inspect}..."
+  Comment.create!(
+    target:  @observation,
+    user:    @user,
+    summary: summary,
+    comment: body
+  )
+end
+
+def average_votes(naming)
+  return nil unless naming
+  sum = num = 0.0
+  naming.votes.each do |vote|
+    weight = vote.user.contribution
+    sum += vote.value * weight
+    num += weight
+  end
+  num > 0 ? sum / num : nil
+end
+
+def users_vote(naming)
+  return nil unless naming
+  naming.votes.each do |vote|
+    return vote.value if vote.user == @user
+  end
+  nil
+end
+
+parse_options
+$stdout.sync = true
+Observation.where(name: @old_name).each do |obs|
+  process_observation(obs)
+end
+exit 0

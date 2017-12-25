@@ -23,8 +23,7 @@
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  text_name::      Alias for +title+ for debugging.
-#  Proj.has_edit_permission?:: Check if User has permission to edit an
-#                              Observation/Image/etc.
+#  Proj.can_edit?:: Check if User has permission to edit an Obs/Image/etc.
 #
 #  ==== Logging
 #  log_create::        Log creation.
@@ -82,23 +81,16 @@ class Project < AbstractModel
   end
 
   # Check if user has permission to edit a given object.
-  def self.has_edit_permission?(obj, user)
-    result = false
-    if user
-      if user.id == obj.user_id
-        result = true
-      elsif !obj.projects.empty?
-        # group_ids = user.user_groups_singular_ids # Rails 3 only
-        group_ids = user.user_groups.map(&:id)
-        obj.projects.each do |project|
-          if group_ids.member?(project.user_group_id)
-            result = true
-            break
-          end
-        end
-      end
+  def self.can_edit?(obj, user)
+    return false unless user
+    return true  if obj.user_id == user.id
+    return false if obj.projects.empty?
+    group_ids = user.user_groups.map(&:id)
+    obj.projects.each do |project|
+      return true if group_ids.member?(project.user_group_id) ||
+                     group_ids.member?(project.admin_group_id)
     end
-    result
+    false
   end
 
   def add_images(imgs)

@@ -1,48 +1,51 @@
 <% # Section for handling deprecated, new and multiple names on naming creation and edit pages
 if !what.blank?
-  if valid_names %>
-    <div class="alert-warning">
+  if valid_names
+    flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-warning max-width-text" id="name_messages">
       <span class="Data"><%= if suggest_corrections
-        :form_naming_not_recognized.t(:name => what)
+        :form_naming_not_recognized.t(name: what)
       elsif parent_deprecated
-        :form_naming_parent_deprecated.t(:parent => parent_deprecated.display_name,
-                                         :rank => :"rank_#{parent_deprecated.rank.to_s.downcase}")
+        :form_naming_parent_deprecated.t(parent: parent_deprecated.display_name,
+                                         rank: :"rank_#{parent_deprecated.rank.to_s.downcase}")
       else
-        :form_naming_deprecated.t(:name => what)
+        :form_naming_deprecated.t(name: what)
       end %></span><br/>
       <% if valid_names.length > 0 %>
         <span class="HelpNote"><%= if suggest_corrections
-          :form_naming_correct_help.t(:button => button_name, :name => what)
+          :form_naming_correct_help.t(button: button_name, name: what)
         else
-          :form_naming_deprecated_help.t(:button => button_name, :name => what)
+          :form_naming_deprecated_help.t(button: button_name, name: what)
         end %></span><br/>
         <% if !suggest_corrections and !parent_deprecated %>
           <span class="Data"><%= :form_naming_valid_synonyms.t %>:<br/>
         <% end %>
           <% for n in valid_names %>
-            <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
+            <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
             <%= n.display_name.t %><br/>
           <% end %>
         </span>
       <% else %>
-        <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
+        <span class="HelpNote"><%= :form_naming_not_recognized_help.t(button: button_name) %></span><br/>
       <% end %>
     </div>
-  <% elsif names && names.length == 0 %>
-    <div class="Errors">
+  <% elsif names && names.length == 0
+    flash_error(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
-        <%= :form_naming_not_recognized.t(:name => what) %>
+        <%= :form_naming_not_recognized.t(name: what) %>
       </span><br/>
       <span class="HelpNote">
-        <%= :form_naming_not_recognized_help.t(:button => button_name) %>
+        <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/>
     </div>
-  <% elsif names && names.length > 1 %>
-    <div class="Errors">
+  <% elsif names && names.length > 1
+    flash_error(:form_observations_there_is_a_problem_with_name.t) %>
+    <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
-        <%= :form_naming_multiple_names.t(:name => what) %>:<br/>
+        <%= :form_naming_multiple_names.t(name: what) %>:<br/>
         <% for n in names %>
-          <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
+          <%= indent + radio_button(:chosen_name, :name_id, n.id) %>
           <%= n.display_name.t %> (<%= n.observations.size %>)<br/>
         <% end %>
       </span>

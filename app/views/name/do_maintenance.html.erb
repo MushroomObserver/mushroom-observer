@@ -1,4 +1,4 @@
-<% @title = 'MO Maintenance' %>
+<% @title = "MO Maintenance" %>
 
 <p>Sorry, this action no longer seems to exist...</p>
   
@@ -9,7 +9,8 @@
   <br/>
   
   <% for datum in @data %>
-    <%= link_to(datum[:name].t, :controller => 'name', :action => 'show_name', :id => datum[:id]) %>
+    <%= link_to(datum[:name].t, controller: :name, action: :show_name,
+                id: datum[:id]) %>
     <%= datum[:login] %><br/>
   <% end %>
 <% end %>

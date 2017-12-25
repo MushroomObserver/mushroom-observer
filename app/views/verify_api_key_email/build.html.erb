@@ -2,11 +2,11 @@
   activate_url = "#{MO.http_domain}/account/activate_api_key/#{@api_key.id}"
   manager_url = "#{MO.http_domain}/account/api_keys"
   intro = :email_verify_api_key_intro.tp(
-    :user => @user.login,
-    :other_user => @other_user.login,
-    :app => @api_key.notes,
-    :activate_link => 'xxx',
-    :manager_link => 'yyy'
+    user: @user.login,
+    other_user: @other_user.login,
+    app: @api_key.notes,
+    activate_link: "xxx",
+    manager_link: "yyy"
   )
   intro.gsub!(/xxx/, link_to(activate_url, activate_url))
   intro.gsub!(/yyy/, link_to(manager_url, manager_url))

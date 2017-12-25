@@ -2,10 +2,6 @@ From: news@mushroomobserver.org
 Reply-To: no-reply@mushroomobserver.org
 To: rolf@collectivesource.com
 Subject: [MO] Observation #<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %> May Be Agaricus campestris L.
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
 Name Proposal
 

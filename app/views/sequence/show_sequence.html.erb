@@ -1,7 +1,22 @@
 <%
   @title = @sequence.unique_format_name
-  tabs = show_sequence_right_tabs(@sequence)
-  @tabsets = { right: draw_tab_set(tabs) }
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :observation),
+            @sequence.observation.show_link_args)
+  ]
+  if check_permission(@sequence)
+    tabs << link_with_query(:edit_object.t(type: :sequence),
+                            action: :edit_sequence, id: @sequence.id, back: :show)
+    tabs << link_with_query(:destroy_object.t(type: :sequence),
+                            {action: :destroy_sequence, id: @sequence.id, back: :index},
+                            data: {confirm: :are_you_sure.t})
+  end
+
+  @tabsets = {
+    pager_for: @sequence,
+    right: draw_tab_set(tabs)
+  }
 %>
 
 <%= render(partial: "observation_title",
@@ -37,7 +52,7 @@
         </tr>
         <tr>
           <td class="bold"><%= :NOTES.t %>:</td>
-          <td><%= @sequence.notes %></td>
+          <td><%= @sequence.notes.tp %></td>
         </tr>
       </tbody>
     </table>

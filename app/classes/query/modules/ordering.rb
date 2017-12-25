@@ -58,11 +58,12 @@ module Query::Modules::Ordering
         "#{table}.title ASC"
       end
 
-    when "title", "login", "summary", "copyright_holder", "where", "herbarium_label"
+    when "title", "login", "summary", "copyright_holder", "where",
+         "initial_det", "accession_number"
       "#{table}.#{by} ASC" if columns.include?(by)
 
     when "user"
-      if columns.include?("user_id")
+      if columns.include?("user_id") || model == Herbarium
         add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
@@ -110,7 +111,9 @@ module Query::Modules::Ordering
         add_join(:'images.thumb_image', :image_votes)
         where << "images.user_id = observations.user_id"
         where << "image_votes.user_id = observations.user_id"
-        "image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC"
+        "image_votes.value DESC, " \
+        "images.vote_cache DESC, " \
+        "observations.vote_cache DESC"
       end
 
     when "observation"
@@ -121,6 +124,32 @@ module Query::Modules::Ordering
 
     when "original_name"
       "images.original_name ASC" if model == Image
+
+    when "url"
+      "external_links.url ASC" if model == ExternalLink
+
+    when "herbarium_name"
+      add_join(:herbaria)
+      "herbaria.name ASC"
+
+    when "herbarium_label"
+      "herbarium_records.initial_det ASC, " \
+      "herbarium_records.accession_number ASC"
+
+    when "name_and_number"
+      "collection_numbers.name ASC, collection_numbers.number ASC"
+
+    when "code"
+      where << "herbaria.code != ''"
+      "herbaria.code ASC"
+
+    when "code_then_name"
+      "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
+
+    when "records"
+      add_join(:herbarium_records)
+      self.group = "herbaria.id"
+      "count(herbarium_records.id) DESC"
 
     when "id" # (for testing)
       "#{table}.id ASC"

@@ -1,4 +1,4 @@
-<% can_delete = herbarium.can_delete_curator?(@user) || in_admin_mode? %>
+<% can_delete = herbarium.curator?(@user) || in_admin_mode? %>
 
 <table class="table-striped table-curators">
   <thead>
@@ -13,8 +13,9 @@
       <tr>
         <% if can_delete %>
           <td>
-            <%= link_to("X ", {action: :delete_curator, id: herbarium.id, user: user.id},
-                             {data: {confirm: :are_you_sure.t}}) %>
+            <%= link_to("X ",
+                  {action: :delete_curator, id: herbarium.id, user: user.id},
+                  {data: {confirm: :are_you_sure.t}}) %>
           </td>
         <% end %>
         <td>

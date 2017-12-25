@@ -143,7 +143,10 @@ class Symbol
       end
       result = "[:#{self}#{args_str}]"
     end
-    result.html_safe
+    # (I guess some "factory-installed" translations can actually return
+    # Hashes instead of strings.  Don't ask me.  This just prevents it from
+    # crashing in those cases at least.)
+    result.is_a?(Hash) ? "".html_safe : result.html_safe
   end
 
   # Run +localize+ in test mode.

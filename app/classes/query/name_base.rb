@@ -1,6 +1,8 @@
 module Query
   # Common code shared by all name queries.
   class NameBase < Query::Base
+    include Query::Initializers::ContentFilters
+
     def model
       Name
     end
@@ -29,16 +31,17 @@ module Query
         classification_has?: :string,
         has_notes?:          :boolean,
         notes_has?:          :string,
-        has_comments?:       { string: [:yes] },
+        has_comments?:       { boolean: [true] },
         comments_has?:       :string,
+        has_observations?:   { boolean: [true] },
         has_default_desc?:   :boolean,
         join_desc?:          { string: [:default, :any] },
-        desc_type?:          :string,
+        desc_type?:          [{string: [Description.all_source_types]}],
         desc_project?:       [:string],
         desc_creator?:       [User],
         desc_content?:       :string,
         ok_for_export?:      :boolean
-      )
+      ).merge(content_filter_parameter_declarations(Name))
     end
 
     def initialize_flavor
@@ -115,10 +118,11 @@ module Query
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.notes)"
+          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
         )
         add_join(:comments)
       end
+      add_join(:observations) if params[:has_observations]
       initialize_model_do_boolean(
         :has_default_desc,
         "names.description_id IS NOT NULL",
@@ -148,6 +152,7 @@ module Query
       fields = NameDescription.all_note_fields
       fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
       initialize_model_do_search(:desc_content, "CONCAT(#{fields.join(",")})")
+      initialize_content_filters(Name)
       super
     end
 

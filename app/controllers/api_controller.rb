@@ -24,12 +24,28 @@ class ApiController < ApplicationController
     rest_query(:api_key)
   end
 
+  def collection_numbers
+    rest_query(:collection_number)
+  end
+
   def comments
     rest_query(:comment)
   end
 
   def external_links
     rest_query(:external_link)
+  end
+
+  def external_sites
+    rest_query(:external_site)
+  end
+
+  def herbaria
+    rest_query(:herbarium)
+  end
+
+  def herbarium_records
+    rest_query(:herbarium_record)
   end
 
   def images

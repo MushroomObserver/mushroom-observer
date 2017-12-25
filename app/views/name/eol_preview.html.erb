@@ -11,5 +11,5 @@ for name in @names.select(&:ok_for_export)
   </div>
 <% end %>
 <p>
-  <%= :eol_preview_name_count.t :count => @names.length %><br/>
+  <%= :eol_preview_name_count.t(count: @names.length) %><br/>
 </p>

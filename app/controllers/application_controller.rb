@@ -256,7 +256,7 @@ class ApplicationController < ActionController::Base
 
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by(locale: I18n.locale)
+    @language = Language.find_by_locale(I18n.locale)
     if @user && @language &&
        (!@language.official || reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -450,8 +450,7 @@ class ApplicationController < ActionController::Base
   end
 
   def editable_by_user?(obj)
-    obj.respond_to?(:has_edit_permission?) &&
-      obj.has_edit_permission?(User.current)
+    obj.try(&:can_edit?)
   end
 
   def obj_is_user?(obj)
@@ -562,14 +561,6 @@ class ApplicationController < ActionController::Base
   #
   ##############################################################################
 
-  # Get sorted list of locale codes (String's) that we have translations for.
-  def all_locales
-    Dir.glob(::Rails.root.to_s + "/config/locales/*.yml").sort.map do |file|
-      file.sub(/.*?(\w+-\w+).yml/, '\\1')
-    end
-  end
-  helper_method :all_locales
-
   # Before filter: Decide which locale to use for this request.  Sets the
   # Globalite default.  Tries to get the locale from:
   #
@@ -580,16 +571,16 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    code = specified_locale || MO.default_locale
+    lang = Language.find_by_locale(specified_locale || MO.default_locale)
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    change_locale_if_needed(code)
+    change_locale_if_needed(lang.locale)
 
     # Update user preference.
-    if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update(locale: I18n.locale.to_s)
+    if @user && @user.locale != lang.locale
+      @user.update(locale: lang.locale)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
@@ -626,8 +617,7 @@ class ApplicationController < ActionController::Base
     locale
   end
 
-  def change_locale_if_needed(code)
-    new_locale = code.split("-")[0]
+  def change_locale_if_needed(new_locale)
     return if I18n.locale.to_s == new_locale
     I18n.locale = new_locale
     session[:locale] = new_locale
@@ -994,6 +984,12 @@ class ApplicationController < ActionController::Base
     Query.safe_find(id)
   end
 
+  # Get instance of Query which is being passed to subsequent pages.
+  def passed_query
+    Query.safe_find(query_params[:q].to_s.dealphabetize)
+  end
+  helper_method :passed_query
+
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query = nil)
@@ -1021,12 +1017,12 @@ class ApplicationController < ActionController::Base
   end
   helper_method :add_query_param
 
-  def redirect_with_query(args)
-    redirect_to(add_query_param(args))
+  def redirect_with_query(args, query = nil)
+    redirect_to(add_query_param(args, query))
   end
 
-  def url_with_query(args)
-    url_for(add_query_param(args))
+  def url_with_query(args, query = nil)
+    url_for(add_query_param(args, query))
   end
 
   def coerced_query_link(query, model)
@@ -1780,11 +1776,17 @@ class ApplicationController < ActionController::Base
   # Bad place for this, but need proper refactor to have a good place.
   def gather_users_votes(obs, user)
     obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] = 
+      votes[naming.id] =
         naming.votes.find { |vote| vote.user_id == user.id } ||
         Vote.new(value: 0)
     end
   end
+
+  # Return this request's URL without the transport or domain.
+  def request_action_and_params
+    request.url.sub(/^\w+:\/+[^\/]+/, "")
+  end
+  helper_method :request_action_and_params
 
   ##############################################################################
 

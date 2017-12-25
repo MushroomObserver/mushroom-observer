@@ -134,12 +134,4 @@ class Language < AbstractModel
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
-
-  def self.lang_from_locale(locale)
-    locale.to_s.split("-")[0]
-  end
-
-  def self.from_locale(locale)
-    Language.find_by_locale(lang_from_locale(locale))
-  end
 end

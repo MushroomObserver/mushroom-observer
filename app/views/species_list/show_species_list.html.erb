@@ -80,9 +80,8 @@
                         controller: :observer,
                         action: :checklist,
                         species_list_id: @species_list.id) %> |
-            <%= link_to(:species_list_show_print_labels.t,
-                        controller: :species_list, action: :print_labels,
-                        id: @species_list.id) %> |
+            <%= link_with_query(:species_list_show_print_labels.t,
+                                controller: :observer, action: :print_labels) %> |
             <%= link_with_query(:DOWNLOAD.t, controller: :observer,
                                             action: :download_observations) %>
           </div>

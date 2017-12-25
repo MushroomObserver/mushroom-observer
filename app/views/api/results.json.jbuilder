@@ -1,5 +1,5 @@
 json.version @api.version
-json.run_date @start_time
+json.run_date @start_time.utc
 json.user @api.user.id if @api.user
 
 unless @api.errors.any?(&:fatal)

@@ -1,6 +1,5 @@
-# encoding: utf-8
-
 class API
+  # API for ApiKey
   class ApiKeyAPI < ModelAPI
     self.model = ApiKey
 
@@ -9,45 +8,34 @@ class API
     self.put_page_length         = 1000
     self.delete_page_length      = 1000
 
-    self.high_detail_includes = [
-      :user
-    ]
-
-    def query_params
-      fail NoMethodForAction.new("GET", :api_keys)
-      # {
-      #   :created_at   => parse_time_ranges(:created_at),
-      #   :verified     => parse_time_ranges(:verified),
-      #   :last_used    => parse_time_ranges(:last_used),
-      #   :num_uses     => parse_integer_ranges(:num_uses),
-      #   :users        => parse_users(:user),
-      #   :notes        => parse_strings(:app),
-      # }
-    end
-
     def create_params
-      @for_user = parse_user(:for_user, default: @user)
+      @for_user = parse(:user, :for_user, help: :api_key_user) || @user
       {
-        notes: parse_string(:app),
-        user: @for_user,
+        notes:    parse(:string, :app, help: 1),
+        user:     @for_user,
         verified: (@for_user == @user ? Time.now : nil)
       }
     end
 
     def validate_create_params!(params)
-      fail MissingParameter.new(:app) if params[:notes].blank?
+      raise MissingParameter.new(:app) if params[:notes].blank?
     end
 
     def after_create(api_key)
-      if @for_user != @user
-        VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
-      end
+      return if @for_user == @user
+      VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
     end
 
-    def update_params
-      {
-        notes: parse_string(:set_notes)
-      }
+    def get
+      raise NoMethodForAction.new("GET", :api_keys)
+    end
+
+    def patch
+      raise NoMethodForAction.new("PATCH", :api_keys)
+    end
+
+    def delete
+      raise NoMethodForAction.new("DELETE", :api_keys)
     end
   end
 end

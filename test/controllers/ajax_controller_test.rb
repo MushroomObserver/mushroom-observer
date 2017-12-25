@@ -138,12 +138,12 @@ class AjaxControllerTest < FunctionalTestCase
                    map(&:where)
     m = m_loc_names + m_obs_wheres
 
-    expect = m.sort
+    expect = m.sort.uniq
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
     assert_equal(expect, @response.body.split("\n"))
 
-    expect = m.map { |x| Location.reverse_name(x) }.sort
+    expect = m.map { |x| Location.reverse_name(x) }.sort.uniq
     expect.unshift("M")
     good_ajax_request(:auto_complete,
                       type: :location, id: "Modesto", format: "scientific")

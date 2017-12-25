@@ -1,0 +1,21 @@
+<%= submit_tag(button.t, class: "btn center-block push-down") %>
+
+<% if @collection_number.observations.count > 1 %>
+  <div class="alert alert-warning push-down">
+    <%= :edit_affects_multiple_observations.t(type: :collection_number) %>
+  </div>
+<% end %>
+
+<div class="form-group push-down">
+  <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
+  <span class="HelpNote">(<%= :required.t %>)</span>
+  <%= text_field(:collection_number, :name, class: "form-control") %>
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:collection_number_number, :collection_number_number.t + ":") %>
+  <span class="HelpNote">(<%= :required.t %>)</span>
+  <%= text_field(:collection_number, :number, class:"form-control") %>
+</div>
+
+<%= submit_tag(button.t, class: "btn center-block push-down") %>

@@ -2,6 +2,7 @@
 # references for associations. Some associations for this fixture may be defined
 # in a fixture on the opposite side of the association.
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
 minimal_unknown_obs_comment_1: # 1
   created_at: 2006-03-02 21:14:00
   updated_at: 2006-03-02 21:14:00
@@ -28,3 +29,12 @@ detailed_unknown_obs_comment: # 3
   comment: ''
   target_type: Observation
   target: detailed_unknown_obs
+
+fungi_comment: # 4
+  created_at: 2017-11-16 00:32:00
+  updated_at: 2017-11-16 00:32:00
+  user: katrina
+  summary: Please do not change this name!
+  comment: It really messes things up.
+  target_type: Name
+  target: fungi

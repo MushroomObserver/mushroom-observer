@@ -1,65 +1,112 @@
 #  Controller for nucleotide Sequences
 #
-#  Actions
+#  Actions:
 #
-#    add_sequence::      Create new sequence and add to Observation
-#    destroy_sequence::  Destroy sequence
-#    edit_sequence::     Update sequence
-#    index_sequence::    List selected sequences, based on current Query
-#    show_sequence::     Display sequence details
-#
+#    index_sequence::    List selected sequences, based on current Query.
+#    show_sequence::     Display sequence details.
+#    create_sequence::   Create new sequence and add to Observation.
+#    destroy_sequence::  Destroy sequence.
+#    edit_sequence::     Update sequence.
 #
 class SequenceController < ApplicationController
-  before_action :login_required, except: [:show_sequence, :index_sequence]
-  before_action :pass_query_params
-  before_action :store_location
+  before_action :login_required, except: [
+    :index_sequence,
+    :list_sequences,
+    :sequence_search,
+    :observation_index,
+    :show_sequence,
+    :next_sequence,
+    :prev_sequence
+  ]
 
-  def add_sequence
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
+  def index_sequence # :nologin: :norobots:
+    query = find_or_create_query(:Sequence, by: params[:by])
+    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+  end
 
-    if !check_permission(@observation)
-      flash_warning(:permission_denied.t)
-      redirect_to_show_observation(@observation)
-    elsif request.method == "POST"
-      build_sequence
+  def list_sequences # :nologin: :norobots:
+    store_location
+    query = create_query(:Sequence, :all)
+    show_selected_sequences(query)
+  end
+
+  # Display list of Sequences whose text matches a string pattern.
+  def sequence_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) &&
+       (sequence = Sequence.safe_find(pattern))
+      redirect_to(action: :show_sequence, id: sequence.id)
+    else
+      query = create_query(:Sequence, :pattern_search, pattern: pattern)
+      show_selected_sequences(query)
     end
   end
 
+  def observation_index # :nologin: :norobots:
+    store_location
+    query = create_query(:Sequence, :for_observation,
+                         observation: params[:id].to_s)
+    @links = [
+      [:show_object.l(type: :observation),
+       Observation.show_link_args(params[:id])],
+      [:show_observation_add_sequence.l,
+       { action: :create_sequence, id: params[:id] }]
+    ]
+    show_selected_sequences(query, always_index: true)
+  end
+
+  def show_sequence # :nologin:
+    pass_query_params
+    store_location
+    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+  end
+
+  def next_sequence # :nologin: :norobots:
+    redirect_to_next_object(:next, Sequence, params[:id].to_s)
+  end
+
+  def prev_sequence # :nologin: :norobots:
+    redirect_to_next_object(:prev, Sequence, params[:id].to_s)
+  end
+
+  def create_sequence
+    store_location
+    pass_query_params
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless @observation
+    build_sequence if request.method == "POST"
+  end
+
   def edit_sequence
+    store_location
+    pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
-
+    figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
-      redirect_to_show_observation(@sequence.observation)
+      redirect_with_query(@sequence.observation.show_link_args)
     elsif request.method == "POST"
       save_edits
     end
   end
 
   def destroy_sequence
+    pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
-    observation = @sequence.observation
-
+    figure_out_where_to_go_back_to
     if check_permission(@sequence)
       @sequence.destroy
       flash_notice(:runtime_destroyed_id.t(type: Sequence, value: params[:id]))
     else
       flash_warning(:permission_denied.t)
     end
-
-    redirect_to_show_observation(observation)
-  end
-
-  def show_sequence
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-  end
-
-  def index_sequence
-    query = find_or_create_query(:Sequence, by: params[:by])
-    show_selected_sequences(query, id: params[:id].to_s, always_index: true)
+    if @back == "index"
+      redirect_with_query(action: :index_sequence)
+    else
+      redirect_with_query(@back_object.show_link_args)
+    end
   end
 
   ##############################################################################
@@ -72,7 +119,7 @@ class SequenceController < ApplicationController
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_to_show_observation
+      redirect_with_query(@observation.show_link_args)
     else
       flash_object_errors(@sequence)
     end
@@ -82,15 +129,15 @@ class SequenceController < ApplicationController
     @sequence.attributes = whitelisted_sequence_params
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@sequence.show_link_args)
+      redirect_with_query(@back_object.show_link_args)
     else
       flash_object_errors(@sequence)
     end
   end
 
-  def redirect_to_show_observation(observation = @observation)
-    redirect_with_query(controller: "observer",
-                        action: "show_observation", id: observation.id)
+  def figure_out_where_to_go_back_to
+    @back = params[:back]
+    @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 
   def show_selected_sequences(query, args = {})
@@ -98,11 +145,11 @@ class SequenceController < ApplicationController
              letters: "sequences.locus",
              num_per_page: 50 }.merge(args)
     @links ||= []
-    args[:sorting_links] = show_sequence_sorts
+    args[:sorting_links] = sequence_index_sorts
     show_index_of_objects(query, args)
   end
 
-  def show_sequence_sorts
+  def sequence_index_sorts
     [
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t],

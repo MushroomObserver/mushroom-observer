@@ -200,7 +200,7 @@ module SessionExtensions
   # Save response from last query on the page stack.
   def push_page(name = "")
     @page_stack ||= []
-    @page_stack.push(name: name, body: response.body)
+    @page_stack.push(name: name, path: path, body: response.body)
   end
 
   # Go back one or more times and restore a previous query result.  If called
@@ -218,7 +218,8 @@ module SessionExtensions
       fail("Missing page called #{name.inspect}!") if @page_stack.empty?
     end
     response.body = @page_stack.last[:body]
-    @html_document = HTML::Document.new(response.body)
+    request.env["PATH_INFO"] = @page_stack.last[:path]
+    @html_document = nil # cause rails to reparse document
     save_page
   end
 

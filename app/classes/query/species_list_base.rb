@@ -19,7 +19,7 @@ module Query
         title_has?:      :string,
         has_notes?:      :boolean,
         notes_has?:      :string,
-        has_comments?:   { string: [:yes] },
+        has_comments?:   { boolean: [true] },
         comments_has?:   :string
       )
     end
@@ -59,7 +59,7 @@ module Query
       unless params[:comments_has].blank?
         initialize_model_do_search(
           :comments_has,
-          "CONCAT(comments.summary,comments.notes)"
+          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
         )
         add_join(:comments)
       end

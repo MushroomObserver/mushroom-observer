@@ -2,8 +2,8 @@ json.id         object.id
 json.type       "species_list"
 json.title      object.title
 json.date       object.when
-json.created_at object.created_at
-json.updated_at object.updated_at
+json.created_at object.created_at.utc
+json.updated_at object.updated_at.utc
 json.notes      object.notes.to_s.tpl_nodiv
 if object.location
   json.location { json_detailed_object(json, object.location) }

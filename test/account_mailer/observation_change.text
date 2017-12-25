@@ -3,10 +3,6 @@ Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Observation Changed, Coprinus comatus (O.F. Mull.) Pers.
  (<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_obs) %>)
-Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
 Observation was Changed
 

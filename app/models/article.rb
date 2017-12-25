@@ -45,7 +45,7 @@ class Article < AbstractModel
 
   # used by RSS feed
   def text_name
-    title.to_s.t.strip_html
+    title.to_s.t.html_to_ascii
   end
 
   # used by MatrixBoxPresenter to show unorphaned obects

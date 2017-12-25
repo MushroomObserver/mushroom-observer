@@ -66,7 +66,7 @@ class TranslationController < ApplicationController
 
   def get_language_and_authorize_user
     locale = params[:locale] || I18n.locale
-    lang = Language.from_locale(locale)
+    lang = Language.find_by_locale(locale)
     if !lang
       fail(:edit_translations_bad_locale.t(locale: locale))
     elsif !@user

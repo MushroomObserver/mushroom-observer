@@ -6,7 +6,7 @@
                      action: :show_name, id: name.id)
     lines << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
                      mycoportal_url(name))
-    lines << link_to(name.text_name.t + " " + :show_name_on_mycobank.t,
+    lines << link_to(name.display_name.t + " " + :show_name_on_mycobank.t,
                      mycobank_url(name))
  end
 
@@ -41,8 +41,8 @@
         query = datum[:query]
         count = datum[:count]
         lines << link_to(:show_name_observations_of.t(name: name2.display_name),
-          add_query_param({ controller: "observer",
-                            action: "index_observation" }, query)) +
+          add_query_param({ controller: :observer,
+                            action: :index_observation }, query)) +
                    " (#{count})"
       end
     end
@@ -53,12 +53,12 @@
     query.save
     if data.length > 1
       lines << link_to(:show_name_all_observations.t,
-        add_query_param({controller: "observer",
-                         action: "index_observation"}, query)) + " (#{count})"
+        add_query_param({controller: :observer,
+                         action: :index_observation}, query)) + " (#{count})"
     else
       lines << link_to(:show_name_observations.t,
-        add_query_param({controller: "observer",
-                         action: "index_observation"}, query)) + " (#{count})"
+        add_query_param({controller: :observer,
+                         action: :index_observation}, query)) + " (#{count})"
     end
 
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
@@ -67,8 +67,8 @@
     if count > 0
       query.save
       lines << link_to(:show_name_other_observations.t,
-        add_query_param({controller: "observer",
-                         action: "index_observation"}, query)) + " (#{count})"
+        add_query_param({controller: :observer,
+                         action: :index_observation}, query)) + " (#{count})"
     end
 
     if genus = name.genus
@@ -77,16 +77,16 @@
       query.save if !browser.bot?
       if count > 1
         lines << link_to(:show_consensus_list_of_species.t(name: genus.display_name.t),
-          add_query_param({controller: "name", action: "index_name"},
+          add_query_param({controller: :name, action: :index_name},
             query)) + " (#{count})"
       end
     end
   end
 
   lines += list_descriptions(name) if name
-
-  result = lines.safe_join(safe_br)
 %>
 <div class="small">
-  <%=result%>
+  <% lines.each do |line| %>
+    <p><%= line %></p>
+  <% end %>
 </div>
