@@ -1,7 +1,6 @@
 # class with information about external websites
 class WebSequenceArchive
   class << self
-
     # on-line primary-source repositories (Archives) for nucleotide sequences
     # in menu order
     #   name    short name, used in drop-down menu
