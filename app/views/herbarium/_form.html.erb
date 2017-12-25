@@ -14,6 +14,7 @@
       <div class="form-inline">
         <%= label_tag(:herbarium_personal_user_name, :edit_herbarium_admin_make_personal.t) %>:
         <%= text_field(:herbarium, :personal_user_name, class: "form-control-xxx") %>
+        <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
       </div>
       <% if button != :CREATE %>
         <div class="well well-sm push-down help-block">
