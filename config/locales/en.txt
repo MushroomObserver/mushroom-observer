@@ -2267,7 +2267,7 @@
   edit_herbarium_admin_make_personal: Make this the personal herbarium for
   edit_herbarium_user_records: "User \"[name]\" has [num] records in this herbarium."
   edit_herbarium_no_herbarium_records: No herbarium records for this herbarium.
-  edit_herbarium_user_already_has_personal_herbarium: User \"[user]\" already has a personal herbarium called \"[herbarium]\".
+  edit_herbarium_user_already_has_personal_herbarium: "User \"[user]\" already has a personal herbarium called \"[herbarium]\"."
   edit_herbarium_successfully_made_personal: "Successfully made this the personal herbarium of \"[user]\"."
   edit_herbarium_successfully_made_nonpersonal: "Successfully made this nobody's personal herbarium."
 
