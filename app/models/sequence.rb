@@ -101,9 +101,12 @@ class Sequence < AbstractModel
 
   # url of NCBI page to create BLAST report for the sequence
   def blast_url
-    blast_query = blastable_by_accession? ? accession : bases
+    if blastable_by_accession?
+      "#{blast_url_prefix}#{accession}"
+    else
     # wrap QUERY in quotes because it can contain whitespace
-    %Q[#{blast_url_prefix}"#{blast_query}"]
+      %Q[#{blast_url_prefix}"#{bases}"]
+    end
   end
 
   def self.blast_url_prefix
