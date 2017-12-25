@@ -50,6 +50,12 @@
             <% end %>
           </td>
         </tr>
+        <tr align="center">
+          <td colspan="2" class="show-sequence-blast">
+            <%= link_to(:show_observation_blast_link.t,
+                        @sequence.blast_url, target: "_blank") %>
+          </td>
+        </tr>
         <tr>
           <td class="bold"><%= :NOTES.t %>:</td>
           <td><%= @sequence.notes.tp %></td>
