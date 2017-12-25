@@ -100,21 +100,25 @@
   <div class="col-xs-7">
     <% if @show_user.location %>
       <p>
-        <strong><%= :show_user_primary_location.t %>:</strong> <%= location_link(nil, @show_user.location) %>
+        <strong><%= :show_user_primary_location.t %>:</strong>
+        <%= location_link(nil, @show_user.location) %>
       </p>
     <% end %>
     <% if !@show_user.mailing_address.blank? %>
-      <strong><%= :show_user_mailing_address.t %>:</strong>
-      <%= @show_user.mailing_address %><br/>
+      <p>
+        <strong><%= :show_user_mailing_address.t %>:</strong>
+        <%= @show_user.mailing_address %>
+      </p>
+    <% end %>
+    <% if !@show_user.personal_herbarium.blank? %>
+      <p>
+        <strong><%= :show_user_personal_herbarium.t %>:</strong>
+        <%= link_to(@show_user.personal_herbarium.name,
+                    @show_user.personal_herbarium.show_link_args) %>
+      </p>
     <% end %>
     <% if !@show_user.notes.blank? %>
-      <table>
-        <tr>
-          <td>
-            <%= @show_user.notes.tpl %>
-          </td>
-        </tr>
-      </table>
+      <%= @show_user.notes.tpl %>
     <% end %>
   </div>
 
