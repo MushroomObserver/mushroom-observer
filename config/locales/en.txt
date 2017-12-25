@@ -130,22 +130,22 @@
 #
 #  Each entry is a *one-line* string. It must not contain a carriage return or
 #  line feed. To display a new line, use: \n, <br>, or <\br>.
-#  Example:
-#    entry: 1st line \n2nd line
+#  Example:  ""
+#    entry:  ""
 #  will display as
 #    1st line
 #    2nd line
 #
 #  The string can include html (without newline characters).
-#  Examples:
-#    entry: <b>bold</b> <i>italic</i> <u>underscore</u>
-#    entry: Use <a href="/observer/textile" target="_new">Textile</a>.
+#  Examples:  ""
+#    entry:  ""
+#    entry:  ""
 #
 #  The string can incorporate other entries by including those entries' labels.
 #  An entry which includes other labels must be dumbquoted.
-#  Example:
-#    quoted_entry:  Hello
-#    quoting_entry: "[:quoted_entry] there."
+#  Example:  ""
+#    quoted_entry:  ""
+#    quoting_entry:  ""
 #
 #  Then in the code,
 #    quoting_entry.t
@@ -155,7 +155,7 @@
 #  Within a dumbquoted entry, dumbquotes must be escaped: \"
 #  (Smartquotes must *not* be escaped.)
 #  Example
-#    entry: "\"dumbquoted\" “smartquoted”."
+#    entry:  ""
 #  will display as
 #    "dumbquoted" “smartquoted”.
 #
@@ -321,8 +321,8 @@
   rss_log: activity log
   RSS_LOGS: Activity Logs
   rss_logs: activity logs
-  SEQUENCE:  Sequence
-  sequence:  sequence
+  SEQUENCE: Sequence
+  sequence: sequence
   SEQUENCES: Sequences
   sequences: sequences
   SOURCE: Source
@@ -355,10 +355,10 @@
   votes: votes
 
   # Other common nouns.
-  ACCESSION:  Accession
-  ACCESSIONS:  Accessions
-  accession:  accession
-  accessions:  accessions
+  ACCESSION: Accession
+  ACCESSIONS: Accessions
+  accession: accession
+  accessions: accessions
   ACCOUNT: Account
   account: account
   ACCOUNTS: Accounts
@@ -380,8 +380,8 @@
   ALTITUDE: Elevation
   altitude: elevation
   # online database with nucleotide Sequence data
-  ARCHIVE:  Archive
-  archive:  archive
+  ARCHIVE: Archive
+  archive: archive
   AUTHORITY: Author
   authority: author
   AUTHORITYS: Authors
@@ -415,7 +415,7 @@
   DATES: Dates
   dates: dates
   # deposit of Sequence Bases in an Archive
-  DEPOSIT:  Deposit
+  DEPOSIT: Deposit
   EDITOR: Editor
   editor: editor
   EDITORS: Editors
@@ -1011,7 +1011,7 @@
 
   # These should not need any translation.
   log_article_created_at: "[:log_object_created_by_user(type=:article)]"
-  log_article_destroyed:  "[:log_object_destroyed_by_user(type=:article)]"
+  log_article_destroyed: "[:log_object_destroyed_by_user(type=:article)]"
   log_article_updated_at: "[:log_object_updated_by_user(type=:article)]"
   log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
   log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
@@ -1079,7 +1079,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "*Great News!*  Donations to support mushroomobserver.org can now be made on a tax-deductible basis!\n\"Mushroom Observer, Inc.\":/support/governance, has been recognized as a section ==501(c)(3)== public charity serving educational purposes.  Your donations will help us maintain free online access to all the mycological observations already recorded, and to continue to improve the platform to make the collected information even more useful.\n%(btn)\"*Donate Today!*\":/support/donate%"
+  app_banner_box: "Please donate in 2017 to support mushroomobserver.org.\nYour tax-deductible donations help maintain free online access to existing Observations and improve MO to make the collected information even more useful.\nPlease also consider including amounts for future years in your 2017 donation to be sure of itemizing tax deductions on those amounts.\nSee <a href=\"/article/show_article/5\">this article</a> for more information.\n%(btn)\"*Click Here to Donate Today!*\":/support/donate%"
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1560,7 +1560,7 @@
   # observer/news
   news_title: "Latest Release: April 17, 2017"
   news_header: This page provides notes on the latest releases and changes to [:app_title].
-  news_content: "[:news_content_pr_306] \n\n[:news_content_pr_301] \n\n[:news_content_pr_294] \n\n[:news_content_pr_291] \n\n[:news_content_pr_293] \n\n[:news_content_pr_276] \n\n[:news_content_pr_261] \n\n[:news_content_pr_258] \n\n[:news_content_pr_256] \n\n[:news_content_pr_249] \n\n[:news_content_pr_248] \n\n[:news_content_pr_247] \n\n[:news_content_pr_246] \n\n[:news_content_commit_efa11ea] \n\n[:news_content_pr_241] \n\n[:news_content_pr_240] \n\n[:news_content_pr_238] \n\n[:news_content_commit_22deee6] \n\n[:news_content_commit_33639d5] \n\n[:news_content_commit_96e27e9] \n\n[:news_content_pr_236] \n\n[:news_content_pr_235] \n\n[:news_content_pr_233] \n\n[:news_content_pr_232] \n\n[:news_content_pr_231] \n\n[:news_content_pr_230] \n\n[:news_content_pr_226] \n\n[:news_content_pr_224] \n\n[:news_content_pr_223] \n\n[:news_content_pr_221] \n\n[:news_content_pr_220] \n\n[:news_content_pr_219] \n\n[:news_content_pr_217] \n\n[:news_content_pr_216] \n\n[:news_content_pr_215] \n\n[:news_content_pr_213] \n\n[:news_content_pr_212] \n\n[:news_content_pr_208]"
+  news_content: "[:news_content_pr_306]\n\n[:news_content_pr_301]\n\n[:news_content_pr_294]\n\n[:news_content_pr_291]\n\n[:news_content_pr_293]\n\n[:news_content_pr_276]\n\n[:news_content_pr_261]\n\n[:news_content_pr_258]\n\n[:news_content_pr_256]\n\n[:news_content_pr_249]\n\n[:news_content_pr_248]\n\n[:news_content_pr_247]\n\n[:news_content_pr_246]\n\n[:news_content_commit_efa11ea]\n\n[:news_content_pr_241]\n\n[:news_content_pr_240]\n\n[:news_content_pr_238]\n\n[:news_content_commit_22deee6]\n\n[:news_content_commit_33639d5]\n\n[:news_content_commit_96e27e9]\n\n[:news_content_pr_236]\n\n[:news_content_pr_235]\n\n[:news_content_pr_233]\n\n[:news_content_pr_232]\n\n[:news_content_pr_231]\n\n[:news_content_pr_230]\n\n[:news_content_pr_226]\n\n[:news_content_pr_224]\n\n[:news_content_pr_223]\n\n[:news_content_pr_221]\n\n[:news_content_pr_220]\n\n[:news_content_pr_219]\n\n[:news_content_pr_217]\n\n[:news_content_pr_216]\n\n[:news_content_pr_215]\n\n[:news_content_pr_213]\n\n[:news_content_pr_212]\n\n[:news_content_pr_208]"
 
   # observer/news individual updates
   news_content_pr_306: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/306\" target=\"_new\">PR #306</a> (April 17, 2017) Allow removal of author from Name; allow Group or Clade authored/unauthored Name pairs."
@@ -1652,7 +1652,7 @@
 
   prefs_notes_template: Observation Notes Template
   notes_template: "[:prefs_notes_template]"
-  prefs_notes_template_explanation: "Comma-separated list of Notes sub-headings for the Create Observation page."
+  prefs_notes_template_explanation: Comma-separated list of Notes sub-headings for the Create Observation page.
   prefs_notes_template_no_other: must not include a heading named “[part]”
   prefs_notes_template_no_dups: contains duplicate heading “[part]”
   prefs_privacy: Privacy Settings
@@ -1895,8 +1895,8 @@
   show_observation_create_specimen: Add Herbarium Specimen
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
-  show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
-  show_observation_add_sequence: "Add [:SEQUENCE]"
+  show_observation_remove_link_dialog: Are you sure you want to remove this link?
+  show_observation_add_sequence: Add [:SEQUENCE]
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1955,7 +1955,7 @@
   show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
 
   # sequence
-  sequence_edit_title: "Editing [name]"
+  sequence_edit_title: Editing [name]
 
   # account/signup
   signup_title: Account signup
@@ -1977,11 +1977,11 @@
 
   # species_list/add_remove_observations
   species_list_add_remove_title: Add or Remove Observations from Species List
-  species_list_add_remove_cancel: "Cancel (back to observation index)"
+  species_list_add_remove_cancel: Cancel (back to observation index)
   species_list_add_remove_body: Adding or removing [num] observation(s) to/from species list. Enter title or id of target species list. Don't worry, it will ignore observations already added or removed from the list.
   species_list_add_remove_label: Target species list
-  species_list_add_remove_add_success: "Successfully added [num] observation(s) to species list."
-  species_list_add_remove_remove_success: "Successfully removed [num] observation(s) from species list."
+  species_list_add_remove_add_success: Successfully added [num] observation(s) to species list.
+  species_list_add_remove_remove_success: Successfully removed [num] observation(s) from species list.
   species_list_add_remove_no_query: Missing observation query results, or query has expired.
   species_list_add_remove_bad_name: "Unrecognized species list id or title: [name]"
 
@@ -2032,19 +2032,19 @@
   species_list_upload_help: A species list can either be a simple text file with each name on its own line, or the 'list' format generated by the Name species listing program.
 
   # sequence/add_sequence
-  sequence_add_title:    "Add [:SEQUENCE]"
-  sequence_add_edit:     "[:image_add_edit]"
+  sequence_add_title: Add [:SEQUENCE]
+  sequence_add_edit: "[:image_add_edit]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
-  form_sequence_locus:      "[:LOCUS] (required)"
-  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples: \n&nbsp;&nbsp; ITS <br>&nbsp;&nbsp; multi-locus <br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence"
-  form_sequence_bases:      "[:BASES] ([:BASES] and/or [:DEPOSIT] required)"
+  form_sequence_locus: "[:LOCUS] (required)"
+  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp; ITS <br>&nbsp;&nbsp; multi-locus <br>&nbsp;&nbsp; LSU large subunit ribosomal RNA gene, partial sequence"
+  form_sequence_bases: "[:BASES] ([:BASES] and/or [:DEPOSIT] required)"
   form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
   form_sequence_bases_format: "<a href=[help_url]>FASTA or Bare Sequence format</a>"
-  form_sequence_archive_help: "On-line, public database with [:sequence] data for this [:OBSERVATION]."
-  form_sequence_accession:      "[:ACCESSION] number/code"
-  form_sequence_accession_help: "Examples: \n&nbsp;&nbsp; KT968655\n&nbsp;&nbsp; UDB024324"
+  form_sequence_archive_help: On-line, public database with [:sequence] data for this [:OBSERVATION].
+  form_sequence_accession: "[:ACCESSION] number/code"
+  form_sequence_accession_help: "Examples:\n&nbsp;&nbsp; KT968655\n&nbsp;&nbsp; UDB024324"
   form_sequence_valid_deposit: "[:DEPOSIT] requires both [:ARCHIVE] and [:ACCESSION]"
 
   # observer/users_by_contribution
@@ -2116,14 +2116,14 @@
   ### news Article ###
   #   news Article Fields
   article_title: Title
-  article_body:  Body
+  article_body: Body
 
   #   news Article Actions
   # article/create_article
   create_article_title: "[:create_object(type=:article)]"
   article_body_required: "[:article_body] [:REQUIRED]"
   article_title_required: "[:article_title] [:REQUIRED]"
-  form_article_title_help: "This field will appear in the Activity Feed."
+  form_article_title_help: This field will appear in the Activity Feed.
 
   # article/show_article
   show_article: "[:show_object(type=:article)]"
@@ -2268,7 +2268,7 @@
   donors_title: The Mushroom Observer Community Thanks Our Donors
   donors_tab: Show Donors
   donate_thanks: Thank you for your interest in donating to Mushroom Observer!
-  donate_explanation: Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the "Confirm" button below or by check made payable to "Mushroom Observer, Inc." and sent to:\n\nMushroom Observer\nc/o Nathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nDonors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
+  donate_explanation: "Tax deductible donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the \"Confirm\" button below or by check made payable to \"Mushroom Observer, Inc.\" and sent to:\n\nMushroom Observer\nc/o Nathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\nDonors are normally acknowledged by name on the \"Mushroom Observer Donors Page\":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please \"send us a comment\":/observer/ask_webmaster_question."
 
   donate_fine_print: "\"http://www.mushroomobserver.org\":/ is operated by \"Mushroom Observer, Inc.\":/support/governance for educational purposes. Mushroom Observer, Inc. is a public charity described under section ==501(c)(3)== of the Internal Revenue Code (see \"IRS Determination Letter\":/doc/mo-determination.pdf). Donations to Mushroom Observer, Inc. are allowable as itemized deductions for federal income tax purposes.  To substantiate the amount of your deductible donation, you will receive an email acknowledgement from Mushroom Observer, Inc. of the amount and date of your donation."
 
@@ -2281,7 +2281,7 @@
 
   # support/governance
   governance_title: Governance of the Mushroom Observer
-  governance: The "Mushroom Observer website":/ is owned and operated by the Massachusetts based non-profit, Mushroom Observer, Inc. - specifically the domain, mushroomobserver.org, as well as all relevant source code copyrights are owned by Mushroom Observer, Inc. The images and user entered text on the site are owned by their respective authors and are licensed for use under Creative Commons licenses as described on the "Introduction":/observer/intro page.\n\nMushroom Observer, Inc. was organized based on its "articles of organization":/doc/mo-articles.pdf and operates under its "bylaws":/doc/mo-bylaws.pdf which may be revised from time to by its Board of Directors. Mushroom Observer, Inc. has been "recognized as a section ==501(c)(3)== public charity":/doc/mo-determination.pdf serving educational purposes. If you have questions about the governance of the site or need to get in touch with members of the Board of Directors please "send us a comment":/observer/ask_webmaster_question.
+  governance: "The \"Mushroom Observer website\":/ is owned and operated by the Massachusetts based non-profit, Mushroom Observer, Inc. - specifically the domain, mushroomobserver.org, as well as all relevant source code copyrights are owned by Mushroom Observer, Inc. The images and user entered text on the site are owned by their respective authors and are licensed for use under Creative Commons licenses as described on the \"Introduction\":/observer/intro page.\n\nMushroom Observer, Inc. was organized based on its \"articles of organization\":/doc/mo-articles.pdf and operates under its \"bylaws\":/doc/mo-bylaws.pdf which may be revised from time to by its Board of Directors. Mushroom Observer, Inc. has been \"recognized as a section ==501(c)(3)== public charity\":/doc/mo-determination.pdf serving educational purposes. If you have questions about the governance of the site or need to get in touch with members of the Board of Directors please \"send us a comment\":/observer/ask_webmaster_question."
 
   # support/thanks
   thanks_title: Thanks for Your Support!
@@ -2351,7 +2351,7 @@
   advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered Observations
   advanced_search_filter_has_specimen_yes: Exclude voucherless Observations
   advanced_search_filter_has_specimen_no: Exclude vouchered Observations
-  advanced_search_filter_region: "Restrict Observations and Locations to a region, e.g., \"California, USA\" or \"Europe\""
+  advanced_search_filter_region: Restrict Observations and Locations to a region, e.g., "California, USA" or "Europe"
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater
@@ -3143,9 +3143,9 @@
   validate_location_user_missing: "[:validate_missing(field=:user)]"
   validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
   validate_name_author_too_long: "[:validate_too_many_characters(field=:authority)]"
-  validate_name_shorten: "Shorten [:form_names_text_name] and/or [:AUTHORITY]."
+  validate_name_shorten: Shorten [:form_names_text_name] and/or [:AUTHORITY].
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
-  validate_name_use_first_author: "Use the first author followed by “et al.” per <a href=\"http://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN Recommendation 46C.2</a>"
+  validate_name_use_first_author: Use the first author followed by “et al.” per <a href="http://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
@@ -3164,7 +3164,7 @@
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:ACCESSIONS] for an [:OBSERVATION] must be unique"
-  validate_sequence_bases_or_archive: "Must have [:BASES] or [:DEPOSIT]"
+  validate_sequence_bases_or_archive: Must have [:BASES] or [:DEPOSIT]
   validate_sequence_bases_blank_lines: "[:BASES] cannot contain blank lines in middle"
   validate_sequence_bases_bad_codes: "[:BASES] contain invalid code(s)"
   validate_sequence_bases_unique: "[:BASES] for an [:OBSERVATION] must be unique"
@@ -3422,7 +3422,7 @@
   runtime_image_remove_denied: You do not have permission to remove images from this observation.
   runtime_image_remove_missing: This observation doesn't have that image!
   runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.
-  runtime_name_for_description_not_found: "Sorry, the name this description belongs to no longer exists."
+  runtime_name_for_description_not_found: Sorry, the name this description belongs to no longer exists.
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) does not exist.  Someone may have deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
   runtime_reverify_already_verified: Your account is already verified!  Please log in.
@@ -3433,20 +3433,20 @@
   runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
 
   # Pattern search error messages.
-  pattern_search_syntax_error: "Syntax error in pattern at [string]."
+  pattern_search_syntax_error: Syntax error in pattern at [string].
   pattern_search_bad_observation_term_error: "Unexpected term in observation search: [term]. [:observation_search_terms_help]"
-  pattern_search_missing_value_error: "Missing value for the term [var]."
-  pattern_search_too_many_values_error: "Search term [term] occurs more than once."
-  pattern_search_bad_boolean_error: "Invalid value for [term], [value], expected \"yes\" or \"no\"."
-  pattern_search_bad_yes_error: "Invalid value for [term], [value], only valid value is \"yes\"."
-  pattern_search_bad_float_error: "Invalid value for [term], [value], expected a number between [min] and [max]."
-  pattern_search_bad_confidence_error: "Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. \"0-100\"."
-  pattern_search_bad_name_error: "Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched."
-  pattern_search_bad_location_error: "Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched."
-  pattern_search_bad_project_error: "Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched."
-  pattern_search_bad_species_list_error: "Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched."
-  pattern_search_bad_user_error: "Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched."
-  pattern_search_bad_date_range_error: "Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD."
+  pattern_search_missing_value_error: Missing value for the term [var].
+  pattern_search_too_many_values_error: Search term [term] occurs more than once.
+  pattern_search_bad_boolean_error: Invalid value for [term], [value], expected "yes" or "no".
+  pattern_search_bad_yes_error: Invalid value for [term], [value], only valid value is "yes".
+  pattern_search_bad_float_error: Invalid value for [term], [value], expected a number between [min] and [max].
+  pattern_search_bad_confidence_error: Invalid value for [term], [value], expected a number or range of numbers between -100 and 100, e.g. "0-100".
+  pattern_search_bad_name_error: Invalid or unrecognized value for [term], [value], expected name id or string; nothing matched.
+  pattern_search_bad_location_error: Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched.
+  pattern_search_bad_project_error: Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched.
+  pattern_search_bad_species_list_error: Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched.
+  pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
+  pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
 
   ################################################################################
 
