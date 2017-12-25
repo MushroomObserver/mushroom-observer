@@ -14,7 +14,7 @@
   <p><%= link_to(:show_object.t(type: :"RANK_PLURAL_#{@first_child.rank.to_s.upcase}"),
                  add_query_param({ action: :index_name }, @children_query)) %></p>
 <% end %>
-<% if @name.below_genus? && @name.genus.classification != @name.classification %>
+<% if @name.below_genus? && @name.genus.try(&:classification) != @name.classification %>
   <p><%= link_with_query(:show_name_refresh_classification.t,
                          controller: :name, action: :refresh_classification,
                          id: @name.id) %></p>
