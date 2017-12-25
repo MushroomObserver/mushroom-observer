@@ -59,6 +59,10 @@ class CollectionNumber < AbstractModel
     "#{name} #{number}"
   end
 
+  def format_name_was
+    "#{name_was} #{number_was}"
+  end
+
   def can_edit?(user = User.current)
     observations.any? { |obs| obs.user == user }
   end
@@ -90,5 +94,22 @@ class CollectionNumber < AbstractModel
     observations.each do |obs|
       obs.log(:log_collection_number_removed, name: format_name, touch: true)
     end
+  end
+
+  # Mirror changes to collection number in herbarium records.  Do this
+  # low-level to avoid redundant rss logs and other callbacks.
+  def change_corresponding_herbarium_records(old_format_name)
+    new_format_name = Observation.connection.quote(format_name)
+    old_format_name = Observation.connection.quote(old_format_name)
+    Observation.connection.execute(%(
+      UPDATE collection_numbers_observations cno,
+             herbarium_records_observations hro,
+             herbarium_records hr
+      SET hr.accession_number = #{new_format_name}
+      WHERE cno.collection_number_id = #{id}
+        AND cno.observation_id = hro.observation_id
+        AND hro.herbarium_record_id = hr.id
+        AND hr.accession_number = #{old_format_name}
+    ))
   end
 end

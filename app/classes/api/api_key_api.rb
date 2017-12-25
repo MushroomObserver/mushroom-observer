@@ -17,7 +17,7 @@ class API
       }
     end
 
-    def before_create(params)
+    def validate_create_params!(params)
       raise MissingParameter.new(:app) if params[:notes].blank?
     end
 

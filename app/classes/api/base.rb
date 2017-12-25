@@ -99,6 +99,7 @@
 #      lambda do |obj|
 #        must_have_edit_permission!(obj)
 #        obj.update!(params)
+#        obj
 #      end
 #    end
 #

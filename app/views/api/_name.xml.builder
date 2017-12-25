@@ -28,7 +28,6 @@ xml.tag!(tag,
       end
     end
     unless object.classification.blank?
-      # This is less complete but doesn't require any additional queries.
       parse = Name.parse_classification(object.classification)
       xml.parents(number: parse.length) do
         for rank, name in parse
@@ -38,13 +37,6 @@ xml.tag!(tag,
           end
         end
       end
-      # This requires extra database queries.
-      # all_parents = object.all_parents
-      # xml.parents(number: all_parents.length) do
-      #   for parent in all_parents
-      #     xml_detailed_object(xml, :parent, parent)
-      #   end
-      # end
     end
   end
 end

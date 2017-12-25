@@ -10,8 +10,8 @@ xml.tag!(tag,
   xml_datetime(xml, :last_login, object.last_login)
   xml_datetime(xml, :last_activity, object.last_activity)
   xml_integer(xml, :contribution, object.contribution)
-  xml_html_string(xml, :notes, (object.notes || "").tpl_nodiv)
-  xml_string(xml, :mailing_address, (object.mailing_address || "").to_s.html_to_ascii)
+  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_string(xml, :mailing_address, object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
   if !detail
     xml_minimal_object(xml, :location, Location, object.location_id)
     xml_minimal_object(xml, :image, Image, object.image_id)

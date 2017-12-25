@@ -24,6 +24,10 @@ class ApiController < ApplicationController
     rest_query(:api_key)
   end
 
+  def collection_numbers
+    rest_query(:collection_number)
+  end
+
   def comments
     rest_query(:comment)
   end
@@ -38,6 +42,10 @@ class ApiController < ApplicationController
 
   def herbaria
     rest_query(:herbarium)
+  end
+
+  def herbarium_records
+    rest_query(:herbarium_record)
   end
 
   def images

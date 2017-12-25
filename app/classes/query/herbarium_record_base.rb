@@ -37,7 +37,7 @@ module Query
       initialize_model_do_boolean(
         :has_notes,
         "COALESCE(herbarium_records.notes, '') != ''",
-        "COALESCE(herbarium_records.notes, '') == ''"
+        "COALESCE(herbarium_records.notes, '') = ''"
       )
       initialize_model_do_exact_match(:initial_det)
       initialize_model_do_exact_match(:accession_number)

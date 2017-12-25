@@ -26,7 +26,7 @@ xml.tag!(tag,
       notes_fields.each do |key, value|
         xml.notes_field do
           xml_string(xml, :key, key)
-          xml_html_string(xml, :value, value.tl)
+          xml_html_string(xml, :value, value.tpl_nodiv)
         end
       end
     end
@@ -37,6 +37,16 @@ xml.tag!(tag,
   xml_integer(xml, :number_of_views, object.num_views)
   xml_datetime(xml, :last_viewed, object.last_view)
   if detail
+    xml.collection_numbers(number: object.collection_numbers.length) do
+      object.collection_numbers.each do |collection_number|
+        xml_detailed_object(xml, :collection_number, collection_number)
+      end
+    end
+    xml.herbarium_records(number: object.herbarium_records.length) do
+      object.herbarium_records.each do |herbarium_record|
+        xml_detailed_object(xml, :herbarium_record, herbarium_record)
+      end
+    end
     xml.sequences(number: object.sequences.length) do
       object.sequences.each do |sequence|
         xml_detailed_object(xml, :sequence, sequence)

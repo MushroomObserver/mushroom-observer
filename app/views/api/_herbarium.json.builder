@@ -3,8 +3,8 @@ json.type        "herbarium"
 json.code        object.code
 json.name        object.name
 json.email       object.email
-json.address     object.mailing_address
-json.description object.description
+json.address     object.mailing_address.to_s.strip_html
+json.description object.description.to_s.tpl_nodiv
 json.created_at  object.created_at.utc
 json.updated_at  object.updated_at.utc
 if !detail

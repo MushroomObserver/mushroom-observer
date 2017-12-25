@@ -52,6 +52,10 @@ class ApiControllerTest < FunctionalTestCase
 
   ##############################################################################
 
+  def test_basic_collection_number_get_request
+    do_basic_get_request_for_model(CollectionNumber)
+  end
+
   def test_basic_comment_get_request
     do_basic_get_request_for_model(Comment)
   end
@@ -66,6 +70,10 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_basic_herbarium_get_request
     do_basic_get_request_for_model(Herbarium)
+  end
+
+  def test_basic_herbarium_record_get_request
+    do_basic_get_request_for_model(HerbariumRecord)
   end
 
   def test_basic_image_get_request
@@ -269,7 +277,8 @@ class ApiControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal("New API Key", notes.to_s)
+    assert_equal("&lt;p&gt;New &lt;span class=\"caps\"&gt;API&lt;/span&gt; Key&lt;/p&gt;",
+                 notes.to_s)
   end
 
   def test_post_api_key

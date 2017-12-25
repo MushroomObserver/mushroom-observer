@@ -57,9 +57,9 @@ class API
       params = create_params
       done_parsing_parameters!
       validate_create_params!(params)
-      before_create(params)
-      obj = model.new(params)
-      obj.save || raise(CreateFailed.new(obj))
+      obj = before_create(params) ||
+            model.create(params)
+      raise(CreateFailed.new(obj)) if obj.new_record?
       after_create(obj)
       obj
     end
@@ -72,8 +72,11 @@ class API
     # Stub for validating parameters before actually creating the object.
     def validate_create_params!(params); end
 
-    # Stub for hook before creating object.
-    def before_create(params); end
+    # Stub for hook before creating object.  Return an object instance if the
+    # object already exists and you don't want to create a new object.
+    def before_create(params)
+      return nil
+    end
 
     # Stub for hook after creating object.
     def after_create(obj); end
@@ -88,13 +91,14 @@ class API
       validate_update_params!(params)
       setter = build_setter(params)
       abort_if_any_errors!
-      results.each do |obj|
+      results.map! do |obj|
         begin
           setter.call(obj)
         rescue => e
           errors << e
+          nil
         end
-      end
+      end.reject!(&:nil?)
     end
 
     # Stub for parsing and validating attributes to pass to record.update.
@@ -110,6 +114,7 @@ class API
       lambda do |obj|
         must_have_edit_permission!(obj)
         obj.update!(params)
+        obj
       end
     end
 
@@ -152,6 +157,10 @@ class API
       else
         raise MustHaveEditPermission.new(obj)
       end
+    end
+
+    def must_have_delete_permission!(obj)
+      must_have_edit_permission!(obj)
     end
 
     # This is just here until the new version of Query comes on-line.

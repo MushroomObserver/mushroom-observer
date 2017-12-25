@@ -280,6 +280,11 @@ class API
   class ExternalLinkPermissionDenied < Error
   end
 
+  # Tried to add herbarium record to observation that you don't own, and you
+  # are not a curator of the herbarium.
+  class CantAddHerbariumRecord < Error
+  end
+
   ##############################################################################
 
   # Request requires upload.
@@ -373,6 +378,14 @@ class API
     def initialize(str)
       super()
       args.merge!(login: str)
+    end
+  end
+
+  # Tried to create herbarium record already been used by someone else.
+  class HerbariumRecordAlreadyExists < Error
+    def initialize(obj)
+      super()
+      args.merge!(herbarium: obj.herbarium.name, number: obj.accession_number)
     end
   end
 

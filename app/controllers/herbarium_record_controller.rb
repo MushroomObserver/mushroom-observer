@@ -217,7 +217,7 @@ class HerbariumRecordController < ApplicationController
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium_record.can_edit?
-    return true if @herbarium_record.herbarium.curators.include?(@user)
+    return true if @herbarium_record.herbarium.curator?(@user)
     flash_error :permission_denied.t
     redirect_to_observation_or_herbarium_record
     false
@@ -225,7 +225,7 @@ class HerbariumRecordController < ApplicationController
 
   def make_sure_can_delete!(herbarium_record)
     return true if in_admin_mode? || herbarium_record.can_edit?
-    return true if herbarium_record.herbarium.curators.include?(@user)
+    return true if herbarium_record.herbarium.curator?(@user)
     flash_error(:permission_denied.t)
     redirect_to(herbarium_record.show_link_args)
     false

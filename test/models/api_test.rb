@@ -1,5 +1,4 @@
 # encoding: utf-8
-# TODO: herbarium_record API
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
@@ -118,6 +117,16 @@ class ApiTest < UnitTestCase
     assert_users_equal(@for_user, api_key.user)
   end
 
+  def assert_last_collection_number_correct
+    num = CollectionNumber.last
+    assert_users_equal(@user, num.user)
+    assert_in_delta(Time.zone.now, num.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, num.updated_at, 1.minute)
+    assert_obj_list_equal([@obs], num.observations)
+    assert_equal(@name.strip, num.name)
+    assert_equal(@number.strip, num.number)
+  end
+
   def assert_last_comment_correct
     com = Comment.last
     assert_users_equal(@user, com.user)
@@ -126,6 +135,18 @@ class ApiTest < UnitTestCase
     assert_objs_equal(@target, com.target)
     assert_equal(@summary.strip, com.summary)
     assert_equal(@content.strip, com.comment)
+  end
+
+  def assert_last_herbarium_record_correct
+    rec = HerbariumRecord.last
+    assert_users_equal(@user, rec.user)
+    assert_in_delta(Time.zone.now, rec.created_at, 1.minute)
+    assert_in_delta(Time.zone.now, rec.updated_at, 1.minute)
+    assert_obj_list_equal([@obs], rec.observations)
+    assert_objs_equal(@herbarium, rec.herbarium)
+    assert_equal(@initial_det.strip, rec.initial_det)
+    assert_equal(@accession_number.strip, rec.accession_number)
+    assert_equal(@notes.strip, rec.notes)
   end
 
   def assert_last_image_correct
@@ -429,7 +450,7 @@ class ApiTest < UnitTestCase
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
   end
 
-  def test_updating_api_keys
+  def test_patching_api_keys
     params = {
       method:   :patch,
       action:   :api_key,
@@ -450,6 +471,157 @@ class ApiTest < UnitTestCase
     }
     # No DELETE requests allowed now.
     assert_api_fail(params)
+  end
+
+  # ---------------------------------------
+  #  :section: Collection Number Requests
+  # ---------------------------------------
+
+  def test_getting_collection_numbers
+    params = { method: :get, action: :collection_number }
+
+    nums = CollectionNumber.where("year(created_at) = 2006")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(created_at: "2006"))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where("year(updated_at) = 2005")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(updated_at: "2005"))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where(user: mary)
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(user: "mary"))
+    assert_api_results(nums)
+
+    obs  = observations(:detailed_unknown_obs)
+    nums = obs.collection_numbers
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(observation: obs.id))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where(name: "Mary Newbie")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(collector: "Mary Newbie"))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where("name LIKE '%mary%'")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(collector_has: "Mary"))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where(number: "174")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(number: "174"))
+    assert_api_results(nums)
+
+    nums = CollectionNumber.where("number LIKE '%17%'")
+    assert_not_empty(nums)
+    assert_api_pass(params.merge(number_has: "17"))
+    assert_api_results(nums)
+  end
+
+  def test_posting_collection_numbers
+    rolfs_obs  = observations(:strobilurus_diminutivus_obs)
+    marys_obs  = observations(:detailed_unknown_obs)
+    @obs       = rolfs_obs
+    @name      = "Someone Else"
+    @number    = "13579a"
+    @user      = rolf
+    params = {
+      method:      :post,
+      action:      :collection_number,
+      api_key:     @api_key.key,
+      observation: @obs.id,
+      collector:   @name,
+      number:      @number
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:observation))
+    assert_api_fail(params.remove(:number))
+    assert_api_fail(params.merge(observation: marys_obs.id))
+    assert_api_pass(params)
+    assert_last_collection_number_correct
+
+    collection_number_count = CollectionNumber.count
+    rolfs_other_obs = observations(:stereum_hirsutum_1)
+    assert_api_pass(params.merge(observation: rolfs_other_obs.id))
+    assert_equal(collection_number_count, CollectionNumber.count)
+    assert_obj_list_equal([rolfs_obs, rolfs_other_obs],
+                          CollectionNumber.last.observations, :sort)
+  end
+
+  def test_patching_collection_numbers
+    rolfs_num = collection_numbers(:coprinus_comatus_coll_num)
+    marys_num = collection_numbers(:minimal_unknown_coll_num)
+    rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
+    params = {
+      method:        :patch,
+      action:        :collection_number,
+      api_key:       @api_key.key,
+      id:            rolfs_num.id,
+      set_collector: "New",
+      set_number:    "42"
+    }
+    assert_equal("Rolf Singer 1", rolfs_rec.accession_number)
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: marys_num.id))
+    assert_api_pass(params)
+    assert_equal("New", rolfs_num.reload.name)
+    assert_equal("42", rolfs_num.reload.number)
+    assert_equal("New 42", rolfs_rec.reload.accession_number)
+
+    old_obs   = rolfs_num.observations.first
+    rolfs_obs = observations(:agaricus_campestris_obs)
+    marys_obs = observations(:detailed_unknown_obs)
+    params = {
+      method:        :patch,
+      action:        :collection_number,
+      api_key:       @api_key.key,
+      id:            rolfs_num.id
+    }
+    assert_api_fail(params.merge(add_observation: marys_obs.id))
+    assert_api_pass(params.merge(add_observation: rolfs_obs.id))
+    assert_obj_list_equal([old_obs, rolfs_obs], rolfs_num.reload.observations,
+                          :sort)
+    assert_api_pass(params.merge(remove_observation: old_obs.id))
+    assert_obj_list_equal([rolfs_obs], rolfs_num.reload.observations)
+    assert_api_pass(params.merge(remove_observation: rolfs_obs.id))
+    assert_nil(CollectionNumber.safe_find(rolfs_num.id))
+  end
+
+  def test_patching_collection_numbers_merge
+    num1 = collection_numbers(:coprinus_comatus_coll_num)
+    num2 = collection_numbers(:agaricus_campestris_coll_num)
+    obs1 = num1.observations.first
+    obs2 = num2.observations.first
+    params = {
+      method:     :patch,
+      action:     :collection_number,
+      api_key:    @api_key.key,
+      id:         num1.id,
+      set_number: num2.number
+    }
+    assert_api_pass(params)
+    assert_obj_list_equal(obs1.reload.collection_numbers,
+                          obs2.reload.collection_numbers)
+    assert_equal(1, obs1.collection_numbers.count)
+  end
+
+  def test_deleting_collection_numbers
+    rolfs_num = collection_numbers(:coprinus_comatus_coll_num)
+    marys_num = collection_numbers(:minimal_unknown_coll_num)
+    params = {
+      method:     :delete,
+      action:     :collection_number,
+      api_key:    @api_key.key,
+      id:         rolfs_num.id
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: marys_num.id))
+    assert_api_pass(params)
+    assert_nil(CollectionNumber.safe_find(rolfs_num.id))
   end
 
   # -----------------------------
@@ -512,7 +684,7 @@ class ApiTest < UnitTestCase
     assert_last_comment_correct
   end
 
-  def test_updating_comments
+  def test_patching_comments
     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
     params = {
@@ -613,7 +785,7 @@ class ApiTest < UnitTestCase
                                  observation: katys_obs.id))
   end
 
-  def test_updating_external_links
+  def test_patching_external_links
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
@@ -728,6 +900,210 @@ class ApiTest < UnitTestCase
     assert_not_empty(herbs)
     assert_api_pass(params.merge(address: "New York"))
     assert_api_results(herbs)
+  end
+
+  # --------------------------------------
+  #  :section: Herbarium Record Requests
+  # --------------------------------------
+
+  def test_getting_herbarium_records
+    params = { method: :get, action: :herbarium_record }
+
+    recs = HerbariumRecord.where("year(created_at) = 2012")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(created_at: "2012"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("year(updated_at) = 2017")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(updated_at: "2017"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where(user: mary)
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(user: "mary"))
+    assert_api_results(recs)
+
+    herb = herbaria(:nybg_herbarium)
+    recs = herb.herbarium_records
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_results(recs)
+
+    obs  = observations(:detailed_unknown_obs)
+    recs = obs.herbarium_records
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(observation: obs.id))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("notes LIKE '%dried%'")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(notes_has: "dried"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("COALESCE(notes, '') = ''")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("CONCAT(notes, '') != ''")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where(initial_det: "Coprinus comatus")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(initial_det: "Coprinus comatus"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("initial_det LIKE '%coprinus%'")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(initial_det_has: "coprinus"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where(accession_number: "NYBG 1234")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(accession_number: "NYBG 1234"))
+    assert_api_results(recs)
+
+    recs = HerbariumRecord.where("accession_number LIKE '%nybg%'")
+    assert_not_empty(recs)
+    assert_api_pass(params.merge(accession_number_has: "nybg"))
+    assert_api_results(recs)
+  end
+
+  def test_posting_herbarium_records
+    rolfs_obs         = observations(:strobilurus_diminutivus_obs)
+    marys_obs         = observations(:detailed_unknown_obs)
+    @obs              = rolfs_obs
+    @herbarium        = herbaria(:mycoflora_herbarium)
+    @initial_det      = "Absurdus namus"
+    @accession_number = "13579a"
+    @notes            = "i make good specimen"
+    @user             = rolf
+    params = {
+      method:           :post,
+      action:           :herbarium_record,
+      api_key:          @api_key.key,
+      observation:      @obs.id,
+      herbarium:        @herbarium.id,
+      initial_det:      @initial_det,
+      accession_number: @accession_number,
+      notes:            @notes
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:observation))
+    assert_api_fail(params.remove(:herbarium))
+    assert_api_fail(params.merge(observation: marys_obs.id))
+    assert_api_pass(params)
+    assert_last_herbarium_record_correct
+
+    herbarium_record_count = HerbariumRecord.count
+    rolfs_other_obs = observations(:stereum_hirsutum_1)
+    assert_api_pass(params.merge(observation: rolfs_other_obs.id))
+    assert_equal(herbarium_record_count, HerbariumRecord.count)
+    assert_obj_list_equal([rolfs_obs, rolfs_other_obs],
+                          HerbariumRecord.last.observations, :sort)
+
+    # Make sure it gives correct default for initial_det.
+    assert_api_pass(params.remove(:initial_det).merge(accession_number: "2"))
+    assert_equal(rolfs_obs.name.text_name, HerbariumRecord.last.initial_det)
+
+    # Check default accession number if obs has no collection number.
+    assert_api_pass(params.remove(:accession_number))
+    assert_equal("MO #{rolfs_obs.id}", HerbariumRecord.last.accession_number)
+
+    # Check default accession number if obs has one collection number.
+    obs = observations(:coprinus_comatus_obs)
+    num = obs.collection_numbers.first
+    assert_operator(obs.collection_numbers.count, :==, 1)
+    assert_api_pass(params.remove(:accession_number).
+                           merge(observation: obs.id))
+    assert_equal(num.format_name, HerbariumRecord.last.accession_number)
+
+    # Check default accession number if obs has two collection numbers.
+    # Also check that Rolf can add a record to Mary's obs if he's a curator.
+    nybg = herbaria(:nybg_herbarium)
+    assert_true(nybg.curator?(rolf))
+    assert_operator(marys_obs.collection_numbers.count, :>, 1)
+    assert_api_pass(params.remove(:accession_number).
+                      merge(observation: marys_obs.id, herbarium: nybg.id))
+    assert_equal("MO #{marys_obs.id}", HerbariumRecord.last.accession_number)
+  end
+
+  def test_patching_herbarium_records
+    # Rolf owns the first record, and curates NYBG, but shouldn't be able to
+    # touch Mary's record at an herbarium that he doesn't curate.
+    rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
+    nybgs_rec = herbarium_records(:interesting_unknown)
+    marys_rec = herbarium_records(:mycoflora_record)
+    mycoflora = herbaria(:mycoflora_herbarium)
+    params = {
+      method:               :patch,
+      action:               :herbarium_record,
+      api_key:              @api_key.key,
+      id:                   rolfs_rec.id,
+      set_herbarium:        "Mycoflora Project",
+      set_initial_det:      " New name ",
+      set_accession_number: " 1234 ",
+      set_notes:            " new notes "
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.merge(id: marys_rec.id))
+    assert_api_fail(params.merge(set_herbarium: ""))
+    assert_api_fail(params.merge(set_initial_det: ""))
+    assert_api_fail(params.merge(set_accession_number: ""))
+    assert_api_pass(params)
+    assert_objs_equal(mycoflora, rolfs_rec.reload.herbarium)
+    assert_equal("New name", rolfs_rec.initial_det)
+    assert_equal("1234", rolfs_rec.accession_number)
+    assert_equal("new notes", rolfs_rec.notes)
+
+    # This should fail because we don't allow merges via API.
+    assert_api_fail(params.merge(id: nybgs_rec.id))
+    assert_api_pass(params.merge(id: nybgs_rec.id).remove(:set_herbarium))
+    assert_equal("New name", nybgs_rec.reload.initial_det)
+    assert_equal("1234", nybgs_rec.accession_number)
+    assert_equal("new notes", nybgs_rec.notes)
+
+    # Rolfs_rec is now at Mycoflora, so Rolf is not a curator, just owns rec.
+    old_obs   = rolfs_rec.observations.first
+    rolfs_obs = observations(:agaricus_campestris_obs)
+    marys_obs = observations(:minimal_unknown_obs)
+    params = {
+      method:  :patch,
+      action:  :herbarium_record,
+      api_key: @api_key.key,
+      id:      rolfs_rec.id
+    }
+    assert_api_fail(params.merge(add_observation: marys_obs.id))
+    assert_api_pass(params.merge(add_observation: rolfs_obs.id))
+    assert_obj_list_equal([old_obs, rolfs_obs], rolfs_rec.reload.observations,
+                          :sort)
+    assert_api_pass(params.merge(remove_observation: old_obs.id))
+    assert_obj_list_equal([rolfs_obs], rolfs_rec.reload.observations)
+    assert_api_pass(params.merge(remove_observation: rolfs_obs.id))
+    assert_nil(HerbariumRecord.safe_find(rolfs_rec.id))
+  end
+
+  def test_deleting_herbarium_records
+    # Rolf should be able to destroy his own records and NYBG records but not
+    # Mary's records at a different herbarium that he doesn't curate.
+    rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
+    nybgs_rec = herbarium_records(:interesting_unknown)
+    marys_rec = herbarium_records(:mycoflora_record)
+    params = {
+      method:     :delete,
+      action:     :herbarium_record,
+      api_key:    @api_key.key
+    }
+    assert_api_fail(params.remove(:api_key))
+    assert_api_pass(params.merge(id: rolfs_rec.id))
+    assert_api_pass(params.merge(id: nybgs_rec.id))
+    assert_api_fail(params.merge(id: marys_rec.id))
+    assert_nil(HerbariumRecord.safe_find(rolfs_rec.id))
+    assert_nil(HerbariumRecord.safe_find(nybgs_rec.id))
+    assert_not_nil(HerbariumRecord.safe_find(marys_rec.id))
   end
 
   # ---------------------------
@@ -931,7 +1307,7 @@ class ApiTest < UnitTestCase
     assert_equal(expect, actual, "Uploaded image differs from original!")
   end
 
-  def test_updating_images
+  def test_patching_images
     rolfs_img = images(:rolf_profile_image)
     marys_img = images(:in_situ_image)
     eol = projects(:eol_project)
@@ -1069,7 +1445,7 @@ class ApiTest < UnitTestCase
     assert_last_location_correct
   end
 
-  def test_updating_locations
+  def test_patching_locations
     albion = locations(:albion)
     burbank = locations(:burbank)
     params = {
@@ -1441,7 +1817,7 @@ class ApiTest < UnitTestCase
     assert_not_empty(Name.where(text_name: "Anzia"))
   end
 
-  def test_updating_name_attributes
+  def test_patching_name_attributes
     agaricus = names(:agaricus)
     lepiota  = names(:lepiota)
     new_classification = [
@@ -1984,7 +2360,7 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([obs], spec.observations)
   end
 
-  def test_updating_observations
+  def test_patching_observations
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)
     assert(rolfs_obs.can_edit?(rolf))
@@ -2226,7 +2602,7 @@ class ApiTest < UnitTestCase
     assert_last_project_correct
   end
 
-  def test_updating_projects
+  def test_patching_projects
     proj = projects(:eol_project)
     assert_user_list_equal([rolf, mary], proj.admin_group.users)
     assert_user_list_equal([rolf, mary, katrina], proj.user_group.users)
@@ -2585,7 +2961,7 @@ class ApiTest < UnitTestCase
     assert_last_sequence_correct
   end
 
-  def test_updating_sequences
+  def test_patching_sequences
     seq        = sequences(:alternate_archive)
     @user      = dick
     @obs       = seq.observation
@@ -2782,7 +3158,7 @@ class ApiTest < UnitTestCase
     assert_last_species_list_correct
   end
 
-  def test_updating_species_lists
+  def test_patching_species_lists
     rolfs_spl = species_lists(:first_species_list)
     marys_spl = species_lists(:unknown_species_list)
     assert(!marys_spl.can_edit?(rolf))
@@ -2910,7 +3286,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(image: "123456"))
   end
 
-  def test_updating_users
+  def test_patching_users
     params = {
       method:              :patch,
       action:              :user,
