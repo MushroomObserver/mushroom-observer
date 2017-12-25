@@ -13,6 +13,7 @@ namespace :email do
 
   desc "Send queued emails"
   task(send: :environment) do
+    require "#{::Rails.root}/app/extensions/extensions.rb"
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     for e in QueuedEmail.all
