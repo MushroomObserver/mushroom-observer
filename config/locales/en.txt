@@ -3641,6 +3641,7 @@
   api_can_only_synonymize_unsynonimized_names: Presently, we're only allowing API clients to synonymize unsynonmized names with other names.  If one of the names has no synonyms, synonymize that name with the others.  But there's no way to merge two sets os synonyms via the API right now.
   api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_can_only_use_this_field_if_has_specimen: The parameter, "[field]", can only be used if the observation has a specimen.
+  api_cant_add_herbarium_record: Only owner of observation and curators of herbarium can add herbarium records to an observation.
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".

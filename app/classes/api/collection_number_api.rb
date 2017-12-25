@@ -15,10 +15,11 @@ class API
 
     def query_params
       {
+        where:        sql_id_condition,
         created_at:   parse_range(:time, :created_at),
         updated_at:   parse_range(:time, :updated_at),
         users:        parse_array(:user, :user, help: :creator),
-        observations: parse_array(:observation, :observation),
+        observations: parse_array(:observation, :observation, as: :id),
         name:         parse(:string, :collector, help: 1),
         number:       parse(:string, :number, help: 1),
         name_has:     parse(:string, :collector_has, help: 1),
@@ -37,9 +38,8 @@ class API
     end
 
     def update_params
-      @add_observation    = parse_array(:observation, :add_observation, help: 1)
-      @remove_observation = parse_array(:observation, :remove_observation,
-                                        help: 1)
+      @adds    = parse_array(:observation, :add_observation, help: 1)
+      @removes = parse_array(:observation, :remove_observation, help: 1)
       {
         name:   parse(:string, :set_collector, not_blank: true, help: 1),
         number: parse(:string, :set_number, not_blank: true, help: 1)
@@ -51,12 +51,17 @@ class API
       raise MissingParameter.new(:number)      if params[:number].blank?
     end
 
-    def before_create
-      obj = CollectionNumber.where(name: params[:collector],
-                                   number: params[:number])
+    def validate_update_params!(params)
+      return if params.any? || @adds || @removes
+      raise MissingSetParameters.new
+    end
+
+    def before_create(params)
+      obj = CollectionNumber.where(name: params[:name],
+                                   number: params[:number]).first
       return nil unless obj
       obj.add_observation(@observation)
-      return obj
+      obj
     end
 
     def after_create(obj)
@@ -66,7 +71,8 @@ class API
     def build_setter(params)
       lambda do |obj|
         must_have_edit_permission!(obj)
-        return nil if add_and_remove_observations(obj)
+        add_observations(obj)
+        return nil if remove_observations(obj)
         obj.attributes = params
         other_obj = lookup_matching_collection_number(obj)
         if other_obj && other_obj != obj
@@ -96,14 +102,19 @@ class API
       other_obj
     end
 
-    # Returns true if the collection_number is destroyed because it has no
-    # more observations left.
-    def add_and_remove_observations(obj)
-      @add_observation.each do |obs|
+    def add_observations(obj)
+      return unless @adds
+      @adds.each do |obs|
         raise MustHaveEditPermission.new(obj) unless obs.can_edit?(@user)
         obj.add_observation(obs)
       end
-      @remove_observation.each do |obs|
+    end
+
+    # Returns true if the collection_number is destroyed because it has no
+    # more observations left.
+    def remove_observations(obj)
+      return false unless @removes
+      @removes.each do |obs|
         obj.remove_observation(obs)
         return true unless obj.id
       end

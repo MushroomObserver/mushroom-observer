@@ -16,11 +16,12 @@ class API
 
     def query_params
       {
+        where:                sql_id_condition,
         created_at:           parse_range(:time, :created_at),
         updated_at:           parse_range(:time, :updated_at),
         users:                parse_array(:user, :user, help: :creator),
-        herbaria:             parse_array(:herbarium, :herbarium),
-        observations:         parse_array(:observation, :observation),
+        herbaria:             parse_array(:herbarium, :herbarium, as: :id),
+        observations:         parse_array(:observation, :observation, as: :id),
         has_notes:            parse(:boolean, :has_notes),
         initial_det:          parse(:string, :initial_det, help: 1),
         accession_number:     parse(:string, :accession_number, help: 1),
@@ -42,9 +43,8 @@ class API
     end
 
     def update_params
-      @add_observation    = parse_array(:observation, :add_observation, help: 1)
-      @remove_observation = parse_array(:observation, :remove_observation,
-                                        help: 1)
+      @adds    = parse_array(:observation, :add_observation, help: 1)
+      @removes = parse_array(:observation, :remove_observation, help: 1)
       {
         herbarium:        parse(:herbarium, :set_herbarium, not_blank: true),
         initial_det:      parse(:string, :set_initial_det, not_blank: true,
@@ -56,29 +56,43 @@ class API
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:observation) unless params[:observation]
+      raise MissingParameter.new(:observation) unless @observation
       raise MissingParameter.new(:herbarium)   unless params[:herbarium]
+      make_sure_can_add_herbarium_record!(params)
       provide_default_label!(params)
     end
 
+    def validate_update_params!(params)
+      return if params.any? || @adds || @removes
+      raise MissingSetParameters.new
+    end
+
+    def make_sure_can_add_herbarium_record!(params)
+      return if @observation.can_edit?(@user)
+      return if params[:herbarium].curator?(@user)
+      raise CantAddHerbariumRecord.new
+    end
+
     def provide_default_label!(params)
-      obs = params[:observation]
       if params[:initial_det].blank?
-        params[:initial_det] = obs.name.text_name
+        params[:initial_det] = @observation.name.text_name
       end
       if params[:accession_number].blank?
-        params[:accession_number] = obs.collection_numbers.one? ?
-                                    obs.collection_numbers.first.format_name :
-                                    "MO #{obs.id}"
+        params[:accession_number] = \
+          @observation.collection_numbers.one? ?
+          @observation.collection_numbers.first.format_name :
+          "MO #{@observation.id}"
       end
     end
 
-    def before_create
-      obj = HerbariumRecord.where(herbarium: params[:herbarium],
-                                  accession_number: params[:accession_number])
+    def before_create(params)
+      obj = HerbariumRecord.where(
+              herbarium: params[:herbarium],
+              accession_number: params[:accession_number]
+            ).first
       return nil unless obj
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
-      obj.add_observation(params[:observation])
+      obj.add_observation(@observation)
       return obj
     end
 
@@ -89,7 +103,8 @@ class API
     def build_setter(params)
       lambda do |obj|
         must_have_edit_permission!(obj)
-        add_and_remove_observations(obj)
+        add_observations(obj)
+        remove_observations(obj)
         obj.attributes = params
         other_obj = lookup_matching_herbarium_record(obj)
         if other_obj && other_obj != obj
@@ -112,9 +127,9 @@ class API
     end
 
     def change_herbarium_record(obj)
-      old_herbarium = obj.herbarium_was
+      old_herbarium_id = obj.herbarium_id_was
       obj.save
-      obj.notify_curators if obj.herbarium != old_herbarium
+      obj.notify_curators if obj.herbarium_id != old_herbarium_id
       obj
     end
 
@@ -122,13 +137,18 @@ class API
       raise HerbariumRecordAlreadyExists.new(this_obj)
     end
 
-    def add_and_remove_observations(obj)
-      @add_observation.each do |obs|
+    def add_observations(obj)
+      return unless @adds
+      @adds.each do |obs|
         raise MustHaveEditPermission.new(obj) \
           unless obs.can_edit?(@user) || obj.herbarium.curator?(@user)
         obj.add_observation(obs)
       end
-      @remove_observation.each do |obs|
+    end
+
+    def remove_observations(obj)
+      return unless @removes
+      @removes.each do |obs|
         obj.remove_observation(obs)
       end
     end
