@@ -279,7 +279,9 @@ class HerbariumController < ApplicationController
       @herbarium.curators.clear
       return true
     end
-    user = User.find_by_login(@herbarium.personal_user_name)
+    name = @herbarium.personal_user_name
+    name.sub!(/^.*<(.*)>$/, '\1')
+    user = User.find_by_login(name)
     unless user
       flash_error(:runtime_no_match_name.t(
                     type: :user, value: @herbarium.personal_user_name

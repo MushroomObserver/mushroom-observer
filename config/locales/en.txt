@@ -2024,6 +2024,7 @@
   show_user_joined: Joined
   show_user_mailing_address: Mailing Address for Collections
   show_user_primary_location: Primary Location
+  show_user_personal_herbarium: Personal Herbarium
   show_user_total: Total
   show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
