@@ -252,7 +252,7 @@ class SequenceTest < UnitTestCase
       sequences(:local_sequence).blast_url
     )
     assert_equal(
-      %Q(#{Sequence.blast_url_prefix}"KT968605"),
+      %Q(#{Sequence.blast_url_prefix}KT968605),
       sequences(:deposited_sequence).blast_url
     )
     # Prove that BLAST url for UNITE sequence uses Bases instead of Accession.
