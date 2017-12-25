@@ -89,7 +89,7 @@ class Sequence < AbstractModel
   # Can we easily create a blast_url for the Sequence?
   #   ("easily" == without using 3d party API to get the BLAST QUERY parameter)
   def blastable?
-     blastable_by_accession? || bases.present?
+    blastable_by_accession? || bases.present?
   end
 
   # Does using Accession as BLAST's QUERY parameter give a good BLAST report?
@@ -104,8 +104,8 @@ class Sequence < AbstractModel
     if blastable_by_accession?
       "#{blast_url_prefix}#{accession}"
     else
-    # wrap QUERY in quotes because it can contain whitespace
-      %Q[#{blast_url_prefix}"#{bases}"]
+      # wrap QUERY in quotes because it can contain whitespace
+      %(#{blast_url_prefix}"#{bases}")
     end
   end
 
