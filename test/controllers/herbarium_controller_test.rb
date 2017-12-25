@@ -384,10 +384,11 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :email_merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
 
-    # Rolf can both edit and does own all the records.
+    # Rolf can both edit and does own all the records.  Should merge.
     login("rolf")
     post(:edit_herbarium, herbarium: params, id: nybg.id)
-    assert_nil(Herbarium.safe_find(nybg.id))
+    assert_nil(Herbarium.safe_find(other.id))
+    assert_not_nil(Herbarium.safe_find(nybg.id))
   end
 
   def test_edit_herbarium_post_with_nonexisting_place_name

@@ -112,12 +112,11 @@ class Herbarium < AbstractModel
   def merge(that)
     return that if that == self
     this = self
-    this, that = [that, this] if that.created_at < this.created_at
     [:code, :location, :email, :mailing_address].each do |var|
       this.merge_field(that, var)
     end
     this.merge_notes(that)
-    this.personal_user ||= that.personal_user
+    this.personal_user_id ||= that.personal_user_id
     this.save
     this.merge_associatied_records(that)
     that.destroy

@@ -47,7 +47,7 @@ class HerbariumTest < UnitTestCase
     description       = ny.description
     curators          = (ny.curators + f.curators).uniq
     herbarium_records = ny.herbarium_records + f.herbarium_records
-    result = f.merge(ny)
+    result = ny.merge(f)
     assert_objs_equal(ny, result)
     assert_equal(name, result.name)
     assert_equal(code, result.code)
