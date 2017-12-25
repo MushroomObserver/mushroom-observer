@@ -26,7 +26,7 @@ xml.tag!(tag,
       notes_fields.each do |key, value|
         xml.notes_field do
           xml_string(xml, :key, key)
-          xml_html_string(xml, :value, value.tl)
+          xml_html_string(xml, :value, value.tpl_nodiv)
         end
       end
     end

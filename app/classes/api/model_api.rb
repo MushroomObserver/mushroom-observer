@@ -97,8 +97,8 @@ class API
         rescue => e
           errors << e
           nil
-        end.reject!(&:nil?)
-      end
+        end
+      end.reject!(&:nil?)
     end
 
     # Stub for parsing and validating attributes to pass to record.update.

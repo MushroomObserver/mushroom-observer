@@ -27,8 +27,8 @@ class API
     end
 
     def create_params
-      @observation = observation: parse(:observation, :observation,
-                                        must_have_edit_permission: true),
+      @observation = parse(:observation, :observation,
+                           must_have_edit_permission: true)
       {
         name:   parse(:string, :collector, help: 1) || @user.legal_name,
         number: parse(:string, :number, help: 1),

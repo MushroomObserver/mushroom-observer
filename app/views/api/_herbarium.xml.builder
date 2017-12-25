@@ -7,7 +7,7 @@ xml.tag!(tag,
   xml_string(xml, :name, object.name)
   xml_string(xml, :email, object.email)
   xml_string(xml, :address, object.mailing_address)
-  xml_string(xml, :description, object.description)
+  xml_string(xml, :description, object.description.to_s.tpl_nodiv)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   if !detail

@@ -10,6 +10,9 @@ json.confidence             object.vote_cache
 unless object.notes.blank?
   notes_fields = object.notes.except(Observation.other_notes_key)
   other_notes  = object.notes_part_value(Observation.other_notes_key)
+  notes_fields.each do |key, val|
+    val.replace(val.to_s.tpl_nodiv)
+  end
   json.notes_fields         notes_fields
   json.notes                other_notes.to_s.tpl_nodiv
 end

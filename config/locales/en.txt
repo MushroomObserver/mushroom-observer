@@ -3648,6 +3648,7 @@
   api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
+  api_herbarium_record_already_exists: "There is already a record for [number] at [herbarium]."
   api_image_upload_failed: "Failed to upload image: [error]"
   api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
   api_location_already_exists: The location "[location]" already exists.

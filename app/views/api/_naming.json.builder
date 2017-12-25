@@ -16,7 +16,7 @@ if reasons.any?
   json.reasons reasons.map do |reason|
     {
       type:  reason.label.l,
-      notes: reason.notes.to_s
+      notes: reason.notes.to_s.tpl_nodiv
     }
   end
 end

@@ -4,7 +4,7 @@ json.locus      object.locus
 json.bases      object.bases
 json.archive    object.archive
 json.accession  object.accession
-json.notes      object.notes
+json.notes      object.notes.to_s.tpl_nodiv
 json.created_at object.created_at.utc
 json.updated_at object.updated_at.utc
 if !detail
