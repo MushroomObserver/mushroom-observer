@@ -36,20 +36,22 @@
           <td class="bold"><%= :LOCUS.t %>:</td>
           <td><%= @sequence.locus %></td>
         </tr>
-        <tr>
-          <td class="bold align-top"><%= :BASES.t %>:</td>
-          <td class="col-md-9 monospace max-width-text">
-            <%= @sequence.bases %></td>
-        </tr>
-        <tr>
-          <td class="bold"><%= :DEPOSIT.t %>:</td>
-          <td>
-            <% if @sequence.deposit? %>
-              <%= sequence_archive_link(@sequence) %>:
-              <%= sequence_accession_link(@sequence) %>
-            <% end %>
-          </td>
-        </tr>
+        <% if @sequence.bases.present? %>
+          <tr>
+            <td class="bold align-top"><%= :BASES.t %>:</td>
+            <td class="col-md-9 monospace max-width-text">
+              <%= @sequence.bases %></td>
+          </tr>
+        <% end %>
+        <% if @sequence.deposit? %>
+          <tr>
+            <td class="bold"><%= :DEPOSIT.t %>:</td>
+            <td>
+                <%= sequence_archive_link(@sequence) %>:
+                <%= sequence_accession_link(@sequence) %>
+            </td>
+          </tr>
+        <% end %>
         <tr align="center">
           <td colspan="2" class="show-sequence-blast">
             <%= link_to(:show_observation_blast_link.t,
