@@ -571,7 +571,7 @@ class ApplicationController < ActionController::Base
   # 5. server (MO.default_locale)
   #
   def set_locale
-    lang = Language.find_by_locale(specified_locale || MO.default_locale)
+    lang = Language.find_by_locale(specified_locale) || Language.official
 
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
