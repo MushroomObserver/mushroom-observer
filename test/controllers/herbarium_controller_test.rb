@@ -85,24 +85,24 @@ class HerbariumControllerTest < FunctionalTestCase
 
     login("dick")
     get(:list_herbaria, merge: source.id)
-    assert_select("a[href*='that=#{source.id}']", count: 0)
-    assert_select("a[href*='that=#{herb1.id}']", count: 1)
-    assert_select("a[href*='that=#{herb2.id}']", count: 1)
-    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+    assert_select("a[href*='this=#{source.id}']", count: 0)
+    assert_select("a[href*='this=#{herb1.id}']", count: 1)
+    assert_select("a[href*='this=#{herb2.id}']", count: 1)
+    assert_select("a[href*='this=#{herb3.id}']", count: 1)
 
     login("rolf")
     get(:list_herbaria, merge: source.id)
-    assert_select("a[href*='that=#{source.id}']", count: 0)
-    assert_select("a[href*='that=#{herb1.id}']", count: 1)
-    assert_select("a[href*='that=#{herb2.id}']", count: 1)
-    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+    assert_select("a[href*='this=#{source.id}']", count: 0)
+    assert_select("a[href*='this=#{herb1.id}']", count: 1)
+    assert_select("a[href*='this=#{herb2.id}']", count: 1)
+    assert_select("a[href*='this=#{herb3.id}']", count: 1)
 
     make_admin("zero")
     get(:list_herbaria, merge: source.id)
-    assert_select("a[href*='that=#{source.id}']", count: 0)
-    assert_select("a[href*='that=#{herb1.id}']", count: 1)
-    assert_select("a[href*='that=#{herb2.id}']", count: 1)
-    assert_select("a[href*='that=#{herb3.id}']", count: 1)
+    assert_select("a[href*='this=#{source.id}']", count: 0)
+    assert_select("a[href*='this=#{herb1.id}']", count: 1)
+    assert_select("a[href*='this=#{herb2.id}']", count: 1)
+    assert_select("a[href*='this=#{herb3.id}']", count: 1)
   end
 
   def test_merge_herbaria
