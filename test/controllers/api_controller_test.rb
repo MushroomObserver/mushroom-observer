@@ -309,12 +309,13 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(mary.email, email.header["to"].to_s)
   end
 
+  # Prove user can add Sequence to someone else's Observation
   def test_post_sequence
     obs = observations(:coprinus_comatus_obs)
     post(
       :sequences,
       observation: obs.id,
-      api_key:     api_keys(:rolfs_api_key).key,
+      api_key:     api_keys(:marys_api_key).key,
       locus:       "ITS",
       bases:       "catg",
       archive:     "GenBank",
@@ -324,7 +325,8 @@ class ApiControllerTest < FunctionalTestCase
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
-    assert_users_equal(rolf, sequence.user)
+    assert_users_equal(mary, sequence.user)
+    refute_equal(obs.user, sequence.user)
     assert_equal("ITS", sequence.locus)
     assert_equal("catg", sequence.bases)
     assert_equal("GenBank", sequence.archive)
