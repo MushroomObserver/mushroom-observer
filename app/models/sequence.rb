@@ -48,11 +48,12 @@ class Sequence < AbstractModel
   BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n # non-blank line
                           ^\s*\n      # followed by blank line
                           (\s*)\S/x   # and later non-whitespace character
-  DESCRIPTION        = /\A>.*$/
+  DESCRIPTION          = /\A>.*$/
   # nucleotide codes from http://www.bioinformatics.org/sms2/iupac.html
-  # FASTA allows interspersed numbers, spaces. See https://goo.gl/NYbptK
-  VALID_CODES        = /ACGTURYSWKMBDHVN.\-\d\s/i
-  INVALID_CODES      = /[^#{VALID_CODES}]/i
+  VALID_CODES          = /ACGTURYSWKMBDHVN.\-/i
+  # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
+  VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i
+  INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i
 
   ##############################################################################
   #
@@ -99,13 +100,12 @@ class Sequence < AbstractModel
     archive.present? && WebSequenceArchive.accession_blastable?(archive)
   end
 
-  # url of NCBI page to create BLAST report for the sequence
+  # url of NCBI page to set up BLAST for the Sequence
   def blast_url
     if blastable_by_accession?
-      "#{blast_url_prefix}#{accession}"
+      "#{blast_url_prefix}#{accession.gsub(/\s/, "")}"
     else
-      # wrap QUERY in quotes because it can contain whitespace
-      %(#{blast_url_prefix}"#{bases}")
+      "#{blast_url_prefix}#{bases_nucleotides}"
     end
   end
 
@@ -117,6 +117,11 @@ class Sequence < AbstractModel
   # convenience wrapper around class method of same name
   def blast_url_prefix
     Sequence.blast_url_prefix
+  end
+
+  # Just the nucleotide codes: no description, no digits, no whitespace
+  def bases_nucleotides
+    bases.sub(DESCRIPTION, "").gsub(/[\d\s]/, "")
   end
 
   def deposit?
@@ -182,7 +187,7 @@ class Sequence < AbstractModel
   validate  :bases_or_deposit
   validate  :deposit_complete_or_absent
   validate  :unique_bases_for_obs, if: :bases?
-  validate  :blastable, if: :bases?
+  validate  :bases_blastable, if: :bases?
   validate  :unique_accession_for_obs
 
   # Valid Sequence must include bases &/or deposit (archive & accession)
@@ -216,7 +221,7 @@ class Sequence < AbstractModel
   # Validate proper formatting of bases
   # See BLAST documentation (shortened url: https://goo.gl/NYbptK)
   # full url in WebSequenceArchive::blast_format_help
-  def blastable
+  def bases_blastable
     if blank_line_in_middle?
       errors.add(:bases, :validate_sequence_bases_blank_lines.t)
     end
@@ -231,7 +236,7 @@ class Sequence < AbstractModel
   def bad_code_in_data?
     # remove any description line
     data = bases.sub(DESCRIPTION, "")
-    data =~ INVALID_CODES
+    data =~ INVALID_BASE_CHARS
   end
 
   # Valid Sequence cannnot have duplicate accessions
