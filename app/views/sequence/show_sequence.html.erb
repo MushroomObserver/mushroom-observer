@@ -53,9 +53,11 @@
           </tr>
         <% end %>
         <tr align="center">
-          <td colspan="2" class="show-sequence-blast">
-            <%= link_to(:show_observation_blast_link.t,
-                        @sequence.blast_url, target: "_blank") %>
+          <td colspan="2">
+            <button type="button" class="btn btn-default">
+              <%= link_to(:show_sequence_setup_blast.t,
+                          @sequence.blast_url, target: "_blank") %>
+            </button>
           </td>
         </tr>
         <tr>

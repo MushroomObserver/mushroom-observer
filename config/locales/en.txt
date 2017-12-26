@@ -1987,6 +1987,9 @@
   # name/show_past_name_description
   show_past_name_description_title: "[:VERSION] [num]: [name]"
 
+  # sequence/show_sequence
+  show_sequence_setup_blast: "Set up NCBI BLAST®"
+
   # object/show_past_versions
   show_past_version_merged_with: "(merged with #[id])"
 
