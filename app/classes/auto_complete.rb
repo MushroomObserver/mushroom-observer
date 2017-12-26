@@ -181,34 +181,15 @@ class AutoCompleteUser < AutoCompleteByString
   end
 end
 
-class AutoCompleteCuratedHerbarium < AutoCompleteByWord
-  # In case we decide it doesn't make sense to let users add to any herbarium?
-  # attr_accessor :user_id
-
-  def initialize(string, params)
-    super(string, params)
-    self.user_id = params[:user_id]
-  end
-
-  def rough_matches(letter)
-    Herbarium.connection.select_values(%(
-      SELECT DISTINCT h.name FROM herbaria h, herbaria_curators c
-      WHERE h.id = c.herbarium_id
-         AND c.user_id = #{user_id}
-         AND (h.name LIKE '#{letter}%'
-              OR h.name LIKE '% #{letter}%')
-      ORDER BY name ASC
-    ))
-  end
-end
-
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
     Herbarium.connection.select_values(%(
-      SELECT DISTINCT name FROM herbaria
+      SELECT IF(code = '', name, CONCAT(name, ' (', code, ')'))
+      FROM herbaria
       WHERE name LIKE '#{letter}%'
-      OR name LIKE '% #{letter}%'
-      ORDER BY name ASC
+         OR name LIKE '% #{letter}%'
+         OR code LIKE '#{letter}%'
+      ORDER BY IF(code = '', '~', code) ASC, name ASC
     ))
   end
 end

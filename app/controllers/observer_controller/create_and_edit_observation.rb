@@ -225,11 +225,12 @@ class ObserverController
     number ? "#{name} #{number}" : "MO #{obs.id}"
   end
 
-  def lookup_herbarium(herbarium_name)
-    return if herbarium_name.blank?
-    herbarium = Herbarium.where(name: herbarium_name).first
+  def lookup_herbarium(name)
+    return if name.blank?
+    name2 = name.sub(/ \(.*\)$/, '')
+    herbarium = Herbarium.where(name: [name, name2]).first
     return herbarium unless herbarium.nil?
-    if herbarium_name != @user.personal_herbarium_name ||
+    if name != @user.personal_herbarium_name ||
        @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)
       return nil
