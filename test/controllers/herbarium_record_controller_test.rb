@@ -5,7 +5,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     {
       id: observations(:strobilurus_diminutivus_obs).id,
       herbarium_record: {
-        herbarium_name: rolf.preferred_herbarium_name,
+        herbarium_name: rolf.preferred_herbarium.format_name,
         initial_det: "Strobilurus diminutivus det. Rolf Singer",
         accession_number: "NYBG 1234567",
         notes: "Some notes about this herbarium record"
@@ -110,7 +110,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
     herbarium_record = HerbariumRecord.last
-    assert_equal(params[:herbarium_record][:herbarium_name],
+    assert_equal("The New York Botanical Garden",
                  herbarium_record.herbarium.name)
     assert_equal(params[:herbarium_record][:initial_det],
                  herbarium_record.initial_det)
@@ -182,7 +182,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     q = query.id.alphabetize
     params = {
       id: obs.id,
-      herbarium_record: { herbarium_name: obs.user.preferred_herbarium_name },
+      herbarium_record: { herbarium_name: obs.user.preferred_herbarium.format_name },
       q: q
     }
 
@@ -252,7 +252,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     params = {
       id: rec.id,
       herbarium_record: {
-        herbarium_name:   rec.herbarium.name,
+        herbarium_name:   rec.herbarium.format_name,
         initial_det:      rec.initial_det,
         accession_number: rec.accession_number,
         notes:            rec.notes

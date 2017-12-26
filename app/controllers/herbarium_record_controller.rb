@@ -240,8 +240,10 @@ class HerbariumRecordController < ApplicationController
   end
 
   def validate_herbarium_name!
-    name = @herbarium_record.herbarium_name
-    @herbarium_record.herbarium = Herbarium.where(name: name).first
+    name = @herbarium_record.herbarium_name.to_s
+    name2 = name.sub(/ \(.*\)$/, '')
+    herbarium = Herbarium.where(name: [name, name2]).first
+    @herbarium_record.herbarium = herbarium
     if name.blank?
       flash_error(:create_herbarium_record_missing_herbarium_name.t)
       return false

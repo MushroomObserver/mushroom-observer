@@ -1586,7 +1586,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_herbarium_record
     generic_construct_observation({
       observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).format_name,
                           herbarium_id: "1234" },
       name: { name: "Coprinus comatus" }
     }, 1, 1, 0)
@@ -1598,12 +1598,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_herbarium_duplicate_label
     generic_construct_observation({
       observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).format_name,
                           herbarium_id: "NYBG 1234" },
       name: { name: "Cortinarius sp." }
     }, 0, 0, 0)
     assert_input_value(:herbarium_record_herbarium_name,
-                       "The New York Botanical Garden")
+                       "The New York Botanical Garden (NY)")
     assert_input_value(:herbarium_record_herbarium_id, "NYBG 1234")
   end
 
@@ -1611,7 +1611,7 @@ class ObserverControllerTest < FunctionalTestCase
     name = "Coprinus comatus"
     generic_construct_observation({
       observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).format_name,
                           herbarium_id: "" },
       name: { name: name }
     }, 1, 1, 0)
@@ -1625,7 +1625,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation({
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).name,
+      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).format_name,
                           herbarium_id: "1234" },
       name: { name: "Coprinus comatus" }
     }, 1, 1, 0)
