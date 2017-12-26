@@ -86,6 +86,10 @@ class Herbarium < AbstractModel
     name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
+  def auto_complete_name
+    code.blank? ? name : "#{code} - #{name}"
+  end
+
   def owns_all_records?(user = User.current)
     herbarium_records.all? { |r| r.user_id == user.id }
   end

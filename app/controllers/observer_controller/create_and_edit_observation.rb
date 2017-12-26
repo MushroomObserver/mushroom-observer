@@ -227,8 +227,9 @@ class ObserverController
 
   def lookup_herbarium(name)
     return if name.blank?
-    name2 = name.sub(/ \(.*\)$/, '')
-    herbarium = Herbarium.where(name: [name, name2]).first
+    name2 = name.sub(/^[^-]* - /, '')
+    herbarium = Herbarium.where(name: [name, name2]).first ||
+                Herbarium.where(code: name).first
     return herbarium unless herbarium.nil?
     if name != @user.personal_herbarium_name ||
        @user.personal_herbarium
