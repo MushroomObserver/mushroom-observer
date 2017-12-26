@@ -3161,6 +3161,10 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_user, id: "Einstein")
     assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
+    # This caused router to crash in the wild.
+    assert_recognizes({ controller: "observer", action: "lookup_user",
+                        id: "I.+G.+Saponov" },
+                      "/observer/lookup_user/I.+G.+Saponov")
   end
 
   ###################

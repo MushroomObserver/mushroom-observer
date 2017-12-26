@@ -66,6 +66,16 @@ MushroomObserver::Application.routes.draw do
   # Short-hand notation for AJAX methods.
   get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
 
+  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  match(":controller/:action/:id",
+    constraints: {
+      controller: /observer/,
+      action: /lookup_\w+/,
+      id: /.*/
+    },
+    via: [:get]
+  )
+
   # Default action for any controller is "index".
   get ":controller" => "controller#index"
 
@@ -73,7 +83,4 @@ MushroomObserver::Application.routes.draw do
   get ":controller/:action"
   match ":controller(/:action(/:id))", constraints: { id: /\d+/ },
                                        via: [:get, :post]
-
-  # Accept non-numeric ids for the lookup_xxx actions.
-  get ":controller/:action/:id", action: /lookup_\w+/
 end
