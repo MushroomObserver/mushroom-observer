@@ -184,7 +184,7 @@ end
 class AutoCompleteHerbarium < AutoCompleteByWord
   def rough_matches(letter)
     Herbarium.connection.select_values(%(
-      SELECT IF(code = '', name, CONCAT(name, ' (', code, ')'))
+      SELECT IF(code = '', name, CONCAT(code, ' - ', name))
       FROM herbaria
       WHERE name LIKE '#{letter}%'
          OR name LIKE '% #{letter}%'
