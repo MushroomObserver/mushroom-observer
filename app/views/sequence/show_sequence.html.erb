@@ -27,8 +27,8 @@
     <table class="table-namings">
       <thead>
         <tr>
-          <th></th>
-          <th></th>
+          <th class="col-md-1"></th>
+          <th class="col-md-11"></th>
         </tr>
       </thead>
       <tbody>
@@ -39,8 +39,11 @@
         <% if @sequence.bases.present? %>
           <tr>
             <td class="bold align-top"><%= :BASES.t %>:</td>
-            <td class="col-md-9 monospace max-width-text">
-              <%= @sequence.bases %></td>
+          </tr>
+          <tr>
+            <td colspan="2" class="monospace max-width-text">
+              <pre><%= @sequence.bases %></pre>
+            </td>
           </tr>
         <% end %>
         <% if @sequence.deposit? %>
