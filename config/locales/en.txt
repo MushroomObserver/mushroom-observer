@@ -1971,7 +1971,7 @@
   show_observation_add_sequence: "Add [:SEQUENCE]"
   show_observation_no_sequences: "No [:sequences]"
   show_observation_archive_link: Show Archive Record
-  show_observation_blast_link: "BLAST®"
+  show_observation_blast_link: "Run BLAST®"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1986,9 +1986,6 @@
 
   # name/show_past_name_description
   show_past_name_description_title: "[:VERSION] [num]: [name]"
-
-  # sequence/show_sequence
-  show_sequence_setup_blast: "Set up NCBI BLAST®"
 
   # object/show_past_versions
   show_past_version_merged_with: "(merged with #[id])"
