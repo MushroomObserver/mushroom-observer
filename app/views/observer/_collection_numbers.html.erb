@@ -15,7 +15,7 @@
     %>]
   </div>
   <ul class="tight-list">
-    <% numbers.map do |number| %>
+    <% numbers.each do |number| %>
       <li>
         <%= link_to("<i>#{number.format_name.t}</i>".html_safe,
                     add_query_param(number.show_link_args, query)) %>
