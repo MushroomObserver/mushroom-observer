@@ -39,7 +39,7 @@ module TabsHelper
   end
 
   def general_questions_link(obs, user)
-    return unless obs.observer_takes_email_questions_from?(user)
+    return unless obs.user.email_general_question && obs.user != user
     link_with_query(:show_observation_send_question.t,
                     controller: :observer, action: :ask_observation_question,
                     id: obs.id)
