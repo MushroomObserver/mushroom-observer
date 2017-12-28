@@ -270,6 +270,10 @@ module SessionExtensions
       end
     end
 
+    def assert_unchecked(id, msg = nil)
+      assert_checked(id, false, msg)
+    end
+
     def assert_checked(id, checked=true, msg = nil)
       field = get_field!(id)
       val = field.node["checked"]
@@ -314,7 +318,13 @@ module SessionExtensions
     # Change the value of the given input field.  Matches field whose ID _ends_
     # in the given String.
     def change(id, val)
-      assert_enabled(id).value = val
+      if val == true
+        assert_enabled(id).node["checked"] = "checked"
+      elsif val == false
+        assert_enabled(id).node.remove_attribute("checked")
+      else
+        assert_enabled(id).value = val
+      end
     end
 
     # Check a given check-box.
