@@ -555,9 +555,10 @@ class AbstractModel < ActiveRecord::Base
   #    # at the top of the RSS feed.
   #    obj.log(:log_observation_updated)
   #
-  def log(*args)
+  def log(tag, args = {})
     init_rss_log unless rss_log
-    rss_log.add_with_date(*args)
+    touch unless new_record? || args[:touch] == false
+    rss_log.add_with_date(tag, args)
   end
 
   # Add message to RssLog if you're about to destroy this object, creating new
