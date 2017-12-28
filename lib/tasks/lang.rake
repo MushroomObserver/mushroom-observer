@@ -50,8 +50,8 @@ namespace :lang do
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
     "strip:unofficial",  # strip out any strings we no longer need
-    "update:all",        # update localization (YAML) files
-    "export:unofficial"  # update export (text) files
+    "update:all"         # update localization (YAML) files
+    # "export:unofficial"  # update export (text) files [never used anymore]
   ]
 
   for namespace_name, action, verbose, verbose_method, description in [
