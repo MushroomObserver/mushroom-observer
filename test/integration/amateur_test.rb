@@ -24,29 +24,30 @@ class AmateurTest < IntegrationTestCase
       form.submit("Login")
     end
     assert_template("account/login")
-    assert_flash(/unsuccessful/i)
+    assert_flash_text(/unsuccessful/i)
 
     # Try again with incorrect password.
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_checked("remember_me", false)
+      form.assert_checked("remember_me")
       form.change("password", "boguspassword")
+      form.uncheck("remember_me")
       form.submit("Login")
     end
     assert_template("account/login")
-    assert_flash(/unsuccessful/i)
+    assert_flash_text(/unsuccessful/i)
 
     # Try yet again with correct password.
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_checked("remember_me", false)
+      form.assert_unchecked("remember_me")
       form.change("password", "testpassword")
       form.submit("Login")
     end
     assert_template("observer/list_rss_logs")
-    assert_flash(/success/i)
+    assert_flash_text(/success/i)
 
     # This should only be accessible if logged in.
     click(label: "Preferences", in: :left_panel)
@@ -134,7 +135,7 @@ class AmateurTest < IntegrationTestCase
     open_form(&:submit)
     assert_template("comment/add_comment")
     # (I don't care so long as it says something.)
-    assert_flash(/\S/)
+    assert_flash_text(/\S/)
 
     open_form do |form|
       form.change("summary", summary)
@@ -365,15 +366,15 @@ class AmateurTest < IntegrationTestCase
       open_form do |form|
         form.assert_value("name_name", "")
         form.assert_value("vote_value", "")
-        form.assert_checked("reason_1_check", false)
-        form.assert_checked("reason_2_check", false)
-        form.assert_checked("reason_3_check", false)
-        form.assert_checked("reason_4_check", false)
+        form.assert_unchecked("reason_1_check")
+        form.assert_unchecked("reason_2_check")
+        form.assert_unchecked("reason_3_check")
+        form.assert_unchecked("reason_4_check")
         form.submit
       end
       assert_template("naming/create")
       # (I don't care so long as it says something.)
-      assert_flash(/\S/)
+      assert_flash_text(/\S/)
 
       open_form do |form|
         form.change("name", text_name)
@@ -387,19 +388,19 @@ class AmateurTest < IntegrationTestCase
 
       open_form(&:submit)
       assert_template("naming/create")
-      assert_flash(/confidence/i)
+      assert_flash_text(/confidence/i)
 
       open_form do |form|
         form.assert_value("name", text_name)
-        form.assert_checked("reason_1_check", false)
-        form.assert_checked("reason_2_check", false)
-        form.assert_checked("reason_3_check", false)
-        form.assert_checked("reason_4_check", false)
+        form.assert_unchecked("reason_1_check")
+        form.assert_unchecked("reason_2_check")
+        form.assert_unchecked("reason_3_check")
+        form.assert_unchecked("reason_4_check")
         form.select(/vote/, /call it that/i)
         form.submit
       end
       assert_template("observer/show_observation")
-      assert_flash(/success/i)
+      assert_flash_text(/success/i)
       assert_objs_equal(obs, assigns(:observation))
 
       obs.reload
@@ -423,8 +424,10 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", text_name)
+        form.assert_checked("reason_1_check")
+        form.uncheck("reason_1_check")
         form.change("name", "#{text_name} #{author}")
-        form.change("reason_2_check", true)
+        form.check("reason_2_check")
         form.change("reason_2_notes", reason)
         form.select("vote_value", /call it that/i)
         form.submit
@@ -448,11 +451,11 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
-        form.assert_checked("reason_1_check", false)
+        form.assert_unchecked("reason_1_check")
         form.assert_value("reason_1_notes", "")
         form.assert_checked("reason_2_check")
         form.assert_value("reason_2_notes", reason)
-        form.assert_checked("reason_3_check", false)
+        form.assert_unchecked("reason_3_check")
         form.assert_value("reason_3_notes", "")
       end
       click(label: /cancel.*show/i)
@@ -461,14 +464,14 @@ class AmateurTest < IntegrationTestCase
 
     def failed_delete(_obs)
       click(label: /destroy/i, href: %r{naming/destroy})
-      assert_flash(/sorry/i)
+      assert_flash_text(/sorry/i)
     end
 
     def successful_delete(obs, naming, text_name, original_name)
       click(label: /destroy/i, href: %r{naming/destroy})
       assert_template("observer/show_observation")
       assert_objs_equal(obs, assigns(:observation))
-      assert_flash(/success/i)
+      assert_flash_text(/success/i)
 
       obs.reload
       assert_names_equal(original_name, obs.name)

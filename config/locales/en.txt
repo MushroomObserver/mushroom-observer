@@ -1296,6 +1296,7 @@
 
   # observer/edit_observation
   edit_observation_title: "[:edit_object(type=:observation)]: [name]"
+  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a voucher specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password
   email_new_password_title: Email New Password
@@ -1966,7 +1967,7 @@
   show_observation_add_link_dialog: "Enter full URL, including \"http://\":"
   show_observation_edit_link_dialog: "[:show_observation_add_link_dialog]"
   show_observation_remove_link_dialog: "Are you sure you want to remove this link?"
-  show_observation_no_collection_numbers: "No [:specimens]"
+  show_observation_no_collection_numbers: "No [:collection_numbers]"
   show_observation_no_herbarium_records: "No [:herbarium_records]"
   show_observation_add_sequence: "Add [:SEQUENCE]"
   show_observation_no_sequences: "No [:sequences]"

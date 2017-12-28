@@ -98,6 +98,7 @@ class HerbariumRecord < AbstractModel
   def remove_observation(obs)
     return unless observations.include?(obs)
     observations.delete(obs)
+    obs.reload.turn_off_specimen_if_no_more_records
     obs.log(:log_herbarium_record_removed, name: accession_at_herbarium,
             touch: true)
     destroy if observations.empty?

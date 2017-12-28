@@ -16,7 +16,7 @@
     %>]
   </div>
   <ul class="tight-list">
-    <% records.map do |record| %>
+    <% records.each do |record| %>
       <li>
         <%= link_to(record.accession_at_herbarium.t,
                     add_query_param(record.show_link_args, query)) %>
@@ -38,7 +38,7 @@
     <%= records.count > 1 ? :Herbarium_records.t : :Herbarium_record.t %>:
   </div>
   <ul class="tight-list">
-    <% records.map do |record| %>
+    <% records.each do |record| %>
       <li>
         <%= link_to(record.accession_at_herbarium.t,
                     add_query_param(record.show_link_args, query)) %>

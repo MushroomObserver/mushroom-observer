@@ -599,7 +599,7 @@ class ImageControllerTest < FunctionalTestCase
     message = :runtime_image_uploaded_image.t(
       name: "#" + obs.images.last.id.to_s
     )
-    assert_flash(/#{message}/)
+    assert_flash_text(/#{message}/)
     img = Image.last
     assert_obj_list_equal([obs], img.observations)
     assert_obj_list_equal([proj], img.projects)
@@ -609,7 +609,7 @@ class ImageControllerTest < FunctionalTestCase
     login("rolf")
     obs = observations(:coprinus_comatus_obs)
     post(:add_image, id: obs.id)
-    assert_flash(/no changes/i)
+    assert_flash_text(/no changes/i)
   end
 
   # This is what would happen when user first opens form.

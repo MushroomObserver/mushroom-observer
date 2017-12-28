@@ -80,6 +80,7 @@ class CollectionNumber < AbstractModel
   def remove_observation(obs)
     return unless observations.include?(obs)
     observations.delete(obs)
+    obs.reload.turn_off_specimen_if_no_more_records
     obs.log(:log_collection_number_removed, name: format_name, touch: true)
     destroy if observations.empty?
   end

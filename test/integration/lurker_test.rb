@@ -117,7 +117,7 @@ class LurkerTest < IntegrationTestCase
     form.select("type", "Locations")
     form.submit("Search")
     assert_template("location/list_locations")
-    assert_flash(/no.*found/i)
+    assert_flash_text(/no.*found/i)
     assert_select("div.results a[href]", false)
 
     # This should give us just about all the locations.
@@ -199,18 +199,18 @@ class LurkerTest < IntegrationTestCase
     save_path = @request.fullpath
     assert_equal(query_params, parse_query_params(save_path))
     click(label: "« Prev", in: :title)
-    assert_flash(/there are no more observations/i)
+    assert_flash_text(/there are no more observations/i)
     assert_equal(save_path, @request.fullpath)
     assert_equal(query_params, parse_query_params(save_path))
     click(label: "Next »", in: :title)
-    assert_flash(nil)
+    assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
     save_path = @request.fullpath
     click(label: "Next »", in: :title)
-    assert_flash(nil)
+    assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
     click(label: "« Prev", in: :title)
-    assert_flash(nil)
+    assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")

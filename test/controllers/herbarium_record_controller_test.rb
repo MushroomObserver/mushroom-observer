@@ -21,7 +21,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
   def test_herbarium_with_no_herbarium_records_index
     get_with_dump(:herbarium_index, id: herbaria(:dick_herbarium).id)
     assert_template(:list_herbarium_records)
-    assert_flash(/No matching herbarium records found/)
+    assert_flash_text(/No matching herbarium records found/)
   end
 
   def test_observation_index
@@ -34,7 +34,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     get_with_dump(:observation_index,
                   id: observations(:strobilurus_diminutivus_obs).id)
     assert_template(:list_herbarium_records)
-    assert_flash(/No matching herbarium records found/)
+    assert_flash_text(/No matching herbarium records found/)
   end
 
   def test_herbarium_record_search
@@ -144,7 +144,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     params[:herbarium_record][:accession_number] = existing.accession_number
     post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_flash(/already exists/i)
+    assert_flash_text(/already exists/i)
     assert_response(:redirect)
   end
 
@@ -165,7 +165,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     post(:create_herbarium_record, params)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
-    assert_flash(/only curators can/i)
+    assert_flash_text(/only curators can/i)
      
     login("dick")
     assert(!nybg.curators.member?(dick))
@@ -203,7 +203,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
 
     login("mary") # Non-curator
     get_with_dump(:edit_herbarium_record, id: nybg.id)
-    assert_flash(/permission denied/i)
+    assert_flash_text(/permission denied/i)
     assert_response(:redirect)
 
     login("rolf")

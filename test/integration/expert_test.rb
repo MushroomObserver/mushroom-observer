@@ -158,13 +158,8 @@ class ExpertTest < IntegrationTestCase
                    form.get_value!("list_members").split(/\r\n/).sort)
       form.check(/chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/)
       form.check(/chosen_multiple_names_\d+_#{names(:suillus_by_white).id}/)
-
-      # For some reason these need to be explicitly re-checked
-      form.assert_value("member_is_collection_location", false) # Should be true
-      form.assert_value("member_specimen", false) # Should be true
-      form.check("member_is_collection_location")
-      form.check("member_specimen")
-
+      form.assert_checked("member_is_collection_location")
+      form.assert_checked("member_specimen")
       form.submit
     end
     assert_flash_success
@@ -198,8 +193,8 @@ class ExpertTest < IntegrationTestCase
       form.assert_value("species_list_notes", "List notes.")
       form.assert_value(SpeciesList.notes_part_id(Observation.other_notes_part),
                         "Member notes.")
-      form.assert_value("member_is_collection_location", false) # Was true
-      form.assert_value("member_specimen", false) # Was true
+      form.assert_checked("member_is_collection_location", true)
+      form.assert_checked("member_specimen", true)
       form.change("list_members", "Agaricus nova\r\nAmanita baccata\r\n")
       form.change("title", "Something New")
       form.change("place_name", new_location_reverse)
