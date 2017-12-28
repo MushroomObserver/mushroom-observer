@@ -879,6 +879,9 @@ class User < AbstractModel
       [:projects,                       :user_id],
       # Leave votes and namings, because I don't want to recalc consensuses.
       [:namings,                        :user_id],
+      [:projects,                       :user_id],
+      [:translation_strings,            :user_id],
+      [:translation_strings_versions,   :user_id],
       [:votes,                          :user_id]
     ].each do |table, col|
       User.connection.update %(
@@ -912,12 +915,15 @@ class User < AbstractModel
     if ids.any?
       ids = ids.join(",")
       [
-        [:comments,            :target_id, :target_type],
-        [:images_observations, :observation_id],
-        [:interests,           :target_id, :target_type],
-        [:namings,             :observation_id],
-        [:rss_logs,            :observation_id],
-        [:votes,               :observation_id]
+        [:collection_numbers_observations, :observation_id],
+        [:comments,                        :target_id, :target_type],
+        [:herbarium_records_observations,  :observation_id],
+        [:images_observations,             :observation_id],
+        [:interests,                       :target_id, :target_type],
+        [:namings,                         :observation_id],
+        [:rss_logs,                        :observation_id],
+        [:sequences,                       :observation_id],
+        [:votes,                           :observation_id]
       ].each do |table, id_col, type_col|
         if type_col
           User.connection.delete %(
@@ -935,20 +941,34 @@ class User < AbstractModel
 
     # Delete records they own, culminating in the user record itself.
     [
-      [:comments,                      :user_id],
-      [:images,                        :user_id],
-      [:image_votes,                   :user_id],
-      [:interests,                     :user_id],
-      [:location_descriptions_authors, :user_id],
-      [:location_descriptions_editors, :user_id],
-      [:name_descriptions_authors,     :user_id],
-      [:name_descriptions_editors,     :user_id],
-      [:notifications,                 :user_id],
-      [:observations,                  :user_id],
-      [:publications,                  :user_id],
-      [:species_lists,                 :user_id],
-      [:user_groups_users,             :user_id],
-      [:users,                         :id]
+      [:api_keys,                       :user_id],
+      [:articles,                       :user_id],
+      [:collection_numbers,             :user_id],
+      [:comments,                       :user_id],
+      [:copyright_changes,              :user_id],
+      [:donations,                      :user_id],
+      [:external_links,                 :user_id],
+      [:glossary_terms,                 :user_id],
+      [:glossary_terms_versions,        :user_id],
+      [:herbaria,                       :personal_user_id],
+      [:herbaria_curators,              :user_id],
+      [:herbarium_records,              :user_id],
+      [:images,                         :user_id],
+      [:image_votes,                    :user_id],
+      [:interests,                      :user_id],
+      [:location_descriptions_authors,  :user_id],
+      [:location_descriptions_editors,  :user_id],
+      [:name_descriptions_authors,      :user_id],
+      [:name_descriptions_editors,      :user_id],
+      [:notifications,                  :user_id],
+      [:observations,                   :user_id],
+      [:publications,                   :user_id],
+      [:queued_emails,                  :user_id],
+      [:queued_emails,                  :to_user_id],
+      [:sequences,                      :user_id],
+      [:species_lists,                  :user_id],
+      [:user_groups_users,              :user_id],
+      [:users,                          :id]
     ].each do |table, col|
       User.connection.delete %(
         DELETE FROM #{table} WHERE `#{col}` = #{id}
