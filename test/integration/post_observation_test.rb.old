@@ -102,8 +102,7 @@
       end
 
       def sess.evaluate_destruction
-        assert_flash_success
-        assert_flash(/destroyed/i)
+        assert_flash_text(/destroyed/i)
         assert_template('observer/list_observations')
       end
 
@@ -116,14 +115,14 @@
 
       def sess.evaluate_no_location
         assert_template('observer/create_observation')
-        assert_flash(/where|location/i)
+        assert_flash_text(/where|location/i)
       end
 
       def sess.evaluate_new_location_observation
-        assert_flash(/success/i)
-        assert_flash(/uploaded/i)
-        assert_flash(/created observation/i)
-        assert_flash(/created proposed name/i)
+        assert_flash_text(/success/i)
+        assert_flash_text(/uploaded/i)
+        assert_flash_text(/created observation/i)
+        assert_flash_text(/created proposed name/i)
         assert_template('location/create_location')
 
         reload_results
@@ -147,8 +146,8 @@
       end
 
       def sess.evaluate_new_location
-        assert_flash(/success/i)
-        assert_flash(/created location/i)
+        assert_flash_text(/success/i)
+        assert_flash_text(/created location/i)
         assert_template('observer/show_observation')
 
         reload_results
