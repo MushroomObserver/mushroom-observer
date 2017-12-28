@@ -238,7 +238,7 @@ class HerbariumControllerTest < FunctionalTestCase
     )
     post(:create_herbarium, herbarium: params)
     assert_equal(herbarium_count, Herbarium.count)
-    assert_flash(/already exists/i)
+    assert_flash_text(/already exists/i)
     # Really means we go back to create_herbarium without having created one.
     assert_response(:success)
     herbarium = assigns(:herbarium)
@@ -259,7 +259,7 @@ class HerbariumControllerTest < FunctionalTestCase
       place_name: "New Location"
     )
     post(:create_herbarium, herbarium: params)
-    assert_flash(/must define this location/i)
+    assert_flash_text(/must define this location/i)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
     herbarium = Herbarium.last
@@ -284,7 +284,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     assert_not_nil(rolf.personal_herbarium)
     post(:create_herbarium, herbarium: params)
-    assert_flash(/already.*created.*personal herbarium/i)
+    assert_flash_text(/already.*created.*personal herbarium/i)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success)
 
@@ -324,7 +324,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("mary")
     assert(!nybg.curator?(mary))
     get(:edit_herbarium, id: nybg.id)
-    assert_flash(/Permission denied/i)
+    assert_flash_text(/Permission denied/i)
     assert_response(:redirect)
 
     login("rolf")
@@ -354,7 +354,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("mary")
     post(:edit_herbarium, herbarium: params, id: nybg.id)
     assert_redirected_to(action: :show_herbarium, id: nybg.id)
-    assert_flash(/Permission denied/)
+    assert_flash_text(/Permission denied/)
     assert_equal(last_update, nybg.reload.updated_at)
 
     login("rolf")

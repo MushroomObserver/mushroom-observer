@@ -27,7 +27,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_empty(obs.collection_numbers)
     get_with_dump(:observation_index, id: obs.id)
     assert_template(:list_collection_numbers)
-    assert_flash(/No matching collection numbers found/)
+    assert_flash_text(/no matching collection numbers found/i)
   end
 
   def test_collection_number_search
@@ -122,16 +122,16 @@ class CollectionNumberControllerTest < FunctionalTestCase
     login("mary")
     post(:create_collection_number, id: obs.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash(/permission denied/i)
+    assert_flash_text(/permission denied/i)
 
     login("rolf")
     post(:create_collection_number, id: obs.id,
                                     collection_number: params.except(:name))
-    assert_flash(/missing.*name/i)
+    assert_flash_text(/missing.*name/i)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create_collection_number, id: obs.id,
                                     collection_number: params.except(:number))
-    assert_flash(/missing.*number/i)
+    assert_flash_text(/missing.*number/i)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create_collection_number, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
@@ -166,7 +166,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
 
     post(:create_collection_number, id: obs.id, collection_number: params)
     assert_equal(collection_number_count + 1, CollectionNumber.count)
-    assert_flash(/shared/i)
+    assert_flash_text(/shared/i)
     assert_obj_list_equal([number], obs.reload.collection_numbers)
   end
 
@@ -186,7 +186,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     login("mary")
     post(:create_collection_number, id: obs2.id, collection_number: params)
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash(/shared/i)
+    assert_flash_text(/shared/i)
     assert_equal(1, obs1.reload.collection_numbers.count)
     assert_equal(3, obs2.reload.collection_numbers.count)
     assert_equal(2, number.reload.observations.count)
@@ -264,17 +264,17 @@ class CollectionNumberControllerTest < FunctionalTestCase
 
     login("mary")
     post(:edit_collection_number, id: number.id, collection_number: params)
-    assert_flash(/permission denied/i)
+    assert_flash_text(/permission denied/i)
 
     login("rolf")
     post(:edit_collection_number, id: number.id,
                                   collection_number: params.merge(name: ""))
-    assert_flash(/missing.*name/i)
+    assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
     post(:edit_collection_number, id: number.id,
                                   collection_number: params.merge(number: ""))
-    assert_flash(/missing.*number/i)
+    assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
     post(:edit_collection_number, id: number.id, collection_number: params)
@@ -309,7 +309,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:edit_collection_number, id: num2.id, collection_number: params)
-    assert_flash(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
+    assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
     assert(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
     assert_obj_list_equal([new_num], obs1.collection_numbers)

@@ -377,7 +377,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(name4.show_link_args.merge(q))
     get(:next_name, q.merge(id: name4.id))
     assert_redirected_to(name4.show_link_args.merge(q))
-    assert_flash(/no more/i)
+    assert_flash_text(/no more/i)
 
     get(:prev_name, q.merge(id: name4.id))
     assert_redirected_to(name3.show_link_args.merge(q))
@@ -385,7 +385,7 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(name1.show_link_args.merge(q))
     get(:prev_name, q.merge(id: name1.id))
     assert_redirected_to(name1.show_link_args.merge(q))
-    assert_flash(/no more/i)
+    assert_flash_text(/no more/i)
   end
 
   def test_names_by_user

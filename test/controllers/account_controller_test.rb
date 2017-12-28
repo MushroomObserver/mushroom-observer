@@ -12,7 +12,7 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = "http://localhost/bogus/location"
     post(:login, user: { login: "rolf", password: "testpassword" })
     assert_response("http://localhost/bogus/location")
-    assert_flash(:runtime_login_success.t)
+    assert_flash_text(:runtime_login_success.t)
     assert(@request.session[:user_id],
            "Didn't store user in session after successful login!")
     assert_equal(rolf.id, @request.session[:user_id],
@@ -354,7 +354,7 @@ class AccountControllerTest < FunctionalTestCase
 
     # Now do it correctly, and make sure changes were made.
     post(:prefs, user: params)
-    assert_flash(:runtime_prefs_success.t)
+    assert_flash_text(:runtime_prefs_success.t)
     user = rolf.reload
     assert_equal("new@email.com", user.email)
     assert_equal(false, user.email_comments_all)
@@ -438,7 +438,7 @@ class AccountControllerTest < FunctionalTestCase
       }
     }
     post_with_dump(:profile, params)
-    assert_flash(:runtime_profile_success.t)
+    assert_flash_text(:runtime_profile_success.t)
 
     # Make sure changes were made.
     user = rolf.reload

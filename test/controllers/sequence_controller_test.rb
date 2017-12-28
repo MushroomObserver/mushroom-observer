@@ -292,7 +292,7 @@ class SequenceControllerTest < FunctionalTestCase
     login("zero")
     post(:edit_sequence, params)
     assert_not_equal(locus, sequence.reload.locus)
-    assert_flash_warning(:permission_denied.t)
+    assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner user can edit Sequence
     login(observer.login)
@@ -438,7 +438,7 @@ class SequenceControllerTest < FunctionalTestCase
     post(:destroy_sequence, id: sequence.id)
     assert_equal(old_count, Sequence.count)
     assert_redirected_to(obs.show_link_args)
-    assert_flash_warning(:permission_denied.t)
+    assert_flash_text(:permission_denied.t)
 
     # Prove Observation owner can destroy Sequence
     login(observer.login)

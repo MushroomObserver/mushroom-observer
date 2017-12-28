@@ -250,7 +250,7 @@ class ProjectControllerTest < FunctionalTestCase
     }
     post_requires_login(:admin_request, params)
     assert_redirected_to(action: :show_project, id: eol_project.id)
-    assert_flash(:admin_request_success.t(title: eol_project.title))
+    assert_flash_text(:admin_request_success.t(title: eol_project.title))
   end
 
   def test_admin_request

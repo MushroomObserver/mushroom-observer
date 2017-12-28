@@ -74,7 +74,7 @@ class SupportControllerTest < FunctionalTestCase
     params = donation_params(amount, rolf, false)
     params[:donation][:other_amount] = amount
     post(:confirm, params)
-    assert_flash(:confirm_positive_number_error.t)
+    assert_flash_text(:confirm_positive_number_error.t)
   end
 
   def test_create_donation
