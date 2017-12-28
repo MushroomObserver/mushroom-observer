@@ -74,7 +74,11 @@ module FlashExtensions
   def assert_flash_text(expect, msg = "Flash text incorrect")
     got = get_last_flash
     got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n") if got.present?
-    assert_equal(expect, got, msg)
+    if expect.is_a?(Regexp)
+      assert_match(expect, got, msg)
+    else
+      assert_equal("<p>#{expect}</p>", got, msg)
+    end
 
     @controller.instance_variable_set("@last_notice", nil)
     session[:notice] = nil

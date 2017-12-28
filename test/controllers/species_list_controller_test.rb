@@ -1454,7 +1454,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login(spl.user.login)
 
     post(:bulk_editor, params)
-    assert_flash(/#{:runtime_date_invalid.l}/)
+    assert_flash_text(/#{:runtime_date_invalid.l}/)
   end
 
   def test_project_checkboxes_in_create_species_list_form

@@ -113,7 +113,7 @@
     <% if !@show_user.personal_herbarium.blank? %>
       <p>
         <strong><%= :show_user_personal_herbarium.t %>:</strong>
-        <%= link_to(@show_user.personal_herbarium.name,
+        <%= link_to(@show_user.personal_herbarium.name.t,
                     @show_user.personal_herbarium.show_link_args) %>
       </p>
     <% end %>

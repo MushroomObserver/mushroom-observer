@@ -18,7 +18,7 @@ class InterestControllerTest < FunctionalTestCase
     get(:set_interest,
         type: "Observation", id: observations(:minimal_unknown_obs),
         user: mary.id)
-    assert_flash(2)
+    assert_flash_error
   end
 
   def test_set_interest_no_object
@@ -44,7 +44,7 @@ class InterestControllerTest < FunctionalTestCase
     login("rolf")
     get(:set_interest, type: "Observation", id: minimal_unknown.id, state: 1,
                        user: rolf.id)
-    assert_flash(0)
+    assert_flash_success
 
     # Make sure rolf now has one Interest: interested in minimal_unknown.
     rolfs_interests = Interest.where(user_id: rolf.id)
@@ -55,7 +55,7 @@ class InterestControllerTest < FunctionalTestCase
     # Succeed: Turn same interest off.
     login("rolf")
     get(:set_interest, type: "Observation", id: minimal_unknown.id, state: -1)
-    assert_flash(0)
+    assert_flash_success
 
     # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
     rolfs_interests = Interest.where(user_id: rolf.id)
@@ -66,7 +66,7 @@ class InterestControllerTest < FunctionalTestCase
     # Succeed: Turn another interest off from no interest.
     login("rolf")
     get(:set_interest, type: "Name", id: peltigera.id, state: -1)
-    assert_flash(0)
+    assert_flash_success
 
     # Make sure rolf now has two Interests.
     rolfs_interests = Interest.where(user_id: rolf.id)
@@ -80,13 +80,13 @@ class InterestControllerTest < FunctionalTestCase
     # interest in yet.
     login("rolf")
     get(:set_interest, type: "Observation", id: detailed_unknown.id, state: 0)
-    assert_flash(0)
+    assert_flash_success
     assert_equal(2, Interest.where(user_id: rolf.id).length)
 
     # Succeed: Delete first interest now.
     login("rolf")
     get(:set_interest, type: "Observation", id: minimal_unknown.id, state: 0)
-    assert_flash(0)
+    assert_flash_success
 
     # Make sure rolf now has one Interest: NOT interested in peltigera.
     rolfs_interests = Interest.where(user_id: rolf.id)
@@ -97,7 +97,7 @@ class InterestControllerTest < FunctionalTestCase
     # Succeed: Delete last interest.
     login("rolf")
     get(:set_interest, type: "Name", id: peltigera.id, state: 0)
-    assert_flash(0)
+    assert_flash_success
     assert_equal(0, Interest.where(user_id: rolf.id).length)
   end
 

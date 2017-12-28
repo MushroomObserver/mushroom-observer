@@ -109,9 +109,22 @@
   </div>
 </div>
 
+<div class="row">
+  <div class="col-xs-12 push-down max-width-text">
+    <div class="form-inline">
+      <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
+      <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
+    </div>
+    <div class="well well-sm push-down max-width-text help-block">
+      <div class="arrow-up"></div>
+      <%= :form_observations_specimen_available_help.t %>
+    </div>
+  </div>
+</div>
+
 <!-- no_specimen_fields -->
 <% if button_name == :SAVE_EDITS.l %>
-  <div class="well well-sm push-down max-width-text help-block">
+  <div class="well well-sm max-width-text help-block">
     <%= :form_observations_edit_specimens_help.t %>
   </div>
 <% end %>
@@ -119,20 +132,6 @@
 
 <!-- specimen_fields -->
 <% if button_name == :CREATE.l %>
-  <div class="row">
-    <div class="col-xs-12 push-down max-width-text">
-      <div class="form-inline">
-        <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
-        <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
-      </div>
-      <div class="well well-sm push-down max-width-text help-block">
-        <div class="arrow-up"></div>
-        <%= :form_observations_specimen_available_help.t %>
-      </div>
-    </div>
-  </div>
-
-  <!-- HERBARIUM_FIELDS -->
   <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
     <div class="row push-up">
       <div class="col-sm-6 max-width-text">
@@ -190,8 +189,6 @@
       });
     });
   ) %>
-  <!-- /HERBARIUM_FIELDS -->
-
 <% end %>
 <!-- /specimen_fields -->
 

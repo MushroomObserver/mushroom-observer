@@ -315,6 +315,7 @@ class ObserverController
       any_errors = false
       update_whitelisted_observation_attributes
       @observation.notes = notes_to_sym_and_compact
+      warn_if_unchecking_specimen_with_records_present!
 
       # Validate place name
       @place_name = @observation.place_name
@@ -372,6 +373,15 @@ class ObserverController
 
   def update_whitelisted_observation_attributes
     @observation.attributes = whitelisted_observation_params || {}
+  end
+
+  def warn_if_unchecking_specimen_with_records_present!
+    return if @observation.specimen
+    return unless @observation.specimen_was
+    return if @observation.collection_numbers.length == 0 &&
+              @observation.herbarium_records.length == 0 &&
+              @observation.sequences.length == 0
+    flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)

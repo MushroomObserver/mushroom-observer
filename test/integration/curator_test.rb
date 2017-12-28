@@ -174,13 +174,13 @@ class CuratorTest < IntegrationTestCase
       form.assert_value("email", "")
       form.assert_value("mailing_address", "")
       form.assert_value("description", "")
-      form.assert_value("personal", "false")
+      form.assert_unchecked("personal")
       form.change("herbarium_name", "Mary's Herbarium")
-      form.change("personal", "1")
+      form.check("personal")
       form.submit(:CREATE.t)
     end
     user = User.find(user.id)
-    assert_not_equal([], user.curated_herbaria)
+    assert_not_empty(user.curated_herbaria)
     assert_template("herbarium/show_herbarium")
   end
 end
