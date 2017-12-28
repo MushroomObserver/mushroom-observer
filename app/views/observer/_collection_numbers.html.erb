@@ -9,7 +9,7 @@
 
 <% if numbers.any? && can_edit %>
   <div>
-    <%= :Specimens.t %>: [<%=
+    <%= :Collection_numbers.t %>: [<%=
       link_with_query(:create_collection_number.t, controller: :collection_number,
                       action: :create_collection_number, id: observation.id)
     %>]
@@ -31,7 +31,7 @@
   </ul>
 
 <% elsif numbers.any? && !can_edit %>
-  <%= numbers.count > 1 ? :Specimens.t : :Specimen.t %>:
+  <%= numbers.count > 1 ? :Collection_numbers.t : :Collection_number.t %>:
   <%= numbers.map do |number|
         link_to("<i>#{number.format_name.t}</i>".html_safe,
                 add_query_param(number.show_link_args, query))
