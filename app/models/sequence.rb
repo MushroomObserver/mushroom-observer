@@ -208,7 +208,7 @@ class Sequence < AbstractModel
   # Prevents duplicate Sequences for the same Observation
   def unique_bases_for_obs
     return unless other_sequences_same_obs.any? do |other_sequence|
-      other_sequence.bases == bases
+      other_sequence.bases_nucleotides == bases_nucleotides
     end
     errors.add(:bases, :validate_sequence_bases_unique.t)
   end

@@ -67,6 +67,7 @@ fasta_formatted_sequence: # 6
 
 bare_formatted_sequence: # 7
   <<: *DEFAULTS
+  # Differs from above by one letter
   # Use YAML literal style to retain newline characters
   # See http://www.yaml.org/spec/1.2/spec.html#id2760844
   locus:       ITS4
@@ -83,9 +84,11 @@ bare_formatted_sequence: # 7
     CGGTCTACTCCGAAATGCATTGTTGCGGAATGCCCCAGTCGGCACAGGCGTAGTGAATTTTCTATCATCG
     TCTGTTTGTCCGCGAGGCGTTCCCGCCCACCGAACCCAATAAACCTTTCTCCTAGTTGACCTCGAATCAG
     GTGGGG
+    A
 
 bare_with_numbers_sequence: # 8
   <<: *DEFAULTS
+  # Differs from above by one letter
   # Use YAML literal style to retain newline chancters
   # Use YAML indentation indicator because lines contain leading content
   # space characters. See http://www.yaml.org/spec/1.2/spec.html#id2793979
@@ -105,4 +108,4 @@ bare_with_numbers_sequence: # 8
     421 ttaagtcaac cctcaagcct cctttggttt ggtcatggaa ctgaacggcc ggacccgctt
     481 gggatccggt cggtctactc cgaaatgcat tgttgcggaa tgccccagtc ggcacaggcg
     541 tagtgaattt tctatcatcg tctgtttgtc cgcgaggcgt tcccgcccac cgaacccaat
-    601 aaacctttct cctagttgac ctcgaatcag gtgggg
+    601 aaacctttct cctagttgac ctcgaatcag gtgggg B

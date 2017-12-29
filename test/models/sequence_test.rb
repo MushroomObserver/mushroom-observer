@@ -134,14 +134,14 @@ class SequenceTest < UnitTestCase
     )
     assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
 
-    # Prove that Sequences Bases must be unique for an Observation
+    # Prove that Sequences Bases raw base codes must be unique for an Observation
     existing_seq = sequences(:local_sequence)
     obs = existing_seq.observation
     sequence = Sequence.new(
       observation: obs,
       user:        obs.user,
       locus:       "ITS",
-      bases:       existing_seq.bases,
+      bases:       "  1 #{existing_seq.bases}",
       archive:     "",
       accession:   "",
       notes:       "Random notes"
@@ -292,7 +292,7 @@ class SequenceTest < UnitTestCase
     "ttaagtcaaccctcaagcctcctttggtttggtcatggaactgaacggccggacccgctt"\
     "gggatccggtcggtctactccgaaatgcattgttgcggaatgccccagtcggcacaggcg"\
     "tagtgaattttctatcatcgtctgtttgtccgcgaggcgttcccgcccaccgaacccaat"\
-    "aaacctttctcctagttgacctcgaatcaggtgggg"
+    "aaacctttctcctagttgacctcgaatcaggtggggB"
 
     assert_equal(
       %(#{Sequence.blast_url_prefix}#{expected_query}),
