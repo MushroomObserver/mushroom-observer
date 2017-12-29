@@ -155,7 +155,7 @@ class CuratorTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
-      form.submit(:edit_herbarium_save.t)
+      form.submit(:SAVE.t)
     end
     herbarium = Herbarium.find(herbarium.id)
     assert_equal(new_code, herbarium.code)
