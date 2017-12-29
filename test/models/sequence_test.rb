@@ -134,7 +134,7 @@ class SequenceTest < UnitTestCase
     )
     assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
 
-    # Prove that Sequences Bases raw base codes must be unique for an Observation
+    # Prove that Sequence raw base codes must be unique for an Observation
     existing_seq = sequences(:local_sequence)
     obs = existing_seq.observation
     sequence = Sequence.new(
