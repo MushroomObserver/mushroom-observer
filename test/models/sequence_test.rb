@@ -134,14 +134,14 @@ class SequenceTest < UnitTestCase
     )
     assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
 
-    # Prove that Sequences Bases must be unique for an Observation
+    # Prove that Sequence raw base codes must be unique for an Observation
     existing_seq = sequences(:local_sequence)
     obs = existing_seq.observation
     sequence = Sequence.new(
       observation: obs,
       user:        obs.user,
       locus:       "ITS",
-      bases:       existing_seq.bases,
+      bases:       "  1 #{existing_seq.bases}",
       archive:     "",
       accession:   "",
       notes:       "Random notes"
@@ -244,5 +244,59 @@ class SequenceTest < UnitTestCase
     sequence = sequences(:deposited_sequence)
     assert_equal("https://www.ncbi.nlm.nih.gov/nuccore/#{sequence.accession}",
                  sequence.accession_url)
+  end
+
+  def test_blast_url
+    assert_equal(
+      %(#{Sequence. blast_url_prefix}ACGT),
+      sequences(:local_sequence).blast_url
+    )
+    assert_equal(
+      %(#{Sequence.blast_url_prefix}KT968605),
+      sequences(:deposited_sequence).blast_url
+    )
+    # Prove that BLAST url for UNITE sequence uses Bases instead of Accession.
+    assert_equal(
+      %(#{Sequence.blast_url_prefix}ACGT),
+      sequences(:alternate_archive).blast_url
+    )
+    # Prove that BLAST url for FASTA formatted sequence
+    # excludes description and whitespace
+    expected_query = "" \
+    "GGAAGTAAAAGTCGTAACAAGGTTTCCGTAGGTGAACCTGCGGAAGGATCATTACACAATACTCTGTATT" \
+    "ATCCACACACACCTTCTGTGATCCATTTACCTGGTTGCTTCCCGTGGCATCTCGCTTGCTTCAGAGGCCC" \
+    "CTGCCTTCCTGCGGGAGGGCAGGTGTGAGCTGCTGCTGGCCCCCCGGGACCACGGGAAGGTCCAATGAAA" \
+    "CCCTGGTTTTTTGATGCCTTCAAGTCTGAAATTATTGAATACAAGAAAACTGTTAAAACTTTCAACAACG" \
+    "GATCTCTTGGTTCTCGCATCGATGAAGAACGCAGCGAAATGCGATAAGTAGTGTGAATTGCAGAATTCAG" \
+    "TGAATCATCGAATCTTTGAACGCACATTGCGCCCCCTGGCATTCCGGGGGGCACGCCTGTTCGAGCGTCA" \
+    "TTAAGTCAACCCTCAAGCCTCCTTTGGTTTGGTCATGGAACTGAACGGCCGGACCCGCTTGGGATCCGGT" \
+    "CGGTCTACTCCGAAATGCATTGTTGCGGAATGCCCCAGTCGGCACAGGCGTAGTGAATTTTCTATCATCG" \
+    "TCTGTTTGTCCGCGAGGCGTTCCCGCCCACCGAACCCAATAAACCTTTCTCCTAGTTGACCTCGAATCAG" \
+    "GTGGGG"
+
+    assert_equal(
+      %(#{Sequence.blast_url_prefix}#{expected_query}),
+      sequences(:fasta_formatted_sequence).blast_url
+    )
+
+    # Prove that BLAST url for bare sequence
+    # excludes digits and whitespace
+    expected_query = "" \
+    "ggaagtaaaagtcgtaacaaggtttccgtaggtgaacctgcggaaggatcattacacaat"\
+    "actctgtattatccacacacaccttctgtgatccatttacctggttgcttcccgtggcat"\
+    "ctcgcttgcttcagaggcccctgccttcctgcgggagggcaggtgtgagctgctgctggc"\
+    "cccccgggaccacgggaaggtccaatgaaaccctggttttttgatgccttcaagtctgaa"\
+    "attattgaatacaagaaaactgttaaaactttcaacaacggatctcttggttctcgcatc"\
+    "gatgaagaacgcagcgaaatgcgataagtagtgtgaattgcagaattcagtgaatcatcg"\
+    "aatctttgaacgcacattgcgccccctggcattccggggggcacgcctgttcgagcgtca"\
+    "ttaagtcaaccctcaagcctcctttggtttggtcatggaactgaacggccggacccgctt"\
+    "gggatccggtcggtctactccgaaatgcattgttgcggaatgccccagtcggcacaggcg"\
+    "tagtgaattttctatcatcgtctgtttgtccgcgaggcgttcccgcccaccgaacccaat"\
+    "aaacctttctcctagttgacctcgaatcaggtggggB"
+
+    assert_equal(
+      %(#{Sequence.blast_url_prefix}#{expected_query}),
+      sequences(:bare_with_numbers_sequence).blast_url
+    )
   end
 end

@@ -45,6 +45,10 @@
                                      action: :destroy_sequence, id: sequence.id },
                                      { data: { confirm: :are_you_sure.t } })
           end
+          if sequence.blastable?
+            links << link_to(:show_observation_blast_link.t,
+                             sequence.blast_url, target: "_blank")
+          end
           "[#{links.safe_join(' | ')}]".html_safe if links.any?
         %>
       </li>
