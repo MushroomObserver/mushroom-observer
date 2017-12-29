@@ -101,58 +101,58 @@ class CacheTest < UnitTestCase
     end
   end
 
-  def test_cronjob_refresh_caches
-    # First "break" the cache; update_columns avoids the callbacks which would
-    # normally propagate the changes to the affected names and observations.
-
-    # The name_description is the most-upstream source for classification.
-    new_str = names(:peltigera).classification
-    desc = name_descriptions(:coprinus_desc)
-    desc.update_columns(classification: new_str)
-
-    # Also break all the mirrored columns in one observation.
-    obs = observations(:agaricus_campestris_obs)
-    assert_not_equal(" lichen ", obs.name.lifeform)
-    assert_not_equal("Spam spam", obs.name.text_name)
-    assert_not_equal(new_str, obs.name.classification)
-    assert_not_equal("Antarctica", obs.location.name)
-    obs.update_columns(
-      lifeform: " lichen ",
-      text_name: "Spam spam",
-      classification: new_str,
-      where: "Antarctica"
-    )
-
-    # Make sure there is an observation associated with the genus Coprinus.
-    Observation.create!(
-      where: Location.unknown,
-      when: Time.now,
-      name: names(:coprinus),
-      user: rolf
-    )
-
-    # Now run the nightly cronjob which will first update the name Coprinus,
-    # and then propagate that change to all the subtaxa of Coprinus, as well
-    # as the observations associated with all those names.
-    Name.refresh_classification_caches
-    Name.propagate_generic_classifications
-    Observation.refresh_content_filter_caches
-
-    # Make sure the name, its subtaxa and related observations' classification
-    # was updated first.  (This will include the new observation of Coprinus.)
-    Name.where("text_name LIKE 'Coprinus%'").each do |name|
-      assert_equal(new_str, name.classification,
-                   "The name #{name.search_name} is wrong.")
-    end
-    Observation.where("text_name LIKE 'Coprinus%'").each do |obs|
-      assert_equal(new_str, obs.classification,
-                   "The name #{fixture_label(obs)} is wrong.")
-    end
-
-    # Make sure the broken observation was also fixed.
-    assert_equal(obs.name.lifeform, obs.reload.lifeform)
-    assert_equal(obs.name.text_name, obs.reload.text_name)
-    assert_equal(obs.name.classification, obs.reload.classification)
-    assert_equal(obs.location.name, obs.reload.where)
-  end
+  # def test_cronjob_refresh_caches
+  #   # First "break" the cache; update_columns avoids the callbacks which would
+  #   # normally propagate the changes to the affected names and observations.
+  #
+  #   # The name_description is the most-upstream source for classification.
+  #   new_str = names(:peltigera).classification
+  #   desc = name_descriptions(:coprinus_desc)
+  #   desc.update_columns(classification: new_str)
+  #
+  #   # Also break all the mirrored columns in one observation.
+  #   obs = observations(:agaricus_campestris_obs)
+  #   assert_not_equal(" lichen ", obs.name.lifeform)
+  #   assert_not_equal("Spam spam", obs.name.text_name)
+  #   assert_not_equal(new_str, obs.name.classification)
+  #   assert_not_equal("Antarctica", obs.location.name)
+  #   obs.update_columns(
+  #     lifeform: " lichen ",
+  #     text_name: "Spam spam",
+  #     classification: new_str,
+  #     where: "Antarctica"
+  #   )
+  #
+  #   # Make sure there is an observation associated with the genus Coprinus.
+  #   Observation.create!(
+  #     where: Location.unknown,
+  #     when: Time.now,
+  #     name: names(:coprinus),
+  #     user: rolf
+  #   )
+  #
+  #   # Now run the nightly cronjob which will first update the name Coprinus,
+  #   # and then propagate that change to all the subtaxa of Coprinus, as well
+  #   # as the observations associated with all those names.
+  #   Name.refresh_classification_caches
+  #   Name.propagate_generic_classifications
+  #   Observation.refresh_content_filter_caches
+  #
+  #   # Make sure the name, its subtaxa and related observations' classification
+  #   # was updated first.  (This will include the new observation of Coprinus.)
+  #   Name.where("text_name LIKE 'Coprinus%'").each do |name|
+  #     assert_equal(new_str, name.classification,
+  #                  "The name #{name.search_name} is wrong.")
+  #   end
+  #   Observation.where("text_name LIKE 'Coprinus%'").each do |obs|
+  #     assert_equal(new_str, obs.classification,
+  #                  "The name #{fixture_label(obs)} is wrong.")
+  #   end
+  #
+  #   # Make sure the broken observation was also fixed.
+  #   assert_equal(obs.name.lifeform, obs.reload.lifeform)
+  #   assert_equal(obs.name.text_name, obs.reload.text_name)
+  #   assert_equal(obs.name.classification, obs.reload.classification)
+  #   assert_equal(obs.location.name, obs.reload.where)
+  # end
 end

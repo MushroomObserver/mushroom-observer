@@ -2489,21 +2489,21 @@ class NameTest < UnitTestCase
     assert_equal(good, name.description.reload.classification)
   end
 
-  def test_propagate_generic_classifications
-    msgs = Name.propagate_generic_classifications
-    assert_empty(msgs, msgs.join("\n"))
-
-    a = names(:agaricus)
-    ac = names(:agaricus_campestris)
-    ac.update_attributes(classification: "")
-    msgs = Name.propagate_generic_classifications
-    assert_equal(["Updating Agaricus campestris"], msgs)
-    assert_equal(a.classification, ac.reload.classification)
-
-    a.destroy
-    msgs = Name.propagate_generic_classifications
-    assert(msgs.include?("Missing genus Agaricus"))
-  end
+  # def test_propagate_generic_classifications
+  #   msgs = Name.propagate_generic_classifications
+  #   assert_empty(msgs, msgs.join("\n"))
+  #
+  #   a = names(:agaricus)
+  #   ac = names(:agaricus_campestris)
+  #   ac.update_attributes(classification: "")
+  #   msgs = Name.propagate_generic_classifications
+  #   assert_equal(["Updating Agaricus campestris"], msgs)
+  #   assert_equal(a.classification, ac.reload.classification)
+  #
+  #   a.destroy
+  #   msgs = Name.propagate_generic_classifications
+  #   assert(msgs.include?("Missing genus Agaricus"))
+  # end
 
   def test_changing_classification_propagates_to_subtaxa
     name  = names(:coprinus)
