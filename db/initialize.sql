@@ -1,7 +1,11 @@
 drop database if exists mo_development;
-create database mo_development;
+create database mo_development
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
 drop database if exists mo_test;
-create database mo_test;
+create database mo_test
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
 drop database if exists mo_tmp;
 create database mo_tmp;
 use mo_tmp;
