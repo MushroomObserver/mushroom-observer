@@ -13,6 +13,7 @@ module Query
       search = google_parse_pattern
       add_search_conditions(
         search,
+        "herbaria.code",
         "herbaria.name",
         "COALESCE(herbaria.description,'')",
         "COALESCE(herbaria.mailing_address,'')"

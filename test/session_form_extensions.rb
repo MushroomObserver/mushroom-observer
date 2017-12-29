@@ -105,14 +105,14 @@ module SessionExtensions
     def initialize(context, form)
       self.context = context
       self.form    = form
-      self.url     = CGI.unescapeHTML(form.attributes["action"])
+      self.url     = CGI.unescapeHTML(form["action"])
       self.inputs  = []
       self.submits = []
       fill_in_initial_values!
     end
 
     def find_value(elem, attr)
-      result = CGI.unescapeHTML(elem.attributes[attr] || "")
+      result = CGI.unescapeHTML(elem[attr] || "")
       result.is_a?(Nokogiri::XML::Attr) ? result.value : result
     end
 
@@ -155,7 +155,7 @@ module SessionExtensions
 
           when "checkbox", "radio"
             field.on_value = val
-            field.value = (elem.attributes["checked"] == "checked")
+            field.value = (elem["checked"] == "checked")
             inputs << field
 
           when "select"
@@ -164,10 +164,11 @@ module SessionExtensions
             context.assert_select(elem, "option") do |elems|
               for elem in elems
                 opt = Field::Option.new
-                opt.value = CGI.unescapeHTML(elem.attributes["value"])
+                opt.value = CGI.unescapeHTML(elem["value"])
                 opt.label = CGI.unescapeHTML(elem.children.map(&:to_s).join(""))
                 opts << opt
-                val = opt.value if elem.attributes["selected"] == "selected"
+                val = opt.value \
+                  if elem["selected"] == "selected"
               end
             end
             val = opts.first.value unless val
@@ -269,6 +270,10 @@ module SessionExtensions
       end
     end
 
+    def assert_unchecked(id, msg = nil)
+      assert_checked(id, false, msg)
+    end
+
     def assert_checked(id, checked=true, msg = nil)
       field = get_field!(id)
       val = field.node["checked"]
@@ -313,7 +318,13 @@ module SessionExtensions
     # Change the value of the given input field.  Matches field whose ID _ends_
     # in the given String.
     def change(id, val)
-      assert_enabled(id).value = val
+      if val == true
+        assert_enabled(id).node["checked"] = "checked"
+      elsif val == false
+        assert_enabled(id).node.remove_attribute("checked")
+      else
+        assert_enabled(id).value = val
+      end
     end
 
     # Check a given check-box.
@@ -321,10 +332,15 @@ module SessionExtensions
       field = assert_enabled(id)
       context.assert([:checkbox, :radio].include?(field.type),
                      "Must be a check-box or radio-box.")
-      field.value = true
+
+      # Just change "checked" property for checkboxes.
+      if field.type == :checkbox
+        field.node["checked"] = "checked"
+      end
 
       # Uncheck all the other radio-boxes in this group.
       if field.type == :radio
+        field.value = true
         for field2 in inputs
           if (field2 != field) && (field2.name == field.name)
             field2.value = false
@@ -337,7 +353,7 @@ module SessionExtensions
     def uncheck(id)
       field = assert_enabled(id)
       context.assert([:checkbox].include?(field.type), "Must be a check-box.")
-      field.value = false
+      field.node.remove_attribute("checked")
     end
 
     # Upload a file in a file field.
@@ -377,7 +393,8 @@ module SessionExtensions
       hash = {}
       for field in inputs
         if field.type == :checkbox
-          hash[field.name] = field.value ? field.on_value : "0"
+          hash[field.name] = field.node["checked"] == "checked" ?
+                                field.on_value : "0"
         elsif field.type == :radio
           hash[field.name] = field.on_value if field.value
         elsif field.type == :file

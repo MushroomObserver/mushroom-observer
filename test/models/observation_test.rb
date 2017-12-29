@@ -144,24 +144,6 @@ class ObservationTest < UnitTestCase
     refute(observations(:detailed_unknown_obs).herbarium_records.empty?)
   end
 
-  def test_observer_accepts_general_email_questions
-    obs = observations(:owner_accepts_general_questions)
-    assert(obs.observer_takes_email_questions_from?(dick),
-           "User with email_general_question should take questions from others")
-  end
-
-  def test_observer_refuses_general_email_questions
-    obs = observations(:owner_refuses_general_questions)
-    refute(obs.observer_takes_email_questions_from?(rolf),
-           "User with email_general_question off should not take questions")
-  end
-
-  def test_observer_general_email_questions_from_self
-    obs = observations(:owner_accepts_general_questions)
-    refute(obs.observer_takes_email_questions_from?(obs.user),
-           "User with email_general_question should take questions from others")
-  end
-
   def test_minimal_map_observation
     obs = observations(:minimal_unknown_obs)
 

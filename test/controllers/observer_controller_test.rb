@@ -326,7 +326,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:next_observation, qp.merge(id: o_id))
     assert_redirected_to(action: :show_observation, id: o_id, params: qp)
-    assert_flash(/can.*t find.*results.*index/i)
+    assert_flash_text(/can.*t find.*results.*index/i)
     get(:next_observation, qp.merge(id: o1.id))
     assert_redirected_to(action: :show_observation, id: o2.id, params: qp)
     get(:next_observation, qp.merge(id: o2.id))
@@ -335,7 +335,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_observation, id: o4.id, params: qp)
     get(:next_observation, qp.merge(id: o4.id))
     assert_redirected_to(action: :show_observation, id: o4.id, params: qp)
-    assert_flash(/no more/i)
+    assert_flash_text(/no more/i)
 
     get(:prev_observation, qp.merge(id: o4.id))
     assert_redirected_to(action: :show_observation, id: o3.id, params: qp)
@@ -345,10 +345,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_observation, id: o1.id, params: qp)
     get(:prev_observation, qp.merge(id: o1.id))
     assert_redirected_to(action: :show_observation, id: o1.id, params: qp)
-    assert_flash(/no more/i)
+    assert_flash_text(/no more/i)
     get(:prev_observation, qp.merge(id: o_id))
     assert_redirected_to(action: :show_observation, id: o_id, params: qp)
-    assert_flash(/can.*t find.*results.*index/i)
+    assert_flash_text(/can.*t find.*results.*index/i)
   end
 
   def test_advanced_search_form
@@ -645,7 +645,7 @@ class ObserverControllerTest < FunctionalTestCase
          user: { email: email },
          question: { content: (args[:content] || "Some content") })
     assert_response(response)
-    assert_flash(flash) if flash
+    assert_flash_text(flash) if flash
   end
 
   def test_show_observation_num_views
@@ -1154,7 +1154,7 @@ class ObserverControllerTest < FunctionalTestCase
       login("rolf")
       get(page, params)
       assert_redirected_to(action: :list_rss_logs)
-      assert_flash(/denied|only.*admin/i)
+      assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
       get_with_dump(page, params)
@@ -1173,7 +1173,7 @@ class ObserverControllerTest < FunctionalTestCase
     login("rolf")
     post(page, params)
     assert_redirected_to(controller: :observer, action: :list_rss_logs)
-    assert_flash(/denied|only.*admin/i)
+    assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
     post_with_dump(page, params)
@@ -1202,7 +1202,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_login(:ask_observation_question, params)
     assert_redirected_to(action: :show_observation)
-    assert_flash(:runtime_ask_observation_question_success.t)
+    assert_flash_text(:runtime_ask_observation_question_success.t)
   end
 
   def test_send_ask_user_question
@@ -1216,7 +1216,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_login(:ask_user_question, params)
     assert_redirected_to(action: :show_user, id: user.id)
-    assert_flash(:runtime_ask_user_question_success.t)
+    assert_flash_text(:runtime_ask_user_question_success.t)
   end
 
   def test_email_merge_request
@@ -1318,7 +1318,7 @@ class ObserverControllerTest < FunctionalTestCase
     post_requires_login(:author_request, params)
     assert_redirected_to(controller: :name, action: :show_name_description,
                          id: name_descriptions(:coprinus_comatus_desc).id)
-    assert_flash(:request_success.t)
+    assert_flash_text(:request_success.t)
 
     params = {
       id: location_descriptions(:albion_desc).id,
@@ -1332,7 +1332,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :location,
                          action: :show_location_description,
                          id: location_descriptions(:albion_desc).id)
-    assert_flash(:request_success.t)
+    assert_flash_text(:request_success.t)
   end
 
   def test_review_authors_locations
@@ -3098,14 +3098,16 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove that when there are no hits and exactly one spelling suggestion,
     # it gives a flash warning and shows the page for the suggestion.
     get(:lookup_name, id: "Fungia")
-    assert_flash_warning(:runtime_suggest_one_alternate.t)
+    assert_flash_text(:runtime_suggest_one_alternate.t(type: :name,
+                                                       match: "Fungia"))
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:fungi).id)
 
     # Prove that when there are no hits and >1 spelling suggestion,
     # it flashes a warning and shows the name index
     get(:lookup_name, id: "Verpab")
-    assert_flash_warning(:runtime_suggest_multiple_alternates.t)
+    assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
+                                                             match: "Verpab"))
     assert_redirected_to(%r{/name/index_name})
 
     # Prove that lookup_name adds flash message when it hits an error,
@@ -3113,7 +3115,7 @@ class ObserverControllerTest < FunctionalTestCase
     ObserverController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
     get(:lookup_name, id: names(:fungi).text_name)
-    assert_flash("RuntimeError")
+    assert_flash_text("RuntimeError")
   end
 
   def test_lookup_observation

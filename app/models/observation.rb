@@ -184,6 +184,10 @@ class Observation < AbstractModel
     true
   end
 
+  def can_edit?(user = User.current)
+    Project.can_edit?(self, user)
+  end
+
   # There is no value to keeping a collection number record after all its
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
@@ -1232,22 +1236,16 @@ class Observation < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Projects
+  #  :section: Specimens
   #
   ##############################################################################
 
-  def observer_takes_email_questions_from?(viewer)
-    user.email_general_question && user != viewer
-  end
-
-  ##############################################################################
-  #
-  #  :section: Projects
-  #
-  ##############################################################################
-
-  def can_edit?(user = User.current)
-    Project.can_edit?(self, user)
+  def turn_off_specimen_if_no_more_records
+    return unless specimen
+    return if collection_numbers.length > 0
+    return if herbarium_records.length > 0
+    return if sequences.length > 0
+    update_attributes(specimen: false)
   end
 
   ##############################################################################

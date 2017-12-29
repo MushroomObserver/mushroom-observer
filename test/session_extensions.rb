@@ -164,7 +164,15 @@ module SessionExtensions
 
   def submit_form_with_changes(changes)
     open_form do |form|
-      changes.each { |key, value| form.change(key, value) }
+      changes.each do |key, value|
+        if value == true
+          form.check(key)
+        elsif value == false
+          form.uncheck(key)
+        else
+          form.change(key, value)
+        end
+      end
       form.submit
     end
   end

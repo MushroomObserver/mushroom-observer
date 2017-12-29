@@ -7,18 +7,21 @@
   query = Query.lookup(:Sequence, :all, observations: observation.id)
 %>
 
-<div>
-  <%= :Sequences.t %>: <%=
-    link = link_with_query(:show_observation_add_sequence.t,
-                           controller: :sequence, action: :create_sequence,
-                           id: observation.id)
-    "[#{link}]".html_safe if @user
-  %>
-</div>
+<% if @user || sequences.any? %>
+  <div>
+    <%= sequences.any? ? :Sequences.t + ":".html_safe :
+                         :show_observation_no_sequences.t %> <%=
+      link = link_with_query(:show_observation_add_sequence.t,
+                             controller: :sequence, action: :create_sequence,
+                             id: observation.id)
+      "[#{link}]".html_safe if @user
+    %>
+  </div>
+<% end %>
 
 <% if sequences.any? %>
   <ul class="tight-list">
-    <% sequences.map do |sequence| %>
+    <% sequences.each do |sequence| %>
       <li>
         <%= locus = sequence.locus.truncate(sequence.locus_width)
         if sequence.deposit?

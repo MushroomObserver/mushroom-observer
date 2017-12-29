@@ -763,9 +763,8 @@ class ApplicationController < ActionController::Base
   # Report an informational message that will be displayed (in green) at the
   # top of the next page the User sees.
   def flash_notice(*strs)
-    session[:notice] += "<br/>" if session[:notice]
     session[:notice] ||= "0"
-    session[:notice] += strs.map(&:to_s).join("<br/>")
+    session[:notice] += strs.map { |str| "<p>#{str}</p>" }.join("")
   end
   helper_method :flash_notice
 
@@ -789,7 +788,7 @@ class ApplicationController < ActionController::Base
 
   def flash_object_errors(obj)
     return unless obj && obj.errors && !obj.errors.empty?
-    flash_error(obj.formatted_errors.join("<br/>"))
+    flash_error(obj.formatted_errors)
   end
 
   def save_with_log(obj)

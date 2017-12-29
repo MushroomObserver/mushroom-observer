@@ -33,6 +33,11 @@
       <% end %>
     </div>
 
+    <div id="specimen_available">
+      <%= observation.specimen ? :show_observation_specimen_available.t :
+                                 :show_observation_specimen_not_available.t %>
+    </div>
+
     <div id="observation_collection_numbers">
       <%= render(partial: "observer/collection_numbers",
                 locals: { observation: observation }) %>
