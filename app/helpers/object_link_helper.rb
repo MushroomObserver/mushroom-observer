@@ -170,13 +170,4 @@ module ObjectLinkHelper
       :show_observation_specimen_not_available.t
     end
   end
-
-  def create_herbarium_record_link(obs)
-    if check_permission(obs) || @user && @user.curated_herbaria.length > 0
-      link = link_with_query(:show_observation_create_herbarium_record.t,
-                             controller: :herbarium_record,
-                             action: :add_herbarium_record, id: obs.id)
-      " | ".html_safe + link
-    end
-  end
 end
