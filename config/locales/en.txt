@@ -3207,6 +3207,7 @@
   observation_term_north: "Latitude of northern edge of search region."
   observation_term_south: "Latitude of southern edge of search region."
   observation_term_images: "Has images? (\"yes\" or \"no\")"
+  observation_term_sequence: "Has a sequence?"
   observation_term_specimen: "Has a specimen?"
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: "Has a name? (other than \"Fungi sp.\")"
