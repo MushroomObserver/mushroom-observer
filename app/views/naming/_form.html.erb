@@ -9,6 +9,8 @@
    reason = @params.reason rescue @reason
    names = @params.names rescue @names
    vote = @params.vote rescue @vote
+
+   unfocused ||= false
 %>
 
 <%= render(partial: "shared/form_name_feedback",
@@ -28,7 +30,7 @@
     <div class="form-group">
       <%= label_tag(:name_name, :WHAT.t + ":") %>
       <%= text_field(:name, :name, value: what, size: 40, class: "form-control",
-                     data: { autofocus: true }) %>
+                     data: { autofocus: !unfocused }) %>
       <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
     </div>
 
