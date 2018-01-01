@@ -105,10 +105,10 @@
   <div class="col-xs-12 max-width-text-times-two">
 <%= render(partial: "naming/form",
             locals: {
-              action: action,
-              button_name: button_name,
+              action:       action,
+              button_name:  button_name,
               show_reasons: false,
-              autofocus_name: false
+              unfocused:    true
             }
           ) if include_naming %>
   </div>
