@@ -26,4 +26,4 @@ Stop sending me email like this: http://mushroomobserver.org/account/no_email_co
 Change your preferences: http://mushroomobserver.org/account/prefs/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
-If you feel this user is abusing this service please forward this entire email message to: mo-admin@googlegroups.com
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
