@@ -1953,8 +1953,8 @@
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
-  show_observation_specimen_available: Voucher specimen reported
-  show_observation_specimen_not_available: No voucher specimen
+  show_observation_specimen_available: Specimen available
+  show_observation_specimen_not_available: No specimen available
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"

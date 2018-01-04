@@ -199,7 +199,7 @@ class ObserverController
   def print_labels # :nologin: :norobots:
     query = find_query(:Observation)
     unless query
-      flash_error(runtime_search_has_expired.t)
+      flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default("/")
     end
     @labels = make_labels(query.results)
