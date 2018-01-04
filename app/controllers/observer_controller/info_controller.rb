@@ -3,14 +3,17 @@
 class ObserverController
   # Intro to site.
   def intro # :nologin:
+    store_location
   end
 
   # Recent features.
   def news # :nologin:
+    store_location
   end
 
   # Help page.
   def how_to_use # :nologin:
+    store_location
     @min_pos_vote = Vote.confidence(Vote.min_pos_vote)
     @min_neg_vote = Vote.confidence(Vote.min_neg_vote)
     @maximum_vote = Vote.confidence(Vote.maximum_vote)
@@ -18,13 +21,16 @@ class ObserverController
 
   # A few ways in which users can help.
   def how_to_help # :nologin:
+    store_location
   end
 
   def wrapup_2011 # :nologin:
+    store_location
   end
 
   # Terminology description for RISD illustration class
   def risd_terminology # :nologin:
+    store_location
   end
 
   # Simple form letting us test our implementation of Textile.
