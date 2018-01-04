@@ -17,4 +17,4 @@ Change user's status: http://mushroomobserver.org/project/change_user_status/<%=
 Show user's profile: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
-If you feel this user is abusing this service please forward this entire email message to: mo-admin@googlegroups.com
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
