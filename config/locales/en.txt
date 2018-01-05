@@ -1296,7 +1296,7 @@
 
   # observer/edit_observation
   edit_observation_title: "[:edit_object(type=:observation)]: [name]"
-  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a voucher specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
+  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password
   email_new_password_title: Email New Password
@@ -1404,7 +1404,7 @@
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
   # observer/_form_observations
-  form_observations_specimen_available: Voucher Specimen Available
+  form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
@@ -1621,7 +1621,7 @@
   news_content_pr_293: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/293\">PR #293</a> (March 16, 2017) Fixed bug which caused loss of “Big Eyes” next to a Proposed Name and caused incorrect calculation of Observer Preference."
   news_content_pr_276: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/276\">PR #276</a> (January 24, 2017) Revived pages explaining color themes. See http://mushroomobserver.org/theme/color_themes. Moved theme actions to a new controller."
   news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
-  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
+  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless observations and/or observations without specimens from Activity Feed and other displays of observations."
   news_content_pr_256: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/256\">PR #256</a> (December 25, 2016) Made it so users who have only proposed a name for an observation will get comment response notifications, instead of requiring users to comment in order to get comment response notifications."
   news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
   news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\".  If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
@@ -1953,8 +1953,8 @@
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
-  show_observation_specimen_available: Voucher specimen reported
-  show_observation_specimen_not_available: No voucher specimen
+  show_observation_specimen_available: Specimen available
+  show_observation_specimen_not_available: No specimen available
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
@@ -2444,10 +2444,10 @@
   advanced_search_filter_has_images_off: Include both imaged and imageless observations
   advanced_search_filter_has_images_yes: Exclude imageless observations
   advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens (vouchers)
-  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered observations
-  advanced_search_filter_has_specimen_yes: Exclude voucherless observations
-  advanced_search_filter_has_specimen_no: Exclude vouchered observations
+  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_has_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
