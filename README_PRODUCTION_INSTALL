@@ -83,6 +83,7 @@ root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
+  swapon /swap
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
