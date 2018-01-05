@@ -1617,10 +1617,7 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1, 1, 0)
     obs = assigns(:observation)
     assert_true(obs.specimen)
-    assert_equal(1, obs.herbarium_records.count)
-    herbarium_record = obs.herbarium_records.first
-    assert_match(/MO #{obs.id}/, herbarium_record.herbarium_label)
-    assert_match(/#{name}/, herbarium_record.herbarium_label)
+    assert_equal(0, obs.herbarium_records.count)
   end
 
   def test_create_observation_with_herbarium_but_no_specimen
@@ -1650,14 +1647,14 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       observation: { specimen: "1" },
       herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
-                          herbarium_id: "" },
+                          herbarium_id: "12345" },
       name: { name: "Coprinus comatus" }
     }, 1, 1, 0, katrina)
     obs = assigns(:observation)
     assert(obs.specimen)
     assert_equal(1, obs.herbarium_records.count)
     assert_not_empty(obs.herbarium_records)
-    herbarium_record = obs.herbarium_records[0]
+    herbarium_record = obs.herbarium_records.first
     herbarium = herbarium_record.herbarium
     assert(herbarium.curator?(katrina))
     assert(herbarium.name.match(/Katrina/))
