@@ -191,7 +191,7 @@ class ObserverController
       normalize_herbarium_record_params(obs, params)
     return if !herbarium || accession_number.blank?
     # If user checks specimen box and nothing else, do not create record.
-    return if accession_number.blank? && obs.collection_numbers.length == 0
+    return if accession_number.blank? && obs.collection_numbers.zero?
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
       herbarium_record = create_herbarium_record(herbarium, initial_det,
