@@ -74,7 +74,7 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp mrtg
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables-restore
@@ -83,11 +83,13 @@ root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
+  swapon /swap
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
-          imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
+          imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev \
+          exiftool mrtg
 
 # Install rvm and ruby.
 root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
