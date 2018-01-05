@@ -113,7 +113,7 @@ class ObserverController
 
   def send_request
     change_locale_if_needed(MO.default_locale)
-    subject = "#{@model.class.name} Merge Request"
+    subject = "#{@model.name} Merge Request"
     content = :email_merge_objects.l(
       user: @user.login,
       type: @model.type_tag,

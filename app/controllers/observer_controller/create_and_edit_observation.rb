@@ -186,10 +186,9 @@ class ObserverController
   end
 
   def save_herbarium_record(obs, params)
-    return unless obs.specimen
     herbarium, initial_det, accession_number =
       normalize_herbarium_record_params(obs, params)
-    return if !herbarium || accession_number.blank?
+    return if not_creating_record?(obs, herbarium, accession_number)
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
       herbarium_record = create_herbarium_record(herbarium, initial_det,
@@ -204,6 +203,17 @@ class ObserverController
       return
     end
     herbarium_record.add_observation(obs)
+  end
+
+  def not_creating_record?(obs, herbarium, accession_number)
+    return true unless obs.specimen
+    # This happens if there is a problem looking up or creating the herbarium.
+    return true if !herbarium || accession_number.blank?
+    # If user checks specimen box and nothing else, do not create record.
+    return false unless obs.collection_numbers.empty?
+    return false unless herbarium == @user.preferred_herbarium
+    return false unless params[:herbarium_record][:herbarium_id].blank?
+    return true
   end
 
   def normalize_herbarium_record_params(obs, params)

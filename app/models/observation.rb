@@ -192,7 +192,7 @@ class Observation < AbstractModel
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
     collection_numbers.each do |col_num|
-      col_num.destroy if col_num.observations == [self]
+      col_num.destroy_without_callbacks if col_num.observations == [self]
     end
   end
 
