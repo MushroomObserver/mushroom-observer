@@ -553,6 +553,9 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_destroy_herbarium
     herbarium = herbaria(:nybg_herbarium)
+    records = herbarium.herbarium_records
+    assert_not_empty(records)
+    record_ids = records.map(&:id)
 
     # Must be logged in.
     get(:destroy_herbarium, id: herbarium.id)
@@ -567,6 +570,11 @@ class HerbariumControllerTest < FunctionalTestCase
     login("roy")
     get(:destroy_herbarium, id: herbarium.id)
     assert_nil(Herbarium.safe_find(herbarium.id))
+    assert_empty(HerbariumRecord.where(herbarium_id: herbarium.id))
+    assert_empty(Herbarium.connection.select_values(%(
+      SELECT observation_id FROM herbarium_records_observations
+      WHERE herbarium_record_id IN (#{record_ids.map(&:to_s).join(",")})
+    )))
   end
 
   def test_destroy_herbarium_noncurator_owns_all_records
