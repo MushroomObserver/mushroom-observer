@@ -210,10 +210,9 @@ class ObserverController
     # This happens if there is a problem looking up or creating the herbarium.
     return true if !herbarium || accession_number.blank?
     # If user checks specimen box and nothing else, do not create record.
-    return false unless obs.collection_numbers.empty?
-    return false unless herbarium == @user.preferred_herbarium
-    return false unless params[:herbarium_record][:herbarium_id].blank?
-    return true
+    obs.collection_numbers.empty? &&
+      herbarium == @user.preferred_herbarium &&
+      params[:herbarium_record][:herbarium_id].blank?
   end
 
   def normalize_herbarium_record_params(obs, params)
