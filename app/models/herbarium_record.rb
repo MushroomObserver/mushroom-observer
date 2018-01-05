@@ -65,18 +65,18 @@ class HerbariumRecord < AbstractModel
   end
 
   def accession_at_herbarium
-    "__#{accession_number}__ @ #{herbarium.format_name}"
+    "__#{accession_number}__ @ #{herbarium.try(&:format_name)}"
   end
 
   # Can a given user edit this HerbariumRecord?
   def can_edit?(user = User.current)
-    self.user == user || herbarium.curator?(user)
+    self.user == user || herbarium && herbarium.curator?(user)
   end
 
   # Send email notifications when herbarium_record created by non-curator.
   def notify_curators
     sender = User.current
-    recipients = herbarium.curators
+    recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
     recipients.each do |recipient|
       email_klass = QueuedEmail::AddHerbariumRecordNotCurator
