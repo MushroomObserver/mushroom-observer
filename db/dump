@@ -4,6 +4,6 @@ RAILS_ENV=${RAILS_ENV-production}
 app_root="$( cd "$(dirname "$0")"; pwd -P | sed 's/\/db*//' )"
 config_file=$app_root/config/mysql-$RAILS_ENV.cnf
 db=mo_$RAILS_ENV
-mysql --defaults-extra-file=$config_file $db -e "select max(id) from images\G" | grep max
 mysqldump --defaults-extra-file=$config_file $db | gzip -c - > checkpoint.gz
 chmod 640 checkpoint.gz
+mysql --defaults-extra-file=$config_file $db -e "select max(id) from images\G" | grep max
