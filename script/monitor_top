@@ -30,14 +30,16 @@ top = `top -bn 1 | head -5`
 mem_total, mem_used = parse_top(top, "Mem")
 swap_total, swap_used = parse_top(top, "Swap")
 
-mem_pct = mem_used / mem_total * 100
-swap_pct = swap_used / swap_total * 100
+begin
+  mem_pct  = mem_used / mem_total * 100
+  swap_pct = swap_used / swap_total * 100
+  size     = File.size(LOG_FILE)
+rescue
+  mem_pct  = 0
+  swap_pct = 0
+  size     = 0
+end
 
-size = begin
-         File.size(LOG_FILE)
-       rescue
-         nil
-       end
 File.open(LOG_FILE, "a") do |file|
   file.print "date                   memory           swap\n" unless size
   file.printf("%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%\n",

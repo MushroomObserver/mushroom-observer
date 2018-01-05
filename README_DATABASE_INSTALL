@@ -38,30 +38,19 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y build-essential man vim emacs iptables mlocate
-root> apt-get install -y  mysql-server mysql-client
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 25=smtp, 3306=mysql, 53=dns)
-root> iptables -F
-root> iptables -P INPUT ACCEPT
-root> iptables -P OUTPUT ACCEPT
-root> iptables -P FORWARD ACCEPT
-root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-root> iptables -A INPUT -i lo -j ACCEPT
-root> iptables -A INPUT -p icmp -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 3306 -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 53   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p udp --dport 53   -j ACCEPT
-root> iptables -A INPUT   -j REJECT --reject-with icmp-host-prohibited
-root> iptables -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+root> iptables-restore
+  # Run "sudo iptables-save" on old server, then copy into here.
 root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
+  swapon /swap
 
-# Configure database.
+# Install and configure database.
+root> apt-get install -y mysql-server mysql-client
 root> mysql -u root -p
   create database mo_production;
   create user 'mo'@'localhost' identified by '$DB_PASSWORD';
@@ -76,7 +65,7 @@ root> scp $SNAPSHOT_PATH/clean.sql .
 root> cat clean.sql | mysql -u mo -p'$DB_PASSWORD' mo_production
 
 # Enable remote access.
-root> vi /etc/mysql/my.cnf
+root> vi /etc/mysql/mysql.conf.d/mysqld.cnf
   # Comment out this line to allow remote connections.
   # bind-address = 127.0.0.1
 root> mysql -u root -p
@@ -111,7 +100,7 @@ database=mo_production
 
 # Enable MRTG load average monitoring
 user> sudo su
-root> adduser mrtg
+root> useradd -m -s /bin/bash mrtg
 root> mkdir ~mrtg/.ssh
 root> chown mrtg ~mrtg/.ssh
 root> cat > ~mrtg/.ssh/authorized_keys

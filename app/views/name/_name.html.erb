@@ -5,7 +5,7 @@
   <% end %></p>
 <p><%= :NAME.t %>: <%= h(name.real_text_name) %></p>
 <p><%= :AUTHORITY.t %>: <%= name.author.to_s.t %></p>
-<p><%= :CITATION.t %>: <%= name.citation.to_s.t %></p>
+<p><%= :CITATION.t %>: <%= name.citation.to_s.tl %></p>
 <% if name.is_misspelling? %>
   <p><%= :show_name_misspelling_correct.t %>:
     <%= if name.correct_spelling

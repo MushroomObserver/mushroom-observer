@@ -85,6 +85,9 @@ Disallow: *set_thumbnail_size=*
 Disallow: */show*user_locale=*
 Disallow: */index*user_locale=*
 Disallow: */lookup*user_locale=*
+
+User-agent: CCBot
+Crawl-Delay: 10
 EOB
 ROBOTS_FOOTER = <<"EOB"
 EOB

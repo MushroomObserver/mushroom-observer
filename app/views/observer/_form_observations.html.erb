@@ -103,9 +103,14 @@
 
 <div class="row">
   <div class="col-xs-12 max-width-text-times-two">
-<%= render(partial: "naming/form", locals: {
-            action: action, button_name: button_name, show_reasons: false
-          }) if include_naming %>
+<%= render(partial: "naming/form",
+            locals: {
+              action:       action,
+              button_name:  button_name,
+              show_reasons: false,
+              unfocused:    true
+            }
+          ) if include_naming %>
   </div>
 </div>
 
