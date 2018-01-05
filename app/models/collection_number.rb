@@ -97,6 +97,12 @@ class CollectionNumber < AbstractModel
     end
   end
 
+  def destroy_without_callbacks
+    self.class.connection.execute(%(
+      DELETE FROM collection_numbers WHERE id = #{id}
+    ))
+  end
+
   # Mirror changes to collection number in herbarium records.  Do this
   # low-level to avoid redundant rss logs and other callbacks.
   def change_corresponding_herbarium_records(old_format_name)
