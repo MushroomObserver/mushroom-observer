@@ -3,8 +3,8 @@ RAILS_ENV=production
 */5 * * * * /var/web/mushroom-observer/script/run_rake email:send
 */5 * * * * /var/web/mushroom-observer/script/run_script monitor_top
 */6 * * * * /var/web/mushroom-observer/script/run_script retransfer_images
-23  * * * * /var/web/mushroom-observer/script/run_script parse_log
+*/4 * * * * /var/web/mushroom-observer/script/run_script parse_log
 13  3 * * * /var/web/mushroom-observer/script/run_script refresh_name_lister_cache
 13  4 * * * /var/web/mushroom-observer/script/run_script verify_images
 13  5 * * * /var/web/mushroom-observer/script/run_script refresh_sitemap
-33 21 * * * /var/web/mushroom-observer/script/run_script make_eol_xml /var/web/mushroom-observer/public/eol.xml
+13  6 * * * /var/web/mushroom-observer/script/run_script make_eol_xml /var/web/mushroom-observer/public/eol.xml

@@ -203,7 +203,7 @@ class PostObservationTest < IntegrationTestCase
     if new_obs.specimen
       assert_match(/show_herbarium_record/, response.body)
     else
-      refute_match(/No voucher specimen/, response.body)
+      refute_match(/No specimen/, response.body)
     end
     assert_match(new_obs.notes_show_formatted, response.body)
     assert_match(new_img.notes, response.body)
@@ -283,13 +283,14 @@ class PostObservationTest < IntegrationTestCase
 
   def create_observation_form_first_changes
     {
-      "observation_when_1i"    => 2010,
-      "observation_when_2i"    => 3,
-      "observation_when_3i"    => 14,
-      "observation_place_name" => "USA, California, Pasadena", # wrong order
-      "is_collection_location" => false,
-      "specimen"               => true,
-      other_notes_id           => "Notes for observation"
+      "observation_when_1i"      => 2010,
+      "observation_when_2i"      => 3,
+      "observation_when_3i"      => 14,
+      "observation_place_name"   => "USA, California, Pasadena", # wrong order
+      "is_collection_location"   => false,
+      "specimen"                 => true,
+      "collection_number_number" => "17-034a",
+      other_notes_id             => "Notes for observation"
     }
   end
 

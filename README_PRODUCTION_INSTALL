@@ -19,28 +19,37 @@ root> visudo
   # Add these lines to end. Allows users in "mo" group to "sudo su mo".
   %mo ALL = NOPASSWD: /bin/su mo
   %mo ALL = NOPASSWD: /bin/su - mo
+  mo ALL = NOPASSWD: /usr/sbin/service nginx *
+  mo ALL = NOPASSWD: /usr/sbin/service unicorn *
 
 # Create user accounts.
 root> useradd -m -s /bin/bash -G mo,sudo jason
 root> useradd -m -s /bin/bash -G mo,sudo nathan
+root> useradd -m -s /bin/bash -G mo,sudo jdcohenesq
 root> useradd -m -s /bin/bash -G mo,sudo alan
 root> mkdir /home/jason/.ssh
 root> mkdir /home/nathan/.ssh
+root> mkdir /home/jdcohenesq/.ssh
 root> mkdir /home/alan/.ssh
 root> vi /home/jason/.ssh/authorized_keys
   # copy over from old server
 root> vi /home/nathan/.ssh/authorized_keys
   # copy over from old server
+root> vi /home/jdcohenesq/.ssh/authorized_keys
+  # copy over from old server
 root> vi /home/alan/.ssh/authorized_keys
   # copy over from old server
 root> chmod 600 /home/jason/.ssh/authorized_keys
 root> chmod 600 /home/nathan/.ssh/authorized_keys
+root> chmod 600 /home/jdcohenesq/.ssh/authorized_keys
 root> chmod 600 /home/alan/.ssh/authorized_keys
 root> chmod 700 /home/jason/.ssh
 root> chmod 700 /home/nathan/.ssh
+root> chmod 700 /home/jdcohenesq/.ssh
 root> chmod 700 /home/alan/.ssh
 root> chown -R jason:jason /home/jason/.ssh
 root> chown -R nathan:nathan /home/nathan/.ssh
+root> chown -R jdcohenesq:jdcohenesq /home/jdcohenesq/.ssh
 root> chown -R alan:alan /home/alan/.ssh
 root> passwd $USER
   # set your password now just to be safe, in case keyless login fails
@@ -65,27 +74,11 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
-# root> apt-get install -y build-essential man telnet wget curl vim emacs \
-#                          iptables mlocate lynx ntp
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp mrtg
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
-root> iptables -F
-root> iptables -P INPUT ACCEPT
-root> iptables -P OUTPUT ACCEPT
-root> iptables -P FORWARD ACCEPT
-root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-root> iptables -A INPUT -i lo -j ACCEPT
-root> iptables -A INPUT -p icmp -j ACCEPT
-root> iptables -A INPUT -s 5.255.253.206/32 -j DROP
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 80   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 3306 -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p tcp --dport 53   -j ACCEPT
-root> iptables -A INPUT -m state --state NEW -p udp --dport 53   -j ACCEPT
-root> iptables -A INPUT   -j REJECT --reject-with icmp-host-prohibited
-root> iptables -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+root> iptables-restore
+  # Run "sudo iptables-save" on old server, then copy into here.
 root> iptables-save > /etc/firewall.conf
 root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
@@ -98,7 +91,7 @@ root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
 
 # Install rvm and ruby.
 root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.1.5
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.2.3
 root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
@@ -111,7 +104,7 @@ root> mkdir /var/web
 root> mkdir /var/web/mo
 root> chown mo:mo /var/web/mo
 root> chmod 750 /var/web/mo
-root> ln -s mo /var/web/mushroom-observer
+root> ln -s /var/web/mushroom-observer /var/web/mo
 
 # Make sure nginx user has access to rails directories.
 root> usermod -a -G mo www-data
@@ -123,6 +116,7 @@ mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
 on code not on the master branch.]
 
+# If trying to keep a completely fresh installation:
 mo> mkdir log log/old tmp tmp/pids tmp/sockets
 mo> mkdir public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
@@ -132,7 +126,11 @@ mo> vi config/consts-site.rb
 mo> vi config/database.yml
   # grab this from old server
 # Ping the database to make sure everything's working right.
-mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
+mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db3.mushroomobserver.org ping
+
+# Or can just mirror old server like this:
+mo> cd /var/web/mo
+mo> rsync -av jason@$OLD_SERVER_IP:/var/web/mo/ .
 
 # Install gems.
 mo> gem install bundle
@@ -142,7 +140,7 @@ mo> bundle install
 mo> exit
 root> cp /var/web/mushroom-observer/config/etc/nginx.conf /etc/nginx/
 root> service nginx restart
-root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
+root> rm /usr/share/nginx/html/index.html # (there's *got* to be a better way!)
 
 # Install our programs for resizing and rotating JPEG images.
 root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
@@ -254,11 +252,13 @@ root> chmod 755 /usr/local/bin/autoreply
 mo> su mo
 mo> ssh-keygen -t rsa
   # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
-mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub images.mushroomobserver.org
   # Enter password.
-# If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
-mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com 'umask 077; mkdir .ssh; cat >> .ssh/authorized_keys'
-mo> ssh cdmr@images.digitalmycology.com echo hello world
+# If that doesn't work it may be because mo doesn't have a password on the
+# image server.  In that case go into the image server as root:
+images> vi /home/mo/.ssh/authorized_keys
+  # copy /home/mo/.ssh/id_rsa.pub from the new server
+mo> ssh cdmr@images.mushroomobserver.org echo hello world
 
 # Set up logrotate to archive unicorn and rails logs.
 mo> exit
@@ -278,12 +278,23 @@ root> vi /etc/logrotate.d/unicorn
   }
 root> su mo
 
-# Grab thumbnails from image server.  (This takes hours!)
-mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/thumb public/images
-mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/320 public/images
-
 # Install cron jobs.
 mo> crontab /var/web/mushroom-observer/config/etc/crontab
+
+--------------------------------------------------------------------------------
+
+# Setup mrtg account.
+root> useradd -m -s /bin/bash -G mo mrtg
+root> su mrtg
+mrtg> cd
+mrtg> ssh-keygen -t rsa
+  # Press return three times.
+mrtg> cat .ssh/id_rsa.pub
+  # Copy this into old server's /home/mrtg/.ssh/authorized_keys.
+mrtg> rsync $OLD_SERVER_IP:/home/mrtg/ .
+mrtg> crontab -e
+
+# MRTG uses a script in alan's home directory, so I rsynced alan's home, too.
 
 --------------------------------------------------------------------------------
 
@@ -299,15 +310,16 @@ root> iptables-save
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep unicorn
-root> ps -ef | grep mysqld   # <--- make sure mysqld is NOT running!!!
+root> ps -ef | grep mysql   # <--- make sure mysqld is NOT running!!!
 root> ps -ef | grep postfix
 
-# If any are missing, do this on ubuntu/debian:
-root> update-rc.d $SERVICE defaults
-
-# If you want to turn one off:
-root> update-rc.d -f $SERVICE remove
+# To enable or disable startup of a service:
+root> systemctl enable|disable $SERVICE
 
 # Make sure date and time and timezone are correct!
 root> date
+root> TZ='America/Los_Angeles' date
+
+# Make sure MRTG is running.
+browser> http:$NEW_SERVER_IP/stats/index.html
 

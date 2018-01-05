@@ -1296,7 +1296,7 @@
 
   # observer/edit_observation
   edit_observation_title: "[:edit_object(type=:observation)]: [name]"
-  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a voucher specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
+  edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, herbarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password
   email_new_password_title: Email New Password
@@ -1404,7 +1404,7 @@
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
   # observer/_form_observations
-  form_observations_specimen_available: Voucher Specimen Available
+  form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
@@ -1418,7 +1418,7 @@
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
-  form_observations_specimen_available_help: Check when there is a dried specimen available for further study.
+  form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\nAlbion, Mendocino Co., California, USA\nHotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
@@ -1432,7 +1432,7 @@
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
-  form_observations_collection_number_help: Enter the collector's full name and number as it should appear on the specimen label.
+  form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
   form_observations_there_is_a_problem_with_name: There is a problem with the name. "+See message below.+":#name_messages
@@ -1621,7 +1621,7 @@
   news_content_pr_293: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/293\">PR #293</a> (March 16, 2017) Fixed bug which caused loss of “Big Eyes” next to a Proposed Name and caused incorrect calculation of Observer Preference."
   news_content_pr_276: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/276\">PR #276</a> (January 24, 2017) Revived pages explaining color themes. See http://mushroomobserver.org/theme/color_themes. Moved theme actions to a new controller."
   news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
-  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless and or unvouchered Observations from Activity Feed and other displays of Observations."
+  news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless observations and/or observations without specimens from Activity Feed and other displays of observations."
   news_content_pr_256: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/256\">PR #256</a> (December 25, 2016) Made it so users who have only proposed a name for an observation will get comment response notifications, instead of requiring users to comment in order to get comment response notifications."
   news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
   news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\".  If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
@@ -1953,8 +1953,8 @@
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
-  show_observation_specimen_available: Voucher specimen reported
-  show_observation_specimen_not_available: No voucher specimen
+  show_observation_specimen_available: Specimen available
+  show_observation_specimen_not_available: No specimen available
   show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
@@ -2444,10 +2444,10 @@
   advanced_search_filter_has_images_off: Include both imaged and imageless observations
   advanced_search_filter_has_images_yes: Exclude imageless observations
   advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens (vouchers)
-  advanced_search_filter_has_specimen_off: Include both vouchered and unvouchered observations
-  advanced_search_filter_has_specimen_yes: Exclude voucherless observations
-  advanced_search_filter_has_specimen_no: Exclude vouchered observations
+  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
+  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
+  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
+  advanced_search_filter_has_specimen_no: Exclude observations with specimens
   advanced_search_filter_lichen: Filter observations based on whether they are lichens
   advanced_search_filter_lichen_off: Include both lichens and nonlichens
   advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
@@ -3086,7 +3086,7 @@
   email_add_herbarium_record_not_curator_intro: "h2. *Herbarium Record Added By Non-Curator*\n\nThe user, [login], added the herbarium record, [herbarium_label], to the herbarium, [herbarium_name], which you curate."
   email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold : [old]\nnew : [new]\nobservations : [observations]\nnamings : [namings]\nname : [url]"
-  email_merge_objects: "User wants to merge two [:types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
+  email_merge_objects: "User wants to merge two [types]:\n\nuser : [user]\nthis : [this]\ninto : [that]\nthis : [this_url]\nthat : [that_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_naming_for_observer_intro: "h2. *Research Request*\n\n[user] ([email]) asked the [:app_title] website to forward the following message to you about your [type] <u>[name]</u>:"
   email_naming_for_tracker_intro: "h2. *Tracking Alert*\n\nAn [obs] on the [:app_title] website has been given the name [name], which you are currently tracking.  You can contact either the [:observer] or the [:identifier] by going to the appropriate link below and clicking the email link near the top of the page."

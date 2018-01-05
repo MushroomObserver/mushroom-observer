@@ -42,7 +42,7 @@ class NamingController < ApplicationController
   def destroy_if_we_can(naming)
     if !check_permission!(naming)
       flash_error(:runtime_destroy_naming_denied.t(id: naming.id))
-    elsif !naming.deletable?
+    elsif !in_admin_mode? && !naming.deletable?
       flash_warning(:runtime_destroy_naming_someone_else.t)
     elsif !naming.destroy
       flash_error(:runtime_destroy_naming_failed.t(id: naming.id))
