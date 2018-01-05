@@ -74,9 +74,7 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
-# root> apt-get install -y build-essential man telnet wget curl vim emacs \
-#                          iptables mlocate lynx ntp
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp mrtg
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables-restore
@@ -294,6 +292,9 @@ mrtg> ssh-keygen -t rsa
 mrtg> cat .ssh/id_rsa.pub
   # Copy this into old server's /home/mrtg/.ssh/authorized_keys.
 mrtg> rsync $OLD_SERVER_IP:/home/mrtg/ .
+mrtg> crontab -e
+
+# MRTG uses a script in alan's home directory, so I rsynced alan's home, too.
 
 --------------------------------------------------------------------------------
 
@@ -318,4 +319,7 @@ root> systemctl enable|disable $SERVICE
 # Make sure date and time and timezone are correct!
 root> date
 root> TZ='America/Los_Angeles' date
+
+# Make sure MRTG is running.
+browser> http:$NEW_SERVER_IP/stats/index.html
 
