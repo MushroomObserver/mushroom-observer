@@ -642,6 +642,7 @@ class ImageController < ApplicationController
   def remove_images_from_object(target_class, params)
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s)
+    return unless @object
     if check_permission!(@object)
       if request.method == "POST" && (images = params[:selected])
         images.each do |image_id, do_it|
