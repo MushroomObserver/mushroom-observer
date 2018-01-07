@@ -31,7 +31,9 @@ class ApiTest < UnitTestCase
     Date.parse(str)
   end
 
-  def time(str)
+  # This method renamed from "time"
+  # minitest 5.11.1 throws ArgumentError with "time".
+  def api_test_time(str)
     DateTime.parse(str + " UTC")
   end
 
@@ -3435,15 +3437,15 @@ class ApiTest < UnitTestCase
 
   def test_parse_time
     assert_parse(:time, nil, nil)
-    assert_parse(:time, time("2012-06-25 12:34:56"), nil,
-                 default: time("2012-06-25 12:34:56"))
-    assert_parse(:time, time("2012-06-25 12:34:56"),
+    assert_parse(:time, api_test_time("2012-06-25 12:34:56"), nil,
+                 default: api_test_time("2012-06-25 12:34:56"))
+    assert_parse(:time, api_test_time("2012-06-25 12:34:56"),
                  "20120625123456")
-    assert_parse(:time, time("2012-06-25 12:34:56"),
+    assert_parse(:time, api_test_time("2012-06-25 12:34:56"),
                  "2012-06-25 12:34:56")
-    assert_parse(:time, time("2012-06-25 12:34:56"),
+    assert_parse(:time, api_test_time("2012-06-25 12:34:56"),
                  "2012/06/25 12:34:56")
-    assert_parse(:time, time("2012-06-05 02:04:06"),
+    assert_parse(:time, api_test_time("2012-06-05 02:04:06"),
                  "2012/6/5 2:4:6")
     assert_parse(:time, API::BadParameterValue, "20120625")
     assert_parse(:time, API::BadParameterValue, "201206251234567")
@@ -3534,8 +3536,8 @@ class ApiTest < UnitTestCase
   # rubocop:enable Metric/LineLength
 
   def assert_parse_tr(from, to, str)
-    from = time(from)
-    to   = time(to)
+    from = api_test_time(from)
+    to   = api_test_time(to)
     ordered_range = aor(from, to)
     assert_parse_r(:time, ordered_range, str)
   end
