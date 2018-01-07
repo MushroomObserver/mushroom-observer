@@ -1110,7 +1110,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: The site will be down for a while for an important security update Friday, July 5, around noon PST.
+  app_banner_box: The new server is now running.  Please let us know if you see any strange behavior.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
