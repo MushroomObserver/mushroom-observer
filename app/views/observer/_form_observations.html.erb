@@ -177,23 +177,25 @@
     </div>
   </div>
 
-  <% inject_javascript_at_end %(
-    jQuery(document).ready(function() {
-      specimen_checkbox = jQuery("#observation_specimen");
-      hide_show_herb_fields = function () {
-        if (specimen_checkbox.is(":checked"))
-          jQuery("#herb_info_fields").removeClass("hidden").show();
-        else
-          jQuery("#herb_info_fields").hide();
-      };
-      hide_show_herb_fields();
-      specimen_checkbox.change(hide_show_herb_fields);
-      jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
-        if (jQuery(this).val().length > 0)
-          specimen_checkbox.prop("checked", true)
+  <% if !@user || @user.id != 2873 # Adolf %>
+    <% inject_javascript_at_end %(
+      jQuery(document).ready(function() {
+        specimen_checkbox = jQuery("#observation_specimen");
+        hide_show_herb_fields = function () {
+          if (specimen_checkbox.is(":checked"))
+            jQuery("#herb_info_fields").removeClass("hidden").show();
+          else
+            jQuery("#herb_info_fields").hide();
+        };
+        hide_show_herb_fields();
+        specimen_checkbox.change(hide_show_herb_fields);
+        jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
+          if (jQuery(this).val().length > 0)
+            specimen_checkbox.prop("checked", true)
+        });
       });
-    });
-  ) %>
+    ) %>
+  <% end %>
 <% end %>
 <!-- /specimen_fields -->
 

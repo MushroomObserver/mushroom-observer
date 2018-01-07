@@ -1052,6 +1052,7 @@
   log_herbarium_record_moved: "[:log_object_moved_by_user(type=:specimen)]"
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
+  log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_created_at0: "[:log_object_added_no_user(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
