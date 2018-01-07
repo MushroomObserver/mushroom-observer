@@ -8,7 +8,7 @@
   query = Query.lookup(:HerbariumRecord, :all, observations: observation.id)
 %>
 
-<% if !@user || @user.id != 2873 # Adolf %>
+<% if (!@user || @user.id != 2873) && observation.user_id != 2873 # Adolf %>
   <% if records.any? && can_add %>
     <div>
       <%= :Herbarium_records.t %>: [<%=
