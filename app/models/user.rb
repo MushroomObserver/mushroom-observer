@@ -437,6 +437,11 @@ class User < AbstractModel
     "#<User #{id}: #{unique_text_name.inspect}>"
   end
 
+  # For now just special exception to keep Adolf from wasting my life.
+  def hide_specimen_stuff?
+    id == 2873
+  end
+
   ##############################################################################
   #
   #  :section: Names

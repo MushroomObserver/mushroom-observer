@@ -177,7 +177,7 @@
     </div>
   </div>
 
-  <% if !@user || @user.id != 2873 # Adolf %>
+  <% if !@user.try(&:hide_specimen_stuff?) %>
     <% inject_javascript_at_end %(
       jQuery(document).ready(function() {
         specimen_checkbox = jQuery("#observation_specimen");
