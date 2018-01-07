@@ -7,39 +7,41 @@
   query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
 %>
 
-<% if numbers.any? && can_edit %>
-  <div>
-    <%= :Collection_numbers.t %>: [<%=
+<% if !@user || @user.id != 2873 # Adolf %>
+  <% if numbers.any? && can_edit %>
+    <div>
+      <%= :Collection_numbers.t %>: [<%=
+        link_with_query(:create_collection_number.t, controller: :collection_number,
+                        action: :create_collection_number, id: observation.id)
+      %>]
+    </div>
+    <ul class="tight-list">
+      <% numbers.each do |number| %>
+        <li>
+          <%= link_to("<i>#{number.format_name.t}</i>".html_safe,
+                      add_query_param(number.show_link_args, query)) %>
+          [<%= link_with_query(:EDIT.t, controller: :collection_number,
+                               action: :edit_collection_number, id: number.id,
+                               back: observation.id) %> |
+           <%= link_with_query(:REMOVE.t, { controller: :collection_number,
+                               action: :remove_observation, id: number.id,
+                               obs: observation.id },
+                               { data: { confirm: :are_you_sure.t } }) %>]
+        </li>
+      <% end %>
+    </ul>
+
+  <% elsif numbers.any? && !can_edit %>
+    <%= numbers.count > 1 ? :Collection_numbers.t : :Collection_number.t %>:
+    <%= numbers.map do |number|
+          link_to("<i>#{number.format_name.t}</i>".html_safe,
+                  add_query_param(number.show_link_args, query))
+        end.safe_join(", ") %>
+
+  <% elsif numbers.none? && can_edit %>
+    <%= :show_observation_no_collection_numbers.t %> [<%=
       link_with_query(:create_collection_number.t, controller: :collection_number,
                       action: :create_collection_number, id: observation.id)
     %>]
-  </div>
-  <ul class="tight-list">
-    <% numbers.each do |number| %>
-      <li>
-        <%= link_to("<i>#{number.format_name.t}</i>".html_safe,
-                    add_query_param(number.show_link_args, query)) %>
-        [<%= link_with_query(:EDIT.t, controller: :collection_number,
-                             action: :edit_collection_number, id: number.id,
-                             back: observation.id) %> |
-         <%= link_with_query(:REMOVE.t, { controller: :collection_number,
-                             action: :remove_observation, id: number.id,
-                             obs: observation.id },
-                             { data: { confirm: :are_you_sure.t } }) %>]
-      </li>
-    <% end %>
-  </ul>
-
-<% elsif numbers.any? && !can_edit %>
-  <%= numbers.count > 1 ? :Collection_numbers.t : :Collection_number.t %>:
-  <%= numbers.map do |number|
-        link_to("<i>#{number.format_name.t}</i>".html_safe,
-                add_query_param(number.show_link_args, query))
-      end.safe_join(", ") %>
-
-<% elsif numbers.none? && can_edit %>
-  <%= :show_observation_no_collection_numbers.t %> [<%=
-    link_with_query(:create_collection_number.t, controller: :collection_number,
-                    action: :create_collection_number, id: observation.id)
-  %>]
+  <% end %>
 <% end %>
