@@ -7,7 +7,7 @@
   query = Query.lookup(:CollectionNumber, :all, observations: observation.id)
 %>
 
-<% if !@user || @user.id != 2873 # Adolf %>
+<% if (!@user || @user.id != 2873) && observation.user_id != 2873 # Adolf %>
   <% if numbers.any? && can_edit %>
     <div>
       <%= :Collection_numbers.t %>: [<%=
