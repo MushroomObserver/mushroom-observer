@@ -71,9 +71,7 @@ MushroomObserver::Application.configure do
   config.news_email_address = "news@" + config.domain
   config.noreply_email_address = "no-reply@" + config.domain
   config.accounts_email_address = "webmaster@" + config.domain
-  config.error_email_address = "webmaster@" + config.domain
-  config.webmaster_email_address = "webmaster@mushroomobserver.org"
-  config.exception_recipients = "webmaster@" + config.domain
+  config.webmaster_email_address = "webmaster@" + config.domain
   config.donation_business = "UQ23P3G6FBYKN"
 
   # File where the list of most commonly used names lives.
