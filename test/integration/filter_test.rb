@@ -151,7 +151,7 @@ class FilterTest < IntegrationTestCase
     # (override their default preference to ignore imageless obs)
     fill_in("Name", with: obs.name.text_name)
     page.choose("content_filter_has_images_")
-    find("#content").click_button("Search")
+    first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user's { has_images: "yes" }
     page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
@@ -181,7 +181,7 @@ class FilterTest < IntegrationTestCase
     fill_in("Name", with: obs.name.text_name)
     choose("content_filter_has_images_")
     choose("content_filter_has_specimen_yes")
-    find("#content").click_button("Search")
+    first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
