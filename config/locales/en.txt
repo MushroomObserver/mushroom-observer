@@ -2428,7 +2428,7 @@
 
   # observer/advanced_search
   advanced_search_at_least_one: Please provide at least one search parameter
-  advanced_search_caveat: "Advanced search was added in February, 2009 to [:app_title].  There are a lot of directions this feature could go.  I have intentionally kept it somewhat limited since I am concerned that it may have performance issues that result in timeouts.  Please send \"email to the webmaster\":/observer/ask_webmaster_question if you experience timeouts or if there are particular types of searches you would like to have added.\n\nHints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use \"OR\" (all caps) to tell it to match one of several possible strings, e.g. \"Xanthoria OR Xanthomendoza\".  Use a star as a wildcard, e.g. \"Wells Gray*Canada\" will match \"Wells Gray, Canada\", \"Wells Gray Park, Canada\", and \"Wells Gray Provincial Park, Canada\".  (See notes under 'Content', too.)"
+  advanced_search_caveat: "Advanced search has somewhat limited options because of performance issues that result in timeouts.  Please \"email the webmaster\":/observer/ask_webmaster_question if you experience timeouts or if there are particular types of searches you would like to have added.\n\nHints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use \"OR\" (all caps) to tell it to match one of several possible strings, e.g. \"Xanthoria OR Xanthomendoza\".  Use a star as a wildcard, e.g. \"Wells Gray*Canada\" will match \"Wells Gray, Canada\", \"Wells Gray Park, Canada\", and \"Wells Gray Provincial Park, Canada\".  (See notes under 'Content', too.)"
   advanced_search_content: Content
   advanced_search_content_help: Text contained in [:observation] notes or [:comments]
   advanced_search_content_notes: "Content search supports full Google syntax, including \"OR\", double quotes, and negation:\naaa bbb -> contains \"aaa\" and \"bbb\" in any order\n\"aaa bbb\" -> contains \"aaa\" followed immediately by \"bbb\"\naaa OR bbb -> contains either \"aaa\" or \"bbb\"\n-aaa -bbb -> reject anything that contains \"aaa\" or \"bbb\""
@@ -2455,6 +2455,7 @@
   advanced_search_filter_lichen_no: Exclude lichen-forming fungi
   advanced_search_filter_region: Restrict observations and locations to a region, e.g., "California, USA" or "Europe"
   advanced_search_filter_clade: Restrict observations to a taxonomic clade, e.g., "Ascomycota" or "Agaricales"
+  advanced_search_submit: Submit Advanced Search
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater
