@@ -588,8 +588,8 @@ class User < AbstractModel
   def preferred_herbarium
     @preferred_herbarium ||= begin
       herbarium_id = Herbarium.connection.select_value(%(
-        SELECT herbarium_id, count(id) FROM herbarium_records WHERE user_id=#{id}
-        GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
+        SELECT herbarium_id FROM herbarium_records WHERE user_id=#{id}
+        ORDER BY created_at DESC LIMIT 1
       ))
       herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
     end

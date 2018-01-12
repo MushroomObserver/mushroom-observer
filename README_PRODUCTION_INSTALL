@@ -286,6 +286,7 @@ mo> crontab /var/web/mushroom-observer/config/etc/crontab
 --------------------------------------------------------------------------------
 
 # Setup mrtg account.
+root> chmod 644 /var/log/nginx/access.log
 root> useradd -m -s /bin/bash -G mo mrtg
 root> su mrtg
 mrtg> cd
