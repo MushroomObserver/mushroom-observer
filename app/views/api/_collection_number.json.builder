@@ -2,8 +2,8 @@ json.id         object.id
 json.type       "collection_number"
 json.collector  object.name
 json.number     object.number
-json.created_at object.created_at.utc
-json.updated_at object.updated_at.utc
+json.created_at object.created_at.try(&:utc)
+json.updated_at object.updated_at.try(&:utc)
 if !detail
   json.user_id  object.user_id
 else

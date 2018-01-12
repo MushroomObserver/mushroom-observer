@@ -2,8 +2,8 @@ json.id              object.id
 json.type            "user"
 json.login_name      object.login
 json.legal_name      object.legal_name
-json.joined          object.created_at.utc
-json.verified        object.verified.utc
+json.joined          object.created_at.try(&:utc)
+json.verified        object.verified.try(&:utc)
 json.last_login      object.last_login.try(&:utc)
 json.last_activity   object.last_activity.try(&:utc)
 json.contribution    object.contribution

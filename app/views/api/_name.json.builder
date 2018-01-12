@@ -7,8 +7,8 @@ json.deprecated      object.deprecated ? true : false
 json.misspelled      object.is_misspelling? ? true : false
 json.citation        object.citation.to_s.tl
 json.notes           object.notes.to_s.tpl_nodiv
-json.created_at      object.created_at.utc
-json.updated_at      object.updated_at.utc
+json.created_at      object.created_at.try(&:utc)
+json.updated_at      object.updated_at.try(&:utc)
 json.number_of_views object.num_views
 json.last_viewed     object.last_view.try(&:utc)
 json.ok_for_export   object.ok_for_export ? true : false
