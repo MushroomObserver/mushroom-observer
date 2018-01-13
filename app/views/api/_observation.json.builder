@@ -16,8 +16,8 @@ unless object.notes.blank?
   json.notes_fields         notes_fields
   json.notes                other_notes.to_s.tpl_nodiv
 end
-json.created_at             object.created_at.utc
-json.updated_at             object.updated_at.utc
+json.created_at             object.created_at.try(&:utc)
+json.updated_at             object.updated_at.try(&:utc)
 json.number_of_views        object.num_views
 json.last_viewed            object.last_view.try(&:utc)
 json.owner                  { json_detailed_object(json, object.user) }
