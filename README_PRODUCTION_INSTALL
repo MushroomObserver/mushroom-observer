@@ -248,6 +248,11 @@ root> cp /var/web/mushroom-observer/config/etc/no-reply.forward   /home/no-reply
 root> chmod 644 /home/no-reply/.[maf]*
 root> chmod 755 /usr/local/bin/autoreply
 
+# So we always run into problems with being black-listed by spam filters after
+# we change IP address.  I don't know how to fix this.  But one thing to check
+# is the magic "TXT" record in the DNS.  Also, check for bounced mail in
+# /var/mail/news.
+
 --------------------------------------------------------------------------------
 
 # Set up password-less ssh for image transfers.
