@@ -58,18 +58,35 @@
       <div class="list-group-item">
         <div class="row">
           <div class="col-sm-6 name-section">
-            <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
-            <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
-            <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
-            <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
-            <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
+            <%= name_section_link(:show_name_observations.t,
+                                  @first_consensus, @consensus_query) %>
+            <%= name_section_link(:show_name_all_observations.t,
+                                  @has_consensus2, @consensus2_query) %>
+            <%= name_section_link(:show_name_synonym_observations.t,
+                                  @has_synonym, @synonym_query) %>
+            <%= name_section_link(:show_name_other_observations.t,
+                                  @has_other, @other_query) %>
+            <%= name_section_link(:show_name_subtaxa_observations.t,
+                                  @has_subtaxa, @subtaxa_query) %>
           </div>
           <div class="col-sm-6 name-section">
-            <%= content_tag(:p, link_to("EOL", @name.eol_url)) if @name.eol_url %>
-            <%= content_tag(:p, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
-            <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(@name))) %>
-            <%= content_tag(:p, link_to("MycoBank", mycobank_url(@name))) %>
-            <%= content_tag(:p, link_with_query(:show_name_distribution_map.t, action: :map, id: @name.id)) %>
+            <%= content_tag(:p, link_to(
+                  "MycoPortal", mycoportal_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "MycoBank", mycobank_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "EOL", @name.eol_url, target: :_blank
+                )) if @name.eol_url %>
+            <%= content_tag(:p, link_to(
+                  :google_images.t,
+                  "http://images.google.com/images?q=#{@name.real_text_name}",
+                  target: :_blank
+                )) %>
+            <%= content_tag(:p, link_with_query(
+                  :show_name_distribution_map.t, action: :map, id: @name.id
+                )) %>
           </div>
         </div>
       </div>
