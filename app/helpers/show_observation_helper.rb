@@ -31,4 +31,21 @@ module ShowObservationHelper
       concat(obs.owner_favorite_or_explanation.t)
     end
   end
+
+  # array of links to pages about Name, e.g.:
+  #   About Polyozellus
+  #   Polyozellus on MyCoPortal
+  #   Polyozellus on MycoBank
+  def show_obs_name_links(obs)
+    links = []
+    if name = obs.name
+      links << link_to(:show_name.t(name: name.display_name), controller: :name,
+                     action: :show_name, id: name.id)
+      links << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
+                     mycoportal_url(name), target: :_blank)
+      links << link_to(name.display_name.t + " " + :show_name_on_mycobank.t,
+                     mycobank_url(name), target: :_blank)
+    end
+    links
+  end
 end
