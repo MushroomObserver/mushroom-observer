@@ -122,6 +122,9 @@ class ApplicationController < ActionController::Base
   # after_action  :extra_gc
   # after_action  :log_memory_usage
 
+  # Make show_observation_helper available to nested partials
+  helper :show_observation
+
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
