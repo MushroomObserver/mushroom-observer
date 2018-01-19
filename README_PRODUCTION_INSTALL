@@ -294,6 +294,7 @@ mo> crontab /var/web/mushroom-observer/config/etc/crontab
 root> vi /etc/logrotate.d/nginx
   # change create line from "640" to:
   create 0644 www-data adm
+root> cp /var/web/mo/config/etc/indexmaker /usr/bin/
 root> chmod 644 /var/log/nginx/access.log
 root> useradd -m -s /bin/bash -G mo mrtg
 root> su mrtg
