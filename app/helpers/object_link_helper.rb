@@ -96,9 +96,11 @@ module ObjectLinkHelper
     if user.is_a?(Fixnum)
       name ||= :USER.t + " #" + user.to_s
       link_to(name, User.show_link_args(user))
-    else
+    elsif user
       name ||= user.unique_text_name
       link_to(name, user.show_link_args)
+    else
+      "?"
     end
   end
 
