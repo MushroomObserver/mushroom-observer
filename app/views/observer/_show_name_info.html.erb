@@ -1,21 +1,17 @@
 <%  ##TODO: Whoa... This is a lot of code for a view.
   lines = []
+
   # links to pages (internal & external) about name
   show_obs_name_links(observation).each { |link| lines << link }
 
+  # links to approved MO synonyms
+  if (synonym_links = show_obs_approved_syn_links(observation) )
+    lines << synonym_links
+  end
 
+  name = observation.name
   if name && !name.unknown? && !browser.bot?
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
-    if approved_synonyms.any?
-      links = approved_synonyms.map {|n| name_link(n)}
-      if name.deprecated
-        label = links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t
-      else
-        label = links.length > 1 ? :show_observation_alternative_names.t : :show_observation_alternative_name.t
-      end
-      lines << label + ": " + content_tag(:span, links.safe_join(", "),
-                                          class: :Data)
-    end
 
     data = []
     sum = 0

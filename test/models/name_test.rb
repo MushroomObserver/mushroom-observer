@@ -2439,6 +2439,12 @@ class NameTest < UnitTestCase
                            Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
 
+  def test_other_approved_synonyms
+    assert_equal([names(:chlorophyllum_rachodes)],
+                 names(:chlorophyllum_rhacodes).other_approved_synonyms)
+    assert_empty(names(:lactarius_alpinus).other_approved_synonyms)
+  end
+
   def test_imageless
     assert_true(names(:imageless).imageless?)
     assert_false(names(:fungi).imageless?)

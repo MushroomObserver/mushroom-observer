@@ -1945,10 +1945,8 @@
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
-  show_observation_alternative_name: Alternative Name
-  show_observation_alternative_names: Alternative Names
-  show_observation_preferred_name: Preferred Name
-  show_observation_preferred_names: Preferred Names
+  show_observation_alternative_names: Alternative Name(s)
+  show_observation_preferred_names: Preferred Name(s)
   show_observation_observation_created_at: Observation created
   # This is used if this is the location where the thing was growing.
   show_observation_collection_location: Collection location

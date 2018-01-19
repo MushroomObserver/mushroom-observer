@@ -48,4 +48,20 @@ module ShowObservationHelper
     end
     links
   end
+
+  # string of links to MO Name pages of non-deprecated synonyms
+  def show_obs_approved_syn_links(obs)
+    name = obs.name
+    return unless name && !name.unknown? && !browser.bot?
+    return if (approved_synonyms = name.other_approved_synonyms).blank?
+
+    links = approved_synonyms.map {|n| name_link(n)}
+    label = if name.deprecated
+              :show_observation_preferred_names.t
+            else
+              :show_observation_alternative_names.t
+            end
+
+    label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
+  end
 end

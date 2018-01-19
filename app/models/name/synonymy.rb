@@ -40,6 +40,11 @@ class Name < AbstractModel
     synonyms.reject(&:deprecated)
   end
 
+  # Array of approved synonyms, excluding self
+  def other_approved_synonyms
+    approved_synonyms - [self]
+  end
+
   # Returns an Array of approved Synonym Name's and an Array of deprecated
   # Synonym Name's, including misspellings, but _NOT_ including itself.
   #
