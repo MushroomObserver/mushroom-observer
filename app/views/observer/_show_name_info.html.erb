@@ -15,12 +15,10 @@
 
     # Observations of each synonym
     data = []
-    sum = 0
     for name2 in [name] + approved_synonyms
       query = Query.lookup(:Observation, :of_name, name: name2, by: :confidence)
       count = query.select_count
       if count > 0
-        sum += count
         query.save
         data << {count: count, name: name2, query: query}
       end
