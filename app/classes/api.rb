@@ -129,3 +129,13 @@ class API
     require_dependency Regexp.last_match(1)
   end
 end
+
+# Sometimes the Rails router insists on trying to autoload the constant 'Api'
+# and expects this file to do so.  It doesn't need to, but that doesn't seem
+# to matter, Rails insists on doing so anyway.  It's requests of the form
+# "/api/table/id" which cause this to happen.  Yes, they are poorly formed
+# requests, but people seem to try it all the time anyway.  I'm tired of
+# ignoring the error messages that result.  This stops the error message...
+# and in fact appears to cause these poorly-formed requests to work, too.
+class Api
+end
