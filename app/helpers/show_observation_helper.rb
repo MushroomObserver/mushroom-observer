@@ -48,7 +48,7 @@ module ShowObservationHelper
     links
   end
 
-  # string of links to MO Name pages of non-deprecated synonyms
+  # string of links to Names of any other non-deprecated synonyms
   def show_obs_approved_syn_links(obs)
     name = obs.name
     return unless name && !name.unknown? && !browser.bot?
@@ -64,7 +64,37 @@ module ShowObservationHelper
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
   end
 
-  # link to a search for species of the genus of name. Sample text:
+  # array of lines with links to Observations of all synonyms of name + count
+  #  Macrolepiota rachodes (Vittadini) Singer (1)
+  #  Chlorophyllum rachodes (Vittadini) Vellinga (96)
+  #  Chlorophyllum rhacodes (Vittadini) Vellinga (63)
+  def obss_by_syn_links(name)
+    data = []
+    for name2 in ([name] + name.other_approved_synonyms)
+      query = Query.lookup(:Observation, :of_name, name: name2, by: :confidence)
+      count = query.select_count
+      if count > 0
+        query.save
+        data << {count: count, name: name2, query: query}
+      end
+    end
+    lines = []
+    if data.length > 1
+      for datum in data
+        name2 = datum[:name]
+        query = datum[:query]
+        count = datum[:count]
+        lines << link_to(:show_name_observations_of.t(name: name2.display_name),
+                          add_query_param({ controller: :observer,
+                                            action: :index_observation },
+                                            query)
+        ) + " (#{count})"
+      end
+    end
+    lines
+  end
+
+  # link to a search for species of name's genus. Sample text:
   #   List of species in Amanita Pers. (1433)
   def show_obs_genera(name)
     return  unless (genus = name.genus)

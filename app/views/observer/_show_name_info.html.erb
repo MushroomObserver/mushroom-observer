@@ -14,25 +14,9 @@
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
 
     # Observations of each synonym
-    data = []
-    for name2 in [name] + approved_synonyms
-      query = Query.lookup(:Observation, :of_name, name: name2, by: :confidence)
-      count = query.select_count
-      if count > 0
-        query.save
-        data << {count: count, name: name2, query: query}
-      end
-    end
-    if data.length > 1
-      for datum in data
-        name2 = datum[:name]
-        query = datum[:query]
-        count = datum[:count]
-        lines << link_to(:show_name_observations_of.t(name: name2.display_name),
-          add_query_param({ controller: :observer,
-                            action: :index_observation }, query)) +
-                   " (#{count})"
-      end
+    links = obss_by_syn_links(name)
+    if links.present? && links.size > 0
+      links.each { |link| lines << link }
     end
 
     # Observations of all synonyms (including this one)
@@ -40,7 +24,7 @@
                          synonyms: :all)
     count = query.select_count
     query.save
-    label = if data.length > 1
+    label = if links.present? && links.size > 1
               :show_name_all_observations.t
             else
               :show_name_observations.t
