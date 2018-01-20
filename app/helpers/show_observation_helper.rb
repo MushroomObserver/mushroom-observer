@@ -1,4 +1,3 @@
-# encoding: utf-8
 # helpers for show Observation view
 module ShowObservationHelper
   def show_obs_title(obs)
@@ -63,5 +62,20 @@ module ShowObservationHelper
             end
 
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
+  end
+
+  # link to a search for species of the genus of name. Sample text:
+  #   List of species in Amanita Pers. (1433)
+  def show_obs_genera(name)
+    return  unless (genus = name.genus)
+    query = Query.lookup(:Name, :of_children, name: genus, all: true)
+    count = query.select_count
+    query.save if !browser.bot?
+    return unless count > 1
+
+    link_to(:show_consensus_list_of_species.t(name: genus.display_name.t),
+            add_query_param({ controller: :name, action: :index_name },
+                            query)
+           ) + " (#{count})"
   end
 end

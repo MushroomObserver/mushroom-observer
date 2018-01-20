@@ -13,6 +13,7 @@
   if name && !name.unknown? && !browser.bot?
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
 
+    # Observations of each synonym
     data = []
     sum = 0
     for name2 in [name] + approved_synonyms
@@ -24,7 +25,6 @@
         data << {count: count, name: name2, query: query}
       end
     end
-
     if data.length > 1
       for datum in data
         name2 = datum[:name]
@@ -37,20 +37,21 @@
       end
     end
 
+    # Observations of all synonyms (including this one)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all)
     count = query.select_count
     query.save
-    if data.length > 1
-      lines << link_to(:show_name_all_observations.t,
+    label = if data.length > 1
+              :show_name_all_observations.t
+            else
+              :show_name_observations.t
+            end
+    lines << link_to(label,
         add_query_param({controller: :observer,
                          action: :index_observation}, query)) + " (#{count})"
-    else
-      lines << link_to(:show_name_observations.t,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
-    end
 
+    # Observations of non-synonyms where synonym was proposed
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all, nonconsensus: :exclusive)
     count = query.select_count
@@ -61,15 +62,10 @@
                          action: :index_observation}, query)) + " (#{count})"
     end
 
-    if genus = name.genus
-      query = Query.lookup(:Name, :of_children, name: genus, all: true)
-      count = query.select_count
-      query.save if !browser.bot?
-      if count > 1
-        lines << link_to(:show_consensus_list_of_species.t(name: genus.display_name.t),
-          add_query_param({controller: :name, action: :index_name},
-            query)) + " (#{count})"
-      end
+    # List of species in the genus. Sample text:
+    #   List of species in Amanita Pers. (1433)
+    if (genera_list = show_obs_genera(name)).present?
+      lines << genera_list
     end
   end
 
