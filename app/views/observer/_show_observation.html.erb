@@ -52,7 +52,9 @@
       <%= render(partial: "observer/sequences",
                 locals: { observation: observation }) %>
     </div>
+  </div>
 
+  <div class="col-xs-12 max-width-text obs-notes">
     <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))
