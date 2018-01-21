@@ -64,34 +64,37 @@ module ShowObservationHelper
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
   end
 
-  # array of lines with links to Observations of all synonyms of name + count
+  # array of lines for name and any accepted synonym, each line comprising
+  # link to observations of a name and a count of those observations
   #  Macrolepiota rachodes (Vittadini) Singer (1)
   #  Chlorophyllum rachodes (Vittadini) Vellinga (96)
   #  Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
-    data = []
-    for name2 in ([name] + name.other_approved_synonyms)
-      query = Query.lookup(:Observation, :of_name, name: name2, by: :confidence)
+    names = [name] + name.other_approved_synonyms
+    names.each_with_object([]) do |nm, lines|
+      query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
       count = query.select_count
-      if count > 0
-        query.save
-        data << {count: count, name: name2, query: query}
-      end
+      next if count.zero?
+
+      query.save
+      lines << link_to(:show_name_observations_of.t(name: nm.display_name),
+                       add_query_param({ controller: :observer,
+                                         action: :index_observation },
+                                         query)
+                      ) + " (#{count})"
     end
-    lines = []
-    if data.length > 1
-      for datum in data
-        name2 = datum[:name]
-        query = datum[:query]
-        count = datum[:count]
-        lines << link_to(:show_name_observations_of.t(name: name2.display_name),
-                          add_query_param({ controller: :observer,
-                                            action: :index_observation },
-                                            query)
-        ) + " (#{count})"
-      end
-    end
-    lines
+  end
+
+  # link to search for observations of this taxon (under any name)
+  def taxon_observations(name)
+    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
+                         synonyms: :all)
+    count = query.select_count
+    query.save
+    link_to(:show_taxon_observations.t,
+            add_query_param({ controller: :observer,
+                            action: :index_observation }, query)
+           ) + " (#{count})"
   end
 
   # link to a search for species of name's genus. Sample text:

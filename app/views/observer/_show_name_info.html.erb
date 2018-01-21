@@ -19,19 +19,8 @@
       links.each { |link| lines << link }
     end
 
-    # Observations of all synonyms (including this one)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all)
-    count = query.select_count
-    query.save
-    label = if links.present? && links.size > 1
-              :show_name_all_observations.t
-            else
-              :show_name_observations.t
-            end
-    lines << link_to(label,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
+    # Observations of taxon (under any name)
+    lines << taxon_observations(name)
 
     # Observations of non-synonyms where synonym was proposed
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
@@ -44,7 +33,7 @@
                          action: :index_observation}, query)) + " (#{count})"
     end
 
-    # List of species in the genus. Sample text:
+    # List of species in the genus.
     #   List of species in Amanita Pers. (1433)
     if (genera_list = show_obs_genera(name)).present?
       lines << genera_list
