@@ -22,15 +22,9 @@
     # Observations of taxon (under any name)
     lines << taxon_observations(name)
 
-    # Observations of non-synonyms where synonym was proposed
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all, nonconsensus: :exclusive)
-    count = query.select_count
-    if count > 0
-      query.save
-      lines << link_to(:show_name_other_observations.t,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
+    # Observations of non-synonyms where this taxon was proposed
+    if (link = taxon_proposed(name))
+      lines << link
     end
 
     # List of species in the genus.
