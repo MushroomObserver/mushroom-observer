@@ -49,8 +49,6 @@
 
   lines += list_descriptions(name) if name
 %>
-<div class="small">
-  <% lines.each do |line| %>
-    <p><%= line %></p>
-  <% end %>
-</div>
+<% lines.each do |line| %>
+  <p><%= line %></p>
+<% end %>
