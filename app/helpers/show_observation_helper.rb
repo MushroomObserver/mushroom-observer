@@ -105,7 +105,7 @@ module ShowObservationHelper
     count = query.select_count
     return nil if count.zero?
     query.save
-    link_to(:show_synonym_proposed.t,
+    link_to(:show_taxon_proposed.t,
             add_query_param({ controller: :observer,
                               action: :index_observation}, query)
            ) + " (#{count})"

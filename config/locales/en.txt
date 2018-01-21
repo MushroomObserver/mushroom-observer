@@ -1894,8 +1894,8 @@
   show_name_observations_of: More [:OBSERVATIONS] of [name]
   show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
   show_taxon_observations: This taxon (any name)
-  show_name_proposed: Other taxa (this name proposed)
-  show_synonym_proposed: Other taxa (this taxon proposed)
+  show_name_proposed: Other Taxa, this name proposed
+  show_taxon_proposed: Other Taxa, this taxon proposed
   show_name_synonym_observations: Synonym [:OBSERVATIONS]
   show_name_other_observations: Similar [:OBSERVATIONS]
   show_name_subtaxa_observations: Subtaxa [:OBSERVATIONS]
