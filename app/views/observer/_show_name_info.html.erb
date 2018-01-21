@@ -10,9 +10,7 @@
     lines << synonym_links
   end
 
-  if name && !name.unknown? && !browser.bot?
-    approved_synonyms, deprecated_synonyms = name.sort_synonyms
-
+  if !name.unknown? && !browser.bot?
     lines << "#{:OBSERVATIONS.t} of:"
 
     # Observations of each synonym
