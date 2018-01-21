@@ -22,12 +22,17 @@
     # Observations of taxon (under any name)
     lines << taxon_observations(name)
 
-    # Observations of non-synonyms where this taxon was proposed
+    # Observations of other taxa where this taxon was proposed
     if (link = taxon_proposed(name))
       lines << link
     end
 
-    # List of species in the genus.
+     # Observations of other taxa where this name was proposed
+    if (link = name_proposed(name))
+      lines << link
+    end
+
+   # List of species in the genus.
     #   List of species in Amanita Pers. (1433)
     if (genera_list = show_obs_genera(name)).present?
       lines << genera_list

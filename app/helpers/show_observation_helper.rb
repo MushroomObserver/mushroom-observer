@@ -111,6 +111,19 @@ module ShowObservationHelper
            ) + " (#{count})"
   end
 
+  # link to a search for observations where this name was proposed
+  # (but this taxon is not the consensus)
+  def name_proposed(name)
+    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
+                         synonyms: :no, nonconsensus: :exclusive)
+    count = query.select_count
+    return nil if count.zero?
+    query.save
+    link_to(:show_name_proposed.t,
+            add_query_param({ controller: :observer,
+                              action: :index_observation}, query)
+           ) + " (#{count})"
+  end
   # link to a search for species of name's genus. Sample text:
   #   List of species in Amanita Pers. (1433)
   def show_obs_genera(name)
