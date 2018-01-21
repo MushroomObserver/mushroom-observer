@@ -23,6 +23,7 @@ module ShowObservationHelper
     end
   end
 
+  # Observer Preference: Agaricus L.
   def owner_id_line(obs)
     return unless obs.show_owner_id?
     capture do
