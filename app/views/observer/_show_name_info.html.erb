@@ -1,17 +1,19 @@
 <%  ##TODO: Whoa... This is a lot of code for a view.
   lines = []
 
+  name = observation.name
   # links to pages (internal & external) about name
-  show_obs_name_links(observation).each { |link| lines << link }
+  show_obs_name_links(name).each { |link| lines << link }
 
   # links to approved MO synonyms
-  if (synonym_links = show_obs_approved_syn_links(observation) )
+  if (synonym_links = show_obs_approved_syn_links(name))
     lines << synonym_links
   end
 
-  name = observation.name
   if name && !name.unknown? && !browser.bot?
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
+
+    lines << "#{:OBSERVATIONS.t} of:"
 
     # Observations of each synonym
     links = obss_by_syn_links(name)

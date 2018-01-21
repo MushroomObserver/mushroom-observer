@@ -35,23 +35,19 @@ module ShowObservationHelper
   #   About Polyozellus
   #   Polyozellus on MyCoPortal
   #   Polyozellus on MycoBank
-  def show_obs_name_links(obs)
+  def show_obs_name_links(name)
     links = []
-    if name = obs.name
-      links << link_to(:show_name.t(name: name.display_name), controller: :name,
-                     action: :show_name, id: name.id)
-      links << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
+    links << link_to(:show_name.t(name: name.display_name), controller: :name,
+                   action: :show_name, id: name.id)
+    links << link_to(:show_name_on_mycoportal.t,
                      mycoportal_url(name), target: :_blank)
-      links << link_to(name.display_name.t + " " + :show_name_on_mycobank.t,
+    links << link_to(:show_name_on_mycobank.t,
                      mycobank_url(name), target: :_blank)
-    end
-    links
   end
 
   # string of links to Names of any other non-deprecated synonyms
-  def show_obs_approved_syn_links(obs)
-    name = obs.name
-    return unless name && !name.unknown? && !browser.bot?
+  def show_obs_approved_syn_links(name)
+    return unless !name.unknown? && !browser.bot?
     return if (approved_synonyms = name.other_approved_synonyms).blank?
 
     links = approved_synonyms.map {|n| name_link(n)}
@@ -77,7 +73,7 @@ module ShowObservationHelper
       next if count.zero?
 
       query.save
-      lines << link_to(:show_name_observations_of.t(name: nm.display_name),
+      lines << link_to(nm.display_name.t,
                        add_query_param({ controller: :observer,
                                          action: :index_observation },
                                          query)
