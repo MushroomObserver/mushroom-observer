@@ -3,7 +3,15 @@
 
   name = observation.name
   # links to pages (internal & external) about name
-  show_obs_name_links(name).each { |link| lines << link }
+  #   About Polyozellus
+  #   on MyCoPortal
+  #   on MycoBank
+  lines << link_to(:show_name.t(name: name.display_name), controller: :name,
+                 action: :show_name, id: name.id)
+  lines << link_to(:show_name_on_mycoportal.t,
+                   mycoportal_url(name), target: :_blank)
+  lines << link_to(:show_name_on_mycobank.t,
+                   mycobank_url(name), target: :_blank)
 
   # links to approved MO synonyms
   if (synonym_links = show_obs_approved_syn_links(name))

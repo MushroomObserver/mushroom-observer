@@ -1,20 +1,6 @@
 # helpers for ShowName view,
 # Also used in ShowNameInfo section of ShowObservation
 module ShowNameHelper
-  # array of links to pages about Name, e.g.:
-  #   About Polyozellus
-  #   Polyozellus on MyCoPortal
-  #   Polyozellus on MycoBank
-  def show_obs_name_links(name)
-    links = []
-    links << link_to(:show_name.t(name: name.display_name), controller: :name,
-                   action: :show_name, id: name.id)
-    links << link_to(:show_name_on_mycoportal.t,
-                     mycoportal_url(name), target: :_blank)
-    links << link_to(:show_name_on_mycobank.t,
-                     mycobank_url(name), target: :_blank)
-  end
-
   # string of links to Names of any other non-deprecated synonyms
   def show_obs_approved_syn_links(name)
     return unless !name.unknown? && !browser.bot?
