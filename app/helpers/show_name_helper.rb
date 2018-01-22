@@ -1,9 +1,7 @@
-# helpers for ShowName view,
-# Also used in ShowNameInfo section of ShowObservation
+# helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   # string of links to Names of any other non-deprecated synonyms
   def show_obs_approved_syn_links(name)
-    return unless !name.unknown? && !browser.bot?
     return if (approved_synonyms = name.other_approved_synonyms).blank?
 
     links = approved_synonyms.map {|n| name_link(n)}
@@ -96,7 +94,7 @@ module ShowNameHelper
     query.save if !browser.bot?
     return unless count > 1
 
-    link_to(:show_consensus_list_of_species.t(name: genus.display_name.t),
+    link_to(:show_consensus_species.t(name: genus.display_name.t),
             add_query_param({ controller: :name, action: :index_name },
                             query)
            ) + " (#{count})"

@@ -1815,7 +1815,7 @@
   show_comments_and_more: And [num] more...
 
   # observation/_show_consensus
-  show_consensus_list_of_species: List of species in [name]
+  show_consensus_species: Species in [name]
 
   # name/show_name_description or location/show_location_description
   show_description_empty: Nothing has been written for this description yet.
@@ -1898,8 +1898,6 @@
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
-  show_name_on_mycoportal: on MyCoPortal
-  show_name_on_mycobank: on MycoBank
   # name/show_name - links to observations
   show_name_observations: More [:OBSERVATIONS]
   show_name_observations_of: More [:OBSERVATIONS] of [name]

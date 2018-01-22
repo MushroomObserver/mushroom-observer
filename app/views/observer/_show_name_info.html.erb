@@ -1,8 +1,6 @@
-<%
+<% # Section showing information about consensus name in ShowObservation
   lines = []
   name = observation.name
-
-  lines += list_descriptions(name) if name
 %>
 <%# links to pages (internal & external) about name
       About Polyozellus
@@ -12,10 +10,10 @@
                             controller: :name,
                             action: :show_name, id: name.id)) %>
 <div class="indent-one-em">
-  <%= content_tag(:p, link_to(:show_name_on_mycoportal.t,
-                              mycoportal_url(name), target: :_blank)) %>
-  <%= content_tag(:p, link_to(:show_name_on_mycobank.t,
-                              mycobank_url(name), target: :_blank)) %>
+  <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
+                              target: :_blank)) %>
+  <%= content_tag(:p, link_to("Mycobank", mycobank_url(name),
+                              target: :_blank)) %>
 </div>
 
 <%= # links to approved MO synonyms
@@ -34,7 +32,7 @@
     <% # Observations of each synonym
     links = obss_by_syn_links(name)
     if links.present? && links.size > 0
-      links.each { |link| %><p class="hang-one-em"><%= link %></p><% } %>
+      links.each { |link| %><p><%= link %></p><% } %>
     <% end %>
 
     <%= # Observations of taxon (under any name)
