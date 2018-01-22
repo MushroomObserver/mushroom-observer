@@ -1975,6 +1975,7 @@
   show_observation_no_sequences: No [:sequences]
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
+  show_observations_of: "[:OBSERVATIONS] of:"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"

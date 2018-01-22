@@ -11,10 +11,12 @@
 <%= content_tag(:p, link_to(:show_name.t(name: name.display_name),
                             controller: :name,
                             action: :show_name, id: name.id)) %>
-<%= content_tag(:p, link_to(:show_name_on_mycoportal.t,
-                            mycoportal_url(name), target: :_blank)) %>
-<%= content_tag(:p, link_to(:show_name_on_mycobank.t,
-                            mycobank_url(name), target: :_blank)) %>
+<div class="indent-one-em">
+  <%= content_tag(:p, link_to(:show_name_on_mycoportal.t,
+                              mycoportal_url(name), target: :_blank)) %>
+  <%= content_tag(:p, link_to(:show_name_on_mycobank.t,
+                              mycobank_url(name), target: :_blank)) %>
+</div>
 
 <%= # links to approved MO synonyms
     if (synonym_links = show_obs_approved_syn_links(name))
@@ -24,12 +26,12 @@
 <%
   if !name.unknown? && !browser.bot?
   # links to observations %>
-  <%= content_tag(:p, "#{:OBSERVATIONS.t} of:") %>
-
-  <% # Observations of each synonym
+  <%= content_tag(:p, :show_observations_of.t) %>
+  <div class="indent-one-em">
+    <% # Observations of each synonym
     links = obss_by_syn_links(name)
     if links.present? && links.size > 0
-      links.each { |link| %><p><%= link %></p><% } %>
+      links.each { |link| %><p class="hang-one-em"><%= link %></p><% } %>
     <% end %>
 
     <%= # Observations of taxon (under any name)
@@ -44,6 +46,7 @@
     if (link = name_proposed(name))
       content_tag(:p, link)
     end %>
+  </div>
 
     <%= # List of species in the genus.
         #   List of species in Amanita Pers. (1433)

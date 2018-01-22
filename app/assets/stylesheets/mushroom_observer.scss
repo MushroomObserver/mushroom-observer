@@ -1478,12 +1478,6 @@ table.table-namings {
     color: $INPUT_FG_COLOR;
 }
 
-.obs-notes p {
-    margin: 0;
-    padding: 0;
-    text-indent: 0;
-}
-
 //
 // generally useful classes
 // --------------------------------------------------
@@ -1496,10 +1490,20 @@ table.table-namings {
     padding-left: 10px !important;
 }
 
+.indent-one-em {
+    padding-left: 1em;
+}
+
 .name-section p {
     margin: 0;
-    padding: 0 0 0 1em;
+    padding-left: 1em;
     text-indent: -1em;
+}
+
+.obs-notes p {
+    margin: 0;
+    padding: 0;
+    text-indent: 0;
 }
 
 .align-bottom {
