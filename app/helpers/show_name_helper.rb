@@ -18,12 +18,7 @@ module ShowNameHelper
   #   This Name (1)
   def obss_of_name(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence)
-    query.save
-    link_to(:show_observations_this_name.t,
-            add_query_param({ controller: :observer,
-                              action: :index_observation },
-                              query)
-           ) + " (#{query.select_count})"
+    link_to_obss_of(query, :show_observations_this_name.t)
   end
 
   # array of lines for other accepted synonyms, each line comprising
@@ -33,28 +28,24 @@ module ShowNameHelper
   def obss_by_syn_links(name)
     name.other_approved_synonyms.each_with_object([]) do |nm, lines|
       query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
-      count = query.select_count
-      next if count.zero?
+      next if query.select_count.zero?
 
-      query.save
-      lines << link_to(nm.display_name.t,
-                       add_query_param({ controller: :observer,
-                                         action: :index_observation },
-                                         query)
-                      ) + " (#{count})"
+      lines << link_to_obss_of(query, nm.display_name.t)
     end
   end
 
-  # link to search for observations of this taxon (under any name)
+  # link to a search for observations of this taxon (under any name)
   def taxon_observations(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all)
-    count = query.select_count
-    query.save
-    link_to(:show_observations_taxon.t,
-            add_query_param({ controller: :observer,
-                            action: :index_observation }, query)
-           ) + " (#{count})"
+    link_to_obss_of(query, :show_observations_taxon.t)
+  end
+
+  # link to a search for observations of this taxon, under other names
+  def taxon_observations_other_names(name)
+    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
+                         synonyms: :exclusive)
+    link_to_obss_of(query, :show_observations_other_names.t)
   end
 
   # link to a search for observations where this taxon was proposed
@@ -62,13 +53,7 @@ module ShowNameHelper
   def taxon_proposed(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all, nonconsensus: :exclusive)
-    count = query.select_count
-    return nil if count.zero?
-    query.save
-    link_to(:show_observations_taxon_proposed.t,
-            add_query_param({ controller: :observer,
-                              action: :index_observation}, query)
-           ) + " (#{count})"
+    link_to_obss_of(query, :show_observations_taxon_proposed.t)
   end
 
   # link to a search for observations where this name was proposed
@@ -76,10 +61,19 @@ module ShowNameHelper
   def name_proposed(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :no, nonconsensus: :exclusive)
+    link_to_obss_of(query, :show_observations_name_proposed.t)
+  end
+
+  # return link to a query for observations
+  # Use:
+  #   query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
+  #                        synonyms: :all)
+  #   link_to_obss_of(query, :show_observations_taxon.t)
+  #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
+  def link_to_obss_of(query, title)
     count = query.select_count
-    return nil if count.zero?
     query.save
-    link_to(:show_observations_name_proposed.t,
+    link_to(title,
             add_query_param({ controller: :observer,
                               action: :index_observation}, query)
            ) + " (#{count})"

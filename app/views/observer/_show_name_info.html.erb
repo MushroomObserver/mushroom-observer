@@ -9,12 +9,10 @@
 <%= content_tag(:p, link_to(:show_name.t(name: name.display_name),
                             controller: :name,
                             action: :show_name, id: name.id)) %>
-<div class="indent-one-em">
-  <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
-                              target: :_blank)) %>
-  <%= content_tag(:p, link_to("Mycobank", mycobank_url(name),
-                              target: :_blank)) %>
-</div>
+<%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
+                            target: :_blank)) %>
+<%= content_tag(:p, link_to("Mycobank", mycobank_url(name),
+                            target: :_blank)) %>
 
 <%= # links to approved MO synonyms
     if (synonym_links = show_obs_approved_syn_links(name))
