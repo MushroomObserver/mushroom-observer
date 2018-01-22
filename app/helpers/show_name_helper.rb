@@ -16,14 +16,24 @@ module ShowNameHelper
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
   end
 
-  # array of lines for name and any accepted synonym, each line comprising
   # link to observations of a name and a count of those observations
-  #  Macrolepiota rachodes (Vittadini) Singer (1)
-  #  Chlorophyllum rachodes (Vittadini) Vellinga (96)
-  #  Chlorophyllum rhacodes (Vittadini) Vellinga (63)
+  #   This Name (1)
+  def obss_of_name(name)
+    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence)
+    query.save
+    link_to(:show_observations_this_name.t,
+            add_query_param({ controller: :observer,
+                              action: :index_observation },
+                              query)
+           ) + " (#{query.select_count})"
+  end
+
+  # array of lines for other accepted synonyms, each line comprising
+  # link to observations of synonym and a count of those observations
+  #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
+  #   Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
-    names = [name] + name.other_approved_synonyms
-    names.each_with_object([]) do |nm, lines|
+    name.other_approved_synonyms.each_with_object([]) do |nm, lines|
       query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
       count = query.select_count
       next if count.zero?
@@ -43,7 +53,7 @@ module ShowNameHelper
                          synonyms: :all)
     count = query.select_count
     query.save
-    link_to(:show_name_taxon_observations.t,
+    link_to(:show_observations_taxon.t,
             add_query_param({ controller: :observer,
                             action: :index_observation }, query)
            ) + " (#{count})"
@@ -57,7 +67,7 @@ module ShowNameHelper
     count = query.select_count
     return nil if count.zero?
     query.save
-    link_to(:show_name_taxon_proposed.t,
+    link_to(:show_observations_taxon_proposed.t,
             add_query_param({ controller: :observer,
                               action: :index_observation}, query)
            ) + " (#{count})"
@@ -71,7 +81,7 @@ module ShowNameHelper
     count = query.select_count
     return nil if count.zero?
     query.save
-    link_to(:show_name_name_proposed.t,
+    link_to(:show_observations_name_proposed.t,
             add_query_param({ controller: :observer,
                               action: :index_observation}, query)
            ) + " (#{count})"
