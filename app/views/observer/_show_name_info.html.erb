@@ -26,7 +26,7 @@
 <%
   if !name.unknown? && !browser.bot?
   # links to observations %>
-  <%= content_tag(:p, :show_observations_of.t) %>
+  <%= content_tag(:p, :show_name_observations_of.t) %>
   <div class="indent-one-em">
     <% # Observations of each synonym
     links = obss_by_syn_links(name)

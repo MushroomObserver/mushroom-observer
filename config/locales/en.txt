@@ -1890,15 +1890,6 @@
   show_name_most_confident: Most Confident Observations
   show_name_previous_version: Previous Version
   show_name_other_versions: Other Versions
-  show_name_observations: More [:OBSERVATIONS]
-  show_name_observations_of: More [:OBSERVATIONS] of [name]
-  show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
-  show_taxon_observations: This taxon (any name)
-  show_name_proposed: Other Taxa, this name proposed
-  show_taxon_proposed: Other Taxa, this taxon proposed
-  show_name_synonym_observations: Synonym [:OBSERVATIONS]
-  show_name_other_observations: Similar [:OBSERVATIONS]
-  show_name_subtaxa_observations: Subtaxa [:OBSERVATIONS]
   show_name_creator: First person to use this name on MO
   show_name_editor: "[:Editors]"
   show_name_editors: "[:Editors]"
@@ -1909,6 +1900,19 @@
   show_name_see_more: See More
   show_name_on_mycoportal: on MyCoPortal
   show_name_on_mycobank: on MycoBank
+  # name/show_name - links to observations
+  show_name_observations: More [:OBSERVATIONS]
+  show_name_observations_of: More [:OBSERVATIONS] of [name]
+  show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
+  show_name_synonym_observations: Synonym [:OBSERVATIONS]
+  show_name_other_observations: Similar [:OBSERVATIONS]
+  show_name_observations_of: "[:OBSERVATIONS] of:"
+  show_name_observations_this_name: This Name
+  show_name_taxon_observations: This Taxon, any name
+  show_name_taxon_other_names: This Taxon, other names
+  show_name_name_proposed: Other Taxa, this name proposed
+  show_name_taxon_proposed: Other Taxa, this taxon proposed
+  show_name_subtaxa_observations: Subtaxa [:OBSERVATIONS]
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
   edit_classification_title: Edit Classification of [name]
@@ -1975,7 +1979,6 @@
   show_observation_no_sequences: No [:sequences]
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
-  show_observations_of: "[:OBSERVATIONS] of:"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
