@@ -85,8 +85,7 @@
             <%= content_tag(:p, link_to(
                   "MycoBank", mycobank_url(@name), target: :_blank
                 )) %>
-            <%=
-                content_tag(:p, link_to(
+            <%= content_tag(:p, link_to(
                   "EOL", @name.eol_url, target: :_blank
                 )) if @name.eol_url %>
             <%= content_tag(:p, link_to(
