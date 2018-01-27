@@ -1905,12 +1905,12 @@
   show_name_synonym_observations: Synonym [:OBSERVATIONS]
   show_name_other_observations: Similar [:OBSERVATIONS]
   show_observations_of: "[:OBSERVATIONS] of:"
-  show_observations_this_name: This Name
+  obss_of_this_name: This Name
   show_observations_taxon: This Taxon, any name
   show_observations_other_names: This Taxon, other names
   show_observations_name_proposed: Other Taxa, this name proposed
   show_observations_taxon_proposed: Other Taxa, this taxon proposed
-  show_name_subtaxa_observations: Subtaxa
+  show_subtaxa_obss: Subtaxa
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
   edit_classification_title: Edit Classification of [name]

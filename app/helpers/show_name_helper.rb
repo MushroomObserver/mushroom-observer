@@ -1,7 +1,7 @@
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   # string of links to Names of any other non-deprecated synonyms
-  def show_obs_approved_syn_links(name)
+  def approved_syn_links(name)
     return if (approved_synonyms = name.other_approved_synonyms).blank?
 
     links = approved_synonyms.map {|n| name_link(n)}
@@ -18,7 +18,7 @@ module ShowNameHelper
   #   This Name (1)
   def obss_of_name(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence)
-    link_to_obss_of(query, :show_observations_this_name.t)
+    link_to_obss_of(query, :obss_of_this_name.t)
   end
 
   # array of lines for other accepted synonyms, each line comprising
@@ -42,7 +42,7 @@ module ShowNameHelper
   end
 
   # link to a search for observations of this taxon, under other names
-  def taxon_observations_other_names(name)
+  def taxon_obss_other_names(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :exclusive)
     link_to_obss_of(query, :show_observations_other_names.t)
@@ -72,6 +72,7 @@ module ShowNameHelper
   #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count
+    return nil if count.zero?
     query.save
     link_to(title,
             add_query_param({ controller: :observer,

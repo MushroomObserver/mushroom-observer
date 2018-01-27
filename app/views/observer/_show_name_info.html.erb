@@ -15,7 +15,7 @@
                             target: :_blank)) %>
 
 <%= # links to approved MO synonyms
-    if (synonym_links = show_obs_approved_syn_links(name))
+    if (synonym_links = approved_syn_links(name))
       content_tag(:p, synonym_links)
     end %>
 
