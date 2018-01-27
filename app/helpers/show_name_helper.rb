@@ -24,14 +24,14 @@ module ShowNameHelper
   def taxon_observations(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all)
-    link_to_obss_of(query, :show_observations_taxon.t)
+    link_to_obss_of(query, :obss_of_taxon.t)
   end
 
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :exclusive)
-    link_to_obss_of(query, :show_observations_other_names.t)
+    link_to_obss_of(query, :taxon_obss_other_names.t)
   end
 
   # link to a search for observations where this taxon was proposed + count
@@ -39,7 +39,7 @@ module ShowNameHelper
   def taxon_proposed(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :all, nonconsensus: :exclusive)
-    link_to_obss_of(query, :show_observations_taxon_proposed.t)
+    link_to_obss_of(query, :obss_taxon_proposed.t)
   end
 
   # link to a search for observations where this name was proposed + count
@@ -47,7 +47,7 @@ module ShowNameHelper
   def name_proposed(name)
     query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
                          synonyms: :no, nonconsensus: :exclusive)
-    link_to_obss_of(query, :show_observations_name_proposed.t)
+    link_to_obss_of(query, :obss_name_proposed.t)
   end
 
   # return link to a query for observations + count of results
@@ -55,7 +55,7 @@ module ShowNameHelper
   # Use:
   #   query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
   #                        synonyms: :all)
-  #   link_to_obss_of(query, :show_observations_taxon.t)
+  #   link_to_obss_of(query, :obss_of_taxon.t)
   #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count
