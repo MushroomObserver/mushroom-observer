@@ -65,7 +65,7 @@ module ShowNameHelper
     query.save
     link_to(
       title, add_query_param({ controller: :observer,
-                              action: :index_observation}, query)
+                               action: :index_observation }, query)
     ) + " (#{count})"
   end
 
@@ -91,9 +91,9 @@ module ShowNameHelper
     query.save unless browser.bot?
     return unless count > 1
 
-    link_to(:show_consensus_species.t(name: genus.display_name.t),
-            add_query_param({ controller: :name, action: :index_name },
-                            query)
-           ) + " (#{count})"
+    link_to(
+      :show_consensus_species.t(name: genus.display_name.t),
+      add_query_param({ controller: :name, action: :index_name }, query)
+    ) + " (#{count})"
   end
 end
