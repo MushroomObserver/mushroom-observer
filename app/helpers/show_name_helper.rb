@@ -4,7 +4,7 @@ module ShowNameHelper
   def approved_syn_links(name)
     return if (approved_synonyms = name.other_approved_synonyms).blank?
 
-    links = approved_synonyms.map {|n| name_link(n)}
+    links = approved_synonyms.map { |n| name_link(n) }
     label = if name.deprecated
               :show_observation_preferred_names.t
             else
@@ -22,31 +22,33 @@ module ShowNameHelper
 
   # link to a search for Observations of this taxon (under any name) + count
   def taxon_observations(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all)
+    query = Query.lookup(:Observation, :of_name,
+                         name: name, by: :confidence, synonyms: :all)
     link_to_obss_of(query, :obss_of_taxon.t)
   end
 
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :exclusive)
+    query = Query.lookup(:Observation, :of_name,
+                         name: name, by: :confidence, synonyms: :exclusive)
     link_to_obss_of(query, :taxon_obss_other_names.t)
   end
 
   # link to a search for observations where this taxon was proposed + count
   # (but is not the consensus)
   def taxon_proposed(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all, nonconsensus: :exclusive)
+    query = Query.lookup(:Observation, :of_name,
+                         name: name, by: :confidence, synonyms: :all,
+                         nonconsensus: :exclusive)
     link_to_obss_of(query, :obss_taxon_proposed.t)
   end
 
   # link to a search for observations where this name was proposed + count
   # (but this taxon is not the consensus)
   def name_proposed(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :no, nonconsensus: :exclusive)
+    query = Query.lookup(:Observation, :of_name,
+                         name: name, by: :confidence, synonyms: :no,
+                         nonconsensus: :exclusive)
     link_to_obss_of(query, :obss_name_proposed.t)
   end
 
@@ -61,10 +63,10 @@ module ShowNameHelper
     count = query.select_count
     return nil if count.zero?
     query.save
-    link_to(title,
-            add_query_param({ controller: :observer,
+    link_to(
+      title, add_query_param({ controller: :observer,
                               action: :index_observation}, query)
-           ) + " (#{count})"
+    ) + " (#{count})"
   end
 
   # array of lines for other accepted synonyms, each line comprising
@@ -86,7 +88,7 @@ module ShowNameHelper
     return  unless (genus = name.genus)
     query = Query.lookup(:Name, :of_children, name: genus, all: true)
     count = query.select_count
-    query.save if !browser.bot?
+    query.save unless browser.bot?
     return unless count > 1
 
     link_to(:show_consensus_species.t(name: genus.display_name.t),
