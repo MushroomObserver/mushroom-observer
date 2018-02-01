@@ -509,3 +509,9 @@ california_obs: # 55
   <<: *DEFAULTS
   location: california
   where: California, USA
+
+# has alternative preferred name
+chlorophyllum_rachodes_obs:
+  <<: *DEFAULTS
+  name: chlorophyllum_rachodes
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
