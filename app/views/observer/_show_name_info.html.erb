@@ -1,92 +1,59 @@
-<%  ##TODO: Whoa... This is a lot of code for a view.
+<% # Section showing information about consensus name in ShowObservation
   lines = []
-
-  if name = observation.name
-    lines << link_to(:show_name.t(name: name.display_name), controller: :name,
-                     action: :show_name, id: name.id)
-    lines << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t,
-                     mycoportal_url(name))
-    lines << link_to(name.display_name.t + " " + :show_name_on_mycobank.t,
-                     mycobank_url(name))
- end
-
-  if name && !name.unknown? && !browser.bot?
-    approved_synonyms, deprecated_synonyms = name.sort_synonyms
-    if approved_synonyms.any?
-      links = approved_synonyms.map {|n| name_link(n)}
-      if name.deprecated
-        label = links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t
-      else
-        label = links.length > 1 ? :show_observation_alternative_names.t : :show_observation_alternative_name.t
-      end
-      lines << label + ": " + content_tag(:span, links.safe_join(", "),
-                                          class: :Data)
-    end
-
-    data = []
-    sum = 0
-    for name2 in [name] + approved_synonyms
-      query = Query.lookup(:Observation, :of_name, name: name2, by: :confidence)
-      count = query.select_count
-      if count > 0
-        sum += count
-        query.save
-        data << {count: count, name: name2, query: query}
-      end
-    end
-
-    if data.length > 1
-      for datum in data
-        name2 = datum[:name]
-        query = datum[:query]
-        count = datum[:count]
-        lines << link_to(:show_name_observations_of.t(name: name2.display_name),
-          add_query_param({ controller: :observer,
-                            action: :index_observation }, query)) +
-                   " (#{count})"
-      end
-    end
-
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all)
-    count = query.select_count
-    query.save
-    if data.length > 1
-      lines << link_to(:show_name_all_observations.t,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
-    else
-      lines << link_to(:show_name_observations.t,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
-    end
-
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-                         synonyms: :all, nonconsensus: :exclusive)
-    count = query.select_count
-    if count > 0
-      query.save
-      lines << link_to(:show_name_other_observations.t,
-        add_query_param({controller: :observer,
-                         action: :index_observation}, query)) + " (#{count})"
-    end
-
-    if genus = name.genus
-      query = Query.lookup(:Name, :of_children, name: genus, all: true)
-      count = query.select_count
-      query.save if !browser.bot?
-      if count > 1
-        lines << link_to(:show_consensus_list_of_species.t(name: genus.display_name.t),
-          add_query_param({controller: :name, action: :index_name},
-            query)) + " (#{count})"
-      end
-    end
-  end
-
-  lines += list_descriptions(name) if name
+  name = observation.name
 %>
-<div class="small">
-  <% lines.each do |line| %>
-    <p><%= line %></p>
+<%# links to pages (internal & external) about name
+      About Polyozellus
+      on MyCoPortal
+      on MycoBank %>
+<%= content_tag(:p, link_to(:show_name.t(name: name.display_name),
+                            controller: :name,
+                            action: :show_name, id: name.id)) %>
+<%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),
+                            target: :_blank)) %>
+<%= content_tag(:p, link_to("Mycobank", mycobank_url(name),
+                            target: :_blank)) %>
+
+<%= # links to approved MO synonyms
+    if (synonym_links = approved_syn_links(name))
+      content_tag(:p, synonym_links)
+    end %>
+
+<%
+  if !name.unknown? && !browser.bot?
+  # links to observations %>
+  <%= content_tag(:p, :show_observations_of.t) %>
+  <div class="indent-one-em">
+    <%= # Observations of this name
+    content_tag(:p, obss_of_name(name)) %>
+
+    <% # Observations of each synonym
+    links = obss_by_syn_links(name)
+    if links.present? && links.size > 0
+      links.each { |link| %><p><%= link %></p><% } %>
+    <% end %>
+
+    <%= # Observations of taxon (under any name)
+    content_tag(:p, taxon_observations(name)) %>
+
+    <%= # Observations of other taxa where this name was proposed
+      content_tag(:p,
+        name_proposed(name) || "#{:obss_name_proposed.t} (0)") %>
+
+    <%= # Observations of other taxa where this taxon was proposed
+      content_tag(:p,
+        taxon_proposed(name) || "#{:obss_taxon_proposed.t} (0)") %>
+  </div>
+
+    <%= # List of species in the genus.
+        #   List of species in Amanita Pers. (1433)
+    if (link = show_obs_genera(name)).present?
+      content_tag(:p, link)
+    end %>
+<% end %>
+
+<% # Descriptions of this name
+  links = list_descriptions(name)
+  if links.present?
+    links.each { |link| %><p><%= link %></p><% } %>
   <% end %>
-</div>

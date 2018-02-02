@@ -367,13 +367,7 @@ class NameController < ApplicationController
       # Create search queries for observation lists.
       args = { name: @name, by: :confidence }
       @consensus_query = create_query(:Observation, :of_name, args)
-      args = { name: @name, synonyms: :all, by: :confidence }
-      @consensus2_query = create_query(:Observation, :of_name, args)
-      args = { name: @name, synonyms: :exclusive, by: :confidence }
-      @synonym_query = create_query(:Observation, :of_name, args)
-      args = { name: @name, synonyms: :all, nonconsensus: :exclusive,
-               by: :confidence }
-      @other_query = create_query(:Observation, :of_name, args)
+
       args = { name: @name, by: :confidence, has_images: :yes }
       @obs_with_images_query = create_query(:Observation, :of_name, args)
 
@@ -383,9 +377,6 @@ class NameController < ApplicationController
       @first_four       = @obs_with_images_query.results(limit: 4)
       @first_child      = @children_query.results(limit: 1).first
       @first_consensus  = @consensus_query.results(limit: 1).first
-      @has_consensus2   = @consensus2_query.select_count
-      @has_synonym      = @synonym_query.select_count
-      @has_other        = @other_query.select_count
       @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
     end
   end

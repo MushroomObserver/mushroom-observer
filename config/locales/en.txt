@@ -1815,7 +1815,7 @@
   show_comments_and_more: And [num] more...
 
   # observation/_show_consensus
-  show_consensus_list_of_species: List of species in [name]
+  show_consensus_species: Species in [name]
 
   # name/show_name_description or location/show_location_description
   show_description_empty: Nothing has been written for this description yet.
@@ -1890,12 +1890,6 @@
   show_name_most_confident: Most Confident Observations
   show_name_previous_version: Previous Version
   show_name_other_versions: Other Versions
-  show_name_observations: More [:OBSERVATIONS]
-  show_name_observations_of: More [:OBSERVATIONS] of [name]
-  show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
-  show_name_synonym_observations: Synonym [:OBSERVATIONS]
-  show_name_other_observations: Similar [:OBSERVATIONS]
-  show_name_subtaxa_observations: Subtaxa [:OBSERVATIONS]
   show_name_creator: First person to use this name on MO
   show_name_editor: "[:Editors]"
   show_name_editors: "[:Editors]"
@@ -1904,8 +1898,19 @@
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
-  show_name_on_mycoportal: on MyCoPortal
-  show_name_on_mycobank: on MycoBank
+  # name/show_name - links to observations
+  show_name_observations: More [:OBSERVATIONS]
+  show_name_observations_of: More [:OBSERVATIONS] of [name]
+  show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
+  show_name_synonym_observations: Synonym [:OBSERVATIONS]
+  show_name_other_observations: Similar [:OBSERVATIONS]
+  show_observations_of: "[:OBSERVATIONS] of:"
+  obss_of_this_name: This Name
+  obss_of_taxon: This Taxon, any name
+  taxon_obss_other_names: This Taxon, other names
+  obss_name_proposed: Other Taxa, this name proposed
+  obss_taxon_proposed: Other Taxa, this taxon proposed
+  show_subtaxa_obss: Subtaxa
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
   edit_classification_title: Edit Classification of [name]
@@ -1945,10 +1950,8 @@
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
-  show_observation_alternative_name: Alternative Name
-  show_observation_alternative_names: Alternative Names
-  show_observation_preferred_name: Preferred Name
-  show_observation_preferred_names: Preferred Names
+  show_observation_alternative_names: Alternative Name(s)
+  show_observation_preferred_names: Preferred Name(s)
   show_observation_observation_created_at: Observation created
   # This is used if this is the location where the thing was growing.
   show_observation_collection_location: Collection location

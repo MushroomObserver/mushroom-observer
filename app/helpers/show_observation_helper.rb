@@ -1,4 +1,3 @@
-# encoding: utf-8
 # helpers for show Observation view
 module ShowObservationHelper
   def show_obs_title(obs)
@@ -24,6 +23,7 @@ module ShowObservationHelper
     end
   end
 
+  # Observer Preference: Agaricus L.
   def owner_id_line(obs)
     return unless obs.show_owner_id?
     capture do

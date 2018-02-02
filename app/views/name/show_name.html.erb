@@ -57,19 +57,47 @@
     <div class="list-group">
       <div class="list-group-item">
         <div class="row">
-          <div class="col-sm-6 name-section">
-            <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
-            <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
-            <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
-            <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
-            <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
+          <div class="col-sm-7 name-section">
+            <%= content_tag(:p, :show_observations_of.t) %>
+            <div class="indent-one-em">
+              <%= # Observations of this name
+                content_tag(:p,
+                  obss_of_name(@name) || "#{:obss_of_this_name.t} (0)")  %>
+              <%= # Observations of taxon under other names
+                content_tag(:p,
+                  taxon_obss_other_names(@name) ||
+                    "#{:taxon_obss_other_names.t} (0)") %>
+              <%= # Observations of taxon under any name
+                content_tag(:p,
+                  taxon_observations(@name) || "#{:obss_of_taxon.t} (0)") %>
+              <%= # Observations of other taxa where this name was proposed
+                content_tag(:p,
+                  name_proposed(@name) || "#{:obss_name_proposed.t} (0)") %>
+              <%= # Observations of other taxa where this taxon was proposed
+                content_tag(:p,
+                  taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
+              <%= name_section_link(:show_subtaxa_obss.t,
+                                    @has_subtaxa, @subtaxa_query) %>
+            </div>
           </div>
-          <div class="col-sm-6 name-section">
-            <%= content_tag(:p, link_to("EOL", @name.eol_url)) if @name.eol_url %>
-            <%= content_tag(:p, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
-            <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(@name))) %>
-            <%= content_tag(:p, link_to("MycoBank", mycobank_url(@name))) %>
-            <%= content_tag(:p, link_with_query(:show_name_distribution_map.t, action: :map, id: @name.id)) %>
+          <div class="col-sm-5 name-section">
+            <%= content_tag(:p, link_to(
+                  "MyCoPortal", mycoportal_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "MycoBank", mycobank_url(@name), target: :_blank
+                )) %>
+            <%= content_tag(:p, link_to(
+                  "EOL", @name.eol_url, target: :_blank
+                )) if @name.eol_url %>
+            <%= content_tag(:p, link_to(
+                  :google_images.t,
+                  "http://images.google.com/images?q=#{@name.real_text_name}",
+                  target: :_blank
+                )) %>
+            <%= content_tag(:p, link_with_query(
+                  :show_name_distribution_map.t, action: :map, id: @name.id
+                )) %>
           </div>
         </div>
       </div>
