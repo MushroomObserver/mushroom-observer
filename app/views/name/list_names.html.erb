@@ -25,7 +25,7 @@
 
 <%= @help.tp if @help %>
 
-<% # Let test_index test passing args to pagination_links.
+<% # Let test_index test pass args to pagination_links.
    args = @test_pagination_args || {} %>
 <%= paginate_block(@pages, args) do %>
     <% if @objects.any? %>
