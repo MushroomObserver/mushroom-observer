@@ -13,7 +13,7 @@
      names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
      if names.any? %>
         <div class="alert-warning">
-          <%= :list_observations_alternate_spellings.t %><br/>
+          <%= :list_observations_suggestions.t %>:<br/>
           <ul type="none">
             <% names.sort_by(&:sort_name).each do |name| %>
                 <%= link_to(name.display_name.t, name.show_link_args) %><br/>

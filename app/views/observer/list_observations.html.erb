@@ -11,7 +11,7 @@
   names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
   if names.any? %>
     <div class="alert-warning">
-      <div><%= :list_observations_alternate_spellings.t %></div>
+      <div><%= :list_observations_suggestions.t %>:</div>
       <% names.sort_by(&:sort_name).each do |name| %>
         <div>
           <%= link_to(name.display_name.t, controller: :observer,
