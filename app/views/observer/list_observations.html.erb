@@ -8,23 +8,37 @@
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?
-  names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
-  if names.any? %>
-    <div class="alert-warning">
-      <div><%= :list_observations_suggestions.t %>:</div>
-      <% names.sort_by(&:sort_name).each do |name| %>
-        <div>
-          <%= link_to(name.display_name.t, controller: :observer,
-                      action: :observation_search, pattern: name.text_name) %>
-        </div>
-      <% end %>
-    </div>
+    names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
+    if names.any? %>
+      <div class="alert-warning">
+        <div><%= :list_observations_suggestions.t %>:</div>
+        <% names.sort_by(&:sort_name).each do |name| %>
+          <div class="indent">
+            <%= search = PatternSearch::Observation.new(name.text_name)
+                count = search.query.num_results
+                if count.zero?
+                  # link to Name because a pattern search would be circular
+                  :list_observation_name.t + ": " +
+                  link_to(
+                    name.display_name.t, name.show_link_args
+                  ) + " (0)"
+                else
+                  :list_observation_observations.t + " " +
+                  link_to(
+                    name.display_name.t, controller: :observer,
+                    action: :observation_search, pattern: name.text_name
+                  ) + " (#{count})"
+                end %>
+          </div>
+        <% end %>
+      </div>
   <% end %>
 <% end %>
 
 <%= paginate_block(@pages) do %>
   <div class="row results push-down">
-    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object)  %>
+    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
+               collection: @objects, as: :object) %>
     <div style="clear: left"></div>
   </div>
 <% end %>

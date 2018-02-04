@@ -1526,6 +1526,8 @@
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_suggestions: Other Links
+  list_observation_name: "[:NAME]"
+  list_observation_observations: Observations of
   list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
