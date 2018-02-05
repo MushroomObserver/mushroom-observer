@@ -1379,7 +1379,11 @@ class ApplicationController < ActionController::Base
     @sorts = (num_results > 1 ? sorting_links(query, args) : nil)
 
     # Supply a default title.
-    @title ||= query.title
+    # If no results, then title is empty but not nil
+    # An empty title will cause the view to display nothing,
+    # overriding any title specified in the view,
+    # while keeping the application default (action name) as <title> metadata
+    num_results.zero? ? @title = "" : @title ||= query.title
 
     # Supply default error message to display if no results found.
     if (query.params.keys - query.required_parameters - [:by]).empty?

@@ -126,4 +126,7 @@ notes_templater: # 18
 thorsten: # 19
   <<: *DEFAULTS
   name: Thorsten Lumbsch
-  
+
+second_roy:
+  <<: *DEFAULTS
+  name: Roy Rogers
