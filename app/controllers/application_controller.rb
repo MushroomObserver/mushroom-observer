@@ -1373,6 +1373,11 @@ class ApplicationController < ActionController::Base
     # Pass this query on when clicking on results.
     query_params_set(query)
 
+    num_results = query.num_results
+
+    # Add magic links for sorting if enough results to sort
+    @sorts = (num_results > 1 ? sorting_links(query, args) : nil)
+
     # Supply a default title.
     @title ||= query.title
 
@@ -1436,10 +1441,6 @@ class ApplicationController < ActionController::Base
         end
     end
     @error ||= :runtime_no_matches.t(type: type)
-
-    # Add magic links for sorting.
-    @sorts = sorting_links(query, args)
-    # "@sorts".print_thing(@sorts)
 
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
