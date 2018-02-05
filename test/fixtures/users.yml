@@ -19,7 +19,7 @@ DEFAULTS: &DEFAULTS
 
 # Rolf is an experienced user
 # Also the default user for Images fixtures
-rolf: # 1
+rolf:
   <<: *DEFAULTS
   name: Rolf Singer
   license: ccwiki30
@@ -28,7 +28,7 @@ rolf: # 1
   user_groups: all_users, eol_users, eol_admins, reviewers, rolf_only
 
 # Mary has no images and no herbaria
-mary: # 2
+mary:
   <<: *DEFAULTS
   name: Mary Newbie
   keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
@@ -36,13 +36,13 @@ mary: # 2
   mailing_address: 123 Some Pl., Pasadena, CA 91106
 
 # Junk gets denied
-junk: # 3
+junk:
   <<: *DEFAULTS
   name: Junk Box
 
 # Need third for testing votes
 # Also is the default user for Observation fixture set.
-dick: # 4
+dick:
   <<: *DEFAULTS
   name: Tricky Dick
   email_general_question: false
@@ -50,34 +50,34 @@ dick: # 4
   user_groups: all_users, bolete_users, bolete_admins, dick_only
 
 # Need fourth for testing votes
-katrina: # 5
+katrina:
   <<: *DEFAULTS
   name: Katrina
   keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
   user_groups: all_users, eol_users, katrina_only
 
 # Roy is a scientific user
-roy: # 6
+roy:
   <<: *DEFAULTS
   name: Roy Halling
   email_general_question: true
   location_format: <%= User.location_formats[:scientific] %>
 
-spammer: # 7
+spammer:
   <<: *DEFAULTS
   login: spamspamspam
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
 # observations, projects, publications, species lists, herbarium_records, or
 # anything except account
-zero_user: # 8
+zero_user:
   <<: *DEFAULTS
   login: zero
   contribution: 0
 
 # excludes imageless Observations from search results, rss feed
 # used by integration filter test
-ignore_imageless_user: # 9
+ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
   content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
@@ -85,45 +85,45 @@ ignore_imageless_user: # 9
   layout_count: 96
 
 # hides unvouchered Observations
-vouchered_only_user: # 10
+vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
   content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
-public_voter: # 11
+public_voter:
   <<: *DEFAULTS
 
 # Has multiple Observations whose sortable attributes are unique
 # Need for tests in which sort order is predictable, e.g.,
 # ObserverControllerIntegrationTest#test_destroy_observation_from_search
-sortable_obs_user: # 12
+sortable_obs_user:
   <<: *DEFAULTS
 
-uniquely_named_user: # 13
+uniquely_named_user:
   <<: *DEFAULTS
 
 # Owns the default Location for Observations
-obs_default_location_user: # 14
+obs_default_location_user:
   <<: *DEFAULTS
 
-small_thumbnail_user: # 15
+small_thumbnail_user:
   <<: *DEFAULTS
   thumbnail_size: small
 
-no_general_questions_user: # 16
+no_general_questions_user:
   <<: *DEFAULTS
   email_general_question: false
 
-article_writer: # 17
+article_writer:
   <<: *DEFAULTS
   user_groups:  all_users, $LABEL_only, article_writers
 
-notes_templater: # 18
+notes_templater:
   <<: *DEFAULTS
   notes_template: Cap, Nearby trees, odor
 
-thorsten: # 19
+thorsten:
   <<: *DEFAULTS
   name: Thorsten Lumbsch
 
