@@ -541,6 +541,7 @@ class ObserverControllerTest < FunctionalTestCase
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
       @controller.instance_variable_get("@title")
     )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
     get_with_dump(:observation_search, pattern: pattern, page: 2)
     assert_template(:list_observations)
@@ -548,12 +549,14 @@ class ObserverControllerTest < FunctionalTestCase
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
       @controller.instance_variable_get("@title")
     )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
     # Prove that when there are no hits, there's no title
     pattern = "no hits"
     get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
     assert_empty(@controller.instance_variable_get("@title"))
+    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
