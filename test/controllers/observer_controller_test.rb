@@ -556,6 +556,9 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
     assert_empty(@controller.instance_variable_get("@title"))
+    assert_equal(css_select("title").text,
+                 "Mushroom Observer: Observation Search",
+                 "metadata <title> tag incorrect")
     assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
 
     # If pattern is id of a real Observation, go directly to that Observation.
@@ -3436,8 +3439,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_empty(@controller.instance_variable_get("@title"),
                  "Displayed title should be empty")
-    assert_equal(css_select("title").text, "Mushroom Observer: user_search",
-                 "<title> metadata should be the action name")
+    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
+                 "metadata <title> tag incorrect")
     assert_empty(css_select("#sorts"),
                  "There should be no sort links")
 
