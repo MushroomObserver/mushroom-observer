@@ -24,9 +24,9 @@ module ObservationReport
         month
         year
         date
-        labelProject
         eventID
         imageUrls
+        labelProject
         occurrenceRemarks
       ]
     end
@@ -53,9 +53,9 @@ module ObservationReport
         row.month,
         row.year,
         row.obs_when,
-        "NA Mycoflora Project",
         row.obs_url,
         image_urls(row),
+        "NA Mycoflora Project",
         row.obs_notes.to_s.t.html_to_ascii
       ]
     end
