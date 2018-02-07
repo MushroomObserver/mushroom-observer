@@ -37,7 +37,7 @@ module ObservationReport
         row.name_text_name,
         row.name_author,
         row.user_name_or_login,
-        row.obs_id,
+        "MO #{row.obs_id}",
         row.val(2).to_s,
         row.val(3).to_s,
         row.locality,
