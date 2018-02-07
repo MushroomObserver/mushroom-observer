@@ -4,15 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <%= auto_discovery_link_tag(:rss, {controller: :observer, action: :rss}, {title: :app_rss.l}) %>
-  <title><%= :app_title.l %>: <%=
-    if @title.present?
-      @title.strip_html.html_safe
-    elsif defined?(:"title_for_#{controller.action_name}")
-      :"title_for_#{controller.action_name}".t
-    else
-      controller.action_name
-    end
-  %></title>
+  <title><%= :app_title.l%>: <%= title_tag_contents(controller.action_name)%></title>
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
   <% if @canonical_url %>
   <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
