@@ -551,15 +551,16 @@ class ObserverControllerTest < FunctionalTestCase
     )
     refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
-    # Prove that when there are no hits, there's no title
+    # When there are no hits, no title is displayed, there's no rh tabset, and
+    # html <title> contents are the action name
     pattern = "no hits"
     get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
     assert_empty(@controller.instance_variable_get("@title"))
+    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
     assert_equal(css_select("title").text,
                  "Mushroom Observer: Observation Search",
                  "metadata <title> tag incorrect")
-    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
