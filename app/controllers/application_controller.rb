@@ -1373,18 +1373,6 @@ class ApplicationController < ActionController::Base
     # Pass this query on when clicking on results.
     query_params_set(query)
 
-    num_results = query.num_results
-
-    # Add magic links for sorting if enough results to sort
-    @sorts = (num_results > 1 ? sorting_links(query, args) : nil)
-
-    # Supply a default title.
-    # If no results, then title is empty but not nil
-    # An empty title will cause the view to display nothing,
-    # overriding any title specified in the view,
-    # while keeping the application default (action name) as <title> metadata
-    num_results.zero? ? @title = "" : @title ||= query.title
-
     # Supply default error message to display if no results found.
     if (query.params.keys - query.required_parameters - [:by]).empty?
       @error ||=
@@ -1460,9 +1448,19 @@ class ApplicationController < ActionController::Base
     @num_results = query.num_results
     @timer_end = Time.current
 
+    # Supply a default title.
+    # If no results, then title is empty but not nil.
+    # Result: No title is displayed
+    # (overriding any title specified in the view)
+    # and the html <title> metadata == a translated tag or the action name
+    # see ApplicationHelper#title_tag_contents
+    @num_results.zero? ? @title = "" : @title ||= query.title
+
+    # Add magic links for sorting if enough results to sort
+    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
+
     # If only one result (before pagination), redirect to 'show' action.
-    if (query.num_results == 1) &&
-       !args[:always_index]
+    if (@num_results == 1) && !args[:always_index]
       redirect_with_query(controller: query.model.show_controller,
                           action: query.model.show_action,
                           id: query.result_ids.first)
