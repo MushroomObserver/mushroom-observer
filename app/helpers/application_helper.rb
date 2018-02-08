@@ -280,7 +280,6 @@ module ApplicationHelper
     if @title.present?
       @title.strip_html.html_safe
     elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      # if translation label exists, return the translation
       :"title_for_#{action_name}".t
     else
       action_name.gsub("_", " ").titleize
