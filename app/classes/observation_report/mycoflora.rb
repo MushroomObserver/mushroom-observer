@@ -38,8 +38,8 @@ module ObservationReport
         row.name_author,
         row.user_name_or_login,
         "MO #{row.obs_id}",
-        row.val(2).to_s,
-        row.val(3).to_s,
+        row.val(2).to_s,        # fieldNumber
+        row.val(3).to_s,        # collectorNumber
         row.locality,
         row.county,
         row.state,
