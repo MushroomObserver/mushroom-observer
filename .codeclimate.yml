@@ -10,30 +10,41 @@ version: "2"         # required to adjust maintainability checks
 
 #################### Maintainability Checks #####################
 
+# Almost all checks disabled 2018-02-08; we cannot control checks per file
+# The plugins allow control of each rule on a file-by-file basis,
+# so we will use only the plugins
 checks:
   argument-count:
     config:
+      enabled: false
       threshold: 4
   complex-logic:
     config:
+      enabled: false
       threshold: 4
   file-lines:
     config:
-      threshold: 250
+     enabled: false
+     threshold: 250
   method-complexity:
     config:
+      enabled: false
       threshold: 5
   method-count:
     config:
+      enabled: false
       threshold: 20
   method-lines:
     config:
+      enabled: false
       threshold: 25
   nested-control-flow:
     config:
+      enabled: false
       threshold: 4
   return-statements:
     config:
+      enabled: false
       threshold: 4
   similar-code:
     config:
