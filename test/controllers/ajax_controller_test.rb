@@ -200,7 +200,8 @@ class AjaxControllerTest < FunctionalTestCase
   def test_auto_complete_user
     good_ajax_request(:auto_complete, type: :user, id: "Rover")
     assert_equal(
-      ["R", "rolf <Rolf Singer>", "roy <Roy Halling>", "second_roy <Roy Rogers>"],
+      ["R", "rolf <Rolf Singer>", "roy <Roy Halling>",
+       "second_roy <Roy Rogers>"],
       @response.body.split("\n")
     )
 

@@ -282,7 +282,7 @@ module ApplicationHelper
     elsif TranslationString.where(tag: "title_for_#{action_name}").present?
       :"title_for_#{action_name}".t
     else
-      action_name.gsub("_", " ").titleize
+      action_name.tr("_", " ").titleize
     end
   end
 end
