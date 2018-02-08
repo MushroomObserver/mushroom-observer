@@ -37,6 +37,8 @@ checks:
       threshold: 4
   similar-code:
     config:
+      # Turned off (temporarily?); gives too many false/wontfix positives
+      enabled: false
       threshold: # language-specific defaults. an override will affect all languages.
   identical-code:
     config:
