@@ -2,11 +2,16 @@
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
 
+AllCops:
+  # Ignore cops for Ruby versions which are newer than that used by MO
+  TargetRubyVersion: 2.2.3
+
 ###################### Exclusions ##############################################
 
 # Completely ignore the following
 AllCops:
   Exclude:
+    - .codeclimate.yml
     - app/assets/javascripts/bootstrap.js
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js

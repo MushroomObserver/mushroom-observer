@@ -6,13 +6,62 @@
 
 ################## Engine-Based Configuration ###################
 
-##### engines ####
+version: "2"         # required to adjust maintainability checks
 
-# CodeClimate will run these "engines" when CodeClimate is triggered.
-# For configuration of specific engines, see CodeClimate documentation
+#################### Maintainability Checks #####################
+
+# Almost all checks disabled 2018-02-08; we cannot control checks per file
+# The plugins allow control of each rule on a file-by-file basis,
+# so we will use only the plugins
+checks:
+  argument-count:
+    enabled: false
+    config:
+      threshold: 4
+  complex-logic:
+    enabled: false
+    config:
+      threshold: 4
+  file-lines:
+    enabled: false
+    config:
+      threshold: 250
+  method-complexity:
+    enabled: false
+    config:
+      threshold: 5
+  method-count:
+    enabled: false
+    config:
+      threshold: 20
+  method-lines:
+    enabled: false
+    config:
+      threshold: 25
+  nested-control-flow:
+    enabled: false
+    config:
+      threshold: 4
+  return-statements:
+    enabled: false
+    config:
+      threshold: 4
+  similar-code:
+    enabled: false
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+  identical-code:
+    enabled: false
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+
+##### plugins ####
+
+# CodeClimate will run these plugins when CodeClimate is triggered.
+# For configuration of specific plugins, see CodeClimate documentation
 #   for that engine.
 
-engines:
+plugins:
 # check Rails apps for security vulnerabilities
   brakeman:
     enabled: true
@@ -32,7 +81,7 @@ engines:
       languages:
       - ruby
       - javascript
-    exclude_paths:
+    exclude_patterns:
     - app/assets/javascripts/bootstrap.js
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js
@@ -45,15 +94,17 @@ engines:
 
 # linting, complexity analysis, & style checking for EcmaScript/JavaScript
   eslint:
-    enabled: true
+   # Disabled (temporarily?). We're currently not doing anything about the
+   # many hits.
+    enabled: false
 
 # case-sensitive search for the following strings: TODO, FIXME, HACK, XXX, BUG
 # Can be configured to search for any strings
   fixme:
     enabled: true
-# We use "xxx" in numerous places, e.g., theme templates
     checks:
       XXX:
+        # We use "xxx" in numerous places, e.g., theme templates
         enabled: false
 
 # markdown style check
@@ -69,7 +120,7 @@ engines:
   scss-lint:
     enabled: true
 
-#### exclude_paths ####
+#### exclude_patterns ####
 
 # A list of file "patterns" completely excluded from analysis
 # Each pattern is either: filenames relative to the project root,
@@ -80,7 +131,8 @@ engines:
 #   A negated pattern will include the matched files for analysis,
 #   even if they were excluded by a previous pattern.
 
-exclude_paths:
+exclude_patterns:
+- .codeclimate.yml
 - app/assets/javascripts/bootstrap.js
 - app/assets/javascripts/jquery.js
 - app/assets/javascripts/jstz.js
@@ -92,108 +144,3 @@ exclude_paths:
 - "log/"
 - public/design_test/jquery-1.5.2.min.js
 - "tmp/"
-
-#### ratings ####
-
-# Files which get a letter grade (A-F) and are included in overall
-# CodeClimate numerical score
-ratings:
-  paths:
-  - Gemfile.lock
-  - "**.erb"
-  - "**.js"
-  - "**.md"
-  - "**.rake"
-  - "**.rb"
-  - "**.scss"
-
-######################## Classic configuration ##########################
-# Kept for convenience in case we decide to drop Engine-Based configuration
-# languages:
-#  JavaScript: true
-#  Ruby: true
-# exclude_paths:
-# - public/design_test/jquery-1.5.2.min.js
-# - app/assets/javascripts/bootstrap.js
-# - app/assets/javascripts/jquery.js
-# - app/assets/javascripts/jstz.js
-# - app/assets/javascripts/lightbox.js
-# - app/classes/query/modules/serialization.rb
-
-################## CodeClimate's "inferred .codeclimate.yml" ##################
-# Codeclimate generated this based on the Classic configuration above
-#
-# engines:
-#   brakeman:
-#     enabled: true
-#   bundler-audit:
-#     enabled: true
-#   duplication:
-#     enabled: true
-#     config:
-#       languages:
-#       - ruby
-#       - javascript
-#       - python
-#       - php
-#   eslint:
-#     enabled: true
-#   fixme:
-#     enabled: true
-#   rubocop:
-#     enabled: true
-# ratings:
-#   paths:
-#   - Gemfile.lock
-#   - "**.erb"
-#   - "**.haml"
-#   - "**.rb"
-#   - "**.rhtml"
-#   - "**.slim"
-#   - "**.inc"
-#   - "**.js"
-#   - "**.jsx"
-#   - "**.module"
-#   - "**.php"
-#   - "**.py"
-#  exclude_paths:
-#  - public/design_test/jquery-1.5.2.min.js
-#  - app/assets/javascripts/bootstrap.js"
-# 	"---
-# engines:
-#   brakeman:
-#     enabled: true
-#   bundler-audit:
-#     enabled: true
-#   duplication:
-#     enabled: true
-#     config:
-#       languages:
-#       - ruby
-#       - javascript
-#       - python
-#       - php
-#   eslint:
-#     enabled: true
-#   fixme:
-#     enabled: true
-#   rubocop:
-#     enabled: true
-# ratings:
-#   paths:
-#   - Gemfile.lock
-#   - "**.erb"
-#   - "**.haml"
-#   - "**.rb"
-#   - "**.rhtml"
-#   - "**.slim"
-#   - "**.inc"
-#   - "**.js"
-#   - "**.jsx"
-#   - "**.module"
-#   - "**.php"
-#   - "**.py"
-#  exclude_paths:
-#  - public/design_test/jquery-1.5.2.min.js
-#  - app/assets/javascripts/bootstrap.js"
-
