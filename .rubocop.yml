@@ -7,6 +7,7 @@
 # Completely ignore the following
 AllCops:
   Exclude:
+    - .codeclimate.yml
     - app/assets/javascripts/bootstrap.js
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js
