@@ -15,50 +15,50 @@ version: "2"         # required to adjust maintainability checks
 # so we will use only the plugins
 checks:
   argument-count:
+    enabled: false
     config:
-      enabled: false
       threshold: 4
   complex-logic:
+    enabled: false
     config:
-      enabled: false
       threshold: 4
   file-lines:
+    enabled: false
     config:
-     enabled: false
-     threshold: 250
+      threshold: 250
   method-complexity:
+    enabled: false
     config:
-      enabled: false
       threshold: 5
   method-count:
+    enabled: false
     config:
-      enabled: false
       threshold: 20
   method-lines:
+    enabled: false
     config:
-      enabled: false
       threshold: 25
   nested-control-flow:
+    enabled: false
     config:
-      enabled: false
       threshold: 4
   return-statements:
+    enabled: false
     config:
-      enabled: false
       threshold: 4
   similar-code:
+    enabled: false
     config:
-      # Turned off (temporarily?); gives too many false/wontfix positives
-      enabled: false
       threshold: # language-specific defaults. an override will affect all languages.
   identical-code:
+    enabled: false
     config:
       threshold: # language-specific defaults. an override will affect all languages.
 
 ##### plugins ####
 
-# CodeClimate will run these engines when CodeClimate is triggered.
-# For configuration of specific engines, see CodeClimate documentation
+# CodeClimate will run these plugins when CodeClimate is triggered.
+# For configuration of specific plugins, see CodeClimate documentation
 #   for that engine.
 
 plugins:
@@ -94,15 +94,17 @@ plugins:
 
 # linting, complexity analysis, & style checking for EcmaScript/JavaScript
   eslint:
-    enabled: true
+   # Disabled (temporarily?). We're currently not doing anything about the
+   # many hits.
+    enabled: false
 
 # case-sensitive search for the following strings: TODO, FIXME, HACK, XXX, BUG
 # Can be configured to search for any strings
   fixme:
     enabled: true
-# We use "xxx" in numerous places, e.g., theme templates
     checks:
       XXX:
+        # We use "xxx" in numerous places, e.g., theme templates
         enabled: false
 
 # markdown style check
