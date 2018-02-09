@@ -2,6 +2,10 @@
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
 
+AllCops:
+  # Ignore cops for Ruby versions which are newer than that used by MO
+  TargetRubyVersion: 2.2.3
+
 ###################### Exclusions ##############################################
 
 # Completely ignore the following
