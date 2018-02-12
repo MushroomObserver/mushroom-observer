@@ -1,54 +1,62 @@
 <nav class="navbar navbar-default">
-  <%= form_tag({controller: :observer, action: :pattern_search}, {class: "navbar-form navbar-left"}) do %>
-    <div>
-      <div class="inline align-top icon-addon addon-sm">
-        <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>
-        <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
-      </div>
-      <div class="inline align-top nowrap">
-        <%=
-          options = [
-            [:COMMENTS.l, :comment],
-            [:HERBARIA.l, :herbarium],
-            [:IMAGES.l, :image],
-            [:LOCATIONS.l, :location],
-            [:NAMES.l, :name],
-            [:OBSERVATIONS.l, :observation],
-            [:PROJECTS.l, :project],
-            [:SPECIES_LISTS.l, :species_list],
-            [:HERBARIUM_RECORDS.l, :herbarium_record],
-            [:USERS.l, :user],
-            [:app_search_google.l, :google],
-          ].sort
-          select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
-                 {class: "form-control inline align-top", style: "width: auto;"})
-        %>
-        <%= submit_tag(:app_search.l, class: "btn align-top", style: "margin-right:0.5em") %>
-      </div>
+  <%=
+    form_tag({controller: :observer, action: :pattern_search},
+             {class: "navbar-form navbar-left"}) do %>
+      <div>
+        <div class="inline align-top icon-addon addon-sm">
+          <%= text_field(:search, :pattern, value: session[:pattern],
+                         class: "form-control", placeholder: :app_find.t) %>
+          <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
+        </div>
+        <div class="inline align-top nowrap">
+          <%=
+            options = [
+              [:COMMENTS.l, :comment],
+              [:HERBARIA.l, :herbarium],
+              [:IMAGES.l, :image],
+              [:LOCATIONS.l, :location],
+              [:NAMES.l, :name],
+              [:OBSERVATIONS.l, :observation],
+              [:PROJECTS.l, :project],
+              [:SPECIES_LISTS.l, :species_list],
+              [:HERBARIUM_RECORDS.l, :herbarium_record],
+              [:USERS.l, :user],
+              [:app_search_google.l, :google],
+            ].sort
+            select(:search, :type,
+                   options_for_select(options,
+                                      session[:search_type] || :observation),
+                   {},
+                   {class: "form-control inline align-top",
+                    style: "width: auto;"})
+          %>
+          <%= submit_tag(:app_search.l, class: "btn align-top",
+                         style: "margin-right:0.5em") %>
+        </div>
 
-      <%
-        adv_search = link_to(:app_advanced_search.l.nowrap, controller: :observer,
-                             action: :advanced_search_form)
-        @timer_end ||= Time.now
-        secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-        timer = "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
-      %>
-      <% if @timer_start %>
-        <div class="inline hidden-xs" style="font-size:80%">
-          <span id="timer"><%= timer %></span><br/>
+        <%
+          adv_search = link_to(:app_advanced_search.l.nowrap, controller: :observer,
+                               action: :advanced_search_form)
+          @timer_end ||= Time.now
+          secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+          timer = "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
+        %>
+        <% if @timer_start %>
+          <div class="inline hidden-xs" style="font-size:80%">
+            <span id="timer"><%= timer %></span><br/>
+            <%= adv_search %>
+          </div>
+        <% else %>
+          <p class="form-control-static hidden-xs">
+            <%= adv_search %>
+          </p>
+        <% end %>
+        <div class="visible-xs">
+          <%= content_tag(:span, timer, id: "timer", class: "nowrap") if @timer_start %>
           <%= adv_search %>
         </div>
-      <% else %>
-        <p class="form-control-static hidden-xs">
-          <%= adv_search %>
-        </p>
-      <% end %>
-      <div class="visible-xs">
-        <%= content_tag(:span, timer, id: "timer", class: "nowrap") if @timer_start %>
-        <%= adv_search %>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
   <% if @user.nil? %>
     <div class="nav navbar-nav navbar-form navbar-right hidden-xs" style="margin:0">

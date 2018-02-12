@@ -161,3 +161,12 @@ banner:
   text: This should show at the top of every page.
   updated_at: 2017-12-17 21:36:00
   user_id: 0
+
+title_for_user_search:
+  version: 1
+  language: english
+  tag: title_for_user_search
+  text: User Search
+  updated_at: 2017-12-17 21:36:00
+  user_id: 0
+

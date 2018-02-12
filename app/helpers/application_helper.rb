@@ -274,4 +274,15 @@ module ApplicationHelper
       order: [:day, :month, :year]
     }
   end
+
+  # contents of the <title> in html header
+  def title_tag_contents(action_name)
+    if @title.present?
+      @title.strip_html.html_safe
+    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
+      :"title_for_#{action_name}".t
+    else
+      action_name.tr("_", " ").titleize
+    end
+  end
 end

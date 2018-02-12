@@ -1526,6 +1526,9 @@
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
+  list_observations_suggestions: Other Links
+  list_observation_name: "[:NAME]"
+  list_observation_observations: Observations of
   list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
@@ -3609,6 +3612,19 @@
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
+
+  # content for html header title tag,
+  # used when there are no hits for a list or search
+  title_for_comment_search:          Comment Search
+  title_for_herbarium_search:        Herbarium Search
+  title_for_herbarium_record_search: Herbarium Record Search
+  title_for_image_search:            Image Search
+  title_for_location_search:         Location Search
+  title_for_name_search:             Name Search
+  title_for_observation_search:      Observation Search
+  title_for_project_search:          Project Search
+  title_for_species_list_search:     Species List Search
+  title_for_user_search:             User Search
 
   ################################################################################
 

@@ -534,17 +534,33 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observation_search
-    get_with_dump(:observation_search, pattern: "120")
+    pattern = "Boletus edulis"
+    get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
-    assert_equal(:query_title_pattern_search.t(types: "Observations",
-                                               pattern: "120"),
-                 @controller.instance_variable_get("@title"))
+    assert_equal(
+      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      @controller.instance_variable_get("@title")
+    )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
-    get_with_dump(:observation_search, pattern: "120", page: 2)
+    get_with_dump(:observation_search, pattern: pattern, page: 2)
     assert_template(:list_observations)
-    assert_equal(:query_title_pattern_search.t(types: "Observations",
-                                               pattern: "120"),
-                 @controller.instance_variable_get("@title"))
+    assert_equal(
+      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      @controller.instance_variable_get("@title")
+    )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+
+    # When there are no hits, no title is displayed, there's no rh tabset, and
+    # html <title> contents are the action name
+    pattern = "no hits"
+    get_with_dump(:observation_search, pattern: pattern)
+    assert_template(:list_observations)
+    assert_empty(@controller.instance_variable_get("@title"))
+    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
+    assert_equal(css_select("title").text,
+                 "Mushroom Observer: Observation Search",
+                 "metadata <title> tag incorrect")
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
@@ -3406,22 +3422,28 @@ class ObserverControllerTest < FunctionalTestCase
 
   # When pattern matches multiple users, list them.
   def test_user_search_multiple_hits
-    pattern = "name_sorts_user"
+    pattern = "Roy"
     get(:user_search, pattern: pattern)
     # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{pattern}/,
-                 css_select("title").text, "Wrong page")
+    assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
+                 "Wrong page displayed")
 
     prove_sorting_links_include_contribution
   end
 
-  # When pattern has no matches, go to list page with flash message.
+  # When pattern has no matches, go to list page with flash message,
+  #  title not displayed and default metadata title
   def test_user_search_unmatched
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search, pattern: unmatched_pattern)
-    # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{unmatched_pattern}/,
-                 css_select("title").text, "Wrong page")
+    assert_template(:list_users)
+
+    assert_empty(@controller.instance_variable_get("@title"),
+                 "Displayed title should be empty")
+    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
+                 "metadata <title> tag incorrect")
+    assert_empty(css_select("#sorts"),
+                 "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
