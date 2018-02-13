@@ -5,7 +5,7 @@ gem "rails", "~> 4.2.0"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
-gem "mysql2", "~> 0.3.18"
+gem "mysql2"
 
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
