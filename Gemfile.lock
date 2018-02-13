@@ -43,13 +43,13 @@ GEM
     ast (2.4.0)
     autoprefixer-rails (8.0.0)
       execjs
-    aws-sdk (2.10.130)
-      aws-sdk-resources (= 2.10.130)
-    aws-sdk-core (2.10.130)
+    aws-sdk (2.10.131)
+      aws-sdk-resources (= 2.10.131)
+    aws-sdk-core (2.10.131)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.10.130)
-      aws-sdk-core (= 2.10.130)
+    aws-sdk-resources (2.10.131)
+      aws-sdk-core (= 2.10.131)
     aws-sigv4 (1.0.2)
     binding_of_caller (0.8.0)
       debug_inspector (>= 0.0.1)
@@ -240,7 +240,7 @@ DEPENDENCIES
   RedCloth
   aws-sdk (~> 2)
   blankslate
-  bootstrap-sass (~> 3.3.2)
+  bootstrap-sass
   browser
   byebug
   capybara

@@ -11,7 +11,7 @@ gem "mysql2"
 # gem "sqlite3"
 
 # Use bootstrap style generator
-gem "bootstrap-sass", "~> 3.3.2"
+gem "bootstrap-sass"
 
 # Use SCSS for stylesheets
 gem "sass-rails"
