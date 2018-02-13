@@ -60,6 +60,9 @@ gem "browser"
 # Create Rich Text Format documents
 gem "rtf"
 
+# Enable remote procedure calls over HTTP (used in MO API)
+gem "xmlrpc"
+
 # Simple versioning
 gem "cure_acts_as_versioned"
 
