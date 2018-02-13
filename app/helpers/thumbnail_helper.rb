@@ -12,7 +12,7 @@ module ThumbnailHelper
   #   notes::            Show image notes??
   #
   def thumbnail(image, args = {})
-    image_id = image.is_a?(Fixnum) ? image : image.id
+    image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image:            image,
       link:             Image.show_link_args(image_id),

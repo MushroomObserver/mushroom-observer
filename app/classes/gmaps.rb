@@ -188,8 +188,8 @@ module GM
           fail "Unexpected option \"#{key}\" for GMap#div."
         end
       end
-      height = height.to_s + "px" if height.is_a?(Fixnum)
-      width = width.to_s + "px" if width.is_a?(Fixnum)
+      height = height.to_s + "px" if height.is_a?(Integer)
+      width = width.to_s + "px" if width.is_a?(Integer)
       "<div id='#{name}' style='width:#{width};height:#{height}'></div>"
     end
 

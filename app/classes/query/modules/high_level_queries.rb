@@ -88,7 +88,7 @@ module Query::Modules::HighLevelQueries
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
-  # better all be valid Fixnum ids -- no error checking is done!!
+  # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
     @result_count = list.count

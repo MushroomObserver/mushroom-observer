@@ -34,7 +34,7 @@ module ObjectLinkHelper
   #   Parent: <%= name_link(name.parent) %>
   #
   def name_link(name, str = nil)
-    if name.is_a?(Fixnum)
+    if name.is_a?(Integer)
       str ||= :NAME.t + " #" + name.to_s
       link_to(str, Name.show_link_args(name))
     else
@@ -93,7 +93,7 @@ module ObjectLinkHelper
   #   Modified by: <%= user_link(login, user_id) %>
   #
   def user_link(user, name = nil)
-    if user.is_a?(Fixnum)
+    if user.is_a?(Integer)
       name ||= :USER.t + " #" + user.to_s
       link_to(name, User.show_link_args(user))
     elsif user

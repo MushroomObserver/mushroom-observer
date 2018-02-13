@@ -469,7 +469,7 @@ class Naming < AbstractModel
   # make changes to the Naming safely.
   #
   # == Attributes
-  # num::           Type of reason (Fixnum from 1 to N).
+  # num::           Type of reason (Integer from 1 to N).
   # notes::         Notes associated with reason (String), or +nil+ if not used.
   #                 *NOTE*: This is writable; changes will be saved with Naming.
   #

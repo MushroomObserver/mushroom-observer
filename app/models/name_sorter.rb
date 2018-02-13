@@ -128,12 +128,12 @@ class NameSorter
   end
 
   def push_synonym(arg)
-    if arg.is_a?(Fixnum)
+    if arg.is_a?(Integer)
       @approved_synonyms.push(Name.find(arg))
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      fail TypeError.new("NameSorter synonyms must be Fixnum or ActiveRecord::Base, not #{arg.clasS}.")
+      fail TypeError.new("NameSorter synonyms must be Integer or ActiveRecord::Base, not #{arg.clasS}.")
     end
   end
 

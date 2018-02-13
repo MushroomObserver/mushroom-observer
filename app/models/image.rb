@@ -283,7 +283,7 @@ class Image < AbstractModel
     [:thumbnail, :small, :medium, :large, :huge, :full_size]
   end
 
-  # Return an Array of all image sizes as pixels (Fixnum) instead of Symbol's.
+  # Return an Array of all image sizes as pixels (Integer) instead of Symbol's.
   def self.all_sizes_in_pixels
     [160, 320, 640, 960, 1280, 1e10]
   end
@@ -727,7 +727,7 @@ class Image < AbstractModel
     all_votes.last
   end
 
-  # Validate a vote value.  Returns type-cast vote (Fixnum from 1 to 4) if
+  # Validate a vote value.  Returns type-cast vote (Integer from 1 to 4) if
   # valid, or nil if not.
   def self.validate_vote(value)
     value = begin
@@ -748,7 +748,7 @@ class Image < AbstractModel
     end
   end
 
-  # Retrieve the given User's vote for this Image.  Returns a Fixnum from
+  # Retrieve the given User's vote for this Image.  Returns a Integer from
   # 1 to 4, or nil if the User hasn't voted.
   def users_vote(user = User.current)
     user_id = user.is_a?(User) ? user.id : user.to_i
@@ -806,7 +806,7 @@ class Image < AbstractModel
   end
 
   # Retrieve list of users who have voted as a Hash mapping user ids to
-  # numerical vote values (Fixnum).  (Forces all votes to be integers.)
+  # numerical vote values (Integer).  (Forces all votes to be integers.)
   def vote_hash # :nodoc:
     unless @vote_hash
       @vote_hash = {}

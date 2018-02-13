@@ -23,7 +23,7 @@
 #  strip_squeeze::      Strip and squeeze spaces.
 #  capitalize_first::   Capitalize first letter, leaving the rest alone.
 #  rand_char::          Pick a single random character from the string.
-#  dealphabetize::      Reverse Fixnum#alphabetize.
+#  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::      Measure how closely this String matches another String.
@@ -547,7 +547,7 @@ class String
     self[Kernel.rand(length), 1]
   end
 
-  # Reverse Fixnum#alphabetize.
+  # Reverse Integer#alphabetize.
   #
   #   string = integer.alphabetize
   #   integer = string.dealphabetize

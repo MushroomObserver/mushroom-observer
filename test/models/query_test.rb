@@ -3,7 +3,7 @@ require "set"
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)
-    test_ids = expect.first.is_a?(Fixnum)
+    test_ids = expect.first.is_a?(Integer)
     expect = expect.to_a unless expect.respond_to?(:map!)
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results

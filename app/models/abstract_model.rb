@@ -147,7 +147,7 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Return the version number given an array-like index.  Use negative indexes
-  # to specify index from the end.  Return Fixnum, or nil if doesn't exist.
+  # to specify index from the end.  Return Integer, or nil if doesn't exist.
   #
   #   name.find_version(-1)  # Last (current) version.
   #   name.find_version(-2)  # Next-to-last (previous) version.

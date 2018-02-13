@@ -216,7 +216,7 @@ module SessionExtensions
   # stack.  If called with 2, it pops one page off the stack then restores the
   # page before that.  And so on.
   def go_back(arg = 1)
-    if arg.is_a?(Fixnum)
+    if arg.is_a?(Integer)
       while arg > 1
         @page_stack.pop
         arg -= 1

@@ -122,7 +122,7 @@ module Query::Modules::Validation
   end
 
   def validate_integer(arg, val)
-    if val.is_a?(Fixnum) ||
+    if val.is_a?(Integer) ||
        val.is_a?(String) and val.match(/^-?\d+$/)
       val.to_i
     elsif val.blank?
@@ -133,7 +133,7 @@ module Query::Modules::Validation
   end
 
   def validate_float(arg, val)
-    if val.is_a?(Fixnum) ||
+    if val.is_a?(Integer) ||
        val.is_a?(Float) ||
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
@@ -143,7 +143,7 @@ module Query::Modules::Validation
   end
 
   def validate_string(arg, val)
-    if val.is_a?(Fixnum) ||
+    if val.is_a?(Integer) ||
        val.is_a?(Float) ||
        val.is_a?(String) ||
        val.is_a?(Symbol)
@@ -161,7 +161,7 @@ module Query::Modules::Validation
       @params_cache ||= {}
       @params_cache[arg] = val
       val.id
-    elsif val.is_a?(Fixnum) ||
+    elsif val.is_a?(Integer) ||
           val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
           # (blasted admin user has id = 0!)
           val.is_a?(String) && (val == "0") && (arg == :user)
@@ -179,10 +179,10 @@ module Query::Modules::Validation
       val.id
     elsif val.is_a?(String)
       val
-    elsif val.is_a?(Fixnum)
+    elsif val.is_a?(Integer)
       val
     else
-      fail("Value for :#{arg} should be a Name, String or Fixnum, got: #{val.class}")
+      fail("Value for :#{arg} should be a Name, String or Integer, got: #{val.class}")
     end
   end
 
@@ -217,7 +217,7 @@ module Query::Modules::Validation
   def validate_query(arg, val)
     if val.is_a?(Query::Base)
       val.record.id
-    elsif val.is_a?(Fixnum)
+    elsif val.is_a?(Integer)
       val
     else
       fail("Value for :#{arg} should be a Query class, got: #{val.inspect}")

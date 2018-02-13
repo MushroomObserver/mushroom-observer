@@ -479,7 +479,7 @@ module ControllerExtensions
   #
   def assert_response(arg, msg = "")
     if arg
-      if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
+      if arg == :success || arg == :redirect || arg.is_a?(Integer)
         super
       else
 
