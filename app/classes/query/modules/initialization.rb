@@ -5,7 +5,7 @@
 module Query::Modules::Initialization
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/PerceivedComplexity
-  # rubocop:disable Style/CyclomaticComplexity
+  # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Style/GuardClause
 
   attr_accessor :join
