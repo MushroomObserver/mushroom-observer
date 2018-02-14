@@ -103,6 +103,7 @@ gem "rubocop", require: false
 # gem "brakeman", require: false
 
 # Amazon S3 SDK, for access to images on dreamhost S3
+# limited to v2 to avoid installing a bunch of gems
 gem "aws-sdk", "~> 2"
 
 # Slick Slider for Image Carousel
