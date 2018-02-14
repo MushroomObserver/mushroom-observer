@@ -114,7 +114,7 @@ gem "jquery-slick-rails"
 # allows for test results to be reported back to test runner IDE's
 group :test do
   gem "minitest"
-  gem "minitest-reporters", ">= 0.5.0"
+  gem "minitest-reporters"
 end
 
 gem "web-console", "~> 2.0", group: :development
