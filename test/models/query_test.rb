@@ -1012,7 +1012,7 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  # rubocop:disable Style/VariableName
+  # rubocop:disable Naming/VariableName
   # RuboCop gives false positives here
   def test_observation_image_coercion
     # Several observation queries can be turned into image queries.
@@ -1417,7 +1417,7 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_equal(q4a, q4c)
   end
-  # rubocop:enable Style/VariableName
+  # rubocop:enable Naming/VariableName
 
   def test_rss_log_coercion
     # The site index's default RssLog query should be coercable into queries on

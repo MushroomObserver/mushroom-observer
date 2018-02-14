@@ -3491,7 +3491,7 @@ class ApiTest < UnitTestCase
     assert_parse_r(:date, aor(from, to), str)
   end
 
-  # rubocop:disable Metric/LineLength
+  # rubocop:disable Metrics/LineLength
   def test_parse_time_range
     assert_parse_r(:time, nil, nil)
     assert_parse_tr("2012-06-25 12:34:56", "2012-06-25 12:34:56", "20120625123456")
@@ -3533,7 +3533,7 @@ class ApiTest < UnitTestCase
     assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011-2012")
     assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011 - 2012")
   end
-  # rubocop:enable Metric/LineLength
+  # rubocop:enable Metrics/LineLength
 
   def assert_parse_tr(from, to, str)
     from = api_test_time(from)
