@@ -34,7 +34,7 @@ gem "uglifier"
 # gem "turbolinks"
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem "jbuilder", "~> 2.6.3"
+gem "jbuilder"
 
 # Use ActiveModel has_secure_password
 # gem "bcrypt", "~> 3.1.7"
