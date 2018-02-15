@@ -7,6 +7,7 @@ class ArrayExtensionsTest < UnitTestCase
     assert_equal({ "a" => true, "b" => true, "c" => true },
                  %w[a b c].to_boolean_hash)
   end
+
   def test_safe_join
     array1 = ["<p>foo</p>".html_safe, "<p>bar</p>"]
     array2 = ["<p>foo</p>".html_safe, "<p>bar</p>".html_safe]

@@ -73,6 +73,7 @@ class API
     return if citations.none?
     raise DubiousLocationName.new(citations)
   end
+
   def parse_bounding_box!
     n = parse(:latitude, :north, help: 1)
     s = parse(:latitude, :south, help: 1)

@@ -20,6 +20,7 @@ class API
       rescue ArgumentError
         raise BadParameterValue.new(str, :time_range)
       end
+
       def try_all_range_patterns(str)
         range_yyyymmddhhmmss_x2(str) ||
           range_yyyymmddhhmm_x2(str) ||

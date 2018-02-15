@@ -20,6 +20,7 @@ class API
       end
 
       private
+
       def try_all_range_patterns(str)
         range_yyyymmdd_x2(str) ||
           range_yyyymm_x2(str) ||
