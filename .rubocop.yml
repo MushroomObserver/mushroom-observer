@@ -6,6 +6,15 @@ AllCops:
   # Ignore cops for Ruby versions which are newer than that used by MO
   TargetRubyVersion: 2.4.1
 
+# Temporarily disable some cops to see if I can make Codeclimate work again
+Layout/EmptyLineAfterMagicComment:
+  Enabled: false
+Style/Encoding:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+
 ###################### Exclusions ##############################################
 
 # Completely ignore the following
