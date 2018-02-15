@@ -24,6 +24,7 @@ AllCops:
     - app/assets/javascripts/jquery.js
     - app/assets/javascripts/jstz.js
     - app/assets/javascripts/lightbox.js
+    - "app/views/api/**/*"
     - "db/**/*"
     - "log/**/*"
     - public/design_test/jquery-1.5.2.min.js

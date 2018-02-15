@@ -324,10 +324,9 @@ module Query::Modules::Initialization
     if val.to_s =~ /^\d\d\d\d/
       y, m, d = val.split("-")
       @where << sprintf("#{col} #{dir}= '%04d-%02d-%02d'",
-        y.to_i,
-        (m || (min ? 1 : 12)).to_i,
-        (d || (min ? 1 : 31)).to_i
-      )
+                        y.to_i,
+                        (m || (min ? 1 : 12)).to_i,
+                        (d || (min ? 1 : 31)).to_i)
     elsif val.to_s =~ /-/
       m, d = val.split("-")
       @where << "MONTH(#{col}) #{dir} #{m} OR " \
@@ -350,7 +349,8 @@ module Query::Modules::Initialization
   def initialize_model_do_time_half(min, val, col)
     return if val.blank?
     y, m, d, h, n, s = val.split("-")
-    @where << sprintf("#{col} %s= '%04d-%02d-%02d %02d:%02d:%02d'",
+    @where << sprintf(
+      "#{col} %s= '%04d-%02d-%02d %02d:%02d:%02d'",
       min ? ">" : "<",
       y.to_i,
       (m || (min ? 1 : 12)).to_i,
