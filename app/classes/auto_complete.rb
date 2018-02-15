@@ -8,7 +8,7 @@
 #
 ################################################################################
 
-PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
+PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'.freeze
 
 class AutoComplete
   attr_accessor :string, :matches
@@ -18,7 +18,7 @@ class AutoComplete
 
   def self.subclass(type)
     "AutoComplete#{type.camelize}".constantize
-  rescue
+  rescue StandardError
     raise "Invalid auto-complete type: #{type.inspect}"
   end
 
@@ -140,7 +140,7 @@ class AutoCompleteName < AutoCompleteByString
       SELECT DISTINCT text_name FROM names
       WHERE text_name LIKE '#{letter}%'
       AND correct_spelling_id IS NULL
-    )).sort_by { |x| (x.match(" ") ? "b" : "a") + x }.uniq
+    )).sort_by { |x| (x.match?(" ") ? "b" : "a") + x }.uniq
     # (this sort puts genera and higher on top, everything else
     # on bottom, and sorts alphabetically within each group)
   end
