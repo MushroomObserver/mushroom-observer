@@ -15,10 +15,7 @@
 # SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
 Layout/AlignHash:
   Exclude:
-    - 'app/classes/api/herbarium_record_api.rb'
-    - 'app/models/herbarium_record.rb'
     - 'app/views/name/eol.xml.builder'
-    - 'test/controllers/name_controller_test.rb'
 
 # Offense count: 77
 # Cop supports --auto-correct.

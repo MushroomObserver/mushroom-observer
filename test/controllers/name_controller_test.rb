@@ -919,7 +919,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name, params)
     assert_redirected_to(action: :show_name,
                          id: Name.find_by(text_name: text_name).id)
-    assert(name = Name.find_by(text_name: text_name))
+    assert(Name.find_by(text_name: text_name))
   end
 
   def test_create_name_with_many_implicit_creates
@@ -1213,7 +1213,6 @@ class NameControllerTest < FunctionalTestCase
   # Prove that user can change name -- without merger --
   # if there's no exact match to desired Name
   def test_edit_name_remove_author_no_exact_match
-    old_name_count = Name.count
     name = names(:amanita_baccata_arora)
     params = {
       id: name.id,
@@ -4314,7 +4313,9 @@ class NameControllerTest < FunctionalTestCase
     assert_input_value("parent", "Agaricaceae")
 
     # Have it select a bogus name (rank wrong in this case).
-    post(:inherit_classification, id: name.id, parent: "Agaricaceae",
+    post(:inherit_classification,
+         id: name.id,
+         parent: "Agaricaceae",
          options: names(:coprinus_comatus).id)
     assert_flash_error
     assert_response(:success)

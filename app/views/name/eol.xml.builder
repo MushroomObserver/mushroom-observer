@@ -1,12 +1,14 @@
-xml.instruct! :xml, version: "1.0" 
-xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
+xml.instruct! :xml, version: "1.0"
+xml.response(
+  "xmlns" => "http://www.eol.org/transfer/content/0.2",
   "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",
   "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
   "xmlns:dcterms" => "http://purl.org/dc/terms/",
   "xmlns:geo" => "http://www.w3.org/2003/01/geo/wgs84_pos#",
   "xmlns:dwc" => "http://rs.tdwg.org/dwc/dwcore/",
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 http://services.eol.org/schema/content_0_2.xsd") {
+  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 http://services.eol.org/schema/content_0_2.xsd"
+) {
     for taxon in @data.names
       xml.taxon do
         xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
@@ -52,11 +54,11 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
                 xml.license(@data.license_url(desc.license_id))
                 xml.dcterms(:rightsHolder, @data.authors(desc.id))
                 xml.audience("General public")
-                
+
                 # Note the following mapping assumes that this is being read in English
                 xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
                             "form_names_#{f}".to_sym.l.gsub(" ", ""))
-                
+
                 xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
                 # xml.reviewStatus(desc.review_status)
               end
