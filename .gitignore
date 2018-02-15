@@ -28,6 +28,5 @@ production-logs
 
 # Ignore bundler config.
 .bundle
-.rubocop_todo.yml
 rubocop.out
 coverage

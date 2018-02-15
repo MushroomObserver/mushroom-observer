@@ -1,3 +1,5 @@
+inherit_from: .rubocop_todo.yml
+
 # RuboCop configuration
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
