@@ -1,4 +1,3 @@
-# encoding: utf-8
 # helpers for creating links in views
 module ObjectLinkHelper
   # Wrap location name in span: "<span>where (count)</span>"

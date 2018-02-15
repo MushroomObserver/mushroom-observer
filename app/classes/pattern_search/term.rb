@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module PatternSearch
   # Parse PatternSearch parameter terms
   # Sample use:

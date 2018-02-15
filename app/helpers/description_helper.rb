@@ -1,4 +1,3 @@
-# encoding: utf-8
 module DescriptionHelper
   # Create tabs for show_description page.
   def show_description_tab_set(desc)

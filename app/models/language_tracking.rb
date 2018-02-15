@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Tracking Usage of Translations
 #

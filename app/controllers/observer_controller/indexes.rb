@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see observer_controller.rb
 class ObserverController
   # Displays matrix of selected Observation's (based on current Query).

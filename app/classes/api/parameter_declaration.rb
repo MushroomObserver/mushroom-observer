@@ -44,8 +44,6 @@ class API
         "#{key}=#{show_val(val)}"
       end
     end
-
-    # rubocop:disable Metrics/CyclomaticComplexity
     def show_val(val)
       case val
       when String, Symbol, Integer, Float, Range

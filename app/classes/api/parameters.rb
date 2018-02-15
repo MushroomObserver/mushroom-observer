@@ -73,9 +73,6 @@ class API
     return if citations.none?
     raise DubiousLocationName.new(citations)
   end
-
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
   def parse_bounding_box!
     n = parse(:latitude, :north, help: 1)
     s = parse(:latitude, :south, help: 1)

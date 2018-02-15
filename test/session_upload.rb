@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class FileUpload
   attr_accessor :filename
   attr_accessor :content_type

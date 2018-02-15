@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: move this into a new SearchController
 class ObserverController
   # This is the action the search bar commits to.  It just redirects to one of

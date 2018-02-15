@@ -1062,11 +1062,6 @@ Style/EmptyMethod:
     - 'app/controllers/observer_controller/info_controller.rb'
     - 'app/controllers/theme_controller.rb'
 
-# Offense count: 191
-# Cop supports --auto-correct.
-Style/Encoding:
-  Enabled: false
-
 # Offense count: 281
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: for, each

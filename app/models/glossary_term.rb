@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 

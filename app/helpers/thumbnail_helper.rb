@@ -1,4 +1,3 @@
-# encoding: utf-8
 module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   #

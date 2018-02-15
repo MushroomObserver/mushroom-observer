@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: move this into a new NotificationController
 class ObserverController
   # Displays notifications related to a given naming and users.

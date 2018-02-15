@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   class BooleanFilter < ContentFilter
     attr_accessor :on_vals

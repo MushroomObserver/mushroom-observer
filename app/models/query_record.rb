@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class QueryRecord < ActiveRecord::Base
   attr_accessor :query
 

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Add HerbariumRecord Not Curator Email
 class QueuedEmail
   class AddHerbariumRecordNotCurator < QueuedEmail

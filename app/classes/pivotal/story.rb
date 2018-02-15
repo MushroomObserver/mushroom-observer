@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Pivotal
   class Story
     attr_accessor :id

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module PivotalHelper
   # From pivotal_tracker_helper.rb
   def pivotal_vote_controls(story)

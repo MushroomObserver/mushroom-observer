@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Observation Change Email
 class QueuedEmail::ObservationChange < QueuedEmail
   def observation

@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API

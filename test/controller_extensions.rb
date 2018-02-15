@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Controller Test Helpers
 #

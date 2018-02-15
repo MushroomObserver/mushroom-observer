@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 namespace :location do
   APPROVED_LOCATIONS = Set.new([
     "0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",

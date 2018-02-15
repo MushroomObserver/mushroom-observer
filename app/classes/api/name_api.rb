@@ -225,8 +225,6 @@ class API
       raise OneOrTheOther.new([:synonymize_with, :clear_synonyms,
                                :set_correct_spelling])
     end
-
-    # rubocop:disable Metrics/CyclomaticComplexity
     def no_other_update_params?
       !@name && !@author && !@rank && @deprecated.nil? &&
         !@synonymize_with && !@clear_synonyms && !@correct_spelling

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module BoxMethods
   def is_location?
     true

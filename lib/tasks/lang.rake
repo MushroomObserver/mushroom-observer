@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # This has to be done without access to Language because it is used
 # to declare tasks before the MO environment has been loaded.
 def all_locales

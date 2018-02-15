@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 require "test_helper"
 
 class NameControllerTest < FunctionalTestCase
@@ -3114,7 +3113,7 @@ class NameControllerTest < FunctionalTestCase
 
     existing_synonyms = {}
     split_name = nil
-    for n in selected_synonym.names # rubocop:disable Style/For
+    for n in selected_synonym.names
       next unless n.id != selected_id
       assert(n.deprecated)
       if split_name.nil? # Find the first different name and uncheck it

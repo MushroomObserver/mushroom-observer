@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 # The original MO controller and hence a real mess!
 # The Clitocybe of controllers.

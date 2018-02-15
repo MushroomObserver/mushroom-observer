@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Integration High-Level Test Helpers
 #

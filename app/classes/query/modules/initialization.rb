@@ -1,12 +1,8 @@
 # Helper methods for turning Query parameters into SQL conditions.
 #
 # rubocop:disable Metrics/ModuleLength
-# rubocop:disable Style/ClassAndModuleChildren
 module Query::Modules::Initialization
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/PerceivedComplexity
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Style/GuardClause
 
   attr_accessor :join
   attr_accessor :tables
