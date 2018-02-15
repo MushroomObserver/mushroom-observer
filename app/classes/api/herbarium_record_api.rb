@@ -92,7 +92,7 @@ class API
       obj = HerbariumRecord.where(
               herbarium: params[:herbarium],
               accession_number: params[:accession_number]
-            ).first
+      ).first
       return nil unless obj
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
       obj.add_observation(@observation)
