@@ -4,7 +4,7 @@
 
 AllCops:
   # Ignore cops for Ruby versions which are newer than that used by MO
-  TargetRubyVersion: 2.2.3
+  TargetRubyVersion: 2.4.1
 
 ###################### Exclusions ##############################################
 
