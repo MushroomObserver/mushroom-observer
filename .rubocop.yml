@@ -7,13 +7,10 @@ AllCops:
   TargetRubyVersion: 2.4.1
 
 # Temporarily disable some cops to see if I can make Codeclimate work again
-Layout/EmptyLineAfterMagicComment:
-  Enabled: false
-Style/Encoding:
-  Enabled: false
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
+# Style/Encoding:
+#   Enabled: false
+# Style/FrozenStringLiteralComment:
+#  Enabled: false
 
 ###################### Exclusions ##############################################
 
@@ -31,6 +28,13 @@ AllCops:
     - "tmp/**/*"
 
 ###################### Global Disables #########################################
+# Disable because enforcement takes up an extra line
+Layout/EmptyLineAfterMagicComment:
+  Enabled: false
+
+# Causes test failures when used with Rubocop auto-correct
+Rails/DynamicFindBy:
+  Enabled: False
 
 # Disable using Rails < 5.0; it's relevant only to >= 5.0
 Rails/HttpPositionalArguments:
