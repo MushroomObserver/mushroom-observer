@@ -27,7 +27,7 @@ class CopyrightChange < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :license
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

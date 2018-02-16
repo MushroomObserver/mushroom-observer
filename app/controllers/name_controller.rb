@@ -327,11 +327,11 @@ class NameController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Show Name
   #
-  ################################################################################
+  ##############################################################################
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
@@ -625,11 +625,11 @@ class NameController < ApplicationController
 
   public
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Synonymy
   #
-  ################################################################################
+  ##############################################################################
 
   # Form accessible from show_name that lets a user review all the synonyms
   # of a name, removing others, writing in new, etc.
@@ -1028,11 +1028,11 @@ class NameController < ApplicationController
     render_xml(layout: false)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Other Stuff
   #
-  ################################################################################
+  ##############################################################################
 
   # Utility accessible from a number of name pages (e.g. indexes and
   # show_name?) that lets you enter a whole list of names, together with
@@ -1158,11 +1158,11 @@ class NameController < ApplicationController
     redirect_with_query(@name.show_link_args)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Stuff for Mushroom App
   #
-  ################################################################################
+  ##############################################################################
 
   def names_for_mushroom_app # :nologin: :norobots:
     number_of_names = params[:number_of_names].blank? ? 1000 : params[:number_of_names]

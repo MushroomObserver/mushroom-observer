@@ -223,7 +223,7 @@ class Vote < AbstractModel
       (user.votes_anonymous == :old && updated_at > Time.parse(MO.vote_cutoff))
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

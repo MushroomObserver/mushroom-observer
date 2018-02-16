@@ -801,11 +801,11 @@ class ImageController < ApplicationController
     redirect_to(controller: :account, action: :prefs)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Stuff for Mushroom App
   #
-  ################################################################################
+  ##############################################################################
 
   def images_for_mushroom_app # :nologin: :norobots:
     minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]

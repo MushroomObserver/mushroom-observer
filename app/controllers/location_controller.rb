@@ -273,11 +273,11 @@ class LocationController < ApplicationController
     result
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Description Searches and Indexes
   #
-  ################################################################################
+  ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
   def index_location_description # :nologin: :norobots:

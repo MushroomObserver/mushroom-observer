@@ -101,11 +101,11 @@ class LocationDescription < Description
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Descriptions
   #
-  ################################################################################
+  ##############################################################################
 
   # Override the default show_controller
   def self.show_controller

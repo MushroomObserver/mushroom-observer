@@ -63,7 +63,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
     ObservationChangeEmail.build(user, to_user, observation, note, queued).deliver_now
   end
 
-  ################################################################################
+  ##############################################################################
 
   private
 

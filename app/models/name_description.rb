@@ -139,11 +139,11 @@ class NameDescription < Description
     !gen_desc.blank? || !diag_desc.blank?
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Descriptions
   #
-  ################################################################################
+  ##############################################################################
 
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
@@ -277,7 +277,7 @@ class NameDescription < Description
     @old_reviewer = nil
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 
