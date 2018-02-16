@@ -94,6 +94,6 @@ class ObserverController < ApplicationController
     :edit_observation,
     :show_obs,
     :show_observation,
-    :show_user,
+    :show_user
   ]
 end

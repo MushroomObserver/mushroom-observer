@@ -1407,17 +1407,6 @@ Style/TrailingBodyOnMethodDefinition:
   Exclude:
     - 'app/models/queued_email/name_change.rb'
 
-# Offense count: 10
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInLiteral:
-  Exclude:
-    - 'app/classes/pivotal/story.rb'
-    - 'app/controllers/observer_controller.rb'
-    - 'app/controllers/theme_controller.rb'
-    - 'test/models/api_test.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Style/UnlessElse:

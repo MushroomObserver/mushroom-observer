@@ -468,7 +468,7 @@ class ApiTest < UnitTestCase
       method:   :delete,
       action:   :api_key,
       api_key:  @api_key.key,
-      id:       @api_key.id,
+      id:       @api_key.id
     }
     # No DELETE requests allowed now.
     assert_api_fail(params)
@@ -1353,7 +1353,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :image,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_img.id))
     assert_api_pass(params.merge(id: rolfs_img.id))
@@ -1782,7 +1782,7 @@ class ApiTest < UnitTestCase
       api_key:        @api_key.key,
       name:           @name,
       rank:           @rank,
-      deprecated:     @deprecated,
+      deprecated:     @deprecated
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:name))
@@ -1947,7 +1947,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :patch,
       action:  :name,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     syns = name1.synonyms
     assert(syns.count > 2)
@@ -1967,7 +1967,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :patch,
       action:  :name,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     correct.clear_synonym
     assert_api_pass(params.merge(id: misspelt.id,
@@ -2490,7 +2490,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :observation,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_obs.id))
     assert_api_pass(params.merge(id: rolfs_obs.id))
@@ -3196,7 +3196,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :species_list,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_pass(params.merge(id: rolfs_spl.id))

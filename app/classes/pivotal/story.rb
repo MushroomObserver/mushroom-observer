@@ -30,7 +30,7 @@ class Pivotal
       "search"          => 2,
       "specimen"        => 2,
       "voting"          => 2,
-      "other"           => 1,
+      "other"           => 1
     }
 
     def initialize(json)
