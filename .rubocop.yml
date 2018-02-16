@@ -37,6 +37,11 @@ AllCops:
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
+# Disable because it casecmp does not work with Unicode in Ruby 2.4
+# Cop supports --auto-correct.
+Performance/Casecmp:
+  Enabled: false
+
 # Causes test failures when used with Rubocop auto-correct
 Rails/DynamicFindBy:
   Enabled: False

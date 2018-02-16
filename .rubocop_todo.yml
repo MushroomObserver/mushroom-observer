@@ -553,12 +553,6 @@ Naming/VariableName:
   Exclude:
     - 'app/models/description.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Performance/Casecmp:
-  Exclude:
-    - 'app/controllers/image_controller.rb'
-
 # Offense count: 16
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
