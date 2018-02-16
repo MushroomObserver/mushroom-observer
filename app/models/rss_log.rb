@@ -354,7 +354,7 @@ class RssLog < AbstractModel
         tag  = :log_orphan
         args = { title: self.class.unescape(line) }
         time = updated_at
-      elsif !line.blank?
+      elsif line.present?
         tag, args, time = self.class.decode(line)
       end
       break if cutoff_time && time < cutoff_time

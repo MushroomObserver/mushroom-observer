@@ -89,18 +89,18 @@ class ObserverController
   def advanced_search # :nologin: :norobots:
     if params[:name] || params[:location] || params[:user] || params[:content]
       search = {}
-      search[:name] = params[:name] unless params[:name].blank?
-      search[:location] = params[:location] unless params[:location].blank?
-      search[:user] = params[:user] unless params[:user].blank?
-      search[:content] = params[:content] unless params[:content].blank?
-      search[:search_location_notes] = !params[:search_location_notes].blank?
+      search[:name] = params[:name] if params[:name].present?
+      search[:location] = params[:location] if params[:location].present?
+      search[:user] = params[:user] if params[:user].present?
+      search[:content] = params[:content] if params[:content].present?
+      search[:search_location_notes] = params[:search_location_notes].present?
       query = create_query(:Observation, :advanced_search, search)
     else
       query = find_query(:Observation)
     end
     show_selected_observations(query)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 end

@@ -106,7 +106,7 @@ class Naming < AbstractModel
         check = x[:check]
         notes = x[:notes]
         if (check == "1") ||
-           (!was_js_on && !notes.blank?)
+           (!was_js_on && notes.present?)
           reason.notes = notes
         else
           reason.delete
@@ -234,7 +234,7 @@ class Naming < AbstractModel
         notes = x[:notes]
         # Reason is "used" if checked or notes non-empty.
         if (check == "1") ||
-           !notes.blank?
+           notes.present?
           reason.notes = notes
         else
           reason.delete

@@ -803,12 +803,6 @@ Rails/OutputSafety:
     - 'app/presenters/matrix_box_presenter.rb'
     - 'config/application.rb'
 
-# Offense count: 125
-# Cop supports --auto-correct.
-# Configuration parameters: NotNilAndNotEmpty, NotBlank, UnlessBlank.
-Rails/Present:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: Include.

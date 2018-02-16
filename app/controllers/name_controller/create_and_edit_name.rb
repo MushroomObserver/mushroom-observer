@@ -52,7 +52,7 @@ class NameController
   end
 
   def reload_name_form_on_error(err)
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
     @name.locked     = params[:name][:locked]
     @name.rank       = params[:name][:rank]
@@ -126,7 +126,7 @@ class NameController
       old_display_name_for_log = @name[:display_name]
     end
     # Fill in author if other has one.
-    if new_name.author.blank? && !@parse.author.blank?
+    if new_name.author.blank? && @parse.author.present?
       new_name.change_author(@parse.author)
     end
     new_name.change_deprecated(change_deprecated) unless change_deprecated.nil?

@@ -612,7 +612,7 @@ class ObserverController
     if args
       i = 0
       while (args2 = args[i.to_s])
-        unless (upload = args2[:image]).blank?
+        if (upload = args2[:image]).present?
           if upload.respond_to?(:original_filename)
             name = upload.original_filename.force_encoding("utf-8")
           end

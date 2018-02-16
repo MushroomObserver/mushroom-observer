@@ -107,7 +107,7 @@ class Name < AbstractModel
     elsif matches.length == 1
       result = matches.first
       # Fill in author automatically if we can.
-      if result.author.blank? && !parsed_name.author.blank?
+      if result.author.blank? && parsed_name.author.present?
         result.change_author(parsed_name.author)
       end
     else

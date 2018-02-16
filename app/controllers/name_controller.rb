@@ -201,7 +201,7 @@ class NameController < ApplicationController
     query = find_query(:Name)
     show_selected_names(query)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -412,7 +412,7 @@ class NameController < ApplicationController
         version = NameDescription::Version.find(@merge_source_id)
         @old_parent_id = version.name_description_id
         subversion = params[:version]
-        if !subversion.blank? &&
+        if subversion.present? &&
            (version.version != subversion.to_i)
           version = NameDescription::Version.
                     find_by_version_and_name_description_id(params[:version], @old_parent_id)
@@ -792,7 +792,7 @@ class NameController < ApplicationController
       @name.change_deprecated(true)
       @name.mark_misspelled(target_name) if @misspelling
       @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
-      post_comment(:deprecate, @name, @comment) unless @comment.blank?
+      post_comment(:deprecate, @name, @comment) if @comment.present?
 
       redirect_with_query(action: "show_name", id: @name.id)
     end
@@ -856,7 +856,7 @@ class NameController < ApplicationController
       name.change_deprecated(true)
       name.save_with_log(:log_deprecated_by)
     rescue RuntimeError => err
-      flash_error(err.to_s) unless err.blank?
+      flash_error(err.to_s) if err.present?
       false
     end
   end

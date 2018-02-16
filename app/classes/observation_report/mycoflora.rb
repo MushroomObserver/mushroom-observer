@@ -57,7 +57,7 @@ module ObservationReport
     # 6371000 = radius of earth in meters
     # x / 360 * 2 * pi = converts degrees to radians
     def radius(row)
-      return nil unless row.obs_lat.blank?
+      return nil if row.obs_lat.present?
       r1 = lat_radius(row)
       r2 = long_radius(row)
       return nil if !r1 || !r2

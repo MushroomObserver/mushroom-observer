@@ -295,7 +295,7 @@ class ProjectController < ApplicationController
       @users = User.where.not(verified: nil).order("login, name").to_a
       if !@project.is_admin?(@user)
         redirect_with_query(action: "show_project", id: @project.id)
-      elsif !params[:candidate].blank?
+      elsif params[:candidate].present?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
       end

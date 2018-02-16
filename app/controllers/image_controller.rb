@@ -111,7 +111,7 @@ class ImageController < ApplicationController
     query = find_query(:Image)
     show_selected_images(query)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search")
   end
 
@@ -197,7 +197,7 @@ class ImageController < ApplicationController
     # show_observation request.  We know we came from an observation-type page
     # because that's the only time the "obs" param will be set (with obs id).
     obs = params[:obs]
-    if !obs.blank? &&
+    if obs.present? &&
        # The outer search on observation won't be saved for robots, so no sense
        # in bothering with any of this.
        !browser.bot?
@@ -308,7 +308,7 @@ class ImageController < ApplicationController
       else
         args = params[:image]
         i = 1
-        while i < 5 || !params[:upload]["image#{i}"].blank?
+        while i < 5 || params[:upload]["image#{i}"].present?
           process_image(args, params[:upload]["image#{i}"])
           i += 1
         end
@@ -319,7 +319,7 @@ class ImageController < ApplicationController
   end
 
   def process_image(args, upload)
-    unless upload.blank?
+    if upload.present?
       @image = Image.new(args.permit(whitelisted_image_args))
       @image.created_at = Time.now
       @image.updated_at = @image.created_at
@@ -536,7 +536,7 @@ class ImageController < ApplicationController
 
   def look_for_image(method, params)
     result = nil
-    if (method == "POST") || !params[:img_id].blank?
+    if (method == "POST") || params[:img_id].present?
       result = Image.safe_find(params[:img_id])
       flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id])) unless result
     end
@@ -585,7 +585,7 @@ class ImageController < ApplicationController
 
     # User entered an image id by hand or clicked on an image.
     elsif (request.method == "POST") ||
-          !params[:img_id].blank?
+          params[:img_id].present?
       image = Image.safe_find(params[:img_id])
       if !image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
@@ -886,7 +886,7 @@ class ImageController < ApplicationController
       get_list_of_names_from_file(file)
     elsif file.is_a?(String)
       get_list_of_names_from_string(file)
-    elsif !file.blank?
+    elsif file.present?
       fail "Names file came in as an unexpected class:" \
         "#{file.class.name.inspect}"
     else

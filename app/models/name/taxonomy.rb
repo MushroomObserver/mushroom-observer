@@ -339,7 +339,7 @@ class Name < AbstractModel
           end
           line_name = match[2]
           results.push([line_rank, line_name])
-        elsif !line.blank?
+        elsif line.present?
           raise :runtime_invalid_classification.t(text: line)
         end
       end

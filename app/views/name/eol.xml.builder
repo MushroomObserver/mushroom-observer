@@ -21,15 +21,15 @@ xml.response(
       xml.dwc(:ScientificName, taxon.real_search_name)
       xml.dcterms(:modified, taxon.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
       citation = taxon.citation
-      if !citation.blank?
+      if citation.present?
         xml.reference(citation.t)
       end
       refs = []
       for desc in @data.descriptions(taxon.id)
-        if !desc.refs.blank?
+        if desc.refs.present?
           for ref in desc.refs.split(/[\n\r]/)
             ref = ref.strip
-            if !ref.blank? and ref != citation
+            if ref.present? and ref != citation
               refs << ref.t
             end
           end
@@ -41,7 +41,7 @@ xml.response(
       for desc in @data.descriptions(taxon.id)
         for f in NameDescription.eol_note_fields
           value = desc.send(f)
-          if !value.blank?
+          if value.present?
             xml.dataObject do
               lang = desc.locale || MO.default_locale
               xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")

@@ -140,7 +140,7 @@ class NameDescription < Description
 
   # Don't add any authors until someone has written something "useful".
   def author_worthy?
-    !gen_desc.blank? || !diag_desc.blank?
+    gen_desc.present? || diag_desc.present?
   end
 
   ##############################################################################

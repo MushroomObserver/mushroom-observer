@@ -183,7 +183,7 @@ class Description < AbstractModel
     }
     if full_or_part == :full
       args[:object] = parent.format_name
-    elsif !source_name.blank?
+    elsif source_name.present?
       tag = :"#{tag}_with_text"
     end
     tag.l(args)
@@ -236,7 +236,7 @@ class Description < AbstractModel
   def note_status
     fieldCount = sizeCount = 0
     for (k, v) in all_notes
-      unless v.blank?
+      if v.present?
         fieldCount += 1
         sizeCount += v.strip_squeeze.length
       end

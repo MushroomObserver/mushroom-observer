@@ -231,7 +231,7 @@ module ObservationReport
 
     def best_lat(prec = 4)
       lat = obs_lat(prec)
-      return lat unless lat.blank?
+      return lat if lat.present?
       north = loc_north(prec + 10)
       south = loc_south(prec + 10)
       return nil unless north && south
@@ -240,7 +240,7 @@ module ObservationReport
 
     def best_long(prec = 4)
       long = obs_long(prec)
-      return long unless long.blank?
+      return long if long.present?
       east = loc_east(prec + 10)
       west = loc_west(prec + 10)
       return nil unless east && west
@@ -349,7 +349,7 @@ module ObservationReport
       return [nil, nil, nil, author] if rank == "Form"
       return [nil, nil, author, nil] if rank == "Variety"
       return [nil, author, nil, nil] if rank == "Subspecies"
-      return [author, nil, nil, nil] unless species.blank?
+      return [author, nil, nil, nil] if species.present?
       [nil, nil, nil, nil]
     end
 

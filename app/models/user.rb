@@ -521,7 +521,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    update_attribute "password", self.class.sha1(pass) unless pass.blank?
+    update_attribute "password", self.class.sha1(pass) if pass.present?
   end
 
   # Mark a User account as "verified".
@@ -1020,7 +1020,7 @@ class User < AbstractModel
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    unless password.blank?
+    if password.present?
       write_attribute("password", self.class.sha1(password))
     end
     write_attribute("auth_code", String.random(40))
@@ -1059,7 +1059,7 @@ class User < AbstractModel
   end
 
   def check_password # :nodoc:
-    unless password.blank?
+    if password.present?
       if password_confirmation.to_s.blank?
         errors.add(:password, :validate_user_password_confirmation_missing.t)
       elsif password != password_confirmation

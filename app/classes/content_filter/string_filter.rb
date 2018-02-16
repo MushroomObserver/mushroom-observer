@@ -5,7 +5,7 @@ class ContentFilter
     end
 
     def on?(val)
-      !val.blank?
+      val.present?
     end
   end
 end

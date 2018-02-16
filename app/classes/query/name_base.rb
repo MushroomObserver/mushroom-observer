@@ -79,7 +79,7 @@ module Query
         "names.ok_for_export IS TRUE",
         "names.ok_for_export IS FALSE"
       )
-      unless params[:text_name_has].blank?
+      if params[:text_name_has].present?
         initialize_model_do_search(:text_name_has, "text_name")
       end
       initialize_model_do_boolean(
@@ -87,7 +87,7 @@ module Query
         'LENGTH(COALESCE(names.author,"")) > 0',
         'LENGTH(COALESCE(names.author,"")) = 0'
       )
-      unless params[:author_has].blank?
+      if params[:author_has].present?
         initialize_model_do_search(:author_has, "author")
       end
       initialize_model_do_boolean(
@@ -95,7 +95,7 @@ module Query
         'LENGTH(COALESCE(names.citation,"")) > 0',
         'LENGTH(COALESCE(names.citation,"")) = 0'
       )
-      unless params[:citation_has].blank?
+      if params[:citation_has].present?
         initialize_model_do_search(:citation_has, "citation")
       end
       initialize_model_do_boolean(
@@ -103,7 +103,7 @@ module Query
         'LENGTH(COALESCE(names.classification,"")) > 0',
         'LENGTH(COALESCE(names.classification,"")) = 0'
       )
-      unless params[:classification_has].blank?
+      if params[:classification_has].present?
         initialize_model_do_search(:classification_has, "classification")
       end
       initialize_model_do_boolean(
@@ -111,11 +111,11 @@ module Query
         'LENGTH(COALESCE(names.notes,"")) > 0',
         'LENGTH(COALESCE(names.notes,"")) = 0'
       )
-      unless params[:notes_has].blank?
+      if params[:notes_has].present?
         initialize_model_do_search(:notes_has, "notes")
       end
       add_join(:comments) if params[:has_comments]
-      unless params[:comments_has].blank?
+      if params[:comments_has].present?
         initialize_model_do_search(
           :comments_has,
           "CONCAT(comments.summary,COALESCE(comments.comment,''))"
@@ -131,10 +131,10 @@ module Query
       if params[:join_desc] == :default
         add_join(:'name_descriptions.default')
       elsif (params[:join_desc] == :any) ||
-            !params[:desc_type].blank? ||
-            !params[:desc_project].blank? ||
-            !params[:desc_creator].blank? ||
-            !params[:desc_content].blank?
+            params[:desc_type].present? ||
+            params[:desc_project].present? ||
+            params[:desc_creator].present? ||
+            params[:desc_content].present?
         add_join(:name_descriptions)
       end
       initialize_model_do_enum_set(

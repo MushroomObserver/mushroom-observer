@@ -178,7 +178,7 @@ module DescriptionControllerHelpers
 
       # This can really gum up the works and it's really hard to figure out
       # what the problem is when it occurs, since the error message is cryptic.
-      if dest.is_a?(Name) && !desc.classification.blank?
+      if dest.is_a?(Name) && desc.classification.present?
         begin
           Name.validate_classification(dest.rank, desc.classification)
         rescue => e
@@ -303,7 +303,7 @@ module DescriptionControllerHelpers
                    rescue
                      false
                    end
-          if !name.blank? &&
+          if name.present? &&
              !update_writein(@description, name, reader, writer, admin)
             @data << { name: name, reader: reader, writer: writer,
                        admin: admin }
@@ -390,7 +390,7 @@ module DescriptionControllerHelpers
     for f in src_notes.keys
       if dest_notes[f].blank?
         dest_notes[f] = src_notes[f]
-      elsif !src_notes[f].blank?
+      elsif src_notes[f].present?
         dest_notes[f] += "\n\n--------------------------------------\n\n"
         dest_notes[f] += src_notes[f].to_s
       end
@@ -403,7 +403,7 @@ module DescriptionControllerHelpers
     desc.license = @user.license
 
     # Creating a draft.
-    if !params[:project].blank?
+    if params[:project].present?
       project = Project.find(params[:project])
       if @user.in_group?(project.user_group)
         desc.source_type  = :project
@@ -419,7 +419,7 @@ module DescriptionControllerHelpers
       end
 
     # Cloning an existing description.
-    elsif !params[:clone].blank?
+    elsif params[:clone].present?
       clone = find_description(params[:clone])
       if in_admin_mode? || clone.is_reader?(@user)
         desc.all_notes = clone.all_notes
@@ -659,12 +659,12 @@ module DescriptionControllerHelpers
 
     # Mergeable if there are no fields which are non-blank in both descriptions.
     if src.class.all_note_fields.none? \
-         { |f| !src_notes[f].blank? && !dest_notes[f].blank? }
+         { |f| src_notes[f].present? && dest_notes[f].present? }
       result = true
 
       # Copy over all non-blank descriptive fields.
       for f, val in src_notes
-        dest.send("#{f}=", val) unless val.blank?
+        dest.send("#{f}=", val) if val.present?
       end
 
       # Store where merge came from in new version of destination.

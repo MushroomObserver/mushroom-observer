@@ -113,7 +113,7 @@ class LocationController < ApplicationController
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -435,7 +435,7 @@ class LocationController < ApplicationController
         version = LocationDescription::Version.find(@merge_source_id)
         @old_parent_id = version.location_description_id
         subversion = params[:version]
-        if !subversion.blank? &&
+        if subversion.present? &&
            (version.version != subversion.to_i)
           version = LocationDescription::Version.
                     find_by_version_and_location_description_id(params[:version], @old_parent_id)
@@ -560,7 +560,7 @@ class LocationController < ApplicationController
       # If done, update any observations at @display_name,
       # and set user's primary location if called from profile.
       if done
-        unless @original_name.blank?
+        if @original_name.present?
           db_name = Location.user_name(@user, @original_name)
           Observation.define_a_location(@location, db_name)
           SpeciesList.define_a_location(@location, db_name)
@@ -845,7 +845,7 @@ class LocationController < ApplicationController
               rescue
                 ""
               end
-      if !where.blank? &&
+      if where.present? &&
          update_observations_by_where(location, where)
         flash_notice(:runtime_location_merge_success.t(this: where,
                                                        that: location.display_name))

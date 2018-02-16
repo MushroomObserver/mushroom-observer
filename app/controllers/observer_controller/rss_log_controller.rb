@@ -14,7 +14,7 @@ class ObserverController
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
-    elsif !params[:type].blank?
+    elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
     else

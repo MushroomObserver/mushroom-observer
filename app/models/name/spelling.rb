@@ -42,7 +42,7 @@ class Name < AbstractModel
     str = parse_author(str).first # (strip author off)
 
     # Guess genus first, then species, and so on.
-    unless str.blank?
+    if str.present?
       words = str.split
       num = words.length
       results = guess_word("", words.first)

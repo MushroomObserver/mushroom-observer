@@ -155,7 +155,7 @@ class TranslationController < ApplicationController
 
   def tags_to_edit(tag, strings)
     tag_list = []
-    unless tag.blank?
+    if tag.present?
       for t in [tag, tag + "s", tag.upcase, (tag + "s").upcase]
         tag_list << t if strings.key?(t)
       end
@@ -166,7 +166,7 @@ class TranslationController < ApplicationController
 
   def tags_used_on_page(page)
     tag_list = nil
-    unless page.blank?
+    if page.present?
       tag_list = Language.load_tags(page)
       flash_error(:edit_translations_page_expired.t) unless tag_list
     end

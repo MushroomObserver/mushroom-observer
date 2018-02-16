@@ -63,8 +63,8 @@ module Query::Modules::Initialization
     return unless params[arg].is_a?(Array)
     min, max = params[arg]
     return if min.blank? && max.blank?
-    @where << "#{col} >= #{min}" unless min.blank?
-    @where << "#{col} <= #{max}" unless max.blank?
+    @where << "#{col} >= #{min}" if min.present?
+    @where << "#{col} <= #{max}" if max.present?
     if (val = args[:join])
       add_join(val)
     end
@@ -332,7 +332,7 @@ module Query::Modules::Initialization
       @where << "MONTH(#{col}) #{dir} #{m} OR " \
                 "(MONTH(#{col}) = #{m} AND " \
                 "DAY(#{col}) #{dir}= #{d})"
-    elsif !val.blank?
+    elsif val.present?
       @where << "MONTH(#{col}) #{dir}= #{val}"
       # XXX This fails if start month > end month XXX
     end

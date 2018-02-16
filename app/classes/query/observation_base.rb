@@ -100,7 +100,7 @@ module Query
         "observations.notes  = #{escape(Observation.no_notes_persisted)}"
       )
       add_join(:comments) if params[:has_comments]
-      unless params[:comments_has].blank?
+      if params[:comments_has].present?
         initialize_model_do_search(
           :comments_has,
           "CONCAT(comments.summary,COALESCE(comments.comment,''))"

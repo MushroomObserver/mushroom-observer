@@ -342,19 +342,19 @@ class Observation < AbstractModel
 
   def lat=(x)
     val = Location.parse_latitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:lat, val)
   end
 
   def long=(x)
     val = Location.parse_longitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:long, val)
   end
 
   def alt=(x)
     val = Location.parse_altitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:alt, val)
   end
 
@@ -364,7 +364,7 @@ class Observation < AbstractModel
   end
 
   def place_name_and_coordinates
-    if !lat.blank? && !long.blank?
+    if lat.present? && long.present?
       lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
       long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
       "#{place_name} (#{lat2} #{long2})"
@@ -1435,15 +1435,15 @@ class Observation < AbstractModel
       errors.add(:where, :validate_observation_where_too_long.t)
     end
 
-    if lat.blank? && !long.blank? ||
-       !lat.blank? && !Location.parse_latitude(lat)
+    if lat.blank? && long.present? ||
+       lat.present? && !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
-    if !lat.blank? && long.blank? ||
-       !long.blank? && !Location.parse_longitude(long)
+    if lat.present? && long.blank? ||
+       long.present? && !Location.parse_longitude(long)
       errors.add(:long, :runtime_lat_long_error.t)
     end
-    if !alt.blank? && !Location.parse_altitude(alt)
+    if alt.present? && !Location.parse_altitude(alt)
       errors.add(:alt, :runtime_altitude_error.t)
     end
 

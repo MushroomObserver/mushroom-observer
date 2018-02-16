@@ -465,7 +465,7 @@ class Location < AbstractModel
   end
 
   def self.check_for_empty_name(name)
-    return [] unless name.blank?
+    return [] if name.present?
     [:location_dubious_empty.l]
   end
 

@@ -558,7 +558,7 @@ class Image < AbstractModel
   # unless the test fails, in which case it adds an error to the :image field.
   def validate_image_md5sum
     result = true
-    if !upload_md5sum.blank? && save_to_temp_file
+    if upload_md5sum.present? && save_to_temp_file
       sum = File.open(upload_temp_file) do |f|
         Digest::MD5.hexdigest(f.read)
       end
@@ -582,7 +582,7 @@ class Image < AbstractModel
     name.sub!(/^.*[\/\\]/, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
-    if !name.blank? and User.current && User.current.keep_filenames != :toss
+    if name.present? and User.current && User.current.keep_filenames != :toss
       self.original_name = name
     end
   end

@@ -23,7 +23,7 @@ module Query::Modules::Validation
     optional = (arg != arg_sym)
     begin
       val = pop_param_value(old_args, arg_sym)
-      unless val.blank?
+      if val.present?
         if arg_type.is_a?(Array)
           val = array_validate(arg_sym, val, arg_type.first)
         else

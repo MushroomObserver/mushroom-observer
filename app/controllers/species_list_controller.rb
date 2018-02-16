@@ -166,7 +166,7 @@ class SpeciesListController < ApplicationController
       "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
     @query = create_query(:Observation, :in_species_list,
                           by: :name, species_list: @species_list)
-    store_query_in_session(@query) unless params[:set_source].blank?
+    store_query_in_session(@query) if params[:set_source].present?
     @query.need_letters = "names.sort_name"
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
@@ -269,7 +269,7 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author unless author.blank?
+      doc << " " + author if author.present?
       doc.line_break
     end
     send_data(doc.to_rtf, type: "text/rtf",
@@ -332,7 +332,7 @@ class SpeciesListController < ApplicationController
       init_name_vars_for_create
       init_member_vars_for_create
       init_project_vars_for_create
-      init_name_vars_for_clone(params[:clone]) unless params[:clone].blank?
+      init_name_vars_for_clone(params[:clone]) if params[:clone].present?
       @checklist ||= calc_checklist
     else
       process_species_list(:create)
@@ -655,16 +655,16 @@ class SpeciesListController < ApplicationController
 
   def manage_object_states
     {
-      list: !params[:objects_list].blank?,
-      obs:  !params[:objects_obs].blank?,
-      img:  !params[:objects_img].blank?
+      list: params[:objects_list].present?,
+      obs:  params[:objects_obs].present?,
+      img:  params[:objects_img].present?
     }
   end
 
   def manage_project_states
     states = {}
     for proj in @projects
-      states[proj.id] = !params["projects_#{proj.id}"].blank?
+      states[proj.id] = params["projects_#{proj.id}"].present?
     end
     states
   end
