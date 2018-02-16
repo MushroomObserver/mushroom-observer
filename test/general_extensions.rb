@@ -479,7 +479,7 @@ module GeneralExtensions
   end
 
   def clean_string!(str)
-    str.gsub!(/\r/, "")
+    str.delete!("\r")
     str.sub!(/\s*\z/, "\n")
   end
 

@@ -563,14 +563,6 @@ Performance/RedundantMatch:
 Performance/RegexpMatch:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Performance/StringReplacement:
-  Exclude:
-    - 'app/models/name/parse.rb'
-    - 'app/views/name/eol.xml.builder'
-    - 'test/general_extensions.rb'
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Rails/ApplicationRecord:

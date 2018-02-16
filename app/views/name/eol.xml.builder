@@ -57,7 +57,7 @@ xml.response(
 
               # Note the following mapping assumes that this is being read in English
               xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
-                          "form_names_#{f}".to_sym.l.gsub(" ", ""))
+                          "form_names_#{f}".to_sym.l.delete(" "))
 
               xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
               # xml.reviewStatus(desc.review_status)

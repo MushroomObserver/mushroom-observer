@@ -500,7 +500,7 @@ class Name < AbstractModel
     str.to_s.
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
-      gsub(/\u2028/, ""). # line separator that we see occasionally
+      delete("\u2028"). # Unicode RLE that we see occasionally as line separator
       strip_squeeze
   end
 
