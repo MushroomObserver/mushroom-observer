@@ -46,10 +46,10 @@ module Query::Modules::Initialization
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
     @where << if vals.length == 1
-      "LOWER(#{col}) = #{vals.first}"
-    else
-      "LOWER(#{col}) IN (#{vals.join(", ")})"
-    end
+                "LOWER(#{col}) = #{vals.first}"
+              else
+                "LOWER(#{col}) IN (#{vals.join(", ")})"
+              end
   end
 
   def initialize_model_do_search(arg, col = nil)
@@ -206,10 +206,10 @@ module Query::Modules::Initialization
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
     @join << if model.name == "Observation"
-      :"locations!"
-    else
-      { observations: :"locations!" }
-    end
+              :"locations!"
+             else
+              { observations: :"locations!" }
+             end
   end
 
   def initialize_model_do_location_bounding_box_cond1_and_2
