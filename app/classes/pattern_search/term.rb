@@ -260,7 +260,7 @@ module PatternSearch
            val == :"rank_#{rank.to_s.downcase}".l ||
            (rank == :Phylum || rank == :Group) &&
              :"rank_alt_#{rank.to_s.downcase}".l.
-               split(",").map(&:strip).include?(val)
+           split(",").map(&:strip).include?(val)
           return rank
         end
       end

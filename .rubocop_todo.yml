@@ -125,23 +125,6 @@ Layout/MultilineHashBraceLayout:
     - 'app/models/notification.rb'
     - 'lib/tasks/location.rake'
 
-# Offense count: 35
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: aligned, indented, indented_relative_to_receiver
-Layout/MultilineMethodCallIndentation:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/controllers/glossary_controller.rb'
-    - 'app/controllers/location_controller.rb'
-    - 'app/controllers/name_controller.rb'
-    - 'app/controllers/species_list_controller.rb'
-    - 'app/models/name/create.rb'
-    - 'app/models/user.rb'
-    - 'test/models/api_test.rb'
-    - 'test/models/pattern_search_test.rb'
-    - 'test/models/query_test.rb'
-
 # Offense count: 9
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IndentationWidth.

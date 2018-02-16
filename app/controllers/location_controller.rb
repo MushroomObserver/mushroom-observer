@@ -486,8 +486,7 @@ class LocationController < ApplicationController
 
     # This is the latest value of place name.
     @display_name = begin
-                      params[:location][:display_name].
-                      strip_squeeze
+                      params[:location][:display_name].strip_squeeze
                     rescue
                       @original_name
                     end
@@ -595,7 +594,8 @@ class LocationController < ApplicationController
     end
   end
 
-  def edit_location # :prefetch: :norobots:
+  # :prefetch: :norobots:
+  def edit_location
     store_location
     pass_query_params
     @location = find_or_goto_index(Location, params[:id].to_s)

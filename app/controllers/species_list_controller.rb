@@ -745,7 +745,7 @@ class SpeciesListController < ApplicationController
 
   def attach_images_to_project(proj)
     imgs = @list.observations.map(&:images).flatten.uniq.
-                 select { |i| check_permission(i) }
+           select { |i| check_permission(i) }
     imgs -= proj.images
     if imgs.any?
       proj.add_images(imgs)
@@ -758,7 +758,7 @@ class SpeciesListController < ApplicationController
 
   def remove_images_from_project(proj)
     imgs = @list.observations.map(&:images).flatten.uniq.
-                 select { |i| check_permission(i) }
+           select { |i| check_permission(i) }
     unless @user.projects_member.include?(proj)
       imgs.select! { |i| i.user == @user }
     end
@@ -1143,17 +1143,15 @@ class SpeciesListController < ApplicationController
   def init_project_vars_for_create
     init_project_vars
     last_obs = Observation.where(user_id: User.current_id).
-                 order(:created_at).last
+               order(:created_at).last
     if last_obs && last_obs.created_at > 1.hour.ago
-      for proj in last_obs.projects
-        @project_checks[proj.id] = true
-      end
+      last_obs.projects.each { |proj| @project_checks[proj.id] = true }
     end
   end
 
   def init_project_vars_for_edit(spl)
     init_project_vars
-    for proj in spl.projects
+    spl.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
       @project_checks[proj.id] = true
     end
@@ -1161,10 +1159,10 @@ class SpeciesListController < ApplicationController
 
   def init_project_vars_for_reload(spl)
     init_project_vars
-    for proj in spl.projects
+    spl.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    for proj in @projects
+    @projects.each do |proj|
       @project_checks[proj.id] = params[:project] &&
                                  params[:project]["id_#{proj.id}"] == "1"
     end
@@ -1173,7 +1171,7 @@ class SpeciesListController < ApplicationController
   def update_projects(spl, checks)
     if checks
       any_changes = false
-      for project in User.current.projects_member
+      User.current.projects_member.each do |project|
         before = spl.projects.include?(project)
         after = checks["id_#{project.id}"] == "1"
         if before != after
@@ -1181,13 +1179,12 @@ class SpeciesListController < ApplicationController
             project.add_species_list(spl)
             flash_notice(:attached_to_project.t(object: :species_list,
                                                 project: project.title))
-            any_changes = true
           else
             project.remove_species_list(spl)
             flash_notice(:removed_from_project.t(object: :species_list,
                                                  project: project.title))
-            any_changes = true
           end
+          any_changes = true
         end
       end
       flash_notice(:species_list_show_manage_observations_too.t) if any_changes

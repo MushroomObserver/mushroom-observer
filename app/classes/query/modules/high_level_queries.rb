@@ -167,10 +167,8 @@ module Query::Modules::HighLevelQueries
       conditions = "#{model.table_name}.id IN (#{set})"
       includes   = args[:include] || []
       model.where(conditions).
-           includes(includes).
-           to_a.each do |obj|
-             @results[obj.id] = obj
-           end
+        includes(includes).
+        to_a.each { |obj| @results[obj.id] = obj }
     end
     ids.map { |id| @results[id] }.reject(&:nil?)
   end

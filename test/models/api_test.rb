@@ -1759,7 +1759,7 @@ class ApiTest < UnitTestCase
     assert_api_results(names)
 
     Name.where(correct_spelling: nil).sample.
-         update_attributes!(ok_for_export: true)
+      update_attributes!(ok_for_export: true)
     names = Name.where(ok_for_export: true).
             reject { |n| n.correct_spelling_id }
     assert_not_empty(names)
