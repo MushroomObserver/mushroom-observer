@@ -1934,7 +1934,8 @@ class ObserverControllerTest < FunctionalTestCase
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
-                                    observation: { place_name: "", lat: lat, long: long },
+                                    observation: { place_name: "",
+                                                   lat: lat, long: long },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
     obs = assigns(:observation)
@@ -1949,7 +1950,8 @@ class ObserverControllerTest < FunctionalTestCase
     lat2 = "34°9’43.92”N"
     long2 = "118°21′7.56″W"
     generic_construct_observation({
-                                    observation: { place_name: "", lat: lat2, long: long2 },
+                                    observation: { place_name: "",
+                                                   lat: lat2, long: long2 },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
     obs = assigns(:observation)
@@ -1963,7 +1965,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_empty_geolocation_and_location
     # Make sure it doesn't accept no location AND no lat/long.
     generic_construct_observation({
-                                    observation: { place_name: "", lat: "", long: "" },
+                                    observation: { place_name: "",
+                                                   lat: "", long: "" },
                                     name: { name: "Unknown" }
                                   }, 0, 0, 0)
   end
@@ -1971,7 +1974,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observations_with_unknown_location_and_empty_geolocation
     # But create observation if explicitly tell it "unknown" location.
     generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
                                     name: { name: "Unknown" }
                                   }, 1, 0, 0)
   end
@@ -1986,7 +1990,8 @@ class ObserverControllerTest < FunctionalTestCase
       where = "Unknown, Massachusetts, USA"
 
       generic_construct_observation({
-                                      observation: { place_name: where, alt: input },
+                                      observation: { place_name: where,
+                                                     alt: input },
                                       name: { name: "Unknown" }
                                     }, 1, 0, 0)
       obs = assigns(:observation)
@@ -1999,7 +2004,8 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_class
     generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
                                     name: { name: "Lecanoromycetes L." },
                                     approved_name: "Lecanoromycetes L."
                                   }, 1, 1, 1)
@@ -2048,7 +2054,8 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_group
     generic_construct_observation({
-                                    observation: { place_name: "Earth", lat: "", long: "" },
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
                                     name: { name: "Morchella elata group" },
                                     approved_name: "Morchella elata group"
                                   }, 1, 1, 2)
