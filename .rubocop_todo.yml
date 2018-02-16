@@ -553,12 +553,6 @@ Naming/VariableName:
   Exclude:
     - 'app/models/description.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Performance/RangeInclude:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-
 # Offense count: 131
 # Cop supports --auto-correct.
 Performance/RedundantMatch:

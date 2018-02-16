@@ -202,11 +202,11 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
-         (-100..100).include?(val.to_f)
+         (-100..100).cover?(val.to_f)
         [val.to_f * 3 / 100, 3]
       elsif val.to_s.match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
-            (-100..100).include?(Regexp.last_match(1).to_f) &&
-            (-100..100).include?(Regexp.last_match(3).to_f) &&
+            (-100..100).cover?(Regexp.last_match(1).to_f) &&
+            (-100..100).cover?(Regexp.last_match(3).to_f) &&
             Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
         [Regexp.last_match(1).to_f * 3 / 100, Regexp.last_match(3).to_f * 3 / 100]
       else
