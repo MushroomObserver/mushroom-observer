@@ -125,13 +125,6 @@ Layout/MultilineHashBraceLayout:
     - 'app/models/notification.rb'
     - 'lib/tasks/location.rake'
 
-# Offense count: 46
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineMethodCallBraceLayout:
-  Enabled: false
-
 # Offense count: 35
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IndentationWidth.

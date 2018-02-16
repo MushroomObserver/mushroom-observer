@@ -503,7 +503,8 @@ class NameController < ApplicationController
         @name.save if @name.changed?
 
         flash_notice(:runtime_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
         redirect_to(action: "show_name_description",
                     id: @description.id)
 
@@ -513,7 +514,8 @@ class NameController < ApplicationController
     end
   end
 
-  def edit_name_description # :prefetch: :norobots:
+  # :prefetch: :norobots:
+  def edit_name_description
     store_location
     pass_query_params
     @description = NameDescription.find(params[:id].to_s)
@@ -548,7 +550,8 @@ class NameController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
 
         # Update name's classification cache.
         name = @description.name
@@ -951,10 +954,11 @@ class NameController < ApplicationController
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
     descs = NameDescription.where(
-      eol_description_conditions(review_status_list))
+      eol_description_conditions(review_status_list)
+    )
 
     # Fill in @descs, @users, @authors, @licenses.
-    for desc in descs
+    descs.each do |desc|
       name_id = desc.name_id.to_i
       @descs[name_id] ||= []
       @descs[name_id] << desc
@@ -963,7 +967,7 @@ class NameController < ApplicationController
         WHERE name_description_id = #{desc.id}
       )).map(&:to_i)
       authors = [desc.user_id] if authors.empty?
-      for author in authors
+      authors.each do |author|
         @users[author.to_i] ||= User.find(author).legal_name
       end
       @authors[desc.id] = authors.map { |id| @users[id.to_i] }.join(", ")
@@ -1226,8 +1230,7 @@ class NameController < ApplicationController
               charset: "UTF-8",
               header: "present",
               disposition: "attachment",
-              filename: "#{action_name}.csv"
-             )
+              filename: "#{action_name}.csv")
 
   rescue => e
     render(text: e.to_s, layout: false, status: 500)

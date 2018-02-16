@@ -61,8 +61,7 @@ class LocationDescription < Description
             user: 5
           },
           source: :source_type,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   belongs_to :license
   belongs_to :location

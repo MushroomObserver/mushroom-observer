@@ -165,8 +165,7 @@ class LocationTest < UnitTestCase
                  old_location_version: loc.version,
                  new_location_version: loc.version,
                  old_description_version: desc.version - 1,
-                 new_description_version: desc.version
-                )
+                 new_description_version: desc.version)
 
     # Dick wisely reconsiders getting emails for every location change.
     # Have Mary opt in for all temporarily just to make sure she doesn't
@@ -222,8 +221,7 @@ class LocationTest < UnitTestCase
                  old_location_version: loc.version,
                  new_location_version: loc.version,
                  old_description_version: desc.version - 1,
-                 new_description_version: desc.version
-                )
+                 new_description_version: desc.version)
 
     # Have Mary opt out of author-notifications to make sure that's why she
     # got the last email.
@@ -282,8 +280,7 @@ class LocationTest < UnitTestCase
                  old_location_version: loc.version,
                  new_location_version: loc.version,
                  old_description_version: desc.version - 1,
-                 new_description_version: desc.version
-                )
+                 new_description_version: desc.version)
 
     # Have Mary and Dick express interest, Rolf express disinterest,
     # then have Dick change it again.  Mary should get an email.
@@ -315,8 +312,7 @@ class LocationTest < UnitTestCase
                  old_location_version: loc.version - 1,
                  new_location_version: loc.version,
                  old_description_version: desc.version,
-                 new_description_version: desc.version
-                )
+                 new_description_version: desc.version)
     assert_equal(4, QueuedEmail.count)
     QueuedEmail.queue_emails(false)
   end

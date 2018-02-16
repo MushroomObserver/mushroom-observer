@@ -90,7 +90,8 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  def locations_by_editor # :nologin: :norobots:
+  # :nologin: :norobots:
+  def locations_by_editor
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Location, :by_editor, user: user)
       show_selected_locations(query)
@@ -98,8 +99,12 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  def location_search # :nologin: :norobots:
-    query = create_query(:Location, :pattern_search, pattern: Location.user_name(@user, params[:pattern].to_s))
+  # :nologin: :norobots:
+  def location_search
+    query = create_query(
+      :Location, :pattern_search,
+      pattern: Location.user_name(@user, params[:pattern].to_s)
+    )
     show_selected_locations(query, link_all_sorts: true)
   end
 
@@ -688,7 +693,8 @@ class LocationController < ApplicationController
                                   name: @description.unique_partial_format_name)
 
         flash_notice(:runtime_location_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+))
         redirect_to(action: "show_location_description",
                     id: @description.id)
 
@@ -726,7 +732,8 @@ class LocationController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_location_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
 
         # Log action in parent location.
         @description.location.log(:log_description_updated,

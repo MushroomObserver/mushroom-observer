@@ -41,8 +41,7 @@ class Notification < AbstractModel
             all_comments: 4
           },
           source: :flavor,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   # List of all available flavors (Symbol's).
   def self.all_flavors

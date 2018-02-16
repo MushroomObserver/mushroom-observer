@@ -876,8 +876,7 @@ class ImageController < ApplicationController
               charset: "UTF-8",
               header: "present",
               disposition: "attachment",
-              filename: "#{action_name}.csv"
-             )
+              filename: "#{action_name}.csv")
   end
 
   def get_list_of_names(file)

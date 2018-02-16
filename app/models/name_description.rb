@@ -74,8 +74,7 @@ class NameDescription < Description
             inaccurate: 4
           },
           source: :review_status,
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:source_type,
           { public: 1,
             foreign: 2,
@@ -84,8 +83,7 @@ class NameDescription < Description
             user: 5
           },
           source: :source_type,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   belongs_to :license
   belongs_to :name
