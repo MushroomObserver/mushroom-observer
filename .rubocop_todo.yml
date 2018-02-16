@@ -29,12 +29,6 @@ Layout/ElseAlignment:
   Exclude:
     - 'app/classes/query/modules/initialization.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/EmptyLines:
-  Exclude:
-    - 'app/controllers/vote_controller.rb'
-
 # Offense count: 3
 # Cop supports --auto-correct.
 Layout/EmptyLinesAroundArguments:
