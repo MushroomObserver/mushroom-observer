@@ -3,7 +3,6 @@
 # The Clitocybe of controllers.
 #
 class ObserverController < ApplicationController
-
   # These need to be moved into the files where they are actually used.
   require "find"
   require "set"
