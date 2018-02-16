@@ -947,9 +947,9 @@ class Observation < AbstractModel
     # Now that we've weeded out potential duplicate votes, we can combine them
     # safely.
     votes = {}
-    taxon_votes.keys.each do |taxon_id|
+    taxon_votes.each_key do |taxon_id|
       vote = votes[taxon_id] = [0, 0]
-      taxon_votes[taxon_id].keys.each do |user_id|
+      taxon_votes[taxon_id].each_key do |user_id|
         user_vote = taxon_votes[taxon_id][user_id]
         val = user_vote[0]
         wgt = user_vote[1]
@@ -968,7 +968,7 @@ class Observation < AbstractModel
     best_wgt = nil
     best_age = nil
     best_id  = nil
-    votes.keys.each do |taxon_id|
+    votes.each_key do |taxon_id|
       wgt = votes[taxon_id][1]
       val = votes[taxon_id][0].to_f / (wgt + 1.0)
       age = taxon_ages[taxon_id]
@@ -1028,9 +1028,9 @@ class Observation < AbstractModel
         # First combine votes for each name; exactly analagous to what we did
         # with taxa above.
         votes = {}
-        name_votes.keys.each do |name_id|
+        name_votes.each_key do |name_id|
           vote = votes[name_id] = [0, 0]
-          name_votes[name_id].keys.each do |user_id|
+          name_votes[name_id].each_key do |user_id|
             user_vote = name_votes[name_id][user_id]
             val = user_vote[0]
             wgt = user_vote[1]
@@ -1174,7 +1174,7 @@ class Observation < AbstractModel
     # Apply heuristics to determine review status.
     status = :unreviewed
     v100 = Vote.maximum_vote.to_f
-    votes.values.each do |value|
+    votes.each_value do |value|
       if value < 0
         status = :inaccurate
         break

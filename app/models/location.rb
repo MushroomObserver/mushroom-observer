@@ -510,7 +510,7 @@ class Location < AbstractModel
   def self.check_for_bad_terms(name)
     reasons = []
     return [] if name.blank?
-    BAD_TERMS.keys.each do |key|
+    BAD_TERMS.each_key do |key|
       next unless name.index(key)
       reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
     end

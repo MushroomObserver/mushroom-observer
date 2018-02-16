@@ -553,22 +553,6 @@ Naming/VariableName:
   Exclude:
     - 'app/models/description.rb'
 
-# Offense count: 16
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/HashEachMethods:
-  Exclude:
-    - 'app/controllers/observer_controller/user_controller.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'app/models/observation.rb'
-    - 'app/views/api/_observation.json.builder'
-    - 'script/fix_xeromphalina'
-    - 'test/controllers/location_controller_test.rb'
-    - 'test/controllers/vote_controller_test.rb'
-    - 'test/models/license_test.rb'
-    - 'test/models/localization_files_test.rb'
-
 # Offense count: 3
 # Cop supports --auto-correct.
 Performance/RangeInclude:

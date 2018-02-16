@@ -4,7 +4,7 @@ class LicenseTest < UnitTestCase
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids
     assert_equal(3, names_and_ids.length)
-    names_and_ids.each do |_name, id|
+    names_and_ids.each do |(_name, id)|
       license = License.find(id)
       refute(
         license.deprecated,

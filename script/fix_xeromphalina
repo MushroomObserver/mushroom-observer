@@ -298,7 +298,7 @@ user_wgts = {}
   [298545, 1.70199],
   [298806, 1.6696],
   [300913, 0.799451]
-].each do |id, old_score|
+].each do |(id, old_score)|
   obs = Observation.safe_find(id)
   old_name = obs.name
   new_score = obs.vote_cache
@@ -322,7 +322,7 @@ user_wgts = {}
         votes[uid] = [val, wgt]
         best_naming = n if uid == user.id
       end
-    end 
+    end
   end
   if !best_naming
     puts "Observation ##{id}: Pulk has no vote for old name!"
@@ -349,7 +349,7 @@ user_wgts = {}
         did_it = true
         break
       end
-      obs.change_vote(best_naming, val, user) 
+      obs.change_vote(best_naming, val, user)
       if obs.reload.name == old_name
         puts "Observation ##{id}: changing vote for old name to #{val}"
         did_it = true

@@ -178,7 +178,7 @@ module GM
 
     def div(args)
       width = height = nil
-      args.each do |key, val|
+      args.each do |key, val| # rubocop:disable Performance/HashEachMethods
         if key == :width
           width = val
         elsif key == :height
@@ -256,7 +256,7 @@ module GM
       self.title       = nil
       self.draggable   = false
       self.info_window = nil
-      opts.each do |key, val|
+      opts.each_key do |key|
         if key == :draggable
           self.draggable = !!opts[key]
         elsif key == :title

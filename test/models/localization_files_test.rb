@@ -32,7 +32,7 @@ class LocalizationFilesTest < UnitTestCase
         YAML.safe_load(fh)
       end
       tags = {}
-      data.keys.each { |tag| tags[tag.to_s.downcase] = true }
+      data.each_key { |tag| tags[tag.to_s.downcase] = true }
       data.each do |tag, str|
         next unless str.is_a?(String)
         str.gsub(/[\[\=]:(\w+)/) do
