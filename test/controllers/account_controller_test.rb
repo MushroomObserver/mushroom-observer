@@ -226,11 +226,20 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
+    # Password and confirmation don't match
     post(:verify, id: user.id, auth_code: user.auth_code,
                   user: { password: "mouse", password_confirmation: "moose" })
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mouse")
+    assert_input_value("user_password_confirmation", "")
+
+    # Password invalid (too short)
+    post(:verify, id: user.id, auth_code: user.auth_code,
+                  user: { password: "mo", password_confirmation: "mo" })
+    assert_flash_error
+    assert_template("choose_password")
+    assert_input_value("user_password", "mo")
     assert_input_value("user_password_confirmation", "")
 
     post(:verify, id: user.id, auth_code: user.auth_code,
@@ -245,6 +254,19 @@ class AccountControllerTest < FunctionalTestCase
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_redirected_to(action: :login)
     assert(!@request.session[:user_id])
+  end
+
+  def test_reverify
+    assert_raises(RuntimeError) { post(:reverify) }
+  end
+
+  def test_send_verify
+    user = User.create!(
+      login: "micky",
+      email: "mm@disney.com"
+    )
+    post(:send_verify, id: user.id)
+    assert_flash_success
   end
 
   def test_edit_prefs
