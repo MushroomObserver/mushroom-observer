@@ -60,7 +60,7 @@ module Query::Modules::HighLevelQueries
         @letters = map = {}
         ids = []
         select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
-        for id, letter in select_rows(args.merge(select: select))
+        select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
           map[id.to_i] = letter.upcase if letter.match(/[a-zA-Z]/)
           ids << id.to_i
@@ -166,9 +166,9 @@ module Query::Modules::HighLevelQueries
       # the reject(&:nil?) clause below.)
       conditions = "#{model.table_name}.id IN (#{set})"
       includes   = args[:include] || []
-      model.where(conditions)
-           .includes(includes)
-           .to_a.each do |obj|
+      model.where(conditions).
+           includes(includes).
+           to_a.each do |obj|
              @results[obj.id] = obj
            end
     end

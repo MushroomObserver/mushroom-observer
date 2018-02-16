@@ -8,14 +8,6 @@
 
 # Offense count: 2
 # Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: leading, trailing
-Layout/DotPosition:
-  Exclude:
-    - 'app/classes/query/modules/high_level_queries.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
 Layout/ElseAlignment:
   Exclude:
     - 'app/classes/query/modules/initialization.rb'
