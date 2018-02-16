@@ -880,7 +880,7 @@ class Observation < AbstractModel
     # I choose the strongest vote in such cases.
     name_votes  = {}  # Records the strongest vote for a given name for a user.
     taxon_votes = {}  # Records the strongest vote for any names in a group of
-                      # synonyms for a given user.
+    #                   synonyms for a given user.
     name_ages   = {}  # Records the oldest date that a name was proposed.
     taxon_ages  = {}  # Records the oldest date that a taxon was proposed.
     user_wgts   = {}  # Caches user rankings.

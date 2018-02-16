@@ -118,7 +118,7 @@ class CollectionNumberController < ApplicationController
     redirect_with_query(action: :index_collection_number)
   end
 
-################################################################################
+  ##############################################################################
 
   private
 

@@ -127,7 +127,7 @@ class HerbariumRecordController < ApplicationController
     redirect_with_query(action: :index_herbarium_record)
   end
 
-################################################################################
+  ##############################################################################
 
   private
 
