@@ -42,8 +42,8 @@
 ##############################################################################
 
 module GM
-  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js"
-  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
+  GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js".freeze
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   class GMap
@@ -101,10 +101,10 @@ module GM
       </script>".html_safe
     end
 
-    attr_accessor :name       # name of map div and global variable for Map object
-    attr_accessor :lat        # center and zoom \
-    attr_accessor :long       #                  |  option one for positioning map
-    attr_accessor :zoom       #                 /
+    attr_accessor :name       # name of map div & global variable for Map object
+    attr_accessor :lat        # center & zoom \
+    attr_accessor :long       #                |  option one for positioning map
+    attr_accessor :zoom       #               /
     attr_accessor :north      # bounds \
     attr_accessor :south      #         \  option two for positioning map
     attr_accessor :east       #         /
@@ -178,7 +178,7 @@ module GM
 
     def div(args)
       width = height = nil
-      for key, val in args
+      args.each do |key, val|
         if key == :width
           width = val
         elsif key == :height
@@ -204,9 +204,7 @@ module GM
 
     def global_declarations_code
       result = "var #{name};"
-      for obj in overlays
-        result += "\nvar #{obj.var};" if obj.var
-      end
+      overlays.each { |obj| result += "\nvar #{obj.var};" if obj.var }
       result
     end
 
@@ -228,16 +226,14 @@ module GM
 
     def overlays_code
       result = ""
-      for obj in overlays
-        result += obj.create_and_initialize_code + ";\n"
-      end
+      overlays.each { |obj| result += obj.create_and_initialize_code + ";\n" }
       result.sub!(/\n\Z/, "")
       result
     end
 
     def events_code
       result = ""
-      for obj, event, code in events
+      events.each do |obj, event, code|
         result += "G.event.addListener(#{obj.var}, '#{event}', #{code});\n"
       end
       result.sub!(/\n\Z/, "")
@@ -260,7 +256,7 @@ module GM
       self.title       = nil
       self.draggable   = false
       self.info_window = nil
-      for key, val in opts
+      opts.each do |key, val|
         if key == :draggable
           self.draggable = !!opts[key]
         elsif key == :title

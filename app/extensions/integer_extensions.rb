@@ -23,7 +23,8 @@ class Integer
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
+           freeze
 
   def alphabetize(alphabet = BASE62)
     str      = ""

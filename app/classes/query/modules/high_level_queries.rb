@@ -24,14 +24,14 @@ module Query::Modules::HighLevelQueries
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
-  RESULTS_ARGS = [:join, :where, :limit, :group]
+  RESULTS_ARGS = [:join, :where, :limit, :group].freeze
 
   # Args accepted by +paginate+ and +paginate_ids+.
-  PAGINATE_ARGS = []
+  PAGINATE_ARGS = [].freeze
 
   # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
   # call +instantiate+, too).
-  INSTANTIATE_ARGS = [:include]
+  INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
   def num_results(args = {})

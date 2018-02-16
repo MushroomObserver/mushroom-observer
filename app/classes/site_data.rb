@@ -84,7 +84,7 @@ class SiteData
     :namings,
     :votes,
     :users
-  ]
+  ].freeze
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
@@ -106,7 +106,7 @@ class SiteData
     species_lists:                 5,
     users:                         0,
     votes:                         1
-  }
+  }.freeze
 
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
@@ -114,14 +114,14 @@ class SiteData
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
     species_list_entries: "observations_species_lists"
-  }
+  }.freeze
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
     observations_with_voucher: "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
     observations_without_voucher: "NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL"
-  }
+  }.freeze
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
@@ -131,7 +131,7 @@ class SiteData
     observations_without_voucher: lambda do |obs|
       !(obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0)
     end
-  }
+  }.freeze
 
   # -----------------------------
   #  :section: Public Interface

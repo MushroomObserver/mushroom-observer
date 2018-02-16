@@ -100,8 +100,12 @@ class NameDescription < Description
   has_and_belongs_to_many :authors,       class_name: "User",      join_table: "name_descriptions_authors"
   has_and_belongs_to_many :editors,       class_name: "User",      join_table: "name_descriptions_editors"
 
-  EOL_NOTE_FIELDS = [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
-  ALL_NOTE_FIELDS = [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
+  EOL_NOTE_FIELDS = [
+    :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
+  ].freeze
+  ALL_NOTE_FIELDS = (
+    [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
+  ).freeze
 
   acts_as_versioned(
     table_name: "name_descriptions_versions",
@@ -167,7 +171,7 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate]
+  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
 
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses

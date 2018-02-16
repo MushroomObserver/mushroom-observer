@@ -1161,11 +1161,6 @@ Style/MultipleComparison:
     - 'app/presenters/matrix_box_presenter.rb'
     - 'script/jpegsize'
 
-# Offense count: 66
-# Cop supports --auto-correct.
-Style/MutableConstant:
-  Enabled: false
-
 # Offense count: 14
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

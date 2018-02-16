@@ -257,7 +257,7 @@ class Description < AbstractModel
     :source,    # Derived from another source, e.g. another website or book.
     :project,   # Draft created for a project.
     :user       # Created by an individual user.
-  ]
+  ].freeze
 
   # Return an Array of source type Symbols, e.g. :public, :project, etc.
   def self.all_source_types
@@ -504,19 +504,19 @@ class Description < AbstractModel
 
   # Demote a User to "editor".  Saves User if changed.  Returns nothing.
   def remove_author(user)
-    if authors.member?(user)
-      authors.delete(user)
-      SiteData.update_contribution(:del, authors_join_table, user.id)
-      if !editors.member?(user) &&
-         # Make sure user has actually made at least one change.
-         self.class.connection.select_value(%(
-           SELECT id FROM #{versioned_table_name}
-           WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
-           LIMIT 1
-         ))
-        editors.push(user)
-        SiteData.update_contribution(:add, editors_join_table, user.id)
-      end
+    return unless authors.member?(user)
+
+    authors.delete(user)
+    SiteData.update_contribution(:del, authors_join_table, user.id)
+    if !editors.member?(user) &&
+       # Make sure user has actually made at least one change.
+       self.class.connection.select_value(%(
+         SELECT id FROM #{versioned_table_name}
+         WHERE #{type_tag}_id = #{id} AND user_id = #{user.id}
+         LIMIT 1
+       ))
+      editors.push(user)
+      SiteData.update_contribution(:add, editors_join_table, user.id)
     end
   end
 
@@ -545,14 +545,8 @@ class Description < AbstractModel
   # added on as an editor.
   before_save :add_author_or_editor
   def add_author_or_editor
-    if !@save_without_our_callbacks &&
-       (user = User.current)
-      if authors.empty? && author_worthy?
-        add_author(user)
-      else
-        add_editor(user)
-      end
-    end
+    return unless !@save_without_our_callbacks && (user = User.current)
+    authors.empty? && author_worthy? ? add_author(user) : add_editor(user)
   end
 
   # When destroying an object, subtract contributions due to
@@ -560,10 +554,10 @@ class Description < AbstractModel
   before_destroy :update_users_and_parent
   def update_users_and_parent
     # Update editors' and authors' contributions.
-    for user in authors
+    authors.each do |user|
       SiteData.update_contribution(:del, authors_join_table, user.id)
     end
-    for user in editors
+    editors.each do |user|
       SiteData.update_contribution(:del, editors_join_table, user.id)
     end
 

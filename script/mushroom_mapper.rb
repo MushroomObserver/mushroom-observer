@@ -34,8 +34,8 @@ require File.expand_path("../../config/environment.rb", __FILE__)
 
 require "json"
 
-JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json"
-RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
+JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json".freeze
+RAW_FILE  = "#{Rails.root}/public/taxonomy.csv".freeze
 
 # synonyms:         map from synonym_id to at least one accepted name_id
 # aliases:          map from name_id to accepted name_id

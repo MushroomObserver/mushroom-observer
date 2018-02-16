@@ -77,7 +77,7 @@ class LocationDescription < Description
   has_and_belongs_to_many :authors,       class_name: "User",      join_table: "location_descriptions_authors"
   has_and_belongs_to_many :editors,       class_name: "User",      join_table: "location_descriptions_editors"
 
-  ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs]
+  ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(
     table_name: "location_descriptions_versions",

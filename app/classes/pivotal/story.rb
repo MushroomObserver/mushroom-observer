@@ -31,7 +31,7 @@ class Pivotal
       "specimen"        => 2,
       "voting"          => 2,
       "other"           => 1
-    }
+    }.freeze
 
     def initialize(json)
       data = json.is_a?(String) ? JSON.parse(json) : json

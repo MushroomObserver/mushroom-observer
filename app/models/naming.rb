@@ -404,10 +404,10 @@ class Naming < AbstractModel
   ##############################################################################
 
   # Array of all reason "types", in the order they should be presented in UI.
-  ALL_REASONS = [1, 2, 3, 4]
+  ALL_REASONS = [1, 2, 3, 4].freeze
 
   # These reasons will be used by default (with empty notes) if no reasons given.
-  DEFAULT_REASONS = [1]
+  DEFAULT_REASONS = [1].freeze
 
   # Localization tags for reason labels.
   REASON_LABELS = [
@@ -415,7 +415,7 @@ class Naming < AbstractModel
     :naming_reason_label_2,  # "Used references"
     :naming_reason_label_3,  # "Based on microscopical features"
     :naming_reason_label_4,  # "Based on chemical features"
-  ]
+  ].freeze
 
   # Return reasons as Array of Reason instances.  Changes to these instances
   # will make appropriate changes to the Naming.
