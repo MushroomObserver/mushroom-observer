@@ -803,17 +803,6 @@ Rails/OutputSafety:
     - 'app/presenters/matrix_box_presenter.rb'
     - 'config/application.rb'
 
-# Offense count: 16
-# Cop supports --auto-correct.
-Rails/Presence:
-  Exclude:
-    - 'app/controllers/image_controller.rb'
-    - 'app/controllers/name_controller.rb'
-    - 'app/controllers/species_list_controller.rb'
-    - 'app/models/description.rb'
-    - 'app/models/name.rb'
-    - 'app/models/user.rb'
-
 # Offense count: 125
 # Cop supports --auto-correct.
 # Configuration parameters: NotNilAndNotEmpty, NotBlank, UnlessBlank.

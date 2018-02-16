@@ -241,7 +241,7 @@ class SpeciesListController < ApplicationController
       csv << %w[scientific_name authority citation accepted]
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
-                name.deprecated ? "" : "1"].map { |v| v.blank? ? nil : v }
+                name.deprecated ? "" : "1"].map { |v| v.presence }
       end
     end
     str = case charset

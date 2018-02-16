@@ -490,7 +490,7 @@ class User < AbstractModel
   def legal_name_change
     old_name = name_change ? name_change[0] : name
     old_login = login_change ? login_change[0] : login
-    old_legal_name = old_name.blank? ? old_login : old_name
+    old_legal_name = old_name.presence || old_login
     new_legal_name = legal_name
     return nil if old_legal_name == new_legal_name
     [old_legal_name, new_legal_name]

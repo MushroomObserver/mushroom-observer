@@ -808,15 +808,15 @@ class ImageController < ApplicationController
   ##############################################################################
 
   def images_for_mushroom_app # :nologin: :norobots:
-    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
-    minimum_quality = params[:minimum_quality].blank? ? 2.0 : params[:minimum_quality]
-    target_width = params[:target_width].blank? ? 400 : params[:target_width]
-    target_height = params[:target_height].blank? ? 600 : params[:target_height]
-    minimum_width = params[:minimum_width].blank? ? target_width : params[:minimum_width]
-    minimum_height = params[:minimum_height].blank? ? target_height : params[:minimum_height]
-    confidence_reward = params[:confidence_reward].blank? ? 2.0 : params[:confidence_reward]
-    quality_reward = params[:quality_reward].blank? ? 1.0 : params[:quality_reward]
-    ratio_penalty = params[:ratio_penalty].blank? ? 0.5 : params[:ratio_penalty]
+    minimum_confidence = params[:minimum_confidence].presence || 1.5
+    minimum_quality = params[:minimum_quality].presence || 2.0
+    target_width = params[:target_width].presence || 400
+    target_height = params[:target_height].presence || 600
+    minimum_width = params[:minimum_width].presence || target_width
+    minimum_height = params[:minimum_height].presence || target_height
+    confidence_reward = params[:confidence_reward].presence || 2.0
+    quality_reward = params[:quality_reward].presence || 1.0
+    ratio_penalty = params[:ratio_penalty].presence || 0.5
 
     # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
     # If we wanted 600x400 it will penalize 400x400 images by "ratio_penalty".

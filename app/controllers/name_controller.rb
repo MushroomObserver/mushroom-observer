@@ -1165,9 +1165,9 @@ class NameController < ApplicationController
   ##############################################################################
 
   def names_for_mushroom_app # :nologin: :norobots:
-    number_of_names = params[:number_of_names].blank? ? 1000 : params[:number_of_names]
-    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
-    minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
+    number_of_names = params[:number_of_names].presence || 1000
+    minimum_confidence = params[:minimum_confidence].presence || 1.5
+    minimum_observations = params[:minimum_observations].presence || 5
     rank_condition = params[:include_higher_taxa].blank? ?
       "= #{Name.ranks[:Species]}" :
       "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(",")})"

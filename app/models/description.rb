@@ -211,7 +211,7 @@ class Description < AbstractModel
     result = {}
     for field in self.class.all_note_fields
       value = send(field).to_s
-      result[field] = value.blank? ? nil : value
+      result[field] = value.presence
     end
     result
   end
