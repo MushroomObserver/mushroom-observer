@@ -309,7 +309,7 @@ class AbstractModel < ActiveRecord::Base
   def formatted_errors
     out = []
     errors.each do |attr, msg|
-      if msg.match(/^[A-Z]/)
+      if /^[A-Z]/.match?(msg)
         out << msg
       else
         name = attr.to_s.to_sym.l

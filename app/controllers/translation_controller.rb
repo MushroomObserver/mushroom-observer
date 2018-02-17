@@ -55,7 +55,7 @@ class TranslationController < ApplicationController
     msg = [error.to_s]
     if Rails.env == "development" && @lang
       for line in error.backtrace
-        break if line.match(/action_controller.*perform_action/)
+        break if /action_controller.*perform_action/.match?(line)
         msg << line
       end
     end
@@ -247,9 +247,9 @@ class TranslationController < ApplicationController
       tag = Regexp.last_match(1)
       str = $'
       process_tag_line(tag)
-      @in_tag = true if str.match(/^>/)
+      @in_tag = true if /^>/.match?(str)
     elsif @in_tag
-      @in_tag = false unless line.match(/\S/)
+      @in_tag = false unless /\S/.match?(line)
     elsif line.blank?
       process_blank_line
     elsif line.match(/^\s*#\s*(.*)/)
@@ -297,11 +297,11 @@ class TranslationController < ApplicationController
   end
 
   def process_comment(str)
-    if str.match(/#############/)
+    if /#############/.match?(str)
       reset_everything
-    elsif str.match(/^[A-Z][^a-z]*(--|$)/)
+    elsif /^[A-Z][^a-z]*(--|$)/.match?(str)
       @major_head << str
-      @on_pages = !!str.match(/PAGES/)
+      @on_pages = !!(/PAGES/.match?(str))
     elsif @expecting_minor_head
       @minor_head << str
     else

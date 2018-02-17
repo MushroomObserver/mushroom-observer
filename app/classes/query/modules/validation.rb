@@ -149,7 +149,8 @@ module Query::Modules::Validation
        val.is_a?(Symbol)
       val.to_s
     else
-      fail("Value for :#{arg} should be a string or symbol, got a #{val.class}: #{val.inspect}")
+      fail("Value for :#{arg} should be a string or symbol, "\
+           "got a #{val.class}: #{val.inspect}")
     end
   end
 
@@ -167,7 +168,8 @@ module Query::Modules::Validation
           val.is_a?(String) && (val == "0") && (arg == :user)
       val.to_i
     else
-      fail("Value for :#{arg} should be id or an #{type} instance, got: #{val.inspect}")
+      fail("Value for :#{arg} should be id or an #{type} instance, "\
+           "got: #{val.inspect}")
     end
   end
 
@@ -182,21 +184,23 @@ module Query::Modules::Validation
     elsif val.is_a?(Integer)
       val
     else
-      fail("Value for :#{arg} should be a Name, String or Integer, got: #{val.class}")
+      fail("Value for :#{arg} should be a Name, String or Integer, " \
+           "got: #{val.class}")
     end
   end
 
   def validate_date(arg, val)
     if val.acts_like?(:date)
       "%04d-%02d-%02d" % [val.year, val.mon, val.day]
-    elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,2}$/i)
+    elsif (/^\d\d\d\d(-\d\d?){0,2}$/i).match?(val.to_s)
       val
-    elsif val.to_s.match(/^\d\d?(-\d\d?)?$/i)
+    elsif (/^\d\d?(-\d\d?)?$/i).match?(val.to_s)
       val
     elsif val.blank? || val.to_s == "0"
       nil
     else
-      fail("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), got: #{val.inspect}")
+      fail("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), " \
+           "got: #{val.inspect}")
     end
   end
 
@@ -205,12 +209,13 @@ module Query::Modules::Validation
       val = val.utc
       "%04d-%02d-%02d-%02d-%02d-%02d" %
         [val.year, val.mon, val.day, val.hour, val.min, val.sec]
-    elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,5}$/i)
+    elsif (/^\d\d\d\d(-\d\d?){0,5}$/i).match?(val.to_s)
       val
     elsif val.blank? || val.to_s == "0"
       nil
     else
-      fail("Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: #{val.inspect}")
+      fail("Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
+           "got: #{val.inspect}")
     end
   end
 

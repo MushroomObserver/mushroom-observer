@@ -21,7 +21,7 @@ module PatternSearch
     end
 
     def quote(x)
-      if x.to_s.match(/['" \\]/)
+      if /['" \\]/.match?(x.to_s)
         '"' + x.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
       else
         x.to_s
@@ -41,8 +41,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return true  if val.match(/^(1|yes|true)$/i)
-      return false if val.match(/^(0|no|false)$/i) && !only_yes
+      return true  if (/^(1|yes|true)$/i).match?(val)
+      return false if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -55,9 +55,9 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "only"   if val.match(/^(1|yes|true)$/i)
-      return "no"     if val.match(/^(0|no|false)$/i)
-      return "either" if val.match(/^(both|either)$/i)
+      return "only"   if (/^(1|yes|true)$/i).match?(val)
+      return "no"     if (/^(0|no|false)$/i).match?(val)
+      return "either" if (/^(both|either)$/i).match?(val)
       raise BadYesNoBothError.new(var: var, val: val)
     end
 
@@ -70,8 +70,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "TRUE" if val.match(/^(1|yes|true)$/i)
-      return "FALSE" if val.match(/^(0|no|false)$/i) && !only_yes
+      return "TRUE"  if (/^(1|yes|true)$/i).match?(val)
+      return "FALSE" if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -85,8 +85,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "NOT NULL" if val.match(/^(1|yes|true)$/i)
-      return "NULL" if val.match(/^(0|no|false)$/i) && !only_yes
+      return "NOT NULL" if (/^(1|yes|true)$/i).match?(val)
+      return "NULL"     if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -94,7 +94,7 @@ module PatternSearch
     def parse_list_of_names
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           ::Name.safe_find(val) ||
             raise(BadNameError.new(var: var, val: val))
         else
@@ -107,7 +107,7 @@ module PatternSearch
     def parse_list_of_herbaria
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
@@ -121,7 +121,7 @@ module PatternSearch
     def parse_list_of_locations
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
@@ -135,7 +135,7 @@ module PatternSearch
     def parse_list_of_projects
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
@@ -148,7 +148,7 @@ module PatternSearch
     def parse_list_of_species_lists
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else
@@ -161,7 +161,7 @@ module PatternSearch
     def parse_list_of_users
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           User.safe_find(val) ||
             raise(BadUserError.new(var: var, val: val))
         else
@@ -183,7 +183,7 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
-        unless val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/)
+        unless (/^-?(\d+(\.\d+)?|\.\d+)$/).match?(val.to_s)
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
         unless val.to_f >= min && val.to_f <= max
       return val.to_f

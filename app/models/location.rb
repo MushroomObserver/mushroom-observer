@@ -476,7 +476,7 @@ class Location < AbstractModel
 
   def self.check_for_dubious_county(name)
     return [] if name.blank?
-    return [] if name =~ /Forest,|Park,|near /
+    return [] if /Forest,|Park,|near /.match?(name)
     return [] unless has_dubious_county?(name)
     [:location_dubious_redundant_county.l]
   end

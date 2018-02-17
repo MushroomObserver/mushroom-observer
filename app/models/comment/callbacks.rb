@@ -113,7 +113,7 @@ class Comment
   end
 
   def lookup_user(name)
-    if name =~ /^\d+$/
+    if /^\d+$/.match?(name)
       User.safe_find(name)
     else
       User.find_by_login(name) || User.find_by_name(name)

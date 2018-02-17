@@ -274,9 +274,9 @@ module SessionExtensions
         # Filter based on link "label" (can be an image too, for example).
         if arg = args[:label]
           if arg == :image
-            match = false unless link.to_s.match(/img /)
+            match = false unless /img /.match?(link.to_s)
           elsif arg.is_a?(Regexp)
-            match = false unless link.to_s.match(arg)
+            match = false unless arg.match?(link.to_s)
           else
             match = false unless link.to_s.index(arg)
           end

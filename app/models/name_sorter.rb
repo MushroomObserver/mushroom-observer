@@ -335,8 +335,8 @@ class NameSorter
   # by newlines or an Array of String's.  Each String must contain a single
   # name
   def sort_names(name_list)
-    for n in name_list.split("\n")
-      add_name(n) if n.match(/\S/)
+    name_list.split("\n").each do |n|
+      add_name(n) if /\S/.match?(n)
     end
   end
 end

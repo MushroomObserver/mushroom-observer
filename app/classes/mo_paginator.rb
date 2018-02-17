@@ -132,7 +132,7 @@ class MOPaginator
   def letter=(char)
     if char
       @letter = char.to_s[0, 1].upcase
-      @letter = nil unless @letter.match(/[A-Z]/)
+      @letter = nil unless /[A-Z]/.match?(@letter)
     else
       @letter = nil
     end

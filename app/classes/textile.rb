@@ -156,7 +156,9 @@ class Textile < String
 
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
-    @@name_lookup[Regexp.last_match(1)] = name.split.first if name.match(/([A-Z])/)
+    if name.match(/([A-Z])/) # rubocop:disable Performance/RegexpMatch
+      @@name_lookup[Regexp.last_match(1)] = name.split.first
+    end
     if rank == :Species
       @@last_species    = name
       @@last_subspecies = nil
@@ -296,11 +298,7 @@ class Textile < String
         ["user"]
       ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
       if matches.length == 1
-        if id.match(/^\d+$/)
-          label = "#{type} #{id}"
-        else
-          label = id
-        end
+        label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
         result = "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
       end
       result

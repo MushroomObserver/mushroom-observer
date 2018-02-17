@@ -267,7 +267,7 @@ class LocationController < ApplicationController
 
       # Also make sure it doesn't reference locations anywhere.  This would
       # presumably be the result of customization of one of the above flavors.
-      result = nil if result.query.match(/\Wlocations\./)
+      result = nil if /\Wlocations\./.match?(result.query)
     end
 
     result

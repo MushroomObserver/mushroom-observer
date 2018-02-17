@@ -541,12 +541,13 @@ class Image < AbstractModel
         type.sub!(/;$/, "")
         self.upload_type = type
       end
-      if upload_type.match(/^image\//)
+      if /^image\//.match?(upload_type)
         result = true
       else
         file = upload_original_name.to_s
         file = "?" if file.blank?
-        errors.add(:image, :validate_image_wrong_type.t(type: upload_type, file: file))
+        errors.add(:image,
+                   :validate_image_wrong_type.t(type: upload_type, file: file))
         result = false
       end
     end
@@ -686,7 +687,7 @@ class Image < AbstractModel
   def set_image_size(file = local_file_name(:full_size))
     script = "#{::Rails.root}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
-    if w.to_s.match(/^\d+$/)
+    if /^\d+$/.match?(w.to_s)
       self.width  = w.to_i
       self.height = h.to_i
       save_without_our_callbacks

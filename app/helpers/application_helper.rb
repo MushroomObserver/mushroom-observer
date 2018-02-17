@@ -187,7 +187,7 @@ module ApplicationHelper
     end
 
     # Deal with the special "/xxx/id" case.
-    if addr.match(/\/(\d+)$/)
+    if /\/(\d+)$/.match?(addr)
       new_id = new_args[:id] || new_args["id"]
       addr.sub!(/\d+$/, new_id.to_s) if new_id
       new_args.delete(:id)

@@ -1563,7 +1563,7 @@ class ApplicationController < ActionController::Base
   end
 
   def reverse_by(query, this_by)
-    query.params[:by].to_s =~ /^reverse_/ ? this_by : "reverse_#{this_by}"
+    /^reverse_/.match?(query.params[:by].to_s) ? this_by : "reverse_#{this_by}"
   end
 
   public ##########

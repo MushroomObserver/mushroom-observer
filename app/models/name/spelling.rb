@@ -176,11 +176,13 @@ class Name < AbstractModel
   # The SQL pattern, e.g., "Lepiota test%", is too permissive.  Verify that the
   # results really are of the form /^Lepiota test(a|us|um)$/.
   def self.valid_alternate_genus?(name, parent, child_pat)
-    unless match = name.text_name.match(/^#{parent} #{child_pat.gsub('%', '(.*)')}$/)
+    unless (
+      match = name.text_name.match(/^#{parent} #{child_pat.gsub('%', '(.*)')}$/)
+    )
       return false
     end
     (1..child_pat.count("%")).each do |i|
-      return false unless match[i].match(/^(a|us|um)$/)
+      return false unless /^(a|us|um)$/.match?(match[i])
     end
     true
   end

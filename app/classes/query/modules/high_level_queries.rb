@@ -62,7 +62,7 @@ module Query::Modules::HighLevelQueries
         select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
         select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
-          map[id.to_i] = letter.upcase if letter.match(/[a-zA-Z]/)
+          map[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
           ids << id.to_i
         end
         ids

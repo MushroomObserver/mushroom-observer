@@ -183,7 +183,7 @@ class Name < AbstractModel
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ (group|clade|complex)$/) ? :Group :
+    / (group|clade|complex)$/.match?(text_name) ? :Group :
     text_name.include?(" f. ")         ? :Form       :
     text_name.include?(" var. ")       ? :Variety    :
     text_name.include?(" subsp. ")     ? :Subspecies :
@@ -192,14 +192,14 @@ class Name < AbstractModel
     text_name.include?(" sect. ")      ? :Section    :
     text_name.include?(" subgenus ")   ? :Subgenus   :
     text_name.include?(" ")            ? :Species    :
-    text_name.match(/^\S+aceae$/)      ? :Family     :
-    text_name.match(/^\S+ineae$/)      ? :Family     : # :Suborder
-    text_name.match(/^\S+ales$/)       ? :Order      :
-    text_name.match(/^\S+mycetidae$/)  ? :Order      : # :Subclass
-    text_name.match(/^\S+mycetes$/)    ? :Class      :
-    text_name.match(/^\S+mycotina$/)   ? :Class      : # :Subphylum
-    text_name.match(/^\S+mycota$/)     ? :Phylum     :
-    text_name.match(/^Fossil-/)        ? :Phylum     :
+    /^\S+aceae$/.match?(text_name)     ? :Family     :
+    /^\S+ineae$/.match?(text_name)     ? :Family     : # :Suborder
+    /^\S+ales$/.match?(text_name)      ? :Order      :
+    /^\S+mycetidae$/.match?(text_name) ? :Order      : # :Subclass
+    /^\S+mycetes$/.match?(text_name)   ? :Class      :
+    /^\S+mycotina$/.match?(text_name)  ? :Class      : # :Subphylum
+    /^\S+mycota$/.match?(text_name)    ? :Phylum     :
+    /^Fossil-/.match?(text_name)       ? :Phylum     :
                                          :Genus
   end
 
@@ -249,7 +249,7 @@ class Name < AbstractModel
 
   def self.standardized_group_abbr(str)
     word = group_wd(str.to_s.downcase)
-    word =~ /^g/ ? "group" : word
+    /^g/.match?(word) ? "group" : word
   end
 
   # sripped group_abbr
@@ -346,11 +346,13 @@ class Name < AbstractModel
   end
 
   def self.parse_rank_abbreviation(str)
-    str.match(SUBG_ABBR) ? :Subgenus : str.match(SECT_ABBR) ? :Section :
-    str.match(SUBSECT_ABBR) ? :Subsection :
-    str.match(STIRPS_ABBR) ? :Stirps :
-    str.match(SSP_ABBR) ? :Subspecies :
-    str.match(VAR_ABBR) ? :Variety : str.match(F_ABBR) ? :Form : nil
+    SUBG_ABBR.match?(str) ?    :Subgenus :
+    SECT_ABBR.match?(str) ?    :Section :
+    SUBSECT_ABBR.match?(str) ? :Subsection :
+    STIRPS_ABBR.match?(str) ?  :Stirps :
+    SSP_ABBR.match?(str) ?     :Subspecies :
+    VAR_ABBR.match?(str) ?     :Variety :
+    F_ABBR.match?(str) ?       :Form : nil
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
@@ -371,7 +373,9 @@ class Name < AbstractModel
   # Convert to: Amanita vaginatae var. vaginatae Author
   def self.fix_autonym(name, author, rank)
     last_word = name.split(" ").last.gsub(/[()]/, "")
-    if match = author.to_s.match(/^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/)
+    if match = author.to_s.match(
+      /^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/
+    )
       name = "#{name}#{match[2]}"
       author = match[1].strip
       words = match[2].split(" ")
@@ -440,21 +444,21 @@ class Name < AbstractModel
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i > 0
-      if words[i].match(/^f/i)
-        words[i] = "f."
-      elsif words[i].match(/^v/i)
-        words[i] = "var."
-      elsif words[i].match(/^sect/i)
-        words[i] = "sect."
-      elsif words[i].match(/^stirps/i)
-        words[i] = "stirps"
-      elsif words[i].match(/^subg/i)
-        words[i] = "subgenus"
-      elsif words[i].match(/^subsect/i)
-        words[i] = "subsect."
-      else
-        words[i] = "subsp."
-      end
+      words[i] = if (/^f/i).match?(words[i])
+                   "f."
+                 elsif (/^v/i).match?(words[i])
+                   "var."
+                 elsif (/^sect/i).match?(words[i])
+                   "sect."
+                 elsif (/^stirps/i).match?(words[i])
+                   "stirps"
+                 elsif (/^subg/i).match?(words[i])
+                   "subgenus"
+                 elsif (/^subsect/i).match?(words[i])
+                  "subsect."
+                 else
+                   "subsp."
+                 end
       i -= 2
     end
     words.join(" ")

@@ -108,7 +108,7 @@ class SpeciesListController < ApplicationController
   # pattern.
   def species_list_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if pattern =~ /^\d+$/
+    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if spl
       redirect_to(action: "show_species_list", id: spl.id)
     else
@@ -428,7 +428,7 @@ class SpeciesListController < ApplicationController
   end
 
   def lookup_species_list_by_id_or_name(str)
-    if str =~ /^\d+$/
+    if /^\d+$/.match?(str)
       SpeciesList.safe_find(str)
     else
       SpeciesList.find_by_title(str)

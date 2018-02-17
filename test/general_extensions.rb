@@ -314,7 +314,7 @@ module GeneralExtensions
   def get_xml_element(key)
     assert(@doc, "XML response is nil!")
     key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
+      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       assert(elem, "XML response missing element \"#{key}\".")
       elem
     end
@@ -327,7 +327,7 @@ module GeneralExtensions
   def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
     result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
+      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       assert(nil, msg || "XML response should have \"#{key}\".") unless elem
       elem
     end
@@ -340,7 +340,7 @@ module GeneralExtensions
   def assert_xml_none(key, msg = nil)
     assert(@doc, "XML response is nil!")
     result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
+      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       return unless elem
       elem
     end
@@ -404,7 +404,7 @@ module GeneralExtensions
     end
     if e.has_text? && e.text =~ /\S/
       txt = e.text.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ")
-      txt = "\"#{txt}\"" if txt.match(" ")
+      txt = "\"#{txt}\"" if txt.match?(" ")
       print " = #{txt}"
     end
     print "\n"

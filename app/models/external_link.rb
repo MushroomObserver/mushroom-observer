@@ -35,7 +35,7 @@ class ExternalLink < AbstractModel
   VALID_URL_PAT = %r{^[a-z]+://}
 
   def check_url_syntax
-    return if url.to_s =~ VALID_URL_PAT
+    return if VALID_URL_PAT.match?(url.to_s)
     errors.add(:url, :validate_invalid_url.t)
   end
 
