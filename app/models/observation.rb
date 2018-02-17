@@ -1451,7 +1451,7 @@ class Observation < AbstractModel
     begin
       Date.parse(@when_str)
     rescue ArgumentError
-      if @when_str =~ /^\d{4}-\d{1,2}-\d{1,2}$/
+      if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
         errors.add(:when_str, :runtime_date_invalid.t)
       else
         errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)

@@ -133,9 +133,12 @@ class QueuedEmail < AbstractModel
   # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
   # soon as QueuedEmail is defined, we know that all subclasses are also
   # properly defined, and we no longer have to rely on autoloading.
+  #
+  # rubocop:disable Performance/RegexpMatch
   Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
     require "queued_email/#{Regexp.last_match(1)}" if file.match(/(\w+)\.rb$/)
   end
+  # rubocop:enable Performance/RegexpMatch
 
   # ----------------------------
   # :section: General methods.
@@ -151,7 +154,9 @@ class QueuedEmail < AbstractModel
     unless defined? @@all_flavors
       @@all_flavors = []
       Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-        @@all_flavors << "QueuedEmail::#{Regexp.last_match(1).camelize}" if file.match(/(\w+).rb/)
+        if /(\w+).rb/.match?(file)
+          @@all_flavors << "QueuedEmail::#{Regexp.last_match(1).camelize}"
+        end
       end
     end
     @@all_flavors
