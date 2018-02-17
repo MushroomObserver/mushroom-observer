@@ -3638,7 +3638,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Get expected names not included in the displayed checklist links.
     missing_names = (
       expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/ =~ css_select(".checklist a").text
+        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
         missing << taxon.text_name
       end
     )

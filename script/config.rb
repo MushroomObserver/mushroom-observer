@@ -26,7 +26,7 @@ class Configuration
   end
 
   def method_missing(var, *vals)
-    if var.to_s.match(/^(.*)=$/)
+    if /^(.*)=$/.match?(var.to_s)
       @hash[var.to_s.sub(/=$/, "")] = vals.first
     else
       @hash[var.to_s]
@@ -91,6 +91,6 @@ end
 
 # If run from command line, evaluate arguments and print results.
 if File.basename($PROGRAM_NAME) == "config.rb"
-  print ARGV.map { |arg| eval(arg).to_s }.join("\n")
+  puts ARGV.map { |arg| eval(arg).to_s }.join("\n")
   exit 0
 end

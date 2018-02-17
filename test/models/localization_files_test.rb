@@ -130,7 +130,7 @@ class LocalizationFilesTest < UnitTestCase
   def source_files(*paths, &block)
     paths.each do |path|
       Dir.glob("#{path}/*").each do |file|
-        if file =~ /\.(rb|rhtml|rxml|erb)$/
+        if /\.(rb|rhtml|rxml|erb)$/.match?(file)
           yield(file)
         elsif File.directory?(file) && file.match(%r{\/\w+$})
           source_files(file, &block)
