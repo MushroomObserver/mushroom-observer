@@ -42,6 +42,13 @@ Layout/EmptyLineAfterMagicComment:
 Performance/Casecmp:
   Enabled: false
 
+Performance/RegexpMatch:
+  # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
+  # The latter throws an error when something == nil:
+  # undefined method `match?' for nil:NilClass
+  # So manually correct to: regexp.match?(something)
+  AutoCorrect: false
+
 # Causes test failures when used with Rubocop auto-correct
 Rails/DynamicFindBy:
   Enabled: False
