@@ -553,11 +553,6 @@ Naming/VariableName:
   Exclude:
     - 'app/models/description.rb'
 
-# Offense count: 131
-# Cop supports --auto-correct.
-Performance/RedundantMatch:
-  Enabled: false
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Rails/ApplicationRecord:

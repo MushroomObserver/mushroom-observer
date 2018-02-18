@@ -153,7 +153,7 @@ class LocalizationFilesTest < UnitTestCase
     Dir.glob("#{::Rails.root}/app/classes/api/parsers/*.rb").each do |file|
       File.open(file, "r:utf-8") do |fh|
         fh.each_line do |line|
-          next unless line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
+          next unless line =~ /BadParameterValue.new\([^()]*, :(\w+)\)/
 
           tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
         end

@@ -52,7 +52,7 @@ namespace :jason do
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|
-          if line.match(/^ +create_table +"(\w+)"/)
+          if line =~ /^ +create_table +"(\w+)"/
             table2 = Regexp.last_match(1)
           elsif table == table2 && line.match(/^ +t.text +"(\w+)"/)
             column = Regexp.last_match(1)
@@ -199,7 +199,7 @@ namespace :jason do
     File.open("esslinger.txt") do |fh|
       fh.each_line do |name|
         name = name.strip!.squeeze(" ")
-        if name.match(/^([A-Z])/)
+        if name =~ /^([A-Z])/
           print Regexp.last_match(1)
 
           name_parse = NameParse.new(name)
@@ -309,7 +309,7 @@ namespace :jason do
           line.chomp!
 
           # All items for an object are of the form: "var: val"
-          if line.match(/^(\w[\w\s]+\w)\s*:\s*(.*)/)
+          if line =~ /^(\w[\w\s]+\w)\s*:\s*(.*)/
             var = Regexp.last_match(1)
             val = Regexp.last_match(2)
             lines.push(line)
@@ -503,7 +503,7 @@ namespace :jason do
           end
 
           if obs.save
-            if notes.match(/(\d{8}\.\d+\w*)/)
+            if notes =~ /(\d{8}\.\d+\w*)/
               name = Regexp.last_match(1)
             elsif what
               name = "%s %s" % [date.strftime("%Y%m%d"), what.text_name]

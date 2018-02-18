@@ -241,10 +241,10 @@ class Symbol
       hash = args.dup
       if args2.present?
         args2.split(",").each do |pair|
-          if pair.match(/^:?([a-z]+)=(.*)$/)
+          if pair =~ /^:?([a-z]+)=(.*)$/
             key = Regexp.last_match(1).to_sym
             val = Regexp.last_match(2).to_s
-            if val.match(/^:(\w+)$/)
+            if val =~ /^:(\w+)$/
               val = Regexp.last_match(1).to_sym
             elsif val.match(/^"(.*)"$/) ||
                   val.match(/^'(.*)'$/) ||

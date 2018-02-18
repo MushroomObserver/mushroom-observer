@@ -361,7 +361,7 @@ module GeneralExtensions
   #   assert_xml_attr(1234, '/response/results/1/id')
   #
   def assert_xml_attr(val, key, msg = nil)
-    key.match(/^(.*)\/(.*)/)
+    key =~ /^(.*)\/(.*)/
     key = Regexp.last_match(1)
     attr = Regexp.last_match(2)
     _assert_xml(val, get_xml_element(key).attributes[attr],

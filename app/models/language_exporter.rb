@@ -251,7 +251,7 @@ module LanguageExporter
     output_lines = []
     in_tag = false
     for line in template_lines
-      if line.match(/^(\W+['"]?(\w+)['"]?:)/)
+      if line =~ /^(\W+['"]?(\w+)['"]?:)/
         out = Regexp.last_match(1)
         tag = Regexp.last_match(2)
         out += translated.key?(tag) ? " " : "  "
@@ -298,7 +298,7 @@ module LanguageExporter
     twice = {}
     pass = true
     for line in read_export_file_lines
-      if line.match(/^ *['"]?(\w+)['"]?:/)
+      if line =~ /^ *['"]?(\w+)['"]?:/
         if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
           verbose("#{locale} #{Regexp.last_match(1)}: " \
                   "tag appears more than once")
@@ -345,7 +345,7 @@ module LanguageExporter
   end
 
   def check_export_line(line)
-    if line.match(/^( *)(['"]?(\w+)['"]?):/)
+    if line =~ /^( *)(['"]?(\w+)['"]?):/
       indent = Regexp.last_match(1)
       quoted_tag = Regexp.last_match(2)
       tag = Regexp.last_match(3)
@@ -436,7 +436,7 @@ module LanguageExporter
   def validate_square_brackets(value)
     value = value.to_s.dup
     pass = true
-    while value.match(/\S/)
+    while value =~ /\S/
       if value.sub!(/^[^\[\]]+/, "")
       elsif value.sub!(/^\[\[/, "")
       elsif value.sub!(/^\]\]/, "")

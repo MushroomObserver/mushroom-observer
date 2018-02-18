@@ -13,7 +13,7 @@ module PatternSearch
     end
 
     def <<(val)
-      while val.to_s.match(/^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/)
+      while val.to_s =~ /^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/
         vals << dequote(Regexp.last_match(1))
         val = val.to_s[Regexp.last_match(0).length..-1]
         break if val.blank?
@@ -218,23 +218,23 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      if val.match(/^(\d\d\d\d)$/)
+      if val =~ /^(\d\d\d\d)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 12, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d\d\d)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d\d\d)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(2).to_i, 12, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d\d\d)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d\d\d)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d?)-(\d\d\d\d)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)-(\d\d\d\d)-(\d\d?)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(4).to_i, Regexp.last_match(5).to_i, Regexp.last_match(6).to_i]]
-      elsif val.match(/^(\d\d?)$/)
+      elsif val =~ /^(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(1).to_i, 31]]
-      elsif val.match(/^(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d?)-(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(2).to_i, 31]]
-      elsif val.match(/^(\d\d?)-(\d\d?)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d?)-(\d\d?)-(\d\d?)-(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i], "%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i]]
       else
         raise BadDateRangeError.new(var: var, val: val)

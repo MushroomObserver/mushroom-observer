@@ -4,7 +4,7 @@ def all_locales
   locales = []
   # rubocop:disable Performance/RegexpMatch
   for file in Dir.glob("#{::Rails.root}/config/locales/*.yml")
-    locales << Regexp.last_match(1) if file.match(/(\w+).yml$/)
+    locales << Regexp.last_match(1) if file =~ /(\w+).yml$/
   end
   # rubocop:enable Performance/RegexpMatch
   locales

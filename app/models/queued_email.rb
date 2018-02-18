@@ -136,7 +136,7 @@ class QueuedEmail < AbstractModel
   #
   # rubocop:disable Performance/RegexpMatch
   Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-    require "queued_email/#{Regexp.last_match(1)}" if file.match(/(\w+)\.rb$/)
+    require "queued_email/#{Regexp.last_match(1)}" if file =~ /(\w+)\.rb$/
   end
   # rubocop:enable Performance/RegexpMatch
 

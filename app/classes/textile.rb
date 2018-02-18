@@ -103,7 +103,7 @@ class Textile < String
       extra = url1.sub!(/([^\w\/]+$)/, "") ? Regexp.last_match(1) : ""
       url2  = ""
       if url1.length > URL_TRUNCATION_LENGTH && !url1.starts_with?(MO.http_domain)
-        if url1.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
+        if url1 =~ /^(\w+:\/\/[^\/]+)(.*?)$/
           url2 = Regexp.last_match(1) + "/..."
         else
           url2 = url1[0..URL_TRUNCATION_LENGTH] + "..."
@@ -156,7 +156,7 @@ class Textile < String
 
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
-    if name.match(/([A-Z])/) # rubocop:disable Performance/RegexpMatch
+    if name =~ /([A-Z])/ # rubocop:disable Performance/RegexpMatch
       @@name_lookup[Regexp.last_match(1)] = name.split.first
     end
     if rank == :Species

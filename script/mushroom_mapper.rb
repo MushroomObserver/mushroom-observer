@@ -102,10 +102,10 @@ for id, genus, classification in Name.connection.select_rows %(
     AND !deprecated
     AND correct_spelling_id IS NULL
 ) do
-  kingdom = classification.to_s.match(/Kingdom: _([^_]+)_/) ? Regexp.last_match(1) : nil
-  klass   = classification.to_s.match(/Class: _([^_]+)_/) ? Regexp.last_match(1) : nil
-  order   = classification.to_s.match(/Order: _([^_]+)_/) ? Regexp.last_match(1) : nil
-  family  = classification.to_s.match(/Family: _([^_]+)_/) ? Regexp.last_match(1) : nil
+  kingdom = classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  klass   = classification.to_s =~ /Class: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  order   = classification.to_s =~ /Order: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  family  = classification.to_s =~ /Family: _([^_]+)_/ ? Regexp.last_match(1) : nil
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]

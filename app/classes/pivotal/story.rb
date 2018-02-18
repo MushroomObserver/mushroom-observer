@@ -70,12 +70,12 @@ class Pivotal
 
     def parse_description(str)
       str.to_s.split(/\n/).select do |line|
-        if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
+        if line =~ /USER:\s*(\d+)\s+(\S.*\S)/
           id   = Regexp.last_match[1]
           name = Regexp.last_match[2]
           @user = Pivotal::User.new(id, name)
           false
-        elsif line.match(/VOTE:\s*(\d+)\s+(\S+)/)
+        elsif line =~ /VOTE:\s*(\d+)\s+(\S+)/
           id    = Regexp.last_match[1]
           value = Regexp.last_match[2]
           @votes << Pivotal::Vote.new(id, value)

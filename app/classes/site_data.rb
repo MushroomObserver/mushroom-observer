@@ -266,7 +266,7 @@ class SiteData
       for field in ALL_FIELDS
         if data[field]
           # This fixes the double-counting of created records.
-          if field.to_s.match(/^(\w+)_versions$/) # rubocop:disable RegexpMatch
+          if field.to_s =~ /^(\w+)_versions$/ # rubocop:disable RegexpMatch
             data[field] -= data[Regexp.last_match(1)] || 0
           end
           metric += FIELD_WEIGHTS[field] * data[field]
@@ -334,7 +334,7 @@ class SiteData
     end
 
     # Exception for past versions.
-    if table.match(/^(\w+)s_versions/)
+    if table =~ /^(\w+)s_versions/
       parent = Regexp.last_match(1)
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"

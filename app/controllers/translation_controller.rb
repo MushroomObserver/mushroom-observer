@@ -243,7 +243,7 @@ class TranslationController < ApplicationController
   end
 
   def process_template_line(line)
-    if line.match(/^\s*['"]?(\w+)['"]?:\s*/)
+    if line =~ /^\s*['"]?(\w+)['"]?:\s*/
       tag = Regexp.last_match(1)
       str = $'
       process_tag_line(tag)
@@ -252,7 +252,7 @@ class TranslationController < ApplicationController
       @in_tag = false unless /\S/.match?(line)
     elsif line.blank?
       process_blank_line
-    elsif line.match(/^\s*#\s*(.*)/)
+    elsif line =~ /^\s*#\s*(.*)/
       process_comment(Regexp.last_match(1))
     end
   end

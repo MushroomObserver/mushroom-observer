@@ -75,12 +75,12 @@ module DescriptionControllerHelpers
       elsif request.method == "POST"
         delete_after = (params[:delete] == "1")
         target = params[:target].to_s
-        if target.match(/^parent_(\d+)$/)
+        if target =~ /^parent_(\d+)$/
           target_id = Regexp.last_match(1)
           if dest = find_or_goto_index(src.parent.class, target_id)
             do_move_description(src, dest, delete_after)
           end
-        elsif target.match(/^desc_(\d+)$/)
+        elsif target =~ /^desc_(\d+)$/
           target_id = Regexp.last_match(1)
           if dest = find_description(target_id)
             do_merge_description(src, dest, delete_after)
@@ -583,7 +583,7 @@ module DescriptionControllerHelpers
   # Update the permissions for a write-in.
   def update_writein(desc, name, reader, writer, admin)
     result = true
-    if name.match(/^(.*\S) +<.*>$/)
+    if name =~ /^(.*\S) +<.*>$/
       group = User.find_by_login(Regexp.last_match(1))
     else
       group = User.find_by_login(name) ||
