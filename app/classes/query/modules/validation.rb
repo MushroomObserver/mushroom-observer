@@ -192,9 +192,9 @@ module Query::Modules::Validation
   def validate_date(arg, val)
     if val.acts_like?(:date)
       "%04d-%02d-%02d" % [val.year, val.mon, val.day]
-    elsif (/^\d\d\d\d(-\d\d?){0,2}$/i).match?(val.to_s)
+    elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s)
       val
-    elsif (/^\d\d?(-\d\d?)?$/i).match?(val.to_s)
+    elsif /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
       val
     elsif val.blank? || val.to_s == "0"
       nil
@@ -209,7 +209,7 @@ module Query::Modules::Validation
       val = val.utc
       "%04d-%02d-%02d-%02d-%02d-%02d" %
         [val.year, val.mon, val.day, val.hour, val.min, val.sec]
-    elsif (/^\d\d\d\d(-\d\d?){0,5}$/i).match?(val.to_s)
+    elsif /^\d\d\d\d(-\d\d?){0,5}$/i.match?(val.to_s)
       val
     elsif val.blank? || val.to_s == "0"
       nil

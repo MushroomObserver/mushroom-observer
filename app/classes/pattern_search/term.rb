@@ -41,8 +41,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return true  if (/^(1|yes|true)$/i).match?(val)
-      return false if (/^(0|no|false)$/i).match?(val) && !only_yes
+      return true  if /^(1|yes|true)$/i.match?(val)
+      return false if /^(0|no|false)$/i.match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -55,9 +55,9 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "only"   if (/^(1|yes|true)$/i).match?(val)
-      return "no"     if (/^(0|no|false)$/i).match?(val)
-      return "either" if (/^(both|either)$/i).match?(val)
+      return "only"   if /^(1|yes|true)$/i.match?(val)
+      return "no"     if /^(0|no|false)$/i.match?(val)
+      return "either" if /^(both|either)$/i.match?(val)
       raise BadYesNoBothError.new(var: var, val: val)
     end
 
@@ -70,8 +70,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "TRUE"  if (/^(1|yes|true)$/i).match?(val)
-      return "FALSE" if (/^(0|no|false)$/i).match?(val) && !only_yes
+      return "TRUE"  if /^(1|yes|true)$/i.match?(val)
+      return "FALSE" if /^(0|no|false)$/i.match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -85,8 +85,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "NOT NULL" if (/^(1|yes|true)$/i).match?(val)
-      return "NULL"     if (/^(0|no|false)$/i).match?(val) && !only_yes
+      return "NOT NULL" if /^(1|yes|true)$/i.match?(val)
+      return "NULL"     if /^(0|no|false)$/i.match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -183,7 +183,7 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
-        unless (/^-?(\d+(\.\d+)?|\.\d+)$/).match?(val.to_s)
+        unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
         unless val.to_f >= min && val.to_f <= max
       return val.to_f

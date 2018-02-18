@@ -296,7 +296,7 @@ class SiteData
     if cond = FIELD_CONDITIONS[field]
       query << "WHERE #{cond}"
     end
-    if (/^(\w+)s_versions/).match?(field.to_s)
+    if /^(\w+)s_versions/.match?(field.to_s)
       # Does this actually make sense??
       # parent = $1
       # query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"

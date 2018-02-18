@@ -444,17 +444,17 @@ class Name < AbstractModel
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i > 0
-      words[i] = if (/^f/i).match?(words[i])
+      words[i] = if /^f/i.match?(words[i])
                    "f."
-                 elsif (/^v/i).match?(words[i])
+                 elsif /^v/i.match?(words[i])
                    "var."
-                 elsif (/^sect/i).match?(words[i])
+                 elsif /^sect/i.match?(words[i])
                    "sect."
-                 elsif (/^stirps/i).match?(words[i])
+                 elsif /^stirps/i.match?(words[i])
                    "stirps"
-                 elsif (/^subg/i).match?(words[i])
+                 elsif /^subg/i.match?(words[i])
                    "subgenus"
-                 elsif (/^subsect/i).match?(words[i])
+                 elsif /^subsect/i.match?(words[i])
                   "subsect."
                  else
                    "subsp."

@@ -221,7 +221,7 @@ class NameController < ApplicationController
     args = {
       action: "list_names",
       letters: "names.sort_name",
-      num_per_page: ((/^[a-z]/i).match?(params[:letter].to_s) ? 500 : 50)
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
     # Tired of not having an easy link to list_names.
