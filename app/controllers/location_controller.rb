@@ -694,7 +694,7 @@ class LocationController < ApplicationController
 
         flash_notice(:runtime_location_description_success.t(
                        id: @description.id
-))
+        ))
         redirect_to(action: "show_location_description",
                     id: @description.id)
 
