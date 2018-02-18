@@ -67,7 +67,8 @@ MushroomObserver::Application.routes.draw do
   get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
 
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  match(":controller/:action/:id",
+  match(
+    ":controller/:action/:id",
     constraints: {
       controller: /observer/,
       action: /lookup_\w+/,

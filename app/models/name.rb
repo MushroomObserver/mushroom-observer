@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Name Model
 #
@@ -372,13 +371,7 @@ class Name < AbstractModel
   end
 
   def best_brief_description
-    if description
-      if description.gen_desc.blank?
-        description.diag_desc
-      else
-        description.gen_desc
-      end
-    end
+    (description.gen_desc.presence || description.diag_desc) if description
   end
 
   # Get an Array of Observation's for this Name that have > 80% confidence.

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module MapHelper
   require_dependency "map_collapsible"
   require_dependency "map_set"
@@ -8,8 +7,7 @@ module MapHelper
     args = provide_defaults(args,
                             map_div: "map_div",
                             controls: [:large_map, :map_type],
-                            info_window: true
-                           )
+                            info_window: true)
     collection = CollapsibleCollectionOfMappableObjects.new(objects)
     gmap = init_map(args)
     if args[:zoom]
@@ -26,8 +24,7 @@ module MapHelper
   def make_editable_map(object, args = {})
     args = provide_defaults(args,
                             editable: true,
-                            info_window: false
-                           )
+                            info_window: false)
     gmap = make_map(object, args)
     gmap.event_init(gmap, "click", "function(e) { clickLatLng(e.latLng) }")
     gmap.event_init(gmap, "dblclick", "function(e) { dblClickLatLng(e.latLng) }")
@@ -38,8 +35,7 @@ module MapHelper
     args = provide_defaults(args,
                             controls: [:small_map],
                             info_window: true,
-                            zoom: 2
-                           )
+                            zoom: 2)
     make_map(objects, args)
   end
 
@@ -71,8 +67,7 @@ module MapHelper
     title = mapset_marker_title(set)
     marker = GM::GMarker.new(set.center,
                              draggable: args[:editable],
-                             title: title
-                            )
+                             title: title)
     marker.info_window = mapset_info_window(set, args) if args[:info_window]
     if args[:editable]
       map_control_init(gmap, marker, args)
@@ -194,8 +189,7 @@ module MapHelper
                   format_latitude(set.north) + safe_br +
                   format_longitude(set.west) + safe_nbsp +
                   format_longitude(set.east) + safe_br +
-                  format_latitude(set.south)
-                 )
+                  format_latitude(set.south))
     end
   end
 
@@ -221,12 +215,12 @@ module MapHelper
   end
 
   def map_box_control_init(gmap, set, args)
-    for point, type in [
+    [
       [set.north_west, "nw"],
       [set.north_east, "ne"],
       [set.south_west, "sw"],
       [set.south_east, "se"]
-    ]
+    ].each do |point, type|
       marker = GM::GMarker.new(point, draggable: true)
       map_control_init(gmap, marker, args, type)
     end

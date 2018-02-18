@@ -285,14 +285,14 @@ class HerbariumController < ApplicationController
     unless user
       flash_error(:runtime_no_match_name.t(
                     type: :user, value: @herbarium.personal_user_name
-                  ))
+      ))
       return false
     end
     return true if user.personal_herbarium == @herbarium
     if user.personal_herbarium.present?
       flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
                     user: user.login, herbarium: user.personal_herbarium.name
-                  ))
+      ))
       return false
     end
     flash_notice(:edit_herbarium_successfully_made_personal.t(user: user.login))

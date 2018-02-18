@@ -8,12 +8,13 @@
 class ThemeController < ApplicationController
   # callbacks
   before_action :login_required, except: MO.themes + [
-    :color_themes,
+    :color_themes
   ]
   before_action :disable_link_prefetching
 
   # Show general information on color themes
-  def color_themes # :nologin:
+  # :nologin:
+  def color_themes
   end
 
   # Individual theme actions. Each shows a sample page in that theme,

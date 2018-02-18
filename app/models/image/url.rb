@@ -7,7 +7,7 @@ class Image
       medium: "640",
       small: "320",
       thumbnail: "thumb"
-    }
+    }.freeze
 
     SUBDIRECTORY_TO_SIZE = {
       "orig"  => :full_size,
@@ -16,7 +16,7 @@ class Image
       "640"   => :medium,
       "320"   => :small,
       "thumb" => :thumbnail
-    }
+    }.freeze
 
     attr_accessor :size, :id, :transferred, :extension
 

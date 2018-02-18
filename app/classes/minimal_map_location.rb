@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class MinimalMapLocation
   attr_accessor :id, :name, :north, :south, :east, :west
 

@@ -604,7 +604,7 @@ class PatternSearchTest < UnitTestCase
 
     expect = Name.where("rank > #{Name.ranks[:Genus]} AND " \
                         "rank != #{Name.ranks[:Group]}").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("rank:family-domain")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -668,13 +668,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_lichen
     expect = Name.where("lifeform LIKE '%lichen%'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where.not("lifeform LIKE '% lichen %'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:no")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -682,13 +682,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_author
     expect = Name.where("COALESCE(author, '') = ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where("COALESCE(author, '') != ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -696,13 +696,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_citation
     expect = Name.where("COALESCE(citation, '') = ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where("COALESCE(citation, '') != ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -710,13 +710,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_classification
     expect = Name.where("COALESCE(classification, '') = ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where("COALESCE(classification, '') != ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -724,13 +724,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_notes
     expect = Name.where("COALESCE(notes, '') = ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where("COALESCE(notes, '') != ''").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -738,7 +738,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_comments
     expect = Comment.where(target_type: "Name").map(&:target).uniq.
-                     reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_comments:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -746,13 +746,13 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_has_description
     expect = Name.where.not(description_id: nil).
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where(description_id: nil).
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -760,7 +760,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_author
     expect = Name.where("author LIKE '%Vittad%'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -768,7 +768,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_citation
     expect = Name.where("citation LIKE '%lichenes%'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -776,7 +776,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_classification
     expect = Name.where("classification LIKE '%ascomycota%'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
     assert_name_list_equal(expect, x.query.results, :sort)
@@ -784,7 +784,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_name_search_notes
     expect = Name.where("notes LIKE '%lichen%'").
-                  reject(&:correct_spelling_id)
+             reject(&:correct_spelling_id)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
     assert_name_list_equal(expect, x.query.results, :sort)

@@ -32,7 +32,7 @@ module Query::Modules::Sql
 
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)
-    if !our_order.blank? &&
+    if our_order.present? &&
        !our_order.match(/.id( |$)/)
       our_order += ", #{model.table_name}.id DESC"
     end
@@ -41,10 +41,10 @@ module Query::Modules::Sql
       SELECT #{our_select}
       FROM #{our_from}
     )
-    sql += "  WHERE #{our_where}\n"    unless our_where.blank?
-    sql += "  GROUP BY #{our_group}\n" unless our_group.blank?
-    sql += "  ORDER BY #{our_order}\n" unless our_order.blank?
-    sql += "  LIMIT #{our_limit}\n"    unless our_limit.blank?
+    sql += "  WHERE #{our_where}\n"    if our_where.present?
+    sql += "  GROUP BY #{our_group}\n" if our_group.present?
+    sql += "  ORDER BY #{our_order}\n" if our_order.present?
+    sql += "  LIMIT #{our_limit}\n"    if our_limit.present?
 
     @last_query = sql
     sql

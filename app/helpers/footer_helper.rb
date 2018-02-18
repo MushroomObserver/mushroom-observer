@@ -1,4 +1,3 @@
-# encoding: utf-8
 module FooterHelper
   # Show list of authors and editors at the bottom of a show_object page, with
   # the appropriate links for making requests and/or reviewing authors.
@@ -15,7 +14,7 @@ module FooterHelper
     type = obj.type_tag
 
     # Descriptions.
-    if type.to_s.match(/description/)
+    if /description/.match?(type.to_s)
       authors   = obj.authors
       editors   = obj.editors
       is_admin  = @user && obj.is_admin?(@user)
@@ -27,11 +26,15 @@ module FooterHelper
       if is_admin
         authors += safe_nbsp
         authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                   controller: :observer, action: :review_authors, id: obj.id, type: type)
+                                   controller: :observer,
+                                   action: :review_authors,
+                                   id: obj.id, type: type)
       elsif !is_author
         authors += safe_nbsp
         authors += link_with_query("(#{:show_name_author_request.t})",
-                                   controller: :observer, action: :author_request, id: obj.id, type: type)
+                                   controller: :observer,
+                                   action: :author_request,
+                                   id: obj.id, type: type)
       end
 
     # Locations and names.
@@ -121,8 +124,10 @@ module FooterHelper
 
     # Show RSS log for all of the above.
     if obj.respond_to?(:rss_log_id) && obj.rss_log_id
-      html << link_to(:show_object.t(type: :log), controller: :observer,
-                                                  action: :show_rss_log, id: obj.rss_log_id)
+      html << link_to(:show_object.t(type: :log),
+                      controller: :observer,
+                      action: :show_rss_log,
+                      id: obj.rss_log_id)
     end
 
     html = html.safe_join(safe_br)

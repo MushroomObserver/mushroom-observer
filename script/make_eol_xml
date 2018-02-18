@@ -75,11 +75,11 @@ end
 ################################################################################
 
 if testing
-  LOCAL_URL = "http://localhost:3000/api/observations?id=1"
-  REMOTE_URL = "http://mushroomobserver.org/api/observations?id=1"
+  LOCAL_URL = "http://localhost:3000/api/observations?id=1".freeze
+  REMOTE_URL = "http://mushroomobserver.org/api/observations?id=1".freeze
 else
-  LOCAL_URL = "http://localhost:3000/name/eol"
-  REMOTE_URL = "http://mushroomobserver.org/name/eol"
+  LOCAL_URL = "http://localhost:3000/name/eol".freeze
+  REMOTE_URL = "http://mushroomobserver.org/name/eol".freeze
 end
 
 temp_file = Tempfile.new("eol")

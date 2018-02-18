@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see ajax_controller.rb
 class AjaxController
   # Mark an object for export. Renders updated export controls.

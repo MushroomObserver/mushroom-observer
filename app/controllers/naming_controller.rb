@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
   before_action :login_required

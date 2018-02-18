@@ -72,6 +72,7 @@ else
 end
 
 # Help message whenever screw up command line.
+# rubocop:disable Layout/EmptyLinesAroundArguments # causes false positive
 $stderr.puts %(
   USAGE
     script/jpegsize <file>.jpg
@@ -85,4 +86,6 @@ $stderr.puts %(
     -f --file <file>      Report size of all files listed in <file>.
 
 )
+# rubocop: enable Layout/EmptyLinesAroundArguments
+
 exit 1

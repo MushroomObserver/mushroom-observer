@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Check for Unsafe HTML
 #
@@ -16,7 +15,7 @@ module CheckForUnsafeHtml
 
     str.gsub!(/<!--.*?-->/mu, "")
     str.gsub!(/<!\[CDATA\[.*?\]\]>/mu, "")
-    return unless str.match(/&lt;[a-z]+|&amp;[#\w]+;/i)
+    return unless str =~ /&lt;[a-z]+|&amp;[#\w]+;/i
 
     msg = "..." + $`[-200..-1] + "***HERE***" + $& + $'[0..200] + "..."
     flunk("Unsafe HTML found!" \

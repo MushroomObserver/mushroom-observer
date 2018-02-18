@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see ajax_controller.rb
 class AjaxController
   # Activate mode: sets verified field of given ApiKey, returns nothing.

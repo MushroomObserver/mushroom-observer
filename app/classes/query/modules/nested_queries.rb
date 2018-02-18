@@ -60,7 +60,7 @@ module Query::Modules::NestedQueries
 
   # Is this query nested in an outer query?
   def has_outer?
-    !outer_id.blank?
+    outer_id.present?
   end
 
   # Get instance for +outer_id+, modifying it slightly to skip results with

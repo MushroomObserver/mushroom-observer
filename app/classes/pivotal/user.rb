@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Pivotal
   class User
     attr_accessor :id

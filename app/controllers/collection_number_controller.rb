@@ -118,7 +118,7 @@ class CollectionNumberController < ApplicationController
     redirect_with_query(action: :index_collection_number)
   end
 
-################################################################################
+  ##############################################################################
 
   private
 
@@ -178,9 +178,12 @@ class CollectionNumberController < ApplicationController
       @collection_number.save
       @collection_number.change_corresponding_herbarium_records(old_format_name)
     else
-      flash_warning(:edit_collection_numbers_merged.t(
-                      this: old_format_name, that: @other_number.format_name
-                    ))
+      flash_warning(
+        :edit_collection_numbers_merged.t(
+          this: old_format_name,
+          that: @other_number.format_name
+        )
+      )
       @collection_number.change_corresponding_herbarium_records(old_format_name)
       @other_number.observations += @collection_number.observations -
                                     @other_number.observations

@@ -3,7 +3,7 @@ class API
     # Parse integer for API.
     class IntegerParser < Base
       def parse(str)
-        raise BadParameterValue.new(str, :integer) unless str =~ /^-?\d+$/
+        raise BadParameterValue.new(str, :integer) unless /^-?\d+$/.match?(str)
         val = str.to_i
         limit = args[:limit]
         return val if !limit || limit.include?(val)

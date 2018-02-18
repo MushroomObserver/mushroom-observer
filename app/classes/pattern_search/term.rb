@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module PatternSearch
   # Parse PatternSearch parameter terms
   # Sample use:
@@ -15,7 +13,7 @@ module PatternSearch
     end
 
     def <<(val)
-      while val.to_s.match(/^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/)
+      while val.to_s =~ /^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/
         vals << dequote(Regexp.last_match(1))
         val = val.to_s[Regexp.last_match(0).length..-1]
         break if val.blank?
@@ -23,7 +21,7 @@ module PatternSearch
     end
 
     def quote(x)
-      if x.to_s.match(/['" \\]/)
+      if /['" \\]/.match?(x.to_s)
         '"' + x.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
       else
         x.to_s
@@ -43,8 +41,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return true  if val.match(/^(1|yes|true)$/i)
-      return false if val.match(/^(0|no|false)$/i) && !only_yes
+      return true  if (/^(1|yes|true)$/i).match?(val)
+      return false if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -57,9 +55,9 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "only"   if val.match(/^(1|yes|true)$/i)
-      return "no"     if val.match(/^(0|no|false)$/i)
-      return "either" if val.match(/^(both|either)$/i)
+      return "only"   if (/^(1|yes|true)$/i).match?(val)
+      return "no"     if (/^(0|no|false)$/i).match?(val)
+      return "either" if (/^(both|either)$/i).match?(val)
       raise BadYesNoBothError.new(var: var, val: val)
     end
 
@@ -72,8 +70,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "TRUE" if val.match(/^(1|yes|true)$/i)
-      return "FALSE" if val.match(/^(0|no|false)$/i) && !only_yes
+      return "TRUE"  if (/^(1|yes|true)$/i).match?(val)
+      return "FALSE" if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -87,8 +85,8 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      return "NOT NULL" if val.match(/^(1|yes|true)$/i)
-      return "NULL" if val.match(/^(0|no|false)$/i) && !only_yes
+      return "NOT NULL" if (/^(1|yes|true)$/i).match?(val)
+      return "NULL"     if (/^(0|no|false)$/i).match?(val) && !only_yes
       raise BadYesError.new(var: var, val: val) if only_yes
       raise BadBooleanError.new(var: var, val: val)
     end
@@ -96,7 +94,7 @@ module PatternSearch
     def parse_list_of_names
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           ::Name.safe_find(val) ||
             raise(BadNameError.new(var: var, val: val))
         else
@@ -109,7 +107,7 @@ module PatternSearch
     def parse_list_of_herbaria
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Herbarium.safe_find(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         else
@@ -123,7 +121,7 @@ module PatternSearch
     def parse_list_of_locations
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Location.safe_find(val) ||
             raise(BadLocationError.new(var: var, val: val))
         else
@@ -137,7 +135,7 @@ module PatternSearch
     def parse_list_of_projects
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           Project.safe_find(val) ||
             raise(BadProjectError.new(var: var, val: val))
         else
@@ -150,7 +148,7 @@ module PatternSearch
     def parse_list_of_species_lists
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           SpeciesList.safe_find(val) ||
             raise(BadSpeciesListError.new(var: var, val: val))
         else
@@ -163,7 +161,7 @@ module PatternSearch
     def parse_list_of_users
       raise MissingValueError.new(var: var) if vals.empty?
       vals.map do |val|
-        if val.match(/^\d+$/)
+        if /^\d+$/.match?(val)
           User.safe_find(val) ||
             raise(BadUserError.new(var: var, val: val))
         else
@@ -185,7 +183,7 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
-        unless val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/)
+        unless (/^-?(\d+(\.\d+)?|\.\d+)$/).match?(val.to_s)
       raise BadFloatError.new(var: var, val:val, min: min, max: max) \
         unless val.to_f >= min && val.to_f <= max
       return val.to_f
@@ -204,11 +202,11 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
       if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
-         (-100..100).include?(val.to_f)
+         (-100..100).cover?(val.to_f)
         [val.to_f * 3 / 100, 3]
       elsif val.to_s.match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
-            (-100..100).include?(Regexp.last_match(1).to_f) &&
-            (-100..100).include?(Regexp.last_match(3).to_f) &&
+            (-100..100).cover?(Regexp.last_match(1).to_f) &&
+            (-100..100).cover?(Regexp.last_match(3).to_f) &&
             Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
         [Regexp.last_match(1).to_f * 3 / 100, Regexp.last_match(3).to_f * 3 / 100]
       else
@@ -220,23 +218,23 @@ module PatternSearch
       raise MissingValueError.new(var: var) if vals.empty?
       raise TooManyValuesError.new(var: var) if vals.length > 1
       val = vals.first
-      if val.match(/^(\d\d\d\d)$/)
+      if val =~ /^(\d\d\d\d)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 12, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d\d\d)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d\d\d)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(2).to_i, 12, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d\d\d)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d\d\d)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i, 31]]
-      elsif val.match(/^(\d\d\d\d)-(\d\d?)-(\d\d?)-(\d\d\d\d)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)-(\d\d\d\d)-(\d\d?)-(\d\d?)$/
         ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(4).to_i, Regexp.last_match(5).to_i, Regexp.last_match(6).to_i]]
-      elsif val.match(/^(\d\d?)$/)
+      elsif val =~ /^(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(1).to_i, 31]]
-      elsif val.match(/^(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d?)-(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(2).to_i, 31]]
-      elsif val.match(/^(\d\d?)-(\d\d?)-(\d\d?)-(\d\d?)$/)
+      elsif val =~ /^(\d\d?)-(\d\d?)-(\d\d?)-(\d\d?)$/
         ["%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i], "%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i]]
       else
         raise BadDateRangeError.new(var: var, val: val)
@@ -262,7 +260,7 @@ module PatternSearch
            val == :"rank_#{rank.to_s.downcase}".l ||
            (rank == :Phylum || rank == :Group) &&
              :"rank_alt_#{rank.to_s.downcase}".l.
-               split(",").map(&:strip).include?(val)
+           split(",").map(&:strip).include?(val)
           return rank
         end
       end

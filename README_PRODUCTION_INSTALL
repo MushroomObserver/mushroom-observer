@@ -93,7 +93,7 @@ root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
 
 # Install rvm and ruby.
 root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.2.3
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.4.1
 root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc

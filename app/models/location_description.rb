@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Location Descriptions
 #
@@ -62,8 +61,7 @@ class LocationDescription < Description
             user: 5
           },
           source: :source_type,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   belongs_to :license
   belongs_to :location
@@ -79,7 +77,7 @@ class LocationDescription < Description
   has_and_belongs_to_many :authors,       class_name: "User",      join_table: "location_descriptions_authors"
   has_and_belongs_to_many :editors,       class_name: "User",      join_table: "location_descriptions_editors"
 
-  ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs]
+  ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
 
   acts_as_versioned(
     table_name: "location_descriptions_versions",
@@ -103,11 +101,11 @@ class LocationDescription < Description
   versioned_class.before_save { |x| x.user_id = User.current_id }
   after_update :notify_users
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Descriptions
   #
-  ################################################################################
+  ##############################################################################
 
   # Override the default show_controller
   def self.show_controller

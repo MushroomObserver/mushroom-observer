@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Language Localization and Export Files
 #
@@ -207,7 +206,7 @@ module LanguageExporter
     write_export_file_lines(hash.map { |k, v| "  #{k}: #{format_string(v)}" })
   end
 
-  ################################################################################
+  ##############################################################################
 
   private
 
@@ -252,15 +251,15 @@ module LanguageExporter
     output_lines = []
     in_tag = false
     for line in template_lines
-      if line.match(/^(\W+['"]?(\w+)['"]?:)/)
+      if line =~ /^(\W+['"]?(\w+)['"]?:)/
         out = Regexp.last_match(1)
         tag = Regexp.last_match(2)
         out += translated.key?(tag) ? " " : "  "
         out += format_string(strings[tag])
         output_lines << out
-        in_tag = true if line.match(/ >\s*$/)
+        in_tag = true if / >\s*$/.match?(line)
       elsif in_tag
-        in_tag = false unless line.match(/\S/)
+        in_tag = false unless /\S/.match?(line)
       else
         output_lines << line.sub(/\s+$/, "\n")
       end
@@ -270,11 +269,11 @@ module LanguageExporter
 
   def format_string(val)
     val = clean_string(val)
-    if val.match(/\\n|\n/)
+    if /\\n|\n/.match?(val)
       val = format_multiline_string(escape_string(val))
-    elsif val.match(/:(\s|$)| #/) ||
-          val.match(/^(no|yes)$/i) ||
-          (val.match(/^\W/) && val[0].is_ascii_character?)
+    elsif (/:(\s|$)| #/).match?(val) ||
+          (/^(no|yes)$/i).match?(val) ||
+          (/^\W/.match?(val) && val[0].is_ascii_character?)
       val = escape_string(val)
     elsif val == ""
       val = '""'
@@ -299,7 +298,7 @@ module LanguageExporter
     twice = {}
     pass = true
     for line in read_export_file_lines
-      if line.match(/^ *['"]?(\w+)['"]?:/)
+      if line =~ /^ *['"]?(\w+)['"]?:/
         if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
           verbose("#{locale} #{Regexp.last_match(1)}: " \
                   "tag appears more than once")
@@ -346,7 +345,7 @@ module LanguageExporter
   end
 
   def check_export_line(line)
-    if line.match(/^( *)(['"]?(\w+)['"]?):/)
+    if line =~ /^( *)(['"]?(\w+)['"]?):/
       indent = Regexp.last_match(1)
       quoted_tag = Regexp.last_match(2)
       tag = Regexp.last_match(3)
@@ -374,7 +373,7 @@ module LanguageExporter
               "invalid tag quotes: #{quoted_tag.inspect}")
       @pass = false
     end
-    if quoted_tag.match(/^(yes|no)$/i)
+    if (/^(yes|no)$/i).match?(quoted_tag)
       verbose("#{locale} #{@line_number}: " \
               "'yes' and 'no' must be quoted in YAML files")
       @pass = false
@@ -421,14 +420,14 @@ module LanguageExporter
   def validate_string(str)
     str = str.strip.squeeze(" ")
     pass = true
-    if str.match(/^(yes|no)$/i)
+    if (/^(yes|no)$/i).match?(str)
       pass = false
-    elsif str.match(/^'/)
-      pass = false unless str.match(/^'([^'\\]|\\.)*'$/)
-    elsif str.match(/^"/)
-      pass = false unless str.match(/^"([^"\\]|\\.)*"$/)
-    elsif str.match(/:(\s|$)| #/) ||
-          (str.match(/^[^\w\(]/) && str[0].is_ascii_character?)
+    elsif /^'/.match?(str)
+      pass = false unless /^'([^'\\]|\\.)*'$/.match?(str)
+    elsif /^"/.match?(str)
+      pass = false unless /^"([^"\\]|\\.)*"$/.match?(str)
+    elsif /:(\s|$)| #/.match?(str) ||
+          (/^[^\w\(]/.match?(str) && str[0].is_ascii_character?)
       pass = false
     end
     pass
@@ -437,7 +436,7 @@ module LanguageExporter
   def validate_square_brackets(value)
     value = value.to_s.dup
     pass = true
-    while value.match(/\S/)
+    while value =~ /\S/
       if value.sub!(/^[^\[\]]+/, "")
       elsif value.sub!(/^\[\[/, "")
       elsif value.sub!(/^\]\]/, "")
@@ -458,10 +457,10 @@ module LanguageExporter
 
   def validate_square_brackets_args(args)
     pass = true
-    for pair in args.split(",")
-      unless pair.match(/^ :?\w+ = (
+    args.split(",").each do |pair|
+      unless (/^ :?\w+ = (
             '.*' | ".*" | -?\d+(\.\d+)? | :\w+ | [a-z][a-z_]*\d*
-          )$/x)
+          )$/x).match?(pair)
         pass = false
         break
       end

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = API Helpers
 #
@@ -34,7 +33,7 @@ module ApiHelper
   end
 
   def xml_string(xml, tag, val)
-    unless val.blank?
+    if val.present?
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "text/plain")
     end
@@ -42,7 +41,7 @@ module ApiHelper
   end
 
   def xml_html_string(xml, tag, val)
-    unless val.blank?
+    if val.present?
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "text/html")
     end
@@ -50,7 +49,7 @@ module ApiHelper
   end
 
   def xml_sql_string(xml, tag, val)
-    unless val.blank?
+    if val.present?
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "application/x-sql")
     end
@@ -143,7 +142,7 @@ module ApiHelper
   end
 
   def xml_minimal_object(xml, tag, model, id)
-    unless id.blank?
+    if id.present?
       model = model.constantize unless model.is_a?(Class)
       url = begin
               model.show_url(id)

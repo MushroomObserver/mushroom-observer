@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Observation Model
 #
@@ -343,19 +342,19 @@ class Observation < AbstractModel
 
   def lat=(x)
     val = Location.parse_latitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:lat, val)
   end
 
   def long=(x)
     val = Location.parse_longitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:long, val)
   end
 
   def alt=(x)
     val = Location.parse_altitude(x)
-    val = x if val.nil? && !x.blank?
+    val = x if val.nil? && x.present?
     write_attribute(:alt, val)
   end
 
@@ -365,7 +364,7 @@ class Observation < AbstractModel
   end
 
   def place_name_and_coordinates
-    if !lat.blank? && !long.blank?
+    if lat.present? && long.present?
       lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
       long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
       "#{place_name} (#{lat2} #{long2})"
@@ -881,7 +880,7 @@ class Observation < AbstractModel
     # I choose the strongest vote in such cases.
     name_votes  = {}  # Records the strongest vote for a given name for a user.
     taxon_votes = {}  # Records the strongest vote for any names in a group of
-                      # synonyms for a given user.
+    #                   synonyms for a given user.
     name_ages   = {}  # Records the oldest date that a name was proposed.
     taxon_ages  = {}  # Records the oldest date that a taxon was proposed.
     user_wgts   = {}  # Caches user rankings.
@@ -948,9 +947,9 @@ class Observation < AbstractModel
     # Now that we've weeded out potential duplicate votes, we can combine them
     # safely.
     votes = {}
-    taxon_votes.keys.each do |taxon_id|
+    taxon_votes.each_key do |taxon_id|
       vote = votes[taxon_id] = [0, 0]
-      taxon_votes[taxon_id].keys.each do |user_id|
+      taxon_votes[taxon_id].each_key do |user_id|
         user_vote = taxon_votes[taxon_id][user_id]
         val = user_vote[0]
         wgt = user_vote[1]
@@ -969,7 +968,7 @@ class Observation < AbstractModel
     best_wgt = nil
     best_age = nil
     best_id  = nil
-    votes.keys.each do |taxon_id|
+    votes.each_key do |taxon_id|
       wgt = votes[taxon_id][1]
       val = votes[taxon_id][0].to_f / (wgt + 1.0)
       age = taxon_ages[taxon_id]
@@ -1029,9 +1028,9 @@ class Observation < AbstractModel
         # First combine votes for each name; exactly analagous to what we did
         # with taxa above.
         votes = {}
-        name_votes.keys.each do |name_id|
+        name_votes.each_key do |name_id|
           vote = votes[name_id] = [0, 0]
-          name_votes[name_id].keys.each do |user_id|
+          name_votes[name_id].each_key do |user_id|
             user_vote = name_votes[name_id][user_id]
             val = user_vote[0]
             wgt = user_vote[1]
@@ -1175,7 +1174,7 @@ class Observation < AbstractModel
     # Apply heuristics to determine review status.
     status = :unreviewed
     v100 = Vote.maximum_vote.to_f
-    votes.values.each do |value|
+    votes.each_value do |value|
       if value < 0
         status = :inaccurate
         break
@@ -1436,15 +1435,15 @@ class Observation < AbstractModel
       errors.add(:where, :validate_observation_where_too_long.t)
     end
 
-    if lat.blank? && !long.blank? ||
-       !lat.blank? && !Location.parse_latitude(lat)
+    if lat.blank? && long.present? ||
+       lat.present? && !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
-    if !lat.blank? && long.blank? ||
-       !long.blank? && !Location.parse_longitude(long)
+    if lat.present? && long.blank? ||
+       long.present? && !Location.parse_longitude(long)
       errors.add(:long, :runtime_lat_long_error.t)
     end
-    if !alt.blank? && !Location.parse_altitude(alt)
+    if alt.present? && !Location.parse_altitude(alt)
       errors.add(:alt, :runtime_altitude_error.t)
     end
 
@@ -1452,7 +1451,7 @@ class Observation < AbstractModel
     begin
       Date.parse(@when_str)
     rescue ArgumentError
-      if @when_str =~ /^\d{4}-\d{1,2}-\d{1,2}$/
+      if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
         errors.add(:when_str, :runtime_date_invalid.t)
       else
         errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)

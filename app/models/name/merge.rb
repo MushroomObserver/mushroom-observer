@@ -98,7 +98,7 @@ class Name < AbstractModel
     end
 
     # Fill in citation if new name is missing one.
-    if citation.blank? && !old_name.citation.blank?
+    if citation.blank? && old_name.citation.present?
       self.citation = old_name.citation.strip_squeeze
     end
 

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Wrapper Class
 #
@@ -47,7 +46,7 @@ class Wrapper < BlankSlate
   end
 
   def method_missing(name, *args) # :nodoc:
-    if name.to_s.match(/^(\w+)=$/)
+    if name.to_s =~ /^(\w+)=$/
       @attributes[Regexp.last_match(1).to_sym] = args[0]
     else
       @attributes[name.to_s.to_sym]

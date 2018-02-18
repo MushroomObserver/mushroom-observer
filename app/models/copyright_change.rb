@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Copyright Change Model
 #
@@ -28,7 +27,7 @@ class CopyrightChange < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :license
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Pivotal
   class Comment
     attr_accessor :id
@@ -44,7 +43,7 @@ class Pivotal
 
     def parse_text(str)
       str.to_s.split(/\n/).select do |line|
-        if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
+        if line =~ /USER:\s*(\d+)\s+(\S.*\S)/
           id   = Regexp.last_match[1]
           name = Regexp.last_match[2]
           @user = Pivotal::User.new(id, name)

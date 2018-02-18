@@ -56,10 +56,10 @@ class AccountMailerTest < UnitTestCase
     in_header = true
     keep_wrapped_line = false
     str.split("\n").select do |line|
-      in_header = false if line =~ /^\s*$|<html>/
+      in_header = false if /^\s*$|<html>/.match?(line)
       if !in_header
         true
-      elsif line =~ /^(To|From|Reply-To|Cc|Bcc|Subject):/
+      elsif /^(To|From|Reply-To|Cc|Bcc|Subject):/.match?(line)
         keep_wrapped_line = true
       elsif keep_wrapped_line && line !~ /^[A-Z][\w\-]+:/
         true

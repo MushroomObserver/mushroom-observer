@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Naming Model
 #
@@ -107,7 +106,7 @@ class Naming < AbstractModel
         check = x[:check]
         notes = x[:notes]
         if (check == "1") ||
-           (!was_js_on && !notes.blank?)
+           (!was_js_on && notes.present?)
           reason.notes = notes
         else
           reason.delete
@@ -235,7 +234,7 @@ class Naming < AbstractModel
         notes = x[:notes]
         # Reason is "used" if checked or notes non-empty.
         if (check == "1") ||
-           !notes.blank?
+           notes.present?
           reason.notes = notes
         else
           reason.delete
@@ -405,10 +404,10 @@ class Naming < AbstractModel
   ##############################################################################
 
   # Array of all reason "types", in the order they should be presented in UI.
-  ALL_REASONS = [1, 2, 3, 4]
+  ALL_REASONS = [1, 2, 3, 4].freeze
 
   # These reasons will be used by default (with empty notes) if no reasons given.
-  DEFAULT_REASONS = [1]
+  DEFAULT_REASONS = [1].freeze
 
   # Localization tags for reason labels.
   REASON_LABELS = [
@@ -416,7 +415,7 @@ class Naming < AbstractModel
     :naming_reason_label_2,  # "Used references"
     :naming_reason_label_3,  # "Based on microscopical features"
     :naming_reason_label_4,  # "Based on chemical features"
-  ]
+  ].freeze
 
   # Return reasons as Array of Reason instances.  Changes to these instances
   # will make appropriate changes to the Naming.
@@ -469,7 +468,7 @@ class Naming < AbstractModel
   # make changes to the Naming safely.
   #
   # == Attributes
-  # num::           Type of reason (Fixnum from 1 to N).
+  # num::           Type of reason (Integer from 1 to N).
   # notes::         Notes associated with reason (String), or +nil+ if not used.
   #                 *NOTE*: This is writable; changes will be saved with Naming.
   #
@@ -537,7 +536,7 @@ class Naming < AbstractModel
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

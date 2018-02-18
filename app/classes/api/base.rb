@@ -251,7 +251,7 @@ class API
     subclass = "API::#{action.camelize}API"
     subclass = subclass.constantize
     subclass.new(params)
-  rescue
+  rescue StandardError
     raise BadAction.new(action)
   end
 
@@ -279,7 +279,7 @@ class API
       User.current = self.user = nil
       User.current_location_format = :postal
     else
-      key = ApiKey.find_by_key(key_str)
+      key = ApiKey.find_by(key: key_str)
       raise BadApiKey.new(key_str)        unless key
       raise ApiKeyNotVerified.new(key)    unless key.verified
       raise UserNotVerified.new(key.user) unless key.user.verified
