@@ -171,7 +171,7 @@ class Name < AbstractModel
 
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
-    lines.reverse.each do |_line_rank, line_name|
+    lines.reverse.each do |(_line_rank, line_name)|
       parent = Name.best_match(line_name)
       parents << parent if parent
       return [parent] if !all && !parent.deprecated
@@ -339,7 +339,7 @@ class Name < AbstractModel
           end
           line_name = match[2]
           results.push([line_rank, line_name])
-        elsif !line.blank?
+        elsif line.present?
           raise :runtime_invalid_classification.t(text: line)
         end
       end

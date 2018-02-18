@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see observer_controller.rb
 class ObserverController
   # Displays matrix of selected Observation's (based on current Query).
@@ -176,7 +175,7 @@ class ObserverController
       "observations.location_id IS NOT NULL"
     }
     @observations = @query.select_rows(args).map do |id, lat, long, loc_id|
-      locations[loc_id.to_i] = nil unless loc_id.blank?
+      locations[loc_id.to_i] = nil if loc_id.present?
       MinimalMapObservation.new(id, lat, long, loc_id)
     end
 

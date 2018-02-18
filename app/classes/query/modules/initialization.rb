@@ -1,12 +1,8 @@
 # Helper methods for turning Query parameters into SQL conditions.
 #
 # rubocop:disable Metrics/ModuleLength
-# rubocop:disable Style/ClassAndModuleChildren
 module Query::Modules::Initialization
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/PerceivedComplexity
-  # rubocop:disable Style/CyclomaticComplexity
-  # rubocop:disable Style/GuardClause
 
   attr_accessor :join
   attr_accessor :tables
@@ -45,20 +41,20 @@ module Query::Modules::Initialization
 
   def initialize_model_do_exact_match(arg, col = arg)
     return if params[arg].blank?
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     vals = params[arg]
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
     @where << if vals.length == 1
-      "LOWER(#{col}) = #{vals.first}"
-    else
-      "LOWER(#{col}) IN (#{vals.join(", ")})"
-    end
+                "LOWER(#{col}) = #{vals.first}"
+              else
+                "LOWER(#{col}) IN (#{vals.join(", ")})"
+              end
   end
 
   def initialize_model_do_search(arg, col = nil)
     return if params[arg].blank?
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     search = google_parse(params[arg])
     @where += google_conditions(search, col)
   end
@@ -67,8 +63,8 @@ module Query::Modules::Initialization
     return unless params[arg].is_a?(Array)
     min, max = params[arg]
     return if min.blank? && max.blank?
-    @where << "#{col} >= #{min}" unless min.blank?
-    @where << "#{col} <= #{max}" unless max.blank?
+    @where << "#{col} >= #{min}" if min.present?
+    @where << "#{col} <= #{max}" if max.present?
     if (val = args[:join])
       add_join(val)
     end
@@ -77,7 +73,7 @@ module Query::Modules::Initialization
   def initialize_model_do_enum_set(arg, col, vals, type)
     types = params[arg]
     return if types.empty?
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     if type == :string
       types.map!(&:to_s)
       types &= vals.map(&:to_s)
@@ -104,7 +100,7 @@ module Query::Modules::Initialization
     ids = params[arg]
     return unless ids
     col ||= "#{arg.to_s.sub(/s$/, "")}_id"
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     set = clean_id_set(ids)
     @where << "#{col} IN (#{set})"
     if (val = args[:join])
@@ -116,7 +112,7 @@ module Query::Modules::Initialization
     names = params[arg]
     return if !names || names.none?
     col ||= arg.to_s.sub(/s?$/, "_id")
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     objs = initialize_model_do_find_objects_by_name(model, names)
     if (filter = args[:filter])
       objs = objs.uniq.map(&filter).flatten
@@ -131,7 +127,7 @@ module Query::Modules::Initialization
   def initialize_model_do_find_objects_by_name(model, names)
     objs = []
     names.each do |name|
-      if name.to_s =~ /^\d+$/
+      if /^\d+$/.match?(name.to_s)
         obj = model.safe_find(name)
         objs << obj if obj
       else
@@ -174,7 +170,7 @@ module Query::Modules::Initialization
     initialize_model_do_objects_by_name(Location, :locations, loc_col, args)
     str = @where.pop
     locs.each do |name|
-      if name =~ /\D/
+      if /\D/.match?(name)
         pattern = clean_pattern(name)
         str += " OR #{table}.where LIKE '%#{pattern}%'"
       end
@@ -210,10 +206,10 @@ module Query::Modules::Initialization
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
     @join << if model.name == "Observation"
-      :"locations!"
-    else
-      { observations: :"locations!" }
-    end
+              :"locations!"
+             else
+              { observations: :"locations!" }
+             end
   end
 
   def initialize_model_do_location_bounding_box_cond1_and_2
@@ -303,7 +299,7 @@ module Query::Modules::Initialization
   def initialize_model_do_date(arg = :date, col = arg, args = {})
     vals = params[arg]
     return unless vals
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     # Ugh, special case for search by month/day where range of months wraps
     # around from December to January.
     if vals[0].to_s.match(/^\d\d-\d\d$/) &&
@@ -325,19 +321,18 @@ module Query::Modules::Initialization
 
   def initialize_model_do_date_half(min, val, col)
     dir = min ? ">" : "<"
-    if val.to_s =~ /^\d\d\d\d/
+    if /^\d\d\d\d/.match?(val.to_s)
       y, m, d = val.split("-")
       @where << sprintf("#{col} #{dir}= '%04d-%02d-%02d'",
-        y.to_i,
-        (m || (min ? 1 : 12)).to_i,
-        (d || (min ? 1 : 31)).to_i
-      )
-    elsif val.to_s =~ /-/
+                        y.to_i,
+                        (m || (min ? 1 : 12)).to_i,
+                        (d || (min ? 1 : 31)).to_i)
+    elsif /-/.match?(val.to_s)
       m, d = val.split("-")
       @where << "MONTH(#{col}) #{dir} #{m} OR " \
                 "(MONTH(#{col}) = #{m} AND " \
                 "DAY(#{col}) #{dir}= #{d})"
-    elsif !val.blank?
+    elsif val.present?
       @where << "MONTH(#{col}) #{dir}= #{val}"
       # XXX This fails if start month > end month XXX
     end
@@ -346,7 +341,7 @@ module Query::Modules::Initialization
   def initialize_model_do_time(arg = :time, col = arg)
     vals = params[arg]
     return unless vals
-    col = "#{model.table_name}.#{col}" unless col.to_s =~ /\./
+    col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     initialize_model_do_time_half(true, vals[0], col)
     initialize_model_do_time_half(false, vals[1], col)
   end
@@ -354,7 +349,8 @@ module Query::Modules::Initialization
   def initialize_model_do_time_half(min, val, col)
     return if val.blank?
     y, m, d, h, n, s = val.split("-")
-    @where << sprintf("#{col} %s= '%04d-%02d-%02d %02d:%02d:%02d'",
+    @where << sprintf(
+      "#{col} %s= '%04d-%02d-%02d %02d:%02d:%02d'",
       min ? ">" : "<",
       y.to_i,
       (m || (min ? 1 : 12)).to_i,

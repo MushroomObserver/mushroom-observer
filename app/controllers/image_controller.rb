@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Image Controller
 #
@@ -112,7 +111,7 @@ class ImageController < ApplicationController
     query = find_query(:Image)
     show_selected_images(query)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search")
   end
 
@@ -198,7 +197,7 @@ class ImageController < ApplicationController
     # show_observation request.  We know we came from an observation-type page
     # because that's the only time the "obs" param will be set (with obs id).
     obs = params[:obs]
-    if !obs.blank? &&
+    if obs.present? &&
        # The outer search on observation won't be saved for robots, so no sense
        # in bothering with any of this.
        !browser.bot?
@@ -309,7 +308,7 @@ class ImageController < ApplicationController
       else
         args = params[:image]
         i = 1
-        while i < 5 || !params[:upload]["image#{i}"].blank?
+        while i < 5 || params[:upload]["image#{i}"].present?
           process_image(args, params[:upload]["image#{i}"])
           i += 1
         end
@@ -320,7 +319,7 @@ class ImageController < ApplicationController
   end
 
   def process_image(args, upload)
-    unless upload.blank?
+    if upload.present?
       @image = Image.new(args.permit(whitelisted_image_args))
       @image.created_at = Time.now
       @image.updated_at = @image.created_at
@@ -537,7 +536,7 @@ class ImageController < ApplicationController
 
   def look_for_image(method, params)
     result = nil
-    if (method == "POST") || !params[:img_id].blank?
+    if (method == "POST") || params[:img_id].present?
       result = Image.safe_find(params[:img_id])
       flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id])) unless result
     end
@@ -586,7 +585,7 @@ class ImageController < ApplicationController
 
     # User entered an image id by hand or clicked on an image.
     elsif (request.method == "POST") ||
-          !params[:img_id].blank?
+          params[:img_id].present?
       image = Image.safe_find(params[:img_id])
       if !image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
@@ -802,22 +801,22 @@ class ImageController < ApplicationController
     redirect_to(controller: :account, action: :prefs)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Stuff for Mushroom App
   #
-  ################################################################################
+  ##############################################################################
 
   def images_for_mushroom_app # :nologin: :norobots:
-    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
-    minimum_quality = params[:minimum_quality].blank? ? 2.0 : params[:minimum_quality]
-    target_width = params[:target_width].blank? ? 400 : params[:target_width]
-    target_height = params[:target_height].blank? ? 600 : params[:target_height]
-    minimum_width = params[:minimum_width].blank? ? target_width : params[:minimum_width]
-    minimum_height = params[:minimum_height].blank? ? target_height : params[:minimum_height]
-    confidence_reward = params[:confidence_reward].blank? ? 2.0 : params[:confidence_reward]
-    quality_reward = params[:quality_reward].blank? ? 1.0 : params[:quality_reward]
-    ratio_penalty = params[:ratio_penalty].blank? ? 0.5 : params[:ratio_penalty]
+    minimum_confidence = params[:minimum_confidence].presence || 1.5
+    minimum_quality = params[:minimum_quality].presence || 2.0
+    target_width = params[:target_width].presence || 400
+    target_height = params[:target_height].presence || 600
+    minimum_width = params[:minimum_width].presence || target_width
+    minimum_height = params[:minimum_height].presence || target_height
+    confidence_reward = params[:confidence_reward].presence || 2.0
+    quality_reward = params[:quality_reward].presence || 1.0
+    ratio_penalty = params[:ratio_penalty].presence || 0.5
 
     # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
     # If we wanted 600x400 it will penalize 400x400 images by "ratio_penalty".
@@ -877,8 +876,7 @@ class ImageController < ApplicationController
               charset: "UTF-8",
               header: "present",
               disposition: "attachment",
-              filename: "#{action_name}.csv"
-             )
+              filename: "#{action_name}.csv")
   end
 
   def get_list_of_names(file)
@@ -888,7 +886,7 @@ class ImageController < ApplicationController
       get_list_of_names_from_file(file)
     elsif file.is_a?(String)
       get_list_of_names_from_string(file)
-    elsif !file.blank?
+    elsif file.present?
       fail "Names file came in as an unexpected class:" \
         "#{file.class.name.inspect}"
     else

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Vote Model
 #
@@ -159,9 +158,9 @@ class Vote < AbstractModel
     [:vote_confidence_40,  -1.0],
     [:vote_confidence_20,  -2.0],
     [:vote_confidence_0,   -3.0]
-  ]
+  ].freeze
 
-  NO_OPINION_VAL = [:vote_no_opinion, 0]
+  NO_OPINION_VAL = [:vote_no_opinion, 0].freeze
 
   # Force unit tests to verify existence of these translations.
   if false
@@ -224,7 +223,7 @@ class Vote < AbstractModel
       (user.votes_anonymous == :old && updated_at > Time.parse(MO.vote_cutoff))
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

@@ -5,7 +5,7 @@ class API
       FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/
 
       def parse(str)
-        raise BadParameterValue.new(str, :float) unless str =~ FLOAT
+        raise BadParameterValue.new(str, :float) unless FLOAT.match?(str)
         val = str.to_f
         limit = args[:limit]
         return val if !limit || limit.include?(val)

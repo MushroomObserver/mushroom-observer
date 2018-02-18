@@ -534,17 +534,33 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observation_search
-    get_with_dump(:observation_search, pattern: "120")
+    pattern = "Boletus edulis"
+    get_with_dump(:observation_search, pattern: pattern)
     assert_template(:list_observations)
-    assert_equal(:query_title_pattern_search.t(types: "Observations",
-                                               pattern: "120"),
-                 @controller.instance_variable_get("@title"))
+    assert_equal(
+      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      @controller.instance_variable_get("@title")
+    )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
-    get_with_dump(:observation_search, pattern: "120", page: 2)
+    get_with_dump(:observation_search, pattern: pattern, page: 2)
     assert_template(:list_observations)
-    assert_equal(:query_title_pattern_search.t(types: "Observations",
-                                               pattern: "120"),
-                 @controller.instance_variable_get("@title"))
+    assert_equal(
+      :query_title_pattern_search.t(types: "Observations", pattern: pattern),
+      @controller.instance_variable_get("@title")
+    )
+    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+
+    # When there are no hits, no title is displayed, there's no rh tabset, and
+    # html <title> contents are the action name
+    pattern = "no hits"
+    get_with_dump(:observation_search, pattern: pattern)
+    assert_template(:list_observations)
+    assert_empty(@controller.instance_variable_get("@title"))
+    assert_empty(css_select('[id="right_tabs"]').text, "Tabset should be empty")
+    assert_equal(css_select("title").text,
+                 "Mushroom Observer: Observation Search",
+                 "metadata <title> tag incorrect")
 
     # If pattern is id of a real Observation, go directly to that Observation.
     obs = Observation.first
@@ -908,19 +924,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, false]], false)
+                    [[obs2.collection_numbers.first.id, false]],
+                    false)
     assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, false]], false)
+                    [[obs2.herbarium_records.first.id, false]],
+                    false)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], false)
+                    [[obs2.sequences.first.id, false]],
+                    false)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+                    obs3.collection_numbers.map { |x| [x.id, false] },
+                    false)
     assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, false] }, false)
+                    obs3.herbarium_records.map { |x| [x.id, false] },
+                    false)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, false)
+                    obs3.sequences.map { |x| [x.id, false] },
+                    false)
 
     # Katrina isn't associated in any way with any of these observations.
     login("katrina")
@@ -932,19 +954,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, false]], false)
+                    [[obs2.collection_numbers.first.id, false]],
+                    false)
     assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, false]], false)
+                    [[obs2.herbarium_records.first.id, false]],
+                    false)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], true)
+                    [[obs2.sequences.first.id, false]],
+                    true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+                    obs3.collection_numbers.map { |x| [x.id, false] },
+                    false)
     assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, false] }, false)
+                    obs3.herbarium_records.map { |x| [x.id, false] },
+                    false)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, true)
+                    obs3.sequences.map { |x| [x.id, false] },
+                    true)
 
     # Roy is a curator at NY, so can add herbarium records, and modify existing
     # herbarium records attached to NY.
@@ -957,19 +985,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, false]], false)
+                    [[obs2.collection_numbers.first.id, false]],
+                    false)
     assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, true]], true)
+                    [[obs2.herbarium_records.first.id, true]],
+                    true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], true)
+                    [[obs2.sequences.first.id, false]],
+                    true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, false] }, false)
+                    obs3.collection_numbers.map { |x| [x.id, false] },
+                    false)
     assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] }, true)
+                    obs3.herbarium_records.map { |x| [x.id, x.can_edit?(roy)] },
+                    true)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, true)
+                    obs3.sequences.map { |x| [x.id, false] },
+                    true)
 
     # Dick owns all of the sequences, is on obs3's project, and has a personal
     # herbarium.
@@ -981,19 +1015,25 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, false]], false)
+                    [[obs2.collection_numbers.first.id, false]],
+                    false)
     assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, false]], true)
+                    [[obs2.herbarium_records.first.id, false]],
+                    true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, true]], true)
+                    [[obs2.sequences.first.id, true]],
+                    true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, true] }, true)
+                    obs3.collection_numbers.map { |x| [x.id, true] },
+                    true)
     assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, false] }, true)
+                    obs3.herbarium_records.map { |x| [x.id, false] },
+                    true)
     assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, true] }, true)
+                    obs3.sequences.map { |x| [x.id, true] },
+                    true)
 
     # Rolf owns obs1 and owns one herbarium record for both obs2 and obs3,
     # and he is a curator at NYBG.
@@ -1005,19 +1045,28 @@ class ObserverControllerTest < FunctionalTestCase
 
     get(:show_observation, id: obs2.id)
     assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, false]], false)
+                    [[obs2.collection_numbers.first.id, false]],
+                    false)
     assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, true]], true)
+                    [[obs2.herbarium_records.first.id, true]],
+                    true)
     assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], true)
+                    [[obs2.sequences.first.id, false]],
+                    true)
 
     get(:show_observation, id: obs3.id)
     assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, false] }, false)
-    assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] }, true)
-    assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, true)
+                    obs3.collection_numbers.map { |x| [x.id, false] }, false)
+    assert_show_obs(
+      :herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(rolf)] },
+      true
+    )
+    assert_show_obs(
+      :sequences,
+      obs3.sequences.map { |x| [x.id, false] },
+      true
+    )
 
     # Mary owns obs2 and obs3, but has nothing to do with obs1.
     login("mary")
@@ -1027,20 +1076,38 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
-    assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, true]], true)
-    assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, false]], true)
-    assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, false]], true)
+    assert_show_obs(
+      :collection_numbers,
+      [[obs2.collection_numbers.first.id, true]],
+      true
+    )
+    assert_show_obs(
+      :herbarium_records,
+      [[obs2.herbarium_records.first.id, false]],
+      true
+    )
+    assert_show_obs(
+      :sequences,
+      [[obs2.sequences.first.id, false]],
+      true
+    )
 
     get(:show_observation, id: obs3.id)
-    assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, true] }, true)
-    assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(mary)] }, true)
-    assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, false] }, true)
+    assert_show_obs(
+      :collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, true] },
+      true
+    )
+    assert_show_obs(
+      :herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, x.can_edit?(mary)] },
+      true
+    )
+    assert_show_obs(
+      :sequences,
+      obs3.sequences.map { |x| [x.id, false] },
+      true
+    )
 
     # Make sure admins can do everything.
     make_admin("katrina")
@@ -1050,38 +1117,61 @@ class ObserverControllerTest < FunctionalTestCase
     assert_show_obs(:sequences, [], true)
 
     get(:show_observation, id: obs2.id)
-    assert_show_obs(:collection_numbers,
-      [[obs2.collection_numbers.first.id, true]], true)
-    assert_show_obs(:herbarium_records,
-      [[obs2.herbarium_records.first.id, true]], true)
-    assert_show_obs(:sequences,
-      [[obs2.sequences.first.id, true]], true)
+    assert_show_obs(
+      :collection_numbers,
+      [[obs2.collection_numbers.first.id, true]],
+      true
+    )
+    assert_show_obs(
+      :herbarium_records,
+      [[obs2.herbarium_records.first.id, true]],
+      true
+    )
+    assert_show_obs(
+      :sequences,
+      [[obs2.sequences.first.id, true]],
+      true
+    )
 
     get(:show_observation, id: obs3.id)
-    assert_show_obs(:collection_numbers,
-      obs3.collection_numbers.map { |x| [x.id, true] }, true)
-    assert_show_obs(:herbarium_records,
-      obs3.herbarium_records.map { |x| [x.id, true] }, true)
-    assert_show_obs(:sequences,
-      obs3.sequences.map { |x| [x.id, true] }, true)
+    assert_show_obs(
+      :collection_numbers,
+      obs3.collection_numbers.map { |x| [x.id, true] },
+      true
+    )
+    assert_show_obs(
+      :herbarium_records,
+      obs3.herbarium_records.map { |x| [x.id, true] },
+      true
+    )
+    assert_show_obs(
+      :sequences,
+      obs3.sequences.map { |x| [x.id, true] },
+      true
+    )
   end
 
   def assert_show_obs(types, items, can_add)
     type = types.to_s.chop
     selector = (types == :collection_numbers && !can_add) ? "i" : "li"
-    assert_select("#observation_#{types} #{selector}", items.count,
-      "Wrong number of #{types} shown.")
+    assert_select("#observation_#{types} #{selector}",
+                  items.count,
+                  "Wrong number of #{types} shown.")
 
     assert(response.body.match(/href="\/#{type}\/create_#{type}\//),
-      "Expected to find a create link for #{types}.") if can_add
+           "Expected to find a create link for #{types}.") if can_add
     assert(!response.body.match(/href="\/#{type}\/create_#{type}\//),
-      "Expected not to find a create link for #{types}.") if !can_add
+           "Expected not to find a create link for #{types}.") if !can_add
 
     items.each do |id, can_edit|
-      assert(response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
-        "Expected to find an edit link for #{type} #{id}.") if can_edit
-      assert(!response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
-        "Expected not to find an edit link for #{type} #{id}.") if !can_edit
+      assert(
+        response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
+        "Expected to find an edit link for #{type} #{id}."
+      ) if can_edit
+      assert(
+        !response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
+        "Expected not to find an edit link for #{type} #{id}."
+      ) if !can_edit
     end
   end
 
@@ -1116,7 +1206,8 @@ class ObserverControllerTest < FunctionalTestCase
     id = obs.id
     params = { id: id.to_s }
     assert_equal("mary", obs.user.login)
-    requires_user(:destroy_observation, [action: :show_observation],
+    requires_user(:destroy_observation,
+                  [action: :show_observation],
                   params, "mary")
     assert_redirected_to(action: :list_observations)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1316,7 +1407,8 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:author_request, params)
-    assert_redirected_to(controller: :name, action: :show_name_description,
+    assert_redirected_to(controller: :name,
+                         action: :show_name_description,
                          id: name_descriptions(:coprinus_comatus_desc).id)
     assert_flash_text(:request_success.t)
 
@@ -1344,9 +1436,11 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it lets Rolf and only Rolf see this page.
     assert(!mary.in_group?("reviewers"))
     assert(rolf.in_group?("reviewers"))
-    requires_user(:review_authors, [controller: :location,
-                                    action: :show_location,
-                                    id: desc.location_id], params)
+    requires_user(:review_authors,
+                  [controller: :location,
+                   action: :show_location,
+                   id: desc.location_id],
+                  params)
     assert_template(:review_authors)
 
     # Remove Rolf from reviewers group.
@@ -1356,7 +1450,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
-    assert_redirected_to(controller: :location, action: :show_location,
+    assert_redirected_to(controller: :location,
+                         action: :show_location,
                          id: locations(:albion).id)
 
     # Make Rolf an author.
@@ -1516,32 +1611,35 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_construct_observation_approved_place_name
     where = "Albion, California, USA"
-    generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Coprinus comatus" },
-      approved_place_name: ""
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { place_name: where },
+        name: { name: "Coprinus comatus" },
+        approved_place_name: "" },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
   end
 
   def test_create_observation_with_collection_number
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      collection_number: { name: "Billy Bob", number: "17-034" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        collection_number: { name: "Billy Bob", number: "17-034" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.collection_numbers.count == 1)
   end
 
   def test_create_observation_with_used_collection_number
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      collection_number: { name: "Rolf Singer", number: "1" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        collection_number: { name: "Rolf Singer", number: "1" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.collection_numbers.count == 1)
@@ -1549,32 +1647,35 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_specimen_and_collector_but_no_number
-    generic_construct_observation( {
-      observation: { specimen: "1" },
-      collection_number: { name: "Rolf Singer", number: "" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        collection_number: { name: "Rolf Singer", number: "" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert_empty(obs.collection_numbers)
   end
 
   def test_create_observation_with_collection_number_but_no_specimen
-    generic_construct_observation({
-      collection_number: { name: "Rolf Singer", number: "3141" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { collection_number: { name: "Rolf Singer", number: "3141" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(!obs.specimen)
     assert_empty(obs.collection_numbers)
   end
 
   def test_create_observation_with_collection_number_but_no_collector
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      collection_number: { name: "", number: "27-18A.2" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        collection_number: { name: "", number: "27-18A.2" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.collection_numbers.count == 1)
@@ -1584,24 +1685,30 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_herbarium_record
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-                          herbarium_id: "1234" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_id: "1234"
+        },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.herbarium_records.count == 1)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-                          herbarium_id: "NYBG 1234" },
-      name: { name: "Cortinarius sp." }
-    }, 0, 0, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_id: "NYBG 1234"
+        },
+        name: { name: "Cortinarius sp." } },
+      0, 0, 0
+    )
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
     assert_input_value(:herbarium_record_herbarium_id, "NYBG 1234")
@@ -1609,47 +1716,56 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-                          herbarium_id: "" },
-      name: { name: name }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_id: ""
+        },
+        name: { name: name } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert_true(obs.specimen)
     assert_equal(0, obs.herbarium_records.count)
   end
 
   def test_create_observation_with_herbarium_but_no_specimen
-    generic_construct_observation({
-      herbarium_record: { herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-                          herbarium_id: "1234" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { herbarium_record:
+        {
+          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_id: "1234"
+        },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(!obs.specimen)
     assert(obs.herbarium_records.count.zero?)
   end
 
   def test_create_observation_with_new_nonpersonal_herbarium
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: "A Brand New Herbarium",
-                          herbarium_id: "" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: { herbarium_name: "A Brand New Herbarium",
+                            herbarium_id: "" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert_empty(obs.herbarium_records)
   end
 
   def test_create_observation_with_new_personal_herbarium
-    generic_construct_observation({
-      observation: { specimen: "1" },
-      herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
-                          herbarium_id: "12345" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0, katrina)
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: { herbarium_name: katrina.personal_herbarium_name,
+                            herbarium_id: "12345" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0, katrina
+    )
     obs = assigns(:observation)
     assert(obs.specimen)
     assert_equal(1, obs.herbarium_records.count)
@@ -1662,10 +1778,11 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_simple_observation_with_approved_unique_name
     where = "Simple, Massachusetts, USA"
-    generic_construct_observation({
-      observation: { place_name: where, thumb_image_id: "0" },
-      name: { name: "Coprinus comatus" }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { observation: { place_name: where, thumb_image_id: "0" },
+        name: { name: "Coprinus comatus" } },
+      1, 1, 0
+    )
     obs = assigns(:observation)
     nam = assigns(:naming)
     assert_equal(where, obs.where)
@@ -1680,9 +1797,9 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_simple_observation_of_unknown_taxon
     where = "Unknown, Massachusetts, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
     obs = assigns(:observation)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
@@ -1690,85 +1807,89 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_new_name
     generic_construct_observation({
-      name: { name: "New name" }
-    }, 0, 0, 0)
+                                    name: { name: "New name" }
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_with_approved_new_name
     # Test an observation creation with an approved new name
     generic_construct_observation({
-      name: { name: "Argus arg-arg" },
-      approved_name: "Argus arg-arg"
-    }, 1, 1, 2)
+                                    name: { name: "Argus arg-arg" },
+                                    approved_name: "Argus arg-arg"
+                                  }, 1, 1, 2)
   end
 
   def test_create_observation_with_approved_name_and_extra_space
     generic_construct_observation({
-      name: { name: "Another new-name" + "  " },
-      approved_name: "Another new-name" + "  "
-    }, 1, 1, 2)
+                                    name: { name: "Another new-name" + "  " },
+                                    approved_name: "Another new-name" + "  "
+                                  }, 1, 1, 2)
   end
 
   def test_create_observation_with_approved_section
     # (This is now supported nominally)
     # (Use Macrocybe because it already exists and has an author.
     # That way we know it is actually creating a name for this section.)
-    generic_construct_observation({
-      name: { name: "Macrocybe section Fakesection" },
-      approved_name: "Macrocybe section Fakesection"
-    }, 1, 1, 1)
+    generic_construct_observation(
+      { name: { name: "Macrocybe section Fakesection" },
+        approved_name: "Macrocybe section Fakesection" },
+      1, 1, 1
+    )
   end
 
   def test_create_observation_with_approved_junk_name
     generic_construct_observation({
-      name: { name: "This is a bunch of junk" },
-      approved_name: "This is a bunch of junk"
-    }, 0, 0, 0)
+                                    name: { name: "This is a bunch of junk" },
+                                    approved_name: "This is a bunch of junk"
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_with_multiple_name_matches
     generic_construct_observation({
-      name: { name: "Amanita baccata" }
-    }, 0, 0, 0)
+                                    name: { name: "Amanita baccata" }
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_choosing_one_of_multiple_name_matches
-    generic_construct_observation({
-      name: { name: "Amanita baccata" },
-      chosen_name: { name_id: names(:amanita_baccata_arora).id }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { name: { name: "Amanita baccata" },
+        chosen_name: { name_id: names(:amanita_baccata_arora).id } },
+      1, 1, 0
+    )
   end
 
   def test_create_observation_choosing_deprecated_one_of_multiple_name_matches
-    generic_construct_observation({
-      name: { name: names(:pluteus_petasatus_deprecated).text_name }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { name: { name: names(:pluteus_petasatus_deprecated).text_name } },
+      1, 1, 0
+    )
     nam = assigns(:naming)
     assert_equal(names(:pluteus_petasatus_approved).id, nam.name_id)
   end
 
   def test_create_observation_with_deprecated_name
     generic_construct_observation({
-      name: { name: "Lactarius subalpinus" }
-    }, 0, 0, 0)
+                                    name: { name: "Lactarius subalpinus" }
+                                  }, 0, 0, 0)
   end
 
   def test_create_observation_with_chosen_approved_synonym_of_deprecated_name
-    generic_construct_observation({
-      name: { name: "Lactarius subalpinus" },
-      approved_name: "Lactarius subalpinus",
-      chosen_name: { name_id: names(:lactarius_alpinus).id }
-    }, 1, 1, 0)
+    generic_construct_observation(
+      { name: { name: "Lactarius subalpinus" },
+        approved_name: "Lactarius subalpinus",
+        chosen_name: { name_id: names(:lactarius_alpinus).id } },
+      1, 1, 0
+    )
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_alpinus))
   end
 
   def test_create_observation_with_approved_deprecated_name
     generic_construct_observation({
-      name: { name: "Lactarius subalpinus" },
-      approved_name: "Lactarius subalpinus",
-      chosen_name: {}
-    }, 1, 1, 0)
+                                    name: { name: "Lactarius subalpinus" },
+                                    approved_name: "Lactarius subalpinus",
+                                    chosen_name: {}
+                                  }, 1, 1, 0)
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_subalpinus))
   end
@@ -1777,9 +1898,9 @@ class ObserverControllerTest < FunctionalTestCase
     # Test an observation creation with an approved new name
     Name.find_by(text_name: "Agaricus").destroy
     generic_construct_observation({
-      name: { name: "Agaricus novus" },
-      approved_name: "Agaricus novus"
-    }, 1, 1, 2)
+                                    name: { name: "Agaricus novus" },
+                                    approved_name: "Agaricus novus"
+                                  }, 1, 1, 2)
     name = Name.find_by(text_name: "Agaricus novus")
     assert(name)
     assert_equal("Agaricus novus", name.text_name)
@@ -1796,9 +1917,9 @@ class ObserverControllerTest < FunctionalTestCase
 
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: name.text_name }
-    }, 1, 1, 0)
+                                    observation: { place_name: where },
+                                    name: { name: name.text_name }
+                                  }, 1, 1, 0)
     obs = assigns(:observation)
     nam = assigns(:naming)
 
@@ -1813,9 +1934,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
-      observation: { place_name: "", lat: lat, long: long },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: "",
+                                                   lat: lat, long: long },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
     obs = assigns(:observation)
 
     assert_equal(lat.to_s, obs.lat.to_s)
@@ -1828,9 +1950,10 @@ class ObserverControllerTest < FunctionalTestCase
     lat2 = "34°9’43.92”N"
     long2 = "118°21′7.56″W"
     generic_construct_observation({
-      observation: { place_name: "", lat: lat2, long: long2 },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: "",
+                                                   lat: lat2, long: long2 },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
     obs = assigns(:observation)
 
     assert_equal("34.1622", obs.lat.to_s)
@@ -1842,17 +1965,19 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_empty_geolocation_and_location
     # Make sure it doesn't accept no location AND no lat/long.
     generic_construct_observation({
-      observation: { place_name: "", lat: "", long: "" },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: "",
+                                                   lat: "", long: "" },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
   end
 
   def test_create_observations_with_unknown_location_and_empty_geolocation
     # But create observation if explicitly tell it "unknown" location.
     generic_construct_observation({
-      observation: { place_name: "Earth", lat: "", long: "" },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
   end
 
   def test_create_observation_with_various_altitude_formats
@@ -1865,9 +1990,10 @@ class ObserverControllerTest < FunctionalTestCase
       where = "Unknown, Massachusetts, USA"
 
       generic_construct_observation({
-        observation: { place_name: where, alt: input },
-        name: { name: "Unknown" }
-      }, 1, 0, 0)
+                                      observation: { place_name: where,
+                                                     alt: input },
+                                      name: { name: "Unknown" }
+                                    }, 1, 0, 0)
       obs = assigns(:observation)
 
       assert_equal(output, obs.alt)
@@ -1878,10 +2004,11 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_class
     generic_construct_observation({
-      observation: { place_name: "Earth", lat: "", long: "" },
-      name: { name: "Lecanoromycetes L." },
-      approved_name: "Lecanoromycetes L."
-    }, 1, 1, 1)
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
+                                    name: { name: "Lecanoromycetes L." },
+                                    approved_name: "Lecanoromycetes L."
+                                  }, 1, 1, 1)
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
@@ -1927,10 +2054,11 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_creating_group
     generic_construct_observation({
-      observation: { place_name: "Earth", lat: "", long: "" },
-      name: { name: "Morchella elata group" },
-      approved_name: "Morchella elata group"
-    }, 1, 1, 2)
+                                    observation: { place_name: "Earth",
+                                                   lat: "", long: "" },
+                                    name: { name: "Morchella elata group" },
+                                    approved_name: "Morchella elata group"
+                                  }, 1, 1, 2)
 
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
@@ -1950,17 +2078,17 @@ class ObserverControllerTest < FunctionalTestCase
     cladina.merge_synonyms(cladonia)
 
     generic_construct_observation({
-      observation: { place_name: "Earth" },
-      name: { name: "Cladina pictum" }
-    }, 0, 0, 0, roy)
+                                    observation: { place_name: "Earth" },
+                                    name: { name: "Cladina pictum" }
+                                  }, 0, 0, 0, roy)
     assert_names_equal(cladina, assigns(:parent_deprecated))
     assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
 
     generic_construct_observation({
-      observation: { place_name: "Earth" },
-      name: { name: "Cladina pictum" },
-      approved_name: "Cladina pictum"
-    }, 1, 1, 1, roy)
+                                    observation: { place_name: "Earth" },
+                                    name: { name: "Cladina pictum" },
+                                    approved_name: "Cladina pictum"
+                                  }, 1, 1, 1, roy)
 
     name = Name.last
     assert_equal("Cladina pictum", name.text_name)
@@ -1971,94 +2099,94 @@ class ObserverControllerTest < FunctionalTestCase
     # Test a reversed name with a scientific user
     where = "USA, Massachusetts, Reversed"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 1, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0, roy)
 
     # Test missing space.
     where = "Reversible, Massachusetts,USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     # (This is accepted now for some reason.)
     where = "USA,Massachusetts, Reversible"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 1, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0, roy)
 
     # Test a bogus country name
     where = "Bogus, Massachusetts, UAS"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "UAS, Massachusetts, Bogus"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0, roy)
 
     # Test a bad state name
     where = "Bad State Name, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "USA, Bad State Name"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0, roy)
 
     # Test mix of city and county
     where = "Burbank, Los Angeles Co., California, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "USA, California, Los Angeles Co., Burbank"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0, roy)
 
     # Test mix of city and county
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "USA, Massachusetts, Barnstable Co., Falmouth"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0, roy)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0, roy)
 
     # Test some bad terms
     where = "Some County, Ohio, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "Old Rd, Ohio, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 0, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 0, 0, 0)
     where = "Old Rd., Ohio, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
 
     # Test some acceptable additions
     where = "near Burbank, Southern California, USA"
     generic_construct_observation({
-      observation: { place_name: where },
-      name: { name: "Unknown" }
-    }, 1, 0, 0)
+                                    observation: { place_name: where },
+                                    name: { name: "Unknown" }
+                                  }, 1, 0, 0)
   end
 
   def test_name_resolution
@@ -3406,22 +3534,28 @@ class ObserverControllerTest < FunctionalTestCase
 
   # When pattern matches multiple users, list them.
   def test_user_search_multiple_hits
-    pattern = "name_sorts_user"
+    pattern = "Roy"
     get(:user_search, pattern: pattern)
     # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{pattern}/,
-                 css_select("title").text, "Wrong page")
+    assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
+                 "Wrong page displayed")
 
     prove_sorting_links_include_contribution
   end
 
-  # When pattern has no matches, go to list page with flash message.
+  # When pattern has no matches, go to list page with flash message,
+  #  title not displayed and default metadata title
   def test_user_search_unmatched
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search, pattern: unmatched_pattern)
-    # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{unmatched_pattern}/,
-                 css_select("title").text, "Wrong page")
+    assert_template(:list_users)
+
+    assert_empty(@controller.instance_variable_get("@title"),
+                 "Displayed title should be empty")
+    assert_equal(css_select("title").text, "Mushroom Observer: User Search",
+                 "metadata <title> tag incorrect")
+    assert_empty(css_select("#sorts"),
+                 "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
@@ -3504,7 +3638,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Get expected names not included in the displayed checklist links.
     missing_names = (
       expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/ =~ css_select(".checklist a").text
+        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
         missing << taxon.text_name
       end
     )

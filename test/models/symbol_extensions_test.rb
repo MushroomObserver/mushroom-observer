@@ -75,7 +75,7 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("This has &#8220;Birds&#8221;", :quote_them.t(them: "birds"))
   end
 
-  def test_Yep # rubocop:disable Style/MethodName
+  def test_Yep # rubocop:disable Naming/MethodName
     assert_equal "Yes", :YEP.t
   end
 
@@ -83,7 +83,7 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal "yes", :yep.t
   end
 
-  def test_Nope # rubocop:disable Style/MethodName
+  def test_Nope # rubocop:disable Naming/MethodName
     assert_equal "No", :NOPE.t
   end
 
@@ -104,7 +104,7 @@ class SymbolExtensionsTest < UnitTestCase
     assert :hello.has_translation?
   end
 
-  def test_Hello_has_translation # rubocop:disable Style/MethodName
+  def test_Hello_has_translation # rubocop:disable Naming/MethodName
     assert :Hello.has_translation?
   end
 

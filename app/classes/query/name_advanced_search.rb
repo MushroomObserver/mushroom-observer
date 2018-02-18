@@ -10,7 +10,7 @@ module Query
     end
 
     def initialize_flavor
-      add_join(:observations) unless params[:content].blank?
+      add_join(:observations) if params[:content].present?
       initialize_advanced_search
       super
     end

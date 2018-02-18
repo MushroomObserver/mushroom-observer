@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = AJAX Controller
 #
@@ -63,7 +62,7 @@ class AjaxController < ApplicationController
   def backtrace(e)
     result = ""
     e.backtrace.each do |line|
-      break if line =~ /action_controller.*perform_action/
+      break if /action_controller.*perform_action/.match?(line)
       result += line + "\n"
     end
     result

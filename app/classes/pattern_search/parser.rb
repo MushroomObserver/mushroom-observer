@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module PatternSearch
   class Parser
     attr_accessor :incoming_string

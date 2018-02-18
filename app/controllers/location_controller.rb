@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require "geocoder"
 
 class LocationController < ApplicationController
@@ -92,7 +90,8 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  def locations_by_editor # :nologin: :norobots:
+  # :nologin: :norobots:
+  def locations_by_editor
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Location, :by_editor, user: user)
       show_selected_locations(query)
@@ -100,8 +99,12 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  def location_search # :nologin: :norobots:
-    query = create_query(:Location, :pattern_search, pattern: Location.user_name(@user, params[:pattern].to_s))
+  # :nologin: :norobots:
+  def location_search
+    query = create_query(
+      :Location, :pattern_search,
+      pattern: Location.user_name(@user, params[:pattern].to_s)
+    )
     show_selected_locations(query, link_all_sorts: true)
   end
 
@@ -110,7 +113,7 @@ class LocationController < ApplicationController
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -264,17 +267,17 @@ class LocationController < ApplicationController
 
       # Also make sure it doesn't reference locations anywhere.  This would
       # presumably be the result of customization of one of the above flavors.
-      result = nil if result.query.match(/\Wlocations\./)
+      result = nil if /\Wlocations\./.match?(result.query)
     end
 
     result
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Description Searches and Indexes
   #
-  ################################################################################
+  ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
   def index_location_description # :nologin: :norobots:
@@ -432,7 +435,7 @@ class LocationController < ApplicationController
         version = LocationDescription::Version.find(@merge_source_id)
         @old_parent_id = version.location_description_id
         subversion = params[:version]
-        if !subversion.blank? &&
+        if subversion.present? &&
            (version.version != subversion.to_i)
           version = LocationDescription::Version.
                     find_by_version_and_location_description_id(params[:version], @old_parent_id)
@@ -483,8 +486,7 @@ class LocationController < ApplicationController
 
     # This is the latest value of place name.
     @display_name = begin
-                      params[:location][:display_name].
-                      strip_squeeze
+                      params[:location][:display_name].strip_squeeze
                     rescue
                       @original_name
                     end
@@ -558,7 +560,7 @@ class LocationController < ApplicationController
       # If done, update any observations at @display_name,
       # and set user's primary location if called from profile.
       if done
-        unless @original_name.blank?
+        if @original_name.present?
           db_name = Location.user_name(@user, @original_name)
           Observation.define_a_location(@location, db_name)
           SpeciesList.define_a_location(@location, db_name)
@@ -592,7 +594,8 @@ class LocationController < ApplicationController
     end
   end
 
-  def edit_location # :prefetch: :norobots:
+  # :prefetch: :norobots:
+  def edit_location
     store_location
     pass_query_params
     @location = find_or_goto_index(Location, params[:id].to_s)
@@ -690,7 +693,8 @@ class LocationController < ApplicationController
                                   name: @description.unique_partial_format_name)
 
         flash_notice(:runtime_location_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
         redirect_to(action: "show_location_description",
                     id: @description.id)
 
@@ -728,7 +732,8 @@ class LocationController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_location_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
 
         # Log action in parent location.
         @description.location.log(:log_description_updated,
@@ -840,7 +845,7 @@ class LocationController < ApplicationController
               rescue
                 ""
               end
-      if !where.blank? &&
+      if where.present? &&
          update_observations_by_where(location, where)
         flash_notice(:runtime_location_merge_success.t(this: where,
                                                        that: location.display_name))

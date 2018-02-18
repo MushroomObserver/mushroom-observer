@@ -25,7 +25,7 @@ namespace :jason do
     fh.close
   end
 
-  ################################################################################
+  ##############################################################################
 
   # ----------------------------
   #  Redcloth.
@@ -52,7 +52,7 @@ namespace :jason do
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|
-          if line.match(/^ +create_table +"(\w+)"/)
+          if line =~ /^ +create_table +"(\w+)"/
             table2 = Regexp.last_match(1)
           elsif table == table2 && line.match(/^ +t.text +"(\w+)"/)
             column = Regexp.last_match(1)
@@ -98,7 +98,7 @@ namespace :jason do
     print "Done!\n"
   end
 
-  ################################################################################
+  ##############################################################################
 
   desc "Get list of browser ID strings from apache logs."
   task(:apache_browser_ids) do
@@ -130,7 +130,7 @@ namespace :jason do
       join("")
   end
 
-  ################################################################################
+  ##############################################################################
 
   # ----------------------------
   #  Translations.
@@ -159,7 +159,7 @@ namespace :jason do
     strings = {}
     File.open("config/locales/#{ENV["LOCALE"]}.yml") do |fh|
       fh.each_line do |line|
-        strings[Regexp.last_match(1)] = true if line.match(/^(\w+):/)
+        strings[Regexp.last_match(1)] = true if /^(\w+):/.match?(line)
       end
     end
     @have_strings = strings
@@ -185,7 +185,7 @@ namespace :jason do
     }.sort.join("\n") + "\n"
   end
 
-  ################################################################################
+  ##############################################################################
 
   # ----------------------------
   #  Esslinger's checklist.
@@ -199,7 +199,7 @@ namespace :jason do
     File.open("esslinger.txt") do |fh|
       fh.each_line do |name|
         name = name.strip!.squeeze(" ")
-        if name.match(/^([A-Z])/)
+        if name =~ /^([A-Z])/
           print Regexp.last_match(1)
 
           name_parse = NameParse.new(name)
@@ -243,7 +243,7 @@ namespace :jason do
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   desc "Convert __Names__ in notes throughout to links."
   task(rebuild_links: :environment) do
@@ -254,7 +254,7 @@ namespace :jason do
     print textilize(str)
   end
 
-  ################################################################################
+  ##############################################################################
 
   desc "Dump and flush mysqld stats."
   task(global_status: :environment) do
@@ -266,7 +266,7 @@ namespace :jason do
     Comment.connection.execute("flush status")
   end
 
-  ################################################################################
+  ##############################################################################
 
   desc "Bulk create observations."
   task(bulk: :environment) do
@@ -286,7 +286,7 @@ namespace :jason do
       lines = [line]
 
       # Skip blank lines and comments.
-      if line.match(/^\s*(#|$)/)
+      if /^\s*(#|$)/.match?(line)
         line = $stdin.gets
 
       # Create new observation.
@@ -309,7 +309,7 @@ namespace :jason do
           line.chomp!
 
           # All items for an object are of the form: "var: val"
-          if line.match(/^(\w[\w\s]+\w)\s*:\s*(.*)/)
+          if line =~ /^(\w[\w\s]+\w)\s*:\s*(.*)/
             var = Regexp.last_match(1)
             val = Regexp.last_match(2)
             lines.push(line)
@@ -319,10 +319,10 @@ namespace :jason do
             if val == '\\'
               val = ""
               line = $stdin.gets
-              while line && !line.match(/^\w/)
+              while line && !(/^\w/.match?(line))
                 line.chomp!
                 lines.push(line)
-                unless line.match(/^\s*#/)
+                unless /^\s*#/.match?(line)
                   val += "\n" if val != ""
                   val += line.sub(/^\s+/, "")
                 end
@@ -344,9 +344,9 @@ namespace :jason do
             when "specimen"
               if !spec.nil?
                 lines.push('>>>>>>>> already set "specimen" for this observation')
-              elsif val.match(/^(y(es)?|1)$/i)
+              elsif (/^(y(es)?|1)$/i).match?(val)
                 spec = true
-              elsif val.match(/^(n(o)?|0)$/i)
+              elsif (/^(n(o)?|0)$/i).match?(val)
                 spec = false
               else
                 lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
@@ -355,9 +355,9 @@ namespace :jason do
             when "is collection location"
               if !is_co.nil?
                 lines.push('>>>>>>>> already set "is collection location" for this observation')
-              elsif val.match(/^(y(es)?|1)$/i)
+              elsif (/^(y(es)?|1)$/i).match?(val)
                 is_co = true
-              elsif val.match(/^(n(o)?|0)$/i)
+              elsif (/^(n(o)?|0)$/i).match?(val)
                 is_co = false
               else
                 lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
@@ -376,17 +376,17 @@ namespace :jason do
                 lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
               elsif !vote.nil?
                 lines.push('>>>>>>>> already set "vote" for this observation')
-              elsif val.match(/call/i)
+              elsif (/call/i).match?(val)
                 vote = 3
-              elsif val.match(/promis/i)
+              elsif (/promis/i).match?(val)
                 vote = 2
-              elsif val.match(/could/i)
+              elsif (/could/i).match?(val)
                 vote = 1
-              elsif val.match(/doubt/i)
+              elsif (/doubt/i).match?(val)
                 vote = -1
-              elsif val.match(/not/i)
+              elsif (/not/i).match?(val)
                 vote = -2
-              elsif val.match(/as[\s_]if/i)
+              elsif (/as[\s_]if/i).match?(val)
                 vote = -3
               else
                 lines.push('>>>>>>>> invalid vote, use "I\'d call it that", "promising" or "could be"')
@@ -470,7 +470,7 @@ namespace :jason do
 
           else
             # Keep blank lines and comments in case of error.
-            if line.match(/^\s*(#|$)/)
+            if /^\s*(#|$)/.match?(line)
               lines.push(line)
             else
               lines.push(">>>>>>>> %s" % line)
@@ -503,7 +503,7 @@ namespace :jason do
           end
 
           if obs.save
-            if notes.match(/(\d{8}\.\d+\w*)/)
+            if notes =~ /(\d{8}\.\d+\w*)/
               name = Regexp.last_match(1)
             elsif what
               name = "%s %s" % [date.strftime("%Y%m%d"), what.text_name]
@@ -587,7 +587,7 @@ namespace :jason do
           puts(x)
         end
 
-      elsif line.match(/^[A-Z]/)
+      elsif /^[A-Z]/.match?(line)
         puts(">>>>>>>> unrecognized object type")
         begin
           line.chomp!
@@ -659,7 +659,7 @@ namespace :jason do
   end
 
   def lookup_image(val, path)
-    if val.match(/^\d+$/)
+    if /^\d+$/.match?(val)
       return Image.find_by_id(val)
     # elsif val.match(/^https?:\/\//)
     #   ...
@@ -684,7 +684,7 @@ namespace :jason do
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   desc "test"
   task(test: :environment) do

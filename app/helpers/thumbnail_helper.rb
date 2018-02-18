@@ -1,4 +1,3 @@
-# encoding: utf-8
 module ThumbnailHelper
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   #
@@ -12,7 +11,7 @@ module ThumbnailHelper
   #   notes::            Show image notes??
   #
   def thumbnail(image, args = {})
-    image_id = image.is_a?(Fixnum) ? image : image.id
+    image_id = image.is_a?(Integer) ? image : image.id
     locals = {
       image:            image,
       link:             Image.show_link_args(image_id),
@@ -29,11 +28,11 @@ module ThumbnailHelper
 
   def show_best_image(obs)
     if obs && obs.thumb_image
-      thumbnail(obs.thumb_image,         link: obs.show_link_args,
-                                         size: :thumbnail,
-                                         votes: true,
-                                         responsive: false
-               ) + image_copyright(obs.thumb_image)
+      thumbnail(obs.thumb_image,
+                link: obs.show_link_args,
+                size: :thumbnail,
+                votes: true,
+                responsive: false) + image_copyright(obs.thumb_image)
     end
   end
 

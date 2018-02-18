@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
@@ -8,7 +6,7 @@ class GlossaryTerm < AbstractModel
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
-  ALL_TERM_FIELDS = [:name, :description]
+  ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
     table_name: "glossary_terms_versions",
     if_changed: ALL_TERM_FIELDS,
@@ -54,12 +52,11 @@ class GlossaryTerm < AbstractModel
   end
 
   def add_image(image)
-    if image
-      if thumb_image.nil?
-        self.thumb_image = image
-      else
-        images.push(image)
-      end
+    return unless image
+    if thumb_image.nil?
+      self.thumb_image = image
+    else
+      images.push(image)
     end
   end
 

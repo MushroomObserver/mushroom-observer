@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class Triple < ActiveRecord::Base
   def self.delete_predicate_matches(predicate)
     if valid_predicate(predicate)

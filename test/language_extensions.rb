@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # stop-gap fix for
 # TypeError: superclass mismatch for class Language
 #   /vagrant/mushroom-observer/app/models/language.rb:27:in `<top (required)>'

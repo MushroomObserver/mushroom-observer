@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Consensus Change Email
 class QueuedEmail::ConsensusChange < QueuedEmail
   def observation

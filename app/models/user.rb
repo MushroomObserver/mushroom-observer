@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = User Model
 #
@@ -491,7 +490,7 @@ class User < AbstractModel
   def legal_name_change
     old_name = name_change ? name_change[0] : name
     old_login = login_change ? login_change[0] : login
-    old_legal_name = old_name.blank? ? old_login : old_name
+    old_legal_name = old_name.presence || old_login
     new_legal_name = legal_name
     return nil if old_legal_name == new_legal_name
     [old_legal_name, new_legal_name]
@@ -522,7 +521,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    update_attribute "password", self.class.sha1(pass) unless pass.blank?
+    update_attribute "password", self.class.sha1(pass) if pass.present?
   end
 
   # Mark a User account as "verified".
@@ -826,7 +825,7 @@ class User < AbstractModel
 
   def self.parse_notes_template(str)
     str.to_s.gsub(/[\x00-\x07\x09\x0B\x0C\x0E-\x1F\x7F]/, "").
-        split(",").map(&:squish).reject(&:blank?)
+      split(",").map(&:squish).reject(&:blank?)
   end
 
   ##############################################################################
@@ -1021,13 +1020,13 @@ class User < AbstractModel
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    unless password.blank?
+    if password.present?
       write_attribute("password", self.class.sha1(password))
     end
     write_attribute("auth_code", String.random(40))
   end
 
-################################################################################
+  ##############################################################################
 
   private
 
@@ -1060,7 +1059,7 @@ class User < AbstractModel
   end
 
   def check_password # :nodoc:
-    unless password.blank?
+    if password.present?
       if password_confirmation.to_s.blank?
         errors.add(:password, :validate_user_password_confirmation_missing.t)
       elsif password != password_confirmation

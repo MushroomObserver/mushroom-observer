@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   class HasImages < BooleanFilter
     def initialize

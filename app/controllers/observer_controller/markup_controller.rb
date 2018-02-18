@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see observer_controller.rb
 class ObserverController
   def lookup_comment # :nologin
@@ -55,7 +54,7 @@ class ObserverController
     type = model.type_tag
     id = params[:id].to_s.gsub(/[+_]/, " ").strip_squeeze
     begin
-      if id.match(/^\d+$/)
+      if /^\d+$/.match?(id)
         obj = find_or_goto_index(model, id)
         return unless obj
         matches = [obj]

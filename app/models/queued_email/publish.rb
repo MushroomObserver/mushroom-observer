@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Name Published Email
 
 class QueuedEmail::Publish < QueuedEmail

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module JavascriptHelper
   # For now, just use Browser gem's "modern?" criteria.
   # (Webkit, Firefox 17+, IE 9+ and Opera 12+)

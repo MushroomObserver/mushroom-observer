@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Extensions to ActiveRecord::Base
 #
@@ -147,7 +146,7 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Return the version number given an array-like index.  Use negative indexes
-  # to specify index from the end.  Return Fixnum, or nil if doesn't exist.
+  # to specify index from the end.  Return Integer, or nil if doesn't exist.
   #
   #   name.find_version(-1)  # Last (current) version.
   #   name.find_version(-2)  # Next-to-last (previous) version.
@@ -310,7 +309,7 @@ class AbstractModel < ActiveRecord::Base
   def formatted_errors
     out = []
     errors.each do |attr, msg|
-      if msg.match(/^[A-Z]/)
+      if /^[A-Z]/.match?(msg)
         out << msg
       else
         name = attr.to_s.to_sym.l

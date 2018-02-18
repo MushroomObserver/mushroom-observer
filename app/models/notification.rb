@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Notification Model
 #
@@ -42,8 +41,7 @@ class Notification < AbstractModel
             all_comments: 4
           },
           source: :flavor,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   # List of all available flavors (Symbol's).
   def self.all_flavors
@@ -121,7 +119,7 @@ class Notification < AbstractModel
     result
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

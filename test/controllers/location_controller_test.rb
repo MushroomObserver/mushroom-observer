@@ -460,7 +460,7 @@ class LocationControllerTest < FunctionalTestCase
     # Only compare the keys that are in both.
     bfp = barton_flats_params
     key_count = 0
-    bfp.keys.each do |k|
+    bfp.each_key do |k|
       if new_params[k]
         key_count += 1
         assert_equal(new_params[k], bfp[k])

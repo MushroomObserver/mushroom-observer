@@ -147,7 +147,7 @@ class VoteControllerTest < FunctionalTestCase
     table = namings(:coprinus_comatus_naming).calc_vote_table
     str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
     str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
-    table.keys.each do |str|
+    table.each_key do |str|
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
       elsif str == str1

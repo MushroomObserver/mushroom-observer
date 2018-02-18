@@ -1,10 +1,8 @@
-# encoding: utf-8
 #
 # The original MO controller and hence a real mess!
 # The Clitocybe of controllers.
 #
 class ObserverController < ApplicationController
-
   # These need to be moved into the files where they are actually used.
   require "find"
   require "set"
@@ -95,6 +93,6 @@ class ObserverController < ApplicationController
     :edit_observation,
     :show_obs,
     :show_observation,
-    :show_user,
+    :show_user
   ]
 end

@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Pivotal
   class Story
     attr_accessor :id
@@ -31,8 +30,8 @@ class Pivotal
       "search"          => 2,
       "specimen"        => 2,
       "voting"          => 2,
-      "other"           => 1,
-    }
+      "other"           => 1
+    }.freeze
 
     def initialize(json)
       data = json.is_a?(String) ? JSON.parse(json) : json
@@ -71,12 +70,12 @@ class Pivotal
 
     def parse_description(str)
       str.to_s.split(/\n/).select do |line|
-        if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
+        if line =~ /USER:\s*(\d+)\s+(\S.*\S)/
           id   = Regexp.last_match[1]
           name = Regexp.last_match[2]
           @user = Pivotal::User.new(id, name)
           false
-        elsif line.match(/VOTE:\s*(\d+)\s+(\S+)/)
+        elsif line =~ /VOTE:\s*(\d+)\s+(\S+)/
           id    = Regexp.last_match[1]
           value = Regexp.last_match[2]
           @votes << Pivotal::Vote.new(id, value)

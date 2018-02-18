@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Name Tracking Email
 
 class QueuedEmail::NameTracking < QueuedEmail

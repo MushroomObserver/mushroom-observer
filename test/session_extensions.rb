@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Integration Session Test Helpers
 #
@@ -142,11 +141,11 @@ module SessionExtensions
     results
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Form Helpers
   #
-  ################################################################################
+  ##############################################################################
 
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
@@ -216,7 +215,7 @@ module SessionExtensions
   # stack.  If called with 2, it pops one page off the stack then restores the
   # page before that.  And so on.
   def go_back(arg = 1)
-    if arg.is_a?(Fixnum)
+    if arg.is_a?(Integer)
       while arg > 1
         @page_stack.pop
         arg -= 1
@@ -275,9 +274,9 @@ module SessionExtensions
         # Filter based on link "label" (can be an image too, for example).
         if arg = args[:label]
           if arg == :image
-            match = false unless link.to_s.match(/img /)
+            match = false unless /img /.match?(link.to_s)
           elsif arg.is_a?(Regexp)
-            match = false unless link.to_s.match(arg)
+            match = false unless arg.match?(link.to_s)
           else
             match = false unless link.to_s.index(arg)
           end
@@ -296,11 +295,11 @@ module SessionExtensions
     assert done, "Expected a link matching: #{args.inspect}"
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: assert_select Wrappers
   #
-  ################################################################################
+  ##############################################################################
 
   def assert_link_exists(url)
     assert_link_exists_general_case(url, "")

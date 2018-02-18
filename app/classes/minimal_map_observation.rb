@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class MinimalMapObservation
   attr_accessor :id, :lat, :long, :location_id
 
@@ -7,7 +5,7 @@ class MinimalMapObservation
     @id = id
     @lat = lat
     @long = long
-    if location_or_id.is_a?(Fixnum) ||
+    if location_or_id.is_a?(Integer) ||
        location_or_id.is_a?(String)
       @location_id = location_or_id.to_i
     elsif location_or_id.is_a?(Location)

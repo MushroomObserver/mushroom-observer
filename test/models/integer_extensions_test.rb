@@ -1,7 +1,7 @@
 require "test_helper"
 
-# Test MO extensions to Ruby Fixnum class
-class FixnumExtensionsTest < UnitTestCase
+# Test MO extensions to Ruby Integer class
+class IntegerExtensionsTest < UnitTestCase
   def test_convert_decimal_to_base62
     assert_equal("0", 0.alphabetize)
     assert_equal("g", 42.alphabetize)

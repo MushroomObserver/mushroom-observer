@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   # Content filter specifically to filter out or just show lichens.
   class Lichen < BooleanFilter
