@@ -114,6 +114,82 @@ class PatternSearchTest < UnitTestCase
     assert_equal("either", x.parse_yes_no_both)
   end
 
+  def test_parse_to_true_false_string
+    x = PatternSearch::Term.new(:xxx)
+    x.vals = []
+    assert_raises(
+      PatternSearch::MissingValueError
+    ) { x.parse_to_true_false_string }
+    x.vals = [1, 2]
+    assert_raises(
+      PatternSearch::TooManyValuesError
+    ) { x.parse_to_true_false_string }
+    x.vals = ["1"]
+    assert_equal("TRUE", x.parse_to_true_false_string)
+    x.vals = ["yes"]
+    assert_equal("TRUE", x.parse_to_true_false_string)
+    x.vals = ["true"]
+    assert_equal("TRUE", x.parse_to_true_false_string)
+    x.vals = ["TRUE"]
+    assert_equal("TRUE", x.parse_to_true_false_string)
+
+    x.vals = ["0"]
+    assert_equal("FALSE", x.parse_to_true_false_string)
+    x.vals = ["no"]
+    assert_equal("FALSE", x.parse_to_true_false_string)
+    x.vals = ["false"]
+    assert_equal("FALSE", x.parse_to_true_false_string)
+    x.vals = ["FALSE"]
+    assert_equal("FALSE", x.parse_to_true_false_string)
+
+    x.vals = ["xxx"]
+    assert_raises(
+      PatternSearch::BadBooleanError
+    ) { x.parse_to_true_false_string }
+    x.vals = ["no"]
+    assert_raises(
+      PatternSearch::BadYesError
+    ) { x.parse_to_true_false_string(:only_yes) }
+  end
+
+  def test_parse_to_null_not_null_string
+    x = PatternSearch::Term.new(:xxx)
+    x.vals = []
+    assert_raises(
+      PatternSearch::MissingValueError
+    ) { x.parse_to_null_not_null_string }
+    x.vals = [1, 2]
+    assert_raises(
+      PatternSearch::TooManyValuesError
+    ) { x.parse_to_null_not_null_string }
+    x.vals = ["1"]
+    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
+    x.vals = ["yes"]
+    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
+    x.vals = ["true"]
+    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
+    x.vals = ["TRUE"]
+    assert_equal("NOT NULL", x.parse_to_null_not_null_string)
+
+    x.vals = ["0"]
+    assert_equal("NULL", x.parse_to_null_not_null_string)
+    x.vals = ["no"]
+    assert_equal("NULL", x.parse_to_null_not_null_string)
+    x.vals = ["false"]
+    assert_equal("NULL", x.parse_to_null_not_null_string)
+    x.vals = ["FALSE"]
+    assert_equal("NULL", x.parse_to_null_not_null_string)
+
+    x.vals = ["xxx"]
+    assert_raises(
+      PatternSearch::BadBooleanError
+    ) { x.parse_to_null_not_null_string }
+    x.vals = ["no"]
+    assert_raises(
+      PatternSearch::BadYesError
+    ) { x.parse_to_null_not_null_string(:only_yes) }
+  end
+
   def test_parse_float
     x = PatternSearch::Term.new(:xxx)
     x.vals = []

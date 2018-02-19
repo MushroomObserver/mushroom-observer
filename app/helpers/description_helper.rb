@@ -223,7 +223,7 @@ module DescriptionHelper
              else
                :private.l
     end
-    result += " (#{permit})" unless (/(^| )#{permit}( |$)/i).match?(result)
+    result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
 
     t(result)
   end
