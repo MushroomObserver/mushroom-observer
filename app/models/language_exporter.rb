@@ -271,8 +271,8 @@ module LanguageExporter
     val = clean_string(val)
     if /\\n|\n/.match?(val)
       val = format_multiline_string(escape_string(val))
-    elsif (/:(\s|$)| #/).match?(val) ||
-          (/^(no|yes)$/i).match?(val) ||
+    elsif /:(\s|$)| #/.match?(val) ||
+          /^(no|yes)$/i.match?(val) ||
           (/^\W/.match?(val) && val[0].is_ascii_character?)
       val = escape_string(val)
     elsif val == ""
@@ -373,7 +373,7 @@ module LanguageExporter
               "invalid tag quotes: #{quoted_tag.inspect}")
       @pass = false
     end
-    if (/^(yes|no)$/i).match?(quoted_tag)
+    if /^(yes|no)$/i.match?(quoted_tag)
       verbose("#{locale} #{@line_number}: " \
               "'yes' and 'no' must be quoted in YAML files")
       @pass = false
@@ -420,7 +420,7 @@ module LanguageExporter
   def validate_string(str)
     str = str.strip.squeeze(" ")
     pass = true
-    if (/^(yes|no)$/i).match?(str)
+    if /^(yes|no)$/i.match?(str)
       pass = false
     elsif /^'/.match?(str)
       pass = false unless /^'([^'\\]|\\.)*'$/.match?(str)
@@ -458,9 +458,9 @@ module LanguageExporter
   def validate_square_brackets_args(args)
     pass = true
     args.split(",").each do |pair|
-      unless (/^ :?\w+ = (
+      unless /^ :?\w+ = (
             '.*' | ".*" | -?\d+(\.\d+)? | :\w+ | [a-z][a-z_]*\d*
-          )$/x).match?(pair)
+          )$/x.match?(pair)
         pass = false
         break
       end
