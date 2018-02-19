@@ -6,7 +6,7 @@ module Query
         {
           name:          :name,
           synonyms?:     { string: [:no, :all, :exclusive] },
-          nonconsensus?: { string: [:no, :all, :exclusive, :other_taxa] }
+          nonconsensus?: { string: [:no, :all, :exclusive, :mixed] }
         }
       end
 
@@ -54,7 +54,7 @@ module Query
           add_name_conditions_all_namings(id_set)
         elsif params[:nonconsensus] == :exclusive
           add_name_conditions_just_losers(id_set)
-        elsif params[:nonconsensus] == :other_taxa
+        elsif params[:nonconsensus] == :mixed
           add_name_conditions_other_taxa(
             included_naming: names.first.id,
             excluded_names: corresponding_name_id_set(names)

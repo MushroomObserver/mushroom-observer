@@ -41,12 +41,12 @@
 #  4) observations with naming @name whose consensus is not a synonym of @name
 #
 #    query = Query.lookup(:Observation, :of_name, name: @name)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :exclusive)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :all, nonconsensus: :exclusive)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, nonconsensus: :other_taxa)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :all, nonconsensus: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :all, nonconsensus: :mixed)
 #
 #  You may further tweak a query after it's been created:
 #

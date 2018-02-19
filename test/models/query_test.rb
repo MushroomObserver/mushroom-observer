@@ -2529,7 +2529,8 @@ class QueryTest < UnitTestCase
       Observation.joins(:namings).
                   where("namings.name" => this_name.id).
                   where.not(name: taxon_names),
-      :Observation, :of_name, name: this_name.id, nonconsensus: :other_taxa
+      :Observation, :of_name, name: this_name.id,
+      synonyms: :all, nonconsensus: :mixed
     )
   end
 
