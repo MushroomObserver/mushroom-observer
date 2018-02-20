@@ -2498,6 +2498,42 @@ class QueryTest < UnitTestCase
                                          nonconsensus: :all)
   end
 
+  def test_observation_other_taxa_this_name
+    user           = users(:rolf)
+    this_name      = names(:peltigera)
+    synonym        = names(:petigera)
+    taxon_names    = [this_name, synonym]
+    other_taxon    = names(:suillus)
+
+    # Observations of taxon
+    this_name_obs  = Observation.create(name: this_name, user: user)
+    synonym_obs    = Observation.create(name: synonym, user: user)
+
+    Observation.create(name: this_name, user: user)
+    Naming.create(observation: this_name_obs, name: synonym, user: user)
+    Observation.create(name: synonym, user: user)
+    Naming.create(observation: synonym_obs, name: this_name, user: user)
+
+    other_taxon_this_name_proposed = Observation.create(name: other_taxon,
+                                                        user: user)
+    Naming.create(
+      observation: other_taxon_this_name_proposed, name: this_name, user: user
+    )
+    other_taxon_synonym_proposed = Observation.create(name: other_taxon,
+                                                      user: user)
+    Naming.create(
+      observation: other_taxon_synonym_proposed, name: synonym, user: user
+    )
+
+    assert_query(
+      Observation.joins(:namings).
+                  where("namings.name" => this_name.id).
+                  where.not(name: taxon_names),
+      :Observation, :of_name, name: this_name.id,
+      synonyms: :all, nonconsensus: :mixed
+    )
+  end
+
   def test_observation_pattern_search
     # notes
     assert_query([observations(:agaricus_campestras_obs).id,

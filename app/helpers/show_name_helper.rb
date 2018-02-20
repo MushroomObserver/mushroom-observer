@@ -47,8 +47,9 @@ module ShowNameHelper
   # (but this taxon is not the consensus)
   def name_proposed(name)
     query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :no,
-                         nonconsensus: :exclusive)
+                         name: name, by: :confidence,
+                         synonyms: :all,
+                         nonconsensus: :mixed)
     link_to_obss_of(query, :obss_name_proposed.t)
   end
 

@@ -34,16 +34,19 @@
 #
 #    query = Query.lookup(:Observation, :by_user, user: @user)
 #
-#  Get observations in the three sections of show_name:
+#  Get observations in the sections of show_name and show_observation:
 #  1) observations whose consensus is @name
 #  2) observations whose consensus is synonym of @name
 #  3) observations with non-consensus naming that is a synonym of @name
+#  4) observations with naming @name whose consensus is not a synonym of @name
 #
 #    query = Query.lookup(:Observation, :of_name, name: @name)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :exclusive)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :all, nonconsensus: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :all, nonconsensus: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name,
+#                         synonyms: :all, nonconsensus: :mixed)
 #
 #  You may further tweak a query after it's been created:
 #
