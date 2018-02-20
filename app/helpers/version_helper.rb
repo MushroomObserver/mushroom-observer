@@ -1,4 +1,3 @@
-# encoding: utf-8
 module VersionHelper
   # Just shows the current version number and a link to see the previous.
   #

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Language
 #
@@ -108,7 +107,7 @@ class Language < AbstractModel
   def self.score_lines(text)
     hash = {}
     for str in text.split("\n")
-      hash[str] = true unless str.blank?
+      hash[str] = true if str.present?
     end
     score = 0
     for key in hash.keys

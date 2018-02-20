@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Controller for community support including donations
 # and summary letters.
 class SupportController < ApplicationController

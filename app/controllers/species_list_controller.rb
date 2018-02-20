@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Species List Controller
 #
@@ -109,7 +108,7 @@ class SpeciesListController < ApplicationController
   # pattern.
   def species_list_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if pattern =~ /^\d+$/
+    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if spl
       redirect_to(action: "show_species_list", id: spl.id)
     else
@@ -167,7 +166,7 @@ class SpeciesListController < ApplicationController
       "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
     @query = create_query(:Observation, :in_species_list,
                           by: :name, species_list: @species_list)
-    store_query_in_session(@query) unless params[:set_source].blank?
+    store_query_in_session(@query) if params[:set_source].present?
     @query.need_letters = "names.sort_name"
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
@@ -242,7 +241,7 @@ class SpeciesListController < ApplicationController
       csv << %w[scientific_name authority citation accepted]
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
-                name.deprecated ? "" : "1"].map { |v| v.blank? ? nil : v }
+                name.deprecated ? "" : "1"].map { |v| v.presence }
       end
     end
     str = case charset
@@ -270,7 +269,7 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author unless author.blank?
+      doc << " " + author if author.present?
       doc.line_break
     end
     send_data(doc.to_rtf, type: "text/rtf",
@@ -333,7 +332,7 @@ class SpeciesListController < ApplicationController
       init_name_vars_for_create
       init_member_vars_for_create
       init_project_vars_for_create
-      init_name_vars_for_clone(params[:clone]) unless params[:clone].blank?
+      init_name_vars_for_clone(params[:clone]) if params[:clone].present?
       @checklist ||= calc_checklist
     else
       process_species_list(:create)
@@ -429,7 +428,7 @@ class SpeciesListController < ApplicationController
   end
 
   def lookup_species_list_by_id_or_name(str)
-    if str =~ /^\d+$/
+    if /^\d+$/.match?(str)
       SpeciesList.safe_find(str)
     else
       SpeciesList.find_by_title(str)
@@ -656,16 +655,16 @@ class SpeciesListController < ApplicationController
 
   def manage_object_states
     {
-      list: !params[:objects_list].blank?,
-      obs:  !params[:objects_obs].blank?,
-      img:  !params[:objects_img].blank?
+      list: params[:objects_list].present?,
+      obs:  params[:objects_obs].present?,
+      img:  params[:objects_img].present?
     }
   end
 
   def manage_project_states
     states = {}
     for proj in @projects
-      states[proj.id] = !params["projects_#{proj.id}"].blank?
+      states[proj.id] = params["projects_#{proj.id}"].present?
     end
     states
   end
@@ -746,7 +745,7 @@ class SpeciesListController < ApplicationController
 
   def attach_images_to_project(proj)
     imgs = @list.observations.map(&:images).flatten.uniq.
-                 select { |i| check_permission(i) }
+           select { |i| check_permission(i) }
     imgs -= proj.images
     if imgs.any?
       proj.add_images(imgs)
@@ -759,7 +758,7 @@ class SpeciesListController < ApplicationController
 
   def remove_images_from_project(proj)
     imgs = @list.observations.map(&:images).flatten.uniq.
-                 select { |i| check_permission(i) }
+           select { |i| check_permission(i) }
     unless @user.projects_member.include?(proj)
       imgs.select! { |i| i.user == @user }
     end
@@ -1144,17 +1143,15 @@ class SpeciesListController < ApplicationController
   def init_project_vars_for_create
     init_project_vars
     last_obs = Observation.where(user_id: User.current_id).
-                 order(:created_at).last
+               order(:created_at).last
     if last_obs && last_obs.created_at > 1.hour.ago
-      for proj in last_obs.projects
-        @project_checks[proj.id] = true
-      end
+      last_obs.projects.each { |proj| @project_checks[proj.id] = true }
     end
   end
 
   def init_project_vars_for_edit(spl)
     init_project_vars
-    for proj in spl.projects
+    spl.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
       @project_checks[proj.id] = true
     end
@@ -1162,10 +1159,10 @@ class SpeciesListController < ApplicationController
 
   def init_project_vars_for_reload(spl)
     init_project_vars
-    for proj in spl.projects
+    spl.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    for proj in @projects
+    @projects.each do |proj|
       @project_checks[proj.id] = params[:project] &&
                                  params[:project]["id_#{proj.id}"] == "1"
     end
@@ -1174,7 +1171,7 @@ class SpeciesListController < ApplicationController
   def update_projects(spl, checks)
     if checks
       any_changes = false
-      for project in User.current.projects_member
+      User.current.projects_member.each do |project|
         before = spl.projects.include?(project)
         after = checks["id_#{project.id}"] == "1"
         if before != after
@@ -1182,13 +1179,12 @@ class SpeciesListController < ApplicationController
             project.add_species_list(spl)
             flash_notice(:attached_to_project.t(object: :species_list,
                                                 project: project.title))
-            any_changes = true
           else
             project.remove_species_list(spl)
             flash_notice(:removed_from_project.t(object: :species_list,
                                                  project: project.title))
-            any_changes = true
           end
+          any_changes = true
         end
       end
       flash_notice(:species_list_show_manage_observations_too.t) if any_changes

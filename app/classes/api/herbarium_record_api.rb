@@ -47,10 +47,13 @@ class API
       @removes = parse_array(:observation, :remove_observation, help: 1)
       {
         herbarium:        parse(:herbarium, :set_herbarium, not_blank: true),
-        initial_det:      parse(:string, :set_initial_det, not_blank: true,
+        initial_det:      parse(:string,
+                                :set_initial_det,
+                                not_blank: true,
                                 help: 1),
         accession_number: parse(:string, :set_accession_number,
-                                not_blank: true, help: 1),
+                                not_blank: true,
+                                help: 1),
         notes:            parse(:string, :set_notes)
       }
     end
@@ -89,7 +92,7 @@ class API
       obj = HerbariumRecord.where(
               herbarium: params[:herbarium],
               accession_number: params[:accession_number]
-            ).first
+      ).first
       return nil unless obj
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
       obj.add_observation(@observation)

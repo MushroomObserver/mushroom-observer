@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Interest Controller
 #
@@ -105,7 +104,8 @@ class InterestController < ApplicationController
     if target
       redirect_back_or_default(
         add_query_param(controller: target.show_controller,
-                        action: target.show_action, id: oid))
+                        action: target.show_action, id: oid)
+      )
     else
       redirect_back_or_default(controller: "interest",
                                action: "list_interests")

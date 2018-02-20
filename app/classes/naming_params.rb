@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Encapsulates parameters needed for NamingController pages
 class NamingParams
   attr_accessor :naming

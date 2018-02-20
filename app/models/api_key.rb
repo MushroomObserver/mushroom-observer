@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class ApiKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults

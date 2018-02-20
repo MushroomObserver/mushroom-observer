@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Collapsible Map Collection Class
 #
@@ -65,7 +64,7 @@ class CollapsibleCollectionOfMappableObjects
     1.0 / 20,
     1.0 / 50,
     1.0 / 90
-  ]
+  ].freeze
   MAX_PRECISION = PRECISION.first
   MIN_PRECISION = PRECISION.last
 

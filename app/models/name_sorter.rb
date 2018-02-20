@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Name Sorter
 #
@@ -128,12 +127,12 @@ class NameSorter
   end
 
   def push_synonym(arg)
-    if arg.is_a?(Fixnum)
+    if arg.is_a?(Integer)
       @approved_synonyms.push(Name.find(arg))
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      fail TypeError.new("NameSorter synonyms must be Fixnum or ActiveRecord::Base, not #{arg.clasS}.")
+      fail TypeError.new("NameSorter synonyms must be Integer or ActiveRecord::Base, not #{arg.clasS}.")
     end
   end
 
@@ -336,8 +335,8 @@ class NameSorter
   # by newlines or an Array of String's.  Each String must contain a single
   # name
   def sort_names(name_list)
-    for n in name_list.split("\n")
-      add_name(n) if n.match(/\S/)
+    name_list.split("\n").each do |n|
+      add_name(n) if /\S/.match?(n)
     end
   end
 end

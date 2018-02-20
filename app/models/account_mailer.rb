@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 #  Base class for mailers for each type of email
 class AccountMailer < ActionMailer::Base
   private

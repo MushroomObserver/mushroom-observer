@@ -21,8 +21,6 @@ class API
 
       private
 
-      # rubocop:disable Metrics/PerceivedComplexity
-      # rubocop:disable Metrics/CyclomaticComplexity
       def try_all_range_patterns(str)
         range_yyyymmdd_x2(str) ||
           range_yyyymm_x2(str) ||

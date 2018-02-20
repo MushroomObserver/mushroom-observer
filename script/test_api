@@ -6,9 +6,9 @@ require "uri"
 
 # HOST = 'mushroomobserver.org'
 # PORT = 80
-HOST = "localhost"
+HOST = "localhost".freeze
 PORT = 3000
-KEY = "xxx"
+KEY = "xxx".freeze
 
 ################################################################################
 

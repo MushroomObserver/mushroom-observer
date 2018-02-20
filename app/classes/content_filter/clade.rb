@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   # Content filter to restrict observations and names to a taxonomic clade.
   class Clade < StringFilter

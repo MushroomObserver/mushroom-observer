@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Geocoder Class
 #
@@ -32,7 +31,10 @@ class Geocoder < BlankSlate
       if rect
         sw = rect.elements["southwest"]
         ne = rect.elements["northeast"]
-        set_extents(ne.elements["lat"].text, sw.elements["lat"].text, ne.elements["lng"].text, sw.elements["lng"].text)
+        set_extents(ne.elements["lat"].text,
+                    sw.elements["lat"].text,
+                    ne.elements["lng"].text,
+                    sw.elements["lng"].text)
         @valid = true
       else
         loc = geom.elements["location"]
@@ -76,8 +78,7 @@ class Geocoder < BlankSlate
   end
 
   def test_place_name(place_name)
-    loc = TEST_EXPECTED_LOCATIONS[place_name]
-    if loc
+    if (loc = TEST_EXPECTED_LOCATIONS[place_name])
       content = test_success(loc)
     else
       content = TEST_FAILURE
@@ -104,14 +105,14 @@ class Geocoder < BlankSlate
         east: -118.065479,
         south: 34.1192
       }
-    }
+    }.freeze
   end
 
   unless defined? TEST_FAILURE
     TEST_FAILURE = '<?xml version="1.0" encoding="UTF-8"?>
     <GeocodeResponse>
      <status>ZERO_RESULTS</status>
-    </GeocodeResponse>'
+    </GeocodeResponse>'.freeze
   end
 
   def test_success(loc)

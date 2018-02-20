@@ -118,7 +118,9 @@ plugins:
 
 # scss style checker
   scss-lint:
-    enabled: true
+    # Causes an enormous amount of issues
+    # Therefore, disable it until there's time to start fixing them
+    enabled: false
 
 #### exclude_patterns ####
 

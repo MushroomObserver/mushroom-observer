@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 class TranslationController < ApplicationController
   # ----------------------------
   #  :section: Edit Actions
@@ -57,7 +55,7 @@ class TranslationController < ApplicationController
     msg = [error.to_s]
     if Rails.env == "development" && @lang
       for line in error.backtrace
-        break if line.match(/action_controller.*perform_action/)
+        break if /action_controller.*perform_action/.match?(line)
         msg << line
       end
     end
@@ -157,7 +155,7 @@ class TranslationController < ApplicationController
 
   def tags_to_edit(tag, strings)
     tag_list = []
-    unless tag.blank?
+    if tag.present?
       for t in [tag, tag + "s", tag.upcase, (tag + "s").upcase]
         tag_list << t if strings.key?(t)
       end
@@ -168,7 +166,7 @@ class TranslationController < ApplicationController
 
   def tags_used_on_page(page)
     tag_list = nil
-    unless page.blank?
+    if page.present?
       tag_list = Language.load_tags(page)
       flash_error(:edit_translations_page_expired.t) unless tag_list
     end
@@ -245,16 +243,16 @@ class TranslationController < ApplicationController
   end
 
   def process_template_line(line)
-    if line.match(/^\s*['"]?(\w+)['"]?:\s*/)
+    if line =~ /^\s*['"]?(\w+)['"]?:\s*/
       tag = Regexp.last_match(1)
       str = $'
       process_tag_line(tag)
-      @in_tag = true if str.match(/^>/)
+      @in_tag = true if /^>/.match?(str)
     elsif @in_tag
-      @in_tag = false unless line.match(/\S/)
+      @in_tag = false unless /\S/.match?(line)
     elsif line.blank?
       process_blank_line
-    elsif line.match(/^\s*#\s*(.*)/)
+    elsif line =~ /^\s*#\s*(.*)/
       process_comment(Regexp.last_match(1))
     end
   end
@@ -299,11 +297,11 @@ class TranslationController < ApplicationController
   end
 
   def process_comment(str)
-    if str.match(/#############/)
+    if /#############/.match?(str)
       reset_everything
-    elsif str.match(/^[A-Z][^a-z]*(--|$)/)
+    elsif /^[A-Z][^a-z]*(--|$)/.match?(str)
       @major_head << str
-      @on_pages = !!str.match(/PAGES/)
+      @on_pages = !!(/PAGES/.match?(str))
     elsif @expecting_minor_head
       @minor_head << str
     else

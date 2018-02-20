@@ -1,4 +1,3 @@
-# encoding: utf-8
 MushroomObserver::Application.configure do
   # Ensure that these are defined in case we're executing this script
   # on its own (e.g., to provide access to configs for bash sripts).

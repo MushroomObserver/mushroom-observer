@@ -131,7 +131,7 @@ class Herbarium < AbstractModel
     this = self
     val1 = this.send(var)
     val2 = that.send(var)
-    return unless val1.blank?
+    return if val1.present?
     this.send(:"#{var}=", val2)
   end
 
@@ -141,7 +141,7 @@ class Herbarium < AbstractModel
     notes2 = that.description
     if notes1.blank?
       this.description = notes2
-    elsif !notes2.blank?
+    elsif notes2.present?
       this.description = "#{notes1}\n\n" \
                          "[Merged at #{Time.now.utc.web_time}]\n\n" +
                          notes2

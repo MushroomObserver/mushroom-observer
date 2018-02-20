@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see observer_controller.rb
 class ObserverController
   # User index, restricted to admins.
@@ -119,15 +118,15 @@ class ObserverController
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
-    if !user_id.blank?
+    if user_id.present?
       if (@show_user = find_or_goto_index(User, user_id))
         @data = Checklist::ForUser.new(@show_user)
       end
-    elsif !proj_id.blank?
+    elsif proj_id.present?
       if (@project = find_or_goto_index(Project, proj_id))
         @data = Checklist::ForProject.new(@project)
       end
-    elsif !list_id.blank?
+    elsif list_id.present?
       if (@species_list = find_or_goto_index(SpeciesList, list_id))
         @data = Checklist::ForSpeciesList.new(@species_list)
       end
@@ -170,12 +169,12 @@ class ObserverController
           contrib = @user2.contribution.to_i
           # Subtract old bonuses.
           if @user2.bonuses
-            @user2.bonuses.each do |points, _reason|
+            @user2.bonuses.each_key do |points|
               contrib -= points
             end
           end
           # Add new bonuses
-          bonuses.each do |points, _reason|
+          bonuses.each do |(points, _reason)|
             contrib += points
           end
           # Update database.

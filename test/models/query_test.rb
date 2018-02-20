@@ -3,7 +3,7 @@ require "set"
 
 class QueryTest < UnitTestCase
   def assert_query(expect, *args)
-    test_ids = expect.first.is_a?(Fixnum)
+    test_ids = expect.first.is_a?(Integer)
     expect = expect.to_a unless expect.respond_to?(:map!)
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results
@@ -1012,7 +1012,7 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  # rubocop:disable Style/VariableName
+  # rubocop:disable Naming/VariableName
   # RuboCop gives false positives here
   def test_observation_image_coercion
     # Several observation queries can be turned into image queries.
@@ -1417,7 +1417,7 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_equal(q4a, q4c)
   end
-  # rubocop:enable Style/VariableName
+  # rubocop:enable Naming/VariableName
 
   def test_rss_log_coercion
     # The site index's default RssLog query should be coercable into queries on
@@ -1525,13 +1525,13 @@ class QueryTest < UnitTestCase
 
   def test_collection_number_pattern_search
     expect = CollectionNumber.
-      where("name like '%Singer%' or number like '%Singer%'").
-      sort_by(&:format_name)
+             where("name like '%Singer%' or number like '%Singer%'").
+             sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :pattern_search, pattern: "Singer")
 
     expect = CollectionNumber.
-      where("name like '%123a%' or number like '%123a%'").
-      sort_by(&:format_name)
+             where("name like '%123a%' or number like '%123a%'").
+             sort_by(&:format_name)
     assert_query(expect, :CollectionNumber, :pattern_search, pattern: "123a")
   end
 
@@ -2763,13 +2763,13 @@ class QueryTest < UnitTestCase
     ##### lichen filters #####
     expect_obs = Observation.where("lifeform LIKE '%lichen%'").to_a
     expect_names = Name.where("lifeform LIKE '%lichen%'").
-                        reject(&:correct_spelling_id).to_a
+                   reject(&:correct_spelling_id).to_a
     assert_query(expect_obs, :Observation, :all, lichen: "yes")
     assert_query(expect_names, :Name, :all, lichen: "yes")
 
     expect_obs = Observation.where("lifeform NOT LIKE '% lichen %'").to_a
     expect_names = Name.where("lifeform NOT LIKE '% lichen %'").
-                        reject(&:correct_spelling_id).to_a
+                   reject(&:correct_spelling_id).to_a
     assert_query(expect_obs, :Observation, :all, lichen: "no")
     assert_query(expect_names, :Name, :all, lichen: "no")
 
@@ -2788,7 +2788,7 @@ class QueryTest < UnitTestCase
 
     ##### clade filter #####
     expect_names = Name.where("classification LIKE '%Agaricales%'").
-                        reject(&:correct_spelling_id).to_a
+                   reject(&:correct_spelling_id).to_a
     expect_names << names(:agaricales)
     expect_obs = expect_names.map(&:observations).flatten
     assert_query(expect_obs, :Observation, :all, clade: "Agaricales")

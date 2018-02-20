@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Controller Test Helpers
 #
@@ -479,7 +478,7 @@ module ControllerExtensions
   #
   def assert_response(arg, msg = "")
     if arg
-      if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
+      if arg == :success || arg == :redirect || arg.is_a?(Integer)
         super
       else
 
@@ -595,7 +594,7 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        if elements.first.to_s.match(/^<select/)
+        if /^<select/.match?(elements.first.to_s)
           message = check_select_value(elements.first, expect_val, id)
         else
           message = check_input_value(elements.first.to_s, expect_val, id)

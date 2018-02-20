@@ -1,4 +1,3 @@
-# encoding: utf-8
 module ExporterHelper
   # Create button? to export an Image.
   def image_exporter(image_id, exported)

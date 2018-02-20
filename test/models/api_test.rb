@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: naming API
 # TODO: vote API
 # TODO: image_vote API
@@ -469,7 +468,7 @@ class ApiTest < UnitTestCase
       method:   :delete,
       action:   :api_key,
       api_key:  @api_key.key,
-      id:       @api_key.id,
+      id:       @api_key.id
     }
     # No DELETE requests allowed now.
     assert_api_fail(params)
@@ -1354,7 +1353,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :image,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_img.id))
     assert_api_pass(params.merge(id: rolfs_img.id))
@@ -1760,7 +1759,7 @@ class ApiTest < UnitTestCase
     assert_api_results(names)
 
     Name.where(correct_spelling: nil).sample.
-         update_attributes!(ok_for_export: true)
+      update_attributes!(ok_for_export: true)
     names = Name.where(ok_for_export: true).
             reject { |n| n.correct_spelling_id }
     assert_not_empty(names)
@@ -1783,7 +1782,7 @@ class ApiTest < UnitTestCase
       api_key:        @api_key.key,
       name:           @name,
       rank:           @rank,
-      deprecated:     @deprecated,
+      deprecated:     @deprecated
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:name))
@@ -1948,7 +1947,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :patch,
       action:  :name,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     syns = name1.synonyms
     assert(syns.count > 2)
@@ -1968,7 +1967,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :patch,
       action:  :name,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     correct.clear_synonym
     assert_api_pass(params.merge(id: misspelt.id,
@@ -2491,7 +2490,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :observation,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_obs.id))
     assert_api_pass(params.merge(id: rolfs_obs.id))
@@ -3197,7 +3196,7 @@ class ApiTest < UnitTestCase
     params = {
       method:  :delete,
       action:  :species_list,
-      api_key: @api_key.key,
+      api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_pass(params.merge(id: rolfs_spl.id))
@@ -3491,7 +3490,7 @@ class ApiTest < UnitTestCase
     assert_parse_r(:date, aor(from, to), str)
   end
 
-  # rubocop:disable Metric/LineLength
+  # rubocop:disable Metrics/LineLength
   def test_parse_time_range
     assert_parse_r(:time, nil, nil)
     assert_parse_tr("2012-06-25 12:34:56", "2012-06-25 12:34:56", "20120625123456")
@@ -3533,7 +3532,7 @@ class ApiTest < UnitTestCase
     assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011-2012")
     assert_parse_tr("2011-01-01 00:00:00", "2012-12-31 23:59:59", "2011 - 2012")
   end
-  # rubocop:enable Metric/LineLength
+  # rubocop:enable Metrics/LineLength
 
   def assert_parse_tr(from, to, str)
     from = api_test_time(from)

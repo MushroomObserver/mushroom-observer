@@ -24,14 +24,14 @@ module Query::Modules::HighLevelQueries
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
-  RESULTS_ARGS = [:join, :where, :limit, :group]
+  RESULTS_ARGS = [:join, :where, :limit, :group].freeze
 
   # Args accepted by +paginate+ and +paginate_ids+.
-  PAGINATE_ARGS = []
+  PAGINATE_ARGS = [].freeze
 
   # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
   # call +instantiate+, too).
-  INSTANTIATE_ARGS = [:include]
+  INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
   def num_results(args = {})
@@ -60,9 +60,9 @@ module Query::Modules::HighLevelQueries
         @letters = map = {}
         ids = []
         select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
-        for id, letter in select_rows(args.merge(select: select))
+        select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
-          map[id.to_i] = letter.upcase if letter.match(/[a-zA-Z]/)
+          map[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
           ids << id.to_i
         end
         ids
@@ -88,7 +88,7 @@ module Query::Modules::HighLevelQueries
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
-  # better all be valid Fixnum ids -- no error checking is done!!
+  # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
     @result_count = list.count
@@ -166,11 +166,9 @@ module Query::Modules::HighLevelQueries
       # the reject(&:nil?) clause below.)
       conditions = "#{model.table_name}.id IN (#{set})"
       includes   = args[:include] || []
-      model.where(conditions)
-           .includes(includes)
-           .to_a.each do |obj|
-             @results[obj.id] = obj
-           end
+      model.where(conditions).
+        includes(includes).
+        to_a.each { |obj| @results[obj.id] = obj }
     end
     ids.map { |id| @results[id] }.reject(&:nil?)
   end

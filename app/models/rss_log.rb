@@ -206,8 +206,8 @@ class RssLog < AbstractModel
   # The top line of log should be the old object's name after it is destroyed.
   def orphan_title
     name = notes.to_s.split("\n", 2).first
-    if name.match(/^\d{14}/)
-      # This is an error, happening occasionally when a log wasn't orphaned properly.
+    if /^\d{14}/.match?(name)
+      # This is an occasional error, when a log wasn't orphaned properly.
       tag, args, time = parse_log.first
       args[:this] || :rss_log_of_deleted_item.l
     else
@@ -354,7 +354,7 @@ class RssLog < AbstractModel
         tag  = :log_orphan
         args = { title: self.class.unescape(line) }
         time = updated_at
-      elsif !line.blank?
+      elsif line.present?
         tag, args, time = self.class.decode(line)
       end
       break if cutoff_time && time < cutoff_time
@@ -364,7 +364,7 @@ class RssLog < AbstractModel
     results
   end
 
-  ################################################################################
+  ##############################################################################
 
   private
 

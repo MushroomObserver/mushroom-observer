@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Tree
   # Searches the screwy ActiveRecord join- and include-style "trees" for a node.
   #

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Site Data
 #
@@ -85,7 +84,7 @@ class SiteData
     :namings,
     :votes,
     :users
-  ]
+  ].freeze
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
@@ -107,7 +106,7 @@ class SiteData
     species_lists:                 5,
     users:                         0,
     votes:                         1
-  }
+  }.freeze
 
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
@@ -115,14 +114,14 @@ class SiteData
     observations_with_voucher: "observations",
     observations_without_voucher: "observations",
     species_list_entries: "observations_species_lists"
-  }
+  }.freeze
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
     observations_with_voucher: "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
     observations_without_voucher: "NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL"
-  }
+  }.freeze
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
@@ -132,7 +131,7 @@ class SiteData
     observations_without_voucher: lambda do |obs|
       !(obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0)
     end
-  }
+  }.freeze
 
   # -----------------------------
   #  :section: Public Interface
@@ -260,13 +259,16 @@ class SiteData
   #     ...
   #   )
   #
-  def calc_metric(data) # :doc:
+  # :doc:
+  def calc_metric(data)
     metric = 0
     if data
       for field in ALL_FIELDS
         if data[field]
           # This fixes the double-counting of created records.
-          data[field] -= data[Regexp.last_match(1)] || 0 if field.to_s.match(/^(\w+)_versions$/)
+          if field.to_s =~ /^(\w+)_versions$/ # rubocop:disable RegexpMatch
+            data[field] -= data[Regexp.last_match(1)] || 0
+          end
           metric += FIELD_WEIGHTS[field] * data[field]
         end
       end
@@ -294,7 +296,7 @@ class SiteData
     if cond = FIELD_CONDITIONS[field]
       query << "WHERE #{cond}"
     end
-    if field.to_s.match(/^(\w+)s_versions/)
+    if /^(\w+)s_versions/.match?(field.to_s)
       # Does this actually make sense??
       # parent = $1
       # query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"
@@ -332,7 +334,7 @@ class SiteData
     end
 
     # Exception for past versions.
-    if table.match(/^(\w+)s_versions/)
+    if table =~ /^(\w+)s_versions/
       parent = Regexp.last_match(1)
       count = "DISTINCT #{parent}_id"
       tables += ", #{parent}s p"

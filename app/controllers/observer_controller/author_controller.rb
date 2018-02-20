@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: move this into a new AuthorController
 class ObserverController
   # Form to compose email for the authors/reviewers.  Linked from show_<object>.

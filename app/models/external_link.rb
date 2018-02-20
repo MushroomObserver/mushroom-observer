@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = External Link Model
 #
@@ -36,7 +35,7 @@ class ExternalLink < AbstractModel
   VALID_URL_PAT = %r{^[a-z]+://}
 
   def check_url_syntax
-    return if url.to_s =~ VALID_URL_PAT
+    return if VALID_URL_PAT.match?(url.to_s)
     errors.add(:url, :validate_invalid_url.t)
   end
 
@@ -51,10 +50,12 @@ class ExternalLink < AbstractModel
       external_site.project.is_member?(user)
   end
 
+  # rubocop:disable Layout/EmptyLineBetweenDefs
   def self.show_controller; end
   def self.show_action; end
   def self.edit_action; end
   def self.index_action; end
   def self.show_url(id); end
   def self.show_link_args(id); end
+  # rubocop:enable Layout/EmptyLineBetweenDefs
 end

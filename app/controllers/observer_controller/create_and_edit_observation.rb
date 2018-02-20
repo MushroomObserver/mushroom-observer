@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see observer_controller.rb
 class ObserverController
   # Form to create a new observation, naming, vote, and images.
@@ -199,7 +198,7 @@ class ObserverController
     else
       flash_error(:create_herbarium_record_already_used_by_someone_else.t(
                     herbarium_name: herbarium.name
-                  ))
+      ))
       return
     end
     herbarium_record.add_observation(obs)
@@ -613,7 +612,7 @@ class ObserverController
     if args
       i = 0
       while (args2 = args[i.to_s])
-        unless (upload = args2[:image]).blank?
+        if (upload = args2[:image]).present?
           if upload.respond_to?(:original_filename)
             name = upload.original_filename.force_encoding("utf-8")
           end

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 namespace :location do
   APPROVED_LOCATIONS = Set.new([
     "0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
@@ -3915,7 +3913,7 @@ namespace :location do
   ])
 
   LOCATION_FIXES = {
-  }
+  }.freeze
 
   def report_on_name(name)
     result = false
@@ -4115,7 +4113,8 @@ namespace :location do
     end
   end
 
-  FIXERS = [AccentFixer.new([204, 128], "e" => "è", "E" => "È"), AccentFixer.new([204, 129], "e" => "é", "E" => "É")]
+  FIXERS = [AccentFixer.new([204, 128], "e" => "è", "E" => "È"),
+            AccentFixer.new([204, 129], "e" => "é", "E" => "É")].freeze
 
   def accent_fix(w)
     for f in FIXERS

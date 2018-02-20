@@ -15,7 +15,7 @@ class API
       end
 
       def try_finding_by_id(str)
-        return nil unless str =~ /^\d+$/
+        return nil unless /^\d+$/.match?(str)
         obj = model.safe_find(str.to_i)
         return obj if obj
         raise ObjectNotFoundById.new(str, model)

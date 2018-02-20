@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Location Change Email
 class QueuedEmail::LocationChange < QueuedEmail
   def location

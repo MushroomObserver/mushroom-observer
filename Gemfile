@@ -5,13 +5,13 @@ gem "rails", "~> 4.2.0"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
-gem "mysql2", "~> 0.3.18"
+gem "mysql2"
 
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
 
 # Use bootstrap style generator
-gem "bootstrap-sass", "~> 3.3.2"
+gem "bootstrap-sass"
 
 # Use SCSS for stylesheets
 gem "sass-rails"
@@ -34,7 +34,7 @@ gem "uglifier"
 # gem "turbolinks"
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem "jbuilder", "~> 2.6.3"
+gem "jbuilder"
 
 # Use ActiveModel has_secure_password
 # gem "bcrypt", "~> 3.1.7"
@@ -59,6 +59,9 @@ gem "browser"
 
 # Create Rich Text Format documents
 gem "rtf"
+
+# Enable remote procedure calls over HTTP (used in MO API)
+gem "xmlrpc"
 
 # Simple versioning
 gem "cure_acts_as_versioned"
@@ -100,17 +103,18 @@ gem "rubocop", require: false
 # gem "brakeman", require: false
 
 # Amazon S3 SDK, for access to images on dreamhost S3
+# limited to v2 to avoid installing a bunch of gems
 gem "aws-sdk", "~> 2"
 
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
-gem "jquery-slick-rails", "~> 1.5.0.1"
+gem "jquery-slick-rails"
 
 # allows for test results to be reported back to test runner IDE's
 group :test do
   gem "minitest"
-  gem "minitest-reporters", ">= 0.5.0"
+  gem "minitest-reporters"
 end
 
-gem "web-console", "~> 2.0", group: :development
+gem "web-console", group: :development

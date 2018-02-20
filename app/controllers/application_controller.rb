@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Application Controller Base Class
 #
@@ -603,7 +602,7 @@ class ApplicationController < ActionController::Base
   end
 
   def prefs_locale
-    return unless @user && !@user.locale.blank? && params[:controller] != "ajax"
+    return unless @user && @user.locale.present? && params[:controller] != "ajax"
     logger.debug "[I18n] loading locale: #{@user.locale} from @user"
     @user.locale
   end
@@ -1043,7 +1042,7 @@ class ApplicationController < ActionController::Base
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
-    @query_params[:q] = params[:q] unless params[:q].blank?
+    @query_params[:q] = params[:q] if params[:q].present?
     @query_params
   end
 
@@ -1474,7 +1473,7 @@ class ApplicationController < ActionController::Base
                end
 
       # Skip to correct place if coming back in to index from show_object.
-      if !args[:id].blank? &&
+      if args[:id].present? &&
          params[@pages.letter_arg].blank? &&
          params[@pages.number_arg].blank?
         @pages.show_index(query.index(args[:id]))
@@ -1564,7 +1563,7 @@ class ApplicationController < ActionController::Base
   end
 
   def reverse_by(query, this_by)
-    query.params[:by].to_s =~ /^reverse_/ ? this_by : "reverse_#{this_by}"
+    /^reverse_/.match?(query.params[:by].to_s) ? this_by : "reverse_#{this_by}"
   end
 
   public ##########

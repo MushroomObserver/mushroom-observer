@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Encapsulates a change in an object
 class ObjectChange
   attr_reader :object

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Location Model
 #
@@ -466,7 +465,7 @@ class Location < AbstractModel
   end
 
   def self.check_for_empty_name(name)
-    return [] unless name.blank?
+    return [] if name.present?
     [:location_dubious_empty.l]
   end
 
@@ -477,7 +476,7 @@ class Location < AbstractModel
 
   def self.check_for_dubious_county(name)
     return [] if name.blank?
-    return [] if name =~ /Forest,|Park,|near /
+    return [] if /Forest,|Park,|near /.match?(name)
     return [] unless has_dubious_county?(name)
     [:location_dubious_redundant_county.l]
   end
@@ -511,7 +510,7 @@ class Location < AbstractModel
   def self.check_for_bad_terms(name)
     reasons = []
     return [] if name.blank?
-    BAD_TERMS.keys.each do |key|
+    BAD_TERMS.each_key do |key|
       next unless name.index(key)
       reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
     end
