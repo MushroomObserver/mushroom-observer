@@ -13,45 +13,6 @@ module ShowNameHelper
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
   end
 
-  # link to a search for Observations of name and a count of those observations
-  #   This Name (1)
-  def obss_of_name(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence)
-    link_to_obss_of(query, :obss_of_this_name.t)
-  end
-
-  # link to a search for Observations of this taxon (under any name) + count
-  def taxon_observations(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :all)
-    link_to_obss_of(query, :obss_of_taxon.t)
-  end
-
-  # link to a search for observations of this taxon, under other names + count
-  def taxon_obss_other_names(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :exclusive)
-    link_to_obss_of(query, :taxon_obss_other_names.t)
-  end
-
-  # link to a search for observations where this taxon was proposed + count
-  # (but is not the consensus)
-  def taxon_proposed(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :all,
-                         nonconsensus: :exclusive)
-    link_to_obss_of(query, :obss_taxon_proposed.t)
-  end
-
-  # link to a search for observations where this name was proposed + count
-  # (but this taxon is not the consensus)
-  def name_proposed(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :no,
-                         nonconsensus: :exclusive)
-    link_to_obss_of(query, :obss_name_proposed.t)
-  end
-
   # array of lines for other accepted synonyms, each line comprising
   # link to observations of synonym and a count of those observations
   #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
