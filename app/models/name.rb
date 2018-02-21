@@ -244,6 +244,17 @@
 #  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
 #
+#  ==== Observation Queries
+#  obss_of_name              Observations of this Name
+#  obss_of_taxon             Observations of this taxon
+#  obss_of_taxon_other_names Observations of this taxon under other Names
+#  obss_of_other_taxa_this_name_proposed
+#                            Observations of other taxa
+#                            where this name was proposed
+#  obss_of_other_taxa_this_taxon_proposed(by: :confidence)
+#                            Observations of other taxa
+#                            where this taxon was proposed
+#
 #  == Callbacks
 #
 #  create_description::      After create: create (empty) official
@@ -262,6 +273,7 @@ class Name < AbstractModel
   require_dependency "name/merge"
   require_dependency "name/spelling"
   require_dependency "name/notify"
+  require_dependency "name/queries"
   require_dependency "name/parse"
   require_dependency "name/resolve"
   require_dependency "name/synonymy"

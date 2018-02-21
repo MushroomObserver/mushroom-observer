@@ -2577,4 +2577,69 @@ class NameTest < UnitTestCase
     name.reload
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
+
+  def test_name_queries
+    user        = users(:rolf)
+    name        = names(:chlorophyllum_rachodes)
+    synonym     = names(:chlorophyllum_rhacodes)
+    taxon_names = [name, synonym]
+    other_taxon = names(:agaricus)
+
+    name_obs    = Observation.create(name: name, user: user, vote_cache: 1)
+    synonym_obs = Observation.create(name: synonym, user: user, vote_cache: 1)
+
+    Observation.create(name: name, user: user, vote_cache: 1)
+    Naming.create(observation: name_obs, name: synonym, user: user)
+    Observation.create(name: synonym, user: user, vote_cache: 1)
+    Naming.create(observation: synonym_obs, name: name, user: user)
+
+    other_taxon_name_proposed = Observation.create(name: other_taxon,
+                                                   user: user, vote_cache: 1)
+    Naming.create(
+      observation: other_taxon_name_proposed, name: name, user: user
+    )
+    other_taxon_synonym_proposed = Observation.create(name: other_taxon,
+                                                      user: user, vote_cache: 1)
+    Naming.create(
+      observation: other_taxon_synonym_proposed, name: synonym, user: user
+    )
+
+    assert_equal(
+      Observation.where(name: name).order(:id).to_a,
+      name.obss_of_name(by: :id).results
+    )
+    assert_equal(
+      Observation.where(name: (name.synonyms - [name])).
+                  order(:id).to_a,
+      name.obss_of_taxon_other_names(by: :id).results
+    )
+    assert_equal(
+      Observation.where(name: name.synonyms).order(:id).to_a,
+      name.obss_of_taxon(by: :id).results
+    )
+    assert_equal(
+      Observation.joins(:namings).
+                  where("namings.name" => name).
+                  where.not("observations.name" => name.synonyms).
+                  order(:id).to_a,
+      name.obss_of_other_taxa_this_name_proposed(by: :id).results
+    )
+    assert_equal(
+      Observation.joins(:namings).
+                  where("namings.name" => name.synonyms).
+                  where.not("observations.name" => name.synonyms).
+                  order(:id).to_a,
+      name.obss_of_other_taxa_this_taxon_proposed(by: :id).results
+    )
+=begin
+
+    assert_equal(
+      Observation.joins(:namings).
+                  where("namings.name" => name.id).
+                  where.not(name: taxon_names),
+      :Observation, :of_name, name: name.id, synonyms: :all,
+      nonconsensus: :mixed
+    )
+=end
+  end
 end
