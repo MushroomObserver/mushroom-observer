@@ -1,4 +1,3 @@
-#
 #  = Name Model
 #
 #  This model describes a single scientific name.  The related class Synonym,
@@ -228,7 +227,6 @@
 #  deprecated::              Is this name deprecated?
 #  status::                  Returns "Deprecated" or "Valid".
 #  change_deprecated::       Changes deprecation status.
-#  reviewed_observations::   (not used by anyone)
 #
 #  ==== Attachments
 #  versions::                Old versions.
@@ -372,11 +370,6 @@ class Name < AbstractModel
 
   def best_brief_description
     (description.gen_desc.presence || description.diag_desc) if description
-  end
-
-  # Get an Array of Observation's for this Name that have > 80% confidence.
-  def reviewed_observations
-    Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
   end
 
   # Get list of most used names to prime auto-completer.  Returns a simple Array
