@@ -379,7 +379,7 @@ class Name < AbstractModel
     Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
   end
 
-  # Get list of common names to prime auto-completer.  Returns a simple Array
+  # Get list of most used names to prime auto-completer.  Returns a simple Array
   # of up to 1000 name String's (no authors).
   #
   # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
@@ -387,33 +387,40 @@ class Name < AbstractModel
   # in a plain old file (MO.name_primer_cache_file).
   #
   def self.primer
-    result = []
-    if !File.exist?(MO.name_primer_cache_file) ||
-       File.mtime(MO.name_primer_cache_file) < Time.now - 1.day
-
-      # Get list of names sorted by how many times they've been used, then
-      # re-sort by name.
-      result = connection.select_values(%(
-        SELECT names.text_name, COUNT(*) AS n
-        FROM namings
-        LEFT OUTER JOIN names ON names.id = namings.name_id
-        WHERE correct_spelling_id IS NULL
-        GROUP BY names.text_name
-        ORDER BY n DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      FileUtils.mkdir_p(File.dirname(MO.name_primer_cache_file))
-      file = File.open(MO.name_primer_cache_file, "w:utf-8")
-      file.write(result.join("\n") + "\n")
-      file.close
+    if name_primer_cache_current?
+      File.open(MO.name_primer_cache_file, "r:UTF-8") do |file|
+        return file.readlines.map(&:chomp)
+      end
     else
-      file = File.open(MO.name_primer_cache_file, "r:UTF-8")
-      result = file.readlines.map(&:chomp)
-      file.close
+      result = most_used_names
+      FileUtils.mkdir_p(File.dirname(MO.name_primer_cache_file))
+      File.open(MO.name_primer_cache_file, "w:utf-8") do |file|
+        file.write(result.join("\n") + "\n")
+      end
+      result
     end
-    result
   end
+
+  def self.name_primer_cache_current?
+    File.exist?(MO.name_primer_cache_file) &&
+      File.mtime(MO.name_primer_cache_file) >= Time.now - 1.day
+  end
+  private_class_method :name_primer_cache_current?
+
+  # Get list of names sorted by how many times they've been used, then
+  # re-sort by name.
+  def self.most_used_names(limit = 1000)
+    connection.select_values(%(
+      SELECT names.text_name, COUNT(*) AS n
+      FROM namings
+      LEFT OUTER JOIN names ON names.id = namings.name_id
+      WHERE correct_spelling_id IS NULL
+      GROUP BY names.text_name
+      ORDER BY n DESC
+      LIMIT #{limit}
+    )).uniq.sort
+  end
+  private_class_method :most_used_names
 
   # Used by show_name.
   def self.count_observations(names)
