@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+#
 #  = Name Model
 #
 #  This model describes a single scientific name.  The related class Synonym,
@@ -303,17 +305,21 @@ class Name < AbstractModel
           source: :rank,
           accessor: :whiny)
 
-  belongs_to :correct_spelling, class_name: "Name",
-                                foreign_key: "correct_spelling_id"
-  belongs_to :description, class_name: "NameDescription" # (main one)
+  belongs_to :correct_spelling, # rubocop:disable Rails/InverseOf
+             class_name: "Name",
+             foreign_key: "correct_spelling_id"
+  belongs_to :description, class_name: "NameDescription",
+                           inverse_of: :name # (main one)
   belongs_to :rss_log
   belongs_to :synonym
+
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "NameDescription"
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+           class_name: "NameDescription",
+           inverse_of:  :name
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :namings
   has_many :observations
 
@@ -377,8 +383,8 @@ class Name < AbstractModel
     end
   end
 
-  def <=>(x)
-    sort_name <=> x.sort_name
+  def <=>(other)
+    sort_name <=> other.sort_name
   end
 
   def best_brief_description
