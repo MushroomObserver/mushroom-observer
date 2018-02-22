@@ -2631,15 +2631,5 @@ class NameTest < UnitTestCase
                   order(:id).to_a,
       name.obss_of_other_taxa_this_taxon_proposed(by: :id).results
     )
-=begin
-
-    assert_equal(
-      Observation.joins(:namings).
-                  where("namings.name" => name.id).
-                  where.not(name: taxon_names),
-      :Observation, :of_name, name: name.id, synonyms: :all,
-      nonconsensus: :mixed
-    )
-=end
   end
 end
