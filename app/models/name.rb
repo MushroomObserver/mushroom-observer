@@ -261,6 +261,7 @@ class Name < AbstractModel
   require_dependency "name/spelling"
   require_dependency "name/notify"
   require_dependency "name/parse"
+  require_dependency "name/primer"
   require_dependency "name/resolve"
   require_dependency "name/synonymy"
   require_dependency "name/taxonomy"
@@ -371,49 +372,6 @@ class Name < AbstractModel
   def best_brief_description
     (description.gen_desc.presence || description.diag_desc) if description
   end
-
-  # Get list of most used names to prime auto-completer.  Returns a simple Array
-  # of up to 1000 name String's (no authors).
-  #
-  # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
-  # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (MO.name_primer_cache_file).
-  #
-  def self.primer
-    if name_primer_cache_current?
-      File.open(MO.name_primer_cache_file, "r:UTF-8") do |file|
-        return file.readlines.map(&:chomp)
-      end
-    else
-      result = most_used_names
-      FileUtils.mkdir_p(File.dirname(MO.name_primer_cache_file))
-      File.open(MO.name_primer_cache_file, "w:utf-8") do |file|
-        file.write(result.join("\n") + "\n")
-      end
-      result
-    end
-  end
-
-  def self.name_primer_cache_current?
-    File.exist?(MO.name_primer_cache_file) &&
-      File.mtime(MO.name_primer_cache_file) >= Time.now - 1.day
-  end
-  private_class_method :name_primer_cache_current?
-
-  # Get list of names sorted by how many times they've been used, then
-  # re-sort by name.
-  def self.most_used_names(limit = 1000)
-    connection.select_values(%(
-      SELECT names.text_name, COUNT(*) AS n
-      FROM namings
-      LEFT OUTER JOIN names ON names.id = namings.name_id
-      WHERE correct_spelling_id IS NULL
-      GROUP BY names.text_name
-      ORDER BY n DESC
-      LIMIT #{limit}
-    )).uniq.sort
-  end
-  private_class_method :most_used_names
 
   # Used by show_name.
   def self.count_observations(names)
