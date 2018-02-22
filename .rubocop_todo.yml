@@ -511,11 +511,6 @@ Metrics/PerceivedComplexity:
 Naming/AccessorMethodName:
   Enabled: false
 
-# Offense count: 1
-Naming/BinaryOperatorParameterName:
-  Exclude:
-    - 'app/models/name.rb'
-
 # Offense count: 14
 # Configuration parameters: Blacklist.
 # Blacklist: END, (?-mix:EO[A-Z]{1})
@@ -676,7 +671,6 @@ Rails/HasManyOrHasOneDependent:
     - 'app/models/image.rb'
     - 'app/models/license.rb'
     - 'app/models/location.rb'
-    - 'app/models/name.rb'
     - 'app/models/observation.rb'
     - 'app/models/synonym.rb'
     - 'app/models/user.rb'
@@ -692,7 +686,6 @@ Rails/InverseOf:
     - 'app/models/image.rb'
     - 'app/models/location.rb'
     - 'app/models/location_description.rb'
-    - 'app/models/name.rb'
     - 'app/models/name_description.rb'
     - 'app/models/observation.rb'
     - 'app/models/project.rb'
@@ -961,7 +954,6 @@ Style/IdenticalConditionalBranches:
     - 'app/controllers/location_controller.rb'
     - 'app/controllers/name_controller.rb'
     - 'app/controllers/species_list_controller.rb'
-    - 'app/models/name.rb'
     - 'script/s3ls.rb'
 
 # Offense count: 7
