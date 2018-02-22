@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+#
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   # string of links to Names of any other non-deprecated synonyms
@@ -18,20 +20,18 @@ module ShowNameHelper
   #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
   #   Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
-    name.other_approved_synonyms.each_with_object([]) do |nm, lines|
-      query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
+    name.other_approved_synonyms.each_with_object([]) do |synonym, lines|
+      query = synonym.obss_of_name
       next if query.select_count.zero?
 
-      lines << link_to_obss_of(query, nm.display_name.t)
+      lines << link_to_obss_of(query, synonym.display_name.t)
     end
   end
 
-  # return link to a query for observations + count of results
-  # returns nil of no results
+  # link to an Observation query, followed by count of results
+  # returns nil if no results
   # Use:
-  #   query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-  #                        synonyms: :all)
-  #   link_to_obss_of(query, :obss_of_taxon.t)
+  #   link_to_obss_of(name.obss_of_taxon, :obss_of_taxon.t)
   #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count
