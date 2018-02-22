@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+#
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   # string of links to Names of any other non-deprecated synonyms
@@ -13,64 +15,23 @@ module ShowNameHelper
     label + ": " + content_tag(:span, links.safe_join(", "), class: :Data)
   end
 
-  # link to a search for Observations of name and a count of those observations
-  #   This Name (1)
-  def obss_of_name(name)
-    query = Query.lookup(:Observation, :of_name, name: name, by: :confidence)
-    link_to_obss_of(query, :obss_of_this_name.t)
-  end
-
-  # link to a search for Observations of this taxon (under any name) + count
-  def taxon_observations(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :all)
-    link_to_obss_of(query, :obss_of_taxon.t)
-  end
-
-  # link to a search for observations of this taxon, under other names + count
-  def taxon_obss_other_names(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :exclusive)
-    link_to_obss_of(query, :taxon_obss_other_names.t)
-  end
-
-  # link to a search for observations where this taxon was proposed + count
-  # (but is not the consensus)
-  def taxon_proposed(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :all,
-                         nonconsensus: :exclusive)
-    link_to_obss_of(query, :obss_taxon_proposed.t)
-  end
-
-  # link to a search for observations where this name was proposed + count
-  # (but this taxon is not the consensus)
-  def name_proposed(name)
-    query = Query.lookup(:Observation, :of_name,
-                         name: name, by: :confidence, synonyms: :no,
-                         nonconsensus: :exclusive)
-    link_to_obss_of(query, :obss_name_proposed.t)
-  end
-
   # array of lines for other accepted synonyms, each line comprising
   # link to observations of synonym and a count of those observations
   #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
   #   Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
-    name.other_approved_synonyms.each_with_object([]) do |nm, lines|
-      query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
+    name.other_approved_synonyms.each_with_object([]) do |synonym, lines|
+      query = synonym.obss_of_name
       next if query.select_count.zero?
 
-      lines << link_to_obss_of(query, nm.display_name.t)
+      lines << link_to_obss_of(query, synonym.display_name.t)
     end
   end
 
-  # return link to a query for observations + count of results
-  # returns nil of no results
+  # link to an Observation query, followed by count of results
+  # returns nil if no results
   # Use:
-  #   query = Query.lookup(:Observation, :of_name, name: name, by: :confidence,
-  #                        synonyms: :all)
-  #   link_to_obss_of(query, :obss_of_taxon.t)
+  #   link_to_obss_of(name.obss_of_taxon, :obss_of_taxon.t)
   #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count

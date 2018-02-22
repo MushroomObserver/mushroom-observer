@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+#
 require "test_helper"
 
 class NameTest < UnitTestCase
@@ -18,16 +20,16 @@ class NameTest < UnitTestCase
     assert parse, "Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
-    %i[
-      text_name
-      real_text_name
-      search_name
-      real_search_name
-      sort_name
-      display_name
-      parent_name
-      rank
-      author
+    [
+      :text_name,
+      :real_text_name,
+      :search_name,
+      :real_search_name,
+      :sort_name,
+      :display_name,
+      :parent_name,
+      :rank,
+      :author
     ].each do |var|
       expect = expects[var]
       actual = if var == :real_text_name
@@ -288,7 +290,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, '"Sp-ABC"')
     assert_no_match(pat, '"S01"')
     assert_no_match(pat, '"Abc\'')
-    assert_no_match(pat, '\'Abc\'')
+    assert_no_match(pat, "\'Abc\'")
     assert_no_match(pat, '\'"Abc"')
     assert_match(pat, "Abc-def")
     assert_no_match(pat, "Abcdef-")
@@ -311,7 +313,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, '"sp. S01"')
     assert_no_match(pat, '"S01"')
     assert_no_match(pat, '"abc\'')
-    assert_no_match(pat, '\'abc\'')
+    assert_no_match(pat, "\'abc\'")
     assert_no_match(pat, '\'"abc"')
     assert_match(pat, "abc-def")
     assert_no_match(pat, "abcdef-")
@@ -365,9 +367,9 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
     assert_name_match_author_optional(pat, '"Amanita"')
     assert_name_match_author_optional(pat, '"Amanita" sp.', '"Amanita"')
-    assert_name_match_author_optional(pat, 'Fossil-Okay')
-    assert_name_match_author_optional(pat, 'Fossil-Okay sp.', 'Fossil-Okay')
-    assert_no_match(pat, 'Anythingelse-Bad')
+    assert_name_match_author_optional(pat, "Fossil-Okay")
+    assert_name_match_author_optional(pat, "Fossil-Okay sp.", "Fossil-Okay")
+    assert_no_match(pat, "Anythingelse-Bad")
   end
 
   def test_subgenus_pat
@@ -1568,25 +1570,24 @@ class NameTest < UnitTestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([
-      names(:agaricus),
-      names(:agaricaceae),
-      names(:agaricales),
-      names(:basidiomycetes),
-      names(:basidiomycota),
-      names(:fungi)
-    ], names(:agaricus_campestris).all_parents)
-    assert_name_list_equal([
-      names(:agaricus)
-    ], names(:agaricus_campestris).parents)
-    assert_name_list_equal([ names(:agaricaceae) ], names(:agaricus).parents)
-    assert_name_list_equal([], names(:agaricus_campestris).children)
-    assert_name_list_equal([
-      names(:agaricus_campestras),
-      names(:agaricus_campestris),
-      names(:agaricus_campestros),
-      names(:agaricus_campestrus)
-    ], names(:agaricus).children, :sort)
+    assert_name_list_equal([names(:agaricus),
+                            names(:agaricaceae),
+                            names(:agaricales),
+                            names(:basidiomycetes),
+                            names(:basidiomycota),
+                            names(:fungi)],
+                           names(:agaricus_campestris).all_parents)
+    assert_name_list_equal([names(:agaricus)],
+                           names(:agaricus_campestris).parents)
+    assert_name_list_equal([names(:agaricaceae)],
+                           names(:agaricus).parents)
+    assert_name_list_equal([],
+                           names(:agaricus_campestris).children)
+    assert_name_list_equal([names(:agaricus_campestras),
+                            names(:agaricus_campestris),
+                            names(:agaricus_campestros),
+                            names(:agaricus_campestrus)],
+                           names(:agaricus).children, :sort)
   end
 
   def test_ancestors_2
@@ -1690,7 +1691,9 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
+    # rubocop:disable Style/FormatStringToken
     assert_equal(4, Name.where("classification LIKE '%Ascomycota%'").count)
+    # rubocop:enable Style/FormatStringToken
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -2576,5 +2579,64 @@ class NameTest < UnitTestCase
     Name.make_sure_names_are_bolded_correctly
     name.reload
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
+  end
+
+  def test_name_queries
+    # set up: 2 Names which are synonyms; 6 Observations; 6 Namings:
+    #  Name n, Name s,
+    #  n and s synonymized.
+    #  Each of n and s needs:
+    #  an Observation where it's a naming and it's the consensus
+    #  an Observation where it's a naming and its synonym is the consensus
+    #  an Observation where it's a naming and neither is the consensus.
+    user        = users(:rolf)
+    name        = names(:chlorophyllum_rachodes)
+    synonym     = names(:chlorophyllum_rhacodes)
+    other_taxon = names(:agaricus)
+
+    name_obs    = Observation.create(name: name, user: user, vote_cache: 1)
+    synonym_obs = Observation.create(name: synonym, user: user, vote_cache: 1)
+
+    Observation.create(name: name, user: user, vote_cache: 1)
+    Naming.create(observation: name_obs, name: synonym, user: user)
+    Observation.create(name: synonym, user: user, vote_cache: 1)
+    Naming.create(observation: synonym_obs, name: name, user: user)
+
+    other_taxon_name_proposed =
+      Observation.create(name: other_taxon, user: user, vote_cache: 1)
+    Naming.create(observation: other_taxon_name_proposed, name: name,
+                  user: user)
+    other_taxon_synonym_proposed =
+      Observation.create(name: other_taxon, user: user, vote_cache: 1)
+    Naming.create(observation: other_taxon_synonym_proposed, name: synonym,
+                  user: user)
+
+    assert_equal(
+      Observation.where(name: name).order(:id).to_a,
+      name.obss_of_name(by: :id).results
+    )
+    assert_equal(
+      Observation.where(name: (name.synonyms - [name])).
+                  order(:id).to_a,
+      name.obss_of_taxon_other_names(by: :id).results
+    )
+    assert_equal(
+      Observation.where(name: name.synonyms).order(:id).to_a,
+      name.obss_of_taxon(by: :id).results
+    )
+    assert_equal(
+      Observation.joins(:namings).
+                  where("namings.name" => name).
+                  where.not("observations.name" => name.synonyms).
+                  order(:id).to_a,
+      name.obss_of_other_taxa_this_name_proposed(by: :id).results
+    )
+    assert_equal(
+      Observation.joins(:namings).
+                  where("namings.name" => name.synonyms).
+                  where.not("observations.name" => name.synonyms).
+                  order(:id).to_a,
+      name.obss_of_other_taxa_this_taxon_proposed(by: :id).results
+    )
   end
 end
