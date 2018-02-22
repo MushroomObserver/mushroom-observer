@@ -38,7 +38,7 @@ class Name < AbstractModel
 
     # List of names sorted by how many times they've been used,
     # then re-sorted by name.
-    def most_used_names(limit = 1000)
+    def most_used_names
       connection.select_values(%(
         SELECT names.text_name, COUNT(*) AS n
         FROM namings
@@ -46,7 +46,7 @@ class Name < AbstractModel
         WHERE correct_spelling_id IS NULL
         GROUP BY names.text_name
         ORDER BY n DESC
-        LIMIT #{limit}
+        LIMIT 1000
       )).uniq.sort
     end
   end
