@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+#
 # Prime the name auto-completer
 class Name < AbstractModel
   # Get list of most used names to prime auto-completer.
@@ -24,7 +26,7 @@ class Name < AbstractModel
 
     def name_primer_cache_current?
       File.exist?(MO.name_primer_cache_file) &&
-        File.mtime(MO.name_primer_cache_file) >= Time.now - 1.day
+        File.mtime(MO.name_primer_cache_file) >= Time.now.getlocal - 1.day
     end
 
     def refreshed_name_cache
