@@ -133,7 +133,7 @@ module ObjectLinkHelper
   #
   def description_link(desc)
     result = description_title(desc)
-    return result if "(#{:private.t})$".match?(result)
+    return result if result.match?("(#{:private.t})$")
     link_with_query(result, desc.show_link_args)
   end
 
