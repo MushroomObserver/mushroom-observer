@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   # Content filter to restrict observations and locations to just one region.
   class Region < StringFilter

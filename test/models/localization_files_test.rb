@@ -32,7 +32,7 @@ class LocalizationFilesTest < UnitTestCase
         YAML.safe_load(fh)
       end
       tags = {}
-      data.keys.each { |tag| tags[tag.to_s.downcase] = true }
+      data.each_key { |tag| tags[tag.to_s.downcase] = true }
       data.each do |tag, str|
         next unless str.is_a?(String)
         str.gsub(/[\[\=]:(\w+)/) do
@@ -130,7 +130,7 @@ class LocalizationFilesTest < UnitTestCase
   def source_files(*paths, &block)
     paths.each do |path|
       Dir.glob("#{path}/*").each do |file|
-        if file =~ /\.(rb|rhtml|rxml|erb)$/
+        if /\.(rb|rhtml|rxml|erb)$/.match?(file)
           yield(file)
         elsif File.directory?(file) && file.match(%r{\/\w+$})
           source_files(file, &block)
@@ -153,7 +153,7 @@ class LocalizationFilesTest < UnitTestCase
     Dir.glob("#{::Rails.root}/app/classes/api/parsers/*.rb").each do |file|
       File.open(file, "r:utf-8") do |fh|
         fh.each_line do |line|
-          next unless line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
+          next unless line =~ /BadParameterValue.new\([^()]*, :(\w+)\)/
 
           tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
         end

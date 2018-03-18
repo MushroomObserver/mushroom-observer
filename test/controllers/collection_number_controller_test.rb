@@ -318,8 +318,10 @@ class CollectionNumberControllerTest < FunctionalTestCase
     assert_equal("07-123a", new_num.number)
     # Make sure it updates the herbarium record which shared the old
     # collection number.
-    assert_equal(new_num.format_name,
-      herbarium_records(:coprinus_comatus_rolf_spec).accession_number)
+    assert_equal(
+      new_num.format_name,
+      herbarium_records(:coprinus_comatus_rolf_spec).accession_number
+    )
   end
 
   def test_edit_collection_number_redirect

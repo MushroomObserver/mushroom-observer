@@ -186,7 +186,7 @@
   # Test with a link
   with_a_link: "\"See this link\":http://mushroomobserver.org"
 
-  ################################################################################
+  ##############################################################################
   #
   #  Overview of File
   #
@@ -211,7 +211,7 @@
   #    LESS IMPORTANT ENUMERATED SETS OF VALUES
   #    DEBUGGING STUFF
   #
-  ################################################################################
+  ##############################################################################
 
   # COMMON WORDS AND PHRASES
 
@@ -764,7 +764,7 @@
   "yes": "yes"
   "no": "no"
 
-  ################################################################################
+  ##############################################################################
 
   # ENUMERATED SETS OF VALUES
 
@@ -1099,7 +1099,7 @@
   log_object_removed: "[:log_object_removed_by_user]"
   log_object_updated: "[:log_object_updated_by_user]"
 
-  ################################################################################
+  ##############################################################################
 
   # APPLICATION LAYOUT -- this stuff appears on every single page
 
@@ -1189,7 +1189,7 @@
   # Title of the RSS auto-discovery link in the HTML header section.
   app_rss: "[:app_title] RSS"
 
-  ################################################################################
+  ##############################################################################
 
   # MOST POPULAR PAGES
 
@@ -1526,6 +1526,9 @@
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
+  list_observations_suggestions: Other Links
+  list_observation_name: "[:NAME]"
+  list_observation_observations: Observations of
   list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
@@ -2400,7 +2403,7 @@
   wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
   wrapup_2012_body: "2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n\n* Substantial revisions to the <a href=\"/name/show_name/383\">Show Name</a> and <a href=\"/image/show_image/267480?size=medium\">Show Image</a> pages\n* Data downloads from observation searches\n* Support for <a href=\"/herbarium\">Herbarium</a> and Specimen pages\n* Interactive support for translators\n* <a href=\"/observer/checklist?user_id=1093\">Life Lists</a> from user summary pages\n* Substantial increase in data shared with EOL\n* Reciprocal links with <a href=\"http://mycoportal.org/\">MyCoPortal</a>\n\nMore details available on the <a href=\"/observer/news\">Features and Fixes</a> page.\n\nOne of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n\nIn addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n\nFortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n\nI am also excited by a recent surge in the number of folks interested in contributing their time to the Mushroom Observer development effort.  We had a summer intern, Han Wang, from RPI create a prototype system for describing Fungi using semantic web technology (references at the end of the letter).  I presented on this work at the 2012 Mycological Society of America annual meeting.  Another RPI student, Katie Chastain, has recently joined the team and is interested in working on data provenance and developing a workflow for species discovery.  Alan Rockefeller has begun looking into improving site performance and Joe Cohen has started exploring upgrading our software stack.  If you want to join the party, sign up for the new <a href=\"https://groups.google.com/forum/?fromgroups=#!forum/mo-developers\">mo-developers@googlegroups.com</a> mailing list.  One of the significant enabling pieces for this is a new simpler system for setting up a development environment.  You can find out more at the <a href=\"https://github.com/MushroomObserver/developer-startup\">developer-startup GitHub Project</a>.\n\nHowever, this year has not been entirely good news. The Consortium for Digital Mycology Resources (CDMR), was organized in 2009 to support online digital mycology resources such as Mushroom Observer, and it applied for federal tax exempt status under section ==501(c)(3)== so that it could receive deductible donations from interested users.  This ruling is still pending in the IRS.  Beginning in 2012, Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, noticed that CDMR’s exemption application had been pending with the IRS for an unusually long time, and volunteered to help CDMR on a pro-bono basis in its attempt to attempt to obtain recognition of a section ==501(c)(3)== status for CDMR.  Since then he has briefed the IRS on the issues that the IRS has raised, and had a conference with the IRS to discuss the ruling request.  CDMR’s case is currently under review in the National Office of the IRS.\n\nIn light of CDMR’s unsettled tax status, CDMR’s board decided not to solicit donations at the end of last year.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n\nWithout financial support from CDMR, I have been personally paying to support Mushroom Observer largely out of my own pocket over the last few months. I would very much appreciate any <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">personal gifts</a> that you all would be willing to send to contribute to the cost of keeping Mushroom Observer online during this interim period. This will be especially important before we can attempt to improve the level of performance by adding more servers. Any gifts I receive will be used to cover costs directly associated with running the Mushroom Observer and such donations will continue to be recognized on the Mushroom Observer donors page. Unfortunately, you will not be able to count them as tax deductible donations.  You can make your gifts with a credit card through <a href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q\">PayPal</a> or you can send your checks to:\n\nNathan Wilson\n68 Bay Rd.\nNorth Falmouth, MA 02556\n\n\nThanks for all your contributions to the Mushroom Observer,\n-Nathan"
 
-  ################################################################################
+  ##############################################################################
 
   # LESS POPULAR PAGES
 
@@ -2859,7 +2862,7 @@
   user_alert_message_bounced_email: "Hi [login],\n\nWe've noticed that email to your address is bouncing.\n\nPlease check the address we're using and make sure it is correct.\n\nEmail : [email]\n\n\"Click here to change it.\":/account/prefs\n\n[notes]"
   user_alert_message_other: "[notes]"
 
-  ################################################################################
+  ##############################################################################
 
   # ADMIN-TYPE PAGES
 
@@ -3011,7 +3014,7 @@
   review_amount: Amount
   review_email: Email
 
-  ################################################################################
+  ##############################################################################
 
   # EMAIL MESSAGES
 
@@ -3114,7 +3117,7 @@
   email_verify_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and activate your [:app_title] account:\n\n[link]"
   email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[other_user]\") has requested access to your [:app_title] account.  If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created.  Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
 
-  ################################################################################
+  ##############################################################################
 
   # HELP PAGES
 
@@ -3241,7 +3244,7 @@
   name_term_notes: Taxonomic notes contains this string.
   name_term_comments: One of the comments contains this string.
 
-  ################################################################################
+  ##############################################################################
 
   # ERROR MESSAGES
 
@@ -3610,7 +3613,20 @@
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
 
-  ################################################################################
+  # content for html header title tag,
+  # used when there are no hits for a list or search
+  title_for_comment_search:          Comment Search
+  title_for_herbarium_search:        Herbarium Search
+  title_for_herbarium_record_search: Herbarium Record Search
+  title_for_image_search:            Image Search
+  title_for_location_search:         Location Search
+  title_for_name_search:             Name Search
+  title_for_observation_search:      Observation Search
+  title_for_project_search:          Project Search
+  title_for_species_list_search:     Species List Search
+  title_for_user_search:             User Search
+
+  ##############################################################################
 
   # LESS IMPORTANT ENUMERATED SETS OF VALUES
 
@@ -3929,7 +3945,7 @@
   sort_by_user: "[:USER]"
   sort_by_where: "[:LOCATION]"
 
-  ################################################################################
+  ##############################################################################
 
   # DEBUGGING STUFF -- this doesn't need translating
 

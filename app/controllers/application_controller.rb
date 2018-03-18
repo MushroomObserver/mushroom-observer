@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Application Controller Base Class
 #
@@ -603,7 +602,7 @@ class ApplicationController < ActionController::Base
   end
 
   def prefs_locale
-    return unless @user && !@user.locale.blank? && params[:controller] != "ajax"
+    return unless @user && @user.locale.present? && params[:controller] != "ajax"
     logger.debug "[I18n] loading locale: #{@user.locale} from @user"
     @user.locale
   end
@@ -1043,7 +1042,7 @@ class ApplicationController < ActionController::Base
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
-    @query_params[:q] = params[:q] unless params[:q].blank?
+    @query_params[:q] = params[:q] if params[:q].present?
     @query_params
   end
 
@@ -1373,9 +1372,6 @@ class ApplicationController < ActionController::Base
     # Pass this query on when clicking on results.
     query_params_set(query)
 
-    # Supply a default title.
-    @title ||= query.title
-
     # Supply default error message to display if no results found.
     if (query.params.keys - query.required_parameters - [:by]).empty?
       @error ||=
@@ -1437,10 +1433,6 @@ class ApplicationController < ActionController::Base
     end
     @error ||= :runtime_no_matches.t(type: type)
 
-    # Add magic links for sorting.
-    @sorts = sorting_links(query, args)
-    # "@sorts".print_thing(@sorts)
-
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1455,9 +1447,19 @@ class ApplicationController < ActionController::Base
     @num_results = query.num_results
     @timer_end = Time.current
 
+    # Supply a default title.
+    # If no results, then title is empty but not nil.
+    # Result: No title is displayed
+    # (overriding any title specified in the view)
+    # and the html <title> metadata == a translated tag or the action name
+    # see ApplicationHelper#title_tag_contents
+    @num_results.zero? ? @title = "" : @title ||= query.title
+
+    # Add magic links for sorting if enough results to sort
+    @sorts = (@num_results > 1 ? sorting_links(query, args) : nil)
+
     # If only one result (before pagination), redirect to 'show' action.
-    if (query.num_results == 1) &&
-       !args[:always_index]
+    if (@num_results == 1) && !args[:always_index]
       redirect_with_query(controller: query.model.show_controller,
                           action: query.model.show_action,
                           id: query.result_ids.first)
@@ -1471,7 +1473,7 @@ class ApplicationController < ActionController::Base
                end
 
       # Skip to correct place if coming back in to index from show_object.
-      if !args[:id].blank? &&
+      if args[:id].present? &&
          params[@pages.letter_arg].blank? &&
          params[@pages.number_arg].blank?
         @pages.show_index(query.index(args[:id]))
@@ -1561,7 +1563,7 @@ class ApplicationController < ActionController::Base
   end
 
   def reverse_by(query, this_by)
-    query.params[:by].to_s =~ /^reverse_/ ? this_by : "reverse_#{this_by}"
+    /^reverse_/.match?(query.params[:by].to_s) ? this_by : "reverse_#{this_by}"
   end
 
   public ##########

@@ -27,7 +27,9 @@ class API
     def show_args
       hash = args.except(:as, :list, :range)
       hash.delete(:default) if hash[:default].to_s == ""
-      hash[:limit] = "#{hash[:limit]} chars" if hash[:limit].to_s =~ /^\d+$/
+      if /^\d+$/.match?(hash[:limit].to_s)
+        hash[:limit] = "#{hash[:limit]} chars"
+      end
       return "" if hash.empty?
       " (" + hash.map { |key, val| show_arg(key, val) }.join(", ") + ")"
     end
@@ -45,7 +47,6 @@ class API
       end
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     def show_val(val)
       case val
       when String, Symbol, Integer, Float, Range

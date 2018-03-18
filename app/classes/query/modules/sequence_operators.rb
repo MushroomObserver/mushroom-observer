@@ -2,7 +2,7 @@ module Query::Modules::SequenceOperators
   # Current place in results, as an id.  (Returns nil if not set yet.)
   attr_reader :current_id
 
-  # Set current place in results; takes id (String or Fixnum).
+  # Set current place in results; takes id (String or Integer).
   def current_id=(id)
     @save_current_id = @current_id = id.to_s.to_i
   end
@@ -17,7 +17,7 @@ module Query::Modules::SequenceOperators
     @current_id ? instantiate([@current_id], *args).first : nil
   end
 
-  # Set current place in results; takes instance or id (String or Fixnum).
+  # Set current place in results; takes instance or id (String or Integer).
   def current=(arg)
     if arg.is_a?(model)
       @results ||= {}

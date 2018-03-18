@@ -1,4 +1,3 @@
-# encoding: utf-8
 # TODO: move this into a new EmailController
 class ObserverController
   def email_features # :root: :norobots:

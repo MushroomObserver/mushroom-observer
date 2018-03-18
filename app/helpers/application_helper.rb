@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Application Helpers
 #
@@ -188,7 +187,7 @@ module ApplicationHelper
     end
 
     # Deal with the special "/xxx/id" case.
-    if addr.match(/\/(\d+)$/)
+    if /\/(\d+)$/.match?(addr)
       new_id = new_args[:id] || new_args["id"]
       addr.sub!(/\d+$/, new_id.to_s) if new_id
       new_args.delete(:id)
@@ -273,5 +272,16 @@ module ApplicationHelper
       end_year: Time.now.year,
       order: [:day, :month, :year]
     }
+  end
+
+  # contents of the <title> in html header
+  def title_tag_contents(action_name)
+    if @title.present?
+      @title.strip_html.html_safe
+    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
+      :"title_for_#{action_name}".t
+    else
+      action_name.tr("_", " ").titleize
+    end
   end
 end

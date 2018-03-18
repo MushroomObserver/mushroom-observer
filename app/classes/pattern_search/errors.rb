@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module PatternSearch
   class Error < ::StandardError
     attr_accessor :args

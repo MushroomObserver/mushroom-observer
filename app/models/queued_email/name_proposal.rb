@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Name Proposal Email
 class QueuedEmail::NameProposal < QueuedEmail
   def naming

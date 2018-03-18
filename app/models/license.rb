@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = License Model
 #
@@ -44,7 +43,7 @@ class License < AbstractModel
   has_many :name_descriptions
   has_many :users
 
-  PREFERRED_LICENSE_FORM_NAME = "ccbysa30"
+  PREFERRED_LICENSE_FORM_NAME = "ccbysa30".freeze
 
   # Use this license if all else equal.
   def self.preferred
@@ -66,10 +65,8 @@ class License < AbstractModel
   #
   def self.current_names_and_ids(current_license = nil)
     result = License.where(deprecated: 0).map { |l| [l.display_name, l.id] }
-    if current_license
-      if current_license.deprecated
-        result.push([current_license.display_name, current_license.id])
-      end
+    if current_license && current_license.deprecated
+      result.push([current_license.display_name, current_license.id])
     end
     result
   end
@@ -78,7 +75,8 @@ class License < AbstractModel
     if form_name == "publicdomain"
       "".html_safe + :image_show_public_domain.t + " " + name
     else
-      "".html_safe + "#{:image_show_copyright.t}" + " &copy;".html_safe + " #{year} " + name
+      "".html_safe + "#{:image_show_copyright.t}" + " &copy;".html_safe +
+        " #{year} " + name
     end
   end
 end

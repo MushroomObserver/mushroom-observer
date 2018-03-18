@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Name Descriptions
 #
@@ -75,8 +74,7 @@ class NameDescription < Description
             inaccurate: 4
           },
           source: :review_status,
-          accessor: :whiny
-         )
+          accessor: :whiny)
   as_enum(:source_type,
           { public: 1,
             foreign: 2,
@@ -85,8 +83,7 @@ class NameDescription < Description
             user: 5
           },
           source: :source_type,
-          accessor: :whiny
-         )
+          accessor: :whiny)
 
   belongs_to :license
   belongs_to :name
@@ -103,8 +100,12 @@ class NameDescription < Description
   has_and_belongs_to_many :authors,       class_name: "User",      join_table: "name_descriptions_authors"
   has_and_belongs_to_many :editors,       class_name: "User",      join_table: "name_descriptions_editors"
 
-  EOL_NOTE_FIELDS = [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
-  ALL_NOTE_FIELDS = [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
+  EOL_NOTE_FIELDS = [
+    :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
+  ].freeze
+  ALL_NOTE_FIELDS = (
+    [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
+  ).freeze
 
   acts_as_versioned(
     table_name: "name_descriptions_versions",
@@ -139,14 +140,14 @@ class NameDescription < Description
 
   # Don't add any authors until someone has written something "useful".
   def author_worthy?
-    !gen_desc.blank? || !diag_desc.blank?
+    gen_desc.present? || diag_desc.present?
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Descriptions
   #
-  ################################################################################
+  ##############################################################################
 
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
@@ -170,7 +171,7 @@ class NameDescription < Description
   #
   ##############################################################################
 
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate]
+  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate].freeze
 
   # Returns an Array of all possible values for +review_status+ (Symbol's).
   def self.all_review_statuses
@@ -280,7 +281,7 @@ class NameDescription < Description
     @old_reviewer = nil
   end
 
-  ################################################################################
+  ##############################################################################
 
   protected
 

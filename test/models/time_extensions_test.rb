@@ -1,6 +1,4 @@
 require "test_helper"
-
-# rubocop:disable Rails/Date, Rails/TimeZone
 # MO time extensions wrap Date, DateTime, and Time
 # So test need to use those Classes in ways which offend RuboCop
 

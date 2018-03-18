@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Name Controller
 #
@@ -202,7 +201,7 @@ class NameController < ApplicationController
     query = find_query(:Name)
     show_selected_names(query)
   rescue => err
-    flash_error(err.to_s) unless err.blank?
+    flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -222,7 +221,7 @@ class NameController < ApplicationController
     args = {
       action: "list_names",
       letters: "names.sort_name",
-      num_per_page: (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50)
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
     # Tired of not having an easy link to list_names.
@@ -328,11 +327,11 @@ class NameController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Show Name
   #
-  ################################################################################
+  ##############################################################################
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
@@ -413,7 +412,7 @@ class NameController < ApplicationController
         version = NameDescription::Version.find(@merge_source_id)
         @old_parent_id = version.name_description_id
         subversion = params[:version]
-        if !subversion.blank? &&
+        if subversion.present? &&
            (version.version != subversion.to_i)
           version = NameDescription::Version.
                     find_by_version_and_name_description_id(params[:version], @old_parent_id)
@@ -504,7 +503,8 @@ class NameController < ApplicationController
         @name.save if @name.changed?
 
         flash_notice(:runtime_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
         redirect_to(action: "show_name_description",
                     id: @description.id)
 
@@ -514,7 +514,8 @@ class NameController < ApplicationController
     end
   end
 
-  def edit_name_description # :prefetch: :norobots:
+  # :prefetch: :norobots:
+  def edit_name_description
     store_location
     pass_query_params
     @description = NameDescription.find(params[:id].to_s)
@@ -549,7 +550,8 @@ class NameController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+        ))
 
         # Update name's classification cache.
         name = @description.name
@@ -623,11 +625,11 @@ class NameController < ApplicationController
 
   public
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Synonymy
   #
-  ################################################################################
+  ##############################################################################
 
   # Form accessible from show_name that lets a user review all the synonyms
   # of a name, removing others, writing in new, etc.
@@ -790,7 +792,7 @@ class NameController < ApplicationController
       @name.change_deprecated(true)
       @name.mark_misspelled(target_name) if @misspelling
       @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
-      post_comment(:deprecate, @name, @comment) unless @comment.blank?
+      post_comment(:deprecate, @name, @comment) if @comment.present?
 
       redirect_with_query(action: "show_name", id: @name.id)
     end
@@ -854,7 +856,7 @@ class NameController < ApplicationController
       name.change_deprecated(true)
       name.save_with_log(:log_deprecated_by)
     rescue RuntimeError => err
-      flash_error(err.to_s) unless err.blank?
+      flash_error(err.to_s) if err.present?
       false
     end
   end
@@ -952,10 +954,11 @@ class NameController < ApplicationController
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
     descs = NameDescription.where(
-      eol_description_conditions(review_status_list))
+      eol_description_conditions(review_status_list)
+    )
 
     # Fill in @descs, @users, @authors, @licenses.
-    for desc in descs
+    descs.each do |desc|
       name_id = desc.name_id.to_i
       @descs[name_id] ||= []
       @descs[name_id] << desc
@@ -964,7 +967,7 @@ class NameController < ApplicationController
         WHERE name_description_id = #{desc.id}
       )).map(&:to_i)
       authors = [desc.user_id] if authors.empty?
-      for author in authors
+      authors.each do |author|
         @users[author.to_i] ||= User.find(author).legal_name
       end
       @authors[desc.id] = authors.map { |id| @users[id.to_i] }.join(", ")
@@ -1025,11 +1028,11 @@ class NameController < ApplicationController
     render_xml(layout: false)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Other Stuff
   #
-  ################################################################################
+  ##############################################################################
 
   # Utility accessible from a number of name pages (e.g. indexes and
   # show_name?) that lets you enter a whole list of names, together with
@@ -1083,8 +1086,8 @@ class NameController < ApplicationController
 
     flavor = Notification.flavors[:name]
     @notification = Notification.
-                      find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
-                                                            @user.id)
+                    find_by_flavor_and_obj_id_and_user_id(flavor, name_id,
+                                                          @user.id)
     if request.method != "POST"
       initialize_tracking_form
     else
@@ -1155,16 +1158,16 @@ class NameController < ApplicationController
     redirect_with_query(@name.show_link_args)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Stuff for Mushroom App
   #
-  ################################################################################
+  ##############################################################################
 
   def names_for_mushroom_app # :nologin: :norobots:
-    number_of_names = params[:number_of_names].blank? ? 1000 : params[:number_of_names]
-    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
-    minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
+    number_of_names = params[:number_of_names].presence || 1000
+    minimum_confidence = params[:minimum_confidence].presence || 1.5
+    minimum_observations = params[:minimum_observations].presence || 5
     rank_condition = params[:include_higher_taxa].blank? ?
       "= #{Name.ranks[:Species]}" :
       "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(",")})"
@@ -1227,8 +1230,7 @@ class NameController < ApplicationController
               charset: "UTF-8",
               header: "present",
               disposition: "attachment",
-              filename: "#{action_name}.csv"
-             )
+              filename: "#{action_name}.csv")
 
   rescue => e
     render(text: e.to_s, layout: false, status: 500)

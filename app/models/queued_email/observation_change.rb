@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Observation Change Email
 class QueuedEmail::ObservationChange < QueuedEmail
   def observation
@@ -65,7 +63,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
     ObservationChangeEmail.build(user, to_user, observation, note, queued).deliver_now
   end
 
-  ################################################################################
+  ##############################################################################
 
   private
 

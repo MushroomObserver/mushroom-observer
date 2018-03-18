@@ -1,13 +1,12 @@
-# encoding: utf-8
 #
-#  = Extensions to Fixnum
+#  = Extensions to Integer
 #
 #  == Instance Methods
 #
 #  alphabetize::    Turn into base-62 "number"
 #                   using upper and lowercase letters for digits over 9.
 #
-class Fixnum
+class Integer
   # Turn into base-62 "number" using upper and lowercase letters for digits
   # over 9.  You can also pass in alternate alphabets to achieve any base.  The
   # inverse is available as a method of String.
@@ -24,7 +23,8 @@ class Fixnum
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
+           freeze
 
   def alphabetize(alphabet = BASE62)
     str      = ""

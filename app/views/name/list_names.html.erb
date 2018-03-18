@@ -16,7 +16,7 @@
           <%= :list_observations_alternate_spellings.t %><br/>
           <ul type="none">
             <% names.sort_by(&:sort_name).each do |name| %>
-                <%= link_to(name.display_name.t, name.show_link_args) %><br/>
+              <%= link_to(name.display_name.t, name.show_link_args) %><br/>
             <% end %>
           </ul>
         </div>
@@ -25,7 +25,7 @@
 
 <%= @help.tp if @help %>
 
-<% # Let test_index test passing args to pagination_links.
+<% # Let test_index test pass args to pagination_links.
    args = @test_pagination_args || {} %>
 <%= paginate_block(@pages, args) do %>
     <% if @objects.any? %>

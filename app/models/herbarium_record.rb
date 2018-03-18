@@ -90,7 +90,8 @@ class HerbariumRecord < AbstractModel
     return if observations.include?(obs)
     observations.push(obs)
     obs.update_attributes(specimen: true) unless obs.specimen
-    obs.log(:log_herbarium_record_added, name: accession_at_herbarium,
+    obs.log(:log_herbarium_record_added,
+            name: accession_at_herbarium,
             touch: true)
   end
 
@@ -99,7 +100,8 @@ class HerbariumRecord < AbstractModel
     return unless observations.include?(obs)
     observations.delete(obs)
     obs.reload.turn_off_specimen_if_no_more_records
-    obs.log(:log_herbarium_record_removed, name: accession_at_herbarium,
+    obs.log(:log_herbarium_record_removed,
+            name: accession_at_herbarium,
             touch: true)
     destroy if observations.empty?
   end
@@ -107,10 +109,12 @@ class HerbariumRecord < AbstractModel
   def log_update
     observations.each do |obs|
       if herbarium_id_was != herbarium_id
-        obs.log(:log_herbarium_record_moved, to: accession_at_herbarium,
+        obs.log(:log_herbarium_record_moved,
+                to: accession_at_herbarium,
                 touch: true)
       else
-        obs.log(:log_herbarium_record_updated, name: accession_at_herbarium,
+        obs.log(:log_herbarium_record_updated,
+                name: accession_at_herbarium,
                 touch: true)
       end
     end
@@ -118,7 +122,8 @@ class HerbariumRecord < AbstractModel
 
   def log_destroy
     observations.each do |obs|
-      obs.log(:log_herbarium_record_removed, name: accession_at_herbarium,
+      obs.log(:log_herbarium_record_removed,
+              name: accession_at_herbarium,
               touch: true)
     end
   end

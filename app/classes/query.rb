@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 #  = Query Model
 #
@@ -276,9 +275,9 @@
 #
 #  ==== Instance Variables
 #  @initialized::       Boolean: has +initialize_query+ been called yet?
-#  @current_id::        Fixnum: current place in results.
-#  @save_current_id::   Fixnum: saved copy of +@current_id+ for +reset+.
-#  @result_ids::        Array of Fixnum: all results.
+#  @current_id::        Integer: current place in results.
+#  @save_current_id::   Integer: saved copy of +@current_id+ for +reset+.
+#  @result_ids::        Array of Integer: all results.
 #  @results::           Hash: maps ids to instantiated records.
 #  @letters::           Cache of first-letters (if +need_letters given).
 #  @outer::             AbstractQuery: cached copy of outer query (nested

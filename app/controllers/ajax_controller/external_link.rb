@@ -1,4 +1,3 @@
-# encoding: utf-8
 # see ajax_controller.rb
 class AjaxController
   # Add, edit or remove external link associated with an observation.

@@ -1,4 +1,3 @@
-# encoding: utf-8
 module CapybaraHelper
   ### locators ###
   # Xpath for 1st link in each feed item,

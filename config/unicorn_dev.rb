@@ -1,4 +1,4 @@
-APP_PATH = "/vagrant/mo"
+APP_PATH = "/vagrant/mo".freeze
 worker_processes 4
 working_directory APP_PATH
 listen "/tmp/unicorn.sock", backlog: 64

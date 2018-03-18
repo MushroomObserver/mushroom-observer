@@ -1,5 +1,3 @@
-# encoding: utf-8
-#
 #  = Checklist
 #
 #  This class calculates a checklist of species observed by users,
@@ -27,8 +25,8 @@ class Checklist
   # Build list of species observed by one User.
   class ForUser < Checklist
     def initialize(user)
-      @user = user
-      fail "Expected User instance, got #{user.inspect}." unless user.is_a?(User)
+      return (@user = user) if user.is_a?(User)
+      raise "Expected User instance, got #{user.inspect}."
     end
 
     def query
@@ -41,14 +39,15 @@ class Checklist
   # Build list of species observed by one Project.
   class ForProject < Checklist
     def initialize(project)
-      @project = project
-      fail "Expected Project instance, got #{project.inspect}." unless project.is_a?(Project)
+      return (@project = project) if project.is_a?(Project)
+      raise "Expected Project instance, got #{project.inspect}."
     end
 
     def query
       super(
         tables: ["observations_projects op"],
-        conditions: ["op.observation_id = o.id", "op.project_id = #{@project.id}"]
+        conditions: ["op.observation_id = o.id",
+                     "op.project_id = #{@project.id}"]
       )
     end
   end
@@ -56,8 +55,8 @@ class Checklist
   # Build list of species observed by one SpeciesList.
   class ForSpeciesList < Checklist
     def initialize(list)
-      @list = list
-      fail "Expected SpeciesList instance, got #{list.inspect}." unless list.is_a?(SpeciesList)
+      return (@list = list) if list.is_a?(SpeciesList)
+      raise "Expected SpeciesList instance, got #{list.inspect}."
     end
 
     def query
@@ -69,7 +68,7 @@ class Checklist
     end
   end
 
-  ################################################################################
+  ##############################################################################
 
   def initialize
     @genera = @species = nil
@@ -106,7 +105,7 @@ class Checklist
 
   def count_nonsynonyms_and_gather_synonyms
     synonyms = {}
-    for text_name, syn_id, deprecated in Name.connection.select_rows(query)
+    Name.connection.select_rows(query).each do |text_name, syn_id, deprecated|
       if syn_id && deprecated == 1
         # wait until we find an accepted synonym
         text_name = synonyms[syn_id] ||= nil
@@ -122,7 +121,7 @@ class Checklist
   end
 
   def count_synonyms(synonyms)
-    for syn_id, text_name in synonyms
+    synonyms.each do |syn_id, text_name|
       text_name ||= Name.connection.select_values(%(
         SELECT text_name FROM names
         WHERE synonym_id = #{syn_id}
@@ -134,7 +133,7 @@ class Checklist
   end
 
   def count_species(text_name)
-    unless text_name.blank?
+    if text_name.present?
       g, s = text_name.split(" ", 3)
       @genera[g] = g
       @species[[g, s]] = "#{g} #{s}"

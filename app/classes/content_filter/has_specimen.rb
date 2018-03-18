@@ -1,4 +1,3 @@
-# encoding: utf-8
 class ContentFilter
   class HasSpecimen < BooleanFilter
     def initialize

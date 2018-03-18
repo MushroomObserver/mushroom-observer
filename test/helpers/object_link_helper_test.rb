@@ -45,20 +45,17 @@ class ObjectLinkHelperTest < ActionView::TestCase
     obj = projects(:bolete_project)
     link_text = "Bolete Project"
     assert_equal(expected_link(path, obj, link_text),
-                 link_to_object(projects(:bolete_project))
-                )
+                 link_to_object(projects(:bolete_project)))
     # link to project, name supplied
     link_text = "BP"
     assert_equal(expected_link(path, obj, link_text),
-                 link_to_object(projects(:bolete_project), "BP")
-                )
+                 link_to_object(projects(:bolete_project), "BP"))
     # link to species list
     path = "/species_list/show_species_list/"
     obj = species_lists(:first_species_list)
     link_text = "A Species List"
     assert_equal(expected_link(path, obj, link_text),
-                 link_to_object(species_lists(:first_species_list))
-                )
+                 link_to_object(species_lists(:first_species_list)))
     # link to non-existent object, name not supplied
     assert_nil(link_to_object(nil), "Non-existent object should lack link.")
     # link to non-existent object, name supplied

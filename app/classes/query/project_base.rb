@@ -36,7 +36,7 @@ module Query
         'LENGTH(COALESCE(projects.summary,"")) = 0'
       )
       add_join(:comments) if params[:has_comments]
-      unless params[:comments_has].blank?
+      if params[:comments_has].present?
         initialize_model_do_search(
           :comments_has,
           "CONCAT(comments.summary,COALESCE(comments.comment,''))"

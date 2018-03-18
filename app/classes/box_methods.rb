@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 module BoxMethods
   def is_location?
     true
@@ -32,7 +30,7 @@ module BoxMethods
   # Return center latitude.
   def lat
     (north + south) / 2.0
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -41,7 +39,7 @@ module BoxMethods
     long = (east + west) / 2.0
     long += 180 if west > east
     return long
-  rescue
+  rescue StandardError
     nil
   end
 

@@ -1,6 +1,6 @@
-# encoding: utf-8
+# frozen_string_literal: true
 #
-#  = Account Controller
+#  Account Controller
 #
 #  == Actions
 #   L = login required
@@ -69,110 +69,113 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def signup # :nologin: :prefetch:
+  # :nologin: :prefetch:
+  def signup
     @new_user = User.new(theme: MO.default_theme)
     return if request.method != "POST"
     initialize_new_user
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
-    group = UserGroup.create_user(@new_user)
+    UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyEmail.build(@new_user).deliver_now
     redirect_back_or_default(action: :welcome)
   end
 
-  def verify # :nologin:
+  # :nologin:
+  def verify
     id        = params["id"]
     auth_code = params["auth_code"]
-    if (user = find_or_goto_index(User, id))
+    return unless (user = find_or_goto_index(User, id))
 
-      # This will happen legitimately whenever a non-verified user tries to
-      # login.  The user just gets redirected here instead of being properly
-      # logged in.  "auth_code" will be missing.
-      if auth_code != user.auth_code
-        @unverified_user = user
-        render(action: :reverify)
+    # This will happen legitimately whenever a non-verified user tries to
+    # login.  The user just gets redirected here instead of being properly
+    # logged in.  "auth_code" will be missing.
+    if auth_code != user.auth_code
+      @unverified_user = user
+      render(action: :reverify)
 
-      # If already logged in and verified, just send to "welcome" page.
-      elsif @user == user
-        redirect_to(action: :welcome)
+    # If already logged in and verified, just send to "welcome" page.
+    elsif @user == user
+      redirect_to(action: :welcome)
 
-      # If user is already verified, send them back to the login page.  (If
-      # someone grabs a user's verify email, they could theoretically use it to
-      # log in any time they wanted to.  This makes it a one-time use.)
-      elsif user.verified
-        flash_warning(:runtime_reverify_already_verified.t)
-        @user = nil
-        User.current = nil
-        session_user_set(nil)
-        redirect_to(action: :login)
+    # If user is already verified, send them back to the login page.  (If
+    # someone grabs a user's verify email, they could theoretically use it to
+    # log in any time they wanted to.  This makes it a one-time use.)
+    elsif user.verified
+      flash_warning(:runtime_reverify_already_verified.t)
+      @user = nil
+      User.current = nil
+      session_user_set(nil)
+      redirect_to(action: :login)
 
-      # If user was created via API, we must ask the user to choose a password
-      # first before we can verify them.
-      elsif user.password.blank?
-        @user = user
-        if request.method != "POST"
-          flash_warning(:account_choose_password_warning.t)
-          render(action: :choose_password)
-        else
-          password = begin
-                       params[:user][:password]
-                     rescue
-                       nil
-                     end
-          confirmation = begin
-                           params[:user][:password_confirmation]
-                         rescue
-                           nil
-                         end
-          if password.blank?
-            @user.errors.add(:password, :validate_user_password_missing.t)
-          elsif password != confirmation
-            @user.errors.add(:password_confirmation,
-                             :validate_user_password_no_match.t)
-          elsif password.length < 5 || password.size > 40
-            @user.errors.add(:password, :validate_user_password_too_long.t)
-          else
-            User.current = @user
-            session_user_set(@user)
-            @user.change_password(password)
-            @user.verify
-          end
-          if user.errors.any?
-            @user.password = password
-            flash_object_errors(user)
-            render(action: :choose_password)
-          end
-        end
-
-      # If not already verified, and the code checks out, then mark account
-      # "verified", log user in, and display the "you're verified" page.
+    # If user was created via API, we must ask the user to choose a password
+    # first before we can verify them.
+    elsif user.password.blank?
+      @user = user
+      if request.method != "POST"
+        flash_warning(:account_choose_password_warning.t)
+        render(action: :choose_password)
       else
-        @user = user
-        User.current = user
-        session_user_set(user)
-        @user.verify
+        password = begin
+                     params[:user][:password]
+                   rescue StandardError
+                     nil
+                   end
+        confirmation = begin
+                         params[:user][:password_confirmation]
+                       rescue StandardError
+                         nil
+                       end
+        if password.blank?
+          @user.errors.add(:password, :validate_user_password_missing.t)
+        elsif password != confirmation
+          @user.errors.add(:password_confirmation,
+                           :validate_user_password_no_match.t)
+        elsif password.length < 5 || password.size > 40
+          @user.errors.add(:password, :validate_user_password_too_long.t)
+        else
+          User.current = @user
+          session_user_set(@user)
+          @user.change_password(password)
+          @user.verify
+        end
+        if user.errors.any?
+          @user.password = password
+          flash_object_errors(user)
+          render(action: :choose_password)
+        end
       end
+
+    # If not already verified, and the code checks out, then mark account
+    # "verified", log user in, and display the "you're verified" page.
+    else
+      @user = user
+      User.current = user
+      session_user_set(user)
+      @user.verify
     end
   end
 
   # This action is never actually used.  Its template is rendered by verify.
-  def reverify # :nologin:
-    fail "This action should never occur!"
+  # :nologin:
+  def reverify
+    raise "This action should never occur!"
   end
 
   # This is used by the "reverify" page to re-send the verification email.
-  def send_verify # :nologin:
-    if (user = find_or_goto_index(User, params[:id].to_s))
-      VerifyEmail.build(user).deliver_now
-      flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
-      redirect_back_or_default(action: :welcome)
-    end
+  # :nologin:
+  def send_verify
+    return unless (user = find_or_goto_index(User, params[:id].to_s))
+
+    VerifyEmail.build(user).deliver_now
+    flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
+    redirect_back_or_default(action: :welcome)
   end
 
   # This is the welcome page for new users who just created an account.
-  def welcome # :nologin:
-  end
+  # :nologin:
+  def welcome; end
 
   ##############################################################################
   #
@@ -180,7 +183,8 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def login # :nologin: :prefetch:
+  # :nologin: :prefetch:
+  def login
     if request.method != "POST"
       @login = ""
       @remember = true
@@ -199,7 +203,7 @@ class AccountController < ApplicationController
       else
         flash_notice :runtime_login_success.t
         @user = user
-        @user.last_login = now = Time.now
+        @user.last_login = now = Time.zone.now
         @user.updated_at = now
         @user.save
         User.current = @user
@@ -214,7 +218,8 @@ class AccountController < ApplicationController
     end
   end
 
-  def email_new_password # :nologin:
+  # :nologin:
+  def email_new_password
     if request.method != "POST"
       @new_user = User.new
     else
@@ -238,14 +243,16 @@ class AccountController < ApplicationController
     end
   end
 
-  def logout_user # :nologin:
+  # :nologin:
+  def logout_user
     @user = nil
     User.current = nil
     session_user_set(nil)
     clear_autologin_cookie
   end
 
-  def show_alert # :nologin:
+  # :nologin:
+  def show_alert
     if !@user
       redirect_back_or_default(action: :welcome)
     elsif !@user.alert || !@user.alert_type
@@ -257,12 +264,11 @@ class AccountController < ApplicationController
     elsif request.method == "POST"
       if params[:commit] == :user_alert_okay.l
         @user.alert = nil
-        @user.save
       else
-        @user.alert_next_showing = Time.now + 1.day
-        @user.save
+        @user.alert_next_showing = Time.zone.now + 1.day
       end
-      if !params[:back].blank?
+      @user.save
+      if params[:back].present?
         redirect_to(params[:back])
       else
         redirect_to("/")
@@ -323,7 +329,8 @@ class AccountController < ApplicationController
     end
   end
 
-  def prefs # :prefetch:
+  # :prefetch:
+  def prefs
     @licenses = License.current_names_and_ids(@user.license)
     return unless request.method == "POST"
 
@@ -386,23 +393,24 @@ class AccountController < ApplicationController
     result
   end
 
-  def profile # :prefetch:
+  # :prefetch:
+  def profile
     @licenses = License.current_names_and_ids(@user.license)
     if request.method != "POST"
       @place_name        = @user.location ? @user.location.display_name : ""
       @copyright_holder  = @user.legal_name
-      @copyright_year    = Time.now.year
+      @copyright_year    = Time.zone.now.year
       @upload_license_id = @user.license.id
 
     else
-      for arg in [:name, :notes, :mailing_address]
+      [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
         @user.send("#{arg}=", val) if @user.send(arg) != val
       end
 
       # Make sure the given location exists before accepting it.
       @place_name = params["user"]["place_name"].to_s
-      if !@place_name.blank?
+      if @place_name.present?
         location = Location.find_by_name_or_reverse_name(@place_name)
         if !location
           need_to_create_location = true
@@ -416,12 +424,7 @@ class AccountController < ApplicationController
 
       # Check if we need to upload an image.
       upload = params["user"]["upload_image"]
-      unless upload.blank?
-        if upload.respond_to?(:original_filename)
-          name = upload.original_filename.force_encoding("utf-8")
-        else
-          name = nil
-        end
+      if upload.present?
         date = Date.parse(params["date"]["copyright_year"].to_s + "0101")
         license = License.safe_find(params["upload"]["license_id"])
         holder = params["copyright_holder"]
@@ -471,7 +474,7 @@ class AccountController < ApplicationController
   end
 
   def remove_image
-    if @user && @user.image
+    if @user&.image
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
@@ -551,14 +554,14 @@ class AccountController < ApplicationController
   end
 
   # These are the old email flags, renamed in favor of more consistent ones.
-  alias_method :no_comment_email,          :no_email_comments_owner
-  alias_method :no_comment_response_email, :no_email_comments_response
-  alias_method :no_commercial_email,       :no_email_general_commercial
-  alias_method :no_consensus_change_email, :no_email_observations_consensus
-  alias_method :no_feature_email,          :no_email_general_feature
-  alias_method :no_name_change_email,      :no_email_names_author
-  alias_method :no_name_proposal_email,    :no_email_observations_naming
-  alias_method :no_question_email,         :no_email_general_question
+  alias no_comment_email no_email_comments_owner
+  alias no_comment_response_email no_email_comments_response
+  alias no_commercial_email no_email_general_commercial
+  alias no_consensus_change_email no_email_observations_consensus
+  alias no_feature_email no_email_general_feature
+  alias no_name_change_email no_email_names_author
+  alias no_name_proposal_email no_email_observations_naming
+  alias no_question_email no_email_general_question
 
   def no_email(type)
     user = User.safe_find(params[:id])
@@ -567,7 +570,6 @@ class AccountController < ApplicationController
       prefix  = "no_email_#{type}"
       success = "#{prefix}_success".to_sym
       @note   = "#{prefix}_note".to_sym
-      set_val = "set_#{type}".to_sym
       @user.send(method, false)
       if @user.save
         flash_notice(success.t(name: @user.unique_text_name))
@@ -582,36 +584,36 @@ class AccountController < ApplicationController
     end
   end
 
-  def api_keys # :login: :norobots:
+  # :login: :norobots:
+  def api_keys
     @key = ApiKey.new
-    if request.method == "POST"
-      if params[:commit] == :account_api_keys_create_button.l
-        create_api_key
-      else
-        remove_api_keys
-      end
+    return unless request.method == "POST"
+    if params[:commit] == :account_api_keys_create_button.l
+      create_api_key
+    else
+      remove_api_keys
     end
   end
 
   def create_api_key
     @key = ApiKey.new(params[:key].permit!)
-    @key.verified = Time.now
+    @key.verified = Time.zone.now
     @key.save!
     @key = ApiKey.new # blank out form for if they want to create another key
     flash_notice(:account_api_keys_create_success.t)
-  rescue => e
+  rescue StandardError => e
     flash_error(:account_api_keys_create_failed.t(msg: e.to_s))
   end
 
   def remove_api_keys
     num_destroyed = 0
-    for key in @user.api_keys
+    @user.api_keys.each do |key|
       if params["key_#{key.id}"] == "1"
         @user.api_keys.delete(key)
         num_destroyed += 1
       end
     end
-    if num_destroyed > 0
+    if num_destroyed.positive?
       flash_notice(:account_api_keys_removed_some.t(num: num_destroyed))
     else
       flash_warning(:account_api_keys_removed_none.t)
@@ -626,7 +628,7 @@ class AccountController < ApplicationController
       end
       redirect_to(action: :api_keys)
     end
-  rescue => e
+  rescue StandardError => e
     flash_error(e.to_s)
   end
 
@@ -644,7 +646,7 @@ class AccountController < ApplicationController
         redirect_to(action: :api_keys)
       end
     end
-  rescue => e
+  rescue StandardError => e
     flash_error(e.to_s)
   end
 
@@ -655,7 +657,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    session[:admin] = true if @user && @user.admin && !in_admin_mode?
+    session[:admin] = true if @user&.admin && !in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -670,8 +672,8 @@ class AccountController < ApplicationController
       if request.method == "POST"
         user_name  = params["user_name"].to_s
         group_name = params["group_name"].to_s
-        user       = User.find_by_login(user_name)
-        group      = UserGroup.find_by_name(group_name)
+        user       = User.find_by(login: user_name)
+        group      = UserGroup.find_by(name: group_name)
         flash_error :add_user_to_group_no_user.t(user: user_name)    unless user
         flash_error :add_user_to_group_no_group.t(group: group_name) unless group
         if user && group
@@ -734,7 +736,7 @@ class AccountController < ApplicationController
   def destroy_user # :root:
     if in_admin_mode?
       id = params["id"]
-      unless id.blank?
+      if id.present?
         user = User.safe_find(id)
         User.erase_user(id) if user
       end
@@ -749,8 +751,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   # This is used to test the autologin feature.
-  def test_autologin
-  end
+  def test_autologin; end
 
   # This is used to test the flash error mechanism in the unit tests.
   def test_flash # :nologin:
@@ -783,10 +784,10 @@ class AccountController < ApplicationController
       mailing_address: "",
       notes:           ""
     }.merge(params.require(:new_user).permit(
-        :login, :name, :theme,
-        :email, :email_confirmation,
-        :password, :password_confirmation
-      ))
+              :login, :name, :theme,
+              :email, :email_confirmation,
+              :password, :password_confirmation
+    ))
   end
 
   def make_sure_theme_is_valid!
@@ -794,13 +795,13 @@ class AccountController < ApplicationController
     login = @new_user.login
     valid_themes = MO.themes + ["NULL"]
     return true if valid_themes.member?(theme) && login != "test_denied"
-    unless theme.blank?
+    if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
       DeniedEmail.build(params["new_user"]).deliver_now
     end
     redirect_back_or_default(action: :welcome)
-    return false
+    false
   end
 
   def validate_and_save_new_user!
@@ -808,14 +809,14 @@ class AccountController < ApplicationController
     make_sure_email_confirmed!
     return true if @new_user.errors.none? && @new_user.save
     flash_object_errors(@new_user)
-    return false
+    false
   end
 
   # I think this is not in the User model validations because of tests or
   # something.  I can't fathom why any "real" user would ever be allowed not
   # to have a password!
   def make_sure_password_present!
-    return unless @new_user.password.blank?
+    return if @new_user.password.present?
     @new_user.errors.add(:password, :validate_user_password_missing.t)
   end
 

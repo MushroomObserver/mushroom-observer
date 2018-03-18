@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 # Comment Email
 class QueuedEmail::CommentAdd < QueuedEmail
   def comment

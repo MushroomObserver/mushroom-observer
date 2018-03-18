@@ -4,7 +4,7 @@ class Name < AbstractModel
     "lichen",
     "lichen_ally",
     "lichenicolous"
-  ]
+  ].freeze
 
   def self.all_lifeforms
     ALL_LIFEFORMS

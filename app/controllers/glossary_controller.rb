@@ -74,7 +74,7 @@ class GlossaryController < ApplicationController
     if request.method == "POST"
       glossary_term = GlossaryTerm.find(params[:id].to_s)
       glossary_term.attributes = params[:glossary_term].
-        permit(:name, :description)
+                                 permit(:name, :description)
       glossary_term.user = @user
       glossary_term.save
       redirect_to(action: "show_glossary_term", id: glossary_term.id)

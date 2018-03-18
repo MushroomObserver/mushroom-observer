@@ -1,4 +1,3 @@
-# encoding: utf-8
 # helpers for creating links in views
 module ObjectLinkHelper
   # Wrap location name in span: "<span>where (count)</span>"
@@ -34,7 +33,7 @@ module ObjectLinkHelper
   #   Parent: <%= name_link(name.parent) %>
   #
   def name_link(name, str = nil)
-    if name.is_a?(Fixnum)
+    if name.is_a?(Integer)
       str ||= :NAME.t + " #" + name.to_s
       link_to(str, Name.show_link_args(name))
     else
@@ -93,7 +92,7 @@ module ObjectLinkHelper
   #   Modified by: <%= user_link(login, user_id) %>
   #
   def user_link(user, name = nil)
-    if user.is_a?(Fixnum)
+    if user.is_a?(Integer)
       name ||= :USER.t + " #" + user.to_s
       link_to(name, User.show_link_args(user))
     elsif user
@@ -134,7 +133,7 @@ module ObjectLinkHelper
   #
   def description_link(desc)
     result = description_title(desc)
-    return result if result.match("(#{:private.t})$")
+    return result if result.match?("(#{:private.t})$")
     link_with_query(result, desc.show_link_args)
   end
 
