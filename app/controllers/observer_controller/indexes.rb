@@ -259,7 +259,9 @@ class ObserverController
   end
 
   def make_labels(observations)
-    @mycoflora_herbarium = Herbarium.where(name: "Mycoflora Project").first
+    @mycoflora_herbarium = Herbarium.where(
+      name: "North American Mycoflora Project"
+    ).first
     observations.map do |observation|
       make_label(observation)
     end

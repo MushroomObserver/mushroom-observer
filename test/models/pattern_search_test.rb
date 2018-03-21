@@ -263,7 +263,7 @@ class PatternSearchTest < UnitTestCase
     assert_raises(PatternSearch::MissingValueError) do
       x.parse_list_of_herbaria
     end
-    x.vals = ["MycoFlora Project"]
+    x.vals = ["North American Mycoflora Project"]
     assert_equal([herbaria(:mycoflora_herbarium).id], x.parse_list_of_herbaria)
     x.vals = [ids.first.to_s]
     assert_equal([ids.first], x.parse_list_of_herbaria)
