@@ -1432,7 +1432,7 @@
   form_observations_gps_info: We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation.
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
-  form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
+  form_observations_image_too_big: This image is too large. Images must be less than [max]Mb in file size.
   form_observations_collection_number_help: Enter the collector's full name and their record identifier.  The identifier can be anything.  It's whatever you use to keep track of your specimens, and it is typically written on the specimen label.  This is most commonly a sequential number starting at 1 for your first specimen, and working up over your life time.  Another common format is a year or date along with a collection number for that date, e.g., "17-034".  But it can be anything you like, including letters and punctuation.
   form_observations_herbarium_record_help: If you've sent a specimen to an herbarium, you can enter that here, along with their accession number if you know it.  Otherwise let it default to your personal herbarium and leave the accession number blank.
   form_observations_there_is_a_problem_with_location: There is a problem with the location. "+See message below.+":#location_messages
