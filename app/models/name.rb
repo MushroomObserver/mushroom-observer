@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = Name Model
 #
@@ -228,7 +229,6 @@
 #  deprecated::              Is this name deprecated?
 #  status::                  Returns "Deprecated" or "Valid".
 #  change_deprecated::       Changes deprecation status.
-#  reviewed_observations::   (not used by anyone)
 #
 #  ==== Attachments
 #  versions::                Old versions.
@@ -263,6 +263,7 @@ class Name < AbstractModel
   require_dependency "name/spelling"
   require_dependency "name/notify"
   require_dependency "name/parse"
+  require_dependency "name/primer"
   require_dependency "name/resolve"
   require_dependency "name/synonymy"
   require_dependency "name/taxonomy"
@@ -292,17 +293,21 @@ class Name < AbstractModel
           source: :rank,
           accessor: :whiny)
 
-  belongs_to :correct_spelling, class_name: "Name",
-                                foreign_key: "correct_spelling_id"
-  belongs_to :description, class_name: "NameDescription" # (main one)
+  belongs_to :correct_spelling, # rubocop:disable Rails/InverseOf
+             class_name: "Name",
+             foreign_key: "correct_spelling_id"
+  belongs_to :description, class_name: "NameDescription",
+                           inverse_of: :name # (main one)
   belongs_to :rss_log
   belongs_to :synonym
+
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
-           class_name: "NameDescription"
-  has_many :comments,  as: :target, dependent: :destroy
-  has_many :interests, as: :target, dependent: :destroy
+           class_name: "NameDescription",
+           inverse_of:  :name
+  has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :namings
   has_many :observations
 
@@ -366,53 +371,12 @@ class Name < AbstractModel
     end
   end
 
-  def <=>(x)
-    sort_name <=> x.sort_name
+  def <=>(other)
+    sort_name <=> other.sort_name
   end
 
   def best_brief_description
     (description.gen_desc.presence || description.diag_desc) if description
-  end
-
-  # Get an Array of Observation's for this Name that have > 80% confidence.
-  def reviewed_observations
-    Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
-  end
-
-  # Get list of common names to prime auto-completer.  Returns a simple Array
-  # of up to 1000 name String's (no authors).
-  #
-  # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
-  # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (MO.name_primer_cache_file).
-  #
-  def self.primer
-    result = []
-    if !File.exist?(MO.name_primer_cache_file) ||
-       File.mtime(MO.name_primer_cache_file) < Time.now - 1.day
-
-      # Get list of names sorted by how many times they've been used, then
-      # re-sort by name.
-      result = connection.select_values(%(
-        SELECT names.text_name, COUNT(*) AS n
-        FROM namings
-        LEFT OUTER JOIN names ON names.id = namings.name_id
-        WHERE correct_spelling_id IS NULL
-        GROUP BY names.text_name
-        ORDER BY n DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      FileUtils.mkdir_p(File.dirname(MO.name_primer_cache_file))
-      file = File.open(MO.name_primer_cache_file, "w:utf-8")
-      file.write(result.join("\n") + "\n")
-      file.close
-    else
-      file = File.open(MO.name_primer_cache_file, "r:UTF-8")
-      result = file.readlines.map(&:chomp)
-      file.close
-    end
-    result
   end
 
   # Used by show_name.
