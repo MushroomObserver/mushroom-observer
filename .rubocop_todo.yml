@@ -6,6 +6,19 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
+# Offense count: 1
+Layout/ConditionPosition:
+  Exclude:
+    - 'app/controllers/translation_controller.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
+# SupportedStylesAlignWith: start_of_line, def
+Layout/DefEndAlignment:
+  Exclude:
+    - 'app/models/queued_email/name_change.rb'
+
 # Offense count: 2
 # Cop supports --auto-correct.
 Layout/EmptyLinesAroundExceptionHandlingKeywords:
@@ -21,6 +34,18 @@ Layout/EmptyLinesAroundModuleBody:
   Exclude:
     - 'app/classes/query/modules/joining.rb'
     - 'test/general_extensions.rb'
+
+# Offense count: 7
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
+# SupportedStylesAlignWith: keyword, variable, start_of_line
+Layout/EndAlignment:
+  Exclude:
+    - 'app/classes/map_set.rb'
+    - 'app/classes/query/modules/initialization.rb'
+    - 'app/helpers/description_helper.rb'
+    - 'app/helpers/pivotal_helper.rb'
+    - 'lib/tasks/jason.rake'
 
 # Offense count: 8
 # Cop supports --auto-correct.
@@ -256,19 +281,6 @@ Lint/BooleanSymbol:
     - 'app/classes/query/modules/validation.rb'
     - 'test/integration/amateur_test.rb'
 
-# Offense count: 1
-Lint/ConditionPosition:
-  Exclude:
-    - 'app/controllers/translation_controller.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
-# SupportedStylesAlignWith: start_of_line, def
-Lint/DefEndAlignment:
-  Exclude:
-    - 'app/models/queued_email/name_change.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Lint/DeprecatedClassMethods:
@@ -290,18 +302,6 @@ Lint/DuplicateMethods:
 Lint/EmptyWhen:
   Exclude:
     - 'script/jpegsize'
-
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
-# SupportedStylesAlignWith: keyword, variable, start_of_line
-Lint/EndAlignment:
-  Exclude:
-    - 'app/classes/map_set.rb'
-    - 'app/classes/query/modules/initialization.rb'
-    - 'app/helpers/description_helper.rb'
-    - 'app/helpers/pivotal_helper.rb'
-    - 'lib/tasks/jason.rake'
 
 # Offense count: 21
 Lint/HandleExceptions:
