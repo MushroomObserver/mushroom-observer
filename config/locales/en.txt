@@ -1119,6 +1119,7 @@
   app_how_to_help: How To Help
   app_donate: Donate
   app_send_a_comment: Send a Comment
+  app_index_a_z: Index A-Z
   app_list_locations: "[:list_objects(type=:location)]"
   app_list_projects: "[:list_objects(type=:project)]"
   app_latest: Latest
