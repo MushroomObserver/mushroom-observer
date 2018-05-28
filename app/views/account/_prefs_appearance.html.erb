@@ -33,10 +33,6 @@
                 end
       form.select(:locale, locales, class: "form-control") %><br/>
 
-  <%= form.check_box(:thumbnail_maps, class: "form-control") %>
-
-  <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
-
   <div>
     <%= form.check_box(:view_owner_id, class: "form-control") %>
     <%= add_context_help(label_tag(:user_view_owner_id, :prefs_view_owner_id.t),

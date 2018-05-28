@@ -1111,7 +1111,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: The new server is now running.  Please let us know if you see any strange behavior.
+  app_banner_box: Maps have been removed from the show observation page to avoid significant new costs that Google is imposing for usage of their map API.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
