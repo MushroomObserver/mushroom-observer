@@ -16,6 +16,7 @@ module VersionHelper
       html += indent(1) + get_version_merge_link(obj, latest_version)
     end
     html += safe_br
+    return html unless latest_version
     if previous_version = latest_version.previous
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
       html += link_with_query(str, action: "show_past_#{type}", id: obj.id,
