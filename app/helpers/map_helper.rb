@@ -1,3 +1,4 @@
+# coding: utf-8
 module MapHelper
   require_dependency "map_collapsible"
   require_dependency "map_set"
@@ -29,14 +30,6 @@ module MapHelper
     gmap.event_init(gmap, "click", "function(e) { clickLatLng(e.latLng) }")
     gmap.event_init(gmap, "dblclick", "function(e) { dblClickLatLng(e.latLng) }")
     gmap
-  end
-
-  def make_thumbnail_map(objects, args = {})
-    args = provide_defaults(args,
-                            controls: [:small_map],
-                            info_window: true,
-                            zoom: 2)
-    make_map(objects, args)
   end
 
   def provide_defaults(args, default_args)
