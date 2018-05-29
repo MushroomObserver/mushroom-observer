@@ -75,7 +75,6 @@ Layout/FirstParameterIndentation:
 # SupportedStyles: special_inside_parentheses, consistent, align_brackets
 Layout/IndentArray:
   Exclude:
-    - 'app/helpers/map_helper.rb'
     - 'lib/tasks/jason.rake'
     - 'lib/tasks/location.rake'
     - 'test/models/name_test.rb'
@@ -401,7 +400,7 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 19
 # Cop supports --auto-correct.
-Lint/UnneededDisable:
+Lint/UnneededCopDisableDirective:
   Exclude:
     - 'app/models/name/parse.rb'
     - 'test/controllers/location_controller_test.rb'
@@ -721,7 +720,6 @@ Rails/OutputSafety:
     - 'app/extensions/string_extensions.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/application_helper.rb'
-    - 'app/helpers/map_helper.rb'
     - 'app/helpers/object_link_helper.rb'
     - 'app/helpers/pagination_helper.rb'
     - 'app/helpers/pivotal_helper.rb'
