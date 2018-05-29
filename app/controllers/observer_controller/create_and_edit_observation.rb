@@ -706,18 +706,6 @@ class ObserverController
     image
   end
 
-  def hide_thumbnail_map # :nologin:
-    pass_query_params
-    id = params[:id].to_s
-    if @user
-      @user.update_attribute(:thumbnail_maps, false)
-      flash_notice(:show_observation_thumbnail_map_hidden.t)
-    else
-      session[:hide_thumbnail_maps] = true
-    end
-    redirect_with_query(action: :show_observation, id: id)
-  end
-
   ##############################################################################
   #
   #  Methods relating to User#notes_template
