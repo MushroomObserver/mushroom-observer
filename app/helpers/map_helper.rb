@@ -15,9 +15,7 @@ module MapHelper
     else
       gmap.center_zoom_on_points_init(*collection.representative_points)
     end
-    for mapset in collection.mapsets
-      draw_mapset(gmap, mapset, args)
-    end
+    collection.mapsets.each { |mapset| draw_mapset(gmap, mapset, args) }
     gmap
   end
 
@@ -49,10 +47,9 @@ module MapHelper
   end
 
   def ensure_global_header_is_added
-    unless @done_gmap_header_yet
-      add_header(GM::GMap.header(host: MO.domain))
-      @done_gmap_header_yet = true
-    end
+    return if @done_gmap_header_yet
+    add_header(GM::GMap.header(host: MO.domain))
+    @done_gmap_header_yet = true
   end
 
   def draw_mapset(gmap, set, args = {})
@@ -72,12 +69,12 @@ module MapHelper
 
   def draw_box_on_gmap(gmap, set, args)
     box = GM::GPolyline.new([
-      set.north_west,
-      set.north_east,
-      set.south_east,
-      set.south_west,
-      set.north_west
-    ], "#00ff88", 3, 1.0)
+                              set.north_west,
+                              set.north_east,
+                              set.south_east,
+                              set.south_west,
+                              set.north_west
+                            ], "#00ff88", 3, 1.0)
     if args[:editable]
       box_name = args[:box_name] || "mo_box"
       gmap.overlay_global_init(box, box_name)
@@ -155,8 +152,11 @@ module MapHelper
   end
 
   def mapset_observation_link(obs, args)
-    link_to("#{:Observation.t} ##{obs.id}", controller: :observer, action: :show_observation,
-                                            id: obs.id, params: args[:query_params] || {})
+    link_to("#{:Observation.t} ##{obs.id}",
+            controller: :observer,
+            action: :show_observation,
+            id: obs.id,
+            params: args[:query_params] || {})
   end
 
   def mapset_location_link(loc, args)
