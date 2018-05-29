@@ -30,7 +30,6 @@ class ObserverController < ApplicationController
     :ask_webmaster_question,
     :checklist,
     :download_observations,
-    :hide_thumbnail_map,
     :how_to_help,
     :how_to_use,
     :risd_terminology,

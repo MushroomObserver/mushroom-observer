@@ -1111,7 +1111,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: The new server is now running.  Please let us know if you see any strange behavior.
+  app_banner_box: Maps have been removed from the show observation page. See <a href="/article/show_article/12">News Article 10</a>.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
