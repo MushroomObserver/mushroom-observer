@@ -1,4 +1,3 @@
-# coding: utf-8
 module MapHelper
   require_dependency "map_collapsible"
   require_dependency "map_set"
