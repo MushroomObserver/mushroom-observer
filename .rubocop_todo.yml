@@ -6,6 +6,19 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
+# Offense count: 1
+Layout/ConditionPosition:
+  Exclude:
+    - 'app/controllers/translation_controller.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
+# SupportedStylesAlignWith: start_of_line, def
+Layout/DefEndAlignment:
+  Exclude:
+    - 'app/models/queued_email/name_change.rb'
+
 # Offense count: 2
 # Cop supports --auto-correct.
 Layout/EmptyLinesAroundExceptionHandlingKeywords:
@@ -21,6 +34,18 @@ Layout/EmptyLinesAroundModuleBody:
   Exclude:
     - 'app/classes/query/modules/joining.rb'
     - 'test/general_extensions.rb'
+
+# Offense count: 7
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
+# SupportedStylesAlignWith: keyword, variable, start_of_line
+Layout/EndAlignment:
+  Exclude:
+    - 'app/classes/map_set.rb'
+    - 'app/classes/query/modules/initialization.rb'
+    - 'app/helpers/description_helper.rb'
+    - 'app/helpers/pivotal_helper.rb'
+    - 'lib/tasks/jason.rake'
 
 # Offense count: 8
 # Cop supports --auto-correct.
@@ -50,7 +75,6 @@ Layout/FirstParameterIndentation:
 # SupportedStyles: special_inside_parentheses, consistent, align_brackets
 Layout/IndentArray:
   Exclude:
-    - 'app/helpers/map_helper.rb'
     - 'lib/tasks/jason.rake'
     - 'lib/tasks/location.rake'
     - 'test/models/name_test.rb'
@@ -256,19 +280,6 @@ Lint/BooleanSymbol:
     - 'app/classes/query/modules/validation.rb'
     - 'test/integration/amateur_test.rb'
 
-# Offense count: 1
-Lint/ConditionPosition:
-  Exclude:
-    - 'app/controllers/translation_controller.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
-# SupportedStylesAlignWith: start_of_line, def
-Lint/DefEndAlignment:
-  Exclude:
-    - 'app/models/queued_email/name_change.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Lint/DeprecatedClassMethods:
@@ -290,18 +301,6 @@ Lint/DuplicateMethods:
 Lint/EmptyWhen:
   Exclude:
     - 'script/jpegsize'
-
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect.
-# SupportedStylesAlignWith: keyword, variable, start_of_line
-Lint/EndAlignment:
-  Exclude:
-    - 'app/classes/map_set.rb'
-    - 'app/classes/query/modules/initialization.rb'
-    - 'app/helpers/description_helper.rb'
-    - 'app/helpers/pivotal_helper.rb'
-    - 'lib/tasks/jason.rake'
 
 # Offense count: 21
 Lint/HandleExceptions:
@@ -401,7 +400,7 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 19
 # Cop supports --auto-correct.
-Lint/UnneededDisable:
+Lint/UnneededCopDisableDirective:
   Exclude:
     - 'app/models/name/parse.rb'
     - 'test/controllers/location_controller_test.rb'
@@ -510,11 +509,6 @@ Metrics/PerceivedComplexity:
 # Offense count: 25
 Naming/AccessorMethodName:
   Enabled: false
-
-# Offense count: 1
-Naming/BinaryOperatorParameterName:
-  Exclude:
-    - 'app/models/name.rb'
 
 # Offense count: 14
 # Configuration parameters: Blacklist.
@@ -676,7 +670,6 @@ Rails/HasManyOrHasOneDependent:
     - 'app/models/image.rb'
     - 'app/models/license.rb'
     - 'app/models/location.rb'
-    - 'app/models/name.rb'
     - 'app/models/observation.rb'
     - 'app/models/synonym.rb'
     - 'app/models/user.rb'
@@ -692,7 +685,6 @@ Rails/InverseOf:
     - 'app/models/image.rb'
     - 'app/models/location.rb'
     - 'app/models/location_description.rb'
-    - 'app/models/name.rb'
     - 'app/models/name_description.rb'
     - 'app/models/observation.rb'
     - 'app/models/project.rb'
@@ -728,7 +720,6 @@ Rails/OutputSafety:
     - 'app/extensions/string_extensions.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/application_helper.rb'
-    - 'app/helpers/map_helper.rb'
     - 'app/helpers/object_link_helper.rb'
     - 'app/helpers/pagination_helper.rb'
     - 'app/helpers/pivotal_helper.rb'
@@ -961,7 +952,6 @@ Style/IdenticalConditionalBranches:
     - 'app/controllers/location_controller.rb'
     - 'app/controllers/name_controller.rb'
     - 'app/controllers/species_list_controller.rb'
-    - 'app/models/name.rb'
     - 'script/s3ls.rb'
 
 # Offense count: 7

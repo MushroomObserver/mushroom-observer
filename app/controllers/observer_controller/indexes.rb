@@ -197,12 +197,13 @@ class ObserverController
 
   def print_labels # :nologin: :norobots:
     query = find_query(:Observation)
-    unless query
+    if query
+      @labels = make_labels(query.results)
+      render(action: "print_labels", layout: "printable")
+    else
       flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default("/")
     end
-    @labels = make_labels(query.results)
-    render(action: "print_labels", layout: "printable")
   end
 
   def download_observations # :nologin: :norobots:

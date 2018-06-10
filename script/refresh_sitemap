@@ -76,7 +76,7 @@ ROBOTS_HEADER = <<"EOB".freeze
 # See http://www.robotstxt.org for documentation.
 Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 User-agent: *
-Crawl-Delay: 10
+Crawl-Delay: 15
 Disallow: *page=*
 Disallow: *letter=*
 Disallow: *by=*
@@ -87,7 +87,17 @@ Disallow: */index*user_locale=*
 Disallow: */lookup*user_locale=*
 
 User-agent: CCBot
-Crawl-Delay: 10
+Crawl-Delay: 30
+
+User-agent: ltx71 
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent : DAUM 
+Disallow : /
+
 EOB
 ROBOTS_FOOTER = <<"EOB".freeze
 EOB
