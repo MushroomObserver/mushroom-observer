@@ -1,0 +1,47 @@
+<div class="row">
+  <div class="col-xs-12">
+    <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
+    <span class="pull-right inline">
+      <%= link_with_query(:show_observation_hide_map.t, action: :hide_thumbnail_map, id: @observation.id) %>
+    </span>
+  </div>
+</div>
+<div class="list-group" id="thumbnail_map" width="360" height="180">
+  <%=
+    if observation.location
+      loc = observation.location
+      n = Math.round(90 - loc.north)
+      s = Math.round(90 - loc.south)
+      e = Math.round(180 + loc.east)
+      w = Math.round(180 + loc.west)
+      if w < e && s > n
+        content_tag(:div, class:  "thumbnail-map-box",
+                          style:  "left:#{w}px; top:#{n}px",
+                          width:  "#{e-w}px",
+                          height: "#{s-n}px")
+      elsif w > e && s > n
+        content_tag(:div, class:  "thumbnail-map-box",
+                          style:  "left:0px; top:#{n}px",
+                          width:  "#{e}px",
+                          height: "#{s-n}px") +
+        content_tag(:div, class:  "thumbnail-map-box",
+                          style:  "left:#{w}px; top:#{n}px",
+                          width:  "#{360-w}px",
+                          height: "#{s-n}px")
+      end
+    end
+  %>
+  <%=
+    lat, long = if observation.lat && observation.long
+      observation.lat, observation.long
+    elsif observation.location
+      observation.location.center
+    end
+    if lat && long
+      x = Math.round(180 + long)
+      y = Math.round(90 - lat)
+      content_tag(:div, class: "red-pin",
+                        style: "left:#{x-11}px; top:#{y-38}px")
+    end
+  %>
+</div>
