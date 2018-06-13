@@ -1815,19 +1815,24 @@ input[type=checkbox] {
   width: 100%;
 }
 
-#thumbnail_map {
-  background: url(globe.jpg);
-}
 .thumbnail-map-box {
-  position:   absolute;
-  background: 2px solid rgba(0, 255, 255, 0.20);
-  border:     2px solid rgba(0, 255, 255, 0.50);
+  position:    absolute;
+  margin-top:  -2px;
+  margin-left: -2px;
+  border:      2px solid rgb(0, 255, 192);
+}
+.pin-offset {
+  position:    absolute;
+  width:       100%;
+  height:      100%;
+  margin-top:  2px;
+  margin-left: -11px;
 }
 .red-pin {
-  position:   absolute;
-  width:      40px;
-  height:     40px;
-  background: url(red_pin.png);
+  position:    absolute;
+  width:       40px;
+  height:      40px;
+  background:  url(red_pin.png);
 }
 
 .map-btn {
