@@ -263,7 +263,23 @@ class AmateurTest < IntegrationTestCase
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
     assert_template("observer/show_observation")
-    assert_select("div#map_div", 0)
+    assert_select("div.thumbnail-map", 1)
+
+    click(label: "Hide thumbnail map.")
+    assert_template("observer/show_observation")
+    assert_select("div.thumbnail-map", 0)
+
+    login("dick")
+    assert_template("observer/show_observation")
+    assert_select("div.thumbnail-map", 1)
+
+    click(label: "Hide thumbnail map.")
+    assert_template("observer/show_observation")
+    assert_select("div.thumbnail-map", 0)
+
+    get("/#{observations(:detailed_unknown_obs).id}")
+    assert_template("observer/show_observation")
+    assert_select("div.thumbnail-map", 0)
   end
 
   # -----------------------------------------------------------------------

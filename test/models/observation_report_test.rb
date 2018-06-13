@@ -97,6 +97,8 @@ class ObservationReportTest < UnitTestCase
       nil,
       "Mary Newbie",
       "MO #{obs.id}",
+      "314159",                               # fieldNumber
+      "Mary Newbie 174, Random Neighbor s/n", # collectorNUmber
       "Burbank",
       nil,
       "California",
@@ -109,11 +111,11 @@ class ObservationReportTest < UnitTestCase
       "11",
       "5",
       "2006",
+      "2006-05-11",
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
       "NA Mycoflora Project",
-      "314159",
       "Found in a strange place... & with śtrangè characters™"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
@@ -126,6 +128,8 @@ class ObservationReportTest < UnitTestCase
       nil,
       "Mary Newbie",
       "MO #{obs.id}",
+      "",       # fieldNumber
+      "",       # collectorNUmber
       "Burbank",
       nil,
       "California",
@@ -138,10 +142,10 @@ class ObservationReportTest < UnitTestCase
       "22",
       "7",
       "2010",
+      "2010-07-22",
       "http://mushroomobserver.org/#{obs.id}",
       "",
       "NA Mycoflora Project",
-      "",
       "unknown_with_lat_long"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
