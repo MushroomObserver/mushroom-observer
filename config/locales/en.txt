@@ -73,10 +73,9 @@
 #
 #  First create the language in the database:
 #
-#    INSERT INTO languages (`locale`, `region`, `name`, `order`, `beta`)
+#    INSERT INTO languages (`locale`, `name`, `order`, `beta`)
 #      VALUES (
 #        "jp",          # locale, e.g. "pt" for Portuguese
-#        "JP",          # region, e.g. "BR" for Brazil
 #        "日本語",      # name of the language *in that language*
 #        "Nihongo",     # transliteration of the above (so it sorts right)
 #        1              # beta=1 means it won't appear in site's language menu
@@ -85,8 +84,9 @@
 #  Create stub language files:
 #
 #    mo$ rake lang:update
+#    mo$ rake lang:export:jp
 #
-#  Should now have an import/export file called config/locales/jp.txt.
+#  You should now have an import/export file called config/locales/jp.txt.
 #  Once you're done editing this file -- remembering to remove the extra space
 #  between "tag:" and "value"!! -- test if it's valid:
 #
@@ -104,11 +104,18 @@
 #    mo$ cp config/locales/jp.txt config/locales/jp.txt.bak
 #    mo$ rake user_id=1234 lang:import:jp
 #    mo$ rake lang:update
+#    mo$ uni reload
 #
 #  You need to supply user_id to lang:import because it needs to know who
 #  created each translation_string.  You can give "user_name=xxx" instead.
-#  If that works, then you should be able to test it on the server.  If you
-#  need to re-import, I think it's safest to purge the old strings first:
+#  If that works, then you should be able to test it on the server.  Note
+#  that the new language is still "beta" so it doesn't show up as a publically
+#  available option.  Instead add "?user_locale=jp" to the end of any URL:
+#
+#    http://mushroomobserver.org/observer/how_to_help?user_locale=jp
+#
+#  It should stay in Japanese now until you tell it to switch to another.
+#  If you need to re-import, it's safest to purge the old strings first:
 #
 #    DELETE FROM translation_strings WHERE language_id = xxx;
 #
@@ -122,7 +129,7 @@
 #
 #    UPDATE languages SET beta=0 WHERE language_id=xxx;
 #
-#  -Jason 20150509
+#  -Jason 20180320
 #
 ################################################################################
 #

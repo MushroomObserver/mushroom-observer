@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-xs-12">
+    <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
+    <span class="pull-right inline">
+      <%= link_with_query(:show_observation_hide_map.t,
+                          action: :hide_thumbnail_map, id: @observation.id) %>
+    </span>
+  </div>
+</div>
+<div class="thumbnail-map" style="position:relative; margin-bottom:1em">
+  <%=
+    if observation.location
+      loc = observation.location
+      n = ((90.0 - loc.north) / 1.80).round(2)
+      s = ((90.0 - loc.south) / 1.80).round(2)
+      e = ((180.0 + loc.east) / 3.60).round(2)
+      w = ((180.0 + loc.west) / 3.60).round(2)
+      if w < e && s > n
+        content_tag(:div, "",
+          class: "thumbnail-map-box",
+          style: "left:#{w}%; top:#{n}%; width:#{e-w}%; height:#{s-n}%"
+        )
+      elsif w > e && s > n
+        content_tag(:div, "",
+          class: "thumbnail-map-box",
+          style: "left:0%; top:#{n}%; width:#{e}%; height:#{s-n}%"
+        ) +
+        content_tag(:div, "",
+          class: "thumbnail-map-box",
+          style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
+        )
+      end
+    end
+  %>
+  <% lat, long = if observation.lat && observation.long
+    [observation.lat, observation.long]
+  elsif observation.location
+    observation.location.center
+  end
+  if lat && long
+    x = ((180.0 + long) / 3.60).round(2)
+    y = ((90.0 - lat) / 1.80).round(2) %>
+    <div class="pin-offset">
+      <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
+    </div>
+  <% end %>
+  <%= image_tag("globe.jpg", width: "100%") %>
+</div>
