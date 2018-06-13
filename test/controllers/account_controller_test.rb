@@ -280,6 +280,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_email, "rolf@collectivesource.com")
     assert_input_value(:user_password, "")
     assert_input_value(:user_password_confirmation, "")
+    assert_input_value(:user_thumbnail_maps, "1")
     assert_input_value(:user_view_owner_id, "1")
     assert_input_value(:user_has_images, "")
     assert_input_value(:user_has_specimen, "")
@@ -320,6 +321,7 @@ class AccountControllerTest < FunctionalTestCase
       location_format:              :scientific,
       notes_template:               "Collector's #",
       theme:                        "Agaricus",
+      thumbnail_maps:               "",
       view_owner_id:                "",
       votes_anonymous:              :yes,
       has_images:                   "1",
@@ -363,6 +365,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value(:user_location_format, :scientific)
     assert_textarea_value(:user_notes_template, "Collector's #")
     assert_input_value(:user_theme, "Agaricus")
+    assert_input_value(:user_thumbnail_maps, "")
     assert_input_value(:user_view_owner_id, "")
     assert_input_value(:user_votes_anonymous, :yes)
     assert_input_value(:user_has_images, "1")
@@ -403,6 +406,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(:scientific, user.location_format)
     assert_equal("Collector's #", user.notes_template)
     assert_equal("Agaricus", user.theme)
+    assert_equal(false, user.thumbnail_maps)
     assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
     assert_equal("yes", user.content_filter[:has_images])
