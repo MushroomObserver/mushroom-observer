@@ -112,7 +112,7 @@
 #  that the new language is still "beta" so it doesn't show up as a publically
 #  available option.  Instead add "?user_locale=jp" to the end of any URL:
 #
-#    http://mushroomobserver.org/observer/how_to_help?user_locale=jp
+#    http:  ""
 #
 #  It should stay in Japanese now until you tell it to switch to another.
 #  If you need to re-import, it's safest to purge the old strings first:
@@ -1118,7 +1118,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Maps have been removed from the show observation page. See <a href="/article/show_article/12">News Article 10</a>.
+  app_banner_box: X
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
