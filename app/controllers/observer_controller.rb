@@ -50,6 +50,7 @@ class ObserverController < ApplicationController
     :lookup_project,
     :lookup_species_list,
     :lookup_user,
+    :map_observation,
     :map_observations,
     :news,
     :next_observation,
