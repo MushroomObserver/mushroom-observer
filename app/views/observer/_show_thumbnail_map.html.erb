@@ -65,6 +65,7 @@
 
 <% inject_javascript_at_end %(
   var zoom = 1.0;
+  var expanded = false;
   var container = jQuery(".thumbnail-map-container");
   var map = jQuery(".thumbnail-map");
 
@@ -85,7 +86,7 @@
           map.css({ top: "", left: "", width: "", height: "" });
           zoom = 1.0;
         } else {
-          if (zoom > 10) zoom = 10.0;
+          if (zoom > 50) zoom = 50.0;
           var cw = container.width();
           var ch = container.height();
           var mw = Math.round(cw * zoom);
@@ -103,6 +104,10 @@
             width:  mw + "px",
             height: mh + "px"
           });
+          if (!expanded) {
+            expanded = true;
+            map.find(">img").attr("src", "#{image_url("globe_large.jpg")}");
+          }
         }
       }
       event.stopPropagation();
