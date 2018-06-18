@@ -32,7 +32,7 @@
   </div>
 </div>
 
-<div class="thumbnail-map-container" style="margin-bottom:1em; overflow:hidden">
+<div class="thumbnail-map-container" style="margin-bottom:1em">
   <div class="thumbnail-map" style="position:relative">
 
     <%= if observation.location
@@ -70,7 +70,7 @@
   var map = jQuery(".thumbnail-map");
 
   jQuery(window).resize(function (event) {
-    container.css({ width: "", height: "" });
+    container.css({ width: "", height: "", overflow: "" });
     map.css({ top: "", left: "", width: "", height: "" });
     console.log("resized!");
   });
@@ -82,7 +82,7 @@
         if (dir > 0) zoom *= Math.sqrt(2);
         if (dir < 0) zoom /= Math.sqrt(2);
         if (zoom <= 1.0) {
-          container.css({ width: "", height: "" });
+          container.css({ width: "", height: "", overflow: "" });
           map.css({ top: "", left: "", width: "", height: "" });
           zoom = 1.0;
         } else {
@@ -95,8 +95,9 @@
           var x  = Math.round(#{x}/100 * (mw - cw*f) - cw/2 * (1-f));
           var y  = Math.round(#{y}/100 * (mh - ch*f) - ch/2 * (1-f));
           container.css({
-            width:  cw + "px",
-            height: ch + "px"
+            width:    cw + "px",
+            height:   ch + "px",
+            overflow: "hidden"
           });
           map.css({
             top:    -y + "px",
@@ -105,8 +106,12 @@
             height: mh + "px"
           });
           if (!expanded) {
+            var large = jQuery("<img/>");
+            var url = "#{image_url("globe_large.jpg")}";
+            large.attr("src", url).load(function () {
+              map.find(">img").attr("src", url);
+            });
             expanded = true;
-            map.find(">img").attr("src", "#{image_url("globe_large.jpg")}");
           }
         }
       }
