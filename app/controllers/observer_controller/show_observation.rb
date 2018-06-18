@@ -85,4 +85,16 @@ class ObserverController
   def prev_observation # :nologin: :norobots:
     redirect_to_next_object(:prev, Observation, params[:id].to_s)
   end
+
+  # Show map of observation.
+  def map_observation # :nologin: :norobots:
+    pass_query_params
+    obs = find_or_goto_index(Observation, params[:id].to_s)
+    return unless obs
+    @title = :map_observation_title.t(id: obs.id)
+    @observations = [
+      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location)
+    ]
+    render(action: :map_observations)
+  end
 end

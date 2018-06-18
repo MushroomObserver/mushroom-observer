@@ -90,6 +90,12 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_mycoflora_no_exact_lat_long
+
+    # There are two collection numbers for this observation.  I can't think of
+    # any good way to ensure the order that these are rendered in the report be
+    # consistent.  So I'm just going to delete one of the numbers.
+    collection_numbers(:detailed_unknown_coll_num_two).destroy
+
     obs = observations(:detailed_unknown_obs)
     img1, img2 = obs.images.sort_by(&:id)
     expect = [
@@ -97,8 +103,8 @@ class ObservationReportTest < UnitTestCase
       nil,
       "Mary Newbie",
       "MO #{obs.id}",
-      "314159",                               # fieldNumber
-      "Mary Newbie 174, Random Neighbor s/n", # collectorNUmber
+      "314159",          # fieldNumber
+      "Mary Newbie 174", # collectorNUmber
       "Burbank",
       nil,
       "California",
