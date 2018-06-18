@@ -1815,6 +1815,13 @@ input[type=checkbox] {
   width: 100%;
 }
 
+.thumbnail-map-container {
+  position:    relative;
+  margin-bottom: 1em;
+}
+.thumbnail-map {
+  position:    relative;
+}
 .thumbnail-map-box {
   position:    absolute;
   margin-top:  -2px;
@@ -1834,12 +1841,27 @@ input[type=checkbox] {
   height:      40px;
   background:  image-url("red_pin.png");
 }
+.thumbnail-buttons {
+  z-index:     2;
+  position:    absolute;
+  padding:     10px;
+  left:        0px;
+  bottom:      0px;
+}
+.plus-button, .minus-button {
+  width:       16px;
+  height:      16px;
+  background:  image-url("thumbnail-map-buttons.png");
+}
+.minus-button {
+  height:      15px;
+  background-position: 0px 15px;
+}
 
 .map-btn {
   @extend .btn;
   margin-top: 10px;
 }
-
 
 .spacer {
   height: 30px;
