@@ -1,3 +1,27 @@
+<%
+  if observation.location
+    loc = observation.location
+    n = ((90.0 - loc.north) / 1.80).round(2)
+    s = ((90.0 - loc.south) / 1.80).round(2)
+    e = ((180.0 + loc.east) / 3.60).round(2)
+    w = ((180.0 + loc.west) / 3.60).round(2)
+  end
+
+  lat, long = if observation.lat && observation.long
+    [observation.lat, observation.long]
+  elsif observation.location
+    observation.location.center
+  end
+  if lat && long
+    x = ((180.0 + long) / 3.60).round(2)
+    y = ((90.0 - lat) / 1.80).round(2)
+  end
+
+  map_url = url_for(add_query_param(controller: :observer,
+                                    action: :map_observation,
+                                    id: observation.id))
+%>
+
 <div class="row">
   <div class="col-xs-12">
     <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
@@ -7,14 +31,11 @@
     </span>
   </div>
 </div>
-<div class="thumbnail-map" style="position:relative; margin-bottom:1em">
-  <%=
-    if observation.location
-      loc = observation.location
-      n = ((90.0 - loc.north) / 1.80).round(2)
-      s = ((90.0 - loc.south) / 1.80).round(2)
-      e = ((180.0 + loc.east) / 3.60).round(2)
-      w = ((180.0 + loc.west) / 3.60).round(2)
+
+<div class="thumbnail-map-container" style="margin-bottom:1em; overflow:hidden">
+  <div class="thumbnail-map" style="position:relative">
+
+    <%= if observation.location
       if w < e && s > n
         content_tag(:div, "",
           class: "thumbnail-map-box",
@@ -30,19 +51,64 @@
           style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
         )
       end
-    end
-  %>
-  <% lat, long = if observation.lat && observation.long
-    [observation.lat, observation.long]
-  elsif observation.location
-    observation.location.center
-  end
-  if lat && long
-    x = ((180.0 + long) / 3.60).round(2)
-    y = ((90.0 - lat) / 1.80).round(2) %>
-    <div class="pin-offset">
-      <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
-    </div>
-  <% end %>
-  <%= image_tag("globe.jpg", width: "100%") %>
+    end %>
+
+    <% if lat && long %>
+      <div class="pin-offset">
+        <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
+      </div>
+    <% end %>
+
+    <%= image_tag("globe.jpg", width: "100%") %>
+  </div>
 </div>
+
+<% inject_javascript_at_end %(
+  var zoom = 1.0;
+  var container = jQuery(".thumbnail-map-container");
+  var map = jQuery(".thumbnail-map");
+
+  jQuery(window).resize(function (event) {
+    container.css({ width: "", height: "" });
+    map.css({ top: "", left: "", width: "", height: "" });
+    console.log("resized!");
+  });
+
+  container.on("wheel", function (event) {
+    if (event.ctrlKey) {
+      if (#{lat && long ? "true" : "false"}) {
+        var dir = event.originalEvent.deltaY < 0 ? 1 : -1;
+        if (dir > 0) zoom *= Math.sqrt(2);
+        if (dir < 0) zoom /= Math.sqrt(2);
+        if (zoom <= 1.0) {
+          container.css({ width: "", height: "" });
+          map.css({ top: "", left: "", width: "", height: "" });
+          zoom = 1.0;
+        } else {
+          if (zoom > 10) zoom = 10.0;
+          var cw = container.width();
+          var ch = container.height();
+          var mw = Math.round(cw * zoom);
+          var mh = Math.round(ch * zoom);
+          var f  = 1.0 / Math.sqrt(zoom);
+          var x  = Math.round(#{x}/100 * (mw - cw*f) - cw/2 * (1-f));
+          var y  = Math.round(#{y}/100 * (mh - ch*f) - ch/2 * (1-f));
+          container.css({
+            width:  cw + "px",
+            height: ch + "px"
+          });
+          map.css({
+            top:    -y + "px",
+            left:   -x + "px",
+            width:  mw + "px",
+            height: mh + "px"
+          });
+        }
+      }
+      event.stopPropagation();
+      return false;
+    }
+  });
+
+  container.click(function() { window.location = "#{map_url}" });
+) %>
