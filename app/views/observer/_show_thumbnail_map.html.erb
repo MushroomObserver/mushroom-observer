@@ -32,8 +32,12 @@
   </div>
 </div>
 
-<div class="thumbnail-map-container" style="margin-bottom:1em">
-  <div class="thumbnail-map" style="position:relative">
+<div class="thumbnail-map-container">
+  <div class="thumbnail-buttons">
+    <div class="plus-button"></div>
+    <div class="minus-button"></div>
+  </div>
+  <div class="thumbnail-map">
 
     <%= if observation.location
       if w < e && s > n
@@ -63,62 +67,12 @@
   </div>
 </div>
 
-<% inject_javascript_at_end %(
-  var zoom = 1.0;
-  var expanded = false;
-  var container = jQuery(".thumbnail-map-container");
-  var map = jQuery(".thumbnail-map");
-
-  jQuery(window).resize(function (event) {
-    container.css({ width: "", height: "", overflow: "" });
-    map.css({ top: "", left: "", width: "", height: "" });
-    console.log("resized!");
-  });
-
-  container.on("wheel", function (event) {
-    if (event.ctrlKey) {
-      if (#{lat && long ? "true" : "false"}) {
-        var dir = event.originalEvent.deltaY < 0 ? 1 : -1;
-        if (dir > 0) zoom *= Math.sqrt(2);
-        if (dir < 0) zoom /= Math.sqrt(2);
-        if (zoom <= 1.0) {
-          container.css({ width: "", height: "", overflow: "" });
-          map.css({ top: "", left: "", width: "", height: "" });
-          zoom = 1.0;
-        } else {
-          if (zoom > 50) zoom = 50.0;
-          var cw = container.width();
-          var ch = container.height();
-          var mw = Math.round(cw * zoom);
-          var mh = Math.round(ch * zoom);
-          var f  = 1.0 / Math.sqrt(zoom);
-          var x  = Math.round(#{x}/100 * (mw - cw*f) - cw/2 * (1-f));
-          var y  = Math.round(#{y}/100 * (mh - ch*f) - ch/2 * (1-f));
-          container.css({
-            width:    cw + "px",
-            height:   ch + "px",
-            overflow: "hidden"
-          });
-          map.css({
-            top:    -y + "px",
-            left:   -x + "px",
-            width:  mw + "px",
-            height: mh + "px"
-          });
-          if (!expanded) {
-            var large = jQuery("<img/>");
-            var url = "#{image_url("globe_large.jpg")}";
-            large.attr("src", url).load(function () {
-              map.find(">img").attr("src", url);
-            });
-            expanded = true;
-          }
-        }
-      }
-      event.stopPropagation();
-      return false;
-    }
-  });
-
-  container.click(function() { window.location = "#{map_url}" });
-) %>
+<%= if lat && long
+  javascript_include "thumbnail_map"
+  javascript_tag %{
+    var THUMBNAIL_MAP_ON   = true;
+    var THUMBNAIL_MAP_X    = #{x};
+    var THUMBNAIL_MAP_Y    = #{y};
+    var THUMBNAIL_MAP_LINK = "#{map_url}";
+  }
+end %>

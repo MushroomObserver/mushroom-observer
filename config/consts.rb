@@ -187,6 +187,7 @@ MushroomObserver::Application.configure do
       rss_feed_select_helper.js
       selectize.min.js
       single_image_uploader.js
+      thumbnail_map.js
       translations.js
       vote_popup.js
       Admin.css
