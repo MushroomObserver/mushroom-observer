@@ -1,10 +1,10 @@
 <%
   if observation.location
     loc = observation.location
-    n = ((90.0 - loc.north) / 1.80).round(2)
-    s = ((90.0 - loc.south) / 1.80).round(2)
-    e = ((180.0 + loc.east) / 3.60).round(2)
-    w = ((180.0 + loc.west) / 3.60).round(2)
+    n = ((90.0 - loc.north) / 1.80).round(6)
+    s = ((90.0 - loc.south) / 1.80).round(6)
+    e = ((180.0 + loc.east) / 3.60).round(6)
+    w = ((180.0 + loc.west) / 3.60).round(6)
   end
 
   lat, long = if observation.lat && observation.long
@@ -13,8 +13,8 @@
     observation.location.center
   end
   if lat && long
-    x = ((180.0 + long) / 3.60).round(2)
-    y = ((90.0 - lat) / 1.80).round(2)
+    x = ((180.0 + long) / 3.60).round(6)
+    y = ((90.0 - lat) / 1.80).round(6)
   end
 
   map_url = url_for(add_query_param(controller: :observer,
