@@ -120,7 +120,7 @@ def print_observation(obs)
   name = obs.name.search_name
   name = "(old name)" if obs.name == @old_name
   name = "(new name)" if obs.name == @new_name
-  puts "http://mushroomobserver.org/#{obs.id} -- #{name}"
+  puts "https://mushroomobserver.org/#{obs.id} -- #{name}"
 end
 
 def print_initial_state

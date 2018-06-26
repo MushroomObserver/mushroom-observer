@@ -31,7 +31,7 @@
 require File.expand_path("../../config/boot.rb", __FILE__)
 require File.expand_path("../../config/environment.rb", __FILE__)
 
-DOMAIN      = "http://mushroomobserver.org".freeze
+DOMAIN      = "https://mushroomobserver.org".freeze
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html".freeze
 

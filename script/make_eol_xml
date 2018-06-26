@@ -12,6 +12,7 @@
 
 require "tempfile"
 require "net/http"
+require "net/https"
 require "erb"
 include ERB::Util
 
@@ -20,7 +21,7 @@ include ERB::Util
 class ParsedUrl
   def initialize(url)
     @url = url
-    @m = url.match(/^http:\/\/([\w\.]+)(:[0-9]+)*(.*)$/)
+    @m = url.match(/^https?:\/\/([\w\.]+)(:[0-9]+)*(.*)$/)
   end
 
   attr_reader :url
@@ -35,7 +36,7 @@ class ParsedUrl
 
   def port
     p = @m[2]
-    p ? p[1..-1].to_i : 80
+    p ? p[1..-1].to_i : 443
   end
 end
 
@@ -51,7 +52,8 @@ end
 def test_host(host, port)
   result = false
   begin
-    Net::HTTP.start(host, port) do |_http|
+    Net::HTTP.start(host, port) do |http|
+      http.use_ssl = true if port == 443
       result = true
     end
   rescue Exception => err
@@ -75,11 +77,11 @@ end
 ################################################################################
 
 if testing
-  LOCAL_URL = "http://localhost:3000/api/observations?id=1".freeze
-  REMOTE_URL = "http://mushroomobserver.org/api/observations?id=1".freeze
+  LOCAL_URL = "https://localhost:3000/api/observations?id=1".freeze
+  REMOTE_URL = "https://mushroomobserver.org/api/observations?id=1".freeze
 else
-  LOCAL_URL = "http://localhost:3000/name/eol".freeze
-  REMOTE_URL = "http://mushroomobserver.org/name/eol".freeze
+  LOCAL_URL = "https://localhost:3000/name/eol".freeze
+  REMOTE_URL = "https://mushroomobserver.org/name/eol".freeze
 end
 
 temp_file = Tempfile.new("eol")

@@ -79,6 +79,7 @@ function copy_file_from_server {
     scp $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
   "http")
+  "https")
     url=${image_server_data[$server,url]}
     wget "$url/$file" -O $image_root/$file || die "Failed to get $file from $url."
     ;;

@@ -10,7 +10,7 @@ MushroomObserver::Application.configure do
 
   config.site_name = "Mushroom Observer"
   config.domain = "mushroomobserver.org"
-  config.http_domain = "http://mushroomobserver.org"
+  config.http_domain = "https://mushroomobserver.org"
 
   # Base URL of the source repository.
   config.code_repository = "https://github.com/MushroomObserver"
@@ -114,7 +114,7 @@ MushroomObserver::Application.configure do
   #   },
   #   :cdmr => {
   #     :test => :transferred_flag,
-  #     :read => "http://images.digitalmycology.com",
+  #     :read => "https://images.digitalmycology.com",
   #   }
   # }
 

@@ -2,10 +2,11 @@
 
 require "digest/md5"
 require "net/http"
+require "net/https"
 require "uri"
 
 # HOST = 'mushroomobserver.org'
-# PORT = 80
+# PORT = 443
 HOST = "localhost".freeze
 PORT = 3000
 KEY = "xxx".freeze
@@ -14,12 +15,14 @@ KEY = "xxx".freeze
 
 # # Get observation #1.
 # http = Net::HTTP.new(HOST, PORT)
+# http.use_ssl = true if PORT == 443
 # response = http.get('/api/observations?id=1')
 # puts response.body
 # exit
 
 # Create observation.
 http = Net::HTTP.new(HOST, PORT)
+http.use_ssl = true if PORT == 443
 path = "/api/observations?" + [
   "api_key=" + KEY,
   "help=1"
@@ -30,6 +33,7 @@ exit
 
 # # Create image via upload.
 # http = Net::HTTP.new(HOST, PORT)
+# http.use_ssl = true if PORT == 443
 # path = '/api/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
@@ -47,6 +51,7 @@ exit
 
 # # Create image via url.
 # http = Net::HTTP.new(HOST, PORT)
+# http.use_ssl = true if PORT == 443
 # path = '/api/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
@@ -59,6 +64,7 @@ exit
 
 # # Create image via local file (admin would have to upload to server first).
 # http = Net::HTTP.new(HOST, PORT)
+# http.use_ssl = true if PORT == 443
 # path = '/api/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
