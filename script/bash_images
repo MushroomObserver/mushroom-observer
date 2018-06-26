@@ -69,17 +69,16 @@ function copy_file_from_server {
   server=$1
   file=$2
   case ${image_server_data[$server,type]} in
-  "file")
+  file)
     path=${image_server_data[$server,path]}
     cp $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
-  "ssh")
+  ssh)
     wait_for "(scp|ssh)"
     path=${image_server_data[$server,path]}
     scp $path/$file $image_root/$file || die "Failed to get $file from $path."
     ;;
-  "http")
-  "https")
+  http*)
     url=${image_server_data[$server,url]}
     wget "$url/$file" -O $image_root/$file || die "Failed to get $file from $url."
     ;;
