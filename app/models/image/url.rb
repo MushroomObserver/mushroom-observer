@@ -47,6 +47,8 @@ class Image
         local_file_exists?(path)
       when /^http:/
         remote_file_exists?(url = spec)
+      when /^https:/
+        remote_file_exists?(url = spec)
       else
         fail "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
       end
