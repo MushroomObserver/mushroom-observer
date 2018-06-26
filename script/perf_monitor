@@ -51,7 +51,7 @@ curl = Class.new do
         return
       end
     end
-    url = "http://#{SITE}/#{page}"
+    url = "https://#{SITE}/#{page}"
     url << "/#{id}" if id
     puts url
     cmd << " #{url} -o #{LOG_DIR}/#{page} -s -i"

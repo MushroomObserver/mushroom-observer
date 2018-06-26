@@ -31,7 +31,7 @@
 require File.expand_path("../../config/boot.rb", __FILE__)
 require File.expand_path("../../config/environment.rb", __FILE__)
 
-DOMAIN      = "http://mushroomobserver.org".freeze
+DOMAIN      = "https://mushroomobserver.org".freeze
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
 INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html".freeze
 
@@ -92,11 +92,20 @@ Crawl-Delay: 30
 User-agent: ltx71 
 Disallow: /
 
+User-agent: spbot
+Disallow: /
+
 User-agent: MJ12bot
 Disallow: /
 
 User-agent : DAUM 
 Disallow : /
+
+User-agent: AhrefsBot 
+Disallow: /
+
+User-agent: MauiBot
+Disallow: /
 
 EOB
 ROBOTS_FOOTER = <<"EOB".freeze

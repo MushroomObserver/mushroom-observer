@@ -1,5 +1,5 @@
 APP_PATH = "/var/web/mo".freeze
-worker_processes 4
+worker_processes 3
 working_directory APP_PATH
 listen APP_PATH + "/tmp/sockets/unicorn.sock", backlog: 64
 listen 8080, tcp_nopush: true
