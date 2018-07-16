@@ -99,6 +99,9 @@ module GM
           return marker;
         }
       </script>".html_safe
+
+      # Temporarily disable.
+      "".html_safe
     end
 
     attr_accessor :name       # name of map div & global variable for Map object
@@ -190,6 +193,9 @@ module GM
       height = height.to_s + "px" if height.is_a?(Integer)
       width = width.to_s + "px" if width.is_a?(Integer)
       "<div id='#{name}' style='width:#{width};height:#{height}'></div>"
+
+      # Temporarily disable.
+       "".html_safe
     end
 
     def to_html(_args)
