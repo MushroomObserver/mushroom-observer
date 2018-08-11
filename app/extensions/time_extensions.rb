@@ -54,6 +54,7 @@ class ActiveSupport::TimeWithZone
 
   # Format time as "5 days ago", etc.
   def fancy_time(ref = Time.now)
+    debugger
     diff = ref - self
     if -diff > 1.minute
       web_time
@@ -110,8 +111,8 @@ class Time
     in_time_zone.email_time
   end
 
-  def fancy_time(*x)
-    in_time_zone.fancy_time(*x)
+  def fancy_time(*args)
+    in_time_zone.fancy_time(*args)
   end
 end
 
@@ -145,7 +146,9 @@ class DateTime
     in_time_zone.email_time
   end
 
-  def fancy_time(*x)
-    in_time_zone.fancy_time(*x)
-  end
+  # This fails with *** TypeError Exception: expected numeric
+  # in class ActiveSupport::TimeWithZone.fancy_time
+  # def fancy_time(*args)
+  #   in_time_zone.fancy_time(*args)
+  # end
 end
