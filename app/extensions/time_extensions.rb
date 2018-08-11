@@ -54,7 +54,6 @@ class ActiveSupport::TimeWithZone
 
   # Format time as "5 days ago", etc.
   def fancy_time(ref = Time.now)
-    debugger
     diff = ref - self
     if -diff > 1.minute
       web_time
