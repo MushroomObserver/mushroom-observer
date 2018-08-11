@@ -42,8 +42,8 @@ class Symbol
   end
 
   # Reset the list of missing tags.
-  def self.missing_tags=(x)
-    @@missing_tags = x
+  def self.missing_tags=(tags)
+    @@missing_tags = tags
   end
 
   # Does this tag have a translation?

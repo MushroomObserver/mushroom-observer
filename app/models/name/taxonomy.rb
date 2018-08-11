@@ -58,8 +58,8 @@ class Name < AbstractModel
     Name.all_ranks.index(rank.to_sym)
   end
 
-  def self.compare_ranks(a, b)
-    all_ranks.index(a.to_sym) <=> all_ranks.index(b.to_sym)
+  def self.compare_ranks(rank_a, rank_b)
+    all_ranks.index(rank_a.to_sym) <=> all_ranks.index(rank_b.to_sym)
   end
 
   def has_eol_data?

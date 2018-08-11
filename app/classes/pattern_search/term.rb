@@ -20,16 +20,16 @@ module PatternSearch
       end
     end
 
-    def quote(x)
-      if /['" \\]/.match?(x.to_s)
-        '"' + x.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
+    def quote(val)
+      if /['" \\]/.match?(val.to_s)
+        '"' + val.to_s.gsub(/(['"\\])/) { |v| '\\' + v } + '"'
       else
-        x.to_s
+        val.to_s
       end
     end
 
-    def dequote(x)
-      x.to_s.sub(/^['"](.*)['"]$/, '\1').gsub(/\\(.)/, '\1')
+    def dequote(val)
+      val.to_s.sub(/^['"](.*)['"]$/, '\1').gsub(/\\(.)/, '\1')
     end
 
     def parse_pattern

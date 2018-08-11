@@ -59,9 +59,9 @@ class AjaxController < ApplicationController
     @value = params[:value].to_s
   end
 
-  def backtrace(e)
+  def backtrace(exception)
     result = ""
-    e.backtrace.each do |line|
+    exception.backtrace.each do |line|
       break if /action_controller.*perform_action/.match?(line)
       result += line + "\n"
     end

@@ -291,9 +291,9 @@ class EolData
     create_triples(subjects, predicate)
   end
 
-  def create_triples(subjects, p)
+  def create_triples(subjects, predicate)
     for s in subjects
-      Triple.new(subject: s.show_url, predicate: p,
+      Triple.new(subject: s.show_url, predicate: predicate,
                  object: eol_search_url(s.class.name, s)).save
     end
   end

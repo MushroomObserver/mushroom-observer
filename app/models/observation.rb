@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #  = Observation Model
 #
@@ -331,31 +332,31 @@ class Observation < AbstractModel
     end
   end
 
-  def when_str=(x)
-    @when_str = x
+  def when_str=(val)
+    @when_str = val
     begin
-      self.when = x if Date.parse(x)
+      self.when = val if Date.parse(val)
     rescue ArgumentError
     end
-    x
+    val
   end
 
-  def lat=(x)
-    val = Location.parse_latitude(x)
-    val = x if val.nil? && x.present?
-    write_attribute(:lat, val)
+  def lat=(val)
+    lat = Location.parse_latitude(val)
+    lat = val if lat.nil? && val.present?
+    write_attribute(:lat, lat)
   end
 
-  def long=(x)
-    val = Location.parse_longitude(x)
-    val = x if val.nil? && x.present?
-    write_attribute(:long, val)
+  def long=(val)
+    long = Location.parse_longitude(val)
+    long = val if long.nil? && val.present?
+    write_attribute(:long, long)
   end
 
-  def alt=(x)
-    val = Location.parse_altitude(x)
-    val = x if val.nil? && x.present?
-    write_attribute(:alt, val)
+  def alt=(val)
+    alt = Location.parse_altitude(val)
+    alt = val if alt.nil? && val.present?
+    write_attribute(:alt, alt)
   end
 
   # Is lat/long more than 10% outside of location extents?
@@ -1255,13 +1256,13 @@ class Observation < AbstractModel
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
-  def add_spl_callback(_o)
+  def add_spl_callback(_obs)
     SiteData.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
-  def remove_spl_callback(_o)
+  def remove_spl_callback(_obs)
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
 

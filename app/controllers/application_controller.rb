@@ -640,8 +640,8 @@ class ApplicationController < ActionController::Base
 
   # Until we get rid of reliance on @js, this is a surrogate for
   # testing if the client's JS is enabled and sufficiently fully-featured.
-  def js_enabled?(tz)
-    tz.present? ? true : Rails.env == "test"
+  def js_enabled?(time_zone)
+    time_zone.present? ? true : Rails.env == "test"
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
@@ -1120,8 +1120,8 @@ class ApplicationController < ActionController::Base
     nil
   end
 
-  def query_exists(q)
-    return unless q && (query = Query.safe_find(q))
+  def query_exists(params)
+    return unless params && (query = Query.safe_find(params))
     query
   end
 
@@ -1196,12 +1196,12 @@ class ApplicationController < ActionController::Base
     }
   end
 
-  def tweak_up(v, amount, max)
-    [max, v.to_f + amount].min
+  def tweak_up(value, amount, max)
+    [max, value.to_f + amount].min
   end
 
-  def tweak_down(v, amount, min)
-    [min, v.to_f - amount].max
+  def tweak_down(value, amount, min)
+    [min, value.to_f - amount].max
   end
 
   public ##########

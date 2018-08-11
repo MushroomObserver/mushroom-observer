@@ -73,7 +73,7 @@ class Name < AbstractModel
   end
 
   # Look up name replacing n letters at a time with a star.
-  def self.guess_with_errors(name, n) # :nodoc:
+  def self.guess_with_errors(name, count) # :nodoc:
     patterns = []
 
     # Restrict search to names close in length.
@@ -86,14 +86,14 @@ class Name < AbstractModel
     (0..(words.length - 1)).each do |i|
       word = words[i]
       if word != "%"
-        if word.length < n
+        if word.length < count
           patterns << guess_pattern(words, i, "%")
         else
-          (0..(word.length - n)).each do |j|
+          (0..(word.length - count)).each do |j|
             sub = ""
             sub += word[0..(j - 1)] if j > 0
             sub += "%"
-            sub += word[(j + n)..(-1)] if j + n < word.length
+            sub += word[(j + count)..(-1)] if j + count < word.length
             patterns << guess_pattern(words, i, sub)
           end
         end
@@ -117,11 +117,11 @@ class Name < AbstractModel
     names
   end
 
-  # String words together replacing the one at index +i+ with +sub+.
-  def self.guess_pattern(words, i, sub) # :nodoc:
+  # String words together replacing the one at +index+ with +sub+.
+  def self.guess_pattern(words, index, sub) # :nodoc:
     result = []
     (0..(words.length - 1)).each do |j|
-      result << (i == j ? sub : words[j])
+      result << (index == j ? sub : words[j])
     end
     result.join(" ")
   end

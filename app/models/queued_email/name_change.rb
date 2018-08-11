@@ -36,13 +36,15 @@ class QueuedEmail::NameChange < QueuedEmail
     ObjectChange.new(description, old_description_version, new_description_version)
   end
 
-  def self.create_email(sender, recipient, name, desc, review_status_changed, d = false)
+  def self.create_email(sender, recipient, name, desc,
+                        review_status_changed,
+                        force_prev = false)
     result = create(sender, recipient)
     fail "Missing name or description!" if !name && !desc
     if name
       result.add_integer(:name, name.id)
       result.add_integer(:new_name_version, name.version)
-      old_version = (name.changed? || d) ? name.version - 1 : name.version
+      old_version = name.version - ((name.changed? || force_prev) ? 1 : 0)
       result.add_integer(:old_name_version, old_version)
     else
       name = desc.name
@@ -53,7 +55,7 @@ class QueuedEmail::NameChange < QueuedEmail
     if desc
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
-      old_version = (desc.changed? || d) ? desc.version - 1 : desc.version
+      old_version = desc.version - ((desc.changed? || force_prev) ? 1 : 0)
       result.add_integer(:old_description_version, old_version)
       result.add_string(:review_status, review_status_changed ? desc.review_status : :no_change)
     else
