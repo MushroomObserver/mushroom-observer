@@ -133,4 +133,12 @@ class ImageTest < UnitTestCase
     assert(File.exist?("#{::Rails.root}/script/retransfer_images"),
            "Missing script/retransfer_images!")
   end
+
+  def test_transform
+    img = Image.new
+    assert_nil(img.transform(:mirror))
+    assert_raises (RuntimeError) {
+      img.transform(:edible)
+    }
+  end
 end
