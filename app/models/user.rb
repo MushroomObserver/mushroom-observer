@@ -393,9 +393,9 @@ class User < AbstractModel
 
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter and API authentication.
-  def self.current=(x)
-    @@location_format = x ? x.location_format : :postal
-    @@user = x
+  def self.current=(val)
+    @@location_format = val ? val.location_format : :postal
+    @@user = val
   end
 
   # Report current user's preferred location_format
@@ -408,8 +408,8 @@ class User < AbstractModel
   end
 
   # Set the location format to use throughout the site.
-  def self.current_location_format=(x)
-    @@location_format = x
+  def self.current_location_format=(val)
+    @@location_format = val
   end
 
   # Did current user opt to view owner_id's?
@@ -734,8 +734,12 @@ class User < AbstractModel
   end
 
   # Get alert structure, initializing it with an empty hash if necessary.
+  # Note: ||= approach original taken does not work since the {} that
+  # gets returned from that expression is not the same as the one that
+  # gets assigned to self.alert so the first key assignment gets lost.
   def get_alert # :nodoc:
-    self.alert ||= {}
+    self.alert = {} if !self.alert
+    self.alert
   end
   protected :get_alert
 
@@ -744,8 +748,8 @@ class User < AbstractModel
     get_alert[:created_at]
   end
 
-  def alert_created_at=(x)
-    get_alert[:created_at] = x
+  def alert_created_at=(val)
+    get_alert[:created_at] = val
   end
 
   # ID of the admin User that created the alert.
@@ -753,8 +757,8 @@ class User < AbstractModel
     get_alert[:user_id]
   end
 
-  def alert_user_id=(x)
-    get_alert[:user_id] = x
+  def alert_user_id=(val)
+    get_alert[:user_id] = val
   end
 
   # Instance of admin User that created the alert.
@@ -762,8 +766,8 @@ class User < AbstractModel
     User.find(alert_user_id)
   end
 
-  def alert_user=(x)
-    get_alert[:user_id] = x ? x.id : nil
+  def alert_user=(val)
+    get_alert[:user_id] = val ? val.id : nil
   end
 
   # Next time the alert will be shown.
@@ -771,8 +775,8 @@ class User < AbstractModel
     get_alert[:next_showing]
   end
 
-  def alert_next_showing=(x)
-    get_alert[:next_showing] = x
+  def alert_next_showing=(val)
+    get_alert[:next_showing] = val
   end
 
   # Type of alert (e.g., :bounced_email).
@@ -780,8 +784,8 @@ class User < AbstractModel
     get_alert[:type]
   end
 
-  def alert_type=(x)
-    get_alert[:type] = x
+  def alert_type=(val)
+    get_alert[:type] = val
   end
 
   # Additional notes admin added when creating alert.
@@ -789,8 +793,8 @@ class User < AbstractModel
     get_alert[:notes]
   end
 
-  def alert_notes=(x)
-    get_alert[:notes] = x
+  def alert_notes=(val)
+    get_alert[:notes] = val
   end
 
   # Get the localization string for the alert message for this type of alert.
