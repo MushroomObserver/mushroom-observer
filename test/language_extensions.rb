@@ -17,8 +17,8 @@ class Language
     @@export_files = nil
   end
 
-  def self.last_update=(x)
-    @@last_update = x
+  def self.last_update=(val)
+    @@last_update = val
   end
 
   def self.clear_verbose_messages

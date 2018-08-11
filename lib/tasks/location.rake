@@ -3950,7 +3950,7 @@ namespace :location do
     end
   end
 
-  def fix_funny_chars(w)
+  def fix_funny_chars(where)
     chars = {
       [101, 204, 128] => "è",
       [101, 204, 129] => "é" }
@@ -3959,9 +3959,9 @@ namespace :location do
       c[0] = k[0]
       c[1] = k[1]
       c[2] = k[2]
-      w.gsub(c, v)
+      where.gsub(c, v)
     end
-    w
+    where
   end
 
   desc "List new locations"
@@ -3997,10 +3997,10 @@ namespace :location do
     end
   end
 
-  def check_save(o)
-    unless o.save
-      print("Save failed for #{o.class}, #{o.id}\n")
-      for e in o.errors
+  def check_save(obj)
+    unless obj.save
+      print("Save failed for #{obj.class}, #{obj.id}\n")
+      for e in obj.errors
         print("\t#{e[1]}\n")
       end
     end
@@ -4116,11 +4116,11 @@ namespace :location do
   FIXERS = [AccentFixer.new([204, 128], "e" => "è", "E" => "È"),
             AccentFixer.new([204, 129], "e" => "é", "E" => "É")].freeze
 
-  def accent_fix(w)
+  def accent_fix(where)
     for f in FIXERS
-      w = f.fix(w)
+      where = f.fix(where)
     end
-    w
+    where
   end
 
   # UTF-8 allows you to express an accent either as part of the character
@@ -4164,8 +4164,8 @@ namespace :location do
     end
   end
 
-  def escapeString(s)
-    "\"#{s.gsub("\"", "\\\"")}\""
+  def escapeString(str)
+    "\"#{str.gsub("\"", "\\\"")}\""
   end
 
   desc "List the fixes"
