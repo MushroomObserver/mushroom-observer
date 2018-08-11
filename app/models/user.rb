@@ -46,13 +46,11 @@
 #     cookie, User#current, and +@user+ (visible to controllers and views).
 #     Sets all these to nil if no User logged in.
 #
-#  2. +check_user_alert+: Check if User has an alert to show, redirecting if so.
+#  2. +set_locale+: Check if User has chosen a locale.
 #
-#  3. +set_locale+: Check if User has chosen a locale.
+#  3. +set_timezone+: Set timezone from cookie set by client's browser.
 #
-#  4. +set_timezone+: Set timezone from cookie set by client's browser.
-#
-#  5. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
+#  4. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
 #     logged in.
 #
 #  == Contribution Score
@@ -62,19 +60,6 @@
 #  score every time a User creates, edits or destroys an object.  It is also
 #  automatically refreshed whenever anyone views the User's summary page, just
 #  in case the callbacks ever fail.
-#
-#  == Alerts
-#
-#  Admins can create an alert for a User.  These are messages that they will
-#  see the very next time they try to load a page.  Only one is allowed at a
-#  time for the User right now.  All the information about the alert is stored
-#  in a simple hash which is stored, serialized, as a +text+ column in the
-#  database.  When the User sees the message, they have three options:
-#
-#  1. Acknowledge the alert by clicking on "okay", and the alert is deleted.
-#  2. Tell it to display the message again in a day (see +alert_next_showing+).
-#  3. Exit or navigate away without acknowledging it, causing the alert to be
-#     shown over and over until they get tired and say "okay".
 #
 #  == Admin Mode
 #
@@ -200,15 +185,6 @@
 #                       "Name (login): Personal Herbarium".
 #  all_editable_species_lists:: Species Lists they own
 #                       or that are attached to projects they're on.
-#
-#  ==== Alerts
-#  all_alert_types::    List of accepted alert types.
-#  alert_user::         Which admin created the alert.
-#  alert_created_at::   When alert was created.
-#  alert_next_showing:: When is the alert going to be shown next?
-#  alert_type::         What type of alert, e.g., :bounced_email.
-#  alert_notes::        Additional notes to add to message.
-#  alert_message::      Actual message, translated into local language.
 #
 #  ==== Other Stuff
 #  primer::             Primer for auto-complete.
@@ -717,93 +693,6 @@ class User < AbstractModel
 
   def is_successful_contributor?
     observations.any?
-  end
-
-  ##############################################################################
-  #
-  #  :section: Alerts
-  #
-  ##############################################################################
-
-  # List of all allowed alert types.
-  #
-  #   raise unless User.all_alert_types.include? :bogus_alert
-  #
-  def self.all_alert_types
-    [:bounced_email, :other]
-  end
-
-  # Get alert structure, initializing it with an empty hash if necessary.
-  # Note: ||= approach original taken does not work since the {} that
-  # gets returned from that expression is not the same as the one that
-  # gets assigned to self.alert so the first key assignment gets lost.
-  def get_alert # :nodoc:
-    self.alert = {} if !self.alert
-    self.alert
-  end
-  protected :get_alert
-
-  # When the alert was created.
-  def alert_created_at
-    get_alert[:created_at]
-  end
-
-  def alert_created_at=(val)
-    get_alert[:created_at] = val
-  end
-
-  # ID of the admin User that created the alert.
-  def alert_user_id
-    get_alert[:user_id]
-  end
-
-  def alert_user_id=(val)
-    get_alert[:user_id] = val
-  end
-
-  # Instance of admin User that created the alert.
-  def alert_user
-    User.find(alert_user_id)
-  end
-
-  def alert_user=(val)
-    get_alert[:user_id] = val ? val.id : nil
-  end
-
-  # Next time the alert will be shown.
-  def alert_next_showing
-    get_alert[:next_showing]
-  end
-
-  def alert_next_showing=(val)
-    get_alert[:next_showing] = val
-  end
-
-  # Type of alert (e.g., :bounced_email).
-  def alert_type
-    get_alert[:type]
-  end
-
-  def alert_type=(val)
-    get_alert[:type] = val
-  end
-
-  # Additional notes admin added when creating alert.
-  def alert_notes
-    get_alert[:notes]
-  end
-
-  def alert_notes=(val)
-    get_alert[:notes] = val
-  end
-
-  # Get the localization string for the alert message for this type of alert.
-  # This is the actual message that will be displayed for the user in question.
-  #
-  #   <%= user.alert_message.tp %>
-  #
-  def alert_message
-    "user_alert_message_#{alert_type}".to_sym
   end
 
   ##############################################################################

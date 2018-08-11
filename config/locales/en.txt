@@ -2846,30 +2846,6 @@
   turn_javascript_on_body: We will now assume javascript is on.
   turn_javascript_on_title: Turn Javascript On
 
-  # account/create_alert and show_alert
-  user_alert_create_title: Edit User Alert for [user]
-  user_alert_created_at: Created on
-  user_alert_create_alert: Create/Edit User Alert
-  user_alert_delete: Delete
-  user_alert_deleted: Deleted alert for [user].
-  user_alert_later: Later
-  user_alert_later_help: Not now! Remind me to look into it again tomorrow.
-  user_alert_missing: Tried to show you an alert that no longer exists, sorry.
-  user_alert_missing_type: Please select an alert type.
-  user_alert_next_showing: Next showing
-  user_alert_notes: Other notes
-  user_alert_okay: Okay
-  user_alert_okay_help: Click here if you don't want to see this message again.
-  user_alert_save: Save
-  user_alert_saved: Saved alert for [user].
-  user_alert_show_title: Alert for [user]
-  user_alert_type: Alert type
-  user_alert_type_bounced_email: email is bouncing
-  user_alert_type_other: other
-  user_alert_user: Created by
-  user_alert_message_bounced_email: "Hi [login],\n\nWe've noticed that email to your address is bouncing.\n\nPlease check the address we're using and make sure it is correct.\n\nEmail : [email]\n\n\"Click here to change it.\":/account/prefs\n\n[notes]"
-  user_alert_message_other: "[notes]"
-
   ##############################################################################
 
   # ADMIN-TYPE PAGES
