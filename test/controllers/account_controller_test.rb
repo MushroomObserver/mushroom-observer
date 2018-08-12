@@ -674,7 +674,9 @@ class AccountControllerTest < FunctionalTestCase
   def test_post_create_alert
     login("mary")
     make_admin
-    post(:create_alert, id: mary.id, commit: :user_alert_save.l,
+    post(:create_alert,
+         id: mary.id,
+         commit: :user_alert_save.l,
          user2: {
            alert_type: :bounced_email,
            alert_notes: "Boing!"
