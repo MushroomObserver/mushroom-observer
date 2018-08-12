@@ -738,8 +738,8 @@ class User < AbstractModel
   # gets returned from that expression is not the same as the one that
   # gets assigned to self.alert so the first key assignment gets lost.
   def get_alert # :nodoc:
-    self.alert = {} if !self.alert
-    self.alert
+    self.alert = {} unless alert
+    alert
   end
   protected :get_alert
 
