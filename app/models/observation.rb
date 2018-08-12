@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 #  = Observation Model
 #
 #  An Observation is a mushroom seen at a certain Location and time, as

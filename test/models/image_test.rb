@@ -137,8 +137,6 @@ class ImageTest < UnitTestCase
   def test_transform
     img = Image.new
     assert_nil(img.transform(:mirror))
-    assert_raises (RuntimeError) {
-      img.transform(:edible)
-    }
+    assert_raises(RuntimeError) { img.transform(:edible) }
   end
 end
