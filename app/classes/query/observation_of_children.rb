@@ -30,10 +30,6 @@ module Query
       do_coerce(:Location)
     end
 
-    def coerce_into_name_query
-      do_coerce(:Name)
-    end
-
     def do_coerce(new_model)
       Query.lookup(new_model, :with_observations_of_children,
                    params_plus_old_by)
