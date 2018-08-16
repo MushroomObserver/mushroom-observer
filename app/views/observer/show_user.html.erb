@@ -50,8 +50,6 @@
     tabs += [
       link_to(:change_user_bonuses.t, controller: :observer,
               action: :change_user_bonuses, id: @show_user.id),
-      link_to(:user_alert_create_alert.t, controller: :account,
-              action: :create_alert, id: @show_user.id),
       link_to(:DESTROY.t, controller: :account, action: :destroy_user,
               id: @show_user.id)
     ]

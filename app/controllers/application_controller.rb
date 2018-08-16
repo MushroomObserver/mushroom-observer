@@ -9,7 +9,6 @@
 #
 #  autologin::          Determine which if any User is logged in.
 #  set_locale::         Determine which language is requested.
-#  check_user_alert::   Check if User has an alert to be displayed.
 #
 #  == Methods
 #  *NOTE*: Methods in parentheses are "private" helpers; you are encouraged to
@@ -23,7 +22,6 @@
 #  reviewer?::              Is the current User a reviewer?
 #  in_admin_mode?::         Is the current User in admin mode?
 #  unshown_notifications?:: Are there pending Notification's of a given type?
-#  check_user_alert::       (filter: redirect to show_alert if has alert)
 #  autologin_cookie_set::   (set autologin cookie)
 #  clear_autologin_cookie:: (clear autologin cookie)
 #  session_user_set::       (store user in session -- id only)
@@ -116,7 +114,6 @@ class ApplicationController < ActionController::Base
   before_action :set_timezone
   before_action :refresh_translations
   before_action :track_translations
-  before_action :check_user_alert
   # before_action :extra_gc
   # after_action  :extra_gc
   # after_action  :log_memory_usage
@@ -133,7 +130,6 @@ class ApplicationController < ActionController::Base
     skip_action_callback :set_timezone
     skip_action_callback :refresh_translations
     skip_action_callback :track_translations
-    skip_action_callback :check_user_alert
     # skip_action_callback   :extra_gc
     # skip_action_callback   :log_memory_usage
     before_action :disable_link_prefetching
@@ -520,17 +516,6 @@ class ApplicationController < ActionController::Base
   # ----------------------------
   #  "Private" methods.
   # ----------------------------
-
-  # Before filter: check if the current User has an alert.  If so, it redirects
-  # to <tt>/account/show_alert</tt>.  Returns true.
-  def check_user_alert
-    if @user && @user.alert && @user.alert_next_showing < Time.current &&
-       # Careful not to start infinite redirect-loop!
-       action_name != "show_alert"
-      redirect_to(controller: :account, action: :show_alert)
-    end
-    true
-  end
 
   # Create/update the auto-login cookie.
   def autologin_cookie_set(user)

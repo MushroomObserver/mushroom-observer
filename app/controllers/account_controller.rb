@@ -19,7 +19,6 @@
 #  login::              <tt>(. V P)</tt>
 #  logout_user::        <tt>(. V .)</tt>
 #  email_new_password:: <tt>(. V .)</tt>
-#  show_alert::         <tt>(. V .)</tt>
 #
 #  ==== Preferences
 #  prefs::              <tt>(L V P)</tt>
@@ -49,7 +48,6 @@ class AccountController < ApplicationController
     :logout_user,
     :reverify,
     :send_verify,
-    :show_alert,
     :signup,
     :test_flash,
     :verify,
@@ -249,31 +247,6 @@ class AccountController < ApplicationController
     User.current = nil
     session_user_set(nil)
     clear_autologin_cookie
-  end
-
-  # :nologin:
-  def show_alert
-    if !@user
-      redirect_back_or_default(action: :welcome)
-    elsif !@user.alert || !@user.alert_type
-      flash_warning :user_alert_missing.t
-      redirect_back_or_default(action: :welcome)
-    elsif request.method == "GET"
-      @back = session["return-to"]
-      # render alert
-    elsif request.method == "POST"
-      if params[:commit] == :user_alert_okay.l
-        @user.alert = nil
-      else
-        @user.alert_next_showing = Time.zone.now + 1.day
-      end
-      @user.save
-      if params[:back].present?
-        redirect_to(params[:back])
-      else
-        redirect_to("/")
-      end
-    end
   end
 
   ##############################################################################
@@ -694,40 +667,6 @@ class AccountController < ApplicationController
     end
     if redirect
       redirect_back_or_default(controller: "observer", action: "index")
-    end
-  end
-
-  def create_alert # :root:
-    redirect = true
-    id = params[:id].to_s
-    if (@user2 = find_or_goto_index(User, id))
-      if in_admin_mode?
-        if request.method == "GET"
-          # render form
-          redirect = false
-        elsif request.method == "POST"
-          if params[:commit] == :user_alert_save.l
-            @user2.alert_type  = params[:user2][:alert_type]
-            @user2.alert_notes = params[:user2][:alert_notes]
-            if params[:user2][:alert_type].blank?
-              flash_error :user_alert_missing_type.t
-              @user2.errors.add(:alert_type)
-              redirect = false
-            else
-              @user2.alert_created_at   = now = Time.now
-              @user2.alert_next_showing = now
-              @user2.alert_user_id      = @user.id
-              @user2.save
-              flash_notice :user_alert_saved.t(user: @user2.login)
-            end
-          else
-            @user2.alert = nil
-            @user2.save
-            flash_notice :user_alert_deleted.t(user: @user2.login)
-          end
-        end
-      end
-      redirect_to(controller: :observer, action: :show_user, id: id) if redirect
     end
   end
 
