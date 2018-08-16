@@ -58,8 +58,8 @@ module ApplicationHelper
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
-  def indent(w = 10)
-    "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
+  def indent(count = 10)
+    "<span style='margin-left:#{count}px'>&nbsp;</span>".html_safe
   end
 
   def content_tag_if(condition, name, content_or_options_with_block = nil,

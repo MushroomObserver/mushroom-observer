@@ -1,4 +1,3 @@
-#
 #  = General Test Helpers
 #
 #  Methods in this class are available to all the unit, functional and
@@ -226,9 +225,9 @@ module GeneralExtensions
   #     :comment => @comment_on_minmal_unknown.id
   #   )
   #
-  def assert_email(n, args)
+  def assert_email(offset, args)
     # email = QueuedEmail.find(:first, :offset => n)
-    email = QueuedEmail.offset(n).first
+    email = QueuedEmail.offset(offset).first
     assert(email)
     for arg in args.keys
       case arg
@@ -256,19 +255,19 @@ module GeneralExtensions
   end
 
   # This should make diagnostics of failed tests more useful!
-  def fixture_label(o)
-    return "" if o.nil?
-    table = o.class.table_name
+  def fixture_label(obj)
+    return "" if obj.nil?
+    table = obj.class.table_name
     @loaded_fixtures[table].fixtures.each do |name, fixture|
-      return "<#{name}>" if fixture["id"] == o.id
+      return "<#{name}>" if fixture["id"] == obj.id
     end
     case table
     when "names"
-      "Name: #{o.search_name}"
+      "Name: #{obj.search_name}"
     when "user"
-      "User: #{o.login}"
+      "User: #{obj.login}"
     else
-      "#{o.class.name} ##{o.id}"
+      "#{obj.class.name} ##{obj.id}"
     end
   end
 
@@ -393,23 +392,23 @@ module GeneralExtensions
   end
 
   # Dump out XML tree.
-  def dump_xml(e, indent = "")
+  def dump_xml(exp, indent = "")
     print "#{indent}#{e.name}"
-    if e.has_attributes?
+    if exp.has_attributes?
       attrs = []
-      e.attributes.each do |a, v|
+      exp.attributes.each do |a, v|
         attrs << "#{a}=#{v}"
       end
       print "(#{attrs.join(" ")})"
     end
-    if e.has_text? && e.text =~ /\S/
-      txt = e.text.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ")
+    if exp.has_text? && exp.text =~ /\S/
+      txt = exp.text.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ")
       txt = "\"#{txt}\"" if txt.match?(" ")
       print " = #{txt}"
     end
     print "\n"
-    if e.has_elements?
-      e.elements.each do |child|
+    if exp.has_elements?
+      exp.elements.each do |child|
         dump_xml(child, indent + "  ")
       end
     end

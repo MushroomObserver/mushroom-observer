@@ -342,17 +342,17 @@ class CollapsibleMapTest < UnitTestCase
   end
   # rubocop:enable Metrics/LineLength
 
-  def do_box_extension_test(w1, e1, w2, e2, w3, e3)
+  def do_box_extension_test(west1, east1, west2, east2, west3, east3)
     loc = Location.new
     loc.north = 50
     loc.south = 40
-    loc.east = e1
-    loc.west = w1
+    loc.east = east1
+    loc.west = west1
     mapset = MapSet.new(loc)
-    loc.east = e2
-    loc.west = w2
+    loc.east = east2
+    loc.west = west2
     mapset.update_extents_with_box(loc)
-    assert_mapset_is_box(mapset, 50, 40, e3, w3)
+    assert_mapset_is_box(mapset, 50, 40, east3, west3)
   end
 
   def test_mapping_one_observation_with_gps

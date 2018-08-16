@@ -90,12 +90,12 @@ class Description < AbstractModel
     send("#{parent_type}_id")
   end
 
-  def parent=(x)
-    send("#{parent_type}=", x)
+  def parent=(val)
+    send("#{parent_type}=", val)
   end
 
-  def parent_id=(x)
-    send("#{parent_type}_id=", x)
+  def parent_id=(val)
+    send("#{parent_type}_id=", val)
   end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.

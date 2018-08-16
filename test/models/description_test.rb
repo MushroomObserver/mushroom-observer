@@ -123,4 +123,15 @@ class DescriptionTest < UnitTestCase
       assert_contributions(0, 0, 0, 0, msg)
     end
   end
+
+  def test_parent_setters
+    albion = locations(:albion)
+    obj = LocationDescription.new(location_id: albion.id,
+                                  license_id: licenses(:ccnc25).id)
+    burbank = locations(:burbank)
+    obj.parent = burbank
+    assert obj.parent_id == burbank.id
+    obj.parent_id = albion.id
+    assert obj.parent == albion
+  end
 end

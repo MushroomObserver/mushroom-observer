@@ -104,13 +104,13 @@ module Query::Modules::HighLevelQueries
   end
 
   # Make sure we requery if we change the letter field.
-  def need_letters=(x)
-    if !x.is_a?(String)
+  def need_letters=(letters)
+    if !letters.is_a?(String)
       fail "You must pass a SQL expression to 'need_letters'."
-    elsif need_letters != x
+    elsif need_letters != letters
       @result_ids   = nil
       @result_count = nil
-      @need_letters = x
+      @need_letters = letters
     end
   end
 

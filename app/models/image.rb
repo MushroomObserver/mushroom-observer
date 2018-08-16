@@ -695,15 +695,15 @@ class Image < AbstractModel
   end
 
   # Rotate or flip image.
-  def transform(op)
-    case op
-    when :rotate_left then op = "-90"
-    when :rotate_right then op = "+90"
-    when :mirror then op = "-h"
+  def transform(operator)
+    case operator
+    when :rotate_left then operator = "-90"
+    when :rotate_right then operator = "+90"
+    when :mirror then operator = "-h"
     else
-      fail("Invalid transform op: #{op.inspect}")
+      fail("Invalid transform operator: #{operator.inspect}")
     end
-    system("script/rotate_image #{id} #{op}&") if Rails.env != "test"
+    system("script/rotate_image #{id} #{operator}&") if Rails.env != "test"
   end
 
   ##############################################################################

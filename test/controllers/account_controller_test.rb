@@ -662,4 +662,27 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)
   end
+
+  def test_get_create_alert
+    login("mary")
+    make_admin
+    get(:create_alert, id: mary.id)
+    assert_response(:success)
+    assert_template(:create_alert)
+  end
+
+  def test_post_create_alert
+    login("mary")
+    make_admin
+    post(:create_alert,
+         id: mary.id,
+         commit: :user_alert_save.l,
+         user2: {
+           alert_type: :bounced_email,
+           alert_notes: "Boing!"
+         })
+    assert_redirected_to(controller: :observer,
+                         action: :show_user,
+                         id: mary.id)
+  end
 end

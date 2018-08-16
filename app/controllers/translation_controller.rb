@@ -204,19 +204,19 @@ class TranslationController < ApplicationController
   #  :section: Edit Form
   # ----------------------------
 
-  def build_form(lang, tags, fh = nil)
+  def build_form(lang, tags, file_handle = nil)
     @form = []
     @tags = tags
     @tags_used = {}
-    fh ||= File.open(lang.export_file, "r:utf-8")
+    file_handle ||= File.open(lang.export_file, "r:utf-8")
     reset_everything
-    fh.each_line do |line|
+    file_handle.each_line do |line|
       line.force_encoding("utf-8")
       process_template_line(line)
     end
     process_blank_line
     include_unlisted_tags
-    fh.close if fh.respond_to?(:close)
+    file_handle.close if file_handle.respond_to?(:close)
     @form
   end
 
