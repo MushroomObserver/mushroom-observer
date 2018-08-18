@@ -1013,12 +1013,6 @@ Style/MethodCallWithoutArgsParentheses:
     - 'app/models/language_exporter.rb'
     - 'app/views/name/eol.xml.builder'
 
-# Offense count: 2
-Style/MethodMissing:
-  Exclude:
-    - 'app/classes/wrapper.rb'
-    - 'script/config.rb'
-
 # Offense count: 1
 Style/MixinUsage:
   Exclude:

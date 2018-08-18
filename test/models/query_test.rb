@@ -1,3 +1,4 @@
+# coding: utf-8
 require "test_helper"
 require "set"
 
@@ -650,21 +651,23 @@ class QueryTest < UnitTestCase
     assert_equal(2, query.index(rolf))
   end
 
-  def paginate_test_setup(from_nth, to_nth)
+  def paginate_test_setup(number, num_per_page)
     @names = Name.all.order(:id)
-    @pages = Wrapper.new(from: from_nth, to: to_nth,
-                         num_per_page: to_nth - from_nth + 1)
+    @pages = MOPaginator.new(number: number,
+                             num_per_page: num_per_page)
     @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
   end
 
-  def paginate_test(from_nth, to_nth, expected_nths)
-    paginate_test_setup(from_nth, to_nth)
-    paginate_assertions(from_nth, to_nth, expected_nths)
+  def paginate_test(number, num_per_page, expected_nths)
+    paginate_test_setup(number, num_per_page)
+    paginate_assertions(number, num_per_page, expected_nths)
   end
 
   # parameters are the ordinals of objects which have been ordered by id
   # E.g., 1 corresponds to Name.all.order(:id).first
-  def paginate_assertions(from_nth, to_nth, expected_nths)
+  def paginate_assertions(number, num_per_page, expected_nths)
+    from_nth = (number - 1) * num_per_page
+    to_nth = from_nth + num_per_page - 1
     name_ids = @names.map { |n| n[:id] }
     assert_equal(
       expected_nths,
@@ -675,36 +678,37 @@ class QueryTest < UnitTestCase
   end
 
   def test_paginate_start
-    paginate_test(1, 4, [2, 3, 4, 5])
+    paginate_test(1, 4, [1, 2, 3, 4])
   end
 
   def test_paginate_middle
     MO.debugger_flag = true
-    paginate_test(5, 8, [6, 7, 8, 9])
+    paginate_test(2, 4, [5, 6, 7, 8])
   end
 
-  def paginate_test_letter_setup(to_nth, from_nth)
-    paginate_test_setup(to_nth, from_nth)
+  def paginate_test_letter_setup(number, num_per_page)
+    paginate_test_setup(number, num_per_page)
     @query.need_letters = "names.text_name"
     @letters = @names.map { |n| n.text_name[0, 1] }.uniq.sort
   end
 
   def test_paginate_need_letters
     paginate_test_letter_setup(1, 4)
-    paginate_assertions(1, 4, [2, 3, 4, 5])
+    paginate_assertions(1, 4, [1, 2, 3, 4])
     assert_equal(@letters, @pages.used_letters.sort)
   end
 
   def test_paginate_ells
-    paginate_test_letter_setup(3, 6)
-    @pages = Wrapper.new(from: 3, to: 6, letter: "L", num_per_page: 4)
-
+    paginate_test_letter_setup(2, 3)
+    @pages = MOPaginator.new(number: 2,
+                             num_per_page: 3,
+                             letter: "L")
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
     assert(@ells.length >= 9)
-    assert_equal(@ells[3..6].map(&:id), @query.paginate_ids(@pages))
+    assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
     assert_equal(@letters, @pages.used_letters.sort)
-    assert_equal(@ells[3..6], @query.paginate(@pages))
+    assert_equal(@ells[3..5], @query.paginate(@pages))
   end
 
   def test_eager_instantiator
