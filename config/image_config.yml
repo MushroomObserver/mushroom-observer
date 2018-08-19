@@ -1,0 +1,43 @@
+development:
+  local_image_files: /vagrant/mushroom-observer/public/images
+  image_sources:
+    :local:
+      :test: file:///vagrant/mushroom-observer/public/images
+      :read: "/images"
+    :cdmr:
+      :test: :transferred_flag
+      :read: http://images.mushroomobserver.org
+  keep_these_image_sizes_local: []
+
+production:
+  local_image_files: /var/web/mo/public/images
+  image_sources:
+    :local:
+      :test: file:///var/web/mo/public/images
+      :read: https://mushroomobserver.org/local_images
+    :cdmr:
+      :test: :transferred_flag
+      :read: https://mushroomobserver.org/images
+      :write: ssh://mo@images.mushroomobserver.org:/images/mo
+  keep_these_image_sizes_local: []
+
+test:
+  local_image_files: /vagrant/mushroom-observer/public/test_images
+  image_sources:
+    :local:
+      :test: file:///vagrant/mushroom-observer/public/test_images
+      :read: "/local_images"
+    :remote1:
+      :test: :transferred_flag
+      :read: "/remote_images"
+      :write: file:///vagrant/mushroom-observer/public/test_server1
+    :remote2:
+      :write: file:///vagrant/mushroom-observer/public/test_server2
+      :sizes:
+      - :thumbnail
+      - :small
+      - :medium
+  keep_these_image_sizes_local:
+  - :thumbnail
+  - :small
+

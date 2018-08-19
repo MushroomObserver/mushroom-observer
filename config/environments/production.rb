@@ -30,34 +30,12 @@ MushroomObserver::Application.configure do
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 
-  # Serve new images locally until transferred to image server
-  config.local_image_files = "#{config.root}/public/images"
-  config.image_sources = {
-    local: {
-      test: "file://#{config.local_image_files}",
-      read: "/local_images"
-    },
-    cdmr: {
-      test: :transferred_flag,
-      read: "/images",
-      # Safer to keep this disabled until truly going live.
-      # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
-    }
-    # For use when testing live server in parallel with production server.
-    # :mo = {
-    #   :test  => "http://mushroomobserver.org/local_images",
-    #   :read  => "http://mushroomobserver.org/local_images",
-    #   :write => "ssh://jason@mushroomobserver.org:/var/web/mo/public/images",
-    #   :sizes => [ :thumbnail, :small ]
-    # }
-  }
   config.image_precedence = {
     default: [:cdmr, :local]
     # For use when testing live server in parallel with production server.
     # :default   => [:cdmr, :local, :mo]
   }
   config.image_fallback_source = :cdmr
-  config.keep_these_image_sizes_local = []
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 

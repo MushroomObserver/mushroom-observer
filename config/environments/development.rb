@@ -22,18 +22,6 @@ MushroomObserver::Application.configure do
     domain:  "localhost"
   }
 
-  # Serve new images locally, pre-existing images from real image server.
-  config.local_image_files = "#{config.root}/public/images"
-  config.image_sources = {
-    local: {
-      test: "file://#{config.local_image_files}",
-      read: "/images"
-    },
-    cdmr: {
-      test: :transferred_flag,
-      read: "http://images.mushroomobserver.org"
-    }
-  }
   config.image_precedence = {
     default: [:local, :cdmr]
   }
