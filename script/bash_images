@@ -44,7 +44,7 @@ image_server_data[local,path]="$image_root"
 image_server_data[local,subdirs]="thumb,320,640,960,1280,orig"
 
 declare -a image_servers
-for line in $(rails runner $app_root/script/config.rb image_servers); do
+for line in $($app_root/script/config.rb image_servers); do
   # Format from "config.rb image_servers" is:
   #   name;type://path;thumb,small
   name=$(    echo "$line" | sed 's/;.*//' )

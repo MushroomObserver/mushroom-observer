@@ -1,4 +1,27 @@
-#!/usr/bin/env rails
+#!/usr/bin/env ruby
+
+require 'yaml'
+
+class ImageConfigData
+  def initialize
+    @env = ENV["RAILS_ENV"] || "development"
+    @config = YAML.load_file("config/image_config.yml")[@env]
+  end
+
+  def local_image_files
+    @config["local_image_files"]
+  end
+
+  def image_sources
+    @config["image_sources"]
+  end
+
+  def keep_these_image_sizes_local
+    @config["keep_these_image_sizes_local"]
+  end
+end
+
+MO = ImageConfigData.new
 
 def image_servers
   map = {

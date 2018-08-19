@@ -55,7 +55,7 @@ trap clean_log EXIT
 # Grab constant from rails configuration (consts.rb and consts-site.rb).
 #   path=$( rails_constant MO.local_image_files )
 function rails_constant {
-  rails runner $app_root/script/config.rb $*
+  $app_root/script/config.rb $*
 }
 
 function time_stamp {
