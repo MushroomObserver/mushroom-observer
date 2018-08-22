@@ -43,16 +43,12 @@ class Image
       when :transferred_flag
         transferred
       when /^file:/
-        path = spec[7..-1] % {root: MO.root}
-        f = open("tmp.out", "a")
-        f.write("\nsource_exists?\n")
-        f.write(path)
-        f.close()
+        path = format(spec[7..-1], root: MO.root)
         local_file_exists?(path)
       when /^http:/
-        remote_file_exists?(url = spec % {root: MO.root})
+        remote_file_exists?(url = format(spec, root: MO.root))
       when /^https:/
-        remote_file_exists?(url = spec % {root: MO.root})
+        remote_file_exists?(url = format(spec, root: MO.root))
       else
         fail "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
       end
@@ -69,7 +65,7 @@ class Image
     end
 
     def source_url(source)
-      spec = specs(source)[:read] % {root: MO.root}
+      spec = format(specs(source)[:read], root: MO.root)
       file_name(spec)
     end
 

@@ -13,7 +13,7 @@ class ImageConfigData
   end
 
   def local_image_files
-    @config["local_image_files"] % {root: root}
+    format(@config["local_image_files"], root: root)
   end
 
   def image_sources
@@ -39,7 +39,7 @@ def image_servers
   results = []
   MO.image_sources.each do |server, specs|
     if specs[:write]
-      url = specs[:write] % {root: MO.root}
+      url = format(specs[:write], root: MO.root)
       sizes = specs[:sizes] || map.keys
       subdirs = sizes.map { |s| map[s] }.join(",")
       results << [server.to_s, url, subdirs].join(";")
