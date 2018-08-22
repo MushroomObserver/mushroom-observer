@@ -115,7 +115,7 @@ MushroomObserver::Application.configure do
   config.max_map_objects = 100
 
   # Where images are kept locally until they are transferred.
-  config.local_image_files = IMAGE_CONFIG_DATA.config["local_image_files"]
+  config.local_image_files = IMAGE_CONFIG_DATA.config["local_image_files"] % {root: MO.root}
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO

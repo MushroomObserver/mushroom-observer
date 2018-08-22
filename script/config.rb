@@ -8,8 +8,12 @@ class ImageConfigData
     @config = YAML.load_file("config/image_config.yml")[@env]
   end
 
+  def root
+    File.expand_path("../..", __FILE__)
+  end
+
   def local_image_files
-    @config["local_image_files"]
+    @config["local_image_files"] % {root: root}
   end
 
   def image_sources
@@ -35,7 +39,7 @@ def image_servers
   results = []
   MO.image_sources.each do |server, specs|
     if specs[:write]
-      url = specs[:write]
+      url = specs[:write] % {root: MO.root}
       sizes = specs[:sizes] || map.keys
       subdirs = sizes.map { |s| map[s] }.join(",")
       results << [server.to_s, url, subdirs].join(";")

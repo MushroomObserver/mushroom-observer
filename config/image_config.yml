@@ -1,8 +1,8 @@
 development:
-  local_image_files: /vagrant/mushroom-observer/public/images
+  local_image_files: "%{root}/public/images"
   image_sources:
     :local:
-      :test: file:///vagrant/mushroom-observer/public/images
+      :test: file://%{root}/public/images
       :read: "/images"
     :cdmr:
       :test: :transferred_flag
@@ -22,17 +22,17 @@ production:
   keep_these_image_sizes_local: []
 
 test:
-  local_image_files: /vagrant/mushroom-observer/public/test_images
+  local_image_files: "%{root}/public/test_images"
   image_sources:
     :local:
-      :test: file:///vagrant/mushroom-observer/public/test_images
+      :test: file://%{root}/public/test_images
       :read: "/local_images"
     :remote1:
       :test: :transferred_flag
       :read: "/remote_images"
-      :write: file:///vagrant/mushroom-observer/public/test_server1
+      :write: file://%{root}/public/test_server1
     :remote2:
-      :write: file:///vagrant/mushroom-observer/public/test_server2
+      :write: file://%{root}/public/test_server2
       :sizes:
       - :thumbnail
       - :small
