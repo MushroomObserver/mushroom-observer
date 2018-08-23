@@ -91,5 +91,5 @@ MushroomObserver::Application.configure do
   config.web_console.whitelisted_ips = "10.0.2.2"
 end
 
-file = File.expand_path("../../consts-site.rb", __FILE__)
+file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

@@ -1,4 +1,4 @@
-require File.expand_path("../boot", __FILE__)
+require File.expand_path("boot", __dir__)
 
 require "rails/all"
 
@@ -45,4 +45,4 @@ module MushroomObserver
 end
 
 MO = MushroomObserver::Application.config
-require File.expand_path("../consts.rb", __FILE__)
+require File.expand_path("consts.rb", __dir__)

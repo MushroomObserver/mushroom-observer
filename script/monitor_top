@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-ROOT = File.expand_path("../..", __FILE__)
+ROOT = File.expand_path("..", __dir__)
 LOG_FILE = "#{ROOT}/log/top.log".freeze
 UNICORN_FILE = "#{ROOT}/tmp/unicorn.pid".freeze
 PASSENGER_FILE = "#{ROOT}/tmp/restart.txt".freeze

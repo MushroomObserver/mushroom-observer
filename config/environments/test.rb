@@ -103,5 +103,5 @@ MushroomObserver::Application.configure do
   config.active_support.test_order = :random
 end
 
-file = File.expand_path("../../consts-site.rb", __FILE__)
+file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require File.expand_path("../config", __FILE__)
+require File.expand_path("config", __dir__)
 TESTING = true
 
 # # ----------------------------
@@ -44,11 +44,11 @@ TESTING = true
 #  Access via Pivotal class.
 # ----------------------------
 
-require File.expand_path("../../app/classes/pivotal/http.rb", __FILE__)
-require File.expand_path("../../app/classes/pivotal/story.rb", __FILE__)
-require File.expand_path("../../app/classes/pivotal/comment.rb", __FILE__)
-require File.expand_path("../../app/classes/pivotal/vote.rb", __FILE__)
-require File.expand_path("../../app/classes/pivotal/user.rb", __FILE__)
+require File.expand_path("../app/classes/pivotal/http.rb", __dir__)
+require File.expand_path("../app/classes/pivotal/story.rb", __dir__)
+require File.expand_path("../app/classes/pivotal/comment.rb", __dir__)
+require File.expand_path("../app/classes/pivotal/vote.rb", __dir__)
+require File.expand_path("../app/classes/pivotal/user.rb", __dir__)
 
 # id = MO.pivotal_test_id
 # story = Pivotal.get_story(id, :refresh_cache)

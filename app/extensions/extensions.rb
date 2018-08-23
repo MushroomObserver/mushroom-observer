@@ -4,6 +4,6 @@
 # explicitly, too.  (Although, I believe ApplicationController is always
 # loaded, no matter what you need(?)...)
 
-for file in Dir[File.expand_path("../*_extensions.rb", __FILE__)]
+for file in Dir[File.expand_path("*_extensions.rb", __dir__)]
   require_dependency file
 end
