@@ -11,7 +11,7 @@
 <% end %>
 
 <% if @first_child %>
-  <p><%= link_to(:show_object.t(type: :"RANK_PLURAL_#{@first_child.rank.to_s.upcase}"),
+  <p><%= link_to(:show_object.t(type: @name.at_or_below_genus? && !@name.at_or_below_species? ? :rank_species : :show_subtaxa_obss),
                  add_query_param({ action: :index_name }, @children_query)) %></p>
 <% end %>
 <% if @name.below_genus? && @name.genus.try(&:classification) != @name.classification %>

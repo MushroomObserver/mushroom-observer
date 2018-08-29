@@ -21,6 +21,7 @@ module Query
       end
 
       # If at genus or below, we can deduce hierarchy purely by syntax.
+      # Note, this will show species below genus, not subgenera etc.
       def add_name_condition_below_genus(name, all)
         where << "names.text_name LIKE '#{name.text_name} %'"
         return if all
