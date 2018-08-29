@@ -28,8 +28,8 @@
 #
 ################################################################################
 
-require File.expand_path("../../config/boot.rb", __FILE__)
-require File.expand_path("../../config/environment.rb", __FILE__)
+require File.expand_path("../config/boot.rb", __dir__)
+require File.expand_path("../config/environment.rb", __dir__)
 
 DOMAIN      = "https://mushroomobserver.org".freeze
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze

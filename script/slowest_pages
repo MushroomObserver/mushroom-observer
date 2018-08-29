@@ -17,7 +17,7 @@
 #
 ################################################################################
 
-FILE = ARGV[0] || File.expand_path("../../log/production.log", __FILE__)
+FILE = ARGV[0] || File.expand_path("../log/production.log", __dir__)
 NUM  = ARGV[1].to_i || 10
 
 data = {}

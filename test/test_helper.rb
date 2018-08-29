@@ -35,7 +35,7 @@ require "webmock/minitest"
 WebMock.disable_net_connect!(allow_localhost: true)
 
 ENV["RAILS_ENV"] ||= "test"
-require File.expand_path("../../config/environment", __FILE__)
+require File.expand_path("../config/environment", __dir__)
 require "rails/test_help"
 
 # Enable mocking and stubbing in Ruby (must be required after rails/test_help).

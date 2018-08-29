@@ -14,7 +14,7 @@ IMAGE_CONFIG_DATA = ImageConfigData.new
 MushroomObserver::Application.configure do
   # Ensure that these are defined in case we're executing this script
   # on its own (e.g., to provide access to configs for bash sripts).
-  config.root = File.expand_path("../..", __FILE__)
+  config.root = File.expand_path("..", __dir__)
   config.env  = ENV["RAILS_ENV"]
 
   # List of alternate server domains.  We redirect from each of these
