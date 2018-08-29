@@ -72,7 +72,8 @@
          image_too_big_text:  "#{j :form_observations_image_too_big.t(max: (MO.image_upload_max_size.to_f/1024/1024).round)}",
          creating_observation_text: "#{j :form_observations_creating_observation.t}",
          months: "#{j :all_months.t}",
-         show_on_map: "#{j :show_on_map.t}"
+         show_on_map: "#{j :show_on_map.t}",
+         something_went_wrong: "#{j :form_observations_upload_error.t}"
        })
        uploader.init();
      });

@@ -6,7 +6,8 @@ function MultiImageUploader(localized_text) {
         image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
         creating_observation_text: "Creating Observation...",
         months: "January, February, March, April, May, June, July, August, September, October, November, December",
-        show_on_map: "Show on map"
+        show_on_map: "Show on map",
+        something_went_wrong: "Something went wrong while uploading image."
     };
 
     if (localized_text == undefined) {
@@ -17,6 +18,7 @@ function MultiImageUploader(localized_text) {
         localized_text.creating_observation_text = !localized_text.creating_observation_text ? defaults.creating_observation_text : localized_text.creating_observation_text;
         localized_text.months = !localized_text.months ? defaults.months : localized_text.months;
         localized_text.show_on_map = !localized_text.show_on_map ? defaults.show_on_map : localized_text.show_on_map;
+        localized_text.something_went_wrong = !localized_text.something_went_wrong ? defaults.something_went_wrong : localized_text.something_went_wrong;
     }
 
     // Internal Variable Definitions.
@@ -531,7 +533,8 @@ function MultiImageUploader(localized_text) {
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
 
-        xhrReq.onload = function () { //after image has been created.
+        xhrReq.onreadystatechange = function () { //after image has been created.
+          if (xhrReq.readyState == 4) {
             if (xhrReq.status == 200) {
                 var image = JSON.parse(xhrReq.response);
                     goodImageVals = $goodImages.val();
@@ -540,13 +543,16 @@ function MultiImageUploader(localized_text) {
                     //set the thumbnail if it is selected
                     jQuery('#observation_thumb_image_id').val(image.id);
                 }
-            } else {
+            } else if (xhrReq.response) {
                 alert(xhrReq.response);
+            } else {
+                alert(localized_text.something_went_wrong);
             }
             if (progress) window.clearTimeout(progress);
             _this.incrementProgressBar(1);
             _this.dom_element.hide('slow');
             onUploadedCallback();
+          }
         };
 
         update = function() {
@@ -574,7 +580,12 @@ function MultiImageUploader(localized_text) {
         xhrReq.open("POST", _uploadImageUri, true);
         xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         var _fd = _this.asFormData(); //Send the form
-        _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
+        if (_fd != null) {
+          xhrReq.send(_fd);
+        } else {
+          alert(localized_text.something_went_wrong);
+          onUploadedCallback();
+        }
     }
 
     FileStoreItem.prototype.destroy = function () {
