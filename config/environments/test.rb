@@ -13,33 +13,10 @@ MushroomObserver::Application.configure do
 
   # Disable queued email.
   config.queue_email = false
-
-  # Serve new images from local_images, old images from remote_images.
-  # Transfer to two servers, both local, but one using ssh to do it.
-  # Keep thumbnails locally, and only copy thumbnails to second server.
-  config.local_image_files = "#{config.root}/public/test_images"
-  config.image_sources = {
-    local: {
-      test: "file://#{config.local_image_files}",
-      read: "/local_images"
-    },
-    remote1: {
-      test: :transferred_flag,
-      read: "/remote_images",
-      write: "file://#{config.root}/public/test_server1"
-    },
-    remote2: {
-      write: "file://#{config.root}/public/test_server2",
-      # Having trouble getting this to work on vagrant machine...
-      # write: "ssh://vagrant@localhost:#{config.root}/public/test_server2",
-      sizes: [:thumbnail, :small, :medium]
-    }
-  }
   config.image_precedence = {
     default: [:local, :remote1]
   }
   config.image_fallback_source = :remote1
-  config.keep_these_image_sizes_local = [:thumbnail, :small]
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
 

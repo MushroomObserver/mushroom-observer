@@ -1,3 +1,16 @@
+require 'yaml'
+
+class ImageConfigData
+  attr_reader :config
+
+  def initialize
+    @env = ENV["RAILS_ENV"] || "development"
+    @config = YAML.load_file("config/image_config.yml")[@env]
+  end
+end
+
+IMAGE_CONFIG_DATA = ImageConfigData.new
+
 MushroomObserver::Application.configure do
   # Ensure that these are defined in case we're executing this script
   # on its own (e.g., to provide access to configs for bash sripts).
@@ -102,21 +115,12 @@ MushroomObserver::Application.configure do
   config.max_map_objects = 100
 
   # Where images are kept locally until they are transferred.
-  config.local_image_files = "#{config.root}/public/images"
+  config.local_image_files = format(IMAGE_CONFIG_DATA.config["local_image_files"], root: MO.root)
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
   # to test for existence of file by using image#transferred flag.
-  # config.image_sources = {
-  #   :local => {
-  #     :test => "file://#{config.local_image_files}",
-  #     :read => "/images",
-  #   },
-  #   :cdmr => {
-  #     :test => :transferred_flag,
-  #     :read => "https://images.digitalmycology.com",
-  #   }
-  # }
+  config.image_sources = IMAGE_CONFIG_DATA.config["image_sources"]
 
   # Search order when serving images.
   # Key is size, e.g., :thumbnail, :small, etc.
@@ -126,7 +130,8 @@ MushroomObserver::Application.configure do
   # config.image_fallback_source = :cdmr
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
-  config.keep_these_image_sizes_local = []
+  config.keep_these_image_sizes_local =
+    IMAGE_CONFIG_DATA.config["keep_these_image_sizes_local"]
 
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
