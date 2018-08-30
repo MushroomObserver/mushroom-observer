@@ -5,7 +5,7 @@ require 'yaml'
 class ImageConfigData
   def initialize
     @env = ENV["RAILS_ENV"] || "development"
-    @config = YAML.load_file("config/image_config.yml")[@env]
+    @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
   end
 
   def root
