@@ -4,8 +4,9 @@ class ImageConfigData
   attr_reader :config
 
   def initialize
+    root = File.expand_path("../..", __FILE__)
     @env = ENV["RAILS_ENV"] || "development"
-    @config = YAML.load_file("config/image_config.yml")[@env]
+    @config = YAML.load_file("#{root}/config/image_config.yml")[@env]
   end
 end
 
