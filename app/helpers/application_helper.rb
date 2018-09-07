@@ -258,7 +258,9 @@ module ApplicationHelper
       attr,
       opts.merge(
         max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size))
+        max_upload_size: max_size
+      )
+    )
     content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
       content_tag(:span, :no_file_selected.t)
   end

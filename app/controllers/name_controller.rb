@@ -503,7 +503,8 @@ class NameController < ApplicationController
         @name.save if @name.changed?
 
         flash_notice(:runtime_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+                     ))
         redirect_to(action: "show_name_description",
                     id: @description.id)
 
@@ -549,7 +550,8 @@ class NameController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_name_description_success.t(
-                       id: @description.id))
+                       id: @description.id
+                     ))
 
         # Update name's classification cache.
         name = @description.name

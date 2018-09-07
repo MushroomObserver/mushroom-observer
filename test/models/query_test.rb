@@ -490,7 +490,8 @@ class QueryTest < UnitTestCase
               where:  ["one = two", "foo LIKE bar"],
               group:  "blah.id",
               order:  "names.id ASC",
-              limit:  "10, 10"))
+              limit:  "10, 10"
+            ))
     )
   end
 

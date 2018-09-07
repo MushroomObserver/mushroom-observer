@@ -89,7 +89,7 @@ Disallow: */lookup*user_locale=*
 User-agent: CCBot
 Crawl-Delay: 30
 
-User-agent: ltx71 
+User-agent: ltx71
 Disallow: /
 
 User-agent: spbot
@@ -98,10 +98,10 @@ Disallow: /
 User-agent: MJ12bot
 Disallow: /
 
-User-agent : DAUM 
+User-agent : DAUM
 Disallow : /
 
-User-agent: AhrefsBot 
+User-agent: AhrefsBot
 Disallow: /
 
 User-agent: MauiBot
