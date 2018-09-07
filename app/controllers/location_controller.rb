@@ -693,8 +693,7 @@ class LocationController < ApplicationController
                                   name: @description.unique_partial_format_name)
 
         flash_notice(:runtime_location_description_success.t(
-                       id: @description.id
-        ))
+                       id: @description.id))
         redirect_to(action: "show_location_description",
                     id: @description.id)
 
@@ -732,8 +731,7 @@ class LocationController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_location_description_success.t(
-                       id: @description.id
-        ))
+                       id: @description.id))
 
         # Log action in parent location.
         @description.location.log(:log_description_updated,

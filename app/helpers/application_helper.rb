@@ -253,10 +253,12 @@ module ApplicationHelper
   def custom_file_field(obj, attr, opts = {})
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(obj, attr, opts.merge(
-                                         max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-                                         max_upload_size: max_size
-    ))
+    file_field = file_field(
+      obj,
+      attr,
+      opts.merge(
+        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
+        max_upload_size: max_size))
     content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
       content_tag(:span, :no_file_selected.t)
   end

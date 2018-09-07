@@ -58,8 +58,7 @@ class ImageS3
                         bucket: @bucket,
                         key: key,
                         acl: "public-read",
-                        body: io
-    )).data
+                        body: io)).data
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
   rescue => e

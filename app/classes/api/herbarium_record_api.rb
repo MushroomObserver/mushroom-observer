@@ -91,8 +91,7 @@ class API
     def before_create(params)
       obj = HerbariumRecord.where(
               herbarium: params[:herbarium],
-              accession_number: params[:accession_number]
-      ).first
+              accession_number: params[:accession_number]).first
       return nil unless obj
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
       obj.add_observation(@observation)

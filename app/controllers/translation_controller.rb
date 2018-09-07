@@ -301,7 +301,7 @@ class TranslationController < ApplicationController
       reset_everything
     elsif /^[A-Z][^a-z]*(--|$)/.match?(str)
       @major_head << str
-      @on_pages = !!(/PAGES/.match?(str))
+      @on_pages = !!/PAGES/.match?(str)
     elsif @expecting_minor_head
       @minor_head << str
     else
