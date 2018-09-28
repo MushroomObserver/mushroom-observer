@@ -196,9 +196,11 @@ class ObserverController
       flash_warning(:create_herbarium_record_already_used.t) if
         herbarium_record.observations.any?
     else
-      flash_error(:create_herbarium_record_already_used_by_someone_else.t(
-                    herbarium_name: herbarium.name
-                  ))
+      flash_error(
+        :create_herbarium_record_already_used_by_someone_else.t(
+          herbarium_name: herbarium.name
+        )
+      )
       return
     end
     herbarium_record.add_observation(obs)
