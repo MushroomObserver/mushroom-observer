@@ -47,7 +47,7 @@ class DateExtensionsTest < ActiveSupport::TestCase
   include DateExtensionsInterfaceTest
 
   def setup
-    @object = Date.today #
+    @object = Date.today
   end
 end
 

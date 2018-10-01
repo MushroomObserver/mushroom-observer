@@ -53,9 +53,8 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    @publication = Publication.new(whitelisted_publication_params.merge(
-                                     user: User.current
-    ))
+    params = whitelisted_publication_params.merge(user: User.current)
+    @publication = Publication.new(params)
     respond_to do |format|
       if @publication.save
         flash_notice(:runtime_created_at.t(type: :publication))

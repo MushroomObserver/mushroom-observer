@@ -399,8 +399,7 @@ class ApplicationController < ActionController::Base
   def track_last_page_request_by_user
     if @user && (
         !@user.last_activity ||
-        @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H")
-    )
+        @user.last_activity.to_s("%Y%m%d%H") != Time.current.to_s("%Y%m%d%H"))
       @user.last_activity = Time.current
       @user.save
     end

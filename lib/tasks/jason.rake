@@ -319,7 +319,7 @@ namespace :jason do
             if val == '\\'
               val = ""
               line = $stdin.gets
-              while line && !(/^\w/.match?(line))
+              while line && !/^\w/.match?(line)
                 line.chomp!
                 lines.push(line)
                 unless /^\s*#/.match?(line)
@@ -344,9 +344,9 @@ namespace :jason do
             when "specimen"
               if !spec.nil?
                 lines.push('>>>>>>>> already set "specimen" for this observation')
-              elsif (/^(y(es)?|1)$/i).match?(val)
+              elsif /^(y(es)?|1)$/i.match?(val)
                 spec = true
-              elsif (/^(n(o)?|0)$/i).match?(val)
+              elsif /^(n(o)?|0)$/i.match?(val)
                 spec = false
               else
                 lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
@@ -355,9 +355,9 @@ namespace :jason do
             when "is collection location"
               if !is_co.nil?
                 lines.push('>>>>>>>> already set "is collection location" for this observation')
-              elsif (/^(y(es)?|1)$/i).match?(val)
+              elsif /^(y(es)?|1)$/i.match?(val)
                 is_co = true
-              elsif (/^(n(o)?|0)$/i).match?(val)
+              elsif /^(n(o)?|0)$/i.match?(val)
                 is_co = false
               else
                 lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
@@ -376,17 +376,17 @@ namespace :jason do
                 lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
               elsif !vote.nil?
                 lines.push('>>>>>>>> already set "vote" for this observation')
-              elsif (/call/i).match?(val)
+              elsif /call/i.match?(val)
                 vote = 3
-              elsif (/promis/i).match?(val)
+              elsif /promis/i.match?(val)
                 vote = 2
-              elsif (/could/i).match?(val)
+              elsif /could/i.match?(val)
                 vote = 1
-              elsif (/doubt/i).match?(val)
+              elsif /doubt/i.match?(val)
                 vote = -1
-              elsif (/not/i).match?(val)
+              elsif /not/i.match?(val)
                 vote = -2
-              elsif (/as[\s_]if/i).match?(val)
+              elsif /as[\s_]if/i.match?(val)
                 vote = -3
               else
                 lines.push('>>>>>>>> invalid vote, use "I\'d call it that", "promising" or "could be"')

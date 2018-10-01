@@ -455,7 +455,7 @@ class Name < AbstractModel
                  elsif /^subg/i.match?(words[i])
                    "subgenus"
                  elsif /^subsect/i.match?(words[i])
-                  "subsect."
+                   "subsect."
                  else
                    "subsp."
                  end

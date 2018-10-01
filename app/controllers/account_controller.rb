@@ -722,11 +722,9 @@ class AccountController < ApplicationController
       layout_count:    15,
       mailing_address: "",
       notes:           ""
-    }.merge(params.require(:new_user).permit(
-              :login, :name, :theme,
-              :email, :email_confirmation,
-              :password, :password_confirmation
-    ))
+    }.merge(params.require(:new_user).permit(:login, :name, :theme,
+                                             :email, :email_confirmation,
+                                             :password, :password_confirmation))
   end
 
   def make_sure_theme_is_valid!
