@@ -38,7 +38,7 @@ module BoxMethods
   def long
     long = (east + west) / 2.0
     long += 180 if west > east
-    return long
+    long
   rescue StandardError
     nil
   end

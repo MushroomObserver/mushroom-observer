@@ -237,12 +237,12 @@ class API
     api.handle_version
     api.authenticate_user
     api.process_request
-    return api
+    api
   rescue API::Error => e
     api ||= new(params)
     api.errors << e
     e.fatal = true
-    return api
+    api
   end
 
   # :stopdoc:

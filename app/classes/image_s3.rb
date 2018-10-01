@@ -78,7 +78,7 @@ class ImageS3
     ).data
   rescue Aws::S3::Errors::NotFound
   rescue Aws::S3::Errors::NoSuchKey
-    return nil
+    nil
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
   rescue => e

@@ -257,7 +257,7 @@ class QueuedEmail < AbstractModel
       result = deliver_email
     end
     I18n.locale = current_locale
-    return result
+    result
   rescue => e
     raise e if Rails.env == "test"
     $stderr.puts("ERROR CREATING EMAIL")
@@ -265,7 +265,7 @@ class QueuedEmail < AbstractModel
     $stderr.puts(e.to_s)
     $stderr.puts(e.backtrace)
     I18n.locale = current_locale
-    return false
+    false
   end
 
   # This method needs to be defined in the subclasses.
