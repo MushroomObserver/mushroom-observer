@@ -54,12 +54,12 @@ class ImageS3
   #
   def upload(key, file, opts = {})
     io = File.open(file, "r") unless file.is_a?(IO)
-    client.put_object(opts.merge(
-                        bucket: @bucket,
-                        key: key,
-                        acl: "public-read",
-                        body: io
-    )).data
+    client.put_object(
+      opts.merge(bucket: @bucket,
+                 key: key,
+                 acl: "public-read",
+                 body: io)
+    ).data
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
   rescue => e

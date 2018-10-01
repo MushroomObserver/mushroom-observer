@@ -283,19 +283,24 @@ class HerbariumController < ApplicationController
     name.sub!(/\s*<(.*)>$/, '')
     user = User.find_by_login(name)
     unless user
-      flash_error(:runtime_no_match_name.t(
-                    type: :user, value: @herbarium.personal_user_name
-      ))
+      flash_error(
+        :runtime_no_match_name.t(type: :user,
+                                 value: @herbarium.personal_user_name)
+      )
       return false
     end
     return true if user.personal_herbarium == @herbarium
     if user.personal_herbarium.present?
-      flash_error(:edit_herbarium_user_already_has_personal_herbarium.t(
-                    user: user.login, herbarium: user.personal_herbarium.name
-      ))
+      flash_error(
+        :edit_herbarium_user_already_has_personal_herbarium.t(
+          user: user.login, herbarium: user.personal_herbarium.name
+        )
+      )
       return false
     end
-    flash_notice(:edit_herbarium_successfully_made_personal.t(user: user.login))
+    flash_notice(
+      :edit_herbarium_successfully_made_personal.t(user: user.login)
+    )
     @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id

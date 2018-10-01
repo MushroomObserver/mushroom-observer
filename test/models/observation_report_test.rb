@@ -90,7 +90,6 @@ class ObservationReportTest < UnitTestCase
   end
 
   def test_mycoflora_no_exact_lat_long
-
     # There are two collection numbers for this observation.  I can't think of
     # any good way to ensure the order that these are rendered in the report be
     # consistent.  So I'm just going to delete one of the numbers.

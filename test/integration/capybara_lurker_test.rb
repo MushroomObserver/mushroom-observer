@@ -154,9 +154,11 @@ class CapybarLurkerTest < IntegrationTestCase
 
       click_link("About #{name.text_name}")
       # (Make sure the page contains create_name_description.)
-      assert(assert_selector(
-               "#content a[href^='/name/create_name_description/#{name.id}']"
-      ))
+      assert(
+        assert_selector(
+          "#content a[href^='/name/create_name_description/#{name.id}']"
+        )
+      )
     end # back at Observation
 
     # Check out images
