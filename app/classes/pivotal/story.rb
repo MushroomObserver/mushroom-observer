@@ -106,7 +106,7 @@ class Pivotal
 
     def story_order
       max = labels.map { |l| LABEL_VALUE[l].to_i }.max.to_i
-      @view_order ||= -((max * 1000 + score) * 100) + comments.length
+      @story_order ||= -((max * 1000 + score) * 100) + comments.length
     end
 
     def score

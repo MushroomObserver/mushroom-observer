@@ -581,12 +581,14 @@ class User < AbstractModel
   end
 
   def create_personal_herbarium
+    # rubocop:disable Naming/MemoizedInstanceVariableName
     @personal_herbarium ||= Herbarium.create(
       name:          personal_herbarium_name,
       email:         email,
       personal_user: self,
       curators:      [self]
     )
+    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
