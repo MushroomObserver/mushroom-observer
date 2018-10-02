@@ -36,8 +36,6 @@ class API
           range_yyyy(str) ||
           raise(ArgumentError)
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
 
       def range_yyyymmddhhmmss_x2(s)
         match = s.match(/^(#{YYYYMMDDHHMMSS1})\s*-\s*(#{YYYYMMDDHHMMSS1})$/) ||
