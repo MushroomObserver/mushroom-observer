@@ -86,7 +86,7 @@ module Query::Modules::LowLevelQueries
       when Array
         tree.any? { |sub| uses_join_sub(sub, arg) }
       when Hash
-        tree.keys.include?(arg) ||
+        tree.keys?(arg) ||
           tree.values.any? { |sub| uses_join_sub(sub, arg) }
       else
         (tree == arg)

@@ -171,7 +171,7 @@ class Name < AbstractModel
 
     # Next grab the names out of the classification string.
     lines = try(&:parse_classification) || []
-    lines.reverse.each do |(_line_rank, line_name)|
+    lines.reverse_each do |(_line_rank, line_name)|
       parent = Name.best_match(line_name)
       parents << parent if parent
       return [parent] if !all && !parent.deprecated
@@ -234,7 +234,7 @@ class Name < AbstractModel
           "classification LIKE '%#{rank}: _#{text_name}_%'"
     sql += " AND correct_spelling_id IS NULL"
     return Name.where(sql).to_a if all
-    Name.all_ranks.reverse.each do |rank2|
+    Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
       matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
       return matches.to_a if matches.any?
@@ -299,7 +299,7 @@ class Name < AbstractModel
       # Reformat output, writing out lines in correct order.
       if parsed_names != {}
         result = ""
-        Name.all_ranks.reverse.each do |rank|
+        Name.all_ranks.reverse_each do |rank|
           if (name = parsed_names[rank])
             result += "#{rank}: _#{name}_\r\n"
           end

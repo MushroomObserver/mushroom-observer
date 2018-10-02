@@ -124,7 +124,7 @@ for genus in genus_to_family.keys.sort do
   if hash.keys.length > 1
     $stderr.puts("Multiple families for #{genus}: #{hash.inspect}")
   end
-  family = hash.keys.sort_by { |k| -hash[k] }.first
+  family = hash.keys.min_by { |k| -hash[k] }
   list_of_genera = family_to_genus[family] ||= []
   list_of_genera << genus
 end
