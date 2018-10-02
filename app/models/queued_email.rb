@@ -135,7 +135,8 @@ class QueuedEmail < AbstractModel
   # properly defined, and we no longer have to rely on autoloading.
   #
   Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
-    require "queued_email/#{Regexp.last_match(1)}" if file =~ /(\w+)\.rb$/
+    match = /(\w+)\.rb$/.match(file)
+    require "queued_email/#{match[1]}" if match
   end
 
   # ----------------------------
