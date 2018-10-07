@@ -81,18 +81,19 @@ module Query::Modules::LowLevelQueries
   # between the different ways to join to a given table via the "table.field"
   # syntax used in +join_conditions+ table.)
   def uses_join?(join_spec)
-    def uses_join_sub(tree, arg) # :nodoc:
-      case tree
-      when Array
-        tree.any? { |sub| uses_join_sub(sub, arg) }
-      when Hash
-        tree.keys?(arg) ||
-          tree.values.any? { |sub| uses_join_sub(sub, arg) }
-      else
-        (tree == arg)
-      end
-    end
     initialize_query unless initialized?
     uses_join_sub(join, join_spec)
+  end
+
+  def uses_join_sub(tree, arg) # :nodoc:
+    case tree
+    when Array
+      tree.any? { |sub| uses_join_sub(sub, arg) }
+    when Hash
+      tree.key?(arg) ||
+        tree.values.any? { |sub| uses_join_sub(sub, arg) }
+    else
+      (tree == arg)
+    end
   end
 end
