@@ -76,8 +76,7 @@ class ImageS3
       bucket: @bucket,
       key: key
     ).data
-  rescue Aws::S3::Errors::NotFound
-  rescue Aws::S3::Errors::NoSuchKey
+  rescue Aws::S3::Errors::NotFound, Aws::S3::Errors::NoSuchKey
     nil
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
@@ -99,8 +98,6 @@ class ImageS3
   rescue => e
     raise "Unable to delete image #{key} from S3 bucket #{@bucket} at #{@server}: #{e}"
   end
-
-  private
 
   def client
     @s3 ||= Aws::S3::Client.new(
