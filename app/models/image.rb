@@ -672,16 +672,11 @@ class Image < AbstractModel
     FileUtils.chmod(0644, original_image)
     true
   rescue SystemCallError
+    # Use Kernel.system to allow stubbing in tests
     unless Kernel.system("cp", upload_temp_file, original_image)
       raise(:runtime_image_move_failed.t(id: id))
     end
     true
-  # Based on some testing this code appears to be dead.
-  # Specifically, if you raise an error you have already rescued,
-  # you cannot rescue it again in the same block.
-  # rescue
-    # SystemCallError errors.add(:image,
-    # :runtime_image_move_failed.t(id: id)) false
   end
 
   # Get image size from JPEG header and set the corresponding record fields.
