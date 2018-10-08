@@ -258,7 +258,6 @@ class QueuedEmail < AbstractModel
     I18n.locale = current_locale
     result
   rescue => e
-    raise e if Rails.env == "test"
     $stderr.puts("ERROR CREATING EMAIL")
     $stderr.puts(log_msg)
     $stderr.puts(e.to_s)
