@@ -2849,16 +2849,16 @@ class ObserverControllerTest < FunctionalTestCase
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
     File.stub(:rename, false) do
-      post(:create_observation,
-           observation: {
-             place_name: "", # will cause failure
-             when: Time.zone.now
-           },
-           image: { "0" => {
-                      image: file,
-                      copyright_holder: "zuul",
-                      when: Time.zone.now
-                    } })
+      post(
+        :create_observation,
+        observation: {
+          place_name: "", # will cause failure
+          when: Time.zone.now
+        },
+        image: { "0": { image: file,
+                        copyright_holder: "zuul",
+                        when: Time.zone.now } }
+      )
       assert_response(:success) # success = failure, paradoxically
     end
     # Make sure image was created, but that it is unattached, and that it has

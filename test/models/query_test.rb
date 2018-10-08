@@ -2610,7 +2610,7 @@ class QueryTest < UnitTestCase
     assert !query.uses_join_sub([], :location)
     assert query.uses_join_sub([:location], :location)
     assert !query.uses_join_sub({}, :location)
-    assert query.uses_join_sub({test: :location}, :location)
+    assert query.uses_join_sub({ test: :location }, :location)
     assert query.uses_join_sub(:location, :location)
   end
 
