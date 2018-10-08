@@ -198,8 +198,10 @@ class ApiControllerTest < FunctionalTestCase
     setup_image_dirs
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
-    post_and_send_file(:images, file, "image/jpeg",
-                       api_key: api_keys(:rolfs_api_key).key)
+    File.stub(:rename, false) do
+      post_and_send_file(:images, file, "image/jpeg",
+                         api_key: api_keys(:rolfs_api_key).key)
+    end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
     img = Image.last
@@ -219,16 +221,20 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_maximal_image
     setup_image_dirs
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
-    post_and_send_file(:images, file, "image/jpeg",
-                       api_key: api_keys(:rolfs_api_key).key,
-                       vote: "3",
-                       date: "20120626",
-                       notes: " Here are some notes. ",
-                       copyright_holder: "My Friend",
-                       license: licenses(:ccnc30).id.to_s,
-                       original_name: "Coprinus_comatus.jpg",
-                       projects: (proj = rolf.projects_member.first).id,
-                       observations: (obs = rolf.observations.first).id)
+    proj = rolf.projects_member.first
+    obs = rolf.observations.first
+    File.stub(:rename, false) do
+      post_and_send_file(:images, file, "image/jpeg",
+                         api_key: api_keys(:rolfs_api_key).key,
+                         vote: "3",
+                         date: "20120626",
+                         notes: " Here are some notes. ",
+                         copyright_holder: "My Friend",
+                         license: licenses(:ccnc30).id.to_s,
+                         original_name: "Coprinus_comatus.jpg",
+                         projects: proj.id,
+                         observations: obs.id)
+    end
     assert_no_api_errors
     img = Image.last
     assert_users_equal(rolf, img.user)

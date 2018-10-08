@@ -1241,9 +1241,13 @@ class ApiTest < UnitTestCase
       api_key:     @api_key.key,
       upload_file: "#{::Rails.root}/test/images/sticky.jpg"
     }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([Image.last], api.results)
+    File.stub(:rename, true) do
+      File.stub(:chmod, true) do
+        api = API.execute(params)
+        assert_no_errors(api, "Errors while posting image")
+        assert_obj_list_equal([Image.last], api.results)
+      end
+    end
     assert_last_image_correct
   end
 
@@ -1273,9 +1277,13 @@ class ApiTest < UnitTestCase
       upload_file:      "#{::Rails.root}/test/images/sticky.jpg",
       original_name:    @orig
     }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting image")
-    assert_obj_list_equal([Image.last], api.results)
+    File.stub(:rename, true) do
+      File.stub(:chmod, true) do
+        api = API.execute(params)
+        assert_no_errors(api, "Errors while posting image")
+        assert_obj_list_equal([Image.last], api.results)
+      end
+    end
     assert_last_image_correct
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:upload_file))
@@ -1299,13 +1307,15 @@ class ApiTest < UnitTestCase
       api_key:    @api_key.key,
       upload_url: url
     }
-    api = API.execute(params)
-    assert_no_errors(api, "Errors while posting image")
-    img = Image.last
-    assert_obj_list_equal([img], api.results)
-    actual = File.read(img.local_file_name(:full_size))
-    expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
-    assert_equal(expect, actual, "Uploaded image differs from original!")
+    File.stub(:rename, false) do
+      api = API.execute(params)
+      assert_no_errors(api, "Errors while posting image")
+      img = Image.last
+      assert_obj_list_equal([img], api.results)
+      actual = File.read(img.local_file_name(:full_size))
+      expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
+      assert_equal(expect, actual, "Uploaded image differs from original!")
+    end
   end
 
   def test_patching_images
