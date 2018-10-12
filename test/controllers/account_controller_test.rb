@@ -495,7 +495,9 @@ class AccountControllerTest < FunctionalTestCase
       upload: { license_id: licenses(:ccnc25).id },
       date: { copyright_year: "2003" }
     }
-    post_requires_login(:profile, params)
+    File.stub(:rename, false) do
+      post_requires_login(:profile, params)
+    end
     assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
     assert_flash_success
 

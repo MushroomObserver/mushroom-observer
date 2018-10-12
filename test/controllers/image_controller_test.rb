@@ -588,11 +588,13 @@ class ImageControllerTest < FunctionalTestCase
         "id_#{proj.id}" => "1"
       }
     }
-    post_requires_user(
-      :add_image,
-      { controller: :observer, action: :show_observation, id: obs.id },
-      params
-    )
+    File.stub(:rename, false) do
+      post_requires_user(
+        :add_image,
+        { controller: :observer, action: :show_observation, id: obs.id },
+        params
+      )
+    end
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
     assert(updated_at != obs.updated_at)

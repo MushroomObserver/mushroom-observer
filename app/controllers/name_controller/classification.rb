@@ -101,7 +101,7 @@ class NameController
     @name.classification = cleaned
   rescue => e
     flash_error(e.to_s)
-    return false
+    false
   end
 
   def resolve_name!(in_str, chosen_id)

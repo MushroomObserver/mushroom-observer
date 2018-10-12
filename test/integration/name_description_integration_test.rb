@@ -252,8 +252,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       permission_fields_should_be(:na)
     end
 
-    def new_name_description
-      @nd ||= NameDescription.last
+    def name_description
+      @name_description ||= NameDescription.last
     end
 
     def show_name_uri
@@ -262,17 +262,17 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def show_name_description_uri
-      desc = new_name_description
+      desc = name_description
       "/name/show_name_description/#{desc.id}"
     end
 
     def edit_name_description_uri
-      desc = new_name_description
+      desc = name_description
       "/name/edit_name_description/#{desc.id}"
     end
 
     def destroy_name_description_uri
-      desc = new_name_description
+      desc = name_description
       "/name/destroy_name_description/#{desc.id}"
     end
 
@@ -321,7 +321,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_name_description_data
-      desc = new_name_description
+      desc = name_description
       data = name_description_data
       assert_equal(data[:source_type], desc.source_type)
       assert(data[:source_name] == desc.source_name)
@@ -334,7 +334,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_name_description_groups
-      desc = new_name_description
+      desc = name_description
       data = group_expectations
       assert_obj_list_equal(data[:admins], desc.admin_groups)
       assert_obj_list_equal(data[:writers], desc.writer_groups)

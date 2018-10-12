@@ -248,7 +248,7 @@ class Vote < AbstractModel
 
     if value.nil?
       errors.add(:value, :validate_vote_value_missing.t)
-    elsif value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
+    elsif !/^[+-]?\d+(\.\d+)?$/.match?(value_before_type_cast.to_s)
       errors.add(:value, :validate_vote_value_not_integer.t)
     elsif value < MINIMUM_VOTE || value > MAXIMUM_VOTE
       errors.add(:value, :validate_vote_value_out_of_bounds.t)

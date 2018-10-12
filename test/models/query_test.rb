@@ -2604,6 +2604,16 @@ class QueryTest < UnitTestCase
                  north: "90", south: "0", west: "-180", east: "-100")
   end
 
+  def test_uses_join_hash
+    query = Query.lookup(:Sequence, :all,
+                         north: "90", south: "0", west: "-180", east: "-100")
+    assert !query.uses_join_sub([], :location)
+    assert query.uses_join_sub([:location], :location)
+    assert !query.uses_join_sub({}, :location)
+    assert query.uses_join_sub({ test: :location }, :location)
+    assert query.uses_join_sub(:location, :location)
+  end
+
   def test_sequence_in_set
     list_set_ids = [sequences(:fasta_formatted_sequence).id,
                     sequences(:bare_formatted_sequence).id]

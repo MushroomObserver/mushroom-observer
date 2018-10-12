@@ -36,13 +36,15 @@ class API
           range_yyyy(str) ||
           raise(ArgumentError)
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
 
-      def range_yyyymmddhhmmss_x2(s)
-        match = s.match(/^(#{YYYYMMDDHHMMSS1})\s*-\s*(#{YYYYMMDDHHMMSS1})$/) ||
-                s.match(/^(#{YYYYMMDDHHMMSS2})\s*-\s*(#{YYYYMMDDHHMMSS2})$/) ||
-                s.match(/^(#{YYYYMMDDHHMMSS3})\s*-\s*(#{YYYYMMDDHHMMSS3})$/)
+      def date_range_match(str, pattern)
+        str.match(/^(#{pattern})\s*-\s*(#{pattern})$/)
+      end
+
+      def range_yyyymmddhhmmss_x2(str)
+        match = date_range_match(str, YYYYMMDDHHMMSS1) ||
+                date_range_match(str, YYYYMMDDHHMMSS2) ||
+                date_range_match(str, YYYYMMDDHHMMSS3)
         return unless match
         from = strip_time(match[1]) + " UTC"
         to   = strip_time(match[2]) + " UTC"
@@ -52,9 +54,9 @@ class API
       end
 
       def range_yyyymmddhhmm_x2(str)
-        match = str.match(/^(#{YYYYMMDDHHMM1})\s*-\s*(#{YYYYMMDDHHMM1})$/) ||
-                str.match(/^(#{YYYYMMDDHHMM2})\s*-\s*(#{YYYYMMDDHHMM2})$/) ||
-                str.match(/^(#{YYYYMMDDHHMM3})\s*-\s*(#{YYYYMMDDHHMM3})$/)
+        match = date_range_match(str, YYYYMMDDHHMM1) ||
+                date_range_match(str, YYYYMMDDHHMM2) ||
+                date_range_match(str, YYYYMMDDHHMM3)
         return unless match
         from = strip_time(match[1]) + "00 UTC"
         to   = strip_time(match[2]) + "59 UTC"
@@ -64,9 +66,9 @@ class API
       end
 
       def range_yyyymmddhh_x2(str)
-        match = str.match(/^(#{YYYYMMDDHH1})\s*-\s*(#{YYYYMMDDHH1})$/) ||
-                str.match(/^(#{YYYYMMDDHH2})\s*-\s*(#{YYYYMMDDHH2})$/) ||
-                str.match(/^(#{YYYYMMDDHH3})\s*-\s*(#{YYYYMMDDHH3})$/)
+        match = date_range_match(str, YYYYMMDDHH1) ||
+                date_range_match(str, YYYYMMDDHH2) ||
+                date_range_match(str, YYYYMMDDHH3)
         return unless match
         from = strip_time(match[1]) + "0000 UTC"
         to   = strip_time(match[2]) + "5959 UTC"
@@ -76,9 +78,9 @@ class API
       end
 
       def range_yyyymmdd_x2(str)
-        match = str.match(/^(#{YYYYMMDD1})\s*-\s*(#{YYYYMMDD1})$/) ||
-                str.match(/^(#{YYYYMMDD2})\s*-\s*(#{YYYYMMDD2})$/) ||
-                str.match(/^(#{YYYYMMDD3})\s*-\s*(#{YYYYMMDD3})$/)
+        match = date_range_match(str, YYYYMMDD1) ||
+                date_range_match(str, YYYYMMDD2) ||
+                date_range_match(str, YYYYMMDD3)
         return unless match
         from = strip_time(match[1]) + "000000 UTC"
         to   = strip_time(match[2]) + "235959 UTC"
@@ -88,9 +90,9 @@ class API
       end
 
       def range_yyyymm_x2(str)
-        match = str.match(/^(#{YYYYMM1})\s*-\s*(#{YYYYMM1})$/) ||
-                str.match(/^(#{YYYYMM2})\s*-\s*(#{YYYYMM2})$/) ||
-                str.match(/^(#{YYYYMM3})\s*-\s*(#{YYYYMM3})$/)
+        match = date_range_match(str, YYYYMM1) ||
+                date_range_match(str, YYYYMM2) ||
+                date_range_match(str, YYYYMM3)
         return unless match
         from = strip_time(match[1])
         to   = strip_time(match[2])
@@ -101,7 +103,7 @@ class API
       end
 
       def range_yyyy_x2(str)
-        match = str.match(/^(#{YYYY})\s*-\s*(#{YYYY})$/)
+        match = date_range_match(str, YYYY)
         return unless match
         from = strip_time(match[1]) + "0101000000 UTC"
         to   = strip_time(match[2]) + "1231235959 UTC"

@@ -293,7 +293,7 @@ class Name < AbstractModel
           source: :rank,
           accessor: :whiny)
 
-  belongs_to :correct_spelling, # rubocop:disable Rails/InverseOf
+  belongs_to :correct_spelling,
              class_name: "Name",
              foreign_key: "correct_spelling_id"
   belongs_to :description, class_name: "NameDescription",

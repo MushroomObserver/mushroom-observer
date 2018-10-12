@@ -666,20 +666,17 @@ class Image < AbstractModel
   # field and returns false.
   def move_original
     original_image = local_file_name(:original)
-    raise(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
     unless File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end
     FileUtils.chmod(0644, original_image)
-    return true
+    true
   rescue SystemCallError
-    unless system("cp", upload_temp_file, original_image)
+    # Use Kernel.system to allow stubbing in tests
+    unless Kernel.system("cp", upload_temp_file, original_image)
       raise(:runtime_image_move_failed.t(id: id))
     end
-    return true
-  rescue SystemCallError
-    errors.add(:image, :runtime_image_move_failed.t(id: id))
-    return false
+    true
   end
 
   # Get image size from JPEG header and set the corresponding record fields.

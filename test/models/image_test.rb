@@ -139,4 +139,13 @@ class ImageTest < UnitTestCase
     assert_nil(img.transform(:mirror))
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
+
+  def test_move_original_system_fail
+    img = Image.new
+    File.stub(:rename, false) do
+      Kernel.stub(:system, false) do
+        assert_raises(RuntimeError) { img.move_original }
+      end
+    end
+  end
 end

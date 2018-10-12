@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
+abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
   USAGE::
 

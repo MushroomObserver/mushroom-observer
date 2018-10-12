@@ -282,7 +282,7 @@ class Name < AbstractModel
     end
     results
   rescue RankMessedUp
-    return nil
+    nil
   end
 
   def self.parse_below_genus(str, deprecated, rank, pattern)
@@ -310,7 +310,7 @@ class Name < AbstractModel
     end
     results
   rescue RankMessedUp
-    return nil
+    nil
   end
 
   def self.parse_subgenus(str, deprecated = false)

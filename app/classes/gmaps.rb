@@ -178,7 +178,7 @@ module GM
 
     def div(args)
       width = height = nil
-      args.each do |key, val| # rubocop:disable Performance/HashEachMethods
+      args.each do |key, val|
         if key == :width
           width = val
         elsif key == :height

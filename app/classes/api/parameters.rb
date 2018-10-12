@@ -83,8 +83,6 @@ class API
     return [n, s, e, w] if n && s && e && w
     raise NeedAllFourEdges.new
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
-  # rubocop:enable Metrics/PerceivedComplexity
 
   ##############################################################################
 

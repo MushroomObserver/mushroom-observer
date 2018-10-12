@@ -49,7 +49,9 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def submit_observation_form_without_errors
-    submit_form_with_changes(create_observation_form_second_changes)
+    File.stub(:rename, false) do
+      submit_form_with_changes(create_observation_form_second_changes)
+    end
     assert_flash_for_create_observation
     assert_template(CREATE_LOCATION_PAGE)
     assert_new_observation_is_correct(expected_values_after_create)

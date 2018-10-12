@@ -83,9 +83,9 @@ module LanguageTracking
       end
     end
     FileUtils.touch(file)
-    return tags
+    tags
   rescue
-    return nil
+    nil
   end
 
   private

@@ -35,7 +35,7 @@ module Query::Modules::HighLevelQueries
 
   # Number of results the query returns.
   def num_results(args = {})
-    @result_count ||=
+    @num_results ||=
       if @result_ids
         @result_ids.count
       else
@@ -79,7 +79,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
     @result_ids = list.map(&:id)
-    @result_count = list.count
+    @num_results = list.count
     @results = list.inject({}) do |map, obj|
       map[obj.id] ||= obj
       map
@@ -91,7 +91,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
-    @result_count = list.count
+    @num_results = list.count
   end
 
   # Get index of a given record / id in the results.
@@ -108,8 +108,8 @@ module Query::Modules::HighLevelQueries
     if !letters.is_a?(String)
       fail "You must pass a SQL expression to 'need_letters'."
     elsif need_letters != letters
-      @result_ids   = nil
-      @result_count = nil
+      @result_ids = nil
+      @num_results = nil
       @need_letters = letters
     end
   end
@@ -123,7 +123,7 @@ module Query::Modules::HighLevelQueries
     # Get list of letters used in results.
     if need_letters
       @result_ids = nil
-      @result_count = nil
+      @num_results = nil
       result_ids(results_args)
       map = @letters
       paginator.used_letters = map.values.uniq
@@ -131,7 +131,7 @@ module Query::Modules::HighLevelQueries
       # Filter by letter. (paginator keeps letter upper case, as do we)
       if letter = paginator.letter
         @result_ids = @result_ids.select { |id| map[id] == letter }
-        @result_count = @result_ids.count
+        @num_results = @result_ids.count
       end
       paginator.num_total = num_results(results_args)
       @result_ids[paginator.from..paginator.to] || []
@@ -178,7 +178,7 @@ module Query::Modules::HighLevelQueries
   def clear_cache
     @results      = nil
     @result_ids   = nil
-    @result_count = nil
+    @num_results  = nil
     @letters      = nil
   end
 

@@ -323,11 +323,7 @@ class Observation < AbstractModel
   # save.  When it renders form again, it notes the error, populates the input
   # field with the old invalid string for editing, and colors it red.
   def when_str
-    if @when_str
-      @when_str
-    else
-      self.when.strftime("%Y-%m-%d")
-    end
+    @when_str || self.when.strftime("%Y-%m-%d")
   end
 
   def when_str=(val)

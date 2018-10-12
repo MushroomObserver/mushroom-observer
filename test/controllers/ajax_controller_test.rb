@@ -393,7 +393,9 @@ class AjaxControllerTest < FunctionalTestCase
     }
 
     # Act
-    post(:create_image_object, params)
+    File.stub(:rename, false) do
+      post(:create_image_object, params)
+    end
     @json_response = JSON.parse(@response.body)
 
     # Assert

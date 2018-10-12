@@ -19,7 +19,6 @@ class Pivotal
     def request_stories(api_params, stories)
       json = get_request("stories?limit=500&filter=state:unscheduled,"\
                          "started,unstarted&#{story_fields}" + api_params)
-
       JSON.parse(json).each do |obj|
         if Rails.env == "test" || obj["name"] != "test"
           story = Pivotal::Story.new(obj)

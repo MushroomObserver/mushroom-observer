@@ -230,7 +230,6 @@ class API
       !@name && !@author && !@rank && @deprecated.nil? &&
         !@synonymize_with && !@clear_synonyms && !@correct_spelling
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def change_name(name)
       return unless @name || @author || @rank

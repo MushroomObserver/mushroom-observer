@@ -2790,30 +2790,32 @@ class ObserverControllerTest < FunctionalTestCase
 
     # assert(new_image1.updated_at < 1.day.ago)
     # assert(new_image2.updated_at < 1.day.ago)
-    post(:create_observation,
-         observation: {
-           place_name: "Zzyzx, Japan",
-           when: time0,
-           thumb_image_id: 0, # (make new image the thumbnail)
-           notes: { Observation.other_notes_key => "blah" }
-         },
-         image: {
-           "0" => {
-             image: file3,
-             copyright_holder: "holder_3",
-             when: time3,
-             notes: "notes_3"
-           }
-         },
-         good_image: {
-           new_image1.id.to_s => {
+    File.stub(:rename, false) do
+      post(:create_observation,
+           observation: {
+             place_name: "Zzyzx, Japan",
+             when: time0,
+             thumb_image_id: 0, # (make new image the thumbnail)
+             notes: { Observation.other_notes_key => "blah" }
            },
-           new_image2.id.to_s => {
-             notes: "notes_2_new"
-           }
-         },
-         # (attach these two images once observation created)
-         good_images: "#{new_image1.id} #{new_image2.id}")
+           image: {
+             "0" => {
+               image: file3,
+               copyright_holder: "holder_3",
+               when: time3,
+               notes: "notes_3"
+             }
+           },
+           good_image: {
+             new_image1.id.to_s => {
+             },
+             new_image2.id.to_s => {
+               notes: "notes_2_new"
+             }
+           },
+           # (attach these two images once observation created)
+           good_images: "#{new_image1.id} #{new_image2.id}")
+    end
     assert_response(:redirect) # redirected = successfully created
 
     obs = Observation.find_by(where: "Zzyzx, Japan")
@@ -2846,19 +2848,19 @@ class ObserverControllerTest < FunctionalTestCase
     setup_image_dirs
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     file = Rack::Test::UploadedFile.new(file, "image/jpeg")
-
-    post(:create_observation,
-         observation: {
-           place_name: "", # will cause failure
-           when: Time.zone.now
-         },
-         image: { "0" => {
-           image: file,
-           copyright_holder: "zuul",
-           when: Time.zone.now
-         } })
-    assert_response(:success) # success = failure, paradoxically
-
+    File.stub(:rename, false) do
+      post(
+        :create_observation,
+        observation: {
+          place_name: "", # will cause failure
+          when: Time.zone.now
+        },
+        image: { "0": { image: file,
+                        copyright_holder: "zuul",
+                        when: Time.zone.now } }
+      )
+      assert_response(:success) # success = failure, paradoxically
+    end
     # Make sure image was created, but that it is unattached, and that it has
     # been kept in the @good_images array for attachment later.
     img = Image.find_by(copyright_holder: "zuul")

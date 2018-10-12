@@ -241,7 +241,7 @@ class SpeciesListController < ApplicationController
       csv << %w[scientific_name authority citation accepted]
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
-                name.deprecated ? "" : "1"].map { |v| v.presence }
+                name.deprecated ? "" : "1"].map(&:presence)
       end
     end
     str = case charset
@@ -599,17 +599,6 @@ class SpeciesListController < ApplicationController
       redirect_to(action: :show_species_list, id: @species_list.id)
     end
   end
-
-  def bulk_editor_new_val(attr, val)
-    case attr
-    when :is_collection_location, :specimen
-      val == "1"
-    else
-      val
-    end
-  end
-
-  private :bulk_editor_new_val
 
   # ----------------------------
   #  :section: Manage Projects
@@ -1197,5 +1186,14 @@ class SpeciesListController < ApplicationController
 
   def whitelisted_species_list_args
     ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]
+  end
+
+  def bulk_editor_new_val(attr, val)
+    case attr
+    when :is_collection_location, :specimen
+      val == "1"
+    else
+      val
+    end
   end
 end

@@ -4,7 +4,7 @@ app_root = File.expand_path("..", __dir__)
 require "#{app_root}/app/classes/image_s3.rb"
 require "fileutils"
 
-abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
+abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
   USAGE::
 
@@ -31,9 +31,9 @@ abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
 
 EOB
 
-delete  = true if ARGV.any? { |arg| arg == "-d" || arg == "--delete"  }
-force   = true if ARGV.any? { |arg| arg == "-f" || arg == "--force"   }
-verbose = true if ARGV.any? { |arg| arg == "-v" || arg == "--verbose" }
+delete  = true if ARGV.any? { |arg| ["-d", "--delete"].include?(arg) }
+force   = true if ARGV.any? { |arg| ["-f", "--force"].include?(arg) }
+verbose = true if ARGV.any? { |arg| ["-v", "--verbose"].include?(arg) }
 copy = !delete
 flags = ARGV.select { |arg| arg.match(/^-/) }.
         reject { |arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/) }

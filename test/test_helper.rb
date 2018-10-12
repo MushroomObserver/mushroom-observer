@@ -24,6 +24,8 @@ SimpleCov.start
 require "minitest/reporters"
 MiniTest::Reporters.use!
 
+require "minitest/autorun"
+
 # Allow simuluation of user-browser interaction with capybara
 require "capybara/rails"
 

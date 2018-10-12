@@ -28,7 +28,7 @@ module Query
     end
 
     def types
-      @rss_log_types ||= (params[:type] || "all").to_s.split
+      @types ||= (params[:type] || "all").to_s.split
     end
 
     def add_rss_log_type_condition

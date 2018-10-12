@@ -156,7 +156,7 @@ class Textile < String
 
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
-    if name =~ /([A-Z])/ # rubocop:disable Performance/RegexpMatch
+    if name =~ /([A-Z])/
       @@name_lookup[Regexp.last_match(1)] = name.split.first
     end
     if rank == :Species

@@ -166,9 +166,11 @@ class API
                             user.create_personal_herbarium
       @collectors_name  ||= user.legal_name
       @initial_det      ||= @name.text_name
+      # rubocop:disable Naming/MemoizedInstanceVariableName
       @accession_number ||= @collection_number ?
                               "#{@collectors_name} #{@collection_number}" :
                               "MO #{obs.id}"
+      # rubocop:enable Naming/MemoizedInstanceVariableName
     end
 
     def update_notes_fields(obs)
