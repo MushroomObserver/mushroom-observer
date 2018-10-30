@@ -15,6 +15,9 @@ class Geocoder < BlankSlate
   attr_reader :west
   attr_reader :valid
 
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
+  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
+
   def initialize(place_name)
     @place_name = place_name
     @valid = false
@@ -61,7 +64,12 @@ class Geocoder < BlankSlate
 
   def request_url(place_name)
     str = u(place_name.gsub("Co.", "County"))
-    "/maps/api/geocode/xml?address=#{str}&sensor=false"
+    key = gmaps_key
+    "/maps/api/geocode/xml?address=#{str}&key=#{key}sensor=false"
+  end
+
+  def gmaps_key
+    GMAPS_API_KEYS[::Rails.env][MO.domain]
   end
 
   def content_from_place_name(place_name)
@@ -69,7 +77,8 @@ class Geocoder < BlankSlate
       content = test_place_name(place_name)
     else
       content = nil
-      Net::HTTP.start("maps.google.com") do |http|
+      uri = URI("https://maps.google.com")
+      Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
         response = http.get(request_url(place_name))
         content = response.body
       end
