@@ -65,7 +65,7 @@ class Geocoder < BlankSlate
   def request_url(place_name)
     str = u(place_name.gsub("Co.", "County"))
     key = gmaps_key
-    "/maps/api/geocode/xml?address=#{str}&key=#{key}sensor=false"
+    "/maps/api/geocode/xml?address=#{str}&key=#{key}&sensor=false"
   end
 
   def gmaps_key
