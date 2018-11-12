@@ -101,9 +101,10 @@ class ObservationReportTest < UnitTestCase
       "Fungi",
       nil,
       "Mary Newbie",
+      "MO #{obs.id}; Mary Newbie 174",
       "MO #{obs.id}",
-      "314159",          # fieldNumber
-      "Mary Newbie 174", # collectorNUmber
+      "",
+      "1",
       "Burbank",
       nil,
       "California",
@@ -133,8 +134,9 @@ class ObservationReportTest < UnitTestCase
       nil,
       "Mary Newbie",
       "MO #{obs.id}",
-      "",       # fieldNumber
-      "",       # collectorNUmber
+      "MO #{obs.id}",
+      "",
+      "0",
       "Burbank",
       nil,
       "California",

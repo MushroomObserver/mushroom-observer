@@ -34,7 +34,7 @@ module ObservationReport
 
     # rubocop:disable Metrics/AbcSize
     def format_row(row)
-      mo_num  = "MO#{row.obs_id}"
+      mo_num  = "MO #{row.obs_id}"
       col_num = row.val(2)
       rec_num = mo_num
       rec_num += "; #{col_num}" unless col_num.blank?
