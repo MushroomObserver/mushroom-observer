@@ -10,7 +10,8 @@ module ObservationReport
         recordedBy
         recordNumber
         fieldNumber
-        collectorNumber
+        catalogNumber
+        specimenFlag
         locality
         county
         state
@@ -33,13 +34,18 @@ module ObservationReport
 
     # rubocop:disable Metrics/AbcSize
     def format_row(row)
+      mo_num  = "MO#{row.obs_id}"
+      col_num = row.val(2)
+      rec_num = mo_num
+      rec_num += "; #{col_num}" unless col_num.blank?
       [
         row.name_text_name,
         row.name_author,
         row.user_name_or_login,
-        "MO #{row.obs_id}",
-        row.val(2).to_s,        # fieldNumber
-        row.val(3).to_s,        # collectorNumber
+        rec_num,                   # recordNumber
+        mo_num,                    # fieldNumber
+        "",                        # catalogNumber
+        row.obs_specimen ? 1 : 0,
         row.locality,
         row.county,
         row.state,
@@ -96,23 +102,7 @@ module ObservationReport
 
     def extend_data!(rows)
       add_image_ids!(rows, 1)
-      add_mycoflora_ids!(rows, 2)
-      add_collector_ids!(rows, 3)
-    end
-
-    def add_mycoflora_ids!(rows, col)
-      herbarium = Herbarium.where(name: MYCOFLORA_PROJECT_NAME).first
-      return unless herbarium
-      vals = HerbariumRecord.connection.select_rows %(
-        SELECT ids.id, h.accession_number
-        FROM herbarium_records h,
-             herbarium_records_observations ho,
-             (#{query.query}) as ids
-        WHERE ho.observation_id = ids.id AND
-              ho.herbarium_record_id = h.id AND
-              h.herbarium_id = #{herbarium.id}
-      )
-      add_column!(rows, vals, col)
+      add_collector_ids!(rows, 2)
     end
 
     def add_collector_ids!(rows, col)
