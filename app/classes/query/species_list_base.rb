@@ -55,6 +55,11 @@ module Query
         'LENGTH(COALESCE(species_lists.notes,"")) > 0',
         'LENGTH(COALESCE(species_lists.notes,"")) = 0'
       )
+      add_joins
+      super
+    end
+
+    def add_joins
       add_join(:comments) if params[:has_comments]
       if params[:comments_has].present?
         initialize_model_do_search(
@@ -63,7 +68,6 @@ module Query
         )
         add_join(:comments)
       end
-      super
     end
 
     def default_order
