@@ -3890,7 +3890,7 @@ class NameControllerTest < FunctionalTestCase
     assert_not_equal(desc, desc.parent.description)
     assert_equal(current_default, desc.parent.description)
   end
-  
+
   # Owner can publish.
   def test_publish_draft
     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil,

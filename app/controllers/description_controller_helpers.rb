@@ -42,18 +42,19 @@ module DescriptionControllerHelpers
   # readable and writable.
   def make_description_default # :norobots:
     pass_query_params
-    if desc = find_description(params[:id].to_s)
-      if !desc.fully_public
-        flash_error(:runtime_description_make_default_only_public.t)
-      else
-        desc.parent.description_id = desc.id
-        desc.parent.log(:log_changed_default_description, user: @user.login,
-                                                          name: desc.unique_partial_format_name,
-                                                          touch: true)
-        desc.parent.save
-      end
-      redirect_with_query(action: desc.show_action, id: desc.id)
+    desc = find_description(params[:id].to_s)
+    return unless desc
+    redirect_with_query(action: desc.show_action, id: desc.id)
+    unless desc.fully_public
+      flash_error(:runtime_description_make_default_only_public.t)
+      return
     end
+    desc.parent.description_id = desc.id
+    desc.parent.log(:log_changed_default_description,
+                    user: @user.login,
+                    name: desc.unique_partial_format_name,
+                    touch: true)
+    desc.parent.save
   end
 
   # Merge a description with another.  User must be both an admin for the
