@@ -78,7 +78,11 @@ module ObservationReport
     end
 
     def obs_notes
-      @vals[9].blank? ? nil : notes_exported_formatted
+      @vals[9].blank? ? nil : notes_export_formatted
+    end
+
+    def obs_notes_as_hash
+      @vals[9].blank? ? nil : notes_to_hash
     end
 
     def obs_updated_at
@@ -355,7 +359,7 @@ module ObservationReport
 
     # --------------------
 
-    def notes_exported_formatted
+    def notes_export_formatted
       Observation.export_formatted(notes_to_hash).strip
     end
 

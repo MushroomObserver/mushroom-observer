@@ -122,6 +122,10 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
       "NA Mycoflora Project",
+      "",
+      "",
+      "",
+      "",
       "Found in a strange place... & with śtrangè characters™"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
@@ -129,6 +133,16 @@ class ObservationReportTest < UnitTestCase
 
   def test_mycoflora_with_exact_lat_long
     obs = observations(:unknown_with_lat_long)
+    obs.notes = {
+      :"Collector's_Name" => "John Doe",
+      Substrate: "wood chips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Foo: "Bar",
+      Other: "Things"
+    }
+    obs.save!
+
     expect = [
       "Fungi",
       nil,
@@ -153,7 +167,11 @@ class ObservationReportTest < UnitTestCase
       "http://mushroomobserver.org/#{obs.id}",
       "",
       "NA Mycoflora Project",
-      "unknown_with_lat_long"
+      "John Doe",
+      "wood chips",
+      "lawn",
+      "Agaricus",
+      "Foo: Bar\nOther: Things"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
