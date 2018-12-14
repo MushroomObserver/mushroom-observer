@@ -28,6 +28,10 @@ module ObservationReport
         eventID
         imageUrls
         labelProject
+        collectorsName
+        substrate
+        habitat
+        host
         occurrenceRemarks
       ]
     end
@@ -62,8 +66,27 @@ module ObservationReport
         row.obs_url,
         image_urls(row),
         "NA Mycoflora Project",
-        row.obs_notes.to_s.t.html_to_ascii
+        *explode_notes(row)
       ]
+    end
+
+    def explode_notes(row)
+      notes = row.obs_notes_as_hash
+      [
+        extract_notes_field(notes, :"Collector's_Name"),
+        extract_notes_field(notes, :Substrate),
+        extract_notes_field(notes, :Habitat),
+        extract_notes_field(notes, :Host),
+        export_other_notes(notes)
+      ]
+    end
+
+    def extract_notes_field(notes, field)
+      notes.delete(field).to_s.strip.t.html_to_ascii
+    end
+
+    def export_other_notes(notes)
+      Observation.export_formatted(notes).strip.t.html_to_ascii
     end
 
     # 6371000 = radius of earth in meters
