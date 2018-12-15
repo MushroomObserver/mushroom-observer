@@ -112,10 +112,10 @@ module ObservationReport
 
     def image_urls(row)
       row.val(1).to_s.split(", ").sort_by(&:to_i).
-        map { |id| "#{MO.http_domain}/#{image_path(id)}" }.join(" ")
+        map { |id| image_url(id) }.join(" ")
     end
 
-    def image_path(id)
+    def image_url(id)
       Image.url(:full_size, id, transferred: true)
     end
 

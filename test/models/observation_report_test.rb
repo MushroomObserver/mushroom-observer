@@ -119,8 +119,8 @@ class ObservationReportTest < UnitTestCase
       "2006",
       "2006-05-11",
       "http://mushroomobserver.org/#{obs.id}",
-      "http://mushroomobserver.org//remote_images/orig/#{img1.id}.jpg " \
-        "http://mushroomobserver.org//remote_images/orig/#{img2.id}.jpg",
+      "/remote_images/orig/#{img1.id}.jpg " \
+        "/remote_images/orig/#{img2.id}.jpg",
       "NA Mycoflora Project",
       "",
       "",
