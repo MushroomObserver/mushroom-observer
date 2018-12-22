@@ -121,3 +121,5 @@ group :test do
 end
 
 gem "web-console", group: :development
+
+gem "mail", "= 2.7.0"
