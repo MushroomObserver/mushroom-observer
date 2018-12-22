@@ -65,6 +65,11 @@ class TranslationController < ApplicationController
   def get_language_and_authorize_user
     locale = params[:locale] || I18n.locale
     lang = Language.find_by_locale(locale)
+    validate_language_and_user(locale, lang)
+    lang
+  end
+
+  def validate_language_and_user(locale, lang)
     if !lang
       fail(:edit_translations_bad_locale.t(locale: locale))
     elsif !@user
@@ -74,7 +79,6 @@ class TranslationController < ApplicationController
     elsif lang.official && !reviewer?
       fail(:edit_translations_reviewer_required.t)
     end
-    lang
   end
 
   def get_record_maps(lang, tags)

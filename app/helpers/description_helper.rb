@@ -1,15 +1,22 @@
 module DescriptionHelper
+  def is_writer?(desc)
+    desc.is_writer?(@user) || in_admin_mode?
+  end
+
+  def is_admin?(desc)
+    desc.is_admin?(@user) || in_admin_mode?
+  end
+
   # Create tabs for show_description page.
   def show_description_tab_set(desc)
     type = desc.type_tag.to_s.sub(/_description/, "").to_sym
-    writer = desc.is_writer?(@user) || in_admin_mode?
-    admin  = desc.is_admin?(@user) || in_admin_mode?
+    admin = is_admin?(desc)
     tabs = []
     if true
       tabs << link_with_query(:show_object.t(type: type),
                               action: "show_#{type}", id: desc.parent_id)
     end
-    if writer
+    if is_writer?(desc)
       tabs << link_with_query(:show_description_edit.t,
                               action: "edit_#{type}_description", id: desc.id)
     end
@@ -63,12 +70,13 @@ module DescriptionHelper
     type = desc.type_tag
     title = description_title(desc)
     links = []
-    if @user && desc.is_writer?(@user) || in_admin_mode?
+    if is_writer?(desc)
       links << link_with_query(:EDIT.t, action: "edit_#{type}", id: desc.id)
     end
-    if @user && desc.is_admin?(@user) || in_admin_mode?
-      links << link_with_query(:DESTROY.t, { action: "destroy_#{type}",
-                                             id: desc.id }, data: { confirm: :are_you_sure.l })
+    if is_admin?(desc)
+      links << link_with_query(:DESTROY.t,
+                               { action: "destroy_#{type}", id: desc.id },
+                               data: { confirm: :are_you_sure.l })
     end
     content_tag(:p, content_tag(:big, title) + links.safe_join(" | "))
   end
@@ -101,8 +109,8 @@ module DescriptionHelper
     list.map! do |desc|
       any = true
       item = description_link(desc)
-      writer = desc.is_writer?(@user) || in_admin_mode?
-      admin  = desc.is_admin?(@user) || in_admin_mode?
+      writer = is_writer?(desc)
+      admin  = is_admin?(desc)
       if writer || admin
         links = []
         if writer

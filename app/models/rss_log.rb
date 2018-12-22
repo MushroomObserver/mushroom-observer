@@ -306,24 +306,22 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, args = {})
-    args = {
-      user: (User.current ? User.current.login : :UNKNOWN.l),
-      touch: true,
-      time: Time.now,
-      save: true
-    }.merge(args)
-
-    args2 = args.dup
-    args2.delete(:touch)
-    args2.delete(:time)
-    args2.delete(:save)
-    entry = RssLog.encode(tag, args2, args[:time])
-
-    RssLog.record_timestamps = false unless args[:touch]
+    entry = RssLog.encode(tag, relevant_args(args), args[:time] || Time.now)
+    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     self.notes = entry + "\n" + notes.to_s
     # self.updated_at = args[:time] if args[:touch]
-    save_without_our_callbacks if args[:save]
+    save_without_our_callbacks unless args.key?(:save) && !args[:save]
     RssLog.record_timestamps = true
+  end
+
+  def relevant_args(args)
+    result = {
+      user: (User.current ? User.current.login : :UNKNOWN.l)
+    }.update(args)
+    result.delete(:touch)
+    result.delete(:time)
+    result.delete(:save)
+    result
   end
 
   # Add line with timestamp and +title+ to notes, clear references to

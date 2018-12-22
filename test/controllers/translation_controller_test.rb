@@ -132,6 +132,20 @@ class TranslationControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_authorization_zero_user
+    login("zero_user")
+    get(:edit_translations, locale: "en")
+    assert_flash_error
+    assert_response(:redirect)
+  end
+
+  def test_authorization_user_bad_locale
+    login("mary")
+    get(:edit_translations, locale: "bad")
+    assert_flash_error
+    assert_response(:redirect)
+  end
+
   def test_authorization_user_el
     login("mary")
     get(:edit_translations, locale: "el")

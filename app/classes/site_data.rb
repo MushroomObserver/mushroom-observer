@@ -147,7 +147,6 @@ class SiteData
     # Two modes: 1) pass in object, 2) pass in field name
     if obj.is_a?(ActiveRecord::Base)
       field = get_applicable_field(obj)
-      weight = FIELD_WEIGHTS[field]
       user_id ||= begin
                     obj.user_id
                   rescue
@@ -155,23 +154,30 @@ class SiteData
                   end
     else
       field = obj
-      weight = FIELD_WEIGHTS[field]
       user_id ||= User.current_id
     end
-
+    weight = FIELD_WEIGHTS[field]
     if weight && weight > 0 && user_id && user_id > 0
-      if mode == :del
-        weight = -weight
-      elsif mode == :chg
-        weight = get_weight_change(obj, field)
-      end
-      unless weight == 0
-        User.connection.update %(
-          UPDATE users SET contribution =
-            IF(contribution IS NULL, #{weight}, contribution + #{weight})
-          WHERE id = #{user_id}
-        )
-      end
+      update_weight(calc_impact(weight, mode, obj, field), user_id)
+    end
+  end
+
+  def self.calc_impact(weight, mode, obj, field)
+    if mode == :del
+      return -weight
+    elsif mode == :chg
+      return get_weight_change(obj, field)
+    end
+    weight
+  end
+
+  def self.update_weight(impact, user_id)
+    unless impact == 0
+      User.connection.update %(
+        UPDATE users SET contribution =
+          IF(contribution IS NULL, #{impact}, contribution + #{impact})
+        WHERE id = #{user_id}
+      )
     end
   end
 
