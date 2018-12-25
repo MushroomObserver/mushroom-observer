@@ -1,3 +1,18 @@
+AJAX_ACTIONS = [
+  "api_key",
+  "auto_complete",
+  "exif",
+  "export",
+  "external_link",
+  "geocode",
+  "old_translation",
+  "pivotal",
+  "multi_image_template",
+  "create_image_object",
+  "vote",
+]
+
+
 MushroomObserver::Application.routes.draw do
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
@@ -64,7 +79,13 @@ MushroomObserver::Application.routes.draw do
   get ":id" => "observer#show_observation", constraints: { id: /\d+/ }
 
   # Short-hand notation for AJAX methods.
-  get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
+  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
+  AJAX_ACTIONS.each do |action|
+    get("ajax/#{action}/:type/:id",
+        controller: "ajax",
+        action: action,
+        constraints: { id: /\S.*/ })
+  end
 
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
   match(
