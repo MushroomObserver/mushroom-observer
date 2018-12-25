@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", "~> 4.2.0"
+gem "rails", "~> 5.0.7.1"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -75,8 +75,6 @@ gem "simple_enum"
 
 # Use byebug as debugging gem
 gem "byebug", group: [:development, :test]
-# Use debugger
-# gem "debugger", group: [:development, :test]
 
 # Stub and set expectations on HTTP requests in test mode
 # Allow selective disabling of internet
@@ -123,3 +121,5 @@ end
 gem "web-console", group: :development
 
 gem "mail", "= 2.7.0"
+
+gem "rails-controller-testing"
