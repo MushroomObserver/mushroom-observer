@@ -60,7 +60,7 @@ MushroomObserver::Application.configure do
   config.active_record.migration_error = :page_load
 
   # Serve assets in rails.
-  config.serve_static_files = true
+  config.public_file_server.enabled = true
 
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
