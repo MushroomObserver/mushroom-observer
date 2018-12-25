@@ -11,6 +11,7 @@
 
 # Code to allow both local and coveralls coverage.  From:
 # https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+require "rails"
 require "simplecov"
 require "coveralls"
 
