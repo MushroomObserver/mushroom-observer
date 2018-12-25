@@ -197,7 +197,7 @@ class QueuedEmail < AbstractModel
   #   end
   #
   def self.create(sender, receiver)
-    # Let ActiveRecord::Base create the record for us.
+    # Let ApplicationRecord create the record for us.
     super(
       user: sender,
       to_user: receiver,

@@ -1,4 +1,4 @@
-class Triple < ActiveRecord::Base
+class Triple < ApplicationRecord
   def self.delete_predicate_matches(predicate)
     if valid_predicate(predicate)
       Triple.connection.delete %(

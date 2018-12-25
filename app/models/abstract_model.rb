@@ -1,5 +1,5 @@
 #
-#  = Extensions to ActiveRecord::Base
+#  = Extensions to ApplicationRecord
 #
 #  == Methods
 #
@@ -60,7 +60,7 @@
 #
 ############################################################################
 
-class AbstractModel < ActiveRecord::Base
+class AbstractModel < ApplicationRecord
   self.abstract_class = true
 
   def self.acts_like_model?

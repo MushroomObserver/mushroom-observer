@@ -1,4 +1,4 @@
-class QueryRecord < ActiveRecord::Base
+class QueryRecord < ApplicationRecord
   attr_accessor :query
 
   def query

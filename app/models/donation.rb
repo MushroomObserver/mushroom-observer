@@ -1,4 +1,4 @@
-class Donation < ActiveRecord::Base
+class Donation < ApplicationRecord
   belongs_to :user
 
   def self.get_donor_list
