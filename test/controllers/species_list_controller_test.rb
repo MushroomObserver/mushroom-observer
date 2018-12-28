@@ -1023,8 +1023,10 @@ class SpeciesListControllerTest < FunctionalTestCase
     # gets a TempFile or a StringIO.
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
-    list_data = "Agaricus bisporus\r\nBoletus rubripes\r\nAmanita phalloides"
-    file = Rack::Test::UploadedString.new(list_data, "text/plain")
+    filename = "#{::Rails.root}/test/species_lists/small_list.txt"
+    file = File.new(filename)
+    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    file = Rack::Test::UploadedFile.new(filename, "text/plain")
     params = {
       "id" => spl.id,
       "species_list" => {
