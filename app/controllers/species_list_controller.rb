@@ -906,7 +906,7 @@ class SpeciesListController < ApplicationController
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(spl, sorter)
     # Put together a list of arguments to use when creating new observations.
-    member_args = params[:member].to_hash.symbolize_keys || {}
+    member_args = params[:member] || {}
     sp_args = {
       created_at: spl.updated_at,
       updated_at: spl.updated_at,
@@ -915,7 +915,7 @@ class SpeciesListController < ApplicationController
       location: spl.location,
       where:    spl.where,
       vote:     member_args[:vote],
-      notes:    member_args[:notes].symbolize_keys,
+      notes:    (member_args[:notes] || {}).symbolize_keys,
       lat:      member_args[:lat].to_s,
       long:     member_args[:long].to_s,
       alt:      member_args[:alt].to_s,

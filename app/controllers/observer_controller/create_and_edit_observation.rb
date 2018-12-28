@@ -118,7 +118,7 @@ class ObserverController
   # Also avoids whitelisting issues
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
-    symbolized = params[:observation][:notes].to_hash.symbolize_keys
+    symbolized = params[:observation][:notes].to_h.symbolize_keys
     symbolized.delete_if { |_key, value| value.blank? }
   end
 

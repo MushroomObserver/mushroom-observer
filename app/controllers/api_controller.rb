@@ -99,7 +99,7 @@ class ApiController < ApplicationController
 
   # Massage params hash to proper args hash for api
   def params_to_api_args(type)
-    args = params.to_hash.symbolize_keys.except(:controller)
+    args = params.to_h.symbolize_keys.except(:controller)
     args[:method] = request.method
     args[:action] = type
     args.delete(:format)
