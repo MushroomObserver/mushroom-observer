@@ -107,7 +107,7 @@ module ControllerExtensions
   #   get_with_dump(:action, params)
   #
   def get_with_dump(page, params = {})
-    get(page, params)
+    get(page, params: params)
     html_dump(page, @response.body, params)
   end
 
@@ -120,7 +120,7 @@ module ControllerExtensions
   #   post_with_dump(:action, params)
   #
   def post_with_dump(page, params = {})
-    post(page, params)
+    post(page, params: params)
     html_dump(page, @response.body, params)
   end
 
@@ -431,14 +431,14 @@ module ControllerExtensions
     # Make sure it fails if not logged in at all.
     if result = args[:require_login]
       result = :login if result == true
-      send(method, action, params)
+      send(method, action, params: params)
       assert_response(result, "No user: ")
     end
 
     # Login alternate user, and make sure that also fails.
     if result = args[:require_user]
       login(alt_user, alt_password)
-      send(method, action, params)
+      send(method, action, params: params)
       assert_response(result, "Wrong user (#{alt_user}): ")
     end
 

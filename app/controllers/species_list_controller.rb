@@ -915,7 +915,7 @@ class SpeciesListController < ApplicationController
       location: spl.location,
       where:    spl.where,
       vote:     member_args[:vote],
-      notes:    (member_args[:notes] || {}).symbolize_keys,
+      notes:    (member_args[:notes] || {}), # .symbolize_keys,: Deprecated
       lat:      member_args[:lat].to_s,
       long:     member_args[:long].to_s,
       alt:      member_args[:alt].to_s,

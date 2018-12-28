@@ -21,11 +21,13 @@ class FunctionalTestCase < ActionController::TestCase
 
   def get(*args, &block)
     super(*args, &block)
+    # debugger
     check_for_unsafe_html!
   end
 
   def post(*args, &block)
     super(*args, &block)
+    # debugger
     check_for_unsafe_html!
   end
 

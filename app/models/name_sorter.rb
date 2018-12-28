@@ -148,7 +148,12 @@ class NameSorter
   end
 
   def add_chosen_names(new_names)
-    @chosen_names.merge!(new_names) if new_names
+    if new_names
+      for key in new_names.keys
+        @chosen_names[key] = new_names[key]
+      end
+    end
+    # @chosen_names.merge!(new_names) if new_names
   end
 
   # append the input to the list of approved deprecated names
