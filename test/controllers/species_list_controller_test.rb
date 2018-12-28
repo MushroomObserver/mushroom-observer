@@ -75,15 +75,15 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def obs_params(obs, vote)
     {
-      when_str:   obs.when_str,
+      when_str: obs.when_str,
       place_name: obs.place_name,
-      notes:      obs.notes,
-      lat:        obs.lat,
-      long:       obs.long,
-      alt:        obs.alt,
+      notes: obs.notes,
+      lat: obs.lat,
+      long: obs.long,
+      alt: obs.alt,
       is_collection_location: obs.is_collection_location ? "1" : "0",
-      specimen:   obs.specimen ? "1" : "0",
-      value:      vote
+      specimen: obs.specimen ? "1" : "0",
+      value: vote
     }
   end
 
@@ -306,7 +306,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_page_has_correct_notes_areas(
       klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "" }
-      )
+    )
 
     # Prove that member_notes textareas are those for template plus Other
     # for user with notes template
@@ -317,7 +317,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       klass: SpeciesList,
       expect_areas: { Cap: "", Nearby_trees: "", odor: "",
                       Observation.other_notes_key => "" }
-      )
+    )
   end
 
   def test_unsuccessful_create_location_description
@@ -689,11 +689,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       list: { members: names(:coprinus_comatus).text_name },
       member: {
-        vote:  Vote.minimum_vote,
+        vote: Vote.minimum_vote,
         notes: { Observation.other_notes_key => "member notes" },
-        lat:   "12 34 56 N",
-        long:  "78 9 12 W",
-        alt:   "345 ft",
+        lat: "12 34 56 N",
+        long: "78 9 12 W",
+        alt: "345 ft",
         is_collection_location: "1",
         specimen: "1"
       },
@@ -1074,23 +1074,23 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     User.current = rolf
     tapinella = Name.create(
-      author:       "(Batsch) Šutara",
-      text_name:    "Tapinella atrotomentosa",
-      search_name:  "Tapinella atrotomentosa (Batsch) Šutara",
-      sort_name:    "Tapinella atrotomentosa (Batsch) Šutara",
+      author: "(Batsch) Šutara",
+      text_name: "Tapinella atrotomentosa",
+      search_name: "Tapinella atrotomentosa (Batsch) Šutara",
+      sort_name: "Tapinella atrotomentosa (Batsch) Šutara",
       display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
-      deprecated:   false,
-      rank:         :Species
+      deprecated: false,
+      rank: :Species
     )
 
     list = species_lists(:first_species_list)
     args = {
       place_name: "limbo",
-      when:       now,
+      when: now,
       created_at: now,
       updated_at: now,
-      user:       rolf,
-      specimen:   false
+      user: rolf,
+      specimen: false
     }
     list.construct_observation(tapinella, args)
     list.construct_observation(names(:fungi), args)
@@ -1153,7 +1153,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_name_resolution
     params = {
       species_list: {
-        when:  Time.zone.now,
+        when: Time.zone.now,
         place_name: "Somewhere, California, USA",
         title: "title",
         notes: "notes"
@@ -1329,15 +1329,15 @@ class SpeciesListControllerTest < FunctionalTestCase
       id: spl.id,
       observation: {
         obs1.id.to_s => obs_params1.merge(
-          when_str:   now.strftime("%Y-%m-%d"),
+          when_str: now.strftime("%Y-%m-%d"),
           place_name: "new location",
           other_notes: "new notes",
-          value:      Vote.minimum_vote
+          value: Vote.minimum_vote
         ),
         obs2.id.to_s => obs_params2.merge(
-          lat:      "12 34 56 N",
-          long:     "78 9 12 W",
-          alt:      "345 ft",
+          lat: "12 34 56 N",
+          long: "78 9 12 W",
+          alt: "345 ft",
           is_collection_location: "1",
           specimen: "1"
         )
@@ -1476,7 +1476,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     get(:create_species_list)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:create_species_list,
-         params: { project: { "id_#{@proj1.id}" => "1" }})
+         params: { project: { "id_#{@proj1.id}" => "1" } })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
@@ -1485,7 +1485,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     get(:create_species_list)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     post(:create_species_list,
-         params: { project: { "id_#{@proj1.id}" => "0" }})
+         params: { project: { "id_#{@proj1.id}" => "0" } })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
@@ -1814,7 +1814,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     get(:edit_species_list, params: { id: spl.id })
     assert_edit_species_list
     assert_page_has_correct_notes_areas(
-      klass:        SpeciesList,
+      klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "test notes" }
     )
     assert_input_value(:member_lat,   "12.3456")
@@ -1836,7 +1836,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     get(:edit_species_list, params: { id: spl.id })
     assert_edit_species_list
     assert_page_has_correct_notes_areas(
-      klass:        SpeciesList,
+      klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "" }
     )
     assert_input_value(:member_lat, "")

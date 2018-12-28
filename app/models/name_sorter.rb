@@ -161,6 +161,7 @@ class NameSorter
   #      or a string of name ids, each on its own line, e.g. "16\r\n14"
   def add_approved_deprecated_names(new_names)
     return unless new_names
+
     if new_names.class == String
       new_names.split("\n").each { |n| @approved_deprecated_names += n.split }
     elsif new_names.class == Array

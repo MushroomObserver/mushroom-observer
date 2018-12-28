@@ -18,8 +18,8 @@ MushroomObserver::Application.configure do
   config.queue_email = false
   config.action_mailer.smtp_settings = {
     address: "localhost",
-    port:    25,
-    domain:  "localhost"
+    port: 25,
+    domain: "localhost"
   }
 
   config.image_precedence = {

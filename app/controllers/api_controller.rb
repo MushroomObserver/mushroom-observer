@@ -112,10 +112,10 @@ class ApiController < ApplicationController
 
   def upload_api
     API::Upload.new(
-      data:         upload_data,
-      length:       upload_length,
+      data: upload_data,
+      length: upload_length,
       content_type: upload_type,
-      checksum:     request.headers["CONTENT_MD5"].to_s
+      checksum: request.headers["CONTENT_MD5"].to_s
     )
   end
 

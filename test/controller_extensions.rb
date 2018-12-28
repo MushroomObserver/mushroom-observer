@@ -358,6 +358,7 @@ module ControllerExtensions
       end
     end
     return pass if found_it
+
     if found.keys
       flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
             "but only found these: <#{found.keys.sort.join(">, <")}>."))

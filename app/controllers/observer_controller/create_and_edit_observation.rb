@@ -63,6 +63,7 @@ class ObserverController
     last_observation = Observation.where(user_id: @user.id).
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
+
     @observation.when     = last_observation.when
     @observation.where    = last_observation.where
     @observation.location = last_observation.location
@@ -118,6 +119,7 @@ class ObserverController
   # Also avoids whitelisting issues
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
+
     symbolized = params[:observation][:notes].to_h.symbolize_keys
     symbolized.delete_if { |_key, value| value.blank? }
   end
@@ -164,8 +166,10 @@ class ObserverController
 
   def save_collection_number(obs, params)
     return unless obs.specimen
+
     name, number = normalize_collection_number_params(params)
     return unless number
+
     col_num = CollectionNumber.where(name: name, number: number).first
     if col_num
       flash_warning(:edit_collection_number_already_used.t) if
@@ -188,6 +192,7 @@ class ObserverController
     herbarium, initial_det, accession_number =
       normalize_herbarium_record_params(obs, params)
     return if not_creating_record?(obs, herbarium, accession_number)
+
     herbarium_record = lookup_herbarium_record(herbarium, accession_number)
     if !herbarium_record
       herbarium_record = create_herbarium_record(herbarium, initial_det,
@@ -210,6 +215,7 @@ class ObserverController
     return true unless obs.specimen
     # This happens if there is a problem looking up or creating the herbarium.
     return true if !herbarium || accession_number.blank?
+
     # If user checks specimen box and nothing else, do not create record.
     obs.collection_numbers.empty? &&
       herbarium == @user.preferred_herbarium &&
@@ -237,10 +243,12 @@ class ObserverController
 
   def lookup_herbarium(name)
     return if name.blank?
+
     name2 = name.sub(/^[^-]* - /, '')
     herbarium = Herbarium.where(name: [name, name2]).first ||
                 Herbarium.where(code: name).first
     return herbarium unless herbarium.nil?
+
     if name != @user.personal_herbarium_name ||
        @user.personal_herbarium
       flash_warning(:create_herbarium_separately.t)
@@ -251,15 +259,15 @@ class ObserverController
 
   def lookup_herbarium_record(herbarium, accession_number)
     HerbariumRecord.where(
-      herbarium:        herbarium,
+      herbarium: herbarium,
       accession_number: accession_number
     ).first
   end
 
   def create_herbarium_record(herbarium, initial_det, accession_number)
     HerbariumRecord.create(
-      herbarium:        herbarium,
-      initial_det:      initial_det,
+      herbarium: herbarium,
+      initial_det: initial_det,
       accession_number: accession_number
     )
   end
@@ -307,6 +315,7 @@ class ObserverController
     includes = [:name, :images, :location]
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
+
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(@observation.when)
 
@@ -388,9 +397,11 @@ class ObserverController
   def warn_if_unchecking_specimen_with_records_present!
     return if @observation.specimen
     return unless @observation.specimen_was
+
     return if @observation.collection_numbers.length == 0 &&
               @observation.herbarium_records.length == 0 &&
               @observation.sequences.length == 0
+
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
 
@@ -401,6 +412,7 @@ class ObserverController
   def destroy_observation # :norobots:
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
+
     obs_id = @observation.id
     next_state = nil
     # decide where to redirect after deleting observation
@@ -560,10 +572,12 @@ class ObserverController
 
   def update_projects(obs, checks)
     return unless checks
+
     User.current.projects_member.each do |project|
       before = obs.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next unless before != after
+
       if after
         project.add_observation(obs)
         flash_notice(:attached_to_project.t(object: :observation,
@@ -578,10 +592,12 @@ class ObserverController
 
   def update_species_lists(obs, checks)
     return unless checks
+
     User.current.all_editable_species_lists.each do |list|
       before = obs.species_lists.include?(list)
       after = checks["id_#{list.id}"] == "1"
       next unless before != after
+
       if after
         list.add_observation(obs)
         flash_notice(:added_to_list.t(list: list.title))
@@ -595,6 +611,7 @@ class ObserverController
   # Save observation now that everything is created successfully.
   def save_observation(observation)
     return true if observation.save
+
     flash_error(:runtime_no_save_observation.t)
     flash_object_errors(observation)
     false
@@ -668,14 +685,17 @@ class ObserverController
     # Now check for edits.
     images.each do |image|
       next unless check_permission(image)
+
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
+
       image.attributes = args.permit(whitelisted_image_args)
       next unless image.when_changed? ||
                   image.notes_changed? ||
                   image.copyright_holder_changed? ||
                   image.license_id_changed? ||
                   image.original_name_changed?
+
       image.updated_at = Time.now
       if image.save
         flash_notice(:runtime_image_updated_notes.t(id: image.id))
@@ -691,6 +711,7 @@ class ObserverController
   # any images that were downloaded earlier
   def attach_good_images(observation, images)
     return unless images
+
     images.each do |image|
       unless observation.image_ids.include?(image.id)
         observation.add_image(image)
@@ -751,6 +772,7 @@ class ObserverController
 
   def whitelisted_observation_params
     return unless params[:observation]
+
     params[:observation].permit(whitelisted_observation_args)
   end
 end

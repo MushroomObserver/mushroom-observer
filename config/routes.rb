@@ -1,17 +1,16 @@
-AJAX_ACTIONS = [
-  "api_key",
-  "auto_complete",
-  "exif",
-  "export",
-  "external_link",
-  "geocode",
-  "old_translation",
-  "pivotal",
-  "multi_image_template",
-  "create_image_object",
-  "vote",
-]
-
+AJAX_ACTIONS = %w[
+  api_key
+  auto_complete
+  exif
+  export
+  external_link
+  geocode
+  old_translation
+  pivotal
+  multi_image_template
+  create_image_object
+  vote
+].freeze
 
 MushroomObserver::Application.routes.draw do
   # The priority is based upon order of creation: first created -> highest priority.

@@ -234,6 +234,7 @@ class QueuedEmail < AbstractModel
   # receiver, then passes it off to the subclass (via deliver_email).
   def send_email
     return true unless RunLevel.is_normal?
+
     log_msg = "SEND #{flavor} " \
       "from=#{begin
                 user.login

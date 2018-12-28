@@ -101,6 +101,7 @@ class AbstractModel < ApplicationRecord
   # Returns +nil+ if +version+ not found.
   def revert_clone(version)
     return self if self.version == version
+
     result = self.class.find(id)
     result = nil unless result.revert_to(version)
     result

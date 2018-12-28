@@ -145,6 +145,7 @@ module ActiveSupport
       ["development", "test", "email-debug", "process_image"].each do |file|
         file = "#{Rails.root}/log/#{file}.log"
         next unless File.exists?(file)
+
         File.truncate(file, 0)
       end
       @@cleared_logs = true

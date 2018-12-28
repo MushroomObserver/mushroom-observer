@@ -86,6 +86,7 @@ class SpeciesListController < ApplicationController
   def species_lists_by_user # :nologin: :norobots:
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
+
     query = create_query(:SpeciesList, :by_user, user: user)
     show_selected_species_lists(query)
   end
@@ -94,6 +95,7 @@ class SpeciesListController < ApplicationController
   def species_lists_for_project
     project = find_or_goto_index(Project, params[:id].to_s)
     return unless project
+
     query = create_query(:SpeciesList, :for_project, project: project)
     show_selected_species_lists(query, always_index: 1)
   end
@@ -162,6 +164,7 @@ class SpeciesListController < ApplicationController
     pass_query_params
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     @canonical_url =
       "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
     @query = create_query(:Observation, :in_species_list,
@@ -199,6 +202,7 @@ class SpeciesListController < ApplicationController
   def make_report # :nologin: :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     names = @species_list.names
     case params[:type]
     when "txt"
@@ -219,6 +223,7 @@ class SpeciesListController < ApplicationController
     unless ["ASCII", "ISO-8859-1", "UTF-8"].include?(charset)
       raise "Unsupported text report charset: #{charset}"
     end
+
     str = names.map(&:real_search_name).join("\r\n")
     str = case charset
           when "ASCII" then str.to_ascii
@@ -237,6 +242,7 @@ class SpeciesListController < ApplicationController
     unless ["ASCII", "ISO-8859-1"].include?(charset)
       raise "Unsupported CSV report charset: #{charset}"
     end
+
     str = CSV.generate do |csv|
       csv << %w[scientific_name authority citation accepted]
       names.each do |name|
@@ -291,6 +297,7 @@ class SpeciesListController < ApplicationController
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }
     return if request.method != "POST"
+
     # (make this an instance var to give unit test access)
     @names = @name_strings.map do |str|
       str.sub!(/\*$/, "")
@@ -342,6 +349,7 @@ class SpeciesListController < ApplicationController
   def edit_species_list # :prefetch: :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     if !check_permission!(@species_list)
       redirect_to(action: "show_species_list", id: @species_list)
     elsif request.method != "POST"
@@ -358,6 +366,7 @@ class SpeciesListController < ApplicationController
   def upload_species_list # :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     if !check_permission!(@species_list)
       redirect_to(action: "show_species_list", id: @species_list)
     elsif request.method != "POST"
@@ -379,6 +388,7 @@ class SpeciesListController < ApplicationController
   def destroy_species_list # :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     if check_permission!(@species_list)
       @species_list.destroy
       id = params[:id].to_s
@@ -400,8 +410,10 @@ class SpeciesListController < ApplicationController
     id = params[:species_list].to_s
     spl = find_list_or_reload_form(id)
     return unless spl
+
     query = find_obs_query_or_redirect(spl)
     return unless query
+
     do_add_remove_observations(spl, query)
     redirect_to(action: "show_species_list", id: spl.id)
   end
@@ -409,6 +421,7 @@ class SpeciesListController < ApplicationController
   def find_obs_query_or_redirect(spl = nil)
     query = find_query(:Observation)
     return query if query
+
     flash_error(:species_list_add_remove_no_query.t)
     if spl
       redirect_to(action: "show_species_list", id: spl.id)
@@ -421,6 +434,7 @@ class SpeciesListController < ApplicationController
   def find_list_or_reload_form(id)
     list = lookup_species_list_by_id_or_name(id)
     return list if list
+
     flash_error(:species_list_add_remove_bad_name.t(name: id.inspect))
     redirect_to(add_query_param(action: :add_remove_observations,
                                 species_list: id))
@@ -437,6 +451,7 @@ class SpeciesListController < ApplicationController
 
   def do_add_remove_observations(spl, query)
     return unless check_permission!(spl)
+
     if params[:commit] == :ADD.l
       do_add_observations(spl, query)
     elsif params[:commit] == :REMOVE.l
@@ -449,6 +464,7 @@ class SpeciesListController < ApplicationController
   def do_add_observations(species_list, query)
     ids = query.result_ids - species_list.observation_ids
     return if ids.empty?
+
     # This is apparently extremely inefficient.  Danny says it times out for
     # large species_lists, such as "Neotropical Fungi".
     # species_list.observation_ids += ids
@@ -464,6 +480,7 @@ class SpeciesListController < ApplicationController
   def do_remove_observations(species_list, query)
     ids = query.result_ids & species_list.observation_ids
     return if ids.empty?
+
     species_list.observation_ids -= ids
     flash_notice(:species_list_add_remove_remove_success.t(num: ids.length))
   end
@@ -478,8 +495,10 @@ class SpeciesListController < ApplicationController
   def remove_observation_from_species_list # :norobots:
     species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless species_list
+
     observation = find_or_goto_index(Observation, params[:observation])
     return unless observation
+
     if check_permission!(species_list)
       species_list.remove_observation(observation)
       flash_notice(:runtime_species_list_remove_observation_success.
@@ -494,8 +513,10 @@ class SpeciesListController < ApplicationController
   def add_observation_to_species_list # :norobots:
     species_list = find_or_goto_index(SpeciesList, params[:species_list])
     return unless species_list
+
     observation = find_or_goto_index(Observation, params[:observation])
     return unless observation
+
     if check_permission!(species_list)
       species_list.add_observation(observation)
       flash_notice(:runtime_species_list_add_observation_success.
@@ -512,6 +533,7 @@ class SpeciesListController < ApplicationController
   def bulk_editor
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
+
     @query = create_query(:Observation, :in_species_list,
                           by: :id,
                           species_list: @species_list,
@@ -569,6 +591,7 @@ class SpeciesListController < ApplicationController
         [:when_str, :place_name, :other_notes, :lat, :long, :alt,
          :is_collection_location, :specimen].each do |method|
           next if args[method].nil?
+
           old_val = obs.send(method)
           old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
           new_val = bulk_editor_new_val(method, args[method])
@@ -645,8 +668,8 @@ class SpeciesListController < ApplicationController
   def manage_object_states
     {
       list: params[:objects_list].present?,
-      obs:  params[:objects_obs].present?,
-      img:  params[:objects_img].present?
+      obs: params[:objects_obs].present?,
+      img: params[:objects_img].present?
     }
   end
 
@@ -910,15 +933,15 @@ class SpeciesListController < ApplicationController
     sp_args = {
       created_at: spl.updated_at,
       updated_at: spl.updated_at,
-      user:     @user,
+      user: @user,
       projects: spl.projects,
       location: spl.location,
-      where:    spl.where,
-      vote:     member_args[:vote],
-      notes:    (member_args[:notes] || {}), # .symbolize_keys,: Deprecated
-      lat:      member_args[:lat].to_s,
-      long:     member_args[:long].to_s,
-      alt:      member_args[:alt].to_s,
+      where: spl.where,
+      vote: member_args[:vote],
+      notes: (member_args[:notes] || {}), # .symbolize_keys,: Deprecated
+      lat: member_args[:lat].to_s,
+      long: member_args[:long].to_s,
+      alt: member_args[:alt].to_s,
       is_collection_location: (member_args[:is_collection_location] == "1"),
       specimen: (member_args[:specimen] == "1")
     }
@@ -932,6 +955,7 @@ class SpeciesListController < ApplicationController
         observation.namings.each do |naming|
           # (compensate for gsub in _form_species_lists)
           next unless (alt_name_id = chosen_names[naming.name_id.to_s])
+
           alt_name = Name.find(alt_name_id)
           naming.name = alt_name
           naming.save
@@ -951,8 +975,10 @@ class SpeciesListController < ApplicationController
     # already in there; it creates new observations for each and stuffs it in.
     sp_args[:when] = spl.when
     return unless params[:checklist_data]
+
     params[:checklist_data].each do |key, value|
       next unless value == "1"
+
       name = find_chosen_name(key.to_i, params[:chosen_approved_names])
       spl.construct_observation(name, sp_args)
     end
@@ -980,32 +1006,32 @@ class SpeciesListController < ApplicationController
       when Name
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
-          limit:  1000
+          limit: 1000
         )
       when Observation
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
-          join:   :names,
-          limit:  1000
+          join: :names,
+          limit: 1000
         )
       when Image
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
-          join:   { images_observations: { observations: :names } },
-          limit:  1000
+          join: { images_observations: { observations: :names } },
+          limit: 1000
         )
       when Location
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
-          join:   { observations: :names },
-          limit:  1000
+          join: { observations: :names },
+          limit: 1000
         )
       when RssLog
         results = query.select_rows(
           select: "DISTINCT names.display_name, names.id",
-          join:   { observations: :names },
-          where:  "rss_logs.observation_id > 0",
-          limit:  1000
+          join: { observations: :names },
+          where: "rss_logs.observation_id > 0",
+          limit: 1000
         )
       else
         results = []
@@ -1068,6 +1094,7 @@ class SpeciesListController < ApplicationController
     init_member_vars_for_create
     spl_obss = spl.observations
     return unless (obs = spl_obss.last)
+
     # Not sure how to check vote efficiently...
     @member_vote = begin
                      obs.namings.first.users_vote(@user).value
