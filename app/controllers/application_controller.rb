@@ -164,7 +164,8 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(text: "Robots are not allowed on this page.", status: 403,
+    render(plain: "Robots are not allowed on this page.",
+           status: 403,
            layout: false)
     false
   end
