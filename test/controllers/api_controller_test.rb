@@ -126,6 +126,7 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_minimal_observation
+    debugger
     post(:observations,
          api_key: api_keys(:rolfs_api_key).key,
          location: "Unknown")

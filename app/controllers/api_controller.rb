@@ -88,6 +88,7 @@ class ApiController < ApplicationController
     args = params_to_api_args(type)
 
     if request.method == "POST"
+      debugger
       args[:upload] = upload_api if upload_present?
       # Special exception to let caller who creates new user to see that user's
       # new API keys.  Otherwise there is no way to get that info via the API.
@@ -120,20 +121,15 @@ class ApiController < ApplicationController
   end
 
   def upload_length
-    testing? ? request.headers["CONTENT_LENGTH"].to_i : request.content_length
+    request.content_length
   end
 
   def upload_type
-    testing? ? request.headers["CONTENT_TYPE"].to_s : request.media_type
+    request.media_type
   end
 
   def upload_data
-    testing? ? request.headers["RAW_POST_DATA"] : request.body
-  end
-
-  # convenience method to shorten lines (also helps to trick Coveralls)
-  def testing?
-    Rails.env == "test"
+    request.body
   end
 
   def render_api_results(args)
