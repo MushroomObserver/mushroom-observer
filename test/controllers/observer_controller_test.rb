@@ -3703,8 +3703,7 @@ class ObserverControllerTest < FunctionalTestCase
     user = users(:rolf)
     expect = Name.joins(observations: :user).
              where("observations.user_id = #{user.id}
-                         AND names.rank = #{Name.ranks[:Species]}").
-             uniq
+                    AND names.rank = #{Name.ranks[:Species]}").distinct
 
     get(:checklist, params: { id: user.id } )
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
@@ -3718,9 +3717,8 @@ class ObserverControllerTest < FunctionalTestCase
     list = species_lists(:one_genus_three_species_list)
     expect = Name.joins(observations: :observations_species_lists).
              where("observations_species_lists.species_list_id
-                               = #{list.id}
-                               AND names.rank = #{Name.ranks[:Species]}").
-             uniq
+                        = #{list.id}
+                    AND names.rank = #{Name.ranks[:Species]}").distinct
 
     get(:checklist, params: { species_list_id: list.id } )
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
@@ -3734,8 +3732,7 @@ class ObserverControllerTest < FunctionalTestCase
     project = projects(:one_genus_two_species_project)
     expect = Name.joins(observations: :observations_projects).
              where("observations_projects.project_id = #{project.id}
-                               AND names.rank = #{Name.ranks[:Species]}").
-             uniq
+                    AND names.rank = #{Name.ranks[:Species]}").distinct
 
     get(:checklist, params: { project_id: project.id } )
     assert_match(/Checklist for #{project.title}/, css_select("title").text,
@@ -3747,8 +3744,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Prove that Site checklist goes to correct page with correct content
   def test_checklist_for_site
     expect = Name.joins(:observations).
-             where(rank: Name.ranks[:Species]).
-             uniq
+             where(rank: Name.ranks[:Species]).distinct
 
     get(:checklist)
     assert_match(/Checklist for #{:app_title.l}/, css_select("title").text,
