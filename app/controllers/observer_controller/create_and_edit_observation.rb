@@ -367,19 +367,21 @@ class ObserverController
         end
       end
 
-      # Update project and species_list attachments.
-      update_projects(@observation, params[:project])
-      update_species_lists(@observation, params[:list])
-
       # Reload form if anything failed.
       if any_errors
         @images         = @bad_images
         @new_image.when = @observation.when
         init_project_vars_for_reload(@observation)
         init_list_vars_for_reload(@observation)
+        return
+      end
 
-        # Redirect to show_observation or create_location on success.
-      elsif @observation.location.nil?
+      # Update project and species_list attachments.
+      update_projects(@observation, params[:project])
+      update_species_lists(@observation, params[:list])
+
+      # Redirect to show_observation or create_location on success.
+      if @observation.location.nil?
         redirect_with_query(controller: :location,
                             action: :create_location,
                             where: @observation.place_name,

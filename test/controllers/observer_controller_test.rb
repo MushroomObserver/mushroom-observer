@@ -3090,6 +3090,7 @@ class ObserverControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit_observation, params: { id: @obs1.id } )
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
+    spl_start_length = @spl1.observations.length
     post(
       :edit_observation,
       params: {
@@ -3098,6 +3099,7 @@ class ObserverControllerTest < FunctionalTestCase
         list: { "id_#{@spl1.id}" => "1" }
       }
     )
+    assert_equal(spl_start_length, @spl1.reload.observations.length)
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
     post(
       :edit_observation,
@@ -3106,6 +3108,7 @@ class ObserverControllerTest < FunctionalTestCase
         list: { "id_#{@spl1.id}" => "1" }
       }
     )
+    assert_equal(spl_start_length + 1, @spl1.reload.observations.length)
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
     get(:edit_observation, params: { id: @obs2.id } )
