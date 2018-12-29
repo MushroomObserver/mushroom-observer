@@ -134,7 +134,6 @@ class ApiController < ApplicationController
   # convenience method to shorten lines (also helps to trick Coveralls)
   def testing?
     Rails.env == "test"
-    request.body
   end
 
   def render_api_results(args)
