@@ -425,7 +425,7 @@ module SessionExtensions
       context.assert(found,
                      "Couldn't find submit button labeled #{button.inspect}.")
       puts "POST #{url}: #{hash.inspect}" if debug
-      context.post(url, hash)
+      context.post(url, params: hash)
     end
   end
 end
