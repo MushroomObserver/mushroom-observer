@@ -3670,7 +3670,8 @@ class ObserverControllerTest < FunctionalTestCase
   #  title not displayed and default metadata title
   def test_user_search_unmatched
     unmatched_pattern = "NonexistentUserContent"
-    get_without_clearing_flash(:user_search, pattern: unmatched_pattern)
+    get_without_clearing_flash(:user_search,
+                               params: { pattern: unmatched_pattern } )
     assert_template(:list_users)
 
     assert_empty(@controller.instance_variable_get("@title"),
