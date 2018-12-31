@@ -47,6 +47,10 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     lurker.check_abilities
   end
 
+  def test_better_understand_sessions
+    skip("Figure out why check_abilities needs to explicitly login/out")
+  end
+
   def test_creating_user_description
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
@@ -98,27 +102,27 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   def open_admin_session(user)
     user.admin = true
     user.save
-    sess = open_session
-    sess.login!(user)
-    sess.click(href: /turn_admin_on/)
-    teach_about_name_descriptions(sess)
-    sess.user = user
-    sess
+    open_session do |sess|
+      sess.login!(user)
+      sess.click(href: /turn_admin_on/)
+      teach_about_name_descriptions(sess)
+      sess.user = user
+    end
   end
 
   def open_normal_session(user)
-    sess = open_session
-    sess.login!(user)
-    teach_about_name_descriptions(sess)
-    sess.user = user
-    sess
+    open_session do |sess|
+      sess.login!(user)
+      teach_about_name_descriptions(sess)
+      sess.user = user
+    end
   end
 
   def open_lurker_session
-    sess = open_session
-    teach_about_name_descriptions(sess)
-    sess.user = nil
-    sess
+    open_session do |sess|
+      teach_about_name_descriptions(sess)
+      sess.user = nil
+    end
   end
 
   def teach_about_name_descriptions(sess)
@@ -344,6 +348,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_abilities
+      login!(user) # This was not needed before Rails 5.0
       get(show_name_uri)
       # Apparently the show_desc link is present
       # even if not allowed to see text.
@@ -353,6 +358,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
       assert_link_exists(destroy_name_description_uri,
                          destroy_description_link_there?)
       check_edit_description_link_behavior if edit_description_link_there?
+      get("/account/logout_user") # This was not needed before Rails 5.0
     end
 
     def check_edit_description_link_behavior
