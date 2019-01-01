@@ -197,6 +197,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_proposing_names
     namer_session = open_session.extend(NamerDsl)
+    app = namer_session.app
     namer = katrina
 
     obs = observations(:detailed_unknown_obs)
@@ -210,7 +211,7 @@ class AmateurTest < IntegrationTestCase
     namer_session.propose_then_login(namer, obs)
     naming = namer_session.create_name(obs, text_name)
 
-    voter_session = open_session.extend(VoterDsl)
+    voter_session = AmateurTest.new(app).extend(VoterDsl)
     voter_session.login!(rolf)
     assert_not_equal(namer_session.session[:session_id],
                      voter_session.session[:session_id])
@@ -222,8 +223,9 @@ class AmateurTest < IntegrationTestCase
 
   def test_sessions
     rolf_session = open_session.extend(NamerDsl)
+    app = rolf_session.app
     rolf_session.login!(rolf)
-    mary_session = open_session.extend(VoterDsl)
+    mary_session = AmateurTest.new(app).extend(VoterDsl)
     mary_session.login!(mary)
     assert_not_equal(mary_session.session[:session_id],
                      rolf_session.session[:session_id])
@@ -328,7 +330,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit
       end
-      assert_template("observer/show_observation")
+      # assert_template("observer/show_observation")
       assert_match(/call it that/i, response.body)
     end
 

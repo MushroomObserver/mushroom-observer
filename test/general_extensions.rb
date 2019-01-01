@@ -258,8 +258,10 @@ module GeneralExtensions
   def fixture_label(obj)
     return "" if obj.nil?
     table = obj.class.table_name
-    @loaded_fixtures[table].fixtures.each do |name, fixture|
-      return "<#{name}>" if fixture["id"] == obj.id
+    if @loaded_fixtures
+      @loaded_fixtures[table].fixtures.each do |name, fixture|
+        return "<#{name}>" if fixture["id"] == obj.id
+      end
     end
     case table
     when "names"
