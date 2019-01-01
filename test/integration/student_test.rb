@@ -13,11 +13,12 @@ class StudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    rolf_session    = open_session.extend(AdminDsl)
-    mary_session    = open_session.extend(CreatorDsl)
-    katrina_session = open_session.extend(StudentDsl)
-    dick_session    = open_session.extend(UserDsl)
-    lurker_session  = open_session.extend(UserDsl)
+    app = open_session.app
+    rolf_session    = StudentTest.new(app).extend(AdminDsl)
+    mary_session    = StudentTest.new(app).extend(CreatorDsl)
+    katrina_session = StudentTest.new(app).extend(StudentDsl)
+    dick_session    = StudentTest.new(app).extend(UserDsl)
+    lurker_session  = StudentTest.new(app).extend(UserDsl)
 
     rolf_session.login!(rolf)
     mary_session.login!(mary)
@@ -42,11 +43,9 @@ class StudentTest < IntegrationTestCase
       refute_match(/#{gen_desc}/, response.body)
       assert_select("a[href*=create_name_description]", 1)
       click(href: /show_name_description/)
-      assert_template("name/show_name_description")
       assert_select("a[href*=edit_name_description]")
       assert_select("a[href*=destroy_name_description]")
       click(href: /edit_name_description/)
-      assert_template("name/edit_name_description")
       open_form do |form|
         form.assert_value("source_type", "project")
         form.assert_value("source_name", project.title)
@@ -64,13 +63,15 @@ class StudentTest < IntegrationTestCase
   module CreatorDsl
     # Navigate to show name (no descriptions) and create draft.
     def create_draft(name, gen_desc, project)
+      assert_nil(NameDescription.find_by_gen_desc(gen_desc))
       get("/")
       click(label: "Names", in: :left_panel)
       click(label: name.text_name)
       url = request.url
       assert_match(/there are no descriptions/i, response.body)
       click(label: project.title)
-      assert_template("name/create_name_description")
+      assert_match(:create_name_description_title.t(name: name.display_name),
+                   response.body)
 
       # Check that initial form is correct.
       open_form do |form|
@@ -86,7 +87,7 @@ class StudentTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      assert_template("name/show_name_description")
+      # assert_template("name/show_name_description")
 
       # Make sure it shows up on main show_name page and can edit it.
       get(url)
@@ -109,7 +110,7 @@ class StudentTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      assert_template("name/show_name_description")
+      assert_not_nil(NameDescription.find_by_gen_desc(gen_desc))
       url
     end
   end
@@ -119,7 +120,6 @@ class StudentTest < IntegrationTestCase
     def check_another_student(url)
       get(url)
       click(href: /show_name_description/)
-      assert_template("name/show_name_description")
       assert_select("a[href*=edit_name_description]", 0)
       assert_select("a[href*=destroy_name_description]", 0)
     end
@@ -132,7 +132,6 @@ class StudentTest < IntegrationTestCase
       assert_select("a[href*=show_name_description]", 1)
       click(href: /show_name_description/)
       assert_flash_error
-      assert_template("project/show_project")
       assert_nil(assigns(:description))
     end
   end
