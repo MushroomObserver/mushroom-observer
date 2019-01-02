@@ -20,22 +20,32 @@ class FunctionalTestCase < ActionController::TestCase
   # ActiveSupport::Deprecation.silenced = true
 
   def get(*args, &block)
+    args = check_for_params(args)
     super(*args, &block)
     check_for_unsafe_html!
   end
 
   def post(*args, &block)
+    args = check_for_params(args)
     super(*args, &block)
     check_for_unsafe_html!
   end
 
   def put(*args, &block)
+    args = check_for_params(args)
     super(*args, &block)
     check_for_unsafe_html!
   end
 
   def delete(*args, &block)
+    args = check_for_params(args)
     super(*args, &block)
     check_for_unsafe_html!
+  end
+
+  def check_for_params(args)
+    return args if args.length < 2 or args[1][:params]
+
+    [args[0], { params: args[1] }] + args[2..-1]
   end
 end
