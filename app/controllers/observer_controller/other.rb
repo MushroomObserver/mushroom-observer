@@ -14,8 +14,7 @@ class ObserverController
       # about missing test_flash_redirection_title tag)
       @title = "test_flash_redirection_title".to_sym.t
       # debugger
-      render(layout: "application", text: "")
-      # render(layout: "application", plain: "")
+      render(layout: "application", html: "")
     end
   end
 
