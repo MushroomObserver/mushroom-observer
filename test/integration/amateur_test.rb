@@ -78,10 +78,9 @@ class AmateurTest < IntegrationTestCase
 
   def get_cookies(user, autologin)
     result = nil
-    open_session do |sess|
-      sess.login(user, "testpassword", autologin)
-      result = sess.cookies.dup
-    end
+    sess = AmateurTest.new(open_session.app)
+    sess.login(user, "testpassword", autologin)
+    result = sess.cookies.dup
     if autologin
       assert_match(/^#{user.id}/, result["mo_user"])
     else
@@ -91,15 +90,16 @@ class AmateurTest < IntegrationTestCase
   end
 
   def try_autologin(cookies, user)
-    open_session do |sess|
-      sess.cookies["mo_user"] = cookies["mo_user"]
-      sess.get("/account/prefs")
-      if user
-        sess.assert_template("account/prefs")
-        assert_users_equal(user, sess.assigns(:user))
-      else
-        sess.assert_template("account/login")
-      end
+    sess = AmateurTest.new(open_session.app)
+    sess.cookies["mo_user"] = cookies["mo_user"]
+    sess.get("/account/prefs")
+    if user
+      sess.assert_match("account/prefs", sess.response.body)
+      sess.assert_no_match("account/login", sess.response.body)
+      assert_users_equal(user, sess.assigns(:user))
+    else
+      sess.assert_no_match("account/prefs", sess.response.body)
+      sess.assert_match("account/login", sess.response.body)
     end
   end
 
