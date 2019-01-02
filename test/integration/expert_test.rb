@@ -126,6 +126,7 @@ class ExpertTest < IntegrationTestCase
     # First attempt at creating a list.
     login!(dick)
     get("/species_list/create_species_list")
+    member_notes = "Member notes."
     open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
@@ -133,7 +134,7 @@ class ExpertTest < IntegrationTestCase
       form.change("place_name", albion_name_reverse)
       form.change("species_list_notes", "List notes.")
       form.change(SpeciesList.notes_part_id(Observation.other_notes_part),
-                  "Member notes.")
+                  member_notes)
       form.check("member_is_collection_location")
       form.check("member_specimen")
       form.submit
@@ -179,13 +180,13 @@ class ExpertTest < IntegrationTestCase
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
     assert_equal(albion, obs.last.location)
-    assert_equal({ Observation.other_notes_key => "Member notes." },
-                 obs.last.notes)
+    assert_equal(member_notes, obs.last.notes[Observation.other_notes_key])
     assert_true(obs.last.is_collection_location)
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
     click(href: /edit_species_list/)
+    new_member_notes = "New member notes."
     open_form do |form|
       form.assert_value("list_members", "")
       form.assert_value("title", "List Title")
@@ -200,7 +201,7 @@ class ExpertTest < IntegrationTestCase
       form.change("place_name", new_location_reverse)
       form.change("species_list_notes", "New list notes.")
       form.change(SpeciesList.notes_part_id(Observation.other_notes_part),
-                  "New member notes.")
+                  new_member_notes)
       form.uncheck("member_is_collection_location")
       form.uncheck("member_specimen")
       form.submit
@@ -240,8 +241,7 @@ class ExpertTest < IntegrationTestCase
     assert_nil(obs.last.location)
     assert_equal(new_location, obs.last.where)
     assert_nil(obs.last.location)
-    assert_equal({ Observation.other_notes_key => "New member notes." },
-                 obs.last.notes)
+    assert_equal(new_member_notes, obs.last.notes[Observation.other_notes_key])
     assert_false(obs.last.is_collection_location)
     assert_false(obs.last.specimen)
 
