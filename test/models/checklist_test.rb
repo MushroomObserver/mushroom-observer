@@ -58,7 +58,7 @@ class ChecklistTest < UnitTestCase
     expect = Name.joins(observations: :user).
              where("observations.user_id = #{users(:rolf).id}
                     AND names.rank = #{Name.ranks[:Species]}").
-             uniq.size
+             distinct.size
     assert_equal(expect, data.num_species)
 
     assert_equal(genera(rolfs_species), data.genera)

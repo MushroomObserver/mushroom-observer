@@ -793,7 +793,7 @@ class Image < AbstractModel
   # Calculate the average vote given the raw vote data.
   def refresh_vote_cache!
     @vote_hash = nil
-    image_votes(true) # force reload
+    image_votes.reload
     sum = num = 0
     for user, value in vote_hash
       sum += value.to_f

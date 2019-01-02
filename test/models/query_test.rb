@@ -1841,11 +1841,11 @@ class QueryTest < UnitTestCase
                  :Location, :advanced_search, location: "park")
 
     assert_query(Location.joins(observations: :user).
-                          where(observations: { user: rolf }).uniq,
+                          where(observations: { user: rolf }).distinct,
                  :Location, :advanced_search, user: "rolf")
 
     assert_query(Location.joins(:observations).
-                          where(observations: { user: dick }).uniq,
+                          where(observations: { user: dick }).distinct,
                  :Location, :advanced_search, user: "dick")
 
     # content in obs.notes
@@ -1967,7 +1967,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations
-    assert_query(Location.joins(:observations).uniq,
+    assert_query(Location.joins(:observations).distinct,
                  :Location, :with_observations)
   end
 

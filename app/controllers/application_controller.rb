@@ -124,14 +124,12 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_action_callback :verify_authenticity_token
-    skip_action_callback :fix_bad_domains
-    skip_action_callback :autologin
-    skip_action_callback :set_timezone
-    skip_action_callback :refresh_translations
-    skip_action_callback :track_translations
-    # skip_action_callback   :extra_gc
-    # skip_action_callback   :log_memory_usage
+    skip_before_action :verify_authenticity_token
+    skip_before_action :fix_bad_domains
+    skip_before_action :autologin
+    skip_before_action :set_timezone
+    skip_before_action :refresh_translations
+    skip_before_action :track_translations
     before_action :disable_link_prefetching
     before_action { User.current = nil }
   end
@@ -321,8 +319,8 @@ class ApplicationController < ActionController::Base
   # destroyed.
   #
   def autologin
-    # render(text: "Sorry, we've taken MO down to test something urgent."\
-    #              "We'll be back in a few minutes. -Jason", layout: false)
+    # render(plain: "Sorry, we've taken MO down to test something urgent."\
+    #               "We'll be back in a few minutes. -Jason", layout: false)
     # return false
 
     # if browser.bot?
@@ -421,7 +419,7 @@ class ApplicationController < ActionController::Base
   end
 
   def block_user
-    render(text: "Your account has been temporarily suspended.",
+    render(plain: "Your account has been temporarily suspended.",
            layout: false)
   end
 
@@ -1708,7 +1706,7 @@ class ApplicationController < ActionController::Base
     return unless request.env["HTTP_X_MOZ"] == "prefetch"
 
     logger.debug "prefetch detected: sending 403 Forbidden"
-    render(text: "", status: 403)
+    render(plain: "", status: 403)
     false
   end
 

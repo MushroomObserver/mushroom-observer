@@ -10,9 +10,9 @@ class AjaxController
   def auto_complete
     string = CGI.unescape(@id).strip_squeeze
     if string.blank?
-      render(text: "\n\n")
+      render(plain: "\n\n")
     else
-      render(text: auto_complete_results(string))
+      render(plain: auto_complete_results(string))
     end
   end
 

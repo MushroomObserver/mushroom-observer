@@ -9,7 +9,7 @@ class AjaxController
     if $CHILD_STATUS.success?
       render_exif_data(result)
     else
-      render(text: result, status: 500)
+      render(plain: result, status: 500)
     end
   end
 

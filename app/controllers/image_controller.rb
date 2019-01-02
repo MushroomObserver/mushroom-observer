@@ -228,7 +228,7 @@ class ImageController < ApplicationController
     end
 
     # Grab list of votes.
-    @votes = @image.image_votes(include: :user).sort_by do |v|
+    @votes = @image.image_votes.sort_by do |v|
       begin
         (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
       rescue
@@ -854,14 +854,14 @@ class ImageController < ApplicationController
       render_image_csv_file(data)
     end
   rescue => e
-    render(text: e.to_s, layout: false, status: 500)
+    render(plain: e.to_s, layout: false, status: 500)
   end
 
   def render_test_image_report(data)
     report = data.map do |name, id|
       "<img src='/images/320/#{id}.jpg'/><br/><i>#{name}</i><br/>"
     end.join("<br/>\n")
-    render(text: report)
+    render(plain: report)
   end
 
   def render_image_csv_file(data)

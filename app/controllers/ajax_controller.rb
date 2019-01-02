@@ -50,7 +50,7 @@ class AjaxController < ApplicationController
   rescue => e
     msg = e.to_s + "\n"
     msg += backtrace(e) if Rails.env != "production"
-    render(text: msg, status: 500)
+    render(plain: msg, status: 500)
   end
 
   def prepare_parameters
@@ -74,6 +74,6 @@ class AjaxController < ApplicationController
 
   # Used by unit tests.
   def test
-    render(text: "test")
+    render(plain: "test")
   end
 end

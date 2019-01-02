@@ -1231,6 +1231,6 @@ class NameController < ApplicationController
               filename: "#{action_name}.csv")
 
   rescue => e
-    render(text: e.to_s, layout: false, status: 500)
+    render(plain: e.to_s, layout: false, status: 500)
   end
 end

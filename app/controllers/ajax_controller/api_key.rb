@@ -21,12 +21,12 @@ class AjaxController
 
   def activate_api_key(key)
     key.verify!
-    render(text: "")
+    render(plain: "")
   end
 
   def edit_api_key(key, value)
     raise :runtime_api_key_notes_cannot_be_blank.l if value.blank?
     key.update_attribute(:notes, value.strip_squeeze)
-    render(text: key.notes)
+    render(plain: key.notes)
   end
 end

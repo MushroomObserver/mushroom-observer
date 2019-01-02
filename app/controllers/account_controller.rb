@@ -704,7 +704,7 @@ class AccountController < ApplicationController
     if redirect
       redirect_to(redirect)
     else
-      render(text: "", layout: true)
+      render(plain: "", layout: true)
     end
   end
 

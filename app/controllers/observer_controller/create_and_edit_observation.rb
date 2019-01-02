@@ -456,7 +456,7 @@ class ObserverController
     rescue => err
       flash_error(:observer_recalc_caught_error.t(error: err))
     end
-    # render(text: "", layout: true)
+    # render(plain: "", layout: true)
     redirect_with_query(action: "show_observation", id: id)
   end
 
