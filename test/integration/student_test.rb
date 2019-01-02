@@ -14,11 +14,11 @@ class StudentTest < IntegrationTestCase
     project.admin_group.users.delete(mary)
 
     app = open_session.app
-    rolf_session    = StudentTest.new(app).extend(AdminDsl)
-    mary_session    = StudentTest.new(app).extend(CreatorDsl)
-    katrina_session = StudentTest.new(app).extend(StudentDsl)
-    dick_session    = StudentTest.new(app).extend(UserDsl)
-    lurker_session  = StudentTest.new(app).extend(UserDsl)
+    rolf_session    = open_session.extend(AdminDsl)
+    mary_session    = open_session.extend(CreatorDsl)
+    katrina_session = open_session.extend(StudentDsl)
+    dick_session    = open_session.extend(UserDsl)
+    lurker_session  = open_session.extend(UserDsl)
 
     rolf_session.login!(rolf)
     mary_session.login!(mary)

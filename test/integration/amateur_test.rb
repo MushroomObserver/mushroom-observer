@@ -78,7 +78,7 @@ class AmateurTest < IntegrationTestCase
 
   def get_cookies(user, autologin)
     result = nil
-    sess = AmateurTest.new(open_session.app)
+    sess = open_session
     sess.login(user, "testpassword", autologin)
     result = sess.cookies.dup
     if autologin
@@ -90,7 +90,7 @@ class AmateurTest < IntegrationTestCase
   end
 
   def try_autologin(cookies, user)
-    sess = AmateurTest.new(open_session.app)
+    sess = open_session
     sess.cookies["mo_user"] = cookies["mo_user"]
     sess.get("/account/prefs")
     if user
@@ -211,7 +211,7 @@ class AmateurTest < IntegrationTestCase
     namer_session.propose_then_login(namer, obs)
     naming = namer_session.create_name(obs, text_name)
 
-    voter_session = AmateurTest.new(app).extend(VoterDsl)
+    voter_session = open_session.extend(VoterDsl)
     voter_session.login!(rolf)
     assert_not_equal(namer_session.session[:session_id],
                      voter_session.session[:session_id])
@@ -225,7 +225,7 @@ class AmateurTest < IntegrationTestCase
     rolf_session = open_session.extend(NamerDsl)
     app = rolf_session.app
     rolf_session.login!(rolf)
-    mary_session = AmateurTest.new(app).extend(VoterDsl)
+    mary_session = open_session.extend(VoterDsl)
     mary_session.login!(mary)
     assert_not_equal(mary_session.session[:session_id],
                      rolf_session.session[:session_id])

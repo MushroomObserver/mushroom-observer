@@ -49,9 +49,9 @@ class RandomTest < IntegrationTestCase
     rolf_session = open_session
     app = rolf_session.app
     rolf_session.login(rolf)
-    mary_session = RandomTest.new(app)
+    mary_session = open_session
     mary_session.login(mary)
-    katrina_session = RandomTest.new(app)
+    katrina_session = open_session
     katrina_session.login(katrina)
 
     rolf_session.get("/")

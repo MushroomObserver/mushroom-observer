@@ -98,7 +98,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   def open_admin_session(user)
     user.admin = true
     user.save
-    sess = NameDescriptionIntegrationTest.new(open_session.app)
+    sess = open_session
     sess.login!(user)
     sess.click(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
@@ -107,7 +107,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   end
 
   def open_normal_session(user)
-    sess = NameDescriptionIntegrationTest.new(open_session.app)
+    sess = open_session
     sess.login!(user)
     teach_about_name_descriptions(sess)
     sess.user = user
@@ -115,7 +115,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   end
 
   def open_lurker_session
-    sess = NameDescriptionIntegrationTest.new(open_session.app)
+    sess = open_session
     teach_about_name_descriptions(sess)
     sess.user = nil
     sess
