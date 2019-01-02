@@ -126,7 +126,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_minimal_observation
-    skip("Need to sort out API file uploading issues")
     post(:observations,
          api_key: api_keys(:rolfs_api_key).key,
          location: "Unknown")
@@ -152,7 +151,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_observation
-    skip("Need to sort out API file uploading issues")
     post(
       :observations,
       api_key: api_keys(:rolfs_api_key).key,
@@ -197,7 +195,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_minimal_image
-    skip("Need to sort out API file uploading issues")
     setup_image_dirs
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
@@ -222,7 +219,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_maximal_image
-    skip("Need to sort out API file uploading issues")
     setup_image_dirs
     file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
     proj = rolf.projects_member.first
@@ -255,7 +251,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_user
-    skip("Need to sort out API file uploading issues")
     rolfs_key = api_keys(:rolfs_api_key)
     post(:users,
          api_key: rolfs_key.key,
@@ -293,7 +288,6 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_api_key
-    skip("Need to sort out API file uploading issues")
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
@@ -323,7 +317,6 @@ class ApiControllerTest < FunctionalTestCase
 
   # Prove user can add Sequence to someone else's Observation
   def test_post_sequence
-    skip("Need to sort out API file uploading issues")
     obs = observations(:coprinus_comatus_obs)
     post(
       :sequences,

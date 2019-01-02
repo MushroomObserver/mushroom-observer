@@ -107,7 +107,7 @@ class ApiController < ApplicationController
   end
 
   def upload_present?
-    upload_length > 0 && upload_type.present?
+    upload_length > 0 && upload_type.present? && upload_data.present?
   end
 
   def upload_api
