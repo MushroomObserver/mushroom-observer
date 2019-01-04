@@ -12,6 +12,18 @@ AJAX_ACTIONS = %w[
   vote
 ].freeze
 
+LOOKUP_XXX_ID_ACTIONS = %w[
+  lookup_accepted_name
+  lookup_comment
+  lookup_image
+  lookup_location
+  lookup_name
+  lookup_observation
+  lookup_project
+  lookup_species_list
+  lookup_user
+].freeze
+
 MushroomObserver::Application.routes.draw do
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
@@ -87,15 +99,12 @@ MushroomObserver::Application.routes.draw do
   end
 
   # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
-  match(
-    ":controller/:action/:id",
-    constraints: {
-      controller: /observer/,
-      action: /lookup_\w+/,
-      id: /.*/
-    },
-    via: [:get]
-  )
+  LOOKUP_XXX_ID_ACTIONS.each do |action|
+    get("observer/#{action}/:id",
+      controller: "observer",
+      action: action,
+      id: /.*/)
+  end
 
   # Default action for any controller is "index".
   get ":controller" => "controller#index"
