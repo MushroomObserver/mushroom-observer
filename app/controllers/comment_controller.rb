@@ -65,8 +65,7 @@ class CommentController < ApplicationController
     show_selected_comments(query)
   end
 
-  # Shows comments for a given user, most recent first.  (Linked from left
-  # panel.)
+  # Shows comments by a given user, most recent first. (Linked from show_user.)
   def show_comments_by_user # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :by_user, user: user)
@@ -74,8 +73,7 @@ class CommentController < ApplicationController
     end
   end
 
-  # Shows comments for a given user, most recent first.  (Linked from left
-  # panel.)
+  # Shows comments for a given user, most recent first. (Linked from show_user.)
   def show_comments_for_user # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :for_user, user: user)
@@ -83,7 +81,7 @@ class CommentController < ApplicationController
     end
   end
 
-  # Shows comments for a given object, most recent first.  (Linked from the
+  # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_target # :nologin: :norobots:
     model = begin
