@@ -111,4 +111,10 @@ class SymbolExtensionsTest < UnitTestCase
   def test_no_translation
     assert !:no_translation.has_translation?
   end
+
+  def test_upcase_first
+    assert_equal(:A, :a.upcase_first)
+    assert_equal(:AB, :aB.upcase_first)
+    assert_equal(:Abc, :abc.upcase_first)
+  end
 end

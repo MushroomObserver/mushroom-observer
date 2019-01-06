@@ -38,7 +38,7 @@ class Name < AbstractModel
     str = clean_incoming_string(str).
           tr("ë", "e").
           sub(/ sp\.?$/, "").
-          tr("_", " ").strip_squeeze.capitalize_first
+          tr("_", " ").strip_squeeze.upcase_first
     str = parse_author(str).first # (strip author off)
 
     # Guess genus first, then species, and so on.

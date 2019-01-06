@@ -314,7 +314,7 @@ class AbstractModel < ApplicationRecord
         out << msg
       else
         name = attr.to_s.to_sym.l
-        obj = type_tag.to_s.capitalize_first.to_sym.l
+        obj = type_tag.to_s.upcase_first.to_sym.l
         out << "#{obj} #{name} #{msg}."
       end
     end
