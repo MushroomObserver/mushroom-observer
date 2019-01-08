@@ -3,7 +3,7 @@
 # controller: {    # hash of controller ctions
 #   action_name: {    # hash of attributes for this action
 #     methods:  (array),  # allowed HTML methods, as symbols
-#                         # methods key omitted => default: [:GET, :POST]
+#                         # methods key omitted => default: [:get, :post]
 #     segments: (string), # expected segments, with leading slash(es)
 #                         # segments key omitted => default: "/:id"
 #                         # blank string means no segments allowed
@@ -23,7 +23,7 @@ ACTIONS = {
     login: { },
     logout_user: { },
     manager: { },
-    no_comment_email: { methods: [:GET] },
+    no_comment_email: { methods: [:get] },
     no_comment_response_email: { },
     no_commercial_email: { },
     no_consensus_change_email: { },
