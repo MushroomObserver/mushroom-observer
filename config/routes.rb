@@ -569,7 +569,9 @@ MushroomObserver::Application.routes.draw do
   end
 
   # Default action for any controller is "index".
-  get ":controller" => "controller#index"
+  ACTIONS.each do |controller, actions|
+    get "#{controller}" => "#{controller}#index"
+  end
 
   # Standard routes.
   get ":controller/:action"
