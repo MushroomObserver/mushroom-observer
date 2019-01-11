@@ -549,7 +549,7 @@ MushroomObserver::Application.routes.draw do
   root "observer#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", constraints: { id: /\d+/ }
+  get ":id" => "observer#show_observation", id: /\d+/
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
