@@ -571,10 +571,10 @@ MushroomObserver::Application.routes.draw do
     actions.each do |action|
       # TODO: add static action routes here, remove dynamic actions
       # Standard routes
+      get "#{controller}/#{action}" => "#{controller}##{action}", id: //
     end
   end
 
   # Standard routes.
-  get ":controller/:action"
   match ":controller(/:action(/:id))", via: [:get, :post], id: /\d+/
 end
