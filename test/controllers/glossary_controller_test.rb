@@ -46,7 +46,6 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   end
 
   def test_show_past_glossary_term_no_version
-    skip "Skip until we can figure out why `redirect_to` throws an Error."
     get_with_dump(:show_past_glossary_term, id: conic.id)
     assert_response(:redirect)
   end

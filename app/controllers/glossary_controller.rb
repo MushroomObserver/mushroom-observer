@@ -93,7 +93,7 @@ class GlossaryController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(action: show_glossary_term, id: @glossary_term.id)
+        redirect_to(action: "show_glossary_term", id: @glossary_term.id)
       end
     end
   end
