@@ -75,6 +75,7 @@ ACTIONS = {
     multi_image_template: {},
     old_translation: {},
     pivotal: {},
+    test: {},
     vote: {}
   },
   api: {
@@ -236,6 +237,7 @@ ACTIONS = {
     adjust_permissions: {},
     advanced_search: {},
     approve_name: {},
+    authored_names: {},
     bulk_name_edit: {},
     change_synonyms: {},
     create_name: {},
@@ -248,6 +250,7 @@ ACTIONS = {
     edit_name_description: {},
     email_tracking: {},
     eol: {},
+    eol_expanded_review: {},
     eol_preview: {},
     index_name: {},
     index_name_description: {},
@@ -578,4 +581,7 @@ MushroomObserver::Application.routes.draw do
              id: /\d+/
     end
   end
+
+  # routes for actions that Rails automatically creates from view templates
+  MO.themes.each { |scheme| get "theme/#{scheme}"}
 end
