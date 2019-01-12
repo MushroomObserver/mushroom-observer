@@ -5,10 +5,7 @@ gem "rails", "~> 5.0.7.1"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
-# Temporarily pin mysql2 version because mysql2 0.5 doesn't work with Rails 4.x
-# See https://github.com/brianmario/mysql2/issues/950
-# Should be unpinned after we upgrade to Rails 5
-gem "mysql2", "~> 0.4.0"
+gem "mysql2"
 
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
