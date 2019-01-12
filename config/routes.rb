@@ -568,13 +568,14 @@ MushroomObserver::Application.routes.draw do
     # Default action for any controller is "index".
     get controller.to_s => "#{controller}#index"
 
+    # Standard routes
     actions.each do |action, attributes|
-      # TODO: add static action routes here, remove dynamic actions
-      # Standard routes
-      get "#{controller}/#{action}" => "#{controller}##{action}", id: //
+      get "#{controller}/#{action}", controller: controller, action: action
+      match "#{controller}(/#{action}(/:id))",
+             controller: controller,
+             action: action,
+             via: [:get, :post],
+             id: /\d+/
     end
   end
-
-  # Standard routes.
-  match ":controller(/:action(/:id))", via: [:get, :post], id: /\d+/
 end
