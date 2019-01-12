@@ -21,15 +21,10 @@ formatters = [SimpleCov::Formatter::HTMLFormatter,
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
 SimpleCov.start
 
-# Allows test results to be reported back to runner IDEs
-# The following enables progress bar output during the test running.
-# However, due to a weird Rails/Minitest interaction double test output
-# is generated causing havoc.  According to:
-# https://github.com/kern/minitest-reporters/issues/230
-# it is fixed in Rails 5.1.6 so we'll wait until then to turn this
-# on.
-# require "minitest/reporters"
-# MiniTest::Reporters.use!
+# Allow test results to be reported back to runner IDEs.
+# Enable progress bar output during the test running.
+require "minitest/reporters"
+MiniTest::Reporters.use!
 
 require "minitest/autorun"
 
