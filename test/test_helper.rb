@@ -22,13 +22,10 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
 SimpleCov.start
 
 # Allows test results to be reported back to runner IDEs
-require "minitest/reporters"
-MiniTest::Reporters.use!
+# require "minitest/reporters"
+# MiniTest::Reporters.use!
 
 require "minitest/autorun"
-
-# Allow simuluation of user-browser interaction with capybara
-require "capybara/rails"
 
 # Allow stubbing and setting expectations on HTTP, and selective
 #  disabling of internet requests.
@@ -62,6 +59,9 @@ require "mocha/minitest"
 ].each do |file|
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
+
+# Allow simuluation of user-browser interaction with capybara
+require "capybara/rails"
 
 I18n.enforce_available_locales = true
 
