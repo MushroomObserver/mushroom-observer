@@ -725,6 +725,22 @@ class AbstractModel < ApplicationRecord
     str + " (#{id_str})"
   end
 
+  ##############################################################################
+  #
+  #  :section: versions
+  #
+  ##############################################################################
+
+  # Replacement for "altered?"" method of cures_acts_as_versioned gem
+  # The gem method is incompatible with Rails 2.2, and the gem is not maintained
+  # TODO: replace the gem.
+  # See notes at https://www.pivotaltracker.com/story/show/163189614
+  def version_altered?
+   track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : changed? # rubocop:disable Metrics/LineLength
+  end
+
+  ##############################################################################
+
   private
 
   def log_image(tag, image, touch) # :nodoc:
