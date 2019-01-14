@@ -1037,7 +1037,8 @@ class SpeciesListControllerTest < FunctionalTestCase
         "file" => file
       }
     }
-    post_requires_login(:upload_species_list, params)
+    login("rolf", "testpassword")
+    post_with_dump(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
@@ -1057,7 +1058,8 @@ class SpeciesListControllerTest < FunctionalTestCase
         "file" => file
       }
     }
-    post_requires_login(:upload_species_list, params)
+    login("rolf", "testpassword")
+    post_with_dump(:upload_species_list, params)
     assert_edit_species_list
     assert_equal(10, rolf.reload.contribution)
     new_data = @controller.instance_variable_get("@list_members")
