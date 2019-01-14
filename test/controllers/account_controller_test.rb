@@ -496,7 +496,8 @@ class AccountControllerTest < FunctionalTestCase
       date: { copyright_year: "2003" }
     }
     File.stub(:rename, false) do
-      post_requires_login(:profile, params)
+      login("rolf", "testpassword")
+      post_with_dump(:profile, params)
     end
     assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
     assert_flash_success
