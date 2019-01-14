@@ -120,7 +120,7 @@ class LocationDescription < Description
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-    if altered?
+    if saved_changes?  # Was altered?
       sender = User.current
       recipients = []
 

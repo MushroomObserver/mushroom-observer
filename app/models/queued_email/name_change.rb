@@ -44,7 +44,7 @@ class QueuedEmail::NameChange < QueuedEmail
     if name
       result.add_integer(:name, name.id)
       result.add_integer(:new_name_version, name.version)
-      old_version = name.version - ((name.changed? || force_prev) ? 1 : 0)
+      old_version = name.version - ((name.saved_changes? || force_prev) ? 1 : 0)
       result.add_integer(:old_name_version, old_version)
     else
       name = desc.name
@@ -55,7 +55,7 @@ class QueuedEmail::NameChange < QueuedEmail
     if desc
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
-      old_version = desc.version - ((desc.changed? || force_prev) ? 1 : 0)
+      old_version = desc.version - ((desc.saved_changes? || force_prev) ? 1 : 0)
       result.add_integer(:old_description_version, old_version)
       result.add_string(:review_status, review_status_changed ? desc.review_status : :no_change)
     else
