@@ -854,21 +854,21 @@ class Image < AbstractModel
 
   # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
-    if when_changed? && when_change[0].year != when_change[1].year ||
-       license_id_changed? ||
-       copyright_holder_changed?
+    if saved_change_to_when? && saved_change_to_when[0].year != saved_change_to_when[1].year ||
+       saved_change_to_license_id? ||
+       saved_change_to_copyright_holder?
       old_year       = begin
-                         when_change[0].year
+                         saved_change_to_when[0].year
                        rescue
                          self.when.year
                        end
       old_name       = begin
-                         copyright_holder_change[0]
+                         saved_change_to_copyright_holder[0]
                        rescue
                          copyright_holder
                        end
       old_license_id = begin
-                         license_id_change[0]
+                         saved_change_to_license_id[0]
                        rescue
                          license_id
                        end
