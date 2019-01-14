@@ -735,8 +735,8 @@ class AbstractModel < ApplicationRecord
   # The gem method is incompatible with Rails 2.2, and the gem is not maintained
   # TODO: replace the gem.
   # See notes at https://www.pivotaltracker.com/story/show/163189614
-  def version_altered?
-   track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : changed? # rubocop:disable Metrics/LineLength
+  def saved_version_changes?
+    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Metrics/LineLength
   end
 
   ##############################################################################
