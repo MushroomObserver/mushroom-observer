@@ -30,7 +30,7 @@ class QueuedEmail::LocationChange < QueuedEmail
     if location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
-      result.add_integer(:old_location_version, (location.changed? ? location.version - 1 : location.version))
+      result.add_integer(:old_location_version, (location.saved_changes? ? location.version - 1 : location.version))
     elsif location = desc.location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
@@ -39,7 +39,7 @@ class QueuedEmail::LocationChange < QueuedEmail
     if desc
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
-      result.add_integer(:old_description_version, (desc.changed? ? desc.version - 1 : desc.version))
+      result.add_integer(:old_description_version, (desc.saved_changes? ? desc.version - 1 : desc.version))
     elsif desc = location.description
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
