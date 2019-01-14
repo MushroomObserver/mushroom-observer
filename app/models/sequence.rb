@@ -167,11 +167,11 @@ class Sequence < AbstractModel
   end
 
   def accession_changed?
-    changes[:accession].present?
+    saved_changes[:accession].present?
   end
 
   def accession_was_blank?
-    changes[:accession].first.blank?
+    saved_changes[:accession].first.blank?
   end
 
   ##############################################################################
