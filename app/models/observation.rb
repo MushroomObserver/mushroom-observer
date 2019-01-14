@@ -1286,13 +1286,13 @@ class Observation < AbstractModel
   # Callback that sends email notifications after save.
   def notify_users_after_change
     if !id ||
-       when_changed? ||
-       where_changed? ||
-       location_id_changed? ||
-       notes_changed? ||
-       specimen_changed? ||
-       is_collection_location_changed? ||
-       thumb_image_id_changed?
+       saved_change_to_when? ||
+       saved_change_to_where? ||
+       saved_change_to_location_id? ||
+       saved_change_to_notes? ||
+       saved_change_to_specimen? ||
+       saved_change_to_is_collection_location? ||
+       saved_change_to_thumb_image_id?
       notify_users(:change)
     end
   end
