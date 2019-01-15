@@ -2389,7 +2389,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all.order("`when` DESC, id DESC").to_a
+    expect = Observation.all.order(when: :desc, id: :desc).to_a
     assert_query(expect, :Observation, :all)
   end
 
