@@ -485,9 +485,9 @@ module ControllerExtensions
 
         # Put together good error message telling us exactly what happened.
         code = @response.response_code
-        if @response.success?
+        if @response.successful?
           got = ", got #{code} rendered <#{@request.fullpath}>."
-        elsif @response.missing?
+        elsif @response.not_found?
           got = ", got #{code} missing (?)"
         elsif @response.redirect?
           url = @response.redirect_url.sub(/^http:..test.host/, "")
