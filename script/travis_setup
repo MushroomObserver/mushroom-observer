@@ -51,4 +51,5 @@ else
 fi
 
 git pull
+gem install bundler
 bundle install
