@@ -22,50 +22,6 @@ class LanguageExporterTest < UnitTestCase
     msg.join("\n")
   end
 
-  def test_yaml
-    temp_file = "#{tmp_dir}/yaml_test"
-    File.open(temp_file, "w:utf-8") do |fh|
-      fh.puts "---"
-      fh.puts "one: ενα"
-    end
-    data = File.open(temp_file, "r:utf-8") do |fh|
-      data = YAML.safe_load(fh)
-    end
-    assert_equal({ "one" => "ενα" }, data)
-    assert_equal("UTF-8", data["one"].encoding.to_s)
-    File.open(temp_file, "w:utf-8") do |fh|
-      fh << data.to_yaml
-    end
-    data = File.open(temp_file, "r:utf-8") do |fh|
-      data = YAML.safe_load(fh)
-    end
-    assert_equal({ "one" => "ενα" }, data)
-    assert_equal("UTF-8", data["one"].encoding.to_s)
-  ensure
-    begin
-      File.unlink(temp_file)
-    rescue
-      nil
-    end
-  end
-
-  def test_yaml_dump_breakage
-    temp_file = "#{tmp_dir}/yaml_test"
-    File.open(temp_file, "w:utf-8") do |fh|
-      begin
-        YAML.dump({ "one" => "ενα" }, fh)
-        print "YAML::dump works!\n"
-      rescue Encoding::UndefinedConversionError
-      end
-    end
-  ensure
-    begin
-      File.unlink(temp_file)
-    rescue
-      nil
-    end
-  end
-
   def test_validators
     assert_valid(:validate_tag, "abc")
     assert_valid(:validate_tag, "abc_2")
