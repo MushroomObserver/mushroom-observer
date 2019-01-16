@@ -87,10 +87,10 @@ module GeneralExtensions
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    unless FileTest.exist?(MO.local_image_files)
-      setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
-      FileUtils.cp_r(setup_images, MO.local_image_files)
-    end
+    return if FileTest.exist?(MO.local_image_files)
+
+    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
+    FileUtils.cp_r(setup_images, MO.local_image_files)
   end
 
   # This seems to have disappeared from rails.
