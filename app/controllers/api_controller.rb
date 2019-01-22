@@ -107,7 +107,10 @@ class ApiController < ApplicationController
   end
 
   def upload_present?
-    upload_length > 0 && upload_type.present? && upload_data.present?
+    (upload_length > 0 &&
+     upload_type.present? &&
+     upload_type != "application/x-www-form-urlencoded" &&
+     upload_data.present?)
   end
 
   def upload_api
@@ -120,20 +123,15 @@ class ApiController < ApplicationController
   end
 
   def upload_length
-    testing? ? request.headers["CONTENT_LENGTH"].to_i : request.content_length
+    request.content_length
   end
 
   def upload_type
-    testing? ? request.headers["CONTENT_TYPE"].to_s : request.media_type
+    request.media_type
   end
 
   def upload_data
-    testing? ? request.headers["RAW_POST_DATA"] : request.body
-  end
-
-  # convenience method to shorten lines (also helps to trick Coveralls)
-  def testing?
-    Rails.env == "test"
+    request.body
   end
 
   def render_api_results(args)

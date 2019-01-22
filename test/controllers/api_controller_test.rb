@@ -18,26 +18,14 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def post_and_send_file(action, file, content_type, params)
-    stream = File.open(file, "rb")
-    length = File.size(file)
-    checksum = file_checksum(file)
-    post_and_send(action, stream, length, content_type, checksum, params)
+    data = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    params[:body] = data
+    post_and_send(action, content_type, params)
   end
 
-  def post_and_send_string(action, string, content_type, params)
-    stream = StringIO.new(string, "rb")
-    length = string.length
-    checksum = string_checksum(string)
-    post_and_send(action, stream, length, content_type, checksum, params)
-  end
-
-  def post_and_send(action, stream, length, type, md5, params)
-    @request.env["RAW_POST_DATA"] = stream
-    @request.env["CONTENT_LENGTH"] = length
+  def post_and_send(action, type, params)
     @request.env["CONTENT_TYPE"] = type
-    @request.env["CONTENT_MD5"] = md5
     post(action, params)
-    @request.env.delete("RAW_POST_DATA")
   end
 
   def file_checksum(filename)
