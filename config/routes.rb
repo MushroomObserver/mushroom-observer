@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Nested hash of permissible controllers and actions. Each entry as follows,
 # with missing element meaning use default
 # controller: {    # hash of controller ctions
@@ -490,7 +491,7 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 ].freeze
 
 MushroomObserver::Application.routes.draw do
-  # The priority is based upon order of creation: first created -> highest priority.
+  # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
@@ -502,7 +503,7 @@ MushroomObserver::Application.routes.draw do
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
 
-  # Example resource route (maps HTTP verbs to controller actions automatically):
+  # Example resource route (maps HTTP verbs to controller actions automatically)
   #   resources :products
 
   # Example resource route with options:
@@ -575,13 +576,13 @@ MushroomObserver::Application.routes.draw do
     actions.each do |action, attributes|
       get "#{controller}/#{action}", controller: controller, action: action
       match "#{controller}(/#{action}(/:id))",
-             controller: controller,
-             action: action,
-             via: [:get, :post],
-             id: /\d+/
+            controller: controller,
+            action: action,
+            via: [:get, :post],
+            id: /\d+/
     end
   end
 
   # routes for actions that Rails automatically creates from view templates
-  MO.themes.each { |scheme| get "theme/#{scheme}"}
+  MO.themes.each { |scheme| get "theme/#{scheme}" }
 end

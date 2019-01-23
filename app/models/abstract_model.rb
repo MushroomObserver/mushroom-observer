@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = Extensions to ApplicationRecord
 #
@@ -97,7 +98,7 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # Make a full clone of the present instance, then revert it to an older version.
+  # Make full clone of the present instance, then revert it to an older version.
   # Returns +nil+ if +version+ not found.
   def revert_clone(version)
     return self if self.version == version
@@ -158,11 +159,7 @@ class AbstractModel < ApplicationRecord
   #   name.versions[idx].version
   #
   def find_version(idx)
-    if idx < 0
-      limit = "DESC LIMIT 1, #{-idx - 1}"
-    else
-      limit = "ASC LIMIT 1, #{idx}"
-    end
+    limit = (idx < 0 ? "DESC LIMIT 1, #{-idx - 1}" : "ASC LIMIT 1, #{idx}")
     num = self.class.connection.select_value %(
       SELECT version FROM #{versioned_table_name}
       WHERE #{type_tag}_id = #{id}
@@ -211,7 +208,7 @@ class AbstractModel < ApplicationRecord
   def do_log_update
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
-    autolog_updated_at if has_rss_log? unless @save_without_our_callbacks
+    autolog_updated_at if has_rss_log? && !@save_without_our_callbacks
   end
 
   # This would be called just after an object's changes are saved, but we have
@@ -275,13 +272,13 @@ class AbstractModel < ApplicationRecord
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
-    if respond_to?("num_views=") || respond_to?("last_view=")
-      self.class.record_timestamps = false
-      self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-      self.last_view = Time.now             if respond_to?("last_view=")
-      save_without_our_callbacks
-      self.class.record_timestamps = true
-    end
+    return unless respond_to?("num_views=") || respond_to?("last_view=")
+
+    self.class.record_timestamps = false
+    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
+    self.last_view = Time.now             if respond_to?("last_view=")
+    save_without_our_callbacks
+    self.class.record_timestamps = true
   end
 
   ##############################################################################
@@ -632,24 +629,18 @@ class AbstractModel < ApplicationRecord
 
   # Do we log this event? and how?
   def autolog_event(event, orphan = nil)
-    if RunLevel.is_normal?
-      if autolog_events.include?(event)
-        touch = false
-      elsif autolog_events.include?("#{event}!".to_sym)
-        touch = true
-      else
-        touch = nil
-      end
-      unless touch.nil?
-        type = type_tag
-        msg = "log_#{type}_#{event}".to_sym
-        if orphan
-          orphan_log(msg, touch: touch)
-        else
-          log(msg, touch: touch)
-        end
-      end
-    end
+    return unless RunLevel.is_normal?
+
+    touch = if autolog_events.include?(event)
+              false
+            elsif autolog_events.include?("#{event}!".to_sym)
+              true
+            end
+    return if touch.nil?
+
+    type = type_tag
+    msg = "log_#{type}_#{event}".to_sym
+    orphan ? orphan_log(msg, touch: touch) : log(msg, touch: touch)
   end
 
   # Create RssLog and attach it if we don't already have one.  This is
@@ -683,10 +674,10 @@ class AbstractModel < ApplicationRecord
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
-    if rss_log && (rss_log.send("#{type_tag}_id") != id)
-      rss_log.send("#{type_tag}_id=", id)
-      rss_log.save
-    end
+    return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
+
+    rss_log.send("#{type_tag}_id=", id)
+    rss_log.save
   end
 
   # The label which is displayed for the model's tab in the RssLog tabset

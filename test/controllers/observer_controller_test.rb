@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class ObserverControllerTest < FunctionalTestCase
@@ -141,11 +143,11 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Test again, this time specifying page number via an observation id.
     get(:list_observations,
-        params: { id: observations(:agaricus_campestris_obs).id } )
+        params: { id: observations(:agaricus_campestris_obs).id })
     assert_template(:list_observations, partial: :_rss_log)
 
     get(:observations_for_project,
-        params: { id: projects(:bolete_project).id } )
+        params: { id: projects(:bolete_project).id })
     assert_template(:list_observations, partial: :_rss_log)
 
     get_with_dump(:list_rss_logs)
@@ -158,7 +160,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations, partial: :_rss_log)
 
     get(:observations_of_name,
-        params: { name: names(:boletus_edulis).text_name } )
+        params: { name: names(:boletus_edulis).text_name })
     assert_template(:list_observations, partial: :_rss_log)
 
     get_with_dump(:rss)
@@ -203,7 +205,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observations_by_unknown_user
-    get(:observations_by_user, params: { id: 1e6 } )
+    get(:observations_by_user, params: { id: 1e6 })
     assert_redirected_to(action: :index_user)
   end
 
@@ -228,10 +230,10 @@ class ObserverControllerTest < FunctionalTestCase
     # With params[:type], it should display only that type
     expect = rss_logs(:glossary_term_rss_log)
     get(:index_rss_log,
-        params: { type: :glossary_term } )
+        params: { type: :glossary_term })
     assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
-    refute_match(/#{rss_logs(:observation_rss_log).observation.name}/,
-                 css_select(".rss-what").text)
+    assert_no_match(/#{rss_logs(:observation_rss_log).observation.name}/,
+                    css_select(".rss-what").text)
 
     # Without params[:type], it should display all logs
     get(:index_rss_log)
@@ -243,19 +245,19 @@ class ObserverControllerTest < FunctionalTestCase
   def test_user_default_rss_log
     # Prove that MO offers to make non-default log the user's default.
     login("rolf")
-    get(:index_rss_log, params: { type: :glossary_term } )
+    get(:index_rss_log, params: { type: :glossary_term })
     link_text = @controller.instance_variable_get("@links").flatten.first
     assert_equal(:rss_make_default.l, link_text)
 
     # Prove that user can change his default rss log type.
-    get(:index_rss_log, params: { type: :glossary_term, make_default: 1 } )
+    get(:index_rss_log, params: { type: :glossary_term, make_default: 1 })
     assert_equal("glossary_term", rolf.reload.default_rss_type)
   end
 
   # Prove that user content_filter works on rss_log
   def test_rss_log_with_content_filter
     login(users(:vouchered_only_user).name)
-    get(:index_rss_log, params: { type: :observation } )
+    get(:index_rss_log, params: { type: :observation })
     results = @controller.instance_variable_get("@objects")
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
@@ -266,7 +268,7 @@ class ObserverControllerTest < FunctionalTestCase
     # First 2 log entries
     logs = RssLog.order(updated_at: :desc).limit(2)
 
-    get(:next_rss_log, params: { id: logs.first } )
+    get(:next_rss_log, params: { id: logs.first })
     # assert_redirected_to does not work here because #next redirects to a url
     # which includes a query after the id, but assert_redirected_to treats
     # the query as part of the id.
@@ -274,7 +276,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_match(%r{/show_rss_log/#{logs.second.id}},
                  @response.header["Location"], "Redirected to wrong page")
 
-    get(:prev_rss_log, params: { id: logs.second } )
+    get(:prev_rss_log, params: { id: logs.second })
     assert_response(:redirect)
     assert_match(%r{/show_rss_log/#{logs.first.id}},
                  @response.header["Location"], "Redirected to wrong page")
@@ -283,11 +285,11 @@ class ObserverControllerTest < FunctionalTestCase
   def test_prev_and_next_observation
     # Uses default observation query
     o_chron = Observation.order(:created_at)
-    get(:next_observation, params: { id: o_chron.fourth.id } )
+    get(:next_observation, params: { id: o_chron.fourth.id })
     assert_redirected_to(action: :show_observation, id: o_chron.third.id,
                          params: @controller.query_params(QueryRecord.last))
 
-    get(:prev_observation, params: { id: o_chron.fourth.id } )
+    get(:prev_observation, params: { id: o_chron.fourth.id })
     assert_redirected_to(action: :show_observation, id: o_chron.fifth.id,
                          params: @controller.query_params(QueryRecord.last))
   end
@@ -390,7 +392,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_advanced_search_2
     get(:advanced_search,
-        params: { name: "Agaricus", location: "California" } )
+        params: { name: "Agaricus", location: "California" })
     assert_response(:success)
     results = @controller.instance_variable_get("@objects")
     assert_equal(4, results.length)
@@ -562,7 +564,7 @@ class ObserverControllerTest < FunctionalTestCase
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
       @controller.instance_variable_get("@title")
     )
-    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
     get_with_dump(:observation_search, pattern: pattern, page: 2)
     assert_template(:list_observations)
@@ -570,7 +572,7 @@ class ObserverControllerTest < FunctionalTestCase
       :query_title_pattern_search.t(types: "Observations", pattern: pattern),
       @controller.instance_variable_get("@title")
     )
-    refute_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
 
     # When there are no hits, no title is displayed, there's no rh tabset, and
     # html <title> contents are the action name
@@ -593,14 +595,14 @@ class ObserverControllerTest < FunctionalTestCase
   # goes directly to that observation.
   def test_observation_search_matching_id
     obs = observations(:minimal_unknown_obs)
-    get(:observation_search, params: { pattern: obs.id } )
+    get(:observation_search, params: { pattern: obs.id })
     assert_redirected_to(%r{/#{obs.id}})
   end
 
   # Prove that when the pattern causes an error,
   # MO just displays an observation list
   def test_observation_search_bad_pattern
-    get(:observation_search, params: { pattern: { error: "" } } )
+    get(:observation_search, params: { pattern: { error: "" } })
     assert_template(:list_observations)
   end
 
@@ -616,14 +618,14 @@ class ObserverControllerTest < FunctionalTestCase
     names = Name.suggest_alternate_spellings("Coprinus comatis")
     assert_not_equal([], names.map(&:search_name))
 
-    get(:observation_search, params: { pattern: "coprinis comatis" } )
+    get(:observation_search, params: { pattern: "coprinis comatis" })
     assert_template(:list_observations)
     assert_equal("coprinis comatis", assigns(:suggest_alternate_spellings))
     assert_select("div.alert-warning", 1)
     assert_select("a[href *= 'observation_search?pattern=Coprinus+comatus']",
                   text: names(:coprinus_comatus).search_name)
 
-    get(:observation_search, params: { pattern: "Coprinus comatus" } )
+    get(:observation_search, params: { pattern: "Coprinus comatus" })
     assert_response(:redirect)
   end
 
@@ -745,7 +747,7 @@ class ObserverControllerTest < FunctionalTestCase
     user = login("rolf")
     obs = observations(:strobilurus_diminutivus_obs)
     assert_equal(obs.user, user)
-    get(:show_observation, params: { id: obs.id } )
+    get(:show_observation, params: { id: obs.id })
     assert_show_observation
 
     # Make sure no queries created for show_image links.
@@ -862,37 +864,37 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal([dick.id], proj.user_group.users.map(&:id))
 
     login("rolf")
-    get(:show_observation, params: { id: obs.id } )
+    get(:show_observation, params: { id: obs.id })
     assert_select("a[href*=edit_observation]", count: 0)
     assert_select("a[href*=destroy_observation]", count: 0)
     assert_select("a[href*=add_image]", count: 0)
     assert_select("a[href*=remove_image]", count: 0)
     assert_select("a[href*=reuse_image]", count: 0)
-    get(:edit_observation, params: { id: obs.id } )
+    get(:edit_observation, params: { id: obs.id })
     assert_response(:redirect)
-    get(:destroy_observation, params: { id: obs.id } )
+    get(:destroy_observation, params: { id: obs.id })
     assert_flash_error
 
     login("mary")
-    get(:show_observation, params: { id: obs.id } )
+    get(:show_observation, params: { id: obs.id })
     assert_select("a[href*=edit_observation]", minimum: 1)
     assert_select("a[href*=destroy_observation]", minimum: 1)
     assert_select("a[href*=add_image]", minimum: 1)
     assert_select("a[href*=remove_image]", minimum: 1)
     assert_select("a[href*=reuse_image]", minimum: 1)
-    get(:edit_observation, params: { id: obs.id } )
+    get(:edit_observation, params: { id: obs.id })
     assert_response(:success)
 
     login("dick")
-    get(:show_observation, params: { id: obs.id } )
+    get(:show_observation, params: { id: obs.id })
     assert_select("a[href*=edit_observation]", minimum: 1)
     assert_select("a[href*=destroy_observation]", minimum: 1)
     assert_select("a[href*=add_image]", minimum: 1)
     assert_select("a[href*=remove_image]", minimum: 1)
     assert_select("a[href*=reuse_image]", minimum: 1)
-    get(:edit_observation, params: { id: obs.id } )
+    get(:edit_observation, params: { id: obs.id })
     assert_response(:success)
-    get(:destroy_observation, params: { id: obs.id } )
+    get(:destroy_observation, params: { id: obs.id })
     assert_flash_success
   end
 
@@ -901,9 +903,9 @@ class ObserverControllerTest < FunctionalTestCase
     obs2 = observations(:minimal_unknown_obs)
     obs3 = observations(:detailed_unknown_obs)
     observations(:locally_sequenced_obs).sequences.
-      first.update_attributes(observation: obs2)
+      first.update(observation: obs2)
     observations(:genbanked_obs).sequences.
-      each {|s| s.update_attributes(observation: obs3) }
+      each { |s| s.update(observation: obs3) }
     obs2.reload
     obs3.reload
 
@@ -940,12 +942,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_operator(obs3.sequences.count, :>, 1)
 
     # Can't edit anything if not logged in.
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
     assert_show_obs(:sequences, [], false)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
                     [[obs2.collection_numbers.first.id, false]],
                     false)
@@ -956,7 +958,7 @@ class ObserverControllerTest < FunctionalTestCase
                     [[obs2.sequences.first.id, false]],
                     false)
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, false] },
                     false)
@@ -969,13 +971,13 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Katrina isn't associated in any way with any of these observations.
     login("katrina")
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
     # But any logged-in user can add sequence to any observation.
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
                     [[obs2.collection_numbers.first.id, false]],
                     false)
@@ -986,7 +988,7 @@ class ObserverControllerTest < FunctionalTestCase
                     [[obs2.sequences.first.id, false]],
                     true)
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, false] },
                     false)
@@ -1001,12 +1003,12 @@ class ObserverControllerTest < FunctionalTestCase
     # herbarium records attached to NY.
     login("roy")
     assert_true(roy.curated_herbaria.any?)
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
                     [[obs2.collection_numbers.first.id, false]],
                     false)
@@ -1017,7 +1019,7 @@ class ObserverControllerTest < FunctionalTestCase
                     [[obs2.sequences.first.id, false]],
                     true)
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, false] },
                     false)
@@ -1031,12 +1033,12 @@ class ObserverControllerTest < FunctionalTestCase
     # Dick owns all of the sequences, is on obs3's project, and has a personal
     # herbarium.
     login("dick")
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], true)
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
                     [[obs2.collection_numbers.first.id, false]],
                     false)
@@ -1047,7 +1049,7 @@ class ObserverControllerTest < FunctionalTestCase
                     [[obs2.sequences.first.id, true]],
                     true)
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, true] },
                     true)
@@ -1061,12 +1063,12 @@ class ObserverControllerTest < FunctionalTestCase
     # Rolf owns obs1 and owns one herbarium record for both obs2 and obs3,
     # and he is a curator at NYBG.
     login("rolf")
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], true)
     assert_show_obs(:herbarium_records, [], true)
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(:collection_numbers,
                     [[obs2.collection_numbers.first.id, false]],
                     false)
@@ -1077,7 +1079,7 @@ class ObserverControllerTest < FunctionalTestCase
                     [[obs2.sequences.first.id, false]],
                     true)
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(:collection_numbers,
                     obs3.collection_numbers.map { |x| [x.id, false] }, false)
     assert_show_obs(
@@ -1093,12 +1095,12 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Mary owns obs2 and obs3, but has nothing to do with obs1.
     login("mary")
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], false)
     assert_show_obs(:herbarium_records, [], false)
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(
       :collection_numbers,
       [[obs2.collection_numbers.first.id, true]],
@@ -1115,7 +1117,7 @@ class ObserverControllerTest < FunctionalTestCase
       true
     )
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(
       :collection_numbers,
       obs3.collection_numbers.map { |x| [x.id, true] },
@@ -1134,12 +1136,12 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make sure admins can do everything.
     make_admin("katrina")
-    get(:show_observation, params: { id: obs1.id } )
+    get(:show_observation, params: { id: obs1.id })
     assert_show_obs(:collection_numbers, [], true)
     assert_show_obs(:herbarium_records, [], true)
     assert_show_obs(:sequences, [], true)
 
-    get(:show_observation, params: { id: obs2.id } )
+    get(:show_observation, params: { id: obs2.id })
     assert_show_obs(
       :collection_numbers,
       [[obs2.collection_numbers.first.id, true]],
@@ -1156,7 +1158,7 @@ class ObserverControllerTest < FunctionalTestCase
       true
     )
 
-    get(:show_observation, params: { id: obs3.id } )
+    get(:show_observation, params: { id: obs3.id })
     assert_show_obs(
       :collection_numbers,
       obs3.collection_numbers.map { |x| [x.id, true] },
@@ -1176,25 +1178,26 @@ class ObserverControllerTest < FunctionalTestCase
 
   def assert_show_obs(types, items, can_add)
     type = types.to_s.chop
-    selector = (types == :collection_numbers && !can_add) ? "i" : "li"
+    selector = types == :collection_numbers && !can_add ? "i" : "li"
     assert_select("#observation_#{types} #{selector}",
                   items.count,
                   "Wrong number of #{types} shown.")
-
-    assert(response.body.match(/href="\/#{type}\/create_#{type}\//),
-           "Expected to find a create link for #{types}.") if can_add
-    assert(!response.body.match(/href="\/#{type}\/create_#{type}\//),
-           "Expected not to find a create link for #{types}.") if !can_add
+    if can_add
+      assert(response.body.match(%r{href="/#{type}/create_#{type}/}),
+             "Expected to find a create link for #{types}.")
+    else
+      assert_not(response.body.match(%r{href="/#{type}/create_#{type}/}),
+                 "Expected not to find a create link for #{types}.")
+    end
 
     items.each do |id, can_edit|
-      assert(
-        response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
-        "Expected to find an edit link for #{type} #{id}."
-      ) if can_edit
-      assert(
-        !response.body.match(/href="\/#{type}\/edit_#{type}\/#{id}/),
-        "Expected not to find an edit link for #{type} #{id}."
-      ) if !can_edit
+      if can_edit
+        assert(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+               "Expected to find an edit link for #{type} #{id}.")
+      else
+        assert_not(response.body.match(%r{href="/#{type}/edit_#{type}/#{id}}),
+                   "Expected not to find an edit link for #{type} #{id}.")
+      end
     end
   end
 
@@ -1220,7 +1223,7 @@ class ObserverControllerTest < FunctionalTestCase
     # redirects to that user's page (instead of an email form).
     user = users(:no_general_questions_user)
     login(user.name)
-    get(:ask_user_question, params: { id: user.id } )
+    get(:ask_user_question, params: { id: user.id })
     assert_flash_text(:permission_denied.t)
   end
 
@@ -1249,7 +1252,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # recalc
     login
-    get(:recalc, params: { id: obs.id } )
+    get(:recalc, params: { id: obs.id })
     obs.reload
 
     assert_redirected_to(action: :show_observation, id: obs.id)
@@ -1457,7 +1460,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_user_list_equal([], desc.reload.authors)
 
     # Make sure it lets Rolf and only Rolf see this page.
-    assert(!mary.in_group?("reviewers"))
+    assert_not(mary.in_group?("reviewers"))
     assert(rolf.in_group?("reviewers"))
     requires_user(:review_authors,
                   [controller: :location,
@@ -1469,7 +1472,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Remove Rolf from reviewers group.
     user_groups(:reviewers).users.delete(rolf)
     rolf.reload
-    assert(!rolf.in_group?("reviewers"))
+    assert_not(rolf.in_group?("reviewers"))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
@@ -1512,7 +1515,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Remove Rolf from reviewers group.
     user_groups(:reviewers).users.delete(rolf)
-    assert(!rolf.reload.in_group?("reviewers"))
+    assert_not(rolf.reload.in_group?("reviewers"))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
@@ -1585,34 +1588,34 @@ class ObserverControllerTest < FunctionalTestCase
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
     login("rolf") # owner
 
     rolf.keep_filenames = :toss
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_but_hide
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-    get(:show_observation, params: { id: obs_id } )
+    get(:show_observation, params: { id: obs_id })
     assert_true(@response.body.include?("áč€εиts"))
   end
 
@@ -1688,7 +1691,7 @@ class ObserverControllerTest < FunctionalTestCase
       1, 1, 0
     )
     obs = assigns(:observation)
-    assert(!obs.specimen)
+    assert_not(obs.specimen)
     assert_empty(obs.collection_numbers)
   end
 
@@ -1764,7 +1767,7 @@ class ObserverControllerTest < FunctionalTestCase
       1, 1, 0
     )
     obs = assigns(:observation)
-    assert(!obs.specimen)
+    assert_not(obs.specimen)
     assert(obs.herbarium_records.count.zero?)
   end
 
@@ -2008,7 +2011,7 @@ class ObserverControllerTest < FunctionalTestCase
       ["500",     500],
       ["500m",    500],
       ["500 ft.", 152],
-      [' 500\' ', 152]
+      [" 500' ", 152]
     ].each do |input, output|
       where = "Unknown, Massachusetts, USA"
 
@@ -2800,8 +2803,7 @@ class ObserverControllerTest < FunctionalTestCase
       user_id: users(:rolf).id,
       image: file1,
       content_type: "image/jpeg",
-      created_at: week_ago,
-      # updated_at: week_ago
+      created_at: week_ago
     )
 
     new_image2 = Image.create(
@@ -2811,8 +2813,7 @@ class ObserverControllerTest < FunctionalTestCase
       user_id: users(:rolf).id,
       image: file2,
       content_type: "image/jpeg",
-      created_at: week_ago,
-      # updated_at: week_ago
+      created_at: week_ago
     )
 
     # assert(new_image1.updated_at < 1.day.ago)
@@ -2971,9 +2972,9 @@ class ObserverControllerTest < FunctionalTestCase
     init_for_project_checkbox_tests
 
     login("rolf")
-    get(:edit_observation, params: { id: @obs1.id } )
+    get(:edit_observation, params: { id: @obs1.id })
     assert_response(:redirect)
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(
       :edit_observation,
@@ -2994,9 +2995,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal([@proj1], @img2.reload.projects)
 
     login("mary")
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    get(:edit_observation, params: { id: @obs1.id } )
+    get(:edit_observation, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
     post(
       :edit_observation,
@@ -3025,9 +3026,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects, :sort)
 
     login("dick")
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_response(:redirect)
-    get(:edit_observation, params: { id: @obs1.id } )
+    get(:edit_observation, params: { id: @obs1.id })
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
   end
@@ -3088,7 +3089,7 @@ class ObserverControllerTest < FunctionalTestCase
     init_for_list_checkbox_tests
 
     login("rolf")
-    get(:edit_observation, params: { id: @obs1.id } )
+    get(:edit_observation, params: { id: @obs1.id })
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
     spl_start_length = @spl1.observations.length
     post(
@@ -3111,20 +3112,20 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(spl_start_length + 1, @spl1.reload.observations.length)
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_response(:redirect)
 
     login("mary")
-    get(:edit_observation, params: { id: @obs1.id } )
+    get(:edit_observation, params: { id: @obs1.id })
     assert_response(:redirect)
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
     @spl1.add_observation(@obs2)
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
 
     login("dick")
-    get(:edit_observation, params: { id: @obs2.id } )
+    get(:edit_observation, params: { id: @obs2.id })
     assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
   end
 
@@ -3158,7 +3159,7 @@ class ObserverControllerTest < FunctionalTestCase
     # No interest in this observation yet.
     #
     # <img[^>]+watch\d*.png[^>]+>[\w\s]*
-    get(:show_observation, params: { id: minimal_unknown.id } )
+    get(:show_observation, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
       /watch\d*.png/,
@@ -3173,7 +3174,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
-    get(:show_observation, params: { id: minimal_unknown.id } )
+    get(:show_observation, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
@@ -3189,7 +3190,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: minimal_unknown, user: rolf, state: false)
-    get(:show_observation, params: { id: minimal_unknown.id } )
+    get(:show_observation, params: { id: minimal_unknown.id })
     assert_response(:success)
     assert_image_link_in_html(
       /halfopen\d*.png/,
@@ -3213,37 +3214,37 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_lookup_comment
     c_id = comments(:minimal_unknown_obs_comment_1).id
-    get(:lookup_comment, params: { id: c_id } )
+    get(:lookup_comment, params: { id: c_id })
     assert_redirected_to(controller: :comment, action: :show_comment, id: c_id)
-    get(:lookup_comment, params: { id: 10_000 } )
+    get(:lookup_comment, params: { id: 10_000 })
     assert_redirected_to(controller: :comment, action: :index_comment)
     assert_flash_error
   end
 
   def test_lookup_image
     i_id = images(:in_situ_image).id
-    get(:lookup_image, params: { id: i_id } )
+    get(:lookup_image, params: { id: i_id })
     assert_redirected_to(controller: :image, action: :show_image, id: i_id)
-    get(:lookup_image, params: { id: 10_000 } )
+    get(:lookup_image, params: { id: 10_000 })
     assert_redirected_to(controller: :image, action: :index_image)
     assert_flash_error
   end
 
   def test_lookup_location
     l_id = locations(:albion).id
-    get(:lookup_location, params: { id: l_id } )
+    get(:lookup_location, params: { id: l_id })
     assert_redirected_to(controller: :location,
                          action: :show_location, id: l_id)
-    get(:lookup_location, params: { id: "Burbank, California" } )
+    get(:lookup_location, params: { id: "Burbank, California" })
     assert_redirected_to(controller: :location, action: :show_location,
                          id: locations(:burbank).id)
-    get(:lookup_location, params: { id: "California, Burbank" } )
+    get(:lookup_location, params: { id: "California, Burbank" })
     assert_redirected_to(controller: :location, action: :show_location,
                          id: locations(:burbank).id)
-    get(:lookup_location, params: { id: "Zyzyx, Califonria" } )
+    get(:lookup_location, params: { id: "Zyzyx, Califonria" })
     assert_redirected_to(controller: :location, action: :index_location)
     assert_flash_error
-    get(:lookup_location, params: { id: "California" } )
+    get(:lookup_location, params: { id: "California" })
     # assert_redirected_to(controller: :location, action: :index_location)
     assert_redirected_to(%r{/location/index_location})
     assert_flash_warning
@@ -3251,46 +3252,46 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_lookup_accepted_name
     get(:lookup_accepted_name,
-        params: { id: names(:lactarius_subalpinus).text_name } )
+        params: { id: names(:lactarius_subalpinus).text_name })
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:lactarius_alpinus))
   end
 
   def test_lookup_name
     n_id = names(:fungi).id
-    get(:lookup_name, params: { id: n_id } )
+    get(:lookup_name, params: { id: n_id })
     assert_redirected_to(controller: :name, action: :show_name, id: n_id)
 
-    get(:lookup_name, params: { id: names(:coprinus_comatus).id } )
+    get(:lookup_name, params: { id: names(:coprinus_comatus).id })
     assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
 
-    get(:lookup_name, params: { id: "Agaricus campestris" } )
+    get(:lookup_name, params: { id: "Agaricus campestris" })
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
 
-    get(:lookup_name, params: { id: "Agaricus newname" } )
+    get(:lookup_name, params: { id: "Agaricus newname" })
     assert_redirected_to(controller: :name, action: :index_name)
     assert_flash_error
 
-    get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" } )
+    get(:lookup_name, params: { id: "Amanita baccata sensu Borealis" })
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:amanita_baccata_borealis).id)
 
-    get(:lookup_name, params: { id: "Amanita baccata" } )
+    get(:lookup_name, params: { id: "Amanita baccata" })
     assert_redirected_to(%r{/name/index_name})
     assert_flash_warning
 
-    get(:lookup_name, params: { id: "Agaricus campestris L." } )
+    get(:lookup_name, params: { id: "Agaricus campestris L." })
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
 
-    get(:lookup_name, params: { id: "Agaricus campestris Linn." } )
+    get(:lookup_name, params: { id: "Agaricus campestris Linn." })
     assert_redirected_to(controller: :name, action: :show_name,
                          id: names(:agaricus_campestris).id)
 
     # Prove that when there are no hits and exactly one spelling suggestion,
     # it gives a flash warning and shows the page for the suggestion.
-    get(:lookup_name, params: { id: "Fungia" } )
+    get(:lookup_name, params: { id: "Fungia" })
     assert_flash_text(:runtime_suggest_one_alternate.t(type: :name,
                                                        match: "Fungia"))
     assert_redirected_to(controller: :name, action: :show_name,
@@ -3298,7 +3299,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Prove that when there are no hits and >1 spelling suggestion,
     # it flashes a warning and shows the name index
-    get(:lookup_name, params: { id: "Verpab" } )
+    get(:lookup_name, params: { id: "Verpab" })
     assert_flash_text(:runtime_suggest_multiple_alternates.t(type: :name,
                                                              match: "Verpab"))
     assert_redirected_to(%r{/name/index_name})
@@ -3307,54 +3308,54 @@ class ObserverControllerTest < FunctionalTestCase
     # stubbing a method called by lookup_name in order to provoke an error.
     ObserverController.any_instance.stubs(:fix_name_matches).
       raises(RuntimeError)
-    get(:lookup_name, params: { id: names(:fungi).text_name } )
+    get(:lookup_name, params: { id: names(:fungi).text_name })
     assert_flash_text("RuntimeError")
   end
 
   def test_lookup_observation
     get(:lookup_observation,
-        params: { id: observations(:minimal_unknown_obs).id } )
+        params: { id: observations(:minimal_unknown_obs).id })
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: observations(:minimal_unknown_obs).id)
   end
 
   def test_lookup_project
     p_id = projects(:eol_project).id
-    get(:lookup_project, params: { id: p_id } )
+    get(:lookup_project, params: { id: p_id })
     assert_redirected_to(controller: :project, action: :show_project, id: p_id)
-    get(:lookup_project, params: { id: "Bolete" } )
+    get(:lookup_project, params: { id: "Bolete" })
     assert_redirected_to(controller: :project, action: :show_project,
                          id: projects(:bolete_project).id)
-    get(:lookup_project, params: { id: "Bogus" } )
+    get(:lookup_project, params: { id: "Bogus" })
     assert_redirected_to(controller: :project, action: :index_project)
     assert_flash_error
-    get(:lookup_project, params: { id: "project" } )
+    get(:lookup_project, params: { id: "project" })
     assert_redirected_to(%r{/project/index_project})
     assert_flash_warning
   end
 
   def test_lookup_species_list
     sl_id = species_lists(:first_species_list).id
-    get(:lookup_species_list, params: { id: sl_id } )
+    get(:lookup_species_list, params: { id: sl_id })
     assert_redirected_to(controller: :species_list, action: :show_species_list,
                          id: sl_id)
-    get(:lookup_species_list, params: { id: "Mysteries" } )
+    get(:lookup_species_list, params: { id: "Mysteries" })
     assert_redirected_to(controller: :species_list, action: :show_species_list,
                          id: species_lists(:unknown_species_list).id)
-    get(:lookup_species_list, params: { id: "species list" } )
+    get(:lookup_species_list, params: { id: "species list" })
     assert_redirected_to(%r{/species_list/index_species_list})
     assert_flash_warning
-    get(:lookup_species_list, params: { id: "Flibbertygibbets" } )
+    get(:lookup_species_list, params: { id: "Flibbertygibbets" })
     assert_redirected_to(controller: :species_list, action: :index_species_list)
     assert_flash_error
   end
 
   def test_lookup_user
-    get(:lookup_user, params: { id: rolf.id } )
+    get(:lookup_user, params: { id: rolf.id })
     assert_redirected_to(controller: :observer, action: :show_user, id: rolf.id)
-    get(:lookup_user, params: { id: "mary" } )
+    get(:lookup_user, params: { id: "mary" })
     assert_redirected_to(controller: :observer, action: :show_user, id: mary.id)
-    get(:lookup_user, params: { id: "Einstein" } )
+    get(:lookup_user, params: { id: "Einstein" })
     assert_redirected_to(controller: :observer, action: :index_rss_log)
     assert_flash_error
     # This caused router to crash in the wild.
@@ -3400,7 +3401,7 @@ class ObserverControllerTest < FunctionalTestCase
       assert_response(:success)
       assert_textarea_value(:val, :app_banner_box.l)
 
-      post(:change_banner, params: { val: "new banner" } )
+      post(:change_banner, params: { val: "new banner" })
       assert_no_flash
       assert_redirected_to(action: :list_rss_logs)
       assert_equal("new banner", :app_banner_box.l)
@@ -3436,9 +3437,9 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_index_observation_by_past_by
-    get(:index_observation, params: { by: :modified } )
+    get(:index_observation, params: { by: :modified })
     assert_response(:success)
-    get(:index_observation, params: { by: :created } )
+    get(:index_observation, params: { by: :created })
     assert_response(:success)
   end
 
@@ -3457,7 +3458,7 @@ class ObserverControllerTest < FunctionalTestCase
       accession_number: "Mary #1234"
     )
 
-    get(:download_observations, params: { q: query.id.alphabetize } )
+    get(:download_observations, params: { q: query.id.alphabetize })
     assert_no_flash
     assert_response(:success)
 
@@ -3580,7 +3581,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_print_labels
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     assert_operator(query.num_results, :>=, 4)
-    get(:print_labels, params: { q: query.id.alphabetize } )
+    get(:print_labels, params: { q: query.id.alphabetize })
     assert_select("div#labels td", query.num_results)
     assert_match(/314159/, @response.body) # make sure mycoflora id in there!
 
@@ -3644,21 +3645,21 @@ class ObserverControllerTest < FunctionalTestCase
   # When pattern is a user's id, go directly to that user's page
   def test_user_search_id
     user = users(:rolf)
-    get(:user_search, params: { pattern: user.id } )
+    get(:user_search, params: { pattern: user.id })
     assert_redirected_to(action: "show_user", id: user.id)
   end
 
   # When a non-id pattern matches only one user, show that user.
   def test_user_search_name
     user = users(:uniquely_named_user)
-    get(:user_search, params: { pattern: user.name } )
+    get(:user_search, params: { pattern: user.name })
     assert_redirected_to(%r{/show_user/#{user.id}})
   end
 
   # When pattern matches multiple users, list them.
   def test_user_search_multiple_hits
     pattern = "Roy"
-    get(:user_search, params: { pattern: pattern } )
+    get(:user_search, params: { pattern: pattern })
     # matcher includes optional quotation mark (?.)
     assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
                  "Wrong page displayed")
@@ -3671,7 +3672,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_user_search_unmatched
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:user_search,
-                               params: { pattern: unmatched_pattern } )
+                               params: { pattern: unmatched_pattern })
     assert_template(:list_users)
 
     assert_empty(@controller.instance_variable_get("@title"),
@@ -3706,7 +3707,7 @@ class ObserverControllerTest < FunctionalTestCase
              where("observations.user_id = #{user.id}
                     AND names.rank = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { id: user.id } )
+    get(:checklist, params: { id: user.id })
     assert_match(/Checklist for #{user.name}/, css_select("title").text,
                  "Wrong page")
 
@@ -3721,7 +3722,7 @@ class ObserverControllerTest < FunctionalTestCase
                         = #{list.id}
                     AND names.rank = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { species_list_id: list.id } )
+    get(:checklist, params: { species_list_id: list.id })
     assert_match(/Checklist for #{list.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -3735,7 +3736,7 @@ class ObserverControllerTest < FunctionalTestCase
              where("observations_projects.project_id = #{project.id}
                     AND names.rank = #{Name.ranks[:Species]}").distinct
 
-    get(:checklist, params: { project_id: project.id } )
+    get(:checklist, params: { project_id: project.id })
     assert_match(/Checklist for #{project.title}/, css_select("title").text,
                  "Wrong page")
 
@@ -3772,11 +3773,11 @@ class ObserverControllerTest < FunctionalTestCase
     # users sorted in default order
     users_alpha = User.order(:name)
 
-    get(:next_user, params: { id: users_alpha.fourth.id } )
+    get(:next_user, params: { id: users_alpha.fourth.id })
     assert_redirected_to(action: :show_user, id: users_alpha.fifth.id,
                          params: @controller.query_params(QueryRecord.last))
 
-    get(:prev_user, params: { id: users_alpha.fourth.id } )
+    get(:prev_user, params: { id: users_alpha.fourth.id })
     assert_redirected_to(action: :show_user, id: users_alpha.third.id,
                          params: @controller.query_params(QueryRecord.last))
   end
@@ -3804,26 +3805,26 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove that non-admin cannot change bonuses and attempt to do so
     # redirects to target user's page
     login("rolf")
-    get(:change_user_bonuses, params: { id: user.id } )
+    get(:change_user_bonuses, params: { id: user.id })
     assert_redirected_to(action: :show_user, id: user.id)
 
     # Prove that admin posting bonuses in wrong format causes a flash error,
     # leaving bonuses and contributions unchanged.
     make_admin
-    post(:change_user_bonuses, params: { id: user.id, val: "wong format 7" } )
+    post(:change_user_bonuses, params: { id: user.id, val: "wong format 7" })
     assert_flash_error
     user.reload
     assert_empty(user.bonuses)
     assert_equal(old_contribution, user.contribution)
 
     # Prove that admin can change bonuses
-    post(:change_user_bonuses, params: { id: user.id, val: bonus } )
+    post(:change_user_bonuses, params: { id: user.id, val: bonus })
     user.reload
     assert_equal([[7, "lucky"], [13, "unlucky"]], user.bonuses)
     assert_equal(old_contribution + 20, user.contribution)
 
     # Prove that admin can get bonuses
-    get(:change_user_bonuses, params: { id: user.id } )
+    get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
   end
 end

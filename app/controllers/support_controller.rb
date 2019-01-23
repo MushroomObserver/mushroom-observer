@@ -92,7 +92,7 @@ class SupportController < ApplicationController
 
   def donors
     store_location
-    @donor_list = Donation.get_donor_list
+    @donor_list = Donation.donor_list
   end
 
   def wrapup_2011

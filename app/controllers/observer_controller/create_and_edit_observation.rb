@@ -244,7 +244,7 @@ class ObserverController
   def lookup_herbarium(name)
     return if name.blank?
 
-    name2 = name.sub(/^[^-]* - /, '')
+    name2 = name.sub(/^[^-]* - /, "")
     herbarium = Herbarium.where(name: [name, name2]).first ||
                 Herbarium.where(code: name).first
     return herbarium unless herbarium.nil?
@@ -312,7 +312,6 @@ class ObserverController
   #
   def edit_observation # :prefetch: :norobots:
     pass_query_params
-    includes = [:name, :images, :location]
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
@@ -400,9 +399,9 @@ class ObserverController
     return if @observation.specimen
     return unless @observation.specimen_was
 
-    return if @observation.collection_numbers.length == 0 &&
-              @observation.herbarium_records.length == 0 &&
-              @observation.sequences.length == 0
+    return if @observation.collection_numbers.empty? &&
+              @observation.herbarium_records.empty? &&
+              @observation.sequences.empty?
 
     flash_warning(:edit_observation_turn_off_specimen_with_records_present.t)
   end
@@ -451,8 +450,10 @@ class ObserverController
     id = params[:id].to_s
     begin
       @observation = Observation.find(id)
+      # rubocop:disable Lint/UselessAssignment
       display_name = @observation.name.display_name
       text = @observation.calc_consensus(true)
+      # rubocop:enable Lint/UselessAssignment
     rescue => err
       flash_error(:observer_recalc_caught_error.t(error: err))
     end

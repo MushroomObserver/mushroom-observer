@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = API Controller
 #
@@ -107,7 +108,7 @@ class ApiController < ApplicationController
   end
 
   def upload_present?
-    (upload_length > 0 &&
+    (upload_length.positive? &&
      upload_type.present? &&
      upload_type != "application/x-www-form-urlencoded" &&
      upload_data.present?)

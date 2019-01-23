@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Base Test Case
 #
@@ -129,7 +131,7 @@ module ActiveSupport
 
     # Record time this test started to run.
     def start_timer
-      @@times = {} if !defined?(@@times)
+      @@times = {} unless defined?(@@times)
       @@times[method_name] = Time.now
     end
 
@@ -144,8 +146,8 @@ module ActiveSupport
     # causes this test to take up to several minutes to complete.
     def clear_logs
       ["development", "test", "email-debug", "process_image"].each do |file|
-        file = "#{Rails.root}/log/#{file}.log"
-        next unless File.exists?(file)
+        file = Rails.root.join("log", "#{file}.log")
+        next unless File.exist?(file)
 
         File.truncate(file, 0)
       end

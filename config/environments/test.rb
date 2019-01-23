@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+#
+# rubocop:disable Metrics/BlockLength
 MushroomObserver::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+  # Settings specified here  take precedence over those in config/application.rb
 
   # ----------------------------
   #  MO configuration.
@@ -8,7 +11,8 @@ MushroomObserver::Application.configure do
   config.domain      = "mushroomobserver.org"
   config.http_domain = "http://mushroomobserver.org"
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
   config.bad_domains = ["www.mushroomobserver.org"]
 
   # Disable queued email.
@@ -41,7 +45,7 @@ MushroomObserver::Application.configure do
   # Configure static asset server for tests with Cache-Control for performance.
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
-    'Cache-Control' => 'public, max-age=3600'
+    "Cache-Control" => "public, max-age=3600"
   }
 
   # Show full error reports and disable caching
@@ -59,8 +63,8 @@ MushroomObserver::Application.configure do
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
 
-  # Use SQL instead of Active Record's schema dumper when creating the test database.
-  # This is necessary if your schema can't be completely dumped by the schema dumper,
+  # Use SQL, not Active Record's schema dumper, when creating the test database.
+  # Necessary if your schema can't be completely dumped by the schema dumper,
   # like if you have constraints or database-specific column types
   # config.active_record.schema_format = :sql
 
@@ -81,6 +85,7 @@ MushroomObserver::Application.configure do
 
   config.active_support.test_order = :random
 end
+# rubocop:enable Metrics/BlockLength
 
 file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

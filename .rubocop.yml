@@ -126,6 +126,14 @@ Layout/DotPosition:
 Style/AsciiComments:
   Enabled: false
 
+# Prefer n == 0, n > 0, n < 0
+# over n.zero?, n.positive? n.negative?
+# Rubocop default is "predicates".
+# But comparisons are transparent and shorter than the predicates,
+# and we've always used the comparisons.
+Style/NumericPredicate:
+  EnforcedStyle: comparison
+
 # Repeat the RuboCop defaults because CodeClimate silently overrides them
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
