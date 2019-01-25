@@ -384,15 +384,11 @@ module ControllerExtensions
   #     str.strip_squeeze.downcase
   #   end
   #
-  def assert_response_equal_file(*_files, &_block)
-    body = @response.body.clone # Rails 3
-    # in Rails 4, it appears that above strips the '\n's added to the body when
-    # the csv converter adds separate rows.
-    # I originally manually replaced the '\n's with the following lines.
-    # But this is bad, e.g., it could cause problems if a different separator is
-    # used. But I cannot figure out how to access the raw body.
-    #  body = @response.body_parts.join("\n").clone
-    #  assert_string_equal_file(body, *files, &block)
+  def assert_response_equal_file(*files, &block)
+    body = @response.body_parts.join("\n").clone
+    # Fix encoding, which GET incorrectly returns as utf-8
+    body.force_encoding("iso-8859-1") if @response.content_type == "text/csv"
+    assert_string_equal_file(body, *files, &block)
   end
 
   # Send a general request of any type.  Check login_required and check_user
