@@ -218,32 +218,17 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def render_name_list_as_txt(names, charset = nil)
-    charset ||= "UTF-8"
-    charset = charset.upcase
-    unless ["ASCII", "ISO-8859-1", "UTF-8"].include?(charset)
-      raise "Unsupported text report charset: #{charset}"
-    end
-
-    str = names.map(&:real_search_name).join("\r\n")
-    str = case charset
-          when "ASCII" then str.to_ascii
-          when "UTF-8" then "\xEF\xBB\xBF" + str
-          else str.iconv(charset)
-          end
+  def render_name_list_as_txt(names)
+    charset = "UTF-8"
+    str = "\xEF\xBB\xBF" + names.map(&:real_search_name).join("\r\n")
     send_data(str, type: "text/plain",
                    charset: charset,
                    disposition: "attachment",
                    filename: "report.txt")
   end
 
-  def render_name_list_as_csv(names, charset = nil)
-    charset ||= "ISO-8859-1"
-    charset = charset.upcase
-    unless ["ASCII", "ISO-8859-1"].include?(charset)
-      raise "Unsupported CSV report charset: #{charset}"
-    end
-
+  def render_name_list_as_csv(names)
+    charset = "ISO-8859-1"
     str = CSV.generate do |csv|
       csv << %w[scientific_name authority citation accepted]
       names.each do |name|
@@ -251,13 +236,7 @@ class SpeciesListController < ApplicationController
                 name.deprecated ? "" : "1"].map(&:presence)
       end
     end
-    str = case charset
-          when "UTF-8" then str
-          when "ASCII" then str.to_ascii
-          else
-            str.force_encoding("UTF-8")
-            str.iconv(charset)
-          end
+    str = str.iconv(charset)
     send_data(str, type: "text/csv",
                    charset: charset,
                    header: "present",
@@ -266,6 +245,7 @@ class SpeciesListController < ApplicationController
   end
 
   def render_name_list_as_rtf(names)
+    charset = "UTF-8"
     doc = RTF::Document.new(RTF::Font::SWISS)
     names.each do |name|
       rank      = name.rank
@@ -280,7 +260,7 @@ class SpeciesListController < ApplicationController
       doc.line_break
     end
     send_data(doc.to_rtf, type: "text/rtf",
-                          charset: "ISO-8859-1",
+                          charset: charset,
                           disposition: "attachment",
                           filename: "report.rtf")
   end
