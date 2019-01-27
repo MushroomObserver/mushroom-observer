@@ -20,14 +20,6 @@ Layout/ConditionPosition:
   Exclude:
     - 'app/controllers/translation_controller.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
-# SupportedStylesAlignWith: start_of_line, def
-Layout/DefEndAlignment:
-  Exclude:
-    - 'app/models/queued_email/name_change.rb'
-
 # Offense count: 581
 # Cop supports --auto-correct.
 Layout/EmptyLineAfterGuardClause:

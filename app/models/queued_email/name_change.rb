@@ -5,8 +5,9 @@ class QueuedEmail::NameChange < QueuedEmail
     get_object(:name, ::Name)
   end
 
-  def description; get_object(:description, ::NameDescription,
-                              :allow_nil); end
+  def description
+    get_object(:description, ::NameDescription, :allow_nil)
+  end
 
   def old_name_version
     get_integer(:old_name_version)
