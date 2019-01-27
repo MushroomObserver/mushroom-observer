@@ -15,14 +15,6 @@
 Layout/AlignHash:
   Enabled: false
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: auto_detection, squiggly, active_support, powerpack, unindent
-Layout/IndentHeredoc:
-  Exclude:
-    - 'script/refresh_sitemap'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: Width, IgnoredPatterns.
