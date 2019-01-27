@@ -48,7 +48,8 @@ namespace :jason do
       projects
       species_lists
       users
-      votes]
+      votes
+]
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|
