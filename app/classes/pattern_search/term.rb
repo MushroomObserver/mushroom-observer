@@ -123,7 +123,7 @@ module PatternSearch
             raise(BadHerbariumError.new(var: var, val: val))
         else
           Herbarium.find_by_code(val) ||
-          Herbarium.find_by_name(val) ||
+            Herbarium.find_by_name(val) ||
             raise(BadHerbariumError.new(var: var, val: val))
         end
       end.map(&:id)
@@ -138,7 +138,7 @@ module PatternSearch
             raise(BadLocationError.new(var: var, val: val))
         else
           Location.find_by_name(val) ||
-          Location.find_by_scientific_name(val) ||
+            Location.find_by_scientific_name(val) ||
             raise(BadLocationError.new(var: var, val: val))
         end
       end.map(&:id)

@@ -88,7 +88,7 @@ module DescriptionHelper
     # Filter out empty descriptions (unless it's public or one you own).
     list = obj.descriptions.select do |desc|
       desc.has_any_notes? || (desc.user == @user) ||
-      reviewer? || (desc.source_type == :public)
+        reviewer? || (desc.source_type == :public)
     end
 
     # Sort, putting the default one on top, followed by public ones, followed

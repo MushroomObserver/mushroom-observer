@@ -49,10 +49,10 @@ class API
       parse_create_params!
       {
         when:             parse(:date, :date, help: :when_taken) ||
-                          @default_date,
+          @default_date,
         notes:            parse(:string, :notes, default: ""),
         copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
-                          user.legal_name,
+          user.legal_name,
         license:          parse(:license, :license) || user.license,
         original_name:    parse(:string, :original_name,
                                 limit: 120, help: :original_name),

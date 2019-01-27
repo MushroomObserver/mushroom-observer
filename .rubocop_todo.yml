@@ -15,28 +15,6 @@
 Layout/AlignHash:
   Enabled: false
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineHashBraceLayout:
-  Exclude:
-    - 'app/models/location_description.rb'
-    - 'app/models/name_description.rb'
-    - 'app/models/notification.rb'
-    - 'lib/tasks/location.rake'
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: aligned, indented
-Layout/MultilineOperationIndentation:
-  Exclude:
-    - 'app/classes/api/image_api.rb'
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/classes/pivotal/story.rb'
-    - 'app/helpers/description_helper.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Layout/RescueEnsureAlignment:
