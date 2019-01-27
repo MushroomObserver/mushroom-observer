@@ -573,7 +573,7 @@ MushroomObserver::Application.routes.draw do
     get controller.to_s => "#{controller}#index"
 
     # Standard routes
-    actions.each do |action, attributes|
+    actions.each_key do |action|
       get "#{controller}/#{action}", controller: controller, action: action
       match "#{controller}(/#{action}(/:id))",
             controller: controller,
