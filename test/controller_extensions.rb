@@ -364,14 +364,18 @@ module ControllerExtensions
 
     if found.keys
       flunk(build_message(
-              msg, "Expected HTML to contain form that posts to <#{url}>," \
-                  "but only found these: <#{found.keys.sort.join(">, <")}>."
-            ))
+              msg,
+              "Expected HTML to contain form that posts to <#{url}>," \
+              "but only found these: <#{found.keys.sort.join(">, <")}>."
+            )
+           )
     else
       flunk(build_message(
-              msg, "Expected HTML to contain form that posts to <#{url}>," \
+              msg,
+              "Expected HTML to contain form that posts to <#{url}>," \
               "but found nothing at all."
-            ))
+            )
+           )
     end
   end
 
