@@ -117,7 +117,7 @@ namespace :jason do
             ids[ua][1] += 1
             totals[str] ||= 0
             totals[str] += 1
-    end
+          end
         end
       end
     end

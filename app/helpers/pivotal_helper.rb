@@ -4,16 +4,28 @@ module PivotalHelper
     current_vote = story.user_vote(@user)
     result = "".html_safe
     result << if @user && current_vote < MO.pivotal_max_vote
-                link_to(image_tag("vote_up_hot.png"), {}, data: { role: "vote_on_story", story: story.id, user: @user.id, vote: current_vote + 1 })
+                link_to(image_tag("vote_up_hot.png"),
+                        {},
+                        data: { role: "vote_on_story",
+                                story: story.id,
+                                user: @user.id,
+                                vote: current_vote + 1 })
               else
                 image_tag("vote_up_cold.png")
-    end
-    result << content_tag(:span, story.score.to_s, id: "pivotal_vote_num_#{story.id}")
+              end
+    result << content_tag(:span,
+                          story.score.to_s,
+                          id: "pivotal_vote_num_#{story.id}")
     result << if @user && current_vote > MO.pivotal_min_vote
-                link_to(image_tag("vote_down_hot.png"), {}, data: { role: "vote_on_story", story: story.id, user: @user.id, vote: current_vote - 1 })
+                link_to(image_tag("vote_down_hot.png"),
+                        {},
+                        data: { role: "vote_on_story",
+                                story: story.id,
+                                user: @user.id,
+                                vote: current_vote - 1 })
               else
                 image_tag("/assets/vote_down_cold.png")
-    end
+              end
     result
   end
 
@@ -33,8 +45,15 @@ module PivotalHelper
       comments << pivotal_comment(comment, num)
     end
     result += content_tag(:div, comments.safe_join, id: "pivotal_comments")
-    form = content_tag(:textarea, "", id: "pivotal_comment", cols: 80, rows: 10) + safe_br
-    form += tag(:input, type: :button, value: :pivotal_post_comment.l, data: { role: "post_comment", story: story.id })
+    form = content_tag(:textarea,
+                       "",
+                       id: "pivotal_comment",
+                       cols: 80,
+                       rows: 10) + safe_br
+    form += tag(:input,
+                type: :button,
+                value: :pivotal_post_comment.l,
+                data: { role: "post_comment", story: story.id })
     result += content_tag(:form, form, action: "", style: "margin-top:1em")
     result
   end

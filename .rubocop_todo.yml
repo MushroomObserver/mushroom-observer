@@ -20,17 +20,6 @@ Layout/ConditionPosition:
   Exclude:
     - 'app/controllers/translation_controller.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleAlignWith, AutoCorrect, Severity.
-# SupportedStylesAlignWith: keyword, variable, start_of_line
-Layout/EndAlignment:
-  Exclude:
-    - 'app/classes/map_set.rb'
-    - 'app/helpers/description_helper.rb'
-    - 'app/helpers/pivotal_helper.rb'
-    - 'lib/tasks/jason.rake'
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: AllowForAlignment, ForceEqualSignAlignment.
