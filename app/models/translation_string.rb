@@ -66,6 +66,7 @@ class TranslationString < AbstractModel
     data = TranslationString.translations(language.locale.to_sym)
     fail "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
     fail "Localization for :#{tag.to_sym} doesn't exist!" unless data[tag.to_sym]
+
     data[tag.to_sym] = text
   end
 

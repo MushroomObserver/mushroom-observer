@@ -74,6 +74,7 @@ class SequenceController < ApplicationController
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
+
     build_sequence if request.method == "POST"
   end
 
@@ -82,6 +83,7 @@ class SequenceController < ApplicationController
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
+
     figure_out_where_to_go_back_to
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
@@ -95,6 +97,7 @@ class SequenceController < ApplicationController
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
+
     figure_out_where_to_go_back_to
     if check_permission(@sequence)
       @sequence.destroy

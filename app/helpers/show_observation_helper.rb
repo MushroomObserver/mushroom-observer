@@ -26,6 +26,7 @@ module ShowObservationHelper
   # Observer Preference: Agaricus L.
   def owner_id_line(obs)
     return unless obs.show_owner_id?
+
     capture do
       concat(:show_observation_owner_id.t + ": ")
       concat(obs.owner_favorite_or_explanation.t)

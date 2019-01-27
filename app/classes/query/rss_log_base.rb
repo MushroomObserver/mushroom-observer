@@ -33,6 +33,7 @@ module Query
 
     def add_rss_log_type_condition
       return if types.include?("all")
+
       types = self.types
       types &= RssLog.all_types
       if types.empty?

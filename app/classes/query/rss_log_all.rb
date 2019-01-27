@@ -36,6 +36,7 @@ module Query
 
     def params_minus_type
       return params unless params.key?(:type)
+
       params2 = params.dup
       params2.delete(:type)
       params2

@@ -70,8 +70,10 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
+
     @back_object = @observation
     return unless make_sure_can_edit!(@observation)
+
     if request.method == "GET"
       @collection_number = CollectionNumber.new(name: @user.legal_name)
     elsif request.method == "POST"
@@ -87,8 +89,10 @@ class CollectionNumberController < ApplicationController
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
+
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@collection_number)
+
     if request.method == "GET"
       # nothing
     elsif request.method == "POST"
@@ -102,9 +106,11 @@ class CollectionNumberController < ApplicationController
     pass_query_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
+
     @observation = find_or_goto_index(Observation, params[:obs])
     return unless @observation
     return unless make_sure_can_delete!(@collection_number)
+
     @collection_number.remove_observation(@observation)
     redirect_with_query(@observation.show_link_args)
   end
@@ -114,6 +120,7 @@ class CollectionNumberController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
     return unless @collection_number
     return unless make_sure_can_delete!(@collection_number)
+
     @collection_number.destroy
     redirect_with_query(action: :index_collection_number)
   end
@@ -195,11 +202,13 @@ class CollectionNumberController < ApplicationController
 
   def whitelisted_collection_number_params
     return {} unless params[:collection_number]
+
     params.require(:collection_number).permit(:name, :number)
   end
 
   def make_sure_can_edit!(obj)
     return true if in_admin_mode? || obj.can_edit?
+
     flash_error :permission_denied.t
     redirect_to_observation_or_collection_number
     false
@@ -207,6 +216,7 @@ class CollectionNumberController < ApplicationController
 
   def make_sure_can_delete!(collection_number)
     return true if collection_number.can_edit? || in_admin_mode?
+
     flash_error(:permission_denied.t)
     redirect_to(collection_number.show_link_args)
     false
@@ -235,6 +245,7 @@ class CollectionNumberController < ApplicationController
     elsif @back != "index"
       @back_object = Observation.safe_find(@back)
       return if @back_object
+
       if @collection_number.observations.count == 1
         @back_object = @collection_number.observations.first
       else

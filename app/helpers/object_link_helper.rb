@@ -114,6 +114,7 @@ module ObjectLinkHelper
   #
   def user_list(title, users = [])
     return safe_empty unless users && users.any?
+
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
     title + ": " + links.safe_join(", ")
@@ -124,6 +125,7 @@ module ObjectLinkHelper
   #   Species List: <%= species_list_link(observation.species_lists.first) %>
   def link_to_object(object, name = nil)
     return nil unless object
+
     link_to(name || object.title.t, object.show_link_args)
   end
 
@@ -134,6 +136,7 @@ module ObjectLinkHelper
   def description_link(desc)
     result = description_title(desc)
     return result if result.match?("(#{:private.t})$")
+
     link_with_query(result, desc.show_link_args)
   end
 
@@ -168,6 +171,7 @@ module ObjectLinkHelper
               id: obs.id)
     else
       return :show_observation_specimen_available.t if obs.specimen
+
       :show_observation_specimen_not_available.t
     end
   end

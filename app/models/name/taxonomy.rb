@@ -129,6 +129,7 @@ class Name < AbstractModel
   def genus
     @genus ||= begin
       return unless text_name.include?(" ")
+
       genus_name = text_name.split(" ", 2).first
       genera     = Name.where(text_name: genus_name, correct_spelling_id: nil)
       accepted   = genera.reject(&:deprecated)
@@ -164,6 +165,7 @@ class Name < AbstractModel
       name = words.join(" ")
       words.pop
       next if name == text_name || name[-1] == "."
+
       parent = Name.best_match(name)
       parents << parent if parent
       return [parent] if !all && parent && !parent.deprecated
@@ -183,6 +185,7 @@ class Name < AbstractModel
     # Return single parent as an array for backwards compatibility.
     return parents if all
     return [] unless parents.any?
+
     [parents.first]
   end
 
@@ -192,8 +195,9 @@ class Name < AbstractModel
   # arbitrarily where there is still ambiguity.  Useful if you just need a
   # name and it's not so critical that it be the exactly correct one.
   def self.best_match(name)
-    matches  = Name.where(search_name: name, correct_spelling_id: nil)
+    matches = Name.where(search_name: name, correct_spelling_id: nil)
     return matches.first if matches.any?
+
     matches  = Name.where(text_name: name, correct_spelling_id: nil)
     accepted = matches.reject(&:deprecated)
     matches  = accepted if accepted.any?
@@ -234,8 +238,10 @@ class Name < AbstractModel
           "classification LIKE '%#{rank}: _#{text_name}_%'"
     sql += " AND correct_spelling_id IS NULL"
     return Name.where(sql).to_a if all
+
     Name.all_ranks.reverse_each do |rank2|
       next if rank_index(rank2) >= rank_index(rank)
+
       matches = Name.where("rank = #{Name.ranks[rank2]} AND #{sql}")
       return matches.to_a if matches.any?
     end
@@ -263,6 +269,7 @@ class Name < AbstractModel
     if text
       parsed_names = {}
       raise :runtime_user_bad_rank.t(rank: rank) if rank_index(rank).nil?
+
       rank_idx = [rank_index(:Genus), rank_index(rank)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
 
@@ -281,6 +288,7 @@ class Name < AbstractModel
         if line_rank_idx.nil?
           raise :runtime_user_bad_rank.t(rank: line_rank_str)
         end
+
         if line_rank_idx <= rank_idx
           raise :runtime_invalid_rank.t(line_rank: line_rank_str,
                                         rank: rank_str)
@@ -288,6 +296,7 @@ class Name < AbstractModel
         if parsed_names[line_rank]
           raise :runtime_duplicate_rank.t(rank: line_rank_str)
         end
+
         if real_rank != expect_rank && kingdom == "Fungi"
           raise :runtime_wrong_rank.t(expect: line_rank_str,
                                       actual: real_rank_str, name: line_name)
@@ -370,6 +379,7 @@ class Name < AbstractModel
   # classification and lifeform from the parent (if infrageneric only).
   def inherit_stuff
     return unless genus # this sets the name instance @genus as side-effect
+
     self.classification ||= genus.classification
     self.lifeform       ||= genus.lifeform
   end
@@ -390,6 +400,7 @@ class Name < AbstractModel
     raise("missing parent!")               if !parent
     raise("only do this on genera or up!") if below_genus?
     raise("parent has no classification!") if parent.classification.blank?
+
     str = parent.classification.to_s.sub(/\s+\z/, "")
     str += "\r\n#{parent.rank}: _#{parent.text_name}_\r\n"
     change_classification(str)
@@ -411,6 +422,7 @@ class Name < AbstractModel
   def propagate_classification
     raise("Name#propagate_classification only works on genera for now.") \
       if rank != :Genus
+
     escaped_string = Name.connection.quote(classification)
     Name.connection.execute(%(
       UPDATE names SET classification = #{escaped_string}

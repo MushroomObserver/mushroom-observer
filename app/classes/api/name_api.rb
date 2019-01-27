@@ -96,6 +96,7 @@ class API
     def validate_create_parameters!(params)
       raise MissingParameter.new(:name) if @name.blank?
       raise MissingParameter.new(:rank) if @rank.blank?
+
       @classification = params[:classification]
       validate_classification!(params)
     end
@@ -133,6 +134,7 @@ class API
 
     def validate_classification!(params)
       return unless @classification
+
       params[:classification] = \
         Name.validate_classification(:Genus, @classification)
     rescue RuntimeError
@@ -153,6 +155,7 @@ class API
       parse = Name.parse_name(str, rank: @rank, deprecated: @deprecated)
       raise NameDoesntParse.new(@name)         unless parse
       raise NameWrongForRank.new(@name, @rank) if parse.rank != @rank
+
       parse
     end
 
@@ -162,6 +165,7 @@ class API
       return unless parse.author.blank? ||
                     match.any? { |n| n.author.blank? } ||
                     match.any? { |n| n.author == parse.author }
+
       raise NameAlreadyExists.new(parse.search_name)
     end
 
@@ -174,6 +178,7 @@ class API
 
     def save_parents(parse)
       return unless parse.parent_name
+
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       parents.each { |n| n.save if n && n.new_record? }
     end
@@ -182,26 +187,31 @@ class API
 
     def must_be_creator!(name)
       return if name.user == @user
+
       raise MustBeCreator.new(:name)
     end
 
     def must_be_only_editor!(name)
       return unless name.versions.any? { |x| x.user_id != @user.id }
+
       raise MustBeOnlyEditor.new(:name)
     end
 
     def must_own_all_descriptions!(name)
       return unless name.descriptions.any? { |x| x.user != @user }
+
       raise MustOwnAllDescriptions.new(:name)
     end
 
     def must_own_all_observations!(name)
       return unless name.observations.any? { |x| x.user != @user }
+
       raise MustOwnAllObservations.new(:name)
     end
 
     def must_own_all_namings!(name)
       return unless name.namings.any? { |x| x.user != @user }
+
       raise MustOwnAllNamings.new(:name)
     end
 
@@ -211,6 +221,7 @@ class API
       @rank   = parse(:enum, :set_rank, limit: Name.all_ranks)
       return unless @name || @author || @rank
       return if query.num_results < 2
+
       raise TryingToSetMultipleNamesAtOnce.new
     end
 
@@ -222,6 +233,7 @@ class API
       return if (@synonymize_with ? 1 : 0) +
                 (@clear_synonyms ? 1 : 0) +
                 (@set_correct_spelling ? 1 : 0) <= 1
+
       raise OneOrTheOther.new([:synonymize_with, :clear_synonyms,
                                :set_correct_spelling])
     end
@@ -233,6 +245,7 @@ class API
 
     def change_name(name)
       return unless @name || @author || @rank
+
       @name   ||= name.text_name
       @author ||= name.author
       @rank   ||= name.rank
@@ -241,17 +254,20 @@ class API
 
     def change_deprecated(name)
       return if @deprecated.nil?
+
       name.change_deprecated(@deprecated)
     end
 
     def add_synonym(name)
       return unless @synonymize_with
       raise CanOnlySynonymizeUnsynonimizedNames.new if name.synonym_id
+
       name.merge_synonyms(@synonymize_with)
     end
 
     def clear_synonymy(name)
       return unless @clear_synonyms
+
       name.clear_synonym
     end
 
@@ -260,6 +276,7 @@ class API
       return if name.correct_spelling_id == @correct_spelling.id
       raise CanOnlySynonymizeUnsynonimizedNames.new \
         if name.synonym_id && name_synonym_id != @correct_spelling.synonym_id
+
       name.change_deprecated(true) unless name.deprecated
       name.correct_spelling = @correct_spelling
       name.merge_synonyms(@correct_spelling)

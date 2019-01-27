@@ -56,6 +56,7 @@ class ObserverController
   def advanced_search_form # :nologin: :norobots:
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
+
     model = params[:search][:model].to_s.camelize.constantize
     query_params = {}
     add_filled_in_text_fields(query_params)
@@ -70,6 +71,7 @@ class ObserverController
     [:content, :location, :name, :user].each do |field|
       val = params[:search][field].to_s
       next unless val.present?
+
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
       if field == :user

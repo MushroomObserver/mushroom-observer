@@ -93,19 +93,23 @@ module ObservationReport
     # x / 360 * 2 * pi = converts degrees to radians
     def radius(row)
       return nil if row.obs_lat.present?
+
       r1 = lat_radius(row)
       r2 = long_radius(row)
       return nil if !r1 || !r2
+
       (r1 > r2 ? r1 : r2).to_f.round
     end
 
     def lat_radius(row)
       return nil if row.loc_north.blank? || row.loc_south.blank?
+
       (row.loc_north - row.loc_south) / 360 * 2 * Math::PI * 6_371_000 / 2
     end
 
     def long_radius(row)
       return nil if row.loc_east.blank? || row.loc_west.blank?
+
       (row.loc_east - row.loc_west) / 360 * 2 * Math::PI * 6_371_000 *
         Math.cos(row.best_lat / 360 * 2 * Math::PI) / 2
     end

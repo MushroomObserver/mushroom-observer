@@ -38,6 +38,7 @@ class Name < AbstractModel
     self.lifeform = words.any? ? " #{words.join(' ')} " : " "
     unknown_words = words - ALL_LIFEFORMS
     return unless unknown_words.any?
+
     unknown_words = unknown_words.map(&:inspect).join(", ")
     errors.add(:lifeform, :validate_invalid_lifeform.t(words: unknown_words))
   end

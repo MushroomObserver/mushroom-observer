@@ -69,6 +69,7 @@ module BoxMethods
     delta_long = east_west_distance * 0.20
     return false if lat > north + delta_lat
     return false if lat < south - delta_lat
+
     if west <= east
       return false if long > east + delta_long
       return false if long < west - delta_long

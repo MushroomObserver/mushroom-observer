@@ -74,12 +74,14 @@ class API
 
     def validate_update_params!(params)
       return unless params.empty? && adds_and_removes.empty?
+
       raise MissingSetParameters.new
     end
 
     def build_setter(params)
       lambda do |proj|
         raise MustBeAdmin.new(proj) unless proj.is_admin?(@user)
+
         proj.update!(params) unless params.empty?
         update_admin_group(proj)
         update_user_group(proj)

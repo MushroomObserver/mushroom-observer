@@ -4,24 +4,28 @@ class API
     uploads = [upload_from_url, upload_from_file, upload_from_http]
     uploads.reject!(&:nil?)
     raise TooManyUploads.new if uploads.length > 1
+
     uploads.first
   end
 
   def upload_from_url
     url = parse(:string, :upload_url)
     return nil unless url
+
     UploadFromURL.new(url)
   end
 
   def upload_from_file
     file = parse(:string, :upload_file)
     return nil unless file
+
     UploadFromFile.new(file)
   end
 
   def upload_from_http
     upload = parse_upload
     return nil unless upload
+
     UploadFromHTTPRequest.new(upload)
   end
 
@@ -50,6 +54,7 @@ class API
 
     def fetch(url, limit = 10)
       raise ArgumentError.new("Too many HTTP redirects") if limit <= 0
+
       uri = URI(url)
       Net::HTTP.start(
         uri.hostname, uri.port, use_ssl: uri.scheme == "https"
@@ -95,6 +100,7 @@ class API
   class UploadFromFile < Upload
     def initialize(file)
       raise FileMissing.new(file) unless File.exist?(file)
+
       self.content = File.open(file, "rb")
       self.content_length = File.size(file)
       self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, "")

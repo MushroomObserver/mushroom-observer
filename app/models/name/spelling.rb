@@ -181,6 +181,7 @@ class Name < AbstractModel
     )
       return false
     end
+
     (1..child_pat.count("%")).each do |i|
       return false unless /^(a|us|um)$/.match?(match[i])
     end

@@ -78,6 +78,7 @@ class HerbariumRecord < AbstractModel
     sender = User.current
     recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
+
     recipients.each do |recipient|
       email_klass = QueuedEmail::AddHerbariumRecordNotCurator
       email_klass.create_email(sender, recipient, self)
@@ -88,6 +89,7 @@ class HerbariumRecord < AbstractModel
   # reports a specimen available, and log the action.
   def add_observation(obs)
     return if observations.include?(obs)
+
     observations.push(obs)
     obs.update_attributes(specimen: true) unless obs.specimen
     obs.log(:log_herbarium_record_added,
@@ -98,6 +100,7 @@ class HerbariumRecord < AbstractModel
   # Remove this HerbariumRecord from an Observation and log the action.
   def remove_observation(obs)
     return unless observations.include?(obs)
+
     observations.delete(obs)
     obs.reload.turn_off_specimen_if_no_more_records
     obs.log(:log_herbarium_record_removed,

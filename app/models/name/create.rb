@@ -58,6 +58,7 @@ class Name < AbstractModel
       # Try again, looking for deprecated names
       # if didn't find any matching approved names.
       break if ignore_deprecated
+
       ignore_deprecated = true
     end
 

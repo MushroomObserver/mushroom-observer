@@ -36,11 +36,13 @@ module Query::Modules::Initialization
 
   def initialize_model_do_boolean(arg, true_cond, false_cond)
     return if params[arg].nil?
+
     @where << (params[arg] ? true_cond : false_cond)
   end
 
   def initialize_model_do_exact_match(arg, col = arg)
     return if params[arg].blank?
+
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     vals = params[arg]
     vals = [vals] unless vals.is_a?(Array)
@@ -54,6 +56,7 @@ module Query::Modules::Initialization
 
   def initialize_model_do_search(arg, col = nil)
     return if params[arg].blank?
+
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     search = google_parse(params[arg])
     @where += google_conditions(search, col)
@@ -61,8 +64,10 @@ module Query::Modules::Initialization
 
   def initialize_model_do_range(arg, col, args = {})
     return unless params[arg].is_a?(Array)
+
     min, max = params[arg]
     return if min.blank? && max.blank?
+
     @where << "#{col} >= #{min}" if min.present?
     @where << "#{col} <= #{max}" if max.present?
     if (val = args[:join])
@@ -73,6 +78,7 @@ module Query::Modules::Initialization
   def initialize_model_do_enum_set(arg, col, vals, type)
     types = params[arg]
     return if types.empty?
+
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     if type == :string
       types.map!(&:to_s)
@@ -99,6 +105,7 @@ module Query::Modules::Initialization
   def initialize_model_do_objects_by_id(arg, col = nil, args = {})
     ids = params[arg]
     return unless ids
+
     col ||= "#{arg.to_s.sub(/s$/, "")}_id"
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     set = clean_id_set(ids)
@@ -111,6 +118,7 @@ module Query::Modules::Initialization
   def initialize_model_do_objects_by_name(model, arg, col = nil, args = {})
     names = params[arg]
     return if !names || names.none?
+
     col ||= arg.to_s.sub(/s?$/, "_id")
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     objs = initialize_model_do_find_objects_by_name(model, names)
@@ -166,6 +174,7 @@ module Query::Modules::Initialization
   def initialize_model_do_locations(table = model.table_name, args = {})
     locs = params[:locations]
     return if !locs || locs.none?
+
     loc_col = "#{table}.location_id"
     initialize_model_do_objects_by_name(Location, :locations, loc_col, args)
     str = @where.pop
@@ -180,12 +189,14 @@ module Query::Modules::Initialization
 
   def initialize_model_do_location_bounding_box
     return unless params[:north]
+
     _, cond2 = initialize_model_do_location_bounding_box_cond1_and_2
     @where += cond2
   end
 
   def initialize_model_do_observation_bounding_box
     return unless params[:north]
+
     cond1, cond2 = initialize_model_do_location_bounding_box_cond1_and_2
     # Condition which returns true if the observation's lat/long is plausible.
     # (should be identical to BoxMethods.lat_long_close?)
@@ -203,12 +214,13 @@ module Query::Modules::Initialization
     cond2 = cond2.join(" AND ")
     @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
     return if uses_join?(:locations)
+
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
     @join << if model.name == "Observation"
-              :"locations!"
+               :"locations!"
              else
-              { observations: :"locations!" }
+               { observations: :"locations!" }
              end
   end
 
@@ -244,6 +256,7 @@ module Query::Modules::Initialization
 
   def initialize_model_do_rank
     return if params[:rank].blank?
+
     min, max = params[:rank]
     max ||= min
     all_ranks = Name.all_ranks
@@ -256,6 +269,7 @@ module Query::Modules::Initialization
 
   def initialize_model_do_image_size
     return unless params[:size]
+
     min, max = params[:size]
     sizes  = Image.all_sizes
     pixels = Image.all_sizes_in_pixels
@@ -271,11 +285,13 @@ module Query::Modules::Initialization
 
   def initialize_model_do_image_types
     return if params[:content_types].blank?
+
     exts  = Image.all_extensions.map(&:to_s)
     mimes = Image.all_content_types.map(&:to_s) - [""]
     types = params[:content_types]
     types = params[:content_types] & exts
     return if types.none?
+
     other = types.include?("raw")
     types -= ["raw"]
     types = types.map { |x| mimes[exts.index(x)] }
@@ -292,6 +308,7 @@ module Query::Modules::Initialization
 
   def initialize_model_do_license
     return if params[:license].blank?
+
     license = find_cached_parameter_instance(License, :license)
     @where << "#{model.table_name}.license_id = #{license.id}"
   end
@@ -299,6 +316,7 @@ module Query::Modules::Initialization
   def initialize_model_do_date(arg = :date, col = arg, args = {})
     vals = params[arg]
     return unless vals
+
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     # Ugh, special case for search by month/day where range of months wraps
     # around from December to January.
@@ -341,6 +359,7 @@ module Query::Modules::Initialization
   def initialize_model_do_time(arg = :time, col = arg)
     vals = params[arg]
     return unless vals
+
     col = "#{model.table_name}.#{col}" unless /\./.match?(col.to_s)
     initialize_model_do_time_half(true, vals[0], col)
     initialize_model_do_time_half(false, vals[1], col)
@@ -348,6 +367,7 @@ module Query::Modules::Initialization
 
   def initialize_model_do_time_half(min, val, col)
     return if val.blank?
+
     y, m, d, h, n, s = val.split("-")
     @where << sprintf(
       "#{col} %s= '%04d-%02d-%02d %02d:%02d:%02d'",
@@ -477,6 +497,7 @@ module Query::Modules::Initialization
           goods << or_strs
         else
           raise("Invalid search string syntax at: '#{str}'") if str != ""
+
           break
         end
       end

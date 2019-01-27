@@ -53,6 +53,7 @@ class API
 
     def validate_update_params!(params)
       return if params.any? || @adds || @removes
+
       raise MissingSetParameters.new
     end
 
@@ -60,6 +61,7 @@ class API
       obj = CollectionNumber.where(name: params[:name],
                                    number: params[:number]).first
       return nil unless obj
+
       obj.add_observation(@observation)
       obj
     end
@@ -73,6 +75,7 @@ class API
         must_have_edit_permission!(obj)
         add_observations(obj)
         return nil if remove_observations(obj)
+
         obj.attributes = params
         other_obj = lookup_matching_collection_number(obj)
         if other_obj && other_obj != obj
@@ -104,8 +107,10 @@ class API
 
     def add_observations(obj)
       return unless @adds
+
       @adds.each do |obs|
         raise MustHaveEditPermission.new(obj) unless obs.can_edit?(@user)
+
         obj.add_observation(obs)
       end
     end
@@ -114,6 +119,7 @@ class API
     # more observations left.
     def remove_observations(obj)
       return false unless @removes
+
       @removes.each do |obs|
         obj.remove_observation(obs)
         return true unless obj.id

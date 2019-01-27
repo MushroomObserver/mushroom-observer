@@ -33,6 +33,7 @@ class VoteController < ApplicationController
     pass_query_params
     observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless observation
+
     if params[:vote]
       flashed = false
       observation.namings.each do |naming|
@@ -40,6 +41,7 @@ class VoteController < ApplicationController
         next unless value &&
                     observation.change_vote(naming, value) &&
                     !flashed
+
         flash_notice(:runtime_show_observation_success.t)
         flashed = true
       end
@@ -53,6 +55,7 @@ class VoteController < ApplicationController
   # :root: :norobots:
   def refresh_vote_cache
     return unless in_admin_mode?
+
     # Naming.refresh_vote_cache
     Observation.refresh_vote_cache
     flash_notice(:refresh_vote_cache.t)

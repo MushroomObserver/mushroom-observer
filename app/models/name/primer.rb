@@ -19,6 +19,7 @@ class Name < AbstractModel
 
     def current_name_cache
       return unless name_primer_cache_current?
+
       File.open(MO.name_primer_cache_file, "r:UTF-8") do |file|
         return file.readlines.map(&:chomp)
       end

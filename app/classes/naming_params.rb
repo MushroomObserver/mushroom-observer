@@ -21,7 +21,7 @@ class NamingParams
   def resolve_name(given_name, approved_name, chosen_name)
     (success, @what, @name, @names, @valid_names,
      @parent_deprecated, @suggest_corrections) =
-       Name.resolve_name(given_name, approved_name, chosen_name)
+      Name.resolve_name(given_name, approved_name, chosen_name)
     success && @name
   end
 

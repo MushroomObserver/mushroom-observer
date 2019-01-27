@@ -17,11 +17,13 @@ class API
         matches = Name.where("search_name = ? OR text_name = ?", str, str)
         if matches.empty?
           raise NameDoesntParse.new(str) unless Name.parse_name(str)
+
           raise ObjectNotFoundByString.new(str, Name)
         end
         matches = restrict_to_exact_matches_if_possible(matches, str)
         matches = restrict_to_approved_names_if_possible(matches)
         raise AmbiguousName.new(str, matches) if matches.length > 1
+
         matches.first
       end
 

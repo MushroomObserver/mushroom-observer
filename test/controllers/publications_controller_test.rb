@@ -29,7 +29,7 @@ class PublicationsControllerTest < FunctionalTestCase
     ref  = "Author, J.R. 2014. Mushroom Observer Rocks! Some Journal 1(2): 3-4."
     link = "http://some_journal.com/mo_rocks.html"
     help = "it exists"
-    assert_difference("Publication.count",+1) do
+    assert_difference("Publication.count", +1) do
       post :create, publication: {
         full: ref,
         link: link,

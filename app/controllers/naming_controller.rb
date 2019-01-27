@@ -4,7 +4,8 @@ class NamingController < ApplicationController
 
   before_action :disable_link_prefetching, except: [
     :create,
-    :edit]
+    :edit
+]
 
   def edit # :prefetch: :norobots:
     pass_query_params
@@ -23,6 +24,7 @@ class NamingController < ApplicationController
     @params = NamingParams.new
     @params.observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @params.observation
+
     create_post if request.method == "POST"
   end
 
@@ -117,6 +119,7 @@ class NamingController < ApplicationController
     @params.rough_draft(params[:naming], params[:vote])
     naming = @params.naming
     return unless validate_object(naming) && validate_object(@params.vote)
+
     naming.create_reasons(params[:reason], params[:was_js_on] == "yes")
     save_with_log(naming)
     @params.logged_change_vote
@@ -126,6 +129,7 @@ class NamingController < ApplicationController
   def change_naming
     return unless @params.update_name(@user, params[:reason],
                                       params[:was_js_on] == "yes")
+
     flash_notice(:runtime_naming_updated_at.t)
     @params.change_vote(param_lookup([:vote, :value], &:to_i))
   end

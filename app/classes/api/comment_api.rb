@@ -52,6 +52,7 @@ class API
       raise MissingParameter.new(:summary) if params[:summary].blank?
       raise MissingParameter.new(:content) if params[:comment].blank?
       raise MissingParameter.new(:target)  if params[:target].blank?
+
       must_have_view_permission!(params[:target])
     end
 

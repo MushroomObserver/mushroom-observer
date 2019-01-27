@@ -18,6 +18,7 @@ module Query
       def target_names
         name = get_cached_parameter_instance(:name)
         return [name] if name
+
         name = params[:name]
         if name.is_a?(Integer) || name.match(/^\d+$/)
           [Name.find(name.to_i)]

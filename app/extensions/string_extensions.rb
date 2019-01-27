@@ -561,6 +561,7 @@ class String
     str.split("").inject(0) do |num, char|
       i = alphabet.index(char)
       raise "Character not in alphabet: '#{char}'" if i.nil?
+
       num = num * len + i
     end
   end
