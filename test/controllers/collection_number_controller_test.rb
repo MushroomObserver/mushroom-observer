@@ -420,7 +420,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     num2 = collection_numbers(:coprinus_comatus_coll_num)
     num1.add_observation(obs2)
     assert_obj_list_equal([num1], obs1.reload.collection_numbers)
-    assert_obj_list_equal([num1,num2], obs2.reload.collection_numbers, :sort)
+    assert_obj_list_equal([num1, num2], obs2.reload.collection_numbers, :sort)
 
     # Make sure user must be logged in.
     get(:destroy_collection_number, id: num1.id)

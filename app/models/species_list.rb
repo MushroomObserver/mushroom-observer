@@ -228,6 +228,7 @@ class SpeciesList < AbstractModel
   # Add observation to list (if not already) and set updated_at.  Saves it.
   def add_observation(obs)
     return if observations.include?(obs)
+
     observations.push(obs)
     update_attribute(:updated_at, Time.now)
   end
@@ -235,6 +236,7 @@ class SpeciesList < AbstractModel
   # Remove observation from list and set updated_at.  Saves it.
   def remove_observation(obs)
     return unless observations.include?(obs)
+
     observations.delete(obs)
     update_attribute(:updated_at, Time.now)
   end
@@ -278,6 +280,7 @@ class SpeciesList < AbstractModel
   #
   def process_file_data(sorter)
     return unless data
+
     if data[0] == 91 # '[' character
       process_name_list(sorter)
     else
@@ -304,6 +307,7 @@ class SpeciesList < AbstractModel
         if kv.length != 2
           raise format("Bad key|value pair (%s) in %s", key_value, filename)
         end
+
         key, value = kv
         if key == "Date"
           # timestamp = Time.local(*(ParseDate.parsedate(value)))

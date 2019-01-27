@@ -2,13 +2,6 @@ require "test_helper"
 
 # test extensions to Ruby and Rails String Class
 class StringExtensionsTest < UnitTestCase
-  def test_capitalize_first
-    assert_equal("", "".capitalize_first)
-    assert_equal("A", "a".capitalize_first)
-    assert_equal("AB", "aB".capitalize_first)
-    assert_equal("Abc", "abc".capitalize_first)
-  end
-
   def test_pluralized_title
     assert_equal("Good Dogs", "good dog".pluralized_title)
     assert_equal("Observations", "Observation".pluralized_title)

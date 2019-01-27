@@ -515,6 +515,7 @@ class Observation < AbstractModel
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
   def form_notes_parts(user)
     return user.notes_template_parts + [other_notes_part] if notes.blank?
+
     user.notes_template_parts + notes_orphaned_parts(user) +
       [other_notes_part]
   end
@@ -523,6 +524,7 @@ class Observation < AbstractModel
   # neither in the notes_template nor the caption for other notes
   def notes_orphaned_parts(user)
     return [] if notes.blank?
+
     # Change spaces to underscores in order to subtract template parts from
     # stringified keys because keys have underscores instead of spaces
     template_parts_underscored = user.notes_template_parts.each do |part|
@@ -707,6 +709,7 @@ class Observation < AbstractModel
 
   def owner_sure_enough?
     return unless owner_favorite_vote
+
     owner_favorite_vote.value >= Vote.owner_id_min_confidence
   end
 
@@ -742,6 +745,7 @@ class Observation < AbstractModel
           if max > 0
             users_votes(user).each do |v|
               next if v.value != max || v.favorite
+
               v.favorite = true
               v.save
             end
@@ -846,6 +850,7 @@ class Observation < AbstractModel
       best_value = matches.first.vote_cache
       matches.each do |naming|
         next unless naming.vote_cache > best_value
+
         best_naming = naming
         best_value  = naming.vote_cache
       end
@@ -897,6 +902,7 @@ class Observation < AbstractModel
         # users zero, who knows...  (It can cause a division by zero below if
         # we ignore zero weights.)
         next unless wgt > 0
+
         # Calculate score for naming.vote_cache.
         sum_val += val * wgt
         sum_wgt += wgt
@@ -951,6 +957,7 @@ class Observation < AbstractModel
         vote[0] += val * wgt
         vote[1] += wgt
         next unless debug
+
         result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, " \
                   "val=#{val}, wgt=#{wgt}<br/>"
       end
@@ -975,6 +982,7 @@ class Observation < AbstractModel
                       age < best_age
                     )
                   )
+
       best_val = val
       best_wgt = wgt
       best_age = age
@@ -996,6 +1004,7 @@ class Observation < AbstractModel
       if match[1] == "s"
         namings.each do |naming|
           next if naming.name.synonym_id.to_s != match[2]
+
           best = naming.name
           break
         end
@@ -1032,6 +1041,7 @@ class Observation < AbstractModel
             vote[0] += val * wgt
             vote[1] += wgt
             next unless debug
+
             result += "vote: name_id=#{name_id}, user_id=#{user_id}, " \
                       "val=#{val}, wgt=#{wgt}<br/>"
           end
@@ -1053,6 +1063,7 @@ class Observation < AbstractModel
           name_id = name.id
           vote = votes[name_id]
           next unless vote
+
           wgt = vote[1]
           val = vote[0].to_f / (wgt + 1.0)
           age = name_ages[name_id]
@@ -1066,6 +1077,7 @@ class Observation < AbstractModel
                           age < best_age2
                         )
                       )
+
           best_val2 = val
           best_wgt2 = wgt
           best_age2 = age
@@ -1239,6 +1251,7 @@ class Observation < AbstractModel
     return if collection_numbers.length > 0
     return if herbarium_records.length > 0
     return if sequences.length > 0
+
     update_attributes(specimen: false)
   end
 
@@ -1286,13 +1299,13 @@ class Observation < AbstractModel
   # Callback that sends email notifications after save.
   def notify_users_after_change
     if !id ||
-       when_changed? ||
-       where_changed? ||
-       location_id_changed? ||
-       notes_changed? ||
-       specimen_changed? ||
-       is_collection_location_changed? ||
-       thumb_image_id_changed?
+       saved_change_to_when? ||
+       saved_change_to_where? ||
+       saved_change_to_location_id? ||
+       saved_change_to_notes? ||
+       saved_change_to_specimen? ||
+       saved_change_to_is_collection_location? ||
+       saved_change_to_thumb_image_id?
       notify_users(:change)
     end
   end
@@ -1330,6 +1343,7 @@ class Observation < AbstractModel
     # Send notification to all except the person who triggered the change.
     recipients.uniq.each do |recipient|
       next if !recipient || recipient == sender
+
       if action == :destroy
         QueuedEmail::ObservationChange.destroy_observation(sender, recipient,
                                                            self)
@@ -1443,6 +1457,7 @@ class Observation < AbstractModel
     end
 
     return unless @when_str
+
     begin
       Date.parse(@when_str)
     rescue ArgumentError

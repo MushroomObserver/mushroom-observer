@@ -31,6 +31,7 @@ class Name < AbstractModel
   #
   def change_author(new_author)
     return if rank == :Group
+
     old_author = author
     new_author2 = new_author.blank? ? "" : " " + new_author
     self.author = new_author.to_s
@@ -64,6 +65,7 @@ class Name < AbstractModel
   # correct spelling, but only saves the changes to this name if you ask it to.
   def mark_misspelled(target_name, save = false)
     return if deprecated && misspelling && correct_spelling == target_name
+
     self.misspelling = true
     self.correct_spelling = target_name
     change_deprecated(true)
@@ -77,6 +79,7 @@ class Name < AbstractModel
   # Mark this name as "not misspelled", and saves the changes if you ask it to.
   def clear_misspelled(save = false)
     return unless misspelling || correct_spelling
+
     was = correct_spelling.display_name
     self.misspelling = false
     self.correct_spelling = nil

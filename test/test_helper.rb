@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Base Test Case
 #
@@ -11,6 +13,7 @@
 
 # Code to allow both local and coveralls coverage.  From:
 # https://coveralls.zendesk.com/hc/en-us/articles/201769485-Ruby-Rails
+require "rails"
 require "simplecov"
 require "coveralls"
 
@@ -20,14 +23,12 @@ formatters = [SimpleCov::Formatter::HTMLFormatter,
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(formatters)
 SimpleCov.start
 
-# Allows test results to be reported back to runner IDEs
+# Allow test results to be reported back to runner IDEs.
+# Enable progress bar output during the test running.
 require "minitest/reporters"
 MiniTest::Reporters.use!
 
 require "minitest/autorun"
-
-# Allow simuluation of user-browser interaction with capybara
-require "capybara/rails"
 
 # Allow stubbing and setting expectations on HTTP, and selective
 #  disabling of internet requests.
@@ -62,6 +63,9 @@ require "mocha/minitest"
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
 
+# Allow simuluation of user-browser interaction with capybara
+require "capybara/rails"
+
 I18n.enforce_available_locales = true
 
 module ActiveSupport
@@ -87,7 +91,7 @@ module ActiveSupport
     # actually need to test transactions.  Since your test is
     # bracketed by a transaction, any transactions started in your
     # code will be automatically rolled back.
-    self.use_transactional_fixtures = true
+    self.use_transactional_tests = true
 
     # Instantiated fixtures are slow, but give you @david where
     # otherwise you would need people(:david).  If you don't want to
@@ -127,7 +131,7 @@ module ActiveSupport
 
     # Record time this test started to run.
     def start_timer
-      @@times = {} if !defined?(@@times)
+      @@times = {} unless defined?(@@times)
       @@times[method_name] = Time.now
     end
 
@@ -142,8 +146,9 @@ module ActiveSupport
     # causes this test to take up to several minutes to complete.
     def clear_logs
       ["development", "test", "email-debug", "process_image"].each do |file|
-        file = "#{Rails.root}/log/#{file}.log"
-        next unless File.exists?(file)
+        file = Rails.root.join("log", "#{file}.log")
+        next unless File.exist?(file)
+
         File.truncate(file, 0)
       end
       @@cleared_logs = true

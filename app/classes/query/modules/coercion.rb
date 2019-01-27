@@ -32,6 +32,7 @@ module Query
       def coercable?(new_model)
         @new_model = new_model.to_s
         return true if @new_model == model.to_s
+
         if respond_to?(test_method)
           send(test_method)
         else
@@ -45,8 +46,10 @@ module Query
       def coerce(new_model)
         @new_model = new_model.to_s
         return self if @new_model == model.to_s
+
         if respond_to?(test_method)
           return nil unless send(test_method)
+
           send(coerce_method)
         elsif respond_to?(coerce_method)
           send(coerce_method)
@@ -84,6 +87,7 @@ module Query
       # Save current sort order to a hash of parameters as "old_by".
       def add_old_by(hash)
         return hash unless params.key?(:by)
+
         hash[:old_by] = params[:by]
         hash
       end

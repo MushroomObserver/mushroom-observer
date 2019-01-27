@@ -11,17 +11,18 @@ class QueuedEmail::ObservationChange < QueuedEmail
   # This should be called when changes are made directly to observation.
   def self.change_observation(sender, recipient, observation)
     changes = []
-    changes.push("date")                   if observation.when_changed?
-    changes.push("location")               if observation.location_id_changed? || observation.where_changed?
-    changes.push("notes")                  if observation.notes_changed?
-    changes.push("specimen")               if observation.specimen_changed?
-    changes.push("is_collection_location") if observation.is_collection_location_changed?
-    changes.push("thumb_image_id")         if observation.thumb_image_id_changed?
+    changes.push("date")                   if observation.saved_change_to_when?
+    changes.push("location")               if observation.saved_change_to_location_id? || observation.saved_change_to_where?
+    changes.push("notes")                  if observation.saved_change_to_notes?
+    changes.push("specimen")               if observation.saved_change_to_specimen?
+    changes.push("is_collection_location") if observation.saved_change_to_is_collection_location?
+    changes.push("thumb_image_id")         if observation.saved_change_to_thumb_image_id?
     if email = find_email(recipient, observation)
       email.add_to_note_list(changes) if email.observation
     else
       email = create(sender, recipient)
       fail "Missing observation!" unless observation
+
       email.add_integer(:observation, observation.id)
       email.add_to_note_list(changes)
       email.finish
@@ -52,6 +53,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
     else
       email = create(sender, recipient)
       fail "Missing observation!" unless observation
+
       email.add_integer(:observation, observation.id)
       email.add_to_note_list([action])
       email.finish

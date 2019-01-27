@@ -32,29 +32,34 @@ module Query
 
       def make_sure_user_entered_something(*args)
         return unless args.all?(&:blank?)
+
         raise :runtime_no_conditions.t
       end
 
       def add_name_condition(name)
         return if name.blank?
+
         self.where += google_conditions(name, name_field)
         add_join_to_names
       end
 
       def add_user_condition(user)
         return if user.blank?
+
         self.where += google_conditions(user, user_field)
         add_join_to_users
       end
 
       def add_location_condition(location)
         return if location.blank?
+
         self.where += google_conditions(location, location_field)
         add_join_to_locations
       end
 
       def add_content_condition(content)
         return if content.blank?
+
         # Cannot do left outer join from observations to comments, because it
         # will never return.  Instead, break it into two queries, one without
         # comments, and another with inner join on comments.

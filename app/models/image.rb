@@ -607,6 +607,7 @@ class Image < AbstractModel
             loop do
               str = upload_handle.read(16_384)
               break if str.to_s.empty?
+
               write_handle.write(str)
             end
           end
@@ -669,6 +670,7 @@ class Image < AbstractModel
     unless File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end
+
     FileUtils.chmod(0644, original_image)
     true
   rescue SystemCallError
@@ -676,6 +678,7 @@ class Image < AbstractModel
     unless Kernel.system("cp", upload_temp_file, original_image)
       raise(:runtime_image_move_failed.t(id: id))
     end
+
     true
   end
 
@@ -793,7 +796,7 @@ class Image < AbstractModel
   # Calculate the average vote given the raw vote data.
   def refresh_vote_cache!
     @vote_hash = nil
-    image_votes(true) # force reload
+    image_votes.reload
     sum = num = 0
     for user, value in vote_hash
       sum += value.to_f
@@ -854,21 +857,21 @@ class Image < AbstractModel
 
   # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
-    if when_changed? && when_change[0].year != when_change[1].year ||
-       license_id_changed? ||
-       copyright_holder_changed?
+    if saved_change_to_when? && saved_change_to_when[0].year != saved_change_to_when[1].year ||
+       saved_change_to_license_id? ||
+       saved_change_to_copyright_holder?
       old_year       = begin
-                         when_change[0].year
+                         saved_change_to_when[0].year
                        rescue
                          self.when.year
                        end
       old_name       = begin
-                         copyright_holder_change[0]
+                         saved_change_to_copyright_holder[0]
                        rescue
                          copyright_holder
                        end
       old_license_id = begin
-                         license_id_change[0]
+                         saved_change_to_license_id[0]
                        rescue
                          license_id
                        end

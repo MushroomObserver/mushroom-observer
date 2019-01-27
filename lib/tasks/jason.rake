@@ -34,21 +34,20 @@ namespace :jason do
   desc "Dump out all notes for obs, names, spls, comments to test RedCloth."
   task(dump_notes: :environment) do
     notes = []
-    for table in %w[
-      comments
-      draft_names
-      images
-      licenses
-      locations
-      names
-      naming_reasons
-      namings
-      notifications
-      observations
-      projects
-      species_lists
-      users
-      votes]
+    for table in %w[comments
+                    draft_names
+                    images
+                    licenses
+                    locations
+                    names
+                    naming_reasons
+                    namings
+                    notifications
+                    observations
+                    projects
+                    species_lists
+                    users
+                    votes]
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|
@@ -117,7 +116,7 @@ namespace :jason do
             ids[ua][1] += 1
             totals[str] ||= 0
             totals[str] += 1
-    end
+          end
         end
       end
     end
@@ -166,21 +165,21 @@ namespace :jason do
   end
 
   desc "Print full list of localization strings used in the code."
-  task(print_localization_strings_used:     :get_localization_strings_used) do
+  task(print_localization_strings_used: :get_localization_strings_used) do
     print @need_strings.keys.sort.join("\n") + "\n"
   end
 
   desc "Print full list of localization strings in a given localization file (use LOCALE=en-US, for example)."
-  task(print_localization_strings_available:     :get_localization_strings_available) do
+  task(print_localization_strings_available: :get_localization_strings_available) do
     print @have_strings.keys.sort.join("\n") + "\n"
   end
 
   desc "Check to make sure all localization strings that are used are available (select language using LOCALE=en-US, for example)."
   task(check_localizations: [
-    :get_localization_strings_used,
-    :get_localization_strings_available
-  ]) do
-    print @need_strings.keys.select {|key|
+         :get_localization_strings_used,
+         :get_localization_strings_available
+       ]) do
+    print @need_strings.keys.select { |key|
       !@have_strings.key?(key)
     }.sort.join("\n") + "\n"
   end

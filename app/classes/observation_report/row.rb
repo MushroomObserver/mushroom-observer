@@ -217,12 +217,14 @@ module ObservationReport
     def locality_with_county
       val = Location.reverse_name(loc_name)
       return nil if val.blank?
+
       val.split(", ", 3)[2]
     end
 
     def split_location
       val = Location.reverse_name(loc_name)
       return [nil, nil, nil, nil] if val.blank?
+
       country, state, county, locality = val.split(", ", 4)
       if county && !county.sub!(/ (Co\.|Parish)$/, "")
         locality = locality.blank? ? county : "#{county}, #{locality}"
@@ -236,18 +238,22 @@ module ObservationReport
     def best_lat(prec = 4)
       lat = obs_lat(prec)
       return lat if lat.present?
+
       north = loc_north(prec + 10)
       south = loc_south(prec + 10)
       return nil unless north && south
+
       ((north + south) / 2).round(prec)
     end
 
     def best_long(prec = 4)
       long = obs_long(prec)
       return long if long.present?
+
       east = loc_east(prec + 10)
       west = loc_west(prec + 10)
       return nil unless east && west
+
       ((east + west) / 2).round(prec)
     end
 
@@ -354,6 +360,7 @@ module ObservationReport
       return [nil, nil, author, nil] if rank == "Variety"
       return [nil, author, nil, nil] if rank == "Subspecies"
       return [author, nil, nil, nil] if species.present?
+
       [nil, nil, nil, nil]
     end
 

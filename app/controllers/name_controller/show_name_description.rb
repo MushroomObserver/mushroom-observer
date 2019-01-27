@@ -5,9 +5,11 @@ class NameController
     pass_query_params
     @description = find_or_goto_index(NameDescription, params[:id].to_s)
     return unless @description
+
     @name = @description.name
     return unless description_name_exists?
     return unless user_has_permission_to_see_description?
+
     update_view_stats(@description)
     @canonical_url = description_canonical_url
     @projects = users_projects_which_dont_have_desc_of_this_name
@@ -17,6 +19,7 @@ class NameController
 
   def description_name_exists?
     return true if @name
+
     flash_error(:runtime_name_for_description_not_found.t)
     redirect_to(action: "list_names")
     false
@@ -24,6 +27,7 @@ class NameController
 
   def user_has_permission_to_see_description?
     return true if in_admin_mode? || @description.is_reader?(@user)
+
     if @description.source_type == :project
       flash_error(:runtime_show_draft_denied.t)
     else
@@ -48,6 +52,7 @@ class NameController
 
   def users_projects_which_dont_have_desc_of_this_name
     return [] unless @user
+
     @user.projects_member.select do |project|
       !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
     end

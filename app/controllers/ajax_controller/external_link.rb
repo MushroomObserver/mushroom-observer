@@ -41,6 +41,7 @@ class AjaxController
       site = link.external_site
     end
     return if obs.user == @user || site.member?(@user) || @user.admin
+
     raise "Permission denied."
   end
 
@@ -62,15 +63,15 @@ class AjaxController
   def remove_link(link)
     id = link.id
     link.destroy!
-    render(text: id)
+    render(plain: id)
   end
 
   def render_errors_or_id(link)
     if link.errors.any?
       msg = link.formatted_errors.join("\n")
-      render(text: msg.strip_html, status: 500)
+      render(plain: msg.strip_html, status: 500)
     else
-      render(text: link.id)
+      render(plain: link.id)
     end
   end
 end

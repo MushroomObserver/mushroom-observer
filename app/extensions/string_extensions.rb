@@ -20,7 +20,6 @@
 #  html_to_ascii::      Convert HTML into plain text.
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
-#  capitalize_first::   Capitalize first letter, leaving the rest alone.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
@@ -511,11 +510,6 @@ class String
     strip.squeeze(" ")
   end
 
-  # Capitalize the first (and _DO_ _NOT_ downcase the rest like +capitalize+).
-  def capitalize_first
-    length > 0 ? self[0].upcase + self[1..-1] : ""
-  end
-
   # Uncamelizes and converts string to pluralized title. E.g.:
   # "Observation"  => "Observations"
   # "SpeciesList"  => "Species Lists"
@@ -567,6 +561,7 @@ class String
     str.split("").inject(0) do |num, char|
       i = alphabet.index(char)
       raise "Character not in alphabet: '#{char}'" if i.nil?
+
       num = num * len + i
     end
   end

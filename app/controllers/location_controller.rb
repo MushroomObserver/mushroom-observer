@@ -600,6 +600,7 @@ class LocationController < ApplicationController
     pass_query_params
     @location = find_or_goto_index(Location, params[:id].to_s)
     return unless @location
+
     params[:location] ||= {}
     @display_name = @location.display_name
     post_edit_location if request.method == "POST"

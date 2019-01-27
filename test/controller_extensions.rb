@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = Controller Test Helpers
 #
@@ -30,7 +31,8 @@
 #
 #  == HTML Assertions
 #  assert_link_in_html::        A given link exists.
-#  assert_image_link_in_html::  A given link with an image instead of text exists#
+#  assert_image_link_in_html::  A given link with an image
+#                               instead of text exists#
 #  assert_form_action::         A form posting to a given action exists.
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
@@ -107,7 +109,7 @@ module ControllerExtensions
   #   get_with_dump(:action, params)
   #
   def get_with_dump(page, params = {})
-    get(page, params)
+    get(page, params: params)
     html_dump(page, @response.body, params)
   end
 
@@ -120,7 +122,7 @@ module ControllerExtensions
   #   post_with_dump(:action, params)
   #
   def post_with_dump(page, params = {})
-    post(page, params)
+    post(page, params: params)
     html_dump(page, @response.body, params)
   end
 
@@ -234,23 +236,23 @@ module ControllerExtensions
   #
   def html_dump(label, html, _params)
     html_dir = "../html"
-    if File.directory?(html_dir) && html[0..11] != "<html><body>"
-      file_name = "#{html_dir}/#{label}.html"
-      count = 0
-      while File.exist?(file_name)
-        file_name = "#{html_dir}/#{label}_#{count}.html"
-        count += 1
-        if count > 100
-          fail(RangeError, "More than 100 files found " \
-                            "with a label of '#{label}'")
-        end
+    return unless File.directory?(html_dir) && html[0..11] != "<html><body>"
+
+    file_name = "#{html_dir}/#{label}.html"
+    count = 0
+    while File.exist?(file_name)
+      file_name = "#{html_dir}/#{label}_#{count}.html"
+      count += 1
+      if count > 100
+        raise(RangeError,
+              "More than 100 files found with a label of '#{label}'")
       end
-      print "Creating html_dump file: #{file_name}\n"
-      file = File.new(file_name, "w")
-      # show_params(file, params, "params")
-      file.write(html)
-      file.close
     end
+    print "Creating html_dump file: #{file_name}\n"
+    file = File.new(file_name, "w")
+    # show_params(file, params, "params")
+    file.write(html)
+    file.close
   end
 
   # Add the hash of parameters to the dump file for diagnostics.
@@ -281,7 +283,7 @@ module ControllerExtensions
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
     args[:only_path] = true unless args.key?(:only_path)
-    URI.unescape(@controller.url_for(args))
+    URI.decode_www_form_component(@controller.url_for(args))
   end
 
   # Extract error message and backtrace from Rails's 500 response.  This should
@@ -343,48 +345,67 @@ module ControllerExtensions
     url_opts[:only_path] = true if url_opts[:only_path].nil?
     url = @controller.url_for(url_opts)
     url.force_encoding("UTF-8") if url.respond_to?(:force_encoding)
-    url = URI.unescape(url)
+    url = URI.decode_www_form_component(url)
     # Find each occurrance of <form action="blah" method="post">.
     found_it = false
     found = {}
     @response.body.split(/<form [^<>]*action/).each do |str|
-      if str =~ /^="([^"]*)" [^>]*method="post"/
-        url2 = URI.unescape(Regexp.last_match(1)).gsub("&amp;", "&")
-        if url == url2
-          found_it = true
-          break
-        end
-        found[url2] = 1
+      next unless str =~ /^="([^"]*)" [^>]*method="post"/
+
+      url2 = URI.decode_www_form_component(Regexp.last_match(1)).gsub("&amp;",
+                                                                      "&")
+      if url == url2
+        found_it = true
+        break
       end
+      found[url2] = 1
     end
     return pass if found_it
+
     if found.keys
-      flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
-            "but only found these: <#{found.keys.sort.join(">, <")}>."))
+      flunk(build_message(msg,
+                          "Expected HTML to contain form that posts to " \
+                          "<#{url}>, but only found these: " \
+                          "<#{found.keys.sort.join(">, <")}>."))
     else
-      flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
-            "but found nothing at all."))
+      flunk(build_message(msg,
+                          "Expected HTML to contain form that posts to " \
+                          "<#{url}>, but found nothing at all."))
     end
   end
 
   # Assert that a response body is same as contents of a given file.
-  # Pass in a block to use as a filter on both contents of response and file.
+  #   get(:action, params)
+  #   assert_response_equal_file("#{path}/file")
   #
+  # Assert that a response body is same as contents of a given file,
+  # where file has given encoding. This is a work-around for a Net::HTTP issue
+  # that causes response-body encoding to be set incorrectly.
+  #   get(:action, params)
+  #   assert_response_equal_file(["#{path}/file", "ISO-8859-1"])
+  #
+  # Pass in a block to use as a filter on both contents of response and file.
+  #   get(:action, params)
   #   assert_response_equal_file(
   #     "#{path}/expected_response.html",
   #     "#{path}/alternate_expected_response.html") do |str|
   #     str.strip_squeeze.downcase
   #   end
   #
-  def assert_response_equal_file(*_files, &_block)
-    body = @response.body.clone # Rails 3
-    # in Rails 4, it appears that above strips the '\n's added to the body when
-    # the csv converter adds separate rows.
-    # I originally manually replaced the '\n's with the following lines.
-    # But this is a bad, e.g., it could cause problems if a different separator is
-    # used.  But I cannot figure out how to access the raw body.
-    #  body = @response.body_parts.join("\n").clone
-    #  assert_string_equal_file(body, *files, &block)
+  def assert_response_equal_file(*files, &block)
+    body = @response.body_parts.join("\n")
+    body = fix_encoding(body, files) if encoding_included?(files)
+    assert_string_equal_file(body, *files, &block)
+  end
+
+  def encoding_included?(files)
+    files.first.is_a?(Array)
+  end
+
+  # Work-around for Net::HTTP issue that causes incorrect response-body encoding
+  def fix_encoding(body, files)
+    encoding = files.first.second
+    body.force_encoding(encoding)
   end
 
   # Send a general request of any type.  Check login_required and check_user
@@ -419,7 +440,7 @@ module ControllerExtensions
   #
   def assert_request(args)
     method       = args[:method] || :get
-    action       = args[:action] || fail("Missing action!")
+    action       = args[:action] || raise("Missing action!")
     params       = args[:params] || {}
     user         = args[:user] || "rolf"
     password     = args[:password] || "testpassword"
@@ -429,16 +450,16 @@ module ControllerExtensions
     logout
 
     # Make sure it fails if not logged in at all.
-    if result = args[:require_login]
+    if (result = args[:require_login])
       result = :login if result == true
-      send(method, action, params)
+      send(method, action, params: params)
       assert_response(result, "No user: ")
     end
 
     # Login alternate user, and make sure that also fails.
-    if result = args[:require_user]
+    if (result = args[:require_user])
       login(alt_user, alt_password)
-      send(method, action, params)
+      send(method, action, params: params)
       assert_response(result, "Wrong user (#{alt_user}): ")
     end
 
@@ -477,73 +498,72 @@ module ControllerExtensions
   #   assert_response("http://bogus.com")
   #
   def assert_response(arg, msg = "")
-    if arg
-      if arg == :success || arg == :redirect || arg.is_a?(Integer)
-        super
+    return unless arg
+
+    if arg == :success || arg == :redirect || arg.is_a?(Integer)
+      super
+    else
+      # Put together good error message telling us exactly what happened.
+      code = @response.response_code
+      if @response.successful?
+        got = ", got #{code} rendered <#{@request.fullpath}>."
+      elsif @response.not_found?
+        got = ", got #{code} missing (?)"
+      elsif @response.redirect?
+        url = @response.redirect_url.sub(/^http:..test.host/, "")
+        got = ", got #{code} redirect to <#{url}>."
       else
+        got = ", got #{code} body is <#{extract_error_from_body}>."
+      end
 
-        # Put together good error message telling us exactly what happened.
-        code = @response.response_code
-        if @response.success?
-          got = ", got #{code} rendered <#{@request.fullpath}>."
-        elsif @response.missing?
-          got = ", got #{code} missing (?)"
-        elsif @response.redirect?
-          url = @response.redirect_url.sub(/^http:..test.host/, "")
-          got = ", got #{code} redirect to <#{url}>."
-        else
-          got = ", got #{code} body is <#{extract_error_from_body}>."
-        end
+      # Add flash notice to potential error message.
+      flash_notice = get_last_flash.to_s.strip_squeeze
+      if flash_notice != ""
+        got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
+      end
 
-        # Add flash notice to potential error message.
-        flash_notice = get_last_flash.to_s.strip_squeeze
-        if flash_notice != ""
-          got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
-        end
-
-        # Now check result.
-        if arg.is_a?(Array)
-          if arg.length == 1
-            if arg[0].is_a?(Hash)
-              msg += "Expected redirect to <#{url_for(arg[0])}>" + got
-              assert_redirected_to(url_for(arg[0]), msg)
-            else
-              controller = @controller.controller_name
-              msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-              # assert_redirected_to({action: arg[0]}, msg)
-              assert_redirected_to(%r{/#{controller}/#{arg[0]}}, msg)
-            end
+      # Now check result.
+      if arg.is_a?(Array)
+        if arg.length == 1
+          if arg[0].is_a?(Hash)
+            msg += "Expected redirect to <#{url_for(arg[0])}>" + got
+            assert_redirected_to(url_for(arg[0]), msg)
           else
-            msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-            # assert_redirected_to({ controller: arg[0], action: arg[1] }, msg)
-            assert_redirected_to(%r{/#{arg[0]}/#{arg[1]}}, msg)
+            controller = @controller.controller_name
+            msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
+            # assert_redirected_to({action: arg[0]}, msg)
+            assert_redirected_to(%r{/#{controller}/#{arg[0]}}, msg)
           end
-        elsif arg.is_a?(Hash)
-          url = @controller.url_for(arg).sub(/^http:..test.host./, "")
-          msg += "Expected redirect to <#{url}>" + got
-          # assert_redirect_match(arg, @response, @controller, msg)
-          assert_redirected_to(arg, msg)
-        elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
-          msg += "Expected redirect to <#{arg}>" + got
-          assert_equal(arg, @response.redirect_url, msg)
-        elsif arg.is_a?(String)
-          controller = @controller.controller_name
-          msg += "Expected it to render <#{controller}/#{arg}>" + got
-          super(:success, msg)
-          assert_template(arg.to_s, msg)
-        elsif arg == :index
-          msg += "Expected redirect to <observer/list_rss_logs>" + got
-          assert_redirected_to({ controller: "observer",
-                                 action: "list_rss_logs" }, msg)
-        elsif arg == :login
-          msg += "Expected redirect to <account/login>" + got
-          assert_redirected_to({ controller: "account", action: "login" }, msg)
-        elsif arg == :welcome
-          msg += "Expected redirect to <account/welcome>" + got
-          assert_redirected_to({ controller: "account", action: "login" }, msg)
         else
-          fail "Invalid response type expected: [#{arg.class}: #{arg}]\n"
+          msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
+          # assert_redirected_to({ controller: arg[0], action: arg[1] }, msg)
+          assert_redirected_to(%r{/#{arg[0]}/#{arg[1]}}, msg)
         end
+      elsif arg.is_a?(Hash)
+        url = @controller.url_for(arg).sub(/^http:..test.host./, "")
+        msg += "Expected redirect to <#{url}>" + got
+        # assert_redirect_match(arg, @response, @controller, msg)
+        assert_redirected_to(arg, msg)
+      elsif arg.is_a?(String) && arg.match(%r{^\w+://})
+        msg += "Expected redirect to <#{arg}>" + got
+        assert_equal(arg, @response.redirect_url, msg)
+      elsif arg.is_a?(String)
+        controller = @controller.controller_name
+        msg += "Expected it to render <#{controller}/#{arg}>" + got
+        super(:success, msg)
+        assert_template(arg.to_s, msg)
+      elsif arg == :index
+        msg += "Expected redirect to <observer/list_rss_logs>" + got
+        assert_redirected_to({ controller: "observer",
+                               action: "list_rss_logs" }, msg)
+      elsif arg == :login
+        msg += "Expected redirect to <account/login>" + got
+        assert_redirected_to({ controller: "account", action: "login" }, msg)
+      elsif arg == :welcome
+        msg += "Expected redirect to <account/welcome>" + got
+        assert_redirected_to({ controller: "account", action: "login" }, msg)
+      else
+        raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
       end
     end
   end
@@ -594,11 +614,11 @@ module ControllerExtensions
       if elements.length > 1
         message = "Found more than one input '#{id}'."
       elsif elements.length == 1
-        if /^<select/.match?(elements.first.to_s)
-          message = check_select_value(elements.first, expect_val, id)
-        else
-          message = check_input_value(elements.first.to_s, expect_val, id)
-        end
+        message = if /^<select/.match?(elements.first.to_s)
+                    check_select_value(elements.first, expect_val, id)
+                  else
+                    check_input_value(elements.first.to_s, expect_val, id)
+                  end
       end
     end
     assert(message.nil?, message)
@@ -608,7 +628,7 @@ module ControllerExtensions
     if expect_val.nil?
       assert_select(elem, "option[selected]", { count: 0 },
                     "Expected :#{id} not to have any options selected")
-      return nil
+      nil
     else
       assert_select(elem, "option[selected]", { count: 1 },
                     "Expected :#{id} to have one option selected") do |opts|
@@ -621,10 +641,10 @@ module ControllerExtensions
     match = elem.match(/value=('[^']*'|"[^"]*")/)
     actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ""
     actual_val = "" if elem =~ /type=['"]?checkbox/ && elem !~ / checked[ >]/
-    if actual_val != expect_val.to_s
-      "Input '#{id}' has wrong value, " \
-      "expected <#{expect_val}>, got <#{actual_val}>"
-    end
+    return if actual_val == expect_val.to_s
+
+    "Input '#{id}' has wrong value, " \
+    "expected <#{expect_val}>, got <#{actual_val}>"
   end
 
   # Check existence and value of a texarea
@@ -675,7 +695,7 @@ module ControllerExtensions
     when :no_field
       assert_select("input##{id}", 0)
     else
-      fail "Invalid state in check_project_checks: #{state.inspect}"
+      raise "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
 

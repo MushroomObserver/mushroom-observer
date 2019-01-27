@@ -1,5 +1,4 @@
 module Query::Modules::Joining
-
   JOIN_CONDITIONS = {
     api_keys: {
       users: :user_id

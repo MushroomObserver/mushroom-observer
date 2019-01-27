@@ -1841,11 +1841,11 @@ class QueryTest < UnitTestCase
                  :Location, :advanced_search, location: "park")
 
     assert_query(Location.joins(observations: :user).
-                          where(observations: { user: rolf }).uniq,
+                          where(observations: { user: rolf }).distinct,
                  :Location, :advanced_search, user: "rolf")
 
     assert_query(Location.joins(:observations).
-                          where(observations: { user: dick }).uniq,
+                          where(observations: { user: dick }).distinct,
                  :Location, :advanced_search, user: "dick")
 
     # content in obs.notes
@@ -1967,7 +1967,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_observations
-    assert_query(Location.joins(:observations).uniq,
+    assert_query(Location.joins(:observations).distinct,
                  :Location, :with_observations)
   end
 
@@ -2180,14 +2180,9 @@ class QueryTest < UnitTestCase
     agaricus_campestris = names(:agaricus_campestris)
     assert_query([agaricaceae], :Name, :of_parents, name: agaricus)
     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
-    assert_query([
-      fungi,
-      basidiomycota,
-      basidiomycetes,
-      agaricales,
-      agaricaceae,
-      agaricus
-    ], :Name, :of_parents, name: agaricus_campestris, all: "yes")
+    assert_query([fungi, basidiomycota, basidiomycetes,
+                  agaricales, agaricaceae, agaricus],
+                 :Name, :of_parents, name: agaricus_campestris, all: "yes")
   end
 
   def test_name_pattern_search
@@ -2389,7 +2384,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all.order("`when` DESC, id DESC").to_a
+    expect = Observation.all.order(when: :desc, id: :desc).to_a
     assert_query(expect, :Observation, :all)
   end
 

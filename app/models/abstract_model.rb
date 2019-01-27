@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 #
-#  = Extensions to ActiveRecord::Base
+#  = Extensions to ApplicationRecord
 #
 #  == Methods
 #
@@ -60,7 +61,7 @@
 #
 ############################################################################
 
-class AbstractModel < ActiveRecord::Base
+class AbstractModel < ApplicationRecord
   self.abstract_class = true
 
   def self.acts_like_model?
@@ -97,10 +98,11 @@ class AbstractModel < ActiveRecord::Base
   #
   ##############################################################################
 
-  # Make a full clone of the present instance, then revert it to an older version.
+  # Make full clone of the present instance, then revert it to an older version.
   # Returns +nil+ if +version+ not found.
   def revert_clone(version)
     return self if self.version == version
+
     result = self.class.find(id)
     result = nil unless result.revert_to(version)
     result
@@ -157,11 +159,7 @@ class AbstractModel < ActiveRecord::Base
   #   name.versions[idx].version
   #
   def find_version(idx)
-    if idx < 0
-      limit = "DESC LIMIT 1, #{-idx - 1}"
-    else
-      limit = "ASC LIMIT 1, #{idx}"
-    end
+    limit = (idx < 0 ? "DESC LIMIT 1, #{-idx - 1}" : "ASC LIMIT 1, #{idx}")
     num = self.class.connection.select_value %(
       SELECT version FROM #{versioned_table_name}
       WHERE #{type_tag}_id = #{id}
@@ -210,7 +208,7 @@ class AbstractModel < ActiveRecord::Base
   def do_log_update
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
-    autolog_updated_at if has_rss_log? unless @save_without_our_callbacks
+    autolog_updated_at if has_rss_log? && !@save_without_our_callbacks
   end
 
   # This would be called just after an object's changes are saved, but we have
@@ -274,13 +272,13 @@ class AbstractModel < ActiveRecord::Base
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
-    if respond_to?("num_views=") || respond_to?("last_view=")
-      self.class.record_timestamps = false
-      self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-      self.last_view = Time.now             if respond_to?("last_view=")
-      save_without_our_callbacks
-      self.class.record_timestamps = true
-    end
+    return unless respond_to?("num_views=") || respond_to?("last_view=")
+
+    self.class.record_timestamps = false
+    self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
+    self.last_view = Time.now             if respond_to?("last_view=")
+    save_without_our_callbacks
+    self.class.record_timestamps = true
   end
 
   ##############################################################################
@@ -313,7 +311,7 @@ class AbstractModel < ActiveRecord::Base
         out << msg
       else
         name = attr.to_s.to_sym.l
-        obj = type_tag.to_s.capitalize_first.to_sym.l
+        obj = type_tag.to_s.upcase_first.to_sym.l
         out << "#{obj} #{name} #{msg}."
       end
     end
@@ -631,24 +629,18 @@ class AbstractModel < ActiveRecord::Base
 
   # Do we log this event? and how?
   def autolog_event(event, orphan = nil)
-    if RunLevel.is_normal?
-      if autolog_events.include?(event)
-        touch = false
-      elsif autolog_events.include?("#{event}!".to_sym)
-        touch = true
-      else
-        touch = nil
-      end
-      unless touch.nil?
-        type = type_tag
-        msg = "log_#{type}_#{event}".to_sym
-        if orphan
-          orphan_log(msg, touch: touch)
-        else
-          log(msg, touch: touch)
-        end
-      end
-    end
+    return unless RunLevel.is_normal?
+
+    touch = if autolog_events.include?(event)
+              false
+            elsif autolog_events.include?("#{event}!".to_sym)
+              true
+            end
+    return if touch.nil?
+
+    type = type_tag
+    msg = "log_#{type}_#{event}".to_sym
+    orphan ? orphan_log(msg, touch: touch) : log(msg, touch: touch)
   end
 
   # Create RssLog and attach it if we don't already have one.  This is
@@ -682,10 +674,10 @@ class AbstractModel < ActiveRecord::Base
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
-    if rss_log && (rss_log.send("#{type_tag}_id") != id)
-      rss_log.send("#{type_tag}_id=", id)
-      rss_log.save
-    end
+    return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
+
+    rss_log.send("#{type_tag}_id=", id)
+    rss_log.save
   end
 
   # The label which is displayed for the model's tab in the RssLog tabset
@@ -723,6 +715,22 @@ class AbstractModel < ActiveRecord::Base
     id_str = id || "?"
     str + " (#{id_str})"
   end
+
+  ##############################################################################
+  #
+  #  :section: versions
+  #
+  ##############################################################################
+
+  # Replacement for "altered?"" method of cures_acts_as_versioned gem
+  # The gem method is incompatible with Rails 2.2, and the gem is not maintained
+  # TODO: replace the gem.
+  # See notes at https://www.pivotaltracker.com/story/show/163189614
+  def saved_version_changes?
+    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Metrics/LineLength
+  end
+
+  ##############################################################################
 
   private
 

@@ -456,8 +456,9 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.reload.rss_log)
     assert(obs.rss_log.notes.include?("log_image_updated"))
     assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
+    image_num = RssLog.escape("Image ##{image.id}")
     assert(
-      obs.rss_log.notes.include?("name #{RssLog.escape("Image ##{image.id}")}")
+      obs.rss_log.notes.include?("name #{image_num}")
     )
     assert_equal(new_name, image.reload.original_name)
   end
@@ -589,11 +590,8 @@ class ImageControllerTest < FunctionalTestCase
       }
     }
     File.stub(:rename, false) do
-      post_requires_user(
-        :add_image,
-        { controller: :observer, action: :show_observation, id: obs.id },
-        params
-      )
+      login("rolf", "testpassword")
+      post_with_dump(:add_image, params)
     end
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))

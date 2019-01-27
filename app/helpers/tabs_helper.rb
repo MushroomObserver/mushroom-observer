@@ -22,6 +22,7 @@ module TabsHelper
 
   def show_obs_google_links_for(obs_name)
     return unless obs_name.known?
+
     [google_images_for(obs_name), google_distribution_map_for(obs_name)]
   end
 
@@ -40,6 +41,7 @@ module TabsHelper
 
   def general_questions_link(obs, user)
     return unless obs.user.email_general_question && obs.user != user
+
     link_with_query(:show_observation_send_question.t,
                     controller: :observer, action: :ask_observation_question,
                     id: obs.id)
@@ -47,6 +49,7 @@ module TabsHelper
 
   def notifications_link(obs, user)
     return unless user && user.has_unshown_naming_notifications?(obs)
+
     link_with_query(:show_observation_view_notifications.t,
                     controller: :observation, action: :show_notifications,
                     id: obs.id)
@@ -54,6 +57,7 @@ module TabsHelper
 
   def manage_lists_link(obs, user)
     return unless user && user.species_lists.any?
+
     link_with_query(:show_observation_manage_species_lists.t,
                     controller: :species_list, action: :manage_species_lists,
                     id: obs.id)
@@ -61,11 +65,13 @@ module TabsHelper
 
   def map_link
     return unless @mappable
+
     link_with_query(:MAP.t, controller: :location, action: :map_locations)
   end
 
   def obs_change_links(obs)
     return unless check_permission(obs)
+
     [
       link_with_query(:show_observation_edit_observation.t,
                       controller: :observer, action: :edit_observation,

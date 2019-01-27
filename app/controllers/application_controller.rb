@@ -124,14 +124,12 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_action_callback :verify_authenticity_token
-    skip_action_callback :fix_bad_domains
-    skip_action_callback :autologin
-    skip_action_callback :set_timezone
-    skip_action_callback :refresh_translations
-    skip_action_callback :track_translations
-    # skip_action_callback   :extra_gc
-    # skip_action_callback   :log_memory_usage
+    skip_before_action :verify_authenticity_token
+    skip_before_action :fix_bad_domains
+    skip_before_action :autologin
+    skip_before_action :set_timezone
+    skip_before_action :refresh_translations
+    skip_before_action :track_translations
     before_action :disable_link_prefetching
     before_action { User.current = nil }
   end
@@ -164,7 +162,9 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(text: "Robots are not allowed on this page.", status: 403,
+
+    render(plain: "Robots are not allowed on this page.",
+           status: 403,
            layout: false)
     false
   end
@@ -172,6 +172,7 @@ class ApplicationController < ActionController::Base
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
     return true if @user && @user.is_successful_contributor?
+
     flash_warning(:unsuccessful_contributor_warning.t)
     redirect_back_or_default(controller: :observer, action: :index)
     false
@@ -266,7 +267,11 @@ class ApplicationController < ActionController::Base
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
-    super
+    if args.member?(:back)
+      redirect_back(fallback_location: "/")
+    else
+      super
+    end
   end
 
   # Redirect from www.mo.org to mo.org.
@@ -316,8 +321,8 @@ class ApplicationController < ActionController::Base
   # destroyed.
   #
   def autologin
-    # render(text: "Sorry, we've taken MO down to test something urgent."\
-    #              "We'll be back in a few minutes. -Jason", layout: false)
+    # render(plain: "Sorry, we've taken MO down to test something urgent."\
+    #               "We'll be back in a few minutes. -Jason", layout: false)
     # return false
 
     # if browser.bot?
@@ -365,6 +370,7 @@ class ApplicationController < ActionController::Base
                   (split = cookie.split(" ")) &&
                   (user = User.where(id: split[0]).first) &&
                   (split[1] == user.auth_code)
+
     user
   end
 
@@ -407,6 +413,7 @@ class ApplicationController < ActionController::Base
 
   def block_suspended_users
     return true unless user_suspended? # Tell Rails to continue processing.
+
     block user
     false                              # Tell Rails to stop processing.
   end
@@ -416,7 +423,7 @@ class ApplicationController < ActionController::Base
   end
 
   def block_user
-    render(text: "Your account has been temporarily suspended.",
+    render(plain: "Your account has been temporarily suspended.",
            layout: false)
   end
 
@@ -503,6 +510,7 @@ class ApplicationController < ActionController::Base
     QueuedEmail.where(flavor: flavor, to_user_id: user.id).each do |q|
       ints = q.get_integers(%w[shown notification], true)
       next if ints["shown"]
+
       notification = Notification.safe_find(ints["notification"].to_i)
       next unless notification && notification.note_template
 
@@ -581,30 +589,35 @@ class ApplicationController < ActionController::Base
 
   def params_locale
     return unless params[:user_locale]
+
     logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
     params[:user_locale]
   end
 
   def prefs_locale
     return unless @user && @user.locale.present? && params[:controller] != "ajax"
+
     logger.debug "[I18n] loading locale: #{@user.locale} from @user"
     @user.locale
   end
 
   def session_locale
     return unless session[:locale]
+
     logger.debug "[I18n] loading locale: #{session[:locale]} from session"
     session[:locale]
   end
 
   def browser_locale
     return unless (locale = valid_locale_from_request_header)
+
     logger.debug "[I18n] loading locale: #{locale} from request header"
     locale
   end
 
   def change_locale_if_needed(new_locale)
     return if I18n.locale.to_s == new_locale
+
     I18n.locale = new_locale
     session[:locale] = new_locale
   end
@@ -650,6 +663,7 @@ class ApplicationController < ActionController::Base
   def map_locales_to_weights(locales)
     locales.split(",").each_with_object({}) do |term, loc_wts|
       next unless (term + ";q=1") =~ /^(.+?);q=([^;]+)/
+
       loc_wts[Regexp.last_match(1)] = (begin
                                          Regexp.last_match(2).to_f
                                        rescue
@@ -681,6 +695,7 @@ class ApplicationController < ActionController::Base
       logger.debug "[globalite] trying to match locale: #{locale}"
       language = locale.split("-").first
       next unless I18n.available_locales.include?(language.to_sym)
+
       logger.debug "[globalite] language match: #{language}"
       return language
     end
@@ -774,6 +789,7 @@ class ApplicationController < ActionController::Base
 
   def flash_object_errors(obj)
     return unless obj && obj.errors && !obj.errors.empty?
+
     flash_error(obj.formatted_errors)
   end
 
@@ -824,11 +840,13 @@ class ApplicationController < ActionController::Base
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
     return unless approved_names
+
     if approved_names.is_a?(String)
       approved_names = approved_names.split(/\r?\n/)
     end
     name_list.split("\n").each do |ns|
       next if ns.blank?
+
       name_parse = NameParse.new(ns)
       construct_approved_name(name_parse, approved_names, deprecate)
     end
@@ -846,6 +864,7 @@ class ApplicationController < ActionController::Base
     # Do the same thing for synonym (found the Approved = Synonym syntax).
     return unless name_parse.has_synonym &&
                   approved_names.member?(name_parse.synonym)
+
     construct_synonyms(name_parse)
   end
 
@@ -915,6 +934,7 @@ class ApplicationController < ActionController::Base
 
   def process_synonym_comments_for_bulk_editor(name_parse, synonym)
     return unless (comment = name_parse.synonym_comment)
+
     # Only save comment if name didn't exist
     if synonym.new_record?
       synonym.notes = comment
@@ -966,6 +986,7 @@ class ApplicationController < ActionController::Base
   # Get Query last stored on the "clipboard" (session).
   def query_from_session
     return unless (id = session[:checklist_source])
+
     Query.safe_find(id)
   end
 
@@ -1012,6 +1033,7 @@ class ApplicationController < ActionController::Base
 
   def coerced_query_link(query, model)
     return nil unless query && query.coercable?(model.name.to_sym)
+
     link_args = {
       controller: model.show_controller,
       action: model.index_action
@@ -1106,6 +1128,7 @@ class ApplicationController < ActionController::Base
 
   def query_exists(params)
     return unless params && (query = Query.safe_find(params))
+
     query
   end
 
@@ -1129,6 +1152,7 @@ class ApplicationController < ActionController::Base
 
   def outer_query_correct_or_coerceable_for_model(model, old_query)
     return unless (outer_query = old_query.outer)
+
     if outer_query.model.to_s == model
       outer_query
     elsif (coerced_outer_query = outer_query.coerce(model))
@@ -1158,6 +1182,7 @@ class ApplicationController < ActionController::Base
 
   def save_query_unless_bot(result)
     return unless result && !browser.bot?
+
     result.increment_access_count
     result.save
   end
@@ -1165,6 +1190,7 @@ class ApplicationController < ActionController::Base
   # Create a new query by adding a bounding box to the given one.
   def restrict_query_to_box(query)
     return query if params[:north].blank?
+
     model = query.model.to_s.to_sym
     flavor = query.flavor
     tweaked_params = query.params.merge(tweaked_bounding_box_params)
@@ -1245,6 +1271,7 @@ class ApplicationController < ActionController::Base
   # q parameter exists, a query exists for that param, and it's an rss query
   def current_query_is_rss_log
     return unless params[:q] && (query = query_exists(dealphabetize_q_param))
+
     query if query.model == RssLog
   end
 
@@ -1254,6 +1281,7 @@ class ApplicationController < ActionController::Base
                   in_query_results(rss_log, query) &&
                   # ... and can set current index in query results
                   (query.current = object.rss_log)
+
     rss_log
   end
 
@@ -1499,6 +1527,7 @@ class ApplicationController < ActionController::Base
       next if query.params.key?(key)
       # in user's content filter?
       next unless fltr.on?(filters[key])
+
       query.params[key] = filters[key]
       @any_content_filters_applied = true
     end
@@ -1512,6 +1541,7 @@ class ApplicationController < ActionController::Base
     return nil unless (sorts = args[:sorting_links]) &&
                       (sorts.length > 1) &&
                       !browser.bot?
+
     add_sorting_links(query, sorts, args[:link_all_sorts])
   end
 
@@ -1576,6 +1606,7 @@ class ApplicationController < ActionController::Base
     from = redirect_from(redirect)
     to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
     raise "Unsure where to go from #{from}." unless to_model
+
     redirect_with_query(controller: to_model.show_controller,
                         action: to_model.index_action)
   end
@@ -1654,6 +1685,7 @@ class ApplicationController < ActionController::Base
 
   def paginator_letter(parameter_key)
     return nil unless params[parameter_key].to_s =~ /^([A-Z])$/i
+
     Regexp.last_match(1).upcase
   end
 
@@ -1703,7 +1735,7 @@ class ApplicationController < ActionController::Base
     return unless request.env["HTTP_X_MOZ"] == "prefetch"
 
     logger.debug "prefetch detected: sending 403 Forbidden"
-    render(text: "", status: 403)
+    render(plain: "", status: 403)
     false
   end
 
@@ -1711,6 +1743,7 @@ class ApplicationController < ActionController::Base
   # request).
   def update_view_stats(object)
     return unless object.respond_to?(:update_view_stats) && !browser.bot?
+
     object.update_view_stats
   end
 

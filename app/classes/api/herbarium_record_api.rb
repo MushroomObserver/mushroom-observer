@@ -61,18 +61,21 @@ class API
     def validate_create_params!(params)
       raise MissingParameter.new(:observation) unless @observation
       raise MissingParameter.new(:herbarium)   unless params[:herbarium]
+
       make_sure_can_add_herbarium_record!(params)
       provide_default_label!(params)
     end
 
     def validate_update_params!(params)
       return if params.any? || @adds || @removes
+
       raise MissingSetParameters.new
     end
 
     def make_sure_can_add_herbarium_record!(params)
       return if @observation.can_edit?(@user)
       return if params[:herbarium].curator?(@user)
+
       raise CantAddHerbariumRecord.new
     end
 
@@ -95,6 +98,7 @@ class API
       ).first
       return nil unless obj
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
+
       obj.add_observation(@observation)
       return obj
     end
@@ -121,6 +125,7 @@ class API
     def must_have_edit_permission!(obj)
       return true if obj.can_edit?(@user) ||
                      obj.herbarium.curator?(@user)
+
       raise MustHaveEditPermission.new(obj)
     end
 
@@ -142,15 +147,18 @@ class API
 
     def add_observations(obj)
       return unless @adds
+
       @adds.each do |obs|
         raise MustHaveEditPermission.new(obj) \
           unless obs.can_edit?(@user) || obj.herbarium.curator?(@user)
+
         obj.add_observation(obs)
       end
     end
 
     def remove_observations(obj)
       return unless @removes
+
       @removes.each do |obs|
         obj.remove_observation(obs)
       end

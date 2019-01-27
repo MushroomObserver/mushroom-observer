@@ -71,9 +71,11 @@ class AccountController < ApplicationController
   def signup
     @new_user = User.new(theme: MO.default_theme)
     return if request.method != "POST"
+
     initialize_new_user
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
+
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyEmail.build(@new_user).deliver_now
@@ -314,6 +316,7 @@ class AccountController < ApplicationController
 
   def update_password
     return unless (password = params["user"]["password"])
+
     if password == params["user"]["password_confirmation"]
       @user.change_password(password)
     else
@@ -350,6 +353,7 @@ class AccountController < ApplicationController
 
   def update_copyright_holder
     return unless (new_holder = @user.legal_name_change)
+
     Image.update_copyright_holder(*new_holder, @user)
   end
 
@@ -561,6 +565,7 @@ class AccountController < ApplicationController
   def api_keys
     @key = ApiKey.new
     return unless request.method == "POST"
+
     if params[:commit] == :account_api_keys_create_button.l
       create_api_key
     else
@@ -704,7 +709,7 @@ class AccountController < ApplicationController
     if redirect
       redirect_to(redirect)
     else
-      render(text: "", layout: true)
+      render(plain: "", layout: true)
     end
   end
 
@@ -732,6 +737,7 @@ class AccountController < ApplicationController
     login = @new_user.login
     valid_themes = MO.themes + ["NULL"]
     return true if valid_themes.member?(theme) && login != "test_denied"
+
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
@@ -745,6 +751,7 @@ class AccountController < ApplicationController
     make_sure_password_present!
     make_sure_email_confirmed!
     return true if @new_user.errors.none? && @new_user.save
+
     flash_object_errors(@new_user)
     false
   end
@@ -754,6 +761,7 @@ class AccountController < ApplicationController
   # to have a password!
   def make_sure_password_present!
     return if @new_user.password.present?
+
     @new_user.errors.add(:password, :validate_user_password_missing.t)
   end
 

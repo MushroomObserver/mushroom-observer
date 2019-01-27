@@ -22,6 +22,7 @@ class API
       def parse_object_type(str)
         match = str.match(/^([a-z][ _a-z]*[a-z]) #?(\d+)$/i)
         raise BadParameterValue.new(str, :object) unless match
+
         [match[1].tr(" ", "_").downcase, match[2]]
       end
 
@@ -29,8 +30,10 @@ class API
         val = nil
         limit.each do |model|
           next unless model.type_tag.to_s.casecmp(type).zero?
+
           val = model.safe_find(id)
           return val if val
+
           raise ObjectNotFoundById.new(str, model)
         end
         raise BadLimitedParameterValue.new(str, limit.map(&:type_tag))

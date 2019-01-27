@@ -9,7 +9,7 @@ module CapybaraHelper
       "//a[1])"
   end
 
-  #XPath for Images in an Observation
+  # XPath for Images in an Observation
   def observation_image_xpath
     "//div[@id='content']/descendant::div[contains(@class, 'show_images')]/
                           descendant::a[child::img]"

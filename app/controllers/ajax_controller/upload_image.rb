@@ -32,13 +32,14 @@ class AjaxController
     name = args[:original_name].to_s
     errors += "\n" + :runtime_no_upload_image.t(name: name)
     logger.error("UPLOAD_FAILED: #{errors.inspect}")
-    render(text: errors.strip_html, status: 500)
+    render(plain: errors.strip_html, status: 500)
   end
 
   def create_and_upload_image(args)
     image = create_image(args)
     upload_image(image, args)
     return image if image.save && image.process_image
+
     raise image.formatted_errors.join("\n")
   ensure
     image.try(&:clean_up)
@@ -66,6 +67,7 @@ class AjaxController
 
   def image_original_name(args)
     return nil if @user.keep_filenames == :toss
+
     args[:original_name].to_s
   end
 

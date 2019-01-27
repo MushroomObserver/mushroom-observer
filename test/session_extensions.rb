@@ -6,8 +6,8 @@
 #  ==== Debugging
 #  dump_links::       Show list of all the links on the last page rendered.
 #  save_page::        Save response from last request in a file.
-#  get::              Call get_via_redirect with extra error checking.
-#  post::             Call post_via_redirect with extra error checking.
+#  get::              Call follow_redirect! with extra error checking.
+#  post::             Call follow_redirect! with extra error checking.
 #  get_without_redirecting::  Call the original 'get'.
 #  post_without_redirecting:: Call the original 'post'.
 #
@@ -59,12 +59,15 @@ module SessionExtensions
     end
   end
 
-  # Call get/post_via_redirect, checking for 500 errors and missing language
+  # Call follow_redirect!, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
   def process_with_error_checking(method, url, *args)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send("#{method.downcase}_via_redirect", url, *args)
+    send("#{method.downcase}", url, *args)
+    while response.redirect?
+      follow_redirect!
+    end
     if status == 500
       if error = controller.instance_variable_get("@error")
         msg = "#{error}\n#{error.backtrace.join("\n")}"

@@ -179,6 +179,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_location_created_at, rss_log)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     loc.log(:test_message, arg: "val")
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
@@ -186,6 +187,7 @@ class AbstractModelTest < UnitTestCase
     assert(rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     Location.update(loc.id, display_name: "New Location")
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
@@ -194,6 +196,7 @@ class AbstractModelTest < UnitTestCase
 
     location_with_notes = locations(:albion)
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     location_with_notes.merge(loc)
     rss_log.reload
     # (extra line for orphan title)
@@ -230,6 +233,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:test_message, rss_log)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     Name.update(name.id, author: "New Author")
     # This is normally done by Name#save_with_log
     name.log(:log_name_updated, user: rolf.login, touch: true)
@@ -239,6 +243,7 @@ class AbstractModelTest < UnitTestCase
     assert(rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     Name.first.merge(name)
     rss_log.reload
     # (extra line for orphan title)
@@ -317,6 +322,7 @@ class AbstractModelTest < UnitTestCase
     assert_rss_log_has_tag(:log_project_created_at, rss_log)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     proj.log(:test_message, arg: "val")
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
@@ -324,6 +330,7 @@ class AbstractModelTest < UnitTestCase
     assert(proj.rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     Project.update(proj.id, summary: "New Summary")
     # Normally done by ProjectController#edit_project.
     proj.log_update
@@ -333,6 +340,7 @@ class AbstractModelTest < UnitTestCase
     assert(proj.rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
+    rss_log.reload
     proj.destroy
     # Normally done by ProjectController#destroy_project.
     proj.log_destroy

@@ -125,18 +125,21 @@ class Comment < AbstractModel
   # Log creation of comment on object's RSS log if it can.
   def log_create(target = self.target)
     return unless target && target.respond_to?(:log)
+
     target.log(:log_comment_added, summary: summary, touch: true)
   end
 
   # Log update of comment on object's RSS log if it can.
   def log_update(target = self.target)
     return unless target && target.respond_to?(:log)
+
     target.log(:log_comment_updated, summary: summary, touch: false)
   end
 
   # Log destruction of comment on object's RSS log if it can.
   def log_destroy(target = self.target)
     return unless target && target.respond_to?(:log)
+
     target.log(:log_comment_destroyed, summary: summary, touch: false)
   end
 
@@ -154,6 +157,7 @@ class Comment < AbstractModel
 
   def check_user # :nodoc:
     return if user || User.current
+
     errors.add(:user, :validate_comment_user_missing.t)
   end
 
@@ -167,6 +171,7 @@ class Comment < AbstractModel
 
   def check_target # :nodoc:
     return unless target_type.to_s.size > 30
+
     errors.add(:target_type, :validate_comment_object_type_too_long.t)
   end
 end

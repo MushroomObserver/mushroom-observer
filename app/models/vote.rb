@@ -131,6 +131,7 @@ class Vote < AbstractModel
   # Convert a given Vote value to a percentage.
   def self.percent(val)
     return 0.0 if val.blank?
+
     val.to_f * 100 / 3
   end
 
@@ -235,6 +236,7 @@ class Vote < AbstractModel
         if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
           return last_pair[0]
         end
+
         last_pair = pair
       end
     end

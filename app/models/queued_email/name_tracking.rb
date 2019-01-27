@@ -12,6 +12,7 @@ class QueuedEmail::NameTracking < QueuedEmail
   def self.create_email(notification, naming)
     fail "Missing notification!" unless notification
     fail "Missing naming!"       unless naming
+
     sender = notification.user
     observer = naming.observation.user
     result = nil

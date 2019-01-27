@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = API Controller
 #
@@ -99,7 +100,7 @@ class ApiController < ApplicationController
 
   # Massage params hash to proper args hash for api
   def params_to_api_args(type)
-    args = params.to_hash.symbolize_keys.except(:controller)
+    args = params.to_unsafe_h.symbolize_keys.except(:controller)
     args[:method] = request.method
     args[:action] = type
     args.delete(:format)
@@ -107,33 +108,31 @@ class ApiController < ApplicationController
   end
 
   def upload_present?
-    upload_length > 0 && upload_type.present?
+    (upload_length.positive? &&
+     upload_type.present? &&
+     upload_type != "application/x-www-form-urlencoded" &&
+     upload_data.present?)
   end
 
   def upload_api
     API::Upload.new(
-      data:         upload_data,
-      length:       upload_length,
+      data: upload_data,
+      length: upload_length,
       content_type: upload_type,
-      checksum:     request.headers["CONTENT_MD5"].to_s
+      checksum: request.headers["CONTENT_MD5"].to_s
     )
   end
 
   def upload_length
-    testing? ? request.headers["CONTENT_LENGTH"].to_i : request.content_length
+    request.content_length
   end
 
   def upload_type
-    testing? ? request.headers["CONTENT_TYPE"].to_s : request.media_type
+    request.media_type
   end
 
   def upload_data
-    testing? ? request.headers["RAW_POST_DATA"] : request.body
-  end
-
-  # convenience method to shorten lines (also helps to trick Coveralls)
-  def testing?
-    Rails.env == "test"
+    request.body
   end
 
   def render_api_results(args)

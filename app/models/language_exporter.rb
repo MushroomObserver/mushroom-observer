@@ -94,6 +94,7 @@ module LanguageExporter
     any_changes = false
     unless old_user = User.current
       fail "Must specify a user to import translation file!" unless official
+
       User.current = User.admin
     end
     old_data = localization_strings

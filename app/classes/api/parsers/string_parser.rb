@@ -5,6 +5,7 @@ class API
       def parse(str)
         limit = args[:limit]
         raise StringTooLong.new(str, limit) if limit && str.size > limit
+
         str
       end
     end

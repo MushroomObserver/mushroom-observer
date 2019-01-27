@@ -84,6 +84,7 @@ class Project < AbstractModel
     return false unless user
     return true  if obj.user_id == user.id
     return false if obj.projects.empty?
+
     group_ids = user.user_groups.map(&:id)
     obj.projects.each do |project|
       return true if group_ids.member?(project.user_group_id) ||
@@ -124,6 +125,7 @@ class Project < AbstractModel
   # Remove image this project. Saves it.
   def remove_image(img)
     return unless images.include?(img)
+
     images.delete(img)
     update_attribute(:updated_at, Time.now)
   end
@@ -132,6 +134,7 @@ class Project < AbstractModel
   # Saves it.
   def add_observation(obs)
     return if observations.include?(obs)
+
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     observations.push(obs)
     imgs.each { |img| images.push(img) }
@@ -140,6 +143,7 @@ class Project < AbstractModel
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
     return unless observations.include?(obs)
+
     imgs = obs.images.select { |img| img.user_id == obs.user_id }
     if imgs.any?
       img_ids = imgs.map(&:id).map(&:to_s).join(",")
@@ -167,6 +171,7 @@ class Project < AbstractModel
   # Remove species_list from this project. Saves it.
   def remove_species_list(spl)
     return unless species_lists.include?(spl)
+
     species_lists.delete(spl)
     update_attribute(:updated_at, Time.now)
   end

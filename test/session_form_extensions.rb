@@ -218,6 +218,7 @@ module SessionExtensions
 
     def string_value(field)
       return field unless field.respond_to?(:value)
+
       string_value(field.value)
     end
 
@@ -240,8 +241,9 @@ module SessionExtensions
     end
 
     def selected_value(field)
-      selected = field.node.children.select {|x| x["selected"]}
+      selected = field.node.children.select { |x| x["selected"] }
       return "" if selected == []
+
       selected[0]["value"]
     end
 
@@ -273,7 +275,7 @@ module SessionExtensions
       assert_checked(id, false, msg)
     end
 
-    def assert_checked(id, checked=true, msg = nil)
+    def assert_checked(id, checked = true, msg = nil)
       field = get_field!(id)
       val = field.node["checked"]
       if checked
@@ -425,7 +427,7 @@ module SessionExtensions
       context.assert(found,
                      "Couldn't find submit button labeled #{button.inspect}.")
       puts "POST #{url}: #{hash.inspect}" if debug
-      context.post(url, hash)
+      context.post(url, params: hash)
     end
   end
 end

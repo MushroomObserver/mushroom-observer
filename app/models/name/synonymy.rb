@@ -102,6 +102,7 @@ class Name < AbstractModel
   #
   def clear_synonym
     return unless synonym_id
+
     names = synonyms
 
     # Get rid of the synonym if only one going to be left in it.

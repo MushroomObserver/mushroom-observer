@@ -12,6 +12,7 @@ class QueuedEmail::NameProposal < QueuedEmail
     result = create(sender, recipient)
     fail "Missing naming!"      unless naming
     fail "Missing observation!" unless observation
+
     result.add_integer(:naming, naming.id)
     result.add_integer(:observation, observation.id)
     result.finish

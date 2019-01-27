@@ -125,6 +125,7 @@ class API
   Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|
     next if file !~ %r{(api/\w+_api)\.rb$}
     next if Regexp.last_match(1) == "api/model_api"
+
     require_dependency Regexp.last_match(1)
   end
 end

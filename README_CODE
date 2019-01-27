@@ -72,7 +72,7 @@ handled using the handy migrations in <tt>db/migrate</tt>.
   rake db:migrate                          # Create or update database.
   rake db:migrate VERSION=YYYYMMDDHHMMSS   # Rollback to previous version.
 
-Access is all done via subclasses of ActiveRecord::Base.  These are generally
+Access is all done via subclasses of ApplicationRecord.  These are generally
 called models.  Each instance of a model represents a single row in the
 corresponding database table.  Look for observations in the class Observation,
 user/account settings in User, taxonomy in Name and Synonym, and so on.  These

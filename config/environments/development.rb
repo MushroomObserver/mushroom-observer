@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+#
+# rubocop:disable Metrics/BlockLength
 MushroomObserver::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+  # Settings specified here take precedence over those in config/application.rb
 
   # ----------------------------
   #  MO configuration.
@@ -8,7 +11,8 @@ MushroomObserver::Application.configure do
   config.domain      = "localhost"
   config.http_domain = "http://localhost:3000"
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
   config.bad_domains = ["localhost.localdomain:3000"]
 
   # Code appended to ids to make "sync_id".  Must start with letter.
@@ -18,15 +22,12 @@ MushroomObserver::Application.configure do
   config.queue_email = false
   config.action_mailer.smtp_settings = {
     address: "localhost",
-    port:    25,
-    domain:  "localhost"
+    port: 25,
+    domain: "localhost"
   }
 
-  config.image_precedence = {
-    default: [:local, :cdmr]
-  }
+  config.image_precedence = { default: [:local, :cdmr] }
   config.image_fallback_source = :cdmr
-
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
   # ----------------------------
@@ -60,7 +61,7 @@ MushroomObserver::Application.configure do
   config.active_record.migration_error = :page_load
 
   # Serve assets in rails.
-  config.serve_static_files = true
+  config.public_file_server.enabled = true
 
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
@@ -72,12 +73,10 @@ MushroomObserver::Application.configure do
   config.assets.logger = false
   config.assets.digest = false
 
-  # Raises error for missing translations
-  # config.action_view.raise_on_missing_translations = true
-
   # Enable web console for MushroomObserver VM
   config.web_console.whitelisted_ips = "10.0.2.2"
 end
+# rubocop:enable Metrics/BlockLength
 
 file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

@@ -2785,6 +2785,7 @@ class NameControllerTest < FunctionalTestCase
     split_name = nil
     selected_synonym.names.each do |n|
       next unless n != selected_name # Check all names not matching selected one
+
       refute(n.deprecated)
       split_name = n
       existing_synonyms[n.id.to_s] = "1"
@@ -2836,6 +2837,7 @@ class NameControllerTest < FunctionalTestCase
     split_name = nil
     selected_synonym.names.each do |n|
       next unless n != selected_name
+
       refute(n.deprecated)
       split_name = n
       # Uncheck all names not matching the selected one
@@ -3122,6 +3124,7 @@ class NameControllerTest < FunctionalTestCase
     split_name = nil
     for n in selected_synonym.names
       next unless n.id != selected_id
+
       assert(n.deprecated)
       if split_name.nil? # Find the first different name and uncheck it
         split_name = n
@@ -3170,6 +3173,7 @@ class NameControllerTest < FunctionalTestCase
     count = 0
     selected_synonym.names.each do |n|
       next unless n != selected_name
+
       assert(n.deprecated)
       if count < 2 # Uncheck two names
         split_names.push(n)
@@ -3218,6 +3222,7 @@ class NameControllerTest < FunctionalTestCase
     split_name = nil
     selected_synonym.names.each do |n|
       next unless n != selected_name
+
       assert(n.deprecated)
       split_name = n
       # Uncheck all names not matching the selected one

@@ -54,6 +54,7 @@ class Name < AbstractModel
   # :stopdoc:
   def check_author
     return if author.to_s.size <= Name.author_limit
+
     errors.add(
       :author,
       "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: "\
@@ -63,6 +64,7 @@ class Name < AbstractModel
 
   def check_text_name
     return if text_name.to_s.size <= Name.text_name_limit
+
     errors.add(
       :text_name,
       "#{:validate_name_text_name_too_long.t} #{:MAXIMUM.t}: "\

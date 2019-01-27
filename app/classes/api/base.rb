@@ -283,6 +283,7 @@ class API
       raise BadApiKey.new(key_str)        unless key
       raise ApiKeyNotVerified.new(key)    unless key.verified
       raise UserNotVerified.new(key.user) unless key.user.verified
+
       User.current = self.user = key.user
       User.current_location_format = :postal
       # (that overrides user pref in order to make it more consistent for apps)
@@ -296,6 +297,7 @@ class API
     self.method = tmp_method.downcase.to_sym
     raise MissingMethod.new     unless method
     raise BadMethod.new(method) unless respond_to?(method)
+
     send(method)
   end
 

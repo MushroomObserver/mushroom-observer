@@ -36,6 +36,7 @@ class ExternalLink < AbstractModel
 
   def check_url_syntax
     return if VALID_URL_PAT.match?(url.to_s)
+
     errors.add(:url, :validate_invalid_url.t)
   end
 
@@ -46,6 +47,7 @@ class ExternalLink < AbstractModel
 
   def can_edit?(user = User.current)
     return false unless user
+
     user.id == observation.user_id ||
       external_site.project.is_member?(user)
   end

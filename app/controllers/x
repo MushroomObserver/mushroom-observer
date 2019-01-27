@@ -1,0 +1,471 @@
+account_controller.rb
+  signup
+  verify
+  reverify
+  login
+  email_new_password
+  logout_user
+  prefs
+  profile
+  remove_image
+  no_email_comments_owner
+  no_email_comments_response
+  no_email_comments_all
+  no_email_observations_consensus
+  no_email_observations_naming
+  no_email_observations_all
+  no_email_names_admin
+  no_email_names_author
+  no_email_names_editor
+  no_email_names_reviewer
+  no_email_names_all
+  no_email_locations_admin
+  no_email_locations_author
+  no_email_locations_editor
+  no_email_locations_all
+  no_email_general_feature
+  no_email_general_commercial
+  no_email_general_question
+  api_keys
+  create_api_key
+  remove_api_keys
+  activate_api_key
+  edit_api_key
+  turn_admin_on
+  turn_admin_off
+  add_user_to_group
+  destroy_user
+  test_flash
+
+api_controller.rb
+  api_keys
+  collection_numbers
+  comments
+  external_links
+  external_sites
+  herbaria
+  herbarium_records
+  images
+  locations
+  names
+  observations
+  projects
+  sequences
+  species_lists
+  users
+
+article_controller.rb
+  index_article
+  list_articles
+  show_article
+  create_article
+  edit_article
+  save_edits
+  destroy_article
+
+collection_number_controller.rb
+  index_collection_number
+  list_collection_numbers
+  collection_number_search
+  observation_index
+  show_collection_number
+  next_collection_number
+  prev_collection_number
+  create_collection_number
+  edit_collection_number
+  remove_observation
+  destroy_collection_number
+
+comment_controller.rb
+  index_comment
+  list_comments
+  show_comments_by_user
+  show_comments_for_user
+  show_comments_for_target
+  comment_search
+  show_comment
+  next_comment
+  prev_comment
+  add_comment
+  edit_comment
+  destroy_comment
+
+description_controller_helpers.rb
+  make_description_default
+  merge_descriptions
+  publish_description
+  adjust_permissions
+
+glossary_controller.rb
+  show_glossary_term
+  index
+  create_glossary_term
+  edit_glossary_term
+  show_past_glossary_term
+
+herbarium_controller.rb
+  index_herbarium
+  index
+  list_herbaria
+  herbarium_search
+  show_herbarium
+  next_herbarium
+  prev_herbarium
+  create_herbarium
+  edit_herbarium
+  merge_herbaria
+  delete_curator
+  request_to_be_curator
+  destroy_herbarium
+
+herbarium_record_controller.rb
+  index_herbarium_record
+  list_herbarium_records
+  herbarium_record_search
+  herbarium_index
+  observation_index
+  show_herbarium_record
+  next_herbarium_record
+  prev_herbarium_record
+  create_herbarium_record
+  edit_herbarium_record
+  remove_observation
+  destroy_herbarium_record
+
+image_controller.rb
+  index_image
+  list_images
+  images_by_user
+  images_for_project
+  image_search
+  advanced_search
+  show_image
+  show_original
+  next_image
+  prev_image
+  cast_vote
+  add_image
+  edit_image
+  destroy_image
+  remove_image
+  reuse_image_for_glossary_term
+  reuse_image
+  remove_images
+  remove_images_for_glossary_term
+  transform_image
+  license_updater
+  images_for_mushroom_app
+
+interest_controller.rb
+  list_interests
+  set_interest
+  destroy_notification
+
+location_controller.rb
+  index_location
+  list_countries
+  list_by_country
+  list_locations
+  list_dubious_locations
+  locations_by_user
+  locations_by_editor
+  location_search
+  advanced_search
+  map_locations
+  index_location_description
+  list_location_descriptions
+  location_descriptions_by_author
+  location_descriptions_by_editor
+  show_location
+  show_location_description
+  show_past_location
+  show_past_location_description
+  next_location
+  prev_location
+  next_location_description
+  prev_location_description
+  create_location
+  edit_location
+  create_location_description
+  edit_location_description
+  destroy_location_description
+  list_merge_options
+  add_to_location
+  help
+
+name_controller.rb
+  index_name
+  list_names
+  observation_index
+  authored_names
+  names_by_user
+  names_by_editor
+  needed_descriptions
+  name_search
+  advanced_search
+  test_index
+  index_name_description
+  list_name_descriptions
+  name_descriptions_by_author
+  name_descriptions_by_editor
+  show_name
+  show_past_name
+  show_past_name_description
+  next_name
+  prev_name
+  next_name_description
+  prev_name_description
+  set_review_status
+  create_name_description
+  edit_name_description
+  destroy_name_description
+  change_synonyms
+  deprecate_name
+  approve_name
+  eol_preview
+  eol
+  bulk_name_edit
+  map
+  email_tracking
+  edit_lifeform
+  propagate_lifeform
+  names_for_mushroom_app
+
+naming_controller.rb
+  edit
+  create
+  destroy
+
+pivotal_controller.rb
+  index
+
+project_controller.rb
+  index_project
+  list_projects
+  project_search
+  show_project
+  next_project
+  prev_project
+  add_project
+  edit_project
+  destroy_project
+  admin_request
+  add_members
+  change_member_status
+
+publications_controller.rb
+  index
+  show
+  new
+  edit
+  create
+  update
+  destroy
+
+sequence_controller.rb
+  index_sequence
+  list_sequences
+  sequence_search
+  observation_index
+  show_sequence
+  next_sequence
+  prev_sequence
+  create_sequence
+  edit_sequence
+  destroy_sequence
+
+species_list_controller.rb
+  index_species_list
+  list_species_lists
+  species_lists_by_user
+  species_lists_for_project
+  species_lists_by_title
+  species_list_search
+  show_species_list
+  next_species_list
+  prev_species_list
+  print_labels
+  make_report
+  name_lister
+  create_species_list
+  edit_species_list
+  upload_species_list
+  destroy_species_list
+  add_remove_observations
+  post_add_remove_observations
+  manage_species_lists
+  remove_observation_from_species_list
+  add_observation_to_species_list
+  bulk_editor
+  manage_projects
+
+support_controller.rb
+  donate
+  create_donation
+  confirm
+  review_donations
+  donors
+  wrapup_2011
+  wrapup_2012
+  letter
+  thanks
+  governance
+
+theme_controller.rb
+  color_themes
+
+translation_controller.rb
+  edit_translations
+  edit_translations_ajax_get
+  edit_translations_ajax_post
+
+vote_controller.rb
+  show_votes
+  cast_vote
+  cast_votes
+  refresh_vote_cache
+
+ajax_controller/api_key.rb
+  api_key
+
+ajax_controller/auto_complete.rb
+  auto_complete
+
+ajax_controller/exif.rb
+  exif
+
+ajax_controller/export.rb
+  export
+
+ajax_controller/external_link.rb
+  external_link
+
+ajax_controller/geocode.rb
+  geocode
+
+ajax_controller/old_translation.rb
+  old_translation
+
+ajax_controller/pivotal.rb
+  pivotal
+
+ajax_controller/upload_image.rb
+  multi_image_template
+  create_image_object
+
+ajax_controller/vote.rb
+  vote
+
+name_controller/classification.rb
+  propagate_classification
+  refresh_classification
+  inherit_classification
+  edit_classification
+
+name_controller/create_and_edit_name.rb
+  create_name
+  edit_name
+
+name_controller/show_name_description.rb
+  show_name_description
+
+observer_controller/author_controller.rb
+  author_request
+  review_authors
+
+observer_controller/create_and_edit_observation.rb
+  create_observation
+  edit_observation
+  update_whitelisted_observation_attributes
+  destroy_observation
+  recalc
+  hide_thumbnail_map
+
+observer_controller/email_controller.rb
+  email_features
+  ask_webmaster_question
+  ask_user_question
+  ask_observation_question
+  commercial_inquiry
+
+observer_controller/indexes.rb
+  index_observation
+  list_observations
+  observations_by_name
+  observations_of_name
+  observations_by_user
+  observations_at_location
+  observations_at_where
+  observations_for_project
+  observation_search
+  map_observations
+  print_labels
+  download_observations
+
+observer_controller/info_controller.rb
+  intro
+  news
+  how_to_use
+  how_to_help
+  wrapup_2011
+  risd_terminology
+  textile_sandbox
+  translators_note
+
+observer_controller/markup_controller.rb
+  lookup_comment
+  lookup_image
+  lookup_location
+  lookup_name
+  lookup_accepted_name
+  lookup_observation
+  lookup_project
+  lookup_species_list
+  lookup_user
+
+observer_controller/notification_controller.rb
+  show_notifications
+
+observer_controller/other.rb
+  test_flash_redirection
+  turn_javascript_on
+  turn_javascript_off
+  turn_javascript_nil
+  w3c_tests
+  change_banner
+  set_export_status
+
+observer_controller/rss_log_controller.rb
+  index
+  index_rss_log
+  list_rss_logs
+  show_rss_log
+  next_rss_log
+  prev_rss_log
+  rss
+
+observer_controller/search_controller.rb
+  pattern_search
+  advanced_search_form
+  advanced_search
+
+observer_controller/show_observation.rb
+  show_observation
+  show_obs
+  next_observation
+  prev_observation
+  map_observation
+
+observer_controller/site_stats.rb
+  show_site_stats
+
+observer_controller/user_controller.rb
+  index_user
+  users_by_name
+  user_search
+  users_by_contribution
+  show_user
+  next_user
+  prev_user
+  checklist
+  change_user_bonuses

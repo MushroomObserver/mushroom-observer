@@ -54,6 +54,13 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest
   # surprises in production mode.
   def setup
     ApplicationController.allow_forgery_protection = true
+
+    # This should be automatically removed at the beginning of each test,
+    # but for some reason it is not nil before the very first test run.
+    # If it is not removed, then all sessions opened in your test will have
+    # the identical session instance, breaking some tests. This is probably
+    # a bug in rails, but as of 20190101 it is required.
+    @integration_session = nil
   end
 
   def teardown

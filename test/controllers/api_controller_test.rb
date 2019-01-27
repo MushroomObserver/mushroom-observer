@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "rexml/document"
 
@@ -5,6 +7,7 @@ class ApiControllerTest < FunctionalTestCase
   def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
     return unless @api
+
     msg = format_api_errors(@api, msg)
     assert(@api.errors.empty?, msg)
   end
@@ -18,26 +21,14 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def post_and_send_file(action, file, content_type, params)
-    stream = File.open(file, "rb")
-    length = File.size(file)
-    checksum = file_checksum(file)
-    post_and_send(action, stream, length, content_type, checksum, params)
+    data = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    params[:body] = data
+    post_and_send(action, content_type, params)
   end
 
-  def post_and_send_string(action, string, content_type, params)
-    stream = StringIO.new(string, "rb")
-    length = string.length
-    checksum = string_checksum(string)
-    post_and_send(action, stream, length, content_type, checksum, params)
-  end
-
-  def post_and_send(action, stream, length, type, md5, params)
-    @request.env["RAW_POST_DATA"] = stream
-    @request.env["CONTENT_LENGTH"] = length
+  def post_and_send(action, type, params)
     @request.env["CONTENT_TYPE"] = type
-    @request.env["CONTENT_MD5"] = md5
     post(action, params)
-    @request.env.delete("RAW_POST_DATA")
   end
 
   def file_checksum(filename)
@@ -283,8 +274,10 @@ class ApiControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal("&lt;p&gt;New &lt;span class=\"caps\"&gt;API&lt;/span&gt; Key&lt;/p&gt;",
-                 notes.to_s)
+    assert_equal(
+      "&lt;p&gt;New &lt;span class=\"caps\"&gt;API&lt;/span&gt; Key&lt;/p&gt;",
+      notes.to_s
+    )
   end
 
   def test_post_api_key
@@ -321,18 +314,18 @@ class ApiControllerTest < FunctionalTestCase
     post(
       :sequences,
       observation: obs.id,
-      api_key:     api_keys(:marys_api_key).key,
-      locus:       "ITS",
-      bases:       "catg",
-      archive:     "GenBank",
-      accession:   "KT1234",
-      notes:       "sequence notes"
+      api_key: api_keys(:marys_api_key).key,
+      locus: "ITS",
+      bases: "catg",
+      archive: "GenBank",
+      accession: "KT1234",
+      notes: "sequence notes"
     )
     assert_no_api_errors
     sequence = Sequence.last
     assert_equal(obs, sequence.observation)
     assert_users_equal(mary, sequence.user)
-    refute_equal(obs.user, sequence.user)
+    assert_not_equal(obs.user, sequence.user)
     assert_equal("ITS", sequence.locus)
     assert_equal("catg", sequence.bases)
     assert_equal("GenBank", sequence.archive)

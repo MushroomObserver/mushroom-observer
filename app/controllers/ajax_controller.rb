@@ -17,16 +17,15 @@
 #
 #  api_key::          Activate and edit ApiKey's.
 #  auto_complete::    Return list of strings matching a given string.
+#  create_image_object::  Uploads image without observation yet.
 #  exif::             Get EXIF header info of an image.
 #  export::           Change export status.
 #  external_link::    Add, edit and remove external links assoc. with obs.
 #  geocode::          Look up extents for geographic location by name.
+#  multi_image_template:: HTML template for uploaded image.
 #  old_translation::  Return an old TranslationString by version id.
 #  pivotal::          Pivotal requests: look up, vote, or comment on story.
 #  vote::             Change vote on proposed name or image.
-#
-#  get_multi_image_template:: HTML template for uploaded image.
-#  create_image_object::      Uploads image without observation yet.
 #
 class AjaxController < ApplicationController
   require_dependency "ajax_controller/api_key"
@@ -50,7 +49,7 @@ class AjaxController < ApplicationController
   rescue => e
     msg = e.to_s + "\n"
     msg += backtrace(e) if Rails.env != "production"
-    render(text: msg, status: 500)
+    render(plain: msg, status: 500)
   end
 
   def prepare_parameters
@@ -63,6 +62,7 @@ class AjaxController < ApplicationController
     result = ""
     exception.backtrace.each do |line|
       break if /action_controller.*perform_action/.match?(line)
+
       result += line + "\n"
     end
     result
@@ -74,6 +74,6 @@ class AjaxController < ApplicationController
 
   # Used by unit tests.
   def test
-    render(text: "test")
+    render(plain: "test")
   end
 end

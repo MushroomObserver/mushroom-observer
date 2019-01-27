@@ -21,8 +21,10 @@ class API
       def parse_scalar
         str = clean_param
         return args[:default] unless str
+
         val = parse(str)
         return val unless val.blank? && args[:not_blank]
+
         raise ParameterCantBeBlank.new(key)
       end
 
@@ -32,6 +34,7 @@ class API
         args[:list] = true
         str = clean_param(:leave_slashes)
         return args[:default] if str.blank?
+
         result = []
         while (match = str.match(/^((\\.|[^\\,]+)+),/))
           str = match.post_match
@@ -49,6 +52,7 @@ class API
         args[:range] = true
         str = clean_param(:leave_slashes)
         return args[:default] if str.blank?
+
         match = str.match(/^((\\.|[^\\-]+)+)-((\\.|[^\\-]+)+)$/)
         if match
           @val = match[1]
@@ -69,6 +73,7 @@ class API
       # backslashes.  Returns String if parameter was given, otherwise nil.
       def clean_param(leave_slashes = false)
         return unless @val
+
         val = @val.to_s.strip
         val.gsub!(/\\(.)/, "\\1") unless leave_slashes
         val

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = Name Sorter
 #
@@ -50,7 +51,7 @@
 #    # (This syntax is not allowed while populating species lists, for example.)
 #    has_new_synonyms
 #
-#    # Checks to make sure user has had a chance to choose from among the synonyms
+#    # Checks to make sure user had a chance to choose from among the synonyms
 #    # of any name they've listed that has synonyms.  This is a bit misnamed.
 #    only_approved_synonyms
 #
@@ -73,7 +74,7 @@
 #  time zone.)
 #
 ################################################################################
-
+#
 class NameSorter
   attr_accessor :approved_deprecated_names
   attr_accessor :approved_synonyms
@@ -132,23 +133,31 @@ class NameSorter
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      fail TypeError.new("NameSorter synonyms must be Integer or ActiveRecord::Base, not #{arg.clasS}.")
+      fail TypeError.new(
+        "NameSorter synonyms must be Integer or ActiveRecord::Base, "\
+        "not #{arg.clasS}."
+      )
     end
   end
 
   def append_approved_synonyms(synonyms)
-    if synonyms # Allow for nil
-      synonyms = synonyms.split("/") if synonyms.class == String
-      if synonyms.class == Array
-        synonyms.each { |id| push_synonym(id.to_i) }
-      else
-        fail TypeError.new("Only Arrays can be appended to a NameSorter synonym list not %s" % synonyms.class)
-      end
+    return unless synonyms # Allow for nil
+
+    synonyms = synonyms.split("/") if synonyms.class == String
+    if synonyms.class == Array
+      synonyms.each { |id| push_synonym(id.to_i) }
+    else
+      fail TypeError.new(
+        "Only Arrays can be appended to a NameSorter synonym list not %s" %
+          synonyms.class
+      )
     end
   end
 
   def add_chosen_names(new_names)
-    @chosen_names.merge!(new_names) if new_names
+    return unless new_names
+
+    new_names.each_pair { |key, _val| @chosen_names[key] = new_names[key] }
   end
 
   # append the input to the list of approved deprecated names
@@ -156,6 +165,7 @@ class NameSorter
   #      or a string of name ids, each on its own line, e.g. "16\r\n14"
   def add_approved_deprecated_names(new_names)
     return unless new_names
+
     if new_names.class == String
       new_names.split("\n").each { |n| @approved_deprecated_names += n.split }
     elsif new_names.class == Array
@@ -164,29 +174,27 @@ class NameSorter
   end
 
   def check_for_deprecated_name(name, name_str = nil)
-    if name.deprecated
-      str = name_str || name.real_search_name
-      @deprecated_name_strs.push(str)
-      @deprecated_names.push(name)
-      if @approved_deprecated_names.nil? ||
-         !@approved_deprecated_names.member?(str) and
-         !@approved_deprecated_names.member?(name.id.to_s)
-        @has_unapproved_deprecated_names = true
-      end
+    return unless name.deprecated
+
+    str = name_str || name.real_search_name
+    @deprecated_name_strs.push(str)
+    @deprecated_names.push(name)
+    if @approved_deprecated_names.nil? ||
+       !@approved_deprecated_names.member?(str) &&
+       !@approved_deprecated_names.member?(name.id.to_s)
+      @has_unapproved_deprecated_names = true
     end
   end
 
   def check_for_deprecated_names(names, name_str = nil)
-    for n in names
-      check_for_deprecated_name(n, name_str)
-    end
+    names.each { |n| check_for_deprecated_name(n, name_str) }
   end
 
   def check_for_deprecated_checklist(checklist)
-    if checklist
-      for key, value in checklist
-        check_for_deprecated_name(Name.find(key.to_i)) if value == "1"
-      end
+    return unless checklist
+
+    checklist.each do |key, value|
+      check_for_deprecated_name(Name.find(key.to_i)) if value == "1"
     end
   end
 
@@ -201,12 +209,10 @@ class NameSorter
     chosen = false
 
     # Did user enter a date/timestamp via comment?
-    if x = begin
-             Time.parse(name_parse.comment)
-           rescue
-             nil
-           end
-      timestamp = x
+    begin
+      comment_time = Time.parse(name_parse.comment) || timestamp
+    rescue
+      comment_time = timestamp
     end
 
     # Need all deprecated names even when another name is chosen
@@ -217,16 +223,16 @@ class NameSorter
     # Check radio boxes for multiple-names and/or approved-names that have
     # been selected -- these take priority over all else.
     if @chosen_names
-      for name in names
-        if chosen_id = @chosen_names[name.id.to_s]
-          @single_line_strs.push(line_str) # (name_str)
-          chosen_name = Name.find(chosen_id)
-          names = [chosen_name]
-          @single_names.push([chosen_name, timestamp])
-          @all_names.push(chosen_name)
-          chosen = true
-          break
-        end
+      names.each do |name|
+        next unless (chosen_id = @chosen_names[name.id.to_s])
+
+        @single_line_strs.push(line_str) # (name_str)
+        chosen_name = Name.find(chosen_id)
+        names = [chosen_name]
+        @single_names.push([chosen_name, comment_time])
+        @all_names.push(chosen_name)
+        chosen = true
+        break
       end
     end
 
@@ -252,26 +258,27 @@ class NameSorter
     end
 
     # Did user specify a synonym via the "Name = Synonym" syntax?
-    if name_parse.has_synonym
-      @has_new_synonyms = true
-      if name_parse.find_synonym_names.length == 0
-        @new_name_strs.push(name_parse.synonym_search_name)
-      end
-      @synonym_data.push([name_parse, names]) # Keep names in addition to parse for the chosen filter
+    return unless name_parse.has_synonym
+
+    @has_new_synonyms = true
+    if name_parse.find_synonym_names.empty?
+      @new_name_strs.push(name_parse.synonym_search_name)
     end
+    # Keep names in addition to parse for the chosen filter
+    @synonym_data.push([name_parse, names])
   end
 
   # Deprecate all the "Species = Synonym" synonyms, and synonymize them.
   # This relies on both the species and the synonym already existing and being
   # unambiguous.  That is, only_single_names must be true.
   def create_new_synonyms
-    for parse, names in @synonym_data
+    @synonym_data.each do |parse, names|
       if names.length == 1
         # Merging earlier in this loop may have affected this name implicitly;
         # reload to pick up potential changes.
         name = names.first.reload
         synonym_names = parse.find_synonym_names
-        for s in synonym_names
+        synonym_names.each do |s|
           s.change_deprecated(true)
           s.save
           name.merge_synonyms(s)
@@ -279,7 +286,9 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        fail TypeError.new("Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}")
+        fail TypeError.new(
+          "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
+        )
       end
     end
   end
@@ -289,7 +298,7 @@ class NameSorter
   # Returns a list of name strings (display_name in particular), not objects.
   def synonym_name_strs
     result = []
-    for name in @all_names
+    @all_names.each do |name|
       result += name.synonyms.map(&:display_name) if name.synonym_id
     end
     result
@@ -301,7 +310,7 @@ class NameSorter
   # of Name ids (not objects).  (*NOTE*: This is a superset of +all_names+.)
   def all_synonyms
     result = @approved_synonyms.dup
-    for name in @all_names
+    @all_names.each do |name|
       result += name.synonyms
     end
     result.uniq
@@ -319,13 +328,13 @@ class NameSorter
     ok_name_ids = (@approved_synonyms + @all_names).map(&:id)
     # error_string = "ok_nameids: [%s]\n" % ok_name_ids.join(', ') +
     # "all_synonyms: [%s]\n" % self.all_synonyms.map(&:id).join(', ')
-    for name in all_synonyms
+    all_synonyms.each do |name|
       # error_string += "%s\n" % name.id
-      unless ok_name_ids.member?(name.id)
-        # raise TypeError.new("member? failed")
-        result = false
-        break
-      end
+      next if ok_name_ids.member?(name.id)
+
+      # raise TypeError.new("member? failed")
+      result = false
+      break
     end
     # raise TypeError.new(error_string)
     result

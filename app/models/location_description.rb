@@ -58,8 +58,7 @@ class LocationDescription < Description
             foreign: 2,
             project: 3,
             source: 4,
-            user: 5
-          },
+            user: 5 },
           source: :source_type,
           accessor: :whiny)
 
@@ -120,7 +119,7 @@ class LocationDescription < Description
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-    if altered?
+    if saved_version_changes?
       sender = User.current
       recipients = []
 

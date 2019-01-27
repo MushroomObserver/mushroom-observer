@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # = QueuedEmail
 #
@@ -52,8 +53,8 @@
 #
 #       CommentEmail.build(from, to, observation, comment)
 #
-#  8. AccountMailer subclass renders the email message and dispatches it to postfix or
-#     whichever mailserver is responsible for delivering email.
+#  8. AccountMailer subclass renders the email message and dispatches it
+#     to postfix or whichever mailserver is responsible for delivering email.
 #
 #  == Basic properties
 #
@@ -122,8 +123,8 @@ class QueuedEmail < AbstractModel
   belongs_to :to_user, class_name: "User", foreign_key: "to_user_id"
 
   # This tells ActiveRecord to instantiate new records into the class referred
-  # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration is
-  # important to convince it not to strip the "QueuedEmail::" off the front.
+  # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration
+  # is important to convince it not to strip the "QueuedEmail::" off the front.
   self.inheritance_column = "flavor"
   self.store_full_sti_class = true
 
@@ -197,7 +198,7 @@ class QueuedEmail < AbstractModel
   #   end
   #
   def self.create(sender, receiver)
-    # Let ActiveRecord::Base create the record for us.
+    # Let ApplicationRecord create the record for us.
     super(
       user: sender,
       to_user: receiver,
@@ -234,6 +235,7 @@ class QueuedEmail < AbstractModel
   # receiver, then passes it off to the subclass (via deliver_email).
   def send_email
     return true unless RunLevel.is_normal?
+
     log_msg = "SEND #{flavor} " \
       "from=#{begin
                 user.login
@@ -270,11 +272,9 @@ class QueuedEmail < AbstractModel
   def deliver_email
     error = "We forgot to define #{type}#deliver_email.\n"
     # Failing to send email should not throw an error in production
-    if Rails.env == "production"
-      $stderr.puts(error)
-    else
-      fail error
-    end
+    return $stderr.puts(error) if Rails.env.production?
+
+    fail error
   end
 
   # Returns "flavor from to" for debugging.
@@ -288,12 +288,8 @@ class QueuedEmail < AbstractModel
     result += "#{id}: from => #{user && user.login}, "
     result += "to => #{to_user.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
-    for i in queued_email_integers
-      result += "\t#{i.key} => #{i.value}\n"
-    end
-    for i in queued_email_strings
-      result += "\t#{i.key} => #{i.value}\n"
-    end
+    queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }
+    queued_email_strings.each { |i| result += "\t#{i.key} => #{i.value}\n" }
     result += "\tNote: #{queued_email_note.value}\n" if queued_email_note
     result
   end
@@ -396,16 +392,14 @@ class QueuedEmail < AbstractModel
   #
   def get_integers(keys, return_dict = false)
     @integers = {}
-    for qi in queued_email_integers
+    queued_email_integers.each do |qi|
       @integers[qi.key.to_s] = qi.value.to_i
     end
     if return_dict
       result = @integers
     else
       result = []
-      for key in keys
-        result.push(@integers[key.to_s])
-      end
+      keys.each { |key| result.push(@integers[key.to_s]) }
     end
     result
   end
@@ -424,16 +418,12 @@ class QueuedEmail < AbstractModel
   #
   def get_strings(keys, return_dict = false)
     @strings = {}
-    for qs in queued_email_strings
-      @strings[qs.key.to_s] = qs.value.to_s
-    end
+    queued_email_strings.each { |qs| @strings[qs.key.to_s] = qs.value.to_s }
     if return_dict
       result = @strings
     else
       result = []
-      for key in keys
-        result.push(@strings[key.to_s])
-      end
+      keys.each { |key| result.push(@strings[key.to_s]) }
     end
     result
   end

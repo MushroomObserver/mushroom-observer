@@ -71,8 +71,7 @@ class NameDescription < Description
           { unreviewed: 1,
             unvetted: 2,
             vetted: 3,
-            inaccurate: 4
-          },
+            inaccurate: 4 },
           source: :review_status,
           accessor: :whiny)
   as_enum(:source_type,
@@ -80,8 +79,7 @@ class NameDescription < Description
             foreign: 2,
             project: 3,
             source: 4,
-            user: 5
-          },
+            user: 5 },
           source: :source_type,
           accessor: :whiny)
 
@@ -230,9 +228,9 @@ class NameDescription < Description
   def notify_users
     # Even though
     # changing review_status doesn't cause a new version to be created, I want
-    # to notify authors of that change.  (review_status_changed? is an implicit
-    # method created by ActiveRecord)
-    if altered? || review_status_changed?
+    # to notify authors of that change.
+    # (saved_change_to_<attribute>? is a Rails automagical method)
+    if saved_version_changes? || saved_change_to_review_status?
       sender = User.current || User.admin
       recipients = []
 
@@ -273,7 +271,7 @@ class NameDescription < Description
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
         QueuedEmail::NameChange.create_email(sender, recipient, name, self,
-                                             review_status_changed?)
+                                             saved_change_to_review_status?)
       end
     end
 

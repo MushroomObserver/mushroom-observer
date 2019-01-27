@@ -356,6 +356,7 @@ class RssLog < AbstractModel
         tag, args, time = self.class.decode(line)
       end
       break if cutoff_time && time < cutoff_time
+
       results << [tag, args, time]
       first = false
     end
@@ -374,6 +375,7 @@ class RssLog < AbstractModel
     time = time.utc.strftime("%Y%m%d%H%M%S")
     tag = tag.to_s
     fail "Invalid rss log tag: #{tag}" if tag.blank?
+
     args = args.keys.sort_by(&:to_s).map do |key|
       [key.to_s, escape(args[key])]
     end.flatten

@@ -7,12 +7,14 @@ class SupportController < ApplicationController
     @donation.user = @user
     @donation.amount = 100
     return unless @user
+
     @donation.who = @user.name
     @donation.email = @user.email
   end
 
   def create_donation
     return unless check_donate_admin(:create_donation_not_allowed.t)
+
     @donation = if request.method == "POST"
                   post_donation(params)
                 else
@@ -22,6 +24,7 @@ class SupportController < ApplicationController
 
   def check_donate_admin(error)
     return true if in_admin_mode?
+
     flash_error(error)
     redirect_to(action: "donate")
   end
@@ -48,6 +51,7 @@ class SupportController < ApplicationController
   def find_user(email)
     users = User.where(email: email)
     return unless users.length == 1
+
     users[0]
   end
 
@@ -55,6 +59,7 @@ class SupportController < ApplicationController
     amount = params["amount"]
     amount = params["other_amount"] if amount == "other"
     return unless valid_amount?(amount, :confirm_positive_number_error.t)
+
     Donation.create(amount: amount,
                     who: params["who"],
                     recurring: params["recurring"],
@@ -74,6 +79,7 @@ class SupportController < ApplicationController
 
   def review_donations
     return unless check_donate_admin(:review_donations_not_allowed.t)
+
     update_donations(params[:reviewed]) if request.method == "POST"
     @donations = Donation.all.order("created_at DESC")
     @reviewed = {}
@@ -92,7 +98,7 @@ class SupportController < ApplicationController
 
   def donors
     store_location
-    @donor_list = Donation.get_donor_list
+    @donor_list = Donation.donor_list
   end
 
   def wrapup_2011

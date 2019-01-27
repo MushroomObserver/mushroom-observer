@@ -33,6 +33,7 @@ class ObserverController
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
     return unless user = find_or_goto_index(User, params[:id].to_s)
+
     query = create_query(:Observation, :by_user, user: user)
     show_selected_observations(query)
   end
@@ -40,6 +41,7 @@ class ObserverController
   # Displays matrix of Observation's at a Location, by date.
   def observations_at_location # :nologin: :norobots:
     return unless (location = find_or_goto_index(Location, params[:id].to_s))
+
     query = create_query(:Observation, :at_location, location: location)
     show_selected_observations(query)
   end
@@ -59,6 +61,7 @@ class ObserverController
   # Display matrix of Observation's attached to a given project.
   def observations_for_project # :nologin: :norobots:
     return unless (project = find_or_goto_index(Project, params[:id].to_s))
+
     query = create_query(:Observation, :for_project, project: project)
     show_selected_observations(query, always_index: 1)
   end
@@ -209,6 +212,7 @@ class ObserverController
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
     fail "no robots!" if browser.bot?
+
     query_params_set(query)
     @format = params[:format] || "raw"
     @encoding = params[:encoding] || "UTF-8"
@@ -287,10 +291,12 @@ class ObserverController
 
   def insert_mycoflora_id(rows, observation)
     return unless @mycoflora_herbarium
+
     mycoflora_record = observation.herbarium_records.where(
       herbarium: @mycoflora_herbarium
     ).first
     return unless mycoflora_record
+
     rows.insert(1, ["Mycoflora #", mycoflora_record.accession_number])
   end
 end

@@ -47,10 +47,6 @@ Performance/RegexpMatch:
 Rails/DynamicFindBy:
   Enabled: False
 
-# Disable using Rails < 5.0; it's relevant only to >= 5.0
-Rails/HttpPositionalArguments:
-  Enabled: False
-
 Style/FrozenStringLiteralComment:
   # When it's auto-corrected in Ruby 2.4, our test suite won't run.
   # We get: "can't modify frozen String" error
@@ -125,6 +121,18 @@ Layout/DotPosition:
 # Allow non-ascii characters in comments; we need to use accented chars
 Style/AsciiComments:
   Enabled: false
+
+# Repeat the RuboCop default because CodeClimate silently overrides it
+Style/DateTime:
+  Enabled: false
+
+# Prefer n == 0, n > 0, n < 0
+# over n.zero?, n.positive? n.negative?
+# Rubocop default is "predicates".
+# But comparisons are transparent and shorter than the predicates,
+# and we've always used the comparisons.
+Style/NumericPredicate:
+  EnforcedStyle: comparison
 
 # Repeat the RuboCop defaults because CodeClimate silently overrides them
 Style/PercentLiteralDelimiters:

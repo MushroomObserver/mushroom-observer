@@ -25,6 +25,7 @@ File.open(FILE).readlines.each do |line|
   if /^TIME:/.match?(line)
     _, time, status, controller, action, robot = line.split
     next if status != "200"
+
     time = time.to_f
     path = "/#{controller}/#{action}"
     rec = data[path] ||= [0, 0, 0, 0]

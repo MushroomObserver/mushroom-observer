@@ -85,10 +85,13 @@ for id in Name.connection.select_values %(
   FROM observations
 ) do
   next unless real_id = aliases[id]
+
   text_name, rank, deprecated = names[real_id]
   next if rank > Name.ranks[:Genus]
+
   genus = text_name.sub(/ .*/, "")
   next if text_name == genus && deprecated
+
   observations[genus] = observations[genus].to_i + 1
 end
 
@@ -150,6 +153,7 @@ data["version"] = 1
 data["families"] = []
 for family in family_to_genus.keys.sort do
   next unless observations[family]
+
   family2 = family.sub(/^Unknown Family in /, "")
   $stderr.puts("Missing family: #{family2}.") unless ids[family2]
   family_data = {}
@@ -158,14 +162,17 @@ for family in family_to_genus.keys.sort do
   family_data["genera"] = []
   for genus in family_to_genus[family].sort do
     next unless observations[genus]
+
     $stderr.puts("Missing genus: #{genus}.") unless ids[genus]
     genus_data = {}
     genus_data["name"] = genus
     genus_data["id"]   = ids[genus]
     genus_data["species"] = []
     next unless genus_to_species[genus]
+
     for species in genus_to_species[genus].sort do
       next unless observations[species]
+
       $stderr.puts("Missing species: #{species}.") unless ids[species]
       genus_data["species"] << {
         "name" => species,

@@ -72,66 +72,66 @@ LOCALES = Language.connection.select_values %(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 )
 
-ROBOTS_HEADER = <<"EOB".freeze
-# See http://www.robotstxt.org for documentation.
-Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
-User-agent: *
-Crawl-Delay: 15
-Disallow: *page=*
-Disallow: *letter=*
-Disallow: *by=*
-Disallow: *user_theme=*
-Disallow: *set_thumbnail_size=*
-Disallow: */show*user_locale=*
-Disallow: */index*user_locale=*
-Disallow: */lookup*user_locale=*
+ROBOTS_HEADER = <<~"EOB".freeze
+  # See http://www.robotstxt.org for documentation.
+  Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
+  User-agent: *
+  Crawl-Delay: 15
+  Disallow: *page=*
+  Disallow: *letter=*
+  Disallow: *by=*
+  Disallow: *user_theme=*
+  Disallow: *set_thumbnail_size=*
+  Disallow: */show*user_locale=*
+  Disallow: */index*user_locale=*
+  Disallow: */lookup*user_locale=*
 
-User-agent: CCBot
-Crawl-Delay: 30
+  User-agent: CCBot
+  Crawl-Delay: 30
 
-User-agent: ltx71
-Disallow: /
+  User-agent: ltx71
+  Disallow: /
 
-User-agent: spbot
-Disallow: /
+  User-agent: spbot
+  Disallow: /
 
-User-agent: MJ12bot
-Disallow: /
+  User-agent: MJ12bot
+  Disallow: /
 
-User-agent : DAUM
-Disallow : /
+  User-agent : DAUM
+  Disallow : /
 
-User-agent: AhrefsBot
-Disallow: /
+  User-agent: AhrefsBot
+  Disallow: /
 
-User-agent: MauiBot
-Disallow: /
+  User-agent: MauiBot
+  Disallow: /
 
 EOB
 ROBOTS_FOOTER = <<"EOB".freeze
 EOB
 
-SITEMAP_ROOT_HEADER = <<"EOB".freeze
-<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+SITEMAP_ROOT_HEADER = <<~"EOB".freeze
+  <?xml version="1.0" encoding="UTF-8"?>
+  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 EOB
-SITEMAP_ROOT_FOOTER = <<"EOB".freeze
-</sitemapindex>
-EOB
-
-SITEMAP_LEAF_HEADER = <<"EOB".freeze
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-EOB
-SITEMAP_LEAF_FOOTER = <<"EOB".freeze
-</urlset>
+SITEMAP_ROOT_FOOTER = <<~"EOB".freeze
+  </sitemapindex>
 EOB
 
-INDEX_HEADER = <<"EOB".freeze
-<html><head></head><body>
+SITEMAP_LEAF_HEADER = <<~"EOB".freeze
+  <?xml version="1.0" encoding="UTF-8"?>
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 EOB
-INDEX_FOOTER = <<"EOB".freeze
-</body></html>
+SITEMAP_LEAF_FOOTER = <<~"EOB".freeze
+  </urlset>
+EOB
+
+INDEX_HEADER = <<~"EOB".freeze
+  <html><head></head><body>
+EOB
+INDEX_FOOTER = <<~"EOB".freeze
+  </body></html>
 EOB
 
 ################################################################################

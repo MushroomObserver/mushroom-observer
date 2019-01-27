@@ -3,11 +3,13 @@
 #  == Instance Methods
 #
 #  localize:: Wrapper on I18n#localize.
-#  l::        Alias for localize.
-#  t::        Localize, textilize (no paragraphs or obj links).
-#  tl::       Localize, textilize with obj links (no paragraphs).
-#  tp::       Localize, textilize with paragraphs (no obj links).
-#  tpl::      Localize, textilize with paragraphs and obj links.
+#  l::           Alias for localize.
+#  t::           Localize, textilize (no paragraphs or obj links).
+#  tl::          Localize, textilize with obj links (no paragraphs).
+#  tp::          Localize, textilize with paragraphs (no obj links).
+#  tpl::         Localize, textilize with paragraphs and obj links.
+#
+#  upcase_first  Capitalize 1st letter of Symbol, leaving remainder alone
 #
 ################################################################################
 #
@@ -24,8 +26,8 @@ class Symbol
 
   # Capitalizes just the first letter of Symbol, leaving remainder alone
   # (Symbol#capitalize capitalizes first letter, downcases the rest)
-  def capitalize_first
-    to_s.capitalize_first.to_sym
+  def upcase_first
+    to_s.upcase_first.to_sym
   end
 
   def add_leaf(*args)
@@ -170,7 +172,7 @@ class Symbol
     end
     if capitalize_result
       # Make token attempt to capitalize result if requested [:TAG] for :tag.
-      result = result.capitalize_first
+      result = result.upcase_first
     end
     result
   end
@@ -204,7 +206,7 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           val.to_s.upcase.to_sym.l :
-          val.to_s.strip_html.capitalize_first
+          val.to_s.strip_html.upcase_first
 
       # Want :TYPES, given :type.
       elsif args.key?(arg = y.downcase.to_sym) &&
@@ -212,21 +214,21 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val.to_s.upcase}S".to_sym.l :
-          val.to_s.strip_html.capitalize_first
+          val.to_s.strip_html.upcase_first
 
       # Want :Type, given :type.
       elsif args.key?(arg = x.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
-          val.l.capitalize_first :
-          val.to_s.strip_html.capitalize_first
+          val.l.upcase_first :
+          val.to_s.strip_html.upcase_first
 
       # Want :Types, given :type.
       elsif args.key?(arg = y.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
-          "#{val}s".to_sym.l.capitalize_first :
-          val.to_s.strip_html.capitalize_first
+          "#{val}s".to_sym.l.upcase_first :
+          val.to_s.strip_html.upcase_first
 
       else
         "[#{orig}]"

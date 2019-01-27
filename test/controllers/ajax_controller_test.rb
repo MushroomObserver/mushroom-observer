@@ -2,14 +2,6 @@ require "test_helper"
 require "json"
 
 class AjaxControllerTest < FunctionalTestCase
-  # Create test image dirs for tests that do image uploads.
-  def setup_image_dirs
-    return if FileTest.exist?(MO.local_image_files)
-
-    setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
-    FileUtils.cp_r(setup_images, MO.local_image_files)
-  end
-
   def good_ajax_request(action, params = {})
     ajax_request(action, params, 200)
   end
