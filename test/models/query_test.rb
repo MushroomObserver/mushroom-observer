@@ -2180,10 +2180,9 @@ class QueryTest < UnitTestCase
     agaricus_campestris = names(:agaricus_campestris)
     assert_query([agaricaceae], :Name, :of_parents, name: agaricus)
     assert_query([agaricus], :Name, :of_parents, name: agaricus_campestris)
-    assert_query(
-     [fungi, basidiomycota, basidiomycetes, agaricales, agaricaceae,
-      agaricus], :Name, :of_parents, name: agaricus_campestris, all: "yes"
-    )
+    assert_query([fungi, basidiomycota, basidiomycetes,
+                  agaricales, agaricaceae, agaricus],
+                 :Name, :of_parents, name: agaricus_campestris, all: "yes")
   end
 
   def test_name_pattern_search

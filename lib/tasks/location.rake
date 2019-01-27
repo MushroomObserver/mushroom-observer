@@ -3955,8 +3955,8 @@ namespace :location do
   def fix_funny_chars(where)
     chars = {
       [101, 204, 128] => "è",
-      [101, 204, 129] => "é" 
-}
+      [101, 204, 129] => "é"
+    }
     c = "123"
     chars.map do |k, v|
       c[0] = k[0]

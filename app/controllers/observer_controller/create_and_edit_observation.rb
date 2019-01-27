@@ -450,10 +450,8 @@ class ObserverController
     id = params[:id].to_s
     begin
       @observation = Observation.find(id)
-      # rubocop:disable Lint/UselessAssignment
-      display_name = @observation.name.display_name
-      text = @observation.calc_consensus(true)
-      # rubocop:enable Lint/UselessAssignment
+      @observation.name.display_name
+      @observation.calc_consensus(true)
     rescue => err
       flash_error(:observer_recalc_caught_error.t(error: err))
     end

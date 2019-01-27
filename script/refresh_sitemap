@@ -85,28 +85,28 @@ ROBOTS_HEADER = <<~"EOB".freeze
   Disallow: */show*user_locale=*
   Disallow: */index*user_locale=*
   Disallow: */lookup*user_locale=*
-  
+
   User-agent: CCBot
   Crawl-Delay: 30
-  
+
   User-agent: ltx71
   Disallow: /
-  
+
   User-agent: spbot
   Disallow: /
-  
+
   User-agent: MJ12bot
   Disallow: /
-  
+
   User-agent : DAUM
   Disallow : /
-  
+
   User-agent: AhrefsBot
   Disallow: /
-  
+
   User-agent: MauiBot
   Disallow: /
-  
+
 EOB
 ROBOTS_FOOTER = <<"EOB".freeze
 EOB

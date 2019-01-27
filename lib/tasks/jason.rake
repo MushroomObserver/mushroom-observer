@@ -34,22 +34,20 @@ namespace :jason do
   desc "Dump out all notes for obs, names, spls, comments to test RedCloth."
   task(dump_notes: :environment) do
     notes = []
-    for table in %w[
-      comments
-      draft_names
-      images
-      licenses
-      locations
-      names
-      naming_reasons
-      namings
-      notifications
-      observations
-      projects
-      species_lists
-      users
-      votes
-]
+    for table in %w[comments
+                    draft_names
+                    images
+                    licenses
+                    locations
+                    names
+                    naming_reasons
+                    namings
+                    notifications
+                    observations
+                    projects
+                    species_lists
+                    users
+                    votes]
       File.open("db/schema.rb", "r") do |fh|
         table2 = nil
         fh.each_line do |line|
@@ -179,7 +177,7 @@ namespace :jason do
   desc "Check to make sure all localization strings that are used are available (select language using LOCALE=en-US, for example)."
   task(check_localizations: [
          :get_localization_strings_used,
-    :get_localization_strings_available
+         :get_localization_strings_available
        ]) do
     print @need_strings.keys.select { |key|
       !@have_strings.key?(key)

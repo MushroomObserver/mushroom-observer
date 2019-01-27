@@ -51,7 +51,7 @@ namespace :lang do
     "strip:all",         # strip out any strings we no longer need
     "update:all",        # update localization (YAML) files
     "export:unofficial"  # update export (text) files
-                         # [used by translation controller to build form]
+    # [used by translation controller to build form]
   ]
 
   for namespace_name, action, verbose, verbose_method, description in [

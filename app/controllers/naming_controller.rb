@@ -5,7 +5,7 @@ class NamingController < ApplicationController
   before_action :disable_link_prefetching, except: [
     :create,
     :edit
-]
+  ]
 
   def edit # :prefetch: :norobots:
     pass_query_params
