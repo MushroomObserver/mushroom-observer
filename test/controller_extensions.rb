@@ -244,8 +244,8 @@ module ControllerExtensions
       file_name = "#{html_dir}/#{label}_#{count}.html"
       count += 1
       if count > 100
-        fail(RangeError, "More than 100 files found " \
-                          "with a label of '#{label}'")
+        raise(RangeError,
+              "More than 100 files found with a label of '#{label}'")
       end
     end
     print "Creating html_dump file: #{file_name}\n"
@@ -376,23 +376,37 @@ module ControllerExtensions
   end
 
   # Assert that a response body is same as contents of a given file.
-  # Pass in a block to use as a filter on both contents of response and file.
+  #   get(:action, params)
+  #   assert_response_equal_file("#{path}/file")
   #
+  # Assert that a response body is same as contents of a given file,
+  # where file has given encoding. This is a work-around for a Net::HTTP issue
+  # that causes response-body encoding to be set incorrectly.
+  #   get(:action, params)
+  #   assert_response_equal_file(["#{path}/file", "ISO-8859-1"])
+  #
+  # Pass in a block to use as a filter on both contents of response and file.
+  #   get(:action, params)
   #   assert_response_equal_file(
   #     "#{path}/expected_response.html",
   #     "#{path}/alternate_expected_response.html") do |str|
   #     str.strip_squeeze.downcase
   #   end
   #
-  def assert_response_equal_file(*_files, &_block)
-    body = @response.body.clone # Rails 3
-    # in Rails 4, it appears that above strips the '\n's added to the body when
-    # the csv converter adds separate rows.
-    # I originally manually replaced the '\n's with the following lines.
-    # But this is bad, e.g., it could cause problems if a different separator is
-    # used. But I cannot figure out how to access the raw body.
-    #  body = @response.body_parts.join("\n").clone
-    #  assert_string_equal_file(body, *files, &block)
+  def assert_response_equal_file(*files, &block)
+    body = @response.body_parts.join("\n")
+    body = fix_encoding(body, files) if encoding_included?(files)
+    assert_string_equal_file(body, *files, &block)
+  end
+
+  def encoding_included?(files)
+    files.first.is_a?(Array)
+  end
+
+  # Work-around for Net::HTTP issue that causes incorrect response-body encoding
+  def fix_encoding(body, files)
+    encoding = files.first.second
+    body.force_encoding(encoding)
   end
 
   # Send a general request of any type.  Check login_required and check_user
@@ -427,7 +441,7 @@ module ControllerExtensions
   #
   def assert_request(args)
     method       = args[:method] || :get
-    action       = args[:action] || fail("Missing action!")
+    action       = args[:action] || raise("Missing action!")
     params       = args[:params] || {}
     user         = args[:user] || "rolf"
     password     = args[:password] || "testpassword"
@@ -550,7 +564,7 @@ module ControllerExtensions
         msg += "Expected redirect to <account/welcome>" + got
         assert_redirected_to({ controller: "account", action: "login" }, msg)
       else
-        fail "Invalid response type expected: [#{arg.class}: #{arg}]\n"
+        raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
       end
     end
   end
@@ -682,7 +696,7 @@ module ControllerExtensions
     when :no_field
       assert_select("input##{id}", 0)
     else
-      fail "Invalid state in check_project_checks: #{state.inspect}"
+      raise "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
 
