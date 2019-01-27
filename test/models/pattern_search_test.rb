@@ -445,7 +445,7 @@ class PatternSearchTest < UnitTestCase
     x = PatternSearch::Observation.new("Agaricus date:12-01")
     assert_obj_list_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new("Agaricus burbank date:2007-03")
-    assert_obj_list_equal([ observations(:agaricus_campestris_obs) ],
+    assert_obj_list_equal([observations(:agaricus_campestris_obs)],
                           x.query.results)
     x = PatternSearch::Observation.new("Agaricus albion")
     assert_obj_list_equal([o1, o2], x.query.results, :sort)
@@ -868,7 +868,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_comments
-    expect = [ comments(:fungi_comment).target ]
+    expect = [comments(:fungi_comment).target]
     assert_not_empty(expect)
     x = PatternSearch::Name.new("comments:\"do not change\"")
     assert_name_list_equal(expect, x.query.results, :sort)
