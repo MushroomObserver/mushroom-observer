@@ -15,13 +15,6 @@
 Layout/AlignHash:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: Width, IgnoredPatterns.
-Layout/IndentationWidth:
-  Exclude:
-    - 'app/classes/query/modules/initialization.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 Layout/LeadingCommentSpace:

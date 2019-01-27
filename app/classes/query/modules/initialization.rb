@@ -218,9 +218,9 @@ module Query::Modules::Initialization
     # TODO: not sure how to deal with the bang notation -- indicates LEFT
     # OUTER JOIN instead of normal INNER JOIN.
     @join << if model.name == "Observation"
-              :"locations!"
+               :"locations!"
              else
-              { observations: :"locations!" }
+               { observations: :"locations!" }
              end
   end
 
