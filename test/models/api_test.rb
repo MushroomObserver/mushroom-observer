@@ -1922,9 +1922,9 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(
-      set_name:   "Agaricus bitorquis",
-      set_author: "(Quélet) Sacc.",
-      set_rank:   "species"
+                      set_name:   "Agaricus bitorquis",
+                      set_author: "(Quélet) Sacc.",
+                      set_rank:   "species"
     ))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
@@ -2422,10 +2422,10 @@ class ApiTest < UnitTestCase
       id:      rolfs_obs.id
     }
     assert_api_pass(params.merge(
-      :set_notes          => "wow!",
-      :"set_notes[Cap]"   => "red",
-      :"set_notes[Ring]"  => "none",
-      :"set_notes[Gills]" => ""
+                      :set_notes          => "wow!",
+                      :"set_notes[Cap]"   => "red",
+                      :"set_notes[Ring]"  => "none",
+                      :"set_notes[Gills]" => ""
     ))
     rolfs_obs.reload
     assert_equal({ Cap: "red", Ring: "none", Other: "wow!" }, rolfs_obs.notes)
