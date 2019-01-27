@@ -189,12 +189,14 @@ class API
       end
       obs.images.delete(*@remove_images)
       return unless @remove_images.include?(obs.thumb_image)
+
       obs.update_attributes!(thumb_image: obs.images.first)
     end
 
     def update_projects(obs)
       return unless @add_to_project || @remove_from_project
       raise MustBeOwner.new(obs) if obs.user != @user
+
       obs.projects.push(@add_to_project) if @add_to_project
       obs.projects.delete(@remove_from_project) if @remove_from_project
     end
@@ -231,6 +233,7 @@ class API
       @images    = parse_array(:image, :images) || []
       @thumbnail = parse(:image, :thumbnail) || @images.first
       return if !@thumbnail || @images.include?(@thumbnail)
+
       @images.unshift(@thumbnail)
     end
 
@@ -241,12 +244,14 @@ class API
       notes[Observation.other_notes_key] = other unless other.nil?
       params.each do |key, val|
         next unless (match = key.to_s.match(/^#{prefix}notes\[(.*)\]$/))
+
         field = parse_notes_field_parameter!(match[1])
         notes[field] = val.to_s.strip
         ignore_parameter(key)
       end
       declare_parameter(:"#{prefix}notes[$field]", :string, help: :notes_field)
       return notes if set
+
       notes.delete_if { |_key, val| val.blank? }
       notes
     end
@@ -254,6 +259,7 @@ class API
     def parse_notes_field_parameter!(str)
       keys = User.parse_notes_template(str)
       return keys.first.to_sym if keys.length == 1
+
       raise BadNotesFieldParameter.new(str)
     end
 
@@ -262,6 +268,7 @@ class API
       @longitude = parse(:longitude, :set_longitude)
       @altitude  = parse(:altitude, :set_altitude)
       return unless @latitude && !@longitude || @longitude && !@latitude
+
       raise LatLongMustBothBeSet.new
     end
 
@@ -272,6 +279,7 @@ class API
                                    must_have_edit_permission: true) || []
       @remove_images = parse_array(:image, :remove_images) || []
       return if !@thumbnail || @add_images.include?(@thumbnail)
+
       @add_images.unshift(@thumbnail)
     end
 
@@ -320,11 +328,13 @@ class API
 
     def make_sure_both_latitude_and_longitude!
       return if @latitude && @longitude || !@longitude && !@latitude
+
       raise LatLongMustBothBeSet.new
     end
 
     def make_sure_has_specimen_set!
       return if @has_specimen
+
       error_class = CanOnlyUseThisFieldIfHasSpecimen
       raise error_class.new(:herbarium)         if @herbarium
       raise error_class.new(:collectors_name)   if @collectors_name
@@ -340,6 +350,7 @@ class API
     def check_for_unknown_location!(params)
       place = params[:place_name]
       return unless place && Location.is_unknown?(place)
+
       params[:place_name] = Location.unknown.name
     end
   end

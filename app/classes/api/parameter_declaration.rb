@@ -31,6 +31,7 @@ class API
         hash[:limit] = "#{hash[:limit]} chars"
       end
       return "" if hash.empty?
+
       " (" + hash.map { |key, val| show_arg(key, val) }.join(", ") + ")"
     end
 

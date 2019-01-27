@@ -44,6 +44,7 @@ class Sequence < AbstractModel
   #
   ##############################################################################
 
+  # rubocop:disable Layout/ExtraSpacing
   # matchers for bases
   BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n # non-blank line
                           ^\s*\n      # followed by blank line
@@ -54,6 +55,7 @@ class Sequence < AbstractModel
   # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
   VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i
   INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i
+  # rubocop:enable Layout/ExtraSpacing
 
   ##############################################################################
   #
@@ -194,6 +196,7 @@ class Sequence < AbstractModel
   # because MO-sourced sequence information should not be secret
   def bases_or_deposit
     return if bases? || deposit?
+
     errors.add(:bases, :validate_sequence_bases_or_archive.t)
   end
 
@@ -201,6 +204,7 @@ class Sequence < AbstractModel
   # (One without the other is not useful.)
   def deposit_complete_or_absent
     return if archive.present? == accession.present?
+
     errors.add(:archive, :validate_sequence_deposit_complete.t)
   end
 
@@ -210,6 +214,7 @@ class Sequence < AbstractModel
     return unless other_sequences_same_obs.any? do |other_sequence|
       other_sequence.bases_nucleotides == bases_nucleotides
     end
+
     errors.add(:bases, :validate_sequence_bases_unique.t)
   end
 
@@ -226,6 +231,7 @@ class Sequence < AbstractModel
       errors.add(:bases, :validate_sequence_bases_blank_lines.t)
     end
     return unless bad_code_in_data?
+
     errors.add(:bases, :validate_sequence_bases_bad_codes.t)
   end
 
@@ -246,6 +252,7 @@ class Sequence < AbstractModel
     return unless other_sequences_same_obs.any? do |sequence|
       sequence.accession == accession
     end
+
     errors.add(:bases, :validate_sequence_accession_unique.t)
   end
 end

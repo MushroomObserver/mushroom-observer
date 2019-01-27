@@ -168,6 +168,7 @@ class SiteData
     elsif mode == :chg
       return get_weight_change(obj, field)
     end
+
     weight
   end
 

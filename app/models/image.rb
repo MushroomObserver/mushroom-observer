@@ -607,6 +607,7 @@ class Image < AbstractModel
             loop do
               str = upload_handle.read(16_384)
               break if str.to_s.empty?
+
               write_handle.write(str)
             end
           end
@@ -669,6 +670,7 @@ class Image < AbstractModel
     unless File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end
+
     FileUtils.chmod(0644, original_image)
     true
   rescue SystemCallError
@@ -676,6 +678,7 @@ class Image < AbstractModel
     unless Kernel.system("cp", upload_temp_file, original_image)
       raise(:runtime_image_move_failed.t(id: id))
     end
+
     true
   end
 

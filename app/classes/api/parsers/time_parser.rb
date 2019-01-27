@@ -7,6 +7,7 @@ class API
       def parse_scalar
         str = clean_param
         return args[:default] if str.blank?
+
         scalar_yyyymmddhhmmss(str)
       rescue ArgumentError
         raise BadParameterValue.new(str, :time)
@@ -16,6 +17,7 @@ class API
         args[:range] = true
         str = clean_param
         return args[:default] if str.blank?
+
         try_all_range_patterns(str)
       rescue ArgumentError
         raise BadParameterValue.new(str, :time_range)
@@ -46,6 +48,7 @@ class API
                 date_range_match(str, YYYYMMDDHHMMSS2) ||
                 date_range_match(str, YYYYMMDDHHMMSS3)
         return unless match
+
         from = strip_time(match[1]) + " UTC"
         to   = strip_time(match[2]) + " UTC"
         from = DateTime.parse(from)
@@ -58,6 +61,7 @@ class API
                 date_range_match(str, YYYYMMDDHHMM2) ||
                 date_range_match(str, YYYYMMDDHHMM3)
         return unless match
+
         from = strip_time(match[1]) + "00 UTC"
         to   = strip_time(match[2]) + "59 UTC"
         from = DateTime.parse(from)
@@ -70,6 +74,7 @@ class API
                 date_range_match(str, YYYYMMDDHH2) ||
                 date_range_match(str, YYYYMMDDHH3)
         return unless match
+
         from = strip_time(match[1]) + "0000 UTC"
         to   = strip_time(match[2]) + "5959 UTC"
         from = DateTime.parse(from)
@@ -82,6 +87,7 @@ class API
                 date_range_match(str, YYYYMMDD2) ||
                 date_range_match(str, YYYYMMDD3)
         return unless match
+
         from = strip_time(match[1]) + "000000 UTC"
         to   = strip_time(match[2]) + "235959 UTC"
         from = DateTime.parse(from)
@@ -94,6 +100,7 @@ class API
                 date_range_match(str, YYYYMM2) ||
                 date_range_match(str, YYYYMM3)
         return unless match
+
         from = strip_time(match[1])
         to   = strip_time(match[2])
         to   = Date.parse(to + "01").next_month.prev_day.to_s
@@ -105,6 +112,7 @@ class API
       def range_yyyy_x2(str)
         match = date_range_match(str, YYYY)
         return unless match
+
         from = strip_time(match[1]) + "0101000000 UTC"
         to   = strip_time(match[2]) + "1231235959 UTC"
         from = DateTime.parse(from)
@@ -117,6 +125,7 @@ class API
                 str.match(/^#{YYYYMMDDHHMMSS2}$/) ||
                 str.match(/^#{YYYYMMDDHHMMSS3}$/)
         return unless match
+
         str  = strip_time(str) + " UTC"
         time = DateTime.parse(str)
         OrderedRange.new(time, time)
@@ -127,6 +136,7 @@ class API
                 str.match(/^#{YYYYMMDDHHMM2}$/) ||
                 str.match(/^#{YYYYMMDDHHMM3}$/)
         return unless match
+
         str  = strip_time(str)
         from = DateTime.parse(str + "00 UTC")
         to   = DateTime.parse(str + "59 UTC")
@@ -138,6 +148,7 @@ class API
                 str.match(/^#{YYYYMMDDHH2}$/) ||
                 str.match(/^#{YYYYMMDDHH3}$/)
         return unless match
+
         str  = strip_time(str)
         from = DateTime.parse(str + "0000 UTC")
         to   = DateTime.parse(str + "5959 UTC")
@@ -149,6 +160,7 @@ class API
                 str.match(/^#{YYYYMMDD2}$/) ||
                 str.match(/^#{YYYYMMDD3}$/)
         return unless match
+
         str  = strip_time(str)
         from = DateTime.parse(str + "000000 UTC")
         to   = DateTime.parse(str + "235959 UTC")
@@ -160,6 +172,7 @@ class API
                 str.match(/^#{YYYYMM2}$/) ||
                 str.match(/^#{YYYYMM3}$/)
         return unless match
+
         str  = strip_time(str) + "01"
         str2 = Date.parse(str).next_month.prev_day.to_s
         str2 = strip_time(str2)
@@ -171,6 +184,7 @@ class API
       def range_yyyy(str)
         match = str.match(/^#{YYYY}$/)
         return unless match
+
         str  = strip_time(str)
         from = DateTime.parse(str + "0101000000 UTC")
         to   = DateTime.parse(str + "1231235959 UTC")
@@ -182,6 +196,7 @@ class API
                 str.match(/^#{YYYYMMDDHHMMSS2}$/) ||
                 str.match(/^#{YYYYMMDDHHMMSS3}$/)
         raise ArgumentError unless match
+
         str = strip_time(str) + " UTC"
         DateTime.parse(str)
       end

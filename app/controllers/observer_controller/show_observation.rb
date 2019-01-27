@@ -24,6 +24,7 @@ class ObserverController
     check_if_user_wants_to_change_thumbnail_size
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
+
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
@@ -47,6 +48,7 @@ class ObserverController
   # Make it easy for users to change thumbnail size.
   def check_if_user_wants_to_change_thumbnail_size
     return if params[:set_thumbnail_size].blank?
+
     default_thumbnail_size_set(params[:set_thumbnail_size])
   end
 
@@ -65,6 +67,7 @@ class ObserverController
   # external_links to (and which no external_link to exists yet).
   def external_sites_user_can_add_links_to(obs)
     return [] unless @user
+
     if @user == obs.user || in_admin_mode?
       ExternalSite.all - obs.external_links.map(&:external_site)
     else
@@ -91,6 +94,7 @@ class ObserverController
     pass_query_params
     obs = find_or_goto_index(Observation, params[:id].to_s)
     return unless obs
+
     @title = :map_observation_title.t(id: obs.id)
     @observations = [
       MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location)

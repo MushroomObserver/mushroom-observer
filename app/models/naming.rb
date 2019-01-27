@@ -229,6 +229,7 @@ class Naming < AbstractModel
 
       # Override with values in params.
       next unless args
+
       if (x = args[num.to_s])
         check = x[:check]
         notes = x[:notes]

@@ -11,6 +11,7 @@ module Query
 
     def initialize_flavor
       return if handle_content_search!
+
       add_join(:images_observations, :observations)
       initialize_advanced_search
       super
@@ -20,6 +21,7 @@ module Query
     # coerce into images.
     def handle_content_search!
       return false if params[:content].blank?
+
       self.executor = lambda do |args|
         args2 = args.dup
         args2.delete(:select)

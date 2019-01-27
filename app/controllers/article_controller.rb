@@ -37,6 +37,7 @@ class ArticleController < ApplicationController
   # Unless user permitted to perform request, just index_articles
   def ignore_request_unless_permitted
     return if permitted?
+
     flash_notice(:permission_denied.t)
     redirect_to(action: "index_article") and return
   end
@@ -96,6 +97,7 @@ class ArticleController < ApplicationController
   # Display one Article
   def show_article
     return false unless (@article = find_or_goto_index(Article, params[:id]))
+
     @canonical_url = "#{MO.http_domain}/article/show_article/#{@article.id}"
   end
 
@@ -105,6 +107,7 @@ class ArticleController < ApplicationController
     return unless request.method == "POST"
 
     return if flash_missing_title?
+
     article = Article.new(title:   params[:article][:title],
                           body:    params[:article][:body],
                           user_id: @user.id)
@@ -115,6 +118,7 @@ class ArticleController < ApplicationController
   # add flash message if title missing
   def flash_missing_title?
     return if params[:article][:title].present?
+
     flash_error(:article_title_required.t)
     true
   end
@@ -127,6 +131,7 @@ class ArticleController < ApplicationController
     return unless request.method == "POST"
 
     return if flash_missing_title?
+
     @article.title = params[:article][:title]
     @article.body = params[:article][:body]
     @article.changed? ? save_edits : flash_warning(:runtime_no_changes.t)

@@ -1163,7 +1163,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.title))
     assert_api_results([img1, img2])
 
-    attached   = Image.all.select {|i| i.observations.count > 0}
+    attached   = Image.all.select { |i| i.observations.count > 0 }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)
@@ -1480,10 +1480,10 @@ class ApiTest < UnitTestCase
     # as it is.  The plan is to temporarily attach one object at a time to make
     # sure it is *not* modifiable if anything is wrong.
     assert_objs_equal(rolf, albion.user)
-    assert_not_empty(albion.versions.select {|v| v.user_id == rolf.id})
-    assert_not_empty(albion.descriptions.select {|v| v.user == rolf})
-    assert_empty(albion.versions.select {|v| v.user_id != rolf.id})
-    assert_empty(albion.descriptions.select {|v| v.user != rolf})
+    assert_not_empty(albion.versions.select { |v| v.user_id == rolf.id })
+    assert_not_empty(albion.descriptions.select { |v| v.user == rolf })
+    assert_empty(albion.versions.select { |v| v.user_id != rolf.id })
+    assert_empty(albion.descriptions.select { |v| v.user != rolf })
     assert_empty(albion.observations)
     assert_empty(albion.species_lists)
     assert_empty(albion.users)
@@ -1855,10 +1855,10 @@ class ApiTest < UnitTestCase
     # The plan is to temporarily attach one object at a time to make sure it is
     # *not* modifiable if anything is wrong.
     assert_objs_equal(rolf, agaricus.user)
-    assert_not_empty(agaricus.versions.select {|v| v.user_id == rolf.id})
-    assert_not_empty(agaricus.descriptions.select {|v| v.user == rolf})
-    assert_empty(agaricus.versions.select {|v| v.user_id != rolf.id})
-    assert_empty(agaricus.descriptions.select {|v| v.user != rolf})
+    assert_not_empty(agaricus.versions.select { |v| v.user_id == rolf.id })
+    assert_not_empty(agaricus.descriptions.select { |v| v.user == rolf })
+    assert_empty(agaricus.versions.select { |v| v.user_id != rolf.id })
+    assert_empty(agaricus.descriptions.select { |v| v.user != rolf })
     assert_empty(agaricus.observations)
     assert_empty(agaricus.namings)
 
@@ -1922,10 +1922,10 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
     assert_api_pass(params.merge(
-      set_name:   "Agaricus bitorquis",
-      set_author: "(Quélet) Sacc.",
-      set_rank:   "species"
-    ))
+                      set_name:   "Agaricus bitorquis",
+                      set_author: "(Quélet) Sacc.",
+                      set_rank:   "species"
+                    ))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
     assert_equal(:Species, agaricus.rank)
@@ -1964,7 +1964,7 @@ class ApiTest < UnitTestCase
     assert(syns.include?(name2))
     assert_api_pass(params.merge(id: name1.id, clear_synonyms: "yes"))
     assert_obj_list_equal([name1], Name.find(name1.id).synonyms)
-    assert_obj_list_equal(syns-[name1], Name.find(name2.id).synonyms)
+    assert_obj_list_equal(syns - [name1], Name.find(name2.id).synonyms)
     assert_api_fail(params.merge(id: name2.id, synonymize_with: name1.id))
     assert_api_pass(params.merge(id: name1.id, synonymize_with: name2.id))
     assert_obj_list_equal(syns, Name.find(name1.id).synonyms)
@@ -2422,11 +2422,11 @@ class ApiTest < UnitTestCase
       id:      rolfs_obs.id
     }
     assert_api_pass(params.merge(
-      :set_notes          => "wow!",
-      :"set_notes[Cap]"   => "red",
-      :"set_notes[Ring]"  => "none",
-      :"set_notes[Gills]" => ""
-    ))
+                      :set_notes          => "wow!",
+                      :"set_notes[Cap]"   => "red",
+                      :"set_notes[Ring]"  => "none",
+                      :"set_notes[Gills]" => ""
+                    ))
     rolfs_obs.reload
     assert_equal({ Cap: "red", Ring: "none", Other: "wow!" }, rolfs_obs.notes)
     assert_api_pass(params.merge(:"set_notes[Cap]" => ""))
@@ -2760,6 +2760,7 @@ class ApiTest < UnitTestCase
     # Make sure all observations have at least one sequence for the rest.
     Observation.all.each do |obs|
       next if obs.sequences.any?
+
       Sequence.create!(observation: obs, user: obs.user, locus: "ITS1F",
                        archive: "GenBank", accession: "MO#{obs.id}")
     end
@@ -3979,6 +3980,7 @@ class ApiTest < UnitTestCase
       assert_equal("API::HelpMessage", api.errors.first.class.name)
       file = help_messages_file
       return unless File.exists?(file)
+
       File.open(file, "a") do |fh|
         fh.puts "#{method.to_s.upcase} #{action}"
         fh.puts api.errors.first.to_s.gsub(/; /, "\n  ").

@@ -73,6 +73,7 @@ class Article < AbstractModel
     # To avoid throwing errors, deny permission if the Project which controls
     #   Article write permission does not yet exist or was deleted.
     return false unless news_articles_project
+
     news_articles_project.is_member?(user)
   end
 

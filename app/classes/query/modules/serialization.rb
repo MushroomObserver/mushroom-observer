@@ -56,6 +56,7 @@ module Query
           params = {}
           str.split(";").each do |line|
             next if line !~ /^(\w+)=(.*)/
+
             key = Regexp.last_match(1)
             val = Regexp.last_match(2)
             params[key.to_sym] = deserialize_value(val)

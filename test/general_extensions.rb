@@ -38,7 +38,6 @@
 ################################################################################
 
 module GeneralExtensions
-
   ##############################################################################
   #
   #  :section: Test unit helpers
@@ -257,6 +256,7 @@ module GeneralExtensions
   # This should make diagnostics of failed tests more useful!
   def fixture_label(obj)
     return "" if obj.nil?
+
     table = obj.class.table_name
     if @loaded_fixtures
       @loaded_fixtures[table].fixtures.each do |name, fixture|
@@ -290,11 +290,12 @@ module GeneralExtensions
       line_num += 1
       match = line.match(/^(\w+):\s+#\s*(\d+)\s*$/)
       next unless match
+
       label = match[1]
       id = match[2].to_i
       raise "IDs are not consecutive at #{file} line #{line_num}: " +
-            "#{id} should be #{last_id+1}\n" if id != last_id + 1
-      result[id-1] = label
+            "#{id} should be #{last_id + 1}\n" if id != last_id + 1
+      result[id - 1] = label
       last_id = id
     end
     result
@@ -343,6 +344,7 @@ module GeneralExtensions
     result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       return unless elem
+
       elem
     end
     assert_nil(result, msg || "XML response shouldn't have \"#{key}\".")
@@ -476,6 +478,7 @@ module GeneralExtensions
 
   def enforce_encoding(encoding, str)
     return str if str.encoding == encoding
+
     str.encode(encoding)
   end
 
@@ -487,6 +490,7 @@ module GeneralExtensions
   def match_ignoring_some_bits(str, template)
     template.split("\n").each do |line|
       next unless line.include?("IGNORE")
+
       pattern = Regexp.escape(line).gsub(/IGNORE/, ".*")
       str.sub!(/^#{pattern}$/, line)
     end

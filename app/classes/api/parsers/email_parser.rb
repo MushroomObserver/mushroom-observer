@@ -7,6 +7,7 @@ class API
       def parse(str)
         val = super || return
         return val if EMAIL.match?(val)
+
         raise BadParameterValue.new(val, :email)
       end
     end

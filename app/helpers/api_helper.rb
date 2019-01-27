@@ -167,6 +167,7 @@ module ApiHelper
 
   def render_detailed_object(builder, object, detail, args)
     return unless object
+
     builder.target! << render(
       partial: object.class.type_tag.to_s,
       locals: args.merge(

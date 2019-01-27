@@ -209,12 +209,10 @@ class NameSorter
     chosen = false
 
     # Did user enter a date/timestamp via comment?
-    if x = begin # rubocop:disable Lint/AssignmentInCondition
-             Time.parse(name_parse.comment)
-           rescue
-             nil
-           end
-      timestamp = x
+    begin
+      comment_time = Time.parse(name_parse.comment) || timestamp
+    rescue
+      comment_time = timestamp
     end
 
     # Need all deprecated names even when another name is chosen
@@ -231,7 +229,7 @@ class NameSorter
         @single_line_strs.push(line_str) # (name_str)
         chosen_name = Name.find(chosen_id)
         names = [chosen_name]
-        @single_names.push([chosen_name, timestamp])
+        @single_names.push([chosen_name, comment_time])
         @all_names.push(chosen_name)
         chosen = true
         break

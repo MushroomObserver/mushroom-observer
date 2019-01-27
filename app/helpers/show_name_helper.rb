@@ -75,6 +75,7 @@ module ShowNameHelper
   def link_to_obss_of(query, title)
     count = query.select_count
     return nil if count.zero?
+
     query.save
     link_to(
       title, add_query_param({ controller: :observer,
@@ -86,6 +87,7 @@ module ShowNameHelper
   #   List of species in Amanita Pers. (1433)
   def show_obs_genera(name)
     return  unless (genus = name.genus)
+
     query = Query.lookup(:Name, :of_children, name: genus, all: true)
     count = query.select_count
     query.save unless browser.bot?

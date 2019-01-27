@@ -1568,25 +1568,27 @@ class NameTest < UnitTestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([
-      names(:agaricus),
-      names(:agaricaceae),
-      names(:agaricales),
-      names(:basidiomycetes),
-      names(:basidiomycota),
-      names(:fungi)
-    ], names(:agaricus_campestris).all_parents)
-    assert_name_list_equal([
-      names(:agaricus)
-    ], names(:agaricus_campestris).parents)
-    assert_name_list_equal([ names(:agaricaceae) ], names(:agaricus).parents)
-    assert_name_list_equal([], names(:agaricus_campestris).children)
-    assert_name_list_equal([
-      names(:agaricus_campestras),
-      names(:agaricus_campestris),
-      names(:agaricus_campestros),
-      names(:agaricus_campestrus)
-    ], names(:agaricus).children, :sort)
+    assert_name_list_equal([names(:agaricus),
+                            names(:agaricaceae),
+                            names(:agaricales),
+                            names(:basidiomycetes),
+                            names(:basidiomycota),
+                            names(:fungi)],
+                           names(:agaricus_campestris).all_parents)
+    assert_name_list_equal(
+      [names(:agaricus)], names(:agaricus_campestris).parents
+    )
+    assert_name_list_equal(
+      [names(:agaricaceae)], names(:agaricus).parents
+    )
+    assert_name_list_equal(
+      [], names(:agaricus_campestris).children
+    )
+    assert_name_list_equal([names(:agaricus_campestras),
+                            names(:agaricus_campestris),
+                            names(:agaricus_campestros),
+                            names(:agaricus_campestrus)],
+                           names(:agaricus).children, :sort)
   end
 
   def test_ancestors_2
@@ -2196,6 +2198,7 @@ class NameTest < UnitTestCase
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
     return unless sql_collates_accents?
+
     # rubocop:disable Lint/UselessAssignment
     # RuboCop gives false positives
     n1 = create_test_name("Agaricus Aehou")

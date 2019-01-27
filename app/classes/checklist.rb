@@ -26,6 +26,7 @@ class Checklist
   class ForUser < Checklist
     def initialize(user)
       return (@user = user) if user.is_a?(User)
+
       raise "Expected User instance, got #{user.inspect}."
     end
 
@@ -40,6 +41,7 @@ class Checklist
   class ForProject < Checklist
     def initialize(project)
       return (@project = project) if project.is_a?(Project)
+
       raise "Expected Project instance, got #{project.inspect}."
     end
 
@@ -56,6 +58,7 @@ class Checklist
   class ForSpeciesList < Checklist
     def initialize(list)
       return (@list = list) if list.is_a?(SpeciesList)
+
       raise "Expected SpeciesList instance, got #{list.inspect}."
     end
 

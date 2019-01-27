@@ -18,6 +18,7 @@ class NameController
     pass_query_params
     @name = find_or_goto_index(Name, params[:id].to_s)
     return unless @name
+
     init_edit_name_form
     if request.method == "POST"
       @parse = parse_name
@@ -140,6 +141,7 @@ class NameController
 
   def set_name_author_and_rank
     return unless name_unlocked?
+
     email_admin_name_change unless minor_change? || just_adding_author?
     @name.attributes = @parse.params
   end
@@ -167,6 +169,7 @@ class NameController
   #
   def update_correct_spelling
     return unless name_unlocked?
+
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
     elsif @correct_spelling.present?
@@ -178,6 +181,7 @@ class NameController
     correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
     raise(:runtime_form_names_misspelling_bad.t) unless correct_name
     raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
+
     @name.mark_misspelled(correct_name)
     # (This tells it not to redirect to "approve".)
     params[:name][:deprecated] = "true"
@@ -217,6 +221,7 @@ class NameController
   def check_for_matches
     matches = Name.where(search_name: @parse.search_name) - [@name]
     return matches.first unless matches.many?
+
     args = {
       str: @parse.real_search_name,
       matches: new_name.map(&:search_name).join(" / ")

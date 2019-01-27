@@ -71,8 +71,7 @@ class NameDescription < Description
           { unreviewed: 1,
             unvetted: 2,
             vetted: 3,
-            inaccurate: 4
-          },
+            inaccurate: 4 },
           source: :review_status,
           accessor: :whiny)
   as_enum(:source_type,
@@ -80,8 +79,7 @@ class NameDescription < Description
             foreign: 2,
             project: 3,
             source: 4,
-            user: 5
-          },
+            user: 5 },
           source: :source_type,
           accessor: :whiny)
 

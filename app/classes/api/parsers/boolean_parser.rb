@@ -6,6 +6,7 @@ class API
         val = positive?(str)
         limit = args[:limit]
         return val if !limit || val == limit
+
         raise BadLimitedParameterValue.new(str, [limit])
       end
 

@@ -6,6 +6,7 @@ class ObserverController
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id].to_s)
     return unless request.method == "POST"
+
     subject = param_lookup([:email, :subject], "")
     content = param_lookup([:email, :content], "")
     (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|

@@ -62,6 +62,7 @@ class AjaxController < ApplicationController
     result = ""
     exception.backtrace.each do |line|
       break if /action_controller.*perform_action/.match?(line)
+
       result += line + "\n"
     end
     result

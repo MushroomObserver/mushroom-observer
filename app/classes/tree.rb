@@ -69,6 +69,7 @@ class Tree
     when Symbol
       if tree == look_for
         return tree unless add_this
+
         return { look_for => add_this }
       elsif add_this
         return [tree, { look_for => add_this }]
@@ -92,6 +93,7 @@ class Tree
       return tree
     when Hash
       fail "Can't use one-table form of Tree.add_leaf if tree is a Hash!" unless add_this
+
       tree.each_pair do |key, val|
         if key == look_for
           case val

@@ -210,6 +210,7 @@ class ProjectController < ApplicationController
   def edit_project # :prefetch: :norobots:
     pass_query_params
     return unless @project = find_or_goto_index(Project, params[:id].to_s)
+
     if !check_permission!(@project)
       redirect_with_query(action: "show_project", id: @project.id)
     elsif request.method == "POST"

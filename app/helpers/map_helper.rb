@@ -48,6 +48,7 @@ module MapHelper
 
   def ensure_global_header_is_added
     return if @done_gmap_header_yet
+
     add_header(GM::GMap.header(host: MO.domain))
     @done_gmap_header_yet = true
   end

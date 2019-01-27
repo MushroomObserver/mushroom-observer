@@ -19,11 +19,13 @@ class API
 
       def check_if_admin!(proj)
         return if api.user.projects_admin.include?(proj)
+
         raise MustBeAdmin.new(proj)
       end
 
       def check_if_member!(proj)
         return if api.user.projects_member.include?(proj)
+
         raise MustBeMember.new(proj)
       end
     end

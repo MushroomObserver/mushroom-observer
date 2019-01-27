@@ -20,7 +20,7 @@
 ###############################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  def initialize(objects, max_objects=MO.max_map_objects)
+  def initialize(objects, max_objects = MO.max_map_objects)
     @max_objects = max_objects
     init_sets(objects)
     group_objects_into_sets
@@ -79,6 +79,7 @@ class CollapsibleCollectionOfMappableObjects
   def init_sets(objects)
     objects = [objects] unless objects.is_a?(Array)
     fail "Tried to create empty map!" if objects.empty?
+
     @sets = {}
     for obj in objects
       if obj.is_location?
@@ -127,6 +128,7 @@ class CollapsibleCollectionOfMappableObjects
     if prec > MIN_PRECISION
       return [round_number(loc.lat, prec), round_number(loc.long, prec)]
     end
+
     [loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0,
      loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
   end

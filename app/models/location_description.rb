@@ -58,8 +58,7 @@ class LocationDescription < Description
             foreign: 2,
             project: 3,
             source: 4,
-            user: 5
-          },
+            user: 5 },
           source: :source_type,
           accessor: :whiny)
 

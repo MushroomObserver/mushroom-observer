@@ -39,6 +39,7 @@ class AjaxController
     image = create_image(args)
     upload_image(image, args)
     return image if image.save && image.process_image
+
     raise image.formatted_errors.join("\n")
   ensure
     image.try(&:clean_up)
@@ -66,6 +67,7 @@ class AjaxController
 
   def image_original_name(args)
     return nil if @user.keep_filenames == :toss
+
     args[:original_name].to_s
   end
 

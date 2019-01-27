@@ -79,6 +79,7 @@ class HerbariumRecordController < ApplicationController
     @layout      = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:id])
     return unless @observation
+
     @back_object = @observation
     if request.method == "GET"
       @herbarium_record = default_herbarium_record
@@ -95,8 +96,10 @@ class HerbariumRecordController < ApplicationController
     @layout = calc_layout_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
+
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
+
     if request.method == "GET"
       @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
     elsif request.method == "POST"
@@ -110,9 +113,11 @@ class HerbariumRecordController < ApplicationController
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
+
     @observation = find_or_goto_index(Observation, params[:obs])
     return unless @observation
     return unless make_sure_can_delete!(@herbarium_record)
+
     @herbarium_record.remove_observation(@observation)
     redirect_with_query(@observation.show_link_args)
   end
@@ -122,6 +127,7 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
     return unless make_sure_can_delete!(@herbarium_record)
+
     figure_out_where_to_go_back_to
     @herbarium_record.destroy
     redirect_with_query(action: :index_herbarium_record)
@@ -188,6 +194,7 @@ class HerbariumRecordController < ApplicationController
         t(herbarium_name: @herbarium_record.herbarium.name))
       return
     end
+
     redirect_to_observation_or_herbarium_record
   end
 
@@ -206,11 +213,13 @@ class HerbariumRecordController < ApplicationController
       flash_warning(:edit_herbarium_record_already_used.t)
       return
     end
+
     redirect_to_observation_or_herbarium_record
   end
 
   def whitelisted_herbarium_record_params
     return {} unless params[:herbarium_record]
+
     params.require(:herbarium_record).
       permit(:herbarium_name, :initial_det, :accession_number, :notes)
   end
@@ -218,6 +227,7 @@ class HerbariumRecordController < ApplicationController
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium_record.can_edit?
     return true if @herbarium_record.herbarium.curator?(@user)
+
     flash_error :permission_denied.t
     redirect_to_observation_or_herbarium_record
     false
@@ -226,6 +236,7 @@ class HerbariumRecordController < ApplicationController
   def make_sure_can_delete!(herbarium_record)
     return true if in_admin_mode? || herbarium_record.can_edit?
     return true if herbarium_record.herbarium.curator?(@user)
+
     flash_error(:permission_denied.t)
     redirect_to(herbarium_record.show_link_args)
     false
@@ -264,6 +275,7 @@ class HerbariumRecordController < ApplicationController
     return true if @observation && @observation.can_edit?
     return true if @herbarium_record.observations.any?(&:can_edit?)
     return true if @herbarium_record.herbarium.curator?(@user)
+
     flash_error(:create_herbarium_record_only_curator_or_owner.t)
     redirect_to_observation_or_herbarium_record
     false
@@ -285,6 +297,7 @@ class HerbariumRecordController < ApplicationController
     elsif @back != "index"
       @back_object = Observation.safe_find(@back)
       return if @back_object
+
       if @herbarium_record.observations.count == 1
         @back_object = @herbarium_record.observations.first
       else

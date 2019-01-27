@@ -71,6 +71,7 @@ class CollectionNumber < AbstractModel
   # reports a specimen available, and log the action.
   def add_observation(obs)
     return if observations.include?(obs)
+
     observations.push(obs)
     obs.update_attributes(specimen: true) unless obs.specimen
     obs.log(:log_collection_number_added, name: format_name, touch: true)
@@ -79,6 +80,7 @@ class CollectionNumber < AbstractModel
   # Remove this CollectionNumber from an Observation and log the action.
   def remove_observation(obs)
     return unless observations.include?(obs)
+
     observations.delete(obs)
     obs.reload.turn_off_specimen_if_no_more_records
     obs.log(:log_collection_number_removed, name: format_name, touch: true)

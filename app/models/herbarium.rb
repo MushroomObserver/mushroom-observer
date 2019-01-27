@@ -102,6 +102,7 @@ class Herbarium < AbstractModel
     return false if self == other
     # Target must be user's personal herbarium.
     return false if !user || !other || other.personal_user_id != user.id
+
     # User must own all the records attached to the one being deleted.
     herbarium_records.all? { |r| r.user_id == user.id }
   end
@@ -115,6 +116,7 @@ class Herbarium < AbstractModel
 
   def merge(that)
     return that if that == self
+
     this = self
     [:code, :location, :email, :mailing_address].each do |var|
       this.merge_field(that, var)
@@ -132,6 +134,7 @@ class Herbarium < AbstractModel
     val1 = this.send(var)
     val2 = that.send(var)
     return if val1.present?
+
     this.send(:"#{var}=", val2)
   end
 
