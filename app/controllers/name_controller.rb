@@ -1238,7 +1238,6 @@ class NameController < ApplicationController
               header: "present",
               disposition: "attachment",
               filename: "#{action_name}.csv")
-
   rescue => e
     render(plain: e.to_s, layout: false, status: 500)
   end

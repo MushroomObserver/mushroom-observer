@@ -87,7 +87,6 @@ class ObserverController
           matches = User.where(name: id) if matches.empty?
         end
       end
-
     rescue => e
       flash_error(e.to_s) unless Rails.env == "production"
     end
