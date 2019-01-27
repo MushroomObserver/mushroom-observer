@@ -16,11 +16,6 @@ Layout/AlignHash:
   Enabled: false
 
 # Offense count: 1
-Layout/ConditionPosition:
-  Exclude:
-    - 'app/controllers/translation_controller.rb'
-
-# Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: IndentationWidth.
 Layout/IndentAssignment:

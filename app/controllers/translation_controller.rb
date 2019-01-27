@@ -122,7 +122,7 @@ class TranslationController < ApplicationController
         change_translation(str, new_val)
         any_changes = true
       elsif
-        touch_translation(str)
+        touch_translation(str) # rubocop:disable Layout/ConditionPosition
       end
       @strings[tag] = new_val
     end
