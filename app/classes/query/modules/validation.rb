@@ -4,7 +4,7 @@ module Query::Modules::Validation
 
   def required_parameters
     keys = parameter_declarations.keys
-    keys.reject! {|x| x.to_s[-1] != "?"}
+    keys.reject! { |x| x.to_s[-1] != "?" }
     keys.sort_by(&:to_s)
   end
 

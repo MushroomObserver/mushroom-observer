@@ -104,18 +104,6 @@ Layout/SpaceBeforeFirstArg:
   Exclude:
     - 'app/classes/query/sequence_base.rb'
 
-# Offense count: 23
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Exclude:
-    - 'app/classes/query/modules/validation.rb'
-    - 'lib/tasks/jason.rake'
-    - 'test/models/api_test.rb'
-    - 'test/session_form_extensions.rb'
-
 # Offense count: 4
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.

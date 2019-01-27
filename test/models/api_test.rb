@@ -1163,7 +1163,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.title))
     assert_api_results([img1, img2])
 
-    attached   = Image.all.select {|i| i.observations.count > 0}
+    attached   = Image.all.select { |i| i.observations.count > 0 }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)
@@ -1480,10 +1480,10 @@ class ApiTest < UnitTestCase
     # as it is.  The plan is to temporarily attach one object at a time to make
     # sure it is *not* modifiable if anything is wrong.
     assert_objs_equal(rolf, albion.user)
-    assert_not_empty(albion.versions.select {|v| v.user_id == rolf.id})
-    assert_not_empty(albion.descriptions.select {|v| v.user == rolf})
-    assert_empty(albion.versions.select {|v| v.user_id != rolf.id})
-    assert_empty(albion.descriptions.select {|v| v.user != rolf})
+    assert_not_empty(albion.versions.select { |v| v.user_id == rolf.id })
+    assert_not_empty(albion.descriptions.select { |v| v.user == rolf })
+    assert_empty(albion.versions.select { |v| v.user_id != rolf.id })
+    assert_empty(albion.descriptions.select { |v| v.user != rolf })
     assert_empty(albion.observations)
     assert_empty(albion.species_lists)
     assert_empty(albion.users)
@@ -1855,10 +1855,10 @@ class ApiTest < UnitTestCase
     # The plan is to temporarily attach one object at a time to make sure it is
     # *not* modifiable if anything is wrong.
     assert_objs_equal(rolf, agaricus.user)
-    assert_not_empty(agaricus.versions.select {|v| v.user_id == rolf.id})
-    assert_not_empty(agaricus.descriptions.select {|v| v.user == rolf})
-    assert_empty(agaricus.versions.select {|v| v.user_id != rolf.id})
-    assert_empty(agaricus.descriptions.select {|v| v.user != rolf})
+    assert_not_empty(agaricus.versions.select { |v| v.user_id == rolf.id })
+    assert_not_empty(agaricus.descriptions.select { |v| v.user == rolf })
+    assert_empty(agaricus.versions.select { |v| v.user_id != rolf.id })
+    assert_empty(agaricus.descriptions.select { |v| v.user != rolf })
     assert_empty(agaricus.observations)
     assert_empty(agaricus.namings)
 

@@ -180,7 +180,7 @@ namespace :jason do
          :get_localization_strings_used,
     :get_localization_strings_available
        ]) do
-    print @need_strings.keys.select {|key|
+    print @need_strings.keys.select { |key|
       !@have_strings.key?(key)
     }.sort.join("\n") + "\n"
   end

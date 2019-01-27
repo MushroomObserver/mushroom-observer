@@ -241,7 +241,7 @@ module SessionExtensions
     end
 
     def selected_value(field)
-      selected = field.node.children.select {|x| x["selected"]}
+      selected = field.node.children.select { |x| x["selected"] }
       return "" if selected == []
 
       selected[0]["value"]
