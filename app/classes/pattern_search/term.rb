@@ -181,7 +181,7 @@ module PatternSearch
             raise(BadUserError.new(var: var, val: val))
         else
           User.find_by_login(val) ||
-            User.find_by_name(val)  ||
+            User.find_by_name(val) ||
             raise(BadUserError.new(var: var, val: val))
         end
       end.map(&:id)

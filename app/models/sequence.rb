@@ -44,6 +44,7 @@ class Sequence < AbstractModel
   #
   ##############################################################################
 
+  # rubocop:disable Layout/ExtraSpacing
   # matchers for bases
   BLANK_LINE_IN_MIDDLE = /(\s*)\S.*\n # non-blank line
                           ^\s*\n      # followed by blank line
@@ -54,6 +55,7 @@ class Sequence < AbstractModel
   # FASTA allows interspersed numbers, whitespace. See https://goo.gl/NYbptK
   VALID_BASE_CHARS     = /#{VALID_CODES}\d\s/i
   INVALID_BASE_CHARS   = /[^#{VALID_BASE_CHARS}]/i
+  # rubocop:enable Layout/ExtraSpacing
 
   ##############################################################################
   #

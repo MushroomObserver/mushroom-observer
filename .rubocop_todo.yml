@@ -20,17 +20,6 @@ Layout/ConditionPosition:
   Exclude:
     - 'app/controllers/translation_controller.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, ForceEqualSignAlignment.
-Layout/ExtraSpacing:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'app/models/sequence.rb'
-    - 'bin/rails'
-    - 'lib/tasks/jason.rake'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IndentationWidth.

@@ -195,7 +195,7 @@ class Name < AbstractModel
   # arbitrarily where there is still ambiguity.  Useful if you just need a
   # name and it's not so critical that it be the exactly correct one.
   def self.best_match(name)
-    matches  = Name.where(search_name: name, correct_spelling_id: nil)
+    matches = Name.where(search_name: name, correct_spelling_id: nil)
     return matches.first if matches.any?
 
     matches  = Name.where(text_name: name, correct_spelling_id: nil)

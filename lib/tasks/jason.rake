@@ -166,12 +166,12 @@ namespace :jason do
   end
 
   desc "Print full list of localization strings used in the code."
-  task(print_localization_strings_used:     :get_localization_strings_used) do
+  task(print_localization_strings_used: :get_localization_strings_used) do
     print @need_strings.keys.sort.join("\n") + "\n"
   end
 
   desc "Print full list of localization strings in a given localization file (use LOCALE=en-US, for example)."
-  task(print_localization_strings_available:     :get_localization_strings_available) do
+  task(print_localization_strings_available: :get_localization_strings_available) do
     print @have_strings.keys.sort.join("\n") + "\n"
   end
 
