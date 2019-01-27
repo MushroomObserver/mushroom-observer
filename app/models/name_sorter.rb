@@ -157,7 +157,7 @@ class NameSorter
   def add_chosen_names(new_names)
     return unless new_names
 
-    new_names.each_key { |key| @chosen_names[key] = new_names[key] }
+    new_names.each_pair { |key, _val| @chosen_names[key] = new_names[key] }
   end
 
   # append the input to the list of approved deprecated names
