@@ -410,12 +410,13 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal([], x.query.results)
 
     x = PatternSearch::Observation.new("Agaricus")
-    assert_obj_list_equal([
-      observations(:agaricus_campestris_obs),
-      observations(:agaricus_campestrus_obs),
-      observations(:agaricus_campestras_obs),
-      observations(:agaricus_campestros_obs)
-    ], x.query.results, :sort)
+    assert_obj_list_equal(
+      [observations(:agaricus_campestris_obs),
+       observations(:agaricus_campestrus_obs),
+       observations(:agaricus_campestras_obs),
+       observations(:agaricus_campestros_obs)],
+      x.query.results, :sort
+    )
 
     x = PatternSearch::Observation.new("Agaricus user:dick")
     assert_obj_list_equal([], x.query.results)

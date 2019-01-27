@@ -1568,25 +1568,29 @@ class NameTest < UnitTestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([
-      names(:agaricus),
-      names(:agaricaceae),
-      names(:agaricales),
-      names(:basidiomycetes),
-      names(:basidiomycota),
-      names(:fungi)
-    ], names(:agaricus_campestris).all_parents)
-    assert_name_list_equal([
-      names(:agaricus)
-    ], names(:agaricus_campestris).parents)
-    assert_name_list_equal([ names(:agaricaceae) ], names(:agaricus).parents)
-    assert_name_list_equal([], names(:agaricus_campestris).children)
-    assert_name_list_equal([
-      names(:agaricus_campestras),
-      names(:agaricus_campestris),
-      names(:agaricus_campestros),
-      names(:agaricus_campestrus)
-    ], names(:agaricus).children, :sort)
+    assert_name_list_equal(
+      [names(:agaricus),
+       names(:agaricaceae),
+       names(:agaricales),
+       names(:basidiomycetes),
+       names(:basidiomycota),
+       names(:fungi)], names(:agaricus_campestris).all_parents
+    )
+    assert_name_list_equal(
+      [names(:agaricus)], names(:agaricus_campestris).parents
+    )
+    assert_name_list_equal(
+      [names(:agaricaceae)], names(:agaricus).parents
+    )
+    assert_name_list_equal(
+      [], names(:agaricus_campestris).children
+    )
+    assert_name_list_equal(
+      [names(:agaricus_campestras),
+       names(:agaricus_campestris),
+       names(:agaricus_campestros),
+       names(:agaricus_campestrus)], names(:agaricus).children, :sort
+    )
   end
 
   def test_ancestors_2

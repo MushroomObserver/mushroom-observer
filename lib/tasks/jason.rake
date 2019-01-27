@@ -177,9 +177,9 @@ namespace :jason do
 
   desc "Check to make sure all localization strings that are used are available (select language using LOCALE=en-US, for example)."
   task(check_localizations: [
-    :get_localization_strings_used,
+         :get_localization_strings_used,
     :get_localization_strings_available
-  ]) do
+       ]) do
     print @need_strings.keys.select {|key|
       !@have_strings.key?(key)
     }.sort.join("\n") + "\n"
