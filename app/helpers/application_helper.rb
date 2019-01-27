@@ -272,7 +272,7 @@ module ApplicationHelper
       content_tag(:span, :no_file_selected.t)
   end
 
-  def date_select_opts(obj=nil)
+  def date_select_opts(obj = nil)
     start_year = 20.years.ago.year
     init_value = obj.try(&:when).try(&:year)
     if init_value && init_value < start_year

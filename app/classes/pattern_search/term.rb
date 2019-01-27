@@ -199,9 +199,9 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
 
       val = vals.first
-      raise BadFloatError.new(var: var, val:val, min: min, max: max) \
+      raise BadFloatError.new(var: var, val: val, min: min, max: max) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
-      raise BadFloatError.new(var: var, val:val, min: min, max: max) \
+      raise BadFloatError.new(var: var, val: val, min: min, max: max) \
         unless val.to_f >= min && val.to_f <= max
 
       return val.to_f

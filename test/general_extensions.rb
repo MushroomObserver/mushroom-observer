@@ -294,8 +294,8 @@ module GeneralExtensions
       label = match[1]
       id = match[2].to_i
       raise "IDs are not consecutive at #{file} line #{line_num}: " +
-            "#{id} should be #{last_id+1}\n" if id != last_id + 1
-      result[id-1] = label
+            "#{id} should be #{last_id + 1}\n" if id != last_id + 1
+      result[id - 1] = label
       last_id = id
     end
     result

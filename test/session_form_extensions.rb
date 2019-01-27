@@ -275,7 +275,7 @@ module SessionExtensions
       assert_checked(id, false, msg)
     end
 
-    def assert_checked(id, checked=true, msg = nil)
+    def assert_checked(id, checked = true, msg = nil)
       field = get_field!(id)
       val = field.node["checked"]
       if checked

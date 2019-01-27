@@ -20,7 +20,7 @@
 ###############################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  def initialize(objects, max_objects=MO.max_map_objects)
+  def initialize(objects, max_objects = MO.max_map_objects)
     @max_objects = max_objects
     init_sets(objects)
     group_objects_into_sets

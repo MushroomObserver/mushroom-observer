@@ -3958,7 +3958,7 @@ namespace :location do
       [101, 204, 129] => "é" 
 }
     c = "123"
-    chars.map do|k, v|
+    chars.map do |k, v|
       c[0] = k[0]
       c[1] = k[1]
       c[2] = k[2]

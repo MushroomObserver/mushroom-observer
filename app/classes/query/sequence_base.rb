@@ -153,7 +153,7 @@ module Query
       )
       initialize_model_do_has_notes_fields(:has_notes_fields)
       initialize_model_do_search(:obs_notes_has, "observations.notes")
-      add_join(:observations) if @where.any? { |w| w.include?"observations." }
+      add_join(:observations) if @where.any? { |w| w.include?("observations.")}
     end
 
     def default_order

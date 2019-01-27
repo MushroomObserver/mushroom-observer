@@ -15,58 +15,6 @@
 Layout/AlignHash:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/RescueEnsureAlignment:
-  Exclude:
-    - 'app/models/location.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Layout/SpaceAfterColon:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Layout/SpaceAfterComma:
-  Exclude:
-    - 'test/controllers/collection_number_controller_test.rb'
-    - 'test/controllers/publications_controller_test.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceAroundEqualsInParameterDefault:
-  Exclude:
-    - 'app/classes/map_collapsible.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'test/session_form_extensions.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/SpaceAroundKeyword:
-  Exclude:
-    - 'lib/tasks/location.rake'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment.
-Layout/SpaceAroundOperators:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'test/general_extensions.rb'
-    - 'test/models/api_test.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment.
-Layout/SpaceBeforeFirstArg:
-  Exclude:
-    - 'app/classes/query/sequence_base.rb'
-
 # Offense count: 4
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
