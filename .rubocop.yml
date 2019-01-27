@@ -126,6 +126,10 @@ Layout/DotPosition:
 Style/AsciiComments:
   Enabled: false
 
+# Repeat the RuboCop default because CodeClimate silently overrides it
+Style/DateTime:
+  Enabled: false
+
 # Prefer n == 0, n > 0, n < 0
 # over n.zero?, n.positive? n.negative?
 # Rubocop default is "predicates".
