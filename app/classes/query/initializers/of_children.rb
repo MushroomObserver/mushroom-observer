@@ -25,6 +25,7 @@ module Query
       def add_name_condition_below_genus(name, all)
         where << "names.text_name LIKE '#{name.text_name} %'"
         return if all
+
         pat = name.rank == :Genus ? "% %" : "% % %"
         where << "names.text_name NOT LIKE '#{name.text_name} #{pat}'"
       end

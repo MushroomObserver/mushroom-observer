@@ -57,6 +57,7 @@ class ObserverController
       if /^\d+$/.match?(id)
         obj = find_or_goto_index(model, id)
         return unless obj
+
         matches = [obj]
       else
         case model.to_s

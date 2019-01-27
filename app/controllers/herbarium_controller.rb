@@ -46,6 +46,7 @@ class HerbariumController < ApplicationController
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return if request.method != "POST"
     return if !@user || !@herbarium.curator?(@user) && !in_admin_mode?
+
     login = params[:add_curator].to_s.sub(/ <.*/, "")
     user = User.find_by_login(login)
     if user
@@ -83,6 +84,7 @@ class HerbariumController < ApplicationController
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
     return unless make_sure_can_edit!
+
     if request.method == "GET"
       @herbarium.place_name         = @herbarium.location.try(&:name)
       @herbarium.personal           = @herbarium.personal_user_id.present?
@@ -108,6 +110,7 @@ class HerbariumController < ApplicationController
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
+
     user = User.safe_find(params[:user])
     if !@herbarium.curator?(@user) && !in_admin_mode?
       flash_error(:permission_denied.t)
@@ -122,6 +125,7 @@ class HerbariumController < ApplicationController
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium && request.method == "POST"
+
     subject = "Herbarium Curator Request"
     content =
       "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
@@ -137,6 +141,7 @@ class HerbariumController < ApplicationController
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
     return unless @herbarium
+
     if in_admin_mode? ||
        @herbarium.curator?(@user) ||
        @herbarium.curators.empty? && @herbarium.owns_all_records?(@user)
@@ -227,6 +232,7 @@ class HerbariumController < ApplicationController
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?
+
     flash_error :permission_denied.t
     redirect_to_referrer || redirect_to_show_herbarium
     false
@@ -244,6 +250,7 @@ class HerbariumController < ApplicationController
   def validate_name!
     other = Herbarium.where(name: @herbarium.name).first
     return true if !other || other == @herbarium
+
     if !@herbarium.id # i.e. in create mode
       flash_error(:create_herbarium_duplicate_name.t(name: @herbarium.name))
       return false
@@ -254,6 +261,7 @@ class HerbariumController < ApplicationController
 
   def validate_location!
     return true if @herbarium.place_name.blank?
+
     @herbarium.location =
       Location.find_by_name_or_reverse_name(@herbarium.place_name)
     # Will redirect to create location if not found.
@@ -265,6 +273,7 @@ class HerbariumController < ApplicationController
     return true  if @herbarium.personal != "1"
     return false if already_have_personal_herbarium!
     return false if cant_make_this_personal_herbarium!
+
     @herbarium.personal_user_id = @user.id
     @herbarium.add_curator(@user)
     true
@@ -272,8 +281,10 @@ class HerbariumController < ApplicationController
 
   def validate_admin_personal_user!
     return true unless in_admin_mode?
+
     if @herbarium.personal_user_name.blank?
       return true if @herbarium.personal_user_id.nil?
+
       flash_notice(:edit_herbarium_successfully_made_nonpersonal.t)
       @herbarium.personal_user_id = nil
       @herbarium.curators.clear
@@ -290,6 +301,7 @@ class HerbariumController < ApplicationController
       return false
     end
     return true if user.personal_herbarium == @herbarium
+
     if user.personal_herbarium.present?
       flash_error(
         :edit_herbarium_user_already_has_personal_herbarium.t(
@@ -309,12 +321,14 @@ class HerbariumController < ApplicationController
   def already_have_personal_herbarium!
     other = @user.personal_herbarium
     return false if !other || other == @herbarium
+
     flash_error(:create_herbarium_personal_already_exists.t(name: other.name))
     true
   end
 
   def cant_make_this_personal_herbarium!
     return false if @herbarium.new_record? || @herbarium.can_make_personal?
+
     flash_error(:edit_herbarium_cant_make_personal.t)
     true
   end
@@ -357,6 +371,7 @@ class HerbariumController < ApplicationController
 
   def redirect_to_referrer
     return false if @back.blank?
+
     redirect_to(@back)
     return true
   end
@@ -371,6 +386,7 @@ class HerbariumController < ApplicationController
 
   def redirect_to_create_location
     return if @herbarium.location || @herbarium.place_name.blank?
+
     flash_notice(:create_herbarium_must_define_location.t)
     redirect_to(controller: :location, action: :create_location, back: @back,
                 where: @herbarium.place_name, set_herbarium: @herbarium.id)
@@ -379,6 +395,7 @@ class HerbariumController < ApplicationController
 
   def whitelisted_herbarium_params
     return {} unless params[:herbarium]
+
     params.require(:herbarium).
       permit(:name, :code, :email, :mailing_address, :description,
              :place_name, :personal, :personal_user_name)

@@ -64,6 +64,7 @@ class Notification < AbstractModel
         naming   = args[:naming]
         fail "Missing 'user' argument for #{flavor} notification."   unless observer
         fail "Missing 'naming' argument for #{flavor} notification." unless naming
+
         template.
           gsub(":observer", observer.login).
           gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").

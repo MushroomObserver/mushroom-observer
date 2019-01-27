@@ -2196,6 +2196,7 @@ class NameTest < UnitTestCase
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
     return unless sql_collates_accents?
+
     # rubocop:disable Lint/UselessAssignment
     # RuboCop gives false positives
     n1 = create_test_name("Agaricus Aehou")

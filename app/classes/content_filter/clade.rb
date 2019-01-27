@@ -23,6 +23,7 @@ class ContentFilter
     def parse_name(val)
       name = Name.best_match(val)
       return [name.text_name, name.rank] if name
+
       [val, Name.guess_rank(val) || :Genus]
     end
   end

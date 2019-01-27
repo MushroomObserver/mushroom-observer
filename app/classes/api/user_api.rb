@@ -64,11 +64,13 @@ class API
       raise MissingParameter.new(:email)    unless params[:email]
       raise MissingParameter.new(:password) unless params[:password]
       raise UserAlreadyExists.new(login)    if User.find_by_login(login)
+
       params[:password_confirmation] = params[:password]
     end
 
     def after_create(user)
       return unless @create_key
+
       key = ApiKey.new(notes: @create_key, user: user)
       key.provide_defaults
       key.verified = nil

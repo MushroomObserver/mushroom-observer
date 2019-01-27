@@ -391,6 +391,7 @@ class Location < AbstractModel
   # it returns nil.
   def self.understood_with_prefixes(candidate, understood_places)
     return candidate if understood_places.member?(candidate)
+
     tokens = candidate.to_s.split
     count = 0
     tokens.each do |s|
@@ -434,6 +435,7 @@ class Location < AbstractModel
   # or undefined location.
   def self.location_exists(name)
     return false unless name
+
     @@location_cache ||= (
       Location.connection.select_values(%(
         SELECT name FROM locations
@@ -466,11 +468,13 @@ class Location < AbstractModel
 
   def self.check_for_empty_name(name)
     return [] if name.present?
+
     [:location_dubious_empty.l]
   end
 
   def self.check_for_dubious_commas(name)
     return [] unless comma_test(name)
+
     [:location_dubious_commas.l]
   end
 
@@ -478,12 +482,14 @@ class Location < AbstractModel
     return [] if name.blank?
     return [] if /Forest,|Park,|near /.match?(name)
     return [] unless has_dubious_county?(name)
+
     [:location_dubious_redundant_county.l]
   end
 
   def self.check_for_bad_country_or_state(name)
     reasons = []
     return [] if name.blank?
+
     a_country = understood_country?(country(name))
     if a_country.nil?
       reasons << :location_dubious_unknown_country.t(country: country(name))
@@ -510,8 +516,10 @@ class Location < AbstractModel
   def self.check_for_bad_terms(name)
     reasons = []
     return [] if name.blank?
+
     BAD_TERMS.each_key do |key|
       next unless name.index(key)
+
       reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
     end
     reasons
@@ -520,6 +528,7 @@ class Location < AbstractModel
   def self.check_for_bad_chars(name)
     reasons = []
     return [] if name.blank?
+
     # For some reason BAD_CHARS.chars.each doesn't work
     count = 0
     while (c = BAD_CHARS[count])
@@ -531,6 +540,7 @@ class Location < AbstractModel
 
   def self.comma_test(name)
     return if name.blank?
+
     tokens = name.split(",").map(&:strip)
     tokens.delete("")
     name != tokens.join(", ")
@@ -555,6 +565,7 @@ class Location < AbstractModel
   def self.has_dubious_county?(name)
     tokens = name.split(", ")
     return if tokens.length < 2
+
     alt = [tokens[0]]
     tokens[1..-1].each { |t| alt.push(t) if " Co." != t[-4..-1] }
     result = alt.join(", ")

@@ -423,6 +423,7 @@ class Description < AbstractModel
   def group_users(table)
     @group_users ||= {}
     return @group_users[table] if @group_users[table]
+
     ids = group_user_ids(table)
     ids = ["-1"] if ids.empty?
     id_list = ids.map(&:to_s).join(",")
@@ -546,6 +547,7 @@ class Description < AbstractModel
   before_save :add_author_or_editor
   def add_author_or_editor
     return unless !@save_without_our_callbacks && (user = User.current)
+
     authors.empty? && author_worthy? ? add_author(user) : add_editor(user)
   end
 

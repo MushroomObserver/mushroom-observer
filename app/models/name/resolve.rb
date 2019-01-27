@@ -122,6 +122,7 @@ class Name < AbstractModel
       if names.last
         names.each do |n|
           next unless n && n.new_record?
+
           n.inherit_stuff
           n.save_with_log(:log_updated_by)
         end
@@ -141,6 +142,7 @@ class Name < AbstractModel
     end
     names.each do |n|
       next unless n && n.new_record?
+
       n.change_deprecated(deprecate) if deprecate
       n.inherit_stuff
       n.save_with_log(log)
@@ -149,6 +151,7 @@ class Name < AbstractModel
 
   def save_with_log(log = nil, args = {})
     return false unless changed?
+
     log ||= :log_name_updated
     args = { touch: altered? }.merge(args)
     log(log, args)

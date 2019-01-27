@@ -2760,6 +2760,7 @@ class ApiTest < UnitTestCase
     # Make sure all observations have at least one sequence for the rest.
     Observation.all.each do |obs|
       next if obs.sequences.any?
+
       Sequence.create!(observation: obs, user: obs.user, locus: "ITS1F",
                        archive: "GenBank", accession: "MO#{obs.id}")
     end
@@ -3979,6 +3980,7 @@ class ApiTest < UnitTestCase
       assert_equal("API::HelpMessage", api.errors.first.class.name)
       file = help_messages_file
       return unless File.exists?(file)
+
       File.open(file, "a") do |fh|
         fh.puts "#{method.to_s.upcase} #{action}"
         fh.puts api.errors.first.to_s.gsub(/; /, "\n  ").

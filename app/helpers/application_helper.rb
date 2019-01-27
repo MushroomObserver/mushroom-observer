@@ -47,12 +47,14 @@ module ApplicationHelper
   def link_to_coerced_query(query, model)
     link = coerced_query_link(query, model)
     return nil unless link
+
     link_to(*link)
   end
 
   # Convert @links in index views into a list of tabs for RHS tab set.
   def create_links(links)
     return [] unless links
+
     links.reject(&:nil?).map { |str, url| link_to(str, url) }
   end
 
@@ -65,6 +67,7 @@ module ApplicationHelper
   def content_tag_if(condition, name, content_or_options_with_block = nil,
                      options = nil, escape = true, &block)
     return unless condition
+
     content_tag(name, content_or_options_with_block, options, escape, &block)
   end
 
@@ -209,6 +212,7 @@ module ApplicationHelper
 
     # Put it back together.
     return addr if args.keys.empty?
+
     addr + "?" + args.keys.sort.map do |k|
       CGI.escape(k) + "=" + (args[k] || "")
     end.join("&")
@@ -219,6 +223,7 @@ module ApplicationHelper
   # but to do that we need to know the id of next object.
   def url_after_delete(object)
     return nil unless object
+
     id = get_next_id(object)
     args = {
       controller: object.show_controller,
@@ -232,8 +237,10 @@ module ApplicationHelper
     query = passed_query
     return nil unless query
     return nil unless query.model.to_s == object.class.name
+
     idx = query.index(object)
     return nil unless idx
+
     query.result_ids[idx + 1] || query.result_ids[idx - 1]
   end
 

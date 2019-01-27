@@ -27,6 +27,7 @@ class QueuedEmail::CommentAdd < QueuedEmail
     else
       email = create(sender, receiver)
       fail "Missing comment!" unless comment
+
       email.add_integer(:comment, comment.id)
       email.finish
     end

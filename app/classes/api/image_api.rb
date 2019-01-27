@@ -91,6 +91,7 @@ class API
         obs.log_create_image(img)
       end
       return unless @vote
+
       img.change_vote(@user, @vote, (@user.votes_anonymous == :yes))
     end
 
@@ -108,6 +109,7 @@ class API
 
     def upload_params
       return {} unless @upload
+
       {
         image:            @upload.content,
         upload_length:    @upload.content_length,

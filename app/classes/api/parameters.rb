@@ -64,6 +64,7 @@ class API
 
   def make_sure_location_isnt_dubious!(name)
     return if name.blank? || Location.where(name: name).any?
+
     citations =
       Location.check_for_empty_name(name) +
       Location.check_for_dubious_commas(name) +
@@ -71,6 +72,7 @@ class API
       Location.check_for_bad_terms(name) +
       Location.check_for_bad_chars(name)
     return if citations.none?
+
     raise DubiousLocationName.new(citations)
   end
 
@@ -81,6 +83,7 @@ class API
     w = parse(:longitude, :west, help: 1)
     return unless n || s || e || w
     return [n, s, e, w] if n && s && e && w
+
     raise NeedAllFourEdges.new
   end
 

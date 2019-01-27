@@ -61,6 +61,7 @@ class API
       raise MissingParameter.new(:south) unless params[:south]
       raise MissingParameter.new(:east)  unless params[:east]
       raise MissingParameter.new(:west)  unless params[:west]
+
       make_sure_location_doesnt_exist!(name)
       make_sure_location_isnt_dubious!(name)
     end
@@ -97,41 +98,49 @@ class API
 
     def must_be_creator!(loc)
       return if loc.user == @user
+
       raise MustBeCreator.new(:location)
     end
 
     def must_be_only_editor!(loc)
       return unless loc.versions.any? { |x| x.user_id != @user.id }
+
       raise MustBeOnlyEditor.new(:location)
     end
 
     def must_own_all_descriptions!(loc)
       return unless loc.descriptions.any? { |x| x.user != @user }
+
       raise MustOwnAllDescriptions.new(:location)
     end
 
     def must_own_all_observations!(loc)
       return unless loc.observations.any? { |x| x.user != @user }
+
       raise MustOwnAllObservations.new(:location)
     end
 
     def must_own_all_species_lists!(loc)
       return unless loc.species_lists.any? { |x| x.user != @user }
+
       raise MustOwnAllSpeciesLists.new(:location)
     end
 
     def must_not_be_another_users_profile_location!(loc)
       return unless loc.users.any? { |x| x != @user }
+
       raise AnotherUsersProfileLocation.new
     end
 
     def must_not_have_any_herbaria!(loc)
       return unless loc.herbaria.any?
+
       raise MustNotHaveAnyHerbaria.new
     end
 
     def make_sure_location_doesnt_exist!(name)
       return unless Location.find_by_name_or_reverse_name(name)
+
       raise LocationAlreadyExists.new(name)
     end
 

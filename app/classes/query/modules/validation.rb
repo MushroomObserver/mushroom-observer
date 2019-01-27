@@ -96,11 +96,13 @@ module Query::Modules::Validation
     if hash.keys.length != 1
       fail("Invalid enum declaration for :#{arg} for #{model} :#{flavor} query! (wrong number of keys in hash)")
     end
+
     arg_type = hash.keys.first
     set = hash.values.first
     unless set.is_a?(Array)
       fail("Invalid enum declaration for :#{arg} for #{model} :#{flavor} query! (expected value to be an array of allowed values)")
     end
+
     val2 = scalar_validate(arg, val, arg_type)
     if (arg_type == :string) && set.include?(val2.to_sym)
       val2 = val2.to_sym
@@ -157,6 +159,7 @@ module Query::Modules::Validation
   def validate_id(arg, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       fail("Value for :#{arg} is an unsaved #{type} instance.") unless val.id
+
       # Cache the instance for later use, in case we both instantiate and
       # execute query in the same action.
       @params_cache ||= {}
@@ -176,6 +179,7 @@ module Query::Modules::Validation
   def validate_name(arg, val)
     if val.is_a?(Name)
       fail("Value for :#{arg} is an unsaved Name instance.") unless val.id
+
       @params_cache ||= {}
       @params_cache[arg] = val
       val.id

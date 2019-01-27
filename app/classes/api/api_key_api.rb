@@ -23,6 +23,7 @@ class API
 
     def after_create(api_key)
       return if @for_user == @user
+
       VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver_now
     end
 

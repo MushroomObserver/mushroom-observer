@@ -11,6 +11,7 @@ class Comment
   #
   def notify_users
     return unless target
+
     recipients = []
     add_owners_and_authors!(recipients)
     add_users_interested_in_all_comments!(recipients)
@@ -30,6 +31,7 @@ class Comment
     user_ids = users_with_other_comments.map(&:id).sort
     return unless (user_ids & MO.water_users).any?
     return unless (user_ids & MO.oil_users).any?
+
     WebmasterEmail.build(
       MO.noreply_email_address,
       oil_and_water_content(user_ids),
@@ -57,6 +59,7 @@ class Comment
 
   def add_users_with_namings!(users)
     return unless target_type == "Observation"
+
     users.concat(target.namings.map(&:user).uniq.
                  select(&:email_comments_response))
   end

@@ -24,6 +24,7 @@ module JavascriptHelper
     if args.select { |arg| arg.class != String } != []
       fail(ArgumentError, "javascript_include doesn't take symbols like :default, etc.")
     end
+
     @javascript_files ||= []
     @javascript_files += args
   end

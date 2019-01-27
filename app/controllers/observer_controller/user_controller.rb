@@ -90,12 +90,14 @@ class ObserverController
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
     return unless @show_user
+
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
     @query = Query.lookup(:Observation, :by_user,
                           user: @show_user, by: :owners_thumbnail_quality)
     @observations = @query.results(limit: 6)
     return unless @observations.length < 6
+
     @query = Query.lookup(:Observation, :by_user,
                           user: @show_user, by: :thumbnail_quality)
     @observations = @query.results(limit: 6)
@@ -139,6 +141,7 @@ class ObserverController
   # for a given user.
   def change_user_bonuses # :root: :norobots:
     return unless (@user2 = find_or_goto_index(User, params[:id].to_s))
+
     if in_admin_mode?
       if request.method != "POST"
         # Reformat bonuses as string for editing, one entry per line.

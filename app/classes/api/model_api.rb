@@ -60,6 +60,7 @@ class API
       obj = before_create(params) ||
             model.create(params)
       raise(CreateFailed.new(obj)) if obj.new_record?
+
       after_create(obj)
       obj
     end
@@ -168,6 +169,7 @@ class API
     def sql_id_condition
       ids = parse_ranges(:integer, :id)
       return nil unless ids
+
       ids.map do |term|
         if term.is_a?(Range)
           "#{model.table_name}.id >= #{term.begin} AND " \

@@ -218,6 +218,7 @@ module SessionExtensions
 
     def string_value(field)
       return field unless field.respond_to?(:value)
+
       string_value(field.value)
     end
 
@@ -242,6 +243,7 @@ module SessionExtensions
     def selected_value(field)
       selected = field.node.children.select {|x| x["selected"]}
       return "" if selected == []
+
       selected[0]["value"]
     end
 

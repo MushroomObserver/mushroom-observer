@@ -16,6 +16,7 @@ class TranslationController < ApplicationController
     @form = build_form(@lang, @show_tags)
   rescue => e
     raise e if Rails.env == "test" && @lang
+
     flash_error(*error_message(e))
     redirect_back_or_default("/")
   end
@@ -56,6 +57,7 @@ class TranslationController < ApplicationController
     if Rails.env == "development" && @lang
       for line in error.backtrace
         break if /action_controller.*perform_action/.match?(line)
+
         msg << line
       end
     end

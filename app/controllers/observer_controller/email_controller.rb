@@ -41,6 +41,7 @@ class ObserverController
     return unless (@target = find_or_goto_index(User, params[:id].to_s)) &&
                   email_question(@user) &&
                   request.method == "POST"
+
     subject = params[:email][:subject]
     content = params[:email][:content]
     UserEmail.build(@user, @target, subject, content).deliver_now
@@ -53,6 +54,7 @@ class ObserverController
     return unless @observation &&
                   email_question(@observation) &&
                   request.method == "POST"
+
     question = params[:question][:content]
     ObservationEmail.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
@@ -63,6 +65,7 @@ class ObserverController
     return unless (@image = find_or_goto_index(Image, params[:id].to_s)) &&
                   email_question(@image, :email_general_commercial) &&
                   request.method == "POST"
+
     commercial_inquiry = params[:commercial_inquiry][:content]
     CommercialEmail.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
@@ -86,6 +89,7 @@ class ObserverController
   def email_merge_request
     @model = validate_merge_model!(params[:type])
     return unless @model
+
     @old_obj = @model.safe_find(params[:old_id])
     @new_obj = @model.safe_find(params[:new_id])
     if !@old_obj || !@new_obj || @old_jb == @new_obj

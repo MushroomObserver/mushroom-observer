@@ -20,11 +20,6 @@ Layout/ConditionPosition:
   Exclude:
     - 'app/controllers/translation_controller.rb'
 
-# Offense count: 581
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Layout/EmptyLinesAroundExceptionHandlingKeywords:

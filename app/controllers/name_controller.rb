@@ -803,8 +803,10 @@ class NameController < ApplicationController
     @name = find_or_goto_index(Name, params[:id].to_s)
     return unless @name
     return if abort_if_name_locked!(@name)
+
     @approved_names = @name.approved_synonyms
     return unless request.method == "POST"
+
     deprecate_others
     approve_this_one
     post_approval_comment
@@ -813,12 +815,14 @@ class NameController < ApplicationController
 
   def abort_if_name_locked!(name)
     return false if !name.locked || in_admin_mode?
+
     flash_error(:permission_denied.t)
     redirect_back_or_default("/")
   end
 
   def deprecate_others
     return unless params[:deprecate] && params[:deprecate][:others] == "1"
+
     @others = []
     @name.approved_synonyms.each do |n|
       n.change_deprecated(true)
@@ -840,8 +844,10 @@ class NameController < ApplicationController
 
   def post_approval_comment
     return unless params[:comment]
+
     comment = params[:comment][:comment]
     return unless comment.present?
+
     post_comment(:approve, @name, comment.strip_squeeze)
   end
 
@@ -850,6 +856,7 @@ class NameController < ApplicationController
   # reason.
   def deprecate_synonym(name)
     return true if name.deprecated
+
     begin
       name.change_deprecated(true)
       name.save_with_log(:log_deprecated_by)
@@ -1135,6 +1142,7 @@ class NameController < ApplicationController
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
     return unless request.method == "POST"
+
     words = Name.all_lifeforms.select do |word|
       params["lifeform_#{word}"] == "1"
     end
@@ -1146,6 +1154,7 @@ class NameController < ApplicationController
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
     return unless request.method == "POST"
+
     Name.all_lifeforms.each do |word|
       if params["add_#{word}"] == "1"
         @name.propagate_add_lifeform(word)

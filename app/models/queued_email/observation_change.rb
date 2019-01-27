@@ -22,6 +22,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
     else
       email = create(sender, recipient)
       fail "Missing observation!" unless observation
+
       email.add_integer(:observation, observation.id)
       email.add_to_note_list(changes)
       email.finish
@@ -52,6 +53,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
     else
       email = create(sender, recipient)
       fail "Missing observation!" unless observation
+
       email.add_integer(:observation, observation.id)
       email.add_to_note_list([action])
       email.finish

@@ -469,6 +469,7 @@ class User < AbstractModel
     old_legal_name = old_name.presence || old_login
     new_legal_name = legal_name
     return nil if old_legal_name == new_legal_name
+
     [old_legal_name, new_legal_name]
   end
 
@@ -690,6 +691,7 @@ class User < AbstractModel
   #
   def sum_bonuses
     return nil unless bonuses
+
     bonuses.inject(0) { |acc, elem| acc + elem[0] }
   end
 
@@ -710,6 +712,7 @@ class User < AbstractModel
   # notes_template_parts # => []
   def notes_template_parts
     return [] if notes_template.blank?
+
     User.parse_notes_template(notes_template)
   end
 
@@ -885,8 +888,10 @@ class User < AbstractModel
       _naming_id, notification_id, shown =
         q.get_integers([:naming, :notification, :shown])
       next unless shown.nil?
+
       notification = Notification.find(notification_id)
       next unless notification && notification.note_template
+
       result = true
       break
     end
@@ -895,6 +900,7 @@ class User < AbstractModel
 
   def remove_image(image)
     return unless self.image == image
+
     self.image = nil
     save
   end
@@ -971,6 +977,7 @@ class User < AbstractModel
 
   def notes_template_forbid_duplicates # :nodoc
     return unless notes_template.present?
+
     squished = notes_template.split(",").map(&:squish)
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
@@ -980,8 +987,10 @@ class User < AbstractModel
 
   def notes_template_bad_parts # :nodoc
     return [] unless notes_template.present?
+
     notes_template.split(",").each_with_object([]) do |part, a|
       next unless notes_template_reserved_words.include?(part.squish.downcase)
+
       a << part.strip
     end
   end

@@ -27,6 +27,7 @@ class QueuedEmail::LocationChange < QueuedEmail
   def self.create_email(sender, recipient, location, desc = nil)
     result = create(sender, recipient)
     fail "Missing location or description!" if !location && !desc
+
     if location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
@@ -51,6 +52,7 @@ class QueuedEmail::LocationChange < QueuedEmail
 
   def deliver_email
     return unless location
+
     loc_change = ObjectChange.new(location,
                                   old_location_version,
                                   new_location_version)

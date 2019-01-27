@@ -153,6 +153,7 @@ end
 
 def propose_new_name
   return if @new_naming
+
   puts "  > proposing new name..."
   @new_naming = Naming.new(
     observation: @observation,
@@ -167,6 +168,7 @@ end
 
 def vote_on_new_name
   return unless @new_naming
+
   vote = @old_vote || @old_score.try(&:ceil) || 1
   puts "  > voting #{vote} on new name..."
   @observation.change_vote(@new_naming, vote, @user)
@@ -175,6 +177,7 @@ end
 
 def vote_against_old_name
   return unless @old_naming
+
   puts "  > voting -3 on old name..."
   @observation.change_vote(@old_naming, -3, @user)
   @any_changes = true
@@ -193,6 +196,7 @@ end
 
 def average_votes(naming)
   return nil unless naming
+
   sum = num = 0.0
   naming.votes.each do |vote|
     weight = vote.user.contribution
@@ -204,6 +208,7 @@ end
 
 def users_vote(naming)
   return nil unless naming
+
   naming.votes.each do |vote|
     return vote.value if vote.user == @user
   end

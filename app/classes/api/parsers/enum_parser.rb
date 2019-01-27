@@ -23,6 +23,7 @@ class API
       def parse_range
         val = super || return
         return val.begin if val.begin == val.end
+
         val.reverse! if limit.index(val.begin) > limit.index(val.end)
         val
       end

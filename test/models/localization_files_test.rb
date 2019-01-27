@@ -35,6 +35,7 @@ class LocalizationFilesTest < UnitTestCase
       data.each_key { |tag| tags[tag.to_s.downcase] = true }
       data.each do |tag, str|
         next unless str.is_a?(String)
+
         str.gsub(/[\[\=]:(\w+)/) do
           unless tags.key?(Regexp.last_match(1).downcase)
             errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
@@ -147,6 +148,7 @@ class LocalizationFilesTest < UnitTestCase
         next unless line.match(/^\s*class (\w+) < /) &&
                     !%w[Error ObjectError BadParameterValue].
                     include?(Regexp.last_match(1))
+
         tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
       end
     end

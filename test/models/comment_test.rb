@@ -125,6 +125,7 @@ class CommentTest < UnitTestCase
 
   def sent_emails(start)
     return "No emails were sent" if num_emails == start
+
     strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
       "to: #{mail["to"]}, subject: #{mail["subject"]}"
     end
