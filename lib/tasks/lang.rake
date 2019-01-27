@@ -50,8 +50,8 @@ namespace :lang do
     "import:official",   # import any changes from official file
     "strip:all",         # strip out any strings we no longer need
     "update:all",        # update localization (YAML) files
-    "export:unofficial"  # update export (text) files
-                         # [used by translation controller to build form]
+    # update export (text) files (used by translation controller to build form)
+    "export:unofficial"
   ]
 
   for namespace_name, action, verbose, verbose_method, description in [
