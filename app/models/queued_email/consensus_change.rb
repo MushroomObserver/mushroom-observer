@@ -5,11 +5,11 @@ class QueuedEmail::ConsensusChange < QueuedEmail
   end
 
   def old_name
-    get_object(:old_name, ::Name, :allow_nil)
+    get_object(:old_name, ::Name)
   end
 
   def new_name
-    get_object(:new_name, ::Name, :allow_nil)
+    get_object(:new_name, ::Name)
   end
 
   def self.create_email(sender, recipient, observation, old_name, new_name)

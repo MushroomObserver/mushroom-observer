@@ -1,7 +1,7 @@
 # Observation Change Email
 class QueuedEmail::ObservationChange < QueuedEmail
   def observation
-    get_object(:observation, ::Observation, :allow_nil)
+    get_object(:observation, ::Observation)
   end
 
   def note
