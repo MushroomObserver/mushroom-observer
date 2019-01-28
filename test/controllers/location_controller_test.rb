@@ -466,7 +466,7 @@ class LocationControllerTest < FunctionalTestCase
         assert_equal(new_params[k], bfp[k])
       end
     end
-    assert(key_count > 0) # Make sure something was compared.
+    assert(key_count.positive?) # Make sure something was compared.
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.

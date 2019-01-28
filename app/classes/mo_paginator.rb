@@ -95,15 +95,15 @@ class MOPaginator
   alias_method :length, :num_total
 
   def blank?
-    num_total == 0
+    num_total.zero?
   end
 
   def empty?
-    num_total == 0
+    num_total.zero?
   end
 
   def any?
-    num_total > 0
+    num_total.positive?
   end
 
   # Create and initialize new instance.
@@ -179,7 +179,7 @@ class MOPaginator
   # First index on current page.
   def from
     n = ((number || 0) - 1) * num_per_page
-    n = 0 if n < 0
+    n = 0 if n.negative?
     n
   end
 
@@ -187,7 +187,7 @@ class MOPaginator
   def to
     n = from + num_per_page - 1
     n = num_total - 1 if n > num_total - 1
-    n = 0 if n < 0
+    n = 0 if n.negative?
     n
   end
 

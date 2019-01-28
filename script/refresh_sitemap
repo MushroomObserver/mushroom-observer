@@ -394,7 +394,7 @@ def remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
   disallowed_paths.reject! do |disallowed_path|
     reject = false
     for allowed_path in allowed_paths
-      if allowed_path.index(disallowed_path) == 0
+      if allowed_path.index(disallowed_path).zero?
         reject = true
         break
       end

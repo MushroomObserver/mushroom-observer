@@ -126,10 +126,12 @@ class SiteData
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
     observations_with_voucher: lambda do |obs|
-      obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0
+      obs.specimen && obs.notes.to_s.length >= 10 &&
+        obs.thumb_image_id.to_i.positive?
     end,
     observations_without_voucher: lambda do |obs|
-      !(obs.specimen && obs.notes.to_s.length >= 10 && obs.thumb_image_id.to_i > 0)
+      !(obs.specimen && obs.notes.to_s.length >= 10 &&
+        obs.thumb_image_id.to_i.positive?)
     end
   }.freeze
 
@@ -157,7 +159,7 @@ class SiteData
       user_id ||= User.current_id
     end
     weight = FIELD_WEIGHTS[field]
-    if weight && weight > 0 && user_id && user_id > 0
+    if weight && weight.positive? && user_id && user_id.positive?
       update_weight(calc_impact(weight, mode, obj, field), user_id)
     end
   end
@@ -173,7 +175,7 @@ class SiteData
   end
 
   def self.update_weight(impact, user_id)
-    unless impact == 0
+    unless impact.zero?
       User.connection.update %(
         UPDATE users SET contribution =
           IF(contribution IS NULL, #{impact}, contribution + #{impact})
@@ -426,7 +428,7 @@ class SiteData
       score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
       sum += score
       [lang, score]
-    end.select { |_lang, score| score > 0 }
+    end.select { |_lang, score| score.positive? }
     @user_data[user.id][:languages] = sum
     @user_data[user.id][:languages_itemized] = list
   end

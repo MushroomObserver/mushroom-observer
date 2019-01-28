@@ -90,7 +90,7 @@ module PaginationHelper
       for n in from..to
         if n == this
           result << content_tag(:li, content_tag(:span, n), class: "active")
-        elsif n > 0 && n <= num
+        elsif n.positive? && n <= num
           result << pagination_link(n, n, arg, args)
         end
       end

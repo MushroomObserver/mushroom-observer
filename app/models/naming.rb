@@ -327,7 +327,7 @@ class Naming < AbstractModel
     result = true
     for v in votes
       if (v.user_id != user_id) &&
-         (v.value > 0)
+         (v.value.positive?)
         result = false
         break
       end
@@ -342,7 +342,7 @@ class Naming < AbstractModel
     result = true
     for v in votes
       if (v.user_id != user_id) &&
-         (v.value > 0) &&
+         (v.value.positive?) &&
          (v.favorite)
         result = false
         break

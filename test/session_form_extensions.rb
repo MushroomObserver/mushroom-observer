@@ -377,7 +377,7 @@ module SessionExtensions
           matches << opt.label
         end
       end
-      context.assert(matches.length > 0,
+      context.assert(matches.length.positive?,
                      "Couldn't find any options in the pulldown " \
                      "#{field.id.inspect} that match #{label.inspect}.\n" \
                      "Have these: #{field.options.map(&:label).inspect}")

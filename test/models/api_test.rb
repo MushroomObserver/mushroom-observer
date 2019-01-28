@@ -1163,7 +1163,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(species_list: spl.title))
     assert_api_results([img1, img2])
 
-    attached   = Image.all.select { |i| i.observations.count > 0 }
+    attached   = Image.all.select { |i| i.observations.count.positive? }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)

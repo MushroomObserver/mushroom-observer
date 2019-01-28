@@ -203,7 +203,7 @@ def average_votes(naming)
     sum += vote.value * weight
     num += weight
   end
-  num > 0 ? sum / num : nil
+  num.positive? ? sum / num : nil
 end
 
 def users_vote(naming)

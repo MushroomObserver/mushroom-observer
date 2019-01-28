@@ -335,7 +335,8 @@ class QueuedEmail < AbstractModel
       result = @objects[key]
     else
       id = get_integer(key)
-      result = @objects[key] = (id == 0 && allow_nil) ? nil : model.safe_find(id)
+      @objects[key] = (id.zero? && allow_nil) ? nil : model.safe_find(id)
+      result = @objects[key]
     end
     result
   end

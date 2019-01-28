@@ -27,14 +27,14 @@ class InterestController < ApplicationController
     # notifications = Notification.find_all_by_user_id(@user.id).sort do |a,b|
     notifications = Notification.where(user_id: @user.id).sort do |a, b|
       result = a.flavor.to_s <=> b.flavor.to_s
-      result = a.summary.to_s <=> b.summary.to_s if result == 0
+      result = a.summary.to_s <=> b.summary.to_s if result.zero?
       result
     end
     # interests = Interest.find_all_by_user_id(@user.id).sort do |a,b|
     interests = Interest.where(user_id: @user.id).sort do |a, b|
       result = a.target_type <=> b.target_type
       result = (a.target ? a.target.text_name : "") <=>
-               (b.target ? b.target.text_name : "") if result == 0
+               (b.target ? b.target.text_name : "") if result.zero?
       result
     end
     @targets = notifications + interests
@@ -67,7 +67,7 @@ class InterestController < ApplicationController
           interest.target = target
           interest.user = @user
         end
-        if state == 0
+        if state.zero?
           name = target ? target.unique_text_name : "--"
           if !interest
             flash_notice(:set_interest_already_deleted.l(name: name))
@@ -80,17 +80,17 @@ class InterestController < ApplicationController
               flash_notice(:set_interest_success_was_off.l(name: name))
             end
           end
-        elsif interest.state == true && state > 0
+        elsif interest.state == true && state.positive?
           flash_notice(:set_interest_already_on.l(name: target.unique_text_name))
-        elsif interest.state == false && state < 0
+        elsif interest.state == false && state.negative?
           flash_notice(:set_interest_already_off.l(name: target.unique_text_name))
         else
-          interest.state = (state > 0)
+          interest.state = (state.positive?)
           interest.updated_at = Time.now
           if !interest.save
             flash_notice(:set_interest_failure.l(name: target.unique_text_name))
           else
-            if state > 0
+            if state.positive?
               flash_notice(:set_interest_success_on.l(name: target.unique_text_name))
             else
               flash_notice(:set_interest_success_off.l(name: target.unique_text_name))

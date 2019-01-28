@@ -78,7 +78,7 @@ namespace :jason do
     results = []
     for str in notes
       if str.index("_")
-        if n % 15 == 0
+        if (n % 15).zero?
           print "%.2f%% done\n" % (100.0 * n / notes.length)
           sleep 1
         end
@@ -614,7 +614,7 @@ namespace :jason do
       # results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc") # Rails 3
       results = Location.where("search_name LIKE ?", "%#{val2}%").
                 order(name).to_a
-      if results.length == 0
+      if results.length.zero?
         lines.push('>>>>>>>> couldn\'t find any matching locations (add "*" to end to create)')
       elsif results.length == 1
         loc = results.first
@@ -634,7 +634,7 @@ namespace :jason do
     names = Name.find_names(val)
     valid_names = names.reject(&:deprecated)
     synonyms = names.first.approved_synonyms.sort if names.first
-    if names.length == 0
+    if names.length.zero?
       lines.push(">>>>>>>> unrecognized name, please correct or create by hand")
     elsif force
       return names.first
@@ -647,7 +647,7 @@ namespace :jason do
       end
     else
       lines.push('>>>>>>>> name is deprecated, accepted names/synonyms are: (add "*" to end to force)')
-      if valid_names.length == 0 && synonyms.length == 0
+      if valid_names.length.zero? && synonyms.length.zero?
         lines.push(">>>>>>>>   none available?!")
       end
       for name in valid_names + synonyms

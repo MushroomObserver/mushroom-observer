@@ -244,7 +244,7 @@ class NameSorter
     unless chosen
       @all_names += names
       len = names.length
-      if len == 0
+      if len.zero?
         @new_line_strs.push(line_str)
         @new_name_strs.push(name_parse.search_name)
       elsif len == 1

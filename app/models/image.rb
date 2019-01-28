@@ -802,7 +802,7 @@ class Image < AbstractModel
       sum += value.to_f
       num += 1
     end
-    self.vote_cache = num > 0 ? sum / num : nil
+    self.vote_cache = num.positive? ? sum / num : nil
   end
 
   # Retrieve list of users who have voted as a Hash mapping user ids to
