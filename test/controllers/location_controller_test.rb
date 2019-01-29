@@ -85,6 +85,13 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(log_updated_at, location.rss_log.updated_at)
   end
 
+  def test_show_location_admin_mode
+    login("mary")
+    make_admin("mary")
+    location = locations(:albion)
+    get_with_dump(:show_location, id: location.id)
+  end
+
   def test_show_past_location
     location = locations(:albion)
     get_with_dump(:show_past_location, id: location.id,
@@ -466,7 +473,7 @@ class LocationControllerTest < FunctionalTestCase
         assert_equal(new_params[k], bfp[k])
       end
     end
-    assert(key_count > 0) # Make sure something was compared.
+    assert(key_count.positive?) # Make sure something was compared.
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.

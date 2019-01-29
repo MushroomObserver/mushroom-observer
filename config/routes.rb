@@ -203,6 +203,7 @@ ACTIONS = {
     advanced_search: {},
     create_location: {},
     create_location_description: {},
+    destroy_location: {},
     destroy_location_description: {},
     edit_location: {},
     edit_location_description: {},

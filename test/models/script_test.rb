@@ -67,7 +67,7 @@ class ScriptTest < UnitTestCase
     script_succeeded = system(cmd)
 
     assert script_succeeded, "Script failed."
-    assert File.size(dest_file) > 0,
+    assert File.size(dest_file).positive?,
            "#{dest_file} should have content but is empty."
     assert_equal("", File.read(stdout_file),
                  "#{stdout_file} should be empty, but has content")

@@ -5,7 +5,7 @@ class QueuedEmail::LocationChange < QueuedEmail
   end
 
   def description
-    get_object(:description, ::LocationDescription, :nil_okay)
+    get_object(:description, ::LocationDescription)
   end
 
   def old_location_version

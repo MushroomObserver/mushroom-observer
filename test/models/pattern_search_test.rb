@@ -461,21 +461,21 @@ class PatternSearchTest < UnitTestCase
 
   def test_observation_search_date
     expect = Observation.where("YEAR(`when`) = 2006")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("date:2006")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_created
     expect = Observation.where("YEAR(created_at) = 2010")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("created:2010")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_modified
     expect = Observation.where("YEAR(updated_at) = 2013")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("modified:2013")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
@@ -483,7 +483,7 @@ class PatternSearchTest < UnitTestCase
   def test_observation_search_name
     expect = Observation.where(name: names(:conocybe_filaris)) +
              Observation.where(name: names(:boletus_edulis))
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new(
       'name:"Conocybe filaris","Boletus edulis Bull."'
     )
@@ -492,7 +492,7 @@ class PatternSearchTest < UnitTestCase
 
   def test_observation_search_synonym_of
     expect = Observation.where(name: names(:peltigera))
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("synonym_of:Petigera")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
@@ -500,56 +500,56 @@ class PatternSearchTest < UnitTestCase
   def test_observation_search_child_of
     names = Name.where("text_name LIKE 'Agaricus%'")
     expect = Observation.where("name_id IN (#{names.map(&:id).join(",")})")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("child_of:Agaricus")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_location
     expect = Observation.where(location: locations(:burbank))
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new('location:"USA, California, Burbank"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project
     expect = projects(:bolete_project).observations
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_list
     expect = species_lists(:unknown_species_list).observations
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new('list:"List of mysteries"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_notes
     expect = Observation.where("notes LIKE '%somewhere else%'")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_comments
     expect = Comment.where("summary LIKE '%complicated%'").map(&:target)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_confidence
     expect = Observation.where(vote_cache: 3)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("confidence:90")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_gps
     expect = Observation.where(lat: 34.1622, long: -118.3521)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.2 south:34.1"
     )
@@ -558,70 +558,70 @@ class PatternSearchTest < UnitTestCase
 
   def test_observation_search_images_no
     expect = Observation.where("thumb_image_id IS NULL")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_images_yes
     expect = Observation.where("thumb_image_id IS NOT NULL")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("images:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_specimens_no
     expect = Observation.where(specimen: false)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("specimen:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_specimens_yes
     expect = Observation.where(specimen: true)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("specimen:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_sequence
     expect = Sequence.all.map(&:observation).uniq
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("sequence:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_names_no
     expect = Observation.where(name: names(:fungi))
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_names_yes
     expect = Observation.where("name_id != #{names(:fungi).id}")
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_no
     expect = Observation.where("notes = ?", Observation.no_notes_persisted)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
     expect = Observation.where("notes != ?", Observation.no_notes_persisted)
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_comments_yes
     expect = Comment.where(target_type: "Observation").map(&:target).uniq
-    assert(expect.count > 0)
+    assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_comments:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end

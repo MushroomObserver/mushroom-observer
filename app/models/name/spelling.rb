@@ -48,7 +48,7 @@ class Name < AbstractModel
       results = guess_word("", words.first)
       (2..num).each do |i|
         if results.any?
-          if (i & 1) == 0
+          if (i & 1).zero?
             prefixes = results.map(&:text_name).uniq
             results = []
             word = (i == 2) ? words[i - 1] : "#{words[i - 2]} #{words[i - 1]}"
@@ -91,7 +91,7 @@ class Name < AbstractModel
         else
           (0..(word.length - count)).each do |j|
             sub = ""
-            sub += word[0..(j - 1)] if j > 0
+            sub += word[0..(j - 1)] if j.positive?
             sub += "%"
             sub += word[(j + count)..(-1)] if j + count < word.length
             patterns << guess_pattern(words, i, sub)

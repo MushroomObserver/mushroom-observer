@@ -159,7 +159,11 @@ class AbstractModel < ApplicationRecord
   #   name.versions[idx].version
   #
   def find_version(idx)
-    limit = (idx < 0 ? "DESC LIMIT 1, #{-idx - 1}" : "ASC LIMIT 1, #{idx}")
+    limit = if idx.negative?
+              "DESC LIMIT 1, #{-idx - 1}"
+            else
+              "ASC LIMIT 1, #{idx}"
+            end
     num = self.class.connection.select_value %(
       SELECT version FROM #{versioned_table_name}
       WHERE #{type_tag}_id = #{id}

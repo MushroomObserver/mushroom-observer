@@ -87,7 +87,7 @@ module FooterHelper
     num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
 
     # Old version of versioned object.
-    if num_versions > 0 && obj.version < num_versions
+    if num_versions.positive? && obj.version < num_versions
       html << :footer_version_out_of.t(num: obj.version, total: num_versions)
       if obj.updated_at
         html << :footer_updated_by.t(user: user_link(obj.user),
@@ -96,7 +96,7 @@ module FooterHelper
 
     # Latest version of non-versioned object.
     else
-      if num_versions > 0
+      if num_versions.positive?
         latest_user = User.safe_find(obj.versions.latest.user_id)
         if obj.created_at
           html << :footer_created_by.t(user: user_link(obj.user),

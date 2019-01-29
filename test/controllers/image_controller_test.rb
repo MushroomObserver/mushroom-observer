@@ -316,7 +316,7 @@ class ImageControllerTest < FunctionalTestCase
     new_count = Image.where(user_id: user_id,
                             license_id: new_license.id,
                             copyright_holder: copyright_holder).length
-    assert(target_count > 0)
+    assert(target_count.positive?)
     assert(new_count.zero?)
 
     params = {
@@ -562,7 +562,7 @@ class ImageControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     proj.observations << obs
     img_count = obs.images.size
-    assert(img_count > 0)
+    assert(img_count.positive?)
     assert(obs.thumb_image)
     file = Rack::Test::UploadedFile.new(
       "#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg"

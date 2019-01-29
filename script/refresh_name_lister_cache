@@ -76,7 +76,7 @@ for rec in species
   n, a, d, s = rec.values_at("n", "a", "d", "s")
   need_author = occurs[n] > 1
   n += "|" + a if a.present? && need_author
-  if s.to_i > 0 && d.to_i != 1
+  if s.to_i.positive? && d.to_i != 1
     l = valid[s] ||= []
     l.push(n) unless l.include?(n)
   end

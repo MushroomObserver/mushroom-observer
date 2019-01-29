@@ -31,7 +31,7 @@ class Integer
     num      = self
     alphabet = alphabet.to_s
     len      = alphabet.length
-    while num > 0
+    while num.positive?
       x = num % len
       num = (num - x) / len
       str = alphabet[x, 1] + str
