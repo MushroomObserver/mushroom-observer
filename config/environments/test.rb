@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 #
-# rubocop:disable Metrics/BlockLength
 MushroomObserver::Application.configure do
   # Settings specified here  take precedence over those in config/application.rb
 
@@ -85,7 +84,6 @@ MushroomObserver::Application.configure do
 
   config.active_support.test_order = :random
 end
-# rubocop:enable Metrics/BlockLength
 
 file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

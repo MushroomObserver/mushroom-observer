@@ -1,5 +1,4 @@
 namespace :location do
-  # rubocop:disable Metrics/LineLength
   APPROVED_LOCATIONS = Set.new(
     ["0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
      "1 hour northwest by car of Denver, Colorado, USA",
@@ -3912,7 +3911,6 @@ namespace :location do
      "Ünye, Turkey",
      "İstanbul, Turkey"]
   )
-  # rubocop:enable Metrics/LineLength
 
   LOCATION_FIXES = {
   }.freeze

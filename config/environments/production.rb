@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 #
-# rubocop:disable Metrics/BlockLength
 MushroomObserver::Application.configure do
   # Settings specified here take precedence over those in config/application.rb
 
@@ -135,7 +134,6 @@ MushroomObserver::Application.configure do
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
 end
-# rubocop:enable Metrics/BlockLength
 
 file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)
