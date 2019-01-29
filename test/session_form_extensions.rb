@@ -124,7 +124,7 @@ module SessionExtensions
           id   = find_value(elem, "id")
           name = find_value(elem, "name")
           val  = find_value(elem, "value")
-          type = (elem.name == "input") ? find_value(elem, "type") : elem.name
+          type = elem.name == "input" ? find_value(elem, "type") : elem.name
           disabled = find_value(elem, "disabled") == "disabled"
 
           field = Field.new(
