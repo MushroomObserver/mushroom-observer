@@ -874,14 +874,6 @@ Style/UnlessElse:
   Exclude:
     - 'lib/tasks/cache.rake'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/UnneededInterpolation:
-  Exclude:
-    - 'app/models/license.rb'
-    - 'test/integration/curator_test.rb'
-    - 'test/session_extensions.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https

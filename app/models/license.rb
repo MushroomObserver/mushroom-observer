@@ -75,7 +75,7 @@ class License < AbstractModel
     if form_name == "publicdomain"
       "".html_safe + :image_show_public_domain.t + " " + name
     else
-      "".html_safe + "#{:image_show_copyright.t}" + " &copy;".html_safe +
+      "".html_safe + (:image_show_copyright.t).to_s + " &copy;".html_safe +
         " #{year} " + name
     end
   end
