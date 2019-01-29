@@ -65,9 +65,7 @@ module SessionExtensions
     @doing_with_error_checking = true
     Symbol.missing_tags = []
     send("#{method.downcase}", url, *args)
-    while response.redirect?
-      follow_redirect!
-    end
+    follow_redirect! while response.redirect?
     if status == 500
       if error = controller.instance_variable_get("@error")
         msg = "#{error}\n#{error.backtrace.join("\n")}"

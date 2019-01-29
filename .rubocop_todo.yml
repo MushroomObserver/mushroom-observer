@@ -882,12 +882,6 @@ Style/UnneededInterpolation:
     - 'test/integration/curator_test.rb'
     - 'test/session_extensions.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/WhileUntilModifier:
-  Exclude:
-    - 'test/session_extensions.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
