@@ -2723,12 +2723,12 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(user: "mary"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where(locus: ["ITS1F", "ITS4", "ITS5"])
+    seqs = Sequence.where(locus: %w[ITS1F ITS4 ITS5])
     assert_not_empty(seqs)
     assert_api_pass(params.merge(locus: "its1f,its4,its5"))
     assert_api_results(seqs)
 
-    seqs = Sequence.where(archive: ["GenBank", "UNITE"])
+    seqs = Sequence.where(archive: %w[GenBank UNITE])
     assert_not_empty(seqs)
     assert_api_pass(params.merge(archive: "genbank,unite"))
     assert_api_results(seqs)

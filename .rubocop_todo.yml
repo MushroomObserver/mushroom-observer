@@ -888,20 +888,6 @@ Style/WhileUntilModifier:
   Exclude:
     - 'test/session_extensions.rb'
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, MinSize, WordRegex.
-# SupportedStyles: percent, brackets
-Style/WordArray:
-  Exclude:
-    - 'app/classes/content_filter/has_images.rb'
-    - 'app/classes/content_filter/has_specimen.rb'
-    - 'app/classes/content_filter/lichen.rb'
-    - 'app/models/name/lifeform.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'test/models/api_test.rb'
-    - 'test/models/query_test.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https

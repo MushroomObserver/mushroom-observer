@@ -4,7 +4,7 @@ class ContentFilter
       super(
         sym:         :has_images,
         models:      [Observation],
-        on_vals:     ["yes", "no"],
+        on_vals:     %w[yes no],
         prefs_vals:  ["yes"],
         off_val:     nil
       )

@@ -5,8 +5,8 @@ class ContentFilter
       super(
         sym:         :lichen,
         models:      [Observation, Name],
-        on_vals:     ["no", "yes"],
-        prefs_vals:  ["no", "yes"],
+        on_vals:     %w[no yes],
+        prefs_vals:  %w[no yes],
         off_val:     nil
       )
     end

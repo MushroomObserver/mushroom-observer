@@ -1,9 +1,9 @@
 class Name < AbstractModel
-  ALL_LIFEFORMS = [
-    "basidiolichen",
-    "lichen",
-    "lichen_ally",
-    "lichenicolous"
+  ALL_LIFEFORMS = %w[
+    basidiolichen
+    lichen
+    lichen_ally
+    lichenicolous
   ].freeze
 
   def self.all_lifeforms

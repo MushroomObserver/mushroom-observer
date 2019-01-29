@@ -159,7 +159,7 @@ class Name < AbstractModel
 
     # Start with infrageneric and genus names.
     # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split(" ") - ["group", "clade", "complex"]
+    words = text_name.split(" ") - %w[group clade complex]
     words.pop
     until words.empty?
       name = words.join(" ")
