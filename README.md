@@ -1,17 +1,16 @@
 Mushroom Observer
 =======
 
-Last Revised: July 26, 2015
+[![Continuous Integration Status][1]][2]
+[![Coverage Status][3]][4]
+[![CodePolice][5]][6]
+
+Last Revised: January 28, 2019
 
 This README provides a quick overview of the tools used by Mushroom Observer
 (MO) and an overview of the other READMEs that accompany this file.  See
 <http://mushroomobserver.org/observer/intro> for an introduction to the website
 itself.
-
-[![Continuous Integration Status][1]][2]
-[![Coverage Status][3]][4]
-[![CodePolice][5]][6]
-[![Dependency Status][7]][8]
 
 Tools
 -----
@@ -49,7 +48,7 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
 
-Copyright (c) © 2006-2017 Mushroom Observer, Inc.
+Copyright (c) © 2006-2019 Mushroom Observer, Inc.
 See [LICENSE][12] for further details.
 
 [1]: <https://secure.travis-ci.org/MushroomObserver/mushroom-observer.png>
@@ -58,8 +57,6 @@ See [LICENSE][12] for further details.
 [4]: <https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master>
 [5]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer.png>
 [6]: <https://codeclimate.com/github/MushroomObserver/mushroom-observer>
-[7]: <https://gemnasium.com/MushroomObserver/mushroom-observer.png>
-[8]: <https://gemnasium.com/MushroomObserver/mushroom-observer>
 [9]: <https://github.com/mo-nathan>
 [10]: <https://github.com/pellaea>
 [11]: <https://github.com/JoeCohen>
