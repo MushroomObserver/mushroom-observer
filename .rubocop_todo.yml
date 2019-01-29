@@ -902,15 +902,6 @@ Style/WordArray:
     - 'test/models/api_test.rb'
     - 'test/models/query_test.rb'
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: all_comparison_operators, equality_operators_only
-Style/YodaCondition:
-  Exclude:
-    - 'app/models/location.rb'
-    - 'test/models/eol_data_test.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https

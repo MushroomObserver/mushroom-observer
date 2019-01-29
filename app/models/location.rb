@@ -569,7 +569,7 @@ class Location < AbstractModel
     return if tokens.length < 2
 
     alt = [tokens[0]]
-    tokens[1..-1].each { |t| alt.push(t) if " Co." != t[-4..-1] }
+    tokens[1..-1].each { |t| alt.push(t) if t[-4..-1] != " Co." }
     result = alt.join(", ")
     result == name ? nil : result
   end
@@ -741,10 +741,10 @@ class Location < AbstractModel
       errors.add(:north, :validate_location_north_less_than_south.t)
     end
 
-    if !east || (east < -180) || (180 < east)
+    if !east || (east < -180) || (east > 180)
       errors.add(:east, :validate_location_east_out_of_bounds.t)
     end
-    if !west || (west < -180) || (180 < west)
+    if !west || (west < -180) || (west > 180)
       errors.add(:west, :validate_location_west_out_of_bounds.t)
     end
 
