@@ -981,7 +981,7 @@ class QueryTest < UnitTestCase
       imgs = Observation.find(obs).images.order("id ASC").map(&:id)
       # get first or last image in the list
       # depending on whether were going forward or back through results
-      img = inc > 0 ? imgs.first : imgs.last
+      img = inc.positive? ? imgs.first : imgs.last
     end
     [obs, imgs, img]
   end

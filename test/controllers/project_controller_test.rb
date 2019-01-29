@@ -181,7 +181,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(admin_group)
     drafts = NameDescription.where(source_name: project.title)
     project_draft_count = drafts.length
-    assert(project_draft_count > 0)
+    assert(project_draft_count.positive?)
     params = { id: project.id.to_s }
     requires_user(:destroy_project, :show_project, params, "dick")
     assert_redirected_to(action: :index_project)

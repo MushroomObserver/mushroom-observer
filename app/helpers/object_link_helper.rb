@@ -165,7 +165,7 @@ module ObjectLinkHelper
 
   def observation_herbarium_record_link(obs)
     count = obs.herbarium_records.count
-    if count > 0
+    if count.positive?
       link_to(pluralize(count, :herbarium_record.t),
               controller: :herbarium_record, action: :observation_index,
               id: obs.id)

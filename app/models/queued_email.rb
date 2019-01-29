@@ -325,19 +325,12 @@ class QueuedEmail < AbstractModel
   # Look-up an object corresponding to a given integer (id).
   # key::       name of integer to get
   # model::     class of model to look for id in
-  # allow_nil:: is nil/zero id acceptible? (if not will raise RecordNotFound)
-  #
-  #   comment = email.get_object('comment', Comment, :nil_okay)
-  #
-  def get_object(key, model, allow_nil = false)
+  def get_object(key, model)
     @objects ||= {}
-    if @objects.key?(key)
-      result = @objects[key]
-    else
-      id = get_integer(key)
-      result = @objects[key] = (id == 0 && allow_nil) ? nil : model.safe_find(id)
+    unless @objects.key?(key)
+      @objects[key] = model.safe_find(get_integer(key))
     end
-    result
+    @objects[key]
   end
 
   # Get string for the given key.

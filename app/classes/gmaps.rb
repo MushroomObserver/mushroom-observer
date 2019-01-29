@@ -144,7 +144,7 @@ module GM
         south = lat  if south.nil? || lat < south
         east1 = long if east1.nil? || long > east1
         west1 = long if west1.nil? || long < west1
-        long += 360 if long < 0
+        long += 360 if long.negative?
         east2 = long if east2.nil? || long > east2
         west2 = long if west2.nil? || long < west2
       end

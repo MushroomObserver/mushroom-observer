@@ -1,5 +1,4 @@
 namespace :location do
-  # rubocop:disable Metrics/LineLength
   APPROVED_LOCATIONS = Set.new(
     ["0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
      "1 hour northwest by car of Denver, Colorado, USA",
@@ -3912,7 +3911,6 @@ namespace :location do
      "Ünye, Turkey",
      "İstanbul, Turkey"]
   )
-  # rubocop:enable Metrics/LineLength
 
   LOCATION_FIXES = {
   }.freeze
@@ -4016,7 +4014,7 @@ namespace :location do
       target_location = Location.find_by_name(target_name)
       if target_location
         obs = Observation.where(where: current_name)
-        if obs.size > 0
+        if obs.size.positive?
           for o in obs
             o.location = target_location
             o.where = nil
@@ -4028,7 +4026,7 @@ namespace :location do
         end
         if current_location && (current_location != target_location)
           obs = Observation.where(location_id: current_location.id)
-          if obs.size > 0
+          if obs.size.positive?
             for o in obs
               o.location = target_location
               o.where = nil
@@ -4039,7 +4037,7 @@ namespace :location do
             print("Moved #{obs.size} observations from location: #{current_name} to location: #{target_name}\n")
           end
           comments = current_location.comments
-          if comments.size > 0
+          if comments.size.positive?
             for comment in comments
               comment.object_id = target_location.id
               check_save(comment)
@@ -4047,7 +4045,7 @@ namespace :location do
             print("Moved #{comments.size} comments from #{current_name} to #{target_name} (#{target_location.id})\n")
           end
           descs = current_location.descriptions
-          if descs.size > 0
+          if descs.size.positive?
             for d in descs
               d.location_id = target_location.id
               check_save(d)

@@ -22,7 +22,7 @@ abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
                entries from old file where the new listing omits them.
                This makes it much more robust, since the S3 server will
                often skip entire segments of files.
-    --verbose  Print what's happening to stdout.
+    --verbose  Print what is happening to stdout.
     --help     Print this message.
 
 EOB
@@ -32,10 +32,10 @@ replace = true if ARGV.any? { |arg| ["-r", "--replace"].include?(arg) }
 flags = ARGV.select { |arg| arg.match(/^-/) }.
         reject { |arg| arg.match(/^(-v|-r|--verbose|--replace)$/) }
 words = ARGV.reject { |arg| arg.match(/^-/) }
-abort("Bad flag(s): #{flags.inspect}") if flags.length > 0
-abort("Missing server!") if words.length == 0
+abort("Bad flag(s): #{flags.inspect}") if flags.length.positive?
+abort("Missing server!") if words.length.zero?
 server = words.shift
-abort("Unexpected parameter(s): #{words.inspect}") if words.length > 0
+abort("Unexpected parameter(s): #{words.inspect}") if words.length.positive?
 
 cache_file = "#{app_root}/public/images/#{server}.files"
 temp_file1 = "#{app_root}/tmp/#{server}.files.#{Process.pid}.1"

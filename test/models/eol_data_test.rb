@@ -5,7 +5,7 @@ class EolDataTest < UnitTestCase
     name_id = name.id
     assert(obj.has_images?(name_id))
     assert_equal(Array, obj.images(name_id).class)
-    assert(obj.image_count(name_id) > 0,
+    assert(obj.image_count(name_id).positive?,
            "Expected #{name.text_name} image count > 0; " \
            "got #{obj.image_count(name_id)}")
     assert_equal(name.user.legal_name, obj.legal_name(name.user.id))

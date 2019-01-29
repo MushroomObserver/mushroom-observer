@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 #
-# rubocop:disable Metrics/BlockLength
 MushroomObserver::Application.configure do
   # Settings specified here take precedence over those in config/application.rb
 
@@ -76,7 +75,6 @@ MushroomObserver::Application.configure do
   # Enable web console for MushroomObserver VM
   config.web_console.whitelisted_ips = "10.0.2.2"
 end
-# rubocop:enable Metrics/BlockLength
 
 file = File.expand_path("../consts-site.rb", __dir__)
 require file if File.exist?(file)

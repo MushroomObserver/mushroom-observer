@@ -196,7 +196,7 @@ module MapHelper
 
   def format_lxxxitude(val, dir1, dir2)
     deg = val.abs.round(4)
-    "#{deg}°#{val < 0 ? dir2 : dir1}".html_safe
+    "#{deg}°#{val.negative? ? dir2 : dir1}".html_safe
   end
 
   def map_control_init(gmap, marker, args, type = "ct")

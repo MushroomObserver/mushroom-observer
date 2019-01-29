@@ -47,9 +47,15 @@ module ThumbnailHelper
   # Create an image link vote, where vote param is vote number ie: 3
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
-    vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
-    link = link_to(vote_text, { controller: :image, action: :show_image, id: image.id, vote: vote },
-                   title: image_vote_as_help_string(vote), data: { role: "image_vote", id: image.id, val: vote }) # #return a link if the user has NOT voted this way
+    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
+    # return a link if the user has NOT voted this way
+    link = link_to(vote_text,
+                   { controller: :image,
+                     action: :show_image,
+                     id: image.id,
+                     vote: vote },
+                   title: image_vote_as_help_string(vote),
+                   data: { role: "image_vote", id: image.id, val: vote })
     if current_vote == vote
       link = content_tag(:span, image_vote_as_short_string(vote))
     end

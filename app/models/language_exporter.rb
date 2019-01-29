@@ -352,7 +352,7 @@ module LanguageExporter
       tag = Regexp.last_match(3)
       str = $'
       check_export_tag_def_line(quoted_tag, tag, str) \
-        unless (indent.length == 0) && (tag == locale) && (str.strip == "")
+        unless indent.length.zero? && (tag == locale) && (str.strip == "")
     elsif @in_tag
       check_export_multi_line(line)
     else

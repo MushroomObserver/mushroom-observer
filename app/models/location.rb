@@ -161,7 +161,7 @@ class Location < AbstractModel
     result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
     if match && (match[4].blank? || [direction1, direction2].member?(match[4]))
-      if match[1].to_f > 0
+      if match[1].to_f.positive?
         val = match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
       else
         val = match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600

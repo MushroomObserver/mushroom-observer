@@ -360,8 +360,8 @@ class Observation < AbstractModel
 
   def place_name_and_coordinates
     if lat.present? && long.present?
-      lat2 = lat < 0 ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
-      long2 = long < 0 ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
+      lat2 = lat.negative? ? "#{-lat.round(4)}°S" : "#{lat.round(4)}°N"
+      long2 = long.negative? ? "#{-long.round(4)}°W" : "#{long.round(4)}°E"
       "#{place_name} (#{lat2} #{long2})"
     else
       place_name
@@ -626,7 +626,7 @@ class Observation < AbstractModel
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.select { |n| n.name == name }.count > 0
+    namings.select { |n| n.name == name }.count.positive?
   end
 
   # Has the owner voted on a given Naming?
@@ -742,7 +742,7 @@ class Observation < AbstractModel
           end
 
           # If any, mark all votes at that level "favorite".
-          if max > 0
+          if max.positive?
             users_votes(user).each do |v|
               next if v.value != max || v.favorite
 
@@ -771,7 +771,7 @@ class Observation < AbstractModel
       other_votes = (users_votes(user) - [vote])
       # Is this vote going to become the favorite?
       favorite = false
-      if value > 0
+      if value.positive?
         favorite = true
         other_votes.each do |v|
           # If any other vote higher, this is not the favorite.
@@ -901,7 +901,7 @@ class Observation < AbstractModel
         # It may be possible in the future for us to weight some "special"
         # users zero, who knows...  (It can cause a division by zero below if
         # we ignore zero weights.)
-        next unless wgt > 0
+        next unless wgt.positive?
 
         # Calculate score for naming.vote_cache.
         sum_val += val * wgt
@@ -938,7 +938,7 @@ class Observation < AbstractModel
         end
       end
       # Note: this is used by consensus_naming(), not this method.
-      value = sum_wgt > 0 ? sum_val.to_f / (sum_wgt + 1.0) : 0.0
+      value = sum_wgt.positive? ? sum_val.to_f / (sum_wgt + 1.0) : 0.0
       if naming.vote_cache != value
         naming.vote_cache = value
         naming.save
@@ -1020,7 +1020,7 @@ class Observation < AbstractModel
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
-      # names = best.synonyms if names.length == 0
+      # names = best.synonyms if names.length.zero?
       names = best.synonyms
       if names.length == 1
         best = names.first
@@ -1133,7 +1133,7 @@ class Observation < AbstractModel
   # current reviewers.  Possible return values:
   #
   # unreviewed:: No reviewers have voted for the consensus.
-  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
+  # inaccurate:: Some reviewer doubts the consensus (vote.value.negative?).
   # unvetted::   Some reviewer is not completely confident in this naming
   #              (vote.value < Vote#maximum_vote).
   # vetted::     All reviewers that have voted on the current consensus fully
@@ -1182,7 +1182,7 @@ class Observation < AbstractModel
     status = :unreviewed
     v100 = Vote.maximum_vote.to_f
     votes.each_value do |value|
-      if value < 0
+      if value.negative?
         status = :inaccurate
         break
       elsif status != :inaccurate
@@ -1234,8 +1234,8 @@ class Observation < AbstractModel
 
   def has_backup_data?
     !thumb_image_id.nil? ||
-      species_lists.count > 0 ||
-      herbarium_records.count > 0 ||
+      species_lists.count.positive? ||
+      herbarium_records.count.positive? ||
       specimen ||
       notes.length >= 100
   end
@@ -1248,9 +1248,9 @@ class Observation < AbstractModel
 
   def turn_off_specimen_if_no_more_records
     return unless specimen
-    return if collection_numbers.length > 0
-    return if herbarium_records.length > 0
-    return if sequences.length > 0
+    return if collection_numbers.length.positive?
+    return if herbarium_records.length.positive?
+    return if sequences.length.positive?
 
     update_attributes(specimen: false)
   end

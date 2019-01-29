@@ -443,7 +443,7 @@ class Name < AbstractModel
     words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
-    while i > 0
+    while i.positive?
       words[i] = if /^f/i.match?(words[i])
                    "f."
                  elsif /^v/i.match?(words[i])

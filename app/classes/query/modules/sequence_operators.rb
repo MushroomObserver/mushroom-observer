@@ -34,7 +34,7 @@ module Query::Modules::SequenceOperators
     new_self = self
     new_self = outer_first if !skip_outer && has_outer?
     id = new_self.select_value(limit: "1").to_i
-    if id > 0
+    if id.positive?
       if new_self == self
         @current_id = id
       else
@@ -53,7 +53,7 @@ module Query::Modules::SequenceOperators
     index = result_ids.index(current_id)
     if !index
       new_self = nil
-    elsif index > 0
+    elsif index.positive?
       if new_self == self
         @current_id = result_ids[index - 1]
       else
@@ -103,7 +103,7 @@ module Query::Modules::SequenceOperators
     new_self = self
     new_self = outer_last if !skip_outer && has_outer?
     id = new_self.select_value(order: :reverse, limit: "1").to_i
-    if id > 0
+    if id.positive?
       if new_self == self
         @current_id = id
       else

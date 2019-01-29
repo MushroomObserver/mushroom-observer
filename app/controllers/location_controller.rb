@@ -172,7 +172,7 @@ class LocationController < ApplicationController
     end
 
     # Paginate the defined locations using the usual helper.
-    args[:always_index] = (@undef_pages && @undef_pages.num_total > 0)
+    args[:always_index] = (@undef_pages && @undef_pages.num_total.positive?)
     args[:action] = args[:action] || "list_locations"
     show_index_of_objects(query, args)
   end
