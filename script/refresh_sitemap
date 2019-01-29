@@ -394,7 +394,13 @@ def remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
   disallowed_paths.reject! do |disallowed_path|
     reject = false
     for allowed_path in allowed_paths
+      # Disable cop because here ".zero?" is not the same as " == 0";
+      # If called on nil: .zero? throws an error, while ==0 returns "false"
+      # Here nil is a perfectly acceptable return value
+      # (means str2 is not found in str1)
+      # rubocop:disable Style/NumericPredicate
       if allowed_path.index(disallowed_path) == 0
+      # rubocop:disable Style/NumericPredicate
         reject = true
         break
       end
