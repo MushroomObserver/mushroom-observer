@@ -868,12 +868,6 @@ Style/TrailingBodyOnMethodDefinition:
   Exclude:
     - 'app/models/queued_email/name_change.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/UnlessElse:
-  Exclude:
-    - 'lib/tasks/cache.rake'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
