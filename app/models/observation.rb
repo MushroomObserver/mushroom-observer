@@ -1248,9 +1248,9 @@ class Observation < AbstractModel
 
   def turn_off_specimen_if_no_more_records
     return unless specimen
-    return if collection_numbers.length > 0
-    return if herbarium_records.length > 0
-    return if sequences.length > 0
+    return if !collection_numbers.empty?
+    return if !herbarium_records.empty?
+    return if !sequences.empty?
 
     update_attributes(specimen: false)
   end

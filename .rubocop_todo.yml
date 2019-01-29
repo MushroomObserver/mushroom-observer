@@ -911,22 +911,6 @@ Style/YodaCondition:
     - 'app/models/location.rb'
     - 'test/models/eol_data_test.rb'
 
-# Offense count: 26
-# Cop supports --auto-correct.
-Style/ZeroLengthPredicate:
-  Exclude:
-    - 'app/controllers/observer_controller/indexes.rb'
-    - 'app/helpers/description_helper.rb'
-    - 'app/models/language_exporter.rb'
-    - 'app/models/name_description.rb'
-    - 'app/models/observation.rb'
-    - 'lib/tasks/jason.rake'
-    - 'lib/tasks/location.rake'
-    - 'script/s3cp.rb'
-    - 'script/s3ls.rb'
-    - 'script/s3uniq.rb'
-    - 'test/session_form_extensions.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https

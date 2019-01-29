@@ -176,7 +176,7 @@ module DescriptionHelper
     html = content_tag(:p, html)
 
     # Show list of projects user is a member of.
-    if projects && projects.length > 0
+    if projects && !projects.empty?
       head2 = :show_name_create_draft.t + ": "
       list = [head2] + projects.map do |project|
         item = link_with_query(project.title,

@@ -13,7 +13,7 @@ abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
 EOB
 
-abort("Unexpected parameters: #{ARGV.inspect}") if ARGV.length > 0
+abort("Unexpected parameters: #{ARGV.inspect}") if !ARGV.empty?
 
 data = {}
 $stdin.each_line do |line|
