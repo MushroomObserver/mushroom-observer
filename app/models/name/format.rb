@@ -100,7 +100,7 @@ class Name < AbstractModel
       name.change_deprecated(name.deprecated)
       name.save
       "The name #{name.search_name.inspect} " \
-      "should #{name.deprecated && 'not '} have been in boldface."
+      "should #{name.deprecated && "not "} have been in boldface."
     end
   end
 end

@@ -1146,7 +1146,7 @@ class NameController < ApplicationController
     words = Name.all_lifeforms.select do |word|
       params["lifeform_#{word}"] == "1"
     end
-    @name.update_attributes(lifeform: " #{words.join(' ')} ")
+    @name.update_attributes(lifeform: " #{words.join(" ")} ")
     redirect_with_query(@name.show_link_args)
   end
 
