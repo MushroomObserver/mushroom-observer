@@ -826,19 +826,6 @@ Style/StringLiteralsInInterpolation:
     - 'app/models/name/format.rb'
     - 'app/models/name/lifeform.rb'
 
-# Offense count: 18
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, MinSize.
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  Exclude:
-    - 'test/controllers/account_controller_test.rb'
-    - 'test/controllers/support_controller_test.rb'
-    - 'test/models/localization_files_test.rb'
-    - 'test/models/name_test.rb'
-    - 'test/models/query_test.rb'
-    - 'test/models/tree_test.rb'
-
 # Offense count: 10
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.

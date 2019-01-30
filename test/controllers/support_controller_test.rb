@@ -2,8 +2,14 @@ require "test_helper"
 
 class SupportControllerTest < FunctionalTestCase
   def test_gets
-    %i[
-      donors confirm thanks governance letter wrapup_2011 wrapup_2012
+    [
+     :donors,
+     :confirm,
+     :thanks,
+     :governance,
+     :letter,
+     :wrapup_2011,
+     :wrapup_2012
     ].each do |template|
       assert_template_with_dump(template)
       get_with_dump(template)

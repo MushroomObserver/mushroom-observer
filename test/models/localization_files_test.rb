@@ -73,7 +73,7 @@ class LocalizationFilesTest < UnitTestCase
   def known_tags
     (i18n_keys +
      # these are tags only used in unit tests
-     %i[one two _unit_test_a _unit_test_x _unit_test_y _unit_test_z]).
+     [:one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y, :_unit_test_z]).
       each.with_object({}) { |tag, h| h[tag.to_s.downcase] = true }
   end
 
@@ -200,7 +200,7 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   def test_description_source_translations
-    tags = %i[public foreign project source user].map do |source|
+    tags = [:public, :foreign, :project, :source, :user].map do |source|
       [
         "description_full_title_#{source}".to_sym,
         "description_part_title_#{source}_with_text".to_sym
