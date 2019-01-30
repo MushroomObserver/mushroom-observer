@@ -1578,25 +1578,25 @@ class ApiTest < UnitTestCase
     assert_api_results([name])
 
     names = Name.where("year(created_at) = 2008").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(names)
 
     names = Name.where("date(updated_at) = '2008-09-05'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
 
     names = Name.where(user: mary).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(user: "mary"))
     assert_api_results(names)
 
     names = Name.where(text_name: "Lentinellus ursinus").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_fail(params.merge(name: "Lentinellus ursinus"))
     assert_api_pass(params.merge(name: "Lentinellus ursinus Kühner,
@@ -1604,7 +1604,7 @@ class ApiTest < UnitTestCase
     assert_api_results(names)
 
     names = names(:lactarius_alpinus).synonyms.sort_by(&:id).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
@@ -1612,20 +1612,20 @@ class ApiTest < UnitTestCase
     names = Name.where("classification like '%Fungi%'").each do |n|
       genus = n.text_name.split.first
       Name.where("text_name like '#{genus} %'") + [n]
-    end.flatten.uniq.sort_by(&:id).reject { |n| n.correct_spelling_id }
+    end.flatten.uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
 
     names = Name.where(deprecated: true).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(is_deprecated: "true"))
     assert_api_results(names)
 
     names = Name.where("date(updated_at) = '2009-10-12'")
-    goods = names.reject { |n| n.correct_spelling_id }
-    bads  = names.select { |n| n.correct_spelling_id }
+    goods = names.reject(&:correct_spelling_id)
+    bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)
@@ -1640,7 +1640,7 @@ class ApiTest < UnitTestCase
 
     without = Name.where(synonym_id: nil)
     with    = Name.where.not(synonym_id: nil).
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(without)
     assert_not_empty(with)
     assert_api_pass(params.merge(has_synonyms: "no"))
@@ -1651,7 +1651,7 @@ class ApiTest < UnitTestCase
     loc   = locations(:burbank)
     names = loc.observations.map(&:name).
             flatten.uniq.sort_by(&:id).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(location: loc.id))
     assert_api_results(names)
@@ -1659,21 +1659,21 @@ class ApiTest < UnitTestCase
     spl   = species_lists(:unknown_species_list)
     names = spl.observations.map(&:name).
             flatten.uniq.sort_by(&:id).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(species_list: spl.id))
     assert_api_results(names)
 
     names = Name.where(rank: Name.ranks[:Variety]).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(rank: "variety"))
     assert_api_results(names)
 
     with    = Name.where.not("author is null or author = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     without = Name.where("author is null or author = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_author: "yes"))
@@ -1682,9 +1682,9 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     with    = Name.where.not("citation is null or citation = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     without = Name.where("citation is null or citation = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_citation: "yes"))
@@ -1693,9 +1693,9 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     with    = Name.where.not("classification is null or classification = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     without = Name.where("classification is null or classification = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_classification: "yes"))
@@ -1704,9 +1704,9 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     with    = Name.where.not("notes is null or notes = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     without = Name.where("notes is null or notes = ''").
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_notes: "yes"))
@@ -1715,15 +1715,15 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     names = Comment.where(target_type: "Name").map(&:target).
-            uniq.sort_by(&:id).reject { |n| n.correct_spelling_id }
+            uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results(names)
 
     with    = Name.where.not(description_id: nil).
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     without = Name.where(description_id: nil).
-              reject { |n| n.correct_spelling_id }
+              reject(&:correct_spelling_id)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params.merge(has_description: "yes"))
@@ -1732,38 +1732,38 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     names = Name.where("text_name like '%bunny%'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
     names = Name.where("author like '%peck%'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
     names = Name.where("citation like '%lichenes%'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
     names = Name.where("classification like '%lecanorales%'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
     names = Name.where("notes like '%known%'").
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
 
     names = Comment.where("target_type = 'Name' and comment like '%mess%'").
             map(&:target).uniq.sort_by(&:id).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(comments_has: "mess"))
     assert_api_results(names)
@@ -1771,7 +1771,7 @@ class ApiTest < UnitTestCase
     Name.where(correct_spelling: nil).sample.
       update_attributes!(ok_for_export: true)
     names = Name.where(ok_for_export: true).
-            reject { |n| n.correct_spelling_id }
+            reject(&:correct_spelling_id)
     assert_not_empty(names)
     assert_api_pass(params.merge(ok_for_export: "yes"))
     assert_api_results(names)

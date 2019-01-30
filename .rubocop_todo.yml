@@ -839,14 +839,6 @@ Style/SymbolArray:
     - 'test/models/query_test.rb'
     - 'test/models/tree_test.rb'
 
-# Offense count: 31
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-# IgnoredMethods: respond_to, define_method
-Style/SymbolProc:
-  Exclude:
-    - 'test/models/api_test.rb'
-
 # Offense count: 10
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.
