@@ -28,6 +28,6 @@ msgs =
   Name.propagate_generic_classifications +
   Observation.refresh_content_filter_caches +
   Observation.make_sure_no_observations_are_misspelled
-$stderr.puts msgs.join("\n") if msgs.any?
+warn msgs.join("\n") if msgs.any?
 
 exit 0

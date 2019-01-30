@@ -509,7 +509,7 @@ namespace :jason do
             else
               name = "unknown"
             end
-            $stderr.puts("Created observation: #%d (%s)" % [obs.id, name])
+            warn("Created observation: #%d (%s)" % [obs.id, name])
             obs.log(:log_observation_created_at, { user: user.login }, true)
             lines.clear
 
@@ -529,12 +529,12 @@ namespace :jason do
                 NamingReason.new(naming: naming, reason: 3, notes: chem).save if chem
                 NamingReason.new(naming: naming, reason: 4, notes: micro).save if micro
                 naming.change_vote(user, vote)
-                $stderr.puts(
+                warn(
                   "  Created naming: #%d (%s)" % [naming.id,
                                                   naming.name.search_name]
                 )
               else
-                $stderr.puts("Failed to create naming: %s" % naming.dump_errors)
+                warn("Failed to create naming: %s" % naming.dump_errors)
               end
             end
 
@@ -573,9 +573,10 @@ namespace :jason do
                     obs.thumb_image_id = image.id
                     obs.save
                   end
-                  $stderr.puts("  Created image: #%d" % image.id)
+                  warn("  Created image: #%d" % image.id)
                 else
-                  $stderr.puts('Failed to create image "%s": %s' % [file, image.dump_errors])
+                  warn('Failed to create image "%s": %s' % [file,
+                                                            image.dump_errors])
                 end
               end
             end

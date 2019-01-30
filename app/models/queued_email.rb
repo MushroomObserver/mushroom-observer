@@ -260,10 +260,10 @@ class QueuedEmail < AbstractModel
     I18n.locale = current_locale
     result
   rescue => e
-    $stderr.puts("ERROR CREATING EMAIL")
-    $stderr.puts(log_msg)
-    $stderr.puts(e.to_s)
-    $stderr.puts(e.backtrace)
+    warn("ERROR CREATING EMAIL")
+    warn(log_msg)
+    warn(e.to_s)
+    warn(e.backtrace)
     I18n.locale = current_locale
     false
   end
@@ -272,7 +272,7 @@ class QueuedEmail < AbstractModel
   def deliver_email
     error = "We forgot to define #{type}#deliver_email.\n"
     # Failing to send email should not throw an error in production
-    return $stderr.puts(error) if Rails.env.production?
+    return warn(error) if Rails.env.production?
 
     fail error
   end

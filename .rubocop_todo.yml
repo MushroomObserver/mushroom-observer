@@ -798,17 +798,6 @@ Style/SafeNavigation:
 Style/SignalException:
   Enabled: false
 
-# Offense count: 21
-# Cop supports --auto-correct.
-Style/StderrPuts:
-  Exclude:
-    - 'app/models/queued_email.rb'
-    - 'lib/tasks/jason.rake'
-    - 'script/jpegsize'
-    - 'script/monitor_top'
-    - 'script/mushroom_mapper.rb'
-    - 'script/refresh_caches'
-
 # Offense count: 10
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.
