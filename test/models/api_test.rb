@@ -184,11 +184,11 @@ class ApiTest < UnitTestCase
     assert_in_delta(@east, loc.east, 0.0001)
     assert_in_delta(@west, loc.west, 0.0001)
     assert_in_delta(@high, loc.high, 0.0001) if @high
-    assert_nil(loc.high) if !@high
+    assert_nil(loc.high) unless @high
     assert_in_delta(@low, loc.low, 0.0001) if @low
-    assert_nil(loc.low) if !@low
+    assert_nil(loc.low) unless @low
     assert_equal(@notes, loc.notes) if @notes
-    assert_nil(loc.notes) if !@notes
+    assert_nil(loc.notes) unless @notes
   end
 
   def assert_last_name_correct(name = Name.last)

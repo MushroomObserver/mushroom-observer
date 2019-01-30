@@ -38,7 +38,7 @@ module Query::Modules::Validation
         new_args[arg_sym] = nil
       end
     rescue MissingValue
-      if !optional
+      unless optional
         fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
       end
     end

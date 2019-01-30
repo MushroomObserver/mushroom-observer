@@ -78,7 +78,7 @@ namespace :jason do
     results = []
     for str in notes
       if str.index("_")
-        if n % 15 == 0
+        if (n % 15).zero?
           print "%.2f%% done\n" % (100.0 * n / notes.length)
           sleep 1
         end

@@ -631,16 +631,6 @@ Style/MutableConstant:
     - 'app/models/name_parse.rb'
     - 'app/models/sequence.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: both, prefix, postfix
-Style/NegatedIf:
-  Exclude:
-    - 'app/classes/query/modules/validation.rb'
-    - 'app/models/name/taxonomy.rb'
-    - 'test/models/api_test.rb'
-
 # Offense count: 32
 Style/NestedTernaryOperator:
   Exclude:
