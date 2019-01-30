@@ -809,13 +809,6 @@ Style/StderrPuts:
     - 'script/mushroom_mapper.rb'
     - 'script/refresh_caches'
 
-# Offense count: 48
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiterals:
-  Enabled: false
-
 # Offense count: 10
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.

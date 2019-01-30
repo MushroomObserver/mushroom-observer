@@ -3075,7 +3075,7 @@ class ApiTest < UnitTestCase
 
     spls = SpeciesList.where(location: locations(:no_mushrooms_location))
     assert_not_empty(spls)
-    assert_api_pass(params.merge(location: 'No Mushrooms'))
+    assert_api_pass(params.merge(location: "No Mushrooms"))
     assert_api_results(spls)
 
     proj1 = projects(:bolete_project)

@@ -252,7 +252,7 @@ class HerbariumRecordController < ApplicationController
 
   def validate_herbarium_name!
     name = @herbarium_record.herbarium_name.to_s
-    name2 = name.sub(/^[^-]* - /, '')
+    name2 = name.sub(/^[^-]* - /, "")
     herbarium = Herbarium.where(name: [name, name2]).first ||
                 Herbarium.where(code: name).first
     @herbarium_record.herbarium = herbarium

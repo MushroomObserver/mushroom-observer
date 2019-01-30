@@ -17,10 +17,10 @@ class PivotalControllerTest < FunctionalTestCase
                  "unstarted&limit=500").
       with(
         headers: {
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent': 'Ruby',
-          'X-Trackertoken': 'xxx'
+          'Accept': "*/*",
+          'Accept-Encoding': "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          'User-Agent': "Ruby",
+          'X-Trackertoken': "xxx"
         }
       ).to_return(status: 200,
                   body: '[{"id":"1",

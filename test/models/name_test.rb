@@ -288,7 +288,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, '"Sp-ABC"')
     assert_no_match(pat, '"S01"')
     assert_no_match(pat, '"Abc\'')
-    assert_no_match(pat, '\'Abc\'')
+    assert_no_match(pat, "'Abc'")
     assert_no_match(pat, '\'"Abc"')
     assert_match(pat, "Abc-def")
     assert_no_match(pat, "Abcdef-")
@@ -311,7 +311,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, '"sp. S01"')
     assert_no_match(pat, '"S01"')
     assert_no_match(pat, '"abc\'')
-    assert_no_match(pat, '\'abc\'')
+    assert_no_match(pat, "'abc'")
     assert_no_match(pat, '\'"abc"')
     assert_match(pat, "abc-def")
     assert_no_match(pat, "abcdef-")
@@ -365,9 +365,9 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
     assert_name_match_author_optional(pat, '"Amanita"')
     assert_name_match_author_optional(pat, '"Amanita" sp.', '"Amanita"')
-    assert_name_match_author_optional(pat, 'Fossil-Okay')
-    assert_name_match_author_optional(pat, 'Fossil-Okay sp.', 'Fossil-Okay')
-    assert_no_match(pat, 'Anythingelse-Bad')
+    assert_name_match_author_optional(pat, "Fossil-Okay")
+    assert_name_match_author_optional(pat, "Fossil-Okay sp.", "Fossil-Okay")
+    assert_no_match(pat, "Anythingelse-Bad")
   end
 
   def test_subgenus_pat

@@ -49,7 +49,7 @@ namespace :email do
           # After a few tries give up and delete it.
           elsif e.num_attempts && (e.num_attempts >= MO.email_num_attempts - 1)
             File.open(MO.email_log, "a") do |fh|
-              fh.puts('Failed to send email #%d at %s' % [e.id, now])
+              fh.puts("Failed to send email #%d at %s" % [e.id, now])
               fh.puts(e.dump)
             end
             e.destroy

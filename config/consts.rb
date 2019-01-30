@@ -1,4 +1,4 @@
-require 'yaml'
+require "yaml"
 
 class ImageConfigData
   attr_reader :config
