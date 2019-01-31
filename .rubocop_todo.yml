@@ -699,19 +699,6 @@ Style/PercentLiteralDelimiters:
   Exclude:
     - 'app/models/user.rb'
 
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: compact, exploded
-Style/RaiseArgs:
-  Exclude:
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/helpers/javascript_helper.rb'
-    - 'app/models/description.rb'
-    - 'app/models/image.rb'
-    - 'app/models/observation.rb'
-    - 'test/controller_extensions.rb'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.

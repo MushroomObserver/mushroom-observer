@@ -244,8 +244,9 @@ module ControllerExtensions
       file_name = "#{html_dir}/#{label}_#{count}.html"
       count += 1
       if count > 100
-        raise(RangeError,
-              "More than 100 files found with a label of '#{label}'")
+        raise RangeError.new(
+          "More than 100 files found with a label of '#{label}'"
+        )
       end
     end
     print "Creating html_dump file: #{file_name}\n"

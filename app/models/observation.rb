@@ -603,8 +603,12 @@ class Observation < AbstractModel
   # observations, we should never need to reload anything.
   def lookup_naming(naming)
     namings.find { |n| n == naming } ||
+      # Disable cop; test suite chokes when the following "raise"
+      # is re-written in "exploded" style (the Rubocop default)
+      # rubocop:disable Style/RaiseArgs
       raise(ActiveRecord::RecordNotFound,
             "Observation doesn't have naming with ID=#{naming.id}")
+      # rubocop:enable Style/RaiseArgs
   end
 
   # Dump out the sitatuation as the observation sees it.  Useful for debugging
