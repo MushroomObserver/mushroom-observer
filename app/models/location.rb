@@ -340,7 +340,7 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    name.split(/,\s*/).reverse.join(", ") if name
+    name&.split(/,\s*/).reverse.join(", ")
   end
 
   # Reverse given name if required in order to make country last.

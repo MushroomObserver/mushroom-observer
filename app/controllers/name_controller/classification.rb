@@ -92,7 +92,7 @@ class NameController
   end
 
   def make_sure_genus_has_classification!(name)
-    return true if name.genus && name.genus.classification.present?
+    return true if name.genus&.classification.present?
 
     flash_error(:edit_name_fill_in_classification_for_genus_first.t)
     redirect_with_query(name.show_link_args)

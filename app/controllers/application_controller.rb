@@ -595,7 +595,7 @@ class ApplicationController < ActionController::Base
   end
 
   def prefs_locale
-    return unless @user && @user.locale.present? && params[:controller] != "ajax"
+    return unless @user&.locale.present? && params[:controller] != "ajax"
 
     logger.debug "[I18n] loading locale: #{@user.locale} from @user"
     @user.locale

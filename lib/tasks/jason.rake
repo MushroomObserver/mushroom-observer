@@ -63,7 +63,7 @@ namespace :jason do
     end
     print "Writing notes.yml...\n"
     File.open("notes.yml", "w") do |fh|
-      fh.write notes.select { |x| x && x.index("_") }.uniq.to_yaml
+      fh.write notes.select { |x| x&.index("_") }.uniq.to_yaml
     end
     print "Done!\n"
   end

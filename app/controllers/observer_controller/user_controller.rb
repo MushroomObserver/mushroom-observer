@@ -172,8 +172,8 @@ class ObserverController
           contrib = @user2.contribution.to_i
           # Subtract old bonuses.
           @user2.bonuses&.each_key do |points|
-              contrib -= points
-            end
+            contrib -= points
+          end
           # Add new bonuses
           bonuses.each do |(points, _reason)|
             contrib += points
