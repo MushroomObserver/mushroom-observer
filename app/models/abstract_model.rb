@@ -147,31 +147,6 @@ class AbstractModel < ApplicationRecord
     count_by_sql("select count(*) from (#{sql}) as my_table")
   end
 
-  # Return the version number given an array-like index.  Use negative indexes
-  # to specify index from the end.  Return Integer, or nil if doesn't exist.
-  #
-  #   name.find_version(-1)  # Last (current) version.
-  #   name.find_version(-2)  # Next-to-last (previous) version.
-  #   name.find_version(0)   # First (oldest) version. (Should always be 1?)
-  #
-  # *NOTE*: Roughly equivalent to but far more efficient than the following:
-  #
-  #   name.versions[idx].version
-  #
-  def find_version(idx)
-    limit = if idx.negative?
-              "DESC LIMIT 1, #{-idx - 1}"
-            else
-              "ASC LIMIT 1, #{idx}"
-            end
-    num = self.class.connection.select_value %(
-      SELECT version FROM #{versioned_table_name}
-      WHERE #{type_tag}_id = #{id}
-      ORDER BY version #{limit}
-    )
-    num ? num.to_i : nil
-  end
-
   ##############################################################################
   #
   #  :section: Callbacks
