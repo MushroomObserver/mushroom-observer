@@ -33,8 +33,8 @@ class TreeTest < UnitTestCase
       :middle,
       :leaf
     ].each do |node|
-        assert_true(tree.has_node?(node), "Tree is missing #{node.inspect}!")
-      end
+      assert_true(tree.has_node?(node), "Tree is missing #{node.inspect}!")
+    end
     assert_false(tree.has_node?(:spam))
   end
 
