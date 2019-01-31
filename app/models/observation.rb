@@ -1020,7 +1020,7 @@ class Observation < AbstractModel
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
-      # names = best.synonyms if names.length.zero?
+      # names = best.synonyms if names.length == 0
       names = best.synonyms
       if names.length == 1
         best = names.first
@@ -1133,7 +1133,7 @@ class Observation < AbstractModel
   # current reviewers.  Possible return values:
   #
   # unreviewed:: No reviewers have voted for the consensus.
-  # inaccurate:: Some reviewer doubts the consensus (vote.value.negative?).
+  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
   # unvetted::   Some reviewer is not completely confident in this naming
   #              (vote.value < Vote#maximum_vote).
   # vetted::     All reviewers that have voted on the current consensus fully
@@ -1248,9 +1248,9 @@ class Observation < AbstractModel
 
   def turn_off_specimen_if_no_more_records
     return unless specimen
-    return if collection_numbers.length.positive?
-    return if herbarium_records.length.positive?
-    return if sequences.length.positive?
+    return unless collection_numbers.empty?
+    return unless herbarium_records.empty?
+    return unless sequences.empty?
 
     update_attributes(specimen: false)
   end

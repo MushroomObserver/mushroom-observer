@@ -3,17 +3,22 @@
 
   target_type = @comment.target_type.underscore.upcase.to_sym
   tabs = [
-    link_with_query(:cancel_and_show.t(type: target_type), @target.show_link_args)
+    link_with_query(:cancel_and_show.t(type: target_type),
+                    @target.show_link_args)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
   <div class="col-xs-12 max-width-text">
-    <%= form_tag(add_query_param(action: :add_comment, id: @comment.target_id, type: @comment.target_type)) do %>
-      <%= submit_tag(:comment_add_create.l, class: "btn center-block push-down") %>
+    <%= form_tag(add_query_param(action: :add_comment,
+                                 id: @comment.target_id,
+                                 type: @comment.target_type)) do %>
+      <%= submit_tag(:comment_add_create.l,
+                     class: "btn center-block push-down") %>
       <%= render(partial: "form_comments") %>
-      <%= submit_tag(:comment_add_create.l, class: "btn center-block push-down") %>
+      <%= submit_tag(:comment_add_create.l,
+                     class: "btn center-block push-down") %>
       <hr align="center" width="90%" />
     <% end %>
   </div>

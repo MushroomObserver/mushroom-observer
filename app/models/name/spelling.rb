@@ -51,7 +51,7 @@ class Name < AbstractModel
           if (i & 1).zero?
             prefixes = results.map(&:text_name).uniq
             results = []
-            word = (i == 2) ? words[i - 1] : "#{words[i - 2]} #{words[i - 1]}"
+            word = i == 2 ? words[i - 1] : "#{words[i - 2]} #{words[i - 1]}"
             prefixes.each { |prefix| results |= guess_word(prefix, word) }
           end
         end

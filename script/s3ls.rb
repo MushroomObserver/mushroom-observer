@@ -32,10 +32,10 @@ replace = true if ARGV.any? { |arg| ["-r", "--replace"].include?(arg) }
 flags = ARGV.select { |arg| arg.match(/^-/) }.
         reject { |arg| arg.match(/^(-v|-r|--verbose|--replace)$/) }
 words = ARGV.reject { |arg| arg.match(/^-/) }
-abort("Bad flag(s): #{flags.inspect}") if flags.length.positive?
-abort("Missing server!") if words.length.zero?
+abort("Bad flag(s): #{flags.inspect}") unless flags.empty?
+abort("Missing server!") if words.empty?
 server = words.shift
-abort("Unexpected parameter(s): #{words.inspect}") if words.length.positive?
+abort("Unexpected parameter(s): #{words.inspect}") unless words.empty?
 
 cache_file = "#{app_root}/public/images/#{server}.files"
 temp_file1 = "#{app_root}/tmp/#{server}.files.#{Process.pid}.1"
