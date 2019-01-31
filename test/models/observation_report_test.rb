@@ -207,7 +207,8 @@ class ObservationReportTest < UnitTestCase
       "148",
       "X",
       obs.thumb_image.id.to_s,
-      "Found in a strange place... & with śtrangè characters™"
+      "Found in a strange place... & with śtrangè characters™",
+      "http://mushroomobserver.org/#{obs.id}"
     ]
     do_report_test(ObservationReport::Raw, obs, expect, &:id)
   end
