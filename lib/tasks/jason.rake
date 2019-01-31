@@ -673,8 +673,6 @@ namespace :jason do
       file
     elsif File.exist?(file = "%s/%s.jpg" % [path, val])
       file
-    else
-      nil
     end
   end
 
