@@ -11,7 +11,7 @@ class ContentFilter
     def sql_conditions(query, model, val)
       val = Location.reverse_name_if_necessary(val)
       expr = make_regexp(query, val)
-      field = (model == Location) ? "locations.name" : "observations.where"
+      field = model == Location ? "locations.name" : "observations.where"
       "CONCAT(', ', #{field}) #{expr}"
     end
 

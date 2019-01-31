@@ -182,7 +182,7 @@ class ObserverController
       MinimalMapObservation.new(id, lat, long, loc_id)
     end
 
-    if locations.length.positive?
+    unless locations.empty?
       # Eager-load corresponding locations.
       @locations = Location.connection.select_rows(%(
         SELECT id, name, north, south, east, west FROM locations

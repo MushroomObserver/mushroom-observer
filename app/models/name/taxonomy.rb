@@ -159,7 +159,7 @@ class Name < AbstractModel
 
     # Start with infrageneric and genus names.
     # Get rid of quoted words and ssp., var., f., etc.
-    words = text_name.split(" ") - ["group", "clade", "complex"]
+    words = text_name.split(" ") - %w[group clade complex]
     words.pop
     until words.empty?
       name = words.join(" ")
@@ -397,7 +397,7 @@ class Name < AbstractModel
   # Copy classification from parent.  Just take parent's classification string
   # and add the parent's name to the bottom of it.  Nice and easy.
   def inherit_classification(parent)
-    raise("missing parent!")               if !parent
+    raise("missing parent!")               unless parent
     raise("only do this on genera or up!") if below_genus?
     raise("parent has no classification!") if parent.classification.blank?
 

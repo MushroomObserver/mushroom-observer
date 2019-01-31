@@ -8,7 +8,7 @@ class CommentEmail < AccountMailer
     @comment = comment
     debug_log(:comment, sender, receiver,
               object: "#{target.type_tag}-#{target.id}")
-    reply_to = (receiver == target.user) ? sender : nil
+    reply_to = receiver == target.user ? sender : nil
     mo_mail(@title, to: receiver, reply_to: reply_to)
   end
 end

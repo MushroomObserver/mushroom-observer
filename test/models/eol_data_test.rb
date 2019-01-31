@@ -17,9 +17,9 @@ class EolDataTest < UnitTestCase
     obj = EolData.new
 
     assert_equal(SortedSet, obj.names.class)
-    assert(2 <= obj.name_count)
-    assert(2 <= obj.total_image_count)
-    assert(1 <= obj.total_description_count)
+    assert(obj.name_count >= 2)
+    assert(obj.total_image_count >= 2)
+    assert(obj.total_description_count >= 1)
     assert_equal(Array, obj.all_images.class)
     assert_equal(Array, obj.all_descriptions.class)
 
@@ -29,7 +29,7 @@ class EolDataTest < UnitTestCase
     name_id = names(:peltigera).id
     assert(obj.has_descriptions?(name_id))
     assert_equal(Array, obj.descriptions(name_id).class)
-    assert(1 <= obj.description_count(name_id))
+    assert(obj.description_count(name_id) >= 1)
     description = obj.descriptions(name_id)[0]
     assert_equal(description.user.legal_name, obj.authors(description.id))
 
