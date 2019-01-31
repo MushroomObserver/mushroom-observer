@@ -30,6 +30,12 @@ class CommentControllerTest < FunctionalTestCase
     assert_form_action(action: "add_comment", id: obs_id, type: "Observation")
   end
 
+  def test_add_comment_to_name_with_synonyms
+    name_id = names(:chlorophyllum_rachodes).id
+    requires_login(:add_comment, id: name_id, type: "Name")
+    assert_form_action(action: "add_comment", id: name_id, type: "Name")
+  end
+
   def test_edit_comment
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
