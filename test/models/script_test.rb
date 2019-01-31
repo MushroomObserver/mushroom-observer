@@ -85,7 +85,7 @@ class ScriptTest < UnitTestCase
     logfile = "#{::Rails.root}/log/top.log"
     old_size = begin
                  File.size(logfile)
-               rescue
+               rescue StandardError
                  0
                end
     cmd = "#{script} 2>&1 > #{tempfile}"

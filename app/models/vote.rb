@@ -144,7 +144,7 @@ class Vote < AbstractModel
   def self.validate_value(val)
     val = val.to_f
     val && val >= MINIMUM_VOTE && val <= MAXIMUM_VOTE ? val : nil
-  rescue
+  rescue StandardError
     nil
   end
 

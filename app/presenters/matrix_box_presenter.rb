@@ -43,7 +43,7 @@ class MatrixBoxPresenter
     name = image.unique_format_name.t
     self.when = begin
                   image.when.web_date
-                rescue
+                rescue StandardError
                   nil
                 end
     self.who  = view.user_link(image.user)
@@ -92,7 +92,7 @@ class MatrixBoxPresenter
     target_type = target ? target.type_tag : rss_log.target_type
     begin
       tag, args, time = rss_log.parse_log.first
-    rescue
+    rescue StandardError
       []
     end
     if !target_type
@@ -104,7 +104,7 @@ class MatrixBoxPresenter
       unless target_type == :observation || target_type == :species_list
         begin
           self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
-        rescue
+        rescue StandardError
           nil
         end
       end
@@ -121,7 +121,7 @@ class MatrixBoxPresenter
       end
       begin
         self.detail ||= tag.t(args)
-      rescue
+      rescue StandardError
         nil
       end
     end

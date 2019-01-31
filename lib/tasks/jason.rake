@@ -85,7 +85,7 @@ namespace :jason do
         n += 1
         begin
           results.push(str.tpl)
-        rescue => e
+        rescue StandardError => e
           results.push("Crashed: " + e.to_s + "\n" + str)
         end
       end

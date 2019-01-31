@@ -616,7 +616,7 @@ class Image < AbstractModel
           self.upload_temp_file = @file.path
           self.upload_length = @file.size
           result = true
-        rescue => e
+        rescue StandardError => e
           errors.add(:image,
                      "Unexpected error while copying attached file "\
                      "to temp file. Error class #{e.class}: #{e}")
@@ -732,7 +732,7 @@ class Image < AbstractModel
   def self.validate_vote(value)
     value = begin
               value.to_i
-            rescue
+            rescue StandardError
               0
             end
     value = nil if value < 1 || value > 4
@@ -862,17 +862,17 @@ class Image < AbstractModel
        saved_change_to_copyright_holder?
       old_year       = begin
                          saved_change_to_when[0].year
-                       rescue
+                       rescue StandardError
                          self.when.year
                        end
       old_name       = begin
                          saved_change_to_copyright_holder[0]
-                       rescue
+                       rescue StandardError
                          copyright_holder
                        end
       old_license_id = begin
                          saved_change_to_license_id[0]
-                       rescue
+                       rescue StandardError
                          license_id
                        end
       CopyrightChange.create!(

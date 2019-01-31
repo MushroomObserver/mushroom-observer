@@ -554,7 +554,7 @@ class User < AbstractModel
 
   def preferred_herbarium_name
     preferred_herbarium.name
-  rescue
+  rescue StandardError
     personal_herbarium_name
   end
 

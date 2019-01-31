@@ -174,7 +174,7 @@ class Description < AbstractModel
     tag = :"description_#{full_or_part}_title_#{source_type}"
     user_name = begin
                   user.legal_name
-                rescue
+                rescue StandardError
                   "?"
                 end
     args = {

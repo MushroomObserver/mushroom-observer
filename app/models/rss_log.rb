@@ -402,7 +402,7 @@ class RssLog < AbstractModel
       time2 = Time.utc(time[0, 4], time[4, 2], time[6, 2],
                        time[8, 2], time[10, 2], time[12, 2]).in_time_zone
       time = time2
-    rescue => e
+    rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env == "production"
         time = Time.now # (but don't crash in production)

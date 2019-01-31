@@ -312,7 +312,7 @@ def get_last_update
   file = SITEMAP_FILE.sub("NAME", "index")
   begin
     format_time(File.mtime(file))
-  rescue
+  rescue StandardError
     format_time(100.years.ago)
   end
 end

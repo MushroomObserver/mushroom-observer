@@ -767,13 +767,6 @@ Style/RegexpLiteral:
     - 'test/integration/curator_test.rb'
     - 'test/integration/name_description_integration_test.rb'
 
-# Offense count: 119
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: implicit, explicit
-Style/RescueStandardError:
-  Enabled: false
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.

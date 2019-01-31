@@ -151,7 +151,7 @@ class SiteData
       field = get_applicable_field(obj)
       user_id ||= begin
                     obj.user_id
-                  rescue
+                  rescue StandardError
                     nil
                   end
     else

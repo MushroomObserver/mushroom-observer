@@ -110,7 +110,7 @@ class ImageController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Image)
     show_selected_images(query)
-  rescue => err
+  rescue StandardError => err
     flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search")
   end
@@ -231,7 +231,7 @@ class ImageController < ApplicationController
     @votes = @image.image_votes.sort_by do |v|
       begin
         (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
-      rescue
+      rescue StandardError
         "?"
       end
     end
@@ -418,7 +418,7 @@ class ImageController < ApplicationController
     for proj in @projects
       @project_checks[proj.id] = begin
                                    params[:project]["id_#{proj.id}"] == "1"
-                                 rescue
+                                 rescue StandardError
                                    false
                                  end
     end
@@ -854,7 +854,7 @@ class ImageController < ApplicationController
     else
       render_image_csv_file(data)
     end
-  rescue => e
+  rescue StandardError => e
     render(plain: e.to_s, layout: false, status: 500)
   end
 

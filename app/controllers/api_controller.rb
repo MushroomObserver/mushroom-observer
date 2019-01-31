@@ -139,7 +139,7 @@ class ApiController < ApplicationController
     @api = API.execute(args)
     User.current = @user = @api.user
     do_render
-  rescue => e
+  rescue StandardError => e
     @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
     do_render

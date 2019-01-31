@@ -95,7 +95,7 @@ class API
       results.map! do |obj|
         begin
           setter.call(obj)
-        rescue => e
+        rescue StandardError => e
           errors << e
           nil
         end
@@ -128,7 +128,7 @@ class API
       results.each do |obj|
         begin
           deleter.call(obj)
-        rescue => e
+        rescue StandardError => e
           errors << e
         end
       end

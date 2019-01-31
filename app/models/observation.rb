@@ -594,7 +594,7 @@ class Observation < AbstractModel
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
-  rescue
+  rescue StandardError
     ""
   end
 

@@ -111,7 +111,7 @@ class NameController
   def validate_classification!
     cleaned = Name.validate_classification(@name.rank, @name.classification)
     @name.classification = cleaned
-  rescue => e
+  rescue StandardError => e
     flash_error(e.to_s)
     false
   end

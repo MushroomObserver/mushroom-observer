@@ -230,7 +230,7 @@ class Location < AbstractModel
     # for "unknown", even when viewing the site in another language
     Language.official.translation_strings.find_by_tag("unknown_locations").
       text.split(/, */)
-  rescue
+  rescue StandardError
     []
   end
 
