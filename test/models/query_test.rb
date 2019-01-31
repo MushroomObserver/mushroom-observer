@@ -2586,7 +2586,7 @@ class QueryTest < UnitTestCase
     seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
     seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
     seq4.update_attribute(:observation, observations(:peltigera_obs))
-    assert_query([seq1, seq2], :Sequence, :all, obs_date: ["2006", "2006"])
+    assert_query([seq1, seq2], :Sequence, :all, obs_date: %w[2006 2006])
     assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
     assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
     assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")

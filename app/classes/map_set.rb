@@ -125,7 +125,7 @@ class MapSet
       @north = lat if lat > @north
       @south = lat if lat < @south
       # point not contained within existing extents
-      if (@east >= @west) ? (long > @east || long < @west) : (long > @east && long < @west)
+      if @east >= @west ? (long > @east || long < @west) : (long > @east && long < @west)
         east_dist = long > @east ? long - @east : long - @east + 360
         west_dist = long < @west ? @west - long : @west - long + 360
         if east_dist <= west_dist
@@ -151,7 +151,7 @@ class MapSet
       @north = n if n > @north
       @south = s if s < @south
       # new box not completely contained within old box
-      if (@east >= @west) ? (e < w || w < @west || e > @east) : (e >= w || w < @west || e > @east)
+      if @east >= @west ? (e < w || w < @west || e > @east) : (e >= w || w < @west || e > @east)
         # overlap, neither or both straddle dateline
         if (@east >= @west && e >= w && w <= @east && e >= @west) ||
            (@east < @west && e < w)

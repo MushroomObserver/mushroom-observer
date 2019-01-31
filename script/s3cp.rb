@@ -38,17 +38,17 @@ copy = !delete
 flags = ARGV.select { |arg| arg.match(/^-/) }.
         reject { |arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/) }
 words = ARGV.reject { |arg| arg.match(/^-/) }
-abort("Bad flag(s): #{flags.inspect}") if flags.length.positive?
+abort("Bad flag(s): #{flags.inspect}") unless flags.empty?
 if copy
-  abort("Missing file!") if words.length.zero?
+  abort("Missing file!") if words.empty?
   file = words.shift
   abort("File doesn't exist: #{file.inspect}") unless File.exist?(file)
 end
-abort("Missing server!") if words.length.zero?
+abort("Missing server!") if words.empty?
 server = words.shift
-abort("Missing key!") if words.length.zero?
+abort("Missing key!") if words.empty?
 key = words.shift
-abort("Unexpected parameter(s): #{words.inspect}") if words.length.positive?
+abort("Unexpected parameter(s): #{words.inspect}") unless words.empty?
 
 cache_file = "#{app_root}/public/images/#{server}.files"
 temp_file  = "#{app_root}/tmp/#{server}.files.#{Process.pid}"

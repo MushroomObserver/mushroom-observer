@@ -108,7 +108,7 @@ class CuratorTest < IntegrationTestCase
   def test_herbarium_index_from_create_herbarium_record
     login!("mary", "testpassword", true)
     get("/herbarium_record/create_herbarium_record/" +
-        "#{observations(:minimal_unknown_obs).id}")
+        observations(:minimal_unknown_obs).id.to_s)
     click(label: :herbarium_index.t)
     assert_template("herbarium/list_herbaria")
   end
