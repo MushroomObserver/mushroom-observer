@@ -252,7 +252,7 @@ module Query::Modules::Joining
         target_table = to
         from, to = to, from
       else
-        fail("Don't know how to join from #{from} to #{to}.")
+        raise("Don't know how to join from #{from} to #{to}.")
       end
 
       # By default source table column is just "id"; enter both target and source

@@ -374,7 +374,7 @@ class RssLog < AbstractModel
   def self.encode(tag, args, time)
     time = time.utc.strftime("%Y%m%d%H%M%S")
     tag = tag.to_s
-    fail "Invalid rss log tag: #{tag}" if tag.blank?
+    raise "Invalid rss log tag: #{tag}" if tag.blank?
 
     args = args.keys.sort_by(&:to_s).map do |key|
       [key.to_s, escape(args[key])]

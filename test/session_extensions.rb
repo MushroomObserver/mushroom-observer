@@ -223,7 +223,7 @@ module SessionExtensions
       end
     else
       @page_stack.pop while @page_stack.any? && (@page_stack.last[:name] != arg)
-      fail("Missing page called #{name.inspect}!") if @page_stack.empty?
+      raise("Missing page called #{name.inspect}!") if @page_stack.empty?
     end
     response.body = @page_stack.last[:body]
     request.env["PATH_INFO"] = @page_stack.last[:path]

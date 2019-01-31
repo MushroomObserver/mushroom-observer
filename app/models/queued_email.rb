@@ -253,7 +253,7 @@ class QueuedEmail < AbstractModel
     current_locale = I18n.locale
     result = false
     if user == to_user
-      fail("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
+      raise("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
     else
       result = deliver_email
     end
@@ -274,7 +274,7 @@ class QueuedEmail < AbstractModel
     # Failing to send email should not throw an error in production
     return warn(error) if Rails.env.production?
 
-    fail error
+    raise error
   end
 
   # Returns "flavor from to" for debugging.
