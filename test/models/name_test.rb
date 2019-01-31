@@ -19,15 +19,15 @@ class NameTest < UnitTestCase
     any_errors = false
     msg = ["Name is wrong; expected -vs- actual:"]
     [
-     :text_name,
-     :real_text_name,
-     :search_name,
-     :real_search_name,
-     :sort_name,
-     :display_name,
-     :parent_name,
-     :rank,
-     :author
+      :text_name,
+      :real_text_name,
+      :search_name,
+      :real_search_name,
+      :sort_name,
+      :display_name,
+      :parent_name,
+      :rank,
+      :author
     ].each do |var|
       expect = expects[var]
       actual = if var == :real_text_name

@@ -512,22 +512,22 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_no_email_hooks
     [
-     :comments_owner,
-     :comments_response,
-     :comments_all,
-     :observations_consensus,
-     :observations_naming,
-     :observations_all,
-     :names_author,
-     :names_editor,
-     :names_reviewer,
-     :names_all,
-     :locations_author,
-     :locations_editor,
-     :locations_all,
-     :general_feature,
-     :general_commercial,
-     :general_question
+      :comments_owner,
+      :comments_response,
+      :comments_all,
+      :observations_consensus,
+      :observations_naming,
+      :observations_all,
+      :names_author,
+      :names_editor,
+      :names_reviewer,
+      :names_all,
+      :locations_author,
+      :locations_editor,
+      :locations_all,
+      :general_feature,
+      :general_commercial,
+      :general_question
     ].each do |type|
       assert_request(
         action: "no_email_#{type}",

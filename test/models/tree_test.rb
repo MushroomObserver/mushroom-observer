@@ -18,16 +18,23 @@ class TreeTest < UnitTestCase
     assert_true(tree.has_node?(:two))
     assert_false(tree.has_node?(:spam))
 
-    tree = [
-      { foo: :bar },
+    tree = [{ foo: :bar },
+            :scalar,
+            { glue: [:one, :two] },
+            { top: { middle: :leaf } }]
+    [
+      :foo,
+      :bar,
       :scalar,
-      { glue: [:one, :two] },
-      { top: { middle: :leaf } }
-    ]
-    [:foo, :bar, :scalar, :glue, :one, :two, :top, :middle, :leaf].
-    each do |node|
-      assert_true(tree.has_node?(node), "Tree is missing #{node.inspect}!")
-    end
+      :glue,
+      :one,
+      :two,
+      :top,
+      :middle,
+      :leaf
+    ].each do |node|
+        assert_true(tree.has_node?(node), "Tree is missing #{node.inspect}!")
+      end
     assert_false(tree.has_node?(:spam))
   end
 
