@@ -219,7 +219,7 @@ class Textile < String
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
-    self.gsub!(NAME_LINK_PATTERN) do |orig_str|
+    gsub!(NAME_LINK_PATTERN) do |orig_str|
       prefix = Regexp.last_match(1)
       label = remove_formatting(Regexp.last_match(2))
       name = expand_genus_abbreviation(label)
@@ -282,7 +282,7 @@ class Textile < String
 
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
-    self.gsub!(OTHER_LINK_PATTERN) do |orig|
+    gsub!(OTHER_LINK_PATTERN) do |orig|
       result = orig
       prefix = Regexp.last_match(1)
       type = Regexp.last_match(2)
@@ -307,7 +307,7 @@ class Textile < String
 
   # Convert !image 12345! in a textile string.
   def check_our_images!
-    self.gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
+    gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
       src  = Image.url(size, id)

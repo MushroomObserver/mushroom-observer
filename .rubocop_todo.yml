@@ -739,16 +739,6 @@ Style/RedundantReturn:
     - 'app/helpers/pagination_helper.rb'
     - 'lib/tasks/jason.rake'
 
-# Offense count: 8
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Exclude:
-    - 'app/classes/eol_data.rb'
-    - 'app/classes/query/location_regexp_search.rb'
-    - 'app/classes/textile.rb'
-    - 'app/models/image.rb'
-    - 'app/models/notification.rb'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.

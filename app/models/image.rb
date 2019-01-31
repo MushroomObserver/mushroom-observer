@@ -760,7 +760,7 @@ class Image < AbstractModel
   # integers.  Returns value of new vote.
   def change_vote(user, value = nil, anon = false)
     user_id = user.is_a?(User) ? user.id : user.to_i
-    save_changes = !self.changed?
+    save_changes = !changed?
 
     # Modify image_votes table first.
     vote = image_votes.find_by_user_id(user_id)
