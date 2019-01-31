@@ -72,7 +72,7 @@ namespace :email do
   desc "Purge the email queue without sending anything"
   task(purge: :environment) do
     for e in QueuedEmail.all
-      print "Purging #{e.id}: from => #{e&.user.login}, "\
+      print "Purging #{e.id}: from => #{e&.user&.login}, "\
             "to => #{e.to_user.login}, flavor => #{e.flavor}, "\
             "queued => #{e.queued}\n"
       e.destroy
