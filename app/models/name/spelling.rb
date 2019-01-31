@@ -93,7 +93,7 @@ class Name < AbstractModel
             sub = ""
             sub += word[0..(j - 1)] if j.positive?
             sub += "%"
-            sub += word[(j + count)..(-1)] if j + count < word.length
+            sub += word[(j + count)..-1] if j + count < word.length
             patterns << guess_pattern(words, i, sub)
           end
         end

@@ -4171,7 +4171,8 @@ namespace :location do
 
   desc "List the fixes"
   task(new: :environment) do
-    print("    " + (LOCATION_FIXES.values.sort.map { |l| escapeString(l) }.join(",\n    ")) + "\n")
+    print("    " + LOCATION_FIXES.values.sort.map { |l| escapeString(l) }.
+      join(",\n    ") + "\n")
   end
 
   desc "Random test task"

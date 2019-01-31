@@ -254,7 +254,7 @@ class Name < AbstractModel
 
   # sripped group_abbr
   def self.group_wd(str)
-    (GROUP_CHUNK.match(str))[:group_wd]
+    GROUP_CHUNK.match(str)[:group_wd]
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)

@@ -193,7 +193,7 @@ class Location < AbstractModel
     if match && alt.to_s.match(/ft|'/)
       result = (match[1].to_f * 0.3048).round
     elsif match
-      result = (match[1].to_f).round
+      result = match[1].to_f.round
     end
     result
   end

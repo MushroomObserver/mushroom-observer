@@ -712,16 +712,6 @@ Style/RaiseArgs:
     - 'app/models/observation.rb'
     - 'test/controller_extensions.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/RedundantParentheses:
-  Exclude:
-    - 'app/models/location.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/naming.rb'
-    - 'lib/tasks/location.rake'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.
