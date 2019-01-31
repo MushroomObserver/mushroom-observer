@@ -784,13 +784,6 @@ Style/RegexpLiteral:
 Style/RescueStandardError:
   Enabled: false
 
-# Offense count: 59
-# Cop supports --auto-correct.
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.
-# Whitelist: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Enabled: false
-
 # Offense count: 10
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowSafeAssignment.

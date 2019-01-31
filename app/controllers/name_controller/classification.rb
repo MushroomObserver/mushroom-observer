@@ -19,7 +19,7 @@ class NameController
 
     name.update_attributes(classification: name.genus.classification)
     desc = name.description
-    desc.update_attributes(classification: name.genus.classification) if desc
+    desc&.update_attributes(classification: name.genus.classification)
     redirect_with_query(name.show_link_args)
   end
 

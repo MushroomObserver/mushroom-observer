@@ -377,7 +377,7 @@ class AbstractModel < ApplicationRecord
   #
   def eol_url
     triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
-    triple.object if triple
+    triple&.object
   end
 
   def self.eol_predicate

@@ -1016,7 +1016,7 @@ class Observation < AbstractModel
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
-    if best && best.synonym_id
+    if best&.synonym_id
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
@@ -1377,7 +1377,7 @@ class Observation < AbstractModel
     recipients = []
 
     # Tell owner of observation if they want.
-    recipients.push(owner) if owner && owner.email_observations_consensus
+    recipients.push(owner) if owner&.email_observations_consensus
 
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.

@@ -109,7 +109,7 @@ class CommentTest < UnitTestCase
 
   def do_comment_test(chg, obs, user, summary, comment = "")
     old = num_emails
-    obs.reload if obs # (to ensure it sees chgs in user prefs)
+    obs&.reload # (to ensure it sees chgs in user prefs)
     Comment.create!(
       target:  obs,
       user:    user,

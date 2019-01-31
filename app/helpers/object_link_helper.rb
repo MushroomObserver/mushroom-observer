@@ -113,7 +113,7 @@ module ObjectLinkHelper
   #   [bob,fred,mary]: "Authors: Bob, Fred, Mary"
   #
   def user_list(title, users = [])
-    return safe_empty unless users && users.any?
+    return safe_empty unless users&.any?
 
     title = users.count > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }

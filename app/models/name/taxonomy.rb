@@ -368,7 +368,7 @@ class Name < AbstractModel
 
   # Does this Name have notes (presumably discussing taxonomy).
   def has_notes?
-    notes && notes.match(/\S/)
+    notes&.match(/\S/)
   end
 
   def text_before_rank

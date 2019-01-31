@@ -98,7 +98,7 @@ module ObservationReport
 
     def parse_orig_label(row)
       notes = row.obs_notes
-      if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, "")
+      if notes&.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, "")
         orig_label = Regexp.last_match(1).gsub(/_(.*?)_/, '\\1')
         [notes.strip, orig_label]
       else

@@ -30,7 +30,7 @@ class Name < AbstractModel
 
     # Tell reviewers of the change.
     descriptions.map(&:reviewer).each do |user|
-      recipients.push(user) if user && user.email_names_reviewer
+      recipients.push(user) if user&.email_names_reviewer
     end
 
     # Tell masochists who want to know about all name changes.

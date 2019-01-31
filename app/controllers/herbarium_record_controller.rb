@@ -272,7 +272,7 @@ class HerbariumRecordController < ApplicationController
 
   def can_add_record_to_herbarium?
     return true if in_admin_mode?
-    return true if @observation && @observation.can_edit?
+    return true if @observation&.can_edit?
     return true if @herbarium_record.observations.any?(&:can_edit?)
     return true if @herbarium_record.herbarium.curator?(@user)
 

@@ -251,7 +251,7 @@ class NameDescription < Description
 
       # Tell reviewer of the change.
       reviewer = self.reviewer || @old_reviewer
-      recipients.push(reviewer) if reviewer && reviewer.email_names_reviewer
+      recipients.push(reviewer) if reviewer&.email_names_reviewer
 
       # Tell masochists who want to know about all name changes.
       for user in User.where(email_names_all: true)

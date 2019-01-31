@@ -356,7 +356,7 @@ end
 
 def parse_path(path)
   controller, action = path.split("/")
-  action.sub!(/\?.*/, "") if action
+  action&.sub!(/\?.*/, "")
   [controller, action]
 end
 

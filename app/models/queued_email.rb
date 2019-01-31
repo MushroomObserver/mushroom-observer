@@ -285,7 +285,7 @@ class QueuedEmail < AbstractModel
   # Dump out all the info about a QueuedEmail record to a string.
   def dump
     result = ""
-    result += "#{id}: from => #{user && user.login}, "
+    result += "#{id}: from => #{user&.login}, "
     result += "to => #{to_user.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
     queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }

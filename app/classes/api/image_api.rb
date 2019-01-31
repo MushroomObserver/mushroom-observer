@@ -81,7 +81,7 @@ class API
     def build_object
       super
     ensure
-      @upload.clean_up if @upload
+      @upload&.clean_up
     end
 
     def after_create(img)

@@ -179,7 +179,7 @@ MushroomObserver::Application.configure do
 
   # Set of javascript and stylesheet files not included by default and
   # therefore need to be precompiled explicitly.
-  if config.assets && config.assets.precompile
+  if config.assets&.precompile
     config.assets.precompile += %w[
       advanced_search.js
       api_key.js

@@ -352,7 +352,7 @@ class NameController < ApplicationController
       @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
 
       # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
+      @projects = @user&.projects_member&.select do |project|
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
