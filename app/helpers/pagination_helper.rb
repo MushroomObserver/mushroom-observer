@@ -44,9 +44,9 @@ module PaginationHelper
           content_tag(:li, content_tag(:span, letter), class: "disabled")
         end
       end.safe_join(" ")
-      return content_tag(:div, str, class: "pagination pagination-sm")
+      content_tag(:div, str, class: "pagination pagination-sm")
     else
-      return safe_empty
+      safe_empty
     end
   end
 

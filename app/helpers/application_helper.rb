@@ -278,11 +278,9 @@ module ApplicationHelper
     if init_value && init_value < start_year
       start_year = init_value
     end
-    return {
-      start_year: start_year,
+    { start_year: start_year,
       end_year: Time.now.year,
-      order: [:day, :month, :year]
-    }
+      order: [:day, :month, :year] }
   end
 
   # contents of the <title> in html header

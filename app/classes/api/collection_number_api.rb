@@ -124,7 +124,7 @@ class API
         obj.remove_observation(obs)
         return true unless obj.id
       end
-      return false
+      false
     end
   end
 end

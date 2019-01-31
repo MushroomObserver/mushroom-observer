@@ -282,7 +282,7 @@ class CommentController < ApplicationController
       parent = object.parent
       redirect_to(controller: parent.show_controller,
                   action: parent.show_action, id: parent.id)
-      return false
+      false
     else
       true
     end

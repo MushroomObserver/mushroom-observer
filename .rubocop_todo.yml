@@ -722,23 +722,6 @@ Style/RedundantParentheses:
     - 'app/models/naming.rb'
     - 'lib/tasks/location.rake'
 
-# Offense count: 21
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'app/classes/api/collection_number_api.rb'
-    - 'app/classes/api/herbarium_record_api.rb'
-    - 'app/classes/api/model_api.rb'
-    - 'app/classes/api/project_api.rb'
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/classes/tree.rb'
-    - 'app/controllers/comment_controller.rb'
-    - 'app/controllers/herbarium_controller.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/helpers/pagination_helper.rb'
-    - 'lib/tasks/jason.rake'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.

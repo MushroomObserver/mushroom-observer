@@ -659,19 +659,19 @@ namespace :jason do
 
   def lookup_image(val, path)
     if /^\d+$/.match?(val)
-      return Image.find_by_id(val)
+      Image.find_by_id(val)
     # elsif val.match(/^https?:\/\//)
     #   ...
     elsif File.exist?(val)
-      return val
+      val
     elsif File.exist?(file = "%s.jpg" % val)
-      return file
+      file
     elsif File.exist?(file = "%s/%s" % [path, val])
-      return file
+      file
     elsif File.exist?(file = "%s/%s.jpg" % [path, val])
-      return file
+      file
     else
-      return nil
+      nil
     end
   end
 
