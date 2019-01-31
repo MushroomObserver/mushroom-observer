@@ -749,24 +749,6 @@ Style/RedundantSelf:
     - 'app/models/image.rb'
     - 'app/models/notification.rb'
 
-# Offense count: 35
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowInnerSlashes.
-# SupportedStyles: slashes, percent_r, mixed
-Style/RegexpLiteral:
-  Exclude:
-    - 'app/classes/textile.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/controllers/observer_controller/email_controller.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/models/image.rb'
-    - 'script/bulk_name_change'
-    - 'script/make_eol_xml'
-    - 'test/general_extensions.rb'
-    - 'test/integration/curator_test.rb'
-    - 'test/integration/name_description_integration_test.rb'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.

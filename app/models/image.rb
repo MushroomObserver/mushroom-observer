@@ -541,7 +541,7 @@ class Image < AbstractModel
         type.sub!(/;$/, "")
         self.upload_type = type
       end
-      if /^image\//.match?(upload_type)
+      if %r{^image/}.match?(upload_type)
         result = true
       else
         file = upload_original_name.to_s
@@ -580,7 +580,7 @@ class Image < AbstractModel
   def validate_image_name
     name = upload_original_name.to_s
     name.sub!(/^[a-zA-Z]:/, "")
-    name.sub!(/^.*[\/\\]/, "")
+    name.sub!(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     if name.present? and User.current && User.current.keep_filenames != :toss

@@ -367,7 +367,7 @@ class String
 
   # This should safely match anything that could possibly be interpreted as
   # an HTML tag.
-  HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
+  HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}
 
   ### Textile-related methods ###
   #
@@ -426,7 +426,7 @@ class String
 
   # Remove hyperlinks from an HTML string.
   def strip_links
-    gsub(/<\/?a.*?>/, "")
+    gsub(%r{</?a.*?>}, "")
   end
 
   # Truncate an HTML string, being careful to close off any open formatting
@@ -439,14 +439,14 @@ class String
     opens = []
     while str != ""
       # Self-closing tag.
-      if str.sub!(/^<(\w+)[^<>]*\/ *>/, "")
+      if str.sub!(%r{^<(\w+)[^<>]*/ *>}, "")
         result += $&
       # Opening tag.
       elsif str.sub!(/^<(\w+)[^<>]*>/, "")
         result += $&
         opens << Regexp.last_match(1)
       # Closing tag -- just assume tags are nested properly.
-      elsif str.sub!(/^< *\/ *(\w+)[^<>]*>/, "")
+      elsif str.sub!(%r{^< */ *(\w+)[^<>]*>}, "")
         result += $&
         opens.pop
       # Normal text.
@@ -474,18 +474,18 @@ class String
   # least.
   def html_to_ascii
     gsub(/\s*\n\s*/, " "). # remove all newlines first
-      gsub(/<\/?div[^>]*>/, "").     # divs are messing things up, too
-      gsub(/<br *\/> */, "\n").      # put \n after every line break
-      gsub(/<\/li> */, "\n").        # put \n after every list item
-      gsub(/<\/tr> */, "\n").        # put \n after every table row
-      gsub(/<\/(p|h\d)> */, "\n\n"). # put two \n between paragraphs
-      gsub(/<\/td> */, "\t").        # put tabs between table columns
-      gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
-      gsub(/\n+\Z/, "").             # remove superfluous newlines at end
-      gsub(HTML_TAG_PATTERN, "").    # remove all <tags>
-      gsub(/^ +|[ \t]+$/, "").       # remove leading/trailing space on each line
+      gsub(%r{</?div[^>]*>}, "").     # divs are messing things up, too
+      gsub(%r{<br */> *}, "\n").      # put \n after every line break
+      gsub(%r{</li> *}, "\n").        # put \n after every list item
+      gsub(%r{</tr> *}, "\n").        # put \n after every table row
+      gsub(%r{</(p|h\d)> *}, "\n\n"). # put two \n between paragraphs
+      gsub(%r{</td> *}, "\t").        # put tabs between table columns
+      gsub(/[ \t]+(\n|$)/, '\\1').    # remove superfluous trailing whitespace
+      gsub(/\n+\Z/, "").              # remove superfluous newlines at end
+      gsub(HTML_TAG_PATTERN, "").     # remove all <tags>
+      gsub(/^ +|[ \t]+$/, "").        # remove leading/trailing space on each line
       gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
-      html_safe                      # convert &xxx; and &#nnn; to ascii
+      html_safe                       # convert &xxx; and &#nnn; to ascii
   end
 
   # Surround HTML string with a span that prevents long strings from being

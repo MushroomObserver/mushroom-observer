@@ -21,7 +21,7 @@ include ERB::Util
 class ParsedUrl
   def initialize(url)
     @url = url
-    @m = url.match(/^https?:\/\/([\w\.]+)(:[0-9]+)*(.*)$/)
+    @m = url.match(%r{^https?://([\w\.]+)(:[0-9]+)*(.*)$})
   end
 
   attr_reader :url
