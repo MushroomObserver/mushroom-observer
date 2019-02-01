@@ -671,7 +671,7 @@ class Image < AbstractModel
       raise SystemCallError.new("Try again.")
     end
 
-    FileUtils.chmod(0644, original_image)
+    FileUtils.chmod(0o644, original_image)
     true
   rescue SystemCallError
     # Use Kernel.system to allow stubbing in tests

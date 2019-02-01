@@ -110,6 +110,6 @@ elsif new_size < old_size * 0.9
   exit 1
 else
   File.rename(temp_filename, dest_filename)
-  File.chmod(0644, dest_filename)
+  File.chmod(0o644, dest_filename)
   exit 0
 end
