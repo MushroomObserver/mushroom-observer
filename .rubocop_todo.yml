@@ -655,28 +655,6 @@ Style/NumericLiteralPrefix:
     - 'app/models/image.rb'
     - 'script/make_eol_xml'
 
-# Offense count: 18
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, EnforcedStyle, IgnoredMethods.
-# SupportedStyles: predicate, comparison
-Style/NumericPredicate:
-  Exclude:
-    - 'spec/**/*'
-    - 'app/classes/api/parsers/enum_parser.rb'
-    - 'app/classes/api/parsers/object_parser.rb'
-    - 'app/classes/api/species_list_api.rb'
-    - 'app/classes/web_sequence_archive.rb'
-    - 'app/controllers/account_controller.rb'
-    - 'app/controllers/api_controller.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/controllers/species_list_controller.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/helpers/show_name_helper.rb'
-    - 'test/controllers/image_controller_test.rb'
-    - 'test/controllers/observer_controller_test.rb'
-    - 'test/mailers/account_mailer_test.rb'
-    - 'test/models/script_test.rb'
-
 # Offense count: 59
 # Cop supports --auto-correct.
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.
