@@ -453,18 +453,17 @@ class ImageController < ApplicationController
       for project in projects
         before = img.projects.include?(project)
         after = checks["id_#{project.id}"] == "1"
-        if before != after
-          if after
-            project.add_image(img)
-            flash_notice(:attached_to_project.t(object: :image,
-                                                project: project.title))
-          else
-            project.remove_image(img)
-            flash_notice(:removed_from_project.t(object: :image,
-                                                 project: project.title))
-          end
-          any_changes = true
+        next if before == after
+        if after
+          project.add_image(img)
+          flash_notice(:attached_to_project.t(object: :image,
+                                              project: project.title))
+        else
+          project.remove_image(img)
+          flash_notice(:removed_from_project.t(object: :image,
+                                               project: project.title))
         end
+        any_changes = true
       end
     end
     any_changes
@@ -646,13 +645,11 @@ class ImageController < ApplicationController
     if check_permission!(@object)
       if request.method == "POST" && (images = params[:selected])
         images.each do |image_id, do_it|
-          if do_it == "yes"
-            if image = Image.safe_find(image_id)
-              @object.remove_image(image)
-              @object.log_remove_image(image)
-              flash_notice(:runtime_image_remove_success.t(id: image_id))
-            end
-          end
+          next unless do_it == "yes"
+          next unless image = Image.safe_find(image_id)
+          @object.remove_image(image)
+          @object.log_remove_image(image)
+          flash_notice(:runtime_image_remove_success.t(id: image_id))
         end
         redirect_with_query(controller: target_class.show_controller,
                             action: target_class.show_action, id: @object.id)
@@ -720,30 +717,29 @@ class ImageController < ApplicationController
         new_id = row[:new_id].to_i
         old_holder = row[:old_holder].to_s
         new_holder = row[:new_holder].to_s
-        if old_id != new_id ||
+        next unless old_id != new_id ||
            old_holder != new_holder
-          old_holder = Image.connection.quote(old_holder)
-          new_holder = Image.connection.quote(new_holder)
-          data = Image.connection.select_rows(%(
-            SELECT id, YEAR(`when`) FROM images
-            WHERE user_id = #{@user.id}
-              AND license_id = #{old_id}
-              AND copyright_holder = #{old_holder}
-          ))
-          Image.connection.insert(%(
-            INSERT INTO copyright_changes
-              (user_id, updated_at, target_type, target_id, year, name, license_id)
-            VALUES
-              #{data.map { |id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})" }.join(",\n")}
-          ))
-          Image.connection.update(%(
-            UPDATE images
-            SET license_id = #{new_id}, copyright_holder = #{new_holder}
-            WHERE user_id = #{@user.id}
-              AND license_id = #{old_id}
-              AND copyright_holder = #{old_holder}
-          ))
-        end
+        old_holder = Image.connection.quote(old_holder)
+        new_holder = Image.connection.quote(new_holder)
+        data = Image.connection.select_rows(%(
+          SELECT id, YEAR(`when`) FROM images
+          WHERE user_id = #{@user.id}
+            AND license_id = #{old_id}
+            AND copyright_holder = #{old_holder}
+        ))
+        Image.connection.insert(%(
+          INSERT INTO copyright_changes
+            (user_id, updated_at, target_type, target_id, year, name, license_id)
+          VALUES
+            #{data.map { |id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})" }.join(",\n")}
+        ))
+        Image.connection.update(%(
+          UPDATE images
+          SET license_id = #{new_id}, copyright_holder = #{new_holder}
+          WHERE user_id = #{@user.id}
+            AND license_id = #{old_id}
+            AND copyright_holder = #{old_holder}
+        ))
       end
     end
 

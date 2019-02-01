@@ -112,12 +112,11 @@ for id, genus, classification in Name.connection.select_rows %(
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]
-  if %w[Amoebozoa Fungi Protozoa].include?(kingdom)
-    family2 = family || "Unknown Family in #{order || klass || kingdom}"
-    hash = genus_to_family[genus] ||= {}
-    hash[family2] = hash[family2].to_i + num_obs
-    observations[family2] = observations[family2].to_i + num_obs
-  end
+  next unless %w[Amoebozoa Fungi Protozoa].include?(kingdom)
+  family2 = family || "Unknown Family in #{order || klass || kingdom}"
+  hash = genus_to_family[genus] ||= {}
+  hash[family2] = hash[family2].to_i + num_obs
+  observations[family2] = observations[family2].to_i + num_obs
 end
 
 # Build mapping from family to genus, complaining about ambiguous genera.

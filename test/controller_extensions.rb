@@ -243,11 +243,10 @@ module ControllerExtensions
     while File.exist?(file_name)
       file_name = "#{html_dir}/#{label}_#{count}.html"
       count += 1
-      if count > 100
-        raise RangeError.new(
-          "More than 100 files found with a label of '#{label}'"
-        )
-      end
+      next unless count > 100
+      raise RangeError.new(
+        "More than 100 files found with a label of '#{label}'"
+      )
     end
     print "Creating html_dump file: #{file_name}\n"
     file = File.new(file_name, "w")

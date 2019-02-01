@@ -22,18 +22,17 @@ NUM  = ARGV[1].to_i || 10
 
 data = {}
 File.open(FILE).readlines.each do |line|
-  if /^TIME:/.match?(line)
-    _, time, status, controller, action, robot = line.split
-    next if status != "200"
+  next unless /^TIME:/.match?(line)
+  _, time, status, controller, action, robot = line.split
+  next if status != "200"
 
-    time = time.to_f
-    path = "/#{controller}/#{action}"
-    rec = data[path] ||= [0, 0, 0, 0]
-    rec[0] += time
-    rec[1] += time * time
-    rec[2] += 1
-    rec[3] += 1 if robot
-  end
+  time = time.to_f
+  path = "/#{controller}/#{action}"
+  rec = data[path] ||= [0, 0, 0, 0]
+  rec[0] += time
+  rec[1] += time * time
+  rec[2] += 1
+  rec[3] += 1 if robot
 end
 
 for path, rec in data

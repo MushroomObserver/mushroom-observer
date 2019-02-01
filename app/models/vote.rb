@@ -232,13 +232,12 @@ class Vote < AbstractModel
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
     for pair in list
-      if pair[1] != 0
-        if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
-          return last_pair[0]
-        end
-
-        last_pair = pair
+      next unless pair[1] != 0
+      if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
+        return last_pair[0]
       end
+
+      last_pair = pair
     end
     last_pair[0]
   end

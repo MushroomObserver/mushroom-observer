@@ -25,43 +25,38 @@ xml.response(
         xml.reference(citation.t)
       end
       refs = []
-      for desc in @data.descriptions(taxon.id)
-        if desc.refs.present?
-          for ref in desc.refs.split(/[\n\r]/)
-            ref = ref.strip
-            if ref.present? and ref != citation
-              refs << ref.t
-            end
-          end
+      @data.descriptions(taxon.id).each do |desc|
+        next unless desc.refs.present?
+        desc.refs.split(/[\n\r]/).each do |ref|
+          ref = ref.strip
+          refs << ref.t if ref.present? && ref != citation
         end
       end
-      for ref in refs.uniq
-        xml.reference(ref.t)
-      end
+      refs.uniq.each { |ref| xml.reference(ref.t) }
       for desc in @data.descriptions(taxon.id)
         for f in NameDescription.eol_note_fields
           value = desc.send(f)
-          if value.present?
-            xml.dataObject do
-              lang = desc.locale || MO.default_locale
-              xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
-              xml.dataType("http://purl.org/dc/dcmitype/Text")
-              xml.mimeType("text/html")
-              xml.agent(@data.authors(desc.id), role: "author")
-              xml.dcterms(:modified, desc.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
-              xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => lang)
-              xml.dc(:language, lang)
-              xml.license(@data.license_url(desc.license_id))
-              xml.dcterms(:rightsHolder, @data.authors(desc.id))
-              xml.audience("General public")
+          next unless value.present?
+          xml.dataObject do
+            lang = desc.locale || MO.default_locale
+            xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
+            xml.dataType("http://purl.org/dc/dcmitype/Text")
+            xml.mimeType("text/html")
+            xml.agent(@data.authors(desc.id), role: "author")
+            xml.dcterms(:modified,
+                        desc.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+            xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => lang)
+            xml.dc(:language, lang)
+            xml.license(@data.license_url(desc.license_id))
+            xml.dcterms(:rightsHolder, @data.authors(desc.id))
+            xml.audience("General public")
 
-              # Note the following mapping assumes that this is being read in English
-              xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
-                          "form_names_#{f}".to_sym.l.delete(" "))
+            # The following mapping assumes that this is being read in English
+            xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
+                        "form_names_#{f}".to_sym.l.delete(" "))
 
-              xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
-              # xml.reviewStatus(desc.review_status)
-            end
+            xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
+            # xml.reviewStatus(desc.review_status)
           end
         end
       end

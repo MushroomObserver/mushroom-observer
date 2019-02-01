@@ -190,12 +190,11 @@ class SiteData
     unless FIELD_WEIGHTS[field]
       field = nil
       for field2, table2 in FIELD_TABLES
-        if table2 == table
-          proc = FIELD_STATE_PROCS[field2]
-          if proc && proc.call(obj)
-            field = field2
-            break
-          end
+        next unless table2 == table
+        proc = FIELD_STATE_PROCS[field2]
+        if proc && proc.call(obj)
+          field = field2
+          break
         end
       end
     end
@@ -273,13 +272,12 @@ class SiteData
     metric = 0
     if data
       for field in ALL_FIELDS
-        if data[field]
-          # This fixes the double-counting of created records.
-          if field.to_s =~ /^(\w+)_versions$/
-            data[field] -= data[Regexp.last_match(1)] || 0
-          end
-          metric += FIELD_WEIGHTS[field] * data[field]
+        next unless data[field]
+        # This fixes the double-counting of created records.
+        if field.to_s =~ /^(\w+)_versions$/
+          data[field] -= data[Regexp.last_match(1)] || 0
         end
+        metric += FIELD_WEIGHTS[field] * data[field]
       end
       metric += data[:languages].to_i
       metric += data[:bonuses].to_i

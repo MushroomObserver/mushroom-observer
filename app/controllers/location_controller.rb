@@ -867,13 +867,12 @@ class LocationController < ApplicationController
     count = 3
     for o in observations
       count += 1
-      unless o.location_id
-        o.location_id = location.id
-        o.where = nil
-        unless o.save
-          flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
-          success = false
-        end
+      next if o.location_id
+      o.location_id = location.id
+      o.where = nil
+      unless o.save
+        flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
+        success = false
       end
     end
     success

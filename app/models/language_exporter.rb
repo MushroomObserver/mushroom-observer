@@ -102,19 +102,17 @@ module LanguageExporter
     good_tags = Language.official.read_export_file
     tag_lookup = translation_strings_hash
     for tag, new_val in new_data
-      if new_val.is_a?(String) &&
+      next unless new_val.is_a?(String) &&
          good_tags.key?(tag)
-        new_val = clean_string(new_val)
-        old_val = clean_string(old_data[tag])
-        if old_data[tag].nil? || (old_val != new_val)
-          if str = tag_lookup[tag]
-            update_string(str, new_val, old_val)
-          else
-            create_string(tag, new_val, old_val)
-          end
-          any_changes = true
-        end
+      new_val = clean_string(new_val)
+      old_val = clean_string(old_data[tag])
+      next unless old_data[tag].nil? || (old_val != new_val)
+      if str = tag_lookup[tag]
+        update_string(str, new_val, old_val)
+      else
+        create_string(tag, new_val, old_val)
       end
+      any_changes = true
     end
     User.current = old_user
     any_changes
@@ -299,15 +297,14 @@ module LanguageExporter
     twice = {}
     pass = true
     for line in read_export_file_lines
-      if line =~ /^ *['"]?(\w+)['"]?:/
-        if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
-          verbose("#{locale} #{Regexp.last_match(1)}: " \
-                  "tag appears more than once")
-          twice[Regexp.last_match(1)] = true
-          pass = false
-        end
-        once[Regexp.last_match(1)] = true
+      next unless line =~ /^ *['"]?(\w+)['"]?:/
+      if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
+        verbose("#{locale} #{Regexp.last_match(1)}: " \
+                "tag appears more than once")
+        twice[Regexp.last_match(1)] = true
+        pass = false
       end
+      once[Regexp.last_match(1)] = true
     end
     pass
   end
@@ -459,12 +456,11 @@ module LanguageExporter
   def validate_square_brackets_args(args)
     pass = true
     args.split(",").each do |pair|
-      unless /^ :?\w+ = (
+      next if /^ :?\w+ = (
             '.*' | ".*" | -?\d+(\.\d+)? | :\w+ | [a-z][a-z_]*\d*
           )$/x.match?(pair)
-        pass = false
-        break
-      end
+      pass = false
+      break
     end
     pass
   end

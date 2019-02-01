@@ -76,18 +76,17 @@ namespace :jason do
     print "Textilizing #{notes.length} strings...\n"
     n = 0
     results = []
-    for str in notes
-      if str.index("_")
-        if (n % 15).zero?
-          print "%.2f%% done\n" % (100.0 * n / notes.length)
-          sleep 1
-        end
-        n += 1
-        begin
-          results.push(str.tpl)
-        rescue StandardError => e
-          results.push("Crashed: " + e.to_s + "\n" + str)
-        end
+    notes.each do |str|
+      next unless str.index("_")
+      if (n % 15).zero?
+        print "%.2f%% done\n" % (100.0 * n / notes.length)
+        sleep 1
+      end
+      n += 1
+      begin
+        results.push(str.tpl)
+      rescue StandardError => e
+        results.push("Crashed: " + e.to_s + "\n" + str)
       end
     end
     print "Writing redcloth.yml...\n"
@@ -108,15 +107,14 @@ namespace :jason do
     for file in Dir.glob("../../../logs/access_log-*").sort
       File.open(file) do |fh|
         fh.each_line do |line|
-          if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
-            ua = match[7]
-            type, ver = parse_user_agent(ua)
-            str = ver ? "#{type}_#{ver}" : type.to_s || "none"
-            ids[ua] ||= [str, 0]
-            ids[ua][1] += 1
-            totals[str] ||= 0
-            totals[str] += 1
-          end
+          next unless match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
+          ua = match[7]
+          type, ver = parse_user_agent(ua)
+          str = ver ? "#{type}_#{ver}" : type.to_s || "none"
+          ids[ua] ||= [str, 0]
+          ids[ua][1] += 1
+          totals[str] ||= 0
+          totals[str] += 1
         end
       end
     end
@@ -198,45 +196,43 @@ namespace :jason do
     File.open("esslinger.txt") do |fh|
       fh.each_line do |name|
         name = name.strip!.squeeze(" ")
-        if name =~ /^([A-Z])/
-          print Regexp.last_match(1)
+        next unless name =~ /^([A-Z])/
+        print Regexp.last_match(1)
 
-          name_parse = NameParse.new(name)
-          results = Name.find_or_create_name_and_parents(name_parse.search_name)
-          if results.last.nil?
-            print "\nError: #{name_parse.name}\n"
-            name = nil
-          else
-            name = n = results.last
-            n.rank  = name_parse.rank    if name_parse.rank
-            n.notes = name_parse.comment if !n.id && name_parse.comment
-            for n in results
-              if n
-                n.change_deprecated(false)
-                n.save_if_changed(user, "Approved by jason, based on Esslinger's checklist.")
-              end
-            end
+        name_parse = NameParse.new(name)
+        results = Name.find_or_create_name_and_parents(name_parse.search_name)
+        if results.last.nil?
+          print "\nError: #{name_parse.name}\n"
+          name = nil
+        else
+          name = n = results.last
+          n.rank  = name_parse.rank    if name_parse.rank
+          n.notes = name_parse.comment if !n.id && name_parse.comment
+          results.each do |n|
+            next unless n
+            n.change_deprecated(false)
+            n.save_if_changed(
+              user, "Approved by jason, based on Esslinger's checklist."
+            )
           end
+        end
 
-          if name_parse.has_synonym
-            results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
-            if results.last.nil?
-              print "\nError: = #{name_parse.synonym}\n"
-            else
-              synonym = n = results.last
-              n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
-              n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
-              n.change_deprecated(true)
-              n.save_if_changed(user, "Deprecated by jason, based on Esslinger's checklist")
-              for n in results[0..-2]
-                n.save_if_changed(user, nil)
-              end
+        next unless name_parse.has_synonym
+        results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+        if results.last.nil?
+          print "\nError: = #{name_parse.synonym}\n"
+        else
+          synonym = n = results.last
+          n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
+          n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
+          n.change_deprecated(true)
+          n.save_if_changed(
+            user, "Deprecated by jason, based on Esslinger's checklist"
+          )
+          results[0..-2].each { |n| n.save_if_changed(user, nil) }
 
-              # Oops, forgot to actually synonymize names!
-              name.merge_synonyms(synonym) if name && synonym
-            end
-          end
-
+          # Oops, forgot to actually synonymize names!
+          name.merge_synonyms(synonym) if name && synonym
         end
       end
     end

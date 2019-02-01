@@ -182,11 +182,10 @@ module ApplicationHelper
     addr, parms = url.split("?")
     for arg in parms ? parms.split("&") : []
       var, val = arg.split("=")
-      if var && var != ""
-        var = CGI.unescape(var)
-        # See note below about precedence in case of redundancy.
-        args[var] = val unless args.key?(var)
-      end
+      next unless var && var != ""
+      var = CGI.unescape(var)
+      # See note below about precedence in case of redundancy.
+      args[var] = val unless args.key?(var)
     end
 
     # Deal with the special "/xxx/id" case.
