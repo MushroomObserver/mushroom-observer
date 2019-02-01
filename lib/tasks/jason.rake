@@ -338,7 +338,7 @@ namespace :jason do
                 lines.push('>>>>>>>> already set "where" for this observation')
               else
                 where = lookup_location(val, lines)
-                where = true unless where # (lookup_location takes care of errors)
+                where ||= true # (lookup_location takes care of errors)
               end
             when "specimen"
               if !spec.nil?
@@ -368,7 +368,7 @@ namespace :jason do
                 lines.push('>>>>>>>> already set "what" for this observation')
               else
                 what = lookup_name(val, lines)
-                what = true unless what # (lookup_name takes care of errors)
+                what ||= true # (lookup_name takes care of errors)
               end
             when "vote"
               if !what

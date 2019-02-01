@@ -170,7 +170,7 @@ module SessionExtensions
                   if elem["selected"] == "selected"
               end
             end
-            val = opts.first.value unless val
+            val ||= opts.first.value
             field.value = val
             inputs << field
 

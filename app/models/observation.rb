@@ -1106,7 +1106,7 @@ class Observation < AbstractModel
     # using first.  (I think it can also happen if zero-weighted users are
     # voting.)
     best = namings.first.name if !best && namings && !namings.empty?
-    best = Name.unknown unless best
+    best ||= Name.unknown
     result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
 
     # Just humor me -- I'm sure there is some pathological case where we can
