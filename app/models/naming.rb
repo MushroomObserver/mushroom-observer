@@ -279,7 +279,7 @@ class Naming < AbstractModel
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
-    votes.each { |v| return v if (v.user_id == user.id) }
+    votes.each { |v| return v if v.user_id == user.id }
     nil
   end
 
