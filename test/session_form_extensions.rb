@@ -370,12 +370,15 @@ module SessionExtensions
       context.assert(field.type == :select,
                      "Expected field #{id.inspect} to be a select field!")
       matches = []
-      for opt in field.options
-        if label.is_a?(Regexp) ? opt.label.match(label) :
-                                 (opt.label == label.to_s)
-          field.value = opt.value
-          matches << opt.label
+      field.options.each do |opt|
+        if label.is_a?(Regexp)
+          next unless opt.label.match(label)
+        else
+          next unless (opt.label == label.to_s)
         end
+
+        field.value = opt.value
+        matches << opt.label
       end
       context.assert(!matches.empty?,
                      "Couldn't find any options in the pulldown " \
@@ -411,18 +414,17 @@ module SessionExtensions
         end
       end
       for field in submits
-        if button.is_a?(Regexp) && field.value.match(button) ||
+        next unless button.is_a?(Regexp) && field.value.match(button) ||
            button.is_a?(String) and (field.value == button) or
            button.nil?
-          context.refute(field.disabled,
-                         "Tried to submit form with disabled button: " \
-                         "#{button.inspect}")
-          context.assert(!found || found == field.value,
-                         "Found multiple non-identical submit buttons " \
-                         "matching #{button.inspect}")
-          hash[field.name] = field.value
-          found = field.value
-        end
+        context.refute(field.disabled,
+                       "Tried to submit form with disabled button: " \
+                       "#{button.inspect}")
+        context.assert(!found || found == field.value,
+                       "Found multiple non-identical submit buttons " \
+                       "matching #{button.inspect}")
+        hash[field.name] = field.value
+        found = field.value
       end
       context.assert(found,
                      "Couldn't find submit button labeled #{button.inspect}.")
