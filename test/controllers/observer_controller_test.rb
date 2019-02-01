@@ -3512,7 +3512,8 @@ class ObserverControllerTest < FunctionalTestCase
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
         "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
-        "#{o.notes[Observation.other_notes_key]}",
+        "#{o.notes[Observation.other_notes_key]}," \
+        "#{MO.http_domain}/#{o.id}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
     )

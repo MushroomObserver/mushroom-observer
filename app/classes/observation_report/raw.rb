@@ -33,6 +33,7 @@ module ObservationReport
         is_collection_location
         thumbnail_image_id
         notes
+        url
       ]
     end
 
@@ -67,7 +68,8 @@ module ObservationReport
         row.loc_low,
         row.obs_is_collection_location,
         row.obs_thumb_image_id,
-        row.obs_notes
+        row.obs_notes,
+        row.obs_url
       ]
     end
 
