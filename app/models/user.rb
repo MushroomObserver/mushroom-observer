@@ -1008,6 +1008,6 @@ class User < AbstractModel
 
   # :nodoc
   def notes_other_translations
-    %w(andere altro altra autre autres otra otras otro otros outros)
+    %w[andere altro altra autre autres otra otras otro otros outros]
   end
 end

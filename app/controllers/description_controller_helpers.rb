@@ -305,8 +305,9 @@ module DescriptionControllerHelpers
                    rescue StandardError
                      false
                    end
+
           next unless name.present? &&
-             !update_writein(@description, name, reader, writer, admin)
+                      !update_writein(@description, name, reader, writer, admin)
           @data << { name: name, reader: reader, writer: writer,
                      admin: admin }
           flash_error(:runtime_description_user_not_found.t(name: name))

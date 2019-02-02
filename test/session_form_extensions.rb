@@ -372,9 +372,9 @@ module SessionExtensions
       matches = []
       field.options.each do |opt|
         if label.is_a?(Regexp)
-          next unless opt.label.match(label)
+          next unless opt.label.match?(label)
         else
-          next unless (opt.label == label.to_s)
+          next unless opt.label == label.to_s
         end
 
         field.value = opt.value
@@ -413,10 +413,10 @@ module SessionExtensions
           hash[field.name] = field.value
         end
       end
-      for field in submits
+      submits.each do |field|
         next unless button.is_a?(Regexp) && field.value.match(button) ||
-           button.is_a?(String) and (field.value == button) or
-           button.nil?
+                    (button.is_a?(String) && (field.value == button) ||
+                     button.nil?)
         context.refute(field.disabled,
                        "Tried to submit form with disabled button: " \
                        "#{button.inspect}")

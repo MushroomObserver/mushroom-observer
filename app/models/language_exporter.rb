@@ -101,13 +101,12 @@ module LanguageExporter
     new_data = read_export_file
     good_tags = Language.official.read_export_file
     tag_lookup = translation_strings_hash
-    for tag, new_val in new_data
-      next unless new_val.is_a?(String) &&
-         good_tags.key?(tag)
+    new_data.each do |tag, new_val|
+      next unless new_val.is_a?(String) && good_tags.key?(tag)
       new_val = clean_string(new_val)
       old_val = clean_string(old_data[tag])
       next unless old_data[tag].nil? || (old_val != new_val)
-      if str = tag_lookup[tag]
+      if (str = tag_lookup[tag])
         update_string(str, new_val, old_val)
       else
         create_string(tag, new_val, old_val)

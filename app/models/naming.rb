@@ -161,10 +161,10 @@ class Naming < AbstractModel
       taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
       done_user = {}
       flavor = Notification.flavors[:name]
-      for taxon in taxa
-        for n in Notification.where(flavor: flavor, obj_id: taxon.id)
+      taxa.each do |taxon|
+        Notification.where(flavor: flavor, obj_id: taxon.id).each do |n|
           next unless (n.user != user) && !done_user[n.user_id] &&
-             (!n.require_specimen || observation.specimen)
+                      (!n.require_specimen || observation.specimen)
           QueuedEmail::NameTracking.create_email(n, self)
           done_user[n.user_id] = true
         end

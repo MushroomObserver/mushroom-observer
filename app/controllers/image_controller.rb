@@ -717,8 +717,7 @@ class ImageController < ApplicationController
         new_id = row[:new_id].to_i
         old_holder = row[:old_holder].to_s
         new_holder = row[:new_holder].to_s
-        next unless old_id != new_id ||
-           old_holder != new_holder
+        next unless old_id != new_id || old_holder != new_holder
         old_holder = Image.connection.quote(old_holder)
         new_holder = Image.connection.quote(new_holder)
         data = Image.connection.select_rows(%(

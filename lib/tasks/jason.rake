@@ -208,10 +208,10 @@ namespace :jason do
           name = n = results.last
           n.rank  = name_parse.rank    if name_parse.rank
           n.notes = name_parse.comment if !n.id && name_parse.comment
-          results.each do |n|
-            next unless n
-            n.change_deprecated(false)
-            n.save_if_changed(
+          results.each do |nm|
+            next unless nm
+            nm.change_deprecated(false)
+            nm.save_if_changed(
               user, "Approved by jason, based on Esslinger's checklist."
             )
           end
@@ -229,9 +229,9 @@ namespace :jason do
           n.save_if_changed(
             user, "Deprecated by jason, based on Esslinger's checklist"
           )
-          results[0..-2].each { |n| n.save_if_changed(user, nil) }
+          results[0..-2].each { |nm| nm.save_if_changed(user, nil) }
 
-          # Oops, forgot to actually synonymize names!
+          # Now actually synonymize names
           name.merge_synonyms(synonym) if name && synonym
         end
       end
