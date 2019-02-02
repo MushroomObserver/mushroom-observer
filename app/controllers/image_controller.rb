@@ -710,37 +710,7 @@ class ImageController < ApplicationController
   #   @data[n]["licenses"]          Options for select menu.
   def license_updater # :norobots:
     # Process any changes.
-    if request.method == "POST"
-      data = params[:updates]
-      for row in data.values
-        old_id = row[:old_id].to_i
-        new_id = row[:new_id].to_i
-        old_holder = row[:old_holder].to_s
-        new_holder = row[:new_holder].to_s
-        next unless old_id != new_id || old_holder != new_holder
-        old_holder = Image.connection.quote(old_holder)
-        new_holder = Image.connection.quote(new_holder)
-        data = Image.connection.select_rows(%(
-          SELECT id, YEAR(`when`) FROM images
-          WHERE user_id = #{@user.id}
-            AND license_id = #{old_id}
-            AND copyright_holder = #{old_holder}
-        ))
-        Image.connection.insert(%(
-          INSERT INTO copyright_changes
-            (user_id, updated_at, target_type, target_id, year, name, license_id)
-          VALUES
-            #{data.map { |id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})" }.join(",\n")}
-        ))
-        Image.connection.update(%(
-          UPDATE images
-          SET license_id = #{new_id}, copyright_holder = #{new_holder}
-          WHERE user_id = #{@user.id}
-            AND license_id = #{old_id}
-            AND copyright_holder = #{old_holder}
-        ))
-      end
-    end
+    process_license_changes if request.method == "POST"
 
     # Gather data for form.
     @data = Image.connection.select_all(%(
@@ -749,13 +719,64 @@ class ImageController < ApplicationController
       WHERE user_id = #{@user.id.to_i}
       GROUP BY copyright_holder, license_id
     )).to_a
-    for datum in @data
-      if license = License.safe_find(datum["license_id"].to_i)
-        datum["license_name"] = license.display_name
-        datum["licenses"]     = License.current_names_and_ids(license)
-      end
+    @data.each do |datum|
+      next unless (license = License.safe_find(datum["license_id"].to_i))
+
+      datum["license_name"] = license.display_name
+      datum["licenses"]     = License.current_names_and_ids(license)
     end
   end
+
+  private # private methods used by license updater ############################
+
+  def process_license_changes
+    data = params[:updates]
+    data.values.each do |row|
+      next unless row_changed?(row)
+
+      images_to_update = Image.where(
+        user: @user, license: row[:old_id], copyright_holder: row[:old_holder]
+      )
+      update_licenses_history(images_to_update, row[:old_holder], row[:old_id])
+
+      # Update the license info in the images
+      # Disable cop because we want to update all relevant records with
+      # a single SELECT. Otherwise license updating would take too long
+      # for users with many (e.g. thousands) of images
+      # rubocop:disable Rails/SkipsModelValidations
+      images_to_update.update_all(license_id: row[:new_id],
+                                  copyright_holder: row[:new_holder])
+      # rubocop:enable Rails/SkipsModelValidations
+    end
+  end
+
+  def row_changed?(row)
+    row[:old_id] != row[:new_id] ||
+      row[:old_holder] != row[:new_holder]
+  end
+
+  # Add license change records with raw SQL in order to use a single INSERT.
+  # Otherwise updating would take too long for many (e.g. thousands) of images
+  def update_licenses_history(images_to_update, old_holder, old_license_id)
+    data = images_to_update.pluck(:id, :when)
+
+    # Prevent SQL injection
+    safe_old_holder = Image.connection.quote(old_holder)
+    safe_old_license_id = old_license_id.to_i
+
+    Image.connection.insert(%(
+      INSERT INTO copyright_changes
+        (user_id, updated_at, target_type, target_id, year, name, license_id)
+      VALUES
+        #{data.map do |img_id, img_when|
+            "(#{@user.id},NOW(),'Image',#{img_id},#{img_when.year},
+            #{safe_old_holder},#{safe_old_license_id})"
+          end.
+          join(",\n")}
+    ))
+  end
+
+  public # end private methods used by license updater #########################
 
   # Bulk update anonymity of user's image votes.
   # Input: params[:commit] - which button user pressed
@@ -850,7 +871,7 @@ class ImageController < ApplicationController
       render_image_csv_file(data)
     end
   rescue StandardError => e
-    render(plain: e.to_s, layout: false, status: 500)
+    render(plain: e.to_s, layout: false, status: :internal_server_error)
   end
 
   def render_test_image_report(data)
