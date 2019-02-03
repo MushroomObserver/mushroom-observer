@@ -4,6 +4,10 @@ inherit_from: .rubocop_todo.yml
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
 
+# WARNING: .codeclimate.yml can specify the RuboCop version used
+# by Code Climate, which can be different than the version in Gemfile.lock
+# Therefore .codeclimate.yml should be updated whenever we update RuboCop
+
 AllCops:
   # Ignore cops for Ruby versions which are newer than that used by MO
   TargetRubyVersion: 2.4.1

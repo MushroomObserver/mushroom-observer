@@ -78,6 +78,7 @@ gem "byebug", group: [:development, :test]
 gem "coveralls", require: false
 
 # Use rubocop for code style quality control
+# TODO: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 gem "rubocop", require: false
 
 # Brakeman static analysis security scanner
