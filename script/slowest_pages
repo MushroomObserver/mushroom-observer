@@ -23,6 +23,7 @@ NUM  = ARGV[1].to_i || 10
 data = {}
 File.open(FILE).readlines.each do |line|
   next unless /^TIME:/.match?(line)
+
   _, time, status, controller, action, robot = line.split
   next if status != "200"
 

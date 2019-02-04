@@ -83,7 +83,7 @@ class AutoCompleteTest < UnitTestCase
       "o p q",              # 8
       "o",                  # 9
       "something",          # 10
-      "else",               # 11
+      "else"                # 11
     ]
     [
       [10, 9, "o"],
@@ -116,7 +116,7 @@ class AutoCompleteTest < UnitTestCase
       "l m n o p q",         # 8 "o"
       "o",                   # 9 "o"
       "something",           # 10
-      "else",                # 11
+      "else"                 # 11
     ]
     [
       [10, 9, "o"],

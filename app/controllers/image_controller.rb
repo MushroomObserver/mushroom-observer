@@ -454,6 +454,7 @@ class ImageController < ApplicationController
         before = img.projects.include?(project)
         after = checks["id_#{project.id}"] == "1"
         next if before == after
+
         if after
           project.add_image(img)
           flash_notice(:attached_to_project.t(object: :image,
@@ -646,7 +647,9 @@ class ImageController < ApplicationController
       if request.method == "POST" && (images = params[:selected])
         images.each do |image_id, do_it|
           next unless do_it == "yes"
+
           next unless image = Image.safe_find(image_id)
+
           @object.remove_image(image)
           @object.log_remove_image(image)
           flash_notice(:runtime_image_remove_success.t(id: image_id))

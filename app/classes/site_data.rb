@@ -191,6 +191,7 @@ class SiteData
       field = nil
       for field2, table2 in FIELD_TABLES
         next unless table2 == table
+
         proc = FIELD_STATE_PROCS[field2]
         if proc && proc.call(obj)
           field = field2
@@ -273,6 +274,7 @@ class SiteData
     if data
       for field in ALL_FIELDS
         next unless data[field]
+
         # This fixes the double-counting of created records.
         if field.to_s =~ /^(\w+)_versions$/
           data[field] -= data[Regexp.last_match(1)] || 0

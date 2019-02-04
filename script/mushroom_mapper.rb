@@ -113,6 +113,7 @@ for id, genus, classification in Name.connection.select_rows %(
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]
   next unless %w[Amoebozoa Fungi Protozoa].include?(kingdom)
+
   family2 = family || "Unknown Family in #{order || klass || kingdom}"
   hash = genus_to_family[genus] ||= {}
   hash[family2] = hash[family2].to_i + num_obs

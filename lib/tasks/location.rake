@@ -3942,6 +3942,7 @@ namespace :location do
     LOCATION_FIXES.values.sort.each do |v|
       reasons = Location.dubious_name?(v, true)
       next if reasons == []
+
       print("#{v}\n")
       reasons.each { |r| print("\t#{r}\n") }
     end

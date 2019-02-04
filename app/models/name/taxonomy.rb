@@ -66,6 +66,7 @@ class Name < AbstractModel
     if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
       observations.each do |o|
         next unless o.vote_cache && o.vote_cache >= MO.eol_min_observation_vote
+
         o.images.each do |i|
           if i.ok_for_export && i.vote_cache &&
              i.vote_cache >= MO.eol_min_image_vote

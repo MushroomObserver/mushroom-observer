@@ -868,6 +868,7 @@ class LocationController < ApplicationController
     for o in observations
       count += 1
       next if o.location_id
+
       o.location_id = location.id
       o.where = nil
       unless o.save

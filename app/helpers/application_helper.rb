@@ -183,6 +183,7 @@ module ApplicationHelper
     for arg in parms ? parms.split("&") : []
       var, val = arg.split("=")
       next unless var && var != ""
+
       var = CGI.unescape(var)
       # See note below about precedence in case of redundancy.
       args[var] = val unless args.key?(var)

@@ -391,7 +391,7 @@ class Naming < AbstractModel
     :naming_reason_label_1,  # "Recognized by sight"
     :naming_reason_label_2,  # "Used references"
     :naming_reason_label_3,  # "Based on microscopical features"
-    :naming_reason_label_4,  # "Based on chemical features"
+    :naming_reason_label_4   # "Based on chemical features"
   ].freeze
 
   # Return reasons as Array of Reason instances.  Changes to these instances

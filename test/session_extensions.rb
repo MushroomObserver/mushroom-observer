@@ -285,6 +285,7 @@ module SessionExtensions
 
         # Click on first link that matches everything.
         next unless match
+
         url = CGI.unescapeHTML(link.attributes["href"])
         get(url)
         done = true

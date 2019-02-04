@@ -27,6 +27,7 @@ xml.response(
       refs = []
       @data.descriptions(taxon.id).each do |desc|
         next unless desc.refs.present?
+
         desc.refs.split(/[\n\r]/).each do |ref|
           ref = ref.strip
           refs << ref.t if ref.present? && ref != citation
@@ -37,6 +38,7 @@ xml.response(
         for f in NameDescription.eol_note_fields
           value = desc.send(f)
           next unless value.present?
+
           xml.dataObject do
             lang = desc.locale || MO.default_locale
             xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")

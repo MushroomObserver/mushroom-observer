@@ -39,6 +39,7 @@ def image_servers
   results = []
   MO.image_sources.each do |server, specs|
     next unless specs[:write]
+
     url = format(specs[:write], root: MO.root)
     sizes = specs[:sizes] || map.keys
     subdirs = sizes.map { |s| map[s] }.join(",")

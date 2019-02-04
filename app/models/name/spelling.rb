@@ -49,6 +49,7 @@ class Name < AbstractModel
       (2..num).each do |i|
         next unless results.any?
         next unless (i & 1).zero?
+
         prefixes = results.map(&:text_name).uniq
         results = []
         word = i == 2 ? words[i - 1] : "#{words[i - 2]} #{words[i - 1]}"

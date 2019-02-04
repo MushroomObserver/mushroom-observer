@@ -20,6 +20,7 @@ class Robots
         File.open(file).readlines.each do |line|
           match = line.match(pat)
           next unless match
+
           controller = match[1]
           action     = match[2]
           results["#{controller}/#{action}"] = true

@@ -78,6 +78,7 @@ namespace :jason do
     results = []
     notes.each do |str|
       next unless str.index("_")
+
       if (n % 15).zero?
         print "%.2f%% done\n" % (100.0 * n / notes.length)
         sleep 1
@@ -108,6 +109,7 @@ namespace :jason do
       File.open(file) do |fh|
         fh.each_line do |line|
           next unless match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
+
           ua = match[7]
           type, ver = parse_user_agent(ua)
           str = ver ? "#{type}_#{ver}" : type.to_s || "none"
@@ -197,6 +199,7 @@ namespace :jason do
       fh.each_line do |name|
         name = name.strip!.squeeze(" ")
         next unless name =~ /^([A-Z])/
+
         print Regexp.last_match(1)
 
         name_parse = NameParse.new(name)
@@ -210,6 +213,7 @@ namespace :jason do
           n.notes = name_parse.comment if !n.id && name_parse.comment
           results.each do |nm|
             next unless nm
+
             nm.change_deprecated(false)
             nm.save_if_changed(
               user, "Approved by jason, based on Esslinger's checklist."
@@ -218,6 +222,7 @@ namespace :jason do
         end
 
         next unless name_parse.has_synonym
+
         results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
         if results.last.nil?
           print "\nError: = #{name_parse.synonym}\n"

@@ -417,6 +417,7 @@ module SessionExtensions
         next unless button.is_a?(Regexp) && field.value.match(button) ||
                     (button.is_a?(String) && (field.value == button) ||
                      button.nil?)
+
         context.refute(field.disabled,
                        "Tried to submit form with disabled button: " \
                        "#{button.inspect}")

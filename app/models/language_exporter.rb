@@ -103,9 +103,11 @@ module LanguageExporter
     tag_lookup = translation_strings_hash
     new_data.each do |tag, new_val|
       next unless new_val.is_a?(String) && good_tags.key?(tag)
+
       new_val = clean_string(new_val)
       old_val = clean_string(old_data[tag])
       next unless old_data[tag].nil? || (old_val != new_val)
+
       if (str = tag_lookup[tag])
         update_string(str, new_val, old_val)
       else
@@ -297,6 +299,7 @@ module LanguageExporter
     pass = true
     for line in read_export_file_lines
       next unless line =~ /^ *['"]?(\w+)['"]?:/
+
       if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
         verbose("#{locale} #{Regexp.last_match(1)}: " \
                 "tag appears more than once")
@@ -458,6 +461,7 @@ module LanguageExporter
       next if /^ :?\w+ = (
             '.*' | ".*" | -?\d+(\.\d+)? | :\w+ | [a-z][a-z_]*\d*
           )$/x.match?(pair)
+
       pass = false
       break
     end
