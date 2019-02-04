@@ -211,7 +211,7 @@ class ObserverController
 
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
-    fail "no robots!" if browser.bot?
+    raise "no robots!" if browser.bot?
 
     query_params_set(query)
     @format = params[:format] || "raw"
@@ -250,7 +250,7 @@ class ObserverController
     when "mycoflora"
       ObservationReport::Mycoflora.new(args)
     else
-      fail("Invalid download type: #{format.inspect}")
+      raise("Invalid download type: #{format.inspect}")
     end
   end
 

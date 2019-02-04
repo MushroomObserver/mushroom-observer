@@ -6,7 +6,7 @@ class ObjectChange
 
   def initialize(obj, old_version, new_version)
     @object = obj
-    @old_clone = obj && obj.revert_clone(old_version)
-    @new_clone = obj && obj.revert_clone(new_version)
+    @old_clone = obj&.revert_clone(old_version)
+    @new_clone = obj&.revert_clone(new_version)
   end
 end

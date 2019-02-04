@@ -888,10 +888,10 @@ class ImageController < ApplicationController
     elsif file.is_a?(String)
       get_list_of_names_from_string(file)
     elsif file.present?
-      fail "Names file came in as an unexpected class:" \
+      raise "Names file came in as an unexpected class:" \
         "#{file.class.name.inspect}"
     else
-      fail "Missing names file!"
+      raise "Missing names file!"
     end
   end
 
@@ -904,7 +904,7 @@ class ImageController < ApplicationController
     when "text/csv"
       get_list_of_names_from_csv_file(file)
     else
-      fail "Names file has unrecognized content_type: #{content_type.inspect}"
+      raise "Names file has unrecognized content_type: #{content_type.inspect}"
     end
   end
 
@@ -914,7 +914,7 @@ class ImageController < ApplicationController
     name_column = headings.index_of("name")
     rank_column = headings.index_of("rank")
     unless name_column
-      fail 'Expected names file to have a \"name\" column, ' \
+      raise 'Expected names file to have a \"name\" column, ' \
         "with column label in the first row."
     end
     if rank_column

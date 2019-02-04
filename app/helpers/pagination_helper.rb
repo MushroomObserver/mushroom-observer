@@ -30,8 +30,7 @@ module PaginationHelper
   #   <%= pagination_numbers(@pages) %>
   #
   def pagination_letters(pages, args = {})
-    if pages &&
-       pages.letter_arg &&
+    if pages&.letter_arg &&
        (pages.letter || pages.num_total > pages.num_per_page) &&
        (!pages.used_letters || pages.used_letters.length > 1)
       args = args.dup
@@ -110,7 +109,7 @@ module PaginationHelper
     url = reload_with_args(params)
     if args[:anchor]
       url.sub!(/#.*/, "")
-      url += '#' + args[:anchor]
+      url += "#" + args[:anchor]
     end
     "<li>#{link_to(label, url)}</li>".html_safe
   end

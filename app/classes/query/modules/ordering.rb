@@ -155,7 +155,7 @@ module Query::Modules::Ordering
       "#{table}.id ASC"
 
     else
-      fail("Can't figure out how to sort #{model} by :#{by}.")
+      raise("Can't figure out how to sort #{model} by :#{by}.")
     end
   end
 

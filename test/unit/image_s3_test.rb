@@ -30,7 +30,7 @@ class ImageS3Test < UnitTestCase
       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       stub: true
     )
-    s3.client.stub_responses(:head_object, 'NotFound')
+    s3.client.stub_responses(:head_object, "NotFound")
     assert_nil s3.status("key")
   end
 
@@ -42,7 +42,7 @@ class ImageS3Test < UnitTestCase
       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       stub: true
     )
-    s3.client.stub_responses(:head_object, 'Http503Error')
+    s3.client.stub_responses(:head_object, "Http503Error")
     assert_raises(RuntimeError) { s3.status("key") }
   end
 
@@ -54,7 +54,7 @@ class ImageS3Test < UnitTestCase
       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       stub: true
     )
-    s3.client.stub_responses(:head_object, 'Timeout::Error')
+    s3.client.stub_responses(:head_object, "Timeout::Error")
     assert_raises(RuntimeError) { s3.status("key") }
   end
 end

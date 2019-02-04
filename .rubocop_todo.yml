@@ -631,6 +631,16 @@ Style/MutableConstant:
     - 'app/models/name_parse.rb'
     - 'app/models/sequence.rb'
 
+# Offense count: 5
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: both, prefix, postfix
+Style/NegatedIf:
+  Exclude:
+    - 'app/classes/query/modules/validation.rb'
+    - 'app/models/name/taxonomy.rb'
+    - 'test/models/api_test.rb'
+
 # Offense count: 32
 Style/NestedTernaryOperator:
   Exclude:
@@ -773,69 +783,6 @@ Style/RegexpLiteral:
 # SupportedStyles: implicit, explicit
 Style/RescueStandardError:
   Enabled: false
-
-# Offense count: 59
-# Cop supports --auto-correct.
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, Whitelist.
-# Whitelist: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Enabled: false
-
-# Offense count: 83
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: only_raise, only_fail, semantic
-Style/SignalException:
-  Enabled: false
-
-# Offense count: 21
-# Cop supports --auto-correct.
-Style/StderrPuts:
-  Exclude:
-    - 'app/models/queued_email.rb'
-    - 'lib/tasks/jason.rake'
-    - 'script/jpegsize'
-    - 'script/monitor_top'
-    - 'script/mushroom_mapper.rb'
-    - 'script/refresh_caches'
-
-# Offense count: 48
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiterals:
-  Enabled: false
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiteralsInInterpolation:
-  Exclude:
-    - 'app/controllers/name_controller.rb'
-    - 'app/models/name/format.rb'
-    - 'app/models/name/lifeform.rb'
-
-# Offense count: 18
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, MinSize.
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  Exclude:
-    - 'test/controllers/account_controller_test.rb'
-    - 'test/controllers/support_controller_test.rb'
-    - 'test/models/localization_files_test.rb'
-    - 'test/models/name_test.rb'
-    - 'test/models/query_test.rb'
-    - 'test/models/tree_test.rb'
-
-# Offense count: 31
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-# IgnoredMethods: respond_to, define_method
-Style/SymbolProc:
-  Exclude:
-    - 'test/models/api_test.rb'
 
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.

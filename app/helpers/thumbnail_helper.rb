@@ -27,7 +27,7 @@ module ThumbnailHelper
   end
 
   def show_best_image(obs)
-    if obs && obs.thumb_image
+    if obs&.thumb_image
       thumbnail(obs.thumb_image,
                 link: obs.show_link_args,
                 size: :thumbnail,

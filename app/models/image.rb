@@ -701,7 +701,7 @@ class Image < AbstractModel
     when :rotate_right then operator = "+90"
     when :mirror then operator = "-h"
     else
-      fail("Invalid transform operator: #{operator.inspect}")
+      raise("Invalid transform operator: #{operator.inspect}")
     end
     system("script/rotate_image #{id} #{operator}&") if Rails.env != "test"
   end

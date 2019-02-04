@@ -63,7 +63,7 @@ namespace :jason do
     end
     print "Writing notes.yml...\n"
     File.open("notes.yml", "w") do |fh|
-      fh.write notes.select { |x| x && x.index("_") }.uniq.to_yaml
+      fh.write notes.select { |x| x&.index("_") }.uniq.to_yaml
     end
     print "Done!\n"
   end
@@ -441,13 +441,13 @@ namespace :jason do
                 if !date.nil?
                   lines.push('>>>>>>>> already set "when" for this observation')
                 elsif !(date = Date.strptime(val, "%Y%m%d"))
-                  lines.push('>>>>>>>> couldn\'t parse date, use YYYYMMDD')
+                  lines.push(">>>>>>>> couldn't parse date, use YYYYMMDD")
                   date = true
                 end
               elsif images.last[2]
                 lines.push('>>>>>>>> already set "image date" for this image')
               elsif !(images.last[2] = Date.strptime(val, "%Y%m%d"))
-                lines.push('>>>>>>>> couldn\'t parse date, use YYYYMMDD')
+                lines.push(">>>>>>>> couldn't parse date, use YYYYMMDD")
                 images.last[2] = true
               end
             when "notes"
@@ -509,7 +509,7 @@ namespace :jason do
             else
               name = "unknown"
             end
-            $stderr.puts('Created observation: #%d (%s)' % [obs.id, name])
+            warn("Created observation: #%d (%s)" % [obs.id, name])
             obs.log(:log_observation_created_at, { user: user.login }, true)
             lines.clear
 
@@ -529,9 +529,12 @@ namespace :jason do
                 NamingReason.new(naming: naming, reason: 3, notes: chem).save if chem
                 NamingReason.new(naming: naming, reason: 4, notes: micro).save if micro
                 naming.change_vote(user, vote)
-                $stderr.puts('  Created naming: #%d (%s)' % [naming.id, naming.name.search_name])
+                warn(
+                  "  Created naming: #%d (%s)" % [naming.id,
+                                                  naming.name.search_name]
+                )
               else
-                $stderr.puts("Failed to create naming: %s" % naming.dump_errors)
+                warn("Failed to create naming: %s" % naming.dump_errors)
               end
             end
 
@@ -570,15 +573,18 @@ namespace :jason do
                     obs.thumb_image_id = image.id
                     obs.save
                   end
-                  $stderr.puts('  Created image: #%d' % image.id)
+                  warn("  Created image: #%d" % image.id)
                 else
-                  $stderr.puts('Failed to create image "%s": %s' % [file, image.dump_errors])
+                  warn('Failed to create image "%s": %s' % [file,
+                                                            image.dump_errors])
                 end
               end
             end
 
           else
-            lines.push('>>>>>>>> couldn\'t create observation: %s' % obs.dump_errors)
+            lines.push(
+              ">>>>>>>> couldn't create observation: %s" % obs.dump_errors
+            )
           end
         end
 

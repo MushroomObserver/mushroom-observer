@@ -48,7 +48,7 @@ module TabsHelper
   end
 
   def notifications_link(obs, user)
-    return unless user && user.has_unshown_naming_notifications?(obs)
+    return unless user&.has_unshown_naming_notifications?(obs)
 
     link_with_query(:show_observation_view_notifications.t,
                     controller: :observation, action: :show_notifications,
@@ -56,7 +56,7 @@ module TabsHelper
   end
 
   def manage_lists_link(obs, user)
-    return unless user && user.species_lists.any?
+    return unless user&.species_lists&.any?
 
     link_with_query(:show_observation_manage_species_lists.t,
                     controller: :species_list, action: :manage_species_lists,

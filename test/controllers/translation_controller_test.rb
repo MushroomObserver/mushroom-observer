@@ -106,7 +106,7 @@ class TranslationControllerTest < FunctionalTestCase
     assert_major_header("MAIN PAGES", form.shift)
     assert_minor_header("observer/index", form.shift)
     assert_tag_field("index_title", form.shift)
-    assert_comment('you don\'t see this every day', form.shift)
+    assert_comment("you don't see this every day", form.shift)
     assert_tag_field("index_error", form.shift)
     assert_tag_field("index_help", form.shift)
     assert_tag_field("index_prefs", form.shift)

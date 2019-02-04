@@ -252,22 +252,22 @@ class Symbol
                   val.match(/^'(.*)'$/) ||
                   val.match(/^(-?\d+(\.\d+)?)$/)
               val = Regexp.last_match(1)
-            elsif !val.match(/^([a-z][a-z_]*\d*)$/)
-              fail(ArgumentError, "Invalid argument value \":#{val}\" in " \
-                "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
-            elsif !args.key?(val.to_sym)
-              fail(ArgumentError, "Forgot to pass :#{val} into " \
-                "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
+            elsif !val.match(/^([a-z][a-z_]*\d*)$/) && Symbol.raise_error?
+              raise(ArgumentError, "Invalid argument value \":#{val}\" in " \
+                    "#{I18n.locale} localization for " +
+                    ([self] + level).map(&:inspect).join(" --> "))
+            elsif !args.key?(val.to_sym) && Symbol.raise_error?
+              raise(ArgumentError, "Forgot to pass :#{val} into " \
+                    "#{I18n.locale} localization for " +
+                    ([self] + level).map(&:inspect).join(" --> "))
             else
               val = args[val.to_sym]
             end
             hash[key] = val
-          else
-            fail(ArgumentError, "Invalid syntax at \"#{pair}\" in " \
-              "arguments for #{I18n.locale} tag :#{tag} embedded in " +
-              ([self] + level).map(&:inspect).join(" --> ")) if Symbol.raise_error?
+          elsif Symbol.raise_error?
+            raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " \
+                  "arguments for #{I18n.locale} tag :#{tag} embedded in " +
+                  ([self] + level).map(&:inspect).join(" --> "))
           end
         end
       end

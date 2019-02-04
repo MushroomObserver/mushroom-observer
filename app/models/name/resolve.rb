@@ -121,7 +121,7 @@ class Name < AbstractModel
       names = find_or_create_name_and_parents(input_what)
       if names.last
         names.each do |n|
-          next unless n && n.new_record?
+          next unless n&.new_record?
 
           n.inherit_stuff
           n.save_with_log(:log_updated_by)
@@ -141,7 +141,7 @@ class Name < AbstractModel
       end
     end
     names.each do |n|
-      next unless n && n.new_record?
+      next unless n&.new_record?
 
       n.change_deprecated(deprecate) if deprecate
       n.inherit_stuff

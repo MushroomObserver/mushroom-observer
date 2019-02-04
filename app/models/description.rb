@@ -414,7 +414,7 @@ class Description < AbstractModel
     elsif user.to_i != 0
       group_user_ids(table).include?(user.to_i)
     else
-      fail "ArgumentError", "Was expecting User instance, id or nil."
+      raise "ArgumentError", "Was expecting User instance, id or nil."
     end
   end
 

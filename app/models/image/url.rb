@@ -50,7 +50,8 @@ class Image
       when /^https:/
         remote_file_exists?(url = format(spec, root: MO.root))
       else
-        fail "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
+        raise "Invalid image source test spec for "\
+              "#{source.inspect}: #{spec.inspect}"
       end
     end
 
@@ -74,7 +75,7 @@ class Image
     end
 
     def subdirectory
-      SUBDIRECTORIES[size] || fail("Invalid size: #{size.inspect}")
+      SUBDIRECTORIES[size] || raise("Invalid size: #{size.inspect}")
     end
 
     def source_order
@@ -86,7 +87,8 @@ class Image
     end
 
     def specs(source)
-      MO.image_sources[source] || fail("Missing image source: #{source.inspect}")
+      MO.image_sources[source] ||
+        raise("Missing image source: #{source.inspect}")
     end
   end
 end

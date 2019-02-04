@@ -28,7 +28,7 @@ module PatternSearch
 
     def parse_next_term!(str)
       str.sub!(TERM_REGEX, "") ||
-        fail(SyntaxError.new(string: str))
+        raise(SyntaxError.new(string: str))
       var = Regexp.last_match(1)
       val = Regexp.last_match(2)
       var = "pattern" if var.blank?
