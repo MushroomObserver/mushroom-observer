@@ -400,8 +400,8 @@ def remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
       # (means str2 is not found in str1)
       # rubocop:disable Style/NumericPredicate
       next unless allowed_path.index(disallowed_path) == 0
-      # rubocop:enable Style/NumericPredicate
 
+      # rubocop:enable Style/NumericPredicate
       reject = true
       break
     end

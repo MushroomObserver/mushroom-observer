@@ -165,6 +165,7 @@ class Naming < AbstractModel
         Notification.where(flavor: flavor, obj_id: taxon.id).each do |n|
           next unless (n.user != user) && !done_user[n.user_id] &&
                       (!n.require_specimen || observation.specimen)
+
           QueuedEmail::NameTracking.create_email(n, self)
           done_user[n.user_id] = true
         end

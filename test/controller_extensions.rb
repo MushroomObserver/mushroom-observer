@@ -244,6 +244,7 @@ module ControllerExtensions
       file_name = "#{html_dir}/#{label}_#{count}.html"
       count += 1
       next unless count > 100
+
       raise RangeError.new(
         "More than 100 files found with a label of '#{label}'"
       )
