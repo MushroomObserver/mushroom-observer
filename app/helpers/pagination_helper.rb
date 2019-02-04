@@ -32,7 +32,7 @@ module PaginationHelper
   def pagination_letters(pages, args = {})
     if pages&.letter_arg &&
        (pages&.letter || pages&.num_total > pages&.num_per_page) &&
-       (!pages&.used_letters || pages&.used_letters.length > 1)
+       (!pages&.used_letters || pages&.used_letters&.length > 1)
       args = args.dup
       args[:params] = (args[:params] || {}).dup
       args[:params][pages.number_arg] = nil
