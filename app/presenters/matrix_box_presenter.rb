@@ -26,16 +26,16 @@ class MatrixBoxPresenter
     target = rss_log.target
     name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     get_rss_log_details(rss_log, target)
-    self.when  = target.when.web_date if target && target.respond_to?(:when)
-    self.who   = view.user_link(target.user) if target && target.user
+    self.when  = target.when.web_date if target&.respond_to?(:when)
+    self.who   = view.user_link(target.user) if target&.user
     self.what  = target ?
       view.link_with_query(name, controller: target.show_controller, action: target.show_action, id: target.id) :
       view.link_with_query(name, controller: :observer, action: :show_rss_log, id: rss_log.id)
     self.where = view.location_link(target.place_name, target.location) \
-                 if target && target.respond_to?(:location)
+                 if target&.respond_to?(:location)
     self.thumbnail = view.thumbnail(target.thumb_image, link: { controller: target.show_controller,
                                                                 action: target.show_action, id: target.id }) \
-                     if target && target.respond_to?(:thumb_image) && target.thumb_image
+                     if target&.respond_to?(:thumb_image) && target.thumb_image
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -81,7 +81,7 @@ class MatrixBoxPresenter
   end
 
   def fancy_time
-    time.fancy_time if time
+    time&.fancy_time
   end
 
   private

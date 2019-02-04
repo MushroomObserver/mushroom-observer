@@ -172,7 +172,7 @@ class LocationController < ApplicationController
     end
 
     # Paginate the defined locations using the usual helper.
-    args[:always_index] = (@undef_pages && @undef_pages.num_total.positive?)
+    args[:always_index] = (@undef_pages&.num_total&.positive?)
     args[:action] = args[:action] || "list_locations"
     show_index_of_objects(query, args)
   end
@@ -366,7 +366,7 @@ class LocationController < ApplicationController
       update_view_stats(@description) if @description
 
       # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
+      @projects = @user&.projects_member&.select do |project|
         !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
     end
@@ -385,7 +385,7 @@ class LocationController < ApplicationController
         update_view_stats(@description)
 
         # Get a list of projects the user can create drafts for.
-        @projects = @user && @user.projects_member.select do |project|
+        @projects = @user&.projects_member&.select do |project|
           !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
         end
 

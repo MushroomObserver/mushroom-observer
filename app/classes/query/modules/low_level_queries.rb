@@ -54,7 +54,7 @@ module Query::Modules::LowLevelQueries
   # Call model.connection.select_all.
   def select_all(args = {})
     initialize_query
-    fail "This query doesn't support low-level access!" if executor
+    raise "This query doesn't support low-level access!" if executor
 
     model.connection.select_all(query(args)).to_a
   end
@@ -62,7 +62,7 @@ module Query::Modules::LowLevelQueries
   # Call model.find_by_sql.
   def find_by_sql(args = {})
     initialize_query
-    fail "This query doesn't support low-level access!" if executor
+    raise "This query doesn't support low-level access!" if executor
 
     model.find_by_sql(query_all(args))
   end

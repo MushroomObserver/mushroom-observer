@@ -33,13 +33,13 @@ module Query::Modules::Validation
       if !val.nil?
         new_args[arg_sym] = val
       elsif !optional
-        fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
+        raise("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
       else
         new_args[arg_sym] = nil
       end
     rescue MissingValue
       unless optional
-        fail("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
+        raise("Missing :#{arg_sym} parameter for #{model} :#{flavor} query.")
       end
     end
   end
@@ -62,7 +62,7 @@ module Query::Modules::Validation
   def check_for_unexpected_params(old_args)
     unless old_args.keys.empty?
       str = old_args.keys.map(&:to_s).join("', '")
-      fail("Unexpected parameter(s) '#{str}' for #{model} :#{flavor} query.")
+      raise("Unexpected parameter(s) '#{str}' for #{model} :#{flavor} query.")
     end
   end
 
@@ -88,26 +88,29 @@ module Query::Modules::Validation
     elsif arg_type.is_a?(Hash)
       validate_enum(arg, val, arg_type)
     else
-      fail("Invalid declaration of :#{arg} for #{model} :#{flavor} query! (invalid type: #{arg_type.class.name})")
+      raise("Invalid declaration of :#{arg} for #{model} :#{flavor} "\
+            "query! (invalid type: #{arg_type.class.name})")
     end
   end
 
   def validate_enum(arg, val, hash)
     if hash.keys.length != 1
-      fail("Invalid enum declaration for :#{arg} for #{model} :#{flavor} query! (wrong number of keys in hash)")
+      raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
+            "query! (wrong number of keys in hash)")
     end
 
     arg_type = hash.keys.first
     set = hash.values.first
     unless set.is_a?(Array)
-      fail("Invalid enum declaration for :#{arg} for #{model} :#{flavor} query! (expected value to be an array of allowed values)")
+      raise("Invalid enum declaration for :#{arg} for #{model} :#{flavor} "\
+            "query! (expected value to be an array of allowed values)")
     end
 
     val2 = scalar_validate(arg, val, arg_type)
     if (arg_type == :string) && set.include?(val2.to_sym)
       val2 = val2.to_sym
     elsif !set.include?(val2)
-      fail("Value for :#{arg} should be one of the following: #{set.inspect}.")
+      raise("Value for :#{arg} should be one of the following: #{set.inspect}.")
     end
     val2
   end
@@ -119,7 +122,7 @@ module Query::Modules::Validation
     when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
       false
     else
-      fail("Value for :#{arg} should be boolean, got: #{val.inspect}")
+      raise("Value for :#{arg} should be boolean, got: #{val.inspect}")
     end
   end
 
@@ -130,7 +133,7 @@ module Query::Modules::Validation
     elsif val.blank?
       nil
     else
-      fail("Value for :#{arg} should be an integer, got: #{val.inspect}")
+      raise("Value for :#{arg} should be an integer, got: #{val.inspect}")
     end
   end
 
@@ -140,7 +143,7 @@ module Query::Modules::Validation
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
-      fail("Value for :#{arg} should be a float, got: #{val.inspect}")
+      raise("Value for :#{arg} should be a float, got: #{val.inspect}")
     end
   end
 
@@ -151,14 +154,14 @@ module Query::Modules::Validation
        val.is_a?(Symbol)
       val.to_s
     else
-      fail("Value for :#{arg} should be a string or symbol, "\
-           "got a #{val.class}: #{val.inspect}")
+      raise("Value for :#{arg} should be a string or symbol, "\
+            "got a #{val.class}: #{val.inspect}")
     end
   end
 
   def validate_id(arg, val, type = ActiveRecord::Base)
     if val.is_a?(type)
-      fail("Value for :#{arg} is an unsaved #{type} instance.") unless val.id
+      raise("Value for :#{arg} is an unsaved #{type} instance.") unless val.id
 
       # Cache the instance for later use, in case we both instantiate and
       # execute query in the same action.
@@ -171,14 +174,14 @@ module Query::Modules::Validation
           val.is_a?(String) && (val == "0") && (arg == :user)
       val.to_i
     else
-      fail("Value for :#{arg} should be id or an #{type} instance, "\
-           "got: #{val.inspect}")
+      raise("Value for :#{arg} should be id or an #{type} instance, "\
+            "got: #{val.inspect}")
     end
   end
 
   def validate_name(arg, val)
     if val.is_a?(Name)
-      fail("Value for :#{arg} is an unsaved Name instance.") unless val.id
+      raise("Value for :#{arg} is an unsaved Name instance.") unless val.id
 
       @params_cache ||= {}
       @params_cache[arg] = val
@@ -188,8 +191,8 @@ module Query::Modules::Validation
     elsif val.is_a?(Integer)
       val
     else
-      fail("Value for :#{arg} should be a Name, String or Integer, " \
-           "got: #{val.class}")
+      raise("Value for :#{arg} should be a Name, String or Integer, " \
+            "got: #{val.class}")
     end
   end
 
@@ -203,8 +206,8 @@ module Query::Modules::Validation
     elsif val.blank? || val.to_s == "0"
       nil
     else
-      fail("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), " \
-           "got: #{val.inspect}")
+      raise("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), " \
+            "got: #{val.inspect}")
     end
   end
 
@@ -218,8 +221,8 @@ module Query::Modules::Validation
     elsif val.blank? || val.to_s == "0"
       nil
     else
-      fail("Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
-           "got: #{val.inspect}")
+      raise("Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
+            "got: #{val.inspect}")
     end
   end
 
@@ -229,7 +232,7 @@ module Query::Modules::Validation
     elsif val.is_a?(Integer)
       val
     else
-      fail("Value for :#{arg} should be a Query class, got: #{val.inspect}")
+      raise("Value for :#{arg} should be a Query class, got: #{val.inspect}")
     end
   end
 

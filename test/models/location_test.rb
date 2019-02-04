@@ -353,7 +353,7 @@ class LocationTest < UnitTestCase
     assert_equal(123, Location.parse_altitude("123m"))
     assert_equal(123, Location.parse_altitude(" 123 m. "))
     assert_equal(37, Location.parse_altitude("123ft"))
-    assert_equal(38, Location.parse_altitude('124\''))
+    assert_equal(38, Location.parse_altitude("124'"))
   end
 
   def test_unknown

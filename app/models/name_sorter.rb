@@ -133,7 +133,7 @@ class NameSorter
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      fail TypeError.new(
+      raise TypeError.new(
         "NameSorter synonyms must be Integer or ActiveRecord::Base, "\
         "not #{arg.clasS}."
       )
@@ -147,7 +147,7 @@ class NameSorter
     if synonyms.class == Array
       synonyms.each { |id| push_synonym(id.to_i) }
     else
-      fail TypeError.new(
+      raise TypeError.new(
         "Only Arrays can be appended to a NameSorter synonym list not %s" %
           synonyms.class
       )
@@ -286,7 +286,7 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        fail TypeError.new(
+        raise TypeError.new(
           "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
         )
       end

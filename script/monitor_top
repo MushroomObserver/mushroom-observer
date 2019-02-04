@@ -50,12 +50,12 @@ if swap_pct > 50 && mem_pct > 99
   if File.exist?(UNICORN_FILE)
     pid = File.read(UNICORN_FILE).chomp
     system("kill -HUP #{pid}")
-    $stderr.puts("Restarted server!")
+    warn("Restarted server!")
   elsif File.exist?(PASSENGER_FILE)
     File.open(PASSENGER_FILE, "w") {}
-    $stderr.puts("Restarted server!")
+    warn("Restarted server!")
   else
-    $stderr.puts("Time to restart server, but couldn't find unicorn or passenger!")
+    warn("Time to restart server, but couldn't find unicorn or passenger!")
   end
 end
 

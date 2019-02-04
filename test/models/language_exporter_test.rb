@@ -50,7 +50,7 @@ class LanguageExporterTest < UnitTestCase
     assert_valid(:validate_square_brackets,
                  "this is [:good(var=123.45)] right")
     assert_valid(:validate_square_brackets,
-                 'this is [:good(var=\'abc def\')] right')
+                 "this is [:good(var='abc def')] right")
     assert_valid(:validate_square_brackets,
                  'this is [:good(var="#$@!")] right')
     assert_invalid(:validate_square_brackets,

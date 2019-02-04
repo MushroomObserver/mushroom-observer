@@ -252,7 +252,7 @@ class HerbariumRecordController < ApplicationController
 
   def validate_herbarium_name!
     name = @herbarium_record.herbarium_name.to_s
-    name2 = name.sub(/^[^-]* - /, '')
+    name2 = name.sub(/^[^-]* - /, "")
     herbarium = Herbarium.where(name: [name, name2]).first ||
                 Herbarium.where(code: name).first
     @herbarium_record.herbarium = herbarium
@@ -272,7 +272,7 @@ class HerbariumRecordController < ApplicationController
 
   def can_add_record_to_herbarium?
     return true if in_admin_mode?
-    return true if @observation && @observation.can_edit?
+    return true if @observation&.can_edit?
     return true if @herbarium_record.observations.any?(&:can_edit?)
     return true if @herbarium_record.herbarium.curator?(@user)
 

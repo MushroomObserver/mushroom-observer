@@ -73,13 +73,13 @@ class TranslationController < ApplicationController
 
   def validate_language_and_user(locale, lang)
     if !lang
-      fail(:edit_translations_bad_locale.t(locale: locale))
+      raise(:edit_translations_bad_locale.t(locale: locale))
     elsif !@user
-      fail(:edit_translations_login_required.t)
+      raise(:edit_translations_login_required.t)
     elsif !@user.is_successful_contributor?
-      fail(:unsuccessful_contributor_warning.t)
+      raise(:unsuccessful_contributor_warning.t)
     elsif lang.official && !reviewer?
-      fail(:edit_translations_reviewer_required.t)
+      raise(:edit_translations_reviewer_required.t)
     end
   end
 

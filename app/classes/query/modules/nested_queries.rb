@@ -69,7 +69,7 @@ module Query::Modules::NestedQueries
     @outer ||= begin
       if outer_id
         outer = Query.find(outer_id)
-        tweak_outer_query.call(outer) if tweak_outer_query
+        tweak_outer_query&.call(outer)
         outer
       end
     end

@@ -172,12 +172,12 @@ class QueryTest < UnitTestCase
     assert_equal(["table"],
                  Query.lookup(:Name, :all, join: :table).params[:join])
     assert_equal(%w[table1 table2],
-                 Query.lookup(:Name, :all, join: %i[table1 table2]).
+                 Query.lookup(:Name, :all, join: [:table1, :table2]).
                  params[:join])
     assert_equal(["table"],
                  Query.lookup(:Name, :all, tables: :table).params[:tables])
     assert_equal(%w[table1 table2],
-                 Query.lookup(:Name, :all, tables: %i[table1 table2]).
+                 Query.lookup(:Name, :all, tables: [:table1, :table2]).
                  params[:tables])
     assert_equal(["foo = bar"],
                  Query.lookup(:Name, :all, where: "foo = bar").params[:where])
@@ -444,7 +444,7 @@ class QueryTest < UnitTestCase
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names`, `images`, `comments`",
-      clean(query.query(tables: %i[images comments]))
+      clean(query.query(tables: [:images, :comments]))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` WHERE shazam!",
@@ -484,7 +484,7 @@ class QueryTest < UnitTestCase
       "WHERE one = two AND foo LIKE bar " \
       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
       clean(query.query(select: "names.*",
-                        join:   %i[observations users.reviewer],
+                        join:   [:observations, :"users.reviewer"],
                         tables: :images,
                         where:  ["one = two", "foo LIKE bar"],
                         group:  "blah.id",
@@ -605,11 +605,11 @@ class QueryTest < UnitTestCase
     assert_equal([:observations], query.tables_used)
 
     query = Query.lookup(:Observation, :all, by: :name)
-    assert_equal(%i[names observations], query.tables_used)
+    assert_equal([:names, :observations], query.tables_used)
 
     query = Query.lookup(:Image, :all, by: :name)
 
-    assert_equal(%i[images images_observations names observations],
+    assert_equal([:images, :images_observations, :names, :observations],
                  query.tables_used)
     assert_equal(true, query.uses_table?(:images))
     assert_equal(true, query.uses_table?(:images_observations))

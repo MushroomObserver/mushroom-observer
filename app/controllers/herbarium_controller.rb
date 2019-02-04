@@ -291,7 +291,7 @@ class HerbariumController < ApplicationController
       return true
     end
     name = @herbarium.personal_user_name
-    name.sub!(/\s*<(.*)>$/, '')
+    name.sub!(/\s*<(.*)>$/, "")
     user = User.find_by_login(name)
     unless user
       flash_error(

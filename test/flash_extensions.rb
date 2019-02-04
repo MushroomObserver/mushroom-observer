@@ -47,7 +47,7 @@ module FlashExtensions
       lvl = got[0, 1].to_i
       got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n")
     end
-    msg.sub(/\n*$/, "\n") if msg
+    msg&.sub(/\n*$/, "\n")
     if !expect && got
       assert(got.nil?,
              "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}.")

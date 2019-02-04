@@ -93,7 +93,7 @@ module LanguageExporter
   def import_from_file
     any_changes = false
     unless old_user = User.current
-      fail "Must specify a user to import translation file!" unless official
+      raise "Must specify a user to import translation file!" unless official
 
       User.current = User.admin
     end

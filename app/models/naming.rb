@@ -178,7 +178,7 @@ class Naming < AbstractModel
         recipients = []
 
         # Send notification to owner if they want.
-        recipients.push(owner) if owner && owner.email_observations_naming
+        recipients.push(owner) if owner&.email_observations_naming
 
         # Send to people who have registered interest in this observation.
         # Also remove everyone who has explicitly said they are NOT interested.

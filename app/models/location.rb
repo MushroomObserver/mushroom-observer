@@ -340,7 +340,7 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    name.split(/,\s*/).reverse.join(", ") if name
+    name&.split(/,\s*/)&.reverse&.join(", ")
   end
 
   # Reverse given name if required in order to make country last.
@@ -649,8 +649,8 @@ class Location < AbstractModel
     end
 
     # Log the action.
-    old_loc.rss_log.orphan(old_loc.name, :log_location_merged,
-                           this: old_loc.name, that: name) if old_loc.rss_log
+    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+                           this: old_loc.name, that: name)
 
     # Destroy past versions.
     editors = []

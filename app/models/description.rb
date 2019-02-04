@@ -174,7 +174,7 @@ class Description < AbstractModel
     tag = :"description_#{full_or_part}_title_#{source_type}"
     user_name = begin
                   user.legal_name
-                rescue StandardError
+                rescue
                   "?"
                 end
     args = {
@@ -414,7 +414,7 @@ class Description < AbstractModel
     elsif user.to_i != 0
       group_user_ids(table).include?(user.to_i)
     else
-      fail ArgumentError.new("Was expecting User instance, id or nil.")
+      raise "ArgumentError", "Was expecting User instance, id or nil."
     end
   end
 

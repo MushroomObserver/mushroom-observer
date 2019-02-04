@@ -352,7 +352,7 @@ class NameController < ApplicationController
       @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
 
       # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
+      @projects = @user&.projects_member&.select do |project|
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
@@ -1146,7 +1146,7 @@ class NameController < ApplicationController
     words = Name.all_lifeforms.select do |word|
       params["lifeform_#{word}"] == "1"
     end
-    @name.update_attributes(lifeform: " #{words.join(' ')} ")
+    @name.update_attributes(lifeform: " #{words.join(" ")} ")
     redirect_with_query(@name.show_link_args)
   end
 

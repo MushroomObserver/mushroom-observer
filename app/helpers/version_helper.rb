@@ -91,7 +91,7 @@ module VersionHelper
                                        version: ver.version)
         end
       end
-      link = content_tag(:b, link) if args[:bold] && args[:bold].call(ver)
+      link = content_tag(:b, link) if args[:bold]&.call(ver)
 
       # Was this the result of a merge?
       if ver.respond_to?(:merge_source_id)

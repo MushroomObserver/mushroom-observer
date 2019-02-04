@@ -213,12 +213,12 @@ class QueuedEmail < AbstractModel
     self.class.debug_log("SAVE #{flavor} " \
          "from=#{begin
                    user.login
-                 rescue StandardError
+                 rescue
                    "nil"
                  end} " \
          "to=#{begin
                  to_user.login
-               rescue StandardError
+               rescue
                  "nil"
                end} " +
          queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
@@ -239,12 +239,12 @@ class QueuedEmail < AbstractModel
     log_msg = "SEND #{flavor} " \
       "from=#{begin
                 user.login
-              rescue StandardError
+              rescue
                 "nil"
               end} " \
       "to=#{begin
               to_user.login
-            rescue StandardError
+            rescue
               "nil"
             end} " +
               queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
@@ -253,17 +253,17 @@ class QueuedEmail < AbstractModel
     current_locale = I18n.locale
     result = false
     if user == to_user
-      fail("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
+      raise("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
     else
       result = deliver_email
     end
     I18n.locale = current_locale
     result
-  rescue StandardError => e
-    $stderr.puts("ERROR CREATING EMAIL")
-    $stderr.puts(log_msg)
-    $stderr.puts(e.to_s)
-    $stderr.puts(e.backtrace)
+  rescue => e
+    warn("ERROR CREATING EMAIL")
+    warn(log_msg)
+    warn(e.to_s)
+    warn(e.backtrace)
     I18n.locale = current_locale
     false
   end
@@ -272,9 +272,9 @@ class QueuedEmail < AbstractModel
   def deliver_email
     error = "We forgot to define #{type}#deliver_email.\n"
     # Failing to send email should not throw an error in production
-    return $stderr.puts(error) if Rails.env.production?
+    return warn(error) if Rails.env.production?
 
-    fail error
+    raise error
   end
 
   # Returns "flavor from to" for debugging.
@@ -285,7 +285,7 @@ class QueuedEmail < AbstractModel
   # Dump out all the info about a QueuedEmail record to a string.
   def dump
     result = ""
-    result += "#{id}: from => #{user && user.login}, "
+    result += "#{id}: from => #{user&.login}, "
     result += "to => #{to_user.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
     queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }
