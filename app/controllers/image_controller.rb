@@ -762,16 +762,16 @@ class ImageController < ApplicationController
     # Prevent SQL injection
     safe_old_holder = Image.connection.quote(old_holder)
     safe_old_license_id = old_license_id.to_i
+    values = data.map do |img_id, img_when|
+      "(#{@user.id}, NOW(), 'Image', #{img_id}, #{img_when.year}, "\
+      "#{safe_old_holder}, #{safe_old_license_id})"
+    end.join(",\n")
 
     Image.connection.insert(%(
       INSERT INTO copyright_changes
         (user_id, updated_at, target_type, target_id, year, name, license_id)
       VALUES
-        #{data.map do |img_id, img_when|
-            "(#{@user.id},NOW(),'Image',#{img_id},#{img_when.year},
-            #{safe_old_holder},#{safe_old_license_id})"
-          end.
-          join(",\n")}
+        #{values}
     ))
   end
 
