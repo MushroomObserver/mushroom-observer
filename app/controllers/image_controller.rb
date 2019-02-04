@@ -730,8 +730,7 @@ class ImageController < ApplicationController
   private # private methods used by license updater ############################
 
   def process_license_changes
-    data = params[:updates]
-    data.values.each do |row|
+    params[:updates].values.each do |row|
       next unless row_changed?(row)
 
       images_to_update = Image.where(
