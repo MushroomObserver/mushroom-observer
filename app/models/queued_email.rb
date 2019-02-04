@@ -213,12 +213,12 @@ class QueuedEmail < AbstractModel
     self.class.debug_log("SAVE #{flavor} " \
          "from=#{begin
                    user.login
-                 rescue
+                 rescue StandardError
                    "nil"
                  end} " \
          "to=#{begin
                  to_user.login
-               rescue
+               rescue StandardError
                  "nil"
                end} " +
          queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
@@ -239,12 +239,12 @@ class QueuedEmail < AbstractModel
     log_msg = "SEND #{flavor} " \
       "from=#{begin
                 user.login
-              rescue
+              rescue StandardError
                 "nil"
               end} " \
       "to=#{begin
               to_user.login
-            rescue
+            rescue StandardError
               "nil"
             end} " +
               queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
@@ -259,7 +259,7 @@ class QueuedEmail < AbstractModel
     end
     I18n.locale = current_locale
     result
-  rescue => e
+  rescue StandardError => e
     warn("ERROR CREATING EMAIL")
     warn(log_msg)
     warn(e.to_s)

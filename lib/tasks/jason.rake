@@ -654,8 +654,8 @@ namespace :jason do
       end
     else
       lines.push(
-        '>>>>>>>> name is deprecated, accepted names/synonyms are: '\
-        '(add "*" to end to force)'
+        ">>>>>>>> name is deprecated, accepted names/synonyms are: "\
+        "(add "*" to end to force)"
       )
       if valid_names.empty? && synonyms.empty?
         lines.push(">>>>>>>>   none available?!")

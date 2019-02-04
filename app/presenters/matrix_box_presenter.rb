@@ -35,7 +35,7 @@ class MatrixBoxPresenter
                  if target&.respond_to?(:location)
     self.thumbnail = view.thumbnail(target.thumb_image, link: { controller: target.show_controller,
                                                                 action: target.show_action, id: target.id }) \
-                     if target&.respond_to?(:thumb_image) && target.thumb_image
+                     if target&.respond_to?(:thumb_image) && target&.thumb_image
   end
 
   # Grabs all the information needed for view from Image instance.
