@@ -1803,12 +1803,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Return this request's URL without the transport or domain.
-  def request_action_and_params
-    request.url.sub(%r{^\w+:/+[^/]+}, "")
-  end
-  helper_method :request_action_and_params
-
   ##############################################################################
 
   private
