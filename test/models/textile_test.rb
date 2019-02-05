@@ -124,10 +124,18 @@ class TextileTest < UnitTestCase
   end
 
   def test_url_formatting
-    assert_href_equal(MO.http_domain +
-                        "/observer/lookup_name/Amanita+%22sp-O01%22",
-                      '_Amanita "sp-O01"_')
+    assert_href_equal(
+      "#{MO.http_domain}/observer/lookup_name/Amanita+%22sp-O01%22",
+      '_Amanita "sp-O01"_')
     assert_href_equal("http://www.amanitaceae.org?Amanita+sp-O01",
                       "http://www.amanitaceae.org?Amanita+sp-O01")
+  end
+
+  def test_link_text_truncation
+    url = "http://www.#{"x" * Textile::URL_TRUNCATION_LENGTH}abc/truncated"
+    result = url.tl
+    link_text = Nokogiri::HTML.parse(result).text
+    assert(link_text.end_with?("abc/..."),
+           "Link text should be truncated with 'x/...'")
   end
 end
