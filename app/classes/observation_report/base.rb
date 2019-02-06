@@ -76,8 +76,8 @@ module ObservationReport
       [
         "observations.id",
         "observations.when",
-        "observations.lat",
-        "observations.long",
+        rounded_latlong_spec(:lat),
+        rounded_latlong_spec(:long),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -107,8 +107,8 @@ module ObservationReport
       [
         "observations.id",
         "observations.when",
-        "observations.lat",
-        "observations.long",
+        rounded_latlong_spec(:lat),
+        rounded_latlong_spec(:long),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -132,6 +132,11 @@ module ObservationReport
         "locations.high",
         "locations.low"
       ]
+    end
+
+    def rounded_latlong_spec(col)
+      "IF(observations.gps_hidden, " \
+        "round(observations.#{col}, 1), observations.#{col})"
     end
 
     # Do second query to get data from many-to-many joined table.

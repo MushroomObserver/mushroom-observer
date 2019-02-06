@@ -49,6 +49,7 @@ class API
         confidence:       parse(:confidence, :confidence),
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
+        gps_hidden:       parse(:boolean, :gps_hidden, help: 1),
         has_images:       parse(:boolean, :has_images),
         has_location:     parse(:boolean, :has_location),
         has_name:         parse(:boolean, :has_name, help: :min_rank),
@@ -78,6 +79,7 @@ class API
         specimen:      @has_specimen,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       default: true, help: 1),
+        gps_hidden:    parse(:boolean, :gps_hidden, default: false, help: 1),
         notes:         @notes,
         thumb_image:   @thumbnail,
         images:        @images,
@@ -102,6 +104,7 @@ class API
         specimen:               parse(:boolean, :set_has_specimen),
         is_collection_location: parse(:boolean, :set_is_collection_location,
                                       help: 1),
+        gps_hidden:             parse(:boolean, :gps_hidden, help: 1),
         thumb_image:            @thumbnail
       }
     end

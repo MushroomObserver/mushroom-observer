@@ -17,9 +17,9 @@
 
     <p id="observation_lat_lng">
       <% if observation.lat or observation.alt %>
-           <%= observation.lat ?
-                  "#{observation.lat}° #{observation.long}° " : '' %>
-           <%= observation.alt ? "#{observation.alt}m" : '' %>
+        <%= observation.lat ?
+          "#{observation.public_lat}° #{observation.public_long}° " : '' %>
+        <%= observation.alt ? "#{observation.alt}m" : '' %>
       <% end %>
     </p>
 

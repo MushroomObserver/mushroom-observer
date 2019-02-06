@@ -176,6 +176,52 @@ class ObservationReportTest < UnitTestCase
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
 
+  def test_mycoflora_with_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    obs.gps_hidden = true
+    obs.notes = {
+      :"Collector's_Name" => "John Doe",
+      Substrate: "wood chips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Foo: "Bar",
+      Other: "Things"
+    }
+    obs.save!
+
+    expect = [
+      "Fungi",
+      nil,
+      "Mary Newbie",
+      "MO #{obs.id}",
+      "MO #{obs.id}",
+      "",
+      "0",
+      "Burbank",
+      nil,
+      "California",
+      "USA",
+      "34.2",
+      "-118.4",
+      nil,
+      "123",
+      "123",
+      "22",
+      "7",
+      "2010",
+      "2010-07-22",
+      "http://mushroomobserver.org/#{obs.id}",
+      "",
+      "NA Mycoflora Project",
+      "John Doe",
+      "wood chips",
+      "lawn",
+      "Agaricus",
+      "Foo: Bar\nOther: Things"
+    ]
+    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+  end
+
   def test_raw
     obs = observations(:detailed_unknown_obs)
     expect = [

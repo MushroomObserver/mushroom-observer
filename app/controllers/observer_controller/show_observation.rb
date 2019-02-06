@@ -96,8 +96,10 @@ class ObserverController
     return unless obs
 
     @title = :map_observation_title.t(id: obs.id)
+    lat, long = obs.lat, obs.long
+    lat = long = nil if obs.gps_hidden
     @observations = [
-      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location)
+      MinimalMapObservation.new(obs.id, lat, long, obs.location)
     ]
     render(action: :map_observations)
   end

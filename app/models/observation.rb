@@ -43,6 +43,7 @@
 #  long::                   Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
+#  gps_hidden::             Hide exact lat/long?
 #  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
@@ -366,6 +367,14 @@ class Observation < AbstractModel
     else
       place_name
     end
+  end
+
+  def public_lat
+    lat.blank? || !gps_hidden ? lat : lat.round(1)
+  end
+
+  def public_long
+    long.blank? || !gps_hidden ? long : long.round(1)
   end
 
   ##############################################################################

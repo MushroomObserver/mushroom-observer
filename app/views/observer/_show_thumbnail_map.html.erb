@@ -8,7 +8,7 @@
   end
 
   lat, long = if observation.lat && observation.long
-    [observation.lat, observation.long]
+    [observation.public_lat, observation.public_long]
   elsif observation.location
     observation.location.center
   end

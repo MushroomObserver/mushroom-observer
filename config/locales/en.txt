@@ -1414,6 +1414,7 @@
   # observer/_form_observations
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
+  form_observations_gps_hidden: Hide exact coordinates?
   form_observations_original_name: Original File Name
   form_observations_upload_images: Upload Images
   form_observations_uploading_images: Uploading Images
@@ -3728,6 +3729,7 @@
   api_help_initial_det: initial determination
   api_help_initial_det_has: search within initial determination
   api_help_is_collection_location: is this location where mushroom was found?
+  api_help_gps_hidden: round off latitude and longitude to hide exact location?
   api_help_locus_has: search within locus
   api_help_log: log this action on main page activity log and RSS feed?
   api_help_mailing_address: postal address
@@ -3746,6 +3748,7 @@
   api_help_postal: in postal format with country last regardless of user preference
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
   api_help_set_is_collection_location: is this location where mushroom was found?
+  api_help_set_gps_hidden: round off latitude and longitude to hide exact location?
   api_help_south: min latitude
   api_help_summary_has: search within summary
   api_help_target: "e.g. \"observation #1234\" or \"name #5678\""
