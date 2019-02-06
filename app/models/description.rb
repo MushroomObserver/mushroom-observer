@@ -52,7 +52,7 @@
 #  remove_admin::         Remove a User's or UserGroup's admin privileges.
 #  remove_writer::        Remove a User's or UserGroup's writer privileges.
 #  remove_reader::        Remove a User's or UserGroup's reader privileges.
-#  has_permission?::      Does a given User have a given type of permission?
+#  permitted?::      Does a given User have a given type of permission?
 #  group_user_ids::       Get list of user ids from a given permissions table.
 #  group_ids::            Get list of user_group ids from a given permissions table.
 #  admins_join_table::    Table used to list admin groups.
@@ -350,17 +350,17 @@ class Description < AbstractModel
 
   # Is a given user an admin for this description?
   def is_admin?(user)
-    has_permission?(admins_join_table, user)
+    permitted?(admins_join_table, user)
   end
 
   # Is a given user an writer for this description?
   def is_writer?(user)
-    public_write || has_permission?(writers_join_table, user)
+    public_write || permitted?(writers_join_table, user)
   end
 
   # Is a given user an reader for this description?
   def is_reader?(user)
-    public || has_permission?(readers_join_table, user)
+    public || permitted?(readers_join_table, user)
   end
 
   # Give a User or UserGroup admin privileges.
@@ -406,15 +406,15 @@ class Description < AbstractModel
   end
 
   # Check if a given user has the given type of permission.
-  def has_permission?(table, user)
+  def permitted?(table, user)
     if user.is_a?(User)
       group_user_ids(table).include?(user.id)
     elsif !user
       group_ids(table).include?(UserGroup.all_users.id)
-    elsif user.to_i != 0
+    elsif user.try(:to_i)&.nonzero?
       group_user_ids(table).include?(user.to_i)
     else
-      raise .new("Was expecting User instance, id or nil.")
+      raise ArgumentError.new("Was expecting User instance, id or nil.")
     end
   end
 
