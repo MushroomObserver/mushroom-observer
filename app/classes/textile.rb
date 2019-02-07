@@ -259,12 +259,19 @@ class Textile < String
     if str.sub!(/^(subsp|ssp)\.? +/, "")
       @@last_species ? @@last_species + " subsp. " + str : ""
     elsif str.sub!(/^(var|v)\.? +/, "")
-      @@last_subspecies ? @@last_subspecies + " var. " + str :
-      @@last_species ? @@last_species + " var. " + str : ""
+      if @@last_subspecies
+        @@last_subspecies + " var. " + str
+      else
+        @@last_species ? @@last_species + " var. " + str : ""
+      end
     elsif str.sub!(/^(forma?|f)\.? +/, "")
-      @@last_variety ? @@last_variety + " f. " + str :
-      @@last_subspecies ? @@last_subspecies + " f. " + str :
-      @@last_species ? @@last_species + " f. " + str : ""
+      if @@last_variety
+        @@last_variety + " f. " + str
+      elsif @@last_subspecies
+        @@last_subspecies + " f. " + str
+      else
+        @@last_species ? @@last_species + " f. " + str : ""
+      end
     else
       str
     end

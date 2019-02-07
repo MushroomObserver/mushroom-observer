@@ -641,14 +641,6 @@ Style/NegatedIf:
     - 'app/models/name/taxonomy.rb'
     - 'test/models/api_test.rb'
 
-# Offense count: 32
-Style/NestedTernaryOperator:
-  Exclude:
-    - 'app/classes/map_collapsible.rb'
-    - 'app/classes/textile.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/rss_log.rb'
-
 # Offense count: 30
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, MinBodyLength.
