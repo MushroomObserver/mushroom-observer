@@ -101,7 +101,7 @@ class MatrixBoxPresenter
       self.detail = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
       self.detail = :rss_created_at.t(type: target_type)
-      unless target_type == :observation || target_type == :species_list
+      unless [:observation, :species_list].include?(target_type)
         begin
           self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
         rescue

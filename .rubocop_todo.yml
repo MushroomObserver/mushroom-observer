@@ -609,28 +609,6 @@ Style/MultilineIfModifier:
 Style/MultilineTernaryOperator:
   Enabled: false
 
-# Offense count: 2
-Style/MultipleComparison:
-  Exclude:
-    - 'app/presenters/matrix_box_presenter.rb'
-    - 'script/jpegsize'
-
-# Offense count: 64
-# Cop supports --auto-correct.
-Style/MutableConstant:
-  Exclude:
-    - 'app/classes/api/parsers/email_parser.rb'
-    - 'app/classes/api/parsers/float_parser.rb'
-    - 'app/classes/pattern_search/parser.rb'
-    - 'app/classes/textile.rb'
-    - 'app/extensions/string_extensions.rb'
-    - 'app/models/comment/callbacks.rb'
-    - 'app/models/external_link.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/name_parse.rb'
-    - 'app/models/sequence.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
