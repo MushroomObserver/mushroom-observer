@@ -367,7 +367,7 @@ class String
 
   # This should safely match anything that could possibly be interpreted as
   # an HTML tag.
-  HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
+  HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/.freeze
 
   ### Textile-related methods ###
   #

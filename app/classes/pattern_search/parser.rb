@@ -3,8 +3,12 @@ module PatternSearch
     attr_accessor :incoming_string
     attr_accessor :terms
 
-    VAL_REGEX  = / "([^\\\"]+|\\.)*" | '([^\\\']+|\\.)*' | ([^\s\\,]+|\\.)+ /x
-    TERM_REGEX = /^(\w+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)/x
+    VAL_REGEX = /
+      "([^\\\"]+|\\.)*" | '([^\\\']+|\\.)*' | ([^\s\\,]+|\\.)+
+    /x.freeze
+    TERM_REGEX = /
+      ^(\w+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)
+    /x.freeze
 
     def initialize(string)
       self.incoming_string = string

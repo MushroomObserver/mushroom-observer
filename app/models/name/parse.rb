@@ -1,43 +1,51 @@
 class Name < AbstractModel
-  SUBG_ABBR    = / subgenus | subg\.? /xi
-  SECT_ABBR    = / section | sect\.? /xi
-  SUBSECT_ABBR = / subsection | subsect\.? /xi
-  STIRPS_ABBR  = / stirps /xi
-  SP_ABBR      = / species | sp\.? /xi
-  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi
-  VAR_ABBR     = / variety | var\.? | v\.? /xi
-  F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi
-  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
-  AUCT_ABBR    = / auct\.? /xi
-  INED_ABBR    = / in\s?ed\.? /xi
-  NOM_ABBR     = / nomen | nom\.? /xi
-  COMB_ABBR    = / combinatio | comb\.? /xi
-  SENSU_ABBR   = / sensu?\.? /xi
-  NOV_ABBR     = / nova | novum | nov\.? /xi
-  PROV_ABBR    = / provisional | prov\.? /xi
-  CRYPT_ABBR   = / crypt\.? \s temp\.? /xi
+  SUBG_ABBR    = / subgenus | subg\.? /xi.freeze
+  SECT_ABBR    = / section | sect\.? /xi.freeze
+  SUBSECT_ABBR = / subsection | subsect\.? /xi.freeze
+  STIRPS_ABBR  = / stirps /xi.freeze
+  SP_ABBR      = / species | sp\.? /xi.freeze
+  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi.freeze
+  VAR_ABBR     = / variety | var\.? | v\.? /xi.freeze
+  F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi.freeze
+  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi.freeze
+  AUCT_ABBR    = / auct\.? /xi.freeze
+  INED_ABBR    = / in\s?ed\.? /xi.freeze
+  NOM_ABBR     = / nomen | nom\.? /xi.freeze
+  COMB_ABBR    = / combinatio | comb\.? /xi.freeze
+  SENSU_ABBR   = / sensu?\.? /xi.freeze
+  NOV_ABBR     = / nova | novum | nov\.? /xi.freeze
+  PROV_ABBR    = / provisional | prov\.? /xi.freeze
+  CRYPT_ABBR   = / crypt\.? \s temp\.? /xi.freeze
 
   ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} |
-                      #{STIRPS_ABBR} /x
-  ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
+                      #{STIRPS_ABBR} /x.freeze
+  ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x.freeze
   ANY_NAME_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} |
-                      #{GROUP_ABBR} /x
+                      #{GROUP_ABBR} /x.freeze
   ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
                           #{COMB_ABBR} | #{SENSU_ABBR} | #{CRYPT_ABBR} )
-                      (?:\s|$) /x
+                      (?:\s|$) /x.freeze
 
-  UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
-  LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
-  BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
+  UPPER_WORD = /
+                [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]"
+  /x.freeze
+  LOWER_WORD = /
+    (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]"
+    /x.freeze
+  BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x.freeze
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
-                           sp\.\s\S*\d\S* /x
+                           sp\.\s\S*\d\S* /x.freeze
 
   # Matches the last epithet in a (standardized) name,
   # including preceding abbreviation if there is one.
-  LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
+  LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x.freeze
 
-  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [
-                   A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
+  AUTHOR_START = /
+    #{ANY_AUTHOR_ABBR} |
+    van\s | de\s |
+    [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] |
+    "[^a-z\s]
+  /x.freeze
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
   #   AUTHOR_PAT ensures "sp", "ssp", etc., aren't included in author.
@@ -59,42 +67,43 @@ class Name < AbstractModel
         )?
       )
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
-    $/x
+    $/x.freeze
 
   # Taxa without authors (for use by GROUP PAT)
+  # disable cop to allow alignment and easier comparison of regexps
   # rubocop:disable Metrics/LineLength
-  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
+  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x.freeze
+  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
   SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
   SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
   STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
-  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
+  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x.freeze
   # rubocop:enable Metrics/LineLength
 
-  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
-  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x
-  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
-  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
-  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
+  GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x.freeze
+  SUBGENUS_PAT    = /^ #{SUBGENUS_TAXON}    (\s #{AUTHOR_START}.*)? $/x.freeze
+  SECTION_PAT     = /^ #{SECTION_TAXON}     (\s #{AUTHOR_START}.*)? $/x.freeze
+  SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x.freeze
+  STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x.freeze
+  SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x.freeze
   SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
                        (\s #{AUTHOR_START}.*)?
-                   $/x
+                   $/x.freeze
   VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
                        (\s #{AUTHOR_START}.*)?
-                   $/x
+                   $/x.freeze
   FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
                        (\s #{AUTHOR_START}.*)?
-                   $/x
+                   $/x.freeze
 
   GROUP_PAT       = /^(?<taxon>
                         #{GENUS_OR_UP_TAXON} |
@@ -120,11 +129,11 @@ class Name < AbstractModel
                           ( \s (#{AUTHOR_START}.*)) \s #{GROUP_ABBR}
                         )
                       )
-                    $/x
+                    $/x.freeze
 
   # group or clade part of name, with
   # <group_wd> capture group capturing the stripped group or clade abbr
-  GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
+  GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x.freeze
 
   # parsing a string to a Name
   class ParsedName

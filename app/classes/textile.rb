@@ -209,8 +209,12 @@ class Textile < String
 
   private
 
-  NAME_LINK_PATTERN = / (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) ) /x
-  OTHER_LINK_PATTERN = / (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w) /x
+  NAME_LINK_PATTERN = /
+    (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
+  /x.freeze
+  OTHER_LINK_PATTERN = /
+   (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
+  /x.freeze
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!

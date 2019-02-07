@@ -32,7 +32,7 @@ class ExternalLink < AbstractModel
   validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
 
-  VALID_URL_PAT = %r{^[a-z]+://}
+  VALID_URL_PAT = %r{^[a-z]+://}.freeze
 
   def check_url_syntax
     return if VALID_URL_PAT.match?(url.to_s)
