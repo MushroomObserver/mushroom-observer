@@ -43,10 +43,13 @@ class Pivotal
       @user  = nil
       @votes = []
       @description = parse_description(data["description"])
-      @labels = data["labels"] == [] ? ["other"] :
-                data["labels"].map { |l| l["name"] }
-      @comments = !data["comments"] ? [] :
-                  data["comments"].map { |c| Pivotal::Comment.new(c) }
+      @labels =
+        data["labels"] == [] ? ["other"] : data["labels"].map { |l| l["name"] }
+      @comments = if !data["comments"]
+                    []
+                  else
+                    data["comments"].map { |c| Pivotal::Comment.new(c) }
+                  end
     end
 
     def to_json
