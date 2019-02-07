@@ -192,8 +192,16 @@ class RssLog < AbstractModel
 
   # Return the type of object of the target, e.g., :observation.
   def target_type
-    location_id ? :location : name_id ? :name : observation_id ? :observation : project_id ? :project : species_list_id ? :species_list :
-    glossary_term_id ? :glossary_term : article_id ? :article : nil
+    [
+      [location_id,      :location],
+      [name_id,          :name],
+      [observation_id,   :observation],
+      [project_id,       :project],
+      [species_list_id,  :species_list],
+      [glossary_term_id, :glossary_term],
+      [article_id,       :article],
+      [true,             nil]
+    ].each { |x| return x.second if x.first }
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an

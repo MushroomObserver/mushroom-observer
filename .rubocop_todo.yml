@@ -631,14 +631,6 @@ Style/MutableConstant:
     - 'app/models/name_parse.rb'
     - 'app/models/sequence.rb'
 
-# Offense count: 32
-Style/NestedTernaryOperator:
-  Exclude:
-    - 'app/classes/map_collapsible.rb'
-    - 'app/classes/textile.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/rss_log.rb'
-
 # Offense count: 653
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
