@@ -166,10 +166,14 @@ class API
                             user.create_personal_herbarium
       @collectors_name  ||= user.legal_name
       @initial_det      ||= @name.text_name
+      # Disable cop because we're creating a bunch of instance variables,
+      # rather than trying to memoize provide_specimen_defaults
       # rubocop:disable Naming/MemoizedInstanceVariableName
-      @accession_number ||= @collection_number ?
-                              "#{@collectors_name} #{@collection_number}" :
+      @accession_number ||= if @collection_number
+                              "#{@collectors_name} #{@collection_number}"
+                            else
                               "MO #{obs.id}"
+                            end
       # rubocop:enable Naming/MemoizedInstanceVariableName
     end
 
