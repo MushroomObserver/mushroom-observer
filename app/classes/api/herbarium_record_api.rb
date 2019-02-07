@@ -80,15 +80,25 @@ class API
     end
 
     def provide_default_label!(params)
-      if params[:initial_det].blank?
-        params[:initial_det] = @observation.name.text_name
-      end
-      if params[:accession_number].blank?
-        params[:accession_number] = \
-          @observation.collection_numbers.one? ?
-          @observation.collection_numbers.first.format_name :
+      provide_default_initial_determination!(params)
+      provide_default_accession_number!(params)
+    end
+
+    def provide_default_initial_determination!(params)
+      return if params[:initial_det].present?
+
+      params[:initial_det] = @observation.name.text_name
+    end
+
+    def provide_default_accession_number!(params)
+      return if params[:accession_number].present?
+
+      params[:accession_number] =
+        if @observation.collection_numbers.one?
+          @observation.collection_numbers.first.format_name
+        else
           "MO #{@observation.id}"
-      end
+        end
     end
 
     def before_create(params)
