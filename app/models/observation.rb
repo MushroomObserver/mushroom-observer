@@ -369,12 +369,16 @@ class Observation < AbstractModel
     end
   end
 
+  # Returns latitude if public or if the current user owns the observation.
+  # The user should also be able to see hidden latitudes if they are an admin
+  # or they are members of a project that the observation belongs to, but
+  # those are harder to determine. This catches the majority of cases.
   def public_lat
-    lat.blank? || !gps_hidden ? lat : lat.round(1)
+    gps_hidden && user_id != User.current_id ? nil : lat
   end
 
   def public_long
-    long.blank? || !gps_hidden ? long : long.round(1)
+    gps_hidden && user_id != User.current_id ? nil : long
   end
 
   ##############################################################################
