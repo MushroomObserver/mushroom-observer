@@ -261,18 +261,38 @@ class Textile < String
   # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
   def supply_implicit_species(str)
     if str.sub!(/^(subsp|ssp)\.? +/, "")
-      @@last_species ? @@last_species + " subsp. " + str : ""
+      expand_subspecies(str)
     elsif str.sub!(/^(var|v)\.? +/, "")
-      @@last_subspecies ? @@last_subspecies + " var. " + str :
-      @@last_species ? @@last_species + " var. " + str : ""
+      expand_variety(str)
     elsif str.sub!(/^(forma?|f)\.? +/, "")
-      @@last_variety ? @@last_variety + " f. " + str :
-      @@last_subspecies ? @@last_subspecies + " f. " + str :
-      @@last_species ? @@last_species + " f. " + str : ""
+      expand_form(str)
     else
       str
     end
   end
+
+  def expand_subspecies(str)
+    @@last_species ? "#{@@last_species} subsp. #{str}" : ""
+  end
+
+  def expand_variety(str)
+    if @@last_subspecies
+      "#{@@last_subspecies} var. #{str}"
+    else
+      @@last_species ? "#{@@last_species} var. #{str}" : ""
+    end
+  end
+
+  def expand_form(str)
+    if @@last_variety
+      "#{@@last_variety} f. #{str}"
+    elsif @@last_subspecies
+      "#{@@last_subspecies} f. #{str}"
+    else
+      @@last_species ? "#{@@last_species} f. #{str}" : ""
+    end
+  end
+
 
   # Allow a number of author-like syntaxes that aren't normally allowed.
   # Remove them and match the rest.  Examples:
