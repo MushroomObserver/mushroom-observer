@@ -340,7 +340,7 @@ class ApiControllerTest < FunctionalTestCase
     get(:observations, id: obs.id, detail: :high, format: :xml)
     assert_match(/34.1622|118.3521/, @response.body)
 
-    obs.update_attribute(:gps_hidden, true);
+    obs.update_attribute(:gps_hidden, true)
     get(:observations, id: obs.id, detail: :high, format: :json)
     assert_no_match(/34.1622|118.3521/, @response.body)
     get(:observations, id: obs.id, detail: :high, format: :xml)

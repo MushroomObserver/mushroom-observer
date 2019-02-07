@@ -208,7 +208,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "",
       "",
-      "unknown_with_lat_long",
+      "unknown_with_lat_long"
     ]
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
 
