@@ -76,7 +76,6 @@ class CollapsibleMapTest < UnitTestCase
     end
 
     format_string = "%9.4f %9.4f %9.4f %9.4f"
-byebug
     expect = list.map { |x| format(format_string, *x) }.sort
     actual = coll.mapsets.map(&:edges).map do |x|
       format(format_string, *x)
