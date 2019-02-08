@@ -285,6 +285,7 @@ module GeneralExtensions
     unless File.exist?(file)
       raise "Can't find fixtures file for #{table}! Should be #{file}."
     end
+
     last_id = 0
     line_num = 0
     File.readlines(file).each do |line|
@@ -295,7 +296,7 @@ module GeneralExtensions
       label = match[1]
       id = match[2].to_i
       if id != last_id + 1
-        raise "IDs are not consecutive at #{file} line #{line_num}: " +
+        raise "IDs are not consecutive at #{file} line #{line_num}: " \
               "#{id} should be #{last_id + 1}\n"
       end
       result[id - 1] = label

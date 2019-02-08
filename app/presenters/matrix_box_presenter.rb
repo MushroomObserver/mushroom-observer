@@ -44,7 +44,7 @@ class MatrixBoxPresenter
                  if target&.respond_to?(:location)
 
     self.thumbnail =
-      if target&.respond_to?(:thumb_image) && target.thumb_image
+      if target&.respond_to?(:thumb_image) && target&.thumb_image
         view.thumbnail(target.thumb_image,
                        link: { controller: target.show_controller,
                                action: target.show_action, id: target.id })
@@ -75,10 +75,13 @@ class MatrixBoxPresenter
     self.what  = view.link_with_query(name, controller: :observer,
                                             action: :show_observation, id: observation.id)
     self.where = view.location_link(observation.place_name, observation.location)
-    if observation.thumb_image
-      self.thumbnail = view.thumbnail(observation.thumb_image, link: { controller: :observer,
-                                                                       action: :show_observation, id: observation.id })
-    end
+    return unless observation.thumb_image
+
+    self.thumbnail =
+      view.thumbnail(observation.thumb_image,
+                     link: { controller: :observer,
+                             action: :show_observation,
+                             id: observation.id })
   end
 
   # Grabs all the information needed for view from User instance.
@@ -89,10 +92,13 @@ class MatrixBoxPresenter
                    #{:Observations.t}: #{user.observations.count}".html_safe
     self.what  = view.link_with_query(name, action: :show_user, id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
-    if user.image_id
-      self.thumbnail = view.thumbnail(user.image_id, link: { controller: user.show_controller,
-                                                             action: user.show_action, id: user.id }, votes: false)
-    end
+    return unless user.image_id
+
+    self.thumbnail =
+      view.thumbnail(user.image_id,
+                     link: { controller: user.show_controller,
+                             action: user.show_action,
+                             id: user.id }, votes: false)
   end
 
   def fancy_time
