@@ -233,9 +233,11 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    sql = at_or_below_genus? ?
-          "text_name LIKE '#{text_name} %'" :
-          "classification LIKE '%#{rank}: _#{text_name}_%'"
+    sql = if at_or_below_genus?
+            "text_name LIKE '#{text_name} %'"
+          else
+            "classification LIKE '%#{rank}: _#{text_name}_%'"
+          end
     sql += " AND correct_spelling_id IS NULL"
     return Name.where(sql).to_a if all
 

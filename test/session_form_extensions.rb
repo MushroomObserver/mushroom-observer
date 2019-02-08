@@ -190,10 +190,11 @@ module SessionExtensions
     # Regexp.  Returns an instance of IntegrationSession::Form::Field or +nil+.
     def get_field(id, strict = false)
       results = []
-      for field in inputs
+      inputs.each do |field|
         id2 = field.id
-        if id.is_a?(Regexp) ? id2.match(id) :
-           ((i = id2.rindex(id)) && (i + id.length == id2.length))
+        if id.is_a?(Regexp) && id2.match(id)
+          results << field
+        elsif ((i = id2.rindex(id)) && (i + id.length == id2.length))
           results << field
         end
       end

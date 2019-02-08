@@ -190,10 +190,13 @@ class RssLog < AbstractModel
       article_id
   end
 
-  # Return the type of object of the target, e.g., :observation.
+  # Return the type of object of the target, e.g., :observation
+  # or nil if it's an orphan
   def target_type
-    location_id ? :location : name_id ? :name : observation_id ? :observation : project_id ? :project : species_list_id ? :species_list :
-    glossary_term_id ? :glossary_term : article_id ? :article : nil
+    RssLog::all_types.each do |type|
+      return type.to_sym if send("#{type}_id".to_sym)
+    end
+    nil
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an

@@ -605,10 +605,6 @@ Style/MultilineIfModifier:
     - 'app/presenters/matrix_box_presenter.rb'
     - 'test/general_extensions.rb'
 
-# Offense count: 56
-Style/MultilineTernaryOperator:
-  Enabled: false
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
