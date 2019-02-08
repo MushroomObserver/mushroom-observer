@@ -127,13 +127,17 @@ class Pivotal
     end
 
     def sorted_labels
-      result = labels.select do |label|
-        !label.match(/^(requires .*|votes:.*|jason)$/) &&
-          !LABEL_VALUE[label].nil?
-      end.sort_by do |label|
+      result = selected_labels.sort_by do |label|
         (9 - LABEL_VALUE[label].to_i).to_s + label
       end
       result.empty? ? ["other"] : result
+    end
+
+    def selected_labels
+      labels.select do |label|
+        !label.match(/^(requires .*|votes:.*|jason)$/) &&
+          !LABEL_VALUE[label].nil?
+      end
     end
 
     def user_vote(user)
