@@ -188,47 +188,51 @@ class Symbol
       # Want :type, given :type.
       elsif args.key?(arg = x.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          val.l :
-          val.to_s.strip_html
+        val.is_a?(Symbol) ? val.l : val.to_s.strip_html
 
       # Want :types, given :type.
       elsif (y = x.sub(/s$/i, "")) &&
             args.key?(arg = y.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          "#{val}s".to_sym.l :
-          val.to_s.strip_html
+        val.is_a?(Symbol) ? "#{val}s".to_sym.l : val.to_s.strip_html
 
       # Want :TYPE, given :type.
       elsif args.key?(arg = x.downcase.to_sym) &&
             (x == x.upcase)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          val.to_s.upcase.to_sym.l :
+        if val.is_a?(Symbol)
+          val.to_s.upcase.to_sym.l
+        else
           val.to_s.strip_html.upcase_first
+        end
 
       # Want :TYPES, given :type.
       elsif args.key?(arg = y.downcase.to_sym) &&
             (y == y.upcase)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          "#{val.to_s.upcase}S".to_sym.l :
+        if val.is_a?(Symbol)
+          "#{val.to_s.upcase}S".to_sym.l
+        else
           val.to_s.strip_html.upcase_first
+        end
 
       # Want :Type, given :type.
       elsif args.key?(arg = x.downcase.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          val.l.upcase_first :
+        if val.is_a?(Symbol)
+          val.l.upcase_first
+        else
           val.to_s.strip_html.upcase_first
+        end
 
       # Want :Types, given :type.
       elsif args.key?(arg = y.downcase.to_sym)
         val = args[arg]
-        val.is_a?(Symbol) ?
-          "#{val}s".to_sym.l.upcase_first :
+        if val.is_a?(Symbol)
+          "#{val}s".to_sym.l.upcase_first
+        else
           val.to_s.strip_html.upcase_first
+        end
 
       else
         "[#{orig}]"

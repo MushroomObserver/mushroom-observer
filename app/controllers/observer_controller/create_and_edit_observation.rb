@@ -482,9 +482,11 @@ class ObserverController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
-    observation = args ?
-      Observation.new(args.permit(whitelisted_observation_args)) :
-      Observation.new
+    observation = if args
+                    Observation.new(args.permit(whitelisted_observation_args))
+                  else
+                    Observation.new
+                  end
     observation.created_at = now
     observation.updated_at = now
     observation.user       = @user
