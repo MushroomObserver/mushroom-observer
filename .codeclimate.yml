@@ -115,6 +115,11 @@ plugins:
 # configuration details are in .rubocop.yml files, rather than here.
   rubocop:
     enabled: true
+    # Specify RuboCop version so that we're not stuck with Code Climate's
+    # default, which can be different than what's in Gemfile.lock.
+    # WARNING: update this setting whenever we update RuboCop
+    channel: rubocop-0-63
+
 
 # scss style checker
   scss-lint:
