@@ -593,18 +593,6 @@ Style/MultilineBlockChain:
     - 'test/models/api_test.rb'
     - 'test/models/collapsible_map_test.rb'
 
-# Offense count: 12
-# Cop supports --auto-correct.
-Style/MultilineIfModifier:
-  Exclude:
-    - 'app/controllers/interest_controller.rb'
-    - 'app/controllers/location_controller.rb'
-    - 'app/extensions/symbol_extensions.rb'
-    - 'app/helpers/autocomplete_helper.rb'
-    - 'app/models/location.rb'
-    - 'app/presenters/matrix_box_presenter.rb'
-    - 'test/general_extensions.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

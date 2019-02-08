@@ -73,10 +73,12 @@ module AutocompleteHelper
 
   # Make text_field auto-complete for Herbarium name.
   def turn_into_herbarium_auto_completer(id, opts = {})
+    return unless @user
+
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/herbarium/@?user_id=" + @user.id.to_s,
+      ajax_url: "/ajax/auto_complete/herbarium/@?user_id=#{@user.id.to_s}",
       unordered: true
-    }.merge(opts)) if @user
+    }.merge(opts))
   end
 
   # Convert year field of date_select into an auto-completed text field.

@@ -500,8 +500,10 @@ class LocationController < ApplicationController
     # Render a blank form.
     if request.method != "POST"
       user_name = Location.user_name(@user, @display_name)
-      @dubious_where_reasons = Location.
-                               dubious_name?(user_name, true) if @display_name
+      if @display_name
+        @dubious_where_reasons = Location.
+                                 dubious_name?(user_name, true)
+      end
       @location = Location.new
       geocoder = Geocoder.new(user_name)
       if geocoder.valid

@@ -42,9 +42,13 @@ class MatrixBoxPresenter
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
-    self.thumbnail = view.thumbnail(target.thumb_image, link: { controller: target.show_controller,
-                                                                action: target.show_action, id: target.id }) \
-                     if target&.respond_to?(:thumb_image) && target.thumb_image
+
+    self.thumbnail =
+      if target&.respond_to?(:thumb_image) && target.thumb_image
+        view.thumbnail(target.thumb_image,
+                       link: { controller: target.show_controller,
+                               action: target.show_action, id: target.id })
+      end
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -71,9 +75,10 @@ class MatrixBoxPresenter
     self.what  = view.link_with_query(name, controller: :observer,
                                             action: :show_observation, id: observation.id)
     self.where = view.location_link(observation.place_name, observation.location)
-    self.thumbnail = view.thumbnail(observation.thumb_image, link: { controller: :observer,
-                                                                     action: :show_observation, id: observation.id }) \
-                     if observation.thumb_image
+    if observation.thumb_image
+      self.thumbnail = view.thumbnail(observation.thumb_image, link: { controller: :observer,
+                                                                       action: :show_observation, id: observation.id })
+    end
   end
 
   # Grabs all the information needed for view from User instance.
@@ -84,9 +89,10 @@ class MatrixBoxPresenter
                    #{:Observations.t}: #{user.observations.count}".html_safe
     self.what  = view.link_with_query(name, action: :show_user, id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
-    self.thumbnail = view.thumbnail(user.image_id, link: { controller: user.show_controller,
-                                                           action: user.show_action, id: user.id }, votes: false) \
-                     if user.image_id
+    if user.image_id
+      self.thumbnail = view.thumbnail(user.image_id, link: { controller: user.show_controller,
+                                                             action: user.show_action, id: user.id }, votes: false)
+    end
   end
 
   def fancy_time
