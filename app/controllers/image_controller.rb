@@ -770,6 +770,8 @@ class ImageController < ApplicationController
       "#{safe_old_holder}, #{safe_old_license_id})"
     end.join(",\n")
 
+    # brakeman generates what appears to be a false positive SQL injection
+    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
     Image.connection.insert(%(
       INSERT INTO copyright_changes
         (user_id, updated_at, target_type, target_id, year, name, license_id)

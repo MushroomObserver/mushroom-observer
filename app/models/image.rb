@@ -896,6 +896,8 @@ class Image < AbstractModel
       WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
     ))
     if data.any?
+      # brakeman generates what appears to be a false positive SQL injection
+      # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
       Image.connection.insert(%(
         INSERT INTO copyright_changes
           (user_id, updated_at, target_type, target_id, year, name, license_id)
