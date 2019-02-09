@@ -194,7 +194,7 @@ module SessionExtensions
         id2 = field.id
         if id.is_a?(Regexp) && id2.match(id)
           results << field
-        elsif ((i = id2.rindex(id)) && (i + id.length == id2.length))
+        elsif (i = id2.rindex(id)) && (i + id.length == id2.length)
           results << field
         end
       end

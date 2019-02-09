@@ -193,7 +193,7 @@ class RssLog < AbstractModel
   # Return the type of object of the target, e.g., :observation
   # or nil if it's an orphan
   def target_type
-    RssLog::all_types.each do |type|
+    RssLog.all_types.each do |type|
       return type.to_sym if send("#{type}_id".to_sym)
     end
     nil

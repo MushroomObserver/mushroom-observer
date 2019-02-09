@@ -58,7 +58,7 @@ def parse_options
       { |o| @refs = o }
   end.parse!
 
-  @user     = if /\D/ =~ user_id.to_s
+  @user     = if user_id.to_s.match?(/\D/)
                 User.where(login: user_id).first
               else
                 User.safe_find(user_id)

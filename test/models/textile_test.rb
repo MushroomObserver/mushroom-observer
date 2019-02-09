@@ -124,7 +124,7 @@ class TextileTest < UnitTestCase
       "_var. beta_", "var. beta", "Hydnum ikeni subsp. alpha var. beta"
     )
 
-   # Expand form
+    # Expand form
     # after Textile is told about species
     assert_name_link_matches("_Hydnum album_", "Hydnum album", "Hydnum album")
     assert_name_link_matches(
