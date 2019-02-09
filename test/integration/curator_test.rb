@@ -13,7 +13,7 @@ class CuratorTest < IntegrationTestCase
       form.submit("Add")
     end
     assert_template("observer/show_observation")
-    assert_match(/href="\/observer\/edit_observation\/#{obs.id}/,
+    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
                  response.body)
   end
 
@@ -35,16 +35,16 @@ class CuratorTest < IntegrationTestCase
       form.submit("Save")
     end
     assert_template("observer/show_observation")
-    assert_match(/href="\/observer\/edit_observation\/#{obs.id}/,
+    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
                  response.body)
     go_back
     click(label: "Cancel (Show Observation)")
     assert_template("observer/show_observation")
-    assert_match(/href="\/observer\/edit_observation\/#{obs.id}/,
+    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
                  response.body)
     click(href: "/herbarium_record/remove_observation/#{rec.id}")
     assert_template("observer/show_observation")
-    assert_match(/href="\/observer\/edit_observation\/#{obs.id}/,
+    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
                  response.body)
     assert(!obs.reload.herbarium_records.include?(rec))
   end

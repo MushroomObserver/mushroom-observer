@@ -206,7 +206,7 @@ class ApplicationController < ActionController::Base
     start = start_state
     yield
     logger.warn(error_stats(start))
-  rescue => e
+  rescue StandardError => e
     raise @error = e
   end
 
@@ -224,19 +224,19 @@ class ApplicationController < ActionController::Base
 
   def catch_ip
     request.remote_ip
-  rescue
+  rescue StandardError
     "unknown"
   end
 
   def catch_url
     request.url
-  rescue
+  rescue StandardError
     "unknown"
   end
 
   def catch_ua
     browser.ua
-  rescue
+  rescue StandardError
     "unknown"
   end
 
@@ -628,7 +628,7 @@ class ApplicationController < ActionController::Base
     if tz.present?
       begin
         Time.zone = tz
-      rescue
+      rescue StandardError
         logger.warn "TimezoneError: #{tz.inspect}"
       end
     end
@@ -666,7 +666,7 @@ class ApplicationController < ActionController::Base
 
       loc_wts[Regexp.last_match(1)] = (begin
                                          Regexp.last_match(2).to_f
-                                       rescue
+                                       rescue StandardError
                                          -1.0
                                        end)
     end
@@ -1122,7 +1122,7 @@ class ApplicationController < ActionController::Base
 
   def dealphabetize_q_param
     params[:q].dealphabetize
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -1287,7 +1287,7 @@ class ApplicationController < ActionController::Base
 
   def rss_log_exists
     object.rss_log
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -1691,7 +1691,7 @@ class ApplicationController < ActionController::Base
 
   def paginator_number(parameter_key)
     params[parameter_key].to_s.to_i
-  rescue
+  rescue StandardError
     1
   end
 
@@ -1802,12 +1802,6 @@ class ApplicationController < ActionController::Base
         Vote.new(value: 0)
     end
   end
-
-  # Return this request's URL without the transport or domain.
-  def request_action_and_params
-    request.url.sub(/^\w+:\/+[^\/]+/, "")
-  end
-  helper_method :request_action_and_params
 
   ##############################################################################
 

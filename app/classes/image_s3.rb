@@ -28,7 +28,7 @@ class ImageS3
     Results.new(client.list_objects(bucket: @bucket))
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
-  rescue => e
+  rescue StandardError => e
     raise "Unable to get directory of S3 bucket #{@bucket} at #{@server}: #{e}"
   end
   class Results
@@ -62,7 +62,7 @@ class ImageS3
     ).data
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
-  rescue => e
+  rescue StandardError => e
     raise "Unable to upload image #{key} to S3 bucket #{@bucket} at #{@server}: #{e}"
   end
 
@@ -80,7 +80,7 @@ class ImageS3
     nil
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
-  rescue => e
+  rescue StandardError => e
     raise "Unable to get info on #{key} from S3 bucket #{@bucket} at #{@server}: #{e.class.name}: #{e}"
   end
 
@@ -95,7 +95,7 @@ class ImageS3
     )
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
-  rescue => e
+  rescue StandardError => e
     raise "Unable to delete image #{key} from S3 bucket #{@bucket} at #{@server}: #{e}"
   end
 
@@ -106,7 +106,7 @@ class ImageS3
       region: "us-east-1",
       stub_responses: @stub
     )
-  rescue => e
+  rescue StandardError => e
     raise "couldn't establish connection: #{e}"
   end
 end

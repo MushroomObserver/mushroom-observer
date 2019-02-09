@@ -541,7 +541,7 @@ class Image < AbstractModel
         type.sub!(/;$/, "")
         self.upload_type = type
       end
-      if /^image\//.match?(upload_type)
+      if %r{^image/}.match?(upload_type)
         result = true
       else
         file = upload_original_name.to_s
@@ -580,7 +580,7 @@ class Image < AbstractModel
   def validate_image_name
     name = upload_original_name.to_s
     name.sub!(/^[a-zA-Z]:/, "")
-    name.sub!(/^.*[\/\\]/, "")
+    name.sub!(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
     if name.present? and User.current && User.current.keep_filenames != :toss
@@ -616,7 +616,7 @@ class Image < AbstractModel
           self.upload_temp_file = @file.path
           self.upload_length = @file.size
           result = true
-        rescue => e
+        rescue StandardError => e
           errors.add(:image,
                      "Unexpected error while copying attached file "\
                      "to temp file. Error class #{e.class}: #{e}")
@@ -668,10 +668,10 @@ class Image < AbstractModel
   def move_original
     original_image = local_file_name(:original)
     unless File.rename(upload_temp_file, original_image)
-      raise(SystemCallError, "Try again.")
+      raise SystemCallError.new("Try again.")
     end
 
-    FileUtils.chmod(0644, original_image)
+    FileUtils.chmod(0o644, original_image)
     true
   rescue SystemCallError
     # Use Kernel.system to allow stubbing in tests
@@ -732,7 +732,7 @@ class Image < AbstractModel
   def self.validate_vote(value)
     value = begin
               value.to_i
-            rescue
+            rescue StandardError
               0
             end
     value = nil if value < 1 || value > 4
@@ -760,7 +760,7 @@ class Image < AbstractModel
   # integers.  Returns value of new vote.
   def change_vote(user, value = nil, anon = false)
     user_id = user.is_a?(User) ? user.id : user.to_i
-    save_changes = !self.changed?
+    save_changes = !changed?
 
     # Modify image_votes table first.
     vote = image_votes.find_by_user_id(user_id)
@@ -862,17 +862,17 @@ class Image < AbstractModel
        saved_change_to_copyright_holder?
       old_year       = begin
                          saved_change_to_when[0].year
-                       rescue
+                       rescue StandardError
                          self.when.year
                        end
       old_name       = begin
                          saved_change_to_copyright_holder[0]
-                       rescue
+                       rescue StandardError
                          copyright_holder
                        end
       old_license_id = begin
                          saved_change_to_license_id[0]
-                       rescue
+                       rescue StandardError
                          license_id
                        end
       CopyrightChange.create!(
@@ -896,6 +896,8 @@ class Image < AbstractModel
       WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
     ))
     if data.any?
+      # brakeman generates what appears to be a false positive SQL injection
+      # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
       Image.connection.insert(%(
         INSERT INTO copyright_changes
           (user_id, updated_at, target_type, target_id, year, name, license_id)

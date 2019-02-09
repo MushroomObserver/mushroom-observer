@@ -100,7 +100,7 @@ class API
       raise HerbariumRecordAlreadyExists.new(obj) unless obj.can_edit?(@user)
 
       obj.add_observation(@observation)
-      return obj
+      obj
     end
 
     def after_create(obj)

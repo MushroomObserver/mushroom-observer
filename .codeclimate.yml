@@ -120,7 +120,6 @@ plugins:
     # WARNING: update this setting whenever we update RuboCop
     channel: rubocop-0-63
 
-
 # scss style checker
   scss-lint:
     # Causes an enormous amount of issues

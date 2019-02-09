@@ -42,7 +42,7 @@ module Query::Modules::HighLevelQueries
         rows = select_rows(args.merge(select: "count(*)"))
         begin
           rows[0][0].to_i
-        rescue
+        rescue StandardError
           0
         end
       end

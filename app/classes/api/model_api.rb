@@ -76,7 +76,7 @@ class API
     # Stub for hook before creating object.  Return an object instance if the
     # object already exists and you don't want to create a new object.
     def before_create(params)
-      return nil
+      nil
     end
 
     # Stub for hook after creating object.
@@ -95,7 +95,7 @@ class API
       results.map! do |obj|
         begin
           setter.call(obj)
-        rescue => e
+        rescue StandardError => e
           errors << e
           nil
         end
@@ -128,7 +128,7 @@ class API
       results.each do |obj|
         begin
           deleter.call(obj)
-        rescue => e
+        rescue StandardError => e
           errors << e
         end
       end

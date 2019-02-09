@@ -16,7 +16,7 @@ class AjaxController
     args = params[:image]
     image = create_and_upload_image(args)
     render_image(image, args)
-  rescue => e
+  rescue StandardError => e
     render_errors(e.to_s, args)
   end
 

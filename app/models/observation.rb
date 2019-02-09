@@ -594,7 +594,7 @@ class Observation < AbstractModel
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
-  rescue
+  rescue StandardError
     ""
   end
 
@@ -602,9 +602,13 @@ class Observation < AbstractModel
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
   def lookup_naming(naming)
+    # Disable cop; test suite chokes when the following "raise"
+    # is re-written in "exploded" style (the Rubocop default)
+    # rubocop:disable Style/RaiseArgs
     namings.find { |n| n == naming } ||
       raise(ActiveRecord::RecordNotFound,
             "Observation doesn't have naming with ID=#{naming.id}")
+    # rubocop:enable Style/RaiseArgs
   end
 
   # Dump out the sitatuation as the observation sees it.  Useful for debugging
@@ -1102,7 +1106,7 @@ class Observation < AbstractModel
     # using first.  (I think it can also happen if zero-weighted users are
     # voting.)
     best = namings.first.name if !best && namings && !namings.empty?
-    best = Name.unknown unless best
+    best ||= Name.unknown
     result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
 
     # Just humor me -- I'm sure there is some pathological case where we can

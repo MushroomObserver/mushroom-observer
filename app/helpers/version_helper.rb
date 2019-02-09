@@ -62,7 +62,7 @@ module VersionHelper
       # Date change was made.
       date = begin
                ver.updated_at.web_date
-             rescue
+             rescue StandardError
                :unknown.t
              end
 
@@ -115,7 +115,7 @@ module VersionHelper
     if ver.merge_source_id &&
        (other_ver = begin
                       ver.class.find(ver.merge_source_id)
-                    rescue
+                    rescue StandardError
                       nil
                     end)
       parent_id = other_ver.send("#{type}_id")

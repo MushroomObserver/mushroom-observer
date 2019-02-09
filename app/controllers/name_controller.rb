@@ -200,7 +200,7 @@ class NameController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Name)
     show_selected_names(query)
-  rescue => err
+  rescue StandardError => err
     flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
@@ -1048,7 +1048,7 @@ class NameController < ApplicationController
     if request.method == "POST"
       list = begin
                params[:list][:members].strip_squeeze
-             rescue
+             rescue StandardError
                ""
              end
       construct_approved_names(list, params[:approved_names])
@@ -1238,7 +1238,7 @@ class NameController < ApplicationController
               header: "present",
               disposition: "attachment",
               filename: "#{action_name}.csv")
-  rescue => e
+  rescue StandardError => e
     render(plain: e.to_s, layout: false, status: 500)
   end
 end

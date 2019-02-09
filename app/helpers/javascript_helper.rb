@@ -22,8 +22,9 @@ module JavascriptHelper
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
     if args.select { |arg| arg.class != String } != []
-      raise(ArgumentError,
-            "javascript_include doesn't take symbols like :default, etc.")
+      raise ArgumentError.new(
+        "javascript_include doesn't take symbols like :default, etc."
+      )
     end
 
     @javascript_files ||= []

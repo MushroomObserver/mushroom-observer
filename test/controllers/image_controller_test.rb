@@ -345,7 +345,8 @@ class ImageControllerTest < FunctionalTestCase
     example_image.reload
     assert_equal(new_license.id, example_image.license_id)
     assert_equal(copyright_holder, example_image.copyright_holder)
-    assert_equal(1, example_image.copyright_changes.length)
+    assert_equal(1, example_image.copyright_changes.length,
+                 "Wrong number of copyright changes")
     assert_equal(old_license.id,
                  example_image.copyright_changes.last.license_id)
 
@@ -367,11 +368,13 @@ class ImageControllerTest < FunctionalTestCase
     post_requires_login(:license_updater, params)
     assert_template("license_updater")
     example_image.reload
-    assert_equal("A. H. Smith", example_image.copyright_holder)
+    assert_equal("A. H. Smith", example_image.copyright_holder,
+                 "Name of new copyright holder is incorrect")
     assert_equal(3, example_image.copyright_changes.length)
     assert_equal(new_license.id,
                  example_image.copyright_changes.last.license_id)
-    assert_equal("", example_image.copyright_changes.last.name)
+    assert_equal("", example_image.copyright_changes.last.name,
+                 "Name of prior copyright holder is incorrect")
   end
 
   def test_delete_images
