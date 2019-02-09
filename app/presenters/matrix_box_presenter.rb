@@ -114,7 +114,7 @@ class MatrixBoxPresenter
     begin
       tag, args, time = rss_log.parse_log.first
     rescue StandardError
-     []
+      []
     end
     if !target_type
       self.detail = :rss_destroyed.t(type: :object)
