@@ -372,8 +372,12 @@ module SessionExtensions
                      "Expected field #{id.inspect} to be a select field!")
       matches = []
       for opt in field.options
-        if label.is_a?(Regexp) ? opt.label.match(label) :
-                                 (opt.label == label.to_s)
+        update_match = if label.is_a?(Regexp)
+                         opt.label.match(label)
+                       else
+                         (opt.label == label.to_s)
+                       end
+        if update_match
           field.value = opt.value
           matches << opt.label
         end
@@ -395,8 +399,8 @@ module SessionExtensions
       hash = {}
       for field in inputs
         if field.type == :checkbox
-          hash[field.name] = field.node["checked"] == "checked" ?
-                                field.on_value : "0"
+          hash[field.name] =
+            field.node["checked"] == "checked" ? field.on_value : "0"
         elsif field.type == :radio
           hash[field.name] = field.on_value if field.value
         elsif field.type == :file

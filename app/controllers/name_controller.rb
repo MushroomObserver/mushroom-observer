@@ -1175,13 +1175,13 @@ class NameController < ApplicationController
     number_of_names = params[:number_of_names].presence.to_i || 1000
     minimum_confidence = params[:minimum_confidence].presence.to_i || 1.5
     minimum_observations = params[:minimum_observations].presence.to_i || 5
-    rank_condition =  if params[:include_higher_taxa].blank?
-      "= #{Name.ranks[:Species]}"
-    else
-      "NOT IN (
-        #{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group
-      ).join(",")})"
-    end
+    rank_condition =
+      if params[:include_higher_taxa].blank?
+        "= #{Name.ranks[:Species]}"
+      else
+        "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).
+          join(",")})"
+      end
     data = Name.connection.select_rows(%(
       SELECT y.name, y.rank, SUM(y.number)
       FROM (

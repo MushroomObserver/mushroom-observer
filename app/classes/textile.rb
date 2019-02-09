@@ -293,7 +293,6 @@ class Textile < String
     end
   end
 
-
   # Allow a number of author-like syntaxes that aren't normally allowed.
   # Remove them and match the rest.  Examples:
   #   _Laccaria cf. laccata_     -->  Laccaria laccata

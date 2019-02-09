@@ -215,7 +215,7 @@ class Name < AbstractModel
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
     TEXT_NAME_MATCHERS.each do |matcher|
-      return matcher.second if matcher.first =~ text_name
+      return matcher.second if text_name.match?(matcher.first)
     end
   end
 
@@ -283,8 +283,8 @@ class Name < AbstractModel
       author = standardize_author(author)
       author2 = author.blank? ? "" : " " + author
       text_name = name.tr("ë", "e")
-      parent_name = Name.ranks_below_genus.include?(rank) ?
-                      name.sub(LAST_PART, "") : nil
+      parent_name =
+        Name.ranks_below_genus.include?(rank) ? name.sub(LAST_PART, "") : nil
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         text_name: text_name,
@@ -370,12 +370,12 @@ class Name < AbstractModel
     [SSP_ABBR,     :Subspecies],
     [VAR_ABBR,     :Variety],
     [F_ABBR,       :Form],
-    [//,           nil]  # match anything else
+    [//,           nil] # match anything else
   ].freeze
 
   def self.parse_rank_abbreviation(str)
     RANK_FROM_ABBREV_MATCHERS.each do |matcher|
-      return matcher.second if matcher.first =~ str
+      return matcher.second if str.match?(matcher.first)
     end
   end
 

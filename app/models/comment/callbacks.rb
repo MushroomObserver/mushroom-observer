@@ -94,13 +94,13 @@ class Comment
       map(&:user).uniq
   end
 
-  USER_LINK_PAT  = /
+  USER_LINK_PAT = /
     (?:^|\W) _+user\s+ ([^_\s](?:[^_\n]+[^_\s])?) _+ (?!\w)
   /xi.freeze
   AT_USER_AT_PAT = /
     (?:^|\W) @ ([^@\s][^@\n]+[^@\s]) @ (?=\W|$)
   /x.freeze
-  AT_USER_PAT    = /
+  AT_USER_PAT = /
     (?:^|\W) @ (\w+) (?=[^@]|$)
   /x.freeze
 
