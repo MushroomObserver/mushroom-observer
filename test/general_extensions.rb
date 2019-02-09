@@ -319,7 +319,7 @@ module GeneralExtensions
   #
   def get_xml_element(key)
     assert(@doc, "XML response is nil!")
-    key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       assert(elem, "XML response missing element \"#{key}\".")
       elem
@@ -332,7 +332,7 @@ module GeneralExtensions
   #
   def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
+    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       assert(nil, msg || "XML response should have \"#{key}\".") unless elem
       elem
@@ -345,7 +345,7 @@ module GeneralExtensions
   #
   def assert_xml_none(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
+    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
       return unless elem
 
@@ -368,7 +368,7 @@ module GeneralExtensions
   #   assert_xml_attr(1234, '/response/results/1/id')
   #
   def assert_xml_attr(val, key, msg = nil)
-    key =~ /^(.*)\/(.*)/
+    key =~ %r{^(.*)/(.*)}
     key = Regexp.last_match(1)
     attr = Regexp.last_match(2)
     _assert_xml(val, get_xml_element(key).attributes[attr],

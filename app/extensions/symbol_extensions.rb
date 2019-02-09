@@ -257,11 +257,11 @@ class Symbol
                   val.match(/^(-?\d+(\.\d+)?)$/)
               val = Regexp.last_match(1)
             elsif !val.match(/^([a-z][a-z_]*\d*)$/) && Symbol.raise_error?
-              raise(ArgumentError, "Invalid argument value \":#{val}\" in " \
+              raise ArgumentError.new("Invalid argument value \":#{val}\" in " \
                     "#{I18n.locale} localization for " +
                     ([self] + level).map(&:inspect).join(" --> "))
             elsif !args.key?(val.to_sym) && Symbol.raise_error?
-              raise(ArgumentError, "Forgot to pass :#{val} into " \
+              raise ArgumentError.new("Forgot to pass :#{val} into " \
                     "#{I18n.locale} localization for " +
                     ([self] + level).map(&:inspect).join(" --> "))
             else
@@ -269,7 +269,7 @@ class Symbol
             end
             hash[key] = val
           elsif Symbol.raise_error?
-            raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " \
+            raise ArgumentError.new("Invalid syntax at \"#{pair}\" in " \
                   "arguments for #{I18n.locale} tag :#{tag} embedded in " +
                   ([self] + level).map(&:inspect).join(" --> "))
           end

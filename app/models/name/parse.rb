@@ -69,9 +69,10 @@ class Name < AbstractModel
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
     $/x.freeze
 
-  # Taxa without authors (for use by GROUP PAT)
-  # disable cop to allow alignment and easier comparison of regexps
+  # Disable cop to allow alignment and easier comparison of regexps
   # rubocop:disable Metrics/LineLength
+
+  # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x.freeze
   SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x.freeze
   SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
@@ -270,7 +271,7 @@ class Name < AbstractModel
 
   # sripped group_abbr
   def self.group_wd(str)
-    (GROUP_CHUNK.match(str))[:group_wd]
+    GROUP_CHUNK.match(str)[:group_wd]
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)

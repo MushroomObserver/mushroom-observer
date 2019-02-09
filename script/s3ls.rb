@@ -62,7 +62,7 @@ begin
     access_key_id: access_key_id,
     secret_access_key: secret_access_key
   )
-rescue => e
+rescue StandardError => e
   abort("Failed: couldn't connect: #{e}")
 end
 

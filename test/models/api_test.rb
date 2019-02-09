@@ -1152,6 +1152,13 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(location: burbank.id))
     assert_api_results(imgs)
 
+    obs1 = observations(:detailed_unknown_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    assert_not_empty(obs1.images)
+    assert_not_empty(obs2.images)
+    assert_api_pass(params.merge(observation: "#{obs1.id},#{obs2.id}"))
+    assert_api_results(obs1.images + obs2.images)
+
     project = projects(:bolete_project)
     assert_not_empty(project.images)
     assert_api_pass(params.merge(project: "Bolete Project"))

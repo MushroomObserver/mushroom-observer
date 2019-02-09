@@ -89,7 +89,7 @@ begin
     access_key_id: access_key_id,
     secret_access_key: secret_access_key
   )
-rescue => e
+rescue StandardError => e
   abort("Upload failed on #{server}/#{key}: couldn't connect: #{e}")
 end
 
@@ -100,12 +100,12 @@ if copy
     if result.etag != "\"#{md5}\""
       begin
         s3.delete(key)
-      rescue
+      rescue StandardError
         nil
       end
       abort("Upload failed on #{server}/#{key}: md5sum didn't match")
     end
-  rescue => e
+  rescue StandardError => e
     abort("Upload failed on #{server}/#{key}: #{e}")
   end
   log("Uploaded #{server}/#{key}\n") if verbose

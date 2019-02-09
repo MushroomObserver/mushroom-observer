@@ -84,7 +84,7 @@ module LanguageTracking
     end
     FileUtils.touch(file)
     tags
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -104,7 +104,7 @@ module LanguageTracking
       for file in Dir.glob(glob)
         begin
           File.delete(file) if File.mtime(file) < cutoff
-        rescue
+        rescue StandardError
           # I've seen this fail because of files presumably being deleted by
           # another process between Dir.glob and File.mtime.
         end

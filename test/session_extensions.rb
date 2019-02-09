@@ -284,12 +284,12 @@ module SessionExtensions
         end
 
         # Click on first link that matches everything.
-        if match
-          url = CGI.unescapeHTML(link.attributes["href"])
-          get(url)
-          done = true
-          break
-        end
+        next unless match
+
+        url = CGI.unescapeHTML(link.attributes["href"])
+        get(url)
+        done = true
+        break
       end
     end
 

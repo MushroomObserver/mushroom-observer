@@ -161,13 +161,13 @@ class Naming < AbstractModel
       taxa.push(Name.find_by_text_name("Lichen")) if name.is_lichen?
       done_user = {}
       flavor = Notification.flavors[:name]
-      for taxon in taxa
-        for n in Notification.where(flavor: flavor, obj_id: taxon.id)
-          if (n.user != user) && !done_user[n.user_id] &&
-             (!n.require_specimen || observation.specimen)
-            QueuedEmail::NameTracking.create_email(n, self)
-            done_user[n.user_id] = true
-          end
+      taxa.each do |taxon|
+        Notification.where(flavor: flavor, obj_id: taxon.id).each do |n|
+          next unless (n.user != user) && !done_user[n.user_id] &&
+                      (!n.require_specimen || observation.specimen)
+
+          QueuedEmail::NameTracking.create_email(n, self)
+          done_user[n.user_id] = true
         end
       end
 
@@ -279,26 +279,14 @@ class Naming < AbstractModel
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
-    result = nil
-    for v in votes
-      if (v.user_id == user.id)
-        result = v
-        break
-      end
-    end
-    result
+    votes.each { |v| return v if v.user_id == user.id }
+    nil
   end
 
   # Is this Naming the given User's favorite Naming for this Observation?
   def is_users_favorite?(user)
-    result = false
-    for v in votes
-      if (v.user_id == user.id) &&
-         (v.favorite)
-        result = true
-      end
-    end
-    result
+    votes.each { |v| return true if (v.user_id == user.id) && v.favorite }
+    false
   end
 
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
@@ -324,31 +312,20 @@ class Naming < AbstractModel
   # the name for namings that the community has voted on.  Returns true if no
   # one has.
   def editable?
-    result = true
-    for v in votes
-      if (v.user_id != user_id) &&
-         (v.value.positive?)
-        result = false
-        break
-      end
+    votes.each do |v|
+      return false if (v.user_id != user_id) && v.value.positive?
     end
-    result
+    true
   end
 
   # Has anyone given this their strongest (positive) vote?  We don't want
   # people destroying namings that someone else likes best.  Returns true if no
   # one has.
   def deletable?
-    result = true
-    for v in votes
-      if (v.user_id != user_id) &&
-         (v.value.positive?) &&
-         (v.favorite)
-        result = false
-        break
-      end
+    votes.each do |v|
+      return false if (v.user_id != user_id) && v.value.positive? && v.favorite
     end
-    result
+    true
   end
 
   # Create a table the number of User's who cast each level of Vote.
@@ -415,7 +392,7 @@ class Naming < AbstractModel
     :naming_reason_label_1,  # "Recognized by sight"
     :naming_reason_label_2,  # "Used references"
     :naming_reason_label_3,  # "Based on microscopical features"
-    :naming_reason_label_4,  # "Based on chemical features"
+    :naming_reason_label_4   # "Based on chemical features"
   ].freeze
 
   # Return reasons as Array of Reason instances.  Changes to these instances

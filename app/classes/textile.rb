@@ -46,7 +46,7 @@ class Textile < String
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
   def textilize_without_paragraph(do_object_links = false, sanitize = true)
-    textilize(do_object_links, sanitize).sub(/\A<p[^>]*>(.*?)<\/p>.*/m, '\\1')
+    textilize(do_object_links, sanitize).sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
   end
 
   # Textilizes the string using RedCloth, doing a little extra processing:
@@ -87,7 +87,7 @@ class Textile < String
 
     # Remove pre-existing links first, replacing with "<XXXnn>".
     hrefs = []
-    gsub!(/(<a[^>]*>.*?<\/a>|<img[^>]*>)/) do |href|
+    gsub!(%r{(<a[^>]*>.*?</a>|<img[^>]*>)}) do |href|
       if do_object_links
         href = href.gsub(/
           x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
@@ -98,12 +98,12 @@ class Textile < String
     end
 
     # Now turn bare urls into links.
-    gsub!(/([a-z]+:\/\/([^\s<>]|<span class="caps">[A-Z]+<\/span>)+)/) do |url|
-      url1  = url.gsub(/<span class="caps">([A-Z]+)<\/span>/, '\\1')
-      extra = url1.sub!(/([^\w\/]+$)/, "") ? Regexp.last_match(1) : ""
+    gsub!(%r{([a-z]+://([^\s<>]|<span class="caps">[A-Z]+</span>)+)}) do |url|
+      url1  = url.gsub(%r{<span class="caps">([A-Z]+)</span>}, '\\1')
+      extra = url1.sub!(%r{([^\w/]+$)}, "") ? Regexp.last_match(1) : ""
       url2  = ""
       if url1.length > URL_TRUNCATION_LENGTH && !url1.starts_with?(MO.http_domain)
-        if url1 =~ /^(\w+:\/\/[^\/]+)(.*?)$/
+        if url1 =~ %r{^(\w+://[^/]+)(.*?)$}
           url2 = Regexp.last_match(1) + "/..."
         else
           url2 = url1[0..URL_TRUNCATION_LENGTH] + "..."
@@ -134,7 +134,7 @@ class Textile < String
     end
 
     # Make sure all links are fully-qualified.
-    gsub!(/href="\//, "href=\"#{MO.http_domain}/")
+    gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
 
     # Put pre-existing links back in (removing the _object_ tag wrappers).
     gsub!(/<XXX(\d+)>/) do
@@ -223,7 +223,7 @@ class Textile < String
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
-    self.gsub!(NAME_LINK_PATTERN) do |orig_str|
+    gsub!(NAME_LINK_PATTERN) do |orig_str|
       prefix = Regexp.last_match(1)
       label = remove_formatting(Regexp.last_match(2))
       name = expand_genus_abbreviation(label)
@@ -305,7 +305,7 @@ class Textile < String
 
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
-    self.gsub!(OTHER_LINK_PATTERN) do |orig|
+    gsub!(OTHER_LINK_PATTERN) do |orig|
       result = orig
       prefix = Regexp.last_match(1)
       type = Regexp.last_match(2)
@@ -330,7 +330,7 @@ class Textile < String
 
   # Convert !image 12345! in a textile string.
   def check_our_images!
-    self.gsub!(/!image (?:(\w+)\/)?(\d+)!/) do
+    gsub!(%r{!image (?:(\w+)/)?(\d+)!}) do
       size = Regexp.last_match[1] || "thumb"
       id   = Regexp.last_match[2]
       src  = Image.url(size, id)

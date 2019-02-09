@@ -286,7 +286,7 @@ class NameDescription < Description
   validate :check_requirements
   def check_requirements # :nodoc:
     self.classification = Name.validate_classification(parent.rank, classification)
-  rescue => e
+  rescue StandardError => e
     errors.add(:classification, e.to_s)
   end
 end

@@ -19,11 +19,11 @@ class Robots
         pat = Regexp.new('Allow: /(\w+)/(\w+)')
         File.open(file).readlines.each do |line|
           match = line.match(pat)
-          if match
-            controller = match[1]
-            action     = match[2]
-            results["#{controller}/#{action}"] = true
-          end
+          next unless match
+
+          controller = match[1]
+          action     = match[2]
+          results["#{controller}/#{action}"] = true
         end
       end
       results

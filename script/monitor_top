@@ -34,7 +34,7 @@ begin
   mem_pct  = mem_used / mem_total * 100
   swap_pct = swap_used / swap_total * 100
   size     = File.size(LOG_FILE)
-rescue
+rescue StandardError
   mem_pct  = 0
   swap_pct = 0
   size     = 0

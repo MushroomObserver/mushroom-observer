@@ -1660,6 +1660,10 @@ class QueryTest < UnitTestCase
   def test_image_all
     expect = Image.all.reverse
     assert_query(expect, :Image, :all)
+
+    obs = observations(:two_img_obs)
+    expect = obs.images
+    assert_query(expect, :Image, :all, observations: obs)
   end
 
   def test_image_by_user

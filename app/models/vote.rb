@@ -144,7 +144,7 @@ class Vote < AbstractModel
   def self.validate_value(val)
     val = val.to_f
     val && val >= MINIMUM_VOTE && val <= MAXIMUM_VOTE ? val : nil
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -232,13 +232,12 @@ class Vote < AbstractModel
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
     for pair in list
-      if pair[1] != 0
-        if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
-          return last_pair[0]
-        end
-
-        last_pair = pair
+      next unless pair[1] != 0
+      if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
+        return last_pair[0]
       end
+
+      last_pair = pair
     end
     last_pair[0]
   end

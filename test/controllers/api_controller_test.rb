@@ -259,18 +259,18 @@ class ApiControllerTest < FunctionalTestCase
     keys = doc.root.elements["results/result/api_keys"]
     num = begin
             keys.attribute("number").value
-          rescue
+          rescue StandardError
             nil
           end
     assert_equal("1", num.to_s)
     key = begin
             keys.elements["api_key/key"].get_text
-          rescue
+          rescue StandardError
             nil
           end
     notes = begin
               keys.elements["api_key/notes"].get_text
-            rescue
+            rescue StandardError
               nil
             end
     assert_not_equal("", key.to_s)

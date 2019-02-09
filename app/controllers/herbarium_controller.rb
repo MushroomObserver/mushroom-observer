@@ -373,7 +373,7 @@ class HerbariumController < ApplicationController
     return false if @back.blank?
 
     redirect_to(@back)
-    return true
+    true
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)
