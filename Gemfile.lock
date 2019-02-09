@@ -136,6 +136,8 @@ GEM
       ruby-progressbar
     mocha (1.7.0)
       metaclass (~> 0.0.1)
+    mry (0.59.0.0)
+      rubocop (>= 0.41.0)
     multi_json (1.13.1)
     mysql2 (0.5.2)
     nio4r (2.3.1)
@@ -279,6 +281,7 @@ DEPENDENCIES
   minitest
   minitest-reporters
   mocha
+  mry
   mysql2
   rails (~> 5.2.2)
   rails-controller-testing

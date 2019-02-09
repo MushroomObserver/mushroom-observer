@@ -81,6 +81,9 @@ gem "coveralls", require: false
 # TODO: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 gem "rubocop", require: false
 
+# use mry to support safe updating of .rubocop.yml
+gem "mry", require: false
+
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
 # We don't need the gem because CodeClimate CI includes a Brakeman engine.
