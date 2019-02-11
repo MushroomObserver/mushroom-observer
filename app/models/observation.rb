@@ -99,12 +99,14 @@
 #  name_been_proposed?::    Has someone proposed this Name already?
 #  owner_voted?::           Has the owner voted on a given Naming?
 #  user_voted?::            Has a given User voted on a given Naming?
-#  owners_vote::            Get the owner's Vote on a given Naming.
-#  users_vote::             Get a given User's Vote on a given Naming.
+#  owners_vote::            Owner's Vote on a given Naming.
+#  users_vote::             A given User's Vote on a given Naming
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
-#  users_votes::            Get all of a given User's Vote's for this Obs..
-#  is_owners_favorite?::    Is a given naming the owner's favorite?
-#  is_users_favorite?::     Is a given naming a given user's favorite?
+#  is_owners_favorite?::    Is a given Naming one of the owner's favorite(s)
+#                           for this Observation?
+#  is_users_favorite?::     Is a given Naming one of the given user's
+#                           favorites for this Observation?
+#  owner_preference         owners's unique prefered Name (if any) for this Obs
 #  change_vote::            Change a given User's Vote for a given Naming.
 #  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
@@ -653,47 +655,60 @@ class Observation < AbstractModel
     lookup_naming(naming).users_vote(user)
   end
 
-  # Returns true if a given naming has received the highest positive vote from
-  # the owner of this observation.  Note, multiple namings can return true for
-  # a given observation.
+  # Disable method name cops to avoid breaking 3rd parties' use of API
+  # rubocop:disable Naming/PredicateName
+
+  # Returns true if a given Naming has received one of the highest positive
+  # votes from the owner of this observation.
+  # Note: multiple namings can return true for a given observation.
+  # This is used to display eyes next to Proposed Name on Observation page
   def is_owners_favorite?(naming)
     lookup_naming(naming).is_users_favorite?(user)
   end
 
-  # Returns true if a given naming has received the highest positive vote from
-  # the given user (among namings for this observation).  Note, multiple
-  # namings can return true for a given user and observation.
+  # Returns true if a given Naming has received one of the highest positive
+  # votes from the given user (among namings for this observation).
+  # Note: multiple namings can return true for a given user and observation.
   def is_users_favorite?(naming, user)
     lookup_naming(naming).is_users_favorite?(user)
   end
 
+  # rubocop:enable Naming/PredicateName
+
+  # All of observation.user's votes on all Namings for this Observation
+  # Used in Observation and in tests
   def owners_votes
-    users_votes(user)
+    user_votes(user)
   end
 
-  def users_votes(user)
-    result = []
-    namings.each do |n|
+  # All of a given User's votes on all Namings for this Observation
+  def user_votes(user)
+    namings.each_with_object([]) do |n, votes|
       v = n.users_vote(user)
-      result << v if v
-    end
-    result
-  end
-
-  def owner_favorite_or_explanation
-    if owner_sure_enough?
-      owners_only_favorite_name.format_name
-    else
-      :show_observation_no_clear_preference
+      votes << v if v
     end
   end
 
-  def owners_only_favorite_name
+  # Observation.user's unique preferred positive Name for this observation
+  # Returns falsy if there's no unique preferred positive id
+  # Used on show_observation page
+  def owner_preference
+    owner_uniq_favorite_name if owner_preference?
+  end
+
+  private # private methods used by owner_preference ###########################
+
+  # Does observation.user have a single preferred id for this observation?
+  def owner_preference?
+    owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
+  end
+
+  def owner_uniq_favorite_name
     favs = owner_favorite_votes
     favs[0].naming.name if favs.count == 1
   end
 
-  def owner_favorite_vote
+  def owner_uniq_favorite_vote
     votes = owner_favorite_votes
     return votes.first if votes.count == 1
   end
@@ -702,17 +717,7 @@ class Observation < AbstractModel
     votes.where(user_id: user_id, favorite: true)
   end
 
-  # show Observer ID? (observer's identification of Observation)
-  # (in code, Observer ID is "owner_id")
-  def show_owner_id?
-    User.view_owner_id_on?
-  end
-
-  def owner_sure_enough?
-    return unless owner_favorite_vote
-
-    owner_favorite_vote.value >= Vote.owner_id_min_confidence
-  end
+  public #######################################################################
 
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
@@ -734,13 +739,13 @@ class Observation < AbstractModel
 
           # Get user's max positive vote for this obs
           max = 0
-          users_votes(user).each do |v|
+          user_votes(user).each do |v|
             max = v.value if v.value > max
           end
 
           # If any, mark all votes at that level "favorite".
           if max.positive?
-            users_votes(user).each do |v|
+            user_votes(user).each do |v|
               next if v.value != max || v.favorite
 
               v.favorite = true
@@ -757,7 +762,7 @@ class Observation < AbstractModel
       # First downgrade any existing 100% votes (if casting a 100% vote).
       v80 = Vote.next_best_vote
       if value > v80
-        users_votes(user).each do |v|
+        user_votes(user).each do |v|
           if v.value > v80
             v.value = v80
             v.save
@@ -765,7 +770,7 @@ class Observation < AbstractModel
         end
       end
 
-      other_votes = (users_votes(user) - [vote])
+      other_votes = (user_votes(user) - [vote])
       # Is this vote going to become the favorite?
       favorite = false
       if value.positive?

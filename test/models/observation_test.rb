@@ -91,30 +91,26 @@ class ObservationTest < UnitTestCase
   #  Test owner id, favorites, consensus
   # --------------------------------------
 
-  def fav_name(obs)
-    fav_naming(obs).name
-  end
-
-  def fav_naming(obs)
-    Vote.where(observation: obs, user: obs.user, favorite: true).first.naming
-  end
-
-  def test_owner_id
+  # Test Observer's Prefered ID
+  def test_observer_preferred_id
     obs = observations(:owner_only_favorite_ne_consensus)
-    assert_equal(fav_name(obs).display_name,
-                 obs.owner_favorite_or_explanation)
+    assert_equal(names(:tremella_mesenterica), obs.owner_preference)
 
     obs = observations(:owner_only_favorite_eq_consensus)
-    assert_equal(fav_name(obs).display_name,
-                 obs.owner_favorite_or_explanation)
-
-    obs = observations(:owner_multiple_favorites)
-    assert_equal(:show_observation_no_clear_preference,
-                 obs.owner_favorite_or_explanation)
+    assert_equal(names(:boletus_edulis), obs.owner_preference)
 
     obs = observations(:owner_only_favorite_eq_fungi)
-    assert_equal(fav_name(obs).display_name,
-                 obs.owner_favorite_or_explanation)
+    assert_equal(names(:fungi), obs.owner_preference)
+
+    # obs Site ID is Fungi, but owner did not propose a Name
+    obs = observations(:minimal_unknown_obs)
+    assert_not(obs.owner_preference)
+
+    obs = observations(:owner_multiple_favorites)
+    assert_not(obs.owner_preference)
+
+    obs = observations(:owner_uncertain_favorite)
+    assert_not(obs.owner_preference)
   end
 
   def test_change_vote_weakened_favorite
