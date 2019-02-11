@@ -681,7 +681,7 @@ class Observation < AbstractModel
   end
 
   def owner_favorite_or_explanation
-    if showable_owner_id?
+    if owner_sure_enough?
       owners_only_favorite_name.format_name
     else
       :show_observation_no_clear_preference
@@ -694,7 +694,8 @@ class Observation < AbstractModel
   end
 
   def owner_favorite_vote
-    owner_favorite_votes.first
+    votes = owner_favorite_votes
+    return votes.first if votes.count == 1
   end
 
   def owner_favorite_votes
@@ -707,18 +708,10 @@ class Observation < AbstractModel
     User.view_owner_id_on?
   end
 
-  def showable_owner_id?
-    owner_sure_enough? && owner_id_known?
-  end
-
   def owner_sure_enough?
     return unless owner_favorite_vote
 
     owner_favorite_vote.value >= Vote.owner_id_min_confidence
-  end
-
-  def owner_id_known?
-    owners_only_favorite_name.try(:known?)
   end
 
   # Change User's Vote for this naming.  Automatically recalculates the

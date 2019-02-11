@@ -812,9 +812,9 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:owner_only_favorite_eq_fungi)
     get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
+                  { text: /#{obs.owners_only_favorite_name.text_name}/,
                     count: 1 },
-                  "Observation should show lack of Observer preference")
+                  "Observation should show Observer ID")
   end
 
   def test_show_owner_id_view_owner_id_false
