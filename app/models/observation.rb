@@ -689,36 +689,6 @@ class Observation < AbstractModel
     end
   end
 
-  # Observation.user's unique preferred positive Name for this observation
-  # Returns falsy if there's no unique preferred positive id
-  # Used on show_observation page
-  def owner_preference
-    owner_uniq_favorite_name if owner_preference?
-  end
-
-  private # private methods used by owner_preference ###########################
-
-  # Does observation.user have a single preferred id for this observation?
-  def owner_preference?
-    owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
-  end
-
-  def owner_uniq_favorite_name
-    favs = owner_favorite_votes
-    favs[0].naming.name if favs.count == 1
-  end
-
-  def owner_uniq_favorite_vote
-    votes = owner_favorite_votes
-    return votes.first if votes.count == 1
-  end
-
-  def owner_favorite_votes
-    votes.where(user_id: user_id, favorite: true)
-  end
-
-  public #######################################################################
-
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
@@ -1198,6 +1168,42 @@ class Observation < AbstractModel
 
     status
   end
+
+  ##############################################################################
+  #
+  #  :section: Preferred ID
+  #
+  ##############################################################################
+
+  # Observation.user's unique preferred positive Name for this observation
+  # Returns falsy if there's no unique preferred positive id
+  # Used on show_observation page
+  def owner_preference
+    owner_uniq_favorite_name if owner_preference?
+  end
+
+  private
+
+  # Does observation.user have a single preferred id for this observation?
+  def owner_preference?
+    owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
+  end
+
+  def owner_uniq_favorite_name
+    favs = owner_favorite_votes
+    favs[0].naming.name if favs.count == 1
+  end
+
+  def owner_uniq_favorite_vote
+    votes = owner_favorite_votes
+    return votes.first if votes.count == 1
+  end
+
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
+  public
 
   ##############################################################################
   #

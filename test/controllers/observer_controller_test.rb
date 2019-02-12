@@ -770,14 +770,14 @@ class ObserverControllerTest < FunctionalTestCase
   def test_show_owner_id
     login(user_with_view_owner_id_true)
     obs = observations(:owner_only_favorite_ne_consensus)
-    get(:show_observation, params: { id: obs.id })
+    get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
 
-    get(:show_observation,
-        params: { id: observations(:owner_multiple_favorites).id })
+    get_with_dump(:show_observation,
+                  id: observations(:owner_multiple_favorites).id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
@@ -786,16 +786,16 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_owner_id_view_owner_id_false
     login(user_with_view_owner_id_false)
-    get(:show_observation,
-        params: { id: observations(:owner_only_favorite_ne_consensus).id })
+    get_with_dump(:show_observation,
+                  id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when user has not opted for it")
   end
 
   def test_show_owner_id_noone_logged_in
     logout
-    get(:show_observation,
-        params: { id: observations(:owner_only_favorite_ne_consensus).id })
+    get_with_dump(:show_observation,
+                  id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
   end
