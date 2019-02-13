@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # helpers for show Observation view
 module ShowObservationHelper
   def show_obs_title(obs)
@@ -25,11 +27,15 @@ module ShowObservationHelper
 
   # Observer Preference: Agaricus L.
   def owner_id_line(obs)
-    return unless obs.show_owner_id?
+    return unless User.view_owner_id_on?
 
     capture do
       concat(:show_observation_owner_id.t + ": ")
-      concat(obs.owner_favorite_or_explanation.t)
+      concat(owner_favorite_or_explanation(obs).t)
     end
+  end
+
+  def owner_favorite_or_explanation(obs)
+    obs.owner_preference&.format_name || :show_observation_no_clear_preference
   end
 end
