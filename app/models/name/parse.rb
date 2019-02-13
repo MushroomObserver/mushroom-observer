@@ -1,13 +1,6 @@
 class Name < AbstractModel
-  SUBG_ABBR    = / subgenus | subg\.? /xi.freeze
-  SECT_ABBR    = / section | sect\.? /xi.freeze
-  SUBSECT_ABBR = / subsection | subsect\.? /xi.freeze
-  STIRPS_ABBR  = / stirps /xi.freeze
-  SP_ABBR      = / species | sp\.? /xi.freeze
-  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi.freeze
-  VAR_ABBR     = / variety | var\.? | v\.? /xi.freeze
-  F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi.freeze
-  GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi.freeze
+  require Rails.root.join("app", "classes", "rank_matcher.rb")
+
   AUCT_ABBR    = / auct\.? /xi.freeze
   INED_ABBR    = / in\s?ed\.? /xi.freeze
   NOM_ABBR     = / nomen | nom\.? /xi.freeze
@@ -191,33 +184,9 @@ class Name < AbstractModel
       parse_genus_or_up(str, deprecated, rank)
   end
 
-  # Regexp's used to guess rank from text_name
-  TEXT_NAME_MATCHERS = [
-    [/ (group|clade|complex)$/, :Group],
-    [/ f\. /,                   :Form],
-    [/ var\. /,                 :Variety],
-    [/ subsp\. /,               :Subspecies],
-    [/ stirps /,                :Stirps],
-    [/ subsect\. /,             :Subsection],
-    [/ sect\. /,                :Section],
-    [/ subgenus /,              :Subgenus],
-    [/ /,                       :Species],
-    [/^\S+aceae$/,              :Family],
-    [/^\S+ineae$/,              :Family], # :Suborder
-    [/^\S+ales$/,               :Order],
-    [/^\S+mycetidae$/,          :Order],  # :Subclass
-    [/^\S+mycetes$/,            :Class],
-    [/^\S+mycotina$/,           :Class],  # :Subphylum
-    [/^\S+mycota$/,             :Phylum],
-    [/^Fossil-/,                :Phylum],
-    [//,                        :Genus]   # matches anything else
-  ].freeze
-
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    TEXT_NAME_MATCHERS.each do |matcher|
-      return matcher.second if text_name.match?(matcher.first)
-    end
+    TEXT_NAME_MATCHERS.find { |matcher| matcher.match?(text_name) }.rank
   end
 
   def self.parse_author(str)
@@ -362,22 +331,8 @@ class Name < AbstractModel
     parse_below_genus(str, deprecated, :Form, FORM_PAT)
   end
 
-  # Regexp's used to guess rank from abbreviation
-  RANK_FROM_ABBREV_MATCHERS = [
-    [SUBG_ABBR,    :Subgenus],
-    [SECT_ABBR,    :Section],
-    [SUBSECT_ABBR, :Subsection],
-    [STIRPS_ABBR,  :Stirps],
-    [SSP_ABBR,     :Subspecies],
-    [VAR_ABBR,     :Variety],
-    [F_ABBR,       :Form],
-    [//,           nil] # match anything else
-  ].freeze
-
   def self.parse_rank_abbreviation(str)
-    RANK_FROM_ABBREV_MATCHERS.each do |matcher|
-      return matcher.second if str.match?(matcher.first)
-    end
+    RANK_FROM_ABBREV_MATCHERS.find { |matcher| matcher.match?(str) }.rank
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
