@@ -1118,7 +1118,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: X
+  app_banner_box: Upgrade from Rails 4.2 to Rails 5.2 was successful!  There was much rejoicing!
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
