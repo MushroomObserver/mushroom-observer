@@ -184,7 +184,7 @@ def vote_against_old_name
 end
 
 def add_comment
-  summary, body = @comment.split(/\//, 2)
+  summary, body = @comment.split(%r{/}, 2)
   puts "  > adding comment #{summary.inspect}..."
   Comment.create!(
     target:  @observation,

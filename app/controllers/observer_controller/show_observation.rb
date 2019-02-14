@@ -60,7 +60,7 @@ class ObserverController
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query && query.coercable?(:Location)
+    query&.coercable?(:Location)
   end
 
   # Get a list of external_sites which the user has permission to add
@@ -97,7 +97,8 @@ class ObserverController
 
     @title = :map_observation_title.t(id: obs.id)
     @observations = [
-      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location)
+      MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
+                                obs.location)
     ]
     render(action: :map_observations)
   end

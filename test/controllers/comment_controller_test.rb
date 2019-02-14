@@ -36,6 +36,15 @@ class CommentControllerTest < FunctionalTestCase
     assert_form_action(action: "add_comment", id: name_id, type: "Name")
   end
 
+  def test_add_comment_to_unreadable_object
+    katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
+    login :katrina
+    get(:add_comment, type: "NameDescription", id: katrina_is_not_reader.id)
+
+    assert_flash_error("MO should flash if trying to comment on object"\
+                       "for which user lacks read privileges")
+  end
+
   def test_edit_comment
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target

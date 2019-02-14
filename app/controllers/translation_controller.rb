@@ -14,7 +14,7 @@ class TranslationController < ApplicationController
     get_record_maps(@lang, @show_tags.keys + @edit_tags)
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
     @form = build_form(@lang, @show_tags)
-  rescue => e
+  rescue StandardError => e
     raise e if Rails.env == "test" && @lang
 
     flash_error(*error_message(e))
@@ -29,7 +29,7 @@ class TranslationController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     get_record_maps(@lang, @edit_tags)
     render(partial: "form")
-  rescue => e
+  rescue StandardError => e
     msg = error_message(e).join("\n")
     render(plain: msg, status: 500)
   end
@@ -43,7 +43,7 @@ class TranslationController < ApplicationController
     get_record_maps(@lang, @edit_tags)
     update_translations(@edit_tags)
     render(partial: "ajax_post")
-  rescue => e
+  rescue StandardError => e
     @error = error_message(e).join("\n")
     render(partial: "ajax_error")
   end
@@ -73,13 +73,13 @@ class TranslationController < ApplicationController
 
   def validate_language_and_user(locale, lang)
     if !lang
-      fail(:edit_translations_bad_locale.t(locale: locale))
+      raise(:edit_translations_bad_locale.t(locale: locale))
     elsif !@user
-      fail(:edit_translations_login_required.t)
+      raise(:edit_translations_login_required.t)
     elsif !@user.is_successful_contributor?
-      fail(:unsuccessful_contributor_warning.t)
+      raise(:unsuccessful_contributor_warning.t)
     elsif lang.official && !reviewer?
-      fail(:edit_translations_reviewer_required.t)
+      raise(:edit_translations_reviewer_required.t)
     end
   end
 
@@ -109,7 +109,7 @@ class TranslationController < ApplicationController
       old_val = @strings[tag].to_s
       new_val = begin
                   params["tag_#{tag}"].to_s
-                rescue
+                rescue StandardError
                   ""
                 end
       old_val = @lang.clean_string(old_val)

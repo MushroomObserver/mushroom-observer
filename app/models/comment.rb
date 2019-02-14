@@ -118,27 +118,27 @@ class Comment < AbstractModel
   #
   def target_type_localized
     target_type.downcase.to_sym.l
-  rescue
+  rescue StandardError
     ""
   end
 
   # Log creation of comment on object's RSS log if it can.
   def log_create(target = self.target)
-    return unless target && target.respond_to?(:log)
+    return unless target&.respond_to?(:log)
 
     target.log(:log_comment_added, summary: summary, touch: true)
   end
 
   # Log update of comment on object's RSS log if it can.
   def log_update(target = self.target)
-    return unless target && target.respond_to?(:log)
+    return unless target&.respond_to?(:log)
 
     target.log(:log_comment_updated, summary: summary, touch: false)
   end
 
   # Log destruction of comment on object's RSS log if it can.
   def log_destroy(target = self.target)
-    return unless target && target.respond_to?(:log)
+    return unless target&.respond_to?(:log)
 
     target.log(:log_comment_destroyed, summary: summary, touch: false)
   end

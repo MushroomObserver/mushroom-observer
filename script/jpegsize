@@ -14,7 +14,7 @@ def get_size(file)
   File.open(file) do |fh|
     x = fh.sysread(2).unpack1("n")
     if x != 0xFFD8
-      $stderr.puts("#{file}: not jpeg")
+      warn("#{file}: not jpeg")
       break
     end
     while str = fh.sysread(4)
@@ -72,7 +72,7 @@ else
 end
 
 # Help message whenever screw up command line.
-$stderr.puts %(
+warn %(
   USAGE
     script/jpegsize <file>.jpg
     script/jpegsize -f <file_list.txt>

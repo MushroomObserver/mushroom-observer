@@ -241,8 +241,8 @@ class Project < AbstractModel
       d.reader_groups.delete(user_group)
       d.save
     end
-    user_group.destroy if user_group
-    admin_group.destroy if admin_group
+    user_group&.destroy
+    admin_group&.destroy
   end
 
   ##############################################################################

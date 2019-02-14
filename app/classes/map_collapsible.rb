@@ -78,7 +78,7 @@ class CollapsibleCollectionOfMappableObjects
 
   def init_sets(objects)
     objects = [objects] unless objects.is_a?(Array)
-    fail "Tried to create empty map!" if objects.empty?
+    raise "Tried to create empty map!" if objects.empty?
 
     @sets = {}
     for obj in objects
@@ -91,7 +91,7 @@ class CollapsibleCollectionOfMappableObjects
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
-        fail "Tried to map #{obj.class}!"
+        raise "Tried to map #{obj.class}!"
       end
     end
   end
@@ -129,7 +129,11 @@ class CollapsibleCollectionOfMappableObjects
       return [round_number(loc.lat, prec), round_number(loc.long, prec)]
     end
 
-    [loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0,
+    [if loc.lat >= 45
+       90
+     else
+       loc.lat <= -45 ? -90 : 0
+     end,
      loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
   end
 

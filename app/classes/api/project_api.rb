@@ -69,7 +69,7 @@ class API
       admin_group.save  || raise(CreateFailed.new(admin_group))
       params[:user_group]  = user_group
       params[:admin_group] = admin_group
-      return nil
+      nil
     end
 
     def validate_update_params!(params)

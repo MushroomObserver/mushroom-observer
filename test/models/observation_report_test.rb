@@ -176,6 +176,49 @@ class ObservationReportTest < UnitTestCase
     do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
 
+  def test_mycoflora_with_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    obs.update_attribute(:gps_hidden, true)
+
+    expect = [
+      "Fungi",
+      nil,
+      "Mary Newbie",
+      "MO #{obs.id}",
+      "MO #{obs.id}",
+      "",
+      "0",
+      "Burbank",
+      nil,
+      "California",
+      "USA",
+      "34.185",
+      "-118.33",
+      "3892",
+      "123",
+      "123",
+      "22",
+      "7",
+      "2010",
+      "2010-07-22",
+      "http://mushroomobserver.org/#{obs.id}",
+      "",
+      "NA Mycoflora Project",
+      "",
+      "",
+      "",
+      "",
+      "unknown_with_lat_long"
+    ]
+    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+
+    User.current = mary
+    expect[11] = "34.1622"
+    expect[12] = "-118.3521"
+    expect[13] = nil
+    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+  end
+
   def test_raw
     obs = observations(:detailed_unknown_obs)
     expect = [
@@ -207,7 +250,8 @@ class ObservationReportTest < UnitTestCase
       "148",
       "X",
       obs.thumb_image.id.to_s,
-      "Found in a strange place... & with śtrangè characters™"
+      "Found in a strange place... & with śtrangè characters™",
+      "http://mushroomobserver.org/#{obs.id}"
     ]
     do_report_test(ObservationReport::Raw, obs, expect, &:id)
   end

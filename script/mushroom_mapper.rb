@@ -69,7 +69,7 @@ for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_dat
     id2 = ids[text_name]
     text_name2, rank2, deprecated2 = names[id2]
     if !deprecated && !deprecated2
-      $stderr.puts("Multiple accepted names match #{text_name}: #{id2}, #{id}")
+      warn("Multiple accepted names match #{text_name}: #{id2}, #{id}")
     elsif !deprecated && deprecated2
       ids[text_name] = id
     end
@@ -112,12 +112,12 @@ for id, genus, classification in Name.connection.select_rows %(
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]
-  if %w[Amoebozoa Fungi Protozoa].include?(kingdom)
-    family2 = family || "Unknown Family in #{order || klass || kingdom}"
-    hash = genus_to_family[genus] ||= {}
-    hash[family2] = hash[family2].to_i + num_obs
-    observations[family2] = observations[family2].to_i + num_obs
-  end
+  next unless %w[Amoebozoa Fungi Protozoa].include?(kingdom)
+
+  family2 = family || "Unknown Family in #{order || klass || kingdom}"
+  hash = genus_to_family[genus] ||= {}
+  hash[family2] = hash[family2].to_i + num_obs
+  observations[family2] = observations[family2].to_i + num_obs
 end
 
 # Build mapping from family to genus, complaining about ambiguous genera.
@@ -125,7 +125,7 @@ family_to_genus = {}
 for genus in genus_to_family.keys.sort do
   hash = genus_to_family[genus]
   if hash.keys.length > 1
-    $stderr.puts("Multiple families for #{genus}: #{hash.inspect}")
+    warn("Multiple families for #{genus}: #{hash.inspect}")
   end
   family = hash.keys.min_by { |k| -hash[k] }
   list_of_genera = family_to_genus[family] ||= []
@@ -155,7 +155,7 @@ for family in family_to_genus.keys.sort do
   next unless observations[family]
 
   family2 = family.sub(/^Unknown Family in /, "")
-  $stderr.puts("Missing family: #{family2}.") unless ids[family2]
+  warn("Missing family: #{family2}.") unless ids[family2]
   family_data = {}
   family_data["name"] = family
   family_data["id"]   = ids[family2]
@@ -163,7 +163,7 @@ for family in family_to_genus.keys.sort do
   for genus in family_to_genus[family].sort do
     next unless observations[genus]
 
-    $stderr.puts("Missing genus: #{genus}.") unless ids[genus]
+    warn("Missing genus: #{genus}.") unless ids[genus]
     genus_data = {}
     genus_data["name"] = genus
     genus_data["id"]   = ids[genus]
@@ -173,7 +173,7 @@ for family in family_to_genus.keys.sort do
     for species in genus_to_species[genus].sort do
       next unless observations[species]
 
-      $stderr.puts("Missing species: #{species}.") unless ids[species]
+      warn("Missing species: #{species}.") unless ids[species]
       genus_data["species"] << {
         "name" => species,
         "id"   => ids[species]

@@ -62,7 +62,7 @@ module VersionHelper
       # Date change was made.
       date = begin
                ver.updated_at.web_date
-             rescue
+             rescue StandardError
                :unknown.t
              end
 
@@ -91,7 +91,7 @@ module VersionHelper
                                        version: ver.version)
         end
       end
-      link = content_tag(:b, link) if args[:bold] && args[:bold].call(ver)
+      link = content_tag(:b, link) if args[:bold]&.call(ver)
 
       # Was this the result of a merge?
       if ver.respond_to?(:merge_source_id)
@@ -115,7 +115,7 @@ module VersionHelper
     if ver.merge_source_id &&
        (other_ver = begin
                       ver.class.find(ver.merge_source_id)
-                    rescue
+                    rescue StandardError
                       nil
                     end)
       parent_id = other_ver.send("#{type}_id")

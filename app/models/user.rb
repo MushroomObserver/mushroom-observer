@@ -364,7 +364,7 @@ class User < AbstractModel
   #
   def self.current_id
     @@user = nil unless defined?(@@user)
-    @@user && @@user.id
+    @@user&.id
   end
 
   # Tell User model which User is currently logged in (if any).  This is used
@@ -554,7 +554,7 @@ class User < AbstractModel
 
   def preferred_herbarium_name
     preferred_herbarium.name
-  rescue
+  rescue StandardError
     personal_herbarium_name
   end
 
@@ -890,7 +890,7 @@ class User < AbstractModel
       next unless shown.nil?
 
       notification = Notification.find(notification_id)
-      next unless notification && notification.note_template
+      next unless notification&.note_template
 
       result = true
       break
@@ -1008,6 +1008,6 @@ class User < AbstractModel
 
   # :nodoc
   def notes_other_translations
-    %w(andere altro altra autre autres otra otras otro otros outros)
+    %w[andere altro altra autre autres otra otras otro otros outros]
   end
 end

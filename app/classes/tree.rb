@@ -70,11 +70,11 @@ class Tree
       if tree == look_for
         return tree unless add_this
 
-        return { look_for => add_this }
+        { look_for => add_this }
       elsif add_this
-        return [tree, { look_for => add_this }]
+        [tree, { look_for => add_this }]
       else
-        return [tree, look_for]
+        [tree, look_for]
       end
     when Array
       tree.each_with_index do |val, i|
@@ -90,9 +90,11 @@ class Tree
       else
         tree << look_for
       end
-      return tree
+      tree
     when Hash
-      fail "Can't use one-table form of Tree.add_leaf if tree is a Hash!" unless add_this
+      unless add_this
+        raise "Can't use one-table form of Tree.add_leaf if tree is a Hash!"
+      end
 
       tree.each_pair do |key, val|
         if key == look_for
@@ -111,7 +113,7 @@ class Tree
         end
       end
       tree[look_for] = add_this
-      return tree
+      tree
     end
   end
 end

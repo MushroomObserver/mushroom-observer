@@ -64,12 +64,10 @@ class ObserverController
                        order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
 
-    @observation.when     = last_observation.when
-    @observation.where    = last_observation.where
-    @observation.location = last_observation.location
-    @observation.lat      = last_observation.lat
-    @observation.long     = last_observation.long
-    @observation.alt      = last_observation.alt
+    %w[when where location lat long alt
+       is_collection_location gps_hidden].each do |attr|
+      @observation.send("#{attr}=", last_observation.send(attr))
+    end
     last_observation.projects.each do |project|
       @project_checks[project.id] = true
     end
@@ -452,7 +450,7 @@ class ObserverController
       @observation = Observation.find(id)
       @observation.name.display_name
       @observation.calc_consensus(true)
-    rescue => err
+    rescue StandardError => err
       flash_error(:observer_recalc_caught_error.t(error: err))
     end
     # render(plain: "", layout: true)
@@ -768,7 +766,8 @@ class ObserverController
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
+     "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location,
+     :gps_hidden]
   end
 
   def whitelisted_observation_params

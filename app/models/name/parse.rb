@@ -62,6 +62,7 @@ class Name < AbstractModel
     $/x
 
   # Taxa without authors (for use by GROUP PAT)
+  # Disable cop to make this more readable
   # rubocop:disable Metrics/LineLength
   GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
   SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
@@ -181,26 +182,33 @@ class Name < AbstractModel
       parse_genus_or_up(str, deprecated, rank)
   end
 
+  # Regexp's used to guess rank from text_name
+  TEXT_NAME_MATCHERS = [
+    [/ (group|clade|complex)$/, :Group],
+    [/ f\. /,                   :Form],
+    [/ var\. /,                 :Variety],
+    [/ subsp\. /,               :Subspecies],
+    [/ stirps /,                :Stirps],
+    [/ subsect\. /,             :Subsection],
+    [/ sect\. /,                :Section],
+    [/ subgenus /,              :Subgenus],
+    [/ /,                       :Species],
+    [/^\S+aceae$/,              :Family],
+    [/^\S+ineae$/,              :Family], # :Suborder
+    [/^\S+ales$/,               :Order],
+    [/^\S+mycetidae$/,          :Order],  # :Subclass
+    [/^\S+mycetes$/,            :Class],
+    [/^\S+mycotina$/,           :Class],  # :Subphylum
+    [/^\S+mycota$/,             :Phylum],
+    [/^Fossil-/,                :Phylum],
+    [//,                        :Genus]   # matches anything else
+  ].freeze
+
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    / (group|clade|complex)$/.match?(text_name) ? :Group :
-    text_name.include?(" f. ")         ? :Form       :
-    text_name.include?(" var. ")       ? :Variety    :
-    text_name.include?(" subsp. ")     ? :Subspecies :
-    text_name.include?(" stirps ")     ? :Stirps     :
-    text_name.include?(" subsect. ")   ? :Subsection :
-    text_name.include?(" sect. ")      ? :Section    :
-    text_name.include?(" subgenus ")   ? :Subgenus   :
-    text_name.include?(" ")            ? :Species    :
-    /^\S+aceae$/.match?(text_name)     ? :Family     :
-    /^\S+ineae$/.match?(text_name)     ? :Family     : # :Suborder
-    /^\S+ales$/.match?(text_name)      ? :Order      :
-    /^\S+mycetidae$/.match?(text_name) ? :Order      : # :Subclass
-    /^\S+mycetes$/.match?(text_name)   ? :Class      :
-    /^\S+mycotina$/.match?(text_name)  ? :Class      : # :Subphylum
-    /^\S+mycota$/.match?(text_name)    ? :Phylum     :
-    /^Fossil-/.match?(text_name)       ? :Phylum     :
-                                         :Genus
+    TEXT_NAME_MATCHERS.each do |matcher|
+      return matcher.second if matcher.first =~ text_name
+    end
   end
 
   def self.parse_author(str)
@@ -254,7 +262,7 @@ class Name < AbstractModel
 
   # sripped group_abbr
   def self.group_wd(str)
-    (GROUP_CHUNK.match(str))[:group_wd]
+    GROUP_CHUNK.match(str)[:group_wd]
   end
 
   def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
@@ -345,14 +353,20 @@ class Name < AbstractModel
     parse_below_genus(str, deprecated, :Form, FORM_PAT)
   end
 
+  RANK_ABBR_MATCHERS = [
+    [SUBG_ABBR,    :Subgenus],
+    [SECT_ABBR,    :Section],
+    [SUBSECT_ABBR, :Subsection],
+    [STIRPS_ABBR,  :Stirps],
+    [SSP_ABBR,     :Subspecies],
+    [VAR_ABBR,     :Variety],
+    [F_ABBR,       :Form]
+  ].freeze
+
   def self.parse_rank_abbreviation(str)
-    SUBG_ABBR.match?(str) ?    :Subgenus :
-    SECT_ABBR.match?(str) ?    :Section :
-    SUBSECT_ABBR.match?(str) ? :Subsection :
-    STIRPS_ABBR.match?(str) ?  :Stirps :
-    SSP_ABBR.match?(str) ?     :Subspecies :
-    VAR_ABBR.match?(str) ?     :Variety :
-    F_ABBR.match?(str) ?       :Form : nil
+    RANK_ABBR_MATCHERS.each do |matcher|
+      return matcher.second if matcher.first =~ str
+    end
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"

@@ -59,7 +59,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def assigns_exist
     !assigns(:all_lists).empty?
-  rescue
+  rescue StandardError
   end
 
   def init_for_project_checkbox_tests
@@ -1250,17 +1250,17 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs3 = observations(:coprinus_comatus_obs)
     old_vote1 = begin
                   obs1.namings.first.users_vote(obs1.user).value
-                rescue
+                rescue StandardError
                   nil
                 end
     old_vote2 = begin
                   obs2.namings.first.users_vote(obs2.user).value
-                rescue
+                rescue StandardError
                   nil
                 end
     old_vote3 = begin
                   obs3.namings.first.users_vote(obs3.user).value
-                rescue
+                rescue StandardError
                   nil
                 end
 
@@ -1312,7 +1312,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       new_obs = Observation.find(old_obs.id)
       new_vote = begin
                    new_obs.namings.first.users_vote(new_obs.user).value
-                 rescue
+                 rescue StandardError
                    nil
                  end
       assert(old_vote == new_vote)
@@ -1355,12 +1355,12 @@ class SpeciesListControllerTest < FunctionalTestCase
     new_obs2 = Observation.find(obs2.id)
     new_vote1 = begin
                   new_obs1.namings.first.users_vote(obs1.user).value
-                rescue
+                rescue StandardError
                   nil
                 end
     new_vote2 = begin
                   new_obs2.namings.first.users_vote(obs2.user).value
-                rescue
+                rescue StandardError
                   nil
                 end
     assert_not_equal(Vote.minimum_vote, old_vote1)

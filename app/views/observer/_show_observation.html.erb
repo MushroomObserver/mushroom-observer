@@ -16,11 +16,23 @@
     </p>
 
     <p id="observation_lat_lng">
-      <% if observation.lat or observation.alt %>
-           <%= observation.lat ?
-                  "#{observation.lat}° #{observation.long}° " : '' %>
-           <%= observation.alt ? "#{observation.alt}m" : '' %>
-      <% end %>
+      <%=
+        hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
+        if observation.lat &&
+           (!observation.gps_hidden || observation.can_edit?)
+          observation.display_lat_long.t + " ".html_safe +
+            observation.display_alt.t
+        elsif observation.lat
+          hidden + " ".html_safe + observation.display_alt.t
+        else
+          observation.display_alt.t
+        end
+      %>
+      <%=
+        if observation.lat && observation.gps_hidden && observation.can_edit?
+          hidden
+        end
+      %>
     </p>
 
     <p id="observation_who">

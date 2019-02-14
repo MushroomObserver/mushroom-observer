@@ -102,6 +102,12 @@ all_namings_deprecated_winning_naming: # 18
   vote_cache:  <%= Vote.maximum_vote %>
 
 all_namings_deprecated_other_naming: # 19
+  # Manually set id low in order to improve test coverage of consensus_naming.
+  # (This avoid Rails' generating the id via hashing the fixture label.)
+  # Coverage is improved when this Naming appears before the winning one
+  # when select'ing Namings. That, in turn, makes consensus_id loop through
+  # both Namings.
+  id:          1
   user:        rolf
   observation: all_namings_deprecated_obs
   name:        namings_deprecated_2

@@ -48,7 +48,7 @@ class API
   class UploadFromURL < Upload
     def initialize(url)
       fetch(url)
-    rescue => e
+    rescue StandardError => e
       raise CouldntDownloadURL.new(url, e)
     end
 

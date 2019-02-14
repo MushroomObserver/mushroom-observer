@@ -49,7 +49,7 @@ namespace :email do
           # After a few tries give up and delete it.
           elsif e.num_attempts && (e.num_attempts >= MO.email_num_attempts - 1)
             File.open(MO.email_log, "a") do |fh|
-              fh.puts('Failed to send email #%d at %s' % [e.id, now])
+              fh.puts("Failed to send email #%d at %s" % [e.id, now])
               fh.puts(e.dump)
             end
             e.destroy
@@ -71,9 +71,10 @@ namespace :email do
 
   desc "Purge the email queue without sending anything"
   task(purge: :environment) do
-    # for e in QueuedEmail.find(:all) # Rails 3
     for e in QueuedEmail.all
-      print "Purging #{e.id}: from => #{e.user && e.user.login}, to => #{e.to_user.login}, flavor => #{e.flavor}, queued => #{e.queued}\n"
+      print "Purging #{e.id}: from => #{e&.user&.login}, "\
+            "to => #{e.to_user.login}, flavor => #{e.flavor}, "\
+            "queued => #{e.queued}\n"
       e.destroy
     end
   end

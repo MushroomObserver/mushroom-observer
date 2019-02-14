@@ -104,6 +104,7 @@ GET image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)
@@ -142,6 +143,7 @@ PATCH image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)
@@ -172,6 +174,7 @@ DELETE image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)
@@ -305,6 +308,7 @@ GET observation
   created_at:	time range
   date:	date range (when seen)
   east:	longitude (max longitude)
+  gps_hidden:	boolean (hide exact coordinates?)
   has_comments:	boolean (limit=true)
   has_images:	boolean
   has_location:	boolean
@@ -334,6 +338,7 @@ POST observation
   collection_number:	string
   collectors_name:	string
   date:	date
+  gps_hidden:	boolean (default=false, hide exact coordinates?)
   has_specimen:	boolean
   herbarium:	herbarium
   images:	image list
@@ -385,6 +390,7 @@ PATCH observation
   add_images:	image list (must have edit permission)
   add_to_project:	project (must be member)
   add_to_species_list:	species_list (must have edit permission)
+  gps_hidden:	boolean (hide exact coordinates?)
   log:	boolean (default, log this action on main page activity log and RSS feed?)
   remove_from_project:	project
   remove_from_species_list:	species_list (must have edit permission)
@@ -407,6 +413,7 @@ DELETE observation
   created_at:	time range
   date:	date range (when seen)
   east:	longitude (max longitude)
+  gps_hidden:	boolean (hide exact coordinates?)
   has_comments:	boolean (limit=true)
   has_images:	boolean
   has_location:	boolean

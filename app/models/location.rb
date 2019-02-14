@@ -193,7 +193,7 @@ class Location < AbstractModel
     if match && alt.to_s.match(/ft|'/)
       result = (match[1].to_f * 0.3048).round
     elsif match
-      result = (match[1].to_f).round
+      result = match[1].to_f.round
     end
     result
   end
@@ -230,7 +230,7 @@ class Location < AbstractModel
     # for "unknown", even when viewing the site in another language
     Language.official.translation_strings.find_by_tag("unknown_locations").
       text.split(/, */)
-  rescue
+  rescue StandardError
     []
   end
 
@@ -340,7 +340,7 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    name.split(/,\s*/).reverse.join(", ") if name
+    name&.split(/,\s*/)&.reverse&.join(", ")
   end
 
   # Reverse given name if required in order to make country last.
@@ -649,8 +649,8 @@ class Location < AbstractModel
     end
 
     # Log the action.
-    old_loc.rss_log.orphan(old_loc.name, :log_location_merged,
-                           this: old_loc.name, that: name) if old_loc.rss_log
+    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+                           this: old_loc.name, that: name)
 
     # Destroy past versions.
     editors = []

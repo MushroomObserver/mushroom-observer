@@ -43,6 +43,7 @@
 #  long::                   Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
+#  gps_hidden::             Hide exact lat/long?
 #  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
@@ -99,12 +100,14 @@
 #  name_been_proposed?::    Has someone proposed this Name already?
 #  owner_voted?::           Has the owner voted on a given Naming?
 #  user_voted?::            Has a given User voted on a given Naming?
-#  owners_vote::            Get the owner's Vote on a given Naming.
-#  users_vote::             Get a given User's Vote on a given Naming.
+#  owners_vote::            Owner's Vote on a given Naming.
+#  users_vote::             A given User's Vote on a given Naming
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
-#  users_votes::            Get all of a given User's Vote's for this Obs..
-#  is_owners_favorite?::    Is a given naming the owner's favorite?
-#  is_users_favorite?::     Is a given naming a given user's favorite?
+#  is_owners_favorite?::    Is a given Naming one of the owner's favorite(s)
+#                           for this Observation?
+#  is_users_favorite?::     Is a given Naming one of the given user's
+#                           favorites for this Observation?
+#  owner_preference         owners's unique prefered Name (if any) for this Obs
 #  change_vote::            Change a given User's Vote for a given Naming.
 #  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
@@ -368,6 +371,31 @@ class Observation < AbstractModel
     end
   end
 
+  # Returns latitude if public or if the current user owns the observation.
+  # The user should also be able to see hidden latitudes if they are an admin
+  # or they are members of a project that the observation belongs to, but
+  # those are harder to determine. This catches the majority of cases.
+  def public_lat
+    gps_hidden && user_id != User.current_id ? nil : lat
+  end
+
+  def public_long
+    gps_hidden && user_id != User.current_id ? nil : long
+  end
+
+  def display_lat_long
+    return "" unless lat
+
+    "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
+      "#{long.abs}°#{long.negative? ? "W" : "E"}"
+  end
+
+  def display_alt
+    return "" unless alt
+
+    "#{alt.round}m"
+  end
+
   ##############################################################################
   #
   #  :section: Notes
@@ -594,7 +622,7 @@ class Observation < AbstractModel
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
-  rescue
+  rescue StandardError
     ""
   end
 
@@ -602,9 +630,13 @@ class Observation < AbstractModel
   # careful to keep all the operations within the tree of assocations of the
   # observations, we should never need to reload anything.
   def lookup_naming(naming)
+    # Disable cop; test suite chokes when the following "raise"
+    # is re-written in "exploded" style (the Rubocop default)
+    # rubocop:disable Style/RaiseArgs
     namings.find { |n| n == naming } ||
       raise(ActiveRecord::RecordNotFound,
             "Observation doesn't have naming with ID=#{naming.id}")
+    # rubocop:enable Style/RaiseArgs
   end
 
   # Dump out the sitatuation as the observation sees it.  Useful for debugging
@@ -649,72 +681,38 @@ class Observation < AbstractModel
     lookup_naming(naming).users_vote(user)
   end
 
-  # Returns true if a given naming has received the highest positive vote from
-  # the owner of this observation.  Note, multiple namings can return true for
-  # a given observation.
+  # Disable method name cops to avoid breaking 3rd parties' use of API
+  # rubocop:disable Naming/PredicateName
+
+  # Returns true if a given Naming has received one of the highest positive
+  # votes from the owner of this observation.
+  # Note: multiple namings can return true for a given observation.
+  # This is used to display eyes next to Proposed Name on Observation page
   def is_owners_favorite?(naming)
     lookup_naming(naming).is_users_favorite?(user)
   end
 
-  # Returns true if a given naming has received the highest positive vote from
-  # the given user (among namings for this observation).  Note, multiple
-  # namings can return true for a given user and observation.
+  # Returns true if a given Naming has received one of the highest positive
+  # votes from the given user (among namings for this observation).
+  # Note: multiple namings can return true for a given user and observation.
   def is_users_favorite?(naming, user)
     lookup_naming(naming).is_users_favorite?(user)
   end
 
+  # rubocop:enable Naming/PredicateName
+
+  # All of observation.user's votes on all Namings for this Observation
+  # Used in Observation and in tests
   def owners_votes
-    users_votes(user)
+    user_votes(user)
   end
 
-  def users_votes(user)
-    result = []
-    namings.each do |n|
+  # All of a given User's votes on all Namings for this Observation
+  def user_votes(user)
+    namings.each_with_object([]) do |n, votes|
       v = n.users_vote(user)
-      result << v if v
+      votes << v if v
     end
-    result
-  end
-
-  def owner_favorite_or_explanation
-    if showable_owner_id?
-      owners_only_favorite_name.format_name
-    else
-      :show_observation_no_clear_preference
-    end
-  end
-
-  def owners_only_favorite_name
-    favs = owner_favorite_votes
-    favs[0].naming.name if favs.count == 1
-  end
-
-  def owner_favorite_vote
-    owner_favorite_votes.first
-  end
-
-  def owner_favorite_votes
-    votes.where(user_id: user_id, favorite: true)
-  end
-
-  # show Observer ID? (observer's identification of Observation)
-  # (in code, Observer ID is "owner_id")
-  def show_owner_id?
-    User.view_owner_id_on?
-  end
-
-  def showable_owner_id?
-    owner_sure_enough? && owner_id_known?
-  end
-
-  def owner_sure_enough?
-    return unless owner_favorite_vote
-
-    owner_favorite_vote.value >= Vote.owner_id_min_confidence
-  end
-
-  def owner_id_known?
-    owners_only_favorite_name.try(:known?)
   end
 
   # Change User's Vote for this naming.  Automatically recalculates the
@@ -737,13 +735,13 @@ class Observation < AbstractModel
 
           # Get user's max positive vote for this obs
           max = 0
-          users_votes(user).each do |v|
+          user_votes(user).each do |v|
             max = v.value if v.value > max
           end
 
           # If any, mark all votes at that level "favorite".
           if max.positive?
-            users_votes(user).each do |v|
+            user_votes(user).each do |v|
               next if v.value != max || v.favorite
 
               v.favorite = true
@@ -760,7 +758,7 @@ class Observation < AbstractModel
       # First downgrade any existing 100% votes (if casting a 100% vote).
       v80 = Vote.next_best_vote
       if value > v80
-        users_votes(user).each do |v|
+        user_votes(user).each do |v|
           if v.value > v80
             v.value = v80
             v.save
@@ -768,7 +766,7 @@ class Observation < AbstractModel
         end
       end
 
-      other_votes = (users_votes(user) - [vote])
+      other_votes = (user_votes(user) - [vote])
       # Is this vote going to become the favorite?
       favorite = false
       if value.positive?
@@ -1016,7 +1014,7 @@ class Observation < AbstractModel
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
-    if best && best.synonym_id
+    if best&.synonym_id
       # This does not allow the community to choose a deprecated synonym over
       # an approved synonym.  See obs #45234 for reasonable-use case.
       # names = best.approved_synonyms
@@ -1102,7 +1100,7 @@ class Observation < AbstractModel
     # using first.  (I think it can also happen if zero-weighted users are
     # voting.)
     best = namings.first.name if !best && namings && !namings.empty?
-    best = Name.unknown unless best
+    best ||= Name.unknown
     result += "fallback: best=#{best ? best.real_text_name : "nil"}" if debug
 
     # Just humor me -- I'm sure there is some pathological case where we can
@@ -1196,6 +1194,42 @@ class Observation < AbstractModel
 
     status
   end
+
+  ##############################################################################
+  #
+  #  :section: Preferred ID
+  #
+  ##############################################################################
+
+  # Observation.user's unique preferred positive Name for this observation
+  # Returns falsy if there's no unique preferred positive id
+  # Used on show_observation page
+  def owner_preference
+    owner_uniq_favorite_name if owner_preference?
+  end
+
+  private
+
+  # Does observation.user have a single preferred id for this observation?
+  def owner_preference?
+    owner_uniq_favorite_vote&.value&.>= Vote.owner_id_min_confidence
+  end
+
+  def owner_uniq_favorite_name
+    favs = owner_favorite_votes
+    favs[0].naming.name if favs.count == 1
+  end
+
+  def owner_uniq_favorite_vote
+    votes = owner_favorite_votes
+    return votes.first if votes.count == 1
+  end
+
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
+  public
 
   ##############################################################################
   #
@@ -1377,7 +1411,7 @@ class Observation < AbstractModel
     recipients = []
 
     # Tell owner of observation if they want.
-    recipients.push(owner) if owner && owner.email_observations_consensus
+    recipients.push(owner) if owner&.email_observations_consensus
 
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.

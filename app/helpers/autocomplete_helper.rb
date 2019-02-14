@@ -19,7 +19,7 @@ module AutocompleteHelper
 
   # Make text_field auto-complete for fixed set of strings.
   def turn_into_menu_auto_completer(id, opts = {})
-    fail "Missing primer for menu auto-completer!" unless opts[:primer]
+    raise "Missing primer for menu auto-completer!" unless opts[:primer]
 
     turn_into_auto_completer(id, {
       unordered: false

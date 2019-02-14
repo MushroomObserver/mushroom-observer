@@ -171,7 +171,7 @@ class ApplicationController < ActionController::Base
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    return true if @user && @user.is_successful_contributor?
+    return true if @user&.is_successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
     redirect_back_or_default(controller: :observer, action: :index)
@@ -206,7 +206,7 @@ class ApplicationController < ActionController::Base
     start = start_state
     yield
     logger.warn(error_stats(start))
-  rescue => e
+  rescue StandardError => e
     raise @error = e
   end
 
@@ -224,19 +224,19 @@ class ApplicationController < ActionController::Base
 
   def catch_ip
     request.remote_ip
-  rescue
+  rescue StandardError
     "unknown"
   end
 
   def catch_url
     request.url
-  rescue
+  rescue StandardError
     "unknown"
   end
 
   def catch_ua
     browser.ua
-  rescue
+  rescue StandardError
     "unknown"
   end
 
@@ -362,7 +362,7 @@ class ApplicationController < ActionController::Base
   end
 
   def already_logged_in?(user)
-    user && user.verified
+    user&.verified
   end
 
   def valid_user_from_cookie
@@ -496,7 +496,7 @@ class ApplicationController < ActionController::Base
   # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
   # is available to views.)
   def in_admin_mode?
-    @user && @user.admin && session[:admin]
+    @user&.admin && session[:admin]
   end
   helper_method :in_admin_mode?
 
@@ -512,7 +512,7 @@ class ApplicationController < ActionController::Base
       next if ints["shown"]
 
       notification = Notification.safe_find(ints["notification"].to_i)
-      next unless notification && notification.note_template
+      next unless notification&.note_template
 
       return true
     end
@@ -595,7 +595,7 @@ class ApplicationController < ActionController::Base
   end
 
   def prefs_locale
-    return unless @user && @user.locale.present? && params[:controller] != "ajax"
+    return unless @user&.locale.present? && params[:controller] != "ajax"
 
     logger.debug "[I18n] loading locale: #{@user.locale} from @user"
     @user.locale
@@ -628,7 +628,7 @@ class ApplicationController < ActionController::Base
     if tz.present?
       begin
         Time.zone = tz
-      rescue
+      rescue StandardError
         logger.warn "TimezoneError: #{tz.inspect}"
       end
     end
@@ -666,7 +666,7 @@ class ApplicationController < ActionController::Base
 
       loc_wts[Regexp.last_match(1)] = (begin
                                          Regexp.last_match(2).to_f
-                                       rescue
+                                       rescue StandardError
                                          -1.0
                                        end)
     end
@@ -788,7 +788,7 @@ class ApplicationController < ActionController::Base
   helper_method :flash_error
 
   def flash_object_errors(obj)
-    return unless obj && obj.errors && !obj.errors.empty?
+    return unless obj&.errors && !obj.errors.empty?
 
     flash_error(obj.formatted_errors)
   end
@@ -1032,7 +1032,7 @@ class ApplicationController < ActionController::Base
   end
 
   def coerced_query_link(query, model)
-    return nil unless query && query.coercable?(model.name.to_sym)
+    return nil unless query&.coercable?(model.name.to_sym)
 
     link_args = {
       controller: model.show_controller,
@@ -1122,7 +1122,7 @@ class ApplicationController < ActionController::Base
 
   def dealphabetize_q_param
     params[:q].dealphabetize
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -1287,7 +1287,7 @@ class ApplicationController < ActionController::Base
 
   def rss_log_exists
     object.rss_log
-  rescue
+  rescue StandardError
     nil
   end
 
@@ -1691,7 +1691,7 @@ class ApplicationController < ActionController::Base
 
   def paginator_number(parameter_key)
     params[parameter_key].to_s.to_i
-  rescue
+  rescue StandardError
     1
   end
 
@@ -1769,7 +1769,7 @@ class ApplicationController < ActionController::Base
   end
 
   def calc_layout_params
-    count = (@user && @user.layout_count) || MO.default_layout_count
+    count = (@user&.layout_count) || MO.default_layout_count
     { "count" => count }
   end
 
@@ -1802,12 +1802,6 @@ class ApplicationController < ActionController::Base
         Vote.new(value: 0)
     end
   end
-
-  # Return this request's URL without the transport or domain.
-  def request_action_and_params
-    request.url.sub(/^\w+:\/+[^\/]+/, "")
-  end
-  helper_method :request_action_and_params
 
   ##############################################################################
 

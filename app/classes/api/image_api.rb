@@ -24,6 +24,7 @@ class API
         synonym_names:   parse_array(:name, :synonyms_of, as: :id),
         children_names:  parse_array(:name, :children_of, as: :id),
         locations:       parse_array(:location, :location, as: :id),
+        observations:    parse_array(:observation, :observation, as: :id),
         projects:        parse_array(:project, :project, as: :id),
         species_lists:   parse_array(:species_list, :species_list, as: :id),
         has_observation: parse(:boolean, :has_observation,
@@ -81,7 +82,7 @@ class API
     def build_object
       super
     ensure
-      @upload.clean_up if @upload
+      @upload&.clean_up
     end
 
     def after_create(img)

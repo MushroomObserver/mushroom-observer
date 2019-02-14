@@ -151,7 +151,7 @@ class SiteData
       field = get_applicable_field(obj)
       user_id ||= begin
                     obj.user_id
-                  rescue
+                  rescue StandardError
                     nil
                   end
     else
@@ -159,7 +159,7 @@ class SiteData
       user_id ||= User.current_id
     end
     weight = FIELD_WEIGHTS[field]
-    if weight && weight.positive? && user_id && user_id.positive?
+    if weight&.positive? && user_id&.positive?
       update_weight(calc_impact(weight, mode, obj, field), user_id)
     end
   end
@@ -189,14 +189,14 @@ class SiteData
     field = table.to_sym
     unless FIELD_WEIGHTS[field]
       field = nil
-      for field2, table2 in FIELD_TABLES
-        if table2 == table
-          proc = FIELD_STATE_PROCS[field2]
-          if proc && proc.call(obj)
-            field = field2
-            break
-          end
-        end
+      FIELD_TABLES.each do |field2, table2|
+        next unless table2 == table
+
+        proc = FIELD_STATE_PROCS[field2]
+        next unless proc&.call(obj)
+
+        field = field2
+        break
       end
     end
     field
@@ -273,13 +273,13 @@ class SiteData
     metric = 0
     if data
       for field in ALL_FIELDS
-        if data[field]
-          # This fixes the double-counting of created records.
-          if field.to_s =~ /^(\w+)_versions$/
-            data[field] -= data[Regexp.last_match(1)] || 0
-          end
-          metric += FIELD_WEIGHTS[field] * data[field]
+        next unless data[field]
+
+        # This fixes the double-counting of created records.
+        if field.to_s =~ /^(\w+)_versions$/
+          data[field] -= data[Regexp.last_match(1)] || 0
         end
+        metric += FIELD_WEIGHTS[field] * data[field]
       end
       metric += data[:languages].to_i
       metric += data[:bonuses].to_i

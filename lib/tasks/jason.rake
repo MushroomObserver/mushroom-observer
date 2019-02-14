@@ -63,7 +63,7 @@ namespace :jason do
     end
     print "Writing notes.yml...\n"
     File.open("notes.yml", "w") do |fh|
-      fh.write notes.select { |x| x && x.index("_") }.uniq.to_yaml
+      fh.write notes.select { |x| x&.index("_") }.uniq.to_yaml
     end
     print "Done!\n"
   end
@@ -76,18 +76,18 @@ namespace :jason do
     print "Textilizing #{notes.length} strings...\n"
     n = 0
     results = []
-    for str in notes
-      if str.index("_")
-        if (n % 15).zero?
-          print "%.2f%% done\n" % (100.0 * n / notes.length)
-          sleep 1
-        end
-        n += 1
-        begin
-          results.push(str.tpl)
-        rescue => e
-          results.push("Crashed: " + e.to_s + "\n" + str)
-        end
+    notes.each do |str|
+      next unless str.index("_")
+
+      if (n % 15).zero?
+        print "%.2f%% done\n" % (100.0 * n / notes.length)
+        sleep 1
+      end
+      n += 1
+      begin
+        results.push(str.tpl)
+      rescue StandardError => e
+        results.push("Crashed: " + e.to_s + "\n" + str)
       end
     end
     print "Writing redcloth.yml...\n"
@@ -108,15 +108,15 @@ namespace :jason do
     for file in Dir.glob("../../../logs/access_log-*").sort
       File.open(file) do |fh|
         fh.each_line do |line|
-          if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
-            ua = match[7]
-            type, ver = parse_user_agent(ua)
-            str = ver ? "#{type}_#{ver}" : type.to_s || "none"
-            ids[ua] ||= [str, 0]
-            ids[ua][1] += 1
-            totals[str] ||= 0
-            totals[str] += 1
-          end
+          next unless match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
+
+          ua = match[7]
+          type, ver = parse_user_agent(ua)
+          str = ver ? "#{type}_#{ver}" : type.to_s || "none"
+          ids[ua] ||= [str, 0]
+          ids[ua][1] += 1
+          totals[str] ||= 0
+          totals[str] += 1
         end
       end
     end
@@ -198,45 +198,46 @@ namespace :jason do
     File.open("esslinger.txt") do |fh|
       fh.each_line do |name|
         name = name.strip!.squeeze(" ")
-        if name =~ /^([A-Z])/
-          print Regexp.last_match(1)
+        next unless name =~ /^([A-Z])/
 
-          name_parse = NameParse.new(name)
-          results = Name.find_or_create_name_and_parents(name_parse.search_name)
-          if results.last.nil?
-            print "\nError: #{name_parse.name}\n"
-            name = nil
-          else
-            name = n = results.last
-            n.rank  = name_parse.rank    if name_parse.rank
-            n.notes = name_parse.comment if !n.id && name_parse.comment
-            for n in results
-              if n
-                n.change_deprecated(false)
-                n.save_if_changed(user, "Approved by jason, based on Esslinger's checklist.")
-              end
-            end
+        print Regexp.last_match(1)
+
+        name_parse = NameParse.new(name)
+        results = Name.find_or_create_name_and_parents(name_parse.search_name)
+        if results.last.nil?
+          print "\nError: #{name_parse.name}\n"
+          name = nil
+        else
+          name = n = results.last
+          n.rank  = name_parse.rank    if name_parse.rank
+          n.notes = name_parse.comment if !n.id && name_parse.comment
+          results.each do |nm|
+            next unless nm
+
+            nm.change_deprecated(false)
+            nm.save_if_changed(
+              user, "Approved by jason, based on Esslinger's checklist."
+            )
           end
+        end
 
-          if name_parse.has_synonym
-            results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
-            if results.last.nil?
-              print "\nError: = #{name_parse.synonym}\n"
-            else
-              synonym = n = results.last
-              n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
-              n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
-              n.change_deprecated(true)
-              n.save_if_changed(user, "Deprecated by jason, based on Esslinger's checklist")
-              for n in results[0..-2]
-                n.save_if_changed(user, nil)
-              end
+        next unless name_parse.has_synonym
 
-              # Oops, forgot to actually synonymize names!
-              name.merge_synonyms(synonym) if name && synonym
-            end
-          end
+        results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+        if results.last.nil?
+          print "\nError: = #{name_parse.synonym}\n"
+        else
+          synonym = n = results.last
+          n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
+          n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
+          n.change_deprecated(true)
+          n.save_if_changed(
+            user, "Deprecated by jason, based on Esslinger's checklist"
+          )
+          results[0..-2].each { |nm| nm.save_if_changed(user, nil) }
 
+          # Now actually synonymize names
+          name.merge_synonyms(synonym) if name && synonym
         end
       end
     end
@@ -338,7 +339,7 @@ namespace :jason do
                 lines.push('>>>>>>>> already set "where" for this observation')
               else
                 where = lookup_location(val, lines)
-                where = true unless where # (lookup_location takes care of errors)
+                where ||= true # (lookup_location takes care of errors)
               end
             when "specimen"
               if !spec.nil?
@@ -368,7 +369,7 @@ namespace :jason do
                 lines.push('>>>>>>>> already set "what" for this observation')
               else
                 what = lookup_name(val, lines)
-                what = true unless what # (lookup_name takes care of errors)
+                what ||= true # (lookup_name takes care of errors)
               end
             when "vote"
               if !what
@@ -441,13 +442,13 @@ namespace :jason do
                 if !date.nil?
                   lines.push('>>>>>>>> already set "when" for this observation')
                 elsif !(date = Date.strptime(val, "%Y%m%d"))
-                  lines.push('>>>>>>>> couldn\'t parse date, use YYYYMMDD')
+                  lines.push(">>>>>>>> couldn't parse date, use YYYYMMDD")
                   date = true
                 end
               elsif images.last[2]
                 lines.push('>>>>>>>> already set "image date" for this image')
               elsif !(images.last[2] = Date.strptime(val, "%Y%m%d"))
-                lines.push('>>>>>>>> couldn\'t parse date, use YYYYMMDD')
+                lines.push(">>>>>>>> couldn't parse date, use YYYYMMDD")
                 images.last[2] = true
               end
             when "notes"
@@ -509,7 +510,7 @@ namespace :jason do
             else
               name = "unknown"
             end
-            $stderr.puts('Created observation: #%d (%s)' % [obs.id, name])
+            warn("Created observation: #%d (%s)" % [obs.id, name])
             obs.log(:log_observation_created_at, { user: user.login }, true)
             lines.clear
 
@@ -529,9 +530,12 @@ namespace :jason do
                 NamingReason.new(naming: naming, reason: 3, notes: chem).save if chem
                 NamingReason.new(naming: naming, reason: 4, notes: micro).save if micro
                 naming.change_vote(user, vote)
-                $stderr.puts('  Created naming: #%d (%s)' % [naming.id, naming.name.search_name])
+                warn(
+                  "  Created naming: #%d (%s)" % [naming.id,
+                                                  naming.name.search_name]
+                )
               else
-                $stderr.puts("Failed to create naming: %s" % naming.dump_errors)
+                warn("Failed to create naming: %s" % naming.dump_errors)
               end
             end
 
@@ -570,15 +574,18 @@ namespace :jason do
                     obs.thumb_image_id = image.id
                     obs.save
                   end
-                  $stderr.puts('  Created image: #%d' % image.id)
+                  warn("  Created image: #%d" % image.id)
                 else
-                  $stderr.puts('Failed to create image "%s": %s' % [file, image.dump_errors])
+                  warn('Failed to create image "%s": %s' % [file,
+                                                            image.dump_errors])
                 end
               end
             end
 
           else
-            lines.push('>>>>>>>> couldn\'t create observation: %s' % obs.dump_errors)
+            lines.push(
+              ">>>>>>>> couldn't create observation: %s" % obs.dump_errors
+            )
           end
         end
 
@@ -646,7 +653,8 @@ namespace :jason do
         lines.push(">>>>>>>>   %s" % name.search_name)
       end
     else
-      lines.push('>>>>>>>> name is deprecated, accepted names/synonyms are: (add "*" to end to force)')
+      lines.push(">>>>>>>> name is deprecated, accepted names/synonyms are: "\
+                 '(add "*" to end to force)')
       if valid_names.empty? && synonyms.empty?
         lines.push(">>>>>>>>   none available?!")
       end
@@ -659,19 +667,17 @@ namespace :jason do
 
   def lookup_image(val, path)
     if /^\d+$/.match?(val)
-      return Image.find_by_id(val)
+      Image.find_by_id(val)
     # elsif val.match(/^https?:\/\//)
     #   ...
     elsif File.exist?(val)
-      return val
+      val
     elsif File.exist?(file = "%s.jpg" % val)
-      return file
+      file
     elsif File.exist?(file = "%s/%s" % [path, val])
-      return file
+      file
     elsif File.exist?(file = "%s/%s.jpg" % [path, val])
-      return file
-    else
-      return nil
+      file
     end
   end
 

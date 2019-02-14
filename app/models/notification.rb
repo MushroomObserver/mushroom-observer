@@ -58,14 +58,14 @@ class Notification < AbstractModel
     if template = note_template
       case flavor.to_sym
       when :name
-        tracker  = self.user
+        tracker  = user
         observer = args[:user]
         naming   = args[:naming]
         unless observer
-          fail "Missing 'user' argument for #{flavor} notification."
+          raise "Missing 'user' argument for #{flavor} notification."
         end
         unless naming
-          fail "Missing 'naming' argument for #{flavor} notification."
+          raise "Missing 'naming' argument for #{flavor} notification."
         end
 
         template.

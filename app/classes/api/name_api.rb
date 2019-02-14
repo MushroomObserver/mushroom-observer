@@ -180,7 +180,7 @@ class API
       return unless parse.parent_name
 
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
-      parents.each { |n| n.save if n && n.new_record? }
+      parents.each { |n| n.save if n&.new_record? }
     end
 
     # ----------------------------------------

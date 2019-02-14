@@ -259,18 +259,18 @@ class ApiControllerTest < FunctionalTestCase
     keys = doc.root.elements["results/result/api_keys"]
     num = begin
             keys.attribute("number").value
-          rescue
+          rescue StandardError
             nil
           end
     assert_equal("1", num.to_s)
     key = begin
             keys.elements["api_key/key"].get_text
-          rescue
+          rescue StandardError
             nil
           end
     notes = begin
               keys.elements["api_key/notes"].get_text
-            rescue
+            rescue StandardError
               nil
             end
     assert_not_equal("", key.to_s)
@@ -331,5 +331,19 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal("GenBank", sequence.archive)
     assert_equal("KT1234", sequence.accession)
     assert_equal("sequence notes", sequence.notes)
+  end
+
+  def test_get_observation_with_gps_hidden
+    obs = observations(:unknown_with_lat_long)
+    get(:observations, id: obs.id, detail: :high, format: :json)
+    assert_match(/34.1622|118.3521/, @response.body)
+    get(:observations, id: obs.id, detail: :high, format: :xml)
+    assert_match(/34.1622|118.3521/, @response.body)
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:observations, id: obs.id, detail: :high, format: :json)
+    assert_no_match(/34.1622|118.3521/, @response.body)
+    get(:observations, id: obs.id, detail: :high, format: :xml)
+    assert_no_match(/34.1622|118.3521/, @response.body)
   end
 end

@@ -291,7 +291,7 @@ class HerbariumController < ApplicationController
       return true
     end
     name = @herbarium.personal_user_name
-    name.sub!(/\s*<(.*)>$/, '')
+    name.sub!(/\s*<(.*)>$/, "")
     user = User.find_by_login(name)
     unless user
       flash_error(
@@ -373,7 +373,7 @@ class HerbariumController < ApplicationController
     return false if @back.blank?
 
     redirect_to(@back)
-    return true
+    true
   end
 
   def redirect_to_herbarium_index(herbarium = @herbarium)

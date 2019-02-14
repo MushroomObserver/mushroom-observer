@@ -112,7 +112,7 @@ class LocationController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
-  rescue => err
+  rescue StandardError => err
     flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
@@ -172,7 +172,7 @@ class LocationController < ApplicationController
     end
 
     # Paginate the defined locations using the usual helper.
-    args[:always_index] = (@undef_pages && @undef_pages.num_total.positive?)
+    args[:always_index] = (@undef_pages&.num_total&.positive?)
     args[:action] = args[:action] || "list_locations"
     show_index_of_objects(query, args)
   end
@@ -366,7 +366,7 @@ class LocationController < ApplicationController
       update_view_stats(@description) if @description
 
       # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
+      @projects = @user&.projects_member&.select do |project|
         !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
     end
@@ -385,7 +385,7 @@ class LocationController < ApplicationController
         update_view_stats(@description)
 
         # Get a list of projects the user can create drafts for.
-        @projects = @user && @user.projects_member.select do |project|
+        @projects = @user&.projects_member&.select do |project|
           !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
         end
 
@@ -487,7 +487,7 @@ class LocationController < ApplicationController
     # This is the latest value of place name.
     @display_name = begin
                       params[:location][:display_name].strip_squeeze
-                    rescue
+                    rescue StandardError
                       @original_name
                     end
 
@@ -843,7 +843,7 @@ class LocationController < ApplicationController
     if location = find_or_goto_index(Location, params[:location])
       where = begin
                 params[:where].strip_squeeze
-              rescue
+              rescue StandardError
                 ""
               end
       if where.present? &&
@@ -867,13 +867,13 @@ class LocationController < ApplicationController
     count = 3
     for o in observations
       count += 1
-      unless o.location_id
-        o.location_id = location.id
-        o.where = nil
-        unless o.save
-          flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
-          success = false
-        end
+      next if o.location_id
+
+      o.location_id = location.id
+      o.where = nil
+      unless o.save
+        flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
+        success = false
       end
     end
     success

@@ -76,8 +76,8 @@ module ObservationReport
       [
         "observations.id",
         "observations.when",
-        "observations.lat",
-        "observations.long",
+        public_latlong_spec(:lat),
+        public_latlong_spec(:long),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -107,8 +107,8 @@ module ObservationReport
       [
         "observations.id",
         "observations.when",
-        "observations.lat",
-        "observations.long",
+        public_latlong_spec(:lat),
+        public_latlong_spec(:long),
         "observations.alt",
         "observations.specimen",
         "observations.is_collection_location",
@@ -132,6 +132,12 @@ module ObservationReport
         "locations.high",
         "locations.low"
       ]
+    end
+
+    def public_latlong_spec(col)
+      "IF(observations.gps_hidden AND " \
+        "observations.user_id != #{User.current_id || -1}, " \
+        "NULL, observations.#{col})"
     end
 
     # Do second query to get data from many-to-many joined table.

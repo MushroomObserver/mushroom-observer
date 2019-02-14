@@ -183,7 +183,7 @@ module DescriptionControllerHelpers
       if dest.is_a?(Name) && desc.classification.present?
         begin
           Name.validate_classification(dest.rank, desc.classification)
-        rescue => e
+        rescue StandardError => e
           flash_error(:runtime_description_move_invalid_classification.t)
           flash_error(e.to_s)
           desc.classification = ""
@@ -287,31 +287,32 @@ module DescriptionControllerHelpers
         for n in params[:writein_name].keys.sort
           name   = begin
                      params[:writein_name][n].to_s
-                   rescue
+                   rescue StandardError
                      ""
                    end
           reader = begin
                      params[:writein_reader][n] == "1"
-                   rescue
+                   rescue StandardError
                      false
                    end
           writer = begin
                      params[:writein_writer][n] == "1"
-                   rescue
+                   rescue StandardError
                      false
                    end
           admin  = begin
                      params[:writein_admin][n] == "1"
-                   rescue
+                   rescue StandardError
                      false
                    end
-          if name.present? &&
-             !update_writein(@description, name, reader, writer, admin)
-            @data << { name: name, reader: reader, writer: writer,
-                       admin: admin }
-            flash_error(:runtime_description_user_not_found.t(name: name))
-            done = false
-          end
+
+          next unless name.present? &&
+                      !update_writein(@description, name, reader, writer, admin)
+
+          @data << { name: name, reader: reader, writer: writer,
+                     admin: admin }
+          flash_error(:runtime_description_user_not_found.t(name: name))
+          done = false
         end
 
         # Were any changes made?
@@ -495,7 +496,7 @@ module DescriptionControllerHelpers
       desc.admin_groups << UserGroup.one_user(@user)
 
     else
-      fail :runtime_invalid_source_type.t(value: desc.source_type.inspect)
+      raise :runtime_invalid_source_type.t(value: desc.source_type.inspect)
     end
   end
 
@@ -672,7 +673,7 @@ module DescriptionControllerHelpers
       # Store where merge came from in new version of destination.
       dest.merge_source_id = begin
                                src.versions.latest.id
-                             rescue
+                             rescue StandardError
                                nil
                              end
 

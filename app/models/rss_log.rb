@@ -192,8 +192,16 @@ class RssLog < AbstractModel
 
   # Return the type of object of the target, e.g., :observation.
   def target_type
-    location_id ? :location : name_id ? :name : observation_id ? :observation : project_id ? :project : species_list_id ? :species_list :
-    glossary_term_id ? :glossary_term : article_id ? :article : nil
+    [
+      [location_id,      :location],
+      [name_id,          :name],
+      [observation_id,   :observation],
+      [project_id,       :project],
+      [species_list_id,  :species_list],
+      [glossary_term_id, :glossary_term],
+      [article_id,       :article],
+      [true,             nil]
+    ].each { |x| return x.second if x.first }
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an
@@ -374,7 +382,7 @@ class RssLog < AbstractModel
   def self.encode(tag, args, time)
     time = time.utc.strftime("%Y%m%d%H%M%S")
     tag = tag.to_s
-    fail "Invalid rss log tag: #{tag}" if tag.blank?
+    raise "Invalid rss log tag: #{tag}" if tag.blank?
 
     args = args.keys.sort_by(&:to_s).map do |key|
       [key.to_s, escape(args[key])]
@@ -402,7 +410,7 @@ class RssLog < AbstractModel
       time2 = Time.utc(time[0, 4], time[4, 2], time[6, 2],
                        time[8, 2], time[10, 2], time[12, 2]).in_time_zone
       time = time2
-    rescue => e
+    rescue StandardError => e
       # Caught this error in the log, not sure how/why.
       if Rails.env == "production"
         time = Time.now # (but don't crash in production)

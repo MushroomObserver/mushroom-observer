@@ -65,12 +65,12 @@ class Name < AbstractModel
   def has_eol_data?
     if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
       observations.each do |o|
-        if o.vote_cache && o.vote_cache >= MO.eol_min_observation_vote
-          o.images.each do |i|
-            if i.ok_for_export && i.vote_cache &&
-               i.vote_cache >= MO.eol_min_image_vote
-              return true
-            end
+        next unless o.vote_cache && o.vote_cache >= MO.eol_min_observation_vote
+
+        o.images.each do |i|
+          if i.ok_for_export && i.vote_cache &&
+             i.vote_cache >= MO.eol_min_image_vote
+            return true
           end
         end
       end
@@ -368,7 +368,7 @@ class Name < AbstractModel
 
   # Does this Name have notes (presumably discussing taxonomy).
   def has_notes?
-    notes && notes.match(/\S/)
+    notes&.match(/\S/)
   end
 
   def text_before_rank

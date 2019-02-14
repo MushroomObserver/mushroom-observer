@@ -50,7 +50,7 @@ class LanguageExporterTest < UnitTestCase
     assert_valid(:validate_square_brackets,
                  "this is [:good(var=123.45)] right")
     assert_valid(:validate_square_brackets,
-                 'this is [:good(var=\'abc def\')] right')
+                 "this is [:good(var='abc def')] right")
     assert_valid(:validate_square_brackets,
                  'this is [:good(var="#$@!")] right')
     assert_invalid(:validate_square_brackets,
@@ -416,7 +416,7 @@ class LanguageExporterTest < UnitTestCase
         "  twos:  twos\n",   # ignore this because unchanged from template
         "  TWOS: Twos\n",    # ignore this because not a change from English
         "  three:  τρία\n",  # take this change even though still indented
-        "  four: τέσσερα\n", # this is correct, it had better take this!
+        "  four: τέσσερα\n"  # this is correct, it had better take this!
       ]
       greek.write_export_file_lines(data)
       assert_true(greek.import_from_file,

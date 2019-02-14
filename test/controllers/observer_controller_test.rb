@@ -111,6 +111,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:thumbnail, user.thumbnail_size)
   end
 
+  def test_show_observation_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    get(:show_observation, id: obs.id)
+    assert_match(/34.1622|118.3521/, @response.body)
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:show_observation, id: obs.id)
+    assert_no_match(/34.1622|118.3521/, @response.body)
+
+    login("mary")
+    get(:show_observation, id: obs.id)
+    assert_match(/34.1622|118.3521/, @response.body)
+    assert_match(:show_observation_gps_hidden.t, @response.body)
+  end
+
   def test_show_obs
     obs = observations(:fungi_obs)
     get(:show_obs,
@@ -611,6 +626,41 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:map_observations)
   end
 
+  def test_map_observation_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    get(:map_observation, params: { id: obs.id })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                       include?("118.3521"))
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:map_observation, params: { id: obs.id })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                        include?("118.3521"))
+  end
+
+  def test_map_observations_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    assert(query.result_ids.include?(obs.id))
+
+    get(:map_observations, params: { q: query.id.alphabetize })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                       include?("118.3521"))
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:map_observations, params: { q: query.id.alphabetize })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                        include?("118.3521"))
+  end
+
   def test_observation_search_with_spelling_correction
     # Missing the stupid genus Coprinus: breaks the alternate name suggestions.
     login("rolf")
@@ -772,45 +822,12 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:owner_only_favorite_ne_consensus)
     get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{obs.owners_only_favorite_name.text_name}/,
+                  { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
-  end
 
-  def test_show_owner_id_equals_site_id
-    login(user_with_view_owner_id_true)
-    obs = observations(:owner_only_favorite_eq_consensus)
-    get_with_dump(:show_observation, id: obs.id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{obs.owners_only_favorite_name.text_name}/,
-                    count: 1 },
-                  "Observation should show Observer preference")
-  end
-
-  def test_show_owner_id_with_multiple_favorites
-    login(user_with_view_owner_id_true)
     get_with_dump(:show_observation,
                   id: observations(:owner_multiple_favorites).id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
-                    count: 1 },
-                  "Observation should show lack of Observer preference")
-  end
-
-  def test_show_owner_id_with_uncertain_high_vote
-    login(user_with_view_owner_id_true)
-    get_with_dump(:show_observation,
-                  id: observations(:owner_uncertain_favorite).id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
-                    count: 1 },
-                  "Observation should show lack of Observer preference")
-  end
-
-  def test_show_owner_id_with_fungi
-    login(user_with_view_owner_id_true)
-    obs = observations(:owner_only_favorite_eq_fungi)
-    get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
@@ -3512,7 +3529,8 @@ class ObserverControllerTest < FunctionalTestCase
         ",,,34.22,34.15,-118.29,-118.37," \
         "#{l.high.to_f.round},#{l.low.to_f.round}," \
         "#{"X" if o.is_collection_location},#{o.thumb_image_id}," \
-        "#{o.notes[Observation.other_notes_key]}",
+        "#{o.notes[Observation.other_notes_key]}," \
+        "#{MO.http_domain}/#{o.id}",
       last_row.iconv("utf-8"),
       "Exported last row incorrect"
     )

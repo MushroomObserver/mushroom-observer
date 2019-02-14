@@ -171,16 +171,20 @@ class ObserverController
 
     # Get matching observations.
     locations = {}
-    columns = %w[id lat long location_id].map { |x| "observations.#{x}" }
+    columns = %w[id lat long gps_hidden location_id].map do |x|
+      "observations.#{x}"
+    end
     args = {
       select: columns.join(", "),
       where: "observations.lat IS NOT NULL OR " \
       "observations.location_id IS NOT NULL"
     }
-    @observations = @query.select_rows(args).map do |id, lat, long, loc_id|
-      locations[loc_id.to_i] = nil if loc_id.present?
-      MinimalMapObservation.new(id, lat, long, loc_id)
-    end
+    @observations = \
+      @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
+        locations[loc_id.to_i] = nil if loc_id.present?
+        lat = long = nil if gps_hidden == 1
+        MinimalMapObservation.new(id, lat, long, loc_id)
+      end
 
     unless locations.empty?
       # Eager-load corresponding locations.
@@ -211,7 +215,7 @@ class ObserverController
 
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
-    fail "no robots!" if browser.bot?
+    raise "no robots!" if browser.bot?
 
     query_params_set(query)
     @format = params[:format] || "raw"
@@ -230,7 +234,7 @@ class ObserverController
       @labels = make_labels(query.results)
       render(action: "print_labels", layout: "printable")
     end
-  rescue => e
+  rescue StandardError => e
     flash_error("Internal error: #{e}", *e.backtrace[0..10])
   end
 
@@ -250,7 +254,7 @@ class ObserverController
     when "mycoflora"
       ObservationReport::Mycoflora.new(args)
     else
-      fail("Invalid download type: #{format.inspect}")
+      raise("Invalid download type: #{format.inspect}")
     end
   end
 

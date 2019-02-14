@@ -3939,14 +3939,12 @@ namespace :location do
   desc "List dubious fixes"
   task(dubious: :environment) do
     # for v in APPROVED_LOCATIONS.sort
-    for v in LOCATION_FIXES.values.sort
+    LOCATION_FIXES.values.sort.each do |v|
       reasons = Location.dubious_name?(v, true)
-      if reasons != []
-        print("#{v}\n")
-        for r in reasons
-          print("\t#{r}\n")
-        end
-      end
+      next if reasons == []
+
+      print("#{v}\n")
+      reasons.each { |r| print("\t#{r}\n") }
     end
   end
 
@@ -4171,7 +4169,8 @@ namespace :location do
 
   desc "List the fixes"
   task(new: :environment) do
-    print("    " + (LOCATION_FIXES.values.sort.map { |l| escapeString(l) }.join(",\n    ")) + "\n")
+    print("    " + LOCATION_FIXES.values.sort.map { |l| escapeString(l) }.
+      join(",\n    ") + "\n")
   end
 
   desc "Random test task"

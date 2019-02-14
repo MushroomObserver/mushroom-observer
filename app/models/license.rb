@@ -65,7 +65,7 @@ class License < AbstractModel
   #
   def self.current_names_and_ids(current_license = nil)
     result = License.where(deprecated: 0).map { |l| [l.display_name, l.id] }
-    if current_license && current_license.deprecated
+    if current_license&.deprecated
       result.push([current_license.display_name, current_license.id])
     end
     result

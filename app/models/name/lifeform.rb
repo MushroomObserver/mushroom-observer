@@ -35,7 +35,7 @@ class Name < AbstractModel
   # and will not match "compoundword".
   def validate_lifeform
     words = lifeform.to_s.split(" ").sort.uniq
-    self.lifeform = words.any? ? " #{words.join(' ')} " : " "
+    self.lifeform = words.any? ? " #{words.join(" ")} " : " "
     unknown_words = words - ALL_LIFEFORMS
     return unless unknown_words.any?
 

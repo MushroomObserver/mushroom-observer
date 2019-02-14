@@ -513,7 +513,7 @@ class NamingControllerTest < FunctionalTestCase
     old_vote1_id = votes(:coprinus_comatus_owner_vote).id
     old_vote2_id = begin
                      votes(:coprinus_comatus_other_vote).id
-                   rescue
+                   rescue StandardError
                      nil
                    end
 

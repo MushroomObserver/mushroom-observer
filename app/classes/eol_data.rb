@@ -60,7 +60,7 @@ class EolData
   end
 
   def image_count(id)
-    if self.has_images?(id)
+    if has_images?(id)
       @name_id_to_images[id].count
     else
       0
@@ -80,7 +80,7 @@ class EolData
   end
 
   def description_count(id)
-    if self.has_descriptions?(id)
+    if has_descriptions?(id)
       @name_id_to_descriptions[id].count
     else
       0

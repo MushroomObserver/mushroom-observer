@@ -9,27 +9,27 @@ module ApiHelper
   def xml_boolean(xml, tag, val)
     str = val ? "true" : "false"
     xml.tag!(tag, type: "boolean", value: str)
-  rescue
+  rescue StandardError
   end
 
   def xml_integer(xml, tag, val)
     str = begin
             "%d" % val
-          rescue
+          rescue StandardError
             ""
           end
     xml.tag!(tag, str, type: "integer")
-  rescue
+  rescue StandardError
   end
 
   def xml_float(xml, tag, val, places)
     str = begin
             "%.#{places}f" % val
-          rescue
+          rescue StandardError
             ""
           end
     xml.tag!(tag, str, type: "float")
-  rescue
+  rescue StandardError
   end
 
   def xml_string(xml, tag, val)
@@ -37,7 +37,7 @@ module ApiHelper
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "text/plain")
     end
-  rescue
+  rescue StandardError
   end
 
   def xml_html_string(xml, tag, val)
@@ -45,7 +45,7 @@ module ApiHelper
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "text/html")
     end
-  rescue
+  rescue StandardError
   end
 
   def xml_sql_string(xml, tag, val)
@@ -53,19 +53,19 @@ module ApiHelper
       str = val.to_s
       xml.tag!(tag, str, type: "string", content_type: "application/x-sql")
     end
-  rescue
+  rescue StandardError
   end
 
   def xml_date(xml, tag, val)
     if val
       str = begin
               val.api_date
-            rescue
+            rescue StandardError
               ""
             end
       xml.tag!(tag, str, type: "date", format: "YYYY-MM-DD")
     end
-  rescue
+  rescue StandardError
   end
 
   def xml_datetime(xml, tag, val)
@@ -73,31 +73,31 @@ module ApiHelper
       str = val.utc.api_time
       xml.tag!(tag, str, type: "date-time", format: "YYYY-MM-DD HH:MM:SS")
     end
-  rescue
+  rescue StandardError
   end
 
   def xml_ellapsed_time(xml, tag, val)
     str = "%.4f" % val
     xml.tag!(tag, str, type: "float", units: "seconds")
-  rescue
+  rescue StandardError
   end
 
   def xml_latitude(xml, tag, val)
     str = "%.4f" % val
     xml.tag!(tag, str, type: "float", units: "degrees north")
-  rescue
+  rescue StandardError
   end
 
   def xml_longitude(xml, tag, val)
     str = "%.4f" % val
     xml.tag!(tag, str, type: "float", units: "degrees east")
-  rescue
+  rescue StandardError
   end
 
   def xml_altitude(xml, tag, val)
     str = "%d" % val
     xml.tag!(tag, str, type: "integer", units: "meters")
-  rescue
+  rescue StandardError
   end
 
   def xml_undefined_location(xml, tag, val)
@@ -105,7 +105,7 @@ module ApiHelper
       val = Location.reverse_name(val)
     end
     xml.tag!(tag, val, type: "string")
-  rescue
+  rescue StandardError
   end
 
   def xml_naming_reason(xml, tag, val)
@@ -120,13 +120,13 @@ module ApiHelper
   def xml_confidence_level(xml, tag, val)
     str = "%.2f" % val
     xml.tag!(tag, str, type: "float", range: "-3.0 to 3.0")
-  rescue
+  rescue StandardError
   end
 
   def xml_image_quality(xml, tag, val)
     str = "%.2f" % val
     xml.tag!(tag, str, type: "float", range: "0.0 to 4.0")
-  rescue
+  rescue StandardError
   end
 
   def xml_image_file(xml, image, size)
@@ -146,7 +146,7 @@ module ApiHelper
       model = model.constantize unless model.is_a?(Class)
       url = begin
               model.show_url(id)
-            rescue
+            rescue StandardError
               nil
             end
       if url

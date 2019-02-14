@@ -70,7 +70,7 @@ class HerbariumRecord < AbstractModel
 
   # Can a given user edit this HerbariumRecord?
   def can_edit?(user = User.current)
-    self.user == user || herbarium && herbarium.curator?(user)
+    self.user == user || herbarium&.curator?(user)
   end
 
   # Send email notifications when herbarium_record created by non-curator.

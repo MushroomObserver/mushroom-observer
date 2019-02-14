@@ -200,7 +200,7 @@ class NameController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Name)
     show_selected_names(query)
-  rescue => err
+  rescue StandardError => err
     flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
@@ -352,7 +352,7 @@ class NameController < ApplicationController
       @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
 
       # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
+      @projects = @user&.projects_member&.select do |project|
         !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
       end
 
@@ -1048,7 +1048,7 @@ class NameController < ApplicationController
     if request.method == "POST"
       list = begin
                params[:list][:members].strip_squeeze
-             rescue
+             rescue StandardError
                ""
              end
       construct_approved_names(list, params[:approved_names])
@@ -1146,7 +1146,7 @@ class NameController < ApplicationController
     words = Name.all_lifeforms.select do |word|
       params["lifeform_#{word}"] == "1"
     end
-    @name.update_attributes(lifeform: " #{words.join(' ')} ")
+    @name.update_attributes(lifeform: " #{words.join(" ")} ")
     redirect_with_query(@name.show_link_args)
   end
 
@@ -1238,7 +1238,7 @@ class NameController < ApplicationController
               header: "present",
               disposition: "attachment",
               filename: "#{action_name}.csv")
-  rescue => e
+  rescue StandardError => e
     render(plain: e.to_s, layout: false, status: 500)
   end
 end
