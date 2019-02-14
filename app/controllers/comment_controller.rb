@@ -86,7 +86,7 @@ class CommentController < ApplicationController
   def show_comments_for_target # :nologin: :norobots:
     model = begin
               params[:type].to_s.constantize
-            rescue
+            rescue StandardError
               nil
             end
     if !model || !model.acts_like?(:model)
@@ -282,7 +282,7 @@ class CommentController < ApplicationController
       parent = object.parent
       redirect_to(controller: parent.show_controller,
                   action: parent.show_action, id: parent.id)
-      return false
+      false
     else
       true
     end

@@ -104,6 +104,7 @@ GET image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)
@@ -142,6 +143,7 @@ PATCH image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)
@@ -172,6 +174,7 @@ DELETE image
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
+  observation:	observation list
   ok_for_export:	boolean
   project:	project list
   quality:	quality range (limit=1..4)

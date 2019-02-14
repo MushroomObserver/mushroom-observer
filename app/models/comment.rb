@@ -118,7 +118,7 @@ class Comment < AbstractModel
   #
   def target_type_localized
     target_type.downcase.to_sym.l
-  rescue
+  rescue StandardError
     ""
   end
 

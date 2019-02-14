@@ -204,7 +204,7 @@ module PatternSearch
       raise BadFloatError.new(var: var, val: val, min: min, max: max) \
         unless val.to_f >= min && val.to_f <= max
 
-      return val.to_f
+      val.to_f
     end
 
     def parse_latitude

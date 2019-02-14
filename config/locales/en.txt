@@ -1609,8 +1609,8 @@
   name_deprecate_comment_summary: "[:Deprecated]"
   name_deprecate_comments: "[:Comments]"
   name_deprecate_submit: "[:SUBMIT]"
-  name_deprecate_preferred_help: Enter the preferred name.  Author citation is recommended but not required.
-  name_deprecate_comments_help: "Please include any notes about why this name has been deprecated.\nThis will be added to the notes for [name]."
+  name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
+  name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum). \nThis will be added to the Comments for [name]."
 
   # name/name_index (and other actions using same view)
   name_index_add_name: Add Name

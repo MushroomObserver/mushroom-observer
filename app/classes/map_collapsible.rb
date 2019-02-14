@@ -129,7 +129,11 @@ class CollapsibleCollectionOfMappableObjects
       return [round_number(loc.lat, prec), round_number(loc.long, prec)]
     end
 
-    [loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0,
+    [if loc.lat >= 45
+       90
+     else
+       loc.lat <= -45 ? -90 : 0
+     end,
      loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
   end
 

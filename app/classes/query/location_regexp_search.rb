@@ -9,7 +9,7 @@ module Query
 
     def initialize_flavor
       regexp = escape(params[:regexp].to_s.strip_squeeze)
-      self.where << "locations.name REGEXP #{regexp}"
+      where << "locations.name REGEXP #{regexp}"
       super
     end
   end

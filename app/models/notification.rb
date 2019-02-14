@@ -58,7 +58,7 @@ class Notification < AbstractModel
     if template = note_template
       case flavor.to_sym
       when :name
-        tracker  = self.user
+        tracker  = user
         observer = args[:user]
         naming   = args[:naming]
         unless observer

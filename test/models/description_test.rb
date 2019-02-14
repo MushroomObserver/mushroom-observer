@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class DescriptionTest < UnitTestCase
@@ -133,5 +135,21 @@ class DescriptionTest < UnitTestCase
     assert obj.parent_id == burbank.id
     obj.parent_id = albion.id
     assert obj.parent == albion
+  end
+
+  def test_permitted?
+    desc = name_descriptions(:peltigera_user_desc)
+    table = desc.readers_join_table
+
+    assert(desc.permitted?(table, users(:dick)),
+           "Dick should have read permission")
+    assert_not(desc.permitted?(table, users(:katrina)),
+               "Katrina should not have read permission")
+    assert_not(desc.permitted?(table, nil),
+               "Nil should not have read permission")
+    assert(desc.permitted?(table, users(:dick).id.to_s),
+           "`permitted?` should accept user.id")
+    error = assert_raises(Exception) { desc.permitted?(table, "bad argument") }
+    assert_equal(ArgumentError, error.class)
   end
 end

@@ -117,7 +117,7 @@ class NameControllerTest < FunctionalTestCase
     draft_gen_desc = draft.gen_desc
     name_gen_desc = begin
                       draft.name.description.gen_desc
-                    rescue
+                    rescue StandardError
                       nil
                     end
     same_gen_desc = (draft_gen_desc == name_gen_desc)
@@ -129,7 +129,7 @@ class NameControllerTest < FunctionalTestCase
     name = Name.find(name_id)
     new_gen_desc = begin
                      name.description.gen_desc
-                   rescue
+                   rescue StandardError
                      nil
                    end
     if merged

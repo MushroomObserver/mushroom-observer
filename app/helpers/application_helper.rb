@@ -159,7 +159,7 @@ module ApplicationHelper
   #   link_to("Next Page", reload_with_args(page: 2))
   #
   def reload_with_args(new_args)
-    uri = request.url.sub(/^\w+:\/+[^\/]+/, "")
+    uri = request.url.sub(%r{^\w+:/+[^/]+}, "")
     add_args_to_url(uri, new_args)
   end
 
@@ -182,15 +182,15 @@ module ApplicationHelper
     addr, parms = url.split("?")
     for arg in parms ? parms.split("&") : []
       var, val = arg.split("=")
-      if var && var != ""
-        var = CGI.unescape(var)
-        # See note below about precedence in case of redundancy.
-        args[var] = val unless args.key?(var)
-      end
+      next unless var && var != ""
+
+      var = CGI.unescape(var)
+      # See note below about precedence in case of redundancy.
+      args[var] = val unless args.key?(var)
     end
 
     # Deal with the special "/xxx/id" case.
-    if /\/(\d+)$/.match?(addr)
+    if %r{/(\d+)$}.match?(addr)
       new_id = new_args[:id] || new_args["id"]
       addr.sub!(/\d+$/, new_id.to_s) if new_id
       new_args.delete(:id)
@@ -278,11 +278,9 @@ module ApplicationHelper
     if init_value && init_value < start_year
       start_year = init_value
     end
-    return {
-      start_year: start_year,
+    { start_year: start_year,
       end_year: Time.now.year,
-      order: [:day, :month, :year]
-    }
+      order: [:day, :month, :year] }
   end
 
   # contents of the <title> in html header

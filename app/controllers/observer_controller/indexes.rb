@@ -234,7 +234,7 @@ class ObserverController
       @labels = make_labels(query.results)
       render(action: "print_labels", layout: "printable")
     end
-  rescue => e
+  rescue StandardError => e
     flash_error("Internal error: #{e}", *e.backtrace[0..10])
   end
 

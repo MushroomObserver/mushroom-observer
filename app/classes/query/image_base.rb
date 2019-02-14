@@ -15,6 +15,7 @@ module Query
         synonym_names?:        [:string],
         children_names?:       [:string],
         locations?:            [:string],
+        observations?:         [Observation],
         projects?:             [:string],
         species_lists?:        [:string],
         has_observation?:      { boolean: [true] },
@@ -36,6 +37,11 @@ module Query
       initialize_model_do_time(:updated_at)
       initialize_model_do_date(:date, :when)
       initialize_model_do_objects_by_id(:users)
+      initialize_model_do_objects_by_id(
+        :observations,
+        "images_observations.observation_id",
+        join: :images_observations
+      )
       initialize_model_do_objects_by_name(
         Name, :names, "observations.name_id",
         join: { images_observations: :observations }

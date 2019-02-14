@@ -821,45 +821,12 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:owner_only_favorite_ne_consensus)
     get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{obs.owners_only_favorite_name.text_name}/,
+                  { text: /#{obs.owner_preference.text_name}/,
                     count: 1 },
                   "Observation should show Observer ID")
-  end
 
-  def test_show_owner_id_equals_site_id
-    login(user_with_view_owner_id_true)
-    obs = observations(:owner_only_favorite_eq_consensus)
-    get_with_dump(:show_observation, id: obs.id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{obs.owners_only_favorite_name.text_name}/,
-                    count: 1 },
-                  "Observation should show Observer preference")
-  end
-
-  def test_show_owner_id_with_multiple_favorites
-    login(user_with_view_owner_id_true)
     get_with_dump(:show_observation,
                   id: observations(:owner_multiple_favorites).id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
-                    count: 1 },
-                  "Observation should show lack of Observer preference")
-  end
-
-  def test_show_owner_id_with_uncertain_high_vote
-    login(user_with_view_owner_id_true)
-    get_with_dump(:show_observation,
-                  id: observations(:owner_uncertain_favorite).id)
-    assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_clear_preference.t}/,
-                    count: 1 },
-                  "Observation should show lack of Observer preference")
-  end
-
-  def test_show_owner_id_with_fungi
-    login(user_with_view_owner_id_true)
-    obs = observations(:owner_only_favorite_eq_fungi)
-    get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
                   { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },

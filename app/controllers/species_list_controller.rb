@@ -529,7 +529,7 @@ class SpeciesListController < ApplicationController
       @observation[obs.id] = obs
       vote = begin
                obs.consensus_naming.users_vote(@user)
-             rescue
+             rescue StandardError
                nil
              end
       @votes[obs.id] = vote || Vote.new
@@ -545,13 +545,13 @@ class SpeciesListController < ApplicationController
       @observations.each do |obs|
         args = begin
                  params[:observation][obs.id.to_s] || {}
-               rescue
+               rescue StandardError
                  {}
                end
         any_changes = false
         old_vote = begin
                      @votes[obs.id].value
-                   rescue
+                   rescue StandardError
                      0
                    end
         if !args[:value].nil? && args[:value].to_s != old_vote.to_s
@@ -1082,7 +1082,7 @@ class SpeciesListController < ApplicationController
     # Not sure how to check vote efficiently...
     @member_vote = begin
                      obs.namings.first.users_vote(@user).value
-                   rescue
+                   rescue StandardError
                      Vote.maximum_vote
                    end
     init_member_notes_for_edit(spl_obss)

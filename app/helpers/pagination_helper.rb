@@ -30,23 +30,27 @@ module PaginationHelper
   #   <%= pagination_numbers(@pages) %>
   #
   def pagination_letters(pages, args = {})
-    if pages&.letter_arg &&
-       (pages.letter || pages.num_total > pages.num_per_page) &&
-       (!pages.used_letters || pages.used_letters.length > 1)
-      args = args.dup
-      args[:params] = (args[:params] || {}).dup
-      args[:params][pages.number_arg] = nil
-      str = %w[A B C D E F G H I J K L M N O P Q R S T U V W X Y Z].map do |letter|
-        if !pages.used_letters || pages.used_letters.include?(letter)
-          pagination_link(letter, letter, pages.letter_arg, args)
-        else
-          content_tag(:li, content_tag(:span, letter), class: "disabled")
-        end
-      end.safe_join(" ")
-      return content_tag(:div, str, class: "pagination pagination-sm")
-    else
-      return safe_empty
-    end
+    return safe_empty unless need_letter_pagination_links?(pages)
+
+    args = args.dup
+    args[:params] = (args[:params] || {}).dup
+    args[:params][pages.number_arg] = nil
+    str = %w[A B C D E F G H I J K L M N O P Q R S T U V W X Y Z].map do |letter|
+      if !pages.used_letters || pages.used_letters.include?(letter)
+        pagination_link(letter, letter, pages.letter_arg, args)
+      else
+        content_tag(:li, content_tag(:span, letter), class: "disabled")
+      end
+    end.safe_join(" ")
+    content_tag(:div, str, class: "pagination pagination-sm")
+  end
+
+  def need_letter_pagination_links?(pages)
+    return unless pages
+
+    pages.letter_arg &&
+      (pages.letter || pages.num_total > pages.num_per_page) &&
+      (!pages.used_letters || pages.used_letters.length > 1)
   end
 
   # Insert numbered pagination links.  I've thrown out the Rails plugin

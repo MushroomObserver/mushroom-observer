@@ -193,7 +193,7 @@ class Location < AbstractModel
     if match && alt.to_s.match(/ft|'/)
       result = (match[1].to_f * 0.3048).round
     elsif match
-      result = (match[1].to_f).round
+      result = match[1].to_f.round
     end
     result
   end
@@ -230,7 +230,7 @@ class Location < AbstractModel
     # for "unknown", even when viewing the site in another language
     Language.official.translation_strings.find_by_tag("unknown_locations").
       text.split(/, */)
-  rescue
+  rescue StandardError
     []
   end
 
