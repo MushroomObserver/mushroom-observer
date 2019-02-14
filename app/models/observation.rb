@@ -43,6 +43,7 @@
 #  long::                   Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
+#  gps_hidden::             Hide exact lat/long?
 #  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
@@ -368,6 +369,31 @@ class Observation < AbstractModel
     else
       place_name
     end
+  end
+
+  # Returns latitude if public or if the current user owns the observation.
+  # The user should also be able to see hidden latitudes if they are an admin
+  # or they are members of a project that the observation belongs to, but
+  # those are harder to determine. This catches the majority of cases.
+  def public_lat
+    gps_hidden && user_id != User.current_id ? nil : lat
+  end
+
+  def public_long
+    gps_hidden && user_id != User.current_id ? nil : long
+  end
+
+  def display_lat_long
+    return "" unless lat
+
+    "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
+      "#{long.abs}°#{long.negative? ? "W" : "E"}"
+  end
+
+  def display_alt
+    return "" unless alt
+
+    "#{alt.round}m"
   end
 
   ##############################################################################

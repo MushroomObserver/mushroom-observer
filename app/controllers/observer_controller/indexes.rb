@@ -171,16 +171,20 @@ class ObserverController
 
     # Get matching observations.
     locations = {}
-    columns = %w[id lat long location_id].map { |x| "observations.#{x}" }
+    columns = %w[id lat long gps_hidden location_id].map do |x|
+      "observations.#{x}"
+    end
     args = {
       select: columns.join(", "),
       where: "observations.lat IS NOT NULL OR " \
       "observations.location_id IS NOT NULL"
     }
-    @observations = @query.select_rows(args).map do |id, lat, long, loc_id|
-      locations[loc_id.to_i] = nil if loc_id.present?
-      MinimalMapObservation.new(id, lat, long, loc_id)
-    end
+    @observations = \
+      @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
+        locations[loc_id.to_i] = nil if loc_id.present?
+        lat = long = nil if gps_hidden == 1
+        MinimalMapObservation.new(id, lat, long, loc_id)
+      end
 
     unless locations.empty?
       # Eager-load corresponding locations.

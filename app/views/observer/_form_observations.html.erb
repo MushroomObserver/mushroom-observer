@@ -97,12 +97,18 @@
           (<%= :units_meters.t %>)
         </div>
       </div>
+      <div class="col-xs-12 col-sm-12">
+        <div class="form-inline">
+          <%= check_box(:observation, :gps_hidden, class: "form-control-xxx") %>
+          <%= label_tag(:observation_gps_hidden, :form_observations_gps_hidden.t) %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 <!-- /LAT_LONG_ALT -->
 
-<div class="row">
+<div class="row push-down">
   <div class="col-xs-12 max-width-text-times-two">
 <%= render(partial: "naming/form",
             locals: {

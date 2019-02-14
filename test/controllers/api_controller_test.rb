@@ -332,4 +332,18 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal("KT1234", sequence.accession)
     assert_equal("sequence notes", sequence.notes)
   end
+
+  def test_get_observation_with_gps_hidden
+    obs = observations(:unknown_with_lat_long)
+    get(:observations, id: obs.id, detail: :high, format: :json)
+    assert_match(/34.1622|118.3521/, @response.body)
+    get(:observations, id: obs.id, detail: :high, format: :xml)
+    assert_match(/34.1622|118.3521/, @response.body)
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:observations, id: obs.id, detail: :high, format: :json)
+    assert_no_match(/34.1622|118.3521/, @response.body)
+    get(:observations, id: obs.id, detail: :high, format: :xml)
+    assert_no_match(/34.1622|118.3521/, @response.body)
+  end
 end

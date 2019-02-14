@@ -111,6 +111,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:thumbnail, user.thumbnail_size)
   end
 
+  def test_show_observation_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    get(:show_observation, id: obs.id)
+    assert_match(/34.1622|118.3521/, @response.body)
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:show_observation, id: obs.id)
+    assert_no_match(/34.1622|118.3521/, @response.body)
+
+    login("mary")
+    get(:show_observation, id: obs.id)
+    assert_match(/34.1622|118.3521/, @response.body)
+    assert_match(:show_observation_gps_hidden.t, @response.body)
+  end
+
   def test_show_obs
     obs = observations(:fungi_obs)
     get(:show_obs,
@@ -609,6 +624,41 @@ class ObserverControllerTest < FunctionalTestCase
   def test_map_observations
     get(:map_observations)
     assert_template(:map_observations)
+  end
+
+  def test_map_observation_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    get(:map_observation, params: { id: obs.id })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                       include?("118.3521"))
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:map_observation, params: { id: obs.id })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                        include?("118.3521"))
+  end
+
+  def test_map_observations_hidden_gps
+    obs = observations(:unknown_with_lat_long)
+    query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    assert(query.result_ids.include?(obs.id))
+
+    get(:map_observations, params: { q: query.id.alphabetize })
+    assert_true(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                       include?("34.1622"))
+    assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                       include?("118.3521"))
+
+    obs.update_attribute(:gps_hidden, true)
+    get(:map_observations, params: { q: query.id.alphabetize })
+    assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
+                                        include?("34.1622"))
+    assert_false(assigns(:observations).map(&:long).map(&:to_s).join("").
+                                        include?("118.3521"))
   end
 
   def test_observation_search_with_spelling_correction

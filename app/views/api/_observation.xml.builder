@@ -10,8 +10,8 @@ xml.tag!(tag,
   else
     xml_undefined_location(xml, :location, object.where)
   end
-  xml_latitude(xml, :latitude, object.lat)
-  xml_longitude(xml, :longitude, object.long)
+  xml_latitude(xml, :latitude, object.public_lat)
+  xml_longitude(xml, :longitude, object.public_long)
   xml_altitude(xml, :altitude, object.alt)
   xml_boolean(xml, :specimen_available, true) if object.specimen
   if object.is_collection_location

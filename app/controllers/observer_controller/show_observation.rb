@@ -97,7 +97,8 @@ class ObserverController
 
     @title = :map_observation_title.t(id: obs.id)
     @observations = [
-      MinimalMapObservation.new(obs.id, obs.lat, obs.long, obs.location)
+      MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
+                                obs.location)
     ]
     render(action: :map_observations)
   end

@@ -1,8 +1,8 @@
 json.id                     object.id
 json.type                   "observation"
 json.date                   object.when
-json.latitude               object.lat
-json.longitude              object.long
+json.latitude               object.public_lat
+json.longitude              object.public_long
 json.altitude               object.alt
 json.specimen_available     object.specimen ? true : false
 json.is_collection_location object.is_collection_location ? true : false
