@@ -122,7 +122,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     login("mary")
     get(:show_observation, id: obs.id)
-    assert_no_match(/34.1622|118.3521/, @response.body)
+    assert_match(/34.1622|118.3521/, @response.body)
+    assert_match(:show_observation_gps_hidden.t, @response.body)
   end
 
   def test_show_obs

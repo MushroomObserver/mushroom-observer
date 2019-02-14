@@ -1969,7 +1969,7 @@
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
   show_observation_seen_at: Seen at
-  show_observation_gps_hidden: coordinates hidden
+  show_observation_gps_hidden: coordinates hidden from public
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
   show_observation_remove_images: "[:remove_objects(type=:image)]"

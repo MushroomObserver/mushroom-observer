@@ -383,6 +383,16 @@ class Observation < AbstractModel
     gps_hidden && user_id != User.current_id ? nil : long
   end
 
+  def display_lat_long
+    return "" if !lat
+    "#{lat.abs}°#{lat < 0 ? 'S' : 'N'} #{long.abs}°#{long < 0 ? 'W' : 'E'}"
+  end
+
+  def display_alt
+    return "" if !alt
+    "#{alt.round}m"
+  end
+
   ##############################################################################
   #
   #  :section: Notes
