@@ -384,12 +384,15 @@ class Observation < AbstractModel
   end
 
   def display_lat_long
-    return "" if !lat
-    "#{lat.abs}°#{lat < 0 ? 'S' : 'N'} #{long.abs}°#{long < 0 ? 'W' : 'E'}"
+    return "" unless lat
+
+    "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
+      "#{long.abs}°#{long.negative? ? "W" : "E"}"
   end
 
   def display_alt
-    return "" if !alt
+    return "" unless alt
+
     "#{alt.round}m"
   end
 
