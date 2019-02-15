@@ -123,6 +123,18 @@ class TextileTest < UnitTestCase
                  do_other_links("_user phooey_ _name gar_"))
   end
 
+  def test_location_lookup
+    # This loc has 2 all-caps words to insure we're stripping
+    # some tags added by Redcloth
+    loc = "OSU, Corvallis, Oregon, USA"
+    textile = "_location #{loc}_".tpl
+    assert_match(
+      "#{MO.http_domain}/observer/lookup_location/#{CGI.escape(loc)}", # href
+      textile
+     )
+    assert_match("<i>#{loc}</i>", textile) # anchor text
+  end
+
   def test_url_formatting
     assert_href_equal(
       "#{MO.http_domain}/observer/lookup_name/Amanita+%22sp-O01%22",
