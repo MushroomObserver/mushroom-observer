@@ -1,5 +1,8 @@
 # frozen_string_literal: true.
-#
+
+require "cgi"
+require "redcloth"
+
 #  == Textile Parser
 #
 #  This class -- a subclass of String -- is a wrapper on RedCloth.  It provides
@@ -22,11 +25,6 @@
 #  textilize::                   Parse the given string.
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #
-################################################################################
-
-require "cgi"
-require "redcloth"
-
 class Textile < String
   @@name_lookup     = {}
   @@last_species    = nil

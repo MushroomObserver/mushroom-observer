@@ -131,7 +131,7 @@ class TextileTest < UnitTestCase
     assert_match(
       "#{MO.http_domain}/observer/lookup_location/#{CGI.escape(loc)}", # href
       textile
-     )
+    )
     assert_match("<i>#{loc}</i>", textile) # anchor text
   end
 
