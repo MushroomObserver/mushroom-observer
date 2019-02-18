@@ -535,7 +535,7 @@ class AjaxControllerTest < FunctionalTestCase
 
     fixture = "#{::Rails.root}/test/images/geotagged.jpg"
     file = image.local_file_name("orig")
-    path = file.sub(%r{/.*?$}, "")
+    path = file.sub(%r{/[^/]*$}, "")
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, file)
 
