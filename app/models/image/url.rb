@@ -38,40 +38,38 @@ class Image
     end
 
     def source_exists?(source)
-      spec = specs(source)[:test]
+      spec = format_spec(source, :test)
       case spec
       when :transferred_flag
         transferred
       when /^file:/
-        path = format(spec[7..-1], root: MO.root)
-        local_file_exists?(path)
+        local_file_exists?(spec)
       when /^http:/
-        remote_file_exists?(url = format(spec, root: MO.root))
+        remote_file_exists?(spec)
       when /^https:/
-        remote_file_exists?(url = format(spec, root: MO.root))
+        remote_file_exists?(spec)
       else
         raise "Invalid image source test spec for "\
               "#{source.inspect}: #{spec.inspect}"
       end
     end
 
-    def local_file_exists?(path)
-      File.exist?(file_name(path))
+    def local_file_exists?(spec)
+      File.exist?(file_name(spec)[7..-1])
     end
 
-    def remote_file_exists?(url)
-      url = URI.parse(url)
+    def remote_file_exists?(spec)
+      url = URI.parse(file_name(spec))
       result = Net::HTTP.new(url.host, url.port).request_head(url.path)
       result.code == 200
     end
 
     def source_url(source)
-      spec = format(specs(source)[:read], root: MO.root)
-      file_name(spec)
+      file_name(format_spec(source, :read))
     end
 
-    def file_name(root)
-      "#{root}/#{subdirectory}/#{id}.#{extension}"
+    def file_name(path)
+      "#{path}/#{subdirectory}/#{id}.#{extension}"
     end
 
     def subdirectory
@@ -84,6 +82,11 @@ class Image
 
     def fallback_source
       MO.image_fallback_source
+    end
+
+    def format_spec(source, mode)
+      spec = specs(source)[mode]
+      spec.is_a?(String) ? format(spec, root: MO.root) : spec
     end
 
     def specs(source)
