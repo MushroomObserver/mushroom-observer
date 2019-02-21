@@ -747,6 +747,7 @@ class ObserverController
   end
 
   def strip_images_if_edit_gps_hidden
+    return unless params[:observation]
     do_strip_images if !@observation.gps_hidden &&
                        whitelisted_observation_params[:gps_hidden] == "1"
   end
