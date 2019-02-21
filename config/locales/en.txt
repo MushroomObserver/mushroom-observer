@@ -3357,6 +3357,7 @@
   runtime_destroyed: Successfully destroyed [type].
   runtime_destroyed_id: "Successfully destroyed [type] #[value]."
   runtime_destroyed_name: Successfully destroyed [type] '[value]'.
+  runtime_failed_to_strip_gps: "Failed to strip GPS data from full-size image's EXIF header: [msg]"
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 N\n123 27.402 N\n123 24 24.12 N\n123° 24’ 24.12” N\n123deg 24min 24.12sec N"
   runtime_altitude_error: "Elevation must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."

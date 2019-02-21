@@ -333,7 +333,7 @@ class ImageController < ApplicationController
       @image.original_name = "" if @user.keep_filenames == :toss
       return flash_object_errors(@image) unless @image.save
 
-      if !@image.process_image
+      if !@image.process_image(@observation.gps_hidden)
         logger.error("Unable to upload image")
         name = @image.original_name
         name = "???" if name.empty?
@@ -594,6 +594,10 @@ class ImageController < ApplicationController
         # Add image to observation.
         @observation.add_image(image)
         @observation.log_reuse_image(image)
+        if @observation.gps_hidden
+          error = image.strip_gps!
+          flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
+        end
         redirect_with_query(controller: "observer",
                             action: "show_observation", id: @observation.id)
         done = true
