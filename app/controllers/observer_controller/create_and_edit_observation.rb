@@ -92,9 +92,9 @@ class ObserverController
 
     # Once observation is saved we can save everything else.
     if success
-      strip_images_if_create_gps_hidden
       @observation.log(:log_observation_created_at)
       save_everything_else(params[:reason]) # should always succeed
+      strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))
       redirect_to_next_page
 
@@ -330,10 +330,10 @@ class ObserverController
 
     else
       any_errors = false
-      strip_images_if_edit_gps_hidden
       update_whitelisted_observation_attributes
       @observation.notes = notes_to_sym_and_compact
       warn_if_unchecking_specimen_with_records_present!
+      strip_images! if @observation.gps_hidden
 
       # Validate place name
       @place_name = @observation.place_name
@@ -742,17 +742,7 @@ class ObserverController
     redirect_with_query(action: :show_observation, id: id)
   end
 
-  def strip_images_if_create_gps_hidden
-    do_strip_images if @observation.gps_hidden
-  end
-
-  def strip_images_if_edit_gps_hidden
-    return unless params[:observation]
-    do_strip_images if !@observation.gps_hidden &&
-                       whitelisted_observation_params[:gps_hidden] == "1"
-  end
-
-  def do_strip_images
+  def strip_images!
     @observation.images.each do |img|
       error = img.strip_gps!
       flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error

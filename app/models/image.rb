@@ -648,8 +648,8 @@ class Image < AbstractModel
       ext = original_extension
       set_image_size(upload_temp_file) if ext == "jpg"
       set = width.nil? ? "1" : "0"
-      strip = strip ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
+      strip = strip ? "1" : "0"
       if !move_original
         result = false
       else
@@ -714,7 +714,7 @@ class Image < AbstractModel
   # string if it fails.
   def strip_gps!
     return nil if gps_stripped
-    output, status = Open3.capture2e("script/strip_exif", id,
+    output, status = Open3.capture2e("script/strip_exif", id.to_s,
                                      transferred ? "1" : "0")
     return output unless status.success?
     update_attribute(:gps_stripped, true)

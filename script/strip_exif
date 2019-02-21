@@ -35,7 +35,6 @@ error=0
 
 if [[ $transferred == 0 ]]; then
   if ! $cmd "$image_root/orig/$id."*; then
-    echo "Failed to strip '$image_root/orig/$id.*' (locally)."
     error=1
   fi
 fi
@@ -48,7 +47,6 @@ if [[ $transferred == 1 ]]; then
       host=`echo "${image_server_data[$server,path]}" | sed "s/:.*//"`
       path=`echo "${image_server_data[$server,path]}" | sed "s/.*://"`
       if ! ssh "$host" "$cmd '$path/orig/$id.'*"; then
-        echo "Failed to strip '$host:$path/orig/$id.*' (remotely)."
         error=1
       fi
     fi
