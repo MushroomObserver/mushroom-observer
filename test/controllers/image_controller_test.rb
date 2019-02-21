@@ -626,7 +626,8 @@ class ImageControllerTest < FunctionalTestCase
     fixture = "#{MO.root}/test/images/geotagged.jpg"
     fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
 
-    post(:add_image,
+    post(
+      :add_image,
       id: obs.id,
       image: {
         "when(1i)" => "2007",
