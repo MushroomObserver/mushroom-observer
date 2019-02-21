@@ -77,12 +77,12 @@ class ScriptTest < UnitTestCase
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
     FileUtils.rm_rf("#{remote_root}2")
-    set_image_transferred_state_externally(in_situ_id)
-    set_image_transferred_state_externally(turned_over_id)
+    clear_image_transferred_state_externally(in_situ_id)
+    clear_image_transferred_state_externally(turned_over_id)
     super
   end
 
-  def set_image_transferred_state_externally(id)
+  def clear_image_transferred_state_externally(id)
     system("mysql -u mo -pmo mo_test -e 'update images set transferred=false where id = #{id}'")
   end
 
