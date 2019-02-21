@@ -1,3 +1,5 @@
+require "open3"
+
 # see ajax_controller.rb
 class AjaxController
   require "English"
@@ -6,8 +8,13 @@ class AjaxController
   def exif
     image = Image.find(@id)
     hide_gps = image.observations.any?(&:gps_hidden)
-    cmd = image.transferred ? "#{MO.root}/script/exiftool_remote" : "exiftool"
-    result, status = Open3.capture2e(cmd, image.original_url);
+    if image.transferred
+      cmd = "#{MO.root}/script/exiftool_remote"
+      result, status = Open3.capture2e(cmd, image.original_url)
+    else
+      file = image.local_file_name("orig")
+      result, status = Open3.capture2e("exiftool", file)
+    end
     if status.success?
       render_exif_data(result, hide_gps)
     else
