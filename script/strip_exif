@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+#  Strip GPS data from EXIF header of original image file.
+#
+################################################################################
+set -e
+
+id=$1
+transferred=$2
+
+source $(dirname "$0")/bash_include
+source $(dirname "$0")/bash_images
+
+cmd="exiftool -gps:all= -xmp:geotag= -overwrite_original -q"
+
+if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
+
+USAGE
+  script/strip_exif <id> <transferred> <ext> <-h|-v>
+
+OPTIONS
+  id           image id (number)
+  transferred  0 = still local, 1 = transferred already
+
+DESCRIPTION
+  This attempts to strip the GPS data from the EXIF header of the original
+  image. If it is stored locally, easy-peasy. If it has already been
+  transferred, then it runs the strip command remotely on the image server.
+  If it has been moved to Digital Ocean object store, then we return an
+  error message and tell the user to re-upload the image.
+
+END
+
+error=0
+
+if [[ $transferred == 0 ]]; then
+  if ! $cmd "$image_root/orig/$id."*; then
+    echo "Failed to strip '$image_root/orig/$id.*' (locally)."
+    error=1
+  fi
+fi
+
+if [[ $transferred == 1 ]]; then
+  for server in ${image_servers[0]}; do
+    if image_server_has_subdir $server orig && \
+       [[ ${image_server_data[$server,type]} == "ssh" ]]; then
+      file=orig/$id.jpg
+      host=`echo "${image_server_data[$server,path]}" | sed "s/:.*//"`
+      path=`echo "${image_server_data[$server,path]}" | sed "s/.*://"`
+      if ! ssh "$host" "$cmd '$path/orig/$id.'*"; then
+        echo "Failed to strip '$host:$path/orig/$id.*' (remotely)."
+        error=1
+      fi
+    fi
+  done
+fi
+
+exit $error
