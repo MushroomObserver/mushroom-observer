@@ -9,11 +9,13 @@ class AjaxController
     image = Image.find(@id)
     hide_gps = image.observations.any?(&:gps_hidden)
     if image.transferred
-      cmd = "script/exiftool_remote"
-      result, status = Open3.capture2e(cmd, image.original_url)
+      cmd = Shellwords.escape("script/exiftool_remote")
+      url = Shellwords.escape(image.original_url)
+      result, status = Open3.capture2e(cmd, url)
     else
-      file = image.local_file_name("orig")
-      result, status = Open3.capture2e("exiftool", file)
+      cmd  = Shellwords.escape("exiftool")
+      file = Shellwords.escape(image.local_file_name("orig"))
+      result, status = Open3.capture2e(cmd, file)
     end
     if status.success?
       render_exif_data(result, hide_gps)
