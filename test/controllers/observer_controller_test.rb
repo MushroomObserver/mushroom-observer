@@ -2450,6 +2450,8 @@ class ObserverControllerTest < FunctionalTestCase
     old_img2 = images(:in_situ_image)
     assert_false(old_img1.gps_stripped)
     assert_false(old_img2.gps_stripped)
+    assert_false(old_img1.transferred)
+    assert_false(old_img2.transferred)
 
     orig_file = old_img1.local_file_name("orig")
     path = orig_file.sub(%r{/[^/]*$}, "")

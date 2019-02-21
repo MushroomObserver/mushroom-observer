@@ -77,7 +77,18 @@ class ScriptTest < UnitTestCase
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
     FileUtils.rm_rf("#{remote_root}2")
+    set_image_transferred_state_externally(in_situ_id)
+    set_image_transferred_state_externally(turned_over_id)
     super
+  end
+
+  def set_image_transferred_state_externally(id)
+    system("mysql -u mo -pmo mo_test -e 'update images set transferred=false where id = #{id}'")
+  end
+
+  def get_image_transferred_state_externally(id)
+    result = `mysql -u mo -pmo mo_test -e "select transferred from images where id = #{id}"`
+    result.split("\n").last.strip == "1"
   end
 
   ##############################################################################
@@ -146,16 +157,19 @@ class ScriptTest < UnitTestCase
   end
 
   test "retransfer_images" do
+    # In unit tests, ActiveRecord wraps all work on the database in a
+    # transaction.  Soon as you look at the database it becomes immune to
+    # external changes for the rest of the test.  In this test we want to check
+    # whether the script is correctly setting the transferred flag in two
+    # images.  If we avoid ActiveRecord's transaction wrapper, we can test this
+    # correctly.  However, then it leaves the database in a condition different
+    # than it started, and that's also bad.  (Breaks other tests if they happen
+    # after this one.)  So we need to avoid the transaction wrapper throughout
+    # the whole test, and ensure that it resets the transferred flags
+    # externally at the end.
+
     script = script_file("retransfer_images")
     tempfile = Tempfile.new("test").path
-    # Can't do this here, since in unit tests ActiveRecord wraps all work on the
-    # database in a transaction.  Soon as you look at the database it becomes
-    # immune to external changes for the rest of the test.  So we need to be
-    # careful not to even peek at the database until we've run the script.
-    # img1 = images(:in_situ_image)
-    # img2 = images(:turned_over_image)
-    # assert_equal(false, img1.transferred)
-    # assert_equal(false, img2.transferred)
 
     File.open("#{local_root}/orig/#{in_situ_id}.tiff", "w") do |f|
       f.write("A")
@@ -195,8 +209,8 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
-    assert_equal(true, images(:in_situ_image).transferred)
-    assert_equal(true, images(:turned_over_image).transferred)
+    assert_true(get_image_transferred_state_externally(in_situ_id))
+    assert_true(get_image_transferred_state_externally(turned_over_id))
 
     assert_equal("A", File.read("#{remote_root}1/orig/#{in_situ_id}.tiff"),
                  "orig/#{in_situ_id}.tiff wrong for server 1")
