@@ -287,6 +287,7 @@ class Name < AbstractModel
         if line_rank_idx.nil?
           raise :runtime_user_bad_rank.t(rank: line_rank.to_s)
         end
+
         line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
 
         if line_rank_idx <= rank_idx
