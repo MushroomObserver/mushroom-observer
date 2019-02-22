@@ -13,7 +13,7 @@ class QueryTest < UnitTestCase
     else
       assert_obj_list_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
     end
-    type = args[0].t.sub(/um$/, "(um|a)")
+    type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
     assert(!query.title.include?("[:"),
            "Title contains undefined localizations: <#{query.title}>")
