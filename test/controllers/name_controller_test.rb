@@ -428,6 +428,11 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(action: :show_name, id: id)
   end
 
+  def test_name_search_help
+    get_with_dump(:name_search, pattern: "help:me")
+    assert_match(/unexpected term/i, @response.body)
+  end
+
   def test_name_search_with_spelling_correction
     get_with_dump(:name_search, pattern: "agaricis campestrus")
     assert_template(:list_names)
