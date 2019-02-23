@@ -11,7 +11,8 @@ transferred=$2
 source $(dirname "$0")/bash_include
 source $(dirname "$0")/bash_images
 
-cmd="exiftool -gps:all= -xmp:geotag= -overwrite_original -q"
+cmd1="exiftool -gps:all= -xmp:geotag= -overwrite_original -q"
+cmd2="exiftool -:all= -overwrite_original -q"
 
 if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 
@@ -34,7 +35,8 @@ END
 error=0
 
 if [[ $transferred == 0 ]]; then
-  if ! $cmd "$image_root/orig/$id."*; then
+  if ! $cmd1 "$image_root/orig/$id."* &&
+     ! $cmd2 "$image_root/orig/$id."* ; then
     error=1
   fi
 fi
@@ -46,7 +48,8 @@ if [[ $transferred == 1 ]]; then
       file=orig/$id.jpg
       host=`echo "${image_server_data[$server,path]}" | sed "s/:.*//"`
       path=`echo "${image_server_data[$server,path]}" | sed "s/.*://"`
-      if ! ssh "$host" "$cmd '$path/orig/$id.'*"; then
+      if ! ssh "$host" "$cmd1 '$path/orig/$id.'*" &&
+         ! ssh "$host" "$cmd2 '$path/orig/$id.'*"; then
         error=1
       fi
     fi
