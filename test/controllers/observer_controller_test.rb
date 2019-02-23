@@ -571,6 +571,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :list_observations)
   end
 
+  def test_observation_search_help
+    get_with_dump(:observation_search, pattern: "help:me")
+    assert_match(/unexpected term/i, @response.body)
+  end
+
   def test_observation_search
     pattern = "Boletus edulis"
     get_with_dump(:observation_search, pattern: pattern)

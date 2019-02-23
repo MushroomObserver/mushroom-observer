@@ -133,8 +133,8 @@ unknown_locations_string: # 15
 english_waiting_for_update: # 16
   version: 1
   language: english
-  tag: old
-  text: old
+  tag: all
+  text: all
   updated_at: 2012-05-30
   user_id: 0
 

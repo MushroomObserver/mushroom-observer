@@ -195,7 +195,10 @@ class LocationControllerTest < FunctionalTestCase
   def test_list_location_descriptions
     login("mary")
     burbank = locations(:burbank)
-    burbank.description = LocationDescription.create!(location_id: burbank.id)
+    burbank.description = LocationDescription.create!(
+      location_id: burbank.id,
+      source_type: "public"
+    )
     get_with_dump(:list_location_descriptions)
     assert_template("list_location_descriptions")
   end

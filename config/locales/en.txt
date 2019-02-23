@@ -251,6 +251,10 @@
   external_link: external link
   EXTERNAL_LINKS: External Links
   external_links: external links
+  EXTERNAL_SITE: External Site
+  external_site: external site
+  EXTERNAL_SITES: External Sites
+  external_sites: external sites
   IMAGE: Image
   image: image
   IMAGES: Images
@@ -3215,6 +3219,7 @@
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_synonym_of: Synonyms of any of these names.
   name_term_child_of: Subtaxa of any of these names.
+  name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
   name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
@@ -3543,7 +3548,7 @@
   runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
   runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
   runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
-  runtime_user_bad_rank: "[:runtime_invalid(type=rank,value=rank)]"
+  runtime_user_bad_rank: "Invalid rank: '[rank]'"
 
   # Longer messages.
   runtime_ask_webmaster_antispam: To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.
@@ -3631,6 +3636,7 @@
   api_bad_date_parameter_value: Invalid date, "[val]", expect "YYYYMMDD".
   api_bad_date_range_parameter_value: Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_email_parameter_value: Invalid email address, "[val]".
+  api_bad_external_site_parameter_value: Invalid external site, "[val]".
   api_bad_float_parameter_value: Invalid float, "[val]".
   api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id, code or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.

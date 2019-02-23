@@ -119,11 +119,13 @@ module ActiveSupport
       User.current = nil
       start_timer if false
       clear_logs unless defined?(@@cleared_logs)
+      Symbol.missing_tags = []
     end
 
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown
+      assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
       stop_timer if false

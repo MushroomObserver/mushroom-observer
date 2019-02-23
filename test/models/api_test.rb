@@ -3101,8 +3101,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    Comment.create!(user: dick, target: spl, summary: "test",
+    x = Comment.create(user: dick, target: spl, summary: "test",
                     comment: "double dare you to reiterate this comment!")
+    x.save
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results([spl])
 
