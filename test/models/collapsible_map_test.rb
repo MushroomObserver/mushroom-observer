@@ -71,14 +71,16 @@ class CollapsibleMapTest < UnitTestCase
   end
 
   def assert_list_of_mapsets(coll, objs)
-    expect = objs.reject(&:nil?).map do |x|
+    list = objs.reject(&:nil?).map do |x|
       x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
-    end.map do |x|
-      "%9.4f %9.4f %9.4f %9.4f" % x # rubocop:disable Style/FormatString
-    end.sort
+    end
+
+    format_string = "%9.4f %9.4f %9.4f %9.4f"
+    expect = list.map { |x| format(format_string, *x) }.sort
     actual = coll.mapsets.map(&:edges).map do |x|
-      "%9.4f %9.4f %9.4f %9.4f" % x # rubocop:disable Style/FormatString
+      format(format_string, *x)
     end.sort
+
     messages = []
     differ = false
     (0..[expect.length, actual.length].max).each do |i|

@@ -423,13 +423,13 @@ class SiteData
   end
 
   def add_language_contributions(user)
-    sum = 0
-    list = Language.all.map do |lang|
+    language_contributions = Language.all.map do |lang|
       score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
-      sum += score
       [lang, score]
-    end.select { |_lang, score| score.positive? }
-    @user_data[user.id][:languages] = sum
-    @user_data[user.id][:languages_itemized] = list
+    end
+    @user_data[user.id][:languages] =
+      language_contributions.map { |_lang, score| score }.sum
+    @user_data[user.id][:languages_itemized] =
+      language_contributions.select { |_lang, score| score.positive? }
   end
 end

@@ -38,9 +38,11 @@ module ThumbnailHelper
 
   # Grab the copyright_text for an Image.
   def image_copyright(image)
-    link = image.copyright_holder == image.user.legal_name ?
-      user_link(image.user) :
-      image.copyright_holder.to_s.t
+    link = if image.copyright_holder == image.user.legal_name
+             user_link(image.user)
+           else
+             image.copyright_holder.to_s.t
+           end
     image.license.copyright_text(image.year, link)
   end
 

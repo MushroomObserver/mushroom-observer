@@ -1172,13 +1172,16 @@ class NameController < ApplicationController
   ##############################################################################
 
   def names_for_mushroom_app # :nologin: :norobots:
-    number_of_names = params[:number_of_names].presence || 1000
-    minimum_confidence = params[:minimum_confidence].presence || 1.5
-    minimum_observations = params[:minimum_observations].presence || 5
-    rank_condition = params[:include_higher_taxa].blank? ?
-      "= #{Name.ranks[:Species]}" :
-      "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(",")})"
-
+    number_of_names = params[:number_of_names].presence.to_i || 1000
+    minimum_confidence = params[:minimum_confidence].presence.to_i || 1.5
+    minimum_observations = params[:minimum_observations].presence.to_i || 5
+    rank_condition =
+      if params[:include_higher_taxa].blank?
+        "= #{Name.ranks[:Species]}"
+      else
+        "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).
+          join(",")})"
+      end
     data = Name.connection.select_rows(%(
       SELECT y.name, y.rank, SUM(y.number)
       FROM (

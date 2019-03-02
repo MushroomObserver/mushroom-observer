@@ -37,8 +37,11 @@ module Query::Modules::Ordering
         self.group = "images.id"
         "MIN(names.sort_name) ASC, images.when DESC"
       elsif model == Location
-        User.current_location_format == :scientific ?
-          "locations.scientific_name ASC" : "locations.name ASC"
+        if User.current_location_format == :scientific
+          "locations.scientific_name ASC"
+        else
+          "locations.name ASC"
+        end
       elsif model == LocationDescription
         add_join(:locations)
         "locations.name ASC, location_descriptions.created_at ASC"
@@ -72,8 +75,11 @@ module Query::Modules::Ordering
       if columns.include?("location_id")
         # Join Users with null locations, else join records with locations
         model == User ? add_join(:locations!) : add_join(:locations)
-        User.current_location_format == :scientific ?
-          "locations.scientific_name ASC" : "locations.name ASC"
+        if User.current_location_format == :scientific
+          "locations.scientific_name ASC"
+        else
+          "locations.name ASC"
+        end
       end
 
     when "rss_log"

@@ -209,8 +209,12 @@ class Textile < String
 
   private
 
-  NAME_LINK_PATTERN = / (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) ) /x
-  OTHER_LINK_PATTERN = / (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w) /x
+  NAME_LINK_PATTERN = /
+    (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) )
+  /x.freeze
+  OTHER_LINK_PATTERN = /
+   (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
+  /x.freeze
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!
@@ -257,23 +261,35 @@ class Textile < String
   # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
   def supply_implicit_species(str)
     if str.sub!(/^(subsp|ssp)\.? +/, "")
-      @@last_species ? @@last_species + " subsp. " + str : ""
+      expand_subspecies(str)
     elsif str.sub!(/^(var|v)\.? +/, "")
-      if @@last_subspecies
-        @@last_subspecies + " var. " + str
-      else
-        @@last_species ? @@last_species + " var. " + str : ""
-      end
+      expand_variety(str)
     elsif str.sub!(/^(forma?|f)\.? +/, "")
-      if @@last_variety
-        @@last_variety + " f. " + str
-      elsif @@last_subspecies
-        @@last_subspecies + " f. " + str
-      else
-        @@last_species ? @@last_species + " f. " + str : ""
-      end
+      expand_form(str)
     else
       str
+    end
+  end
+
+  def expand_subspecies(str)
+    @@last_species ? "#{@@last_species} subsp. #{str}" : ""
+  end
+
+  def expand_variety(str)
+    if @@last_subspecies
+      "#{@@last_subspecies} var. #{str}"
+    else
+      @@last_species ? "#{@@last_species} var. #{str}" : ""
+    end
+  end
+
+  def expand_form(str)
+    if @@last_variety
+      "#{@@last_variety} f. #{str}"
+    elsif @@last_subspecies
+      "#{@@last_subspecies} f. #{str}"
+    else
+      @@last_species ? "#{@@last_species} f. #{str}" : ""
     end
   end
 
