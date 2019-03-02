@@ -86,7 +86,8 @@ class API
     end
 
     def after_create(img)
-      img.process_image || raise(ImageUploadFailed.new(img))
+      strip = @observations.any?(&:gps_hidden)
+      img.process_image(strip) || raise(ImageUploadFailed.new(img))
       @observations.each do |obs|
         obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
         obs.log_create_image(img)

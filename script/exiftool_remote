@@ -1,0 +1,2 @@
+#!/bin/sh
+wget -qO- "$1" | exiftool -
