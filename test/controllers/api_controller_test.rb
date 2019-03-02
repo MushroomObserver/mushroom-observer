@@ -274,10 +274,7 @@ class ApiControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal(
-      "&lt;p&gt;New &lt;span class=\"caps\"&gt;API&lt;/span&gt; Key&lt;/p&gt;",
-      notes.to_s
-    )
+    assert_equal(CGI.escapeHTML("<p>New API Key</p>"), notes.to_s)
   end
 
   def test_post_api_key
