@@ -8,6 +8,9 @@ sudo: true
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rake lang:update
 
+before_install:
+  - sudo apt-get install exiftool
+
 install: ./script/travis_setup
 
 before_script:

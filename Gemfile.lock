@@ -48,25 +48,26 @@ GEM
     ansi (1.5.0)
     arel (9.0.0)
     ast (2.4.0)
-    autoprefixer-rails (9.4.8)
+    autoprefixer-rails (9.4.9)
       execjs
-    aws-sdk (2.11.227)
-      aws-sdk-resources (= 2.11.227)
-    aws-sdk-core (2.11.227)
+    aws-sdk (2.11.232)
+      aws-sdk-resources (= 2.11.232)
+    aws-sdk-core (2.11.232)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.11.227)
-      aws-sdk-core (= 2.11.227)
+    aws-sdk-resources (2.11.232)
+      aws-sdk-core (= 2.11.232)
     aws-sigv4 (1.0.3)
     bindex (0.5.0)
     blankslate (3.1.3)
     bootstrap-sass (3.4.1)
       autoprefixer-rails (>= 5.2.1)
       sassc (>= 2.0.0)
+    brakeman (4.4.0)
     browser (2.5.3)
     builder (3.2.3)
     byebug (11.0.0)
-    capybara (3.13.2)
+    capybara (3.14.0)
       addressable
       mini_mime (>= 0.1.3)
       nokogiri (~> 1.8)
@@ -96,7 +97,7 @@ GEM
     docile (1.3.1)
     erubi (1.8.0)
     execjs (2.7.0)
-    ffi (1.9.25)
+    ffi (1.10.0)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     hashdiff (0.3.8)
@@ -143,7 +144,7 @@ GEM
     nio4r (2.3.1)
     nokogiri (1.10.1)
       mini_portile2 (~> 2.4.0)
-    parallel (1.13.0)
+    parallel (1.14.0)
     parser (2.6.0.0)
       ast (~> 2.4.0)
     powerpack (0.1.2)
@@ -211,8 +212,8 @@ GEM
       sprockets (>= 2.8, < 4.0)
       sprockets-rails (>= 2.0, < 4.0)
       tilt (>= 1.1, < 3)
-    sassc (2.0.0)
-      ffi (~> 1.9.6)
+    sassc (2.0.1)
+      ffi (~> 1.9)
       rake
     simple_enum (2.3.2)
       activesupport (>= 4.0.0)
@@ -269,6 +270,7 @@ DEPENDENCIES
   aws-sdk (~> 2)
   blankslate
   bootstrap-sass
+  brakeman
   browser
   byebug
   capybara

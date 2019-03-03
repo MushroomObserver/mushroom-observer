@@ -606,6 +606,8 @@ class ImageControllerTest < FunctionalTestCase
     img = Image.last
     assert_obj_list_equal([obs], img.observations)
     assert_obj_list_equal([proj], img.projects)
+    assert_false(obs.gps_hidden)
+    assert_false(img.gps_stripped)
   end
 
   def test_add_images_empty
@@ -613,6 +615,37 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     post(:add_image, id: obs.id)
     assert_flash_text(/no changes/i)
+  end
+
+  def test_add_images_strip_gps
+    login("rolf")
+    obs = observations(:coprinus_comatus_obs)
+    obs.update_attribute(:gps_hidden, true)
+
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+
+    post(
+      :add_image,
+      id: obs.id,
+      image: {
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "29",
+        copyright_holder: "Douglas Smith",
+        notes: "Some notes."
+      },
+      upload: {
+        image1: fixture,
+        image2: "",
+        image3: "",
+        image4: ""
+      }
+    )
+
+    img = Image.last
+    assert_true(img.gps_stripped)
   end
 
   # This is what would happen when user first opens form.
@@ -642,6 +675,36 @@ class ImageControllerTest < FunctionalTestCase
                          id: rolf.id)
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
+  end
+
+  def test_reuse_image_strip_gps_failed
+    login("mary")
+    obs = observations(:minimal_unknown_obs)
+    img = images(:in_situ_image)
+    obs.update_attribute(:gps_hidden, true)
+    assert_false(img.gps_stripped)
+    post(:reuse_image, mode: "observation", obs_id: obs.id, img_id: img.id)
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_reuse_image_strip_gps_worked
+    login("mary")
+    obs = observations(:minimal_unknown_obs)
+    img = images(:in_situ_image)
+    obs.update_attribute(:gps_hidden, true)
+    assert_false(img.gps_stripped)
+
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    orig_file = img.local_file_name("orig")
+    path = orig_file.sub(%r{/[^/]*$}, "")
+    FileUtils.mkdir_p(path) unless File.directory?(path)
+    FileUtils.cp(fixture, orig_file)
+
+    post(:reuse_image, mode: "observation", obs_id: obs.id, img_id: img.id)
+    assert_true(img.reload.gps_stripped)
+    assert_not_equal(File.size(fixture),
+                     File.size(img.local_file_name("orig")))
   end
 
   # Test setting anonymity of all image votes.

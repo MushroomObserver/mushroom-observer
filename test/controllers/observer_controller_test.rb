@@ -2444,6 +2444,65 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('"One" Author', assigns(:observation).name.search_name)
   end
 
+  def test_create_observation_strip_images
+    login("rolf")
+
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+
+    old_img1 = images(:turned_over_image)
+    old_img2 = images(:in_situ_image)
+    assert_false(old_img1.gps_stripped)
+    assert_false(old_img2.gps_stripped)
+    assert_false(old_img1.transferred)
+    assert_false(old_img2.transferred)
+
+    orig_file = old_img1.local_file_name("orig")
+    path = orig_file.sub(%r{/[^/]*$}, "")
+    FileUtils.mkdir_p(path) unless File.directory?(path)
+    FileUtils.cp(fixture, orig_file)
+
+    post(
+      :create_observation,
+      observation: {
+        when: Time.zone.now,
+        place_name: "Burbank, California, USA",
+        lat: "45.4545",
+        long: "-90.1234",
+        alt: "456",
+        specimen: "0",
+        thumb_image_id: "0",
+        gps_hidden: "1"
+      },
+      image: {
+        "0" => {
+          image: fixture,
+          copyright_holder: "me",
+          when: Time.zone.now
+        }
+      },
+      good_images: "#{old_img1.id} #{old_img2.id}"
+    )
+
+    obs = Observation.last
+    assert_equal(3, obs.images.length)
+    new_img = (obs.images - [old_img1, old_img2]).first
+    assert_true(new_img.gps_stripped)
+    # We have script/process_image disabled for tests, so it doesn't actually
+    # strip the uploaded image.
+    # assert_not_equal(File.size(fixture),
+    #                  File.size(new_img.local_file_name("orig")))
+
+    # Make sure it stripped the image which had already been created.
+    assert_true(old_img1.reload.gps_stripped)
+    assert_not_equal(File.size(fixture),
+                     File.size(old_img1.local_file_name("orig")))
+
+    # Second pre-existing image has missing file, so stripping should fail.
+    assert_false(old_img2.reload.gps_stripped)
+  end
+
   # ----------------------------------------------------------------
   #  Test edit_observation, both "get" and "post".
   # ----------------------------------------------------------------
@@ -2648,6 +2707,61 @@ class ObserverControllerTest < FunctionalTestCase
       "Expected 200 (OK), Got #{@response.status} (#{@response.message})"
     )
     assert_flash_error
+  end
+
+  def test_edit_observation_strip_images
+    login("mary")
+    obs = observations(:detailed_unknown_obs)
+
+    setup_image_dirs
+    fixture = "#{MO.root}/test/images/geotagged.jpg"
+    fixture = Rack::Test::UploadedFile.new(fixture, "image/jpeg")
+
+    old_img1 = images(:turned_over_image)
+    old_img2 = images(:in_situ_image)
+    assert_false(old_img1.gps_stripped)
+    assert_false(old_img2.gps_stripped)
+
+    orig_file = old_img1.local_file_name("orig")
+    path = orig_file.sub(%r{/[^/]*$}, "")
+    FileUtils.mkdir_p(path) unless File.directory?(path)
+    FileUtils.cp(fixture, orig_file)
+
+    post(
+      :edit_observation,
+      id: obs.id,
+      observation: {
+        gps_hidden: "1"
+      },
+      image: {
+        "0" => {
+          image: fixture,
+          copyright_holder: "me",
+          when: Time.zone.now
+        }
+      }
+    )
+
+    obs.reload
+    old_img1.reload
+    old_img2.reload
+
+    assert_equal(3, obs.images.length)
+    new_img = (obs.images - [old_img1, old_img2]).first
+
+    assert_true(new_img.gps_stripped)
+    # We have script/process_image disabled for tests, so it doesn't actually
+    # strip the uploaded image.
+    # assert_not_equal(File.size(fixture),
+    #                  File.size(new_img.local_file_name("orig")))
+
+    # Make sure it stripped the image which had already been created.
+    assert_true(old_img1.reload.gps_stripped)
+    assert_not_equal(File.size(fixture),
+                     File.size(old_img1.local_file_name("orig")))
+
+    # Second pre-existing image has missing file, so stripping should fail.
+    assert_false(old_img2.reload.gps_stripped)
   end
 
   # --------------------------------------------------------------------

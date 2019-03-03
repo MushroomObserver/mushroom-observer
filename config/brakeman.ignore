@@ -1,0 +1,46 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "707f76fbf1433a3c3e2bb17f47366eef235bc1973f5d82c7539efcec1db82bac",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/controllers/ajax_controller/exif.rb",
+      "line": 20,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture2e(Shellwords.escape(\"exiftool\"), Shellwords.escape(Image.find(@id).local_file_name(\"orig\")))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AjaxController",
+        "method": "exif"
+      },
+      "user_input": "Image.find(@id).local_file_name(\"orig\")",
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "bd0d055e181600f6e69bd2b0db5335ed7ae6bccb776e1ac82d70e209fe175045",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/controllers/ajax_controller/exif.rb",
+      "line": 16,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture2e(Shellwords.escape(\"script/exiftool_remote\"), Shellwords.escape(Image.find(@id).original_url))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "AjaxController",
+        "method": "exif"
+      },
+      "user_input": "Image.find(@id).original_url",
+      "confidence": "High",
+      "note": ""
+    }
+  ],
+  "updated": "2019-03-03 01:01:00 +0000",
+  "brakeman_version": "4.4.0"
+}

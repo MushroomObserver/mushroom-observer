@@ -1,3 +1,4 @@
+require "open3"
 #
 #  = Image Model
 #
@@ -638,7 +639,7 @@ class Image < AbstractModel
   # be called after the image has been validated and the record saved.  (We
   # need to have an ID at this point.)  Adds any errors to the :image field
   # and returns false.
-  def process_image
+  def process_image(strip = false)
     result = true
     if new_record?
       errors.add(:image, "Called process_image before saving image record.")
@@ -647,13 +648,16 @@ class Image < AbstractModel
       ext = original_extension
       set_image_size(upload_temp_file) if ext == "jpg"
       set = width.nil? ? "1" : "0"
+      update_attribute(:gps_stripped, true) if strip
+      strip = strip ? "1" : "0"
       if !move_original
         result = false
       else
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
-              gsub("<set>", set)
+              gsub("<set>", set).
+              gsub("<strip>", strip)
         if Rails.env != "test" && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
@@ -704,6 +708,19 @@ class Image < AbstractModel
       raise("Invalid transform operator: #{operator.inspect}")
     end
     system("script/rotate_image #{id} #{operator}&") if Rails.env != "test"
+  end
+
+  # Attempt to strip GPS data from original image. Returns error message as
+  # string if it fails.
+  def strip_gps!
+    return nil if gps_stripped
+
+    output, status = Open3.capture2e("script/strip_exif", id.to_s,
+                                     transferred ? "1" : "0")
+    return output unless status.success?
+
+    update_attribute(:gps_stripped, true)
+    nil
   end
 
   ##############################################################################
