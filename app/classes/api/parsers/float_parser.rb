@@ -2,7 +2,7 @@ class API
   module Parsers
     # Parse floats for API.
     class FloatParser < Base
-      FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/
+      FLOAT = /^(-?\d+(\.\d+)?|-?\.\d+)$/.freeze
 
       def parse(str)
         raise BadParameterValue.new(str, :float) unless FLOAT.match?(str)

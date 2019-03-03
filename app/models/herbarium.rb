@@ -58,8 +58,11 @@ class Herbarium < AbstractModel
   attr_accessor :personal_user_name
 
   def can_edit?(user = User.current)
-    personal_user_id ? personal_user_id == user.try(&:id) :
-                       curators.none? || curators.member?(user)
+    if personal_user_id
+      personal_user_id == user.try(&:id)
+    else
+      curators.none? || curators.member?(user)
+    end
   end
 
   def curator?(user)

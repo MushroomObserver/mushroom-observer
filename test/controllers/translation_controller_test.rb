@@ -322,8 +322,8 @@ class TranslationControllerTest < FunctionalTestCase
     make_admin
 
     Language.track_usage
-    :one.l
-    :two.l
+    :all.l
+    :none.l
     page = Language.save_tags
 
     # Page is good, should only display the two tags used above.

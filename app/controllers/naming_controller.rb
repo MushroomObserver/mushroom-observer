@@ -69,8 +69,11 @@ class NamingController < ApplicationController
   end
 
   def check_for_notifications
-    action = unshown_notifications?(@user, :naming) ?
-               :show_notifications : :show_observation
+    action = if unshown_notifications?(@user, :naming)
+               :show_notifications
+             else
+               :show_observation
+             end
     default_redirect(@params.observation, action)
   end
 
@@ -86,8 +89,9 @@ class NamingController < ApplicationController
   end
 
   def valid_use_of_imageless(name, obs)
-    name.imageless? && obs.has_backup_data? ?
-      flash_warning(:runtime_bad_use_of_imageless.t) : true
+    return true unless name.imageless? && obs.has_backup_data?
+
+    flash_warning(:runtime_bad_use_of_imageless.t)
   end
 
   def validate_name

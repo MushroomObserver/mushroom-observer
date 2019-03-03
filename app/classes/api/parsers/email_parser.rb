@@ -2,7 +2,7 @@ class API
   module Parsers
     # Parse email addresses for API.
     class EmailParser < StringParser
-      EMAIL = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/
+      EMAIL = /^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/.freeze
 
       def parse(str)
         val = super || return

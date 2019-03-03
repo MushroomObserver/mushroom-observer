@@ -43,10 +43,13 @@ class Pivotal
       @user  = nil
       @votes = []
       @description = parse_description(data["description"])
-      @labels = data["labels"] == [] ? ["other"] :
-                data["labels"].map { |l| l["name"] }
-      @comments = !data["comments"] ? [] :
-                  data["comments"].map { |c| Pivotal::Comment.new(c) }
+      @labels =
+        data["labels"] == [] ? ["other"] : data["labels"].map { |l| l["name"] }
+      @comments = if !data["comments"]
+                    []
+                  else
+                    data["comments"].map { |c| Pivotal::Comment.new(c) }
+                  end
     end
 
     def to_json
@@ -124,13 +127,17 @@ class Pivotal
     end
 
     def sorted_labels
-      result = labels.select do |label|
-        !label.match(/^(requires .*|votes:.*|jason)$/) &&
-          !LABEL_VALUE[label].nil?
-      end.sort_by do |label|
+      result = selected_labels.sort_by do |label|
         (9 - LABEL_VALUE[label].to_i).to_s + label
       end
       result.empty? ? ["other"] : result
+    end
+
+    def selected_labels
+      labels.select do |label|
+        !label.match(/^(requires .*|votes:.*|jason)$/) &&
+          !LABEL_VALUE[label].nil?
+      end
     end
 
     def user_vote(user)

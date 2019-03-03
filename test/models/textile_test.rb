@@ -103,6 +103,49 @@ class TextileTest < UnitTestCase
     assert_equal({ "A" => "Amanita", "F" => "Fungi" }, Textile.name_lookup)
   end
 
+  def test_expand_infra_specific_names
+    # Expand subspecies after Textile is told about species
+    assert_name_link_matches("_Hydnum album_", "Hydnum album", "Hydnum album")
+    assert_name_link_matches(
+      "_subsp. alpha_", "subsp. alpha", "Hydnum album subsp. alpha"
+    )
+
+    # Expand variety
+    # after Textile is told about species
+    assert_name_link_matches("_Hydnum ikeni_", "Hydnum ikeni", "Hydnum ikeni")
+    assert_name_link_matches(
+      "_var. beta_", "var. beta", "Hydnum ikeni var. beta"
+    )
+    # after Textile is told about subspecies
+    assert_name_link_matches(
+      "_subsp. alpha_", "subsp. alpha", "Hydnum ikeni subsp. alpha"
+    )
+    assert_name_link_matches(
+      "_var. beta_", "var. beta", "Hydnum ikeni subsp. alpha var. beta"
+    )
+
+    # Expand form
+    # after Textile is told about species
+    assert_name_link_matches("_Hydnum album_", "Hydnum album", "Hydnum album")
+    assert_name_link_matches(
+      "_f. gamma_", "f. gamma", "Hydnum album f. gamma"
+    )
+    # after Textile is  told about subspecies
+    assert_name_link_matches(
+      "_subsp. alpha_", "subsp. alpha", "Hydnum album subsp. alpha"
+    )
+    assert_name_link_matches(
+      "_f. gamma_", "f. gamma", "Hydnum album subsp. alpha f. gamma"
+    )
+    # after Textile is told about variety
+    assert_name_link_matches(
+      "_var. delta_", "var. delta", "Hydnum album subsp. alpha var. delta"
+    )
+    assert_name_link_matches(
+      "_f. gamma_", "f. gamma", "Hydnum album subsp. alpha var. delta f. gamma"
+    )
+  end
+
   # These should not be interpreted as names.
   def test_name_lookup_failures
     assert_name_link_fails("__arriba!__")
@@ -121,6 +164,18 @@ class TextileTest < UnitTestCase
                  do_other_links("_iMg 765_"))
     assert_equal("x{USER __phooey__ }{ phooey }x x{NAME __gar__ }{ gar }x",
                  do_other_links("_user phooey_ _name gar_"))
+  end
+
+  def test_location_lookup
+    # This loc has 2 all-caps words to insure we're stripping
+    # some tags added by Redcloth
+    loc = "OSU, Corvallis, Oregon, USA"
+    textile = "_location #{loc}_".tpl
+    assert_match(
+      "#{MO.http_domain}/observer/lookup_location/#{CGI.escape(loc)}", # href
+      textile
+    )
+    assert_match("<i>#{loc}</i>", textile) # anchor text
   end
 
   def test_url_formatting

@@ -176,10 +176,12 @@ coprinus_comatus_desc: # 16
   updated_at: 2007-02-27 20:48:00
 
 mergeable_description_notes_desc: # 17
+  <<: *DEFAULTS
   name:  mergeable_description_notes
   notes: Notes for $LABEL
 
 mergeable_second_description_notes_desc: # 18
+  <<: *DEFAULTS
   name:  mergeable_second_description_notes
   notes: Notes for $LABEL
 
@@ -201,7 +203,7 @@ boletus_edulis_desc: # 20
   ok_for_export:    1
   public:           1
   review_status:    1
-  source_type:      1
+  source_type:      <%= NameDescription.source_types[:public] %>
   updated_at:       2012-07-12 06:32:18
   user:             roy # this was admin, but we don't have an admin in test
   version:          1

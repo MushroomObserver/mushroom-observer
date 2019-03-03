@@ -33,8 +33,10 @@ class InterestController < ApplicationController
     # interests = Interest.find_all_by_user_id(@user.id).sort do |a,b|
     interests = Interest.where(user_id: @user.id).sort do |a, b|
       result = a.target_type <=> b.target_type
-      result = (a.target ? a.target.text_name : "") <=>
-               (b.target ? b.target.text_name : "") if result.zero?
+      if result.zero?
+        result = (a.target ? a.target.text_name : "") <=>
+                 (b.target ? b.target.text_name : "")
+      end
       result
     end
     @targets = notifications + interests

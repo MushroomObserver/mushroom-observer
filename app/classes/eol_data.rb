@@ -230,11 +230,11 @@ class EolData
   end
 
   def image_id_to_names
-    make_list_hash_from_pairs(names.map do |n|
-      @name_id_to_images[n.id].map { |i| [i.id, n] }
-    end.reduce do |a, b|
-      a + b
-    end)
+    make_list_hash_from_pairs(name_images_list.reduce { |a, b| a + b })
+  end
+
+  def name_images_list
+    names.map { |n| @name_id_to_images[n.id].map { |i| [i.id, n] } }
   end
 
   def license_id_to_url

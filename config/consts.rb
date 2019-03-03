@@ -137,7 +137,7 @@ MushroomObserver::Application.configure do
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
   config.process_image_command =
-    "#{config.root}/script/process_image <id> <ext> <set> &"
+    "#{config.root}/script/process_image <id> <ext> <set> <strip> &"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
   config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb

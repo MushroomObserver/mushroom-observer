@@ -233,9 +233,11 @@ class Name < AbstractModel
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all = false)
-    sql = at_or_below_genus? ?
-          "text_name LIKE '#{text_name} %'" :
-          "classification LIKE '%#{rank}: _#{text_name}_%'"
+    sql = if at_or_below_genus?
+            "text_name LIKE '#{text_name} %'"
+          else
+            "classification LIKE '%#{rank}: _#{text_name}_%'"
+          end
     sql += " AND correct_spelling_id IS NULL"
     return Name.where(sql).to_a if all
 
@@ -268,7 +270,7 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      raise :runtime_user_bad_rank.t(rank: rank) if rank_index(rank).nil?
+      raise :runtime_user_bad_rank.t(rank: rank.to_s) if rank_index(rank).nil?
 
       rank_idx = [rank_index(:Genus), rank_index(rank)].max
       rank_str = "rank_#{rank}".downcase.to_sym.l
@@ -283,11 +285,12 @@ class Name < AbstractModel
                       else
                         :Genus # cannot guess Kingdom or Domain
                       end
-        line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
         line_rank_idx = rank_index(line_rank)
         if line_rank_idx.nil?
-          raise :runtime_user_bad_rank.t(rank: line_rank_str)
+          raise :runtime_user_bad_rank.t(rank: line_rank.to_s)
         end
+
+        line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
 
         if line_rank_idx <= rank_idx
           raise :runtime_invalid_rank.t(line_rank: line_rank_str,

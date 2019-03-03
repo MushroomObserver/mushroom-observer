@@ -192,11 +192,7 @@ class PostObservationTest < IntegrationTestCase
     new_loc = Location.last
     new_img = Image.last
     assert_match(new_obs.when.web_date, response.body)
-    # USA ends up as <span class="caps">USA</span>,
-    # so just search for each component
-    new_loc.name.split(", ").each do |token|
-      assert_match(token, response.body)
-    end
+    assert_match(new_loc.name, response.body)
     if new_obs.is_collection_location
       assert_match(:show_observation_collection_location.l, response.body)
     else

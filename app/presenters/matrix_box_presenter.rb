@@ -28,14 +28,27 @@ class MatrixBoxPresenter
     get_rss_log_details(rss_log, target)
     self.when  = target.when.web_date if target&.respond_to?(:when)
     self.who   = view.user_link(target.user) if target&.user
-    self.what  = target ?
-      view.link_with_query(name, controller: target.show_controller, action: target.show_action, id: target.id) :
-      view.link_with_query(name, controller: :observer, action: :show_rss_log, id: rss_log.id)
+    self.what  =
+      if target
+        view.link_with_query(name,
+                             controller: target.show_controller,
+                             action: target.show_action,
+                             id: target.id)
+      else
+        view.link_with_query(name,
+                             controller: :observer,
+                             action: :show_rss_log,
+                             id: rss_log.id)
+      end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
-    self.thumbnail = view.thumbnail(target.thumb_image, link: { controller: target.show_controller,
-                                                                action: target.show_action, id: target.id }) \
-                     if target&.respond_to?(:thumb_image) && target&.thumb_image
+
+    self.thumbnail =
+      if target&.respond_to?(:thumb_image) && target&.thumb_image
+        view.thumbnail(target.thumb_image,
+                       link: { controller: target.show_controller,
+                               action: target.show_action, id: target.id })
+      end
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -62,9 +75,13 @@ class MatrixBoxPresenter
     self.what  = view.link_with_query(name, controller: :observer,
                                             action: :show_observation, id: observation.id)
     self.where = view.location_link(observation.place_name, observation.location)
-    self.thumbnail = view.thumbnail(observation.thumb_image, link: { controller: :observer,
-                                                                     action: :show_observation, id: observation.id }) \
-                     if observation.thumb_image
+    return unless observation.thumb_image
+
+    self.thumbnail =
+      view.thumbnail(observation.thumb_image,
+                     link: { controller: :observer,
+                             action: :show_observation,
+                             id: observation.id })
   end
 
   # Grabs all the information needed for view from User instance.
@@ -75,9 +92,13 @@ class MatrixBoxPresenter
                    #{:Observations.t}: #{user.observations.count}".html_safe
     self.what  = view.link_with_query(name, action: :show_user, id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
-    self.thumbnail = view.thumbnail(user.image_id, link: { controller: user.show_controller,
-                                                           action: user.show_action, id: user.id }, votes: false) \
-                     if user.image_id
+    return unless user.image_id
+
+    self.thumbnail =
+      view.thumbnail(user.image_id,
+                     link: { controller: user.show_controller,
+                             action: user.show_action,
+                             id: user.id }, votes: false)
   end
 
   def fancy_time
@@ -101,7 +122,7 @@ class MatrixBoxPresenter
       self.detail = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
       self.detail = :rss_created_at.t(type: target_type)
-      unless target_type == :observation || target_type == :species_list
+      unless [:observation, :species_list].include?(target_type)
         begin
           self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
         rescue StandardError

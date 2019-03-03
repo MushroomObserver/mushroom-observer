@@ -81,6 +81,8 @@ xml.response(
         end
       end
     end
-    break if @max_secs and @timer_start and (Time.now() > (@timer_start + @max_secs))
+    if @max_secs && @timer_start && (Time.now > (@timer_start + @max_secs))
+      break
+    end
   end
 }

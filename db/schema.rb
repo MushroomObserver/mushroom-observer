@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_05_170400) do
+ActiveRecord::Schema.define(version: 2019_02_20_232900) do
 
   create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "created_at"
@@ -173,6 +173,7 @@ ActiveRecord::Schema.define(version: 2019_02_05_170400) do
     t.boolean "ok_for_export", default: true, null: false
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
+    t.boolean "gps_stripped", default: false, null: false
   end
 
   create_table "images_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
