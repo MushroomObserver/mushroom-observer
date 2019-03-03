@@ -551,12 +551,12 @@ class AjaxControllerTest < FunctionalTestCase
     fixture = "#{MO.root}/test/images/geotagged.jpg"
     result, status = Open3.capture2e("exiftool", fixture)
     unstripped = @controller.test_parse_exif_data(result, false)
-    assert_not_empty(unstripped.select { |key, _val|
-      key.match(/latitude|longitude|gps/i)
-    })
+    assert_not_empty(unstripped.select do |key, _val|
+                       key.match(/latitude|longitude|gps/i)
+                     end)
     stripped = @controller.test_parse_exif_data(result, true)
-    assert_empty(stripped.select { |key, _val|
-      key.match(/latitude|longitude|gps/i)
-    })
+    assert_empty(stripped.select do |key, _val|
+                   key.match(/latitude|longitude|gps/i)
+                 end)
   end
 end
