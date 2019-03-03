@@ -1,4 +1,8 @@
-#
+# frozen_string_literal: true.
+
+require "cgi"
+require "redcloth"
+
 #  == Textile Parser
 #
 #  This class -- a subclass of String -- is a wrapper on RedCloth.  It provides
@@ -11,8 +15,9 @@
 #  textilize::                   Parse the given string.
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #  ---
-#  register_name::               Register a set of names that _S. name_ abbreviations may refer to.
-#  textile_name_size::           Report on the current size of the name lookup cache.
+#  register_name::               Register a set of names that _S. name_
+#                                abbreviations may refer to.
+#  textile_name_size::           Report on current size of name lookup cache.
 #  clear_textile_cache::         Flush the name lookup cache.
 #
 #  === Instance methods
@@ -20,11 +25,6 @@
 #  textilize::                   Parse the given string.
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #
-################################################################################
-
-require "cgi"
-require "redcloth"
-
 class Textile < String
   @@name_lookup     = {}
   @@last_species    = nil
@@ -33,8 +33,9 @@ class Textile < String
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
 
-  # Convenience wrapper on the instance method Textile#textilize_without_paragraph.
-  def self.textilize_without_paragraph(str, do_object_links = false, sanitize = true)
+  # Convenience wrapper on instance method Textile#textilize_without_paragraph.
+  def self.textilize_without_paragraph(str, do_object_links = false,
+                                       sanitize = true)
     new(str).textilize_without_paragraph(do_object_links, sanitize)
   end
 
@@ -85,61 +86,18 @@ class Textile < String
     red.sanitize_html = sanitize
     replace(red.to_html)
 
-    # Remove pre-existing links first, replacing with "<XXXnn>".
-    hrefs = []
-    gsub!(%r{(<a[^>]*>.*?</a>|<img[^>]*>)}) do |href|
-      if do_object_links
-        href = href.gsub(/
-          x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
-        /x, '\\2')
-      end
-      hrefs.push(href)
-      "<XXX#{hrefs.length - 1}>"
-    end
+    # Strip <span class="caps">...</span> tags (leaving inner text intact).
+    # When RedCloth.to_html sees an ALLCAPS word, it wraps it with these tags.
+    # They mess up our url's. And we never need them. (We don't style "caps").
+    strip_caps_class_spans!
 
-    # Now turn bare urls into links.
-    gsub!(%r{([a-z]+://([^\s<>]|<span class="caps">[A-Z]+</span>)+)}) do |url|
-      url1  = url.gsub(%r{<span class="caps">([A-Z]+)</span>}, '\\1')
-      extra = url1.sub!(%r{([^\w/]+$)}, "") ? Regexp.last_match(1) : ""
-      url2  = ""
-      if url1.length > URL_TRUNCATION_LENGTH && !url1.starts_with?(MO.http_domain)
-        if url1 =~ %r{^(\w+://[^/]+)(.*?)$}
-          url2 = Regexp.last_match(1) + "/..."
-        else
-          url2 = url1[0..URL_TRUNCATION_LENGTH] + "..."
-        end
-      else
-        url2 = url1
-      end
-      # Leave as much untouched as possible, but some characters will cause the HTML
-      # to be badly formed, so we need to at least protect those.
-      url1.gsub!(/([<>"\\]+)/) { CGI.escape(Regexp.last_match(1)) }
-      "<a href=\"#{url1}\">#{url2}</a>" + extra
-    end
-
-    # Convert _object_ tags into proper links.
-    if do_object_links
-      gsub!(/
-        x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
-      /x) do |_orig|
-        type = Regexp.last_match(1)
-        label = Regexp.last_match(2)
-        id = Regexp.last_match(3)
-        id.gsub!(/&#822[01];/, '"')
-        id = CGI.unescapeHTML(id)
-        id = CGI.escape(id)
-        url = "#{MO.http_domain}/observer/lookup_#{type.downcase}/#{id}"
-        "<a href=\"#{url}\">#{label}</a>"
-      end
-    end
-
-    # Make sure all links are fully-qualified.
-    gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
-
-    # Put pre-existing links back in (removing the _object_ tag wrappers).
-    gsub!(/<XXX(\d+)>/) do
-      hrefs[Regexp.last_match(1).to_i].to_s.gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
-    end
+    # Replace pre-existing links with "<XXXnn>" so that they aren't modified
+    # by the following lines, saving the links so we can restore them later.
+    saved_links = pre_existing_links_replaced_by_placeholders!(do_object_links)
+    convert_bare_urls_to_links!
+    convert_object_tags_to_proper_links!
+    fully_qualify_links!
+    restore_pre_existing_links!(saved_links)
 
     self
   end
@@ -147,18 +105,16 @@ class Textile < String
   # Register one or more names (instances) so that subsequent textile strings
   # can refer to them by abbreviation.
   def self.register_name(*names)
-    for name in names
-      if name.try(:at_or_below_genus?)
-        Textile.private_register_name(name.real_text_name, name.rank)
-      end
+    names.each do |name|
+      next unless name.try(:at_or_below_genus?)
+
+      Textile.private_register_name(name.real_text_name, name.rank)
     end
   end
 
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
-    if name =~ /([A-Z])/
-      @@name_lookup[Regexp.last_match(1)] = name.split.first
-    end
+    @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
     if rank == :Species
       @@last_species    = name
       @@last_subspecies = nil
@@ -230,10 +186,11 @@ class Textile < String
       name = supply_implicit_species(name)
       name = strip_out_sp_cfr_and_sensu(name)
       if (parse = Name.parse_name(name)) &&
-         # Allowing arbitrary authors on Genera and higher makes it impossible to
-         # distinguish between publication titles and taxa, e.g., "Lichen Flora
-         # of the Greater Sonoran Region".  I'm sure it can still break with species
-         # but it should be very infrequent (I don't see it in current tests). -JPH
+         # Allowing arbitrary authors on Genera and higher makes it impossible
+         # to distinguish between publication titles and taxa, e.g.,
+         # "Lichen Flora of the Greater Sonoran Region".
+         # I'm sure it can still break with species but it should be
+         # very infrequent (I don't see it in current tests). -JPH
          (parse.author.blank? || parse.rank != :Genus)
         Textile.private_register_name(parse.real_text_name, parse.rank)
         prefix + "x{NAME __#{label}__ }{ #{name} }x"
@@ -322,7 +279,8 @@ class Textile < String
       ].select { |x| x[0] == type.downcase || x[1] == type.downcase }
       if matches.length == 1
         label = (/^\d+$/.match?(id) ? "#{type} #{id}" : id)
-        result = "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
+        result =
+          "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
       end
       result
     end
@@ -337,5 +295,77 @@ class Textile < String
       link = "#{MO.http_domain}/image/show_image/#{id}"
       "\"!#{src}!\":#{link}"
     end
+  end
+
+  def strip_caps_class_spans!
+    gsub!(%r{((<span class="caps">[A-Z]+</span>)+)}) do |url|
+      url.gsub(%r{<span class="caps">([A-Z]+)</span>}, '\\1')
+    end
+  end
+
+  # Remove pre-existing links, replacing them with "<XXXnn>" while saving them.
+  # Return array of saved links.
+  def pre_existing_links_replaced_by_placeholders!(do_object_links)
+    saved_links = []
+    gsub!(%r{(<a[^>]*>.*?</a>|<img[^>]*>)}) do |href|
+      if do_object_links
+        href = href.gsub(/
+          x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+        /x, '\\2')
+      end
+      saved_links.push(href)
+      "<XXX#{saved_links.length - 1}>"
+    end
+    saved_links
+  end
+
+  def restore_pre_existing_links!(saved_links)
+    gsub!(/<XXX(\d+)>/) do
+      saved_links[Regexp.last_match(1).to_i].to_s.
+        gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
+    end
+  end
+
+  def convert_bare_urls_to_links!
+    gsub!(%r{([a-z]+:\/\/[^\s<>]+)}) do |url|
+      extra = url.sub!(%r{([^\w/]+$)}, "") ? Regexp.last_match(1) : ""
+      # Leave as much untouched as possible, but some characters will cause the
+      # HTML to be badly formed, so escape them.
+      url.gsub!(/([<>"\\]+)/) { CGI.escape(Regexp.last_match(1)) }
+      "<a href=\"#{url}\">#{link_label(url)}</a>#{extra}"
+    end
+  end
+
+  def link_label(url)
+    return url unless truncate_link_label?(url)
+
+    if url =~ %r{^(\w+://[^/]+)(.*?)$}
+      Regexp.last_match(1) + "/..."
+    else
+      url[0..URL_TRUNCATION_LENGTH] + "..."
+    end
+  end
+
+  def truncate_link_label?(url)
+    url.length > URL_TRUNCATION_LENGTH && !url.starts_with?(MO.http_domain)
+  end
+
+  def convert_object_tags_to_proper_links!
+    gsub!(/
+      x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+    /x) do |_orig|
+      type = Regexp.last_match(1)
+      label = Regexp.last_match(2)
+      id = Regexp.last_match(3)
+      id.gsub!(/&#822[01];/, '"')
+      id = CGI.unescapeHTML(id)
+      id = CGI.escape(id)
+      url = "#{MO.http_domain}/observer/lookup_#{type.downcase}/#{id}"
+      "<a href=\"#{url}\">#{label}</a>"
+    end
+  end
+
+  def fully_qualify_links!
+    gsub!(%r{href="/}, "href=\"#{MO.http_domain}/")
   end
 end
