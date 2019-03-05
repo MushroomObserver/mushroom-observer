@@ -23,7 +23,7 @@ class Name < AbstractModel
                 [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]"
   /x.freeze
   LOWER_WORD = /
-    (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]"
+    (?!(?:sensu|van|de)\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]"
     /x.freeze
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x.freeze
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
