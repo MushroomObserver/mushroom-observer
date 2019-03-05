@@ -15,7 +15,8 @@ module LoginSystem
     true
   end
 
-  # overwrite this method if you only want to protect certain actions of the controller
+  # overwrite this method if you only want to protect certain actions
+  # of the controller
   # example:
   #
   #  # don't protect the login and the about method
@@ -54,8 +55,8 @@ module LoginSystem
     false
   end
 
-  # overwrite if you want to have special behavior in case the user is not authorized
-  # to access the current operation.
+  # overwrite if you want to have special behavior in case the user
+  # is not authorized to access the current operation.
   # the default action is to redirect to the login screen
   # example use :
   # a popup window might just close itself for instance
