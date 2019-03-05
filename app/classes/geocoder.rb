@@ -102,7 +102,8 @@ class Geocoder < BlankSlate
         north: 41.6592100,
         east: -70.6022670
       },
-      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA" => {
+      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, "\
+      "Ohio, USA" => {
         north: 39.3043,
         west: -82.1067,
         east: -82.002,
