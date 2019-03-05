@@ -319,6 +319,8 @@ class NameTest < UnitTestCase
     assert_no_match(pat, "abc1def")
     assert_no_match(pat, "abcXdef")
     assert_match(pat, "abcëdef")
+    assert_no_match(pat, "van")
+    assert_no_match(pat, "de")
   end
 
   def test_author_pat
@@ -356,6 +358,14 @@ class NameTest < UnitTestCase
     assert_no_match(pat, "Amanita vaginata v. grisea group")
     assert_no_match(pat, "Amanita vaginata group Author")
     assert_no_match(pat, "Amanita vaginata v. grisea group Author")
+    match = pat.match("Lecania van den Boom")
+    assert_equal(" van den Boom", match[2])
+    match = pat.match("Lecania ryaniana van den Boom")
+    assert_equal(" van den Boom", match[2])
+    match = pat.match("Lecania de Hoog")
+    assert_equal(" de Hoog", match[2])
+    match = pat.match("Lecania ryaniana de Hoog")
+    assert_equal(" de Hoog", match[2])
   end
 
   def test_genus_or_up_pat
@@ -556,6 +566,51 @@ class NameTest < UnitTestCase
       parent_name: "Lecania",
       rank: :Species,
       author: "van den Boom"
+    )
+  end
+
+  def test_name_parse_1a
+    do_name_parse_test(
+      "Lecania van den Boom",
+      text_name: "Lecania",
+      real_text_name: "Lecania",
+      search_name: "Lecania van den Boom",
+      real_search_name: "Lecania van den Boom",
+      sort_name: "Lecania  van den Boom",
+      display_name: "**__Lecania__** van den Boom",
+      parent_name: nil,
+      rank: :Genus,
+      author: "van den Boom"
+    )
+  end
+
+  def test_name_parse_1b
+    do_name_parse_test(
+      "Lecania ryaniana de Hoog",
+      text_name: "Lecania ryaniana",
+      real_text_name: "Lecania ryaniana",
+      search_name: "Lecania ryaniana de Hoog",
+      real_search_name: "Lecania ryaniana de Hoog",
+      sort_name: "Lecania ryaniana  de Hoog",
+      display_name: "**__Lecania ryaniana__** de Hoog",
+      parent_name: "Lecania",
+      rank: :Species,
+      author: "de Hoog"
+    )
+  end
+
+  def test_name_parse_1c
+    do_name_parse_test(
+      "Lecania de Hoog",
+      text_name: "Lecania",
+      real_text_name: "Lecania",
+      search_name: "Lecania de Hoog",
+      real_search_name: "Lecania de Hoog",
+      sort_name: "Lecania  de Hoog",
+      display_name: "**__Lecania__** de Hoog",
+      parent_name: nil,
+      rank: :Genus,
+      author: "de Hoog"
     )
   end
 
