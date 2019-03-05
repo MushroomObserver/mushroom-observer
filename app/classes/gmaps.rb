@@ -2,8 +2,8 @@
 #  = Google Maps interface
 #
 #  GM::GMap::      Represents a "google.maps.Map" object.
-#  GM::Marker::    Represents a "google.maps.Marker" object, i.e., a balloon-pin.
-#  GM::Polyline::  Represents a "google.maps.Polyline" object, e.g., a rectangle.
+#  GM::Marker::    Represents a "google.maps.Marker" object, i.e., a balloon-pin
+#  GM::Polyline::  Represents a "google.maps.Polyline" object, e.g., a rectangle
 #
 #  == Typical Usage
 #
@@ -47,16 +47,18 @@ module GM
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   class GMap
-    # Escape carrier returns and single and double quotes for JavaScript segments.
+    # Escape carrier returns, single and double quotes for JavaScript segments.
     # Lifted from ActionView::Helpers::JavascriptHelper (2.1.1) -JPH
     def self.escape_javascript(javascript)
-      (javascript || "").gsub('\\', '\0\0').gsub("</", '<\/').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
+      (javascript || "").gsub('\\', '\0\0').gsub("</", '<\/').
+        gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
     end
 
     def self.header(args)
       url = GMAPS_API_URL
       key = GMAPS_API_KEYS[::Rails.env][args[:host]]
-      "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'></script>
+      "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'>"\
+      "</script>
       <script type='text/javascript'>
         var G = google.maps;
         // in case jQuery is not loaded for this page
@@ -137,8 +139,8 @@ module GM
 
     def center_zoom_on_points_init(*points)
       north = south = nil
-      east1 = west1 = nil  # east edge and west edge assuming not straddling date line
-      east2 = west2 = nil  # east edge and west edge assuming it DOES straddle date line
+      east1 = west1 = nil  # E and W edges assuming not straddling date line
+      east2 = west2 = nil  # E and West edges assuming DOES straddle date line
       for lat, long in points
         north = lat  if north.nil? || lat > north
         south = lat  if south.nil? || lat < south
@@ -195,7 +197,8 @@ module GM
     def to_html(_args)
       "#{global_declarations_code}\n" \
       "G.event.addDomListener(window, 'load', function() {\n" \
-        "var M = #{name} = new G.Map(E('#{name}'), { #{map_options_code.join(", ")} });\n" \
+        "var M = #{name} = new G.Map(E('#{name}'), "\
+        "{ #{map_options_code.join(", ")} });\n" \
         "#{center_map_code}\n" \
         "#{overlays_code}\n" \
         "#{events_code}\n" \
@@ -220,7 +223,8 @@ module GM
         "M.setCenter(L(#{lat}, #{long}));\n" \
         "M.setZoom(#{zoom});"
       else
-        "M.fitBounds(new G.LatLngBounds( L(#{south},#{west}), L(#{north},#{east}) ));"
+        "M.fitBounds(new G.LatLngBounds( L(#{south},#{west}), "\
+        "L(#{north},#{east}) ));"
       end
     end
 
@@ -247,7 +251,8 @@ module GM
     attr_accessor :long         # longitude
     attr_accessor :title        # roll-over text
     attr_accessor :draggable    # is this draggable?
-    attr_accessor :info_window  # content of "info window" to pop up if user clicks on marker
+    attr_accessor :info_window  # content of "info window" to pop up
+                                # if user clicks on marker
 
     def initialize(lat_long, opts)
       self.var         = nil
