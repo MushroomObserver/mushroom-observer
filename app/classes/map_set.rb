@@ -124,8 +124,7 @@ class MapSet
     else
       @north = lat if lat > @north
       @south = lat if lat < @south
-      # point not contained within existing extents
-      if @east >= @west ? (long > @east || long < @west) : (long > @east && long < @west)
+      if long_outside_existing_extents?(long)
         east_dist = long > @east ? long - @east : long - @east + 360
         west_dist = long < @west ? @west - long : @west - long + 360
         if east_dist <= west_dist
@@ -134,6 +133,14 @@ class MapSet
           @west = long
         end
       end
+    end
+  end
+
+  def long_outside_existing_extents?(long)
+    if @east >= @west
+      long > @east || long < @west
+    else
+      long > @east && long < @west
     end
   end
 
@@ -150,8 +157,7 @@ class MapSet
     else
       @north = n if n > @north
       @south = s if s < @south
-      # new box not completely contained within old box
-      if @east >= @west ? (e < w || w < @west || e > @east) : (e >= w || w < @west || e > @east)
+      if new_box_not_contained_by_old_box?(e, w)
         # overlap, neither or both straddle dateline
         if (@east >= @west && e >= w && w <= @east && e >= @west) ||
            (@east < @west && e < w)
@@ -176,6 +182,14 @@ class MapSet
           end
         end
       end
+    end
+  end
+
+  def new_box_not_contained_by_old_box?(e, w)
+    if @east >= @west
+      e < w || w < @west || e > @east
+    else
+      e >= w || w < @west || e > @east
     end
   end
 end
