@@ -8,10 +8,11 @@
 #   P = prefetching allowed
 #
 #  index_name::                  List of results of index/search.
-#  list_names::                  Alphabetical list of all names, used or otherwise.
+#  list_names::                  Alphabetical list of all names, used or not.
 #  observation_index::           Alphabetical list of names people have seen.
-#  names_by_user::               Alphabetical list of names created by given user.
-#  names_by_editor::             Alphabetical list of names edited by given user.
+#  names_by_user::               Alphabetical list of names created by
+#                                given user.
+#  names_by_editor::             Alphabetical list of names edited by given user
 #  name_search::                 Seach for string in name, notes, etc.
 #  map::                         Show distribution map.
 #  index_name_description::      List of results of index/search.
@@ -43,7 +44,7 @@
 #  approve_name::                Flag given name as "accepted"
 #                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
-#  names_for_mushroom_app::      Display list of most common names in plain text.
+#  names_for_mushroom_app::      Display list of most common names in plain text
 #  edit_lifeform::               Edit lifeform tags.
 #  propagate_lifeform::          Add/remove lifeform tags to/from subtaxa.
 #  propagate_classification::    Copy classification to all subtaxa.
@@ -158,7 +159,8 @@ class NameController < ApplicationController
     # NOTE!! -- all this extra info and help will be lost if user re-sorts.
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
-      FROM names LEFT OUTER JOIN name_descriptions ON names.id = name_descriptions.name_id,
+      FROM names LEFT OUTER JOIN name_descriptions
+        ON names.id = name_descriptions.name_id,
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
@@ -387,7 +389,8 @@ class NameController < ApplicationController
     if @name = find_or_goto_index(Name, params[:id].to_s)
       @name.revert_to(params[:version].to_i)
 
-      # Old correct spellings could have gotten merged with something else and no longer exist.
+      # Old correct spellings could have gotten merged with something else
+      # and no longer exist.
       if @name.is_misspelling?
         @correct_spelling = Name.connection.select_value %(
           SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
@@ -415,7 +418,8 @@ class NameController < ApplicationController
         if subversion.present? &&
            (version.version != subversion.to_i)
           version = NameDescription::Version.
-                    find_by_version_and_name_description_id(params[:version], @old_parent_id)
+                    find_by_version_and_name_description_id(params[:version],
+                                                            @old_parent_id)
         end
         @description.clone_versioned_model(version, @description)
       end
@@ -560,8 +564,10 @@ class NameController < ApplicationController
         end
 
         # Log action to parent name.
-        name.log(:log_description_updated, touch: true, user: @user.login,
-                                           name: @description.unique_partial_format_name)
+        name.log(:log_description_updated,
+                 touch: true,
+                 user: @user.login,
+                 name: @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
@@ -695,7 +701,9 @@ class NameController < ApplicationController
       # there are multiple unchecked names -- that is, it splits this
       # synonym into two synonyms, with checked names staying in this one,
       # and unchecked names moving to the new one.
-      check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
+      check_for_new_synonym(
+        @name, @name.synonyms, params[:existing_synonyms] || {}
+      )
 
       # Deprecate everything if that check-box has been marked.
       success = true
@@ -719,7 +727,8 @@ class NameController < ApplicationController
     @list_members     = sorter.all_line_strs.join("\r\n")
     @new_names        = sorter.new_name_strs.uniq
     @synonym_name_ids = sorter.all_synonyms.map(&:id)
-    @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.reject(&:nil?)
+    @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.
+                          reject(&:nil?)
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
@@ -784,12 +793,14 @@ class NameController < ApplicationController
 
       # Change target name to "undeprecated".
       target_name.change_deprecated(false)
-      target_name.save_with_log(:log_name_approved, other: @name.real_search_name)
+      target_name.save_with_log(:log_name_approved,
+                                other: @name.real_search_name)
 
       # Change this name to "deprecated", set correct spelling, add note.
       @name.change_deprecated(true)
       @name.mark_misspelled(target_name) if @misspelling
-      @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
+      @name.save_with_log(:log_name_deprecated,
+                          other: target_name.real_search_name)
       post_comment(:deprecate, @name, @comment) if @comment.present?
 
       redirect_with_query(action: "show_name", id: @name.id)
@@ -892,7 +903,9 @@ class NameController < ApplicationController
   end
 
   def dump_sorter(sorter)
-    logger.warn("tranfer_synonyms: only_single_names or only_approved_synonyms is false")
+    logger.warn(
+      "tranfer_synonyms: only_single_names or only_approved_synonyms is false"
+    )
     logger.warn("New names:")
     for n in sorter.new_line_strs
       logger.warn(n)
@@ -1061,10 +1074,18 @@ class NameController < ApplicationController
       else
         if sorter.new_name_strs != []
           # This error message is no longer necessary.
-          flash_error "Unrecognized names given, including: #{sorter.new_name_strs[0].inspect}" if Rails.env == "test"
+          if Rails.env == "test"
+            flash_error(
+              "Unrecognized names given, including: "\
+              "#{sorter.new_name_strs[0].inspect}"
+            )
+          end
         else
           # Same with this one... err, no this is not reported anywhere.
-          flash_error "Ambiguous names given, including: #{sorter.multiple_line_strs[0].inspect}"
+          flash_error(
+            "Ambiguous names given, including: "\
+            "#{sorter.multiple_line_strs[0].inspect}"
+          )
         end
         @list_members = sorter.all_line_strs.join("\r\n")
         @new_names    = sorter.new_name_strs.uniq.sort
@@ -1133,7 +1154,9 @@ class NameController < ApplicationController
       @notification.save
     when :DISABLE.l
       @notification.destroy
-      flash_notice(:email_tracking_no_longer_tracking.t(name: @name.display_name))
+      flash_notice(
+        :email_tracking_no_longer_tracking.t(name: @name.display_name)
+      )
     end
     redirect_with_query(action: "show_name", id: name_id)
   end
@@ -1197,7 +1220,9 @@ class NameController < ApplicationController
             AND o.vote_cache >= #{minimum_confidence}
           GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)
         ) AS x
-        LEFT OUTER JOIN names n ON IF(x.synonym_id IS NULL, n.id = x.name_id, n.synonym_id = x.synonym_id)
+        LEFT OUTER JOIN names n ON IF(x.synonym_id IS NULL,
+                                      n.id = x.name_id,
+                                      n.synonym_id = x.synonym_id)
         WHERE n.deprecated = FALSE
           AND x.number >= #{minimum_observations}
           AND n.rank #{rank_condition}
