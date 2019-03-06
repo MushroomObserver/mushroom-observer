@@ -64,7 +64,9 @@ class LocationController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def list_by_country # :nologin:
-    query = create_query(:Location, :regexp_search, regexp: "#{params[:country]}$")
+    query = create_query(
+      :Location, :regexp_search, regexp: "#{params[:country]}$"
+    )
     show_selected_locations(query, link_all_sorts: true)
   end
 
@@ -77,8 +79,10 @@ class LocationController < ApplicationController
   # Displays a list of all locations.
   def list_dubious_locations # :nologin:
     query = create_query(:Location, :all, by: :name)
-    show_selected_locations(query, link_all_sorts: true,
-                                   action: :list_dubious_locations, num_per_page: 1000)
+    show_selected_locations(query,
+                            link_all_sorts: true,
+                            action: :list_dubious_locations,
+                            num_per_page: 1000)
   end
 
   # Display list of locations that a given user is author on.
@@ -138,7 +142,8 @@ class LocationController < ApplicationController
     # location description query.
     if query.coercable?(:LocationDescription)
       @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: "index_location_description" }, query)]
+                 add_query_param({ action: "index_location_description" },
+                                 query)]
     end
 
     # Restrict to subset within a geographical region (used by map
@@ -158,11 +163,15 @@ class LocationController < ApplicationController
         # If user has explicitly selected the order, then this is disabled.)
         @default_orders = true
       end
-      @undef_pages = paginate_letters(:letter2, :page2, args[:num_per_page] || 50)
+      @undef_pages = paginate_letters(:letter2,
+                                      :page2,
+                                      args[:num_per_page] || 50)
       @undef_data = query2.select_rows(select_args)
       @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
       if (letter = params[:letter2].to_s.downcase) != ""
-        @undef_data = @undef_data.select { |row| row[0][0, 1].downcase == letter }
+        @undef_data = @undef_data.select do |row|
+          row[0][0, 1].downcase == letter
+        end
       end
       @undef_pages.num_total = @undef_data.length
       @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
@@ -257,7 +266,8 @@ class LocationController < ApplicationController
       flavor = nil
     end
 
-    # These are only used to create title, which isn't used, they just get in the way.
+    # These are only used to create title, which isn't used,
+    # they just get in the way.
     args.delete(:old_title)
     args.delete(:old_by)
 
@@ -349,14 +359,17 @@ class LocationController < ApplicationController
     loc_id = params[:id].to_s
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id)
-      @canonical_url = "#{MO.http_domain}/location/show_location/#{@location.id}"
+      @canonical_url = "#{MO.http_domain}/location/show_location/"\
+                       "#{@location.id}"
 
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?
         @description = nil
-      elsif @description = LocationDescription.safe_find(desc_id)
-        @description = nil unless in_admin_mode? || @description.is_reader?(@user)
+      elsif (@description = LocationDescription.safe_find(desc_id))
+        unless in_admin_mode? || @description.is_reader?(@user)
+          @description = nil
+        end
       else
         flash_error(:runtime_object_not_found.t(type: :description,
                                                 id: desc_id))
@@ -377,7 +390,8 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/location/show_location_description/#{@description.id}"
+      @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
+                       "#{@description.id}"
 
       # Public or user has permission.
       if in_admin_mode? || @description.is_reader?(@user)
@@ -438,7 +452,9 @@ class LocationController < ApplicationController
         if subversion.present? &&
            (version.version != subversion.to_i)
           version = LocationDescription::Version.
-                    find_by_version_and_location_description_id(params[:version], @old_parent_id)
+                    find_by_version_and_location_description_id(
+                      params[:version], @old_parent_id
+                    )
         end
         @description.clone_versioned_model(version, @description)
       end
@@ -581,16 +597,22 @@ class LocationController < ApplicationController
           if herbarium = Herbarium.safe_find(@set_herbarium)
             herbarium.location = @location
             herbarium.save
-            redirect_to(controller: "herbarium", action: "show_herbarium", id: @set_herbarium)
+            redirect_to(controller: "herbarium",
+                        action: "show_herbarium",
+                        id: @set_herbarium)
           end
         elsif @set_user
           if user = User.safe_find(@set_user)
             user.location = @location
             user.save
-            redirect_to(controller: "observer", action: "show_user", id: @set_user)
+            redirect_to(controller: "observer",
+                        action: "show_user",
+                        id: @set_user)
           end
         else
-          redirect_to(controller: "location", action: "show_location", id: @location.id)
+          redirect_to(controller: "location",
+                      action: "show_location",
+                      id: @location.id)
         end
       end
     end
@@ -754,10 +776,12 @@ class LocationController < ApplicationController
           else
             flash_notice(:runtime_description_merge_deleted.
                            t(old: old_desc.partial_format_name))
-            @description.location.log(:log_object_merged_by_user,
-                                      user: @user.login, touch: true,
-                                      from: old_desc.unique_partial_format_name,
-                                      to: @description.unique_partial_format_name)
+            @description.location.log(
+              :log_object_merged_by_user,
+              user: @user.login, touch: true,
+              from: old_desc.unique_partial_format_name,
+              to: @description.unique_partial_format_name
+              )
             old_desc.destroy
           end
         end
@@ -850,8 +874,9 @@ class LocationController < ApplicationController
               end
       if where.present? &&
          update_observations_by_where(location, where)
-        flash_notice(:runtime_location_merge_success.t(this: where,
-                                                       that: location.display_name))
+        flash_notice(:runtime_location_merge_success.t(
+          this: where, that: location.display_name
+        ))
       end
       redirect_to(action: "list_locations")
     end
