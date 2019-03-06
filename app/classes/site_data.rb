@@ -118,8 +118,11 @@ class SiteData
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    observations_with_voucher: "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
-    observations_without_voucher: "NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )",
+    observations_with_voucher:
+      "specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL",
+    observations_without_voucher:
+      "NOT(specimen IS TRUE AND LENGTH(notes) >= 10"\
+      "AND thumb_image_id IS NOT NULL )",
     users: "`verified` IS NOT NULL"
   }.freeze
 
