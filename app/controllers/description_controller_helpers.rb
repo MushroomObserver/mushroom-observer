@@ -16,18 +16,26 @@
 #  adjust_permissions::
 #
 #  == Helpers
-#  find_description::                   Look up a description based on id and controller name.
-#  merge_description_notes::            Merge the notes fields of two descriptions.
-#  initialize_description_source::      Initialize source info before serving creation form.
-#  initialize_description_permissions:: Initialize permissions of new Description.
-#  check_description_edit_permission::  Double check that no illegal changes are being made.
-#  modify_description_permissions::     Update blah_groups based on changed to two public checkboxes.
-#  update_writein::                     Update the permissions for a write-in user or group.
-#  update_groups::                      Update one type of permissions for a Hash of groups.
-#  update_group::                       Update one type of permission for one group.
+#  find_description::                   Look up a description based on id and
+#                                       controller name.
+#  merge_description_notes::            Merge the notes fields of 2 descriptions
+#  initialize_description_source::      Initialize source info before serving
+#                                       creation form.
+#  initialize_description_permissions:: Initialize permissions of new
+#                                       Description.
+#  check_description_edit_permission::  Double check that no illegal changes are
+#                                       being made.
+#  modify_description_permissions::     Update blah_groups based on changed to
+#                                       two public checkboxes.
+#  update_writein::                     Update the permissions for a write-in
+#                                       user or group.
+#  update_groups::                      Update one type of permissions for a
+#                                       Hash of groups.
+#  update_group::                       Update 1 type of permission for 1 group.
 #  flash_description_changes::          Show changes made to permissions.
 #  group_name::                         Return human-readable name of UserGroup.
-#  perform_merge::                      Merge one description into another if it can.
+#  perform_merge::                      Merge 1 description into another if it
+#                                       can.
 #
 ################################################################################
 
@@ -118,9 +126,10 @@ module DescriptionControllerHelpers
 
     # Merged successfully.
     else
-      desc.parent.log(:log_object_merged_by_user, user: @user.login,
-                                                  touch: true, from: src_name,
-                                                  to: dest.unique_partial_format_name)
+      desc.parent.log(:log_object_merged_by_user,
+                      user: @user.login,
+                      touch: true, from: src_name,
+                      to: dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
                    t(old: src_title, new: dest.format_name))
       redirect_with_query(action: dest.show_action, id: dest.id)
@@ -138,19 +147,25 @@ module DescriptionControllerHelpers
       if src.parent.description_id == src.id
         src.parent.description_id = nil
         src.parent.save
-        src.parent.log(:log_changed_default_description, user: @user.login,
-                                                         name: :none, touch: true)
+        src.parent.log(:log_changed_default_description,
+                       user: @user.login,
+                       name: :none,
+                       touch: true)
       end
       src.parent = dest
       src.save
-      src.parent.log(:log_object_moved_by_user, user: @user.login,
-                                                from: src_name, to: dest.unique_format_name,
-                                                touch: true)
+      src.parent.log(:log_object_moved_by_user,
+                     user: @user.login,
+                     from: src_name,
+                     to: dest.unique_format_name,
+                     touch: true)
       if make_dest_default && src.fully_public
         dest.description_id = src
         dest.save
-        dest.log(:log_changed_default_description, user: @user.login,
-                                                   name: src.unique_partial_format_name, touch: true)
+        dest.log(:log_changed_default_description,
+                 user: @user.login,
+                 name: src.unique_partial_format_name,
+                 touch: true)
       end
       flash_notice(:runtime_description_move_success.
                    t(old: src_title, new: dest.format_name))
@@ -194,8 +209,10 @@ module DescriptionControllerHelpers
       if !desc.save
         flash_object_errors(desc)
       else
-        dest.log(:log_description_created_at, user: @user.login,
-                                              name: desc.unique_partial_format_name, touch: true)
+        dest.log(:log_description_created_at,
+                 user: @user.login,
+                 name: desc.unique_partial_format_name,
+                 touch: true)
         flash_notice(:runtime_description_copy_success.
                      t(old: src_title, new: desc.format_name))
         redirect_with_query(action: desc.show_action, id: desc.id)
@@ -240,8 +257,10 @@ module DescriptionControllerHelpers
         draft.reader_groups.clear
         draft.reader_groups << UserGroup.all_users
         draft.save
-        parent.log(:log_published_description, user: @user.login,
-                                               name: draft.unique_partial_format_name, touch: true)
+        parent.log(:log_published_description,
+                   user: @user.login,
+                   name: draft.unique_partial_format_name,
+                   touch: true)
         parent.description = draft
         parent.save
         redirect_with_query(action: parent.show_action, id: parent.id)
