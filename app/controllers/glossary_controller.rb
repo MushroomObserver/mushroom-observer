@@ -9,7 +9,8 @@ class GlossaryController < ApplicationController
   def show_glossary_term # :nologin:
     store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
-    @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/#{@glossary_term.id}"
+    @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/"\
+                     "#{@glossary_term.id}"
     @layout = calc_layout_params
     @objects = @glossary_term.images
   end
