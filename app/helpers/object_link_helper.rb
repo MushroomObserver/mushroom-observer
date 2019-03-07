@@ -146,9 +146,11 @@ module ObjectLinkHelper
     [
       link_to("Google Maps", "http://maps.google.com/maps?q=" + search_string),
       link_to("Yahoo Maps", "http://maps.yahoo.com/#mvt=m&q1=" + search_string),
-      link_to("Wikipedia",
-              "http://en.wikipedia.org/w/index.php?title=Special:Search&search=" +
-              search_string),
+      link_to(
+        "Wikipedia",
+        "http://en.wikipedia.org/w/index.php?title=Special:Search&search=" +
+          search_string
+      ),
       link_to("Google Search",
               "http://www.google.com/search?q=" + search_string)
     ]
