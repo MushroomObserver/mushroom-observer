@@ -35,13 +35,14 @@ module PaginationHelper
     args = args.dup
     args[:params] = (args[:params] || {}).dup
     args[:params][pages.number_arg] = nil
-    str = %w[A B C D E F G H I J K L M N O P Q R S T U V W X Y Z].map do |letter|
-      if !pages.used_letters || pages.used_letters.include?(letter)
-        pagination_link(letter, letter, pages.letter_arg, args)
-      else
-        content_tag(:li, content_tag(:span, letter), class: "disabled")
-      end
-    end.safe_join(" ")
+    str = %w[A B C D E F G H I J K L M N O P Q R S T U V W X Y Z].
+      map do |letter|
+        if !pages.used_letters || pages.used_letters.include?(letter)
+          pagination_link(letter, letter, pages.letter_arg, args)
+        else
+          content_tag(:li, content_tag(:span, letter), class: "disabled")
+        end
+      end.safe_join(" ")
     content_tag(:div, str, class: "pagination pagination-sm")
   end
 
@@ -89,7 +90,9 @@ module PaginationHelper
       nstr = "#{:NEXT.t} »"
       result << pagination_link(pstr, this - 1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args) if from > 1
-      result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if from > 2
+      if from > 2
+        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+      end
       for n in from..to
         if n == this
           result << content_tag(:li, content_tag(:span, n), class: "active")
@@ -97,11 +100,15 @@ module PaginationHelper
           result << pagination_link(n, n, arg, args)
         end
       end
-      result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if to < num - 1
+      if to < num - 1
+        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+      end
       result << pagination_link(num, num, arg, args) if to < num
       result << pagination_link(nstr, this + 1, arg, args) if this < num
 
-      result = content_tag(:ul, result.safe_join(" "), class: "pagination pagination-sm")
+      result = content_tag(:ul,
+                           result.safe_join(" "),
+                           class: "pagination pagination-sm")
     end
     result
   end
