@@ -381,7 +381,9 @@ class String
 
   # TODO: Move somewhere that content_tag is defined
   def tp(sanitize = true)
-    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + "</div>".html_safe
+    '<div class="textile">'.html_safe +
+      Textile.textilize(self, false, sanitize).html_safe +
+      "</div>".html_safe
   end
 
   def tpl(sanitize = true)
@@ -483,9 +485,10 @@ class String
       gsub(/[ \t]+(\n|$)/, '\\1').    # remove superfluous trailing whitespace
       gsub(/\n+\Z/, "").              # remove superfluous newlines at end
       gsub(HTML_TAG_PATTERN, "").     # remove all <tags>
-      gsub(/^ +|[ \t]+$/, "").        # remove leading/trailing space on each line
-      gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
-      html_safe                       # convert &xxx; and &#nnn; to ascii
+      gsub(/^ +|[ \t]+$/, "").        # remove leading/trailing sp on each line
+      gsub(                           # convert &xxx; and &#nnn; to ascii
+        /&(#\d+|[a-zA-Z]+);/
+      ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.html_safe
   end
 
   # Surround HTML string with a span that prevents long strings from being
@@ -554,7 +557,9 @@ class String
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  def dealphabetize(alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+  def dealphabetize(
+    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  )
     str      = to_s
     alphabet = alphabet.to_s
     len      = alphabet.length
