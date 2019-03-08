@@ -6,10 +6,14 @@
 #  == Attributes
 #
 #  locale::     Official locale string, e.g., "en".
-#  name::       Name of the language in that language, e.g., "English" or "Español".
-#  order::      Latinized version of name of language, e.g., "Russkii" or "Ellenika".
-#  official::   Set to true for English: this is the fall-back language for missing translations.
-#  beta::       If true, this will not be shown in the list of available languages.
+#  name::       Name of the language in that language, e.g.,
+#               "English" or "Español".
+#  order::      Latinized version of name of language, e.g.,
+#               "Russkii" or "Ellenika".
+#  official::   Set to true for English: this is the fall-back language
+#               for missing translations.
+#  beta::       If true, this will not be shown in the list of available
+#               languages.
 #
 #  == Localization and export files
 #
