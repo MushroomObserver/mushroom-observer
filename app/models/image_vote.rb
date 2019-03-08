@@ -1,7 +1,7 @@
 #
 #  = Image Vote Model
 #
-#  Model describing a single vote for a single Image.  Most of the time views and
+#  Model describing a single vote for a single Image. Most of the time views and
 #  actions will use methods in Image to query and modify image votes.  See:
 #
 #  Image#vote_cache::   Average vote for this Image.
