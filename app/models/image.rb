@@ -476,8 +476,10 @@ class Image < AbstractModel
       self.upload_length = file.size
       self.upload_type   = file.content_type if file.respond_to?(:content_type)
       self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
-        if file.respond_to?(:original_filename)
+      if file.respond_to?(:original_filename)
+        self.upload_original_name = file.original_filename.to_s.
+                                      force_encoding("utf-8")
+      end
 
     # Image is given as an input stream.  We need to save it to a temp file
     # before we can do anything useful with it.
@@ -486,12 +488,16 @@ class Image < AbstractModel
           defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
       @file = nil
       self.upload_temp_file = nil
-      self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
-      self.upload_length = file.size           if file.respond_to?(:size)
-      self.upload_type   = file.content_type   if file.respond_to?(:content_type)
-      self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
-        if file.respond_to?(:original_filename)
+      if file.respond_to?(:content_length)
+        self.upload_length = file.content_length.chomp
+      end
+      self.upload_length = file.size          if file.respond_to?(:size)
+      self.upload_type   = file.content_type  if file.respond_to?(:content_type)
+      self.upload_md5sum = file.md5sum        if file.respond_to?(:md5sum)
+      if file.respond_to?(:original_filename)
+        self.upload_original_name = file.original_filename.to_s.
+                                      force_encoding("utf-8")
+      end
     end
   end
 
@@ -537,7 +543,8 @@ class Image < AbstractModel
   def validate_image_type
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
-      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
+      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").
+              chomp.split[1]
       if type
         type.sub!(/;$/, "")
         self.upload_type = type
@@ -874,7 +881,8 @@ class Image < AbstractModel
 
   # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
-    if saved_change_to_when? && saved_change_to_when[0].year != saved_change_to_when[1].year ||
+    if saved_change_to_when? &&
+       saved_change_to_when[0].year != saved_change_to_when[1].year ||
        saved_change_to_license_id? ||
        saved_change_to_copyright_holder?
       old_year       = begin
@@ -919,7 +927,8 @@ class Image < AbstractModel
         INSERT INTO copyright_changes
           (user_id, updated_at, target_type, target_id, year, name, license_id)
         VALUES
-          #{data.map { |id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})" }.join(",\n")}
+          #{data.map { |id, year, lic| "(#{user.id},NOW(),'Image',#{id},"\
+            "#{year},#{old_name},#{lic})" }.join(",\n")}
       ))
       Image.connection.update(%(
         UPDATE images SET copyright_holder = #{new_name}
