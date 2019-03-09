@@ -1,3 +1,6 @@
+# rubocop:disable Style/FrozenStringLiteralComment
+# disable cop: magic comment "frozen_string_literal: true" causes
+#   ActionView::Template::Error: can't modify frozen String
 #
 #  = Google Maps interface
 #
@@ -39,13 +42,12 @@
 #      <%= gmap.div(:width => 800, :height => 600) %>
 #    </body>
 #
-##############################################################################
-
 module GM
   GMAPS_API_URL = "https://maps.googleapis.com/maps/api/js".freeze
   GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
+  # represent a GoogleMaps map object
   class GMap
     # Escape carrier returns, single and double quotes for JavaScript segments.
     # Lifted from ActionView::Helpers::JavascriptHelper (2.1.1) -JPH
@@ -245,14 +247,15 @@ module GM
     end
   end
 
+  # represent a GoogleMaps marker object, e.g., a balloon-pin
   class GMarker
     attr_accessor :var          # name of global variable to assign it to if any
     attr_accessor :lat          # latitude
     attr_accessor :long         # longitude
     attr_accessor :title        # roll-over text
     attr_accessor :draggable    # is this draggable?
-    attr_accessor :info_window  # content of "info window" to pop up
-                                # if user clicks on marker
+    # content of "info window" to pop up if user clicks on marker
+    attr_accessor :info_window
 
     def initialize(lat_long, opts)
       self.var         = nil
@@ -284,6 +287,7 @@ module GM
     end
   end
 
+  # represent a GoogleMaps Polyline object, e.g., a rectangle
   class GPolyline
     attr_accessor :var      # name of global variable to assign it to if any
     attr_accessor :points   # array of [lat, long]
@@ -312,3 +316,4 @@ module GM
     end
   end
 end
+# rubocop:enable Style/FrozenStringLiteralComment
