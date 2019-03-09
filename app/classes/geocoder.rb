@@ -1,13 +1,12 @@
-#
-#  = Geocoder Class
-#
-#  Wraps a call to the Google Geocoding webservice
-#
-################################################################################
+# frozen_string_literal: true
 
 require "net/http"
 require "rexml/document"
 
+#  = Geocoder Class
+#
+#  Wraps a call to the Google Geocoding webservice
+#
 class Geocoder < BlankSlate
   attr_reader :north
   attr_reader :south
@@ -22,16 +21,15 @@ class Geocoder < BlankSlate
     @place_name = place_name
     @valid = false
     set_extents(nil, nil, nil, nil)
-    if place_name
-      set_rectangle_from_content(content_from_place_name(place_name))
-    end
+    return unless place_name
+
+    rectangle_from_content(content_from_place_name(place_name))
   end
 
-  def set_rectangle_from_content(content)
+  def rectangle_from_content(content)
     xml = REXML::Document.new(content)
     xml.elements.each("GeocodeResponse/result/geometry") do |geom|
-      rect = geom.elements["bounds"] || geom.elements["viewport"]
-      if rect
+      if (rect = geom.elements["bounds"] || geom.elements["viewport"])
         sw = rect.elements["southwest"]
         ne = rect.elements["northeast"]
         set_extents(ne.elements["lat"].text,
@@ -39,14 +37,11 @@ class Geocoder < BlankSlate
                     ne.elements["lng"].text,
                     sw.elements["lng"].text)
         @valid = true
-      else
-        loc = geom.elements["location"]
-        if loc
-          lat = loc.elements["lat"].text
-          lng = loc.elements["lng"].text
-          set_extents(lat, lat, lng, lng)
-          @valid = true
-        end
+      elsif (loc = geom.elements["location"])
+        lat = loc.elements["lat"].text
+        lng = loc.elements["lng"].text
+        set_extents(lat, lat, lng, lng)
+        @valid = true
       end
     end
   end
@@ -73,7 +68,7 @@ class Geocoder < BlankSlate
   end
 
   def content_from_place_name(place_name)
-    if ::Rails.env == "test"
+    if Rails.env.test?
       content = test_place_name(place_name)
     else
       content = nil
@@ -88,9 +83,9 @@ class Geocoder < BlankSlate
 
   def test_place_name(place_name)
     if (loc = TEST_EXPECTED_LOCATIONS[place_name])
-      content = test_success(loc)
+      test_success(loc)
     else
-      content = TEST_FAILURE
+      TEST_FAILURE
     end
   end
 
