@@ -40,6 +40,7 @@ class Symbol
 
   # Return a list of missing tags we've encountered.
   def self.missing_tags
+    @@missing_tags = [] unless defined?(@@missing_tags)
     @@missing_tags
   end
 
