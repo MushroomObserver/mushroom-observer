@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = EOL Data
 #
@@ -11,8 +12,6 @@
 #    descriptions(id) - id is the id of a Name
 #    description_count(id) - id is the id of a Name
 #
-################################################################################
-
 class EolData
   attr_accessor :names
 
@@ -47,9 +46,12 @@ class EolData
     @id_to_description.count
   end
 
+  # grandfather method name to avoid breaking 3rd-party use of API
+  # rubocop:disable Naming/PredicateName: Rename
   def has_images?(id)
     @name_id_to_images.member?(id)
   end
+  # rubocop:enable Naming/PredicateName: Rename
 
   def all_images
     @id_to_image.values
@@ -60,16 +62,15 @@ class EolData
   end
 
   def image_count(id)
-    if has_images?(id)
-      @name_id_to_images[id].count
-    else
-      0
-    end
+    has_images?(id) ? @name_id_to_images[id].count : 0
   end
 
+  # grandfather method name to avoid breaking 3rd-party use of API
+  # rubocop:disable Naming/PredicateName: Rename
   def has_descriptions?(id)
     @name_id_to_descriptions.member?(id)
   end
+  # rubocop:enable Naming/PredicateName: Rename
 
   def all_descriptions
     @id_to_description.values
@@ -80,11 +81,7 @@ class EolData
   end
 
   def description_count(id)
-    if has_descriptions?(id)
-      @name_id_to_descriptions[id].count
-    else
-      0
-    end
+    has_descriptions?(id) ? @name_id_to_descriptions[id].count : 0
   end
 
   def license_url(id)
@@ -97,11 +94,7 @@ class EolData
 
   def rights_holder(image)
     result = image.copyright_holder
-    if result.nil? || result.strip == ""
-      legal_name(image.user_id)
-    else
-      result
-    end
+    result.nil? || result.strip == "" ? legal_name(image.user_id) : result
   end
 
   def authors(id)
@@ -166,8 +159,10 @@ class EolData
   end
 
   def id_to_description
-    make_id_hash(NameDescription.find_by_sql(
-      "SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}")
+    make_id_hash(
+      NameDescription.find_by_sql(
+        "SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"
+      )
     )
   end
 
