@@ -64,8 +64,8 @@ module PivotalHelper
         result = :CREATED.t + ": " + comment.time.to_s + safe_br
         if comment.user
           result << :BY.t + ": " +
-                      user_link(comment.user.id, comment.user.name) +
-                      safe_br
+                    user_link(comment.user.id, comment.user.name) +
+                    safe_br
         end
         result
       end + comment.text.to_s.tp
