@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = Map Set Class
 #
@@ -15,8 +16,7 @@
 #      draw_box(mapset.north_west, mapset.north_east, ..., mapset.north_west)
 #    end
 #
-################################################################################
-
+#
 class MapSet
   attr_reader :objects, :north, :south, :east, :west
 
@@ -185,11 +185,11 @@ class MapSet
     end
   end
 
-  def new_box_not_contained_by_old_box?(e, w)
+  def new_box_not_contained_by_old_box?(east, west)
     if @east >= @west
-      e < w || w < @west || e > @east
+      east < west || west < @west || east > @east
     else
-      e >= w || w < @west || e > @east
+      east >= west || west < @west || east > @east
     end
   end
 end
