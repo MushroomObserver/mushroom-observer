@@ -728,7 +728,7 @@ class NameController < ApplicationController
     @new_names        = sorter.new_name_strs.uniq
     @synonym_name_ids = sorter.all_synonyms.map(&:id)
     @synonym_names    = @synonym_name_ids.map { |id| Name.safe_find(id) }.
-                          reject(&:nil?)
+                        reject(&:nil?)
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
@@ -1058,38 +1058,38 @@ class NameController < ApplicationController
   def bulk_name_edit # :prefetch: :norobots:
     @list_members = nil
     @new_names    = nil
-    if request.method == "POST"
-      list = begin
-               params[:list][:members].strip_squeeze
-             rescue StandardError
-               ""
-             end
-      construct_approved_names(list, params[:approved_names])
-      sorter = NameSorter.new
-      sorter.sort_names(list)
-      if sorter.only_single_names
-        sorter.create_new_synonyms
-        flash_notice :name_bulk_success.t
-        redirect_to(controller: "observer", action: "list_rss_logs")
-      else
-        if sorter.new_name_strs != []
-          # This error message is no longer necessary.
-          if Rails.env == "test"
-            flash_error(
-              "Unrecognized names given, including: "\
-              "#{sorter.new_name_strs[0].inspect}"
-            )
-          end
-        else
-          # Same with this one... err, no this is not reported anywhere.
+    return unless request.method == "POST"
+
+    list = begin
+             params[:list][:members].strip_squeeze
+           rescue StandardError
+             ""
+           end
+    construct_approved_names(list, params[:approved_names])
+    sorter = NameSorter.new
+    sorter.sort_names(list)
+    if sorter.only_single_names
+      sorter.create_new_synonyms
+      flash_notice :name_bulk_success.t
+      redirect_to(controller: "observer", action: "list_rss_logs")
+    else
+      if sorter.new_name_strs != []
+        # This error message is no longer necessary.
+        if Rails.env.test?
           flash_error(
-            "Ambiguous names given, including: "\
-            "#{sorter.multiple_line_strs[0].inspect}"
+            "Unrecognized names given, including: "\
+            "#{sorter.new_name_strs[0].inspect}"
           )
         end
-        @list_members = sorter.all_line_strs.join("\r\n")
-        @new_names    = sorter.new_name_strs.uniq.sort
+      else
+        # Same with this one... err, no this is not reported anywhere.
+        flash_error(
+          "Ambiguous names given, including: "\
+          "#{sorter.multiple_line_strs[0].inspect}"
+        )
       end
+      @list_members = sorter.all_line_strs.join("\r\n")
+      @new_names    = sorter.new_name_strs.uniq.sort
     end
   end
 
