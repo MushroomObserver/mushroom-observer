@@ -781,7 +781,7 @@ class LocationController < ApplicationController
               user: @user.login, touch: true,
               from: old_desc.unique_partial_format_name,
               to: @description.unique_partial_format_name
-              )
+            )
             old_desc.destroy
           end
         end
@@ -874,9 +874,10 @@ class LocationController < ApplicationController
               end
       if where.present? &&
          update_observations_by_where(location, where)
-        flash_notice(:runtime_location_merge_success.t(
-          this: where, that: location.display_name
-        ))
+        flash_notice(
+          :runtime_location_merge_success.t(this: where,
+                                            that: location.display_name)
+        )
       end
       redirect_to(action: "list_locations")
     end
