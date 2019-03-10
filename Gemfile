@@ -79,6 +79,7 @@ gem "coveralls", require: false
 
 # Use rubocop for code style quality control
 # TODO: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
+#  See https://docs.codeclimate.com/docs/rubocop
 gem "rubocop", require: false
 
 # use mry to support safe updating of .rubocop.yml

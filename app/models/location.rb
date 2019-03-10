@@ -650,7 +650,7 @@ class Location < AbstractModel
 
     # Log the action.
     old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
-                           this: old_loc.name, that: name)
+                            this: old_loc.name, that: name)
 
     # Destroy past versions.
     editors = []

@@ -81,7 +81,7 @@ class Name < AbstractModel
 
     # Log the action.
     old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,
-                              this: old_name.display_name, that: display_name)
+                             this: old_name.display_name, that: display_name)
 
     # Destroy past versions.
     editors = []
