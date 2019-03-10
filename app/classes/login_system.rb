@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_dependency "user"
 
+# Methods to restrict method access to logged-in users
 module LoginSystem
   protected
 
