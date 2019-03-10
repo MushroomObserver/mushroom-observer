@@ -235,7 +235,7 @@ class TranslationController < ApplicationController
     if unlisted_tags.any?
       @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
       @form << TranslationFormMinorHeader.new(
-                 "These tags are missing from the export files."
+        "These tags are missing from the export files."
                )
       for tag in unlisted_tags.sort
         @form << TranslationFormTagField.new(tag)
