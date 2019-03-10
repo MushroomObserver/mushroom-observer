@@ -14,7 +14,7 @@ class Geocoder < BlankSlate
   attr_reader :west
   attr_reader :valid
 
-  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   def initialize(place_name)
@@ -29,21 +29,38 @@ class Geocoder < BlankSlate
   def rectangle_from_content(content)
     xml = REXML::Document.new(content)
     xml.elements.each("GeocodeResponse/result/geometry") do |geom|
-      if (rect = geom.elements["bounds"] || geom.elements["viewport"])
-        sw = rect.elements["southwest"]
-        ne = rect.elements["northeast"]
-        set_extents(ne.elements["lat"].text,
-                    sw.elements["lat"].text,
-                    ne.elements["lng"].text,
-                    sw.elements["lng"].text)
-        @valid = true
-      elsif (loc = geom.elements["location"])
-        lat = loc.elements["lat"].text
-        lng = loc.elements["lng"].text
-        set_extents(lat, lat, lng, lng)
-        @valid = true
-      end
+      set_bounds(geom)
     end
+  end
+
+  def set_bounds(geom)
+    set_rect_elements(geom)
+    set_loc_elements(geom)
+  end
+
+  def set_rect_elements(geom)
+    return unless (rect = bounds_or_viewport(geom))
+
+    sw = rect.elements["southwest"]
+    ne = rect.elements["northeast"]
+    set_extents(ne.elements["lat"].text,
+                sw.elements["lat"].text,
+                ne.elements["lng"].text,
+                sw.elements["lng"].text)
+    @valid = true
+  end
+
+  def bounds_or_viewport(geom)
+    geom.elements["bounds"] || geom.elements["viewport"]
+  end
+
+  def set_loc_elements(geom)
+    return unless (loc = geom.elements["location"])
+
+    lat = loc.elements["lat"].text
+    lng = loc.elements["lng"].text
+    set_extents(lat, lat, lng, lng)
+    @valid = true
   end
 
   def set_extents(north, south, east, west)
@@ -117,7 +134,7 @@ class Geocoder < BlankSlate
     TEST_FAILURE = '<?xml version="1.0" encoding="UTF-8"?>
     <GeocodeResponse>
      <status>ZERO_RESULTS</status>
-    </GeocodeResponse>'.freeze
+    </GeocodeResponse>'
   end
 
   def test_success(loc)
