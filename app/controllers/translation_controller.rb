@@ -232,14 +232,14 @@ class TranslationController < ApplicationController
 
   def include_unlisted_tags
     unlisted_tags = @tags.keys - @tags_used.keys
-    if unlisted_tags.any?
-      @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
-      @form << TranslationFormMinorHeader.new(
-        "These tags are missing from the export files."
-               )
-      for tag in unlisted_tags.sort
-        @form << TranslationFormTagField.new(tag)
-      end
+    return if unlisted_tags.none?
+
+    @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
+    @form << TranslationFormMinorHeader.new(
+      "These tags are missing from the export files."
+    )
+    unlisted_tags.sort.each do |tag|
+      @form << TranslationFormTagField.new(tag)
     end
   end
 
