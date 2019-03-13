@@ -1250,7 +1250,7 @@ class NameController < ApplicationController
         AND COALESCE(classification,'') != ''
         AND text_name IN ('#{genera.join("','")}')
     ))
-      Name.parse_classification(classification).reverse.each do |rank, name|
+      Name.parse_classification(classification).reverse_each do |rank, name|
         next unless rank == :Family
 
         families[genus] = name
