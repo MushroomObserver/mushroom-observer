@@ -874,7 +874,9 @@ class ImageController < ApplicationController
             IF(n1.synonym_id IS NULL,
               n2.id = n1.id,
               n2.synonym_id = n1.synonym_id)
-          WHERE n1.rank = #{Name.ranks[:Species]}
+          # include "to_i" to avoid Brakeman "SQL injection" false positive.
+          # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
+          WHERE n1.rank = #{Name.ranks[:Species].to_i}
             AND n1.text_name IN (#{names})
         ) AS x, observations o, images i
         WHERE o.name_id = x.name_id

@@ -164,7 +164,9 @@ class NameController < ApplicationController
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
-        AND names.rank = #{Name.ranks[:Species]}
+        # include "to_i" to avoid Brakeman "SQL injection" false positive.
+        # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
+        AND names.rank = #{Name.ranks[:Species].to_i}
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
@@ -1200,7 +1202,9 @@ class NameController < ApplicationController
     minimum_observations = params[:minimum_observations].presence.to_i || 5
     rank_condition =
       if params[:include_higher_taxa].blank?
-        "= #{Name.ranks[:Species]}"
+        # include "to_i" to avoid Brakeman "SQL injection" false positive.
+        # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
+        "= #{Name.ranks[:Species].to_i}"
       else
         "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).
           join(",")})"
@@ -1240,15 +1244,17 @@ class NameController < ApplicationController
     families = {}
     for genus, classification in Name.connection.select_rows(%(
       SELECT text_name, classification FROM names
-      WHERE rank = #{Name.ranks[:Genus]}
+      # include "to_i" to avoid Brakeman "SQL injection" false positive.
+      # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
+      WHERE rank = #{Name.ranks[:Genus].to_i}
         AND COALESCE(classification,'') != ''
         AND text_name IN ('#{genera.join("','")}')
     ))
-      for rank, name in Name.parse_classification(classification).reverse
-        if rank == :Family
-          families[genus] = name
-          break
-        end
+      Name.parse_classification(classification).reverse.each |rank, name|
+        next unless rank == :Family
+
+        families[genus] = name
+        break
       end
     end
 
