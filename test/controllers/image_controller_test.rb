@@ -16,10 +16,6 @@ class ImageControllerTest < FunctionalTestCase
     assert_template("list_images", partial: "_image")
   end
 
-  def test_mushroom_app_report
-    get(:images_for_mushroom_app, names: names(:agaricus_campestris).text_name)
-  end
-
   def test_next_image
     get_with_dump(:next_image, id: images(:turned_over_image).id)
     # Default sort order is inverse chronological (created_at DESC, id DESC).

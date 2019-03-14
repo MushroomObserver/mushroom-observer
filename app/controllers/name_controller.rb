@@ -44,7 +44,6 @@
 #  approve_name::                Flag given name as "accepted"
 #                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
-#  names_for_mushroom_app::      Display list of most common names in plain text
 #  edit_lifeform::               Edit lifeform tags.
 #  propagate_lifeform::          Add/remove lifeform tags to/from subtaxa.
 #  propagate_classification::    Copy classification to all subtaxa.
@@ -1188,91 +1187,5 @@ class NameController < ApplicationController
       end
     end
     redirect_with_query(@name.show_link_args)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Stuff for Mushroom App
-  #
-  ##############################################################################
-
-  def names_for_mushroom_app # :nologin: :norobots:
-    number_of_names = params[:number_of_names].presence.to_i || 1000
-    minimum_confidence = params[:minimum_confidence].presence.to_i || 1.5
-    minimum_observations = params[:minimum_observations].presence.to_i || 5
-    rank_condition =
-      if params[:include_higher_taxa].blank?
-        # include "to_i" to avoid Brakeman "SQL injection" false positive.
-        # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
-        "= #{Name.ranks[:Species].to_i}"
-      else
-        "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).
-          join(",")})"
-      end
-    data = Name.connection.select_rows(%(
-      SELECT y.name, y.rank, SUM(y.number)
-      FROM (
-        SELECT n.text_name AS name,
-               n.rank AS rank,
-               x.number AS number
-        FROM (
-          SELECT n.id AS name_id,
-                 n.synonym_id AS synonym_id,
-                 COUNT(o.id) AS number
-          FROM names n, observations o
-          WHERE o.name_id = n.id
-            AND o.vote_cache >= #{minimum_confidence}
-          GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)
-        ) AS x
-        LEFT OUTER JOIN names n ON IF(x.synonym_id IS NULL,
-                                      n.id = x.name_id,
-                                      n.synonym_id = x.synonym_id)
-        WHERE n.deprecated = FALSE
-          AND x.number >= #{minimum_observations}
-          AND n.rank #{rank_condition}
-        GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)
-      ) AS y
-      GROUP BY y.name
-      ORDER BY SUM(y.number) DESC
-      LIMIT #{number_of_names}
-    ))
-
-    genera = data.map do |name, _rank, _number|
-      name.split(" ").first
-    end.uniq
-
-    families = {}
-    for genus, classification in Name.connection.select_rows(%(
-      SELECT text_name, classification FROM names
-      # include "to_i" to avoid Brakeman "SQL injection" false positive.
-      # (Brakeman does not know that Name.ranks[:xxx] is an enum.)
-      WHERE rank = #{Name.ranks[:Genus].to_i}
-        AND COALESCE(classification,'') != ''
-        AND text_name IN ('#{genera.join("','")}')
-    ))
-      Name.parse_classification(classification).reverse_each do |rank, name|
-        next unless rank == :Family
-
-        families[genus] = name
-        break
-      end
-    end
-
-    report = CSV.generate(col_sep: "\t") do |csv|
-      csv << %w[name rank number_observations family]
-      data.each do |name, rank, number|
-        genus = name.split(" ").first
-        family = families[genus] || ""
-        csv << [name, rank, number.round.to_s, family]
-      end
-    end
-    send_data(report,
-              type: "text/csv",
-              charset: "UTF-8",
-              header: "present",
-              disposition: "attachment",
-              filename: "#{action_name}.csv")
-  rescue StandardError => e
-    render(plain: e.to_s, layout: false, status: 500)
   end
 end
