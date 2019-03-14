@@ -35,6 +35,8 @@ class String
   require "digest/md5"
 
   # :stopdoc:
+  # Disable cop in order to make code more readable
+  # rubocop:disable Layout/AlignHash
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
     # characters and accents -- it covers HTML codes &#1 to &#400.
@@ -363,6 +365,7 @@ class String
       "nbsp"  => " "
     }.freeze
   end
+  # rubocop:enable Layout/AlignHash
   # :startdoc:
 
   # This should safely match anything that could possibly be interpreted as
