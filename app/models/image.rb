@@ -478,7 +478,7 @@ class Image < AbstractModel
       self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
       if file.respond_to?(:original_filename)
         self.upload_original_name = file.original_filename.to_s.
-                                      force_encoding("utf-8")
+                                    force_encoding("utf-8")
       end
 
     # Image is given as an input stream.  We need to save it to a temp file
@@ -496,7 +496,7 @@ class Image < AbstractModel
       self.upload_md5sum = file.md5sum        if file.respond_to?(:md5sum)
       if file.respond_to?(:original_filename)
         self.upload_original_name = file.original_filename.to_s.
-                                      force_encoding("utf-8")
+                                    force_encoding("utf-8")
       end
     end
   end
@@ -544,7 +544,7 @@ class Image < AbstractModel
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
       type = File.read("| /usr/bin/file --mime #{upload_temp_file}").
-              chomp.split[1]
+             chomp.split[1]
       if type
         type.sub!(/;$/, "")
         self.upload_type = type
@@ -911,7 +911,7 @@ class Image < AbstractModel
     end
   end
 
-  # Whenever a user changes their name, update all their images.
+# Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
     # This is orders of magnitude faster than doing via active-record.
     old_name = Image.connection.quote(old_name)
@@ -920,21 +920,22 @@ class Image < AbstractModel
       SELECT id, YEAR(`when`), license_id FROM images
       WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
     ))
-    if data.any?
-      # brakeman generates what appears to be a false positive SQL injection
-      # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-      Image.connection.insert(%(
-        INSERT INTO copyright_changes
-          (user_id, updated_at, target_type, target_id, year, name, license_id)
-        VALUES
-          #{data.map { |id, year, lic| "(#{user.id},NOW(),'Image',#{id},"\
-            "#{year},#{old_name},#{lic})" }.join(",\n")}
-      ))
-      Image.connection.update(%(
-        UPDATE images SET copyright_holder = #{new_name}
-        WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-      ))
-    end
+    return unless data.any?
+
+    # brakeman generates what appears to be a false positive SQL injection
+    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
+    Image.connection.insert(%(
+      INSERT INTO copyright_changes
+        (user_id, updated_at, target_type, target_id, year, name, license_id)
+      VALUES
+        #{data.map do |id, year, lic|
+            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
+          end.join(",\n")}
+    ))
+    Image.connection.update(%(
+      UPDATE images SET copyright_holder = #{new_name}
+      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    ))
   end
 
   def year
