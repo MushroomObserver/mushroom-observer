@@ -373,7 +373,9 @@ class String
   HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}.freeze
 
   ### Textile-related methods ###
-  #
+
+  # Disable cop because we need to use html_safe to avoid added escaping
+  # rubocop:disable Rails/OutputSafety
   def t(sanitize = true)
     Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
@@ -402,6 +404,7 @@ class String
   def tpl_nodiv(sanitize = true)
     Textile.textilize(self, true, sanitize)
   end
+  # rubocop:enable Rails/OutputSafety
 
   ### String transformations ###
   #
@@ -433,6 +436,9 @@ class String
   def strip_links
     gsub(%r{</?a.*?>}, "")
   end
+
+  # Disable cop because we need to use html_safe to avoid added escaping
+  # rubocop:disable Rails/OutputSafety
 
   # Truncate an HTML string, being careful to close off any open formatting
   # tags.  If greater than +max+, truncates to <tt>max - 1</tt> and adds "..."
@@ -499,6 +505,7 @@ class String
   def nowrap
     '<span style="white-space:nowrap">'.html_safe + self + "</span>".html_safe
   end
+  # rubocop:enable Rails/OutputSafety
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
