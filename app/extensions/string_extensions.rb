@@ -384,14 +384,14 @@ class String
 
   # TODO: Move somewhere that content_tag is defined
   def tp(sanitize = true)
-    '<div class="textile">'.html_safe +
-      Textile.textilize(self, false, sanitize).html_safe +
+    '<div class="textile">'.html_safe <<
+      Textile.textilize(self, false, sanitize).html_safe <<
       "</div>".html_safe
   end
 
   def tpl(sanitize = true)
-    '<div class="textile">'.html_safe +
-      Textile.textilize(self, true, sanitize).html_safe +
+    '<div class="textile">'.html_safe <<
+      Textile.textilize(self, true, sanitize).html_safe <<
       "</div>".html_safe
   end
 
