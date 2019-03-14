@@ -10,7 +10,6 @@ class LocationController < ApplicationController
     :index_location_description,
     :list_by_country,
     :list_countries,
-    :list_dubious_locations,
     :list_location_descriptions,
     :list_locations,
     :location_descriptions_by_author,
@@ -74,15 +73,6 @@ class LocationController < ApplicationController
   def list_locations # :nologin:
     query = create_query(:Location, :all, by: :name)
     show_selected_locations(query, link_all_sorts: true)
-  end
-
-  # Displays a list of all locations.
-  def list_dubious_locations # :nologin:
-    query = create_query(:Location, :all, by: :name)
-    show_selected_locations(query,
-                            link_all_sorts: true,
-                            action: :list_dubious_locations,
-                            num_per_page: 1000)
   end
 
   # Display list of locations that a given user is author on.

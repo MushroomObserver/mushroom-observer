@@ -1638,6 +1638,14 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
   end
 
+  def test_edit_misspelled_name
+    misspelled_name = names(:suilus)
+    login("rolf")
+    get(:edit_name, id: misspelled_name.id)
+    assert_select("input[type=checkbox]#name_misspelling", count: 1)
+    assert_select("input[type=text]#name_correct_spelling", count: 1)
+  end
+
   # ----------------------------
   #  Edit name -- with merge
   # ----------------------------

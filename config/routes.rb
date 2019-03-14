@@ -211,7 +211,6 @@ ACTIONS = {
     index_location_description: {},
     list_by_country: {},
     list_countries: {},
-    list_dubious_locations: {},
     list_location_descriptions: {},
     list_locations: {},
     list_merge_options: {},
