@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Synonyms of Names
 class Name < AbstractModel
   # Returns "Deprecated" or "Valid" in the local language.
   def status
@@ -121,7 +124,7 @@ class Name < AbstractModel
     end
 
     # This has to apply to names that are misspellings of this name, too.
-    Name.where(correct_spelling: self).each do |n|
+    Name.where(correct_spelling: self).find_each do |n|
       n.update_attribute!(correct_spelling: nil)
     end
   end
@@ -208,7 +211,9 @@ class Name < AbstractModel
   # (if no namings, returns created_at)
   def time_of_last_naming
     @time_of_last_naming ||= begin
-      last_use = Name.connection.select_value("SELECT MAX(created_at) FROM namings WHERE name_id = #{id}")
+      last_use = Name.connection.select_value(
+        "SELECT MAX(created_at) FROM namings WHERE name_id = #{id}"
+      )
       last_use || created_at
     end
   end
