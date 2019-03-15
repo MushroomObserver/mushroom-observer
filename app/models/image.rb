@@ -911,7 +911,7 @@ class Image < AbstractModel
     end
   end
 
-# Whenever a user changes their name, update all their images.
+  # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
     # This is orders of magnitude faster than doing via active-record.
     old_name = Image.connection.quote(old_name)
