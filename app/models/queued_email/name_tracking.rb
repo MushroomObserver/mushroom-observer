@@ -30,7 +30,9 @@ class QueuedEmail::NameTracking < QueuedEmail
     if naming
       result = NamingTrackerEmail.build(user, naming).deliver_now
       if notification.note_template
-        result = NamingObserverEmail.build(to_user, naming, notification).deliver_now
+        result = NamingObserverEmail.build(
+          to_user, naming, notification
+        ).deliver_now
       end
     end
     result
