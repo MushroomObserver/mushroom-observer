@@ -396,6 +396,10 @@ class Observation < AbstractModel
     "#{alt.round}m"
   end
 
+  def saved_change_to_place?
+    saved_change_to_location_id? || saved_change_to_where?
+  end
+
   ##############################################################################
   #
   #  :section: Notes
