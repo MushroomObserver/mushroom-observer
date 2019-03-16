@@ -8,7 +8,8 @@
 #  user::           User that created it.
 #  flavor::         Type of Notification.
 #  obj_id::         Id of principle object.
-#  note_template::  Template for an email (context depends on type of Notification).
+#  note_template::  Template for an email
+#                   (context depends on type of Notification).
 #  require_specimen:: Require observation to have a specimen?
 #
 #  == Class methods
@@ -27,8 +28,6 @@
 #
 #  None.
 #
-################################################################################
-
 class Notification < AbstractModel
   belongs_to :user
 
@@ -99,12 +98,12 @@ class Notification < AbstractModel
 
   # Return a string summarizing what this Notification is about.
   def summary
-    result = "Unrecognized notification flavor"
     case flavor
     when :name
-      result = "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
+      "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
+    else
+      "Unrecognized notification flavor"
     end
-    result
   end
   alias_method :text_name, :summary
 
