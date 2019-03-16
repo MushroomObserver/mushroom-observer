@@ -29,23 +29,25 @@ class Name < AbstractModel
 
     # Move all misspellings over to the new name.
     old_name.misspellings.each do |name|
-      if name == self
-        name.correct_spelling = nil
-      else
-        name.correct_spelling = self
-      end
+      name.correct_spelling = if name == self
+                                nil
+                              else
+                                self
+                              end
       name.save
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Name", target_id: old_name.id).each do |int|
+    Interest.where(
+      target_type: "Name", target_id: old_name.id
+    ).find_each do |int|
       int.target = self
       int.save
     end
 
     # Move over any notifications on the old name.
     Notification.where(flavor: Notification.flavors[:name],
-                       obj_id: old_name.id).each do |note|
+                       obj_id: old_name.id).find_each do |note|
       note.obj_id = id
       note.save
     end
