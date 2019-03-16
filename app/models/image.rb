@@ -493,7 +493,7 @@ class Image < AbstractModel
     @file = file
     self.upload_temp_file = file.path
     self.upload_length    = file.size
-    add_extra_attributes_if_file_responds(file)
+    add_extra_attributes_from_file(file)
   end
 
   # Image is given as an input stream. We need to save it to a temp file
@@ -504,12 +504,11 @@ class Image < AbstractModel
     if file.respond_to?(:content_length)
       self.upload_length = file.content_length.chomp
     end
-    self.upload_length   = file.size          if file.respond_to?(:size)
-    self.upload_type     = file.content_type  if file.respond_to?(:content_type)
-    add_extra_attributes_if_file_responds(file)
+    self.upload_length = file.size if file.respond_to?(:size)
+    add_extra_attributes_from_file(file)
   end
 
-  def add_extra_attributes_if_file_responds(file)
+  def add_extra_attributes_from_file(file)
     self.upload_type     = file.content_type if file.respond_to?(:content_type)
     self.upload_md5sum   = file.md5sum       if file.respond_to?(:md5sum)
     return unless file.respond_to?(:original_filename)
