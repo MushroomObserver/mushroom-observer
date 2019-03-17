@@ -7,7 +7,8 @@ xml.response(
   "xmlns:geo" => "http://www.w3.org/2003/01/geo/wgs84_pos#",
   "xmlns:dwc" => "http://rs.tdwg.org/dwc/dwcore/",
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 http://services.eol.org/schema/content_0_2.xsd"
+  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 "\
+                          "http://services.eol.org/schema/content_0_2.xsd"
 ) {
   for taxon in @data.names
     xml.taxon do
@@ -19,7 +20,8 @@ xml.response(
         end
       end
       xml.dwc(:ScientificName, taxon.real_search_name)
-      xml.dcterms(:modified, taxon.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+      xml.dcterms(:modified,
+                  taxon.updated_at.utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
       citation = taxon.citation
       if citation.present?
         xml.reference(citation.t)
@@ -63,19 +65,25 @@ xml.response(
         end
       end
       for image in @data.images(taxon.id)
-        # for image_id, obs_id, user_id, license_id, created in @image_data[taxon.id]
+        # for image_id, obs_id, user_id,
+        #     license_id, created in @image_data[taxon.id]
         user = @data.rights_holder(image)
         xml.dataObject do
           xml.dc(:identifier, "Image-#{image.id}")
           xml.dataType("http://purl.org/dc/dcmitype/StillImage")
           xml.mimeType("image/jpeg")
-          xml.agent(user, role: "photographer") # Illustrations need to be identified
-          xml.dcterms(:created, Time.parse(image.created_at.to_s).utc.strftime("%Y-%m-%dT%H:%M:%SZ"))
+          # Illustrations need to be identified
+          xml.agent(user, role: "photographer")
+          xml.dcterms(:created, Time.parse(image.created_at.to_s).utc.
+                                     strftime("%Y-%m-%dT%H:%M:%SZ"))
           xml.license(@data.license_url(image.license_id))
           xml.dcterms(:rightsHolder, user)
           xml.audience("General public")
           xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
-          xml.dc(:description, "Mushroom Observer Image #{image.id}: #{@data.image_to_names(image.id)}", "xml:lang" => "en")
+          xml.dc(:description,
+            "Mushroom Observer Image #{image.id}: "\
+            "#{@data.image_to_names(image.id)}",
+            "xml:lang" => "en")
           xml.mediaURL("#{MO.http_domain}/images/640/#{image.id}.jpg")
           # xml.reviewStatus(image.review_status)
         end
