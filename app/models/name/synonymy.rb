@@ -66,9 +66,7 @@ class Name < AbstractModel
       if @other_authors
         @other_authors.map(&:id)
       else
-        Name.connection.select_values(%(
-          SELECT id FROM names WHERE text_name = '#{text_name}'
-        )).map(&:to_i)
+        Name.select(:id).where(text_name: text_name).map { |n| n.id(&:to_i) }
       end
     end
   end

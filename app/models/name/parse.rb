@@ -510,8 +510,9 @@ class Name < AbstractModel
           sub(/(^\S+?)o?mycetes$/,   '\1!3').
           sub(/(^\S+?)o?mycotina$/,  '\1!2').
           sub(/(^\S+?)o?mycota$/,    '\1!1')
-    1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/,
-                     '\1\2 \3 !\2\4') # put autonyms at the top
+
+    # put autonyms at the top
+    1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')
 
     if author.present?
       str += "  " + author.
