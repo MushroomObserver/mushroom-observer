@@ -3,26 +3,26 @@
 #
 #  == Attributes
 #
-#  id::             Locally unique numerical id, starting at 1.
-#  updated_at::     Date/time it was last updated.
-#  user::           User that created it.
-#  flavor::         Type of Notification.
-#  obj_id::         Id of principle object.
-#  note_template::  Template for an email
-#                   (context depends on type of Notification).
+#  id::               Locally unique numerical id, starting at 1
+#  updated_at::       Date/time it was last updated
+#  user::             User who created it
+#  flavor::           Type of Notification
+#  obj_id::           Id of principal object
+#  note_template::    Template for an email
+#                     (context depends on type of Notification)
 #  require_specimen:: Require observation to have a specimen?
 #
 #  == Class methods
 #
-#  all_flavors::    List of Notifcation types available.
+#  all_flavors::       List of Notifcation types available.
 #
 #  == Instance methods
 #
-#  calc_note::      Create body of the email we're about to send.
-#  target::         Return principle object involved.
-#  summary::        String summarizing what this Notification is about.
-#  link_params::    Hash of link_to options for edit action.
-#  text_name::      Alias for +summary+ for debugging.
+#  calc_note::         Create body of the email we're about to send.
+#  target::            Return principle object involved.
+#  summary::           String summarizing what this Notification is about
+#  link_params::       Hash of link_to options for edit action
+#  text_name::         Alias for +summary+ for debugging
 #
 #  == Callbacks
 #
@@ -54,46 +54,41 @@ class Notification < AbstractModel
   #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
-    if template = note_template
-      case flavor.to_sym
-      when :name
-        tracker  = user
-        observer = args[:user]
-        naming   = args[:naming]
-        unless observer
-          raise "Missing 'user' argument for #{flavor} notification."
-        end
-        unless naming
-          raise "Missing 'naming' argument for #{flavor} notification."
-        end
+    return unless (template = note_template)
 
-        template.
-          gsub(":observer", observer.login).
-          gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
-          gsub(":mailing_address", tracker.mailing_address || "").
-          gsub(":location", naming.observation.place_name).
-          gsub(":name", naming.format_name)
+    case flavor.to_sym
+    when :name
+      tracker  = user
+      observer = args[:user]
+      naming   = args[:naming]
+      unless observer
+        raise "Missing 'user' argument for #{flavor} notification."
       end
+      unless naming
+        raise "Missing 'naming' argument for #{flavor} notification."
+      end
+
+      template.
+        gsub(":observer", observer.login).
+        gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
+        gsub(":mailing_address", tracker.mailing_address || "").
+        gsub(":location", naming.observation.place_name).
+        gsub(":name", naming.format_name)
     end
   end
 
-  # Return principle target involved.  Again, this is different for each
+  # Return principal target involved.  Again, this is different for each
   # flavor:
   #
   # name::   Name that User is tracking.
   #
   def target
-    result = nil
-    if @target
-      result = @target
-    else
-      case flavor
-      when :name
-        result = Name.find(obj_id)
-      end
-      @target = result
-    end
-    result
+    # target already known
+    return @target if @target
+
+    @target = case flavor
+              when :name then Name.find(obj_id)
+              end
   end
 
   # Return a string summarizing what this Notification is about.
