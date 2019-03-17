@@ -60,10 +60,15 @@ class MatrixBoxPresenter
                   nil
                 end
     self.who  = view.user_link(image.user)
-    self.what = view.link_with_query(name, controller: image.show_controller,
-                                           action: image.show_action, id: image.id)
-    self.thumbnail = view.thumbnail(image, link: { controller: image.show_controller,
-                                                   action: image.show_action, id: image.id }, responsive: true)
+    self.what = view.link_with_query(name,
+                                     controller: image.show_controller,
+                                     action: image.show_action,
+                                     id: image.id)
+    self.thumbnail = view.thumbnail(image,
+                                    link: { controller: image.show_controller,
+                                            action: image.show_action,
+                                            id: image.id },
+                                    responsive: true)
   end
 
   # Grabs all the information needed for view from Observation instance.
@@ -73,8 +78,10 @@ class MatrixBoxPresenter
     self.when  = observation.when.web_date
     self.who   = view.user_link(observation.user) if observation.user
     self.what  = view.link_with_query(name, controller: :observer,
-                                            action: :show_observation, id: observation.id)
-    self.where = view.location_link(observation.place_name, observation.location)
+                                            action: :show_observation,
+                                            id: observation.id)
+    self.where = view.location_link(observation.place_name,
+                                    observation.location)
     return unless observation.thumb_image
 
     self.thumbnail =
@@ -118,7 +125,8 @@ class MatrixBoxPresenter
     end
     if !target_type
       self.detail = :rss_destroyed.t(type: :object)
-    elsif !target || tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
+    elsif !target ||
+          tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
       self.detail = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
       self.detail = :rss_created_at.t(type: target_type)
@@ -131,7 +139,8 @@ class MatrixBoxPresenter
       end
     else
       if [:observation, :species_list].include?(target_type) &&
-         [target.user.login, target.user.name, target.user.legal_name].include?(args[:user])
+         [target.user.login, target.user.name, target.user.legal_name].
+         include?(args[:user])
         # This will remove redundant user from observation logs.
         tag2 = :"#{tag}0"
         self.detail = tag2.t(args) if tag2.has_translation?
