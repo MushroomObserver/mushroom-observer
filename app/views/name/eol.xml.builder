@@ -81,9 +81,9 @@ xml.response(
           xml.audience("General public")
           xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
           xml.dc(:description,
-            "Mushroom Observer Image #{image.id}: "\
-            "#{@data.image_to_names(image.id)}",
-            "xml:lang" => "en")
+                 "Mushroom Observer Image #{image.id}: "\
+                 "#{@data.image_to_names(image.id)}",
+                 "xml:lang" => "en")
           xml.mediaURL("#{MO.http_domain}/images/640/#{image.id}.jpg")
           # xml.reviewStatus(image.review_status)
         end
