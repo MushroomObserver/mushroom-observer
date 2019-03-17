@@ -150,7 +150,7 @@ class AccountControllerTest < FunctionalTestCase
            login: "brandnewuser",
            password: "brandnewpassword",
            password_confirmation: "brandnewpassword",
-           name: "brand new name",
+           name: "brand new name"
          })
     assert_flash_error(
       "email_new_password should flash error if user doesn't already exist"
