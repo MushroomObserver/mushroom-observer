@@ -43,10 +43,12 @@ for path, rec in data
 end
 
 n = 0
-puts "%-40s %6s %6s %6s %6s" % %w[path mean sigma num robot]
+puts format("%-40s %6s   %6s    %6s  %6s",
+            path,  mean, sigma, num, robot)
 for path in data.keys.sort { |a, b| data[b][0] <=> data[a][0] }
   avg, sig, num, robots = data[path]
-  puts "%-40s %6.3f %6.3f %6d %5d%%" % [path, avg, sig, num, 100.0 * robots / num]
+  puts format("%-40s %6.3f %6.3f %6d  %5d%%",
+              path,  avg,  sig,  num, 100.0 * robots / num)
   n += 1
   break if n >= NUM
 end
