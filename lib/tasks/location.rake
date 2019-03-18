@@ -1,9 +1,10 @@
-# frozen_string_literal: true
+# rubocop:disable Style/FrozenStringLiteralComment
+# disable cop because it causes "can't modify frozen String" error
 
 # disable cop because no alternative given size of array
 namespace :location do # rubocop:disable Metrics/BlockLength
-  # disable cop to make array simpler and more readable
   # rubocop:disable Metrics/LineLength
+  # disable cop to make array simpler and more readable
   APPROVED_LOCATIONS = Set.new(
     ["0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
      "1 hour northwest by car of Denver, Colorado, USA",
@@ -4200,3 +4201,4 @@ namespace :location do # rubocop:disable Metrics/BlockLength
     print("This should be 'comment' not '[:comment]': #{:comment.t}\n")
   end
 end
+# rubocop:enable Style/FrozenStringLiteralComment
