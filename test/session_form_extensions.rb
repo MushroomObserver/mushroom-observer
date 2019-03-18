@@ -14,7 +14,8 @@
 #  debug::            Set to true to have it display POST data on submit.
 #
 #  == Methods
-#  new::              Initialize form from HTML element returned by assert_select.
+#  new::              Initialize form from HTML element returned by
+#                     assert_select.
 #  get_field::        Return Form::Field matching the given DOM id.
 #  get_field!::       Same as get_field, but flunks an assertion if not found.
 #  get_value::        Return value (String) of field matching the given DOM id.
