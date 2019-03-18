@@ -1,4 +1,6 @@
 namespace :location do
+  # disable cop to make array simpler and more readable
+  # rubocop:disable Metrics/LineLength
   APPROVED_LOCATIONS = Set.new(
     ["0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
      "1 hour northwest by car of Denver, Colorado, USA",
@@ -3911,6 +3913,7 @@ namespace :location do
      "Ünye, Turkey",
      "İstanbul, Turkey"]
   )
+  # rubocop:enable Metrics/LineLength
 
   LOCATION_FIXES = {
   }.freeze
@@ -3992,7 +3995,10 @@ namespace :location do
 
   def add_comment(object, from_name, to_name)
     if from_name != to_name
-      object.add_note("[admin - #{Time.now}]: Changed location name from '#{from_name}' to '#{to_name}'")
+      object.add_note(
+        "[admin - #{Time.now}]: "\
+        "Changed location name from '#{from_name}' to '#{to_name}'"
+      )
     end
   end
 
@@ -4019,8 +4025,13 @@ namespace :location do
             check_save(o)
             add_comment(o, current_name, target_name)
           end
-          # Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE `where` = '#{current_sql_safe}'")
-          print("Moved #{obs.size} observations from non-location: #{current_name} to location: #{target_name}\n")
+          # Observation.connection.update(
+          #   "UPDATE observations
+          #    SET location_id = #{target_location.id}, `where` = NULL
+          #    WHERE `where` = '#{current_sql_safe}'"
+          # )
+          print("Moved #{obs.size} observations from non-location: "\
+                "#{current_name} to location: #{target_name}\n")
         end
         if current_location && (current_location != target_location)
           obs = Observation.where(location_id: current_location.id)
@@ -4031,8 +4042,13 @@ namespace :location do
               check_save(o)
               add_comment(o, current_name, target_name)
             end
-            # Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE location_id = #{current_location.id}")
-            print("Moved #{obs.size} observations from location: #{current_name} to location: #{target_name}\n")
+            # Observation.connection.update(
+            #   "UPDATE observations
+            #    SET location_id = #{target_location.id}, `where` = NULL
+            #    WHERE location_id = #{current_location.id}"
+            # )
+            print("Moved #{obs.size} observations from location: "\
+                  "#{current_name} to location: #{target_name}\n")
           end
           comments = current_location.comments
           unless comments.empty?
@@ -4040,7 +4056,8 @@ namespace :location do
               comment.object_id = target_location.id
               check_save(comment)
             end
-            print("Moved #{comments.size} comments from #{current_name} to #{target_name} (#{target_location.id})\n")
+            print("Moved #{comments.size} comments from #{current_name} "\
+                  "to #{target_name} (#{target_location.id})\n")
           end
           descs = current_location.descriptions
           unless descs.empty?
@@ -4048,7 +4065,8 @@ namespace :location do
               d.location_id = target_location.id
               check_save(d)
             end
-            print("Moved #{descs.size} descriptions from #{current_name} to #{target_name} (#{target_location.id})\n")
+            print("Moved #{descs.size} descriptions from #{current_name} "\
+                  "to #{target_name} (#{target_location.id})\n")
           end
           current_location.destroy
           print("Deleted #{current_name}\n")
@@ -4066,7 +4084,8 @@ namespace :location do
             check_save(o)
             add_comment(o, current_name, target_name)
           end
-          print("Changed #{obs.length} non-location(s): #{current_name} to: #{target_name}\n")
+          print("Changed #{obs.length} non-location(s): #{current_name} "\
+                "to: #{target_name}\n")
         end
       end
     end
