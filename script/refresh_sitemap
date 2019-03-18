@@ -213,8 +213,8 @@ def update_times_of_objects_with_new_comments(times, comments, type)
   for target_type, target_id, target_time in comments
     target_id = target_id.to_i
     target_time = parse_mysql_time(target_time)
-    if target_type == type &&
-                      (!times[target_id] || times[target_id] < target_time)
+    if target_type == type && (!times[target_id] ||
+                               times[target_id] < target_time)
       times[target_id] = target_time
     end
   end
