@@ -98,9 +98,9 @@ namespace :lang do
 
   desc 'Turn on safe mode if include "safe=yes".'
   task(:safe_mode) do
-    return unless ENV.include?("safe")
-
-    Language.safe_mode = true
-    puts "*** SAFE MODE ***"
+    if ENV.include?("safe")
+      Language.safe_mode = true
+      puts "*** SAFE MODE ***"
+    end
   end
 end
