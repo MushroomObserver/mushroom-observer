@@ -76,7 +76,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:signup, new_user: params.except(:email))
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?, assigns("new_user").dump_errors)
+    assert(assigns("new_user").errors[:email].any?,
+           assigns("new_user").dump_errors)
 
     # Email doesn't match.
     post(:signup, new_user: params.merge(email_confirmation: "wrong"))
