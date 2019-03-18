@@ -21,9 +21,12 @@
 #  click::            Click on first link that matches the given args.
 #
 #  ==== Links
-#  assert_link_exists::                   Check that a link exists somewhere on the page.
-#  assert_link_exists_containing::        Check that a link containing a given string exists.
-#  assert_link_exists_beginning_with::    Check that a link beginning with a given string exists.
+#  assert_link_exists::                   Check that a link exists somewhere
+#                                         on the page.
+#  assert_link_exists_containing::        Check that a link containing a given
+#                                         string exists.
+#  assert_link_exists_beginning_with::    Check that a link beginning with a
+#                                         given string exists.
 #  assert_no_link_exists::                Opposite of above.
 #  assert_no_link_exists_containing::     Opposite of above.
 #  assert_no_link_exists_beginning_with:: Opposite of above.
@@ -31,7 +34,8 @@
 #  ==== Forms
 #  open_form::        Encapsulate filling out and posting a given form.
 #  submit_form_with_changes::  Open form, apply Hash of changes, and submit it.
-#  assert_form_has_correct_values::  Make sure a given form has been initialized correctly.
+#  assert_form_has_correct_values::  Make sure a given form has been
+#                                    initialized correctly.
 #
 ################################################################################
 
@@ -75,7 +79,8 @@ module SessionExtensions
       end
       flunk msg
     end
-    assert_equal([], Symbol.missing_tags, "Language tag(s) are missing. #{url}: #{method}")
+    assert_equal([], Symbol.missing_tags,
+                 "Language tag(s) are missing. #{url}: #{method}")
     save_page
   ensure
     @doing_with_error_checking = false
@@ -327,10 +332,12 @@ module SessionExtensions
   end
 
   def assert_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}='#{url}']", { minimum: 1 }, "Expected to find link to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { minimum: 1 },
+                  "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}='#{url}']", { count: 0 }, "Shouldn't be any links to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { count: 0 },
+                  "Shouldn't be any links to #{url}")
   end
 end
