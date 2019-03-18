@@ -1,4 +1,7 @@
-namespace :location do
+# frozen_string_literal: true
+
+# disable cop because no alternative given size of array
+namespace :location do # rubocop:disable Metrics/BlockLength
   # disable cop to make array simpler and more readable
   # rubocop:disable Metrics/LineLength
   APPROVED_LOCATIONS = Set.new(
