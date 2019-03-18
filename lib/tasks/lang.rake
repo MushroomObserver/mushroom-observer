@@ -35,7 +35,7 @@ def define_tasks(action, verbose, verbose_method, description)
     end
   end
 
-  all_locales.ech do |locale|
+  all_locales.each do |locale|
     desc description.gsub(/XXX/, locale).gsub(/\(S\)/, "")
     task(locale => :setup) do |task|
       lang = Language.find_by_locale(task.name.sub(/.*:/, ""))
