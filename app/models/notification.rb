@@ -8,8 +8,7 @@
 #  user::             User who created it
 #  flavor::           Type of Notification
 #  obj_id::           Id of principal object
-#  note_template::    Template for an email
-#                     (context depends on type of Notification)
+#  note_template::   Template for an email, context depends on Notification type
 #  require_specimen:: Require observation to have a specimen?
 #
 #  == Class methods
