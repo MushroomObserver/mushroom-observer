@@ -14,9 +14,8 @@
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
 #  merge_source_id::  (V) Tracks of descriptions that were merged into this one.
-#                         Primarily useful in the past versions: stores id of
-#                         latest version of the Description merged into this one
-#                         at the time of the merge.
+#    Primarily useful in the past versions: stores id of latest version of the
+#    Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
 #  num_views::        (-) Number of times it has been viewed.
