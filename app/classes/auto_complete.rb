@@ -170,7 +170,9 @@ end
 class AutoCompleteUser < AutoCompleteByString
   def rough_matches(letter)
     User.connection.select_values(%(
-      SELECT DISTINCT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+      SELECT DISTINCT CONCAT(
+        users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">"))
+      )
       FROM users
       WHERE login LIKE '#{letter}%'
          OR name LIKE '#{letter}%'

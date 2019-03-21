@@ -54,7 +54,11 @@ class NamingParams
                   name_str = nil, approved_name = nil, chosen_name = nil)
     @naming = Naming.construct(naming_args, @observation)
     @vote = Vote.construct(vote_args, @naming)
-    result = name_str ? resolve_name(name_str, approved_name, chosen_name) : true
+    result = if name_str
+               resolve_name(name_str, approved_name, chosen_name)
+             else
+               true
+             end
     @naming.name = @name
     result
   end

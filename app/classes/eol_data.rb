@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 #  = EOL Data
 #
@@ -11,8 +12,6 @@
 #    descriptions(id) - id is the id of a Name
 #    description_count(id) - id is the id of a Name
 #
-################################################################################
-
 class EolData
   attr_accessor :names
 
@@ -47,9 +46,12 @@ class EolData
     @id_to_description.count
   end
 
+  # grandfather method name to avoid breaking 3rd-party use of API
+  # rubocop:disable Naming/PredicateName: Rename
   def has_images?(id)
     @name_id_to_images.member?(id)
   end
+  # rubocop:enable Naming/PredicateName: Rename
 
   def all_images
     @id_to_image.values
@@ -60,16 +62,15 @@ class EolData
   end
 
   def image_count(id)
-    if has_images?(id)
-      @name_id_to_images[id].count
-    else
-      0
-    end
+    has_images?(id) ? @name_id_to_images[id].count : 0
   end
 
+  # grandfather method name to avoid breaking 3rd-party use of API
+  # rubocop:disable Naming/PredicateName: Rename
   def has_descriptions?(id)
     @name_id_to_descriptions.member?(id)
   end
+  # rubocop:enable Naming/PredicateName: Rename
 
   def all_descriptions
     @id_to_description.values
@@ -80,11 +81,7 @@ class EolData
   end
 
   def description_count(id)
-    if has_descriptions?(id)
-      @name_id_to_descriptions[id].count
-    else
-      0
-    end
+    has_descriptions?(id) ? @name_id_to_descriptions[id].count : 0
   end
 
   def license_url(id)
@@ -97,11 +94,7 @@ class EolData
 
   def rights_holder(image)
     result = image.copyright_holder
-    if result.nil? || result.strip == ""
-      legal_name(image.user_id)
-    else
-      result
-    end
+    result.nil? || result.strip == "" ? legal_name(image.user_id) : result
   end
 
   def authors(id)
@@ -143,10 +136,13 @@ class EolData
     WHERE name_descriptions.name_id = names.id
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND name_descriptions.review_status in (#{NameDescription.review_statuses[:vetted]}, #{NameDescription.review_statuses[:unvetted]})
+    AND name_descriptions.review_status in (
+      #{NameDescription.review_statuses[:vetted]},
+      #{NameDescription.review_statuses[:unvetted]}
+    )
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
-  ).freeze
+  )
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -154,13 +150,20 @@ class EolData
 
   def name_id_to_descriptions
     descriptions = @id_to_description
-    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, name_descriptions.id did #{DESCRIPTION_CONDITIONS}").to_a.map do |row|
+    make_list_hash_from_pairs(Name.connection.select_all(
+      "SELECT DISTINCT names.id nid,
+                       name_descriptions.id did #{DESCRIPTION_CONDITIONS}"
+    ).to_a.map do |row|
       [row["nid"], descriptions[row["did"]]]
     end)
   end
 
   def id_to_description
-    make_id_hash(NameDescription.find_by_sql("SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"))
+    make_id_hash(
+      NameDescription.find_by_sql(
+        "SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"
+      )
+    )
   end
 
   IMAGE_CONDITIONS = %(FROM observations, images_observations, images, names
@@ -172,8 +175,10 @@ class EolData
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN (#{Name.ranks.values_at(:Form, :Variety, :Subspecies, :Species, :Genus).join(",")})
-  ).freeze
+    AND names.rank IN (#{Name.ranks.values_at(
+      :Form, :Variety, :Subspecies, :Species, :Genus
+    ).join(",")})
+  )
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
@@ -192,7 +197,7 @@ class EolData
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-  ).freeze
+  )
 
   def glossary_term_names
     get_sorted_names(GLOSSARY_TERM_CONDITIONS)
@@ -267,7 +272,9 @@ class EolData
     end
     result = make_list_hash_from_pairs(pairs)
     all_descriptions.each do |d|
-      result[d.id] = [@user_id_to_legal_name[d.user_id]] unless result.member?(d.id)
+      next if result.member?(d.id)
+
+      result[d.id] = [@user_id_to_legal_name[d.user_id]]
     end
     result
   end
@@ -300,9 +307,11 @@ class EolData
 
   def eol_search_url(class_name, subject)
     if class_name == "Image"
-      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}&type%5B%5D=Image"
+      "http://eol.org/search?q=#{image_to_names(subject.id).tr(" ", "+")}"\
+      "&type%5B%5D=Image"
     elsif class_name == "Name"
-      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}&type%5B%5D=TaxonConcept"
+      "http://eol.org/search?q=#{subject.text_name.tr(" ", "+")}"\
+      "&type%5B%5D=TaxonConcept"
     else
       "http://eol.org"
     end
