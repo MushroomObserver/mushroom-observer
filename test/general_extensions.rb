@@ -5,8 +5,7 @@
 #
 #  == Test unit helpers
 #  rolf, mary, etc.::           Quick access to User instances.
-#  setup_image_dirs::           Create test image dirs for tests
-#                               that do image uploads.
+#  setup_image_dirs::  Create test image dirs for tests that do image uploads.
 #
 #  == General Assertions
 #  assert_fail::                Make sure an assertion fails.
@@ -20,8 +19,7 @@
 #  assert_objs_equal::          Compare two model instances.
 #  assert_users_equal::         Compare two user instances.
 #  assert_names_equal::         Compare two name instances.
-#  assert_list_equal::          Compare two lists by mapping and sorting
-#                               elements.
+#  assert_list_equal:: Compare two lists by mapping and sorting elements.
 #  assert_obj_list_equal::      Compare two lists of objects, comparing ids.
 #  assert_user_list_equal::     Compare two lists of User's.
 #  assert_name_list_equal::     Compare two lists of Name's.

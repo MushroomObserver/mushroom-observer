@@ -21,8 +21,7 @@
 #  click::            Click on first link that matches the given args.
 #
 #  ==== Links
-#  assert_link_exists::                   Check that a link exists somewhere
-#                                         on the page.
+#  assert_link_exists::         Check that a link exists somewhere on the page.
 #  assert_link_exists_containing::        Check that a link containing a given
 #                                         string exists.
 #  assert_link_exists_beginning_with::    Check that a link beginning with a
@@ -32,7 +31,7 @@
 #  assert_no_link_exists_beginning_with:: Opposite of above.
 #
 #  ==== Forms
-#  open_form::        Encapsulate filling out and posting a given form.
+#  open_form::                 Encapsulate filling out and posting a given form.
 #  submit_form_with_changes::  Open form, apply Hash of changes, and submit it.
 #  assert_form_has_correct_values::  Make sure a given form has been
 #                                    initialized correctly.
