@@ -652,8 +652,10 @@ class AccountController < ApplicationController
         group_name = params["group_name"].to_s
         user       = User.find_by(login: user_name)
         group      = UserGroup.find_by(name: group_name)
-        flash_error :add_user_to_group_no_user.t(user: user_name)    unless user
-        flash_error :add_user_to_group_no_group.t(group: group_name) unless group
+        flash_error :add_user_to_group_no_user.t(user: user_name) unless user
+        unless group
+          flash_error :add_user_to_group_no_group.t(group: group_name)
+        end
         if user && group
           if user.user_groups.member?(group)
             flash_warning :add_user_to_group_already. \

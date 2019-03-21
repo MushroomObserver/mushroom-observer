@@ -138,13 +138,17 @@ class TranslationController < ApplicationController
     str = @lang.translation_strings.create(tag: tag, text: val)
     @translated_records[tag] = str
     str.update_localization
-    flash_notice(:edit_translations_created_at.t(tag: tag, str: val)) unless @ajax
+    return if @ajax
+
+    flash_notice(:edit_translations_created_at.t(tag: tag, str: val))
   end
 
   def change_translation(str, val)
     str.update!(text: val)
     str.update_localization
-    flash_notice(:edit_translations_changed.t(tag: str.tag, str: val)) unless @ajax
+    return if @ajax
+
+    flash_notice(:edit_translations_changed.t(tag: str.tag, str: val))
   end
 
   def touch_translation(str)
@@ -228,12 +232,14 @@ class TranslationController < ApplicationController
 
   def include_unlisted_tags
     unlisted_tags = @tags.keys - @tags_used.keys
-    if unlisted_tags.any?
-      @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
-      @form << TranslationFormMinorHeader.new("These tags are missing from the export files.")
-      for tag in unlisted_tags.sort
-        @form << TranslationFormTagField.new(tag)
-      end
+    return if unlisted_tags.none?
+
+    @form << TranslationFormMajorHeader.new("UNLISTED STRINGS")
+    @form << TranslationFormMinorHeader.new(
+      "These tags are missing from the export files."
+    )
+    unlisted_tags.sort.each do |tag|
+      @form << TranslationFormTagField.new(tag)
     end
   end
 

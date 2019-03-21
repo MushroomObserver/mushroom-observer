@@ -44,7 +44,11 @@ class NameController
   def init_edit_name_form
     if !params[:name]
       @misspelling      = @name.is_misspelling?
-      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ""
+      @correct_spelling = if @misspelling
+                            @name.correct_spelling.real_search_name
+                          else
+                            ""
+                          end
     else
       @misspelling      = params[:name][:misspelling] == "1"
       @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze

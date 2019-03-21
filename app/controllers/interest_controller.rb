@@ -58,7 +58,9 @@ class InterestController < ApplicationController
     uid    = params[:user]
     target = Comment.find_object(type, oid)
     if @user
-      interest = Interest.find_by_target_type_and_target_id_and_user_id(type, oid, @user.id)
+      interest = Interest.find_by_target_type_and_target_id_and_user_id(
+        type, oid, @user.id
+      )
       if uid && @user.id != uid.to_i
         flash_error(:set_interest_user_mismatch.l)
       elsif !target && state != 0
@@ -83,9 +85,13 @@ class InterestController < ApplicationController
             end
           end
         elsif interest.state == true && state.positive?
-          flash_notice(:set_interest_already_on.l(name: target.unique_text_name))
+          flash_notice(
+            :set_interest_already_on.l(name: target.unique_text_name)
+          )
         elsif interest.state == false && state.negative?
-          flash_notice(:set_interest_already_off.l(name: target.unique_text_name))
+          flash_notice(
+            :set_interest_already_off.l(name: target.unique_text_name)
+          )
         else
           interest.state = state.positive?
           interest.updated_at = Time.now
@@ -93,9 +99,13 @@ class InterestController < ApplicationController
             flash_notice(:set_interest_failure.l(name: target.unique_text_name))
           else
             if state.positive?
-              flash_notice(:set_interest_success_on.l(name: target.unique_text_name))
+              flash_notice(
+                :set_interest_success_on.l(name: target.unique_text_name)
+              )
             else
-              flash_notice(:set_interest_success_off.l(name: target.unique_text_name))
+              flash_notice(
+                :set_interest_success_off.l(name: target.unique_text_name)
+              )
             end
           end
         end

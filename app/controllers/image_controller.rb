@@ -358,42 +358,46 @@ class ImageController < ApplicationController
   # Outputs: @image, @licenses
   def edit_image # :prefetch: :norobots:
     pass_query_params
-    if @image = find_or_goto_index(Image, params[:id].to_s)
-      @licenses = License.current_names_and_ids(@image.license)
-      if !check_permission!(@image)
-        redirect_with_query(action: "show_image", id: @image)
-      elsif request.method != "POST"
-        init_project_vars_for_add_or_edit(@image)
-      else
-        @image.attributes = whitelisted_image_params
-        xargs = {}
-        xargs[:set_date] = @image.when if @image.when_changed?
-        xargs[:set_notes] = @image.notes if @image.notes_changed?
-        xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
-        xargs[:set_original_name] = @image.original_name if @image.original_name_changed?
-        xargs[:set_license] = @image.license if @image.license_id_changed?
-        done = false
-        if xargs.empty?
-          if update_projects(@image, params[:project])
-            flash_notice :runtime_image_edit_success.t(id: @image.id)
-          else
-            flash_notice(:runtime_no_changes.t)
-          end
-          done = true
-        elsif !@image.save
-          flash_object_errors(@image)
-        else
-          xargs[:id] = @image
-          @image.log_update
+    return unless (@image = find_or_goto_index(Image, params[:id].to_s))
+
+    @licenses = License.current_names_and_ids(@image.license)
+    if !check_permission!(@image)
+      redirect_with_query(action: "show_image", id: @image)
+    elsif request.method != "POST"
+      init_project_vars_for_add_or_edit(@image)
+    else
+      @image.attributes = whitelisted_image_params
+      xargs = {}
+      xargs[:set_date] = @image.when if @image.when_changed?
+      xargs[:set_notes] = @image.notes if @image.notes_changed?
+      if @image.copyright_holder_changed?
+        xargs[:set_copyright_holder] = @image.copyright_holder
+      end
+      if @image.original_name_changed?
+        xargs[:set_original_name] = @image.original_name
+      end
+      xargs[:set_license] = @image.license if @image.license_id_changed?
+      done = false
+      if xargs.empty?
+        if update_projects(@image, params[:project])
           flash_notice :runtime_image_edit_success.t(id: @image.id)
-          update_projects(@image, params[:project])
-          done = true
-        end
-        if done
-          redirect_with_query(action: "show_image", id: @image.id)
         else
-          init_project_vars_for_reload(@image)
+          flash_notice(:runtime_no_changes.t)
         end
+        done = true
+      elsif !@image.save
+        flash_object_errors(@image)
+      else
+        xargs[:id] = @image
+        @image.log_update
+        flash_notice :runtime_image_edit_success.t(id: @image.id)
+        update_projects(@image, params[:project])
+        done = true
+      end
+      if done
+        redirect_with_query(action: "show_image", id: @image.id)
+      else
+        init_project_vars_for_reload(@image)
       end
     end
   end
@@ -535,12 +539,12 @@ class ImageController < ApplicationController
   end
 
   def look_for_image(method, params)
-    result = nil
-    if (method == "POST") || params[:img_id].present?
-      result = Image.safe_find(params[:img_id])
-      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id])) unless result
+    return nil unless (method == "POST") || params[:img_id].present?
+
+    unless (img = Image.safe_find(params[:img_id]))
+      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
     end
-    result
+    img
   end
 
   def reuse_image_for_glossary_term
@@ -573,7 +577,9 @@ class ImageController < ApplicationController
   def reuse_image # :norobots:
     pass_query_params
     @mode = params[:mode].to_sym
-    @observation = Observation.safe_find(params[:obs_id]) if @mode == :observation
+    if @mode == :observation
+      @observation = Observation.safe_find(params[:obs_id])
+    end
     done = false
 
     # Make sure user owns the observation.
@@ -805,15 +811,19 @@ class ImageController < ApplicationController
         )
         flash_notice(:image_vote_anonymity_made_public.t)
       else
-        flash_error(:image_vote_anonymity_invalid_submit_button.l(label: submit))
+        flash_error(
+          :image_vote_anonymity_invalid_submit_button.l(label: submit)
+        )
       end
       redirect_to(controller: "account", action: "prefs")
     else
       @num_anonymous = ImageVote.connection.select_value %(
-        SELECT count(id) FROM image_votes WHERE user_id = #{@user.id} AND anonymous
+        SELECT count(id) FROM image_votes
+        WHERE user_id = #{@user.id} AND anonymous
       )
       @num_public = ImageVote.connection.select_value %(
-        SELECT count(id) FROM image_votes WHERE user_id = #{@user.id} AND !anonymous
+        SELECT count(id) FROM image_votes
+        WHERE user_id = #{@user.id} AND !anonymous
       )
     end
   end
@@ -824,137 +834,6 @@ class ImageController < ApplicationController
     ))
     flash_notice(:prefs_bulk_filename_purge_success.t)
     redirect_to(controller: :account, action: :prefs)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Stuff for Mushroom App
-  #
-  ##############################################################################
-
-  def images_for_mushroom_app # :nologin: :norobots:
-    minimum_confidence = params[:minimum_confidence].presence || 1.5
-    minimum_quality = params[:minimum_quality].presence || 2.0
-    target_width = params[:target_width].presence || 400
-    target_height = params[:target_height].presence || 600
-    minimum_width = params[:minimum_width].presence || target_width
-    minimum_height = params[:minimum_height].presence || target_height
-    confidence_reward = params[:confidence_reward].presence || 2.0
-    quality_reward = params[:quality_reward].presence || 1.0
-    ratio_penalty = params[:ratio_penalty].presence || 0.5
-
-    # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
-    # If we wanted 600x400 it will penalize 400x400 images by "ratio_penalty".
-    ratio_penalty = ratio_penalty.to_f / Math.log10(600.0 / 400)
-
-    names = get_list_of_names(params[:names])
-    names = names.map { |n| "'" + n.gsub(/'/, '\\\'') + "'" }.join(",")
-
-    data = Name.connection.select_rows(%(
-      SELECT y.name, y.id, y.width, y.height
-      FROM (
-        SELECT x.text_name AS name, i.id AS id, i.width AS width, i.height AS height
-        FROM (
-          SELECT DISTINCT n1.text_name AS text_name, n2.id AS name_id
-          FROM names n1
-          JOIN names n2 ON IF(n1.synonym_id IS NULL, n2.id = n1.id, n2.synonym_id = n1.synonym_id)
-          WHERE n1.rank = #{Name.ranks[:Species]} AND n1.text_name IN (#{names})
-        ) AS x, observations o, images i
-        WHERE o.name_id = x.name_id
-          AND i.id = o.thumb_image_id
-          AND o.vote_cache >= #{minimum_confidence}
-          AND i.vote_cache >= #{minimum_quality}
-          AND i.width >= #{minimum_width} AND i.height >= #{minimum_height}
-        ORDER BY
-          o.vote_cache * #{confidence_reward} +
-          i.vote_cache * #{quality_reward} -
-          ABS(LOG(width/height) - #{Math.log10(target_width.to_f / target_height)}) * #{ratio_penalty} DESC
-      ) AS y
-      GROUP BY y.name
-    ))
-
-    if params[:test]
-      render_test_image_report(data)
-    else
-      render_image_csv_file(data)
-    end
-  rescue StandardError => e
-    render(plain: e.to_s, layout: false, status: :internal_server_error)
-  end
-
-  def render_test_image_report(data)
-    report = data.map do |name, id|
-      "<img src='/images/320/#{id}.jpg'/><br/><i>#{name}</i><br/>"
-    end.join("<br/>\n")
-    render(plain: report)
-  end
-
-  def render_image_csv_file(data)
-    report = CSV.generate(col_sep: "\t") do |csv|
-      csv << ["name", "image id", "image width", "image height"]
-      data.each do |name, id, width, height|
-        csv << [name, id.to_s, width.to_s, height.to_s]
-      end
-    end
-    send_data(report,
-              type: "text/csv",
-              charset: "UTF-8",
-              header: "present",
-              disposition: "attachment",
-              filename: "#{action_name}.csv")
-  end
-
-  def get_list_of_names(file)
-    results = []
-    if file.respond_to?(:read) &&
-       file.respond_to?(:content_type)
-      get_list_of_names_from_file(file)
-    elsif file.is_a?(String)
-      get_list_of_names_from_string(file)
-    elsif file.present?
-      raise "Names file came in as an unexpected class:" \
-        "#{file.class.name.inspect}"
-    else
-      raise "Missing names file!"
-    end
-  end
-
-  def get_list_of_names_from_file(file)
-    case file.content_type.chomp
-    when "text/plain",
-         "application/text",
-         "application/octet-stream"
-      get_list_of_names_from_plain_text_file(file)
-    when "text/csv"
-      get_list_of_names_from_csv_file(file)
-    else
-      raise "Names file has unrecognized content_type: #{content_type.inspect}"
-    end
-  end
-
-  def get_list_of_names_from_csv_file(file)
-    results = CSV.parse(file.read)
-    headings = results.shift.map(&:to_s).map(&:downcase)
-    name_column = headings.index_of("name")
-    rank_column = headings.index_of("rank")
-    unless name_column
-      raise 'Expected names file to have a \"name\" column, ' \
-        "with column label in the first row."
-    end
-    if rank_column
-      results.reject! { |row| row[rank_column].to_s.downcase != "species" }
-    end
-    results.map do |row|
-      row[name_column].to_s.strip_squeeze
-    end.reject(:blank?)
-  end
-
-  def get_list_of_names_from_plain_text_file(file)
-    file.read.split(/[\r\n]+/)
-  end
-
-  def get_list_of_names_from_string(str)
-    str.split(/\s*,\s*/)
   end
 
   ##############################################################################

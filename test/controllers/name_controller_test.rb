@@ -234,10 +234,6 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:list_names)
   end
 
-  def test_mushroom_app_report
-    get(:names_for_mushroom_app)
-  end
-
   def test_show_name
     assert_equal(0, QueryRecord.count)
     get_with_dump(:show_name, id: names(:coprinus_comatus).id)
@@ -1640,6 +1636,14 @@ class NameControllerTest < FunctionalTestCase
     assert_true(name.deprecated)
     assert_equal("Foo", name.text_name)
     assert_equal("Bar", name.author)
+  end
+
+  def test_edit_misspelled_name
+    misspelled_name = names(:suilus)
+    login("rolf")
+    get(:edit_name, id: misspelled_name.id)
+    assert_select("input[type=checkbox]#name_misspelling", count: 1)
+    assert_select("input[type=text]#name_correct_spelling", count: 1)
   end
 
   # ----------------------------
@@ -3689,14 +3693,6 @@ class NameControllerTest < FunctionalTestCase
     notification = Notification.
                    find_by(flavor: :name, obj_id: name.id, user_id: rolf.id)
     assert_nil(notification)
-  end
-
-  # ----------------------------
-  #  Mushroom App
-  # ----------------------------
-
-  def test_names_for_mushroom_app
-    requires_login(:names_for_mushroom_app)
   end
 
   # ----------------------------
