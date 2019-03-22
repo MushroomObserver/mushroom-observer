@@ -140,20 +140,26 @@ module ObjectLinkHelper
     link_with_query(result, desc.show_link_args)
   end
 
+  # Array of links to searches on external sites;
+  # Shown on create/edit location pages
   def location_search_links(name)
     search_string = name.gsub(" Co.", " County").gsub(", USA", "").
                     tr(" ", "+").gsub(",", "%2C")
-    [
-      link_to("Google Maps", "http://maps.google.com/maps?q=" + search_string),
-      link_to("Yahoo Maps", "http://maps.yahoo.com/#mvt=m&q1=" + search_string),
-      link_to(
-        "Wikipedia",
-        "http://en.wikipedia.org/w/index.php?title=Special:Search&search=" +
-          search_string
-      ),
-      link_to("Google Search",
-              "http://www.google.com/search?q=" + search_string)
-    ]
+    LOCATION_SEARCH_URLS.each_with_object([]) do |site, link_array|
+      link_array << search_link_to(site.first, search_string)
+    end
+  end
+
+  LOCATION_SEARCH_URLS = {
+    Google_Maps: "https://maps.google.com/maps?q=",
+    Google_Search: "https://www.google.com/search?q=",
+    Wikipedia: "https://en.wikipedia.org/w/index.php?search="
+  }.freeze
+
+  def search_link_to(site_symbol, search_string)
+    return unless (url = LOCATION_SEARCH_URLS[site_symbol])
+
+    link_to(site_symbol.to_s.titlecase, url << search_string)
   end
 
   def add_sequence_link(obs)
