@@ -29,14 +29,15 @@ module PaginationHelper
   #   <%= pagination_letters(@pages) %>
   #   <%= pagination_numbers(@pages) %>
   #
+  LETTERS = ("A".."Z").freeze
+
   def pagination_letters(pages, args = {})
     return safe_empty unless need_letter_pagination_links?(pages)
 
     args = args.dup
     args[:params] = (args[:params] || {}).dup
     args[:params][pages.number_arg] = nil
-    str = %w[A B C D E F G H I J K L M N O P Q R S T U V W X Y Z].
-          map do |letter|
+    str = LETTERS.map do |letter|
             if !pages.used_letters || pages.used_letters.include?(letter)
               pagination_link(letter, letter, pages.letter_arg, args)
             else
