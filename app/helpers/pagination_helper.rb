@@ -29,8 +29,6 @@ module PaginationHelper
   #   <%= pagination_letters(@pages) %>
   #   <%= pagination_numbers(@pages) %>
   #
-  LETTERS = ("A".."Z").freeze
-
   def pagination_letters(pages, args = {})
     return safe_empty unless need_letter_pagination_links?(pages)
 
@@ -38,12 +36,12 @@ module PaginationHelper
     args[:params] = (args[:params] || {}).dup
     args[:params][pages.number_arg] = nil
     str = LETTERS.map do |letter|
-            if !pages.used_letters || pages.used_letters.include?(letter)
-              pagination_link(letter, letter, pages.letter_arg, args)
-            else
-              content_tag(:li, content_tag(:span, letter), class: "disabled")
-            end
-          end.safe_join(" ")
+      if !pages.used_letters || pages.used_letters.include?(letter)
+        pagination_link(letter, letter, pages.letter_arg, args)
+      else
+        content_tag(:li, content_tag(:span, letter), class: "disabled")
+      end
+    end.safe_join(" ")
     content_tag(:div, str, class: "pagination pagination-sm")
   end
 
@@ -54,6 +52,8 @@ module PaginationHelper
       (pages.letter || pages.num_total > pages.num_per_page) &&
       (!pages.used_letters || pages.used_letters.length > 1)
   end
+
+  LETTERS = ("A".."Z").freeze
 
   # Insert numbered pagination links.  I've thrown out the Rails plugin
   # pagination_letters because it is no longer giving us enough to be worth it.
