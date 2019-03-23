@@ -29,11 +29,7 @@ class Name < AbstractModel
 
     # Move all misspellings over to the new name.
     old_name.misspellings.each do |name|
-      name.correct_spelling = if name == self
-                                nil
-                              else
-                                self
-                              end
+      name.correct_spelling = name == self ? nil : self
       name.save
     end
 
