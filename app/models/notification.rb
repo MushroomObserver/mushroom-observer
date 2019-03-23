@@ -53,27 +53,20 @@ class Notification < AbstractModel
   #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
-    return unless (template = note_template)
+    return nil unless (template = note_template) && flavor == :name
 
-    case flavor.to_sym
-    when :name
-      tracker  = user
-      observer = args[:user]
-      naming   = args[:naming]
-      unless observer
-        raise "Missing 'user' argument for #{flavor} notification."
-      end
-      unless naming
-        raise "Missing 'naming' argument for #{flavor} notification."
-      end
+    tracker  = user
+    observer = args[:user]
+    naming   = args[:naming]
+    raise "Missing 'user' argument for #{flavor} notification." unless observer
+    raise "Missing 'naming' argument for #{flavor} notification." unless naming
 
-      template.
-        gsub(":observer", observer.login).
-        gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
-        gsub(":mailing_address", tracker.mailing_address || "").
-        gsub(":location", naming.observation.place_name).
-        gsub(":name", naming.format_name)
-    end
+    template.
+      gsub(":observer", observer.login).
+      gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
+      gsub(":mailing_address", tracker.mailing_address || "").
+      gsub(":location", naming.observation.place_name).
+      gsub(":name", naming.format_name)
   end
 
   # Return principal target involved.  Again, this is different for each
@@ -82,18 +75,12 @@ class Notification < AbstractModel
   # name::   Name that User is tracking.
   #
   def target
-    # target already known
-    return @target if @target
-
-    @target = case flavor
-              when :name then Name.find(obj_id)
-              end
+    @target ||= flavor == :name ? Name.find(obj_id) : nil
   end
 
   # Return a string summarizing what this Notification is about.
   def summary
-    case flavor
-    when :name
+    if flavor == :name
       "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
     else
       "Unrecognized notification flavor"
@@ -107,8 +94,7 @@ class Notification < AbstractModel
   #
   def link_params
     result = {}
-    case flavor
-    when :name
+    if flavor == :name
       result[:controller] = :name
       result[:action] = :email_tracking
       result[:id] = obj_id
