@@ -6,12 +6,13 @@
 #
 #  === Localization files
 #
-#  YAML files: <tt>config/locales/en.yml</tt>  These are written automatically and
-#  should never be edited by hand anymore.
+#  YAML files: <tt>config/locales/en.yml</tt>
+#  These are written automatically and should never be edited by hand anymore.
 #
 #  === Export files
 #
-#  Text files: <tt>config/locales/en.yml</tt>  These are meant to be edited by hand.
+#  Text files: <tt>config/locales/en.yml</tt>
+#  These are meant to be edited by hand.
 #  Note that one of the locales is chosen as the "official" locale.  All the
 #  other files are patterned after this one.  You can import changes from any
 #  of these files, and it will update the database and YAML files automatically.
@@ -119,8 +120,9 @@ module LanguageExporter
     any_changes
   end
 
-  # Strip tags "unused" translation strings from unofficial locales.  That is, remove
-  # any strings from unofficial locales which are not also in the official locale.
+  # Strip tags "unused" translation strings from unofficial locales.
+  # That is, remove any strings from unofficial locales which are not also
+  # in the official locale.
   def strip
     any_changes = false
     good_tags = Language.official.read_export_file
@@ -149,7 +151,8 @@ module LanguageExporter
     merge_localization_strings_into({})
   end
 
-  # Return Hash mapping tag (String) to TranslationString (ActiveRecord instance).
+  # Return Hash mapping tag (String) to
+  # TranslationString (ActiveRecord instance).
   def translation_strings_hash
     hash = {}
     for str in translation_strings

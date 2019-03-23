@@ -14,7 +14,7 @@
 #  text_name::                  Description of Agaricus from Source
 #  unique_text_name::           Description of Agaricus from Source (123)
 #  format_name::                Description of **__Agaricus__** from __Source__
-#  unique_format_name::         Description of **__Agaricus__** from __Source__ (123)
+#  unique_format_name::    Description of **__Agaricus__** from __Source__ (123)
 #  partial_text_name::          Description from Source
 #  unique_partial_text_name::   Description from Source (123)
 #  partial_format_name::        Description from __Source__
@@ -52,9 +52,9 @@
 #  remove_admin::         Remove a User's or UserGroup's admin privileges.
 #  remove_writer::        Remove a User's or UserGroup's writer privileges.
 #  remove_reader::        Remove a User's or UserGroup's reader privileges.
-#  permitted?::      Does a given User have a given type of permission?
+#  permitted?::           Does a given User have a given type of permission?
 #  group_user_ids::       Get list of user ids from a given permissions table.
-#  group_ids::            Get list of user_group ids from a given permissions table.
+#  group_ids::      Get list of user_group ids from a given permissions table.
 #  admins_join_table::    Table used to list admin groups.
 #  writers_join_table::   Table used to list writer groups.
 #  readers_join_table::   Table used to list reader groups.
@@ -74,7 +74,8 @@
 #
 #  == Callbacks
 #  before_save::          Add User as author/editor before making change.
-#  before_destroy::       Subtract authorship/editorship contributions before destroy.
+#  before_destroy::       Subtract authorship/editorship contributions
+#                         before destroy.
 #
 ############################################################################
 

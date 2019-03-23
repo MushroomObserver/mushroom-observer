@@ -323,7 +323,9 @@ class Location < AbstractModel
     where = ""
     where = "WHERE observations.user_id = #{User.current_id}" if User.current
     result = connection.select_values(%(
-      SELECT DISTINCT IF(observations.location_id > 0, locations.name, observations.where) AS x
+      SELECT DISTINCT IF(observations.location_id > 0,
+                         locations.name,
+                         observations.where) AS x
       FROM observations
       LEFT OUTER JOIN locations ON locations.id = observations.location_id
       #{where}
@@ -336,7 +338,8 @@ class Location < AbstractModel
     result
   end
 
-  # Takes a location string splits on commas, reverses the order, and joins it back together
+  # Takes a location string splits on commas, reverses the order,
+  # and joins it back together
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
