@@ -1,5 +1,5 @@
 <%
-  @title = :rss_log_title.t.nowrap
+  @title = content_tag(:span, :rss_log_title.t, style: "white-space:nowrap")
 
   if @links.any?
     tabs = create_links(@links)
@@ -11,7 +11,10 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
+  <%= render(partial: "shared/matrix_box",
+             layout: "shared/matrix_table",
+             collection: @objects,
+             as: :object) %>
   <div style="clear:left"></div>
 <% end %>
 

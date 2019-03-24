@@ -499,12 +499,6 @@ class String
         /&(#\d+|[a-zA-Z]+);/
       ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.html_safe
   end
-
-  # Surround HTML string with a span that prevents long strings from being
-  # broken.
-  def nowrap
-    '<span style="white-space:nowrap">'.html_safe + self + "</span>".html_safe
-  end
   # rubocop:enable Rails/OutputSafety
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
