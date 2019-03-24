@@ -374,37 +374,38 @@ class String
 
   ### Textile-related methods ###
 
-  # Disable cop because we need to use html_safe to avoid added escaping
-  # rubocop:disable Rails/OutputSafety
   def t(sanitize = true)
-    Textile.textilize_without_paragraph(self, false, sanitize).html_safe
+    Textile.textilize_without_paragraph_safe(self, false, sanitize)
   end
 
   def tl(sanitize = true)
-    Textile.textilize_without_paragraph(self, true, sanitize).html_safe
+    Textile.textilize_without_paragraph_safe(self, true, sanitize)
   end
 
-  # TODO: Move somewhere that content_tag is defined
+  # Textilize string, wrapped in a <div>, making it all safe for output
   def tp(sanitize = true)
-    '<div class="textile">'.html_safe <<
-      Textile.textilize(self, false, sanitize).html_safe <<
-      "</div>".html_safe
+    textile_div_safe { Textile.textilize(self, false, sanitize) }
   end
 
+  # Textilize string (with links), wrapped in a <div>,
+  # making it all safe for output
   def tpl(sanitize = true)
-    '<div class="textile">'.html_safe <<
-      Textile.textilize(self, true, sanitize).html_safe <<
-      "</div>".html_safe
+    textile_div_safe { Textile.textilize(self, true, sanitize) }
+  end
+
+  def textile_div_safe
+    %(<div class="textile">#{yield}</div>).
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
   end
 
   def tp_nodiv(sanitize = true)
-    Textile.textilize(self, false, sanitize)
+    Textile.textilize_safe(self, false, sanitize)
   end
 
   def tpl_nodiv(sanitize = true)
-    Textile.textilize(self, true, sanitize)
+    Textile.textilize_safe(self, true, sanitize)
   end
-  # rubocop:enable Rails/OutputSafety
 
   ### String transformations ###
   #
@@ -436,9 +437,6 @@ class String
   def strip_links
     gsub(%r{</?a.*?>}, "")
   end
-
-  # Disable cop because we need to use html_safe to avoid added escaping
-  # rubocop:disable Rails/OutputSafety
 
   # Truncate an HTML string, being careful to close off any open formatting
   # tags.  If greater than +max+, truncates to <tt>max - 1</tt> and adds "..."
@@ -476,7 +474,8 @@ class String
       end
     end
     result += opens.reverse.map { |x| "<\/#{x}>" }.join("")
-    result.html_safe
+    # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+    result.html_safe # rubocop:disable Rails/OutputSafety
   end
 
   # Attempt to turn HTML into plain text.  Remove all '<blah>' tags, and
@@ -485,21 +484,26 @@ class String
   # least.
   def html_to_ascii
     gsub(/\s*\n\s*/, " "). # remove all newlines first
-      gsub(%r{</?div[^>]*>}, "").     # divs are messing things up, too
-      gsub(%r{<br */> *}, "\n").      # put \n after every line break
-      gsub(%r{</li> *}, "\n").        # put \n after every list item
-      gsub(%r{</tr> *}, "\n").        # put \n after every table row
+      gsub(%r{</?div[^>]*>}, ""). # divs are messing things up, too
+      gsub(%r{<br */> *}, "\n"). # put \n after every line break
+      gsub(%r{</li> *}, "\n"). # put \n after every list item
+      gsub(%r{</tr> *}, "\n"). # put \n after every table row
       gsub(%r{</(p|h\d)> *}, "\n\n"). # put two \n between paragraphs
-      gsub(%r{</td> *}, "\t").        # put tabs between table columns
-      gsub(/[ \t]+(\n|$)/, '\\1').    # remove superfluous trailing whitespace
-      gsub(/\n+\Z/, "").              # remove superfluous newlines at end
-      gsub(HTML_TAG_PATTERN, "").     # remove all <tags>
-      gsub(/^ +|[ \t]+$/, "").        # remove leading/trailing sp on each line
-      gsub(                           # convert &xxx; and &#nnn; to ascii
-        /&(#\d+|[a-zA-Z]+);/
-      ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.html_safe
+      gsub(%r{</td> *}, "\t"). # put tabs between table columns
+      gsub(/[ \t]+(\n|$)/, '\\1'). # remove superfluous trailing whitespace
+      gsub(/\n+\Z/, ""). # remove superfluous newlines at end
+      gsub(HTML_TAG_PATTERN, ""). # remove all <tags>
+      gsub(/^ +|[ \t]+$/, ""). # remove leading/trailing sp on each line
+      gsub_html_special_chars # convert &xxx; and &#nnn; to ascii
   end
-  # rubocop:enable Rails/OutputSafety
+
+  def gsub_html_special_chars
+    gsub(
+      /&(#\d+|[a-zA-Z]+);/
+    ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
+  end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
