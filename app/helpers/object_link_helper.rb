@@ -1,5 +1,12 @@
 # helpers for creating links in views
 module ObjectLinkHelper
+  # Dictionary of urls for searches on external sites
+  LOCATION_SEARCH_URLS = {
+    Google_Maps: "https://maps.google.com/maps?q=",
+    Google_Search: "https://www.google.com/search?q=",
+    Wikipedia: "https://en.wikipedia.org/w/index.php?search="
+  }.freeze
+
   # Wrap location name in span: "<span>where (count)</span>"
   #
   #   Where: <%= where_string(obs.place_name) %>
@@ -149,12 +156,6 @@ module ObjectLinkHelper
       link_array << search_link_to(site.first, search_string)
     end
   end
-
-  LOCATION_SEARCH_URLS = {
-    Google_Maps: "https://maps.google.com/maps?q=",
-    Google_Search: "https://www.google.com/search?q=",
-    Wikipedia: "https://en.wikipedia.org/w/index.php?search="
-  }.freeze
 
   def search_link_to(site_symbol, search_string)
     return unless (url = LOCATION_SEARCH_URLS[site_symbol])

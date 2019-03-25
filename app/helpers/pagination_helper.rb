@@ -1,4 +1,7 @@
 module PaginationHelper
+  # Letters used as text in pagination links
+  LETTERS = ("A".."Z").freeze
+
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= paginate_block(@pages) do %>
@@ -52,8 +55,6 @@ module PaginationHelper
       (pages.letter || pages.num_total > pages.num_per_page) &&
       (!pages.used_letters || pages.used_letters.length > 1)
   end
-
-  LETTERS = ("A".."Z").freeze
 
   # Insert numbered pagination links.  I've thrown out the Rails plugin
   # pagination_letters because it is no longer giving us enough to be worth it.
