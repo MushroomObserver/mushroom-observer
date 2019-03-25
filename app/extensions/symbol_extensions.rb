@@ -153,13 +153,11 @@ class Symbol
   end
 
   # Run +localize+ in test mode.
-  def self.test_localize(val, args = {}, level = []) # :nodoc:
+  def self.test_localize(val, args = {}, level = [])
     :test.localize_postprocessing(val, args, level)
   end
 
-  def localize_postprocessing( # :nodoc:
-    val, args, level, capitalize_result = false
-  )
+  def localize_postprocessing(val, args, level, capitalize_result = false)
     result = val
     if result.is_a?(String)
       result = result.gsub(/ *\\n */, "\n")
