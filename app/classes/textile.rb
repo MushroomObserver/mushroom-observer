@@ -35,7 +35,7 @@ class Textile < String
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
 
-  #########@ Class methods #####################################################
+  ########## Class methods #####################################################
 
   # Convenience wrapper on instance method Textile#textilize_without_paragraph.
   def self.textilize_without_paragraph(str, do_object_links = false,
@@ -63,7 +63,7 @@ class Textile < String
       html_safe # rubocop:disable Rails/OutputSafety
   end
 
-  #########@ Instance methods ##################################################
+  ########## Instance methods ##################################################
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
