@@ -124,6 +124,6 @@ module PaginationHelper
       url.sub!(/#.*/, "")
       url += "#" + args[:anchor]
     end
-    "<li>#{link_to(label, url)}</li>".html_safe
+    content_tag(:li, link_to(label, url))
   end
 end
