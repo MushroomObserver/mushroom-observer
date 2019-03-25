@@ -25,7 +25,9 @@ module MapHelper
                             info_window: false)
     gmap = make_map(object, args)
     gmap.event_init(gmap, "click", "function(e) { clickLatLng(e.latLng) }")
-    gmap.event_init(gmap, "dblclick", "function(e) { dblClickLatLng(e.latLng) }")
+    gmap.event_init(
+      gmap, "dblclick", "function(e) { dblClickLatLng(e.latLng) }"
+    )
     gmap
   end
 
@@ -124,8 +126,12 @@ module MapHelper
     locations = set.underlying_locations
     lines << mapset_observation_header(set, args) if observations.length > 1
     lines << mapset_location_header(set, args) if locations.length > 1
-    lines << mapset_observation_link(observations.first, args) if observations.length == 1
-    lines << mapset_location_link(locations.first, args) if locations.length == 1
+    if observations.length == 1
+      lines << mapset_observation_link(observations.first, args)
+    end
+    if locations.length == 1
+      lines << mapset_location_link(locations.first, args)
+    end
     lines << mapset_coords(set)
     lines.safe_join(safe_br)
   end

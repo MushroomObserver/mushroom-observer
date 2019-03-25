@@ -117,7 +117,11 @@ module FooterHelper
         end
       end
       if obj.respond_to?(:num_views) && obj.last_view
-        times = obj.num_views == 1 ? :one_time.l : :many_times.l(num: obj.num_views)
+        times = if obj.num_views == 1
+                  :one_time.l
+                else
+                  :many_times.l(num: obj.num_views)
+                end
         html << :footer_viewed.t(date: obj.last_view.web_time, times: times)
       end
     end

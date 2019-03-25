@@ -22,12 +22,14 @@ module DescriptionHelper
     end
     if admin
       tabs << link_with_query(:show_description_destroy.t,
-                              { action: "destroy_#{type}_description", id: desc.id },
+                              { action: "destroy_#{type}_description",
+                                id: desc.id },
                               data: { confirm: :are_you_sure.l })
     end
     if true
       tabs << link_with_query(:show_description_clone.t,
-                              controller: type, action: "create_#{type}_description",
+                              controller: type,
+                              action: "create_#{type}_description",
                               id: desc.parent_id, clone: desc.id,
                               help: :show_description_clone_help.l)
     end
@@ -114,12 +116,16 @@ module DescriptionHelper
       if writer || admin
         links = []
         if writer
-          links << link_with_query(:EDIT.t, controller: obj.show_controller,
-                                            action: "edit_#{type}_description", id: desc.id)
+          links << link_with_query(:EDIT.t,
+                                   controller: obj.show_controller,
+                                   action: "edit_#{type}_description",
+                                   id: desc.id)
         end
         if admin
-          links << link_with_query(:DESTROY.t, { controller: obj.show_controller,
-                                                 action: "destroy_#{type}_description", id: desc.id },
+          links << link_with_query(:DESTROY.t,
+                                   { controller: obj.show_controller,
+                                     action: "destroy_#{type}_description",
+                                     id: desc.id },
                                    data: { confirm: :are_you_sure.t })
         end
         item += indent + "[" + links.safe_join(" | ") + "]" if links.any?
@@ -131,7 +137,8 @@ module DescriptionHelper
     if fake_default && !obj.descriptions.any? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_with_query(:CREATE.t, controller: obj.show_controller,
-                                        action: "create_#{type}_description", id: obj.id)
+                                        action: "create_#{type}_description",
+                                        id: obj.id)
       str += indent + "[" + link + "]"
       list.unshift(str)
     end
