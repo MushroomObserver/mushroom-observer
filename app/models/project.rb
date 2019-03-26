@@ -230,19 +230,24 @@ class Project < AbstractModel
   # When deleting a project, "orphan" its unpublished drafts and remove the
   # user groups.
   def orphan_drafts
-    title       = self.title
-    user_group  = self.user_group
-    admin_group = self.admin_group
-    for d in NameDescription.where(source_type: NameDescription.source_types[:project], project_id: id) +
-             LocationDescription.where(source_type: LocationDescription.source_types[:project], project_id: id)
+    drafts = NameDescription.where(
+      source_type: NameDescription.source_types[:project], project_id: id
+    ) + LocationDescription.where(
+      source_type: LocationDescription.source_types[:project], project_id: id
+    )
+    orphan_each_draft(drafts)
+    user_group&.destroy
+    admin_group&.destroy
+  end
+
+  def orphan_each_draft(drafts)
+    drafts.each do |d|
       d.source_type = :source
       d.admin_groups.delete(admin_group)
       d.writer_groups.delete(admin_group)
       d.reader_groups.delete(user_group)
       d.save
     end
-    user_group&.destroy
-    admin_group&.destroy
   end
 
   ##############################################################################

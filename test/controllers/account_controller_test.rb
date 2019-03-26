@@ -141,6 +141,22 @@ class AccountControllerTest < FunctionalTestCase
     assert(@request.session["user_id"])
   end
 
+  def test_email_new_password
+    get(:email_new_password)
+    assert_no_flash
+
+    post(:email_new_password,
+         new_user: {
+           login: "brandnewuser",
+           password: "brandnewpassword",
+           password_confirmation: "brandnewpassword",
+           name: "brand new name"
+         })
+    assert_flash_error(
+      "email_new_password should flash error if user doesn't already exist"
+    )
+  end
+
   # Test autologin feature.
   def test_autologin
     # Make sure test page that requires login fails without autologin cookie.

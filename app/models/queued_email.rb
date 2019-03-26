@@ -247,13 +247,17 @@ class QueuedEmail < AbstractModel
             rescue StandardError
               "nil"
             end} " +
-              queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
-              queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.join(" ")
+              queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.
+              join(" ") +
+              queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.
+              join(" ")
     self.class.debug_log(log_msg)
     current_locale = I18n.locale
     result = false
     if user == to_user
-      raise("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
+      unless Rails.env.test?
+        raise("Skipping email with same sender and recipient: #{user.email}\n")
+      end
     else
       result = deliver_email
     end
@@ -279,7 +283,8 @@ class QueuedEmail < AbstractModel
 
   # Returns "flavor from to" for debugging.
   def text_name
-    "#{flavor.sub("QueuedEmail::", "")} #{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
+    "#{flavor.sub("QueuedEmail::", "")} "\
+    "#{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
   end
 
   # Dump out all the info about a QueuedEmail record to a string.

@@ -64,8 +64,14 @@ class TranslationString < AbstractModel
   # Update this string in the translations I18n is using.
   def update_localization
     data = TranslationString.translations(language.locale.to_sym)
-    raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
-    raise "Localization for :#{tag.to_sym} doesn't exist!" unless data[tag.to_sym]
+    unless data
+      raise(
+        "Localization for #{language.locale.inspect} hasn't been loaded yet!"
+      )
+    end
+    unless data[tag.to_sym]
+      raise "Localization for :#{tag.to_sym} doesn't exist!"
+    end
 
     data[tag.to_sym] = text
   end

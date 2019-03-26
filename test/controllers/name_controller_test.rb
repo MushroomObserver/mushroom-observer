@@ -2048,6 +2048,29 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_desc, new_name.description.notes)
   end
 
+  def test_edit_name_merged_notes_include_notes_from_both_names
+    old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
+    new_name = names(:russula_brevipes_author_notes)
+    original_notes = new_name.notes
+    old_name_notes = old_name.notes
+    params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        citation: new_name.citation,
+        notes: old_name.notes,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login("rolf")
+    post(:edit_name, params)
+
+    assert_match(original_notes, new_name.reload.notes)
+    assert_match(old_name_notes, new_name.notes)
+  end
+
   # Test merging two names, only one with observations.  Should work either
   # direction, but always keeping the name with observations.
   def test_edit_name_merge_one_with_observations

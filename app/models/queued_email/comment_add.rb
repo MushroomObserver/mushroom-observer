@@ -6,12 +6,6 @@ class QueuedEmail::CommentAdd < QueuedEmail
 
   def self.find_or_create_email(sender, receiver, comment)
     # Check for an already queued matching email
-    #    email = QueuedEmail.find(:first, :include => :queued_email_integers, # Rails 3
-    #      :conditions => [
-    #        'queued_emails.to_user_id = ?
-    #          AND queued_emails.flavor = "QueuedEmail::CommentAdd"
-    #          AND queued_email_integers.key = "comment"
-    #          AND queued_email_integers.value = ?', receiver.id, comment.id])
     email = QueuedEmail.
             includes(:queued_email_integers).
             where("queued_emails.flavor" => "QueuedEmail::CommentAdd",
