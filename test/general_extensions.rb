@@ -465,10 +465,12 @@ module GeneralExtensions
         break
       elsif !msg
         # Write out expected (old) and received (new) files for debugging.
-        File.
-          open(filename + ".old", "w:#{encoding}") { |fh| fh.write(template) }
-        File.
-          open(filename + ".new", "w:#{encoding}") { |fh| fh.write(str) }
+        File.open(filename + ".old", "w:#{encoding}") do |fh|
+          fh.write(template)
+        end
+        File.open(filename + ".new", "w:#{encoding}") do |fh|
+          fh.write(str)
+        end
         msg = "File #{filename} wrong:\n" +
               `diff #{filename}.old #{filename}.new`
         File.delete(filename + ".old") if File.exist?(filename + ".old")
