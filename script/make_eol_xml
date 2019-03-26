@@ -110,7 +110,8 @@ if !new_size
   print "Unable to create the new EOL dump as #{temp_filename}.\n"
   exit 1
 elsif new_size < old_size * 0.9
-  print "Size of new EOL dump, #{new_size}, was less than 90% of the old dump, #{old_size}.\n"
+  print "Size of new EOL dump, #{new_size}, "\
+        "was less than 90% of the old dump, #{old_size}.\n"
   print "Left the old file in place.\n"
   exit 1
 else

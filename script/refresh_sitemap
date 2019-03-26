@@ -41,15 +41,33 @@ INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html".freeze
 CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 
 OBJECT_TYPES = [
-  ["observations",          "Observation",         "observer/show_observation/ID"],
-  ["names",                 "Name",                "name/show_name/ID"],
-  ["locations",             "Location",            "location/show_location/ID"],
-  ["species_lists",         "SpeciesList",         "species_list/show_species_list/ID"],
-  ["projects",              "Project",             "project/show_project/ID"],
-  ["glossary_terms",        "GlossaryTerm",        "glossary/show_glossary_term/ID"],
-  ["herbaria",              "Herbarium",           "herbarium/show_herbarium/ID"],
-  ["name_descriptions",     "NameDescription",     "name/show_name_description/ID"],
-  ["location_descriptions", "LocationDescription", "location/show_location_description/ID"]
+  ["observations",
+   "Observation",
+   "observer/show_observation/ID"],
+  ["names",
+   "Name",
+   "name/show_name/ID"],
+  ["locations",
+   "Location",
+   "location/show_location/ID"],
+  ["species_lists",
+   "SpeciesList",
+   "species_list/show_species_list/ID"],
+  ["projects",
+   "Project",
+   "project/show_project/ID"],
+  ["glossary_terms",
+   "GlossaryTerm",
+   "glossary/show_glossary_term/ID"],
+  ["herbaria",
+   "Herbarium",
+   "herbarium/show_herbarium/ID"],
+  ["name_descriptions",
+   "NameDescription",
+   "name/show_name_description/ID"],
+  ["location_descriptions",
+   "LocationDescription",
+   "location/show_location_description/ID"]
 ].freeze
 
 STATIC_PAGES = [
@@ -168,7 +186,9 @@ def map_one_object_type(params, comments, last_update)
   table, type, path = *params
   times = read_old_files(table)
   update_times_of_new_objects(times, table, last_update)
-  update_times_of_objects_with_new_images(times, last_update) if type == "Observation"
+  if type == "Observation"
+    update_times_of_objects_with_new_images(times, last_update)
+  end
   update_times_of_objects_with_new_comments(times, comments, type)
   write_new_files(times, table, path)
 end
@@ -193,8 +213,10 @@ def update_times_of_objects_with_new_comments(times, comments, type)
   for target_type, target_id, target_time in comments
     target_id = target_id.to_i
     target_time = parse_mysql_time(target_time)
-    times[target_id] = target_time if target_type == type and
-                                      (!times[target_id] or times[target_id] < target_time)
+    if target_type == type && (!times[target_id] ||
+                               times[target_id] < target_time)
+      times[target_id] = target_time
+    end
   end
 end
 
