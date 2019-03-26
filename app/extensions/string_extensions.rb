@@ -384,13 +384,13 @@ class String
 
   # Textilize string, wrapped in a <div>, making it all safe for output
   def tp(sanitize = true)
-    textile_div_safe { Textile.textilize(self, false, sanitize) }
+    Textile.textile_div_safe { Textile.textilize(self, false, sanitize) }
   end
 
   # Textilize string (with links), wrapped in a <div>,
   # making it all safe for output
   def tpl(sanitize = true)
-    textile_div_safe { Textile.textilize(self, true, sanitize) }
+    Textile.textile_div_safe { Textile.textilize(self, true, sanitize) }
   end
 
   def textile_div_safe

@@ -13,6 +13,7 @@ require "redcloth"
 #  === Class methods
 #
 #  textilize::                   Parse the given string.
+#  textile_div_safe::  Wrap string in textile div, marking it safe for output
 #  textilize_safe::              Same as above, marking it safe for output
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #  textilize_without_paragraph_safe  Same as above, marking it safe for output
@@ -59,6 +60,13 @@ class Textile < String
   # Wrap self.textilize_without_paragraph, marking output trusted safe
   def self.textilize_safe(str, do_object_links = false, sanitize = true)
     textilize(str, do_object_links, sanitize).
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
+  end
+
+  # Wrap string in textile div, marking output trusted safe
+  def self.textile_div_safe
+    %(<div class="textile">#{yield}</div>).
       # Disable cop; we need `html_safe` to prevent Rails from adding escaping
       html_safe # rubocop:disable Rails/OutputSafety
   end
