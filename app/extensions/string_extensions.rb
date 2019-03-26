@@ -393,12 +393,6 @@ class String
     Textile.textile_div_safe { Textile.textilize(self, true, sanitize) }
   end
 
-  def textile_div_safe
-    %(<div class="textile">#{yield}</div>).
-      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
-      html_safe # rubocop:disable Rails/OutputSafety
-  end
-
   def tp_nodiv(sanitize = true)
     Textile.textilize_safe(self, false, sanitize)
   end
