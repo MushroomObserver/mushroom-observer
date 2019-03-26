@@ -56,7 +56,9 @@ namespace :jason do
           elsif table == table2 && line.match(/^ +t.text +"(\w+)"/)
             column = Regexp.last_match(1)
             print "Getting #{table} #{column}...\n"
-            notes += Name.connection.select_values "SELECT DISTINCT #{column} FROM #{table}"
+            notes += Name.connection.select_values(
+              "SELECT DISTINCT #{column} FROM #{table}"
+            )
           end
         end
       end
@@ -99,6 +101,9 @@ namespace :jason do
 
   ##############################################################################
 
+  BROWSER_MATCH =
+    /(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/.
+    freeze
   desc "Get list of browser ID strings from apache logs."
   task(:apache_browser_ids) do
     require "vendor/plugins/browser_status/lib/browser_status"
@@ -108,7 +113,7 @@ namespace :jason do
     for file in Dir.glob("../../../logs/access_log-*").sort
       File.open(file) do |fh|
         fh.each_line do |line|
-          next unless match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
+          next unless (match = line.match(BROWSER_MATCH))
 
           ua = match[7]
           type, ver = parse_user_agent(ua)
@@ -169,12 +174,16 @@ namespace :jason do
     print @need_strings.keys.sort.join("\n") + "\n"
   end
 
-  desc "Print full list of localization strings in a given localization file (use LOCALE=en-US, for example)."
-  task(print_localization_strings_available: :get_localization_strings_available) do
+  desc "Print full list of localization strings in a given localization file "\
+       "(use LOCALE=en-US, for example)."
+  task(
+    print_localization_strings_available: :get_localization_strings_available
+  ) do
     print @have_strings.keys.sort.join("\n") + "\n"
   end
 
-  desc "Check to make sure all localization strings that are used are available (select language using LOCALE=en-US, for example)."
+  desc "Check to make sure all localization strings that are used are "\
+       "available (select language using LOCALE=en-US, for example)."
   task(check_localizations: [
          :get_localization_strings_used,
          :get_localization_strings_available
@@ -223,13 +232,17 @@ namespace :jason do
 
         next unless name_parse.has_synonym
 
-        results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+        results = Name.find_or_create_name_and_parents(
+          name_parse.synonym_search_name
+        )
         if results.last.nil?
           print "\nError: = #{name_parse.synonym}\n"
         else
           synonym = n = results.last
-          n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
-          n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
+          n.rank  = name_parse.synonym_rank if name_parse.synonym_rank
+          if !n.id && name_parse.synonym_comment
+            n.notes = name_parse.synonym_comment
+          end
           n.change_deprecated(true)
           n.save_if_changed(
             user, "Deprecated by jason, based on Esslinger's checklist"
@@ -248,7 +261,8 @@ namespace :jason do
   desc "Convert __Names__ in notes throughout to links."
   task(rebuild_links: :environment) do
     include ApplicationHelper
-    str = "This looks a lot like _Agaricus_, like _A. campestris_ or _X. elegans_.\n"
+    str = "This looks a lot like _Agaricus_, like _A. campestris_, "\
+          "or _X. elegans_.\n"
     print str
     print str = check_other_links(check_name_links(str))
     print textilize(str)
@@ -336,31 +350,42 @@ namespace :jason do
             case var
             when "where"
               if !where.nil?
-                lines.push('>>>>>>>> already set "where" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "where" for this observation'
+                )
               else
                 where = lookup_location(val, lines)
                 where ||= true # (lookup_location takes care of errors)
               end
             when "specimen"
               if !spec.nil?
-                lines.push('>>>>>>>> already set "specimen" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "specimen" for this observation'
+                )
               elsif /^(y(es)?|1)$/i.match?(val)
                 spec = true
               elsif /^(n(o)?|0)$/i.match?(val)
                 spec = false
               else
-                lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
+                lines.push(
+                  '>>>>>>>> unrecognized value, please use "yes" or "no"'
+                )
                 spec = true
               end
             when "is collection location"
               if !is_co.nil?
-                lines.push('>>>>>>>> already set "is collection location" for this observation')
+                lines.push(
+                  ">>>>>>>> already set 'is collection location' "\
+                  "for this observation"
+                )
               elsif /^(y(es)?|1)$/i.match?(val)
                 is_co = true
               elsif /^(n(o)?|0)$/i.match?(val)
                 is_co = false
               else
-                lines.push('>>>>>>>> unrecognized value, please use "yes" or "no"')
+                lines.push(
+                  '>>>>>>>> unrecognized value, please use "yes" or "no"'
+                )
                 is_co = true
               end
 
@@ -373,9 +398,13 @@ namespace :jason do
               end
             when "vote"
               if !what
-                lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
+                lines.push(
+                  '>>>>>>>> haven\'t set "what" for this observation yet'
+                )
               elsif !vote.nil?
-                lines.push('>>>>>>>> already set "vote" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "vote" for this observation'
+                )
               elsif /call/i.match?(val)
                 vote = 3
               elsif /promis/i.match?(val)
@@ -389,37 +418,56 @@ namespace :jason do
               elsif /as[\s_]if/i.match?(val)
                 vote = -3
               else
-                lines.push('>>>>>>>> invalid vote, use "I\'d call it that", "promising" or "could be"')
+                lines.push(
+                  '>>>>>>>> invalid vote, use "I\'d call it that", '\
+                  '"promising" or "could be"'
+                )
               end
             when /^by sight$/
               if !what
-                lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
+                lines.push(
+                  '>>>>>>>> haven\'t set "what" for this observation yet'
+                )
               elsif !sight.nil?
-                lines.push('>>>>>>>> already set "by sight" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "by sight" for this observation'
+                )
               else
                 sight = val
               end
             when /^(used )?ref(erence)?s$/
               if !what
-                lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
+                lines.push(
+                  '>>>>>>>> haven\'t set "what" for this observation yet'
+                )
               elsif !refs.nil?
-                lines.push('>>>>>>>> already set "used refs" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "used refs" for this observation'
+                )
               else
                 refs = val
               end
             when /^(by )?chem\w*/
               if !what
-                lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
+                lines.push(
+                  '>>>>>>>> haven\'t set "what" for this observation yet'
+                )
               elsif !chem.nil?
-                lines.push('>>>>>>>> already set "chemistry" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "chemistry" for this observation'
+                )
               else
                 chem = val
               end
             when /^(by )?micro\w*/
               if !what
-                lines.push('>>>>>>>> haven\'t set "what" for this observation yet')
+                lines.push(
+                  '>>>>>>>> haven\'t set "what" for this observation yet'
+                )
               elsif !micro.nil?
-                lines.push('>>>>>>>> already set "microscopic" for this observation')
+                lines.push(
+                  '>>>>>>>> already set "microscopic" for this observation'
+                )
               else
                 micro = val
               end
@@ -454,7 +502,9 @@ namespace :jason do
             when "notes"
               if images.empty?
                 if !notes.nil?
-                  lines.push('>>>>>>>> already set "notes" for this observation')
+                  lines.push(
+                    '>>>>>>>> already set "notes" for this observation'
+                  )
                 else
                   notes = val
                 end
@@ -525,10 +575,18 @@ namespace :jason do
 
               # Attach to observation if creates successfully.
               if naming.save
-                NamingReason.new(naming: naming, reason: 1, notes: sight).save if sight
-                NamingReason.new(naming: naming, reason: 2, notes: refs).save if refs
-                NamingReason.new(naming: naming, reason: 3, notes: chem).save if chem
-                NamingReason.new(naming: naming, reason: 4, notes: micro).save if micro
+                if sight
+                  NamingReason.new(naming: naming, reason: 1, notes: sight).save
+                end
+                if refs
+                  NamingReason.new(naming: naming, reason: 2, notes: refs).save
+                end
+                if chem
+                  NamingReason.new(naming: naming, reason: 3, notes: chem).save
+                end
+                if micro
+                  NamingReason.new(naming: naming, reason: 4, notes: micro).save
+                end
                 naming.change_vote(user, vote)
                 warn(
                   "  Created naming: #%d (%s)" % [naming.id,

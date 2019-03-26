@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 # This has to be done without access to Language because it is used
 # to declare tasks before the MO environment has been loaded.
 def all_locales
   locales = []
-  for file in Dir.glob("#{::Rails.root}/config/locales/*.yml")
+  Dir.glob("#{::Rails.root}/config/locales/*.yml").each do |file|
     match = /(\w+).yml$/.match(file)
     locales << match[1] if match
   end
@@ -19,7 +21,7 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc description.gsub(/XXX/, "unofficial").gsub(/\(S\)/, "s")
   task(unofficial: :setup) do
-    for lang in Language.unofficial
+    Language.unofficial.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
       lang.send(action)
     end
@@ -27,13 +29,13 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc description.gsub(/XXX/, "all").gsub(/\(S\)/, "s")
   task(all: :setup) do
-    for lang in Language.all
+    Language.all.each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
       lang.send(action)
     end
   end
 
-  for locale in all_locales
+  all_locales.each do |locale|
     desc description.gsub(/XXX/, locale).gsub(/\(S\)/, "")
     task(locale => :setup) do |task|
       lang = Language.find_by_locale(task.name.sub(/.*:/, ""))
@@ -44,7 +46,8 @@ def define_tasks(action, verbose, verbose_method, description)
 end
 
 namespace :lang do
-  desc "Check syntax of official export file, integrate changes into database, refresh YAML and export files."
+  desc "Check syntax of official export file, integrate changes into database,"\
+       " refresh YAML and export files."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
@@ -54,13 +57,18 @@ namespace :lang do
     "export:unofficial"
   ]
 
-  for namespace_name, action, verbose, verbose_method, description in [
-    [:check,  :check_export_syntax,      "Checking",  :export_file,       "Check syntax of XXX YAML file(S)."],
-    [:strip,  :strip,                    "Stripping", :locale,            "Strip unused tags in XXX locale(S) from database."],
-    [:update, :update_localization_file, "Updating",  :localization_file, "Update the XXX YAML file(S) from database."],
-    [:export, :update_export_file,       "Exporting", :export_file,       "Export XXX locale(S) to text file(S)."],
-    [:import, :import_from_file,         "Importing", :export_file,       "Import XXX locale(S) from text file(S)."]
-  ]
+  [
+    [:check,  :check_export_syntax,      "Checking",  :export_file,
+     "Check syntax of XXX YAML file(S)."],
+    [:strip,  :strip,                    "Stripping", :locale,
+     "Strip unused tags in XXX locale(S) from database."],
+    [:update, :update_localization_file, "Updating",  :localization_file,
+     "Update the XXX YAML file(S) from database."],
+    [:export, :update_export_file,       "Exporting", :export_file,
+     "Export XXX locale(S) to text file(S)."],
+    [:import, :import_from_file,         "Importing", :export_file,
+     "Import XXX locale(S) from text file(S)."]
+  ].each do |namespace_name, action, verbose, verbose_method, description|
     namespace namespace_name do
       define_tasks(action, verbose, verbose_method, description)
     end
@@ -71,13 +79,11 @@ namespace :lang do
 
   desc "Log in user for import tasks."
   task(:login) do
-    if ENV.include?("user_name")
-      User.current = User.find_by_login(ENV["user_name"])
-    elsif ENV.include?("user_id")
-      User.current = User.find(ENV["user_id"])
-    else
-      User.current = nil
-    end
+    User.current = if ENV.include?("user_name")
+                     User.find_by_login(ENV["user_name"])
+                   elsif ENV.include?("user_id")
+                     User.find(ENV["user_id"])
+                   end
   end
 
   desc "Log in admin for import tasks."

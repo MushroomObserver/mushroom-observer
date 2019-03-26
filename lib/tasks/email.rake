@@ -2,13 +2,9 @@ namespace :email do
   desc "List queued emails"
   task(list: :environment) do
     print "#{MO.http_domain}, #{::Rails.env}\n"
-    # for e in QueuedEmail.find(:all, :include => [ # Rails 3
-    #  :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
-    for e in QueuedEmail.all.includes(:queued_email_integers,
-                                      :queued_email_note,
-                                      :queued_email_strings, :user)
-      e.dump
-    end
+    QueuedEmail.all.includes(:queued_email_integers,
+                             :queued_email_note,
+                             :queued_email_strings, :user).each(&:dump)
   end
 
   desc "Send queued emails"
@@ -35,7 +31,9 @@ namespace :email do
           File.open("#{::Rails.root}/log/email-low-level.log", "a") do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
-            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : "false"}")
+            fh.puts(
+              "sent #{e.id.inspect} = #{result ? result.class.name : "false"}"
+            )
           end
 
           # Destroy if sent successfully.
