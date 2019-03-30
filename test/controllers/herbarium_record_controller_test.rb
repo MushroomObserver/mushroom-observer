@@ -166,7 +166,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
     assert_flash_text(/only curators can/i)
-     
+
     login("dick")
     assert(!nybg.curators.member?(dick))
     assert(obs.can_edit?(dick))
@@ -182,7 +182,8 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     q = query.id.alphabetize
     params = {
       id: obs.id,
-      herbarium_record: { herbarium_name: obs.user.preferred_herbarium.auto_complete_name },
+      herbarium_record: { herbarium_name:
+                          obs.user.preferred_herbarium.auto_complete_name },
       q: q
     }
 

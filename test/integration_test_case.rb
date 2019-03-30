@@ -6,8 +6,9 @@
 #
 #    class YourTest < IntegrationTestCase
 #
-#      # Most basic test doesn't even need to know about session: all session methods
-#      # are automatically delegated to a default session created at setup.
+#      # Most basic test doesn't even need to know about session: all session
+#      # methods are automatically delegated to a default session created at
+#      # setup.
 #      def test_simplest
 #        get('/controller/action?args=...')
 #        assert_template('controller/action')

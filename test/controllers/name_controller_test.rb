@@ -4454,7 +4454,8 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(name.show_link_args)
     assert_equal(new_str, name.reload.classification)
     assert_equal(new_str, names(:agaricus).classification)
-    assert_equal(new_str, names(:agaricus_campestras).description.classification)
+    assert_equal(new_str,
+                 names(:agaricus_campestras).description.classification)
     assert_equal(new_str, observations(:agaricus_campestras_obs).classification)
   end
 

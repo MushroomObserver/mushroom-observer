@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "test_helper"
 
 class PivotalControllerTest < FunctionalTestCase
@@ -10,11 +11,13 @@ class PivotalControllerTest < FunctionalTestCase
   end
 
   def test_index_enabled
-    stub_request(:get,
-                 "https://www.pivotaltracker.com/services/v5/projects/224629/stories?" \
-                 "fields=story_type,estimate,current_state,name,description,updated_at," \
-                 "labels(name),comments(created_at,text)&filter=state:unscheduled,started," \
-                 "unstarted&limit=500").
+    stub_request(
+      :get,
+      "https://www.pivotaltracker.com/services/v5/projects/224629/stories?" \
+      "fields=story_type,estimate,current_state,name,description,updated_at," \
+      "labels(name),comments(created_at,text)&"\
+      "filter=state:unscheduled,started,unstarted&limit=500"
+    ).
       with(
         headers: {
           'Accept': "*/*",
