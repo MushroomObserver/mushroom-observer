@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 require "test_helper"
-
 require "textile"
+
 class Textile
   def send_private(method, *args, &block)
     send(method, *args, &block)
@@ -193,5 +194,14 @@ class TextileTest < UnitTestCase
     link_text = Nokogiri::HTML.parse(result).text
     assert(link_text.end_with?("abc/..."),
            "Link text should be truncated with 'x/...'")
+  end
+
+  def test_textile_div_safe
+    str = "Xyz"
+    assert_match(
+      %r{<div class=\"textile\">.*#{str}.*</div>},
+      Textile.textile_div_safe { Textile.textilize(str) },
+      %("#{str}" should be within a <div class="textile>")
+    )
   end
 end

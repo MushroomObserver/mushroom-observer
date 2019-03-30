@@ -88,12 +88,12 @@ class Symbol
   #   logins: nombres de usuario
   #
   #   # Yields these:
-  #   tag1: Por favor, entrar [type].    =>  Por favor, entrar nombre de usuario.
-  #   tag2: Ninguno [types] encontrados. =>  Ninguno nombres de usuario encontrados.
-  #   tag3: [Type] desaparecidos.        =>  Nombre de usuario desaparecidos.
-  #   tag4: [Types] son necesarios.      =>  Nombres de usuario son necesarios.
-  #   title1: Cambio de [TYPE]           =>  Cambio de Nombre de Usuario
-  #   title2: Todos los [TYPES]          =>  Todos los Nombres de Usuario
+  #   tag1: Por favor, entrar [type]   =>  Por favor, entrar nombre de usuario
+  #   tag2: Ningun [types] encontrados =>  Ningun nombres de usuario encontrados
+  #   tag3: [Type] desaparecidos       =>  Nombre de usuario desaparecidos
+  #   tag4: [Types] son necesarios     =>  Nombres de usuario son necesarios
+  #   title1: Cambio de [TYPE]         =>  Cambio de Nombre de Usuario
+  #   title2: Todos los [TYPES]        =>  Todos los Nombres de Usuario
   #
   # This allows German to capitalize all of the above, since all major nouns
   # are capitalized even in normal sentences.  And it allows the translator to
@@ -117,10 +117,10 @@ class Symbol
   # Otherwise it must start and end with single-quotes.  Any additional single
   # quotes inside are preserved as-is.
   #
-  #   [:tag(type=:name)]                 ==  :tag.l(:type => :name)
-  #   [:tag(type=parent_arg)]            ==  :tag.l(:type => args[:parent_arg])
-  #   [:tag(type='Literal Value')]       ==  :tag.l(:type => "Literal Value")
-  #   [:tag(type=""Quote's Are Kept"")]  ==  :tag.l(:type => ""Quote"s Are Kept'")
+  #   [:tag(type=:name)]                 ==  :tag.l(type: :name)
+  #   [:tag(type=parent_arg)]            ==  :tag.l(type: args[:parent_arg])
+  #   [:tag(type='Literal Value')]       ==  :tag.l(type: "Literal Value")
+  #   [:tag(type=""Quote's Are Kept"")]  ==  :tag.l(type: ""Quote"s Are Kept'")
   #
   # *NOTE*: Square brackets are NOT allowed in the literals, even if quoted!
   # That would make the parsing non-trivial and potentially slow.
@@ -130,7 +130,8 @@ class Symbol
     Language.note_usage_of_tag(self)
     if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: "")) != ""
       result = localize_postprocessing(val, args, level)
-    elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}", default: "")) != ""
+    elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}",
+                        default: "")) != ""
       result = localize_postprocessing(val, args, level, :captialize)
     else
       @@missing_tags << self if defined?(@@missing_tags)
@@ -152,11 +153,11 @@ class Symbol
   end
 
   # Run +localize+ in test mode.
-  def self.test_localize(val, args = {}, level = []) # :nodoc:
+  def self.test_localize(val, args = {}, level = [])
     :test.localize_postprocessing(val, args, level)
   end
 
-  def localize_postprocessing(val, args, level, capitalize_result = false) # :nodoc:
+  def localize_postprocessing(val, args, level, capitalize_result = false)
     result = val
     if result.is_a?(String)
       result = result.gsub(/ *\\n */, "\n")

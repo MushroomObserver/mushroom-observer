@@ -35,6 +35,8 @@ class String
   require "digest/md5"
 
   # :stopdoc:
+  # Disable cop in order to make code more readable
+  # rubocop:disable Layout/AlignHash
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
     # characters and accents -- it covers HTML codes &#1 to &#400.
@@ -363,6 +365,7 @@ class String
       "nbsp"  => " "
     }.freeze
   end
+  # rubocop:enable Layout/AlignHash
   # :startdoc:
 
   # This should safely match anything that could possibly be interpreted as
@@ -370,32 +373,32 @@ class String
   HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}.freeze
 
   ### Textile-related methods ###
-  #
+
   def t(sanitize = true)
-    Textile.textilize_without_paragraph(self, false, sanitize).html_safe
+    Textile.textilize_without_paragraph_safe(self, false, sanitize)
   end
 
   def tl(sanitize = true)
-    Textile.textilize_without_paragraph(self, true, sanitize).html_safe
+    Textile.textilize_without_paragraph_safe(self, true, sanitize)
   end
 
-  # TODO: Move somewhere that content_tag is defined
+  # Textilize string, wrapped in a <div>, making it all safe for output
   def tp(sanitize = true)
-    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + "</div>".html_safe
+    Textile.textile_div_safe { Textile.textilize(self, false, sanitize) }
   end
 
+  # Textilize string (with links), wrapped in a <div>,
+  # making it all safe for output
   def tpl(sanitize = true)
-    '<div class="textile">'.html_safe +
-      Textile.textilize(self, true, sanitize).html_safe +
-      "</div>".html_safe
+    Textile.textile_div_safe { Textile.textilize(self, true, sanitize) }
   end
 
   def tp_nodiv(sanitize = true)
-    Textile.textilize(self, false, sanitize)
+    Textile.textilize_safe(self, false, sanitize)
   end
 
   def tpl_nodiv(sanitize = true)
-    Textile.textilize(self, true, sanitize)
+    Textile.textilize_safe(self, true, sanitize)
   end
 
   ### String transformations ###
@@ -465,7 +468,8 @@ class String
       end
     end
     result += opens.reverse.map { |x| "<\/#{x}>" }.join("")
-    result.html_safe
+    # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+    result.html_safe # rubocop:disable Rails/OutputSafety
   end
 
   # Attempt to turn HTML into plain text.  Remove all '<blah>' tags, and
@@ -474,24 +478,25 @@ class String
   # least.
   def html_to_ascii
     gsub(/\s*\n\s*/, " "). # remove all newlines first
-      gsub(%r{</?div[^>]*>}, "").     # divs are messing things up, too
-      gsub(%r{<br */> *}, "\n").      # put \n after every line break
-      gsub(%r{</li> *}, "\n").        # put \n after every list item
-      gsub(%r{</tr> *}, "\n").        # put \n after every table row
+      gsub(%r{</?div[^>]*>}, ""). # divs are messing things up, too
+      gsub(%r{<br */> *}, "\n"). # put \n after every line break
+      gsub(%r{</li> *}, "\n"). # put \n after every list item
+      gsub(%r{</tr> *}, "\n"). # put \n after every table row
       gsub(%r{</(p|h\d)> *}, "\n\n"). # put two \n between paragraphs
-      gsub(%r{</td> *}, "\t").        # put tabs between table columns
-      gsub(/[ \t]+(\n|$)/, '\\1').    # remove superfluous trailing whitespace
-      gsub(/\n+\Z/, "").              # remove superfluous newlines at end
-      gsub(HTML_TAG_PATTERN, "").     # remove all <tags>
-      gsub(/^ +|[ \t]+$/, "").        # remove leading/trailing space on each line
-      gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
-      html_safe                       # convert &xxx; and &#nnn; to ascii
+      gsub(%r{</td> *}, "\t"). # put tabs between table columns
+      gsub(/[ \t]+(\n|$)/, '\\1'). # remove superfluous trailing whitespace
+      gsub(/\n+\Z/, ""). # remove superfluous newlines at end
+      gsub(HTML_TAG_PATTERN, ""). # remove all <tags>
+      gsub(/^ +|[ \t]+$/, ""). # remove leading/trailing sp on each line
+      gsub_html_special_chars # convert &xxx; and &#nnn; to ascii
   end
 
-  # Surround HTML string with a span that prevents long strings from being
-  # broken.
-  def nowrap
-    '<span style="white-space:nowrap">'.html_safe + self + "</span>".html_safe
+  def gsub_html_special_chars
+    gsub(
+      /&(#\d+|[a-zA-Z]+);/
+    ) { HTML_SPECIAL_CHAR_EQUIVALENTS[Regexp.last_match(1)].to_s }.
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
@@ -554,7 +559,9 @@ class String
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  def dealphabetize(alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+  def dealphabetize(
+    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  )
     str      = to_s
     alphabet = alphabet.to_s
     len      = alphabet.length
