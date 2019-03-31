@@ -782,15 +782,15 @@ class AccountController < ApplicationController
     end
   end
 
-  SPAM_BLOCKERS = %w(
+  SPAM_BLOCKERS = %w[
     hotmail.com
-  )
+  ].freeze
 
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")
     return unless SPAM_BLOCKERS.any? { |d| domain == d }
 
-    url = "#{MO.http_domain}/account/verify/#{user.id}?" +
+    url = "#{MO.http_domain}/account/verify/#{user.id}?" \
           "auth_code=#{user.auth_code}"
     subject = :email_subject_verify.l
     content = :email_verify_intro.tp(user: @user.login, link: url)
