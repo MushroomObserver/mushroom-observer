@@ -157,7 +157,9 @@ class ExpertTest < IntegrationTestCase
     open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!("list_members").split(/\r\n/).sort)
-      form.check(/chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/)
+      form.check(
+        /chosen_multiple_names_\d+_#{names(:amanita_baccata_arora).id}/
+      )
       form.check(/chosen_multiple_names_\d+_#{names(:suillus_by_white).id}/)
       form.assert_checked("member_is_collection_location")
       form.assert_checked("member_specimen")

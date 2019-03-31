@@ -76,7 +76,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:signup, new_user: params.except(:email))
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?, assigns("new_user").dump_errors)
+    assert(assigns("new_user").errors[:email].any?,
+           assigns("new_user").dump_errors)
 
     # Email doesn't match.
     post(:signup, new_user: params.merge(email_confirmation: "wrong"))
@@ -139,6 +140,22 @@ class AccountControllerTest < FunctionalTestCase
     user.change_password("try_this_for_size")
     post(:login, user: { login: "api", password: "try_this_for_size" })
     assert(@request.session["user_id"])
+  end
+
+  def test_email_new_password
+    get(:email_new_password)
+    assert_no_flash
+
+    post(:email_new_password,
+         new_user: {
+           login: "brandnewuser",
+           password: "brandnewpassword",
+           password_confirmation: "brandnewpassword",
+           name: "brand new name"
+         })
+    assert_flash_error(
+      "email_new_password should flash error if user doesn't already exist"
+    )
   end
 
   # Test autologin feature.

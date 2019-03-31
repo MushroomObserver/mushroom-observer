@@ -234,10 +234,6 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:list_names)
   end
 
-  def test_mushroom_app_report
-    get(:names_for_mushroom_app)
-  end
-
   def test_show_name
     assert_equal(0, QueryRecord.count)
     get_with_dump(:show_name, id: names(:coprinus_comatus).id)
@@ -1642,6 +1638,14 @@ class NameControllerTest < FunctionalTestCase
     assert_equal("Bar", name.author)
   end
 
+  def test_edit_misspelled_name
+    misspelled_name = names(:suilus)
+    login("rolf")
+    get(:edit_name, id: misspelled_name.id)
+    assert_select("input[type=checkbox]#name_misspelling", count: 1)
+    assert_select("input[type=text]#name_correct_spelling", count: 1)
+  end
+
   # ----------------------------
   #  Edit name -- with merge
   # ----------------------------
@@ -2042,6 +2046,29 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_notes, new_name.notes)
     assert_not_nil(new_name.description)
     assert_equal(old_desc, new_name.description.notes)
+  end
+
+  def test_edit_name_merged_notes_include_notes_from_both_names
+    old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
+    new_name = names(:russula_brevipes_author_notes)
+    original_notes = new_name.notes
+    old_name_notes = old_name.notes
+    params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        citation: new_name.citation,
+        notes: old_name.notes,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+    login("rolf")
+    post(:edit_name, params)
+
+    assert_match(original_notes, new_name.reload.notes)
+    assert_match(old_name_notes, new_name.notes)
   end
 
   # Test merging two names, only one with observations.  Should work either
@@ -3692,14 +3719,6 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # ----------------------------
-  #  Mushroom App
-  # ----------------------------
-
-  def test_names_for_mushroom_app
-    requires_login(:names_for_mushroom_app)
-  end
-
-  # ----------------------------
   #  Review status.
   # ----------------------------
 
@@ -4435,7 +4454,8 @@ class NameControllerTest < FunctionalTestCase
     assert_redirected_to(name.show_link_args)
     assert_equal(new_str, name.reload.classification)
     assert_equal(new_str, names(:agaricus).classification)
-    assert_equal(new_str, names(:agaricus_campestras).description.classification)
+    assert_equal(new_str,
+                 names(:agaricus_campestras).description.classification)
     assert_equal(new_str, observations(:agaricus_campestras_obs).classification)
   end
 

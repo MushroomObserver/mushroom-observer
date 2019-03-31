@@ -120,8 +120,10 @@ module VersionHelper
                     end)
       parent_id = other_ver.send("#{type}_id")
       link_with_query(:show_past_version_merged_with.t(id: parent_id),
-                      controller: obj.show_controller, action: "show_past_#{type}",
-                      id: obj.id, merge_source_id: ver.merge_source_id)
+                      controller: obj.show_controller,
+                      action: "show_past_#{type}",
+                      id: obj.id,
+                      merge_source_id: ver.merge_source_id)
     end
   end
 end

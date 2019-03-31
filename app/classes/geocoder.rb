@@ -1,13 +1,12 @@
-#
-#  = Geocoder Class
-#
-#  Wraps a call to the Google Geocoding webservice
-#
-################################################################################
+# frozen_string_literal: true
 
 require "net/http"
 require "rexml/document"
 
+#  = Geocoder Class
+#
+#  Wraps a call to the Google Geocoding webservice
+#
 class Geocoder < BlankSlate
   attr_reader :north
   attr_reader :south
@@ -15,40 +14,53 @@ class Geocoder < BlankSlate
   attr_reader :west
   attr_reader :valid
 
-  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml".freeze
+  GMAPS_CONFIG_FILE = "config/gmaps_api_key.yml"
   GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + "/" + GMAPS_CONFIG_FILE)
 
   def initialize(place_name)
     @place_name = place_name
     @valid = false
     set_extents(nil, nil, nil, nil)
-    if place_name
-      set_rectangle_from_content(content_from_place_name(place_name))
+    return unless place_name
+
+    rectangle_from_content(content_from_place_name(place_name))
+  end
+
+  def rectangle_from_content(content)
+    xml = REXML::Document.new(content)
+    xml.elements.each("GeocodeResponse/result/geometry") do |geom|
+      set_bounds(geom)
     end
   end
 
-  def set_rectangle_from_content(content)
-    xml = REXML::Document.new(content)
-    xml.elements.each("GeocodeResponse/result/geometry") do |geom|
-      rect = geom.elements["bounds"] || geom.elements["viewport"]
-      if rect
-        sw = rect.elements["southwest"]
-        ne = rect.elements["northeast"]
-        set_extents(ne.elements["lat"].text,
-                    sw.elements["lat"].text,
-                    ne.elements["lng"].text,
-                    sw.elements["lng"].text)
-        @valid = true
-      else
-        loc = geom.elements["location"]
-        if loc
-          lat = loc.elements["lat"].text
-          lng = loc.elements["lng"].text
-          set_extents(lat, lat, lng, lng)
-          @valid = true
-        end
-      end
-    end
+  def set_bounds(geom)
+    set_rect_elements(geom)
+    set_loc_elements(geom)
+  end
+
+  def set_rect_elements(geom)
+    return unless (rect = bounds_or_viewport(geom))
+
+    sw = rect.elements["southwest"]
+    ne = rect.elements["northeast"]
+    set_extents(ne.elements["lat"].text,
+                sw.elements["lat"].text,
+                ne.elements["lng"].text,
+                sw.elements["lng"].text)
+    @valid = true
+  end
+
+  def bounds_or_viewport(geom)
+    geom.elements["bounds"] || geom.elements["viewport"]
+  end
+
+  def set_loc_elements(geom)
+    return unless (loc = geom.elements["location"])
+
+    lat = loc.elements["lat"].text
+    lng = loc.elements["lng"].text
+    set_extents(lat, lat, lng, lng)
+    @valid = true
   end
 
   def set_extents(north, south, east, west)
@@ -73,7 +85,7 @@ class Geocoder < BlankSlate
   end
 
   def content_from_place_name(place_name)
-    if ::Rails.env == "test"
+    if Rails.env.test?
       content = test_place_name(place_name)
     else
       content = nil
@@ -88,9 +100,9 @@ class Geocoder < BlankSlate
 
   def test_place_name(place_name)
     if (loc = TEST_EXPECTED_LOCATIONS[place_name])
-      content = test_success(loc)
+      test_success(loc)
     else
-      content = TEST_FAILURE
+      TEST_FAILURE
     end
   end
 
@@ -102,7 +114,8 @@ class Geocoder < BlankSlate
         north: 41.6592100,
         east: -70.6022670
       },
-      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA" => {
+      "North bound Rest Area, State Highway 33, between Pomeroy and Athens, "\
+      "Ohio, USA" => {
         north: 39.3043,
         west: -82.1067,
         east: -82.002,
@@ -121,7 +134,7 @@ class Geocoder < BlankSlate
     TEST_FAILURE = '<?xml version="1.0" encoding="UTF-8"?>
     <GeocodeResponse>
      <status>ZERO_RESULTS</status>
-    </GeocodeResponse>'.freeze
+    </GeocodeResponse>'
   end
 
   def test_success(loc)

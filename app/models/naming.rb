@@ -190,7 +190,7 @@ class Naming < AbstractModel
           end
         end
 
-        # Also send to people who have registered positive interest in this name.
+        # Also send to people who registered positive interest in this name.
         # (Don't want *disinterest* in name overriding
         # interest in the observation, say.)
         for taxon in taxa
@@ -336,7 +336,7 @@ class Naming < AbstractModel
   #     str    = key.l
   #     num    = record[:num]    # Number of users who voted near this level.
   #     weight = record[:wgt]    # Sum of users' weights.
-  #     value  = record[:value]  # Value of this level of vote (arbitrary scale).
+  #     value  = record[:value]  # Value of this level of vote (arbitrary scale)
   #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
@@ -384,7 +384,7 @@ class Naming < AbstractModel
   # Array of all reason "types", in the order they should be presented in UI.
   ALL_REASONS = [1, 2, 3, 4].freeze
 
-  # These reasons will be used by default (with empty notes) if no reasons given.
+  # These reasons will be used by default (with empty notes) if no reasons given
   DEFAULT_REASONS = [1].freeze
 
   # Localization tags for reason labels.

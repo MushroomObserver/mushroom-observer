@@ -35,7 +35,9 @@
         </div>
 
         <%
-          adv_search = link_to(:app_advanced_search.l.nowrap, controller: :observer,
+          adv_search = link_to(content_tag(:span, :app_advanced_search.l,
+                                           style: "white-space:nowrap"),
+                               controller: :observer,
                                action: :advanced_search_form)
           @timer_end ||= Time.now
           secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)

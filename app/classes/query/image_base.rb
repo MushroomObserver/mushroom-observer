@@ -67,7 +67,8 @@ module Query
       initialize_model_do_objects_by_name(
         SpeciesList, :species_lists,
         "observations_species_lists.species_list_id",
-        join: { images_observations: { observations: :observations_species_lists } }
+        join: { images_observations:
+                { observations: :observations_species_lists } }
       )
       add_join(:images_observations) if params[:has_observation]
       initialize_model_do_image_size

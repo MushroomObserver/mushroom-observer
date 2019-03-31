@@ -1,0 +1,2 @@
+# Prevent gem from generating RDoc/RI documentation
+gem: --no-document

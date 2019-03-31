@@ -79,6 +79,7 @@ class AccountController < ApplicationController
     UserGroup.create_user(@new_user)
     flash_notice(:runtime_signup_success.tp + :email_spam_notice.tp)
     VerifyEmail.build(@new_user).deliver_now
+    notify_root_of_blocked_verification_email(@new_user)
     redirect_back_or_default(action: :welcome)
   end
 
@@ -169,6 +170,7 @@ class AccountController < ApplicationController
     return unless (user = find_or_goto_index(User, params[:id].to_s))
 
     VerifyEmail.build(user).deliver_now
+    notify_root_of_blocked_verification_email(user)
     flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
     redirect_back_or_default(action: :welcome)
   end
@@ -652,8 +654,10 @@ class AccountController < ApplicationController
         group_name = params["group_name"].to_s
         user       = User.find_by(login: user_name)
         group      = UserGroup.find_by(name: group_name)
-        flash_error :add_user_to_group_no_user.t(user: user_name)    unless user
-        flash_error :add_user_to_group_no_group.t(group: group_name) unless group
+        flash_error :add_user_to_group_no_user.t(user: user_name) unless user
+        unless group
+          flash_error :add_user_to_group_no_group.t(group: group_name)
+        end
         if user && group
           if user.user_groups.member?(group)
             flash_warning :add_user_to_group_already. \
@@ -776,5 +780,20 @@ class AccountController < ApplicationController
     elsif @new_user.email != @new_user.email_confirmation
       @new_user.errors.add(:email, :validate_user_email_mismatch.t)
     end
+  end
+
+  SPAM_BLOCKERS = %w[
+    hotmail.com
+  ].freeze
+
+  def notify_root_of_blocked_verification_email(user)
+    domain = user.email.to_s.sub(/^.*@/, "")
+    return unless SPAM_BLOCKERS.any? { |d| domain == d }
+
+    url = "#{MO.http_domain}/account/verify/#{user.id}?" \
+          "auth_code=#{user.auth_code}"
+    subject = :email_subject_verify.l
+    content = :email_verify_intro.tp(user: @user.login, link: url)
+    WebmasterEmail.build(user.email, content, subject).deliver_now
   end
 end

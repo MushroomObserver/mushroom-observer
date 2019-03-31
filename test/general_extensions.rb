@@ -5,7 +5,7 @@
 #
 #  == Test unit helpers
 #  rolf, mary, etc.::           Quick access to User instances.
-#  setup_image_dirs::           Create test image dirs for tests that do image uploads.
+#  setup_image_dirs::  Create test image dirs for tests that do image uploads.
 #
 #  == General Assertions
 #  assert_fail::                Make sure an assertion fails.
@@ -14,11 +14,12 @@
 #  assert_blank::               Make sure something is blank.
 #  assert_not_blank::           Make sure something is not blank.
 #  assert_not_match::           Make sure a string does NOT match.
-#  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone instances as dates.
+#  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone
+#                               instances as dates.
 #  assert_objs_equal::          Compare two model instances.
 #  assert_users_equal::         Compare two user instances.
 #  assert_names_equal::         Compare two name instances.
-#  assert_list_equal::          Compare two lists by mapping and sorting elements.
+#  assert_list_equal:: Compare two lists by mapping and sorting elements.
 #  assert_obj_list_equal::      Compare two lists of objects, comparing ids.
 #  assert_user_list_equal::     Compare two lists of User's.
 #  assert_name_list_equal::     Compare two lists of Name's.
@@ -239,7 +240,8 @@ module GeneralExtensions
       when :note
         assert_equal(args[arg], email.get_note, "Value of note is wrong")
       else
-        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
+        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg),
+                     "Value of #{arg} is wrong")
       end
     end
   end
@@ -371,8 +373,10 @@ module GeneralExtensions
     key =~ %r{^(.*)/(.*)}
     key = Regexp.last_match(1)
     attr = Regexp.last_match(2)
-    _assert_xml(val, get_xml_element(key).attributes[attr],
-                msg || "XML element \"#{key}\" should have attribute \"#{val}\".")
+    _assert_xml(
+      val, get_xml_element(key).attributes[attr],
+      msg || "XML element \"#{key}\" should have attribute \"#{val}\"."
+    )
   end
 
   # Assert that a given element has a given value.
@@ -460,9 +464,13 @@ module GeneralExtensions
         result = true
         break
       elsif !msg
-        # Write out expected (old) and received (new) files for debugging purposes.
-        File.open(filename + ".old", "w:#{encoding}") { |fh| fh.write(template) }
-        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(str) }
+        # Write out expected (old) and received (new) files for debugging.
+        File.open(filename + ".old", "w:#{encoding}") do |fh|
+          fh.write(template)
+        end
+        File.open(filename + ".new", "w:#{encoding}") do |fh|
+          fh.write(str)
+        end
         msg = "File #{filename} wrong:\n" +
               `diff #{filename}.old #{filename}.new`
         File.delete(filename + ".old") if File.exist?(filename + ".old")

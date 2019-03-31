@@ -110,6 +110,13 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_location_advanced_search
+    query = Query.lookup_and_save(:Location, :advanced_search,
+                                  location: "California")
+    get(:advanced_search, @controller.query_params(query))
+    assert_template(:list_locations)
+  end
+
   def test_location_bounding_box
     delta = 0.001
     get(:list_locations, north: 0, south: 0, east: 0, west: 0)

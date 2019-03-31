@@ -138,8 +138,14 @@ class ArticleControllerTest < FunctionalTestCase
   end
 
   def test_index
+    # Prove any user can see article index
     get(:index_article)
     assert(:success)
+
+    # Prove privileged user get link to create an article
+    login(users(:article_writer).login)
+    get(:index_article)
+    assert_select("a", text: :create_article_title.l)
   end
 
   def test_list_articles
@@ -152,6 +158,13 @@ class ArticleControllerTest < FunctionalTestCase
     get(:show_article, id: articles(:premier_article).id)
     assert_response(:success)
     assert_template(:show_article)
+
+    # Prove privileged user gets extra links
+    login(users(:article_writer).login)
+    get(:show_article, id: articles(:premier_article).id)
+    assert_select("a", text: :create_article_title.l)
+    assert_select("a", text: :EDIT.l)
+    assert_select("a", text: :DESTROY.l)
 
     # Prove that trying to show non-existent article provokes error & redirect
     get(:show_article, id: -1)

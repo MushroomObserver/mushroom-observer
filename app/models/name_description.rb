@@ -13,9 +13,9 @@
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
-#  merge_source_id::  (V) Used to keep track of descriptions that were merged into this one.
-#                         Primarily useful in the past versions: stores id of latest version
-#                         of the Description merged into this one at the time of the merge.
+#  merge_source_id::  (V) Used to keep track of descriptions that were merged
+#    into this one. Primarily useful in the past versions: stores id of latest
+#    version of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
 #  review_status::    (-) :vetted, :unvetted, :inaccurate, :unreviewed.
@@ -43,7 +43,8 @@
 #  == Class Methods
 #
 #  all_note_fields::     NameDescriptive text fields: all.
-#  eol_note_fields::     NameDescriptive text fields: ones that don't require special handling for EOL.
+#  eol_note_fields::     NameDescriptive text fields:
+#                        ones that don't require special handling for EOL.
 #  all_review_statuses:: Review status: allowed values.
 #
 #  == Instance Methods
@@ -92,11 +93,21 @@ class NameDescription < Description
   has_many :comments,  as: :target, dependent: :destroy
   has_many :interests, as: :target, dependent: :destroy
 
-  has_and_belongs_to_many :admin_groups,  class_name: "UserGroup", join_table: "name_descriptions_admins"
-  has_and_belongs_to_many :writer_groups, class_name: "UserGroup", join_table: "name_descriptions_writers"
-  has_and_belongs_to_many :reader_groups, class_name: "UserGroup", join_table: "name_descriptions_readers"
-  has_and_belongs_to_many :authors,       class_name: "User",      join_table: "name_descriptions_authors"
-  has_and_belongs_to_many :editors,       class_name: "User",      join_table: "name_descriptions_editors"
+  has_and_belongs_to_many :admin_groups,
+                          class_name: "UserGroup",
+                          join_table: "name_descriptions_admins"
+  has_and_belongs_to_many :writer_groups,
+                          class_name: "UserGroup",
+                          join_table: "name_descriptions_writers"
+  has_and_belongs_to_many :reader_groups,
+                          class_name: "UserGroup",
+                          join_table: "name_descriptions_readers"
+  has_and_belongs_to_many :authors,
+                          class_name: "User",
+                          join_table: "name_descriptions_authors"
+  has_and_belongs_to_many :editors,
+                          class_name: "User",
+                          join_table: "name_descriptions_editors"
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
@@ -285,7 +296,8 @@ class NameDescription < Description
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    self.classification = Name.validate_classification(parent.rank, classification)
+    self.classification = Name.validate_classification(parent.rank,
+                                                       classification)
   rescue StandardError => e
     errors.add(:classification, e.to_s)
   end

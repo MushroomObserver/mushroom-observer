@@ -241,13 +241,15 @@ module Query::Modules::Joining
       # Check for "forward" join first, e.g., if joining from observatons to
       # rss_logs, use "observations.rss_log_id = rss_logs.id", because that will
       # take advantage of the primary key on rss_logs.id.
-      if col = (JOIN_CONDITIONS[from.to_sym] && JOIN_CONDITIONS[from.to_sym][to.to_sym])
+      if (col = (JOIN_CONDITIONS[from.to_sym] &&
+                 JOIN_CONDITIONS[from.to_sym][to.to_sym]))
         to.sub!(/\..*/, "")
         target_table = to
 
       # Now look for "reverse" join.  (In the above example, and this was how it
       # used to be, it would be "observations.id = rss_logs.observation_id".)
-      elsif col = (JOIN_CONDITIONS[to.to_sym] && JOIN_CONDITIONS[to.to_sym][from.to_sym])
+      elsif (col = (JOIN_CONDITIONS[to.to_sym] &&
+                    JOIN_CONDITIONS[to.to_sym][from.to_sym]))
         to.sub!(/\..*/, "")
         target_table = to
         from, to = to, from
@@ -255,8 +257,8 @@ module Query::Modules::Joining
         raise("Don't know how to join from #{from} to #{to}.")
       end
 
-      # By default source table column is just "id"; enter both target and source
-      # columns explcitly by making join table value an Array.
+      # By default source table column is just "id"; enter both target and
+      # source columns explcitly by making join table value an Array.
       if col.is_a?(Array)
         col1, col2 = *col
       else

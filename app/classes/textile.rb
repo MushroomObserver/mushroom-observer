@@ -13,7 +13,10 @@ require "redcloth"
 #  === Class methods
 #
 #  textilize::                   Parse the given string.
+#  textile_div_safe::  Wrap string in textile div, marking it safe for output
+#  textilize_safe::              Same as above, marking it safe for output
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
+#  textilize_without_paragraph_safe  Same as above, marking it safe for output
 #  ---
 #  register_name::               Register a set of names that _S. name_
 #                                abbreviations may refer to.
@@ -33,16 +36,42 @@ class Textile < String
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
 
+  ########## Class methods #####################################################
+
   # Convenience wrapper on instance method Textile#textilize_without_paragraph.
   def self.textilize_without_paragraph(str, do_object_links = false,
                                        sanitize = true)
     new(str).textilize_without_paragraph(do_object_links, sanitize)
   end
 
+  # Wrap self.textilize_without_paragraph, marking output trusted safe
+  def self.textilize_without_paragraph_safe(str, do_object_links = false,
+                                            sanitize = true)
+    textilize_without_paragraph(str, do_object_links, sanitize).
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
+  end
+
   # Convenience wrapper on the instance method Textile#textilize.
   def self.textilize(str, do_object_links = false, sanitize = true)
     new(str).textilize(do_object_links, sanitize)
   end
+
+  # Wrap self.textilize_without_paragraph, marking output trusted safe
+  def self.textilize_safe(str, do_object_links = false, sanitize = true)
+    textilize(str, do_object_links, sanitize).
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
+  end
+
+  # Wrap string in textile div, marking output trusted safe
+  def self.textile_div_safe
+    %(<div class="textile">#{yield}</div>).
+      # Disable cop; we need `html_safe` to prevent Rails from adding escaping
+      html_safe # rubocop:disable Rails/OutputSafety
+  end
+
+  ########## Instance methods ##################################################
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.

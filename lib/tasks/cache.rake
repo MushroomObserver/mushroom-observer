@@ -14,14 +14,12 @@ namespace :cache do
   desc "Recalculate vote caches for observations and namings"
   task(refresh_votes: :environment) do
     print "Refreshing naming.vote_cache...\n"
-    # for n in Naming.find(:all) # Rails 3
-    for n in Naming.all
+    Naming.all.each do |n|
       print "##{n.id}\r"
       n.calc_vote_table
     end
     print "Refreshing observation.vote_cache...\n"
-    # for o in Observation.find(:all) # Rails 3
-    for o in Observation.all
+    Observation.all.each do |o|
       print "##{o.id}\r"
       o.calc_consensus
     end
@@ -31,10 +29,16 @@ namespace :cache do
   desc "Reset the queued_emails flavor enum"
   task(refresh_queued_emails: :environment) do
     print "Refreshing flavor enum for queued_emails...\n"
-    ActiveRecord::Migration.add_column :queued_emails, :flavor_tmp, :enum, limit: QueuedEmail.all_flavors
-    QueuedEmail.connection.update("update queued_emails set flavor_tmp=flavor+0")
+    ActiveRecord::Migration.add_column(
+      :queued_emails, :flavor_tmp, :enum, limit: QueuedEmail.all_flavors
+    )
+    QueuedEmail.connection.update(
+      "update queued_emails set flavor_tmp=flavor+0"
+    )
     ActiveRecord::Migration.remove_column :queued_emails, :flavor
-    ActiveRecord::Migration.add_column :queued_emails, :flavor, :enum, limit: QueuedEmail.all_flavors
+    ActiveRecord::Migration.add_column(
+      :queued_emails, :flavor, :enum, limit: QueuedEmail.all_flavors
+    )
     QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
     ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
   end
@@ -42,10 +46,14 @@ namespace :cache do
   desc "Reset the ranks"
   task(refresh_ranks: :environment) do
     print "Refreshing the list of ranks...\n"
-    ActiveRecord::Migration.add_column :names, :rank_tmp, :enum, limit: Name.all_ranks
+    ActiveRecord::Migration.add_column(
+      :names, :rank_tmp, :enum, limit: Name.all_ranks
+    )
     Name.connection.update("update names set rank_tmp=rank+0")
     ActiveRecord::Migration.remove_column :names, :rank
-    ActiveRecord::Migration.add_column :names, :rank, :enum, limit: Name.all_ranks
+    ActiveRecord::Migration.add_column(
+      :names, :rank, :enum, limit: Name.all_ranks
+    )
     Name.connection.update("update names set rank=rank_tmp")
     ActiveRecord::Migration.remove_column :names, :rank_tmp
   end
@@ -53,27 +61,47 @@ namespace :cache do
   desc "Reset the search_states query_type enum"
   task(refresh_search_states: :environment) do
     print "Refreshing query_type enum for search_states...\n"
-    ActiveRecord::Migration.add_column :search_states, :query_type_tmp, :enum, limit: SearchState.all_query_types
-    SearchState.connection.update("update search_states set query_type_tmp=query_type+0")
+    ActiveRecord::Migration.add_column(
+      :search_states, :query_type_tmp, :enum, limit: SearchState.all_query_types
+    )
+    SearchState.connection.update(
+      "update search_states set query_type_tmp=query_type+0"
+    )
     ActiveRecord::Migration.remove_column :search_states, :query_type
-    ActiveRecord::Migration.add_column :search_states, :query_type, :enum, limit: SearchState.all_query_types
-    SearchState.connection.update("update search_states set query_type=query_type_tmp")
+    ActiveRecord::Migration.add_column(
+      :search_states, :query_type, :enum, limit: SearchState.all_query_types
+    )
+    SearchState.connection.update(
+      "update search_states set query_type=query_type_tmp"
+    )
     ActiveRecord::Migration.remove_column :search_states, :query_type_tmp
   end
 
   desc "Reset the name review_status enum"
   task(refresh_name_review_status: :environment) do
     print "Refreshing review_status enum for names and past_names...\n"
-    ActiveRecord::Migration.add_column :names, :review_status_tmp, :enum, limit: Name.all_review_statuses
-    ActiveRecord::Migration.add_column :past_names, :review_status_tmp, :enum, limit: Name.all_review_statuses
+    ActiveRecord::Migration.add_column(
+      :names, :review_status_tmp, :enum, limit: Name.all_review_statuses
+    )
+    ActiveRecord::Migration.add_column(
+      :past_names, :review_status_tmp, :enum, limit: Name.all_review_statuses
+    )
     Name.connection.update("update names set review_status_tmp=review_status+0")
-    Name.connection.update("update past_names set review_status_tmp=review_status+0")
+    Name.connection.update(
+      "update past_names set review_status_tmp=review_status+0"
+    )
     ActiveRecord::Migration.remove_column :names, :review_status
     ActiveRecord::Migration.remove_column :past_names, :review_status
-    ActiveRecord::Migration.add_column :names, :review_status, :enum, limit: Name.all_review_statuses
-    ActiveRecord::Migration.add_column :past_names, :review_status, :enum, limit: Name.all_review_statuses
+    ActiveRecord::Migration.add_column(
+      :names, :review_status, :enum, limit: Name.all_review_statuses
+    )
+    ActiveRecord::Migration.add_column(
+      :past_names, :review_status, :enum, limit: Name.all_review_statuses
+    )
     Name.connection.update("update names set review_status=review_status_tmp")
-    Name.connection.update("update past_names set review_status=review_status_tmp")
+    Name.connection.update(
+      "update past_names set review_status=review_status_tmp"
+    )
     ActiveRecord::Migration.remove_column :names, :review_status_tmp
     ActiveRecord::Migration.remove_column :past_names, :review_status_tmp
   end
@@ -81,7 +109,8 @@ namespace :cache do
   desc "Add reviewers"
   task(add_reviewers: :environment) do
     group = UserGroup.find_by_name("reviewers")
-    for login in [] # Should be a list of logins for users you want to add to reviewers list
+    # Should be a list of logins for users you want to add to reviewers list
+    [].each do |login|
       user = User.find_by_login(login)
       if user.user_groups.member?(group)
         print "#{login} is already in the reviewers group\n"
@@ -128,7 +157,7 @@ namespace :cache do
       end
       authors = Set.new
       if n.gen_desc && n.gen_desc != ""
-        if n.authors # If there are already authors then make sure they are a set
+        if n.authors # If there are already authors, make sure they are a set
           authors.merge(n.authors)
         else
           authors.add(users[author_id]) if author_id

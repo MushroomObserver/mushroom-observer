@@ -6,7 +6,10 @@
 #
 #  DESCRIPTION::
 #
-#  Creates JSON data file for Mushroom Mapper app.  It writes output to:
+#  Creates JSON data file for Narth American Mycoflora Project's
+#  Mushroom Mapper app.
+#
+#  It writes output to:
 #
 #    RAILS_ROOT/public/mushroom_mapper.json
 #    RAILS_ROOT/public/taxonomy.csv
@@ -56,27 +59,34 @@ name_data = Name.connection.select_rows %(
   SELECT id, text_name, rank, deprecated, synonym_id, correct_spelling_id
   FROM names
 )
-for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_data do
-  synonyms[synonym_id] = id if synonym_id && !deprecated
-end
-for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_data do
-  real_id = id
-  real_id = correct_spelling_id if correct_spelling_id
-  real_id = synonyms[synonym_id] if synonym_id
-  aliases[id] = real_id if real_id
-  names[id] = [text_name, rank, deprecated]
-  if ids[text_name]
-    id2 = ids[text_name]
-    text_name2, rank2, deprecated2 = names[id2]
-    if !deprecated && !deprecated2
-      warn("Multiple accepted names match #{text_name}: #{id2}, #{id}")
-    elsif !deprecated && deprecated2
+
+# rubocop:disable Metrics/ParameterLists
+# > 5 parameters needed for 2nd name.data block, and it's efficient
+# to use name_data for the 1st block to avoid hitting db twice
+name_data.
+  each do |id, _text_name, _rank, deprecated, synonym_id, _correct_spelling_id|
+    synonyms[synonym_id] = id if synonym_id && !deprecated
+  end
+name_data.
+  each do |id, text_name, rank, deprecated, synonym_id, correct_spelling_id|
+    real_id = id
+    real_id = correct_spelling_id if correct_spelling_id
+    real_id = synonyms[synonym_id] if synonym_id
+    aliases[id] = real_id if real_id
+    names[id] = [text_name, rank, deprecated]
+    if ids[text_name]
+      id2 = ids[text_name]
+      text_name2, rank2, deprecated2 = names[id2]
+      if !deprecated && !deprecated2
+        warn("Multiple accepted names match #{text_name}: #{id2}, #{id}")
+      elsif !deprecated && deprecated2
+        ids[text_name] = id
+      end
+    else
       ids[text_name] = id
     end
-  else
-    ids[text_name] = id
   end
-end
+# rubocop:enable Metrics/ParameterLists
 
 # Build table of number of observations per genus.
 observations = {}
@@ -105,10 +115,14 @@ for id, genus, classification in Name.connection.select_rows %(
     AND !deprecated
     AND correct_spelling_id IS NULL
 ) do
-  kingdom = classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  klass   = classification.to_s =~ /Class: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  order   = classification.to_s =~ /Order: _([^_]+)_/ ? Regexp.last_match(1) : nil
-  family  = classification.to_s =~ /Family: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  kingdom =
+    classification.to_s =~ /Kingdom: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  klass   =
+    classification.to_s =~ /Class: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  order   =
+    classification.to_s =~ /Order: _([^_]+)_/ ? Regexp.last_match(1) : nil
+  family  =
+    classification.to_s =~ /Family: _([^_]+)_/ ? Regexp.last_match(1) : nil
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]

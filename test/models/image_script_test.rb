@@ -83,11 +83,13 @@ class ScriptTest < UnitTestCase
   end
 
   def clear_image_transferred_state_externally(id)
-    system("mysql -u mo -pmo mo_test -e 'update images set transferred=false where id = #{id}'")
+    system("mysql -u mo -pmo mo_test -e "\
+           "'update images set transferred=false where id = #{id}'")
   end
 
   def get_image_transferred_state_externally(id)
-    result = `mysql -u mo -pmo mo_test -e "select transferred from images where id = #{id}"`
+    result = `mysql -u mo -pmo mo_test -e '\
+             '"select transferred from images where id = #{id}"`
     result.split("\n").last.strip == "1"
   end
 

@@ -21,14 +21,20 @@ module ExporterHelper
       if obj.ok_for_export
         content_tag(:b, :review_ok_for_export.t, class: "nowrap")
       else
-        link_with_query(:review_ok_for_export.t, { controller: :observer,
-                                                   action: :set_export_status, type: obj.type_tag,
-                                                   id: obj.id, value: 1 }, class: "nowrap")
+        link_with_query(:review_ok_for_export.t,
+                        { controller: :observer,
+                          action: :set_export_status,
+                          type: obj.type_tag,
+                          id: obj.id, value: 1 },
+                        class: "nowrap")
       end + " | " +
         if obj.ok_for_export
-          link_with_query(:review_no_export.t, { controller: :observer,
-                                                 action: :set_export_status, type: obj.type_tag,
-                                                 id: obj.id, value: 0 }, class: "nowrap")
+          link_with_query(:review_no_export.t,
+                          { controller: :observer,
+                            action: :set_export_status,
+                            type: obj.type_tag,
+                            id: obj.id, value: 0 },
+                          class: "nowrap")
         else
           content_tag(:b, :review_no_export.t)
         end

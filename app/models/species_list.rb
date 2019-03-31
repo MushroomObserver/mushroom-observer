@@ -196,14 +196,16 @@ class SpeciesList < AbstractModel
 
     # Takes 0.25 seconds on Sebastopol Observations.
     # ids = observations.map(&:name_id).uniq
-    # Name.find(:all, :conditions => ['id IN (?)', ids], :order => 'sort_name ASC')
+    # Name.find(:all, :conditions => ['id IN (?)', ids], :
+    #           order => 'sort_name ASC')
 
     # Takes 0.71 seconds on Sebastopol Observations.
     # self.observations.map {|o| o.name_id}.
     #   uniq.map {|id| Name.find(id)}.sort_by(&:sort_name)
 
     # Takes 1.00 seconds on Sebastopol Observations.
-    # Name.all(:conditions => ['observations_species_lists.species_list_id = ?', id],
+    # Name.all(:conditions =>
+    #            ['observations_species_lists.species_list_id = ?', id],
     #          :include => {:observations => :species_lists},
     #          :order => 'names.sort_name ASC')
   end

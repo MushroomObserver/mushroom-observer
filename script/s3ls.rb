@@ -93,7 +93,8 @@ log("#{sum} bytes in #{num} files\n") if verbose
 unless replace
   FileUtils.mv(cache_file, temp_file2)
   FileUtils.touch(cache_file)
-  system("cat #{temp_file1} #{temp_file2} | #{app_root}/script/s3uniq.rb >> #{cache_file}")
+  system("cat #{temp_file1} #{temp_file2} | #{app_root}/script/s3uniq.rb "\
+         ">> ""#{cache_file}")
   FileUtils.rm(temp_file1)
   FileUtils.rm(temp_file2)
 end

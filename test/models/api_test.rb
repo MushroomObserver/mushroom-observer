@@ -2478,8 +2478,10 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(id: marys_obs.id, add_to_project: proj.id))
     assert(Project.find(proj.id).observations.include?(rolfs_obs))
     assert(Project.find(proj.id).observations.include?(marys_obs))
-    assert_api_pass(params.merge(id: rolfs_obs.id, remove_from_project: proj.id))
-    assert_api_fail(params.merge(id: marys_obs.id, remove_from_project: proj.id))
+    assert_api_pass(params.merge(id: rolfs_obs.id,
+                                 remove_from_project: proj.id))
+    assert_api_fail(params.merge(id: marys_obs.id,
+                                 remove_from_project: proj.id))
     assert(!Project.find(proj.id).observations.include?(rolfs_obs))
     assert(Project.find(proj.id).observations.include?(marys_obs))
 

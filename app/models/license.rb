@@ -26,7 +26,7 @@
 #  == Instance methods
 #
 #  images::                 Array of Image's that use this License.
-#  users::                  Array of User's for whom this is the default License.
+#  users::                  Array of User's for whom this is the default License
 #  location_descriptions::  Array of Name's that use this License.
 #  name_descriptions::      Array of Name's that use this License.
 #  text_name::              Alias for +display_name+ for debugging.

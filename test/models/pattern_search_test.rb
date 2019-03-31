@@ -631,7 +631,9 @@ class PatternSearchTest < UnitTestCase
     expect = HerbariumRecord.where(herbarium: nybg).
              map(&:observations).flatten.uniq
     assert_not_empty(expect)
-    x = PatternSearch::Observation.new('herbarium:"The New York Botanical Garden"')
+    x = PatternSearch::Observation.new(
+      'herbarium:"The New York Botanical Garden"'
+    )
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 

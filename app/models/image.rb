@@ -465,34 +465,56 @@ class Image < AbstractModel
   # MD5 sum, etc. afterwards before it actually processes the image.
   def image=(file)
     self.upload_handle = file
-
-    # Image is already stored in a local temp file.  This is how Rails passes
+    # Image is already stored in a local temp file. This is how Rails passes
     # large files from the webserver.
-    if file.is_a?(Tempfile) ||
-       file.is_a?(ActionDispatch::Http::UploadedFile) ||
-       file.is_a?(Rack::Test::UploadedFile)
-      @file = file
-      self.upload_temp_file = file.path
-      self.upload_length = file.size
-      self.upload_type   = file.content_type if file.respond_to?(:content_type)
-      self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
-        if file.respond_to?(:original_filename)
-
-    # Image is given as an input stream.  We need to save it to a temp file
-    # before we can do anything useful with it.
-    elsif file.is_a?(IO) ||
-          file.is_a?(StringIO) ||
-          defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
-      @file = nil
-      self.upload_temp_file = nil
-      self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
-      self.upload_length = file.size           if file.respond_to?(:size)
-      self.upload_type   = file.content_type   if file.respond_to?(:content_type)
-      self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
-        if file.respond_to?(:original_filename)
+    if local_file?(file)
+      init_image_from_local_file(file)
+    # Image is given as an input stream.
+    elsif input_stream?(file)
+      init_image_from_stream(file)
     end
+  end
+
+  # Is image already stored in a local temp file?
+  def local_file?(file)
+    file.is_a?(Tempfile) ||
+      file.is_a?(ActionDispatch::Http::UploadedFile) ||
+      file.is_a?(Rack::Test::UploadedFile)
+  end
+
+  # Is image an input stream?
+  def input_stream?(file)
+    file.is_a?(IO) ||
+      file.is_a?(StringIO) ||
+      defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
+  end
+
+  def init_image_from_local_file(file)
+    @file = file
+    self.upload_temp_file = file.path
+    self.upload_length    = file.size
+    add_extra_attributes_from_file(file)
+  end
+
+  # Image is given as an input stream. We need to save it to a temp file
+  # before we can do anything useful with it.
+  def init_image_from_stream(file)
+    @file = nil
+    self.upload_temp_file = nil
+    if file.respond_to?(:content_length)
+      self.upload_length = file.content_length.chomp
+    end
+    self.upload_length = file.size if file.respond_to?(:size)
+    add_extra_attributes_from_file(file)
+  end
+
+  def add_extra_attributes_from_file(file)
+    self.upload_type     = file.content_type if file.respond_to?(:content_type)
+    self.upload_md5sum   = file.md5sum       if file.respond_to?(:md5sum)
+    return unless file.respond_to?(:original_filename)
+
+    self.upload_original_name = file.original_filename.to_s.
+                                force_encoding("utf-8")
   end
 
   def upload_from_url(url)
@@ -537,7 +559,8 @@ class Image < AbstractModel
   def validate_image_type
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
-      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
+      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").
+             chomp.split[1]
       if type
         type.sub!(/;$/, "")
         self.upload_type = type
@@ -874,7 +897,8 @@ class Image < AbstractModel
 
   # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
-    if saved_change_to_when? && saved_change_to_when[0].year != saved_change_to_when[1].year ||
+    if saved_change_to_when? &&
+       saved_change_to_when[0].year != saved_change_to_when[1].year ||
        saved_change_to_license_id? ||
        saved_change_to_copyright_holder?
       old_year       = begin
@@ -912,20 +936,22 @@ class Image < AbstractModel
       SELECT id, YEAR(`when`), license_id FROM images
       WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
     ))
-    if data.any?
-      # brakeman generates what appears to be a false positive SQL injection
-      # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
-      Image.connection.insert(%(
-        INSERT INTO copyright_changes
-          (user_id, updated_at, target_type, target_id, year, name, license_id)
-        VALUES
-          #{data.map { |id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})" }.join(",\n")}
-      ))
-      Image.connection.update(%(
-        UPDATE images SET copyright_holder = #{new_name}
-        WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-      ))
-    end
+    return unless data.any?
+
+    # brakeman generates what appears to be a false positive SQL injection
+    # warning.  See https://github.com/presidentbeef/brakeman/issues/1231
+    Image.connection.insert(%(
+      INSERT INTO copyright_changes
+        (user_id, updated_at, target_type, target_id, year, name, license_id)
+      VALUES
+        #{data.map do |id, year, lic|
+            "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"
+          end.join(",\n")}
+    ))
+    Image.connection.update(%(
+      UPDATE images SET copyright_holder = #{new_name}
+      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    ))
   end
 
   def year
