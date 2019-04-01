@@ -50,8 +50,8 @@
     tabs += [
       link_to(:change_user_bonuses.t, controller: :observer,
               action: :change_user_bonuses, id: @show_user.id),
-      link_to(:DESTROY.t, controller: :account, action: :destroy_user,
-              id: @show_user.id)
+      link_to(:DESTROY.t, {controller: :account, action: :destroy_user,
+              id: @show_user.id}, data: {confirm: :are_you_sure.l})
     ]
   end
   @tabsets = {
