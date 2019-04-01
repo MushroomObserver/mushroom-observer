@@ -1242,7 +1242,7 @@
 
   # observer/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
-  commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image.
+  commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
   # location/create_location_description
   create_location_description_title: "[:create_name_description_title]"
