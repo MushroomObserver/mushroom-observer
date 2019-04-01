@@ -2,6 +2,7 @@
 
 <div class="max-width-text">
   <%= form_tag(add_query_param(action: :ask_user_question, id: @target.id)) do %>
+    <%= :ask_user_question_label.tp(user: @target.legal_name) %>
 
     <div class="form-group">
       <%= label_tag(:email_subject, :ask_user_question_subject.t + ":") %>
