@@ -794,6 +794,7 @@ class AccountController < ApplicationController
           "auth_code=#{user.auth_code}"
     subject = :email_subject_verify.l
     content = :email_verify_intro.tp(user: @user.login, link: url)
+    content = "email: #{user.email}\n\n" + content.html_to_ascii
     WebmasterEmail.build(user.email, content, subject).deliver_now
   end
 end
