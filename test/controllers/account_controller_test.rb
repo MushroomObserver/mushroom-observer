@@ -286,6 +286,15 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
+  def test_send_verify_hotmail
+    user = User.create!(
+      login: "micky",
+      email: "mm@hotmail.com"
+    )
+    post(:send_verify, id: user.id)
+    assert_flash_success
+  end
+
   def test_edit_prefs
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
