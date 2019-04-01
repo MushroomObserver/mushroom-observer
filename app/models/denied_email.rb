@@ -1,4 +1,4 @@
-# Email sent to Nathan when sign-up is denied.
+# Email sent to admins when sign-up is denied.
 class DeniedEmail < AccountMailer
   def build(user_params)
     I18n.locale = MO.default_locale
