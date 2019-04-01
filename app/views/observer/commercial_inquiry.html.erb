@@ -2,11 +2,13 @@
 
 <div class="max-width-text-plus_image">
   <%= form_tag(add_query_param(action: :commercial_inquiry, id: @image.id)) do %>
-    <div class="pull-right">
+    <div>
       <%= thumbnail(@image, size: :medium, border: 0, votes: true) %>
     </div>
-    <%= :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
-    <%= text_area(:commercial_inquiry, :content, rows: 10, class: "form-control") %>
-    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    <div>
+      <%= :commercial_inquiry_header.tp(user: @image.user.legal_name) %>
+      <%= text_area(:commercial_inquiry, :content, rows: 10, class: "form-control") %>
+      <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    </div>
   <% end %>
 </div>
