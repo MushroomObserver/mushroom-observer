@@ -3,6 +3,7 @@
 <div class="max-width-text">
   <%= form_tag(add_query_param(action: :author_request, id: @object.id,
                                type: @object.type_tag)) do %>
+    <%= :author_request_note.tp %>
 
     <div class="form-group push-down">
       <%= label_tag(:email_subject, :request_subject.t + ":") %>
