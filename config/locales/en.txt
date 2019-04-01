@@ -1210,6 +1210,7 @@
 
   # observer/ask_user_question
   ask_user_question_title: Email Message for [user]
+  ask_user_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will include your email address as the 'Reply To' address.
   ask_user_question_message: "[:Message]"
   ask_user_question_subject: "[:Subject]"
 
@@ -2898,8 +2899,10 @@
   admin_request_change_member_status: Change [:user]'s status
   admin_request_success: Successfully sent admin request for [title]
   admin_request_title: Admin Request for [title]
+  admin_request_note: Enter your request below.  When you hit "[:SEND]" it will be emailed to to project admins.  The email will include your email address so that they can respond to your request.
   author_request_add_author: Make sender an author
   author_request_title: Authorship Request for [title]
+  author_request_note: "[:admin_request_note]"
   request_message: Message
   request_show_user: Show details on sender
   request_subject: Subject
