@@ -1122,7 +1122,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Upgrade from Rails 4.2 to Rails 5.2 was successful!  There was much rejoicing!
+  app_banner_box: On Sunday March 3, 2019 we passed 1 million fungus related images on MO!  Thanks for all the contributions, participation and support!
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1614,7 +1614,7 @@
   name_deprecate_comments: "[:Comments]"
   name_deprecate_submit: "[:SUBMIT]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
-  name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum). \nThis will be added to the Comments for [name]."
+  name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
   # name/name_index (and other actions using same view)
   name_index_add_name: Add Name
