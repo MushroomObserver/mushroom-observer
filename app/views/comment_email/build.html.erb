@@ -43,9 +43,7 @@
 
   # Only give the owner of the object being commented on access to the email
   # address of the user who commented on it.
-  handy_links = is_owner ?
-    :email_can_respond.l(name: @comment.user.legal_name, email: @comment.user.email) :
-    "*#{:email_no_respond.l}* #{:email_respond_via_comment.l}"
+  handy_links = "*#{:email_no_respond.l}* #{:email_respond_via_comment.l}"
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []

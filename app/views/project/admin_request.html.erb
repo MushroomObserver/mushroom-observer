@@ -4,6 +4,8 @@
 
 <div class="max-width-text">
   <%= form_tag(add_query_param(action: :admin_request, id: @project.id)) do %>
+    <%= :admin_request_note.tp %>
+
     <div class="form-group push-down">
       <%= label_tag(:email_subject, :request_subject.t + ":") %>
       <%= text_field(:email, :subject, class: "form-control", data: {autofocus: true}) %>

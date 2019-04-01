@@ -570,9 +570,3 @@ Style/LineEndConcatenation:
   Exclude:
     - 'test/general_extensions.rb'
     - 'test/integration/curator_test.rb'
-
-# Offense count: 653
-# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Metrics/LineLength:
-  Max: 212

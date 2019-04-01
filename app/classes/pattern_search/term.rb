@@ -12,8 +12,11 @@ module PatternSearch
       self.vals = []
     end
 
+    CONTAINS_QUOTES =
+      /^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/.freeze
+
     def <<(val)
-      while val.to_s =~ /^("([^\"\\]+|\\.)*"|'([^\"\\]+|\\.)*'|[^\"\',]*)(\s*,\s*|$)/
+      while val.to_s =~ CONTAINS_QUOTES
         vals << dequote(Regexp.last_match(1))
         val = val.to_s[Regexp.last_match(0).length..-1]
         break if val.blank?
@@ -223,11 +226,13 @@ module PatternSearch
       if val.to_s.match(/^-?(\d+(\.\d+)?|\.\d+)$/) &&
          (-100..100).cover?(val.to_f)
         [val.to_f * 3 / 100, 3]
-      elsif val.to_s.match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
+      elsif val.to_s.
+            match(/^(-?\d+(\.\d+)?|-?\.\d+)-(-?\d+(\.\d+)?|-?\.\d+)$/) &&
             (-100..100).cover?(Regexp.last_match(1).to_f) &&
             (-100..100).cover?(Regexp.last_match(3).to_f) &&
             Regexp.last_match(1).to_f <= Regexp.last_match(3).to_f
-        [Regexp.last_match(1).to_f * 3 / 100, Regexp.last_match(3).to_f * 3 / 100]
+        [Regexp.last_match(1).to_f * 3 / 100,
+         Regexp.last_match(3).to_f * 3 / 100]
       else
         raise BadConfidenceError.new(var: var, val: val)
       end
@@ -238,27 +243,38 @@ module PatternSearch
       raise TooManyValuesError.new(var: var) if vals.length > 1
 
       val = vals.first
-      if val =~ /^(\d\d\d\d)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 12, 31]]
-      elsif val =~ /^(\d\d\d\d)-(\d\d?)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 31]]
-      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i]]
-      elsif val =~ /^(\d\d\d\d)-(\d\d\d\d)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, 1, 1], "%04d-%02d-%02d" % [Regexp.last_match(2).to_i, 12, 31]]
-      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d\d\d)-(\d\d?)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, 1], "%04d-%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i, 31]]
-      elsif val =~ /^(\d\d\d\d)-(\d\d?)-(\d\d?)-(\d\d\d\d)-(\d\d?)-(\d\d?)$/
-        ["%04d-%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i, Regexp.last_match(3).to_i], "%04d-%02d-%02d" % [Regexp.last_match(4).to_i, Regexp.last_match(5).to_i, Regexp.last_match(6).to_i]]
-      elsif val =~ /^(\d\d?)$/
-        ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(1).to_i, 31]]
-      elsif val =~ /^(\d\d?)-(\d\d?)$/
-        ["%02d-%02d" % [Regexp.last_match(1).to_i, 1], "%02d-%02d" % [Regexp.last_match(2).to_i, 31]]
-      elsif val =~ /^(\d\d?)-(\d\d?)-(\d\d?)-(\d\d?)$/
-        ["%02d-%02d" % [Regexp.last_match(1).to_i, Regexp.last_match(2).to_i], "%02d-%02d" % [Regexp.last_match(3).to_i, Regexp.last_match(4).to_i]]
+      if /^(?<yr>\d{4})$/ =~ val
+        yyyymmdd([yr, 1, 1], [yr, 12, 31])
+      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)$/ =~ val
+        yyyymmdd([yr, mo, 1], [yr, mo, 31])
+      elsif /^(?<yr>\d{4})-(?<mo>\d\d?)-(?<day>\d\d?)$/ =~ val
+        yyyymmdd([yr, mo, day], [yr, mo, day])
+      elsif /^(?<yr1>\d{4})-(?<yr2>\d{4})$/ =~ val
+        yyyymmdd([yr1, 1, 1], [yr2, 12, 31])
+      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<yr2>\d{4})-(?<mo2>\d\d?)$/ =~ val
+        yyyymmdd([yr1, mo1, 1], [yr2, mo2, 31])
+      elsif /^(?<yr1>\d{4})-(?<mo1>\d\d?)-(?<dy1>\d\d?)-
+             (?<yr2>\d{4})-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/x =~ val
+        yyyymmdd([yr1, mo1, dy1], [yr2, mo2, dy2])
+      elsif /^(?<mo>\d\d?)$/ =~ val
+        mmdd([mo, 1], [mo, 31])
+      elsif /^(?<mo1>\d\d?)-(?<mo2>\d\d?)$/ =~ val
+        mmdd([mo1, 1], [mo2, 31])
+      elsif /^(?<mo1>\d\d?)-(?<dy1>\d\d?)-(?<mo2>\d\d?)-(?<dy2>\d\d?)$/ =~ val
+        mmdd([mo1, dy1], [mo2, dy2])
       else
         raise BadDateRangeError.new(var: var, val: val)
       end
+    end
+
+    def yyyymmdd(from, to)
+      [format("%04d-%02d-%02d", from.first, from.second.to_i, from.third.to_i),
+       format("%04d-%02d-%02d", to.first, to.second.to_i, to.third.to_i)]
+    end
+
+    def mmdd(from, to)
+      [format("%02d-%02d", from.first.to_i, from.second.to_i),
+       format("%02d-%02d", to.first.to_i, to.second.to_i)]
     end
 
     def parse_rank_range

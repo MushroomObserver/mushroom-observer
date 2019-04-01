@@ -676,15 +676,16 @@ namespace :jason do
       loc ||= val
     elsif !loc
       val2 = val.downcase.gsub(/\W+/, " ")
-      # results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc") # Rails 3
       results = Location.where("search_name LIKE ?", "%#{val2}%").
                 order(name).to_a
       if results.empty?
-        lines.push('>>>>>>>> couldn\'t find any matching locations (add "*" to end to create)')
+        lines.push(">>>>>>>> couldn't find any matching locations" \
+                   "(add '*' to end to create)")
       elsif results.length == 1
         loc = results.first
       elsif results.length > 1
-        lines.push('>>>>>>>> multiple locations match: (add "*" to end to create)')
+        lines.push(">>>>>>>> multiple locations match: "\
+                   "(add '*' to end to create)")
         for x in results
           lines.push(">>>>>>>>   %s" % x.name)
         end
