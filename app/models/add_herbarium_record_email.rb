@@ -9,6 +9,6 @@ class AddHerbariumRecordEmail < AccountMailer
     @herbarium_record = herbarium_record
     debug_log(:add_herbarium_record_not_curator, sender, receiver,
               herbarium_record: herbarium_record)
-    mo_mail(@title, to: receiver, reply_to: sender)
+    mo_mail(@title, to: receiver)
   end
 end
