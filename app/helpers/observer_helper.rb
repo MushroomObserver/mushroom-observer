@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # helpers for show Observation view
-module ShowObservationHelper
+module ObservationHelper
   def show_obs_title(obs)
     @owner_id ? show_obs_title_site_id(obs) : show_obs_title_num_after_name(obs)
   end
