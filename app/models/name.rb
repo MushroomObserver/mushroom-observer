@@ -118,7 +118,7 @@
 #  real_text_name::   (V) "Xanthoparmelia" coloradoënsis
 #  search_name::      (V) "Xanthoparmelia" coloradoensis Fries
 #  real_search_name:: (V) "Xanthoparmelia" coloradoënsis Fries
-#  sort_name::        (V) Xanthoparmelia" coloradoensis Fries
+#  sort_name::        (V) "Xanthoparmelia" coloradoensis Fries
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #                         (adds "sp." on the fly for genera)
@@ -190,6 +190,7 @@
 #  format_name::             "Xxx sp. Author"
 #  unique_text_name::        "Xxx (123)"
 #  unique_format_name::      "Xxx sp. Author (123)"
+#  short_display_name::      **__"Xanthoparmelia" coloradoënsis__**
 #  change_text_name::        Change name, updating formats.
 #  change_author::           Change author, updating formats.
 #
@@ -211,6 +212,7 @@
 #  synonym_ids:              List of IDs of all synonyms, including this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
+#  best_approved_synonym::   Single "best" approved synonym
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
 #  transfer_synonym::        Transfer a Name from another Synonym

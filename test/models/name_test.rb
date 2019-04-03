@@ -2195,6 +2195,36 @@ class NameTest < UnitTestCase
     assert_equal("Ach.", name.author)
   end
 
+  def test_short_display_name
+    # Name without author
+    assert_equal("**__Russula brevipes__**",
+                 names(:russula_brevipes_no_author).short_display_name)
+
+    # Name with author
+    assert_equal("**__Russula brevipes__**",
+                 names(:russula_brevipes_author_notes).short_display_name)
+
+    # Autonym with author
+    autonym = Name.create!(
+      text_name:   "Russula sect. Russula",
+      display_name: "**__Russula__** Pers. sect. **__Russula__**",
+      author: "Pers.",
+      rank: :Section,
+      deprecated: false, correct_spelling: nil,
+      user: users(:rolf)
+    )
+    assert_equal("**__Russula__** sect. **__Russula__**",
+                 autonym.short_display_name)
+
+    # group without author
+    assert_equal(names(:unauthored_group).display_name,
+                 names(:unauthored_group).short_display_name)
+
+    # group with author
+    assert_equal("**__Groupauthored__** group",
+                 names(:authored_group).short_display_name)
+  end
+
   def test_format_autonym
     assert_equal("**__Acarospora__**",
                  Name.format_autonym("Acarospora", "", :Genus, false))
@@ -2501,6 +2531,78 @@ class NameTest < UnitTestCase
     assert_equal([names(:chlorophyllum_rachodes)],
                  names(:chlorophyllum_rhacodes).other_approved_synonyms)
     assert_empty(names(:lactarius_alpinus).other_approved_synonyms)
+  end
+
+  def test_best_preferred_synonym
+    # no preferred synonyms
+    assert_nil(names(:pluteus_petasatus_deprecated).best_preferred_synonym)
+
+    # only 1 preferred synonym
+    assert_equal(names(:lactarius_alpinus),
+                 names(:lactarius_alpigenes).best_preferred_synonym)
+
+    # > 1 preferred synonym, none with observations
+    # Macrolepiota rachodes & rhacodes are synonyms, approved, and have
+    # no observations
+    # Create a deprecated synonym and test it
+    deprecated_name = Name.create!(
+      text_name:   "Lepiota rhacodes", author: "(Vittad.) Quél.",
+      display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
+      synonym: synonyms(:macrolepiota_rachodes_synonym),
+      deprecated: true,
+      rank: :Species, user: users(:rolf)
+    )
+    # M. rachodes & rhacodes are tied with 0 Observations
+    # "Best" one is the one last updated
+    assert_equal(names(:macrolepiota_rachodes),
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, one with observations
+    # C. rachodes is approved, has 1 Observation
+    # C. rachodes is approved, has 0 Observations
+    # Create a deprecated synonym and test it
+    deprecated_name = Name.create!(
+      text_name:   "Agaricus rhacodes", author: "Vittad.",
+      display_name: "__Agaricus rhacodes__ Vittad.",
+      synonym: synonyms(:chlorophyllum_rachodes_synonym),
+      deprecated: true,
+      rank: :Species, user: users(:rolf)
+    )
+    assert_equal(names(:chlorophyllum_rachodes),
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, > 1 with observations,
+    # Neither has more Observations
+    # Create an Observation for the other approved synonym, so that they'll
+    # be tied in # of Observations
+    revised_best_synonym = names(:chlorophyllum_rhacodes)
+    Observation.create(
+      name: revised_best_synonym,
+      user: users(:rolf), when: Time.now, location: locations(:albion)
+    )
+    # other_approved_synonyms.name.observations is cached by Rails, so
+    # it didn't change when we created the Observation above.
+    # So reload it
+    deprecated_name.other_approved_synonyms.
+      find { |n| n == revised_best_synonym }.observations.reload
+    assert_equal(revised_best_synonym,
+                 deprecated_name.best_preferred_synonym)
+
+    # > 1 preferred synonyms, > 1 with observations,
+    # 1 has more obs than all the others
+    # Make C. rachodes have 2 observations
+    revised_best_synonym = names(:chlorophyllum_rachodes)
+    Observation.create(
+      name: revised_best_synonym,
+      user: users(:rolf), when: Time.now, location: locations(:albion)
+    )
+    # other_approved_synonyms.name.observations is cached by Rails, so
+    # it didn't change when we created the Observation above.
+    # So reload it
+    deprecated_name.other_approved_synonyms.
+      find { |n| n == revised_best_synonym }.observations.reload
+    assert_equal(revised_best_synonym,
+                 deprecated_name.best_preferred_synonym)
   end
 
   def test_imageless

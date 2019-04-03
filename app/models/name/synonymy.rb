@@ -215,4 +215,29 @@ class Name < AbstractModel
       last_use || created_at
     end
   end
+
+  # "Best" preferred synonym of a deprecated name.
+  def best_preferred_synonym
+    candidates = preferred_synonyms_with_most_observations
+    candidates.blank? ? nil : most_recently_updated(candidates)
+  end
+
+  ##############################################################################
+
+  private
+
+  # array of synonyms with the most observations, sorted by observation_count
+  def preferred_synonyms_with_most_observations
+    betters = preferreds_by_observation_count_descending
+    max_observations = betters.first&.observation_count
+    betters.select { |name| name.observation_count == max_observations }
+  end
+
+  def preferreds_by_observation_count_descending
+    other_approved_synonyms.sort_by { |name| -name.observation_count }
+  end
+
+  def most_recently_updated(names)
+    names.sort_by { |name| name.updated_at }.last
+  end
 end
