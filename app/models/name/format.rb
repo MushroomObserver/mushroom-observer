@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
+# portion of Name dealing for formatting of Names for display
 class Name < AbstractModel
-##### Display of names #########################################################
+  ##### Display of names #######################################################
   def display_name
     str = self[:display_name]
     if User.current &&
@@ -76,7 +79,7 @@ class Name < AbstractModel
   # Make sure display names are in boldface for accepted names, and not in
   # boldface for deprecated names.
   def self.make_sure_names_are_bolded_correctly
-    msgs = Name.connection.select_values(%(
+    Name.connection.select_values(%(
       SELECT id FROM names
       WHERE IF(deprecated, display_name LIKE "%*%", display_name NOT LIKE "%*%")
     )).map do |id|
@@ -124,5 +127,4 @@ class Name < AbstractModel
     num_namings = namings.count
     "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
   end
-
 end

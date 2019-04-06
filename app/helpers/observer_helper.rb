@@ -47,12 +47,11 @@ module ObserverHelper
   def obs_title_consensus_id(name)
     capture do
       concat(name.short_display_name.t)
-      # Disable cop because a guard clause (or break) inside a `capture` block
-      # doesn't return correct value for the method
-      if name.deprecated #rubocop:disable GuardClause
+      if name.deprecated &&
+         (current_name = name.best_preferred_synonym).present?
         # concat leading space separately because `.t` would strip it
         concat(" ")
-        concat("(#{name.best_preferred_synonym.short_display_name})".t)
+        concat("(#{current_name.short_display_name})".t)
       end
     end
   end

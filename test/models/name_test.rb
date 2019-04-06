@@ -2206,7 +2206,7 @@ class NameTest < UnitTestCase
 
     # Autonym with author
     autonym = Name.create!(
-      text_name:   "Russula sect. Russula",
+      text_name: "Russula sect. Russula",
       display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
       rank: :Section,
@@ -2535,7 +2535,7 @@ class NameTest < UnitTestCase
 
   def test_best_preferred_synonym
     # no preferred synonyms
-    assert_nil(names(:pluteus_petasatus_deprecated).best_preferred_synonym)
+    assert_empty(names(:pluteus_petasatus_deprecated).best_preferred_synonym)
 
     # only 1 preferred synonym
     assert_equal(names(:lactarius_alpinus),
@@ -2546,7 +2546,8 @@ class NameTest < UnitTestCase
     # no observations
     # Create a deprecated synonym and test it
     deprecated_name = Name.create!(
-      text_name:   "Lepiota rhacodes", author: "(Vittad.) Quél.",
+      text_name: "Lepiota rhacodes",
+      author: "(Vittad.) Quél.",
       display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
@@ -2562,7 +2563,8 @@ class NameTest < UnitTestCase
     # C. rachodes is approved, has 0 Observations
     # Create a deprecated synonym and test it
     deprecated_name = Name.create!(
-      text_name:   "Agaricus rhacodes", author: "Vittad.",
+      text_name: "Agaricus rhacodes",
+      author: "Vittad.",
       display_name: "__Agaricus rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
@@ -2578,7 +2580,7 @@ class NameTest < UnitTestCase
     revised_best_synonym = names(:chlorophyllum_rhacodes)
     Observation.create(
       name: revised_best_synonym,
-      user: users(:rolf), when: Time.now, location: locations(:albion)
+      user: users(:rolf), when: Time.current, location: locations(:albion)
     )
     # other_approved_synonyms.name.observations is cached by Rails, so
     # it didn't change when we created the Observation above.
@@ -2594,7 +2596,7 @@ class NameTest < UnitTestCase
     revised_best_synonym = names(:chlorophyllum_rachodes)
     Observation.create(
       name: revised_best_synonym,
-      user: users(:rolf), when: Time.now, location: locations(:albion)
+      user: users(:rolf), when: Time.current, location: locations(:albion)
     )
     # other_approved_synonyms.name.observations is cached by Rails, so
     # it didn't change when we created the Observation above.

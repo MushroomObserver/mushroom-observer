@@ -218,8 +218,7 @@ class Name < AbstractModel
 
   # "Best" preferred synonym of a deprecated name.
   def best_preferred_synonym
-    candidates = preferred_synonyms_with_most_observations
-    candidates.blank? ? nil : most_recently_updated(candidates)
+    most_recently_updated(preferred_synonyms_with_most_observations)
   end
 
   ##############################################################################
@@ -238,6 +237,6 @@ class Name < AbstractModel
   end
 
   def most_recently_updated(names)
-    names.sort_by { |name| name.updated_at }.last
+    names.max_by(&:updated_at)
   end
 end
