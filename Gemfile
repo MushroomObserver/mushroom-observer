@@ -71,25 +71,6 @@ gem "cure_acts_as_versioned"
 # In Rails >= 4.1, use Rails built-in enums instead (available only in >= 4.1)
 gem "simple_enum"
 
-# Use byebug as debugging gem
-gem "byebug", group: [:development, :test]
-
-# Automatically track code test coverage
-gem "coveralls", require: false
-
-# Use rubocop for code style quality control
-# TODO: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
-#  See https://docs.codeclimate.com/docs/rubocop
-gem "rubocop", require: false
-
-# use mry to support safe updating of .rubocop.yml
-gem "mry", require: false
-
-# Brakeman static analysis security scanner
-# See http://brakemanscanner.org/
-# We don't need the gem because CodeClimate CI includes a Brakeman engine.
-gem "brakeman", require: false
-
 # Amazon S3 SDK, for access to images on dreamhost S3
 # limited to v2 to avoid installing a bunch of gems
 gem "aws-sdk", "~> 2"
@@ -99,10 +80,34 @@ gem "aws-sdk", "~> 2"
 #     https://github.com/bodrovis/jquery-slick-rails
 gem "jquery-slick-rails"
 
+# email generation, parsing and sending
+gem "mail", "= 2.7.0"
+
+########## Development, Testing, and Analysis ##################################
+
+# Use byebug as debugging gem
+gem "byebug", group: [:development, :test]
+
 # Calling `console` creates irb session in the browser (instead of the terminal)
 gem "web-console", group: :development
 
-gem "mail", "= 2.7.0"
+# Automatically track code test coverage
+gem "coveralls", require: false
+
+# Brakeman static analysis security scanner
+# See http://brakemanscanner.org/
+gem "brakeman", require: false
+
+# Use rubocop for code style quality control
+# WARNING: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
+# See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
+gem "rubocop", require: false
+
+# performance cops
+gem "rubocop-performance", require: false
+
+# use mry to support safe updating of .rubocop.yml
+gem "mry", require: false
 
 group :test do
   # Use capybara to simulate user-browser interaction

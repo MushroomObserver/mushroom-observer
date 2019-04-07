@@ -1,11 +1,13 @@
 inherit_from: .rubocop_todo.yml
+require: rubocop-performance
 
 # RuboCop configuration
 # Uses Rubcop's default configuration, except as specified below
 # For more info, see http://rubocop.readthedocs.io/en/latest/configuration/
 
-# WARNING: .codeclimate.yml can specify the RuboCop version used
+# WARNING: .codeclimate.yml can specify the RuboCop version ('channel') used
 # by Code Climate, which can be different than the version in Gemfile.lock
+# See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
 # Therefore .codeclimate.yml should be updated whenever we update RuboCop
 
 AllCops:
