@@ -21,7 +21,6 @@
 #  exif::             Get EXIF header info of an image.
 #  export::           Change export status.
 #  external_link::    Add, edit and remove external links assoc. with obs.
-#  geocode::          Look up extents for geographic location by name.
 #  multi_image_template:: HTML template for uploaded image.
 #  old_translation::  Return an old TranslationString by version id.
 #  pivotal::          Pivotal requests: look up, vote, or comment on story.
@@ -33,7 +32,6 @@ class AjaxController < ApplicationController
   require_dependency "ajax_controller/exif"
   require_dependency "ajax_controller/export"
   require_dependency "ajax_controller/external_link"
-  require_dependency "ajax_controller/geocode"
   require_dependency "ajax_controller/old_translation"
   require_dependency "ajax_controller/pivotal"
   require_dependency "ajax_controller/upload_image"
