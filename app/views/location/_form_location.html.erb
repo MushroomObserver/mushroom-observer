@@ -108,7 +108,9 @@
 
     <div class="col-md-4 col-lg-6 push-up push-down">
       <%=
-        javascript_include('edit_location')
+        javascript_include("edit_location")
+        format = User.current_location_format
+        inject_javascript_at_end("LOCATION_FORMAT = '#{format}';");
         @location.force_valid_lat_longs!
         gmap = make_editable_map(@location)
         finish_map(gmap)

@@ -230,34 +230,6 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:export, type: :user, id: 1, value: "1")
   end
 
-  def test_geocode_address
-    check_address("North Falmouth, Massachusetts, USA", "postal", true)
-    check_address("USA, Massachusetts, North Falmouth", "scientific", true)
-    check_address("Foo, Bar, Baz", "postal", false)
-
-    # This address is special since Google only likes in the following order
-    address = "North bound Rest Area, State Highway 33, " \
-              "between Pomeroy and Athens, Ohio, USA"
-    check_address(address, "postal", true)
-    check_address(address, "scientific", false)
-    check_address(Location.reverse_name(address), "postal", false)
-    check_address(Location.reverse_name(address), "scientific", true)
-  end
-
-  def check_address(name, format, good)
-    p = { name: name, format: format }
-    good_ajax_request(:geocode, p)
-    assert(@response.body)
-    if good
-      assert_equal(4, @response.body.split("\n").length)
-      @response.body.split("\n").each do |s|
-        assert(s.to_f != 0.0)
-      end
-    else
-      assert_equal(0, @response.body.split("\n").length)
-    end
-  end
-
   def test_get_pivotal_story
     return unless MO.pivotal_enabled
 
