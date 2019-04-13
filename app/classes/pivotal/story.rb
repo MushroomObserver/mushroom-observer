@@ -52,7 +52,7 @@ class Pivotal
                   end
     end
 
-    def to_json
+    def to_json(*_args)
       JSON.dump(
         "id" => @id,
         "story_type" => @type,
