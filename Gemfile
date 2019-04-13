@@ -104,7 +104,7 @@ gem "brakeman", require: false
 gem "rubocop", require: false
 
 # performance cops
-gem "rubocop-performance", require: false
+gem "rubocop-performance"
 
 # use mry to support safe updating of .rubocop.yml
 gem "mry", require: false

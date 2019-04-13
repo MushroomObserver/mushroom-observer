@@ -1,5 +1,4 @@
 inherit_from: .rubocop_todo.yml
-require: rubocop-performance
 
 # RuboCop configuration
 # Uses Rubcop's default configuration, except as specified below
