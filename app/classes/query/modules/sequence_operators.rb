@@ -49,7 +49,6 @@ module Query::Modules::SequenceOperators
   # Move to previous place.
   def prev
     new_self = self
-    ids = result_ids
     index = result_ids.index(current_id)
     if !index
       new_self = nil
@@ -60,14 +59,19 @@ module Query::Modules::SequenceOperators
         new_self.current_id = result_ids[index - 1]
       end
     elsif has_outer?
-      while new_self = new_self.outer_prev
-        if new_new_self = new_self.last(:skip_outer)
-          new_self = new_new_self
-          break
-        end
-      end
+      new_self = prev_inner(new_self)
     else
       new_self = nil
+    end
+    new_self
+  end
+
+  def prev_inner(new_self)
+    while (new_self = new_self.outer_prev)
+      if (new_new_self = new_self.last(:skip_outer))
+        new_self = new_new_self
+        break
+      end
     end
     new_self
   end
@@ -86,14 +90,19 @@ module Query::Modules::SequenceOperators
         new_self.current_id = result_ids[index + 1]
       end
     elsif has_outer?
-      while new_self = new_self.outer_next
-        if new_new_self = new_self.first(:skip_outer)
-          new_self = new_new_self
-          break
-        end
-      end
+      new_self = next_inner(new_self)
     else
       new_self = nil
+    end
+    new_self
+  end
+
+  def next_inner(new_self)
+    while (new_self = new_self.outer_next)
+      if (new_new_self = new_self.first(:skip_outer))
+        new_self = new_new_self
+        break
+      end
     end
     new_self
   end

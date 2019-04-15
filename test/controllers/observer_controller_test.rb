@@ -554,7 +554,7 @@ class ObserverControllerTest < FunctionalTestCase
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
     target =
-      "https://google.com/search?q=site:mushroomobserver.org%20#{pattern}"
+      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
 
