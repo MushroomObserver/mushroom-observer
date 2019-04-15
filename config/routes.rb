@@ -489,6 +489,7 @@ LOOKUP_XXX_ID_ACTIONS = %w[
 ].freeze
 
 MushroomObserver::Application.routes.draw do
+  get 'policy/privacy'
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
