@@ -2195,10 +2195,83 @@ class NameTest < UnitTestCase
     assert_equal("Ach.", name.author)
   end
 
-  def test_short_display_name
-    # Name without author
-    assert_equal("**__Russula brevipes__**",
-                 names(:russula_brevipes_no_author).short_display_name)
+  # Prove that short_authors_display_name is shortened correctly
+  def test_short_authors_display_name
+    # Name 0 authors
+    assert_equal(names(:russula_brevipes_no_author).display_name,
+                 names(:russula_brevipes_no_author).short_authors_display_name)
+
+    # Name 1 author
+    assert_equal(
+      names(:russula_brevipes_author_notes).display_name,
+      names(:russula_brevipes_author_notes).short_authors_display_name
+    )
+
+    # Name 2 authors
+    assert_equal(
+      names(:hygrocybe_russocoriacea_good_author).display_name,
+      names(:hygrocybe_russocoriacea_good_author).short_authors_display_name
+    )
+
+    # Name > 2 authors
+    assert_equal("**__Coprinellus micaceus__** (Bull.) Vilgalys et al.",
+                 names(:coprinellus_micaceus).short_authors_display_name)
+
+    # Name > 2 authors in parentheses
+    authors = "(Author1, Author2 & Author3) Author4, Author5 & Author6"
+    name = Name.new(
+      text_name: "Xxx #{authors}",
+      display_name: "**__Xxx__** #{authors}",
+      author: "#{authors}",
+      rank: :Genus,
+      deprecated: false, correct_spelling: nil,
+      user: users(:rolf)
+    )
+    assert_equal("**__Xxx__** (Author1 et al.) Author4 et al.",
+                 name.short_authors_display_name)
+
+    # Autonym <= 2 authors
+    autonym = Name.new(
+      text_name: "Russula sect. Russula",
+      display_name: "**__Russula__** Pers. sect. **__Russula__**",
+      author: "Pers.",
+      rank: :Section,
+      deprecated: false, correct_spelling: nil,
+      user: users(:rolf)
+    )
+    assert_equal(autonym.display_name,
+                 autonym.short_authors_display_name)
+
+    # Autonym > 2 authors
+    authors = "Redhead, Vizzini, Drehmel & Contu"
+    autonym = Name.new(
+      text_name: "Saproamanita sect. Saproamanita",
+      display_name: "**__Saproamanita__** #{authors} sect. Saproamanita",
+      author: authors,
+      rank: :Section,
+      deprecated: false, correct_spelling: nil,
+      user: users(:rolf)
+    )
+    assert_equal("**__Saproamanita__** Redhead et al. sect. Saproamanita",
+                 autonym.short_authors_display_name)
+
+    # group <= 2 authors
+    assert_equal(names(:authored_group).display_name,
+                 names(:authored_group).short_authors_display_name)
+
+    # group > 2 authors
+    authors = "Author1, Author2 & Author3"
+    group_name = Name.new(
+      text_name: "Xxx yyy clade #{authors}",
+      display_name: "**__Xxx yyy__** clade #{authors}",
+      author: authors,
+      rank: :Group,
+      deprecated: false, correct_spelling: nil,
+      user: users(:rolf)
+    )
+    assert_equal("**__Xxx yyy__** clade Author1 et al.",
+                 group_name.short_authors_display_name)
+  end
 
     # Name with author
     assert_equal("**__Russula brevipes__**",

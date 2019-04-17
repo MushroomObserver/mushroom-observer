@@ -30,18 +30,18 @@ class Name < AbstractModel
     display_name
   end
 
-  # display_name less author
-  # This depends on display_name having markup around name proper
-  # Otherwise, it might delete author if that were part of the name proper
-  def short_display_name
-    if author.blank?
-      display_name
-    elsif rank == :Group
-      # Remove author and preceding space at end
-      display_name.sub(/ #{Regexp.quote(author)}$/, "")
+  # Marked up Name, authors shortened per ICN Recommendation 46C.2,
+  #  e.g.: **__"Xxx yyy__ author1 et al.**
+  def short_authors_display_name
+    if rank == :Group
+      # Xxx yyy group author
+      display_name.sub(/ #{Regexp.quote(author)}$/," #{brief_author}")
     else
-      # Remove author and preceding space after markup
-      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1")
+      # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
+      # Relies on display_name having markup around name proper
+      # Otherwise, it might delete author if that were part of the name proper
+      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/,
+                       "\\1 #{brief_author}")
     end
   end
 
@@ -126,5 +126,16 @@ class Name < AbstractModel
     num_obs     = observations.count
     num_namings = namings.count
     "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
+  end
+
+  ##############################################################################
+
+  private
+
+  # author(s) string shortened per ICN Recommendation 46C.2
+  # Relies on name.author having a comma only if there are > 2 authors
+  def brief_author
+    author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
+           sub(/\,.*/, " et al.") # then shorten any remaining > 2 authors
   end
 end
