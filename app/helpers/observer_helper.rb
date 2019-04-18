@@ -45,14 +45,15 @@ module ObserverHelper
 
   # name portion of Observation title
   def obs_title_consensus_id(name)
-    capture do
-      concat(name.short_authors_display_name.t)
-      if name.deprecated &&
-         (current_name = name.best_preferred_synonym).present?
-        # concat leading space separately because `.t` would strip it
-        concat(" ")
-        concat("(#{current_name.short_authors_display_name})".t)
+    if name.deprecated &&
+       (current_name = name.best_preferred_synonym).present?
+      capture do
+        concat(name.short_authors_display_name.t)
+        concat(" ") # concat leading space separately since `.t` would strip it
+        concat("(#{current_name.display_name_without_authors})".t)
       end
+    else
+      name.short_authors_display_name.t
     end
   end
 

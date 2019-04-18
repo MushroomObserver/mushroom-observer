@@ -9,7 +9,7 @@ class ObserverHelperTest < ActionView::TestCase
 
     # approved name
     current_name = names(:lactarius_alpinus)
-    Observation.create!(
+    Observation.new(
       name: current_name, user: user, when: Time.current, where: location
     )
     assert_equal(current_name.short_authors_display_name.t,
@@ -17,11 +17,11 @@ class ObserverHelperTest < ActionView::TestCase
 
     # deprecated name
     deprecated_name = names(:lactarius_alpigenes)
-    Observation.create!(
+    Observation.new(
       name: deprecated_name, user: user, when: Time.current, where: location
     )
-    assert_equal("#{deprecated_name.display_name_without_authors.t} " \
-                 "(#{current_name.short_authors_display_name.t})",
+    assert_equal("#{deprecated_name.short_authors_display_name.t} " \
+                 "(#{current_name.display_name_without_authors.t})",
                  obs_title_consensus_id(deprecated_name))
   end
 end

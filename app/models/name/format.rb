@@ -45,6 +45,19 @@ class Name < AbstractModel
     end
   end
 
+  # display_name less author
+  # This depends on display_name having markup around name proper
+  # Otherwise, it might delete author if that were part of the name proper
+  def display_name_without_authors
+    if rank == :Group
+      # Remove author and preceding space at end
+      display_name.sub(/ #{Regexp.quote(author)}$/, "")
+    else
+      # Remove author and preceding space after markup
+      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1")
+    end
+  end
+
   # Tack id on to end of +text_name+.
   def unique_text_name
     real_text_name + " (#{id || "?"})"

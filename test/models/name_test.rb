@@ -2273,9 +2273,18 @@ class NameTest < UnitTestCase
                  group_name.short_authors_display_name)
   end
 
+  def test_display_name_without_authors
+    # Name with 0 authors
+    assert_equal(
+      names(:russula_brevipes_no_author).display_name,
+      names(:russula_brevipes_no_author).display_name_without_authors
+    )
+
     # Name with author
-    assert_equal("**__Russula brevipes__**",
-                 names(:russula_brevipes_author_notes).short_display_name)
+    assert_equal(
+      "**__Russula brevipes__**",
+      names(:russula_brevipes_author_notes).display_name_without_authors
+    )
 
     # Autonym with author
     autonym = Name.create!(
@@ -2287,15 +2296,15 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
     assert_equal("**__Russula__** sect. **__Russula__**",
-                 autonym.short_display_name)
+                 autonym.display_name_without_authors)
 
     # group without author
     assert_equal(names(:unauthored_group).display_name,
-                 names(:unauthored_group).short_display_name)
+                 names(:unauthored_group).display_name_without_authors)
 
     # group with author
     assert_equal("**__Groupauthored__** group",
-                 names(:authored_group).short_display_name)
+                 names(:authored_group).display_name_without_authors)
   end
 
   def test_format_autonym
