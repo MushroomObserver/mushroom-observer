@@ -58,7 +58,11 @@ module ObserverHelper
   end
 
   def owner_favorite_or_explanation(obs)
-    obs.owner_preference&.format_name || :show_observation_no_clear_preference
+    if (name = obs.owner_preference)
+      link_to_short_authors_display_name(name)
+    else
+      :show_observation_no_clear_preference
+    end
   end
 
   def link_to_short_authors_display_name(name)
