@@ -3,25 +3,17 @@
 # helpers for show Observation view
 module ObserverHelper
   ##### Portion of page title that includes consensus (site id) ################
-
+  #
+  # Depends on whether consensus is deprecated and user preferences include
+  # showing Observer's Preference
+  #
+  # Consensus not deprecated, observer preference not shown:
+  #   Observation nnn: Aaa bbb Author(s)
+  # Consensus deprecated, observer preference not shown:
+  #   Observation nnn: Ccc ddd Author(s) (Site ID) (Aaa bbb)
+  # Observer preference shown, consensus not deprecated:
+  #   Observation nnn: Aaa bbb Author(s) (Site ID)
   def show_obs_title(obs)
-    @owner_id ? obs_title_with_name_and_site_id(obs) : obs_title_with_name(obs)
-  end
-
-  # Observation nnn: Hydnum washingtonianum (Site ID)
-  #   or, if name is deprecated, include preferred name in parentheses
-  # Observation nnn: Hydnum neorepandum (Hydnum washingtonianum) (Site ID)
-  def obs_title_with_name_and_site_id(obs)
-    capture do
-      concat(obs_title_with_name(obs))
-      # "(Site ID)" differentiates this Name from Observer Preference
-      concat(" (#{:show_observation_site_id.t})")
-    end
-  end
-
-  # Same as above, without (Site ID)
-  # Used when user prefers not to display Observer Preference
-  def obs_title_with_name(obs)
     capture do
       concat(:show_observation_header.t)
       concat(" #{obs.id || "?"}: ")
@@ -49,13 +41,19 @@ module ObserverHelper
        (current_name = name.best_preferred_synonym).present?
       capture do
         concat(link_to_short_authors_display_name(name))
-        concat(" ") # concat leading space separately, else `.t` would strip it
+        # Differentiate deprecated consensus from preferred name
+        concat(" (#{:show_observation_site_id.t})")
+        concat(" ") # concat space separately, else `.t` strips it
         concat("(")
         concat(link_to_display_name_without_authors(current_name))
         concat(")")
       end
     else
-      link_to_short_authors_display_name(name)
+      capture do
+        concat(link_to_short_authors_display_name(name))
+        # Differentiate this Name from Observer Preference
+        concat(" (#{:show_observation_site_id.t})") if @owner_id
+      end
     end
   end
 
