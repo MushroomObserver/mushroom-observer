@@ -19,7 +19,7 @@ module ObserverHelper
     end
   end
 
-  # Same as above, sans (Site ID)
+  # Same as above, without (Site ID)
   # Used when user prefers not to display Observer Preference
   def obs_title_with_name(obs)
     capture do
@@ -48,16 +48,30 @@ module ObserverHelper
     if name.deprecated &&
        (current_name = name.best_preferred_synonym).present?
       capture do
-        concat(name.short_authors_display_name.t)
-        concat(" ") # concat leading space separately since `.t` would strip it
-        concat("(#{current_name.display_name_without_authors})".t)
+        concat(link_to_short_authors_display_name(name))
+        concat(" ") # concat leading space separately, else `.t` would strip it
+        concat("(")
+        concat(link_to_display_name_without_authors(current_name))
+        concat(")")
       end
     else
-      name.short_authors_display_name.t
+      link_to_short_authors_display_name(name)
     end
   end
 
   def owner_favorite_or_explanation(obs)
     obs.owner_preference&.format_name || :show_observation_no_clear_preference
+  end
+
+  def link_to_short_authors_display_name(name)
+    link_to(name.short_authors_display_name.t,
+            controller: :name,
+            action: :show_name, id: name.id)
+  end
+
+  def link_to_display_name_without_authors(name)
+    link_to(name.display_name_without_authors.t,
+            controller: :name,
+            action: :show_name, id: name.id)
   end
 end
