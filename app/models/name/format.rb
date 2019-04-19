@@ -35,7 +35,7 @@ class Name < AbstractModel
   def display_name_brief_authors
     if rank == :Group
       # Xxx yyy group author
-      display_name.sub(/ #{Regexp.quote(author)}$/," #{brief_author}")
+      display_name.sub(/ #{Regexp.quote(author)}$/, " #{brief_author}")
     else
       # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
       # Relies on display_name having markup around name proper
@@ -149,6 +149,6 @@ class Name < AbstractModel
   # Relies on name.author having a comma only if there are > 2 authors
   def brief_author
     author.sub(/(\(*.),.*\)/, "\\1 et al.)"). # shorten > 2 authors in parens
-           sub(/\,.*/, " et al.") # then shorten any remaining > 2 authors
+      sub(/\,.*/, " et al.") # then shorten any remaining > 2 authors
   end
 end

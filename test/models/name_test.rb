@@ -2222,7 +2222,7 @@ class NameTest < UnitTestCase
     name = Name.new(
       text_name: "Xxx #{authors}",
       display_name: "**__Xxx__** #{authors}",
-      author: "#{authors}",
+      author: authors.to_s,
       rank: :Genus,
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
