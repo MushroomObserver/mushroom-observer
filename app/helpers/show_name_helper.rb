@@ -94,7 +94,7 @@ module ShowNameHelper
     return unless count > 1
 
     link_to(
-      :show_consensus_species.t(name: genus.display_name.t),
+      :show_consensus_species.t(name: genus.short_authors_display_name.t),
       add_query_param({ controller: :name, action: :index_name }, query)
     ) + " (#{count})"
   end
