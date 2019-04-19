@@ -132,6 +132,10 @@ class Naming < AbstractModel
     name ? name.observation_name : ""
   end
 
+  def short_authors_display_name
+    name ? name.short_authors_display_name : ""
+  end
+
   # Return name in Textile format (with id tacked on to make unique).
   def unique_format_name
     format_name + " (#{id || "?"})"
