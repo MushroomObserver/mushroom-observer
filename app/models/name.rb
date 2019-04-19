@@ -190,7 +190,7 @@
 #  format_name::             "Xxx sp. Author"
 #  unique_text_name::        "Xxx (123)"
 #  unique_format_name::      "Xxx sp. Author (123)"
-#  short_authors_display_name:: Marked up name with authors shortened:
+#  display_name_brief_authors:: Marked up name with authors shortened:
 #                            **__"Xxx yyy__ author**
 #                            **__"Xxx yyy__ author1 & author2**
 #                            **__"Xxx yyy__ author1 et al.**

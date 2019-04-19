@@ -40,7 +40,7 @@ module ObserverHelper
     if name.deprecated &&
        (current_name = name.best_preferred_synonym).present?
       capture do
-        concat(link_to_short_authors_display_name(name))
+        concat(link_to_display_name_brief_authors(name))
         # Differentiate deprecated consensus from preferred name
         concat(" (#{:show_observation_site_id.t})")
         concat(" ") # concat space separately, else `.t` strips it
@@ -50,7 +50,7 @@ module ObserverHelper
       end
     else
       capture do
-        concat(link_to_short_authors_display_name(name))
+        concat(link_to_display_name_brief_authors(name))
         # Differentiate this Name from Observer Preference
         concat(" (#{:show_observation_site_id.t})") if @owner_id
       end
@@ -59,14 +59,14 @@ module ObserverHelper
 
   def owner_favorite_or_explanation(obs)
     if (name = obs.owner_preference)
-      link_to_short_authors_display_name(name)
+      link_to_display_name_brief_authors(name)
     else
       :show_observation_no_clear_preference
     end
   end
 
-  def link_to_short_authors_display_name(name)
-    link_to(name.short_authors_display_name.t,
+  def link_to_display_name_brief_authors(name)
+    link_to(name.display_name_brief_authors.t,
             controller: :name,
             action: :show_name, id: name.id)
   end

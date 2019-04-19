@@ -44,7 +44,7 @@ module ObjectLinkHelper
       str ||= :NAME.t + " #" + name.to_s
       link_to(str, Name.show_link_args(name))
     else
-      str ||= name.short_authors_display_name.t
+      str ||= name.display_name_brief_authors.t
       link_to(str, name.show_link_args)
     end
   end

@@ -6,7 +6,7 @@
       About Polyozellus
       on MyCoPortal
       on MycoBank %>
-<%= content_tag(:p, link_to(:show_name.t(name: name.short_authors_display_name),
+<%= content_tag(:p, link_to(:show_name.t(name: name.display_name_brief_authors),
                             controller: :name,
                             action: :show_name, id: name.id)) %>
 <%= content_tag(:p, link_to("MyCoPortal", mycoportal_url(name),

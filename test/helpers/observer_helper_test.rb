@@ -13,7 +13,7 @@ class ObserverHelperTest < ActionView::TestCase
       name: current_name, user: user, when: Time.current, where: location
     )
     assert_match(
-      link_to(current_name.short_authors_display_name.t,
+      link_to(current_name.display_name_brief_authors.t,
               controller: :name,
               action: :show_name, id: current_name.id),
       obs_title_consensus_id(current_name),
@@ -26,7 +26,7 @@ class ObserverHelperTest < ActionView::TestCase
       name: deprecated_name, user: user, when: Time.current, where: location
     )
     assert_match(
-      "#{link_to_short_authors_display_name(deprecated_name)} (Site ID) " \
+      "#{link_to_display_name_brief_authors(deprecated_name)} (Site ID) " \
       "(#{link_to_display_name_without_authors(current_name)})",
       obs_title_consensus_id(deprecated_name),
       "Observation of deprecated Name should link to it and approved Name"

@@ -32,7 +32,7 @@ class Name < AbstractModel
 
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
-  def short_authors_display_name
+  def display_name_brief_authors
     if rank == :Group
       # Xxx yyy group author
       display_name.sub(/ #{Regexp.quote(author)}$/," #{brief_author}")

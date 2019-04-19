@@ -2195,27 +2195,27 @@ class NameTest < UnitTestCase
     assert_equal("Ach.", name.author)
   end
 
-  # Prove that short_authors_display_name is shortened correctly
-  def test_short_authors_display_name
+  # Prove that display_name_brief_authors is shortened correctly
+  def test_display_name_brief_authors
     # Name 0 authors
     assert_equal(names(:russula_brevipes_no_author).display_name,
-                 names(:russula_brevipes_no_author).short_authors_display_name)
+                 names(:russula_brevipes_no_author).display_name_brief_authors)
 
     # Name 1 author
     assert_equal(
       names(:russula_brevipes_author_notes).display_name,
-      names(:russula_brevipes_author_notes).short_authors_display_name
+      names(:russula_brevipes_author_notes).display_name_brief_authors
     )
 
     # Name 2 authors
     assert_equal(
       names(:hygrocybe_russocoriacea_good_author).display_name,
-      names(:hygrocybe_russocoriacea_good_author).short_authors_display_name
+      names(:hygrocybe_russocoriacea_good_author).display_name_brief_authors
     )
 
     # Name > 2 authors
     assert_equal("**__Coprinellus micaceus__** (Bull.) Vilgalys et al.",
-                 names(:coprinellus_micaceus).short_authors_display_name)
+                 names(:coprinellus_micaceus).display_name_brief_authors)
 
     # Name > 2 authors in parentheses
     authors = "(Author1, Author2 & Author3) Author4, Author5 & Author6"
@@ -2228,7 +2228,7 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
     assert_equal("**__Xxx__** (Author1 et al.) Author4 et al.",
-                 name.short_authors_display_name)
+                 name.display_name_brief_authors)
 
     # Autonym <= 2 authors
     autonym = Name.new(
@@ -2240,7 +2240,7 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
     assert_equal(autonym.display_name,
-                 autonym.short_authors_display_name)
+                 autonym.display_name_brief_authors)
 
     # Autonym > 2 authors
     authors = "Redhead, Vizzini, Drehmel & Contu"
@@ -2253,11 +2253,11 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
     assert_equal("**__Saproamanita__** Redhead et al. sect. Saproamanita",
-                 autonym.short_authors_display_name)
+                 autonym.display_name_brief_authors)
 
     # group <= 2 authors
     assert_equal(names(:authored_group).display_name,
-                 names(:authored_group).short_authors_display_name)
+                 names(:authored_group).display_name_brief_authors)
 
     # group > 2 authors
     authors = "Author1, Author2 & Author3"
@@ -2270,7 +2270,7 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
     assert_equal("**__Xxx yyy__** clade Author1 et al.",
-                 group_name.short_authors_display_name)
+                 group_name.display_name_brief_authors)
   end
 
   def test_display_name_without_authors
