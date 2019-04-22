@@ -653,6 +653,7 @@
   save_edits: save edits
   SEARCH: Search
   search: search
+  SEARCHES: Searches
   SEND: Send
   send: send
   SHOW: Show
@@ -3238,6 +3239,12 @@
   name_term_classification: Classification contains this string.
   name_term_notes: Taxonomic notes contains this string.
   name_term_comments: One of the comments contains this string.
+
+  # link to search bar help
+  search_bar_help: Search Help
+
+  # Search bar help page
+  search_bar_help_title: Search Bar Help
 
   ##############################################################################
 

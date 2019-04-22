@@ -68,6 +68,7 @@ class ObserverController < ApplicationController
     :prev_user,
     :print_labels,
     :rss,
+    :search_bar_help,
     :show_obs,
     :show_observation,
     :show_rss_log,

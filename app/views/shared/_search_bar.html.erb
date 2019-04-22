@@ -33,6 +33,12 @@
           <%= submit_tag(:app_search.l, class: "btn align-top",
                          style: "margin-right:0.5em") %>
         </div>
+        <%=
+            link_to(content_tag(:span, :search_bar_help.t),
+                    controller: :observer,
+                    action: :search_bar_help)
+        %>
+        |
 
         <%
           adv_search = link_to(content_tag(:span, :app_advanced_search.l,

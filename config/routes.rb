@@ -348,6 +348,7 @@ ACTIONS = {
     recalc: {},
     review_authors: {},
     rss: {},
+    search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
