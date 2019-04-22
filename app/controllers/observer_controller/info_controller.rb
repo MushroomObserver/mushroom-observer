@@ -27,11 +27,6 @@ class ObserverController
     store_location
   end
 
-  # Terminology description for RISD illustration class
-  def risd_terminology # :nologin:
-    store_location
-  end
-
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox # :nologin:
     if request.method != "POST"
