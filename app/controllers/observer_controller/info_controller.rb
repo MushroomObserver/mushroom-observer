@@ -27,10 +27,15 @@ class ObserverController
     store_location
   end
 
+  # Disable cop as a temporary measure to make Codeclimate pass
+  # because :nologin: might have to be on same line as def
+  # rubocop:disable Style/CommentedKeyword
+
   # linked from search bar
   def search_bar_help # :nologin:
     store_location
   end
+  # rubocop:enable Style/CommentedKeyword
 
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox # :nologin:

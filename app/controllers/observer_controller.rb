@@ -1,4 +1,5 @@
-#
+# frozen_string_literal: true
+
 # The original MO controller and hence a real mess!
 # The Clitocybe of controllers.
 #
@@ -23,6 +24,9 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/rss_log_controller"
   require_dependency "observer_controller/search_controller"
   require_dependency "observer_controller/user_controller"
+
+  # Disable cop: all these methods are defined in files included above.
+  # rubocop:disable Rails/LexicallyScopedActionFilter
 
   before_action :login_required, except: [
     :advanced_search,
@@ -96,4 +100,5 @@ class ObserverController < ApplicationController
     :show_observation,
     :show_user
   ]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 end
