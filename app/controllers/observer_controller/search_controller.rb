@@ -25,12 +25,7 @@ class ObserverController
       :name, :project, :species_list, :herbarium_record
       ctrlr = type
     when :google
-      if pattern.blank?
-        redirect_to(action: :list_rss_logs)
-      else
-        search = URI.escape("site:#{MO.domain} #{pattern}")
-        redirect_to("https://google.com/search?q=#{search}")
-      end
+      site_google_search(pattern)
       return
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
@@ -44,6 +39,15 @@ class ObserverController
     else
       redirect_to(controller: ctrlr, action: "#{type}_search",
                   pattern: pattern)
+    end
+  end
+
+  def site_google_search(pattern)
+    if pattern.blank?
+      redirect_to(action: :list_rss_logs)
+    else
+      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
+      redirect_to("https://google.com/search?#{search}")
     end
   end
 

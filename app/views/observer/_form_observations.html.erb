@@ -40,7 +40,15 @@
   <div class="col-xs-12 col-sm-6">
     <div class="well well-sm max-width-text help-block">
       <div class="arrow-left hidden-xs"></div>
-      <%= :form_observations_where_help.t %>
+      <%=
+        loc1 = "Albion, Mendocino Co., California, USA"
+        loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+        if User.current_location_format == :scientific
+          loc1 = Location.reverse_name(loc1)
+          loc2 = Location.reverse_name(loc2)
+        end
+        :form_observations_where_help.t(loc1: loc1, loc2: loc2)
+      %>
     </div>
   </div>
 </div>

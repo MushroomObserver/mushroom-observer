@@ -554,7 +554,7 @@ class ObserverControllerTest < FunctionalTestCase
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
     target =
-      "https://google.com/search?q=site:mushroomobserver.org%20#{pattern}"
+      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
 
@@ -1655,6 +1655,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_herbarium_id, "")
+    assert_true(@response.body.include?("Albion, Mendocino Co., California"))
+    users(:rolf).update_attribute(:location_format, :scientific)
+    get(:create_observation)
+    assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
 
   def test_construct_observation_approved_place_name

@@ -347,7 +347,6 @@ ACTIONS = {
     print_labels: {},
     recalc: {},
     review_authors: {},
-    risd_terminology: {},
     rss: {},
     set_export_status: {},
     show_location_observations: {},
