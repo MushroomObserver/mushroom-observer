@@ -15,7 +15,7 @@ gem "mysql2"
 gem "bootstrap-sass"
 
 # Use SCSS for stylesheets
-gem "sass-rails"
+gem "sassc-rails"
 
 # Use jquery as the JavaScript library
 gem "jquery-rails"
