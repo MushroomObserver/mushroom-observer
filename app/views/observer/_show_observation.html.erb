@@ -20,8 +20,10 @@
         hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
         if observation.lat &&
            (!observation.gps_hidden || observation.can_edit?)
-          observation.display_lat_long.t + " ".html_safe +
-            observation.display_alt.t
+          link_to("#{observation.display_lat_long.t} " \
+                  "#{observation.display_alt.t} " \
+                  "[#{:click_for_map.t}]".html_safe,
+            controller: :observer, action: :map_observation, id: observation.id)
         elsif observation.lat
           hidden + " ".html_safe + observation.display_alt.t
         else
