@@ -1721,7 +1721,9 @@
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
   prefs_filters_region: Show only observations and locations within this region
+  prefs_filters_region_help: 'Must match the end of the location name, e.g., "Thailand" and "California, USA".'
   prefs_filters_clade: Show only observations within this taxonomic clade
+  prefs_filters_clade_help: 'Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".'
   prefs_filter_off: filter off
 
   prefs_notes_template: Observation Notes Template

@@ -2,6 +2,7 @@
 <%= content_tag(:div, class: "form-inline") do %>
   <%= label_tag(:"user_#{filter.sym}",
                 :"prefs_filters_#{filter.sym}".t) %>:<br/>
+  <span class="HelpNote"><%= :"prefs_filters_#{filter.sym}_help".t %></span><br/>
   <%= form.text_field(filter.sym, class: "form-control",
                       value: @user.content_filter[filter.sym]) %>
 <% end %>
