@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 module PatternSearch
+  # Base class for PatternSearch; handles everything but build_query
   class Base
     attr_accessor :errors
     attr_accessor :parser
@@ -18,7 +21,7 @@ module PatternSearch
     def build_query
       self.flavor = :all
       self.args   = {}
-      for term in parser.terms
+      parser.terms.each do |term|
         param = params[term.var]
         if term.var == :pattern
           self.flavor = :pattern_search
@@ -35,8 +38,12 @@ module PatternSearch
     end
 
     def help_message
-      "#{:pattern_search_terms_help.l}\n" + params.keys.map do |arg|
-        "* *#{arg}*: #{ :"#{model.type_tag}_term_#{arg}".l }"
+      "#{:pattern_search_terms_help.l}\n#{self.class.terms_help}"
+    end
+
+    def self.terms_help
+      params.keys.map do |arg|
+        "* *#{arg}*: #{:"#{model.type_tag}_term_#{arg}".l}"
       end.join("\n")
     end
   end

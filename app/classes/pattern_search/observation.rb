@@ -36,12 +36,20 @@ module PatternSearch
       has_comments:    [:has_comments,     :parse_yes]
     }.freeze
 
-    def params
+    def self.params
       PARAMS
     end
 
-    def model
+    def params
+      self.class.params
+    end
+
+    def self.model
       ::Observation
+    end
+
+    def model
+      self.class.model
     end
   end
 end
