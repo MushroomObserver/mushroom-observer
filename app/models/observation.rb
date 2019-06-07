@@ -1296,7 +1296,7 @@ class Observation < AbstractModel
   # Return primary collector and their number if available, else just return
   # the observer's name.
   def collector_and_number
-    return user.name if collection_numbers.empty?
+    return user.legal_name if collection_numbers.empty?
 
     collection_numbers.first.format_name
   end
