@@ -286,7 +286,7 @@ class ObserverController
     [
       ["MO #", observation.id],
       ["When", observation.when],
-      ["Who", observation.user.name],
+      ["Who", observation.collector_and_number],
       ["Where", observation.place_name_and_coordinates],
       ["What", observation.format_name.t],
       ["Notes", observation.notes_export_formatted.t]
