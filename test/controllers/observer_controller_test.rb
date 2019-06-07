@@ -3728,6 +3728,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:print_labels, params: { q: query.id.alphabetize })
     assert_select("div#labels td", query.num_results)
     assert_match(/314159/, @response.body) # make sure mycoflora id in there!
+    assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
     # Alternative entry point.
     post(
