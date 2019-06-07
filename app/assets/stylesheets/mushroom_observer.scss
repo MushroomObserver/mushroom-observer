@@ -114,7 +114,7 @@ $state-danger-text: $DANGER_BORDER_COLOR;
 $state-danger-bg: $DANGER_BG_COLOR;
 $state-danger-border: mix($DANGER_BORDER_COLOR, $DANGER_BG_COLOR);
 
-$tooltip-opacity: 100%;
+$tooltip-opacity: 1;
 $tooltip-max-width: 400px;
 $tooltip-color: $TOOLTIP_FG_COLOR;
 $tooltip-bg: $TOOLTIP_BG_COLOR;

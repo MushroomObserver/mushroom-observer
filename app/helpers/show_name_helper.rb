@@ -61,7 +61,7 @@ module ShowNameHelper
       query = Query.lookup(:Observation, :of_name, name: nm, by: :confidence)
       next if query.select_count.zero?
 
-      lines << link_to_obss_of(query, nm.display_name.t)
+      lines << link_to_obss_of(query, nm.display_name_brief_authors.t)
     end
   end
 
@@ -94,7 +94,7 @@ module ShowNameHelper
     return unless count > 1
 
     link_to(
-      :show_consensus_species.t(name: genus.display_name.t),
+      :show_consensus_species.t(name: genus.display_name_brief_authors.t),
       add_query_param({ controller: :name, action: :index_name }, query)
     ) + " (#{count})"
   end

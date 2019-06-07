@@ -153,6 +153,9 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:intro)
     assert_template(:intro)
 
+    get(:search_bar_help)
+    assert_response(:success)
+
     get_with_dump(:list_observations)
     assert_template(:list_observations, partial: :_rss_log)
 
@@ -3725,6 +3728,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:print_labels, params: { q: query.id.alphabetize })
     assert_select("div#labels td", query.num_results)
     assert_match(/314159/, @response.body) # make sure mycoflora id in there!
+    assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
     # Alternative entry point.
     post(

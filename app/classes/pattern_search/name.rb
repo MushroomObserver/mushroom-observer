@@ -27,12 +27,20 @@ module PatternSearch
       comments:           [:comments_has,       :parse_string]
     }.freeze
 
-    def params
+    def self.params
       PARAMS
     end
 
-    def model
+    def params
+      self.class.params
+    end
+
+    def self.model
       ::Name
+    end
+
+    def model
+      self.class.model
     end
   end
 end
