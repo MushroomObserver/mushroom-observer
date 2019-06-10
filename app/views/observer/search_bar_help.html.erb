@@ -2,9 +2,12 @@
 
 <div class="max-width-text">
   <%= :pattern_search_terms_help.tp %>
-  <%= content_tag(:p, "#{:OBSERVATIONS.t} #{:SEARCHES.t}", { class: "bold" }) %>
+
+  <%= content_tag(:p, "#{:OBSERVATION.t} #{:SEARCHES.t}", { class: "bold" }) %>
+  <%= content_tag(:p, :observation_search_default.t) %>
   <%= PatternSearch::Observation.terms_help.tp %>
 
-  <%= content_tag(:p, "#{:NAMES.t} #{:SEARCHES.t}", { class: "bold" }) %>
+  <%= content_tag(:p, "#{:NAME.t} #{:SEARCHES.t}", { class: "bold" }) %>
+  <%= content_tag(:p, :name_search_default.t) %>
   <%= PatternSearch::Name.terms_help.tp %>
 </div>

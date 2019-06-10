@@ -3190,7 +3190,10 @@
   location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful.  If you don't find anything there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
 
   # Search bar help
-  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+  pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.\n
+  Recognized variables include:"
+
+  observation_search_default: An Observation search without a variable defaults to synonym_of.
 
   observation_term_date: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
   observation_term_created: Date observation was first posted.
@@ -3219,6 +3222,8 @@
   observation_term_has_notes: Has notes?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has and comments?
+
+  name_search_default: A Name search without a variable defaults to synonym_of.
 
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
