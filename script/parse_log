@@ -18,7 +18,7 @@ rails_log=$app_root/log/$RAILS_ENV.log
 old_errors=$app_root/log/errors.old
 new_errors=$app_root/log/errors.new
 
-grep '^[A-Za-z:]*Error \|ENOMEM' $rails_log |
+grep 'FATAL.* [A-Za-z:]*Error \|ENOMEM' $rails_log |
 grep -v 'Using a password on the command line' |
 grep -v 'Can.t figure out how to sort' |
 grep -v 'ActionController::RoutingError' |
