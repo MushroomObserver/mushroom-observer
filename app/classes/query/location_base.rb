@@ -20,9 +20,11 @@ module Query
     end
 
     def initialize_flavor
-      initialize_model_do_time(:created_at)
-      initialize_model_do_time(:updated_at)
-      initialize_model_do_objects_by_id(:users)
+      unless is_a?(LocationWithObservations)
+        initialize_model_do_time(:created_at)
+        initialize_model_do_time(:updated_at)
+        initialize_model_do_objects_by_id(:users)
+      end
       initialize_model_do_location_bounding_box
       initialize_content_filters(Location)
       super
