@@ -26,7 +26,6 @@ module Query
         has_location?:     :boolean,
         has_name?:         :boolean,
         has_comments?:     { boolean: [true] },
-        has_specimen?:     :boolean,
         has_sequences?:    { boolean: [true] },
         has_notes?:        :boolean,
         has_notes_fields?: [:string],
