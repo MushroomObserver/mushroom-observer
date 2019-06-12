@@ -21,13 +21,25 @@ module Query
 
     def initialize_flavor
       unless is_a?(LocationWithObservations)
-        initialize_model_do_time(:created_at)
-        initialize_model_do_time(:updated_at)
-        initialize_model_do_objects_by_id(:users)
+        initialize_created_at_condition
+        initialize_updated_at_condition
+        initialize_users_condition
       end
       initialize_model_do_location_bounding_box
       initialize_content_filters(Location)
       super
+    end
+
+    def initialize_created_at_condition
+      initialize_model_do_time(:created_at)
+    end
+
+    def initialize_updated_at_condition
+      initialize_model_do_time(:updated_at)
+    end
+
+    def initialize_users_condition
+      initialize_model_do_objects_by_id(:users)
     end
 
     def default_order
