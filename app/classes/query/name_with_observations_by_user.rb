@@ -1,13 +1,12 @@
 module Query
   # Names with observations created by a given user.
-  class NameWithObservationsByUser < Query::NameBase
+  class NameWithObservationsByUser < NameWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
-        user:    User,
-        old_by?: :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        user: User
+      )
     end
 
     def initialize_flavor

@@ -1,14 +1,13 @@
 module Query
   # Names with observations at a given "where".
-  class NameWithObservationsAtWhere < Query::NameBase
+  class NameWithObservationsAtWhere < NameWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         location:    :string,
-        user_where?: :string, # used to pass parameter to create_location
-        old_by?:     :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        user_where?: :string # used to pass parameter to create_location
+      )
     end
 
     def initialize_flavor

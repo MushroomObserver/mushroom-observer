@@ -45,89 +45,213 @@ module Query
     end
 
     def initialize_flavor
+      unless is_a?(LocationWithObservations)
+        initialize_created_at_condition
+        initialize_updated_at_condition
+        initialize_users_condition
+        initialize_has_notes_condition
+        initialize_notes_has_condition
+        initialize_has_comments_condition
+        initialize_comments_has_condition
+      end
+      initialize_misspellings_condition
+      initialize_deprecated_condition
+      initialize_names_condition
+      initialize_rank_condition
+      initialize_synonym_names_condition
+      initialize_children_names_condition
+      initialize_observations_condition
+      initialize_species_lists_condition
+      initialize_is_deprecated_condition
+      initialize_has_synonyms_condition
+      initialize_ok_for_export_condition
+      initialize_text_name_has_condition
+      initialize_has_author_condition
+      initialize_author_has_condition
+      initialize_has_citation_condition
+      initialize_citation_has_condition
+      initialize_has_classification_condition
+      initialize_classification_has_condition
+      initialize_has_observations_condition
+      initialize_has_default_desc_condition
+      initialize_join_desc_condition
+      initialize_desc_type_condition
+      initialize_desc_project_condition
+      initialize_desc_creator_condition
+      initialize_desc_content_condition
+      initialize_content_filters(Name)
+      super
+    end
+
+    def initialize_created_at_condition
       initialize_model_do_time(:created_at)
+    end
+
+    def initialize_updated_at_condition
       initialize_model_do_time(:updated_at)
+    end
+
+    def initialize_users_condition
       initialize_model_do_objects_by_id(:users)
-      initialize_model_do_misspellings
-      initialize_model_do_deprecated
-      initialize_model_do_objects_by_name(Name, :names, :id)
-      initialize_model_do_objects_by_name(
-        Name, :synonym_names, :id, filter: :synonyms
-      )
-      initialize_model_do_objects_by_name(
-        Name, :children_names, :id, filter: :all_children
-      )
-      initialize_model_do_locations("observations", join: :observations)
-      initialize_model_do_objects_by_name(
-        SpeciesList, :species_lists,
-        "observations_species_lists.species_list_id",
-        join: { observations: :observations_species_lists }
-      )
-      initialize_model_do_rank
-      initialize_model_do_boolean(
-        :is_deprecated,
-        "names.deprecated IS TRUE",
-        "names.deprecated IS FALSE"
-      )
-      initialize_model_do_boolean(
-        :has_synonyms,
-        "names.synonym_id IS NOT NULL",
-        "names.synonym_id IS NULL"
-      )
-      initialize_model_do_boolean(
-        :ok_for_export,
-        "names.ok_for_export IS TRUE",
-        "names.ok_for_export IS FALSE"
-      )
-      if params[:text_name_has].present?
-        initialize_model_do_search(:text_name_has, "text_name")
-      end
-      initialize_model_do_boolean(
-        :has_author,
-        'LENGTH(COALESCE(names.author,"")) > 0',
-        'LENGTH(COALESCE(names.author,"")) = 0'
-      )
-      if params[:author_has].present?
-        initialize_model_do_search(:author_has, "author")
-      end
-      initialize_model_do_boolean(
-        :has_citation,
-        'LENGTH(COALESCE(names.citation,"")) > 0',
-        'LENGTH(COALESCE(names.citation,"")) = 0'
-      )
-      if params[:citation_has].present?
-        initialize_model_do_search(:citation_has, "citation")
-      end
-      initialize_model_do_boolean(
-        :has_classification,
-        'LENGTH(COALESCE(names.classification,"")) > 0',
-        'LENGTH(COALESCE(names.classification,"")) = 0'
-      )
-      if params[:classification_has].present?
-        initialize_model_do_search(:classification_has, "classification")
-      end
+    end
+
+    def initialize_has_notes_condition
       initialize_model_do_boolean(
         :has_notes,
         'LENGTH(COALESCE(names.notes,"")) > 0',
         'LENGTH(COALESCE(names.notes,"")) = 0'
       )
-      if params[:notes_has].present?
-        initialize_model_do_search(:notes_has, "notes")
-      end
-      add_join(:comments) if params[:has_comments]
-      if params[:comments_has].present?
-        initialize_model_do_search(
-          :comments_has,
-          "CONCAT(comments.summary,COALESCE(comments.comment,''))"
-        )
-        add_join(:comments)
-      end
-      add_join(:observations) if params[:has_observations]
+    end
+
+    def initialize_notes_has_condition
+      return unless params[:notes_has].present?
+
+      initialize_model_do_search(:notes_has, "notes")
+    end
+
+    def initialize_has_comments_condition
+      return unless params[:comments_has].present?
+
+      initialize_model_do_search(
+        :comments_has,
+        "CONCAT(comments.summary,COALESCE(comments.comment,''))"
+      )
+      add_join(:comments)
+    end
+
+    def initialize_comments_has_condition
+      return unless params[:has_comments]
+
+      add_join(:comments)
+    end
+
+    def initialize_misspellings_condition
+      initialize_model_do_misspellings
+    end
+
+    def initialize_deprecated_condition
+      initialize_model_do_deprecated
+    end
+
+    def initialize_names_condition
+      initialize_model_do_objects_by_name(Name, :names, :id)
+    end
+
+    def initialize_rank_condition
+      initialize_model_do_rank
+    end
+
+    def initialize_synonym_names_condition
+      initialize_model_do_objects_by_name(
+        Name, :synonym_names, :id, filter: :synonyms
+      )
+    end
+
+    def initialize_children_names_condition
+      initialize_model_do_objects_by_name(
+        Name, :children_names, :id, filter: :all_children
+      )
+    end
+
+    def initialize_observations_condition
+      initialize_model_do_locations("observations", join: :observations)
+    end
+
+    def initialize_species_lists_condition
+      initialize_model_do_objects_by_name(
+        SpeciesList, :species_lists,
+        "observations_species_lists.species_list_id",
+        join: { observations: :observations_species_lists }
+      )
+    end
+
+    def initialize_is_deprecated_condition
+      initialize_model_do_boolean(
+        :is_deprecated,
+        "names.deprecated IS TRUE",
+        "names.deprecated IS FALSE"
+      )
+    end
+
+    def initialize_has_synonyms_condition
+      initialize_model_do_boolean(
+        :has_synonyms,
+        "names.synonym_id IS NOT NULL",
+        "names.synonym_id IS NULL"
+      )
+    end
+
+    def initialize_ok_for_export_condition
+      initialize_model_do_boolean(
+        :ok_for_export,
+        "names.ok_for_export IS TRUE",
+        "names.ok_for_export IS FALSE"
+      )
+    end
+
+    def initialize_text_name_has_condition
+      return unless params[:text_name_has].present?
+
+      initialize_model_do_search(:text_name_has, "text_name")
+    end
+
+    def initialize_has_author_condition
+      initialize_model_do_boolean(
+        :has_author,
+        'LENGTH(COALESCE(names.author,"")) > 0',
+        'LENGTH(COALESCE(names.author,"")) = 0'
+      )
+    end
+
+    def initialize_author_has_condition
+      return unless params[:author_has].present?
+
+      initialize_model_do_search(:author_has, "author")
+    end
+
+    def initialize_has_citation_condition
+      initialize_model_do_boolean(
+        :has_citation,
+        'LENGTH(COALESCE(names.citation,"")) > 0',
+        'LENGTH(COALESCE(names.citation,"")) = 0'
+      )
+    end
+
+    def initialize_citation_has_condition
+      return unless params[:citation_has].present?
+
+      initialize_model_do_search(:citation_has, "citation")
+    end
+
+    def initialize_has_classification_condition
+      initialize_model_do_boolean(
+        :has_classification,
+        'LENGTH(COALESCE(names.classification,"")) > 0',
+        'LENGTH(COALESCE(names.classification,"")) = 0'
+      )
+    end
+
+    def initialize_classification_has_condition
+      return unless params[:classification_has].present?
+
+      initialize_model_do_search(:classification_has, "classification")
+    end
+
+    def initialize_has_observations_condition
+      return unless params[:has_observations]
+
+      add_join(:observations)
+    end
+
+    def initialize_has_default_desc_condition
       initialize_model_do_boolean(
         :has_default_desc,
         "names.description_id IS NOT NULL",
         "names.description_id IS NULL"
       )
+    end
+
+    def initialize_join_desc_condition
       if params[:join_desc] == :default
         add_join(:'name_descriptions.default')
       elsif (params[:join_desc] == :any) ||
@@ -137,23 +261,33 @@ module Query
             params[:desc_content].present?
         add_join(:name_descriptions)
       end
+    end
+
+    def initialize_desc_type_condition
       initialize_model_do_enum_set(
         :desc_type,
         "name_descriptions.source_type",
         Description.all_source_types,
         :integer
       )
+    end
+
+    def initialize_desc_project_condition
       initialize_model_do_objects_by_name(
         Project, :desc_project, "name_descriptions.project_id"
       )
+    end
+
+    def initialize_desc_creator_condition
       initialize_model_do_objects_by_name(
         User, :desc_creator, "name_descriptions.user_id"
       )
+    end
+
+    def initialize_desc_content_condition
       fields = NameDescription.all_note_fields
       fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
       initialize_model_do_search(:desc_content, "CONCAT(#{fields.join(",")})")
-      initialize_content_filters(Name)
-      super
     end
 
     def default_order

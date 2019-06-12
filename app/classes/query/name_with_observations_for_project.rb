@@ -1,13 +1,12 @@
 module Query
   # Names with observations attached to a given project.
-  class NameWithObservationsForProject < Query::NameBase
+  class NameWithObservationsForProject < NameWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
-        project: Project,
-        old_by?: :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        project: Project
+      )
     end
 
     def initialize_flavor
