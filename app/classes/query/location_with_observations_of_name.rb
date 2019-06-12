@@ -1,14 +1,11 @@
 module Query
   # Locations with observations of a given name.
-  class LocationWithObservationsOfName < Query::LocationBase
+  class LocationWithObservationsOfName < LocationWithObservations
     include Query::Initializers::ContentFilters
     include Query::Initializers::OfName
 
     def parameter_declarations
-      super.merge(
-        old_by?: :string
-      ).merge(of_name_parameter_declarations).
-        merge(content_filter_parameter_declarations(Observation))
+      super.merge(of_name_parameter_declarations)
     end
 
     def initialize_flavor

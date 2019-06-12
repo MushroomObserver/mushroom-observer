@@ -1,14 +1,13 @@
 module Query
   # Locations with observations in a given set.
-  class LocationWithObservationsInSet < Query::LocationBase
+  class LocationWithObservationsInSet < LocationWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
         ids:        [Observation],
-        old_title?: :string,
-        old_by?:    :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        old_title?: :string
+      )
     end
 
     def initialize_flavor

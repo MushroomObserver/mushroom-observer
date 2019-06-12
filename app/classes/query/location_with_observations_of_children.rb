@@ -1,15 +1,14 @@
 module Query
   # Locations with observations of subtaxa of a given name.
-  class LocationWithObservationsOfChildren < Query::LocationBase
+  class LocationWithObservationsOfChildren < LocationWithObservations
     include Query::Initializers::ContentFilters
     include Query::Initializers::OfChildren
 
     def parameter_declarations
       super.merge(
-        name:    Name,
-        all?:    :boolean,
-        old_by?: :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        name: Name,
+        all?: :boolean
+      )
     end
 
     def initialize_flavor

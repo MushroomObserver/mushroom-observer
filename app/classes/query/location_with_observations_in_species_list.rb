@@ -1,13 +1,12 @@
 module Query
   # Locations with observations in a given species list.
-  class LocationWithObservationsInSpeciesList < Query::LocationBase
+  class LocationWithObservationsInSpeciesList < LocationWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
-        species_list: SpeciesList,
-        old_by?:      :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        species_list: SpeciesList
+      )
     end
 
     def initialize_flavor

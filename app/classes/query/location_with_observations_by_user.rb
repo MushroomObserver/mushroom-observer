@@ -1,13 +1,12 @@
 module Query
   # Locations with observations created by a given user.
-  class LocationWithObservationsByUser < Query::LocationBase
+  class LocationWithObservationsByUser < LocationWithObservations
     include Query::Initializers::ContentFilters
 
     def parameter_declarations
       super.merge(
-        user:    User,
-        old_by?: :string
-      ).merge(content_filter_parameter_declarations(Observation))
+        user: User
+      )
     end
 
     def initialize_flavor
