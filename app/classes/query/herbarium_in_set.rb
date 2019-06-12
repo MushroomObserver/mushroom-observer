@@ -1,15 +1,12 @@
-module Query
-  # Herbaria in a given set.
-  class HerbariumInSet < Query::HerbariumBase
-    def parameter_declarations
-      super.merge(
-        ids: [Herbarium]
-      )
-    end
+class Query::HerbariumInSet < Query::HerbariumBase
+  def parameter_declarations
+    super.merge(
+      ids: [Herbarium]
+    )
+  end
 
-    def initialize_flavor
-      initialize_in_set_flavor("herbaria")
-      super
-    end
+  def initialize_flavor
+    add_id_condition("herbaria.id", params[:ids])
+    super
   end
 end

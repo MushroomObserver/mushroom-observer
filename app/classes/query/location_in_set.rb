@@ -1,15 +1,12 @@
-module Query
-  # Locations in a given set.
-  class LocationInSet < Query::LocationBase
-    def parameter_declarations
-      super.merge(
-        ids: [Location]
-      )
-    end
+class Query::LocationInSet < Query::LocationBase
+  def parameter_declarations
+    super.merge(
+      ids: [Location]
+    )
+  end
 
-    def initialize_flavor
-      initialize_in_set_flavor("locations")
-      super
-    end
+  def initialize_flavor
+    add_id_condition("locations.id", params[:ids])
+    super
   end
 end

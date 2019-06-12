@@ -1,24 +1,23 @@
-module Query
-  # Simple herbarium search.
-  class HerbariumPatternSearch < Query::HerbariumBase
-    include Query::Initializers::PatternSearch
+class Query::HerbariumPatternSearch < Query::HerbariumBase
+  include Query::Initializers::PatternSearch
 
-    def parameter_declarations
-      super.merge(
-        pattern: :string
-      )
-    end
+  def parameter_declarations
+    super.merge(
+      pattern: :string
+    )
+  end
 
-    def initialize_flavor
-      search = google_parse_pattern
-      add_search_conditions(
-        search,
-        "herbaria.code",
-        "herbaria.name",
-        "COALESCE(herbaria.description,'')",
-        "COALESCE(herbaria.mailing_address,'')"
-      )
-      super
-    end
+  def initialize_flavor
+    add_search_condition(search_fields, params[:pattern])
+    super
+  end
+
+  def search_fields
+    "CONCAT(" \
+      "herbaria.code," \
+      "herbaria.name," \
+      "COALESCE(herbaria.description,'')," \
+      "COALESCE(herbaria.mailing_address,'')" \
+      ")"
   end
 end
