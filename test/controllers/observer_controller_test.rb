@@ -530,7 +530,7 @@ class ObserverControllerTest < FunctionalTestCase
     params = { search: { pattern: "56", type: :name } }
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :name, action: :name_search,
-                         pattern: "56")
+                         pattern: 'synonym_of:"56"')
 
     params = { search: { pattern: "78", type: :location } }
     get_with_dump(:pattern_search, params)

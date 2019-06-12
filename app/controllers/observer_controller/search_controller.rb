@@ -25,10 +25,16 @@ class ObserverController
         pattern = %Q(synonym_of:"#{pattern}")
         session[:pattern] = pattern
       end
+    when :name
+      ctrlr = :name
+      if pattern.present? && variable_absent?(pattern)
+        pattern = %Q(synonym_of:"#{pattern}")
+        session[:pattern] = pattern
+      end
     when :user
       ctrlr = :observer
     when :comment, :herbarium, :image, :location,
-      :name, :project, :species_list, :herbarium_record
+      :project, :species_list, :herbarium_record
       ctrlr = type
     when :google
       site_google_search(pattern)
