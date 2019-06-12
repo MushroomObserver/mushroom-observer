@@ -79,13 +79,17 @@ class ObserverController
 
   ##### Advanced Search #####
 
+  ADVANCED_SEARCH_CONDITIONS = [
+    :content, :location, :name, :user
+  ].freeze
+
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
   #   image/advanced_search
   #   location/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
-  def advanced_search_form # :nologin: :norobots:
+  def advanced_search_form
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
 
@@ -99,42 +103,22 @@ class ObserverController
                                 query))
   end
 
-  def add_filled_in_text_fields(query_params)
-    [:content, :location, :name, :user].each do |field|
-      val = params[:search][field].to_s
-      next unless val.present?
+  # Display matrix of advanced search results.
+  def advanced_search
+    if advanced_search_condition?
+      search = (ADVANCED_SEARCH_CONDITIONS + [:search_location_notes]).
+               each_with_object({}) do |param, h|
+                 h[param] = params[param] if params[param].present?
+               end
 
-      # Treat User field differently; remove angle-bracketed user name,
-      # since it was included by the auto-completer only as a hint.
-      if field == :user
-        val = val.sub(/ <.*/, "")
-      end
-      query_params[field] = val
-    end
-  end
-
-  def add_applicable_filter_parameters(query_params, model)
-    ContentFilter.by_model(model).each do |fltr|
-      query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
-    end
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search # :nologin: :norobots:
-    if params[:name] || params[:location] || params[:user] || params[:content]
-      search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
       query = create_query(:Observation, :advanced_search, search)
     else
       query = find_query(:Observation)
     end
+
     show_selected_observations(query)
-  rescue StandardError => err
-    flash_error(err.to_s) if err.present?
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -163,5 +147,32 @@ class ObserverController
 
   def variable_present?(pattern)
     /\w+:/ =~ pattern
+  end
+
+  ##### advanced search #####
+
+  def add_filled_in_text_fields(query_params)
+    ADVANCED_SEARCH_CONDITIONS.each do |field|
+      val = params[:search][field].to_s
+      next if val.blank?
+
+      # Treat User field differently; remove angle-bracketed user name,
+      # since it was included by the auto-completer only as a hint.
+      val = val.sub(/ <.*/, "") if field == :user
+      query_params[field] = val
+    end
+  end
+
+  def add_applicable_filter_parameters(query_params, model)
+    ContentFilter.by_model(model).each do |fltr|
+      query_params[fltr.sym] = params[:"content_filter_#{fltr.sym}"]
+    end
+  end
+
+  def advanced_search_condition?
+    ADVANCED_SEARCH_CONDITIONS.each do |field|
+      return true if params[field]
+    end
+    false
   end
 end
