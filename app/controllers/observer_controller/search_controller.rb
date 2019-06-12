@@ -19,7 +19,13 @@ class ObserverController
     session[:search_type] = type
 
     case type
-    when :observation, :user
+    when :observation
+      ctrlr = :observer
+      if pattern.present? && variable_absent?(pattern)
+        pattern = %Q(synonym_of:"#{pattern}")
+        session[:pattern] = pattern
+      end
+    when :user
       ctrlr = :observer
     when :comment, :herbarium, :image, :location,
       :name, :project, :species_list, :herbarium_record
@@ -49,6 +55,14 @@ class ObserverController
       search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
       redirect_to("https://google.com/search?#{search}")
     end
+  end
+
+  def variable_absent?(pattern)
+    !variable_present?(pattern)
+  end
+
+  def variable_present?(pattern)
+    /\w+:/ =~ pattern
   end
 
   # Advanced search form.  When it posts it just redirects to one of several
