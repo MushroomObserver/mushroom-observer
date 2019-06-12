@@ -1,5 +1,32 @@
+# frozen_string_literal: true
 # TODO: move this into a new SearchController
+
+# Handle "pattern" and "advanced" searches
 class ObserverController
+  ##### Pattern Search #####
+
+  # valid pattern search types
+  PATTERN_SEARCH_TYPES = [
+    :comment,
+    :herbarium,
+    :herbarium_record,
+    :google,
+    :image,
+    :location,
+    :name,
+    :observation,
+    :project,
+    :species_list,
+    :user
+  ].freeze
+
+  # types with special default patterns:
+  # If the pattern is a bare value, it defaults to synonym_of:"value"
+  SYNONYM_PATTERN_TYPES = [
+    :name,
+    :observation
+  ].freeze
+
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   comment/image_search
@@ -10,38 +37,25 @@ class ObserverController
   #   observer/user_search
   #   project/project_search
   #   species_list/species_list_search
-  def pattern_search # :nologin: :norobots:
+  def pattern_search
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
+
+    unless PATTERN_SEARCH_TYPES.include?(type)
+      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+      redirect_back_or_default(action: :list_rss_logs)
+      return
+    end
 
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern
     session[:search_type] = type
 
-    case type
-    when :observation
-      ctrlr = :observer
-      if pattern.present? && variable_absent?(pattern)
-        pattern = %Q(synonym_of:"#{pattern}")
-        session[:pattern] = pattern
-      end
-    when :name
-      ctrlr = :name
-      if pattern.present? && variable_absent?(pattern)
-        pattern = %Q(synonym_of:"#{pattern}")
-        session[:pattern] = pattern
-      end
-    when :user
-      ctrlr = :observer
-    when :comment, :herbarium, :image, :location,
-      :project, :species_list, :herbarium_record
-      ctrlr = type
-    when :google
+    ctrlr = search_ctrlr(type)
+    pattern = synonym_pattern(pattern) if SYNONYM_PATTERN_TYPES.include?(type)
+
+    if type == :google
       site_google_search(pattern)
-      return
-    else
-      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default(action: :list_rss_logs)
       return
     end
 
@@ -63,13 +77,7 @@ class ObserverController
     end
   end
 
-  def variable_absent?(pattern)
-    !variable_present?(pattern)
-  end
-
-  def variable_present?(pattern)
-    /\w+:/ =~ pattern
-  end
+  ##### Advanced Search #####
 
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
@@ -128,5 +136,32 @@ class ObserverController
   rescue StandardError => err
     flash_error(err.to_s) if err.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
+  end
+
+  ##############################################################################
+
+  private
+
+  def search_ctrlr(type)
+    case type
+    when :observation, :user
+      :observer
+    when :comment, :herbarium, :image, :location, :name,
+      :project, :species_list, :herbarium_record
+      type
+    end
+  end
+
+  # Pattern can include variable(s) and value(s), e.g.: variable:value
+  # If the pattern is a bare value, it defaults to synonym_of:"value"
+  def synonym_pattern(pattern)
+    return if pattern.blank? || variable_present?(pattern)
+
+    pattern = %(synonym_of:"#{pattern}")
+    session[:pattern] = pattern
+  end
+
+  def variable_present?(pattern)
+    /\w+:/ =~ pattern
   end
 end
