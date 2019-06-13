@@ -1,10 +1,14 @@
 class Query::Base
   include Query::Modules::ActiveRecord
+  include Query::Modules::BoundingBox
   include Query::Modules::Coercion
   include Query::Modules::Conditions
+  include Query::Modules::Datetime
+  include Query::Modules::GoogleSearch
   include Query::Modules::HighLevelQueries
   include Query::Modules::Initialization
   include Query::Modules::Joining
+  include Query::Modules::LookupObjects
   include Query::Modules::LowLevelQueries
   include Query::Modules::NestedQueries
   include Query::Modules::Ordering
