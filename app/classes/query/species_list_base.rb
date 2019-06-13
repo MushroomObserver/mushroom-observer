@@ -25,36 +25,24 @@ class Query::SpeciesListBase < Query::Base
   def initialize_flavor
     add_owner_and_time_stamp_conditions("species_lists")
     add_date_condition("species_lists.when", params[:date])
-    initialize_names_parameter
-    initialize_synonym_names_parameter
-    initialize_children_names_parameter
-    initialize_locations_parameter
-    initialize_projects_parameter
-    initialize_has_notes_parameter
-    add_join(:comments) if params[:has_comments]
-    add_search_condition("species_lists.title", params[:title_has])
-    add_search_condition("species_lists.notes", params[:notes_has])
-    initialize_comments_has_parameter
+    initialize_names_parameters
+    initialize_association_parameters
+    initialize_boolean_parameters
+    initialize_search_parameters
     super
   end
 
-  def initialize_names_parameter
+  def initialize_names_parameters
     add_id_condition(
       "observations.name_id",
       lookup_names_by_name(params[:names]),
       :observations_species_lists, :observations
     )
-  end
-
-  def initialize_synonym_names_parameter
     add_id_condition(
       "observations.name_id",
       lookup_names_by_name(params[:synonym_names], :synonyms),
       :observations_species_lists, :observations
     )
-  end
-
-  def initialize_children_names_parameter
     add_id_condition(
       "observations.name_id",
       lookup_names_by_name(params[:children_names], :all_children),
@@ -62,11 +50,8 @@ class Query::SpeciesListBase < Query::Base
     )
   end
 
-  def initialize_locations_parameter
+  def initialize_association_parameters
     add_where_condition("species_lists", params[:locations])
-  end
-
-  def initialize_projects_parameter
     add_id_condition(
       "projects_species_lists.project_id",
       lookup_projects_by_name(params[:projects]),
@@ -74,15 +59,24 @@ class Query::SpeciesListBase < Query::Base
     )
   end
 
-  def initialize_has_notes_parameter
+  def initialize_boolean_parameters
     add_boolean_condition(
       "LENGTH(COALESCE(species_lists.notes,'')) > 0",
       "LENGTH(COALESCE(species_lists.notes,'')) = 0",
       params[:has_notes]
     )
+    add_join(:comments) if params[:has_comments]
   end
 
-  def initialize_comments_has_parameter
+  def initialize_search_parameters
+    add_search_condition(
+      "species_lists.title",
+      params[:title_has]
+    )
+    add_search_condition(
+      "species_lists.notes",
+      params[:notes_has]
+    )
     add_search_condition(
       "CONCAT(comments.summary,COALESCE(comments.comment,''))",
       params[:comments_has],

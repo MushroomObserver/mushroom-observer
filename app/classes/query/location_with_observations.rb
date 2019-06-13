@@ -22,7 +22,7 @@ class Query::LocationWithObservations < Query::LocationBase
       has_notes?:        :boolean,
       has_notes_fields?: [:string],
       notes_has?:        :string,
-      comments_has?:     :string,
+      comments_has?:     :string
     ).merge(content_filter_parameter_declarations(Observation))
   end
 
@@ -30,15 +30,55 @@ class Query::LocationWithObservations < Query::LocationBase
     add_join(:observations)
     add_owner_and_time_stamp_conditions("observations")
     add_date_condition("observations.when", params[:date])
-    initialize_names_parameter
-    initialize_synonym_names_parameter
-    initialize_children_names_parameter
+    initialize_names_parameters
     add_where_condition(:observations, params[:locations])
-    initialize_projects_parameter
-    initialize_species_lists_parameter
-    initialize_herbaria_parameter
-    initialize_herbarium_records_parameter
+    initialize_association_parameters
     add_range_condition("observations.vote_cache", params[:confidence])
+    initialize_boolean_parameters
+    initialize_search_parameters
+    initialize_content_filters(Observation)
+    super
+  end
+
+  def initialize_names_parameters
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:names])
+    )
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:synonym_names], :synonyms)
+    )
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:children_names], :all_children)
+    )
+  end
+
+  def initialize_association_parameters
+    add_id_condition(
+      "observations_projects.project_id",
+      lookup_projects_by_name(params[:projects]),
+      :observations, :observations_projects
+    )
+    add_id_condition(
+      "observations_species_lists.species_list_id",
+      lookup_species_lists_by_name(params[:species_lists]),
+      :observations, :observations_species_lists
+    )
+    add_id_condition(
+      "herbarium_records.herbarium_id",
+      lookup_herbaria_by_name(params[:herbaria]),
+      :observations, :herbarium_records_observations, :herbarium_records
+    )
+    add_id_condition(
+      "herbarium_records_observations.herbarium_record_id",
+      lookup_herbarium_records_by_name(params[:herbarium_records]),
+      :observations, :herbarium_records_observations
+    )
+  end
+
+  def initialize_boolean_parameters
     initialize_is_collection_location_parameter
     initialize_has_location_parameter
     initialize_has_name_parameter
@@ -46,63 +86,6 @@ class Query::LocationWithObservations < Query::LocationBase
     add_has_notes_fields_condition(params[:has_notes_fields])
     add_join(:observations, :comments) if params[:has_comments]
     add_join(:observations, :sequences) if params[:has_sequences]
-    add_search_condition("observations.notes", params[:notes_has])
-    initialize_comments_has_parameter
-    initialize_content_filters(Observation)
-    super
-  end
-
-  def initialize_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:names])
-    )
-  end
-
-  def initialize_synonym_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms)
-    )
-  end
-
-  def initialize_children_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children)
-    )
-  end
-
-  def initialize_projects_parameter
-    add_id_condition(
-      "observations_projects.project_id",
-      lookup_projects_by_name(params[:projects]),
-      :observations, :observations_projects
-    )
-  end
-
-  def initialize_species_lists_parameter
-    add_id_condition(
-      "observations_species_lists.species_list_id",
-      lookup_species_lists_by_name(params[:species_lists]),
-      :observations, :observations_species_lists
-    )
-  end
-
-  def initialize_herbaria_parameter
-    add_id_condition(
-      "herbarium_records.herbarium_id",
-      lookup_herbaria_by_name(params[:herbaria]),
-      :observations, :herbarium_records_observations, :herbarium_records
-    )
-  end
-
-  def initialize_herbarium_records_parameter
-    add_id_condition(
-      "herbarium_records_observations.herbarium_record_id",
-      lookup_herbarium_records_by_name(params[:herbarium_records]),
-      :observations, :herbarium_records_observations
-    )
   end
 
   def initialize_is_collection_location_parameter
@@ -140,7 +123,11 @@ class Query::LocationWithObservations < Query::LocationBase
     )
   end
 
-  def initialize_comments_has_parameter
+  def initialize_search_parameters
+    add_search_condition(
+      "observations.notes",
+      params[:notes_has]
+    )
     add_search_condition(
       "CONCAT(comments.summary,COALESCE(comments.comment,''))",
       params[:comments_has],

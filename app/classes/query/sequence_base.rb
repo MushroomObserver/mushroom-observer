@@ -51,76 +51,35 @@ class Query::SequenceBase < Query::Base
   end
 
   def initialize_flavor
-    initialize_sequence_filters
-    initialize_observation_filters
-    super
-  end
-
-  def initialize_sequence_filters
-    add_owner_and_time_stamp_conditions("sequences")
-    add_id_condition("sequences.observation_id", params[:observations])
     # Leaving out bases because some formats allow spaces and other "garbage"
     # delimiters which could interrupt the subsequence the user is searching
     # for.  Users would probably not understand why the search fails to find
     # some sequences because of this.
-    add_exact_match_condition("sequences.locus", params[:locus])
-    add_exact_match_condition("sequences.archive", params[:archive])
-    add_exact_match_condition("sequences.accession", params[:accession])
-    add_search_condition("sequences.locus", params[:locus_has])
-    add_search_condition("sequences.accession", params[:accession_has])
-    add_search_condition("sequences.notes", params[:notes_has])
+    add_owner_and_time_stamp_conditions("sequences")
+    initialize_association_parameters
+    initialize_names_parameters
+    initialize_observation_parameters
+    initialize_exact_match_parameters
+    initialize_boolean_parameters
+    initialize_search_parameters
+    add_bounding_box_conditions_for_observations
+    super
   end
 
-  def initialize_observation_filters
-    add_date_condition("observations.when", params[:obs_date], :observations)
+  def initialize_association_parameters
+    add_id_condition("sequences.observation_id", params[:observations])
     initialize_observers_parameter
-    initialize_names_parameter
-    initialize_synonym_names_parameter
-    initialize_children_names_parameter
     initialize_locations_parameter
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
     initialize_projects_parameter
     initialize_species_lists_parameter
-    initialize_confidence_parameter
-    initialize_is_collection_location_parameter
-    initialize_has_images_parameter
-    initialize_has_specimen_parameter
-    initialize_has_name_parameter
-    initialize_has_obs_notes_parameter
-    add_has_notes_fields_condition(params[:has_notes_fields], :observations)
-    initialize_obs_notes_has_parameter
-    add_bounding_box_conditions_for_observations
   end
 
   def initialize_observers_parameter
     add_id_condition(
       "observations.user_id",
       lookup_users_by_name(params[:observers]),
-      :observations
-    )
-  end
-
-  def initialize_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:names]),
-      :observations
-    )
-  end
-
-  def initialize_synonym_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms),
-      :observations
-    )
-  end
-
-  def initialize_children_names_parameter
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children),
       :observations
     )
   end
@@ -165,18 +124,55 @@ class Query::SequenceBase < Query::Base
     )
   end
 
-  def initialize_confidence_parameter
-    add_range_condition("observations.vote_cache", params[:confidence],
-                        :observations)
+  def initialize_names_parameters
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:names]),
+      :observations
+    )
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:synonym_names], :synonyms),
+      :observations
+    )
+    add_id_condition(
+      "observations.name_id",
+      lookup_names_by_name(params[:children_names], :all_children),
+      :observations
+    )
   end
 
-  def initialize_is_collection_location_parameter
+  def initialize_observation_parameters
+    add_date_condition(
+      "observations.when",
+      params[:obs_date],
+      :observations
+    )
     add_boolean_condition(
       "observations.is_collection_location IS TRUE",
       "observations.is_collection_location IS FALSE",
       params[:is_collection_location],
       :observations
     )
+    add_range_condition(
+      "observations.vote_cache",
+      params[:confidence],
+      :observations
+    )
+  end
+
+  def initialize_exact_match_parameters
+    add_exact_match_condition("sequences.locus", params[:locus])
+    add_exact_match_condition("sequences.archive", params[:archive])
+    add_exact_match_condition("sequences.accession", params[:accession])
+  end
+
+  def initialize_boolean_parameters
+    initialize_has_images_parameter
+    initialize_has_specimen_parameter
+    initialize_has_name_parameter
+    initialize_has_obs_notes_parameter
+    add_has_notes_fields_condition(params[:has_notes_fields], :observations)
   end
 
   def initialize_has_images_parameter
@@ -217,7 +213,10 @@ class Query::SequenceBase < Query::Base
     )
   end
 
-  def initialize_obs_notes_has_parameter
+  def initialize_search_parameters
+    add_search_condition("sequences.locus", params[:locus_has])
+    add_search_condition("sequences.accession", params[:accession_has])
+    add_search_condition("sequences.notes", params[:notes_has])
     add_search_condition("observations.notes", params[:obs_notes_has],
                          :observations)
   end

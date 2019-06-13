@@ -39,6 +39,7 @@ class Query::Base
       parameter_declarations.key?("#{key}?".to_sym)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def initialize_flavor
     add_join_from_string(params[:join]) if params[:join]
     self.tables += params[:tables]      if params[:tables]
@@ -46,6 +47,7 @@ class Query::Base
     self.group   = params[:group]       if params[:group]
     self.order   = params[:order]       if params[:order]
   end
+  # rubocop:enable Metrics/AbcSize
 
   def default_order
     raise "Didn't supply default order for #{model} #{flavor} query."
