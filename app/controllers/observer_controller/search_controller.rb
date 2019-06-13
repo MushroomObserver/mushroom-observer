@@ -40,6 +40,9 @@ class ObserverController
   def pattern_search
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
+    # Save it so that we can keep it in the search bar in subsequent pages.
+    session[:pattern] = pattern
+    session[:search_type] = type
 
     unless PATTERN_SEARCH_TYPES.include?(type)
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
@@ -47,14 +50,16 @@ class ObserverController
       return
     end
 
-    # Save it so that we can keep it in the search bar in subsequent pages.
-    session[:pattern] = pattern
-    session[:search_type] = type
+    ctrlr = pattern_search_ctrlr(type)
 
-    ctrlr = search_ctrlr(type)
-    pattern = synonym_pattern(pattern) if SYNONYM_PATTERN_TYPES.include?(type)
-
-    if type == :google
+    # sepcial cases
+    case type
+    when :name, :observation
+      # If the pattern is a bare value, it defaults to synonym_of:"value"
+      pattern = default_synonym_pattern(pattern)
+      session[:pattern] = pattern
+    when :google
+      # external search, rather than a sql or ActiveRecord query
       site_google_search(pattern)
       return
     end
@@ -65,15 +70,6 @@ class ObserverController
     else
       redirect_to(controller: ctrlr, action: "#{type}_search",
                   pattern: pattern)
-    end
-  end
-
-  def site_google_search(pattern)
-    if pattern.blank?
-      redirect_to(action: :list_rss_logs)
-    else
-      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
-      redirect_to("https://google.com/search?#{search}")
     end
   end
 
@@ -95,7 +91,7 @@ class ObserverController
 
     model = params[:search][:model].to_s.camelize.constantize
     query_params = {}
-    add_filled_in_text_fields(query_params)
+    add_filled_in_conditions(query_params)
     add_applicable_filter_parameters(query_params, model)
     query = create_query(model, :advanced_search, query_params)
     redirect_to(add_query_param({ controller: model.show_controller,
@@ -126,7 +122,9 @@ class ObserverController
 
   private
 
-  def search_ctrlr(type)
+  ##### pattern search #####
+
+  def pattern_search_ctrlr(type)
     case type
     when :observation, :user
       :observer
@@ -138,7 +136,7 @@ class ObserverController
 
   # Pattern can include variable(s) and value(s), e.g.: variable:value
   # If the pattern is a bare value, it defaults to synonym_of:"value"
-  def synonym_pattern(pattern)
+  def default_synonym_pattern(pattern)
     return if pattern.blank? || variable_present?(pattern)
 
     pattern = %(synonym_of:"#{pattern}")
@@ -149,9 +147,18 @@ class ObserverController
     /\w+:/ =~ pattern
   end
 
+  def site_google_search(pattern)
+    if pattern.blank?
+      redirect_to(action: :list_rss_logs)
+    else
+      search = URI.encode_www_form(q: "site:#{MO.domain} #{pattern}")
+      redirect_to("https://google.com/search?#{search}")
+    end
+  end
+
   ##### advanced search #####
 
-  def add_filled_in_text_fields(query_params)
+  def add_filled_in_conditions(query_params)
     ADVANCED_SEARCH_CONDITIONS.each do |field|
       val = params[:search][field].to_s
       next if val.blank?
