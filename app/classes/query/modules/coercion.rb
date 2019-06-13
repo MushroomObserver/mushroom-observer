@@ -35,9 +35,9 @@ module Query
         return false unless respond_to?(coerce_method)
 
         send(coerce_method)
-        return true
-      rescue
-        return false
+        true
+      rescue RuntimeError
+        false
       end
 
       # Attempt to coerce a query for one model into a related query for
