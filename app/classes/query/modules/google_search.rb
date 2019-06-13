@@ -41,7 +41,7 @@ module Query::Modules::GoogleSearch
     if (str = str.to_s.strip_squeeze) != ""
       str.gsub!(/\s+/, " ")
       loop do
-        google_parse_one_clause(str, goods, bads)
+        google_parse_one_clause(str, goods, bads) && break
       end
     end
     GoogleSearch.new(
@@ -82,8 +82,9 @@ module Query::Modules::GoogleSearch
     else
       raise("Invalid search string syntax at: '#{str}'") if str != ""
 
-      break
+      return true
     end
+    false
   end
 
   # Simple class to hold the results of +google_parse+.  It just has two

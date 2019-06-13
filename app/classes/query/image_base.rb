@@ -41,7 +41,7 @@ class Query::ImageBase < Query::Base
     initialize_association_parameters
     initialize_name_parameters
     initialize_image_parameters
-    initialize_votes_parameters
+    initialize_vote_parameters
   end
 
   def initialize_notes_parameters
