@@ -72,7 +72,7 @@ module Query::Modules::Conditions
   def initialize_in_set_flavor(table = model.table_name)
     set = clean_id_set(params[:ids])
     @where << "#{table}.id IN (#{set})"
-    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless order
+    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
   end
 
   def add_id_condition(col, ids, *joins)
