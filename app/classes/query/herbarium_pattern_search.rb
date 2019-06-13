@@ -1,6 +1,4 @@
 class Query::HerbariumPatternSearch < Query::HerbariumBase
-  include Query::Initializers::PatternSearch
-
   def parameter_declarations
     super.merge(
       pattern: :string

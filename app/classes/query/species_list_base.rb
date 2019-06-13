@@ -63,13 +63,13 @@ class Query::SpeciesListBase < Query::Base
   end
 
   def initialize_locations_parameter
-    add_location_condition("species_lists", params[:locations])
+    add_where_condition("species_lists", params[:locations])
   end
 
   def initialize_projects_parameter
     add_id_condition(
       "projects_species_lists.project_id",
-      lookup_projects_by_name(params[:species_lists]),
+      lookup_projects_by_name(params[:projects]),
       :projects_species_lists
     )
   end

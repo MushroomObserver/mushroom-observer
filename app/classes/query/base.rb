@@ -1,6 +1,7 @@
 class Query::Base
   include Query::Modules::ActiveRecord
   include Query::Modules::Coercion
+  include Query::Modules::Conditions
   include Query::Modules::HighLevelQueries
   include Query::Modules::Initialization
   include Query::Modules::Joining
@@ -47,6 +48,6 @@ class Query::Base
   end
 
   def ==(other)
-    serialize == other.serialize
+    serialize == other.try(&:serialize)
   end
 end

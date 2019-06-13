@@ -12,7 +12,7 @@ class Query::ImageWithObservations < Query::ImageBase
       has_comments?:     { boolean: [true] },
       has_sequences?:    { boolean: [true] },
       has_notes_fields?: [:string],
-      comments_has?:     :string
+      comments_has?:     :string,
       north?:            :float,
       south?:            :float,
       east?:             :float,

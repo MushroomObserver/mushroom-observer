@@ -54,7 +54,7 @@ class Query::NameWithObservations < Query::NameBase
   def initialize_herbaria_parameter
     add_id_condition(
       "herbarium_records.herbarium_id",
-      lookup_herbaria_by_name(params[:herbaria],
+      lookup_herbaria_by_name(params[:herbaria]),
       :observations, :herbarium_records_observations, :herbarium_records
     )
   end
@@ -103,14 +103,14 @@ class Query::NameWithObservations < Query::NameBase
 
   def initialize_comments_has_parameter
     add_search_condition(
-      "CONCAT(comments.summary,COALESCE(comments.comment,''))"
+      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
       params[:comments_has],
       :observations, :comments
     )
   end
 
-  def add_join_to_locations
-    add_join(:observations, :locations)
+  def add_join_to_locations!
+    add_join(:observations, :locations!)
   end
 
   def coerce_into_observation_query

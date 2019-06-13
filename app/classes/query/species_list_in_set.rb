@@ -6,7 +6,7 @@ class Query::SpeciesListInSet < Query::SpeciesListBase
   end
 
   def initialize_flavor
-    add_id_condition("species_lists.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

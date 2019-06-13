@@ -6,7 +6,7 @@ class Query::SequenceInSet < Query::SequenceBase
   end
 
   def initialize_flavor
-    add_id_condition("sequences.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

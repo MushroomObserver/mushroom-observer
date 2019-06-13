@@ -12,7 +12,7 @@ class Query::CommentPatternSearch < Query::CommentBase
 
   def search_fields
     "CONCAT(" \
-      "comments.summary,",
+      "comments.summary," \
       "COALESCE(comments.comment,'')" \
       ")"
   end

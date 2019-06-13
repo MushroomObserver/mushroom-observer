@@ -43,7 +43,7 @@ class Query::NameBase < Query::Base
   end
 
   def initialize_flavor
-    unless is_a?(NameWithObservations)
+    unless is_a?(Query::NameWithObservations)
       add_owner_and_time_stamp_conditions("names")
       initialize_has_notes_parameter
       add_search_condition("names.notes", params[:notes_has])
@@ -57,6 +57,7 @@ class Query::NameBase < Query::Base
     initialize_synonym_names_parameter
     initialize_children_names_parameter
     add_id_condition("observations.id", params[:observations], :observations)
+    add_where_condition("observations", params[:locations], :observations)
     initialize_species_lists_parameter
     initialize_is_deprecated_parameter
     initialize_has_synonyms_parameter
@@ -168,7 +169,7 @@ class Query::NameBase < Query::Base
   def initialize_has_citation_parameter
     add_boolean_condition(
       "LENGTH(COALESCE(names.citation,'')) > 0",
-      "LENGTH(COALESCE(names.citation,'')) = 0"
+      "LENGTH(COALESCE(names.citation,'')) = 0",
       params[:has_citation]
     )
   end
@@ -176,7 +177,7 @@ class Query::NameBase < Query::Base
   def initialize_has_classification_parameter
     add_boolean_condition(
       "LENGTH(COALESCE(names.classification,'')) > 0",
-      "LENGTH(COALESCE(names.classification,'')) = 0"
+      "LENGTH(COALESCE(names.classification,'')) = 0",
       params[:has_classification]
     )
   end
@@ -202,7 +203,7 @@ class Query::NameBase < Query::Base
   end
 
   def initialize_desc_type_parameter
-    do_indexed_enum_condition(
+    add_indexed_enum_condition(
       "name_descriptions.source_type",
       params[:desc_type],
       Description.all_source_types

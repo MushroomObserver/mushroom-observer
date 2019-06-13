@@ -6,7 +6,7 @@ class Query::UserInSet < Query::UserBase
   end
 
   def initialize_flavor
-    add_id_condition("users.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

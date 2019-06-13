@@ -49,7 +49,7 @@ module Query::Modules::Conditions
     add_joins(*joins)
   end
 
-  def do_string_enum_condition(col, vals, allowed, *joins)
+  def add_string_enum_condition(col, vals, allowed, *joins)
     return if vals.empty?
 
     vals = vals.map(&:to_s) & allowed.map(&:to_s)
@@ -59,7 +59,7 @@ module Query::Modules::Conditions
     add_joins(*joins)
   end
 
-  def do_indexed_enum_condition(col, vals, allowed, *joins)
+  def add_indexed_enum_condition(col, vals, allowed, *joins)
     return if vals.empty?
 
     vals = vals.map { |v| allowed.index_of(v.to_sym) }.reject(&:nil?)
@@ -67,6 +67,12 @@ module Query::Modules::Conditions
 
     @where << "#{col} IN (#{val.join(",")})"
     add_joins(*joins)
+  end
+
+  def initialize_in_set_flavor(table = model.table_name)
+    set = clean_id_set(params[:ids])
+    @where << "#{table}.id IN (#{set})"
+    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless order
   end
 
   def add_id_condition(col, ids, *joins)
@@ -143,7 +149,7 @@ module Query::Modules::Conditions
           val
         end
       elsif filter
-        find_matching_names(val).map(&:send, filter).map(&:id)
+        find_matching_names(val).map {|x| x.send(filter) }.flatten.map(&:id)
       else
         find_matching_names(val).map(&:id)
       end
@@ -158,7 +164,7 @@ module Query::Modules::Conditions
     matches
   end
 
-  def add_location_condition(table, vals, *joins)
+  def add_where_condition(table, vals, *joins)
     return if vals.empty?
 
     loc_col   = "#{table}.location_id"
@@ -192,7 +198,7 @@ module Query::Modules::Conditions
     cond1 = cond1.join(" AND ")
     cond2 = cond2.join(" AND ")
     @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
-    add_join_to_locations
+    add_join_to_locations!
   end
 
   def lat_long_plausible
@@ -216,38 +222,43 @@ module Query::Modules::Conditions
       bounding_box_normal(n, s, e, w)
     else
       bounding_box_straddling_date_line(n, s, e, w)
+    end
   end
 
   def bounding_box_normal(n, s, e, w)
     [
-      # point location inside target box
-      "observations.lat >= #{s}",
-      "observations.lat <= #{n}",
-      "observations.long >= #{w}",
-      "observations.long <= #{e}"
-    ], [
-      # box entirely within target box
-      "locations.south >= #{s}",
-      "locations.north <= #{n}",
-      "locations.west >= #{w}",
-      "locations.east <= #{e}",
-      "locations.west <= locations.east"
+      [
+        # point location inside target box
+        "observations.lat >= #{s}",
+        "observations.lat <= #{n}",
+        "observations.long >= #{w}",
+        "observations.long <= #{e}"
+      ], [
+        # box entirely within target box
+        "locations.south >= #{s}",
+        "locations.north <= #{n}",
+        "locations.west >= #{w}",
+        "locations.east <= #{e}",
+        "locations.west <= locations.east"
+      ]
     ]
   end
 
   def bounding_box_straddling_date_line(n, s, e, w)
     [
-      # point location inside target box
-      "observations.lat >= #{s}",
-      "observations.lat <= #{n}",
-      "(observations.long >= #{w} OR observations.long <= #{e})"
-    ], [
-      # box entirely within target box
-      "locations.south >= #{s}",
-      "locations.north <= #{n}",
-      "locations.west >= #{w}",
-      "locations.east <= #{e}",
-      "locations.west > locations.east"
+      [
+        # point location inside target box
+        "observations.lat >= #{s}",
+        "observations.lat <= #{n}",
+        "(observations.long >= #{w} OR observations.long <= #{e})"
+      ], [
+        # box entirely within target box
+        "locations.south >= #{s}",
+        "locations.north <= #{n}",
+        "locations.west >= #{w}",
+        "locations.east <= #{e}",
+        "locations.west > locations.east"
+      ]
     ]
   end
 
@@ -273,7 +284,7 @@ module Query::Modules::Conditions
     pixels = Image.all_sizes_in_pixels
     if min
       size = pixels[sizes.index(min)]
-      @where << "#images.width >= #{size} OR images.height >= #{size}"
+      @where << "images.width >= #{size} OR images.height >= #{size}"
     end
     if max
       size = pixels[sizes.index(max) + 1]
@@ -378,9 +389,9 @@ module Query::Modules::Conditions
   def notes_field_presence_condition(field)
     field = field.clone
     pat = if field.gsub!(/(["\\])/) { |m| '\\\1' }
-            "\":#{key}:\""
+            "\":#{field}:\""
           else
-            ":#{key}:"
+            ":#{field}:"
           end
     "observations.notes like \"%#{pat}%\""
   end

@@ -1,4 +1,4 @@
-class Query::LocationWithObservationsInSet < LocationWithObservations
+class Query::LocationWithObservationsInSet < Query::LocationWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations
@@ -11,8 +11,7 @@ class Query::LocationWithObservationsInSet < LocationWithObservations
   def initialize_flavor
     title_args[:observations] = params[:old_title] ||
                                 :query_title_in_set.t(type: :observation)
-    set = clean_id_set(params[:ids])
-    where << "observations.id IN (#{set})"
+    initialize_in_set_flavor("observations")
     where << "observations.is_collection_location IS TRUE"
     super
   end

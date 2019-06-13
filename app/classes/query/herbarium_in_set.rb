@@ -6,7 +6,7 @@ class Query::HerbariumInSet < Query::HerbariumBase
   end
 
   def initialize_flavor
-    add_id_condition("herbaria.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

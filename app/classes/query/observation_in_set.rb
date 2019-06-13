@@ -6,7 +6,7 @@ class Query::ObservationInSet < Query::ObservationBase
   end
 
   def initialize_flavor
-    add_id_condition("observations.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 

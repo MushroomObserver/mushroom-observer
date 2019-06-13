@@ -6,7 +6,7 @@ class Query::ArticleInSet < Query::ArticleBase
   end
 
   def initialize_flavor
-    add_id_condition("articles.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

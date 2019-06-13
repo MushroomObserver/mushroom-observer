@@ -90,8 +90,7 @@ class Query::SequenceBase < Query::Base
     initialize_has_obs_notes_parameter
     add_has_notes_fields_condition(params[:has_notes_fields], :observations)
     initialize_obs_notes_has_parameter
-    initialize_model_do_observation_bounding_box
-    # add_join(:observations) if @where.any? { |w| w.include?("observations.") }
+    add_bounding_box_conditions_for_observations
   end
 
   def initialize_observers_parameter
@@ -175,7 +174,7 @@ class Query::SequenceBase < Query::Base
     add_boolean_condition(
       "observations.is_collection_location IS TRUE",
       "observations.is_collection_location IS FALSE",
-      :is_collection_location,
+      params[:is_collection_location],
       :observations
     )
   end
@@ -184,7 +183,7 @@ class Query::SequenceBase < Query::Base
     add_boolean_condition(
       "observations.thumb_image_id IS NOT NULL",
       "observations.thumb_image_id IS NULL",
-      :has_images,
+      params[:has_images],
       :observations
     )
   end
@@ -193,7 +192,7 @@ class Query::SequenceBase < Query::Base
     add_boolean_condition(
       "observations.specimen IS TRUE",
       "observations.specimen IS FALSE",
-      :has_specimen,
+      params[:has_specimen],
       :observations
     )
   end
@@ -204,7 +203,7 @@ class Query::SequenceBase < Query::Base
     add_boolean_condition(
       "names.rank <= #{genus} or names.rank = #{group}",
       "names.rank > #{genus} and names.rank < #{group}",
-      :has_name,
+      params[:has_name],
       :observations, :names
     )
   end
@@ -213,7 +212,7 @@ class Query::SequenceBase < Query::Base
     add_boolean_condition(
       "observations.notes != #{escape(Observation.no_notes_persisted)}",
       "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-      :has_obs_notes,
+      params[:has_obs_notes],
       :observations
     )
   end
@@ -221,6 +220,10 @@ class Query::SequenceBase < Query::Base
   def initialize_obs_notes_has_parameter
     add_search_condition("observations.notes", params[:obs_notes_has],
                          :observations)
+  end
+
+  def add_join_to_locations!
+    add_join(:observations, :locations!)
   end
 
   def default_order

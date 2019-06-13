@@ -6,7 +6,7 @@ class Query::CommentInSet < Query::CommentBase
   end
 
   def initialize_flavor
-    add_id_condition("comments.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

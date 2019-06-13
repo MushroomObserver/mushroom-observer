@@ -1,4 +1,4 @@
-class Query::NameWithObservationsAtLocation < NameWithObservations
+class Query::NameWithObservationsAtLocation < Query::NameWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations

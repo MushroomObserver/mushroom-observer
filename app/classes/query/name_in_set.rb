@@ -6,7 +6,7 @@ class Query::NameInSet < Query::NameBase
   end
 
   def initialize_flavor
-    add_id_condition("names.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

@@ -6,7 +6,7 @@ class Query::ProjectInSet < Query::ProjectBase
   end
 
   def initialize_flavor
-    add_id_condition("projects.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

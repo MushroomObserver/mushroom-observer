@@ -33,7 +33,7 @@ class Query::LocationWithObservations < Query::LocationBase
     initialize_names_parameter
     initialize_synonym_names_parameter
     initialize_children_names_parameter
-    add_location_condition(:observations, params[:locations])
+    add_where_condition(:observations, params[:locations])
     initialize_projects_parameter
     initialize_species_lists_parameter
     initialize_herbaria_parameter
@@ -127,7 +127,7 @@ class Query::LocationWithObservations < Query::LocationBase
     add_boolean_condition(
       "names.rank <= #{genus} or names.rank = #{group}",
       "names.rank > #{genus} and names.rank < #{group}",
-      :has_name,
+      params[:has_name],
       :observations, :names
     )
   end

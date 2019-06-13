@@ -6,7 +6,7 @@ class Query::ImageInSet < Query::ImageBase
   end
 
   def initialize_flavor
-    add_id_condition("images.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

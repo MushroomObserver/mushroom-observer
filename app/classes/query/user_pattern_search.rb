@@ -13,7 +13,7 @@ class Query::UserPatternSearch < Query::UserBase
   def search_fields
     "CONCAT(" \
       "users.login," \
-      "users.name"
+      "users.name" \
       ")"
   end
 end

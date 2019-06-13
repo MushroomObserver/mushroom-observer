@@ -1,4 +1,4 @@
-class Query::NameWithObservationsInSpeciesList < NameWithObservations
+class Query::NameWithObservationsInSpeciesList < Query::NameWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations

@@ -1,4 +1,5 @@
-class Query::LocationWithObservationsOfChildren < LocationWithObservations
+class Query::LocationWithObservationsOfChildren <
+      Query::LocationWithObservations
   include Query::Initializers::ContentFilters
   include Query::Initializers::OfChildren
 

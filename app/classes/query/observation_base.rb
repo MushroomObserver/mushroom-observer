@@ -42,7 +42,7 @@ class Query::ObservationBase < Query::Base
     initialize_names_parameter
     initialize_synonym_names_parameter
     initialize_children_names_parameter
-    add_location_condition("observations", params[:locations])
+    add_where_condition("observations", params[:locations])
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
     initialize_projects_parameter
@@ -158,8 +158,8 @@ class Query::ObservationBase < Query::Base
     )
   end
 
-  def add_join_to_locations
-    add_join(:locations)
+  def add_join_to_locations!
+    add_join(:locations!)
   end
 
   def default_order

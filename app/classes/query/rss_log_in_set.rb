@@ -6,7 +6,7 @@ class Query::RssLogInSet < Query::RssLogBase
   end
 
   def initialize_flavor
-    add_id_condition("rss_logs.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

@@ -1,4 +1,4 @@
-class Query::ImageWithObservationsInSpeciesList < ImageWithObservations
+class Query::ImageWithObservationsInSpeciesList < Query::ImageWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations
@@ -10,8 +10,9 @@ class Query::ImageWithObservationsInSpeciesList < ImageWithObservations
   def initialize_flavor
     spl = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = spl.format_name
-    add_join(:observations, :observations_species_lists)
     where << "observations_species_lists.species_list_id = '#{spl.id}'"
+    add_join(:images_observations, :observations)
+    add_join(:observations, :observations_species_lists)
     super
   end
 

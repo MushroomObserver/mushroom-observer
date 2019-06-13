@@ -7,7 +7,7 @@ class Query::NameDescriptionInSet < Query::NameDescriptionBase
   end
 
   def initialize_flavor
-    add_id_condition("name_descriptions.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 

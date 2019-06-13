@@ -1,4 +1,4 @@
-class Query::ImageWithObservationsAtWhere < ImageWithObservations
+class Query::ImageWithObservationsAtWhere < Query::ImageWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations

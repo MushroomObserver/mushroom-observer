@@ -10,7 +10,7 @@ class Query::LocationWithDescriptionsInSet < Query::LocationBase
   def initialize_flavor
     title_args[:descriptions] = params[:old_title] ||
                                 :query_title_in_set.t(type: :description)
-    add_id_condition("location_descriptions.id", params[:ids])
+    initialize_in_set_flavor("location_descriptions")
     add_join(:location_descriptions)
     super
   end

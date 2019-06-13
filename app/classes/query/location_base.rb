@@ -18,7 +18,7 @@ class Query::LocationBase < Query::Base
   end
 
   def initialize_flavor
-    unless is_a?(LocationWithObservations)
+    unless is_a?(Query::LocationWithObservations)
       add_owner_and_time_stamp_conditions("locations")
     end
     add_bounding_box_conditions_for_locations

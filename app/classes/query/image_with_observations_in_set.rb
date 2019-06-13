@@ -1,4 +1,4 @@
-class Query::ImageWithObservationsInSet < ImageWithObservations
+class Query::ImageWithObservationsInSet < Query::ImageWithObservations
   include Query::Initializers::ContentFilters
 
   def parameter_declarations
@@ -11,7 +11,7 @@ class Query::ImageWithObservationsInSet < ImageWithObservations
   def initialize_flavor
     title_args[:observations] = params[:old_title] ||
                                 :query_title_in_set.t(type: :observation)
-    add_id_condition("observations.id", params[:ids])
+    initialize_in_set_flavor("observations")
     super
   end
 

@@ -6,7 +6,7 @@ class Query::LocationInSet < Query::LocationBase
   end
 
   def initialize_flavor
-    add_id_condition("locations.id", params[:ids])
+    initialize_in_set_flavor
     super
   end
 end

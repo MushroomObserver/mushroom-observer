@@ -1,4 +1,4 @@
-class Query::ImageWithObservationsOfName < ImageWithObservations
+class Query::ImageWithObservationsOfName < Query::ImageWithObservations
   include Query::Initializers::ContentFilters
   include Query::Initializers::OfName
 
