@@ -2383,7 +2383,8 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
     assert_query([observations(:coprinus_comatus_obs).id], :Observation,
                  :advanced_search, content: "second fruiting") # notes
-    assert_query([observations(:minimal_unknown_obs).id], :Observation,
+    assert_query([observations(:minimal_unknown_obs).id,
+                  observations(:amateur_obs).id], :Observation,
                  :advanced_search, content: "agaricus") # comment
   end
 

@@ -3,23 +3,20 @@ require "test_helper"
 # Tests which supplement QueryTest
 class QuerySupplementalTest < IntegrationTestCase
   # Test deserialization of non-ascii characters
-  # Observation and Show Location title include
+  # Some page titles include smart single quotes
   #               `             and ’
-  # as            &#8216        and &#8217;
   # serialized as %26%238216%3B and %26%238217%3B
-  # They are deserialized and displayed as pat of Map Locations title.
+  # displayed as  &#8216        and &#8217;
+  # after deserialization.
   def test_deserialize
-    obs = observations(:boletus_edulis_obs)
+    pattern = "Agaricus campestris"
 
     visit("/")
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("search_pattern", with: pattern)
+    page.select("Comments", from: :search_type)
     click_button("Search")
-    click_link("Show Locations")
-    click_link("Map Locations")
-
     title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
 
-    title.assert_text("‘#{obs.name.text_name}’")
+    title.assert_text("‘#{pattern}’")
   end
 end

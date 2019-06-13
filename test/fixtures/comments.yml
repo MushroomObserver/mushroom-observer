@@ -38,3 +38,13 @@ fungi_comment: # 4
   comment: It really messes things up.
   target_type: Name
   target: fungi
+
+# QuerySupplementTest looks for Comments with "Agaricus campestris"
+amateur_obs_comment:
+  created_at: 2017-11-16 00:32:00
+  updated_at: 2017-11-16 00:32:00
+  user: katrina
+  summary: bad
+  comment: not Agaricus campestris
+  target_type: Observation
+  target: amateur_obs

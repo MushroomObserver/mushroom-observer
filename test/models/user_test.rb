@@ -251,8 +251,7 @@ class UserTest < UnitTestCase
     assert_equal(1, image.observations.length)
     assert_equal(observation_id, image.observations.first.id)
 
-    # Move some other user's comment over to make sure they get deleted, too.
-    assert_equal(1, katrina.comments.length)
+    assert_equal(2, katrina.comments.length)
     comment_id = katrina.comments.first.id
 
     # Fixtures have one vote for this observation,
@@ -272,12 +271,12 @@ class UserTest < UnitTestCase
 
     User.erase_user(user.id)
 
-    # Should have deleted one of each type of object.
+    # Count of each type of object should decrease by how many user had
     assert_equal(num_observations - 1, Observation.count)
     assert_equal(num_namings - 1, Naming.count)
     assert_equal(num_votes - 1, Vote.count)
     assert_equal(num_images - 1, Image.count)
-    assert_equal(num_comments - 1, Comment.count)
+    assert_equal(num_comments - 2, Comment.count)
     assert_equal(num_publications - 1, Publication.count)
     assert_raises(ActiveRecord::RecordNotFound) do
       Observation.find(observation_id)
