@@ -50,19 +50,17 @@ class ObserverController
       return
     end
 
-    ctrlr = pattern_search_ctrlr(type)
-
-    # sepcial cases
+    # special cases
     case type
     when :name, :observation
-      # If the pattern is a bare value, it defaults to synonym_of:"value"
-      pattern = default_synonym_pattern(pattern)
-      session[:pattern] = pattern
+      pattern = change_bare_value_to_synonym_of(pattern)
     when :google
       # external search, rather than a sql or ActiveRecord query
       site_google_search(pattern)
       return
     end
+
+    ctrlr = pattern_search_ctrlr(type)
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
@@ -134,13 +132,15 @@ class ObserverController
     end
   end
 
-  # Pattern can include variable(s) and value(s), e.g.: variable:value
-  # If the pattern is a bare value, it defaults to synonym_of:"value"
-  def default_synonym_pattern(pattern)
-    return if pattern.blank? || variable_present?(pattern)
+  def change_bare_value_to_synonym_of(pattern)
+    return pattern unless bare_value?(pattern)
 
     pattern = %(synonym_of:"#{pattern}")
     session[:pattern] = pattern
+  end
+
+  def bare_value?(pattern)
+    pattern.present? && !variable_present?(pattern)
   end
 
   def variable_present?(pattern)

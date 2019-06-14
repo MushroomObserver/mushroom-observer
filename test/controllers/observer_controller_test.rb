@@ -517,20 +517,13 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_pattern_search
-    params = { search: { pattern: "12", type: :observation } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :observation_search,
-                         pattern: 'synonym_of:"12"')
+    # Test defaults (patterns without without variables)
+    # They should search for pattern
 
     params = { search: { pattern: "34", type: :image } }
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :image, action: :image_search,
                          pattern: "34")
-
-    params = { search: { pattern: "56", type: :name } }
-    get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :name, action: :name_search,
-                         pattern: 'synonym_of:"56"')
 
     params = { search: { pattern: "78", type: :location } }
     get_with_dump(:pattern_search, params)
@@ -553,6 +546,18 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(controller: :observer, action: :user_search,
                          pattern: "34")
 
+    # default Observation and Name searches should search synonyms of pattern
+    params = { search: { pattern: "12", type: :observation } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :observer, action: :observation_search,
+                         pattern: 'synonym_of:"12"')
+
+    params = { search: { pattern: "56", type: :name } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :name, action: :name_search,
+                         pattern: 'synonym_of:"56"')
+
+    # default Google search should Google site for pattern
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
@@ -560,6 +565,12 @@ class ObserverControllerTest < FunctionalTestCase
       "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
+
+    # non-defaults
+    params = { search: { pattern: 'synonym_of:"56"', type: :name } }
+    get_with_dump(:pattern_search, params)
+    assert_redirected_to(controller: :name, action: :name_search,
+                         pattern: 'synonym_of:"56"')
 
     params = { search: { pattern: "", type: :google } }
     get_with_dump(:pattern_search, params)
