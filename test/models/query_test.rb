@@ -317,89 +317,6 @@ class QueryTest < UnitTestCase
     assert_equal(7, QueryRecord.count)
   end
 
-  # rubocop:disable Metrics/LineLength
-  # def test_cleanup
-  #   # Due to the modified => updated_at change explicitly setting updated_at
-  #   # this way doesn't work. However, I don't really understand what this test
-  #   # does or if it's important, since the time zone comment is definitely
-  #   # inaccurate. - NJW
-  #
-  #   # It is supposed to verify that QueryRecord.cleanup culls old unused
-  #   # queries.  This is called automatically periodicallt when clients create
-  #   # or lookup new queries. - JPH
-  #
-  #   # This avoids any possible difference in time zone between mysql and you.
-  #   # (This should be obsolete, but timezone handling is tested elsewhere.)
-  #   now = DateTime.parse(QueryRecord.connection.select_value("SELECT NOW()")
-  #         .to_s)
-  #
-  #   s11 = QueryRecord.new(access_count: 0, updated_at: now - 1.minute)
-  #   s12 = QueryRecord.new(access_count: 0, updated_at: now - 6.hour + 1.minute)
-  #   s13 = QueryRecord.new(access_count: 0, updated_at: now - 6.hour - 1.minute)
-  #   s14 = QueryRecord.new(access_count: 0, updated_at: now - 1.day + 1.minute)
-  #   s15 = QueryRecord.new(access_count: 0, updated_at: now - 1.day - 1.minute)
-  #   s21 = QueryRecord.new(access_count: 1, updated_at: now - 1.minute)
-  #   s22 = QueryRecord.new(access_count: 1, updated_at: now - 6.hour + 1.minute)
-  #   s23 = QueryRecord.new(access_count: 1, updated_at: now - 6.hour - 1.minute)
-  #   s24 = QueryRecord.new(access_count: 1, updated_at: now - 1.day + 1.minute)
-  #   s25 = QueryRecord.new(access_count: 1, updated_at: now - 1.day - 1.minute)
-  #
-  #   assert_save(s11)
-  #   assert_save(s12)
-  #   assert_save(s13)
-  #   assert_save(s14)
-  #   assert_save(s15)
-  #   assert_save(s21)
-  #   assert_save(s22)
-  #   assert_save(s23)
-  #   assert_save(s24)
-  #   assert_save(s25)
-  #
-  #   s11 = s11.id
-  #   s12 = s12.id
-  #   s13 = s13.id
-  #   s14 = s14.id
-  #   s15 = s15.id
-  #   s21 = s21.id
-  #   s22 = s22.id
-  #   s23 = s23.id
-  #   s24 = s24.id
-  #   s25 = s25.id
-  #
-  #   assert_state_exists(s11)
-  #   assert_state_exists(s12)
-  #   assert_state_exists(s13)
-  #   assert_state_exists(s14)
-  #   assert_state_exists(s15)
-  #   assert_state_exists(s21)
-  #   assert_state_exists(s22)
-  #   assert_state_exists(s23)
-  #   assert_state_exists(s24)
-  #   assert_state_exists(s25)
-  #
-  #   QueryRecord.cleanup
-  #
-  #   assert_state_exists(s11)
-  #   assert_state_exists(s12)
-  #   assert_state_not_exists(s13)
-  #   assert_state_not_exists(s14)
-  #   assert_state_not_exists(s15)
-  #   assert_state_exists(s21)
-  #   assert_state_exists(s22)
-  #   assert_state_exists(s23)
-  #   assert_state_exists(s24)
-  #   assert_state_not_exists(s25)
-  # end
-  #
-  # def assert_state_exists(id)
-  #   assert(!id.nil? && QueryRecord.find(id))
-  # end
-  #
-  # def assert_state_not_exists(id)
-  #   assert_raises(ActiveRecord::RecordNotFound) { QueryRecord.find(id) }
-  # end
-  # rubocop:enable Metrics/LineLength
-
   ##############################################################################
   #
   #  :section: Query Mechanics
@@ -1732,6 +1649,20 @@ class QueryTest < UnitTestCase
     assert_query(Image.includes(:observations).
                        where.not(observations: { thumb_image: nil }),
                  :Image, :with_observations)
+    # TODO: test these parameters
+    # created_at
+    # updated_at
+    # users
+    # herbaria
+    # herbarium_records
+    # is_collection_location
+    # has_location
+    # has_name
+    # has_comments
+    # has_sequences
+    # has_notes_fields
+    # comments_has
+    # north/south/east/west
   end
 
   def test_image_with_observations_at_location
@@ -1973,6 +1904,29 @@ class QueryTest < UnitTestCase
   def test_location_with_observations
     assert_query(Location.joins(:observations).distinct,
                  :Location, :with_observations)
+    # TODO: test these parameters
+    # created_at
+    # updated_at
+    # users
+    # date
+    # names
+    # synonym_names
+    # children_names
+    # locations
+    # projects
+    # species_lists
+    # herbaria
+    # herbarium_records
+    # confidence
+    # is_collection_location
+    # has_location
+    # has_name
+    # has_comments
+    # has_sequences
+    # has_notes
+    # has_notes_fields
+    # notes_has
+    # comments_has
   end
 
   def test_location_with_observations_by_user
@@ -2269,6 +2223,21 @@ class QueryTest < UnitTestCase
   def test_name_with_observations
     expect = Observation.select(:name).distinct.pluck(:name_id).sort
     assert_query(expect, :Name, :with_observations, by: :id)
+    # TODO: test these parameters
+    # created_at
+    # updated_at
+    # users
+    # date
+    # projects
+    # herbaria
+    # herbarium_records
+    # confidence
+    # is_collection_location
+    # has_location
+    # has_name
+    # has_sequences
+    # has_notes_fields
+    # north/south/east/west
   end
 
   def test_name_with_observations_at_location
