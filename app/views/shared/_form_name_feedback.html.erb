@@ -2,9 +2,9 @@
 # Handling deprecated, new & multiple Names
 # Used by Name and Naming create and edit pages
 # Does three things:
-#   Flashes either Warning or Error
-#   Describes the issue, either Deprecated or Not Recognized
-#   Adds Help on how to proceed; text depends on the issue and the button
+#   Flashes - Warning or Error
+#   Describes the issue - Deprecated, Parent Deprecated, or Not Recognized
+#   Adds Help how to proceed - depends on issue and the button
 #
 # locals:
 # what - text typed by user
@@ -16,6 +16,7 @@
 
 if what.present?
   if valid_names
+    ##### Warnings #####
     flash_warning(:form_observations_there_is_a_problem_with_name.t) %>
     <div class="alert alert-warning max-width-text" id="name_messages">
     <span class="Data"><%=
@@ -55,6 +56,8 @@ if what.present?
       </span><br/><%
     end %>
     </div><%
+
+  ##### Errors #####
   elsif names.blank?
     flash_error(:form_observations_there_is_a_problem_with_name.t) %>
     <div class="alert alert-danger max-width-text" id="name_messages">
