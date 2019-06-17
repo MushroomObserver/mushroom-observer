@@ -83,6 +83,17 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_observation_with_unrecognized_name
+    text_name = "Elfin saddle"
+    params = { name: { name: text_name },
+               user: rolf,
+               where: locations.first.name }
+    post_requires_login(:create_observation, params)
+
+    assert_select("div[id='name_messages']",
+                  /MO does not recognize the name.*#{text_name}/)
+  end
+
   ##############################################################################
 
   # ----------------------------
