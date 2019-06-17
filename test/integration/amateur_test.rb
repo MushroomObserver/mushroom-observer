@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Test typical sessions of amateur user who just posts the occasional comment,
@@ -68,7 +70,7 @@ class AmateurTest < IntegrationTestCase
   # ----------------------------
 
   def test_autologin
-    rolf_cookies = get_cookies(rolf, :true)
+    rolf_cookies = get_cookies(rolf, true)
     mary_cookies = get_cookies(mary, true)
     dick_cookies = get_cookies(dick, false)
     try_autologin(rolf_cookies, rolf)
@@ -77,7 +79,6 @@ class AmateurTest < IntegrationTestCase
   end
 
   def get_cookies(user, autologin)
-    result = nil
     sess = open_session
     sess.login(user, "testpassword", autologin)
     result = sess.cookies.dup
@@ -197,7 +198,6 @@ class AmateurTest < IntegrationTestCase
 
   def test_proposing_names
     namer_session = open_session.extend(NamerDsl)
-    app = namer_session.app
     namer = katrina
 
     obs = observations(:detailed_unknown_obs)
@@ -223,7 +223,6 @@ class AmateurTest < IntegrationTestCase
 
   def test_sessions
     rolf_session = open_session.extend(NamerDsl)
-    app = rolf_session.app
     rolf_session.login!(rolf)
     mary_session = open_session.extend(VoterDsl)
     mary_session.login!(mary)
@@ -385,7 +384,7 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/create")
       assert_select("div.alert-warning") do |elems|
         assert(elems.any? do |e|
-                /MO does not recognize the name.*#{text_name}/ =~ e.to_s
+                 /MO does not recognize the name.*#{text_name}/ =~ e.to_s
                end,
                "Expected error about name not existing yet.")
       end
@@ -480,7 +479,7 @@ class AmateurTest < IntegrationTestCase
       obs.reload
       assert_names_equal(original_name, obs.name)
       assert_nil(Naming.safe_find(naming.id))
-      refute_match(text_name, response.body)
+      assert_no_match(text_name, response.body)
     end
   end
 end
