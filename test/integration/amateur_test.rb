@@ -384,7 +384,9 @@ class AmateurTest < IntegrationTestCase
       end
       assert_template("naming/create")
       assert_select("div.alert-warning") do |elems|
-        assert(elems.any? { |e| e.to_s.match(/#{text_name}.*not recognized/i) },
+        assert(elems.any? do |e|
+                /MO does not recognize the name.*#{text_name}/ =~ e.to_s
+               end,
                "Expected error about name not existing yet.")
       end
 
