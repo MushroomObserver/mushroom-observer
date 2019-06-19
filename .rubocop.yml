@@ -1,3 +1,7 @@
+require:
+  - rubocop-performance
+  - rubocop-rails
+
 inherit_from: .rubocop_todo.yml
 
 # RuboCop configuration
