@@ -105,8 +105,8 @@ class ObserverController
       query = find_query(:Observation)
     end
     show_selected_observations(query)
-  rescue StandardError => err
-    flash_error(err.to_s) if err.present?
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 end
