@@ -107,15 +107,15 @@ class NameTest < UnitTestCase
   def do_parse_classification_test(text, expected)
     parse = Name.parse_classification(text)
     assert_equal(expected, parse)
-  rescue RuntimeError => err
-    raise err if expected
+  rescue RuntimeError => e
+    raise e if expected
   end
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
     assert(expected == result)
-  rescue RuntimeError => err
-    raise err if expected
+  rescue RuntimeError => e
+    raise e if expected
   end
 
   ##############################################################################

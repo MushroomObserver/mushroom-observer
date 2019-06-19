@@ -9,8 +9,8 @@ class NameController
       make_sure_name_doesnt_exist!
       create_new_name
     end
-  rescue RuntimeError => err
-    reload_name_form_on_error(err)
+  rescue RuntimeError => e
+    reload_name_form_on_error(e)
   end
 
   def edit_name # :prefetch: :norobots:
@@ -29,8 +29,8 @@ class NameController
         change_existing_name
       end
     end
-  rescue RuntimeError => err
-    reload_name_form_on_error(err)
+  rescue RuntimeError => e
+    reload_name_form_on_error(e)
   end
 
   private

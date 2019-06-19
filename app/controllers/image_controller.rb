@@ -110,8 +110,8 @@ class ImageController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Image)
     show_selected_images(query)
-  rescue StandardError => err
-    flash_error(err.to_s) if err.present?
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search")
   end
 
