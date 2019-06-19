@@ -98,13 +98,12 @@ gem "coveralls", require: false
 # See http://brakemanscanner.org/
 gem "brakeman", require: false
 
-# Use rubocop for code style quality control
+# Use rubocop and associated gems for code quality control
 # WARNING: update .codeclimate.yml's RuboCop channel whenever we update RuboCop.
 # See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
 gem "rubocop", require: false
-
-# performance cops
 gem "rubocop-performance"
+gem "rubocop-rails"
 
 # use mry to support safe updating of .rubocop.yml
 gem "mry", require: false
