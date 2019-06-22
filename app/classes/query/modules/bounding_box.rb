@@ -71,7 +71,7 @@ module Query::Modules::BoundingBox
         # point location inside target box
         "observations.lat >= #{south}",
         "observations.lat <= #{north}",
-        "(observations.long >= #{west} OR observations.long <= #{eeast})"
+        "(observations.long >= #{west} OR observations.long <= #{east})"
       ], [
         # box entirely within target box
         "locations.south >= #{south}",
