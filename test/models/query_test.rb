@@ -2223,22 +2223,115 @@ class QueryTest < UnitTestCase
   def test_name_with_observations
     expect = Observation.select(:name).distinct.pluck(:name_id).sort
     assert_query(expect, :Name, :with_observations, by: :id)
-    # TODO: test these parameters
+
+    # Prove that Query works with each (correctly parsed) allowable parameter
+
+    ##### date/time parameters #####
+
     # created_at
+    created_at = observations(:california_obs).created_at
+    assert_query(
+      Name.joins(:observations).where(observations: { created_at: created_at }).
+           uniq,
+      :Name, :with_observations, created_at: created_at
+    )
     # updated_at
-    # users
+    updated_at = observations(:california_obs).updated_at
+    assert_query(
+      Name.joins(:observations).where(observations: { updated_at: updated_at }).
+           uniq,
+      :Name, :with_observations, updated_at: updated_at
+    )
     # date
-    # projects
-    # herbaria
-    # herbarium_records
-    # confidence
-    # is_collection_location
-    # has_location
-    # has_name
-    # has_sequences
+    date = observations(:california_obs).when
+    assert_query(
+      Name.joins(:observations).where(observations: { when: date }).
+           uniq,
+      :Name, :with_observations, date: date
+    )
+
+    ##### list/string parameters #####
+
     # has_notes_fields
+    assert_query(
+      Name.joins(:observations).
+           where("observations.notes LIKE ?", "%:substrate:%").uniq,
+      :Name, :with_observations, has_notes_fields: "substrate"
+    )
+    # herbaria
+    name = "The New York Botanical Garden"
+    expect = Name.joins(observations: { herbarium_records: :herbarium }).
+                  where(herbaria: { name: name }).uniq
+    assert_query(expect, :Name, :with_observations, herbaria: name)
+    # users
+    assert_query(
+      Name.joins(:observations).where(observations: { user: dick }).uniq,
+      :Name, :with_observations, users: dick
+    )
+    # projects
+    project = projects(:bolete_project)
+    assert_query(
+      project.observations.map(&:name).uniq,
+      :Name, :with_observations, projects: project.title
+    )
+
+    ##### numeric parameters #####
+
+    # confidence
+    assert_query(
+      Name.joins(:observations).
+           where(observations: { vote_cache: 1..3 }).uniq,
+      :Name, :with_observations, confidence: [1,3]
+    )
     # north/south/east/west
-  end
+    obs = observations(:unknown_with_lat_long)
+    lat = obs.lat
+    long = obs.long
+    assert_query(
+      Name.joins(:observations).
+           where(observations: { lat: lat }).
+           where(observations: { long: long }).uniq,
+     :Name, :with_observations, { north: lat.to_f, south: lat.to_f,
+                                  west: lat.to_f, east: lat.to_f }
+    )
+
+    ##### boolean parameters #####
+
+    # :has_comments
+    assert_query(
+      Name.joins(observations: :comments).uniq,
+      :Name, :with_observations, has_comments: :true
+    )
+    # has_location
+    assert_query(
+      Name.joins(:observations).
+           where.not(observations: { location_id: false }).uniq,
+      :Name, :with_observations, has_location: :true
+    )
+    # has_name
+    assert_query(
+      Name.joins(:observations).
+           where(observations: { name_id: Name.unknown }).uniq,
+      :Name, :with_observations, has_name: :false
+    )
+    # :has_notes
+    assert_query(
+      Name.joins(:observations).
+           where.not(observations: { notes: Observation.no_notes }).uniq,
+      :Name, :with_observations, has_notes: :true
+    )
+    # has_sequences
+    assert_query(
+      Name.joins(observations: :sequences).uniq,
+      Name, :with_observations, has_sequences: true
+    )
+    # is_collection_location
+    assert_query(
+      Name.joins(:observations).
+           where(observations: { is_collection_location: :true }).uniq,
+      :Name, :with_observations, is_collection_location: :true
+    )
+ end
 
   def test_name_with_observations_at_location
     assert_query(Name.joins(:observations).
