@@ -7,32 +7,41 @@ class Query::ObservationBase < Query::Base
 
   def parameter_declarations
     super.merge(
+      # dates/times
+      date?:             [:date],
       created_at?:       [:time],
       updated_at?:       [:time],
-      date?:             [:date],
-      users?:            [User],
+
+      # strings/ lists
+      children_names?:   [:string],
       names?:            [:string],
       synonym_names?:    [:string],
-      children_names?:   [:string],
+
+      comments_has?:     :string,
+      has_notes_fields?: [:string],
+      herbaria?:         [:string],
+      # TODO delete and associated code
+      herbarium_records?: [:string],
       locations?:        [:string],
+      notes_has?:        :string,
       projects?:         [:string],
       species_lists?:    [:string],
-      herbaria?:         [:string],
-      herbarium_records?: [:string],
+      users?:            [User],
+
+      # numeric
       confidence?:       [:float],
-      is_collection_location?: :boolean,
-      has_location?:     :boolean,
-      has_name?:         :boolean,
-      has_comments?:     { boolean: [true] },
-      has_sequences?:    { boolean: [true] },
-      has_notes?:        :boolean,
-      has_notes_fields?: [:string],
-      notes_has?:        :string,
-      comments_has?:     :string,
+      east?:             :float,
       north?:            :float,
       south?:            :float,
-      east?:             :float,
-      west?:             :float
+      west?:             :float,
+
+      # boolean
+      has_comments?:     { boolean: [true] },
+      has_location?:     :boolean,
+      has_name?:         :boolean,
+      has_notes?:        :boolean,
+      has_sequences?:    { boolean: [true] },
+      is_collection_location?: :boolean,
     ).merge(content_filter_parameter_declarations(Observation))
   end
 
