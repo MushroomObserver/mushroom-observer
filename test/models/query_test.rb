@@ -2263,16 +2263,16 @@ class QueryTest < UnitTestCase
     expect = Name.joins(observations: { herbarium_records: :herbarium }).
                   where(herbaria: { name: name }).uniq
     assert_query(expect, :Name, :with_observations, herbaria: name)
-    # users
-    assert_query(
-      Name.joins(:observations).where(observations: { user: dick }).uniq,
-      :Name, :with_observations, users: dick
-    )
     # projects
     project = projects(:bolete_project)
     assert_query(
       project.observations.map(&:name).uniq,
       :Name, :with_observations, projects: project.title
+    )
+    # users
+    assert_query(
+      Name.joins(:observations).where(observations: { user: dick }).uniq,
+      :Name, :with_observations, users: dick
     )
 
     ##### numeric parameters #####
