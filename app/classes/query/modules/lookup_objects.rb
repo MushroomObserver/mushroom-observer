@@ -14,7 +14,7 @@ module Query::Modules::LookupObjects
 
   def lookup_herbarium_records_by_name(vals)
     lookup_objects_by_name(vals) do |name|
-      HerbariumRecord.where(herbarium_label: name)
+      HerbariumRecord.where(id: name)
     end
   end
 

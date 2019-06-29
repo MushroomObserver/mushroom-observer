@@ -5,7 +5,6 @@ class Query::ImageWithObservations < Query::ImageBase
     super.merge(
       old_by?:           :string,
       herbaria?:         [:string],
-      herbarium_records?: [:string],
       is_collection_location?: :boolean,
       has_location?:     :boolean,
       has_name?:         :boolean,
@@ -36,11 +35,6 @@ class Query::ImageWithObservations < Query::ImageBase
       "herbarium_records.herbarium_id",
       lookup_herbaria_by_name(params[:herbaria]),
       :observations, :herbarium_records_observations, :herbarium_records
-    )
-    add_id_condition(
-      "herbarium_records_observations.herbarium_record_id",
-      lookup_herbarium_records_by_name(params[:herbarium_records]),
-      :observations, :herbarium_records_observations
     )
   end
 
