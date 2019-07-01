@@ -1918,20 +1918,20 @@ class QueryTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     assert_query(
       Location.joins(:observations).
-               where(observations: { created_at: created_at }).uniq,
-               :Location, :with_observations, created_at: created_at
+               where("observations.created_at >= ?", created_at).uniq,
+      :Location, :with_observations, created_at: created_at
     )
     # updated_at
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Location.joins(:observations).
-               where(observations: { updated_at: updated_at }).uniq,
-               :Location, :with_observations, updated_at: updated_at
+               where("observations.updated_at >= ?", updated_at).uniq,
+      :Location, :with_observations, updated_at: updated_at
     )
     # date
     date = observations(:california_obs).when
     assert_query(
-      Location.joins(:observations).where(observations: { when: date }).uniq,
+      Location.joins(:observations).where("observations.when >= ?", date).uniq,
       :Location, :with_observations, date: date
     )
 
@@ -2374,29 +2374,31 @@ class QueryTest < UnitTestCase
     expect = Observation.select(:name).distinct.pluck(:name_id).sort
     assert_query(expect, :Name, :with_observations, by: :id)
 
-    # Prove that Query works with each (correctly parsed) allowable parameter
+    # Prove that :with_observations flavor of Name Query works with each
+    # parameter P for which (a) there's no other test of P for any flavor of
+    # Name, OR (b) P behaves differently in :with_observations than in
+    # all other flavors of Name Query's.
 
     ##### date/time parameters #####
 
     # created_at
     created_at = observations(:california_obs).created_at
     assert_query(
-      Name.joins(:observations).where(observations: { created_at: created_at }).
-           uniq,
+      Name.joins(:observations).
+           where("observations.created_at >= ?", created_at).uniq,
       :Name, :with_observations, created_at: created_at
     )
     # updated_at
     updated_at = observations(:california_obs).updated_at
     assert_query(
-      Name.joins(:observations).where(observations: { updated_at: updated_at }).
-           uniq,
+      Name.joins(:observations).
+           where("observations.updated_at >= ?", updated_at).uniq,
       :Name, :with_observations, updated_at: updated_at
     )
     # date
     date = observations(:california_obs).when
     assert_query(
-      Name.joins(:observations).where(observations: { when: date }).
-           uniq,
+      Name.joins(:observations).where("observations.when >= ?", date).uniq,
       :Name, :with_observations, date: date
     )
 
