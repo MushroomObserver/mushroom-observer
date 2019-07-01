@@ -1710,9 +1710,16 @@ class QueryTest < UnitTestCase
     # herbaria
     name = "The New York Botanical Garden"
     expect = Image.joins(observations: { herbarium_records: :herbarium }).
-                  where(herbaria: { name: name }).uniq
+                   where(herbaria: { name: name }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, herbaria: name)
+
+    # projects
+    project = projects(:bolete_project)
+    expect = Image.joins(observations: :projects).
+                   where(projects: { title: project.title }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, projects: [project.title])
 
     # users
     expect = Image.joins(:observations).where(observations: { user: dick }).uniq
@@ -2562,10 +2569,10 @@ class QueryTest < UnitTestCase
     ##### numeric parameters #####
 
     # confidence
-    assert_query(
-      Name.joins(:observations).where(observations: { vote_cache: 1..3 }).uniq,
-      :Name, :with_observations, confidence: [1,3]
-    )
+    expect =
+      Name.joins(:observations).where(observations: { vote_cache: 1..3 }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Name, :with_observations, confidence: [1,3])
 
     # north/south/east/west
     obs = observations(:unknown_with_lat_long)

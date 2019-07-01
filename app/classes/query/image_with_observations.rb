@@ -37,6 +37,11 @@ class Query::ImageWithObservations < Query::ImageBase
       lookup_herbaria_by_name(params[:herbaria]),
       :observations, :herbarium_records_observations, :herbarium_records
     )
+    add_id_condition(
+      "observations_projects.project_id",
+      lookup_projects_by_name(params[:projects]),
+      :images_observations, :observations, :observations_projects
+    )
   end
 
   def initialize_boolean_parameters
