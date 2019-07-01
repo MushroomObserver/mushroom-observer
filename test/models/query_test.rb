@@ -1581,6 +1581,10 @@ class QueryTest < UnitTestCase
     obs = observations(:two_img_obs)
     expect = obs.images
     assert_query(expect, :Image, :all, observations: obs)
+
+    project = projects(:bolete_project)
+    expect = project.images
+    assert_query(expect, :Image, :all, projects: [project.title])
   end
 
   def test_image_by_user
@@ -1649,22 +1653,130 @@ class QueryTest < UnitTestCase
     assert_query(Image.includes(:observations).
                        where.not(observations: { thumb_image: nil }),
                  :Image, :with_observations)
-    # TODO: test these parameters
-    # date
+
+    # Prove that :with_observations flavor of Image Query works with each
+    # parameter P for which (a) there's no other test of P for any flavor of
+    # Image, OR (b) P behaves differently in :with_observations than in
+    # all other flavors of Image Query's.
+
+    ##### date/time parameters #####
+
     # created_at
+    created_at = observations(:detailed_unknown_obs).created_at
+    expect =
+      Image.joins(:observations).
+            where("observations.created_at >= ?", created_at).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, created_at: created_at)
+
     # updated_at
-    # users
-    # herbaria
-    # herbarium_records
-    # is_collection_location
-    # has_location
-    # has_name
-    # has_comments
-    # has_sequences
-    # has_notes
-    # has_notes_fields
+    updated_at = observations(:detailed_unknown_obs).updated_at
+    expect =
+      Image.joins(:observations).
+            where("observations.updated_at >= ?", updated_at).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, updated_at: updated_at)
+
+    # date
+    date = observations(:detailed_unknown_obs).when
+    expect = Image.joins(:observations).
+                   where("observations.when >= ?", date).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, date: date)
+
+    ##### list/string parameters #####
+
     # comments_has
+    expect =
+      Image.joins(observations: :comments).
+            where("comments.summary LIKE ?", "%give%").
+            or(Image.joins(observations: :comments).
+                     where("comments.comment LIKE ?", "%give%")).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, comments_has: "give")
+
+    # has_notes_fields
+    obs = observations(:substrate_notes_obs) # obs has notes substrate: field
+    # give it some images
+    obs.images = [images(:conic_image), images(:convex_image)]
+    obs.save
+    expect =
+      Image.joins(:observations).
+            where("observations.notes LIKE ?", "%:substrate:%").uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect,
+                :Image, :with_observations, has_notes_fields: "substrate")
+
+    # herbaria
+    name = "The New York Botanical Garden"
+    expect = Image.joins(observations: { herbarium_records: :herbarium }).
+                  where(herbaria: { name: name }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, herbaria: name)
+
+    # users
+    expect = Image.joins(:observations).where(observations: { user: dick }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, Image, :with_observations, users: dick)
+
+    ##### numeric parameters #####
+
     # north/south/east/west
+    obs = observations(:unknown_with_lat_long) # obs has lat/lon
+    # give it some images
+    obs.images = [images(:conic_image), images(:convex_image)]
+    obs.save
+    lat = obs.lat
+    long = obs.long
+    expect = Image.joins(:observations).
+                   where(observations: { lat: lat }).
+                   where(observations: { long: long }).uniq
+    assert_query(
+      expect,
+      :Image, :with_observations, { north: lat.to_f, south: lat.to_f,
+                                    west: lat.to_f, east: lat.to_f }
+    )
+
+    ##### boolean parameters #####
+
+    # :has_comments
+    expect = Image.joins(observations: :comments).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, has_comments: :true)
+
+    # has_location
+    expect = Image.joins(:observations).
+                   where.not(observations: { location_id: false }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, has_location: :true)
+
+    # has_name
+    expect = Image.joins(:observations).
+                   where(observations: { name_id: Name.unknown }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, has_name: :false)
+
+    # :has_notes
+    expect =
+      Image.joins(:observations).
+            where.not(observations: { notes: Observation.no_notes }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, :Image, :with_observations, has_notes: :true)
+
+    # has_sequences
+    expect = Image.joins(observations: :sequences).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(expect, Image, :with_observations, has_sequences: true)
+
+    # is_collection_location
+    expect =
+      Image.joins(:observations).
+            where(observations: { is_collection_location: :true }).uniq
+    assert_not_empty(expect, "'expect` is broken; it should not be empty")
+    assert_query(
+      expect,
+      :Image, :with_observations, is_collection_location: :true
+    )
   end
 
   def test_image_with_observations_at_location

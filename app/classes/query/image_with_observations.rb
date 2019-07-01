@@ -26,6 +26,7 @@ class Query::ImageWithObservations < Query::ImageBase
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
+    add_bounding_box_conditions_for_observations
     initialize_content_filters(Observation)
     super
   end
@@ -97,6 +98,10 @@ class Query::ImageWithObservations < Query::ImageBase
 
   def default_order
     "name"
+  end
+
+  def add_join_to_locations!
+    add_join(:observations, :locations!)
   end
 
   def coerce_into_observation_query
