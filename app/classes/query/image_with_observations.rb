@@ -1,21 +1,23 @@
+# frozen_string_literal: true
+# Query's for Images where Observation meets specified conditions
 class Query::ImageWithObservations < Query::ImageBase
   include Query::Initializers::ContentFilters
 
   def parameter_declarations
     super.merge(
-      old_by?:           :string,
-      herbaria?:         [:string],
+      old_by?: :string,
+      herbaria?: [:string],
       is_collection_location?: :boolean,
-      has_location?:     :boolean,
-      has_name?:         :boolean,
-      has_comments?:     { boolean: [true] },
-      has_sequences?:    { boolean: [true] },
+      has_location?: :boolean,
+      has_name?: :boolean,
+      has_comments?: { boolean: [true] },
+      has_sequences?: { boolean: [true] },
       has_notes_fields?: [:string],
-      comments_has?:     :string,
-      north?:            :float,
-      south?:            :float,
-      east?:             :float,
-      west?:             :float
+      comments_has?: :string,
+      north?: :float,
+      south?: :float,
+      east?: :float,
+      west?: :float
     ).merge(content_filter_parameter_declarations(Observation))
   end
 
