@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Helper methods to help parsing object instances from parameter strings.
 module Query::Modules::LookupObjects
   def lookup_external_sites_by_name(vals)
