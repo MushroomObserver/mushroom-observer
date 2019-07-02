@@ -1,27 +1,29 @@
+# frozen_string_literal: true
+# Query's for Locations where Observation meets specified conditions
 class Query::LocationWithObservations < Query::LocationBase
   include Query::Initializers::ContentFilters
 
   def parameter_declarations
     super.merge(
-      old_by?:           :string,
-      date?:             [:date],
-      names?:            [:string],
-      synonym_names?:    [:string],
-      children_names?:   [:string],
-      locations?:        [:string],
-      projects?:         [:string],
-      species_lists?:    [:string],
-      herbaria?:         [:string],
-      confidence?:       [:float],
+      old_by?: :string,
+      date?: [:date],
+      names?: [:string],
+      synonym_names?: [:string],
+      children_names?: [:string],
+      locations?: [:string],
+      projects?: [:string],
+      species_lists?: [:string],
+      herbaria?: [:string],
+      confidence?: [:float],
       is_collection_location?: :boolean,
-      has_location?:     :boolean,
-      has_name?:         :boolean,
-      has_comments?:     { boolean: [true] },
-      has_sequences?:    { boolean: [true] },
-      has_notes?:        :boolean,
+      has_location?: :boolean,
+      has_name?: :boolean,
+      has_comments?: { boolean: [true] },
+      has_sequences?: { boolean: [true] },
+      has_notes?: :boolean,
       has_notes_fields?: [:string],
-      notes_has?:        :string,
-      comments_has?:     :string
+      notes_has?: :string,
+      comments_has?: :string
     ).merge(content_filter_parameter_declarations(Observation))
   end
 
