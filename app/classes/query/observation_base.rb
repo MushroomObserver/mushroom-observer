@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# methods for initializing Quert's for Observations
 class Query::ObservationBase < Query::Base
   include Query::Initializers::ContentFilters
 
@@ -8,40 +11,39 @@ class Query::ObservationBase < Query::Base
   def parameter_declarations
     super.merge(
       # dates/times
-      date?:             [:date],
-      created_at?:       [:time],
-      updated_at?:       [:time],
+      date?: [:date],
+      created_at?: [:time],
+      updated_at?: [:time],
 
       # strings/ lists
-      children_names?:   [:string],
-      names?:            [:string],
-      synonym_names?:    [:string],
+      children_names?: [:string],
+      names?: [:string],
+      synonym_names?: [:string],
 
-      comments_has?:     :string,
+      comments_has?: :string,
       has_notes_fields?: [:string],
-      herbaria?:         [:string],
-      # TODO delete and associated code
+      herbaria?: [:string],
       herbarium_records?: [:string],
-      locations?:        [:string],
-      notes_has?:        :string,
-      projects?:         [:string],
-      species_lists?:    [:string],
-      users?:            [User],
+      locations?: [:string],
+      notes_has?: :string,
+      projects?: [:string],
+      species_lists?: [:string],
+      users?: [User],
 
       # numeric
-      confidence?:       [:float],
-      east?:             :float,
-      north?:            :float,
-      south?:            :float,
-      west?:             :float,
+      confidence?: [:float],
+      east?: :float,
+      north?: :float,
+      south?: :float,
+      west?: :float,
 
       # boolean
-      has_comments?:     { boolean: [true] },
-      has_location?:     :boolean,
-      has_name?:         :boolean,
-      has_notes?:        :boolean,
-      has_sequences?:    { boolean: [true] },
-      is_collection_location?: :boolean,
+      has_comments?: { boolean: [true] },
+      has_location?: :boolean,
+      has_name?: :boolean,
+      has_notes?: :boolean,
+      has_sequences?: { boolean: [true] },
+      is_collection_location?: :boolean
     ).merge(content_filter_parameter_declarations(Observation))
   end
 
