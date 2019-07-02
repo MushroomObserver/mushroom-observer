@@ -1,3 +1,6 @@
+# rubocop:disable Style/FrozenStringLiteralComment
+# disable cop because tests do modify string literals
+
 require "test_helper"
 require "set"
 
@@ -401,12 +404,12 @@ class QueryTest < UnitTestCase
       "WHERE one = two AND foo LIKE bar " \
       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
       clean(query.query(select: "names.*",
-                        join:   [:observations, :"users.reviewer"],
+                        join: [:observations, :"users.reviewer"],
                         tables: :images,
-                        where:  ["one = two", "foo LIKE bar"],
-                        group:  "blah.id",
-                        order:  "names.id ASC",
-                        limit:  "10, 10"))
+                        where: ["one = two", "foo LIKE bar"],
+                        group: "blah.id",
+                        order: "names.id ASC",
+                        limit: "10, 10"))
     )
   end
 
@@ -1665,7 +1668,7 @@ class QueryTest < UnitTestCase
     created_at = observations(:detailed_unknown_obs).created_at
     expect =
       Image.joins(:observations).
-            where("observations.created_at >= ?", created_at).uniq
+      where("observations.created_at >= ?", created_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, created_at: created_at)
 
@@ -1673,14 +1676,14 @@ class QueryTest < UnitTestCase
     updated_at = observations(:detailed_unknown_obs).updated_at
     expect =
       Image.joins(:observations).
-            where("observations.updated_at >= ?", updated_at).uniq
+      where("observations.updated_at >= ?", updated_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, updated_at: updated_at)
 
     # date
     date = observations(:detailed_unknown_obs).when
     expect = Image.joins(:observations).
-                   where("observations.when >= ?", date).uniq
+             where("observations.when >= ?", date).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, date: date)
 
@@ -1689,9 +1692,9 @@ class QueryTest < UnitTestCase
     # comments_has
     expect =
       Image.joins(observations: :comments).
-            where("comments.summary LIKE ?", "%give%").
-            or(Image.joins(observations: :comments).
-                     where("comments.comment LIKE ?", "%give%")).uniq
+      where("comments.summary LIKE ?", "%give%").
+      or(Image.joins(observations: :comments).
+         where("comments.comment LIKE ?", "%give%")).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, comments_has: "give")
 
@@ -1702,22 +1705,22 @@ class QueryTest < UnitTestCase
     obs.save
     expect =
       Image.joins(:observations).
-            where("observations.notes LIKE ?", "%:substrate:%").uniq
+      where("observations.notes LIKE ?", "%:substrate:%").uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect,
-                :Image, :with_observations, has_notes_fields: "substrate")
+                 :Image, :with_observations, has_notes_fields: "substrate")
 
     # herbaria
     name = "The New York Botanical Garden"
     expect = Image.joins(observations: { herbarium_records: :herbarium }).
-                   where(herbaria: { name: name }).uniq
+             where(herbaria: { name: name }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, herbaria: name)
 
     # projects
     project = projects(:bolete_project)
     expect = Image.joins(observations: :projects).
-                   where(projects: { title: project.title }).uniq
+             where(projects: { title: project.title }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, projects: [project.title])
 
@@ -1736,12 +1739,12 @@ class QueryTest < UnitTestCase
     lat = obs.lat
     long = obs.long
     expect = Image.joins(:observations).
-                   where(observations: { lat: lat }).
-                   where(observations: { long: long }).uniq
+             where(observations: { lat: lat }).
+             where(observations: { long: long }).uniq
     assert_query(
       expect,
-      :Image, :with_observations, { north: lat.to_f, south: lat.to_f,
-                                    west: lat.to_f, east: lat.to_f }
+      :Image, :with_observations,
+      north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
     )
 
     ##### boolean parameters #####
@@ -1749,26 +1752,26 @@ class QueryTest < UnitTestCase
     # :has_comments
     expect = Image.joins(observations: :comments).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_comments: :true)
+    assert_query(expect, :Image, :with_observations, has_comments: true)
 
     # has_location
     expect = Image.joins(:observations).
-                   where.not(observations: { location_id: false }).uniq
+             where.not(observations: { location_id: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_location: :true)
+    assert_query(expect, :Image, :with_observations, has_location: true)
 
     # has_name
     expect = Image.joins(:observations).
-                   where(observations: { name_id: Name.unknown }).uniq
+             where(observations: { name_id: Name.unknown }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_name: :false)
+    assert_query(expect, :Image, :with_observations, has_name: false)
 
     # :has_notes
     expect =
       Image.joins(:observations).
-            where.not(observations: { notes: Observation.no_notes }).uniq
+      where.not(observations: { notes: Observation.no_notes }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, :with_observations, has_notes: :true)
+    assert_query(expect, :Image, :with_observations, has_notes: true)
 
     # has_sequences
     expect = Image.joins(observations: :sequences).uniq
@@ -1778,10 +1781,10 @@ class QueryTest < UnitTestCase
     # is_collection_location
     expect =
       Image.joins(:observations).
-            where(observations: { is_collection_location: :true }).uniq
+      where(observations: { is_collection_location: true }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect,
-                 :Image, :with_observations, is_collection_location: :true)
+                 :Image, :with_observations, is_collection_location: true)
   end
 
   def test_image_with_observations_at_location
@@ -2097,7 +2100,7 @@ class QueryTest < UnitTestCase
     # herbaria
     name = "The New York Botanical Garden"
     expect = Location.joins(observations: { herbarium_records: :herbarium }).
-                      where(herbaria: { name: name }).uniq
+             where(herbaria: { name: name }).uniq
     assert_query(expect, :Location, :with_observations, herbaria: name)
 
     # names
@@ -2166,8 +2169,8 @@ class QueryTest < UnitTestCase
     obses = Observation.where(vote_cache: 1..3)
     obses.each { |obs| obs.update!(location: locations(:albion)) }
     expect =
-       Location.joins(:observations).
-       where(observations: { vote_cache: 1..3 }).uniq
+      Location.joins(:observations).
+      where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Location, :with_observations, confidence: [1.0, 3.0])
 
@@ -2176,27 +2179,27 @@ class QueryTest < UnitTestCase
     # :has_comments
     assert_query(
       Location.joins(observations: :comments).uniq,
-      :Location, :with_observations, has_comments: :true
+      :Location, :with_observations, has_comments: true
     )
 
     # has_location
     assert_query(
       Location.joins(:observations).
                where.not(observations: { location_id: false }).uniq,
-      :Location, :with_observations, has_location: :true
+      :Location, :with_observations, has_location: true
     )
 
     # has_name
     assert_query(
       Location.joins(:observations).
                where(observations: { name_id: Name.unknown }).uniq,
-      :Location, :with_observations, has_name: :false
+      :Location, :with_observations, has_name: false
     )
     # :has_notes
     assert_query(
       Location.joins(:observations).
                where.not(observations: { notes: Observation.no_notes }).uniq,
-      :Location, :with_observations, has_notes: :true
+      :Location, :with_observations, has_notes: true
     )
     # has_sequences
     assert_query(
@@ -2206,8 +2209,8 @@ class QueryTest < UnitTestCase
     # is_collection_location
     assert_query(
       Location.joins(:observations).
-               where(observations: { is_collection_location: :true }).uniq,
-      :Location, :with_observations, is_collection_location: :true
+               where(observations: { is_collection_location: true }).uniq,
+      :Location, :with_observations, is_collection_location: true
     )
   end
 
@@ -2550,7 +2553,7 @@ class QueryTest < UnitTestCase
     assert_query(
       Name.joins(observations: { herbarium_records: :herbarium }).
            where(herbaria: { name: name }).uniq,
-     :Name, :with_observations, herbaria: name
+      :Name, :with_observations, herbaria: name
     )
 
     # projects
@@ -2572,7 +2575,7 @@ class QueryTest < UnitTestCase
     expect =
       Name.joins(:observations).where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Name, :with_observations, confidence: [1,3])
+    assert_query(expect, :Name, :with_observations, confidence: [1, 3])
 
     # north/south/east/west
     obs = observations(:unknown_with_lat_long)
@@ -2582,8 +2585,8 @@ class QueryTest < UnitTestCase
       Name.joins(:observations).
            where(observations: { lat: lat }).
            where(observations: { long: long }).uniq,
-     :Name, :with_observations, { north: lat.to_f, south: lat.to_f,
-                                  west: lat.to_f, east: lat.to_f }
+      :Name, :with_observations,
+      north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
     )
 
     ##### boolean parameters #####
@@ -2591,28 +2594,28 @@ class QueryTest < UnitTestCase
     # :has_comments
     assert_query(
       Name.joins(observations: :comments).uniq,
-      :Name, :with_observations, has_comments: :true
+      :Name, :with_observations, has_comments: true
     )
 
     # has_location
     assert_query(
       Name.joins(:observations).
            where.not(observations: { location_id: false }).uniq,
-      :Name, :with_observations, has_location: :true
+      :Name, :with_observations, has_location: true
     )
 
     # has_name
     assert_query(
       Name.joins(:observations).
            where(observations: { name_id: Name.unknown }).uniq,
-      :Name, :with_observations, has_name: :false
+      :Name, :with_observations, has_name: false
     )
 
     # :has_notes
     assert_query(
       Name.joins(:observations).
            where.not(observations: { notes: Observation.no_notes }).uniq,
-      :Name, :with_observations, has_notes: :true
+      :Name, :with_observations, has_notes: true
     )
 
     # has_sequences
@@ -2624,10 +2627,10 @@ class QueryTest < UnitTestCase
     # is_collection_location
     assert_query(
       Name.joins(:observations).
-           where(observations: { is_collection_location: :true }).uniq,
-      :Name, :with_observations, is_collection_location: :true
+           where(observations: { is_collection_location: true }).uniq,
+      :Name, :with_observations, is_collection_location: true
     )
- end
+  end
 
   def test_name_with_observations_at_location
     assert_query(Name.joins(:observations).
@@ -3206,3 +3209,5 @@ class QueryTest < UnitTestCase
                  ids: [obs1.id, obs2.id], by: :location)
   end
 end
+
+# rubocop:enable Style/FrozenStringLiteralComment
