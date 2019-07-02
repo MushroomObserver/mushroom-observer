@@ -1,5 +1,9 @@
+# frozen_string_literal: true
 module PatternSearch
+  # base class for Searches for Observations meeting conditions in a Pattern
   class Observation < Base
+    # Disable cop to preserve alignment for easier reading of parser value
+    # rubocop:disable Layout/AlignHash
     PARAMS = {
       # dates / times
       date:            [:date,             :parse_date_range],
@@ -38,8 +42,9 @@ module PatternSearch
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen:          [:lichen,           :parse_boolean],
       sequence:        [:has_sequences,    :parse_yes],
-      specimen:        [:has_specimen,     :parse_boolean],
+      specimen:        [:has_specimen,     :parse_boolean]
     }.freeze
+    # rubocop:enable Layout/AlignHash
 
     def self.params
       PARAMS
