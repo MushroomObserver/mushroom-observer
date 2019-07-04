@@ -143,44 +143,39 @@ module ObservationReport
     def add_herbarium_labels!(rows, col)
       vals = HerbariumRecord.connection.select_rows %(
         SELECT ho.observation_id,
-               CONCAT(h.initial_det, ": ", h.accession_number)
-        FROM herbarium_records h, herbarium_records_observations ho,
-              (#{query.query}) as ids
-        WHERE ho.observation_id = ids.id
-          AND ho.herbarium_record_id = h.id
+          CONCAT(h.initial_det, ": ", h.accession_number)
+        FROM herbarium_records h, herbarium_records_observations ho
+        WHERE ho.herbarium_record_id = h.id AND
+          ho.observation_id IN (#{plain_query})
       )
       add_column!(rows, vals, col)
     end
 
     def add_collector_ids!(rows, col)
       vals = CollectionNumber.connection.select_rows %(
-        SELECT ids.id,
+        SELECT co.observation_id,
           GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
         FROM collection_numbers c,
-          collection_numbers_observations co,
-          (#{query.query}) as ids
-        WHERE co.observation_id = ids.id AND
-          co.collection_number_id = c.id
-        GROUP BY ids.id
+          collection_numbers_observations co
+        WHERE co.collection_number_id = c.id AND
+          co.observation_id IN (#{plain_query})
+        GROUP BY co.observation_id
       )
       add_column!(rows, vals, col)
     end
 
     def add_image_ids!(rows, col)
-      start = Time.now
-      Rails.logger.warn "Starting add_image_ids..."
-      Rails.logger.warn %(
-        SELECT io.observation_id, io.image_id
-        FROM images_observations io, (#{query.query}) as ids
-        WHERE io.observation_id = ids.id
-      ).gsub(/\s+/, " ").to_s
       vals = Image.connection.select_rows %(
-        SELECT io.observation_id, io.image_id
-        FROM images_observations io, (#{query.query}) as ids
-        WHERE io.observation_id = ids.id
+        SELECT observation_id, image_id
+        FROM images_observations
+        WHERE observation_id IN (#{plain_query})
       )
-      Rails.logger.warn "finished add_image_ids: #{Time.now - start} seconds"
       add_column!(rows, vals, col)
+    end
+      
+    def plain_query
+      # Sometimes the default order requires unnecessary joins!
+      query.query(order: "observations.id ASC")
     end
 
     def add_column!(rows, vals, col)
