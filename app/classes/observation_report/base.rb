@@ -172,7 +172,7 @@ module ObservationReport
       )
       add_column!(rows, vals, col)
     end
-      
+
     def plain_query
       # Sometimes the default order requires unnecessary joins!
       query.query(order: "observations.id ASC")

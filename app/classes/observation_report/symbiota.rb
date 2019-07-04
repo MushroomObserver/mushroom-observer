@@ -72,7 +72,7 @@ module ObservationReport
     end
 
     def explode_notes(row)
-      notes = row.obs_notes_as_hash
+      notes = row.obs_notes_as_hash || {}
       [
         extract_notes_field(notes, :Substrate),
         extract_notes_field(notes, :Host),
