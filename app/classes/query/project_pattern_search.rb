@@ -1,25 +1,19 @@
-module Query
-  # Simple project search.
-  class ProjectPatternSearch < Query::ProjectBase
-    include Query::Initializers::PatternSearch
+class Query::ProjectPatternSearch < Query::ProjectBase
+  def parameter_declarations
+    super.merge(
+      pattern: :string
+    )
+  end
 
-    def parameter_declarations
-      super.merge(
-        pattern: :string
-      )
-    end
+  def initialize_flavor
+    add_search_condition(search_fields, params[:pattern])
+    super
+  end
 
-    def initialize_flavor
-      search = google_parse_pattern
-      add_search_conditions(search, *search_fields)
-      super
-    end
-
-    def search_fields
-      [
-        "projects.title",
-        "COALESCE(projects.summary,'')"
-      ]
-    end
+  def search_fields
+    "CONCAT(" \
+      "projects.title," \
+      "COALESCE(projects.summary,'')" \
+      ")"
   end
 end

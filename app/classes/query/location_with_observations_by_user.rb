@@ -1,27 +1,21 @@
-module Query
-  # Locations with observations created by a given user.
-  class LocationWithObservationsByUser < Query::LocationBase
-    include Query::Initializers::ContentFilters
+class Query::LocationWithObservationsByUser < Query::LocationWithObservations
+  include Query::Initializers::ContentFilters
 
-    def parameter_declarations
-      super.merge(
-        user:    User,
-        old_by?: :string
-      ).merge(content_filter_parameter_declarations(Observation))
-    end
+  def parameter_declarations
+    super.merge(
+      user: User
+    )
+  end
 
-    def initialize_flavor
-      user = find_cached_parameter_instance(User, :user)
-      title_args[:user] = user.legal_name
-      add_join(:observations)
-      where << "observations.user_id = '#{user.id}'"
-      where << "observations.is_collection_location IS TRUE"
-      initialize_content_filters(Observation)
-      super
-    end
+  def initialize_flavor
+    user = find_cached_parameter_instance(User, :user)
+    title_args[:user] = user.legal_name
+    where << "observations.user_id = '#{user.id}'"
+    where << "observations.is_collection_location IS TRUE"
+    super
+  end
 
-    def coerce_into_observation_query
-      Query.lookup(:Observation, :by_user, params_with_old_by_restored)
-    end
+  def coerce_into_observation_query
+    Query.lookup(:Observation, :by_user, params_with_old_by_restored)
   end
 end
