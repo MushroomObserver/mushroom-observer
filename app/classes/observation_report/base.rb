@@ -65,20 +65,11 @@ module ObservationReport
     end
 
     def rows_with_location
-      start = Time.now
-      Rails.logger.warn "Starting main query..."
-      Rails.logger.warn query.query(
+      query.select_rows(
         select: with_location_selects.join(","),
         join: [:users, :locations, :names],
         order: "observations.id ASC"
       )
-      data = query.select_rows(
-        select: with_location_selects.join(","),
-        join: [:users, :locations, :names],
-        order: "observations.id ASC"
-      )
-      Rails.logger.warn "finished main query: #{Time.now - start} seconds"
-      data
     end
 
     def without_location_selects
@@ -162,18 +153,6 @@ module ObservationReport
     end
 
     def add_collector_ids!(rows, col)
-      start = Time.now
-      Rails.logger.warn "Starting add_collector_ids..."
-      Rails.logger.warn %(
-        SELECT ids.id,
-          GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
-        FROM collection_numbers c,
-          collection_numbers_observations co,
-          (#{query.query}) as ids
-        WHERE co.observation_id = ids.id AND
-          co.collection_number_id = c.id
-        GROUP BY ids.id
-      )
       vals = CollectionNumber.connection.select_rows %(
         SELECT ids.id,
           GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
@@ -184,7 +163,6 @@ module ObservationReport
           co.collection_number_id = c.id
         GROUP BY ids.id
       )
-      Rails.logger.warn "finished add_collector_ids: #{Time.now - start} seconds"
       add_column!(rows, vals, col)
     end
 
@@ -195,7 +173,7 @@ module ObservationReport
         SELECT io.observation_id, io.image_id
         FROM images_observations io, (#{query.query}) as ids
         WHERE io.observation_id = ids.id
-      )
+      ).gsub(/\s+/, " ").to_s
       vals = Image.connection.select_rows %(
         SELECT io.observation_id, io.image_id
         FROM images_observations io, (#{query.query}) as ids
