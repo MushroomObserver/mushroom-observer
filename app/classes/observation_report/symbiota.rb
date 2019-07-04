@@ -1,6 +1,6 @@
 module ObservationReport
-  # Symbiota-style csv report.
-  class Symbiota < ObservationReport::CSV
+  # Symbiota-style tsv report.
+  class Symbiota < ObservationReport::TSV
     def labels
       %w[
         scientificName
@@ -11,6 +11,7 @@ module ObservationReport
         infraspecificEpithet
         recordedBy
         recordNumber
+        disposition
         eventDate
         year
         month
@@ -24,7 +25,11 @@ module ObservationReport
         minimumElevationInMeters
         maximumElevationInMeters
         updated_at
+        substrate
+        host
         fieldNotes
+        observationUrl
+        imageUrls
       ]
     end
 
@@ -37,8 +42,8 @@ module ObservationReport
         row.genus,
         row.species,
         row.form_or_variety_or_subspecies,
-        row.user_name_or_login,
-        row.obs_id,
+        *collector_and_number(row),
+        row.obs_specimen ? "vouchered" : nil,
         row.obs_when,
         row.year,
         row.month,
@@ -52,12 +57,61 @@ module ObservationReport
         row.best_low,
         row.best_high,
         row.obs_updated_at,
-        row.obs_notes
+        *explode_notes(row),
+        row.obs_url,
+        image_urls(row)
       ]
     end
 
-    def sort_after(rows)
-      rows.sort_by { |row| row[7].to_i }
+    def collector_and_number(row)
+      if row.val(2).blank?
+        [row.user_name_or_login, "MO #{row.obs_id}"]
+      else
+        row.val(2).split("\n").first.split("\t")
+      end
+    end
+
+    def explode_notes(row)
+      notes = row.obs_notes_as_hash
+      [
+        extract_notes_field(notes, :Substrate),
+        extract_notes_field(notes, :Host),
+        export_other_notes(notes)
+      ]
+    end
+
+    def extract_notes_field(notes, field)
+      clean_notes(notes.delete(field).to_s)
+    end
+
+    def export_other_notes(notes)
+      clean_notes(Observation.export_formatted(notes))
+    end
+
+    def clean_notes(str)
+      str.strip.t.html_to_ascii.
+        gsub(/\\/, "\\\\").gsub(/\n/, "\\n").gsub(/\t/, "\\t")
+    end
+
+    def image_urls(row)
+      row.val(1).to_s.split(", ").sort_by(&:to_i).
+        map { |id| image_url(id) }.join(" ")
+    end
+
+    def image_url(id)
+      # Image.url(:full_size, id, transferred: true)
+      # The following URL is the permanent one, should always be correct,
+      # no matter how much we change the underlying image server(s) around.
+      "#{MO.http_domain}/images/orig/#{id}"
+    end
+
+    def sort_before(rows)
+      rows.sort_by(&:obs_id)
+    end
+
+    def extend_data!(rows)
+      add_image_ids!(rows, 1)
+      add_collector_ids!(rows, 2)
     end
   end
 end

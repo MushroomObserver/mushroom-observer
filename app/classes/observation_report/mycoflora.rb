@@ -38,16 +38,12 @@ module ObservationReport
 
     # rubocop:disable Metrics/AbcSize
     def format_row(row)
-      mo_num  = "MO #{row.obs_id}"
-      col_num = row.val(2)
-      rec_num = mo_num
-      rec_num += "; #{col_num}" unless col_num.blank?
       [
         row.name_text_name,
         row.name_author,
         row.user_name_or_login,
-        rec_num,                   # recordNumber
-        mo_num,                    # fieldNumber
+        record_numbers(row),       # recordNumber
+        mo_number(row),            # fieldNumber
         "",                        # catalogNumber
         row.obs_specimen ? 1 : 0,
         row.locality,
@@ -68,6 +64,20 @@ module ObservationReport
         "NA Mycoflora Project",
         *explode_notes(row)
       ]
+    end
+
+    def record_numbers(row)
+      str = collector_numbers(row)
+      str = "; " + str if str.present?
+      mo_number(row) + str
+    end
+
+    def mo_number(row)
+      "MO #{row.obs_id}"
+    end
+
+    def collector_numbers(row)
+      row.val(2).to_s.tr("\t", " ").gsub(/\n/, ", ")
     end
 
     def explode_notes(row)
@@ -130,20 +140,6 @@ module ObservationReport
     def extend_data!(rows)
       add_image_ids!(rows, 1)
       add_collector_ids!(rows, 2)
-    end
-
-    def add_collector_ids!(rows, col)
-      vals = CollectionNumber.connection.select_rows %(
-        SELECT ids.id,
-            GROUP_CONCAT(DISTINCT CONCAT(c.name, " ", c.number) SEPARATOR ", ")
-        FROM collection_numbers c,
-             collection_numbers_observations co,
-             (#{query.query}) as ids
-        WHERE co.observation_id = ids.id AND
-              co.collection_number_id = c.id
-        GROUP BY ids.id
-      )
-      add_column!(rows, vals, col)
     end
   end
 end
