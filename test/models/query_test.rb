@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "set"
 
@@ -484,12 +486,12 @@ class QueryTest < UnitTestCase
       "WHERE one = two AND foo LIKE bar " \
       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
       clean(query.query(select: "names.*",
-                        join:   [:observations, :"users.reviewer"],
+                        join: [:observations, :"users.reviewer"],
                         tables: :images,
-                        where:  ["one = two", "foo LIKE bar"],
-                        group:  "blah.id",
-                        order:  "names.id ASC",
-                        limit:  "10, 10"))
+                        where: ["one = two", "foo LIKE bar"],
+                        group: "blah.id",
+                        order: "names.id ASC",
+                        limit: "10, 10"))
     )
   end
 

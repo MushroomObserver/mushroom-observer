@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Tests which supplement QueryTest
@@ -15,7 +17,7 @@ class QuerySupplementalTest < IntegrationTestCase
     fill_in("search_pattern", with: pattern)
     page.select("Comments", from: :search_type)
     click_button("Search")
-    title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
+    title = page.find_by_id("title")
 
     title.assert_text("‘#{pattern}’")
   end

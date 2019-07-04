@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "capybara_helper"
 
@@ -27,7 +29,7 @@ class FilterTest < IntegrationTestCase
       /#{:app_title.l }: Observation Index/,
       page.title, "Wrong page"
     )
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_text(:filtered.t)
 
     results = page.find("div.results", match: :first)
@@ -38,12 +40,12 @@ class FilterTest < IntegrationTestCase
 
     # Show Locations should be filtered
     click_link("Show Locations")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_text(:filtered.t)
 
     # And mapping them should also be filtered.
     click_link("Map Locations")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_text(:filtered.t)
 
     ### Now prove that turning filter off stops filtering ###
@@ -73,7 +75,7 @@ class FilterTest < IntegrationTestCase
     page.select("Observations", from: :search_type)
     click_button("Search")
 
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_no_text(:filtered.t)
 
     results = page.find("div.results", match: :first)
@@ -114,7 +116,7 @@ class FilterTest < IntegrationTestCase
     page.select("Observations", from: :search_type)
 
     click_button("Search")
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_text(:filtered.t)
 
     results = page.find("div.results", match: :first)
@@ -154,7 +156,7 @@ class FilterTest < IntegrationTestCase
     first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user's { has_images: "yes" }
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_no_text(:filtered.t)
 
     results = page.find("div.results", match: :first)
@@ -185,7 +187,7 @@ class FilterTest < IntegrationTestCase
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
-    page.find_by_id("title"). # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title").
       assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("div.results", match: :first)
