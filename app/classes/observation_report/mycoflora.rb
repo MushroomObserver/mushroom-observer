@@ -68,7 +68,7 @@ module ObservationReport
 
     def record_numbers(row)
       str = collector_numbers(row)
-      str = "; " + str unless str.blank?
+      str = "; " + str if str.present?
       mo_number(row) + str
     end
 
@@ -77,7 +77,7 @@ module ObservationReport
     end
 
     def collector_numbers(row)
-      row.val(2).to_s.gsub(/\t/, " ").gsub(/\n/, ", ")
+      row.val(2).to_s.tr("\t", " ").gsub(/\n/, ", ")
     end
 
     def explode_notes(row)

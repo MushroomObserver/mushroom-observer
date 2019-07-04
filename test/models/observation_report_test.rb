@@ -1,14 +1,24 @@
 require "test_helper"
 
 class ObservationReportTest < UnitTestCase
-  def do_report_test(report_type, obs, expect, &block)
+  def do_csv_test(report_type, obs, expect, &block)
     query = Query.lookup(:Observation, :all)
     report = report_type.new(query: query).body
     assert_not_empty(report)
     table = CSV.parse(report)
     assert_equal(query.num_results + 1, table.count)
     idx = query.results.sort_by(&block).index(obs)
-    assert_equal(expect, table[idx + 1], "(coprinus_comatus_obs)")
+    assert_equal(expect, table[idx + 1])
+  end
+
+  def do_tsv_test(report_type, obs, expect, &block)
+    query = Query.lookup(:Observation, :all)
+    report = report_type.new(query: query).body
+    assert_not_empty(report)
+    rows = report.split("\n")
+    assert_equal(query.num_results + 1, rows.length)
+    idx = query.results.sort_by(&block).index(obs)
+    assert_equal(expect, rows[idx + 1].split("\t"))
   end
 
   def test_adolf
@@ -55,7 +65,7 @@ class ObservationReportTest < UnitTestCase
       obs.id.to_s,
       nil
     ]
-    do_report_test(ObservationReport::Adolf, obs, expect, &:text_name)
+    do_csv_test(ObservationReport::Adolf, obs, expect, &:text_name)
   end
 
   def test_darwin
@@ -86,7 +96,7 @@ class ObservationReportTest < UnitTestCase
       "294",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_report_test(ObservationReport::Darwin, obs, expect, &:id)
+    do_csv_test(ObservationReport::Darwin, obs, expect, &:id)
   end
 
   def test_mycoflora_no_exact_lat_long
@@ -128,7 +138,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "Found in a strange place... & with śtrangè characters™"
     ]
-    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
 
   def test_mycoflora_with_exact_lat_long
@@ -173,7 +183,7 @@ class ObservationReportTest < UnitTestCase
       "Agaricus",
       "Foo: Bar\nOther: Things"
     ]
-    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
 
   def test_mycoflora_with_hidden_gps
@@ -210,13 +220,13 @@ class ObservationReportTest < UnitTestCase
       "",
       "unknown_with_lat_long"
     ]
-    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
 
     User.current = mary
     expect[11] = "34.1622"
     expect[12] = "-118.3521"
     expect[13] = nil
-    do_report_test(ObservationReport::Mycoflora, obs, expect, &:id)
+    do_csv_test(ObservationReport::Mycoflora, obs, expect, &:id)
   end
 
   def test_raw
@@ -253,36 +263,52 @@ class ObservationReportTest < UnitTestCase
       "Found in a strange place... & with śtrangè characters™",
       "http://mushroomobserver.org/#{obs.id}"
     ]
-    do_report_test(ObservationReport::Raw, obs, expect, &:id)
+    do_csv_test(ObservationReport::Raw, obs, expect, &:id)
   end
 
   def test_symbiota
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "First\tline.\nSecond\tline."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
     expect = [
       "Fungi",
-      nil,
+      "",
       "Kingdom",
       "Fungi",
-      nil,
-      nil,
+      "",
+      "",
       "Mary Newbie",
-      obs.id.to_s,
-      "2010-07-22",
-      "2010",
-      "7",
-      "22",
+      "174",
+      "vouchered",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
       "USA",
       "California",
-      nil,
+      "",
       "Burbank",
-      "34.1622",
-      "-118.3521",
-      "123",
-      "123",
-      "2010-07-22 09:21:00 UTC",
-      "unknown_with_lat_long"
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      'wood\tchips',
+      "Agaricus",
+      'Habitat: lawn\nOther: First\tline.\nSecond\tline.',
+      "http://mushroomobserver.org/#{obs.id}",
+      "http://mushroomobserver.org/images/orig/#{img1.id} " \
+        "http://mushroomobserver.org/images/orig/#{img2.id}"
     ]
-    do_report_test(ObservationReport::Symbiota, obs, expect, &:id)
+    do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
   end
 
   def test_rounding_of_latitudes_etc

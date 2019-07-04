@@ -65,7 +65,7 @@ module ObservationReport
 
     def collector_and_number(row)
       if row.val(2).blank?
-        [ row.user_name_or_login, "MO #{row.obs_id}" ]
+        [row.user_name_or_login, "MO #{row.obs_id}"]
       else
         row.val(2).split("\n").first.split("\t")
       end
