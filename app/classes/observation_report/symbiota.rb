@@ -102,7 +102,7 @@ module ObservationReport
       # Image.url(:full_size, id, transferred: true)
       # The following URL is the permanent one, should always be correct,
       # no matter how much we change the underlying image server(s) around.
-      "#{MO.http_domain}/images/orig/#{id}"
+      "#{MO.http_domain}/images/orig/#{id}.jpg"
     end
 
     def sort_before(rows)
