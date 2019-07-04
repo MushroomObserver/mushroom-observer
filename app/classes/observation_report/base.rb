@@ -153,6 +153,20 @@ module ObservationReport
       add_column!(rows, vals, col)
     end
 
+    def add_collector_ids!(rows, col)
+      vals = CollectionNumber.connection.select_rows %(
+        SELECT ids.id,
+          GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
+        FROM collection_numbers c,
+          collection_numbers_observations co,
+          (#{query.query}) as ids
+        WHERE co.observation_id = ids.id AND
+          co.collection_number_id = c.id
+        GROUP BY ids.id
+      )
+      add_column!(rows, vals, col)
+    end
+
     def add_image_ids!(rows, col)
       vals = Image.connection.select_rows %(
         SELECT io.observation_id, io.image_id
