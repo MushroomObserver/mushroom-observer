@@ -305,8 +305,8 @@ class ObservationReportTest < UnitTestCase
       "Agaricus",
       'Habitat: lawn\nOther: First\tline.\nSecond\tline.',
       "http://mushroomobserver.org/#{obs.id}",
-      "http://mushroomobserver.org/images/orig/#{img1.id} " \
-        "http://mushroomobserver.org/images/orig/#{img2.id}"
+      "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
     do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
   end
