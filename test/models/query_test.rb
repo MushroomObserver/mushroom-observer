@@ -2058,13 +2058,14 @@ class QueryTest < UnitTestCase
 
     ##### list/string parameters #####
 
-    # children_names
+    # include_subtaxa
     parent = names(:agaricus)
     children = Name.where("text_name REGEXP ?", "#{parent.text_name} ")
     assert_query(
       Location.joins(:observations).
-               where(observations: { name: children }).uniq,
-      :Location, :with_observations, children_names: parent.text_name
+               where(observations: { name: [parent] + children }).uniq,
+      :Location, :with_observations,
+      names: parent.text_name, include_subtaxa: true
     )
 
     # comments_has
@@ -2135,7 +2136,7 @@ class QueryTest < UnitTestCase
       :Location, :with_observations, projects: project.title
     )
 
-    # synonym_names
+    # include_synonyms
     # Create Observations of synonyms, unfortunately hitting the db, because:
     # (a) there are no Observation fixtures for a Name with a synonym_names; and
     # (b) tests are brittle, so adding an Observation fixture will break them.
@@ -2151,7 +2152,8 @@ class QueryTest < UnitTestCase
     )
     assert_query(
       [locations(:albion), locations(:howarth_park)],
-      :Location, :with_observations, synonym_names: "Macrolepiota rachodes"
+      :Location, :with_observations,
+      names: "Macrolepiota rachodes", include_synonyms: true
     )
 
     # users
@@ -2954,7 +2956,8 @@ class QueryTest < UnitTestCase
     assert_query([seq1, seq2], :Sequence, :all, obs_date: %w[2006 2006])
     assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
     assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
-    assert_query([seq4], :Sequence, :all, synonym_names: "Petigera")
+    assert_query([seq4], :Sequence, :all,
+                 names: "Petigera", include_synonyms: true)
     assert_query([seq1, seq2, seq3], :Sequence, :all, locations: "Burbank")
     assert_query([seq2], :Sequence, :all, projects: "Bolete Project")
     assert_query([seq1, seq2], :Sequence, :all,
@@ -3207,6 +3210,56 @@ class QueryTest < UnitTestCase
     assert_equal(:scientific, User.current_location_format)
     assert_query([obs2, obs1], :Observation, :in_set,
                  ids: [obs1.id, obs2.id], by: :location)
+  end
+
+  def test_lookup_names_by_name
+    User.current = rolf
+
+    name1 = names(:macrolepiota)
+    name2 = names(:macrolepiota_rachodes)
+    name3 = names(:macrolepiota_rhacodes)
+    name4 = Name.new_name(Name.parse_name("Pseudolepiota").params)
+    name5 = Name.new_name(Name.parse_name("Pseudolepiota rachodes").params)
+
+    name1.update_attribute(:synonym_id, Synonym.create.id)
+    name4.update_attribute(:synonym_id, name1.synonym_id)
+    name5.update_attribute(:synonym_id, name2.synonym_id)
+
+    assert_lookup_names_by_name([name1],
+      ["Macrolepiota"], false, false)
+    assert_lookup_names_by_name([name2],
+      ["Macrolepiota rachodes"], false, false)
+    assert_lookup_names_by_name([name1, name4],
+      ["Macrolepiota"], true, false)
+    assert_lookup_names_by_name([name2, name3, name5],
+      ["Macrolepiota rachodes"], true, false)
+    assert_lookup_names_by_name([name1, name2, name3],
+      ["Macrolepiota"], false, true)
+    assert_lookup_names_by_name([name1, name2, name3, name4, name5],
+      ["Macrolepiota"], true, true)
+
+    name5.update_attribute(:synonym_id, nil)
+    name5 = Name.where(text_name: "Pseudolepiota rachodes").first
+    assert_lookup_names_by_name([name1, name2, name3, name4, name5],
+      ["Macrolepiota"], true, true)
+
+    name6 = names(:peltigeraceae)
+    name7 = names(:peltigera)
+    name8 = names(:petigera)
+    name9 = Name.new_name(Name.parse_name("Peltigera canina").params)
+    name9.update_attribute(:classification, name7.classification)
+
+    assert_lookup_names_by_name([name6, name7, name8, name9],
+      ["Peltigeraceae"], false, true)
+  end
+
+  def assert_lookup_names_by_name(expect, names, include_synonyms,
+                                  include_subtaxa)
+    actual = Query::Base.new.lookup_names_by_name(names, include_synonyms,
+                                                  include_subtaxa)
+    expect = expect.sort_by(&:text_name)
+    actual = actual.map {|id| Name.find(id)}.sort_by(&:text_name)
+    assert_name_list_equal(expect, actual)
   end
 end
 

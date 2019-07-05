@@ -9,12 +9,7 @@ module Query::Modules::LookupNames
     min_names = include_synonyms ? add_synonyms(min_names) :
                                    add_other_spellings(min_names)
     if include_subtaxa
-      min_names2 = add_subtaxa_genera_and_up(min_names)
-      if min_names2.length > min_names.length
-        min_names = include_synonyms ? add_synonyms(min_names2) :
-                                       add_other_spellings(min_names2)
-      end
-      min_names2 = add_subtaxa_genera_and_down(min_names)
+      min_names2 = add_subtaxa(min_names)
       if min_names2.length > min_names.length
         min_names = include_synonyms ? add_synonyms(min_names2) :
                                        add_other_spellings(min_names2)
@@ -78,28 +73,20 @@ module Query::Modules::LookupNames
       ))
   end
 
-  def add_subtaxa_genera_and_up(min_names)
+  def add_subtaxa(min_names)
     higher_names = genera_and_up(min_names)
-    return min_names if higher_names.empty?
-
-    (
-      min_names +
-      Name.connection.select_rows(%(
+    lower_names = genera_and_down(min_names)
+    unless higher_names.empty?
+      min_names += Name.connection.select_rows(%(
         SELECT #{minimal_name_columns} FROM names
         WHERE classification REGEXP ": _(#{higher_names.join("|")})_"
       ))
-    ).uniq
-  end
-
-  def add_subtaxa_genera_and_down(min_names)
-    lower_names = genera_and_down(min_names)
-    (
-      min_names +
-      Name.connection.select_rows(%(
-        SELECT #{minimal_name_columns} FROM names
-        WHERE text_name REGEXP "^(#{lower_names.join("|")}) "
-      ))
-    ).uniq
+    end
+    min_names += Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE text_name REGEXP "^(#{lower_names.join("|")}) "
+    ))
+    min_names.uniq
   end
 
   def genera_and_up(min_names)
