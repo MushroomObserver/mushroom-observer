@@ -21,12 +21,12 @@ class ObserverController
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name # :nologin: :norobots:
     args = {
-      name: params[:name],
-      synonyms: :all,
+      names: [params[:name]],
+      include_synonyms: true,
       nonconsensus: :no,
       by: :created_at
     }
-    query = create_query(:Observation, :of_name, args)
+    query = create_query(:Observation, :all, args)
     show_selected_observations(query)
   end
 
