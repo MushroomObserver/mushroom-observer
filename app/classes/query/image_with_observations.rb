@@ -2,6 +2,7 @@
 # Query's for Images where Observation meets specified conditions
 class Query::ImageWithObservations < Query::ImageBase
   include Query::Initializers::ContentFilters
+  include Query::Initializers::Names
 
   def parameter_declarations
     super.merge(
@@ -18,7 +19,8 @@ class Query::ImageWithObservations < Query::ImageBase
       south?: :float,
       east?: :float,
       west?: :float
-    ).merge(content_filter_parameter_declarations(Observation))
+    ).merge(content_filter_parameter_declarations(Observation)).
+      merge(consensus_parameter_declarations)
   end
 
   def initialize_flavor

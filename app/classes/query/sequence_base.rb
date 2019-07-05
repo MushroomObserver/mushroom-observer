@@ -1,11 +1,14 @@
 class Query::SequenceBase < Query::Base
+  include Query::Initializers::Names
+
   def model
     Sequence
   end
 
   def parameter_declarations
     super.merge(sequence_parameter_declarations).
-      merge(observation_parameter_declarations)
+      merge(observation_parameter_declarations).
+      merge(names_parameter_declarations)
   end
 
   def sequence_parameter_declarations
@@ -27,9 +30,6 @@ class Query::SequenceBase < Query::Base
     {
       obs_date?:         [:date],
       observers?:        [User],
-      names?:            [:string],
-      include_synonyms?: :boolean,
-      include_subtaxa?:  :boolean,
       locations?:        [:string],
       herbaria?:         [:string],
       herbarium_records?: [:string],
@@ -57,7 +57,7 @@ class Query::SequenceBase < Query::Base
     # some sequences because of this.
     add_owner_and_time_stamp_conditions("sequences")
     initialize_association_parameters
-    initialize_names_parameters
+    initialize_names_parameters(:observation)
     initialize_observation_parameters
     initialize_exact_match_parameters
     initialize_boolean_parameters
@@ -121,15 +121,6 @@ class Query::SequenceBase < Query::Base
       "observations_species_lists.species_list_id",
       lookup_species_lists_by_name(params[:species_lists]),
       :observations, :observations_species_lists
-    )
-  end
-
-  def initialize_names_parameters
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:names], params[:include_synonyms],
-                           params[:include_subtaxa]),
-      :observations
     )
   end
 

@@ -1,5 +1,6 @@
 class Query::NameBase < Query::Base
   include Query::Initializers::ContentFilters
+  include Query::Initializers::Names
 
   def model
     Name
@@ -11,9 +12,6 @@ class Query::NameBase < Query::Base
       created_at?:         [:time],
       updated_at?:         [:time],
       users?:              [User],
-      names?:              [:string],
-      include_synonyms?:   :boolean,
-      include_subtaxa?:    :boolean,
       misspellings?:       { string: [:no, :either, :only] },
       deprecated?:         { string: [:either, :no, :only] },
       has_synonyms?:       :boolean,
@@ -40,7 +38,8 @@ class Query::NameBase < Query::Base
       desc_creator?:       [User],
       desc_content?:       :string,
       ok_for_export?:      :boolean
-    ).merge(content_filter_parameter_declarations(Name))
+    ).merge(content_filter_parameter_declarations(Name)).
+      merge(names_parameter_declarations)
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -48,10 +47,10 @@ class Query::NameBase < Query::Base
     unless is_a?(Query::NameWithObservations)
       add_owner_and_time_stamp_conditions("names")
       initialize_comments_and_notes_parameters
+      initialize_names_parameters_for_name_queries
     end
     initialize_taxonomy_parameters
     initialize_boolean_parameters
-    initialize_names_parameters
     initialize_association_parameters
     initialize_search_parameters
     initialize_description_parameters
@@ -111,14 +110,6 @@ class Query::NameBase < Query::Base
       "names.ok_for_export IS TRUE",
       "names.ok_for_export IS FALSE",
       params[:ok_for_export]
-    )
-  end
-
-  def initialize_names_parameters
-    add_id_condition(
-      "names.id",
-      lookup_names_by_name(params[:names], params[:include_synonyms],
-                           params[:include_subtaxa])
     )
   end
 

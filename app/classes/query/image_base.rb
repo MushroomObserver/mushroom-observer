@@ -1,4 +1,6 @@
 class Query::ImageBase < Query::Base
+  include Query::Initializers::Names
+
   def model
     Image
   end
@@ -9,9 +11,6 @@ class Query::ImageBase < Query::Base
       updated_at?:           [:time],
       date?:                 [:date],
       users?:                [User],
-      names?:                [:string],
-      include_synonyms?:     :boolean,
-      include_subtaxa?:      :boolean,
       locations?:            [:string],
       observations?:         [Observation],
       projects?:             [:string],
@@ -27,7 +26,7 @@ class Query::ImageBase < Query::Base
       quality?:              [:float],
       confidence?:           [:float],
       ok_for_export?:        :boolean
-    )
+    ).merge(names_parameter_declarations)
   end
 
   def initialize_flavor
@@ -39,7 +38,7 @@ class Query::ImageBase < Query::Base
       initialize_notes_parameters
     end
     initialize_association_parameters
-    initialize_name_parameters
+    initialize_names_parameters(:images_observations, :observations)
     initialize_image_parameters
     initialize_vote_parameters
   end
@@ -65,15 +64,6 @@ class Query::ImageBase < Query::Base
       :images_observations, :observations, :observations_species_lists
     )
     add_id_condition("images.license_id", params[:license])
-  end
-
-  def initialize_name_parameters
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:names], params[:include_synonyms],
-                           params[:include_subtaxa]),
-      :images_observations, :observations
-    )
   end
 
   def initialize_image_parameters

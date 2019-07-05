@@ -3,6 +3,7 @@
 # Query's for Names where Observations meet specified conditions
 class Query::NameWithObservations < Query::NameBase
   include Query::Initializers::ContentFilters
+  include Query::Initializers::Names
 
   def parameter_declarations
     super.merge(
@@ -20,7 +21,8 @@ class Query::NameWithObservations < Query::NameBase
       south?: :float,
       east?: :float,
       west?: :float
-    ).merge(content_filter_parameter_declarations(Observation))
+    ).merge(content_filter_parameter_declarations(Observation)).
+      merge(consensus_parameter_declarations)
   end
 
   def initialize_flavor
@@ -30,6 +32,7 @@ class Query::NameWithObservations < Query::NameBase
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
+    initialize_names_parameters(:observations)
     add_range_condition("observations.vote_cache", params[:confidence])
     add_bounding_box_conditions_for_observations
     initialize_content_filters(Observation)

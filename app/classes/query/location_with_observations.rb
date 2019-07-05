@@ -2,14 +2,12 @@
 # Query's for Locations where Observation meets specified conditions
 class Query::LocationWithObservations < Query::LocationBase
   include Query::Initializers::ContentFilters
+  include Query::Initializers::Names
 
   def parameter_declarations
     super.merge(
       old_by?: :string,
       date?: [:date],
-      names?: [:string],
-      include_synonyms?: :boolean,
-      include_subtaxa?: :boolean,
       locations?: [:string],
       projects?: [:string],
       species_lists?: [:string],
@@ -24,7 +22,9 @@ class Query::LocationWithObservations < Query::LocationBase
       has_notes_fields?: [:string],
       notes_has?: :string,
       comments_has?: :string
-    ).merge(content_filter_parameter_declarations(Observation))
+    ).merge(content_filter_parameter_declarations(Observation)).
+      merge(names_parameter_declarations).
+      merge(consensus_parameter_declarations)
   end
 
   def initialize_flavor
@@ -39,14 +39,6 @@ class Query::LocationWithObservations < Query::LocationBase
     initialize_search_parameters
     initialize_content_filters(Observation)
     super
-  end
-
-  def initialize_names_parameters
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:names], params[:include_synonyms],
-                           params[:include_subtaxa])
-    )
   end
 
   def initialize_association_parameters
