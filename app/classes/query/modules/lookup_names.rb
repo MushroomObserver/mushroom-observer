@@ -13,7 +13,7 @@ module Query::Modules::LookupNames
     elsif args[:include_immediate_subtaxa]
       add_immediate_subtaxa(min_names)
     end
-    if min_names2.length > min_names.length
+    if min_names2 && min_names2.length > min_names.length
       min_names = args[:include_synonyms] ? add_synonyms(min_names2) :
                                             add_other_spellings(min_names2)
     end
@@ -99,6 +99,7 @@ module Query::Modules::LookupNames
       min_names += Name.connection.select_rows(%(
         SELECT #{minimal_name_columns} FROM names
         WHERE classification REGEXP ": _(#{higher_names.join("|")})_$"
+        AND text_name NOT LIKE "% %"
       ))
     end
     min_names += Name.connection.select_rows(%(

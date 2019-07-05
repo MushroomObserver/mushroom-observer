@@ -31,7 +31,7 @@ class Query::LocationWithObservations < Query::LocationBase
     add_join(:observations)
     add_owner_and_time_stamp_conditions("observations")
     add_date_condition("observations.when", params[:date])
-    initialize_names_parameters
+    initialize_name_parameters
     add_where_condition(:observations, params[:locations])
     initialize_association_parameters
     add_range_condition("observations.vote_cache", params[:confidence])

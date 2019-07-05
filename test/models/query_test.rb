@@ -921,7 +921,7 @@ class QueryTest < UnitTestCase
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(10, QueryRecord.count)
+    assert_equal(8, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Image))
@@ -1019,7 +1019,7 @@ class QueryTest < UnitTestCase
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(10, QueryRecord.count)
+    assert_equal(8, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Location))
@@ -1132,7 +1132,7 @@ class QueryTest < UnitTestCase
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
                                 location: "california")
-    assert_equal(9, QueryRecord.count)
+    assert_equal(8, QueryRecord.count)
 
     # Try coercing them all.
     assert(q1b = q1a.coerce(:Name))
@@ -1772,7 +1772,7 @@ class QueryTest < UnitTestCase
   def test_image_with_observations_of_children
     assert_query([images(:agaricus_campestris_image).id],
                  :Image, :with_observations,
-                 names: [names(:agaricus)], include_children: true)
+                 names: [names(:agaricus).id], include_subtaxa: true)
   end
 
   def test_image_sorted_by_original_name
@@ -2172,7 +2172,7 @@ class QueryTest < UnitTestCase
   def test_location_with_observations_of_children
     assert_query([locations(:burbank).id],
                  :Location, :with_observations,
-                 names: [names(:agaricus)], include_children: true)
+                 names: [names(:agaricus).id], include_subtaxa: true)
   end
 
   def test_location_with_observations_of_name
@@ -2326,7 +2326,8 @@ class QueryTest < UnitTestCase
     expect = Name.where("text_name LIKE 'agaricus %'").order("text_name").to_a
     expect.reject!(&:is_misspelling?)
     assert_query(expect, :Name, :all,
-                 names: [names(:agaricus)], include_children: true)
+                 names: [names(:agaricus).id], include_subtaxa: true,
+                 exclude_original_names: true)
   end
 
   def test_name_pattern_search
@@ -2717,7 +2718,7 @@ class QueryTest < UnitTestCase
                   observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestrus_obs).id],
                  :Observation, :all,
-                 names: [names(:agaricus)], include_children: true)
+                 names: [names(:agaricus).id], include_subtaxa: true)
   end
 
   def test_observation_of_name
@@ -2739,7 +2740,7 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :Observation, :all, names: [names(:macrolepiota_rachodes).id])
     assert_query([observations(:agaricus_campestris_obs).id],
-                 :Observation, :all, names: [names(:agaricus_campestris).id)]
+                 :Observation, :all, names: [names(:agaricus_campestris).id])
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestrus_obs).id],
@@ -3123,45 +3124,85 @@ class QueryTest < UnitTestCase
     name1 = names(:macrolepiota)
     name2 = names(:macrolepiota_rachodes)
     name3 = names(:macrolepiota_rhacodes)
-    name4 = Name.new_name(Name.parse_name("Pseudolepiota").params)
-    name5 = Name.new_name(Name.parse_name("Pseudolepiota rachodes").params)
+    name4 = create_test_name("Pseudolepiota")
+    name5 = create_test_name("Pseudolepiota rachodes")
 
     name1.update_attribute(:synonym_id, Synonym.create.id)
     name4.update_attribute(:synonym_id, name1.synonym_id)
     name5.update_attribute(:synonym_id, name2.synonym_id)
 
-    assert_lookup_names_by_name([name1],
-      ["Macrolepiota"], false, false)
-    assert_lookup_names_by_name([name2],
-      ["Macrolepiota rachodes"], false, false)
+    assert_lookup_names_by_name([name1], names: ["Macrolepiota"])
+    assert_lookup_names_by_name([name2], names: ["Macrolepiota rachodes"])
     assert_lookup_names_by_name([name1, name4],
-      ["Macrolepiota"], true, false)
+      names: ["Macrolepiota"], include_synonyms: true)
     assert_lookup_names_by_name([name2, name3, name5],
-      ["Macrolepiota rachodes"], true, false)
+      names: ["Macrolepiota rachodes"], include_synonyms: true)
+    assert_lookup_names_by_name([name3, name5],
+      names: ["Macrolepiota rachodes"],
+      include_synonyms: true,
+      exclude_original_names: true)
     assert_lookup_names_by_name([name1, name2, name3],
-      ["Macrolepiota"], false, true)
+      names: ["Macrolepiota"], include_subtaxa: true)
+    assert_lookup_names_by_name([name1, name2, name3],
+      names: ["Macrolepiota"], include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-      ["Macrolepiota"], true, true)
+      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true)
+    assert_lookup_names_by_name([name2, name3, name4, name5],
+      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true,
+      exclude_original_names: true)
 
     name5.update_attribute(:synonym_id, nil)
     name5 = Name.where(text_name: "Pseudolepiota rachodes").first
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-      ["Macrolepiota"], true, true)
+      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true)
 
     name6 = names(:peltigeraceae)
     name7 = names(:peltigera)
     name8 = names(:petigera)
-    name9 = Name.new_name(Name.parse_name("Peltigera canina").params)
-    name9.update_attribute(:classification, name7.classification)
+    name9 = create_test_name("Peltigera canina")
+    nameA = create_test_name("Peltigera canina var. spuria")
+    nameB = create_test_name("Peltigera subg. Foo")
+    nameC = create_test_name("Peltigera subg. Foo sect. Bar")
 
-    assert_lookup_names_by_name([name6, name7, name8, name9],
-      ["Peltigeraceae"], false, true)
+    name9.update_attribute(:classification, name7.classification)
+    nameA.update_attribute(:classification, name7.classification)
+    nameB.update_attribute(:classification, name7.classification)
+    nameC.update_attribute(:classification, name7.classification)
+
+    assert_lookup_names_by_name(
+      [name6, name7, name8, name9, nameA, nameB, nameC],
+      names: ["Peltigeraceae"], include_subtaxa: true
+    )
+    assert_lookup_names_by_name(
+      [name6, name7, name8],
+      names: ["Peltigeraceae"], include_immediate_subtaxa: true
+    )
+    assert_lookup_names_by_name(
+      [name7, name8, name9, nameA, nameB, nameC],
+      names: ["Peltigera"], include_subtaxa: true
+    )
+    assert_lookup_names_by_name(
+      [name7, name8, name9, nameB],
+      names: ["Peltigera"], include_immediate_subtaxa: true,
+    )
+    assert_lookup_names_by_name(
+      [nameB, nameC],
+      names: ["Peltigera subg. Foo"], include_immediate_subtaxa: true,
+    )
+    assert_lookup_names_by_name(
+      [name9, nameA],
+      names: ["Peltigera canina"], include_immediate_subtaxa: true,
+    )
   end
 
-  def assert_lookup_names_by_name(expect, names, include_synonyms,
-                                  include_subtaxa)
-    actual = Query::Base.new.lookup_names_by_name(names, include_synonyms,
-                                                  include_subtaxa)
+  def create_test_name(name)
+    name = Name.new_name(Name.parse_name(name).params)
+    name.save
+    name
+  end
+
+  def assert_lookup_names_by_name(expect, args)
+    actual = Query::Base.new.lookup_names_by_name(args)
     expect = expect.sort_by(&:text_name)
     actual = actual.map {|id| Name.find(id)}.sort_by(&:text_name)
     assert_name_list_equal(expect, actual)

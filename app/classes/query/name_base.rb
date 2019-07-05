@@ -47,7 +47,7 @@ class Query::NameBase < Query::Base
     unless is_a?(Query::NameWithObservations)
       add_owner_and_time_stamp_conditions("names")
       initialize_comments_and_notes_parameters
-      initialize_names_parameters_for_name_queries
+      initialize_name_parameters_for_name_queries
     end
     initialize_taxonomy_parameters
     initialize_boolean_parameters

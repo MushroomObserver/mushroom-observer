@@ -40,7 +40,7 @@ class Query::ObservationBase < Query::Base
       has_notes?: :boolean,
       has_sequences?: { boolean: [true] },
       is_collection_location?: :boolean
-    ).merge(content_filter_parameter_declarations(Observation))
+    ).merge(content_filter_parameter_declarations(Observation)).
       merge(names_parameter_declarations).
       merge(consensus_parameter_declarations)
   end
@@ -48,7 +48,7 @@ class Query::ObservationBase < Query::Base
   def initialize_flavor
     add_owner_and_time_stamp_conditions("observations")
     add_date_condition("observations.when", params[:date])
-    initialize_names_parameters
+    initialize_name_parameters
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters

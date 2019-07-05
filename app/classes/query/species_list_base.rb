@@ -24,7 +24,7 @@ p
   def initialize_flavor
     add_owner_and_time_stamp_conditions("species_lists")
     add_date_condition("species_lists.when", params[:date])
-    initialize_names_parameters(:observations_species_lists, :observations)
+    initialize_name_parameters(:observations_species_lists, :observations)
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters

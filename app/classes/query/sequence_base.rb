@@ -57,7 +57,7 @@ class Query::SequenceBase < Query::Base
     # some sequences because of this.
     add_owner_and_time_stamp_conditions("sequences")
     initialize_association_parameters
-    initialize_names_parameters(:observation)
+    initialize_name_parameters(:observations)
     initialize_observation_parameters
     initialize_exact_match_parameters
     initialize_boolean_parameters

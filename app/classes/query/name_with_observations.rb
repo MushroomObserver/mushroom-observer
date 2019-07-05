@@ -32,7 +32,7 @@ class Query::NameWithObservations < Query::NameBase
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
-    initialize_names_parameters(:observations)
+    initialize_name_parameters(:observations)
     add_range_condition("observations.vote_cache", params[:confidence])
     add_bounding_box_conditions_for_observations
     initialize_content_filters(Observation)

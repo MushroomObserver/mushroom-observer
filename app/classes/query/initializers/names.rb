@@ -7,7 +7,7 @@ module Query::Initializers::Names
       include_immediate_subtaxa?: :boolean,
       exclude_original_names?:    :boolean
     }
-  ends
+  end
 
   def consensus_parameter_declarations
     {
@@ -29,10 +29,10 @@ module Query::Initializers::Names
   def initialize_name_parameters(*joins)
     table = params[:include_nonconsensus] ? "namings" : "observations"
     column = "#{table}.name_id"
-    add_id_condition(columm, lookup_names_by_name(names_parameters), *joins)
+    add_id_condition(column, lookup_names_by_name(names_parameters), *joins)
     add_join(:observations, :namings) if params[:include_nonconsensus]
     if params[:exclude_consensus]
-      self.where << "naming.name_id != observations.name_id"
+      self.where << "namings.name_id != observations.name_id"
     end
   end
 
