@@ -12,8 +12,8 @@ class Query::NameBase < Query::Base
       updated_at?:         [:time],
       users?:              [User],
       names?:              [:string],
-      synonym_names?:      [:string],
-      children_names?:     [:string],
+      include_synonyms?:   :boolean,
+      include_subtaxa?:    :boolean,
       misspellings?:       { string: [:no, :either, :only] },
       deprecated?:         { string: [:either, :no, :only] },
       has_synonyms?:       :boolean,
@@ -117,15 +117,8 @@ class Query::NameBase < Query::Base
   def initialize_names_parameters
     add_id_condition(
       "names.id",
-      lookup_names_by_name(params[:names])
-    )
-    add_id_condition(
-      "names.id",
-      lookup_names_by_name(params[:synonym_names], :synonyms)
-    )
-    add_id_condition(
-      "names.id",
-      lookup_names_by_name(params[:children_names], :all_children)
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa])
     )
   end
 

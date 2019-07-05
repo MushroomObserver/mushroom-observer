@@ -28,8 +28,8 @@ class Query::SequenceBase < Query::Base
       obs_date?:         [:date],
       observers?:        [User],
       names?:            [:string],
-      synonym_names?:    [:string],
-      children_names?:   [:string],
+      include_synonyms?: :boolean,
+      include_subtaxa?:  :boolean,
       locations?:        [:string],
       herbaria?:         [:string],
       herbarium_records?: [:string],
@@ -127,17 +127,8 @@ class Query::SequenceBase < Query::Base
   def initialize_names_parameters
     add_id_condition(
       "observations.name_id",
-      lookup_names_by_name(params[:names]),
-      :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms),
-      :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children),
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa]),
       :observations
     )
   end

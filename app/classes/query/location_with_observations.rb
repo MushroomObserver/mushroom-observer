@@ -8,8 +8,8 @@ class Query::LocationWithObservations < Query::LocationBase
       old_by?: :string,
       date?: [:date],
       names?: [:string],
-      synonym_names?: [:string],
-      children_names?: [:string],
+      include_synonyms?: :boolean,
+      include_subtaxa?: :boolean,
       locations?: [:string],
       projects?: [:string],
       species_lists?: [:string],
@@ -44,15 +44,8 @@ class Query::LocationWithObservations < Query::LocationBase
   def initialize_names_parameters
     add_id_condition(
       "observations.name_id",
-      lookup_names_by_name(params[:names])
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms)
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children)
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa])
     )
   end
 

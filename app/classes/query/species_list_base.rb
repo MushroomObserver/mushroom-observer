@@ -10,8 +10,8 @@ class Query::SpeciesListBase < Query::Base
       date?:           [:date],
       users?:          [User],
       names?:          [:string],
-      synonym_names?:  [:string],
-      children_names?: [:string],
+      include_synonyms?: :boolean,
+      include_subtaxa?:  :boolean,
       locations?:      [:string],
       projects?:       [:string],
       title_has?:      :string,
@@ -35,17 +35,8 @@ class Query::SpeciesListBase < Query::Base
   def initialize_names_parameters
     add_id_condition(
       "observations.name_id",
-      lookup_names_by_name(params[:names]),
-      :observations_species_lists, :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms),
-      :observations_species_lists, :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children),
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa]),
       :observations_species_lists, :observations
     )
   end

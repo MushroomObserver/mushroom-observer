@@ -10,8 +10,8 @@ class Query::ImageBase < Query::Base
       date?:                 [:date],
       users?:                [User],
       names?:                [:string],
-      synonym_names?:        [:string],
-      children_names?:       [:string],
+      include_synonyms?:     :boolean,
+      include_subtaxa?:      :boolean,
       locations?:            [:string],
       observations?:         [Observation],
       projects?:             [:string],
@@ -70,17 +70,8 @@ class Query::ImageBase < Query::Base
   def initialize_name_parameters
     add_id_condition(
       "observations.name_id",
-      lookup_names_by_name(params[:names]),
-      :images_observations, :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms),
-      :images_observations, :observations
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children),
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa]),
       :images_observations, :observations
     )
   end

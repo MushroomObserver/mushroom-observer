@@ -16,9 +16,9 @@ class Query::ObservationBase < Query::Base
       updated_at?: [:time],
 
       # strings/ lists
-      children_names?: [:string],
+      include_subtaxa?: :boolean,
+      include_synonyms?: :boolean,
       names?: [:string],
-      synonym_names?: [:string],
 
       comments_has?: :string,
       has_notes_fields?: [:string],
@@ -63,15 +63,8 @@ class Query::ObservationBase < Query::Base
   def initialize_names_parameters
     add_id_condition(
       "observations.name_id",
-      lookup_names_by_name(params[:names])
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:synonym_names], :synonyms)
-    )
-    add_id_condition(
-      "observations.name_id",
-      lookup_names_by_name(params[:children_names], :all_children)
+      lookup_names_by_name(params[:names], params[:include_synonyms],
+                           params[:include_subtaxa])
     )
   end
 

@@ -9,6 +9,7 @@ class Query::Base
   include Query::Modules::Initialization
   include Query::Modules::Joining
   include Query::Modules::LookupObjects
+  include Query::Modules::LookupNames
   include Query::Modules::LowLevelQueries
   include Query::Modules::NestedQueries
   include Query::Modules::Ordering
