@@ -1143,7 +1143,13 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
 
+    assert_api_pass(params.merge(name: "Agaricus campestros", include_synonyms: "yes"))
+    assert_api_results(imgs)
+
     assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(imgs)
+
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(imgs)
 
     burbank = locations(:burbank)
