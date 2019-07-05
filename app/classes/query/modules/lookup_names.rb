@@ -2,19 +2,22 @@
 
 # Helper methods to help parsing name instances from parameter strings.
 module Query::Modules::LookupNames
-  def lookup_names_by_name(vals, include_synonyms, include_subtaxa)
-    return unless vals
+  def lookup_names_by_name(args)
+    return unless vals = args[:names]
 
-    min_names = find_exact_name_matches(vals)
-    min_names = include_synonyms ? add_synonyms(min_names) :
-                                   add_other_spellings(min_names)
-    if include_subtaxa
-      min_names2 = add_subtaxa(min_names)
-      if min_names2.length > min_names.length
-        min_names = include_synonyms ? add_synonyms(min_names2) :
-                                       add_other_spellings(min_names2)
-      end
+    orig_names = find_exact_name_matches(vals)
+    min_names = args[:include_synonyms] ? add_synonyms(orig_names) :
+                                          add_other_spellings(orig_names)
+    min_names2 = if args[:include_subtaxa]
+      add_subtaxa(min_names)
+    elsif args[:include_immediate_subtaxa]
+      add_immediate_subtaxa(min_names)
     end
+    if min_names2.length > min_names.length
+      min_names = args[:include_synonyms] ? add_synonyms(min_names2) :
+                                            add_other_spellings(min_names2)
+    end
+    min_names -= orig_names if args[:exclude_original_names]
     min_names.map {|min_name| min_name[0]}
   end
 
@@ -85,6 +88,22 @@ module Query::Modules::LookupNames
     min_names += Name.connection.select_rows(%(
       SELECT #{minimal_name_columns} FROM names
       WHERE text_name REGEXP "^(#{lower_names.join("|")}) "
+    ))
+    min_names.uniq
+  end
+
+  def add_immediate_subtaxa(min_names)
+    higher_names = genera_and_up(min_names)
+    lower_names = genera_and_down(min_names)
+    unless higher_names.empty?
+      min_names += Name.connection.select_rows(%(
+        SELECT #{minimal_name_columns} FROM names
+        WHERE classification REGEXP ": _(#{higher_names.join("|")})_$"
+      ))
+    end
+    min_names += Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE text_name REGEXP "^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$"
     ))
     min_names.uniq
   end
