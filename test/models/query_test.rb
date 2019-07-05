@@ -2853,8 +2853,8 @@ class QueryTest < UnitTestCase
     sequences = Sequence.all
     seq1 = sequences[0]
     seq2 = sequences[1]
-    seq3 = sequences[2]
-    seq4 = sequences[3]
+    seq3 = sequences[3]
+    seq4 = sequences[4]
     seq1.update(observation: observations(:minimal_unknown_obs))
     seq2.update(observation: observations(:detailed_unknown_obs))
     seq3.update(observation: observations(:agaricus_campestris_obs))
