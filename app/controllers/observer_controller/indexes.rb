@@ -23,7 +23,6 @@ class ObserverController
     args = {
       names: [params[:name]],
       include_synonyms: true,
-      nonconsensus: :no,
       by: :created_at
     }
     query = create_query(:Observation, :all, args)
