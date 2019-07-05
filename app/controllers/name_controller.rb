@@ -360,18 +360,31 @@ class NameController < ApplicationController
       end
 
       # Create query for immediate children.
-      @children_query = create_query(:Name, :of_children, name: @name)
+      @children_query = create_query(:Name, :all,
+        names: [@name],
+        include_immediate_subtaxa: true,
+        exclude_parent: true
+      )
       if @name.at_or_below_genus?
-        args = { name: @name, all: true, by: :confidence }
-        @subtaxa_query = create_query(:Observation, :of_children, args)
+        @subtaxa_query = create_query(:Observation, :all,
+          names: [@name],
+          include_subtaxa: true,
+          exclude_parent: true,
+          by: :confidence
+        )
       end
 
       # Create search queries for observation lists.
-      args = { name: @name, by: :confidence }
-      @consensus_query = create_query(:Observation, :of_name, args)
+      @consensus_query = create_query(:Observation, :all,
+        names: [@name],
+        by: :confidence
+      )
 
-      args = { name: @name, by: :confidence, has_images: :yes }
-      @obs_with_images_query = create_query(:Observation, :of_name, args)
+      @obs_with_images_query = create_query(:Observation, :all,
+        names: [@name],
+        has_images: true,
+        by: :confidence
+      )
 
       # Determine which queries actually have results and instantiate the ones
       # we'll use.
@@ -1098,7 +1111,7 @@ class NameController < ApplicationController
   def map # :nologin: :norobots:
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
-      @query = create_query(:Observation, :of_name, name: @name)
+      @query = create_query(:Observation, :all, names: [@name])
       apply_content_filters(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
