@@ -1,0 +1,10 @@
+<% @title = :search_bar_help_title .t %>
+
+<div class="max-width-text">
+  <%= :pattern_search_terms_help.tp %>
+  <%= content_tag(:p, "#{:OBSERVATIONS.t} #{:SEARCHES.t}", { class: "bold" }) %>
+  <%= PatternSearch::Observation.terms_help.tp %>
+
+  <%= content_tag(:p, "#{:NAMES.t} #{:SEARCHES.t}", { class: "bold" }) %>
+  <%= PatternSearch::Name.terms_help.tp %>
+</div>

@@ -32,12 +32,12 @@ module Query
       def coercable?(new_model)
         @new_model = new_model.to_s
         return true if @new_model == model.to_s
+        return false unless respond_to?(coerce_method)
 
-        if respond_to?(test_method)
-          send(test_method)
-        else
-          respond_to?(coerce_method)
-        end
+        send(coerce_method)
+        true
+      rescue RuntimeError
+        false
       end
 
       # Attempt to coerce a query for one model into a related query for

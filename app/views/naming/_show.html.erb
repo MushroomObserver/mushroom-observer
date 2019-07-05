@@ -24,7 +24,7 @@
           <tr>
             <% Textile.register_name(naming.name) %>
             <td>
-              <%= link_with_query(naming.format_name.t,
+              <%= link_with_query(naming.display_name_brief_authors.t,
                                   controller: :name, action: :show_name,
                                   id: naming.name) %>
               <% if check_permission(naming) %>

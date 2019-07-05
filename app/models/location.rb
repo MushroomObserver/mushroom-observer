@@ -199,15 +199,20 @@ class Location < AbstractModel
   end
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
+  # New: Ensure box has nonzero size or make_editable_map fails.
   def force_valid_lat_longs!
     self.north = Location.parse_latitude(north) || 45
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
     self.west = Location.parse_longitude(west) || -90
-    return unless north < south
+    return if north > south
 
-    self.north = south
-    self.south = north
+    center_lat = (north + south) / 2
+    center_lon = (east + west) / 2
+    self.north = center_lat + 0.0001
+    self.south = center_lat - 0.0001
+    self.east = center_lon + 0.0001
+    self.west = center_lon - 0.0001
   end
 
   ##############################################################################

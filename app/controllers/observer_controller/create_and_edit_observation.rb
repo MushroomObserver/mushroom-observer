@@ -452,8 +452,8 @@ class ObserverController
       @observation = Observation.find(id)
       @observation.name.display_name
       @observation.calc_consensus(true)
-    rescue StandardError => err
-      flash_error(:observer_recalc_caught_error.t(error: err))
+    rescue StandardError => e
+      flash_error(:observer_recalc_caught_error.t(error: e))
     end
     # render(plain: "", layout: true)
     redirect_with_query(action: "show_observation", id: id)

@@ -42,7 +42,7 @@ function updateMapOverlay(north, south, east, west) {
   mo_marker_ne.setPosition(ne);
   mo_marker_sw.setPosition(sw);
   mo_marker_se.setPosition(se);
-  
+
   mo_box.setPath([nw,nwe,ne,se,swe,sw,nw]);
 
   if (parseFloat(jQuery("#location_north").val()) != north)
@@ -67,7 +67,7 @@ function resetToLatLng(loc) {
   south = Math.max(-90, lat-1);
   east  = lngAdd(lng, 1);
   west  = lngAdd(lng, -1);
-  updateMapOverlay(north, south, east, west);  
+  updateMapOverlay(north, south, east, west);
   north = Math.min(90, lat+1.5);
   south = Math.max(-90, lat-1.5);
   east  = lngAdd(lng, 1.5);
@@ -76,31 +76,30 @@ function resetToLatLng(loc) {
 }
 
 function findOnMap() {
-  address = jQuery("#location_display_name").val();
-  jQuery.ajax('/ajax/geocode', {
-    data: { name: address, authenticity_token: csrf_token() },
-    dataType: "text",
-    type: "GET",
-    success: function(response) {
-      list = []
-      while ((x = response.indexOf("\n")) >= 0) {
-        if (x > 0)
-          list.push(response.substr(0, x));
-        response = response.substr(x+1);
+  var address = jQuery("#location_display_name").val();
+  var geocoder = new google.maps.Geocoder();
+  if (LOCATION_FORMAT == "scientific")
+    address = address.split(/, */).reverse().join(", ");
+  geocoder.geocode(
+    { address: address },
+    function (results, status) {
+      var bounds = results[0].geometry.viewport;
+      if (bounds) {
+        var ne = bounds.getNorthEast();
+        var sw = bounds.getSouthWest();
+        var north = ne.lat();
+        var south = sw.lat();
+        var east  = ne.lng();
+        var west  = sw.lng();
+        if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+          updateMapOverlay(north, south, east, west);
+          map_div.fitBounds(bounds);
+          return;
+        }
       }
-      north = parseFloat(list[0]);
-      south = parseFloat(list[1]);
-      east = parseFloat(list[2]);
-      west = parseFloat(list[3]);
-      if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
-        updateMapOverlay(north, south, east, west);
-        map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
-      };
-    },
-    error: function(response) {
-      alert(response.responseText);
+      alert("Something went wrong!");
     }
-  });  
+  );
 }
 
 function sendOldLoc() {

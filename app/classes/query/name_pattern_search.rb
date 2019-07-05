@@ -1,29 +1,24 @@
-module Query
-  # Simple name search.
-  class NamePatternSearch < Query::NameBase
-    include Query::Initializers::PatternSearch
+class Query::NamePatternSearch < Query::NameBase
+  def parameter_declarations
+    super.merge(
+      pattern: :string
+    )
+  end
 
-    def parameter_declarations
-      super.merge(
-        pattern: :string
-      )
-    end
+  def initialize_flavor
+    add_search_condition(search_fields, params[:pattern])
+    add_join(:"name_descriptions.default!")
+    super
+  end
 
-    def initialize_flavor
-      search = google_parse_pattern
-      add_search_conditions(search, *note_fields)
-      add_join(:"name_descriptions.default!")
-      super
+  def search_fields
+    fields = [
+      "names.search_name",
+      "COALESCE(names.citation,'')",
+      "COALESCE(names.notes,'')"
+    ] + NameDescription.all_note_fields.map do |x|
+      "COALESCE(name_descriptions.#{x},'')"
     end
-
-    def note_fields
-      [
-        "names.search_name",
-        "COALESCE(names.citation,'')",
-        "COALESCE(names.notes,'')"
-      ] + NameDescription.all_note_fields.map do |x|
-        "COALESCE(name_descriptions.#{x},'')"
-      end
-    end
+    "CONCAT(#{fields.join(",")})"
   end
 end

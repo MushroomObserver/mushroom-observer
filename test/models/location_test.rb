@@ -417,4 +417,42 @@ class LocationTest < UnitTestCase
     assert_equal("Trois, Deux, Un", loc.name)
     assert_equal("Un, Deux, Trois", loc.scientific_name)
   end
+
+  def test_force_valid_lat_longs
+    loc = locations(:albion)
+
+    # Make sure a good location is unchanged.
+    loc.north = 8
+    loc.south = 6
+    loc.east = 4
+    loc.west = 2
+    loc.force_valid_lat_longs!
+    assert_equal([8, 6, 4, 2], [loc.north, loc.south, loc.east, loc.west])
+
+    # Make sure north/south reversed is fixed.
+    loc.north = -8
+    loc.south = 6
+    loc.east = 4
+    loc.west = 2
+    loc.force_valid_lat_longs!
+    assert_equal([-0.9999, -1.0001, 3.0001, 2.9999],
+                 [loc.north, loc.south, loc.east, loc.west])
+
+    # Make sure point is expanded to tiny box.
+    loc.north = 6
+    loc.south = 6
+    loc.east = 4
+    loc.west = 4
+    loc.force_valid_lat_longs!
+    assert_equal([6.0001, 5.9999, 4.0001, 3.9999],
+                 [loc.north, loc.south, loc.east, loc.west])
+
+    # Make sure good box spanning dateline is unchanged.
+    loc.north = 8
+    loc.south = 6
+    loc.east = -170
+    loc.west = 170
+    loc.force_valid_lat_longs!
+    assert_equal([8, 6, -170, 170], [loc.north, loc.south, loc.east, loc.west])
+  end
 end

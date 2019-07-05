@@ -113,13 +113,14 @@ plugins:
 
 # style and quality checks for Ruby code
 # configuration details are in .rubocop.yml files, rather than here.
+# WARNING: update "channel" whenever we update RuboCop.
+# See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
   rubocop:
     enabled: true
     # Specify RuboCop version so that we're not stuck with Code Climate's
-    # default, which can be different than what's in Gemfile.lock.
-    # WARNING: update this setting whenever we update RuboCop
-    # See https://docs.codeclimate.com/docs/rubocop
-    channel: rubocop-0-64
+    # default, which can be different than what's in Gemfile.lock. See
+    # docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
+    channel: rubocop-0-70
 
 # scss style checker
   scss-lint:

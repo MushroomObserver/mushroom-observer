@@ -653,6 +653,7 @@
   save_edits: save edits
   SEARCH: Search
   search: search
+  SEARCHES: Searches
   SEND: Send
   send: send
   SHOW: Show
@@ -1122,7 +1123,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: X
+  app_banner_box: On Sunday March 3, 2019 we passed 1 million fungus related images on MO!  Thanks for all the contributions, participation and support!
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1210,6 +1211,7 @@
 
   # observer/ask_user_question
   ask_user_question_title: Email Message for [user]
+  ask_user_question_label: Enter your question below.  When you hit "[:SEND]" it will be emailed to [user].  The email will include your email address as the 'Reply To' address.
   ask_user_question_message: "[:Message]"
   ask_user_question_subject: "[:Subject]"
 
@@ -1242,7 +1244,7 @@
 
   # observer/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
-  commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image.
+  commercial_inquiry_header: Enter your commercial inquiry about this image.  When you hit "[:SEND]" it will be emailed to [user].  The email will automatically include a link to this image as well as your email address.
 
   # location/create_location_description
   create_location_description_title: "[:create_name_description_title]"
@@ -1404,13 +1406,13 @@
   form_naming_confidence: Confidence
   form_naming_valid_synonyms: Valid synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
-  form_naming_not_recognized: The name '[name]' was not recognized.
+  form_naming_not_recognized: MO does not recognize the name '[name]'.
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
   form_naming_name_help_create: The name you would apply to this observation.  If you don't know what it is, just leave it blank.  If you find a better name in the future, you can always propose a name later.
-  form_naming_name_help: Scientific names are currently required, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
+  form_naming_name_help: "<strong>Scientific names are currently required</strong>, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo."
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
-  form_naming_not_recognized_help: Click '[button]' to create this name or edit the name below to correct any typo.
+  form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n (or -- if you are creating an Observation -- erase the name). \nThen click '[button]'."
   form_naming_multiple_names: Multiple names match '[name]'.  Select the one you intended.
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
@@ -1434,7 +1436,7 @@
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
-  form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\nAlbion, Mendocino Co., California, USA\nHotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
+  form_observations_where_help: "Where the observation was made. In the US this should be at least accurate to the county. Examples:\n[loc1]\n[loc2]\n&nbsp;\n*Use the Locate Button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude."
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any species lists you would like to add this observation to.
@@ -1614,7 +1616,7 @@
   name_deprecate_comments: "[:Comments]"
   name_deprecate_submit: "[:SUBMIT]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
-  name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum). \nThis will be added to the Comments for [name]."
+  name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
   # name/name_index (and other actions using same view)
   name_index_add_name: Add Name
@@ -1689,8 +1691,8 @@
   prefs_location_format_postal: Postal (New York, USA)
   prefs_location_format_scientific: Scientific (USA, New York)
   prefs_hide_authors: "[:AUTHORITYS]"
-  prefs_hide_authors_none: show all authorities (default)
-  prefs_hide_authors_above_species: hide authorities for genera and higher ranks
+  prefs_hide_authors_none: show author for all ranks (default)
+  prefs_hide_authors_above_species: hide author for gunus and higher ranks
   prefs_thumbnail_size: Thumbnail size
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
@@ -1720,7 +1722,9 @@
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
   prefs_filters_region: Show only observations and locations within this region
+  prefs_filters_region_help: 'Must match the end of the location name, e.g., "Thailand" and "California, USA".'
   prefs_filters_clade: Show only observations within this taxonomic clade
+  prefs_filters_clade_help: 'Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".'
   prefs_filter_off: filter off
 
   prefs_notes_template: Observation Notes Template
@@ -1892,7 +1896,7 @@
   show_name_propagate_classification: Propagate to Subtaxa
   show_name_lifeform: Lifeform
   show_name_propagate_lifeform: Propagate to Subtaxa
-  show_name_notes: Notes on Taxonomy
+  show_name_notes: "[:form_names_taxonomic_notes]"
   show_name_descriptions: "[:DESCRIPTIONS]"
   show_name_create_draft: Create New Draft for
   show_name_no_descriptions: There are no descriptions for this name yet.
@@ -2898,8 +2902,10 @@
   admin_request_change_member_status: Change [:user]'s status
   admin_request_success: Successfully sent admin request for [title]
   admin_request_title: Admin Request for [title]
+  admin_request_note: Enter your request below.  When you hit "[:SEND]" it will be emailed to to project admins.  The email will include your email address so that they can respond to your request.
   author_request_add_author: Make sender an author
   author_request_title: Authorship Request for [title]
+  author_request_note: "[:admin_request_note]"
   request_message: Message
   request_show_user: Show details on sender
   request_subject: Subject
@@ -3193,7 +3199,7 @@
   observation_term_synonym_of: Consensus name is synonym of one of these names.
   observation_term_child_of: Consensus name is a subtaxon of one of these names.
   observation_term_herbarium: Specimen at an herbarium.
-  observation_term_location: "Location mushroom was observed. Must be an exact match of entire location name. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
+  observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
@@ -3210,9 +3216,11 @@
   observation_term_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
-  observation_term_has_notes: Has notes?
+  observation_term_has_notes: Has Notes?
+  observation_term_has_location: "Are the [:OBSERVATION]\'s [:LATITUDE] and [:LONGITUDE] fields filled in?"
   observation_term_has_field: Has a given notes template field filled in.
-  observation_term_has_comments: Has and comments?
+  observation_term_has_comments: Has any comments?
+  observation_term_is_collection_location: "Mushroom was growing at the location. (\"[:form_observations_is_collection_location]\" is checked.)"
 
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
@@ -3224,17 +3232,23 @@
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
   name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
-  name_term_has_author: Has author filled in?
-  name_term_has_citation: Has citation filled in?
-  name_term_has_classification: Has classification filled in?
-  name_term_has_notes: Has any taxonomic nodes?
-  name_term_has_comments: Has any comments?
+  name_term_has_author: Has Author filled in?
+  name_term_has_citation: Has Citation filled in?
+  name_term_has_classification: Has Classification filled in?
+  name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
+  name_term_has_comments: Has any Comments?
   name_term_has_description: Has a public description?
   name_term_author: Author contains this string.
   name_term_citation: Citation contains this string.
   name_term_classification: Classification contains this string.
-  name_term_notes: Taxonomic notes contains this string.
-  name_term_comments: One of the comments contains this string.
+  name_term_notes: "[:form_names_taxonomic_notes] contains this string."
+  name_term_comments: At least one Comment contains this string.
+
+  # link to search bar help
+  search_bar_help: Search Help
+
+  # Search bar help page
+  search_bar_help_title: Search Bar Help
 
   ##############################################################################
 

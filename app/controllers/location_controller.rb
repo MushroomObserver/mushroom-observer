@@ -106,8 +106,8 @@ class LocationController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
-  rescue StandardError => err
-    flash_error(err.to_s) if err.present?
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 

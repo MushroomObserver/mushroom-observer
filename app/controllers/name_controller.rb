@@ -203,8 +203,8 @@ class NameController < ApplicationController
   def advanced_search # :nologin: :norobots:
     query = find_query(:Name)
     show_selected_names(query)
-  rescue StandardError => err
-    flash_error(err.to_s) if err.present?
+  rescue StandardError => e
+    flash_error(e.to_s) if e.present?
     redirect_to(controller: "observer", action: "advanced_search_form")
   end
 
@@ -872,8 +872,8 @@ class NameController < ApplicationController
     begin
       name.change_deprecated(true)
       name.save_with_log(:log_deprecated_by)
-    rescue RuntimeError => err
-      flash_error(err.to_s) if err.present?
+    rescue RuntimeError => e
+      flash_error(e.to_s) if e.present?
       false
     end
   end

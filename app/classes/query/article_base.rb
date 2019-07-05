@@ -1,31 +1,26 @@
-module Query
-  # Code common to all Article queries.
-  class ArticleBase < Query::Base
-    def model
-      Article
-    end
+class Query::ArticleBase < Query::Base
+  def model
+    Article
+  end
 
-    def parameter_declarations
-      super.merge(
-        created_at?:        [:time],
-        updated_at?:        [:time],
-        users?:             [User],
-        title_has?:         :string,
-        body_has?:          :string
-      )
-    end
+  def parameter_declarations
+    super.merge(
+      created_at?: [:time],
+      updated_at?: [:time],
+      users?:      [User],
+      title_has?:  :string,
+      body_has?:   :string
+    )
+  end
 
-    def initialize_flavor
-      initialize_model_do_time(:created_at)
-      initialize_model_do_time(:updated_at)
-      initialize_model_do_objects_by_id(:users)
-      initialize_model_do_search(:title_has, :title)
-      initialize_model_do_search(:body_has, :body)
-      super
-    end
+  def initialize_flavor
+    add_owner_and_time_stamp_conditions("articles")
+    add_search_condition("articles.title", params[:title_has])
+    add_search_condition("articles.body", params[:body_has])
+    super
+  end
 
-    def default_order
-      "created_at"
-    end
+  def default_order
+    "created_at"
   end
 end

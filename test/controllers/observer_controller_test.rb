@@ -83,6 +83,17 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_observation_with_unrecognized_name
+    text_name = "Elfin saddle"
+    params = { name: { name: text_name },
+               user: rolf,
+               where: locations.first.name }
+    post_requires_login(:create_observation, params)
+
+    assert_select("div[id='name_messages']",
+                  /MO does not recognize the name.*#{text_name}/)
+  end
+
   ##############################################################################
 
   # ----------------------------
@@ -113,15 +124,15 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
-    get(:show_observation, id: obs.id)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_match(/34.1622|118.3521/, @response.body)
 
-    obs.update_attribute(:gps_hidden, true)
-    get(:show_observation, id: obs.id)
+    obs.update(gps_hidden: true)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_no_match(/34.1622|118.3521/, @response.body)
 
     login("mary")
-    get(:show_observation, id: obs.id)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
@@ -152,6 +163,9 @@ class ObserverControllerTest < FunctionalTestCase
 
     get_with_dump(:intro)
     assert_template(:intro)
+
+    get(:search_bar_help)
+    assert_response(:success)
 
     get_with_dump(:list_observations)
     assert_template(:list_observations, partial: :_rss_log)
@@ -554,7 +568,7 @@ class ObserverControllerTest < FunctionalTestCase
     pattern =  "hexiexiva"
     params = { search: { pattern: pattern, type: :google } }
     target =
-      "https://google.com/search?q=site:mushroomobserver.org%20#{pattern}"
+      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
     get_with_dump(:pattern_search, params)
     assert_redirected_to(target)
 
@@ -639,7 +653,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
                                        include?("118.3521"))
 
-    obs.update_attribute(:gps_hidden, true)
+    obs.update(gps_hidden: true)
     get(:map_observation, params: { id: obs.id })
     assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
                                         include?("34.1622"))
@@ -658,7 +672,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
                                        include?("118.3521"))
 
-    obs.update_attribute(:gps_hidden, true)
+    obs.update(gps_hidden: true)
     get(:map_observations, params: { q: query.id.alphabetize })
     assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
                                         include?("34.1622"))
@@ -1655,6 +1669,10 @@ class ObserverControllerTest < FunctionalTestCase
     assert_input_value(:herbarium_record_herbarium_name,
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_herbarium_id, "")
+    assert_true(@response.body.include?("Albion, Mendocino Co., California"))
+    users(:rolf).update(location_format: :scientific)
+    get(:create_observation)
+    assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
 
   def test_construct_observation_approved_place_name
@@ -2463,7 +2481,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(
+    post( # rubocop:disable HttpPositionalArguments
       :create_observation,
       observation: {
         when: Time.zone.now,
@@ -2727,7 +2745,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(
+    post( # rubocop:disable HttpPositionalArguments
       :edit_observation,
       id: obs.id,
       observation: {
@@ -3721,6 +3739,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:print_labels, params: { q: query.id.alphabetize })
     assert_select("div#labels td", query.num_results)
     assert_match(/314159/, @response.body) # make sure mycoflora id in there!
+    assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
     # Alternative entry point.
     post(

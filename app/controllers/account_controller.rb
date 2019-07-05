@@ -170,7 +170,7 @@ class AccountController < ApplicationController
     return unless (user = find_or_goto_index(User, params[:id].to_s))
 
     VerifyEmail.build(user).deliver_now
-    notify_root_of_blocked_verification_email(user)
+    notify_root_of_verification_email(user)
     flash_notice(:runtime_reverify_sent.tp + :email_spam_notice.tp)
     redirect_back_or_default(action: :welcome)
   end
@@ -784,12 +784,17 @@ class AccountController < ApplicationController
 
   SPAM_BLOCKERS = %w[
     hotmail.com
+    live.com
   ].freeze
 
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")
     return unless SPAM_BLOCKERS.any? { |d| domain == d }
 
+    notify_root_of_verification_email(user)
+  end
+
+  def notify_root_of_verification_email(user)
     url = "#{MO.http_domain}/account/verify/#{user.id}?" \
           "auth_code=#{user.auth_code}"
     subject = :email_subject_verify.l
