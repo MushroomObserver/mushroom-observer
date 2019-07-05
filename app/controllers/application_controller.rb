@@ -1419,17 +1419,6 @@ class ApplicationController < ActionController::Base
         when :inside_observation
           id = query.params[:observation]
           :runtime_index_no_inside_observation.t(type: type, id: id)
-        when :of_children
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_children.t(type: type,
-                                          name: name.display_name)
-        when :of_name
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_name.t(type: type, name: name.display_name)
-        when :of_parents
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_parents.t(type: type,
-                                         name: name.display_name)
         when :pattern_search
           :runtime_no_matches_pattern.t(type: type,
                                         value: query.params[:pattern].

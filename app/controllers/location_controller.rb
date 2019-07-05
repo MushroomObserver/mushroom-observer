@@ -237,10 +237,6 @@ class LocationController < ApplicationController
       flavor = :in_set
     when :with_observations_in_species_list
       flavor = :in_species_list
-    when :with_observations_of_children
-      flavor = :of_children
-    when :with_observations_of_name
-      flavor = :of_name
 
     # Temporarily kludge in pattern search the old way.
     when :pattern_search
