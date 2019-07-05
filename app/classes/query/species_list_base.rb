@@ -1,6 +1,6 @@
 class Query::SpeciesListBase < Query::Base
   include Query::Initializers::Names
-p
+
   def model
     SpeciesList
   end

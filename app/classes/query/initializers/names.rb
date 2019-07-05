@@ -32,7 +32,7 @@ module Query::Initializers::Names
     add_id_condition(column, lookup_names_by_name(names_parameters), *joins)
     add_join(:observations, :namings) if params[:include_nonconsensus]
     if params[:exclude_consensus]
-      self.where << "namings.name_id != observations.name_id"
+      where << "namings.name_id != observations.name_id"
     end
   end
 

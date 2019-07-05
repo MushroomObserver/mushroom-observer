@@ -6,19 +6,17 @@ module Query::Modules::LookupNames
     return unless vals = args[:names]
 
     orig_names = find_exact_name_matches(vals)
-    min_names = args[:include_synonyms] ? add_synonyms(orig_names) :
-                                          add_other_spellings(orig_names)
+    min_names = add_synonyms_or_spellings(orig_names, args[:include_synonyms])
     min_names2 = if args[:include_subtaxa]
-      add_subtaxa(min_names)
-    elsif args[:include_immediate_subtaxa]
-      add_immediate_subtaxa(min_names)
-    end
+                   add_subtaxa(min_names)
+                 elsif args[:include_immediate_subtaxa]
+                   add_immediate_subtaxa(min_names)
+                 end
     if min_names2 && min_names2.length > min_names.length
-      min_names = args[:include_synonyms] ? add_synonyms(min_names2) :
-                                            add_other_spellings(min_names2)
+      min_names = add_synonyms_or_spellings(min_names2, args[:include_synonyms])
     end
     min_names -= orig_names if args[:exclude_original_names]
-    min_names.map {|min_name| min_name[0]}
+    min_names.map { |min_name| min_name[0] }
   end
 
   # ----------------------------------------------------------------------------
@@ -40,7 +38,7 @@ module Query::Modules::LookupNames
     name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
     matches = Name.where(search_name: name2)
     matches = Name.where(text_name: name2) if matches.empty?
-    matches.map {|name| minimal_name_data(name)}
+    matches.map { |name3| minimal_name_data(name3) }
   end
 
   def minimal_name_data(name)
@@ -58,21 +56,29 @@ module Query::Modules::LookupNames
     "id, correct_spelling_id, synonym_id, text_name"
   end
 
+  def add_synonyms_or_spellings(min_names, include_synonyms)
+    if include_synonyms
+      add_synonyms(min_names)
+    else
+      add_other_spellings(min_names)
+    end
+  end
+
   def add_other_spellings(min_names)
-    correct_spelling_ids = min_names.map {|min_name| min_name[1] || min_name[0]}
-    min_names.reject {|min_name| min_name[1]} +
+    ids = min_names.map { |min_name| min_name[1] || min_name[0] }
+    min_names.reject { |min_name| min_name[1] } +
       Name.connection.select_rows(%(
         SELECT #{minimal_name_columns} FROM names
-        WHERE correct_spelling_id IN (#{correct_spelling_ids.join(",")})
+        WHERE correct_spelling_id IN (#{ids.join(",")})
       ))
   end
 
   def add_synonyms(min_names)
-    synonym_ids = min_names.map {|min_name| min_name[2]}.reject(&:nil?)
-    min_names.reject {|min_name| min_name[2]} +
+    ids = min_names.map { |min_name| min_name[2] }.reject(&:nil?)
+    min_names.reject { |min_name| min_name[2] } +
       Name.connection.select_rows(%(
         SELECT #{minimal_name_columns} FROM names
-        WHERE synonym_id IN (#{synonym_ids.join(",")})
+        WHERE synonym_id IN (#{ids.join(",")})
       ))
   end
 
@@ -104,19 +110,20 @@ module Query::Modules::LookupNames
     end
     min_names += Name.connection.select_rows(%(
       SELECT #{minimal_name_columns} FROM names
-      WHERE text_name REGEXP "^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$"
+      WHERE text_name REGEXP
+        "^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$"
     ))
     min_names.uniq
   end
 
   def genera_and_up(min_names)
-    min_names.map {|min_name| min_name[3]}.
-              reject {|min_name| min_name.include?(" ")}
+    min_names.map { |min_name| min_name[3] }.
+      reject { |min_name| min_name.include?(" ") }
   end
 
   def genera_and_down(min_names)
     genera = {}
-    text_names = min_names.map {|min_name| min_name[3]}
+    text_names = min_names.map { |min_name| min_name[3] }
     # Make hash of all genera present.
     text_names.each do |text_name|
       genera[text_name] = true unless text_name.include?(" ")
