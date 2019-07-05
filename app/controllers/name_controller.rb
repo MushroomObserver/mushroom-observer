@@ -363,13 +363,13 @@ class NameController < ApplicationController
       @children_query = create_query(:Name, :all,
         names: [@name],
         include_immediate_subtaxa: true,
-        exclude_parent: true
+        exclude_original_names: true
       )
       if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :all,
           names: [@name],
           include_subtaxa: true,
-          exclude_parent: true,
+          exclude_original_names: true,
           by: :confidence
         )
       end
