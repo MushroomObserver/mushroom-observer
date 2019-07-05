@@ -18,8 +18,8 @@ class QueryTest < UnitTestCase
     end
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
-    assert(!query.title.include?("[:"),
-           "Title contains undefined localizations: <#{query.title}>")
+    assert_not(query.title.include?("[:"),
+               "Title contains undefined localizations: <#{query.title}>")
   end
 
   def clean(str)
@@ -38,7 +38,7 @@ class QueryTest < UnitTestCase
     assert_equal(:all, query.flavor)
 
     query2 = Query.lookup_and_save(:Observation)
-    assert(!query2.record.new_record?)
+    assert_not(query2.record.new_record?)
     assert_equal(query, query2)
 
     assert_equal(query2, Query.safe_find(query2.id))
@@ -597,10 +597,10 @@ class QueryTest < UnitTestCase
     ids = query.result_ids
 
     first = query.instantiate([ids[0]]).first
-    assert(!first.images.loaded?)
+    assert_not(first.images.loaded?)
 
     first = query.instantiate([ids[0]], include: :images).first
-    assert(!first.images.loaded?)
+    assert_not(first.images.loaded?)
 
     # Have to test it on a different one, because first is now cached.
     second = query.instantiate([ids[1]], include: :images).first
@@ -796,8 +796,8 @@ class QueryTest < UnitTestCase
           "Query #{q.id} is not the inner for Observation #{obs}"
         )
       else
-        refute(inners_query_ids.include?(q.id),
-               "Observation #{obs} should not be in inner1 - inner4")
+        assert_not(inners_query_ids.include?(q.id),
+                   "Observation #{obs} should not be in inner1 - inner4")
       end
       # And at the right image?
       assert_equal(img, q.current_id)
@@ -825,8 +825,8 @@ class QueryTest < UnitTestCase
           "Query #{q.id} is not the inner for Observation #{obs}"
         )
       else
-        refute(inners_query_ids.include?(q.id),
-               "Observation #{obs} should not be in inner1 - inner4")
+        assert_not(inners_query_ids.include?(q.id),
+                   "Observation #{obs} should not be in inner1 - inner4")
       end
       # And at the right image?
       assert_equal(img, q.current_id)
@@ -981,19 +981,19 @@ class QueryTest < UnitTestCase
     assert(q9c = q9b.coerce(:Observation))
 
     # Only some should be new.
-    assert(!q1c.record.new_record?)
+    assert_not(q1c.record.new_record?)
     assert_equal(q1a, q1c)
-    assert(!q2c.record.new_record?)
+    assert_not(q2c.record.new_record?)
     assert_equal(q2a, q2c)
-    assert(!q3c.record.new_record?)
+    assert_not(q3c.record.new_record?)
     assert_equal(q3a, q3c)
-    assert(!q5c.record.new_record?)
+    assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     assert(q6c.record.new_record?)  # (converted to in_set)
     assert(q7c.record.new_record?)  # (converted to in_set)
-    assert(!q8c.record.new_record?)
+    assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
-    assert(!q9c.record.new_record?)
+    assert_not(q9c.record.new_record?)
     assert_equal(q9a, q9c)
   end
 
@@ -1098,13 +1098,13 @@ class QueryTest < UnitTestCase
     assert_nil(q8b.coerce(:Observation))
 
     # Only some should be new.
-    assert(!q1c.record.new_record?)
+    assert_not(q1c.record.new_record?)
     assert_equal(q1a, q1c)
-    assert(!q2c.record.new_record?)
+    assert_not(q2c.record.new_record?)
     assert_equal(q2a, q2c)
-    assert(!q3c.record.new_record?)
+    assert_not(q3c.record.new_record?)
     assert_equal(q3a, q3c)
-    assert(!q5c.record.new_record?)
+    assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     assert(q6c.record.new_record?)  # (converted to in_set)
     assert(q7c.record.new_record?)  # (converted to in_set)
@@ -1192,19 +1192,19 @@ class QueryTest < UnitTestCase
     assert(q9c = q9b.coerce(:Observation))
 
     # Only some should be new.
-    assert(!q1c.record.new_record?)
+    assert_not(q1c.record.new_record?)
     assert_equal(q1a, q1c)
-    assert(!q2c.record.new_record?)
+    assert_not(q2c.record.new_record?)
     assert_equal(q2a, q2c)
-    assert(!q3c.record.new_record?)
+    assert_not(q3c.record.new_record?)
     assert_equal(q3a, q3c)
-    assert(!q5c.record.new_record?)
+    assert_not(q5c.record.new_record?)
     assert_equal(q5a, q5c)
     assert(q6c.record.new_record?)  # (converted to in_set)
     assert(q7c.record.new_record?)  # (converted to in_set)
-    assert(!q8c.record.new_record?)
+    assert_not(q8c.record.new_record?)
     assert_equal(q8a, q8c)
-    assert(!q9c.record.new_record?)
+    assert_not(q9c.record.new_record?)
     assert_equal(q9a, q9c)
   end
 
@@ -1312,7 +1312,7 @@ class QueryTest < UnitTestCase
 
   def test_coercable
     assert(Query.lookup(:Observation, :all, by: :id).coercable?(:Image))
-    refute(Query.lookup(:Herbarium, :all, by: :id).coercable?(:Project))
+    assert_not(Query.lookup(:Herbarium, :all, by: :id).coercable?(:Project))
   end
 
   ##############################################################################
@@ -2855,10 +2855,10 @@ class QueryTest < UnitTestCase
     seq2 = sequences[1]
     seq3 = sequences[2]
     seq4 = sequences[3]
-    seq1.update_attribute(:observation, observations(:minimal_unknown_obs))
-    seq2.update_attribute(:observation, observations(:detailed_unknown_obs))
-    seq3.update_attribute(:observation, observations(:agaricus_campestris_obs))
-    seq4.update_attribute(:observation, observations(:peltigera_obs))
+    seq1.update(observation: observations(:minimal_unknown_obs))
+    seq2.update(observation: observations(:detailed_unknown_obs))
+    seq3.update(observation: observations(:agaricus_campestris_obs))
+    seq4.update(observation: observations(:peltigera_obs))
     assert_query([seq1, seq2], :Sequence, :all, obs_date: %w[2006 2006])
     assert_query([seq1, seq2], :Sequence, :all, observers: users(:mary))
     assert_query([seq1, seq2], :Sequence, :all, names: "Fungi")
@@ -2876,11 +2876,11 @@ class QueryTest < UnitTestCase
   def test_uses_join_hash
     query = Query.lookup(:Sequence, :all,
                          north: "90", south: "0", west: "-180", east: "-100")
-    assert !query.uses_join_sub([], :location)
-    assert query.uses_join_sub([:location], :location)
-    assert !query.uses_join_sub({}, :location)
-    assert query.uses_join_sub({ test: :location }, :location)
-    assert query.uses_join_sub(:location, :location)
+    assert_not(query.uses_join_sub([], :location))
+    assert(query.uses_join_sub([:location], :location))
+    assert_not(query.uses_join_sub({}, :location))
+    assert(query.uses_join_sub({ test: :location }, :location))
+    assert(query.uses_join_sub(:location, :location))
   end
 
   def test_sequence_in_set
@@ -3127,71 +3127,85 @@ class QueryTest < UnitTestCase
     name4 = create_test_name("Pseudolepiota")
     name5 = create_test_name("Pseudolepiota rachodes")
 
-    name1.update_attribute(:synonym_id, Synonym.create.id)
-    name4.update_attribute(:synonym_id, name1.synonym_id)
-    name5.update_attribute(:synonym_id, name2.synonym_id)
+    name1.update(synonym_id: Synonym.create.id)
+    name4.update(synonym_id: name1.synonym_id)
+    name5.update(synonym_id: name2.synonym_id)
 
     assert_lookup_names_by_name([name1], names: ["Macrolepiota"])
     assert_lookup_names_by_name([name2], names: ["Macrolepiota rachodes"])
     assert_lookup_names_by_name([name1, name4],
-      names: ["Macrolepiota"], include_synonyms: true)
+                                names: ["Macrolepiota"],
+                                include_synonyms: true)
     assert_lookup_names_by_name([name2, name3, name5],
-      names: ["Macrolepiota rachodes"], include_synonyms: true)
+                                names: ["Macrolepiota rachodes"],
+                                include_synonyms: true)
     assert_lookup_names_by_name([name3, name5],
-      names: ["Macrolepiota rachodes"],
-      include_synonyms: true,
-      exclude_original_names: true)
+                                names: ["Macrolepiota rachodes"],
+                                include_synonyms: true,
+                                exclude_original_names: true)
     assert_lookup_names_by_name([name1, name2, name3],
-      names: ["Macrolepiota"], include_subtaxa: true)
+                                names: ["Macrolepiota"],
+                                include_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3],
-      names: ["Macrolepiota"], include_immediate_subtaxa: true)
+                                names: ["Macrolepiota"],
+                                include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true)
+                                names: ["Macrolepiota"],
+                                include_synonyms: true,
+                                include_subtaxa: true)
     assert_lookup_names_by_name([name2, name3, name4, name5],
-      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true,
-      exclude_original_names: true)
+                                names: ["Macrolepiota"],
+                                include_synonyms: true,
+                                include_subtaxa: true,
+                                exclude_original_names: true)
 
-    name5.update_attribute(:synonym_id, nil)
+    name5.update(synonym_id: nil)
     name5 = Name.where(text_name: "Pseudolepiota rachodes").first
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-      names: ["Macrolepiota"], include_synonyms: true, include_subtaxa: true)
+                                names: ["Macrolepiota"],
+                                include_synonyms: true,
+                                include_subtaxa: true)
+  end
 
-    name6 = names(:peltigeraceae)
-    name7 = names(:peltigera)
-    name8 = names(:petigera)
-    name9 = create_test_name("Peltigera canina")
-    nameA = create_test_name("Peltigera canina var. spuria")
-    nameB = create_test_name("Peltigera subg. Foo")
-    nameC = create_test_name("Peltigera subg. Foo sect. Bar")
+  def test_lookup_names_by_name2
+    User.current = rolf
 
-    name9.update_attribute(:classification, name7.classification)
-    nameA.update_attribute(:classification, name7.classification)
-    nameB.update_attribute(:classification, name7.classification)
-    nameC.update_attribute(:classification, name7.classification)
+    name1 = names(:peltigeraceae)
+    name2 = names(:peltigera)
+    name3 = names(:petigera)
+    name4 = create_test_name("Peltigera canina")
+    name5 = create_test_name("Peltigera canina var. spuria")
+    name6 = create_test_name("Peltigera subg. Foo")
+    name7 = create_test_name("Peltigera subg. Foo sect. Bar")
+
+    name4.update(classification: name2.classification)
+    name5.update(classification: name2.classification)
+    name6.update(classification: name2.classification)
+    name7.update(classification: name2.classification)
 
     assert_lookup_names_by_name(
-      [name6, name7, name8, name9, nameA, nameB, nameC],
+      [name1, name2, name3, name4, name5, name6, name7],
       names: ["Peltigeraceae"], include_subtaxa: true
     )
     assert_lookup_names_by_name(
-      [name6, name7, name8],
+      [name1, name2, name3],
       names: ["Peltigeraceae"], include_immediate_subtaxa: true
     )
     assert_lookup_names_by_name(
-      [name7, name8, name9, nameA, nameB, nameC],
+      [name2, name3, name4, name5, name6, name7],
       names: ["Peltigera"], include_subtaxa: true
     )
     assert_lookup_names_by_name(
-      [name7, name8, name9, nameB],
-      names: ["Peltigera"], include_immediate_subtaxa: true,
+      [name2, name3, name4, name6],
+      names: ["Peltigera"], include_immediate_subtaxa: true
     )
     assert_lookup_names_by_name(
-      [nameB, nameC],
-      names: ["Peltigera subg. Foo"], include_immediate_subtaxa: true,
+      [name6, name7],
+      names: ["Peltigera subg. Foo"], include_immediate_subtaxa: true
     )
     assert_lookup_names_by_name(
-      [name9, nameA],
-      names: ["Peltigera canina"], include_immediate_subtaxa: true,
+      [name4, name5],
+      names: ["Peltigera canina"], include_immediate_subtaxa: true
     )
   end
 
@@ -3204,7 +3218,7 @@ class QueryTest < UnitTestCase
   def assert_lookup_names_by_name(expect, args)
     actual = Query::Base.new.lookup_names_by_name(args)
     expect = expect.sort_by(&:text_name)
-    actual = actual.map {|id| Name.find(id)}.sort_by(&:text_name)
+    actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
     assert_name_list_equal(expect, actual)
   end
 end
