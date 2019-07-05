@@ -20,9 +20,6 @@ class API
         updated_at:      parse_range(:time, :updated_at),
         date:            parse_range(:date, :date, help: :when_taken),
         users:           parse_array(:user, :user, help: :uploader),
-        names:           parse_array(:name, :name, as: :id),
-        synonym_names:   parse_array(:name, :synonyms_of, as: :id),
-        children_names:  parse_array(:name, :children_of, as: :id),
         locations:       parse_array(:location, :location, as: :id),
         observations:    parse_array(:observation, :observation, as: :id),
         projects:        parse_array(:project, :project, as: :id),
@@ -42,9 +39,30 @@ class API
         quality:         parse_range(:quality, :quality),
         confidence:      parse_range(:confidence, :confidence),
         ok_for_export:   parse(:boolean, :ok_for_export)
-      }
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
+
+    # This probably belongs in a shared module somewhere.
+    def parse_names_parameters
+      args = {
+        names:            parse_array(:name, :name, as: :id),
+        include_synonyms: parse(:boolean, :include_synonyms),
+        include_subtaxa:  parse(:boolean, :include_subtaxa)
+      }
+      if names = parse_array(:name, :synonyms_of, as: :id)
+        args[:names]            = names
+        args[:include_synonyms] = true
+      end
+      if names = parse_array(:name, :children_of, as: :id)
+        args[:names]           = names
+        args[:include_subtaxa] = true
+      end
+      # TODO: create mechanism for deprecating parameters
+      # deprecate_parameter(:synonyms_of)
+      # deprecate_parameter(:children_of)
+      args
+    end
 
     def create_params
       parse_create_params!
