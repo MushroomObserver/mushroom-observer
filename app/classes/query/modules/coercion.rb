@@ -14,13 +14,6 @@ module Query
     #   end
     #
     #   ObservationAdvancedSearch << ObservationBase
-    #     # Perhaps only some advanced searches can be coerced.  Add this
-    #     # method (with question mark) to check if it is possible.
-    #     def coerce_into_name_query?
-    #       params[:content].blank?
-    #     end
-    #
-    #     # This is only called if it passed coerce_into_name_query? first.
     #     def coerce_into_name_query
     #       Query.lookup(:Name, ...)
     #     end
@@ -32,12 +25,7 @@ module Query
       def coercable?(new_model)
         @new_model = new_model.to_s
         return true if @new_model == model.to_s
-        return false unless respond_to?(coerce_method)
-
-        send(coerce_method)
-        true
-      rescue RuntimeError
-        false
+        respond_to?(coerce_method)
       end
 
       # Attempt to coerce a query for one model into a related query for
@@ -47,17 +35,7 @@ module Query
         @new_model = new_model.to_s
         return self if @new_model == model.to_s
 
-        if respond_to?(test_method)
-          return nil unless send(test_method)
-
-          send(coerce_method)
-        elsif respond_to?(coerce_method)
-          send(coerce_method)
-        end
-      end
-
-      def test_method
-        "coerce_into_#{@new_model.underscore}_query?"
+        send(coerce_method)
       end
 
       def coerce_method
