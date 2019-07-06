@@ -62,36 +62,6 @@ class API
     raise UnusedParameters.new(unused)     if unused.any?
   end
 
-  # ------------------------------------------
-  #  These validators belong elsewhere.
-  #  They are shared by multiple model apis.
-  # ------------------------------------------
-
-  def make_sure_location_isnt_dubious!(name)
-    return if name.blank? || Location.where(name: name).any?
-
-    citations =
-      Location.check_for_empty_name(name) +
-      Location.check_for_dubious_commas(name) +
-      Location.check_for_bad_country_or_state(name) +
-      Location.check_for_bad_terms(name) +
-      Location.check_for_bad_chars(name)
-    return if citations.none?
-
-    raise DubiousLocationName.new(citations)
-  end
-
-  def parse_bounding_box!
-    n = parse(:latitude, :north, help: 1)
-    s = parse(:latitude, :south, help: 1)
-    e = parse(:longitude, :east, help: 1)
-    w = parse(:longitude, :west, help: 1)
-    return unless n || s || e || w
-    return [n, s, e, w] if n && s && e && w
-
-    raise NeedAllFourEdges.new
-  end
-
   ##############################################################################
 
   private

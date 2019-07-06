@@ -43,27 +43,6 @@ class API
     end
     # rubocop:enable Metrics/AbcSize
 
-    # This probably belongs in a shared module somewhere.
-    def parse_names_parameters
-      args = {
-        names:            parse_array(:name, :name, as: :verbatim),
-        include_synonyms: parse(:boolean, :include_synonyms),
-        include_subtaxa:  parse(:boolean, :include_subtaxa)
-      }
-      if names = parse_array(:name, :synonyms_of, as: :id)
-        args[:names]            = names
-        args[:include_synonyms] = true
-      end
-      if names = parse_array(:name, :children_of, as: :id)
-        args[:names]           = names
-        args[:include_subtaxa] = true
-        args[:exclude_original_names] = true
-      end
-      deprecate_parameter(:synonyms_of)
-      deprecate_parameter(:children_of)
-      args
-    end
-
     def create_params
       parse_create_params!
       {
