@@ -34,6 +34,7 @@ module Query
       def coerce(new_model)
         @new_model = new_model.to_s
         return self if @new_model == model.to_s
+        return nil unless respond_to?(coerce_method)
 
         send(coerce_method)
       end
