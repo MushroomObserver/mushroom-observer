@@ -86,24 +86,9 @@ module Query::Modules::LookupNames
   def find_matching_names(name)
     parse = Name.parse_name(name)
     name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-    matches = Name.where(search_name: name2)
+    matches = Name.where(search_name: name2) if parse.author.present?
     matches = Name.where(text_name: name2) if matches.empty?
     matches.map { |name3| minimal_name_data(name3) }
-  end
-
-  def minimal_name_data(name)
-    return nil unless name
-
-    [
-      name.id,                   # 0
-      name.correct_spelling_id,  # 1
-      name.synonym_id,           # 2
-      name.text_name             # 3
-    ]
-  end
-
-  def minimal_name_columns
-    "id, correct_spelling_id, synonym_id, text_name"
   end
 
   def add_other_spellings(min_names)
@@ -177,5 +162,29 @@ module Query::Modules::LookupNames
     text_names.reject do |text_name|
       text_name.include?(" ") && genera[text_name.split(" ").first]
     end.uniq
+  end
+
+  # This ugliness with "minimal name data" is a way to avoid having Rails
+  # instantiate all the names (which can get quite huge if you start talking
+  # about all the children of Kingdom Fungi!)  It allows us to use low-level
+  # mysql queries, and restricts the dataflow back and forth to the database
+  # to just the few columns we actually need.  Unfortunately it is ugly,
+  # it totally violates the autonomy of Name, and it is probably hard to
+  # understand.  But hopefully once we get it working it will remain stable.
+  # Blame it on me... -Jason, July 2019 
+
+  def minimal_name_data(name)
+    return nil unless name
+
+    [
+      name.id,                   # 0
+      name.correct_spelling_id,  # 1
+      name.synonym_id,           # 2
+      name.text_name             # 3
+    ]
+  end
+
+  def minimal_name_columns
+    "id, correct_spelling_id, synonym_id, text_name"
   end
 end
