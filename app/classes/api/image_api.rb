@@ -58,9 +58,8 @@ class API
         args[:names]           = names
         args[:include_subtaxa] = true
       end
-      # TODO: create mechanism for deprecating parameters
-      # deprecate_parameter(:synonyms_of)
-      # deprecate_parameter(:children_of)
+      deprecate_parameter(:synonyms_of)
+      deprecate_parameter(:children_of)
       args
     end
 

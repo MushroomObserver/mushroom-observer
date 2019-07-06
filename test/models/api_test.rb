@@ -3902,6 +3902,12 @@ class ApiTest < UnitTestCase
   #  :section: Help Messages
   # --------------------------
 
+  def test_deprecation
+    api = API.execute(method: :get, action: :image, help: :me)
+    assert_match(/created_at/, api.errors.first.to_s)
+    assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
+  end
+
   def test_api_key_help
     file = help_messages_file
     File.open(file, "w") { |fh| fh.truncate(0) }

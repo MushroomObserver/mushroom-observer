@@ -50,6 +50,11 @@ class API
     ignore_params[key] = nil
   end
 
+  # These parameters should be omitted from the help message.
+  def deprecate_parameter(key)
+    expected_params[key].deprecated = true
+  end
+
   def done_parsing_parameters!
     unused = params.keys - expected_params.keys - ignore_params.keys
     raise HelpMessage.new(expected_params) if unused.include?(:help)

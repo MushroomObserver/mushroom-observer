@@ -1,7 +1,7 @@
 class API
   # Information about an API parameter to provide automatic documentation
   class ParameterDeclaration
-    attr_accessor :key, :type, :args, :set_parameter
+    attr_accessor :key, :type, :args, :set_parameter, :deprecated
 
     def initialize(key, type, args = {})
       self.key  = key
@@ -11,6 +11,10 @@ class API
 
     def set_parameter?
       @set_parameter
+    end
+
+    def deprecated?
+      @deprecated
     end
 
     def inspect

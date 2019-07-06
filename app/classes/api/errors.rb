@@ -232,7 +232,7 @@ class API
     end
 
     def all_keys
-      params.keys - [
+      params.keys.reject { |k| params[k].deprecated? } - [
         :method, :action, :version, :api_key, :page, :detail, :format
       ]
     end
