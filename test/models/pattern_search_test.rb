@@ -490,18 +490,28 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_synonym_of
+  def test_observation_search_include_synonyms
     expect = Observation.where(name: names(:peltigera))
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("synonym_of:Petigera")
+    x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_child_of
+  def test_observation_search_include_subtaxa
     names = Name.where("text_name LIKE 'Agaricus%'")
     expect = Observation.where("name_id IN (#{names.map(&:id).join(",")})")
     assert(expect.count.positive?)
-    x = PatternSearch::Observation.new("child_of:Agaricus")
+    x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
+    assert_obj_list_equal(expect, x.query.results, :sort)
+  end
+
+  def test_observation_search_include_nonconsensus
+    name = names(:agaricus_campestris)
+    consensus = Observation.where(name: name)
+    expect = Observation.joins(:namings).where(namings: { name: name })
+    assert(consensus.count < expect.count)
+    x = PatternSearch::Observation.new("Agaricus campestris" \
+                                       " include_nonconsensus:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
@@ -689,18 +699,19 @@ class PatternSearchTest < UnitTestCase
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_synonym_of
+  def test_name_search_include_synonyms
     expect = names(:macrolepiota_rachodes).synonyms.
              reject(&:correct_spelling_id)
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("synonym_of:\"Macrolepiota rachodes\"")
+    x = PatternSearch::Name.new("Macrolepiota rachodes include_synonyms:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_child_of
-    expect = names(:agaricus).all_children.reject(&:correct_spelling_id)
+  def test_name_search_include_subtaxa
+    name = names(:agaricus)
+    expect = [name] + name.all_children.reject(&:correct_spelling_id)
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("child_of:Agaricus")
+    x = PatternSearch::Name.new("Agaricus include_subtaxa:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
@@ -728,20 +739,20 @@ class PatternSearchTest < UnitTestCase
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_misspelled
+  def test_name_search_include_misspellings
     expect = Name.where.not(correct_spelling_id: nil)
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("misspelled:yes")
+    x = PatternSearch::Name.new("include_misspellings:yes")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.where(correct_spelling_id: nil)
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("misspelled:no")
+    x = PatternSearch::Name.new("include_misspellings:no")
     assert_name_list_equal(expect, x.query.results, :sort)
 
     expect = Name.all
     assert_not_empty(expect)
-    x = PatternSearch::Name.new("misspelled:both")
+    x = PatternSearch::Name.new("include_misspellings:both")
     assert_name_list_equal(expect, x.query.results, :sort)
   end
 
