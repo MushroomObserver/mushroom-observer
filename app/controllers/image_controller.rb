@@ -157,8 +157,9 @@ class ImageController < ApplicationController
     elsif (query.params[:by] == "copyright_holder") ||
           (query.params[:by] == "reverse_copyright_holder")
       args[:letters] = "images.copyright_holder"
-    # Paginate by letter if names are included in query.
-    elsif query.uses_table?(:names)
+    # Paginate by letter if sorting by name.
+    elsif (query.params[:by] == "name") ||
+          (query.params[:by] == "reverse_name")
       args[:letters] = "names.sort_name"
     end
 

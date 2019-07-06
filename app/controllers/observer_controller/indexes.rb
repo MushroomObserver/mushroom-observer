@@ -148,8 +148,9 @@ class ObserverController
     if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
       args[:letters] = "users.login"
-    # Paginate by letter if names are included in query.
-    elsif query.uses_table?(:names)
+    # Paginate by letter if sorting by name.
+    elsif (query.params[:by] == "name") ||
+          (query.params[:by] == "reverse_name")
       args[:letters] = "names.sort_name"
     end
 
