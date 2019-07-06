@@ -72,7 +72,7 @@ module Query::Modules::Conditions
   end
 
   def add_id_condition(col, ids, *joins)
-    return if ids.empty?
+    return if ids.nil?
 
     set = clean_id_set(ids)
     @where << "#{col} IN (#{set})"
