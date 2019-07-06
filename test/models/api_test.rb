@@ -1143,14 +1143,29 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
 
-    assert_api_pass(params.merge(name: "Agaricus campestros", include_synonyms: "yes"))
+    assert_api_pass(
+      params.merge(name: "Agaricus campestros", include_synonyms: "yes")
+    )
     assert_api_results(imgs)
+
+    ### test children_of, include_subtaxa
+    # Use existing autonym instead of new factory Name
+    agaricus = Name.where(text_name: "Agaricus").first
+    agaricus_img = Image.create(
+      # add notes to avoid breaking later, brittle assertion
+      notes: "Agaricus image", user: rolf
+      )
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+      )
 
     assert_api_pass(params.merge(children_of: "Agaricus"))
     assert_api_results(imgs)
 
     assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
-    assert_api_results(imgs)
+    assert_api_results(imgs << agaricus_img)
+    ###
 
     burbank = locations(:burbank)
     imgs = burbank.observations.map(&:images).flatten
@@ -1621,6 +1636,10 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(names)
 
     names = Name.where("classification like '%Fungi%'").each do |n|
       genus = n.text_name.split.first
@@ -1629,6 +1648,11 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
+    assert_api_pass(
+      params.merge(name: "Fungi", include_subtaxa: "yes")
+    )
+    assert_api_results(names)
+
 
     names = Name.where(deprecated: true).
             reject(&:correct_spelling_id)

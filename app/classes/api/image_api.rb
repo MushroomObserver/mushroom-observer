@@ -57,6 +57,7 @@ class API
       if names = parse_array(:name, :children_of, as: :id)
         args[:names]           = names
         args[:include_subtaxa] = true
+        args[:exclude_original_names] = true
       end
       deprecate_parameter(:synonyms_of)
       deprecate_parameter(:children_of)
