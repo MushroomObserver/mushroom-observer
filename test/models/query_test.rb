@@ -3183,30 +3183,27 @@ class QueryTest < UnitTestCase
     name6.update(classification: name2.classification)
     name7.update(classification: name2.classification)
 
-    assert_lookup_names_by_name(
-      [name1, name2, name3, name4, name5, name6, name7],
-      names: ["Peltigeraceae"], include_subtaxa: true
-    )
-    assert_lookup_names_by_name(
-      [name1, name2, name3],
-      names: ["Peltigeraceae"], include_immediate_subtaxa: true
-    )
-    assert_lookup_names_by_name(
-      [name2, name3, name4, name5, name6, name7],
-      names: ["Peltigera"], include_subtaxa: true
-    )
-    assert_lookup_names_by_name(
-      [name2, name3, name4, name6],
-      names: ["Peltigera"], include_immediate_subtaxa: true
-    )
-    assert_lookup_names_by_name(
-      [name6, name7],
-      names: ["Peltigera subg. Foo"], include_immediate_subtaxa: true
-    )
-    assert_lookup_names_by_name(
-      [name4, name5],
-      names: ["Peltigera canina"], include_immediate_subtaxa: true
-    )
+    assert_lookup_names_by_name([name2, name3], names: ["Peltigera"])
+    assert_lookup_names_by_name([name2, name3], names: ["Petigera"])
+    assert_lookup_names_by_name([name1, name2, name3, name4, name5, name6,
+                                 name7],
+                                names: ["Peltigeraceae"],
+                                include_subtaxa: true)
+    assert_lookup_names_by_name([name1, name2, name3],
+                                names: ["Peltigeraceae"],
+                                include_immediate_subtaxa: true)
+    assert_lookup_names_by_name([name2, name3, name4, name5, name6, name7],
+                                names: ["Peltigera"],
+                                include_subtaxa: true)
+    assert_lookup_names_by_name([name2, name3, name4, name6],
+                                names: ["Peltigera"],
+                                include_immediate_subtaxa: true)
+    assert_lookup_names_by_name([name6, name7],
+                                names: ["Peltigera subg. Foo"],
+                                include_immediate_subtaxa: true)
+    assert_lookup_names_by_name([name4, name5],
+                                names: ["Peltigera canina"],
+                                include_immediate_subtaxa: true)
   end
 
   def create_test_name(name)

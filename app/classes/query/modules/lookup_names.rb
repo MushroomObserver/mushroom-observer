@@ -66,11 +66,10 @@ module Query::Modules::LookupNames
 
   def add_other_spellings(min_names)
     ids = min_names.map { |min_name| min_name[1] || min_name[0] }
-    min_names.reject { |min_name| min_name[1] } +
-      Name.connection.select_rows(%(
-        SELECT #{minimal_name_columns} FROM names
-        WHERE correct_spelling_id IN (#{ids.join(",")})
-      ))
+    Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE COALESCE(correct_spelling_id, id) IN (#{ids.join(",")})
+    ))
   end
 
   def add_synonyms(min_names)
