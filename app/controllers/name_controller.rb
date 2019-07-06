@@ -1111,7 +1111,7 @@ class NameController < ApplicationController
   def map # :nologin: :norobots:
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
-      @query = create_query(:Observation, :all, names: [@name])
+      @query = create_query(:Observation, :all, names: @name.id)
       apply_content_filters(@query)
       @observations = @query.results.select { |o| o.lat || o.location }
     end
