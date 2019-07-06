@@ -54,7 +54,7 @@ class ApiTest < UnitTestCase
   end
 
   def assert_api_results(expect)
-    msg = "API results wrong.  Query: #{@api.query.query}"
+    msg = "API results wrong.\nQuery args: #{@api.query.params.inspect}\nQuery sql: #{@api.query.query}"
     assert_obj_list_equal(expect, @api.results, :sort, msg)
   end
 
@@ -1249,6 +1249,33 @@ class ApiTest < UnitTestCase
     pretty_img.update_attributes!(ok_for_export: false)
     assert_api_pass(params.merge(ok_for_export: "no"))
     assert_api_results([pretty_img])
+  end
+
+  def test_two_agaricus_bug
+    name = names(:agaricus_campestris) # the only Agaricus species with images
+    imgs = name.observations.map(&:images).flatten
+
+    # Create 2nd Agaricus.  There's an existing Agaricus without and author.
+    # The API and Query parsers were resolving "Agaricus" to the one without
+    # an author thinking that was an exact match, instead of resolving to both
+    # versions like it should. 
+    agaricus = Name.create(
+      rank: Name.ranks[:Genus], text_name: "Agaricus",  author: "L.",
+      search_name: "Agaricus L.", sort_name: "Agaricus  L.",
+      display_name: "**__Agaricus__** L.", user: rolf
+      )
+    assert_equal(2, Name.where(text_name: "Agaricus").count)
+
+    agaricus_img = Image.create(user: rolf)
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+      )
+
+    assert_api_pass(
+      method: :get, action: :image, name: "Agaricus", include_subtaxa: "yes"
+    )
+    assert_api_results(imgs << agaricus_img)
   end
 
   def test_posting_minimal_image
