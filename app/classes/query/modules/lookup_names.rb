@@ -3,18 +3,15 @@
 # Helper methods to help parsing name instances from parameter strings.
 module Query::Modules::LookupNames
   def lookup_names_by_name(args)
-    return unless vals = args[:names]
-
-    orig_names = find_exact_name_matches(vals)
-    min_names = add_synonyms_or_spellings(orig_names, args[:include_synonyms])
-    min_names2 = if args[:include_subtaxa]
-                   add_subtaxa(min_names)
-                 elsif args[:include_immediate_subtaxa]
-                   add_immediate_subtaxa(min_names)
-                 end
-    if min_names2 && min_names2.length > min_names.length
-      min_names = add_synonyms_or_spellings(min_names2, args[:include_synonyms])
+    unless vals = args[:names]
+      complain_about_unused_flags!(args)
+      return
     end
+
+    orig_names = given_names(vals, args)
+    min_names  = add_synonyms_if_necessary(orig_names, args)
+    min_names2 = add_subtaxa_if_necessary(min_names, args)
+    min_names  = add_synonyms_again(min_names, min_names2, args)
     min_names -= orig_names if args[:exclude_original_names]
     min_names.map { |min_name| min_name[0] }
   end
@@ -22,6 +19,59 @@ module Query::Modules::LookupNames
   # ----------------------------------------------------------------------------
 
   private
+
+  def given_names(vals, args)
+    min_names = find_exact_name_matches(vals)
+    if args[:exclude_original_names]
+      add_other_spellings(min_names)
+    else
+      min_names
+    end
+  end
+
+  def add_synonyms_if_necessary(min_names, args)
+    if args[:include_synonyms]
+      add_synonyms(min_names)
+    elsif !args[:exclude_original_names]
+      add_other_spellings(min_names)
+    else
+      min_names
+    end
+  end
+
+  def add_subtaxa_if_necessary(min_names, args)
+    if args[:include_subtaxa]
+      add_subtaxa(min_names)
+    elsif args[:include_immediate_subtaxa]
+      add_immediate_subtaxa(min_names)
+    else
+      min_names
+    end
+  end
+
+  def add_synonyms_again(min_names, min_names2, args)
+    if min_names.length >= min_names2.length
+      min_names
+    elsif args[:include_synonyms]
+      add_synonyms(min_names2)
+    else
+      add_other_spellings(min_names2)
+    end
+  end
+
+  def complain_about_unused_flags!(args)
+    complain_about_unused_flag!(args, :include_synonyms)
+    complain_about_unused_flag!(args, :include_subtaxa)
+    complain_about_unused_flag!(args, :include_nonconsensus)
+    complain_about_unused_flag!(args, :exclude_consensus)
+    complain_about_unused_flag!(args, :exclude_original_names)
+  end
+
+  def complain_about_unused_flag!(args, arg)
+    return if args[arg].nil?
+
+    raise "Flag \"#{arg}\" is invalid without \"names\" parameter."
+  end
 
   def find_exact_name_matches(vals)
     vals.inject([]) do |result, val|
@@ -54,14 +104,6 @@ module Query::Modules::LookupNames
 
   def minimal_name_columns
     "id, correct_spelling_id, synonym_id, text_name"
-  end
-
-  def add_synonyms_or_spellings(min_names, include_synonyms)
-    if include_synonyms
-      add_synonyms(min_names)
-    else
-      add_other_spellings(min_names)
-    end
   end
 
   def add_other_spellings(min_names)
