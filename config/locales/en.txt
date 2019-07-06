@@ -3196,8 +3196,9 @@
   observation_term_created: Date observation was first posted.
   observation_term_modified: Date observation was last modified.
   observation_term_name: Consensus name is one of these names.
-  observation_term_synonym_of: Consensus name is synonym of one of these names.
-  observation_term_child_of: Consensus name is a subtaxon of one of these names.
+  observation_term_include_nonconsensus: Include all name proposals, not just the consensus.
+  observation_term_include_subtaxa: Include observations of subtaxa of the given names.
+  observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at an herbarium.
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
@@ -3225,12 +3226,12 @@
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
-  name_term_synonym_of: Synonyms of any of these names.
-  name_term_child_of: Subtaxa of any of these names.
+  name_term_include_synonyms: Include synonyms of the given names.
+  name_term_include_subtaxa: Include subtaxa of the given names.
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
-  name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
   name_term_has_citation: Has Citation filled in?
