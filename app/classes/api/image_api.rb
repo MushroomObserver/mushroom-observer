@@ -46,7 +46,7 @@ class API
     # This probably belongs in a shared module somewhere.
     def parse_names_parameters
       args = {
-        names:            parse_array(:name, :name, as: :id),
+        names:            parse_array(:name, :name, as: :verbatim),
         include_synonyms: parse(:boolean, :include_synonyms),
         include_subtaxa:  parse(:boolean, :include_subtaxa)
       }

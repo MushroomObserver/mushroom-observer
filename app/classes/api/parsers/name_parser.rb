@@ -20,6 +20,8 @@ class API
 
           raise ObjectNotFoundByString.new(str, Name)
         end
+        return str if args[:as] == :verbatim
+
         matches = restrict_to_exact_matches_if_possible(matches, str)
         matches = restrict_to_approved_names_if_possible(matches)
         raise AmbiguousName.new(str, matches) if matches.length > 1

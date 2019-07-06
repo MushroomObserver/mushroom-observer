@@ -9,7 +9,7 @@ class API
         raise ObjectNotFoundByString.new(str, model) unless obj
 
         check_permissions!(obj)
-        args[:as] == :id ? obj.id : obj
+        args[:as] == :verbatim ? str : args[:as] == :id ? obj.id : obj
       end
 
       def find_object(str)
