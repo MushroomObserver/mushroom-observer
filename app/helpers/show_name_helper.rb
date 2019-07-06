@@ -16,14 +16,14 @@ module ShowNameHelper
   # link to a search for Observations of name and a count of those observations
   #   This Name (1)
   def obss_of_name(name)
-    query = Query.lookup(:Observation, :all, names: [name], by: :confidence)
+    query = Query.lookup(:Observation, :all, names: name.id, by: :confidence)
     link_to_obss_of(query, :obss_of_this_name.t)
   end
 
   # link to a search for Observations of this taxon (under any name) + count
   def taxon_observations(name)
     query = Query.lookup(:Observation, :all,
-      names: [name],
+      names: name.id,
       include_synonyms: true,
       by: :confidence
     )
@@ -33,7 +33,7 @@ module ShowNameHelper
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
     query = Query.lookup(:Observation, :all,
-      names: [name],
+      names: name.id,
       include_synonyms: true,
       exclude_original_names: true,
       by: :confidence
@@ -45,7 +45,7 @@ module ShowNameHelper
   # (but is not the consensus)
   def taxon_proposed(name)
     query = Query.lookup(:Observation, :all,
-      names: [name],
+      names: name.id,
       include_synonyms: true,
       include_nonconsensus: true,
       exclude_consensus: true,
@@ -58,7 +58,7 @@ module ShowNameHelper
   # (but this taxon is not the consensus)
   def name_proposed(name)
     query = Query.lookup(:Observation, :all,
-      names: [name],
+      names: name.id,
       include_synonyms: false,
       include_nonconsensus: true,
       exclude_consensus: true,
@@ -73,7 +73,7 @@ module ShowNameHelper
   #   Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
     name.other_approved_synonyms.each_with_object([]) do |name, lines|
-      query = Query.lookup(:Observation, :all, names: [name], by: :confidence)
+      query = Query.lookup(:Observation, :all, names: name.id, by: :confidence)
       next if query.select_count.zero?
 
       lines << link_to_obss_of(query, nm.display_name_brief_authors.t)
@@ -83,7 +83,7 @@ module ShowNameHelper
   # return link to a query for observations + count of results
   # returns nil of no results
   # Use:
-  #   query = Query.lookup(:Observation, :all, names: [name], by: :confidence,
+  #   query = Query.lookup(:Observation, :all, names: name.id, by: :confidence,
   #                        include_synonyms: true)
   #   link_to_obss_of(query, :obss_of_taxon.t)
   #   => <a href="/observer/index_observation?q=Q">This Taxon, any name</a> (19)
@@ -104,7 +104,7 @@ module ShowNameHelper
     return  unless (genus = name.genus)
 
     query = Query.lookup(:Name, :all,
-      names: [genus],
+      names: genus.id,
       include_children: true,
       exclude_original_names: true
     )
