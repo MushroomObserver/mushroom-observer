@@ -105,7 +105,7 @@ module ShowNameHelper
 
     query = Query.lookup(:Name, :all,
       names: genus.id,
-      include_children: true,
+      include_subtaxa: true,
       exclude_original_names: true
     )
     count = query.select_count
