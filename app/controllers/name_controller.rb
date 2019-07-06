@@ -361,13 +361,13 @@ class NameController < ApplicationController
 
       # Create query for immediate children.
       @children_query = create_query(:Name, :all,
-        names: [@name],
+        names: @name.id,
         include_immediate_subtaxa: true,
         exclude_original_names: true
       )
       if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :all,
-          names: [@name],
+          names: @name.id,
           include_subtaxa: true,
           exclude_original_names: true,
           by: :confidence
@@ -376,12 +376,12 @@ class NameController < ApplicationController
 
       # Create search queries for observation lists.
       @consensus_query = create_query(:Observation, :all,
-        names: [@name],
+        names: @name.id,
         by: :confidence
       )
 
       @obs_with_images_query = create_query(:Observation, :all,
-        names: [@name],
+        names: @name.id,
         has_images: true,
         by: :confidence
       )
