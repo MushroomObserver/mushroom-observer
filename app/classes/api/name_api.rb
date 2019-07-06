@@ -21,8 +21,6 @@ class API
         updated_at:         parse_range(:time, :updated_at),
         users:              parse_array(:user, :user, help: :first_user),
         names:              parse_array(:name, :name, as: :id),
-        synonym_names:      parse_array(:name, :synonyms_of, as: :id),
-        children_names:     parse_array(:name, :children_of, as: :id),
         is_deprecated:      parse(:boolean, :is_deprecated),
         misspellings:       parse_misspellings,
         has_synonyms:       parse(:boolean, :has_synonyms),
@@ -42,7 +40,7 @@ class API
         notes_has:          parse(:string, :notes_has, help: 1),
         comments_has:       parse(:string, :comments_has, help: 1),
         ok_for_export:      parse(:boolean, :ok_for_export)
-      }
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
 

@@ -38,8 +38,6 @@ class API
         date:             parse_range(:date, :date, help: :when_seen),
         users:            parse_array(:user, :user, help: :observer),
         names:            parse_array(:name, :name, as: :id),
-        synonym_names:    parse_array(:name, :synonyms_of, as: :id),
-        children_names:   parse_array(:name, :children_of, as: :id),
         locations:        parse_array(:location, :location, as: :id),
         herbaria:         parse_array(:herbarium, :herbarium, as: :id),
         herbarium_records: parse_array(:herbarium_record, :herbarium_record,
@@ -63,7 +61,7 @@ class API
         south:            s,
         east:             e,
         west:             w
-      }
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength

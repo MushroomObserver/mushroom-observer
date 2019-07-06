@@ -31,8 +31,6 @@ class API
         obs_date:          parse_range(:date, :obs_date, help: :obs_date),
         observers:         parse_array(:user, :observer),
         names:             parse_array(:name, :name, as: :id),
-        synonym_names:     parse_array(:name, :synonyms_of, as: :id),
-        children_names:    parse_array(:name, :children_of, as: :id),
         locations:         parse_array(:location, :location, as: :id),
         herbaria:          parse_array(:herbarium, :herbarium, as: :id),
         herbarium_records: parse_array(:herbarium_record, :herbarium_record,
@@ -52,7 +50,7 @@ class API
         has_obs_notes:    parse(:boolean, :has_obs_notes, help: 1),
         has_notes_fields: parse(:string, :has_notes_field, help: 1),
         obs_notes_has:    parse(:string, :obs_notes_has, help: 1)
-      }
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength

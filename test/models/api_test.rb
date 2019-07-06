@@ -1142,15 +1142,12 @@ class ApiTest < UnitTestCase
     name2.update_attributes!(synonym: synonym)
     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
-
     assert_api_pass(
       params.merge(name: "Agaricus campestros", include_synonyms: "yes")
     )
     assert_api_results(imgs)
 
-    ### test children_of, include_subtaxa
-    # Use existing autonym instead of new factory Name
-    agaricus = Name.where(text_name: "Agaricus").first
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_img = Image.create(
       # add notes to avoid breaking later, brittle assertion
       notes: "Agaricus image", user: rolf
@@ -1159,10 +1156,8 @@ class ApiTest < UnitTestCase
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
       )
-
     assert_api_pass(params.merge(children_of: "Agaricus"))
     assert_api_results(imgs)
-
     assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(imgs << agaricus_img)
     ###
@@ -1258,7 +1253,7 @@ class ApiTest < UnitTestCase
     # Create 2nd Agaricus.  There's an existing Agaricus without and author.
     # The API and Query parsers were resolving "Agaricus" to the one without
     # an author thinking that was an exact match, instead of resolving to both
-    # versions like it should. 
+    # versions like it should.
     agaricus = Name.create(
       rank: Name.ranks[:Genus], text_name: "Agaricus",  author: "L.",
       search_name: "Agaricus L.", sort_name: "Agaricus  L.",
@@ -1675,11 +1670,8 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
-    assert_api_pass(
-      params.merge(name: "Fungi", include_subtaxa: "yes")
-    )
-    assert_api_results(names)
-
+    assert_api_pass(params.merge(name: "Fungi", include_subtaxa: "yes"))
+    assert_api_results(names << names(:fungi))
 
     names = Name.where(deprecated: true).
             reject(&:correct_spelling_id)
@@ -2107,11 +2099,23 @@ class ApiTest < UnitTestCase
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
-
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
     assert_api_results(obses)
+
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(ssp_obs)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_obs.to_a << agaricus_obs)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -2849,12 +2853,28 @@ class ApiTest < UnitTestCase
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(obses.map(&:sequences).flatten)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(obses.map(&:sequences).flatten)
 
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_sequence = Sequence.create(
+      observation: agaricus_obs, user: rolf, locus: "ITS", bases: "ACGT"
+    )
+    ssp_sequences = ssp_obs.map(&:sequences).flatten.sort_by(&:id)
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(ssp_sequences)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_sequences << agaricus_sequence)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -3128,16 +3148,33 @@ class ApiTest < UnitTestCase
     obs2.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:another_species_list)
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert(spls.length > 1)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert(ssp_lists.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(ssp_lists)
 
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
     obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert_not_empty(spls)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(ssp_lists)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_genus_list = SpeciesList.create!(
+      title: "Agaricus Genus Obses", location: locations(:albion), user: rolf
+    )
+    agaricus_obs.species_lists << agaricus_genus_list
+
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_lists << agaricus_genus_list)
 
     spls = SpeciesList.where(location: locations(:no_mushrooms_location))
     assert_not_empty(spls)
