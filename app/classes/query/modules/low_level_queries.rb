@@ -1,7 +1,7 @@
 module Query::Modules::LowLevelQueries
   # Execute query after wrapping select clause in COUNT().
   def select_count(args = {})
-    initialize_query
+    initialize_query unless initialized?
     if executor
       executor.call(args).length
     else
@@ -13,7 +13,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.connection.select_value.
   def select_value(args = {})
-    initialize_query
+    initialize_query unless initialized?
     if executor
       executor.call(args).first.first
     else
@@ -23,7 +23,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.connection.select_values.
   def select_values(args = {})
-    initialize_query
+    initialize_query unless initialized?
     if executor
       executor.call(args).map(&:first)
     else
@@ -33,7 +33,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.connection.select_rows.
   def select_rows(args = {})
-    initialize_query
+    initialize_query unless initialized?
     if executor
       executor.call(args)
     else
@@ -43,7 +43,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.connection.select_one.
   def select_one(args = {})
-    initialize_query
+    initialize_query unless initialized?
     if executor
       executor.call(args).first
     else
@@ -53,7 +53,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.connection.select_all.
   def select_all(args = {})
-    initialize_query
+    initialize_query unless initialized?
     raise "This query doesn't support low-level access!" if executor
 
     model.connection.select_all(query(args)).to_a
@@ -61,7 +61,7 @@ module Query::Modules::LowLevelQueries
 
   # Call model.find_by_sql.
   def find_by_sql(args = {})
-    initialize_query
+    initialize_query unless initialized?
     raise "This query doesn't support low-level access!" if executor
 
     model.find_by_sql(query_all(args))
