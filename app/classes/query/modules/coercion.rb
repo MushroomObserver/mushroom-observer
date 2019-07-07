@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module Query
   module Modules
     # Handles coercing queries from one model to a related model.
-    # 
+    #
     # Define a method in each Query subclass for each model it can be coerced
     # into.  Examples:
     #
@@ -25,6 +27,7 @@ module Query
       def coercable?(new_model)
         @new_model = new_model.to_s
         return true if @new_model == model.to_s
+
         respond_to?(coerce_method)
       end
 
