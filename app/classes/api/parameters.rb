@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # API
 class API
   attr_accessor :expected_params

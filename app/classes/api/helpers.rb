@@ -1,15 +1,18 @@
+# frozen_string_literal: true
+
+# miscellaneous helpers for parameter parsing, location validation
 class API
   def parse_names_parameters
     args = {
-      names:            parse_array(:name, :name, as: :verbatim),
+      names: parse_array(:name, :name, as: :verbatim),
       include_synonyms: parse(:boolean, :include_synonyms),
-      include_subtaxa:  parse(:boolean, :include_subtaxa)
+      include_subtaxa: parse(:boolean, :include_subtaxa)
     }
-    if names = parse_array(:name, :synonyms_of, as: :id)
+    if (names = parse_array(:name, :synonyms_of, as: :id))
       args[:names]            = names
       args[:include_synonyms] = true
     end
-    if names = parse_array(:name, :children_of, as: :id)
+    if (names = parse_array(:name, :children_of, as: :id))
       args[:names]           = names
       args[:include_subtaxa] = true
       args[:exclude_original_names] = true
@@ -38,9 +41,21 @@ class API
     s = parse(:latitude, :south, help: 1)
     e = parse(:longitude, :east, help: 1)
     w = parse(:longitude, :west, help: 1)
-    return unless n || s || e || w
-    return [n, s, e, w] if n && s && e && w
+    return if no_edges(n, s, e, w)
+    return [n, s, e, w] if all_edges(n, s, e, w)
 
     raise NeedAllFourEdges.new
+  end
+
+  #########
+
+  private
+
+  def no_edges(north, south, east, west)
+    !(north || south || east || west)
+  end
+
+  def all_edges(north, south, east, west)
+    north && south && east && west
   end
 end

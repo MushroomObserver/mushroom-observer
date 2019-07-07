@@ -138,7 +138,6 @@ Lint/Loop:
 # Configuration parameters: MaximumRangeSize.
 Lint/MissingCopEnableDirective:
   Exclude:
-    - 'app/classes/api/observation_api.rb'
     - 'app/classes/observation_report/adolf.rb'
     - 'app/classes/observation_report/darwin.rb'
     - 'app/classes/observation_report/mycoflora.rb'

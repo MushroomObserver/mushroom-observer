@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   module Parsers
     # Base class for API object parsers.
