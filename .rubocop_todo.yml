@@ -155,7 +155,6 @@ Lint/ReturnInVoidContext:
 Lint/ShadowingOuterLocalVariable:
   Exclude:
     - 'app/classes/eol_data.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/models/language_exporter.rb'
     - 'app/models/name/taxonomy.rb'
     - 'script/refresh_name_lister_cache'
@@ -348,8 +347,6 @@ Style/Alias:
   Exclude:
     - 'app/classes/gmaps.rb'
     - 'app/classes/mo_paginator.rb'
-    - 'app/controllers/name_controller.rb'
-    - 'app/controllers/observer_controller/indexes.rb'
     - 'app/controllers/observer_controller/info_controller.rb'
     - 'app/controllers/observer_controller/user_controller.rb'
     - 'app/controllers/translation_controller.rb'
@@ -364,8 +361,6 @@ Style/AndOr:
   Exclude:
     - 'app/classes/query/modules/validation.rb'
     - 'app/controllers/article_controller.rb'
-    - 'app/controllers/image_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/controllers/project_controller.rb'
     - 'app/models/image.rb'
     - 'app/views/name/eol.xml.builder'
@@ -439,7 +434,6 @@ Style/EachWithObject:
 # SupportedStyles: compact, expanded
 Style/EmptyMethod:
   Exclude:
-    - 'app/controllers/location_controller.rb'
     - 'app/controllers/observer_controller/info_controller.rb'
     - 'app/controllers/theme_controller.rb'
 
@@ -509,8 +503,6 @@ Style/HashSyntax:
 # Offense count: 6
 Style/IdenticalConditionalBranches:
   Exclude:
-    - 'app/controllers/location_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'script/s3ls.rb'
 
 # Offense count: 7
@@ -518,7 +510,6 @@ Style/IfInsideElse:
   Exclude:
     - 'app/classes/box_methods.rb'
     - 'app/controllers/interest_controller.rb'
-    - 'app/controllers/location_controller.rb'
     - 'app/controllers/project_controller.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'lib/tasks/cache.rake'
@@ -534,9 +525,6 @@ Style/IfUnlessModifier:
 Style/InverseMethods:
   Exclude:
     - 'app/classes/query/modules/validation.rb'
-    - 'app/controllers/image_controller.rb'
-    - 'app/controllers/location_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/controllers/name_controller/show_name_description.rb'
     - 'app/helpers/description_helper.rb'
     - 'app/helpers/javascript_helper.rb'
