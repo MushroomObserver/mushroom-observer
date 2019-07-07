@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require "geocoder"
 
+# Location controller.
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
@@ -25,8 +28,7 @@ class LocationController < ApplicationController
     :show_location,
     :show_location_description,
     :show_past_location,
-    :show_past_location_description,
-    :tweak
+    :show_past_location_description
   ]
 
   before_action :disable_link_prefetching, except: [
@@ -51,18 +53,18 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location # :nologin: :norobots:
+  def index_location
     query = find_or_create_query(:Location, by: params[:by])
     show_selected_locations(query, id: params[:id].to_s, always_index: true)
   end
 
   # Displays a list of all countries with counts.
-  def list_countries # :nologin:
+  def list_countries
     @cc = CountryCounter.new
   end
 
   # Displays a list of all locations whose country matches the id param.
-  def list_by_country # :nologin:
+  def list_by_country
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
@@ -70,26 +72,28 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of all locations.
-  def list_locations # :nologin:
+  def list_locations
     query = create_query(:Location, :all, by: :name)
     show_selected_locations(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user is author on.
-  def locations_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Location, :by_user, user: user)
-      show_selected_locations(query, link_all_sorts: true)
-    end
+  def locations_by_user
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Location, :by_user, user: user)
+    show_selected_locations(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user is editor on.
   # :nologin: :norobots:
   def locations_by_editor
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Location, :by_editor, user: user)
-      show_selected_locations(query)
-    end
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Location, :by_editor, user: user)
+    show_selected_locations(query)
   end
 
   # Displays a list of locations matching a given string.
@@ -103,12 +107,12 @@ class LocationController < ApplicationController
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search # :nologin: :norobots:
+  def advanced_search
     query = find_query(:Location)
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search_form")
+    redirect_to(controller: :observer, action: :advanced_search_form)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -132,7 +136,7 @@ class LocationController < ApplicationController
     # location description query.
     if query.coercable?(:LocationDescription)
       @links << [:show_objects.t(type: :description),
-                 add_query_param({ action: "index_location_description" },
+                 add_query_param({ action: :index_location_description },
                                  query)]
     end
 
@@ -142,9 +146,9 @@ class LocationController < ApplicationController
 
     # Get matching *undefined* locations.
     @undef_location_format = User.current_location_format
-    if query2 = coerce_query_for_undefined_locations(query)
+    if (query2 = coerce_query_for_undefined_locations(query))
       select_args = {
-        group: "observations.where",
+        group:  "observations.where",
         select: "observations.where AS w, COUNT(observations.id) AS c"
       }
       if args[:link_all_sorts]
@@ -177,25 +181,25 @@ class LocationController < ApplicationController
   end
 
   # Map results of a search or index.
-  def map_locations # :nologin: :norobots:
+  def map_locations
     @query = find_or_create_query(:Location)
 
     apply_content_filters(@query)
 
-    if @query.flavor == :all
-      @title = :map_locations_global_map.t
-    else
-      @title = :map_locations_title.t(locations: @query.title)
-    end
+    @title = if @query.flavor == :all
+               :map_locations_global_map.t
+             else
+               :map_locations_title.t(locations: @query.title)
+             end
     @query = restrict_query_to_box(@query)
-    @timer_start = Time.now
+    @timer_start = Time.current
     columns = %w[name north south east west].map { |x| "locations.#{x}" }
     args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }
-    @locations = @query.select_rows(args).map do |id, name, n, s, e, w|
-      MinimalMapLocation.new(id, name, n, s, e, w)
+    @locations = @query.select_rows(args).map do |id, *the_rest|
+      MinimalMapLocation.new(id, *the_rest)
     end
     @num_results = @locations.count
-    @timer_end = Time.now
+    @timer_end = Time.current
   end
 
   # Try to turn this into a query on observations.where instead.
@@ -276,32 +280,34 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location_description # :nologin: :norobots:
+  def index_location_description
     query = find_or_create_query(:LocationDescription, by: params[:by])
-    show_selected_location_descriptions(query, id: params[:id].to_s,
+    show_selected_location_descriptions(query, id:           params[:id].to_s,
                                                always_index: true)
   end
 
   # Displays a list of all location_descriptions.
-  def list_location_descriptions # :nologin:
+  def list_location_descriptions
     query = create_query(:LocationDescription, :all, by: :name)
     show_selected_location_descriptions(query)
   end
 
   # Display list of location_descriptions that a given user is author on.
-  def location_descriptions_by_author # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:LocationDescription, :by_author, user: user)
-      show_selected_location_descriptions(query)
-    end
+  def location_descriptions_by_author
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:LocationDescription, :by_author, user: user)
+    show_selected_location_descriptions(query)
   end
 
   # Display list of location_descriptions that a given user is editor on.
-  def location_descriptions_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:LocationDescription, :by_editor, user: user)
-      show_selected_location_descriptions(query)
-    end
+  def location_descriptions_by_editor
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:LocationDescription, :by_editor, user: user)
+    show_selected_location_descriptions(query)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -309,7 +315,7 @@ class LocationController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: "list_location_descriptions",
+      action:       :list_location_descriptions,
       num_per_page: 50
     }.merge(args)
 
@@ -335,7 +341,7 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
-  def show_location # :nologin: :prefetch:
+  def show_location
     store_location
     pass_query_params
     clear_query_in_session
@@ -344,126 +350,126 @@ class LocationController < ApplicationController
     # objects.
     loc_id = params[:id].to_s
     desc_id = params[:desc]
-    if @location = find_or_goto_index(Location, loc_id)
-      @canonical_url = "#{MO.http_domain}/location/show_location/"\
-                       "#{@location.id}"
+    @location = find_or_goto_index(Location, loc_id)
+    return unless @location
 
-      # Load default description if user didn't request one explicitly.
-      desc_id = @location.description_id if desc_id.blank?
-      if desc_id.blank?
-        @description = nil
-      elsif (@description = LocationDescription.safe_find(desc_id))
-        unless in_admin_mode? || @description.is_reader?(@user)
-          @description = nil
-        end
-      else
-        flash_error(:runtime_object_not_found.t(type: :description,
-                                                id: desc_id))
-      end
+    @canonical_url = "#{MO.http_domain}/location/show_location/"\
+                     "#{@location.id}"
 
-      update_view_stats(@location)
-      update_view_stats(@description) if @description
+    # Load default description if user didn't request one explicitly.
+    desc_id = @location.description_id if desc_id.blank?
+    if desc_id.blank?
+      @description = nil
+    elsif (@description = LocationDescription.safe_find(desc_id))
+      @description = nil unless in_admin_mode? || @description.is_reader?(@user)
+    else
+      flash_error(:runtime_object_not_found.t(type: :description,
+                                              id:   desc_id))
+    end
 
-      # Get a list of projects the user can create drafts for.
-      @projects = @user&.projects_member&.select do |project|
-        !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
-      end
+    update_view_stats(@location)
+    update_view_stats(@description) if @description
+
+    # Get a list of projects the user can create drafts for.
+    @projects = @user&.projects_member&.select do |project|
+      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
   end
 
   # Show just a LocationDescription.
-  def show_location_description # :nologin: :prefetch:
+  def show_location_description
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
-                       "#{@description.id}"
+    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+    return unless @description
 
-      # Public or user has permission.
-      if in_admin_mode? || @description.is_reader?(@user)
-        @location = @description.location
-        update_view_stats(@description)
+    @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
+                     "#{@description.id}"
 
-        # Get a list of projects the user can create drafts for.
-        @projects = @user&.projects_member&.select do |project|
-          !@location.descriptions.any? { |d| d.belongs_to_project?(project) }
-        end
+    # Public or user has permission.
+    if in_admin_mode? || @description.is_reader?(@user)
+      @location = @description.location
+      update_view_stats(@description)
 
-      # User doesn't have permission to see this description.
-      else
-        if @description.source_type == :project
-          flash_error(:runtime_show_draft_denied.t)
-          if project = @description.project
-            redirect_to(controller: "project", action: "show_project",
-                        id: project.id)
-          else
-            redirect_to(action: "show_location", id: @description.location_id)
-          end
-        else
-          flash_error(:runtime_show_description_denied.t)
-          redirect_to(action: "show_location", id: @description.location_id)
-        end
+      # Get a list of projects the user can create drafts for.
+      @projects = @user&.projects_member&.select do |project|
+        @location.descriptions.none? { |d| d.belongs_to_project?(project) }
       end
+
+    # User doesn't have permission to see this description.
+    elsif @description.source_type == :project
+      flash_error(:runtime_show_draft_denied.t)
+      if (project = @description.project)
+        redirect_to(controller: :project, action: :show_project,
+                    id: project.id)
+      else
+        redirect_to(action: :show_location, id: @description.location_id)
+      end
+    else
+      flash_error(:runtime_show_description_denied.t)
+      redirect_to(action: :show_location, id: @description.location_id)
     end
   end
 
   # Show past version of Location.  Accessible only from show_location page.
-  def show_past_location # :nologin: :prefetch: :norobots:
+  def show_past_location
     store_location
     pass_query_params
-    if @location = find_or_goto_index(Location, params[:id].to_s)
-      if params[:version]
-        @location.revert_to(params[:version].to_i)
-      else
-        flash_error(:show_past_location_no_version.t)
-        redirect_to(action: "show_location", id: @location.id)
-      end
+    @location = find_or_goto_index(Location, params[:id].to_s)
+    return unless @location
+
+    if params[:version]
+      @location.revert_to(params[:version].to_i)
+    else
+      flash_error(:show_past_location_no_version.t)
+      redirect_to(action: :show_location, id: @location.id)
     end
   end
 
   # Show past version of LocationDescription.  Accessible only from
   # show_location_description page.
-  def show_past_location_description # :nologin: :prefetch: :norobots:
+  def show_past_location_description
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-      @location = @description.location
-      if params[:merge_source_id].blank?
-        @description.revert_to(params[:version].to_i)
-      else
-        @merge_source_id = params[:merge_source_id]
-        version = LocationDescription::Version.find(@merge_source_id)
-        @old_parent_id = version.location_description_id
-        subversion = params[:version]
-        if subversion.present? &&
-           (version.version != subversion.to_i)
-          version = LocationDescription::Version.
-                    find_by_version_and_location_description_id(
-                      params[:version], @old_parent_id
-                    )
-        end
-        @description.clone_versioned_model(version, @description)
+    @description = find_or_goto_index(LocationDescription, params[:id].to_s)
+    return unless @description
+
+    @location = @description.location
+    if params[:merge_source_id].blank?
+      @description.revert_to(params[:version].to_i)
+    else
+      @merge_source_id = params[:merge_source_id]
+      version = LocationDescription::Version.find(@merge_source_id)
+      @old_parent_id = version.location_description_id
+      subversion = params[:version]
+      if subversion.present? &&
+         (version.version != subversion.to_i)
+        version = LocationDescription::Version.
+                  find_by_version_and_location_description_id(
+                    params[:version], @old_parent_id
+                  )
       end
+      @description.clone_versioned_model(version, @description)
     end
   end
 
   # Go to next location: redirects to show_location.
-  def next_location # :nologin: :norobots:
+  def next_location
     redirect_to_next_object(:next, Location, params[:id].to_s)
   end
 
   # Go to previous location: redirects to show_location.
-  def prev_location # :nologin: :norobots:
+  def prev_location
     redirect_to_next_object(:prev, Location, params[:id].to_s)
   end
 
   # Go to next location: redirects to show_location.
-  def next_location_description # :nologin: :norobots:
+  def next_location_description
     redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
   end
 
   # Go to previous location: redirects to show_location.
-  def prev_location_description # :nologin: :norobots:
+  def prev_location_description
     redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
   end
 
@@ -472,7 +478,7 @@ class LocationController < ApplicationController
   #  :section: Create/Edit Location
   #
   ##############################################################################
-  def create_location # :prefetch: :norobots:
+  def create_location
     store_location
     pass_query_params
 
@@ -571,34 +577,35 @@ class LocationController < ApplicationController
         end
         if @set_observation
           if unshown_notifications?(@user, :naming)
-            redirect_to(controller: "observer", action: "show_notifications")
+            redirect_to(controller: :observer, action: :show_notifications)
           else
-            redirect_to(controller: "observer", action: "show_observation",
-                        id: @set_observation)
+            redirect_to(controller: :observer,
+                        action:     :show_observation,
+                        id:         @set_observation)
           end
         elsif @set_species_list
-          redirect_to(controller: "species_list", action: "show_species_list",
+          redirect_to(controller: :species_list, action: :show_species_list,
                       id: @set_species_list)
         elsif @set_herbarium
-          if herbarium = Herbarium.safe_find(@set_herbarium)
+          if (herbarium = Herbarium.safe_find(@set_herbarium))
             herbarium.location = @location
             herbarium.save
-            redirect_to(controller: "herbarium",
-                        action: "show_herbarium",
-                        id: @set_herbarium)
+            redirect_to(controller: :herbarium,
+                        action:     :show_herbarium,
+                        id:         @set_herbarium)
           end
         elsif @set_user
-          if user = User.safe_find(@set_user)
+          if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
-            redirect_to(controller: "observer",
-                        action: "show_user",
-                        id: @set_user)
+            redirect_to(controller: :observer,
+                        action:     :show_user,
+                        id:         @set_user)
           end
         else
-          redirect_to(controller: "location",
-                      action: "show_location",
-                      id: @location.id)
+          redirect_to(controller: :location,
+                      action:     :show_location,
+                      id:         @location.id)
         end
       end
     end
@@ -639,8 +646,10 @@ class LocationController < ApplicationController
       redirect_to(@location.show_link_args)
     else
       redirect_with_query(controller: :observer,
-                          action: :email_merge_request, type: :Location,
-                          old_id: @location.id, new_id: merge.id)
+                          action:     :email_merge_request,
+                          type:       :Location,
+                          old_id:     @location.id,
+                          new_id:     merge.id)
     end
   end
 
@@ -648,9 +657,7 @@ class LocationController < ApplicationController
   def post_edit_location_change(db_name)
     @dubious_where_reasons = []
     @location.notes = params[:location][:notes].to_s.strip
-    if in_admin_mode?
-      @location.locked = params[:location][:locked] == "1"
-    end
+    @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     if !@location.locked || in_admin_mode?
       @location.north = params[:location][:north] if params[:location][:north]
       @location.south = params[:location][:south] if params[:location][:south]
@@ -663,35 +670,33 @@ class LocationController < ApplicationController
         @dubious_where_reasons = Location.dubious_name?(db_name, true)
       end
     end
-    if @dubious_where_reasons.empty?
-      if !@location.changed?
-        flash_warning(:runtime_edit_location_no_change.t)
-        redirect_to(action: "show_location", id: @location.id)
-      elsif !@location.save
-        flash_object_errors(@location)
-      else
-        flash_notice(:runtime_edit_location_success.t(id: @location.id))
-        redirect_to(@location.show_link_args)
-      end
+    return unless @dubious_where_reasons.empty?
+
+    if !@location.changed?
+      flash_warning(:runtime_edit_location_no_change.t)
+      redirect_to(action: :show_location, id: @location.id)
+    elsif !@location.save
+      flash_object_errors(@location)
+    else
+      flash_notice(:runtime_edit_location_success.t(id: @location.id))
+      redirect_to(@location.show_link_args)
     end
   end
 
-  def create_location_description # :prefetch: :norobots:
+  def create_location_description
     store_location
     pass_query_params
     @location = Location.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
+    @description = LocationDescription.new
+    @description.location = @location
 
     # Render a blank form.
     if request.method == "GET"
-      @description = LocationDescription.new
-      @description.location = @location
       initialize_description_source(@description)
 
     # Create new description.
     else
-      @description = LocationDescription.new
-      @description.location = @location
       @description.attributes = whitelisted_location_description_params
 
       if @description.valid?
@@ -706,8 +711,8 @@ class LocationController < ApplicationController
         flash_notice(
           :runtime_location_description_success.t(id: @description.id)
         )
-        redirect_to(action: "show_location_description",
-                    id: @description.id)
+        redirect_to(action: :show_location_description,
+                    id:     @description.id)
 
       else
         flash_object_errors @description
@@ -715,7 +720,7 @@ class LocationController < ApplicationController
     end
   end
 
-  def edit_location_description # :prefetch: :norobots:
+  def edit_location_description
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
@@ -733,8 +738,8 @@ class LocationController < ApplicationController
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
-        redirect_to(action: "show_location_description",
-                    id: @description.id)
+        redirect_to(action: :show_location_description,
+                    id:     @description.id)
 
       # There were error(s).
       elsif !@description.save
@@ -766,19 +771,19 @@ class LocationController < ApplicationController
               :log_object_merged_by_user,
               user: @user.login, touch: true,
               from: old_desc.unique_partial_format_name,
-              to: @description.unique_partial_format_name
+              to:   @description.unique_partial_format_name
             )
             old_desc.destroy
           end
         end
 
-        redirect_to(action: "show_location_description",
-                    id: @description.id)
+        redirect_to(action: :show_location_description,
+                    id:     @description.id)
       end
     end
   end
 
-  def destroy_location_description # :norobots:
+  def destroy_location_description
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
     if in_admin_mode? || @description.is_admin?(@user)
@@ -787,16 +792,16 @@ class LocationController < ApplicationController
                                 user: @user.login, touch: true,
                                 name: @description.unique_partial_format_name)
       @description.destroy
-      redirect_with_query(action: "show_location",
-                          id: @description.location_id)
+      redirect_with_query(action: :show_location,
+                          id:     @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(action: "show_location_description",
-                            id: @description.id)
+        redirect_with_query(action: :show_location_description,
+                            id:     @description.id)
       else
-        redirect_with_query(action: "show_location",
-                            id: @description.location_id)
+        redirect_with_query(action: :show_location,
+                            id:     @description.location_id)
       end
     end
   end
@@ -809,7 +814,7 @@ class LocationController < ApplicationController
 
   # Show a list of defined locations that match a given +where+ string, in
   # order of closeness of match.
-  def list_merge_options # :norobots:
+  def list_merge_options
     store_location
     @where = Location.user_name(@user, params[:where].to_s)
 
@@ -842,36 +847,36 @@ class LocationController < ApplicationController
   end
 
   def reverse_name_order
-    if location = Location.safe_find(params[:id].to_s)
+    if (location = Location.safe_find(params[:id].to_s))
       location.name = Location.reverse_name(location.name)
       location.save
     end
-    redirect_to(action: "show_location", id: params[:id].to_s)
+    redirect_to(action: :show_location, id: params[:id].to_s)
   end
 
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
-  def add_to_location # :norobots:
-    if location = find_or_goto_index(Location, params[:location])
-      where = begin
-                params[:where].strip_squeeze
-              rescue StandardError
-                ""
-              end
-      if where.present? &&
-         update_observations_by_where(location, where)
-        flash_notice(
-          :runtime_location_merge_success.t(this: where,
-                                            that: location.display_name)
-        )
-      end
-      redirect_to(action: "list_locations")
+  def add_to_location
+    location = find_or_goto_index(Location, params[:location])
+    return unless location
+
+    where = begin
+              params[:where].strip_squeeze
+            rescue StandardError
+              ""
+            end
+    if where.present? &&
+       update_observations_by_where(location, where)
+      flash_notice(
+        :runtime_location_merge_success.t(this: where,
+                                          that: location.display_name)
+      )
     end
+    redirect_to(action: :list_locations)
   end
 
   # Help for locations
-  def help # :nologin:
-  end
+  def help; end
 
   # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, given_where)
@@ -879,7 +884,7 @@ class LocationController < ApplicationController
     # observations = Observation.find_all_by_where(given_where)
     observations = Observation.where(where: given_where)
     count = 3
-    for o in observations
+    observations.each do |o|
       count += 1
       next if o.location_id
 
