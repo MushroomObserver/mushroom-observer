@@ -2,7 +2,7 @@
 
 module Query
   module Modules
-    # Helper methods to help parsing name instances from parameter strings.
+    # Helper methods to help parsing Name instances from parameter strings.
     module LookupNames
       def lookup_names_by_name(args)
         unless (vals = args[:names])
@@ -80,7 +80,10 @@ module Query
           if /^\d+$/.match?(val.to_s)
             result << minimal_name_data(Name.safe_find(val))
           else
-            result + find_matching_names(val)
+            # rubocop:disable Lint/UselessAssignment
+            # Cop appears to generate false positive
+            result += find_matching_names(val)
+            # rubocop:enable Lint/UselessAssignment
           end
         end.uniq.reject(&:nil?)
       end
@@ -167,13 +170,13 @@ module Query
       end
 
       # This ugliness with "minimal name data" is a way to avoid having Rails
-      # instantiate all the names (which can get quite huge if you start
-      # talking about all the children of Kingdom Fungi!)  It allows us to use
-      # low-level mysql queries, and restricts the dataflow back and forth to
-      # the database to just the few columns we actually need.  Unfortunately
-      # it is ugly, it totally violates the autonomy of Name, and it is
-      # probably hard to understand.  But hopefully once we get it working it
-      # will remain stable.  Blame it on me... -Jason, July 2019
+      # instantiate all the names (which can get quite huge if you start talking
+      # about all the children of Kingdom Fungi!)  It allows us to use low-level
+      # mysql queries, and restricts the dataflow back and forth to the database
+      # to just the few columns we actually need.  Unfortunately it is ugly,
+      # it totally violates the autonomy of Name, and it is probably hard to
+      # understand.  But hopefully once we get it working it will remain stable.
+      # Blame it on me... -Jason, July 2019
 
       def minimal_name_data(name)
         return nil unless name

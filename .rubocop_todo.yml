@@ -36,14 +36,6 @@ Layout/SpaceInsideParens:
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideStringInterpolation:
-  Exclude:
-    - 'app/classes/pattern_search/base.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
 # SupportedStyles: final_newline, final_blank_line
 Layout/TrailingBlankLines:
   Exclude:
@@ -54,7 +46,6 @@ Layout/TrailingBlankLines:
 # Configuration parameters: AllowInHeredoc.
 Layout/TrailingWhitespace:
   Exclude:
-    - 'app/classes/query/modules/coercion.rb'
     - 'app/views/observer/rss.xml.builder'
     - 'test/controllers/herbarium_record_controller_test.rb'
     - 'test/models/cache_test.rb'
@@ -465,7 +456,6 @@ Style/For:
 # SupportedStyles: format, sprintf, percent
 Style/FormatString:
   Exclude:
-    - 'app/classes/pattern_search/term.rb'
     - 'app/classes/query/modules/initialization.rb'
     - 'app/classes/query/modules/validation.rb'
     - 'app/controllers/observer_controller/user_controller.rb'

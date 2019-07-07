@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 module PatternSearch
+  # Search where results returned are Names
   class Name < Base
     PARAMS = {
       created:              [:created_at,         :parse_date_range],
