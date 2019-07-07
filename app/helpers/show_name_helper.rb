@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   # string of links to Names of any other non-deprecated synonyms
@@ -23,21 +25,19 @@ module ShowNameHelper
   # link to a search for Observations of this taxon (under any name) + count
   def taxon_observations(name)
     query = Query.lookup(:Observation, :all,
-      names: name.id,
-      include_synonyms: true,
-      by: :confidence
-    )
+                         names:            name.id,
+                         include_synonyms: true,
+                         by:               :confidence)
     link_to_obss_of(query, :obss_of_taxon.t)
   end
 
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
     query = Query.lookup(:Observation, :all,
-      names: name.id,
-      include_synonyms: true,
-      exclude_original_names: true,
-      by: :confidence
-    )
+                         names:                  name.id,
+                         include_synonyms:       true,
+                         exclude_original_names: true,
+                         by:                     :confidence)
     link_to_obss_of(query, :taxon_obss_other_names.t)
   end
 
@@ -45,12 +45,11 @@ module ShowNameHelper
   # (but is not the consensus)
   def taxon_proposed(name)
     query = Query.lookup(:Observation, :all,
-      names: name.id,
-      include_synonyms: true,
-      include_nonconsensus: true,
-      exclude_consensus: true,
-      by: :confidence
-    )
+                         names:                name.id,
+                         include_synonyms:     true,
+                         include_nonconsensus: true,
+                         exclude_consensus:    true,
+                         by:                   :confidence)
     link_to_obss_of(query, :obss_taxon_proposed.t)
   end
 
@@ -58,12 +57,11 @@ module ShowNameHelper
   # (but this taxon is not the consensus)
   def name_proposed(name)
     query = Query.lookup(:Observation, :all,
-      names: name.id,
-      include_synonyms: false,
-      include_nonconsensus: true,
-      exclude_consensus: true,
-      by: :confidence
-    )
+                         names:                name.id,
+                         include_synonyms:     false,
+                         include_nonconsensus: true,
+                         exclude_consensus:    true,
+                         by:                   :confidence)
     link_to_obss_of(query, :obss_name_proposed.t)
   end
 
@@ -72,8 +70,8 @@ module ShowNameHelper
   #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
   #   Chlorophyllum rhacodes (Vittadini) Vellinga (63)
   def obss_by_syn_links(name)
-    name.other_approved_synonyms.each_with_object([]) do |name, lines|
-      query = Query.lookup(:Observation, :all, names: name.id, by: :confidence)
+    name.other_approved_synonyms.each_with_object([]) do |name2, lines|
+      query = Query.lookup(:Observation, :all, names: name2.id, by: :confidence)
       next if query.select_count.zero?
 
       lines << link_to_obss_of(query, nm.display_name_brief_authors.t)
@@ -93,8 +91,10 @@ module ShowNameHelper
 
     query.save
     link_to(
-      title, add_query_param({ controller: :observer,
-                               action: :index_observation }, query)
+      title,
+      add_query_param(
+        { controller: :observer, action: :index_observation }, query
+      )
     ) + " (#{count})"
   end
 
@@ -104,10 +104,9 @@ module ShowNameHelper
     return  unless (genus = name.genus)
 
     query = Query.lookup(:Name, :all,
-      names: genus.id,
-      include_subtaxa: true,
-      exclude_original_names: true
-    )
+                         names:                  genus.id,
+                         include_subtaxa:        true,
+                         exclude_original_names: true)
     count = query.select_count
     query.save unless browser.bot?
     return unless count > 1
