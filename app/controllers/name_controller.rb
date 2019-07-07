@@ -63,6 +63,10 @@ class NameController < ApplicationController
 
   include DescriptionControllerHelpers
 
+  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # No idea how to fix this offense.  If I add another
+  #    before_action :login_required, except: :show_name_description
+  # in name_controller/show_name_description.rb, it ignores it.
   before_action :login_required, except: [
     :advanced_search,
     :authored_names,
@@ -85,6 +89,7 @@ class NameController < ApplicationController
     :prev_name,
     :prev_name_description,
     :show_name,
+    :show_name_description,
     :show_past_name,
     :show_past_name_description,
     :test_index
@@ -98,9 +103,11 @@ class NameController < ApplicationController
     :deprecate_name,
     :edit_name_description,
     :show_name,
+    :show_name_description,
     :show_past_name,
     :show_past_name_description
   ]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   ##############################################################################
   #

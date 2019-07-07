@@ -2,14 +2,6 @@
 
 # see app/controllers/name_controller.rb
 class NameController
-  before_action :login_required, except: [
-    :show_name_description
-  ]
-
-  before_action :disable_link_prefetching, except: [
-    :show_name_description
-  ]
-
   def show_name_description
     store_location
     pass_query_params

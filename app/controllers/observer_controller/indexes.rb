@@ -208,8 +208,8 @@ class ObserverController
       @locations = Location.connection.select_rows(%(
         SELECT id, name, north, south, east, west FROM locations
         WHERE id IN (#{locations.keys.sort.map(&:to_s).join(",")})
-      )).map do |*vals|
-        locations[id.to_i] = MinimalMapLocation.new(*vals)
+      )).map do |id, *the_rest|
+        locations[id.to_i] = MinimalMapLocation.new(id, *the_rest)
       end
       @observations.each do |obs|
         obs.location = locations[obs.location_id] if obs.location_id
@@ -231,10 +231,10 @@ class ObserverController
   end
 
   def download_observations
-    query = find_or_create_query(:Observation, by: params[:by])
+    @query = find_or_create_query(:Observation, by: params[:by])
     raise "no robots!" if browser.bot?
 
-    query_params_set(query)
+    query_params_set(@query)
     @format = params[:format] || "raw"
     @encoding = params[:encoding] || "UTF-8"
     download_observations_switch
@@ -256,7 +256,7 @@ class ObserverController
 
   def render_observation_report
     report = create_observation_report(
-      query:    query,
+      query:    @query,
       format:   @format,
       encoding: @encoding
     )
@@ -264,7 +264,7 @@ class ObserverController
   end
 
   def render_labels
-    @labels = make_labels(query.results)
+    @labels = make_labels(@query.results)
     render(action: "print_labels", layout: "printable")
   end
 
