@@ -46,7 +46,6 @@ Layout/TrailingBlankLines:
 # Configuration parameters: AllowInHeredoc.
 Layout/TrailingWhitespace:
   Exclude:
-    - 'app/classes/query/modules/coercion.rb'
     - 'app/views/observer/rss.xml.builder'
     - 'test/controllers/herbarium_record_controller_test.rb'
     - 'test/models/cache_test.rb'
