@@ -22,10 +22,8 @@ class ObserverController
 
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name
-    query = create_query(:Observation, :all,
-                         names:            [params[:name]],
-                         include_synonyms: true,
-                         by:               :created_at)
+    query = create_query(:Observation, :all, names: [params[:name]],
+                         include_synonyms: true, by: :created_at)
     show_selected_observations(query)
   end
 
@@ -51,9 +49,8 @@ class ObserverController
   def observations_at_where
     where = params[:where].to_s
     params[:location] = where
-    query = create_query(:Observation, :at_where,
-                         user_where: where,
-                         location:   Location.user_name(@user, where))
+    query = create_query(:Observation, :at_where, user_where: where,
+                         location: Location.user_name(@user, where))
     show_selected_observations(query, always_index: 1)
   end
 
@@ -68,8 +65,7 @@ class ObserverController
   # Display matrix of Observation's whose notes, etc. match a string pattern.
   def observation_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (observation = Observation.safe_find(pattern))
+    if pattern.match(/^\d+$/) && (observation = Observation.safe_find(pattern))
       redirect_to(action: "show_observation", id: observation.id)
     else
       search = PatternSearch::Observation.new(pattern)
@@ -89,33 +85,21 @@ class ObserverController
   def show_selected_observations(query, args = {})
     store_query_in_session(query)
     @links ||= []
-    args = {
-      action:  "list_observations",
-      matrix:  true,
-      include: [:name, :location, :user, :rss_log,
-                { thumb_image: :image_votes }]
-    }.merge(args)
+    args = {  action: "list_observations", matrix: true,
+              include: [:name, :location, :user, :rss_log,
+                        { thumb_image: :image_votes }] }.merge(args)
 
     # Add some extra links to the index user is sent to if they click on an
     # undefined location.
     if query.flavor == :at_where
-      @links << [
-        :list_observations_location_define.l,
-        { controller: "location",
-          action:     "create_location",
-          where:      query.params[:user_where] }
-      ]
-      @links << [
-        :list_observations_location_merge.l,
-        { controller: "location",
-          action:     "list_merge_options",
-          where:      query.params[:user_where] }
-      ]
-      @links << [
-        :list_observations_location_all.l,
-        { controller: "location",
-          action:     "list_locations" }
-      ]
+      @links << [:list_observations_location_define.l,
+                 { controller: "location", action: "create_location",
+                   where: query.params[:user_where] }]
+      @links << [:list_observations_location_merge.l,
+                 { controller: "location", action: "list_merge_options",
+                   where: query.params[:user_where] }]
+      @links << [:list_observations_location_all.l,
+                 { controller: "location", action: "list_locations" }]
     end
 
     # Add some alternate sorting criteria.
@@ -134,10 +118,8 @@ class ObserverController
 
     link = [
       :show_object.t(type: :map),
-      add_query_param(
-        { controller: "observer", action: "map_observations" },
-        query
-      )
+      add_query_param({ controller: "observer", action: "map_observations" },
+                      query)
     ]
     @links << link
 
@@ -193,8 +175,8 @@ class ObserverController
     end
     args = {
       select: columns.join(", "),
-      where:  "observations.lat IS NOT NULL OR " \
-              "observations.location_id IS NOT NULL"
+      where: "observations.lat IS NOT NULL OR " \
+             "observations.location_id IS NOT NULL"
     }
     @observations = \
       @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
@@ -256,9 +238,7 @@ class ObserverController
 
   def render_observation_report
     report = create_observation_report(
-      query:    @query,
-      format:   @format,
-      encoding: @encoding
+      query: @query, format: @format, encoding: @encoding
     )
     render_report(report)
   end
@@ -288,10 +268,10 @@ class ObserverController
 
   def render_report(report)
     send_data(report.body, {
-      type:        report.mime_type,
-      charset:     report.encoding,
+      type: report.mime_type,
+      charset: report.encoding,
       disposition: "attachment",
-      filename:    report.filename
+      filename: report.filename
     }.merge(report.header || {}))
   end
 
