@@ -11,7 +11,7 @@ class API
         raise ObjectNotFoundByString.new(str, model) unless obj
 
         check_permissions!(obj)
-        args[:as] == :verbatim ? str : args[:as] == :id ? obj.id : obj
+        value_based_on_as_argument(args[:as], str, obj)
       end
 
       def find_object(str)
@@ -53,6 +53,21 @@ class API
         return if obj.can_edit?(api.user)
 
         raise MustHaveEditPermission.new(obj)
+      end
+
+      # ------------------------------------------------------------------------
+
+      private
+
+      def value_based_on_as_argument(arg, str, obj)
+        case arg
+        when :verbatim
+          str
+        when :id
+          obj.id
+        else
+          obj
+        end
       end
     end
   end
