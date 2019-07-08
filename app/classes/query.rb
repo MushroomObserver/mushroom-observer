@@ -252,7 +252,7 @@
 #
 #  ==== Outer queries
 #  outer::              Outer Query (if nested).
-#  has_outer?::         Is this Query nested?
+#  outer?::             Is this Query nested?
 #  get_outer_current_id::  Get outer Query's current id.
 #  outer_first::        Call +first+ on outer Query.
 #  outer_prev::         Call +prev+ on outer Query.

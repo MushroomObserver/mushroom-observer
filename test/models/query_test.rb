@@ -730,7 +730,7 @@ class QueryTest < UnitTestCase
     inners_query_ids = inners_details.map { |n| n[:inner].record.id }.sort
     inners_obs_ids = inners_details.map { |n| n[:obs] }.sort
 
-    assert(inner1.has_outer?)
+    assert(inner1.outer?)
     # it's been tweaked but still same id
     assert_equal(outer.record.id, inner1.outer.record.id)
     assert_equal(inners_details.first[:obs],  inner1.get_outer_current_id)

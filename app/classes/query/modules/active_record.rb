@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Modules
     # Handles saving and looking up query records in database.
@@ -57,9 +59,7 @@ module Query
         @record ||= Query.get_record(self)
       end
 
-      def id
-        record.id
-      end
+      delegate :id, to: :record
 
       def save
         record.outer_id = outer_id
