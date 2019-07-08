@@ -36,7 +36,7 @@ class API
     def create_params
       {
         title:      parse(:string, :title, limit: 100),
-        when:       parse(:date, :date) || Time.zone.today,
+        when:       parse(:date, :date) || Date.today,
         place_name: parse(:place_name, :location,
                           limit: 1024, default: Location.unknown.display_name),
         notes:      parse(:string, :notes, default: ""),

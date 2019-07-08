@@ -108,7 +108,7 @@ class API
       @observations = parse_array(:observation, :observations,
                                   must_have_edit_permission: true) || []
       @default_date =
-        @observations.any? ? @observations.first.when : Time.zone.today
+        @observations.any? ? @observations.first.when : Date.today
       @vote = parse(:enum, :vote, limit: Image.all_votes)
       @upload = prepare_upload
     end
