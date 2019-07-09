@@ -44,15 +44,12 @@ module Query
         parameter_declarations.key?("#{key}?".to_sym)
     end
 
-    # rubocop:disable Metrics/AbcSize
     def initialize_flavor
-      add_join_from_string(params[:join]) if params[:join]
-      self.tables += params[:tables]      if params[:tables]
-      self.where  += params[:where]       if params[:where]
-      self.group   = params[:group]       if params[:group]
-      self.order   = params[:order]       if params[:order]
+      # These strings can never come direct from user, so no need to sanitize.
+      # (I believe they are only used by the site stats page. -JPH 20190708)
+      self.where += params[:where] if params[:where]
+      add_join(params[:join])      if params[:join]
     end
-    # rubocop:enable Metrics/AbcSize
 
     def default_order
       raise "Didn't supply default order for #{model} #{flavor} query."

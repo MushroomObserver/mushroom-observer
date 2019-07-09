@@ -95,21 +95,6 @@ module Query
         end
       end
 
-      # Join parameter needs to be converted into an include-style "tree".
-      # It just evals the string, so the syntax is almost identical
-      # to what you're used to:
-      #
-      #   ":table, :table"
-      #   "table: :table"
-      #   "table: [:table, {table: :table}]"
-      #
-      def add_join_from_string(val)
-        @join += val.map do |str|
-          # TODO: sanitize str if val originates from user!
-          str.to_s.index(" ") ? eval(str) : str
-        end
-      end
-
       # Safely add to :where in +args+. Dups <tt>args[:where]</tt>,
       # casts it into an Array, and returns the new Array.
       def extend_where(args)
