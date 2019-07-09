@@ -385,7 +385,6 @@ class LocationController < ApplicationController
 
     @canonical_url = "#{MO.http_domain}/location/show_location_description/"\
                      "#{@description.id}"
-
     # Public or user has permission.
     if in_admin_mode? || @description.is_reader?(@user)
       @location = @description.location
