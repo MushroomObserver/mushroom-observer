@@ -741,8 +741,8 @@ class ApplicationController < ActionController::Base
 
   # Get a copy of the errors.  Return as String.
   def flash_get_notices
-    # TODO: Maybe there is a cleaner way to do this.  session[:notice] should
-    # already by html_safe, but the substring marks it as unsafe.  Maybe there
+    # Maybe there is a cleaner way to do this.  session[:notice] should
+    # already be html_safe, but the substring marks it as unsafe. Maybe there
     # is a way to test if it's html_safe before, and if so, then it should be
     # okay to remove the first character without making it html_unsafe??
     # rubocop:disable Rails/OutputSafety
