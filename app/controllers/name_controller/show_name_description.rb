@@ -43,8 +43,8 @@ class NameController
   def redirect_to_name_or_project
     if @description.project
       redirect_to(controller: "project",
-                  action:     "show_project",
-                  id:         @description.project_id)
+                  action: "show_project",
+                  id: @description.project_id)
     else
       redirect_to(action: "show_name", id: @description.name_id)
     end

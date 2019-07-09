@@ -236,7 +236,7 @@ class NameController
     return matches.first unless matches.many?
 
     args = {
-      str:     @parse.real_search_name,
+      str: @parse.real_search_name,
       matches: new_name.map(&:search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
@@ -263,12 +263,12 @@ class NameController
   def email_admin_name_change
     subject = "Nontrivial Name Change"
     content = :email_name_change.l(
-      user:         @user.login,
-      old:          @name.real_search_name,
-      new:          @parse.real_search_name,
+      user: @user.login,
+      old: @name.real_search_name,
+      new: @parse.real_search_name,
       observations: @name.observations.length,
-      namings:      @name.namings.length,
-      url:          "#{MO.http_domain}/name/show_name/#{@name.id}"
+      namings: @name.namings.length,
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?

@@ -16,17 +16,17 @@ class API
 
     def query_params
       {
-        where:                sql_id_condition,
-        created_at:           parse_range(:time, :created_at),
-        updated_at:           parse_range(:time, :updated_at),
-        users:                parse_array(:user, :user, help: :creator),
-        herbaria:             parse_array(:herbarium, :herbarium, as: :id),
-        observations:         parse_array(:observation, :observation, as: :id),
-        has_notes:            parse(:boolean, :has_notes),
-        initial_det:          parse(:string, :initial_det, help: 1),
-        accession_number:     parse(:string, :accession_number, help: 1),
-        notes_has:            parse(:string, :notes_has, help: 1),
-        initial_det_has:      parse(:string, :initial_det_has, help: 1),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users: parse_array(:user, :user, help: :creator),
+        herbaria: parse_array(:herbarium, :herbarium, as: :id),
+        observations: parse_array(:observation, :observation, as: :id),
+        has_notes: parse(:boolean, :has_notes),
+        initial_det: parse(:string, :initial_det, help: 1),
+        accession_number: parse(:string, :accession_number, help: 1),
+        notes_has: parse(:string, :notes_has, help: 1),
+        initial_det_has: parse(:string, :initial_det_has, help: 1),
         accession_number_has: parse(:string, :accession_number_has, help: 1)
       }
     end
@@ -34,11 +34,11 @@ class API
     def create_params
       @observation = parse(:observation, :observation)
       {
-        herbarium:        parse(:herbarium, :herbarium),
-        initial_det:      parse(:string, :initial_det, help: 1),
+        herbarium: parse(:herbarium, :herbarium),
+        initial_det: parse(:string, :initial_det, help: 1),
         accession_number: parse(:string, :accession_number, help: 1),
-        notes:            parse(:string, :notes),
-        user:             @user
+        notes: parse(:string, :notes),
+        user: @user
       }
     end
 
@@ -46,15 +46,15 @@ class API
       @adds    = parse_array(:observation, :add_observation, help: 1)
       @removes = parse_array(:observation, :remove_observation, help: 1)
       {
-        herbarium:        parse(:herbarium, :set_herbarium, not_blank: true),
-        initial_det:      parse(:string,
+        herbarium: parse(:herbarium, :set_herbarium, not_blank: true),
+        initial_det: parse(:string,
                                 :set_initial_det,
                                 not_blank: true,
                                 help: 1),
         accession_number: parse(:string, :set_accession_number,
                                 not_blank: true,
                                 help: 1),
-        notes:            parse(:string, :set_notes)
+        notes: parse(:string, :set_notes)
       }
     end
 

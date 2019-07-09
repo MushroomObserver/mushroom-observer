@@ -11,16 +11,16 @@ class WebSequenceArchive
     #           Does NCBI BLAST recognize accession from this Archive?
     def archives
       [
-        { name:   "GenBank",
-          home:   "https://www.ncbi.nlm.nih.gov/genbank/",
+        { name: "GenBank",
+          home: "https://www.ncbi.nlm.nih.gov/genbank/",
           prefix: "https://www.ncbi.nlm.nih.gov/nuccore/",
           blastable_by_accession: true },
-        { name:   "ENA",
-          home:   "http://www.ebi.ac.uk/ena",
+        { name: "ENA",
+          home: "http://www.ebi.ac.uk/ena",
           prefix: "http://www.ebi.ac.uk/ena/data/view/",
           blastable_by_accession: true },
-        { name:   "UNITE",
-          home:   "https://unite.ut.ee/",
+        { name: "UNITE",
+          home: "https://unite.ut.ee/",
           prefix: "https://unite.ut.ee/search.php?qresult=yes&accno=",
           blastable_by_accession: false }
       ]

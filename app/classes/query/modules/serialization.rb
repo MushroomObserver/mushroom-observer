@@ -8,7 +8,7 @@ module Query
 
       def serialize
         hash = params.merge(
-          model:  model.to_s.to_sym,
+          model: model.to_s.to_sym,
           flavor: flavor
         )
         hash.keys.sort_by(&:to_s).map do |key|

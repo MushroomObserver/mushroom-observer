@@ -3,11 +3,11 @@ class ContentFilter
   class Lichen < BooleanFilter
     def initialize
       super(
-        sym:         :lichen,
-        models:      [Observation, Name],
-        on_vals:     %w[no yes],
-        prefs_vals:  %w[no yes],
-        off_val:     nil
+        sym: :lichen,
+        models: [Observation, Name],
+        on_vals: %w[no yes],
+        prefs_vals: %w[no yes],
+        off_val: nil
       )
     end
 

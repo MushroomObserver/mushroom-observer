@@ -5,12 +5,12 @@ class Query::ExternalLinkBase < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?:     [:time],
-      updated_at?:     [:time],
-      users?:          [User],
-      observations?:   [Observation],
+      created_at?: [:time],
+      updated_at?: [:time],
+      users?: [User],
+      observations?: [Observation],
       external_sites?: [ExternalSite],
-      url?:            :string
+      url?: :string
     )
   end
 

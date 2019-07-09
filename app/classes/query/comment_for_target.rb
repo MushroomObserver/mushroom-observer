@@ -2,7 +2,7 @@ class Query::CommentForTarget < Query::CommentBase
   def parameter_declarations
     super.merge(
       target: AbstractModel,
-      type:  :string
+      type: :string
     )
   end
 

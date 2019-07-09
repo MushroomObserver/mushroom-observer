@@ -1,7 +1,7 @@
 class Query::NameDescriptionByAuthor < Query::NameDescriptionBase
   def parameter_declarations
     super.merge(
-      user:    User,
+      user: User,
       old_by?: :string
     )
   end

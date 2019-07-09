@@ -792,9 +792,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        author:    "",
-        rank:      desired_name.rank,
-        citation:  desired_name.citation
+        author: "",
+        rank: desired_name.rank,
+        citation: desired_name.citation
       }
     }
     flash_text = :create_name_multiple_names_match.t(str: text_name)
@@ -815,9 +815,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: name.text_name,
-        author:    "Author",
-        rank:      name.rank,
-        status:    name.status
+        author: "Author",
+        rank: name.rank,
+        status: name.status
       }
     }
     user = users(:rolf)
@@ -839,9 +839,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: name.text_name,
-        author:    "",
-        rank:      name.rank,
-        status:    name.status
+        author: "",
+        rank: name.rank,
+        status: name.status
       }
     }
     post(:create_name, params)
@@ -861,9 +861,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        author:    "Author",
-        rank:      :Group,
-        citation:  ""
+        author: "Author",
+        rank: :Group,
+        citation: ""
       }
     }
     login("rolf")
@@ -904,8 +904,8 @@ class NameControllerTest < FunctionalTestCase
     params = {
       name: {
         text_name: text_name,
-        author:    author,
-        rank:      :Genus
+        author: author,
+        rank: :Genus
       }
     }
     post_requires_login(:create_name, params)
@@ -1007,9 +1007,9 @@ class NameControllerTest < FunctionalTestCase
     author    = "(Fr.) Boedijn"
     params = {
       name: {
-        text_name:  "#{text_name} #{author}",
-        author:     "",
-        rank:       :Variety,
+        text_name: "#{text_name} #{author}",
+        author: "",
+        rank: :Variety,
         deprecated: "false"
       }
     }
@@ -1068,10 +1068,10 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:   text_name,
-        author:      author,
-        rank:        rank,
-        citation:    citation,
+        text_name: text_name,
+        author: author,
+        rank: rank,
+        citation: citation,
         deprecated: (deprecated ? "true" : "false")
       }
     }
@@ -1126,9 +1126,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:  desired_text_name,
-        author:     "",
-        rank:       name.rank,
+        text_name: desired_text_name,
+        author: "",
+        rank: name.rank,
         deprecated: "false"
       }
     }
@@ -1203,9 +1203,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:  old_text_name,
-        author:     new_author,
-        rank:       :Species,
+        text_name: old_text_name,
+        author: new_author,
+        rank: :Species,
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
@@ -1226,9 +1226,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:  names(:coprinus_comatus).text_name,
-        author:     "",
-        rank:       names(:coprinus_comatus).rank,
+        text_name: names(:coprinus_comatus).text_name,
+        author: "",
+        rank: names(:coprinus_comatus).rank,
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
@@ -1252,10 +1252,10 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:   name.text_name,
-        author:      name.author,
-        rank:        name.rank,
-        deprecated:  "true",
+        text_name: name.text_name,
+        author: name.author,
+        rank: name.rank,
+        deprecated: "true",
         misspelling: ""
       }
     }
@@ -1272,11 +1272,11 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:        name.text_name,
-        author:           name.author,
-        rank:             name.rank,
-        deprecated:       "false",
-        misspelling:      "1",
+        text_name: name.text_name,
+        author: name.author,
+        rank: name.rank,
+        deprecated: "false",
+        misspelling: "1",
         correct_spelling: "Peltigera"
       }
     }
@@ -1292,12 +1292,12 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:         name.text_name,
-        author:            name.author,
-        rank:              name.rank,
-        deprecated:        (name.deprecated ? "true" : "false"),
-        misspelling:       1,
-        correct_spelling:  "Qwertyuiop"
+        text_name: name.text_name,
+        author: name.author,
+        rank: name.rank,
+        deprecated: (name.deprecated ? "true" : "false"),
+        misspelling: 1,
+        correct_spelling: "Qwertyuiop"
       }
     }
     post(:edit_name, params)
@@ -1309,12 +1309,12 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:         name.text_name,
-        author:            name.author,
-        rank:              name.rank,
-        deprecated:        (name.deprecated ? "true" : "false"),
-        misspelling:       1,
-        correct_spelling:  name.text_name
+        text_name: name.text_name,
+        author: name.author,
+        rank: name.rank,
+        deprecated: (name.deprecated ? "true" : "false"),
+        misspelling: 1,
+        correct_spelling: name.text_name
       }
     }
     post(:edit_name, params)
@@ -1328,12 +1328,12 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_correct_spelling.id,
       name: {
-        text_name:         old_correct_spelling.text_name,
-        author:            old_correct_spelling.author,
-        rank:              old_correct_spelling.rank,
-        deprecated:        (old_correct_spelling.deprecated ? "true" : "false"),
-        misspelling:       1,
-        correct_spelling:  old_misspelling.text_name
+        text_name: old_correct_spelling.text_name,
+        author: old_correct_spelling.author,
+        rank: old_correct_spelling.rank,
+        deprecated: (old_correct_spelling.deprecated ? "true" : "false"),
+        misspelling: 1,
+        correct_spelling: old_misspelling.text_name
       }
     }
     post(:edit_name, params)
@@ -1572,9 +1572,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name:  new_name,
-        author:     name.author,
-        rank:       name.rank
+        text_name: new_name,
+        author: name.author,
+        rank: name.rank
       }
     }
     login(name.user.login)
@@ -1590,13 +1590,13 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        locked:     "0",
-        rank:       "Genus",
+        locked: "0",
+        rank: "Genus",
         deprecated: "true",
-        text_name:  "Foo",
-        author:     "Bar",
-        citation:   "new citation",
-        notes:      "new notes"
+        text_name: "Foo",
+        author: "Bar",
+        citation: "new citation",
+        notes: "new notes"
       }
     }
 
@@ -1661,9 +1661,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_name.id,
       name: {
-        text_name:  agaricus_campestris.text_name,
-        author:     agaricus_campestris.author,
-        rank:       :Species,
+        text_name: agaricus_campestris.text_name,
+        author: agaricus_campestris.author,
+        rank: :Species,
         deprecated: agaricus_campestris.deprecated
       }
     }
@@ -1732,9 +1732,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_name.id,
       name: {
-        text_name:  old_name.text_name,
-        author:     "",
-        rank:       old_name.rank,
+        text_name: old_name.text_name,
+        author: "",
+        rank: old_name.rank,
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -1759,9 +1759,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_name.id,
       name: {
-        text_name:  old_name.text_name,
-        author:     new_author,
-        rank:       old_name.rank,
+        text_name: old_name.text_name,
+        author: new_author,
+        rank: old_name.rank,
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -1782,9 +1782,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: old_name.id,
       name: {
-        text_name:  old_name.text_name,
-        author:     "",
-        rank:       old_name.rank,
+        text_name: old_name.text_name,
+        author: "",
+        rank: old_name.rank,
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -1843,9 +1843,9 @@ class NameControllerTest < FunctionalTestCase
     params = {
       id: wrong_author_name.id,
       name: {
-        text_name:  wrong_author_name.text_name,
-        author:     new_name.author,
-        rank:       new_name.rank,
+        text_name: wrong_author_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
         deprecated: (wrong_author_name.deprecated ? "true" : "false")
       }
     }
@@ -1998,9 +1998,9 @@ class NameControllerTest < FunctionalTestCase
       id: old_name.id,
       name: {
         text_name: new_name.text_name,
-        author:    new_name.author,
-        rank:      new_name.rank,
-        citation:  "",
+        author: new_name.author,
+        rank: new_name.rank,
+        citation: "",
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
@@ -2360,32 +2360,32 @@ class NameControllerTest < FunctionalTestCase
     # Obsolete intrageneric Name, :Genus with rank & author in the author field.
     # (NameController no longer allows this.)
     old_style_name = Name.create!(
-      text_name:        "Amanita",
-      search_name:      "Amanita (sect. Vaginatae)",
-      sort_name:        "Amanita  (sect. Vaginatae)",
-      display_name:     "**__Amanita__** (sect. Vaginatae)",
-      author:           "(sect. Vaginatae)",
-      rank:             :Genus,
-      deprecated:       false,
+      text_name: "Amanita",
+      search_name: "Amanita (sect. Vaginatae)",
+      sort_name: "Amanita  (sect. Vaginatae)",
+      display_name: "**__Amanita__** (sect. Vaginatae)",
+      author: "(sect. Vaginatae)",
+      rank: :Genus,
+      deprecated: false,
       correct_spelling: nil
     )
     # New style. Uses correct rank, and puts rank text in text_name
     new_style_name = Name.create!(
-      text_name:        "Amanita sect. Vaginatae",
-      search_name:      "Amanita sect. Vaginatae (Fr.) Quél.",
-      sort_name:        "Amanita sect. Vaginatae  (Fr.)   Quél.",
-      display_name:     "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
-      author:           "(Fr.) Quél.",
-      rank:             :Section,
-      deprecated:       false,
+      text_name: "Amanita sect. Vaginatae",
+      search_name: "Amanita sect. Vaginatae (Fr.) Quél.",
+      sort_name: "Amanita sect. Vaginatae  (Fr.)   Quél.",
+      display_name: "**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.",
+      author: "(Fr.) Quél.",
+      rank: :Section,
+      deprecated: false,
       correct_spelling: nil
     )
     params = {
       id: old_style_name.id,
       name: {
-        text_name:  new_style_name.text_name,
-        author:     new_style_name.author,
-        rank:       new_style_name.rank,
+        text_name: new_style_name.text_name,
+        author: new_style_name.author,
+        rank: new_style_name.rank,
         deprecated: "false"
       }
     }

@@ -310,7 +310,7 @@ class Name < AbstractModel
 
   has_many :descriptions, -> { order "num_views DESC" },
            class_name: "NameDescription",
-           inverse_of:  :name
+           inverse_of: :name
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :namings

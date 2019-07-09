@@ -48,8 +48,8 @@ module Query
           desc = query.serialize
           QueryRecord.find_by_description(desc) ||
             QueryRecord.new(
-              description:  desc,
-              updated_at:   Time.now,
+              description: desc,
+              updated_at: Time.now,
               access_count: 0
             )
         end

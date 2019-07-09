@@ -23,7 +23,7 @@ class ObserverController
   # Displays matrix of Observations with the given text_name (or search_name).
   def observations_of_name
     query = create_query(:Observation, :all, names: [params[:name]],
-                         include_synonyms: true, by: :created_at)
+                                             include_synonyms: true, by: :created_at)
     show_selected_observations(query)
   end
 
@@ -50,7 +50,7 @@ class ObserverController
     where = params[:where].to_s
     params[:location] = where
     query = create_query(:Observation, :at_where, user_where: where,
-                         location: Location.user_name(@user, where))
+                                                  location: Location.user_name(@user, where))
     show_selected_observations(query, always_index: 1)
   end
 

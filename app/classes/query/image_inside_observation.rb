@@ -2,7 +2,7 @@ class Query::ImageInsideObservation < Query::ImageBase
   def parameter_declarations
     super.merge(
       observation: Observation,
-      outer:       :query
+      outer: :query
     )
   end
 

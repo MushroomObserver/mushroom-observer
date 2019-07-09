@@ -5,14 +5,14 @@ class Query::CollectionNumberBase < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?:   [:time],
-      updated_at?:   [:time],
-      users?:        [User],
+      created_at?: [:time],
+      updated_at?: [:time],
+      users?: [User],
       observations?: [:string],
-      name?:         [:string],
-      number?:       [:string],
-      name_has?:     :string,
-      number_has?:   :string
+      name?: [:string],
+      number?: [:string],
+      name_has?: :string,
+      number_has?: :string
     )
   end
 

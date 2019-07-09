@@ -382,9 +382,9 @@ class AjaxControllerTest < FunctionalTestCase
     site = ExternalSite.first
     url  = "http://valid.url"
     params = {
-      type:  "add",
-      id:    obs.id,
-      site:  site.id,
+      type: "add",
+      id: obs.id,
+      site: site.id,
       value: url
     }
 
@@ -423,8 +423,8 @@ class AjaxControllerTest < FunctionalTestCase
     link    = ExternalLink.first
     new_url = "http://another.valid.url"
     params = {
-      type:  "edit",
-      id:    link.id,
+      type: "edit",
+      id: link.id,
       value: new_url
     }
 
@@ -452,8 +452,8 @@ class AjaxControllerTest < FunctionalTestCase
     # obs owned by rolf, mary created link and is member of site's project
     link   = ExternalLink.first
     params = {
-      type:  "remove",
-      id:    link.id
+      type: "remove",
+      id: link.id
     }
 
     # not logged in

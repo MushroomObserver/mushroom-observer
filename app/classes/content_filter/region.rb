@@ -3,7 +3,7 @@ class ContentFilter
   class Region < StringFilter
     def initialize
       super(
-        sym:    :region,
+        sym: :region,
         models: [Observation, Location]
       )
     end

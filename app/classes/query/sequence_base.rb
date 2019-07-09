@@ -17,40 +17,40 @@ module Query
 
     def sequence_parameter_declarations
       {
-        created_at?:    [:time],
-        updated_at?:    [:time],
-        observations?:  [Observation],
-        users?:         [User],
-        locus?:         [:string],
-        archive?:       [:string],
-        accession?:     [:string],
-        locus_has?:     :string,
+        created_at?: [:time],
+        updated_at?: [:time],
+        observations?: [Observation],
+        users?: [User],
+        locus?: [:string],
+        archive?: [:string],
+        accession?: [:string],
+        locus_has?: :string,
         accession_has?: :string,
-        notes_has?:     :string
+        notes_has?: :string
       }
     end
 
     def observation_parameter_declarations
       {
-        obs_date?:               [:date],
-        observers?:              [User],
-        locations?:              [:string],
-        herbaria?:               [:string],
-        herbarium_records?:      [:string],
-        projects?:               [:string],
-        species_lists?:          [:string],
-        confidence?:             [:float],
-        north?:                  :float,
-        south?:                  :float,
-        east?:                   :float,
-        west?:                   :float,
+        obs_date?: [:date],
+        observers?: [User],
+        locations?: [:string],
+        herbaria?: [:string],
+        herbarium_records?: [:string],
+        projects?: [:string],
+        species_lists?: [:string],
+        confidence?: [:float],
+        north?: :float,
+        south?: :float,
+        east?: :float,
+        west?: :float,
         is_collection_location?: :boolean,
-        has_images?:             :boolean,
-        has_name?:               :boolean,
-        has_specimen?:           :boolean,
-        has_obs_notes?:          :boolean,
-        has_notes_fields?:       [:string],
-        obs_notes_has?:          :string
+        has_images?: :boolean,
+        has_name?: :boolean,
+        has_specimen?: :boolean,
+        has_obs_notes?: :boolean,
+        has_notes_fields?: [:string],
+        obs_notes_has?: :string
       }
     end
 

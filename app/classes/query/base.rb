@@ -29,13 +29,13 @@ module Query
 
     def parameter_declarations
       {
-        join?:   [:string],
+        join?: [:string],
         tables?: [:string],
-        where?:  [:string],
-        group?:  :string,
-        order?:  :string,
-        by?:     :string,
-        title?:  [:string]
+        where?: [:string],
+        group?: :string,
+        order?: :string,
+        by?: :string,
+        title?: [:string]
       }
     end
 

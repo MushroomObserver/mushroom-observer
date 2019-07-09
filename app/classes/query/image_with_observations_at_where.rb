@@ -3,7 +3,7 @@ class Query::ImageWithObservationsAtWhere < Query::ImageWithObservations
 
   def parameter_declarations
     super.merge(
-      location:    :string,
+      location: :string,
       user_where?: :string # used to pass parameter to create_location
     )
   end

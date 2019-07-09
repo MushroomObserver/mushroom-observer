@@ -12,15 +12,15 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:   [:time],
-        updated_at?:   [:time],
-        date?:         [:date],
-        users?:        [User],
-        locations?:    [:string],
-        projects?:     [:string],
-        title_has?:    :string,
-        has_notes?:    :boolean,
-        notes_has?:    :string,
+        created_at?: [:time],
+        updated_at?: [:time],
+        date?: [:date],
+        users?: [User],
+        locations?: [:string],
+        projects?: [:string],
+        title_has?: :string,
+        has_notes?: :boolean,
+        notes_has?: :string,
         has_comments?: { boolean: [true] },
         comments_has?: :string
       ).merge(names_parameter_declarations)

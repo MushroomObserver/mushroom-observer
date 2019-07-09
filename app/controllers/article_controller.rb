@@ -108,8 +108,8 @@ class ArticleController < ApplicationController
 
     return if flash_missing_title?
 
-    article = Article.new(title:   params[:article][:title],
-                          body:    params[:article][:body],
+    article = Article.new(title: params[:article][:title],
+                          body: params[:article][:body],
                           user_id: @user.id)
     article.save
     redirect_to(action: "show_article", id: article.id)

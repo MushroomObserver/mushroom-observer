@@ -85,7 +85,7 @@ class ArticleControllerTest < FunctionalTestCase
     new_title = "Edited Article Title"
     new_body = "Edited body"
     params = {
-      id:      article.id,
+      id: article.id,
       article: { title: new_title, body: new_body }
     }
     login(users(:zero_user).login)

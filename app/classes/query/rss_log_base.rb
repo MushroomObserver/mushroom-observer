@@ -8,7 +8,7 @@ class Query::RssLogBase < Query::Base
   def parameter_declarations
     super.merge(
       updated_at?: [:time],
-      type?:       :string
+      type?: :string
     ).merge(content_filter_parameter_declarations(Observation)).
       merge(content_filter_parameter_declarations(Location))
   end

@@ -13,15 +13,15 @@ module ThumbnailHelper
   def thumbnail(image, args = {})
     image_id = image.is_a?(Integer) ? image : image.id
     locals = {
-      image:            image,
-      link:             Image.show_link_args(image_id),
-      size:             :small,
-      votes:            true,
-      original:         false,
-      responsive:       true,
+      image: image,
+      link: Image.show_link_args(image_id),
+      size: :small,
+      votes: true,
+      original: false,
+      responsive: true,
       theater_on_click: false,
-      html_options:     {},
-      notes:            ""
+      html_options: {},
+      notes: ""
     }.merge(args)
     render(partial: "image/image_thumbnail", locals: locals)
   end

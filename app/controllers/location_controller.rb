@@ -148,7 +148,7 @@ class LocationController < ApplicationController
     @undef_location_format = User.current_location_format
     if (query2 = coerce_query_for_undefined_locations(query))
       select_args = {
-        group:  "observations.where",
+        group: "observations.where",
         select: "observations.where AS w, COUNT(observations.id) AS c"
       }
       if args[:link_all_sorts]
@@ -282,7 +282,7 @@ class LocationController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_location_description
     query = find_or_create_query(:LocationDescription, by: params[:by])
-    show_selected_location_descriptions(query, id:           params[:id].to_s,
+    show_selected_location_descriptions(query, id: params[:id].to_s,
                                                always_index: true)
   end
 
@@ -315,7 +315,7 @@ class LocationController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action:       :list_location_descriptions,
+      action: :list_location_descriptions,
       num_per_page: 50
     }.merge(args)
 
@@ -364,7 +364,7 @@ class LocationController < ApplicationController
       @description = nil unless in_admin_mode? || @description.is_reader?(@user)
     else
       flash_error(:runtime_object_not_found.t(type: :description,
-                                              id:   desc_id))
+                                              id: desc_id))
     end
 
     update_view_stats(@location)
@@ -579,8 +579,8 @@ class LocationController < ApplicationController
             redirect_to(controller: :observer, action: :show_notifications)
           else
             redirect_to(controller: :observer,
-                        action:     :show_observation,
-                        id:         @set_observation)
+                        action: :show_observation,
+                        id: @set_observation)
           end
         elsif @set_species_list
           redirect_to(controller: :species_list, action: :show_species_list,
@@ -590,21 +590,21 @@ class LocationController < ApplicationController
             herbarium.location = @location
             herbarium.save
             redirect_to(controller: :herbarium,
-                        action:     :show_herbarium,
-                        id:         @set_herbarium)
+                        action: :show_herbarium,
+                        id: @set_herbarium)
           end
         elsif @set_user
           if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
             redirect_to(controller: :observer,
-                        action:     :show_user,
-                        id:         @set_user)
+                        action: :show_user,
+                        id: @set_user)
           end
         else
           redirect_to(controller: :location,
-                      action:     :show_location,
-                      id:         @location.id)
+                      action: :show_location,
+                      id: @location.id)
         end
       end
     end
@@ -645,10 +645,10 @@ class LocationController < ApplicationController
       redirect_to(@location.show_link_args)
     else
       redirect_with_query(controller: :observer,
-                          action:     :email_merge_request,
-                          type:       :Location,
-                          old_id:     @location.id,
-                          new_id:     merge.id)
+                          action: :email_merge_request,
+                          type: :Location,
+                          old_id: @location.id,
+                          new_id: merge.id)
     end
   end
 
@@ -711,7 +711,7 @@ class LocationController < ApplicationController
           :runtime_location_description_success.t(id: @description.id)
         )
         redirect_to(action: :show_location_description,
-                    id:     @description.id)
+                    id: @description.id)
 
       else
         flash_object_errors @description
@@ -738,7 +738,7 @@ class LocationController < ApplicationController
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
         redirect_to(action: :show_location_description,
-                    id:     @description.id)
+                    id: @description.id)
 
       # There were error(s).
       elsif !@description.save
@@ -770,14 +770,14 @@ class LocationController < ApplicationController
               :log_object_merged_by_user,
               user: @user.login, touch: true,
               from: old_desc.unique_partial_format_name,
-              to:   @description.unique_partial_format_name
+              to: @description.unique_partial_format_name
             )
             old_desc.destroy
           end
         end
 
         redirect_to(action: :show_location_description,
-                    id:     @description.id)
+                    id: @description.id)
       end
     end
   end
@@ -792,15 +792,15 @@ class LocationController < ApplicationController
                                 name: @description.unique_partial_format_name)
       @description.destroy
       redirect_with_query(action: :show_location,
-                          id:     @description.location_id)
+                          id: @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: :show_location_description,
-                            id:     @description.id)
+                            id: @description.id)
       else
         redirect_with_query(action: :show_location,
-                            id:     @description.location_id)
+                            id: @description.location_id)
       end
     end
   end

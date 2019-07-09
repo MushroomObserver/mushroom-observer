@@ -231,7 +231,7 @@ class CollectionNumberController < ApplicationController
 
   def name_and_number_free?
     @other_number = CollectionNumber.where(
-      name:   @collection_number.name,
+      name: @collection_number.name,
       number: @collection_number.number
     ).first
     !@other_number || @other_number == @collection_number

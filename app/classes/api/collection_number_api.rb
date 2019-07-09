@@ -15,15 +15,15 @@ class API
 
     def query_params
       {
-        where:        sql_id_condition,
-        created_at:   parse_range(:time, :created_at),
-        updated_at:   parse_range(:time, :updated_at),
-        users:        parse_array(:user, :user, help: :creator),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users: parse_array(:user, :user, help: :creator),
         observations: parse_array(:observation, :observation, as: :id),
-        name:         parse(:string, :collector, help: 1),
-        number:       parse(:string, :number, help: 1),
-        name_has:     parse(:string, :collector_has, help: 1),
-        number_has:   parse(:string, :number_has, help: 1)
+        name: parse(:string, :collector, help: 1),
+        number: parse(:string, :number, help: 1),
+        name_has: parse(:string, :collector_has, help: 1),
+        number_has: parse(:string, :number_has, help: 1)
       }
     end
 
@@ -31,9 +31,9 @@ class API
       @observation = parse(:observation, :observation,
                            must_have_edit_permission: true)
       {
-        name:   parse(:string, :collector, help: 1) || @user.legal_name,
+        name: parse(:string, :collector, help: 1) || @user.legal_name,
         number: parse(:string, :number, help: 1),
-        user:   @user
+        user: @user
       }
     end
 
@@ -41,7 +41,7 @@ class API
       @adds    = parse_array(:observation, :add_observation, help: 1)
       @removes = parse_array(:observation, :remove_observation, help: 1)
       {
-        name:   parse(:string, :set_collector, not_blank: true, help: 1),
+        name: parse(:string, :set_collector, not_blank: true, help: 1),
         number: parse(:string, :set_number, not_blank: true, help: 1)
       }
     end

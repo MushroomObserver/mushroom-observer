@@ -281,14 +281,14 @@ class PostObservationTest < IntegrationTestCase
 
   def create_observation_form_first_changes
     {
-      "observation_when_1i"      => 2010,
-      "observation_when_2i"      => 3,
-      "observation_when_3i"      => 14,
-      "observation_place_name"   => "USA, California, Pasadena", # wrong order
-      "is_collection_location"   => false,
-      "specimen"                 => true,
+      "observation_when_1i" => 2010,
+      "observation_when_2i" => 3,
+      "observation_when_3i" => 14,
+      "observation_place_name" => "USA, California, Pasadena", # wrong order
+      "is_collection_location" => false,
+      "specimen" => true,
       "collection_number_number" => "17-034a",
-      other_notes_id             => "Notes for observation"
+      other_notes_id => "Notes for observation"
     }
   end
 

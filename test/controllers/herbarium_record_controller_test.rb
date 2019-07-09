@@ -253,10 +253,10 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     params = {
       id: rec.id,
       herbarium_record: {
-        herbarium_name:   rec.herbarium.auto_complete_name,
-        initial_det:      rec.initial_det,
+        herbarium_name: rec.herbarium.auto_complete_name,
+        initial_det: rec.initial_det,
         accession_number: rec.accession_number,
-        notes:            rec.notes
+        notes: rec.notes
       }
     }
 

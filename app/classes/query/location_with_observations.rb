@@ -8,22 +8,22 @@ module Query
 
     def parameter_declarations
       super.merge(
-        old_by?:                 :string,
-        date?:                   [:date],
-        locations?:              [:string],
-        projects?:               [:string],
-        species_lists?:          [:string],
-        herbaria?:               [:string],
-        confidence?:             [:float],
+        old_by?: :string,
+        date?: [:date],
+        locations?: [:string],
+        projects?: [:string],
+        species_lists?: [:string],
+        herbaria?: [:string],
+        confidence?: [:float],
         is_collection_location?: :boolean,
-        has_location?:           :boolean,
-        has_name?:               :boolean,
-        has_comments?:           { boolean: [true] },
-        has_sequences?:          { boolean: [true] },
-        has_notes?:              :boolean,
-        has_notes_fields?:       [:string],
-        notes_has?:              :string,
-        comments_has?:           :string
+        has_location?: :boolean,
+        has_name?: :boolean,
+        has_comments?: { boolean: [true] },
+        has_sequences?: { boolean: [true] },
+        has_notes?: :boolean,
+        has_notes_fields?: [:string],
+        notes_has?: :string,
+        comments_has?: :string
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
         merge(consensus_parameter_declarations)

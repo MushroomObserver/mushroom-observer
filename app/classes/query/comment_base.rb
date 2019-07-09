@@ -9,10 +9,10 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:  [:time],
-        updated_at?:  [:time],
-        users?:       [User],
-        types?:       [{ string: Comment.all_type_tags }],
+        created_at?: [:time],
+        updated_at?: [:time],
+        users?: [User],
+        types?: [{ string: Comment.all_type_tags }],
         summary_has?: :string,
         content_has?: :string
       )
