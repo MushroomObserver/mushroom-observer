@@ -212,9 +212,10 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_location_descriptions_by_author
     descs = LocationDescription.all
+    desc = location_descriptions(:albion_desc)
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
-      %r{/location/show_location_description/#{ descs.first.id }}
+      %r{/location/show_location_description/#{ desc.id }}
     )
   end
 
@@ -224,10 +225,34 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_show_location_description
+    # happy path
     desc = location_descriptions(:albion_desc)
     get_with_dump(:show_location_description, id: desc.id)
     assert_action_partials("show_location_description",
                            %w[_show_description _location_description])
+
+    # Unhappy paths
+    # Prove they flash an error and redirect to the appropriate page
+
+    # description is private and belongs to a project
+    desc = location_descriptions(:bolete_project_private_location_desc)
+    get_with_dump(:show_location_description, id: desc.id)
+    assert_flash_error
+    assert_redirected_to(controller: :project, action: :show_project,
+                         id: desc.project.id)
+
+    # description is private, for a project, project doesn't exist
+    # but project doesn't existb
+    desc = location_descriptions(:non_ex_project_private_location_desc)
+    get_with_dump(:show_location_description, id: desc.id)
+    assert_flash_error
+    assert_redirected_to(action: :show_location, id: desc.location_id)
+
+    # description is private, not for a project
+    desc = location_descriptions(:user_private_location_desc)
+    get_with_dump(:show_location_description, id: desc.id)
+    assert_flash_error
+    assert_redirected_to(action: :show_location, id: desc.location_id)
   end
 
   def test_show_past_location_description

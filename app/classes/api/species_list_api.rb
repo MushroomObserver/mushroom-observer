@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API for SpeciesList
   class SpeciesListAPI < ModelAPI
@@ -15,22 +17,20 @@ class API
 
     def query_params
       {
-        where:          sql_id_condition,
-        created_at:     parse_range(:time, :created_at),
-        updated_at:     parse_range(:time, :updated_at),
-        date:           parse_range(:date, :date, help: :any_date),
-        users:          parse_array(:user, :user, help: :creator),
-        names:          parse_array(:name, :name, as: :id),
-        synonym_names:  parse_array(:name, :synonyms_of, as: :id),
-        children_names: parse_array(:name, :children_of, as: :id),
-        locations:      parse_array(:location, :location, as: :id),
-        projects:       parse_array(:project, :project, as: :id),
-        has_notes:      parse(:boolean, :has_notes),
-        has_comments:   parse(:boolean, :has_comments, limit: true),
-        title_has:      parse(:string, :title_has, help: 1),
-        notes_has:      parse(:string, :notes_has, help: 1),
-        comments_has:   parse(:string, :comments_has, help: 1)
-      }
+        where:        sql_id_condition,
+        created_at:   parse_range(:time, :created_at),
+        updated_at:   parse_range(:time, :updated_at),
+        date:         parse_range(:date, :date, help: :any_date),
+        users:        parse_array(:user, :user, help: :creator),
+        names:        parse_array(:name, :name, as: :id),
+        locations:    parse_array(:location, :location, as: :id),
+        projects:     parse_array(:project, :project, as: :id),
+        has_notes:    parse(:boolean, :has_notes),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        title_has:    parse(:string, :title_has, help: 1),
+        notes_has:    parse(:string, :notes_has, help: 1),
+        comments_has: parse(:string, :comments_has, help: 1)
+      }.merge(parse_names_parameters)
     end
 
     def create_params
@@ -49,7 +49,7 @@ class API
       {
         title:      parse(:string, :set_title, limit: 100, not_blank: true),
         when:       parse(:date, :set_date),
-        place_name: parse(:place_name, :set_location, limit: 1024,
+        place_name: parse(:place_name, :set_location, limit:     1024,
                                                       not_blank: true),
         notes:      parse(:string, :set_notes)
       }

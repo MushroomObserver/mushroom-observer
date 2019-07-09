@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API for Name
   class NameAPI < ModelAPI
@@ -21,8 +23,6 @@ class API
         updated_at:         parse_range(:time, :updated_at),
         users:              parse_array(:user, :user, help: :first_user),
         names:              parse_array(:name, :name, as: :id),
-        synonym_names:      parse_array(:name, :synonyms_of, as: :id),
-        children_names:     parse_array(:name, :children_of, as: :id),
         is_deprecated:      parse(:boolean, :is_deprecated),
         misspellings:       parse_misspellings,
         has_synonyms:       parse(:boolean, :has_synonyms),
@@ -42,7 +42,7 @@ class API
         notes_has:          parse(:string, :notes_has, help: 1),
         comments_has:       parse(:string, :comments_has, help: 1),
         ok_for_export:      parse(:boolean, :ok_for_export)
-      }
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
 
@@ -238,10 +238,13 @@ class API
                                :set_correct_spelling])
     end
 
+    # Disable cop because there's no reasonable way to avoid the offense
+    # rubocop:disable CyclomaticComplexity
     def no_other_update_params?
       !@name && !@author && !@rank && @deprecated.nil? &&
         !@synonymize_with && !@clear_synonyms && !@correct_spelling
     end
+    # rubocop:enable CyclomaticComplexity
 
     def change_name(name)
       return unless @name || @author || @rank

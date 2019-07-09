@@ -77,7 +77,9 @@ module ObservationReport
     end
 
     def collector_numbers(row)
-      row.val(2).to_s.tr("\t", " ").gsub(/\n/, ", ")
+      row.val(2).to_s.split("\n").sort_by(&:to_i).map do |str|
+        str.split("\t")[1..2].join(" ")
+      end.join(", ")
     end
 
     def explode_notes(row)

@@ -30,3 +30,36 @@ no_mushrooms_location_desc: # 2
   reader_groups: dick_only
   writer_groups: dick_only
 
+bolete_project_private_location_desc:
+  location: gualala
+  user: dick
+  version: 1
+  notes: Private location description for Bolete Project
+  source_type: <%= LocationDescription.source_types[:project] %>
+  public: 0
+  authors: dick
+  reader_groups: dick_only
+  writer_groups: dick_only
+  project: bolete_project
+
+non_ex_project_private_location_desc:
+  location: gualala
+  user: dick
+  version: 1
+  notes: Private location description for a project which doesn't exist
+  source_type: <%= LocationDescription.source_types[:project] %>
+  public: 0
+  authors: dick
+  reader_groups: dick_only
+  writer_groups: dick_only
+
+user_private_location_desc:
+  location: gualala
+  user: dick
+  version: 1
+  notes: Private location description, not for a project
+  source_type: <%= LocationDescription.source_types[:user] %>
+  public: 0
+  authors: dick
+  reader_groups: dick_only
+  writer_groups: dick_only

@@ -54,7 +54,8 @@ class ApiTest < UnitTestCase
   end
 
   def assert_api_results(expect)
-    msg = "API results wrong.  Query: #{@api.query.query}"
+    msg = "API results wrong.\nQuery args: #{@api.query.params.inspect}\n"\
+          "Query sql: #{@api.query.query}"
     assert_obj_list_equal(expect, @api.results, :sort, msg)
   end
 
@@ -799,16 +800,16 @@ class ApiTest < UnitTestCase
       id:      link.id,
       set_url: new_url
     }
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_url: ""))
     assert_api_pass(params)
     assert_equal(new_url, link.reload.url)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update!(user: mary)
     assert_api_pass(params.merge(set_url: new_url + "2"))
     assert_equal(new_url + "2", link.reload.url)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     link.external_site.project.user_group.users << dick
     assert_api_pass(params.merge(set_url: new_url + "3"))
     assert_equal(new_url + "3", link.reload.url)
@@ -831,17 +832,17 @@ class ApiTest < UnitTestCase
       external_site: link.external_site,
       url:           link.url
     }
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_pass(params)
     assert_nil(ExternalLink.safe_find(link.id))
     link = ExternalLink.create!(recreate_params)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update!(user: mary)
     assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
     link = ExternalLink.create!(recreate_params)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     link.external_site.project.user_group.users << dick
     assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
@@ -1138,13 +1139,29 @@ class ApiTest < UnitTestCase
 
     name2 = names(:agaricus_campestros)
     synonym = Synonym.create!
-    name.update_attributes!(synonym: synonym)
-    name2.update_attributes!(synonym: synonym)
+    name.update!(synonym: synonym)
+    name2.update!(synonym: synonym)
     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
+    assert_api_pass(
+      params.merge(name: "Agaricus campestros", include_synonyms: "yes")
+    )
+    assert_api_results(imgs)
 
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_img = Image.create(
+      # add notes to avoid breaking later, brittle assertion
+      notes: "Agaricus image", user: rolf
+    )
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+    )
     assert_api_pass(params.merge(children_of: "Agaricus"))
     assert_api_results(imgs)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(imgs << agaricus_img)
+    ###
 
     burbank = locations(:burbank)
     imgs = burbank.observations.map(&:images).flatten
@@ -1189,7 +1206,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(size: "large"))
     assert_api_results(imgs)
 
-    img1.update_attributes!(content_type: "image/png")
+    img1.update!(content_type: "image/png")
     assert_api_pass(params.merge(content_type: "png"))
     assert_api_results([img1])
 
@@ -1225,9 +1242,36 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(confidence: "2-3"))
     assert_api_results(imgs)
 
-    pretty_img.update_attributes!(ok_for_export: false)
+    pretty_img.update!(ok_for_export: false)
     assert_api_pass(params.merge(ok_for_export: "no"))
     assert_api_results([pretty_img])
+  end
+
+  def test_two_agaricus_bug
+    name = names(:agaricus_campestris) # the only Agaricus species with images
+    imgs = name.observations.map(&:images).flatten
+
+    # Create 2nd Agaricus.  There's an existing Agaricus without and author.
+    # The API and Query parsers were resolving "Agaricus" to the one without
+    # an author thinking that was an exact match, instead of resolving to both
+    # versions like it should.
+    agaricus = Name.create(
+      rank: Name.ranks[:Genus], text_name: "Agaricus",  author: "L.",
+      search_name: "Agaricus L.", sort_name: "Agaricus  L.",
+      display_name: "**__Agaricus__** L.", user: rolf
+    )
+    assert_equal(2, Name.where(text_name: "Agaricus").count)
+
+    agaricus_img = Image.create(user: rolf)
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+    )
+
+    assert_api_pass(
+      method: :get, action: :image, name: "Agaricus", include_subtaxa: "yes"
+    )
+    assert_api_results(imgs << agaricus_img)
   end
 
   def test_posting_minimal_image
@@ -1331,7 +1375,7 @@ class ApiTest < UnitTestCase
     eol = projects(:eol_project)
     pd = licenses(:publicdomain)
     assert(rolfs_img.can_edit?(rolf))
-    assert(!marys_img.can_edit?(rolf))
+    assert_not(marys_img.can_edit?(rolf))
     params = {
       method:               :patch,
       action:               :image,
@@ -1499,45 +1543,45 @@ class ApiTest < UnitTestCase
     # Not allowed to change if anyone else has an observation there.
     obs = observations(:minimal_unknown_obs)
     assert_objs_equal(mary, obs.user)
-    obs.update_attributes!(location: albion)
+    obs.update!(location: albion)
     assert_api_fail(params)
-    obs.update_attributes!(location: burbank)
+    obs.update!(location: burbank)
 
     # But allow it if rolf owns that observation.
     obs = observations(:coprinus_comatus_obs)
     assert_objs_equal(rolf, obs.user)
-    obs.update_attributes!(location: albion)
+    obs.update!(location: albion)
 
     # Not allowed to change if anyone else has a species_list there.
     spl = species_lists(:unknown_species_list)
     assert_objs_equal(mary, spl.user)
-    spl.update_attributes!(location: albion)
+    spl.update!(location: albion)
     assert_api_fail(params)
-    spl.update_attributes!(location: burbank)
+    spl.update!(location: burbank)
 
     # But allow it if rolf owns that list.
     spl = species_lists(:first_species_list)
     assert_objs_equal(rolf, spl.user)
-    spl.update_attributes!(location: albion)
+    spl.update!(location: albion)
 
     # Not allowed to change if anyone has made this their personal location.
-    mary.update_attributes!(location: albion)
+    mary.update!(location: albion)
     assert_api_fail(params)
-    mary.update_attributes!(location: burbank)
+    mary.update!(location: burbank)
 
     # But allow it if rolf is that user.
-    rolf.update_attributes!(location: albion)
+    rolf.update!(location: albion)
 
     # Not allowed to change if an herbarium is at that location, period.
     nybg = herbaria(:nybg_herbarium)
-    nybg.update_attributes!(location: albion)
+    nybg.update!(location: albion)
     assert_api_fail(params)
-    nybg.update_attributes!(location: burbank)
+    nybg.update!(location: burbank)
 
     # Not allowed to change if user didn't create it.
-    albion.update_attributes!(user: mary)
+    albion.update!(user: mary)
     assert_api_fail(params)
-    albion.update_attributes!(user: rolf)
+    albion.update!(user: rolf)
 
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that name is valid and not already
@@ -1615,6 +1659,10 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(names)
 
     names = Name.where("classification like '%Fungi%'").each do |n|
       genus = n.text_name.split.first
@@ -1623,6 +1671,8 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
+    assert_api_pass(params.merge(name: "Fungi", include_subtaxa: "yes"))
+    assert_api_results(names << names(:fungi))
 
     names = Name.where(deprecated: true).
             reject(&:correct_spelling_id)
@@ -1776,7 +1826,7 @@ class ApiTest < UnitTestCase
     assert_api_results(names)
 
     Name.where(correct_spelling: nil).sample.
-      update_attributes!(ok_for_export: true)
+      update!(ok_for_export: true)
     names = Name.where(ok_for_export: true).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
@@ -1854,7 +1904,7 @@ class ApiTest < UnitTestCase
       set_classification: new_classification
     }
 
-    lepiota.update_attributes!(user: mary)
+    lepiota.update!(user: mary)
 
     # Just to be clear about the starting point, the only objects attached to
     # this name at first are a version and a description, both owned by rolf,
@@ -1872,31 +1922,31 @@ class ApiTest < UnitTestCase
     # Not allowed to change if anyone else has an observation of that name.
     obs = observations(:minimal_unknown_obs)
     assert_objs_equal(mary, obs.user)
-    obs.update_attributes!(name: agaricus)
+    obs.update!(name: agaricus)
     assert_api_fail(params)
-    obs.update_attributes!(name: lepiota)
+    obs.update!(name: lepiota)
 
     # But allow it if rolf owns that observation.
     obs = observations(:coprinus_comatus_obs)
     assert_objs_equal(rolf, obs.user)
-    obs.update_attributes!(name: agaricus)
+    obs.update!(name: agaricus)
 
     # Not allowed to change if anyone else has proposed that name.
     nam = namings(:detailed_unknown_naming)
     assert_objs_equal(mary, nam.user)
-    nam.update_attributes!(name: agaricus)
+    nam.update!(name: agaricus)
     assert_api_fail(params)
-    nam.update_attributes!(name: lepiota)
+    nam.update!(name: lepiota)
 
     # But allow it if rolf owns that name proposal.
     nam = namings(:coprinus_comatus_naming)
     assert_objs_equal(rolf, nam.user)
-    nam.update_attributes!(name: agaricus)
+    nam.update!(name: agaricus)
 
     # Not allowed to change if user didn't create it.
-    agaricus.update_attributes!(user: mary)
+    agaricus.update!(user: mary)
     assert_api_fail(params)
-    agaricus.update_attributes!(user: rolf)
+    agaricus.update!(user: rolf)
 
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that classification is valid.
@@ -2042,19 +2092,33 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(obses)
 
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpinus))
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
-
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
     assert_api_results(obses)
+
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(ssp_obs)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_obs.to_a << agaricus_obs)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -2380,7 +2444,7 @@ class ApiTest < UnitTestCase
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)
     assert(rolfs_obs.can_edit?(rolf))
-    assert(!marys_obs.can_edit?(rolf))
+    assert_not(marys_obs.can_edit?(rolf))
     params = {
       method:                     :patch,
       action:                     :observation,
@@ -2464,7 +2528,7 @@ class ApiTest < UnitTestCase
     proj = projects(:bolete_project)
     proj.user_group.users << rolf
     rolf.reload
-    assert(!proj.observations.include?(rolfs_obs))
+    assert_not(proj.observations.include?(rolfs_obs))
     assert(proj.observations.include?(marys_obs))
     assert(rolfs_obs.can_edit?(rolf))
     assert(marys_obs.can_edit?(rolf))
@@ -2482,21 +2546,21 @@ class ApiTest < UnitTestCase
                                  remove_from_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id,
                                  remove_from_project: proj.id))
-    assert(!Project.find(proj.id).observations.include?(rolfs_obs))
+    assert_not(Project.find(proj.id).observations.include?(rolfs_obs))
     assert(Project.find(proj.id).observations.include?(marys_obs))
 
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:query_first_list)
     assert(spl1.can_edit?(rolf))
-    assert(!spl2.can_edit?(rolf))
+    assert_not(spl2.can_edit?(rolf))
     assert_api_pass(params.merge(add_to_species_list: spl1.id))
     assert_api_fail(params.merge(add_to_species_list: spl2.id))
     assert(spl1.reload.observations.include?(rolfs_obs))
-    assert(!spl2.reload.observations.include?(rolfs_obs))
+    assert_not(spl2.reload.observations.include?(rolfs_obs))
     assert_api_pass(params.merge(remove_from_species_list: spl1.id))
     assert_api_fail(params.merge(remove_from_species_list: spl2.id))
-    assert(!spl1.reload.observations.include?(rolfs_obs))
-    assert(!spl2.reload.observations.include?(rolfs_obs))
+    assert_not(spl1.reload.observations.include?(rolfs_obs))
+    assert_not(spl2.reload.observations.include?(rolfs_obs))
   end
 
   def test_deleting_observations
@@ -2634,9 +2698,9 @@ class ApiTest < UnitTestCase
 
     assert_api_fail(params)
     assert_api_fail(params.remove(:api_key))
-    @api_key.update_attributes!(user: katrina)
+    @api_key.update!(user: katrina)
     assert_api_fail(params.merge(set_title: "new title"))
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_title: ""))
     assert_api_pass(params.merge(set_title: "new title"))
     assert_equal("new title", proj.reload.title)
@@ -2725,8 +2789,8 @@ class ApiTest < UnitTestCase
     assert_api_results(seqs)
 
     obs = observations(:locally_sequenced_obs)
-    obs.update_attributes!(user: mary)
-    obs.sequences.each { |s| s.update_attributes!(user: mary) }
+    obs.update!(user: mary)
+    obs.sequences.each { |s| s.update!(user: mary) }
     seqs = Sequence.where(user: mary)
     assert_not_empty(seqs)
     assert_api_pass(params.merge(user: "mary"))
@@ -2785,19 +2849,37 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpinus))
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(obses.map(&:sequences).flatten)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(obses.map(&:sequences).flatten)
 
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_sequence = Sequence.create(
+      observation: agaricus_obs, user: rolf, locus: "ITS", bases: "ACGT"
+    )
+    ssp_sequences = ssp_obs.map(&:sequences).flatten.sort_by(&:id)
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(ssp_sequences)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_sequences << agaricus_sequence)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -2999,7 +3081,7 @@ class ApiTest < UnitTestCase
       set_notes:     @notes
     }
     assert_api_fail(params)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params.merge(set_locus: ""))
     assert_api_fail(params.merge(set_archive: "bogus"))
     assert_api_fail(params.merge(set_archive: ""))
@@ -3018,7 +3100,7 @@ class ApiTest < UnitTestCase
     }
     assert_api_fail(params)
     assert_not_nil(Sequence.safe_find(seq.id))
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_pass(params)
     assert_nil(Sequence.safe_find(seq.id))
   end
@@ -3061,26 +3143,43 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(spls)
 
-    obs1 = Observation.create!(user: rolf, when: Time.now,
+    obs1 = Observation.create!(user: rolf, when: Time.zone.now,
                                where: locations(:burbank),
                                name: names(:lactarius_alpinus))
-    obs2 = Observation.create!(user: rolf, when: Time.now,
+    obs2 = Observation.create!(user: rolf, when: Time.zone.now,
                                where: locations(:burbank),
                                name: names(:lactarius_alpigenes))
     obs1.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:another_species_list)
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert(spls.length > 1)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert(ssp_lists.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(ssp_lists)
 
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
     obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert_not_empty(spls)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(ssp_lists)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_genus_list = SpeciesList.create!(
+      title: "Agaricus Genus Obses", location: locations(:albion), user: rolf
+    )
+    agaricus_obs.species_lists << agaricus_genus_list
+
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_lists << agaricus_genus_list)
 
     spls = SpeciesList.where(location: locations(:no_mushrooms_location))
     assert_not_empty(spls)
@@ -3179,7 +3278,7 @@ class ApiTest < UnitTestCase
   def test_patching_species_lists
     rolfs_spl = species_lists(:first_species_list)
     marys_spl = species_lists(:unknown_species_list)
-    assert(!marys_spl.can_edit?(rolf))
+    assert_not(marys_spl.can_edit?(rolf))
     @user     = rolf
     @title    = "New Title"
     @date     = Date.parse("2017-11-17")
@@ -3896,6 +3995,12 @@ class ApiTest < UnitTestCase
   #  :section: Help Messages
   # --------------------------
 
+  def test_deprecation
+    api = API.execute(method: :get, action: :image, help: :me)
+    assert_match(/created_at/, api.errors.first.to_s)
+    assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
+  end
+
   def test_api_key_help
     file = help_messages_file
     File.open(file, "w") { |fh| fh.truncate(0) }
@@ -3967,7 +4072,7 @@ class ApiTest < UnitTestCase
   end
 
   def help_messages_file
-    "#{Rails.root}/README_API_HELP_MESSAGES.txt"
+    Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
   end
 
   def do_help_test(method, action, fail = false)

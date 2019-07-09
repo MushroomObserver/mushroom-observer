@@ -1,6 +1,13 @@
+# frozen_string_literal: true
+
 # see app/controllers/name_controller.rb
 class NameController
-  def create_name # :prefetch: :norobots:
+  before_action :disable_link_prefetching, except: [
+    :create_name,
+    :edit_name
+  ]
+
+  def create_name
     store_location
     pass_query_params
     init_create_name_form
@@ -13,7 +20,7 @@ class NameController
     reload_name_form_on_error(e)
   end
 
-  def edit_name # :prefetch: :norobots:
+  def edit_name
     store_location
     pass_query_params
     @name = find_or_goto_index(Name, params[:id].to_s)
@@ -32,6 +39,8 @@ class NameController
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
+
+  # ----------------------------------------------------------------------------
 
   private
 
@@ -71,13 +80,13 @@ class NameController
   def create_new_name
     @name = Name.new_name_from_parsed_name(@parse)
     set_locked_citation_and_notes
-    if @name.save_with_log(:log_name_updated)
-      flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
-      update_ancestors
-      redirect_to_show_name
-    else
+    unless @name.save_with_log(:log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     end
+
+    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+    update_ancestors
+    redirect_to_show_name
   end
 
   def change_existing_name
@@ -227,7 +236,7 @@ class NameController
     return matches.first unless matches.many?
 
     args = {
-      str: @parse.real_search_name,
+      str:     @parse.real_search_name,
       matches: new_name.map(&:search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
@@ -254,15 +263,15 @@ class NameController
   def email_admin_name_change
     subject = "Nontrivial Name Change"
     content = :email_name_change.l(
-      user: @user.login,
-      old:  @name.real_search_name,
-      new:  @parse.real_search_name,
+      user:         @user.login,
+      old:          @name.real_search_name,
+      new:          @parse.real_search_name,
       observations: @name.observations.length,
-      namings: @name.namings.length,
-      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
+      namings:      @name.namings.length,
+      url:          "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
-    NameControllerTest.report_email(content) if Rails.env == "test"
+    NameControllerTest.report_email(content) if Rails.env.test?
   end
 
   def redirect_to_show_name

@@ -15,16 +15,6 @@
 Layout/AlignHash:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideHashLiteralBraces:
-  Exclude:
-    - 'app/classes/query/comment_base.rb'
-    - 'app/classes/query/name_base.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -32,14 +22,6 @@ Layout/SpaceInsideHashLiteralBraces:
 Layout/SpaceInsideParens:
   Exclude:
     - 'app/models/name/parse.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideStringInterpolation:
-  Exclude:
-    - 'app/classes/pattern_search/base.rb'
 
 # Offense count: 1
 # Cop supports --auto-correct.
@@ -54,7 +36,6 @@ Layout/TrailingBlankLines:
 # Configuration parameters: AllowInHeredoc.
 Layout/TrailingWhitespace:
   Exclude:
-    - 'app/classes/query/modules/coercion.rb'
     - 'app/views/observer/rss.xml.builder'
     - 'test/controllers/herbarium_record_controller_test.rb'
     - 'test/models/cache_test.rb'
@@ -72,7 +53,6 @@ Lint/AssignmentInCondition:
 # Offense count: 3
 Lint/BooleanSymbol:
   Exclude:
-    - 'app/classes/query/modules/validation.rb'
     - 'test/integration/amateur_test.rb'
 
 # Offense count: 1
@@ -113,14 +93,6 @@ Lint/IneffectiveAccessModifier:
     - 'app/models/rss_log.rb'
     - 'app/models/vote.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: runtime_error, standard_error
-Lint/InheritException:
-  Exclude:
-    - 'app/classes/query/modules/validation.rb'
-
 # Offense count: 6
 Lint/LiteralAsCondition:
   Exclude:
@@ -138,13 +110,11 @@ Lint/Loop:
 # Configuration parameters: MaximumRangeSize.
 Lint/MissingCopEnableDirective:
   Exclude:
-    - 'app/classes/api/observation_api.rb'
     - 'app/classes/observation_report/adolf.rb'
     - 'app/classes/observation_report/darwin.rb'
     - 'app/classes/observation_report/mycoflora.rb'
     - 'app/classes/observation_report/raw.rb'
     - 'app/classes/observation_report/symbiota.rb'
-    - 'app/classes/query/modules/initialization.rb'
 
 # Offense count: 1
 Lint/NonLocalExitFromIterator:
@@ -165,7 +135,6 @@ Lint/ReturnInVoidContext:
 Lint/ShadowingOuterLocalVariable:
   Exclude:
     - 'app/classes/eol_data.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/models/language_exporter.rb'
     - 'app/models/name/taxonomy.rb'
     - 'script/refresh_name_lister_cache'
@@ -196,7 +165,6 @@ Lint/UnneededCopDisableDirective:
 # Configuration parameters: IgnoreEmptyBlocks, AllowUnusedKeywordArguments.
 Lint/UnusedBlockArgument:
   Exclude:
-    - 'app/classes/query/modules/initialization.rb'
     - 'config/routes.rb'
 
 # Offense count: 7
@@ -358,8 +326,6 @@ Style/Alias:
   Exclude:
     - 'app/classes/gmaps.rb'
     - 'app/classes/mo_paginator.rb'
-    - 'app/controllers/name_controller.rb'
-    - 'app/controllers/observer_controller/indexes.rb'
     - 'app/controllers/observer_controller/info_controller.rb'
     - 'app/controllers/observer_controller/user_controller.rb'
     - 'app/controllers/translation_controller.rb'
@@ -372,10 +338,7 @@ Style/Alias:
 # SupportedStyles: always, conditionals
 Style/AndOr:
   Exclude:
-    - 'app/classes/query/modules/validation.rb'
     - 'app/controllers/article_controller.rb'
-    - 'app/controllers/image_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/controllers/project_controller.rb'
     - 'app/models/image.rb'
     - 'app/views/name/eol.xml.builder'
@@ -437,19 +400,12 @@ Style/DoubleNegation:
     - 'app/models/naming.rb'
     - 'test/models/language_exporter_test.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/EachWithObject:
-  Exclude:
-    - 'app/classes/query/modules/high_level_queries.rb'
-
 # Offense count: 3
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: compact, expanded
 Style/EmptyMethod:
   Exclude:
-    - 'app/controllers/location_controller.rb'
     - 'app/controllers/observer_controller/info_controller.rb'
     - 'app/controllers/theme_controller.rb'
 
@@ -466,9 +422,6 @@ Style/For:
 # SupportedStyles: format, sprintf, percent
 Style/FormatString:
   Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/classes/query/modules/initialization.rb'
-    - 'app/classes/query/modules/validation.rb'
     - 'app/controllers/observer_controller/user_controller.rb'
     - 'app/helpers/api_helper.rb'
     - 'app/models/name_sorter.rb'
@@ -483,7 +436,6 @@ Style/FormatString:
 # SupportedStyles: annotated, template, unannotated
 Style/FormatStringToken:
   Exclude:
-    - 'app/classes/query/modules/initialization.rb'
     - 'app/controllers/observer_controller/user_controller.rb'
     - 'app/helpers/api_helper.rb'
     - 'app/helpers/tabs_helper.rb'
@@ -513,15 +465,12 @@ Style/GuardClause:
 # SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
 Style/HashSyntax:
   Exclude:
-    - 'app/classes/query/modules/joining.rb'
     - 'test/models/api_test.rb'
     - 'test/models/observation_report_test.rb'
 
 # Offense count: 6
 Style/IdenticalConditionalBranches:
   Exclude:
-    - 'app/controllers/location_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'script/s3ls.rb'
 
 # Offense count: 7
@@ -529,7 +478,6 @@ Style/IfInsideElse:
   Exclude:
     - 'app/classes/box_methods.rb'
     - 'app/controllers/interest_controller.rb'
-    - 'app/controllers/location_controller.rb'
     - 'app/controllers/project_controller.rb'
     - 'app/extensions/symbol_extensions.rb'
     - 'lib/tasks/cache.rake'
@@ -544,10 +492,6 @@ Style/IfUnlessModifier:
 # Configuration parameters: InverseMethods, InverseBlocks.
 Style/InverseMethods:
   Exclude:
-    - 'app/classes/query/modules/validation.rb'
-    - 'app/controllers/image_controller.rb'
-    - 'app/controllers/location_controller.rb'
-    - 'app/controllers/name_controller.rb'
     - 'app/controllers/name_controller/show_name_description.rb'
     - 'app/helpers/description_helper.rb'
     - 'app/helpers/javascript_helper.rb'

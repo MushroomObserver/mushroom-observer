@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class API
   # Information about an API parameter to provide automatic documentation
   class ParameterDeclaration
-    attr_accessor :key, :type, :args, :set_parameter
+    attr_accessor :key, :type, :args, :set_parameter, :deprecated
 
     def initialize(key, type, args = {})
       self.key  = key
@@ -11,6 +13,10 @@ class API
 
     def set_parameter?
       @set_parameter
+    end
+
+    def deprecated?
+      @deprecated
     end
 
     def inspect
@@ -48,6 +54,7 @@ class API
       end
     end
 
+    # rubocop:disable CyclomaticComplexity
     def show_val(val)
       case val
       when String, Symbol, Integer, Float, Range
@@ -58,9 +65,7 @@ class API
         "true"
       when FalseClass
         "false"
-      when Date
-        "varies"
-      when License
+      when Date, License
         "varies"
       when Name
         val.search_name
@@ -70,5 +75,6 @@ class API
         raise "Don't know how to display #{val.class.name} in api help msg."
       end
     end
+    # rubocop:enable CyclomaticComplexity
   end
 end

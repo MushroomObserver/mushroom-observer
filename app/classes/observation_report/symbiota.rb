@@ -67,7 +67,7 @@ module ObservationReport
       if row.val(2).blank?
         [row.user_name_or_login, "MO #{row.obs_id}"]
       else
-        row.val(2).split("\n").first.split("\t")
+        row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
       end
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Name Controller
 #
@@ -61,6 +63,10 @@ class NameController < ApplicationController
 
   include DescriptionControllerHelpers
 
+  # rubocop:disable Rails/LexicallyScopedActionFilter
+  # No idea how to fix this offense.  If I add another
+  #    before_action :login_required, except: :show_name_description
+  # in name_controller/show_name_description.rb, it ignores it.
   before_action :login_required, except: [
     :advanced_search,
     :authored_names,
@@ -93,16 +99,15 @@ class NameController < ApplicationController
     :approve_name,
     :bulk_name_edit,
     :change_synonyms,
-    :create_name,
     :create_name_description,
     :deprecate_name,
-    :edit_name,
     :edit_name_description,
     :show_name,
     :show_name_description,
     :show_past_name,
     :show_past_name_description
   ]
+  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   ##############################################################################
   #
@@ -111,50 +116,52 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def index_name # :nologin: :norobots:
+  def index_name
     query = find_or_create_query(:Name, by: params[:by])
     show_selected_names(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def list_names # :nologin:
+  def list_names
     query = create_query(:Name, :all, by: :name)
     show_selected_names(query)
   end
 
   # Display list of names that have observations.
-  def observation_index # :nologin: :norobots:
+  def observation_index
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
   end
 
   # Display list of names that have authors.
-  def authored_names # :nologin: :norobots:
+  def authored_names
     query = create_query(:Name, :with_descriptions)
     show_selected_names(query)
   end
 
   # Display list of names that a given user is author on.
-  def names_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Name, :by_user, user: user)
-      show_selected_names(query)
-    end
+  def names_by_user
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Name, :by_user, user: user)
+    show_selected_names(query)
   end
 
   # This no longer makes sense, but is being requested by robots.
-  alias_method :names_by_author, :names_by_user
+  alias names_by_author names_by_user
 
   # Display list of names that a given user is editor on.
-  def names_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Name, :by_editor, user: user)
-      show_selected_names(query)
-    end
+  def names_by_editor
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:Name, :by_editor, user: user)
+    show_selected_names(query)
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
-  def needed_descriptions # :nologin: :norobots:
+  def needed_descriptions
     # NOTE!! -- all this extra info and help will be lost if user re-sorts.
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
@@ -174,13 +181,13 @@ class NameController < ApplicationController
     )
     @help = :needed_descriptions_help
     query = create_query(:Name, :in_set,
-                         ids: data.map(&:first),
+                         ids:   data.map(&:first),
                          title: :needed_descriptions_title.l)
     show_selected_names(query, num_per_page: 100)
   end
 
   # Display list of names that match a string.
-  def name_search # :nologin: :norobots:
+  def name_search
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (name = Name.safe_find(pattern))
@@ -200,7 +207,7 @@ class NameController < ApplicationController
   end
 
   # Displays list of advanced search results.
-  def advanced_search # :nologin: :norobots:
+  def advanced_search
     query = find_query(:Name)
     show_selected_names(query)
   rescue StandardError => e
@@ -209,8 +216,10 @@ class NameController < ApplicationController
   end
 
   # Used to test pagination.
-  def test_index # :nologin: :norobots:
-    query = find_query(:Name) or raise("Missing query: #{params[:q]}")
+  def test_index
+    query = find_query(:Name)
+    raise("Missing query: #{params[:q]}") unless query
+
     if params[:test_anchor]
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
@@ -222,8 +231,8 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: "list_names",
-      letters: "names.sort_name",
+      action:       "list_names",
+      letters:      "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
@@ -234,8 +243,8 @@ class NameController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ["name",        :sort_by_name.t],
-      ["created_at",  :sort_by_created_at.t],
+      ["name", :sort_by_name.t],
+      ["created_at", :sort_by_created_at.t],
       [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
        :sort_by_updated_at.t],
       ["num_views", :sort_by_num_views.t]
@@ -256,7 +265,7 @@ class NameController < ApplicationController
     # Add some extra fields to the index for authored_names.
     if query.flavor == :with_descriptions
       show_index_of_objects(query, args) do |name|
-        if desc = name.description
+        if (desc = name.description)
           [desc.authors.map(&:login).join(", "),
            desc.note_status.map(&:to_s).join("/"),
            :"review_#{desc.review_status}".t]
@@ -278,32 +287,34 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def index_name_description # :nologin: :norobots:
+  def index_name_description
     query = find_or_create_query(:NameDescription, by: params[:by])
-    show_selected_name_descriptions(query, id: params[:id].to_s,
+    show_selected_name_descriptions(query, id:           params[:id].to_s,
                                            always_index: true)
   end
 
   # Display list of all (correctly-spelled) name_descriptions in the database.
-  def list_name_descriptions # :nologin:
+  def list_name_descriptions
     query = create_query(:NameDescription, :all, by: :name)
     show_selected_name_descriptions(query)
   end
 
   # Display list of name_descriptions that a given user is author on.
-  def name_descriptions_by_author # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:NameDescription, :by_author, user: user)
-      show_selected_name_descriptions(query)
-    end
+  def name_descriptions_by_author
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:NameDescription, :by_author, user: user)
+    show_selected_name_descriptions(query)
   end
 
   # Display list of name_descriptions that a given user is editor on.
-  def name_descriptions_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:NameDescription, :by_editor, user: user)
-      show_selected_name_descriptions(query)
-    end
+  def name_descriptions_by_editor
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
+    return unless user
+
+    query = create_query(:NameDescription, :by_editor, user: user)
+    show_selected_name_descriptions(query)
   end
 
   # Show selected search results as a list with 'list_names' template.
@@ -311,7 +322,7 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: "list_name_descriptions",
+      action:       "list_name_descriptions",
       num_per_page: 50
     }.merge(args)
 
@@ -338,118 +349,124 @@ class NameController < ApplicationController
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
-  def show_name # :nologin: :prefetch:
+  def show_name
     pass_query_params
     store_location
     clear_query_in_session
 
     # Load Name and NameDescription along with a bunch of associated objects.
     name_id = params[:id].to_s
-    desc_id = params[:desc]
-    if @name = find_or_goto_index(Name, name_id)
-      @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
+    @name = find_or_goto_index(Name, name_id)
+    return unless @name
 
-      update_view_stats(@name)
+    update_view_stats(@name)
 
-      # Tell robots the proper URL to use to index this content.
-      @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
+    # Tell robots the proper URL to use to index this content.
+    @canonical_url = "#{MO.http_domain}/name/show_name/#{@name.id}"
 
-      # Get a list of projects the user can create drafts for.
-      @projects = @user&.projects_member&.select do |project|
-        !@name.descriptions.any? { |d| d.belongs_to_project?(project) }
-      end
-
-      # Create query for immediate children.
-      @children_query = create_query(:Name, :of_children, name: @name)
-      if @name.at_or_below_genus?
-        args = { name: @name, all: true, by: :confidence }
-        @subtaxa_query = create_query(:Observation, :of_children, args)
-      end
-
-      # Create search queries for observation lists.
-      args = { name: @name, by: :confidence }
-      @consensus_query = create_query(:Observation, :of_name, args)
-
-      args = { name: @name, by: :confidence, has_images: :yes }
-      @obs_with_images_query = create_query(:Observation, :of_name, args)
-
-      # Determine which queries actually have results and instantiate the ones
-      # we'll use.
-      @best_description = @name.best_brief_description
-      @first_four       = @obs_with_images_query.results(limit: 4)
-      @first_child      = @children_query.results(limit: 1).first
-      @first_consensus  = @consensus_query.results(limit: 1).first
-      @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
+    # Get a list of projects the user can create drafts for.
+    @projects = @user&.projects_member&.select do |project|
+      @name.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
+
+    # Create query for immediate children.
+    @children_query = create_query(:Name, :all,
+                                   names:                     @name.id,
+                                   include_immediate_subtaxa: true,
+                                   exclude_original_names:    true)
+    if @name.at_or_below_genus?
+      @subtaxa_query = create_query(:Observation, :all,
+                                    names:                  @name.id,
+                                    include_subtaxa:        true,
+                                    exclude_original_names: true,
+                                    by:                     :confidence)
+    end
+
+    # Create search queries for observation lists.
+    @consensus_query = create_query(:Observation, :all,
+                                    names: @name.id, by: :confidence)
+
+    @obs_with_images_query = create_query(:Observation, :all,
+                                          names:      @name.id,
+                                          has_images: true,
+                                          by:         :confidence)
+
+    # Determine which queries actually have results and instantiate the ones
+    # we'll use.
+    @best_description = @name.best_brief_description
+    @first_four       = @obs_with_images_query.results(limit: 4)
+    @first_child      = @children_query.results(limit: 1).first
+    @first_consensus  = @consensus_query.results(limit: 1).first
+    @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
   end
 
   # Show past version of Name.  Accessible only from show_name page.
-  def show_past_name # :nologin: :prefetch: :norobots:
+  def show_past_name
     pass_query_params
     store_location
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      @name.revert_to(params[:version].to_i)
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
 
-      # Old correct spellings could have gotten merged with something else
-      # and no longer exist.
-      if @name.is_misspelling?
-        @correct_spelling = Name.connection.select_value %(
-          SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
-        )
-      else
-        @correct_spelling = ""
-      end
-    end
+    @name.revert_to(params[:version].to_i)
+    @correct_spelling = ""
+    return unless @name.is_misspelling?
+
+    # Old correct spellings could have gotten merged with something else
+    # and no longer exist.
+    @correct_spelling = Name.connection.select_value %(
+      SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
+    )
   end
 
   # Show past version of NameDescription.  Accessible only from
   # show_name_description page.
-  def show_past_name_description # :nologin: :prefetch: :norobots:
+  def show_past_name_description
     pass_query_params
     store_location
-    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
-      @name = @description.name
-      if params[:merge_source_id].blank?
-        @description.revert_to(params[:version].to_i)
-      else
-        @merge_source_id = params[:merge_source_id]
-        version = NameDescription::Version.find(@merge_source_id)
-        @old_parent_id = version.name_description_id
-        subversion = params[:version]
-        if subversion.present? &&
-           (version.version != subversion.to_i)
-          version = NameDescription::Version.
-                    find_by_version_and_name_description_id(params[:version],
-                                                            @old_parent_id)
-        end
-        @description.clone_versioned_model(version, @description)
+    @description = find_or_goto_index(NameDescription, params[:id].to_s)
+    return unless @description
+
+    @name = @description.name
+    if params[:merge_source_id].blank?
+      @description.revert_to(params[:version].to_i)
+    else
+      @merge_source_id = params[:merge_source_id]
+      version = NameDescription::Version.find(@merge_source_id)
+      @old_parent_id = version.name_description_id
+      subversion = params[:version]
+      if subversion.present? &&
+         (version.version != subversion.to_i)
+        version = NameDescription::Version.
+                  find_by_version_and_name_description_id(params[:version],
+                                                          @old_parent_id)
       end
+      @description.clone_versioned_model(version, @description)
     end
   end
 
   # Go to next name: redirects to show_name.
-  def next_name # :nologin: :norobots:
+  def next_name
     redirect_to_next_object(:next, Name, params[:id].to_s)
   end
 
   # Go to previous name: redirects to show_name.
-  def prev_name # :nologin: :norobots:
+  def prev_name
     redirect_to_next_object(:prev, Name, params[:id].to_s)
   end
 
   # Go to next name: redirects to show_name.
-  def next_name_description # :nologin: :norobots:
+  def next_name_description
     redirect_to_next_object(:next, NameDescription, params[:id].to_s)
   end
 
   # Go to previous name_description: redirects to show_name_description.
-  def prev_name_description # :nologin: :norobots:
+  def prev_name_description
     redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
   end
 
   # Callback to let reviewers change the review status of a Name from the
   # show_name page.
-  def set_review_status # :norobots:
+  def set_review_status
     pass_query_params
     id = params[:id].to_s
     desc = NameDescription.find(id)
@@ -463,22 +480,20 @@ class NameController < ApplicationController
   #
   ##############################################################################
 
-  def create_name_description # :prefetch: :norobots:
+  def create_name_description
     store_location
     pass_query_params
     @name = Name.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
+    @description = NameDescription.new
+    @description.name = @name
 
     # Render a blank form.
     if request.method == "GET"
-      @description = NameDescription.new
-      @description.name = @name
       initialize_description_source(@description)
 
     # Create new description.
     else
-      @description = NameDescription.new
-      @description.name = @name
       @description.attributes = whitelisted_name_description_params
       @description.source_type = @description.source_type.to_sym
 
@@ -488,8 +503,7 @@ class NameController < ApplicationController
 
         # Make this the "default" description if there isn't one and this is
         # publicly readable and writable.
-        if !@name.description &&
-           @description.fully_public
+        if !@name.description && @description.fully_public
           @name.description = @description
         end
 
@@ -501,16 +515,15 @@ class NameController < ApplicationController
 
         # Log action in parent name.
         @description.name.log(:log_description_created_at,
-                              user: @user.login, touch: true,
-                              name: @description.unique_partial_format_name)
+                              user:  @user.login,
+                              touch: true,
+                              name:  @description.unique_partial_format_name)
 
         # Save any changes to parent name.
         @name.save if @name.changed?
 
         flash_notice(:runtime_name_description_success.t(id: @description.id))
-        redirect_to(action: "show_name_description",
-                    id: @description.id)
-
+        redirect_to(action: "show_name_description", id: @description.id)
       else
         flash_object_errors @description
       end
@@ -567,8 +580,8 @@ class NameController < ApplicationController
         # Log action to parent name.
         name.log(:log_description_updated,
                  touch: true,
-                 user: @user.login,
-                 name: @description.unique_partial_format_name)
+                 user:  @user.login,
+                 name:  @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
@@ -584,32 +597,32 @@ class NameController < ApplicationController
             name.log(:log_object_merged_by_user,
                      user: @user.login, touch: true,
                      from: old_desc.unique_partial_format_name,
-                     to: @description.unique_partial_format_name)
+                     to:   @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
 
-        redirect_to(action: "show_name_description",
-                    id: @description.id)
+        redirect_to(action: "show_name_description", id: @description.id)
       end
     end
   end
 
-  def destroy_name_description # :norobots:
+  def destroy_name_description
     pass_query_params
     @description = NameDescription.find(params[:id].to_s)
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
-                            user: @user.login, touch: true,
-                            name: @description.unique_partial_format_name)
+                            user:  @user.login,
+                            touch: true,
+                            name:  @description.unique_partial_format_name)
       @description.destroy
       redirect_with_query(action: "show_name", id: @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_name_description",
-                            id: @description.id)
+                            id:     @description.id)
       else
         redirect_with_query(action: "show_name", id: @description.name_id)
       end
@@ -638,7 +651,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets a user review all the synonyms
   # of a name, removing others, writing in new, etc.
-  def change_synonyms # :prefetch: :norobots:
+  def change_synonyms
     pass_query_params
     @name = find_or_goto_index(Name, params[:id].to_s)
     return unless @name
@@ -674,8 +687,6 @@ class NameController < ApplicationController
     elsif !sorter.only_approved_synonyms
       flash_notice :name_change_synonyms_confirm.t
     else
-      now = Time.now
-
       # Create synonym and add this name to it if this name not already
       # associated with a synonym.
       unless @name.synonym_id
@@ -689,7 +700,7 @@ class NameController < ApplicationController
       # attempt to submit this form will have checkboxes and therefore must
       # be checked to proceed -- the default initial state.
       proposed_synonyms = params[:proposed_synonyms] || {}
-      for n in sorter.all_synonyms
+      sorter.all_synonyms.each do |n|
         # Synonymize all names that have been checked, or that don't have
         # checkboxes.
         if proposed_synonyms[n.id.to_s] != "0"
@@ -709,7 +720,7 @@ class NameController < ApplicationController
       # Deprecate everything if that check-box has been marked.
       success = true
       if @deprecate_all
-        for n in sorter.all_names
+        sorter.all_names.each do |n|
           unless deprecate_synonym(n)
             # Already flashed error message.
             success = false
@@ -734,7 +745,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets the user deprecate a name in favor
   # of another name.
-  def deprecate_name # :prefetch: :norobots:
+  def deprecate_name
     pass_query_params
 
     # These parameters aren't always provided.
@@ -767,12 +778,12 @@ class NameController < ApplicationController
     end
 
     # Find the chosen preferred name.
-    if params[:chosen_name][:name_id] &&
-       name = Name.safe_find(params[:chosen_name][:name_id])
-      @names = [name]
-    else
-      @names = Name.find_names_filling_in_authors(@what)
-    end
+    @names = if params[:chosen_name][:name_id] &&
+                (name = Name.safe_find(params[:chosen_name][:name_id]))
+               [name]
+             else
+               Name.find_names_filling_in_authors(@what)
+             end
     approved_name = params[:approved_name].to_s.strip_squeeze
     if @names.empty? &&
        (new_name = Name.create_needed_names(approved_name, @what))
@@ -787,7 +798,6 @@ class NameController < ApplicationController
 
     # If written-in name matches uniquely an existing name:
     elsif target_name && @names.length == 1
-      now = Time.now
 
       # Merge this name's synonyms with the preferred name's synonyms.
       @name.merge_synonyms(target_name)
@@ -810,7 +820,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets a user make call this an accepted
   # name, possibly deprecating its synonyms at the same time.
-  def approve_name # :prefetch: :norobots:
+  def approve_name
     pass_query_params
     @name = find_or_goto_index(Name, params[:id].to_s)
     return unless @name
@@ -855,12 +865,12 @@ class NameController < ApplicationController
   end
 
   def post_approval_comment
-    return unless params[:comment]
+    return unless params[:comment] && params[:comment][:comment]
 
-    comment = params[:comment][:comment]
-    return unless comment.present?
+    comment = params[:comment][:comment].to_s.strip_squeeze
+    return unless comment != ""
 
-    post_comment(:approve, @name, comment.strip_squeeze)
+    post_comment(:approve, @name, comment)
   end
 
   # Helper used by change_synonyms.  Deprecates a single name.  Returns true
@@ -886,15 +896,15 @@ class NameController < ApplicationController
   def check_for_new_synonym(name, candidates, checks)
     new_synonym_members = []
     # Gather all names with un-checked checkboxes.
-    for n in candidates
+    candidates.each do |n|
       new_synonym_members.push(n) if (name != n) && (checks[n.id.to_s] == "0")
     end
     len = new_synonym_members.length
     if len > 1
       name = new_synonym_members.shift
-      name.synonym = new_synonym = Synonym.create
+      name.synonym = Synonym.create
       name.save
-      for n in new_synonym_members
+      new_synonym_members.each do |n|
         name.transfer_synonym(n)
       end
     elsif len == 1
@@ -908,25 +918,25 @@ class NameController < ApplicationController
       "tranfer_synonyms: only_single_names or only_approved_synonyms is false"
     )
     logger.warn("New names:")
-    for n in sorter.new_line_strs
+    sorter.new_line_strs.each do |n|
       logger.warn(n)
     end
     logger.warn("\nSingle names:")
-    for n in sorter.single_line_strs
+    sorter.single_line_strs.each do |n|
       logger.warn(n)
     end
     logger.warn("\nMultiple names:")
-    for n in sorter.multiple_line_strs
+    sorter.multiple_line_strs.each do |n|
       logger.warn(n)
     end
     if sorter.chosen_names
       logger.warn("\nChosen names:")
-      for n in sorter.chosen_names
+      sorter.chosen_names.each do |n|
         logger.warn(n)
       end
     end
     logger.warn("\nSynonym names:")
-    for n in sorter.all_synonyms.map(&:id)
+    sorter.all_synonyms.map(&:id).each do |n|
       logger.warn(n)
     end
   end
@@ -934,11 +944,9 @@ class NameController < ApplicationController
   # Post a comment after approval or deprecation if the user entered one.
   def post_comment(action, name, message)
     summary = :"name_#{action}_comment_summary".l
-    comment = Comment.create!(
-      target: name,
-      summary: summary,
-      comment: message
-    )
+    Comment.create!(target:  name,
+                    summary: summary,
+                    comment: message)
   end
 
   ############################################################################
@@ -948,10 +956,10 @@ class NameController < ApplicationController
   ############################################################################
 
   # Show the data getting sent to EOL
-  def eol_preview # :nologin: :norobots:
-    @timer_start = Time.now
+  def eol_preview
+    @timer_start = Time.current
     eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
-    @timer_end = Time.now
+    @timer_end = Time.current
   end
 
   def eol_description_conditions(review_status_list)
@@ -1013,7 +1021,7 @@ class NameController < ApplicationController
     image_data = image_data.to_a
 
     # Fill in @image_data, @users, and @licenses.
-    for row in image_data
+    image_data.each do |row|
       name_id    = row["name_id"].to_i
       user_id    = row["user_id"].to_i
       license_id = row["license_id"].to_i
@@ -1027,7 +1035,7 @@ class NameController < ApplicationController
   end
 
   def eol_expanded_review
-    @timer_start = Time.now
+    @timer_start = Time.current
     @data = EolData.new
   end
   # TODO: Add ability to preview synonyms?
@@ -1040,9 +1048,9 @@ class NameController < ApplicationController
   # Review unapproved descriptions
 
   # Send stuff to eol.
-  def eol # :nologin: :norobots:
+  def eol
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @timer_start = Time.now
+    @timer_start = Time.current
     @data = EolData.new
     render_xml(layout: false)
   end
@@ -1056,7 +1064,7 @@ class NameController < ApplicationController
   # Utility accessible from a number of name pages (e.g. indexes and
   # show_name?) that lets you enter a whole list of names, together with
   # synonymy, and create them all in one blow.
-  def bulk_name_edit # :prefetch: :norobots:
+  def bulk_name_edit
     @list_members = nil
     @new_names    = nil
     return unless request.method == "POST"
@@ -1095,21 +1103,23 @@ class NameController < ApplicationController
   end
 
   # Draw a map of all the locations where this name has been observed.
-  def map # :nologin: :norobots:
+  def map
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id].to_s)
-      @query = create_query(:Observation, :of_name, name: @name)
-      apply_content_filters(@query)
-      @observations = @query.results.select { |o| o.lat || o.location }
-    end
+    @name = find_or_goto_index(Name, params[:id].to_s)
+    return unless @name
+
+    @query = create_query(:Observation, :all, names: @name.id)
+    apply_content_filters(@query)
+    @observations = @query.results.select { |o| o.lat || o.location }
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications
   # for a name.
-  def email_tracking # :norobots:
+  def email_tracking
     pass_query_params
     name_id = params[:id].to_s
-    return unless @name = find_or_goto_index(Name, name_id)
+    @name = find_or_goto_index(Name, name_id)
+    return unless @name
 
     flavor = Notification.flavors[:name]
     @notification = Notification.
@@ -1131,9 +1141,9 @@ class NameController < ApplicationController
       @note_template = @notification.note_template
     else
       @note_template = :email_tracking_note_template.l(
-        species_name: @name.real_text_name,
+        species_name:    @name.real_text_name,
         mailing_address: @user.mailing_address_for_tracking_template,
-        users_name: @user.legal_name
+        users_name:      @user.legal_name
       )
     end
   end
@@ -1144,8 +1154,9 @@ class NameController < ApplicationController
       note_template = params[:notification][:note_template]
       note_template = nil if note_template.blank?
       if @notification.nil?
-        @notification = Notification.new(flavor: :name, user: @user,
-                                         obj_id: name_id,
+        @notification = Notification.new(flavor:        :name,
+                                         user:          @user,
+                                         obj_id:        name_id,
                                          note_template: note_template)
         flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
       else
@@ -1162,7 +1173,7 @@ class NameController < ApplicationController
     redirect_with_query(action: "show_name", id: name_id)
   end
 
-  def edit_lifeform # :norobots:
+  def edit_lifeform
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
     return unless request.method == "POST"
@@ -1170,11 +1181,11 @@ class NameController < ApplicationController
     words = Name.all_lifeforms.select do |word|
       params["lifeform_#{word}"] == "1"
     end
-    @name.update_attributes(lifeform: " #{words.join(" ")} ")
+    @name.update(lifeform: " #{words.join(" ")} ")
     redirect_with_query(@name.show_link_args)
   end
 
-  def propagate_lifeform # :norobots:
+  def propagate_lifeform
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
     return unless request.method == "POST"

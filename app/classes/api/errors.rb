@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API exception base class.
   class Error < ::StandardError
@@ -232,7 +234,7 @@ class API
     end
 
     def all_keys
-      params.keys - [
+      params.keys.reject { |k| params[k].deprecated? } - [
         :method, :action, :version, :api_key, :page, :detail, :format
       ]
     end

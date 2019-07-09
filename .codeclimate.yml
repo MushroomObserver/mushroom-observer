@@ -120,7 +120,7 @@ plugins:
     # Specify RuboCop version so that we're not stuck with Code Climate's
     # default, which can be different than what's in Gemfile.lock. See
     # docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-    channel: rubocop-0-70
+    channel: rubocop-0-71
 
 # scss style checker
   scss-lint:
