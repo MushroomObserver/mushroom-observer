@@ -123,10 +123,6 @@ Metrics/PerceivedComplexity:
 
 ###################### Layout and Style ########################################
 
-# Seems necessary in order to have this file work with .rubocop_todo.yml
-Layout/AlignHash:
-  EnforcedColonStyle: table
-
 # Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:
   EnforcedStyle: trailing
