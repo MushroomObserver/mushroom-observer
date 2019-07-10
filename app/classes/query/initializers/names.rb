@@ -6,28 +6,28 @@ module Query
     module Names
       def names_parameter_declarations
         {
-          names?:                     [:string],
-          include_synonyms?:          :boolean,
-          include_subtaxa?:           :boolean,
+          names?: [:string],
+          include_synonyms?: :boolean,
+          include_subtaxa?: :boolean,
           include_immediate_subtaxa?: :boolean,
-          exclude_original_names?:    :boolean
+          exclude_original_names?: :boolean
         }
       end
 
       def consensus_parameter_declarations
         {
           include_nonconsensus?: :boolean,
-          exclude_consensus?:    :boolean
+          exclude_consensus?: :boolean
         }
       end
 
       def names_parameters
         {
-          names:                     params[:names],
-          include_synonyms:          params[:include_synonyms],
-          include_subtaxa:           params[:include_subtaxa],
+          names: params[:names],
+          include_synonyms: params[:include_synonyms],
+          include_subtaxa: params[:include_subtaxa],
           include_immediate_subtaxa: params[:include_immediate_subtaxa],
-          exclude_original_names:    params[:exclude_original_names]
+          exclude_original_names: params[:exclude_original_names]
         }
       end
 

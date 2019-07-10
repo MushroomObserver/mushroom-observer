@@ -543,8 +543,8 @@ class ObservationTest < UnitTestCase
 
     User.current = rolf
     obs = Observation.create!(
-      when:    Time.zone.today,
-      where:   "anywhere",
+      when: Time.zone.today,
+      where: "anywhere",
       name_id: @fungi.id
     )
 

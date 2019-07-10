@@ -46,7 +46,7 @@ module Query::Modules::GoogleSearch
     end
     GoogleSearch.new(
       goods: goods,
-      bads:  bads
+      bads: bads
     )
   end
 

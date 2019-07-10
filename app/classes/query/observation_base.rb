@@ -13,33 +13,33 @@ module Query
     def parameter_declarations
       super.merge(
         # dates/times
-        date?:                   [:date],
-        created_at?:             [:time],
-        updated_at?:             [:time],
+        date?: [:date],
+        created_at?: [:time],
+        updated_at?: [:time],
 
-        comments_has?:           :string,
-        has_notes_fields?:       [:string],
-        herbaria?:               [:string],
-        herbarium_records?:      [:string],
-        locations?:              [:string],
-        notes_has?:              :string,
-        projects?:               [:string],
-        species_lists?:          [:string],
-        users?:                  [User],
+        comments_has?: :string,
+        has_notes_fields?: [:string],
+        herbaria?: [:string],
+        herbarium_records?: [:string],
+        locations?: [:string],
+        notes_has?: :string,
+        projects?: [:string],
+        species_lists?: [:string],
+        users?: [User],
 
         # numeric
-        confidence?:             [:float],
-        east?:                   :float,
-        north?:                  :float,
-        south?:                  :float,
-        west?:                   :float,
+        confidence?: [:float],
+        east?: :float,
+        north?: :float,
+        south?: :float,
+        west?: :float,
 
         # boolean
-        has_comments?:           { boolean: [true] },
-        has_location?:           :boolean,
-        has_name?:               :boolean,
-        has_notes?:              :boolean,
-        has_sequences?:          { boolean: [true] },
+        has_comments?: { boolean: [true] },
+        has_location?: :boolean,
+        has_name?: :boolean,
+        has_notes?: :boolean,
+        has_sequences?: { boolean: [true] },
         is_collection_location?: :boolean
       ).merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).

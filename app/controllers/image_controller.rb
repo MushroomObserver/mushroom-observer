@@ -119,8 +119,8 @@ class ImageController < ApplicationController
     # about 90%, but for some reason misses 10%, and always the same 10%, but
     # apparently with no rhyme or reason. -JPH 20100204
     args = {
-      action:  "list_images",
-      matrix:  true,
+      action: "list_images",
+      matrix: true,
       include: [:user, { observations: :name }]
     }.merge(args)
 
@@ -458,11 +458,11 @@ class ImageController < ApplicationController
 
         if after
           project.add_image(img)
-          flash_notice(:attached_to_project.t(object:  :image,
+          flash_notice(:attached_to_project.t(object: :image,
                                               project: project.title))
         else
           project.remove_image(img)
-          flash_notice(:removed_from_project.t(object:  :image,
+          flash_notice(:removed_from_project.t(object: :image,
                                                project: project.title))
         end
         any_changes = true
@@ -757,7 +757,7 @@ class ImageController < ApplicationController
       # a single SELECT. Otherwise license updating would take too long
       # for users with many (e.g. thousands) of images
       # rubocop:disable Rails/SkipsModelValidations
-      images_to_update.update_all(license_id:       row[:new_id],
+      images_to_update.update_all(license_id: row[:new_id],
                                   copyright_holder: row[:new_holder])
       # rubocop:enable Rails/SkipsModelValidations
     end

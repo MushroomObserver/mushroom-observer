@@ -7,7 +7,7 @@ class Query::ApiKeyBase < Query::Base
     super.merge(
       created_at?: [:time],
       updated_at?: [:time],
-      notes_has?:  :string
+      notes_has?: :string
     )
   end
 

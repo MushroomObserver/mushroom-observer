@@ -3,7 +3,7 @@ class Query::ImageWithObservationsInSet < Query::ImageWithObservations
 
   def parameter_declarations
     super.merge(
-      ids:        [Observation],
+      ids: [Observation],
       old_title?: :string
     )
   end

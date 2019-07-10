@@ -3,7 +3,7 @@ class Query::LocationWithObservationsInSet < Query::LocationWithObservations
 
   def parameter_declarations
     super.merge(
-      ids:        [Observation],
+      ids: [Observation],
       old_title?: :string
     )
   end

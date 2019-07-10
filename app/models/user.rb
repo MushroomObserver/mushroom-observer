@@ -584,10 +584,10 @@ class User < AbstractModel
   def create_personal_herbarium
     # rubocop:disable Naming/MemoizedInstanceVariableName
     @personal_herbarium ||= Herbarium.create(
-      name:          personal_herbarium_name,
-      email:         email,
+      name: personal_herbarium_name,
+      email: email,
       personal_user: self,
-      curators:      [self]
+      curators: [self]
     )
     # rubocop:enable Naming/MemoizedInstanceVariableName
   end

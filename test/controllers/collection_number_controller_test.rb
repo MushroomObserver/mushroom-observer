@@ -255,7 +255,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     old_nybg_accession = record2.accession_number
 
     params = {
-      name:   "  New   Name <spam>  ",
+      name: "  New   Name <spam>  ",
       number: "  69-abc <spam>  "
     }
 

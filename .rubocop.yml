@@ -123,9 +123,9 @@ Metrics/PerceivedComplexity:
 
 ###################### Layout and Style ########################################
 
-# Seems necessary in order to have this file work with .rubocop_todo.yml
+# Repeat the default because Codeclimate ignores it as of 2019-07-09
 Layout/AlignHash:
-  EnforcedColonStyle: table
+  EnforcedColonStyle: key
 
 # Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:

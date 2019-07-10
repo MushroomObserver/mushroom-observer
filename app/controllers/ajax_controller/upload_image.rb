@@ -47,13 +47,13 @@ class AjaxController
 
   def create_image(args)
     Image.new(
-      created_at:       Time.now,
-      user:             @user,
-      when:             image_date(args),
-      license_id:       args[:license].to_i,
-      notes:            args[:notes].to_s,
+      created_at: Time.now,
+      user: @user,
+      when: image_date(args),
+      license_id: args[:license].to_i,
+      notes: args[:notes].to_s,
       copyright_holder: args[:copyright_holder].to_s,
-      original_name:    image_original_name(args)
+      original_name: image_original_name(args)
     )
   end
 

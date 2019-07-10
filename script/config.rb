@@ -30,10 +30,10 @@ MO = ImageConfigData.new
 def image_servers
   map = {
     thumbnail: "thumb",
-    small:     "320",
-    medium:    "640",
-    large:     "960",
-    huge:      "1280",
+    small: "320",
+    medium: "640",
+    large: "960",
+    huge: "1280",
     full_size: "orig"
   }
   results = []

@@ -160,12 +160,12 @@ class ApplicationController < ActionController::Base
     return true unless browser.bot?
     return true if Robots.allowed?(
       controller: params[:controller],
-      action:     params[:action],
-      ua:         browser.ua,
-      ip:         request.remote_ip
+      action: params[:action],
+      ua: browser.ua,
+      ip: request.remote_ip
     )
 
-    render(plain:  "Robots are not allowed on this page.",
+    render(plain: "Robots are not allowed on this page.",
            status: :forbidden,
            layout: false)
     false
@@ -214,13 +214,13 @@ class ApplicationController < ActionController::Base
 
   def start_state
     {
-      time:       Time.current,
+      time: Time.current,
       controller: params[:controller],
-      action:     params[:action],
-      robot:      browser.bot? ? "robot" : "user",
-      ip:         catch_ip,
-      url:        catch_url,
-      ua:         catch_ua
+      action: params[:action],
+      robot: browser.bot? ? "robot" : "user",
+      ip: catch_ip,
+      url: catch_url,
+      ua: catch_ua
     }
   end
 
@@ -425,7 +425,7 @@ class ApplicationController < ActionController::Base
   end
 
   def block_user
-    render(plain:  "Your account has been temporarily suspended.",
+    render(plain: "Your account has been temporarily suspended.",
            layout: false)
   end
 
@@ -529,7 +529,7 @@ class ApplicationController < ActionController::Base
   # Create/update the auto-login cookie.
   def autologin_cookie_set(user)
     cookies["mo_user"] = {
-      value:   "#{user.id} #{user.auth_code}",
+      value: "#{user.id} #{user.auth_code}",
       expires: 1.month.from_now
     }
   end
@@ -892,7 +892,7 @@ class ApplicationController < ActionController::Base
 
     # Parse must have failed.
     else
-      flash_error :runtime_no_create_name.t(type:  :name,
+      flash_error :runtime_no_create_name.t(type: :name,
                                             value: name_parse.name)
     end
   end
@@ -929,7 +929,7 @@ class ApplicationController < ActionController::Base
 
     # Parse must have failed.
     else
-      flash_error :runtime_no_create_name.t(type:  :name,
+      flash_error :runtime_no_create_name.t(type: :name,
                                             value: name_parse.synonym)
     end
   end
@@ -1043,7 +1043,7 @@ class ApplicationController < ActionController::Base
     [
       :show_objects.t(type: model.type_tag),
       add_query_param({ controller: model.show_controller,
-                        action:     model.index_action }, query)
+                        action: model.index_action }, query)
     ]
   end
   helper_method :coerced_query_link
@@ -1204,8 +1204,8 @@ class ApplicationController < ActionController::Base
     {
       north: tweak_up(params[:north], 0.001, 90),
       south: tweak_down(params[:south], 0.001, -90),
-      east:  tweak_up(params[:east], 0.001, 180),
-      west:  tweak_down(params[:west], 0.001, -180)
+      east: tweak_up(params[:east], 0.001, 180),
+      west: tweak_down(params[:west], 0.001, -180)
     }
   end
 
@@ -1238,8 +1238,8 @@ class ApplicationController < ActionController::Base
 
     # Redirect to the show_object page appropriate for the new object.
     redirect_to(add_query_param({ controller: object.show_controller,
-                                  action:     object.show_action,
-                                  id:         id }, query))
+                                  action: object.show_action,
+                                  id: id }, query))
   end
 
   def find_query_and_next_object(object, method, id)
@@ -1315,7 +1315,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_object_missing_from_current_query_results(object, id, query)
-    flash_error(:runtime_object_not_in_index.t(id:   object.id,
+    flash_error(:runtime_object_not_in_index.t(id: object.id,
                                                type: object.type_tag))
     { object: object, id: id, query: query }
   end
@@ -1393,10 +1393,10 @@ class ApplicationController < ActionController::Base
           :runtime_no_objects.t(type: type)
         when :at_location
           loc = query.find_cached_parameter_instance(Location, :location)
-          :runtime_index_no_at_location.t(type:     type,
+          :runtime_index_no_at_location.t(type: type,
                                           location: loc.display_name)
         when :at_where
-          :runtime_index_no_at_location.t(type:     type,
+          :runtime_index_no_at_location.t(type: type,
                                           location: query.params[:location])
         when :by_author
           user = query.find_cached_parameter_instance(User, :user)
@@ -1421,10 +1421,10 @@ class ApplicationController < ActionController::Base
           id = query.params[:observation]
           :runtime_index_no_inside_observation.t(type: type, id: id)
         when :pattern_search
-          :runtime_no_matches_pattern.t(type:  type,
+          :runtime_no_matches_pattern.t(type: type,
                                         value: query.params[:pattern].to_s)
         when :regexp_search
-          :runtime_no_matches_regexp.t(type:  type,
+          :runtime_no_matches_regexp.t(type: type,
                                        value: query.params[:regexp].to_s)
         when :with_descriptions
           :runtime_index_no_with.t(type: type, attachment: :description)
@@ -1462,8 +1462,8 @@ class ApplicationController < ActionController::Base
     # If only one result (before pagination), redirect to 'show' action.
     if (@num_results == 1) && !args[:always_index]
       redirect_with_query(controller: query.model.show_controller,
-                          action:     query.model.show_action,
-                          id:         query.result_ids.first)
+                          action: query.model.show_action,
+                          id: query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
     else
@@ -1561,8 +1561,8 @@ class ApplicationController < ActionController::Base
 
   def sort_link(text, query, by)
     [text, { controller: query.model.show_controller,
-             action:     query.model.index_action,
-             by:         by }.merge(query_params)]
+             action: query.model.index_action,
+             by: by }.merge(query_params)]
   end
 
   def reverse_by(query, this_by)
@@ -1576,10 +1576,10 @@ class ApplicationController < ActionController::Base
   def find_or_goto_index(model, id)
     result = model.safe_find(id)
     unless result
-      flash_error(:runtime_object_not_found.t(id:   id || "0",
+      flash_error(:runtime_object_not_found.t(id: id || "0",
                                               type: model.type_tag))
       redirect_with_query(controller: model.show_controller,
-                          action:     model.index_action)
+                          action: model.index_action)
     end
     result
   end
@@ -1597,7 +1597,7 @@ class ApplicationController < ActionController::Base
     raise "Unsure where to go from #{from}." unless to_model
 
     redirect_with_query(controller: to_model.show_controller,
-                        action:     to_model.index_action)
+                        action: to_model.index_action)
   end
 
   # Return string which is the class or controller to fall back from.
@@ -1607,19 +1607,19 @@ class ApplicationController < ActionController::Base
   end
 
   REDIRECT_FALLBACK_MODELS = {
-    account:      RssLog,
-    comment:      Comment,
-    image:        Image,
-    location:     Location,
-    name:         Name,
-    naming:       Observation,
-    observation:  Observation,
-    observer:     RssLog,
-    project:      Project,
-    rss_log:      RssLog,
+    account: RssLog,
+    comment: Comment,
+    image: Image,
+    location: Location,
+    name: Name,
+    naming: Observation,
+    observation: Observation,
+    observer: RssLog,
+    project: Project,
+    rss_log: RssLog,
     species_list: SpeciesList,
-    user:         RssLog,
-    vote:         Observation
+    user: RssLog,
+    vote: Observation
   }.freeze
 
   public ##########
@@ -1641,10 +1641,10 @@ class ApplicationController < ActionController::Base
   def paginate_letters(letter_arg = :letter, number_arg = :page,
                        num_per_page = 50)
     MOPaginator.new(
-      letter_arg:   letter_arg,
-      number_arg:   number_arg,
-      letter:       paginator_letter(letter_arg),
-      number:       paginator_number(number_arg),
+      letter_arg: letter_arg,
+      number_arg: number_arg,
+      letter: paginator_letter(letter_arg),
+      number: paginator_number(number_arg),
       num_per_page: num_per_page
     )
   end
@@ -1664,8 +1664,8 @@ class ApplicationController < ActionController::Base
   #
   def paginate_numbers(arg = :page, num_per_page = 50)
     MOPaginator.new(
-      number_arg:   arg,
-      number:       paginator_number(arg),
+      number_arg: arg,
+      number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end

@@ -1,9 +1,9 @@
 class Query::LocationWithDescriptionsInSet < Query::LocationBase
   def parameter_declarations
     super.merge(
-      ids:        [LocationDescription],
+      ids: [LocationDescription],
       old_title?: :string,
-      old_by?:    :string
+      old_by?: :string
     )
   end
 

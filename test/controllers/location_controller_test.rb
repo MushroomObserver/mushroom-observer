@@ -621,15 +621,15 @@ class LocationControllerTest < FunctionalTestCase
     params = {
       id: location.id,
       location: {
-        locked:       "",
+        locked: "",
         display_name: "My Back Yard, Fresno, California, USA",
-        north:        "31",
-        south:        "30",
-        east:         "-118",
-        west:         "-119",
-        high:         "30",
-        low:          "10",
-        notes:        "new notes"
+        north: "31",
+        south: "30",
+        east: "-118",
+        west: "-119",
+        high: "30",
+        low: "10",
+        notes: "new notes"
       }
     }
 
@@ -710,7 +710,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_nil(obs.location)
 
     params = {
-      where:    obs.where,
+      where: obs.where,
       location: albion.id
     }
     requires_login(:add_to_location, params)
@@ -723,7 +723,7 @@ class LocationControllerTest < FunctionalTestCase
     login("roy")
     albion = locations(:albion)
     obs = Observation.create!(
-      when:  Time.zone.now,
+      when: Time.zone.now,
       where: (where = "Albion, Mendocino Co., California, USA"),
       notes: "new observation"
     )

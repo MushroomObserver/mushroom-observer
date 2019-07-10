@@ -4,10 +4,10 @@ module Query
     module AdvancedSearch
       def advanced_search_parameter_declarations
         {
-          name?:     :string,
+          name?: :string,
           location?: :string,
-          user?:     :string,
-          content?:  :string,
+          user?: :string,
+          content?: :string,
           search_location_notes?: :boolean
         }
       end

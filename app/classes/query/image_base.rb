@@ -11,25 +11,25 @@ module Query
 
     def parameter_declarations
       super.merge(
-        created_at?:           [:time],
-        updated_at?:           [:time],
-        date?:                 [:date],
-        users?:                [User],
-        locations?:            [:string],
-        observations?:         [Observation],
-        projects?:             [:string],
-        species_lists?:        [:string],
-        has_observation?:      { boolean: [true] },
-        size?:                 { string: Image.all_sizes - [:full_size] },
-        content_types?:        [{ string: Image.all_extensions }],
-        has_notes?:            :boolean,
-        notes_has?:            :string,
+        created_at?: [:time],
+        updated_at?: [:time],
+        date?: [:date],
+        users?: [User],
+        locations?: [:string],
+        observations?: [Observation],
+        projects?: [:string],
+        species_lists?: [:string],
+        has_observation?: { boolean: [true] },
+        size?: { string: Image.all_sizes - [:full_size] },
+        content_types?: [{ string: Image.all_extensions }],
+        has_notes?: :boolean,
+        notes_has?: :string,
         copyright_holder_has?: :string,
-        license?:              [License],
-        has_votes?:            :boolean,
-        quality?:              [:float],
-        confidence?:           [:float],
-        ok_for_export?:        :boolean
+        license?: [License],
+        has_votes?: :boolean,
+        quality?: [:float],
+        confidence?: [:float],
+        ok_for_export?: :boolean
       ).merge(names_parameter_declarations)
     end
 

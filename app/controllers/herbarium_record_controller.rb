@@ -161,8 +161,8 @@ class HerbariumRecordController < ApplicationController
 
   def default_herbarium_record
     HerbariumRecord.new(
-      herbarium_name:   @user.preferred_herbarium_name,
-      initial_det:      @observation.name.text_name,
+      herbarium_name: @user.preferred_herbarium_name,
+      initial_det: @observation.name.text_name,
       accession_number: default_accession_number
     )
   end
@@ -283,7 +283,7 @@ class HerbariumRecordController < ApplicationController
 
   def herbarium_label_free?
     @other_record = HerbariumRecord.where(
-      herbarium:        @herbarium_record.herbarium,
+      herbarium: @herbarium_record.herbarium,
       accession_number: @herbarium_record.accession_number
     ).first
     !@other_record || @other_record == @herbarium_record

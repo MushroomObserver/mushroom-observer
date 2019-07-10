@@ -4,13 +4,13 @@ require "test_helper"
 class HerbariumControllerTest < FunctionalTestCase
   def herbarium_params
     {
-      name:            "",
-      personal:        "",
-      code:            "",
-      place_name:      "",
-      email:           "",
+      name: "",
+      personal: "",
+      code: "",
+      place_name: "",
+      email: "",
       mailing_address: "",
-      description:     ""
+      description: ""
     }
   end
 
@@ -162,7 +162,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_show_herbarium_post
     nybg = herbaria(:nybg_herbarium)
     params = {
-      id:          nybg.id,
+      id: nybg.id,
       add_curator: mary.login
     }
     curator_count = nybg.curators.count
@@ -192,12 +192,12 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_herbarium_post
     herbarium_count = Herbarium.count
     params = herbarium_params.merge(
-      name:            " Burbank <blah> Herbarium ",
-      code:            "BH  ",
-      place_name:      "Burbank, California, USA",
-      email:           "curator@bh.org",
+      name: " Burbank <blah> Herbarium ",
+      code: "BH  ",
+      place_name: "Burbank, California, USA",
+      email: "curator@bh.org",
       mailing_address: "New Herbarium\n1234 Figueroa\nBurbank, CA, 91234\n\n\n",
-      description:     "\nSpecializes in local macrofungi. <http:blah>\n"
+      description: "\nSpecializes in local macrofungi. <http:blah>\n"
     )
     post(:create_herbarium, herbarium: params)
     assert_equal(herbarium_count, Herbarium.count)
@@ -228,13 +228,13 @@ class HerbariumControllerTest < FunctionalTestCase
     login("rolf")
     nybg = herbaria(:nybg_herbarium)
     params = herbarium_params.merge(
-      name:            nybg.name.gsub(/ /, " <spam> "),
-      code:            "  NEW <spam> ",
-      place_name:      "New Location",
-      email:           "  new <spam> email  ",
+      name: nybg.name.gsub(/ /, " <spam> "),
+      code: "  NEW <spam> ",
+      place_name: "New Location",
+      email: "  new <spam> email  ",
       mailing_address: "  New <spam> Address  ",
-      description:     "  New Notes  ",
-      personal:        "1"
+      description: "  New Notes  ",
+      personal: "1"
     )
     post(:create_herbarium, herbarium: params)
     assert_equal(herbarium_count, Herbarium.count)
@@ -255,7 +255,7 @@ class HerbariumControllerTest < FunctionalTestCase
     herbarium_count = Herbarium.count
     login("rolf")
     params = herbarium_params.merge(
-      name:       "New Herbarium",
+      name: "New Herbarium",
       place_name: "New Location"
     )
     post(:create_herbarium, herbarium: params)
@@ -277,7 +277,7 @@ class HerbariumControllerTest < FunctionalTestCase
   def test_create_personal_herbarium
     herbarium_count = Herbarium.count
     params = herbarium_params.merge(
-      name:     "My Herbarium",
+      name: "My Herbarium",
       personal: "1"
     )
 
@@ -340,12 +340,12 @@ class HerbariumControllerTest < FunctionalTestCase
     nybg = herbaria(:nybg_herbarium)
     last_update = nybg.updated_at
     params = herbarium_params.merge(
-      name:            " New Herbarium <spam> ",
-      code:            " FOO <spam> ",
-      place_name:      "Burbank, California, USA",
-      email:           " new@email.com <spam> ",
+      name: " New Herbarium <spam> ",
+      code: " FOO <spam> ",
+      place_name: "Burbank, California, USA",
+      email: " new@email.com <spam> ",
       mailing_address: "All\nNew\nLocation\n<spam>\n",
-      description:     " And  more  stuff. "
+      description: " And  more  stuff. "
     )
 
     post(:edit_herbarium, herbarium: params, id: nybg.id)

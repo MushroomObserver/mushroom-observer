@@ -47,10 +47,10 @@ class AjaxController
 
   def create_link(obs, site, url)
     link = ExternalLink.create(
-      user:          @user,
-      observation:   obs,
+      user: @user,
+      observation: obs,
       external_site: site,
-      url:           url
+      url: url
     )
     render_errors_or_id(link)
   end

@@ -34,36 +34,35 @@ class API
     def query_params
       n, s, e, w = parse_bounding_box!
       {
-        where:                  sql_id_condition,
-        created_at:             parse_range(:time, :created_at),
-        updated_at:             parse_range(:time, :updated_at),
-        date:                   parse_range(:date, :date, help: :when_seen),
-        users:                  parse_array(:user, :user, help: :observer),
-        names:                  parse_array(:name, :name, as: :id),
-        locations:              parse_array(:location, :location, as: :id),
-        herbaria:               parse_array(:herbarium, :herbarium, as: :id),
-        herbarium_records:      parse_array(:herbarium_record,
-                                            :herbarium_record, as: :id),
-        projects:               parse_array(:project, :project, as: :id),
-        species_lists:          parse_array(:species_list, :species_list,
-                                            as: :id),
-        confidence:             parse(:confidence, :confidence),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        date: parse_range(:date, :date, help: :when_seen),
+        users: parse_array(:user, :user, help: :observer),
+        names: parse_array(:name, :name, as: :id),
+        locations: parse_array(:location, :location, as: :id),
+        herbaria: parse_array(:herbarium, :herbarium, as: :id),
+        herbarium_records: parse_array(:herbarium_record, :herbarium_record,
+                                       as: :id),
+        projects: parse_array(:project, :project, as: :id),
+        species_lists: parse_array(:species_list, :species_list, as: :id),
+        confidence: parse(:confidence, :confidence),
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
-        gps_hidden:             parse(:boolean, :gps_hidden, help: 1),
-        has_images:             parse(:boolean, :has_images),
-        has_location:           parse(:boolean, :has_location),
-        has_name:               parse(:boolean, :has_name, help: :min_rank),
-        has_comments:           parse(:boolean, :has_comments, limit: true),
-        has_specimen:           parse(:boolean, :has_specimen),
-        has_notes:              parse(:boolean, :has_notes),
-        has_notes_fields:       parse_array(:string, :has_notes_field, help: 1),
-        notes_has:              parse(:string, :notes_has, help: 1),
-        comments_has:           parse(:string, :comments_has, help: 1),
-        north:                  n,
-        south:                  s,
-        east:                   e,
-        west:                   w
+        gps_hidden: parse(:boolean, :gps_hidden, help: 1),
+        has_images: parse(:boolean, :has_images),
+        has_location: parse(:boolean, :has_location),
+        has_name: parse(:boolean, :has_name, help: :min_rank),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_specimen: parse(:boolean, :has_specimen),
+        has_notes: parse(:boolean, :has_notes),
+        has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
+        notes_has: parse(:string, :notes_has, help: 1),
+        comments_has: parse(:string, :comments_has, help: 1),
+        north: n,
+        south: s,
+        east: e,
+        west: w
       }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
@@ -72,43 +71,41 @@ class API
     def create_params
       parse_create_params!
       {
-        when:                   parse(:date, :date) || Date.today,
-        place_name:             @location,
-        lat:                    @latitude,
-        long:                   @longitude,
-        alt:                    @altitude,
-        specimen:               @has_specimen,
+        when: parse(:date, :date) || Date.today,
+        place_name: @location,
+        lat: @latitude,
+        long: @longitude,
+        alt: @altitude,
+        specimen: @has_specimen,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       default: true, help: 1),
-        gps_hidden:             parse(:boolean, :gps_hidden, default: false,
-                                                             help:    1),
-        notes:                  @notes,
-        thumb_image:            @thumbnail,
-        images:                 @images,
-        projects:               parse_array(:project, :projects,
-                                            must_be_member: true) || [],
-        species_lists:          parse_array(:species_list, :species_lists,
-                                            must_have_edit_permission: true) ||
-          [],
-        name:                   @name,
-        user:                   @user
+        gps_hidden: parse(:boolean, :gps_hidden, default: false,
+                                                 help: 1),
+        notes: @notes,
+        thumb_image: @thumbnail,
+        images: @images,
+        projects: parse_array(:project, :projects, must_be_member: true) || [],
+        species_lists: parse_array(:species_list, :species_lists,
+                                   must_have_edit_permission: true) || [],
+        name: @name,
+        user: @user
       }
     end
 
     def update_params
       parse_update_params!
       {
-        when:                   parse(:date, :set_date),
-        place_name:             parse(:place_name, :set_location,
-                                      limit: 1024, not_blank: true),
-        lat:                    @latitude,
-        long:                   @longitude,
-        alt:                    @altitude,
-        specimen:               parse(:boolean, :set_has_specimen),
+        when: parse(:date, :set_date),
+        place_name: parse(:place_name, :set_location, limit: 1024,
+                                                      not_blank: true),
+        lat: @latitude,
+        long: @longitude,
+        alt: @altitude,
+        specimen: parse(:boolean, :set_has_specimen),
         is_collection_location: parse(:boolean, :set_is_collection_location,
                                       help: 1),
-        gps_hidden:             parse(:boolean, :gps_hidden, help: 1),
-        thumb_image:            @thumbnail
+        gps_hidden: parse(:boolean, :gps_hidden, help: 1),
+        thumb_image: @thumbnail
       }
     end
 
@@ -152,17 +149,17 @@ class API
       provide_specimen_defaults(obs)
       if @collection_number
         CollectionNumber.create!(
-          user:   user,
-          name:   @collectors_name,
+          user: user,
+          name: @collectors_name,
           number: @collection_number
         ).add_observation(obs)
       end
       return unless @herbarium
 
       HerbariumRecord.create!(
-        herbarium:        @herbarium,
-        user:             user,
-        initial_det:      @initial_det,
+        herbarium: @herbarium,
+        user: user,
+        initial_det: @initial_det,
         accession_number: @accession_number
       ).add_observation(obs)
     end

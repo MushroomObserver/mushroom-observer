@@ -7,7 +7,7 @@ class Query::LocationDescriptionBase < Query::Base
     super.merge(
       created_at?: [:time],
       updated_at?: [:time],
-      users?:      [User]
+      users?: [User]
     )
   end
 

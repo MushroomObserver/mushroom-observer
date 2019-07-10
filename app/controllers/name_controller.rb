@@ -181,7 +181,7 @@ class NameController < ApplicationController
     )
     @help = :needed_descriptions_help
     query = create_query(:Name, :in_set,
-                         ids:   data.map(&:first),
+                         ids: data.map(&:first),
                          title: :needed_descriptions_title.l)
     show_selected_names(query, num_per_page: 100)
   end
@@ -231,8 +231,8 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action:       "list_names",
-      letters:      "names.sort_name",
+      action: "list_names",
+      letters: "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
     }.merge(args)
 
@@ -289,7 +289,7 @@ class NameController < ApplicationController
   # Display list of names in last index/search query.
   def index_name_description
     query = find_or_create_query(:NameDescription, by: params[:by])
-    show_selected_name_descriptions(query, id:           params[:id].to_s,
+    show_selected_name_descriptions(query, id: params[:id].to_s,
                                            always_index: true)
   end
 
@@ -322,7 +322,7 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action:       "list_name_descriptions",
+      action: "list_name_descriptions",
       num_per_page: 50
     }.merge(args)
 
@@ -371,15 +371,15 @@ class NameController < ApplicationController
 
     # Create query for immediate children.
     @children_query = create_query(:Name, :all,
-                                   names:                     @name.id,
+                                   names: @name.id,
                                    include_immediate_subtaxa: true,
-                                   exclude_original_names:    true)
+                                   exclude_original_names: true)
     if @name.at_or_below_genus?
       @subtaxa_query = create_query(:Observation, :all,
-                                    names:                  @name.id,
-                                    include_subtaxa:        true,
+                                    names: @name.id,
+                                    include_subtaxa: true,
                                     exclude_original_names: true,
-                                    by:                     :confidence)
+                                    by: :confidence)
     end
 
     # Create search queries for observation lists.
@@ -387,9 +387,9 @@ class NameController < ApplicationController
                                     names: @name.id, by: :confidence)
 
     @obs_with_images_query = create_query(:Observation, :all,
-                                          names:      @name.id,
+                                          names: @name.id,
                                           has_images: true,
-                                          by:         :confidence)
+                                          by: :confidence)
 
     # Determine which queries actually have results and instantiate the ones
     # we'll use.
@@ -515,9 +515,9 @@ class NameController < ApplicationController
 
         # Log action in parent name.
         @description.name.log(:log_description_created_at,
-                              user:  @user.login,
+                              user: @user.login,
                               touch: true,
-                              name:  @description.unique_partial_format_name)
+                              name: @description.unique_partial_format_name)
 
         # Save any changes to parent name.
         @name.save if @name.changed?
@@ -580,8 +580,8 @@ class NameController < ApplicationController
         # Log action to parent name.
         name.log(:log_description_updated,
                  touch: true,
-                 user:  @user.login,
-                 name:  @description.unique_partial_format_name)
+                 user: @user.login,
+                 name: @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
@@ -597,7 +597,7 @@ class NameController < ApplicationController
             name.log(:log_object_merged_by_user,
                      user: @user.login, touch: true,
                      from: old_desc.unique_partial_format_name,
-                     to:   @description.unique_partial_format_name)
+                     to: @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
@@ -613,16 +613,16 @@ class NameController < ApplicationController
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
-                            user:  @user.login,
+                            user: @user.login,
                             touch: true,
-                            name:  @description.unique_partial_format_name)
+                            name: @description.unique_partial_format_name)
       @description.destroy
       redirect_with_query(action: "show_name", id: @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
         redirect_with_query(action: "show_name_description",
-                            id:     @description.id)
+                            id: @description.id)
       else
         redirect_with_query(action: "show_name", id: @description.name_id)
       end
@@ -944,7 +944,7 @@ class NameController < ApplicationController
   # Post a comment after approval or deprecation if the user entered one.
   def post_comment(action, name, message)
     summary = :"name_#{action}_comment_summary".l
-    Comment.create!(target:  name,
+    Comment.create!(target: name,
                     summary: summary,
                     comment: message)
   end
@@ -1141,9 +1141,9 @@ class NameController < ApplicationController
       @note_template = @notification.note_template
     else
       @note_template = :email_tracking_note_template.l(
-        species_name:    @name.real_text_name,
+        species_name: @name.real_text_name,
         mailing_address: @user.mailing_address_for_tracking_template,
-        users_name:      @user.legal_name
+        users_name: @user.legal_name
       )
     end
   end
@@ -1154,9 +1154,9 @@ class NameController < ApplicationController
       note_template = params[:notification][:note_template]
       note_template = nil if note_template.blank?
       if @notification.nil?
-        @notification = Notification.new(flavor:        :name,
-                                         user:          @user,
-                                         obj_id:        name_id,
+        @notification = Notification.new(flavor: :name,
+                                         user: @user,
+                                         obj_id: name_id,
                                          note_template: note_template)
         flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
       else

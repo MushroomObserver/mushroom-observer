@@ -5,17 +5,17 @@ class Query::ProjectBase < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?:        [:time],
-      updated_at?:        [:time],
-      users?:             [User],
-      has_images?:        { boolean: [true] },
-      has_observations?:  { boolean: [true] },
+      created_at?: [:time],
+      updated_at?: [:time],
+      users?: [User],
+      has_images?: { boolean: [true] },
+      has_observations?: { boolean: [true] },
       has_species_lists?: { boolean: [true] },
-      has_comments?:      { boolean: [true] },
-      has_summary?:       :boolean,
-      title_has?:         :string,
-      summary_has?:       :string,
-      comments_has?:      :string
+      has_comments?: { boolean: [true] },
+      has_summary?: :boolean,
+      title_has?: :string,
+      summary_has?: :string,
+      comments_has?: :string
     )
   end
 

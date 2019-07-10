@@ -3,7 +3,7 @@ class ContentFilter
   class Clade < StringFilter
     def initialize
       super(
-        sym:    :clade,
+        sym: :clade,
         models: [Observation, Name]
       )
     end
