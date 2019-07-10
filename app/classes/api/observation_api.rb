@@ -79,7 +79,8 @@ class API
         specimen: @has_specimen,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       default: true, help: 1),
-        gps_hidden: parse(:boolean, :gps_hidden, default: false, help: 1),
+        gps_hidden: parse(:boolean, :gps_hidden, default: false,
+                                                 help: 1),
         notes: @notes,
         thumb_image: @thumbnail,
         images: @images,
@@ -96,7 +97,7 @@ class API
       {
         when: parse(:date, :set_date),
         place_name: parse(:place_name, :set_location, limit: 1024,
-                          not_blank: true),
+                                                      not_blank: true),
         lat: @latitude,
         long: @longitude,
         alt: @altitude,

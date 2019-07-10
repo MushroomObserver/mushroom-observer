@@ -28,8 +28,9 @@ class API
         species_lists: parse_array(:species_list, :species_list, as: :id),
         has_observation: parse(:boolean, :has_observation,
                                limit: true, help: 1),
-        size: parse(:enum, :size, limit: Image.all_sizes - [:full_size],
-                    help: :min_size),
+        size: parse(
+          :enum, :size, limit: Image.all_sizes - [:full_size], help: :min_size
+        ),
         content_types: parse_array(:enum, :content_type,
                                    limit: Image.all_extensions),
         has_notes: parse(:boolean, :has_notes),
@@ -49,17 +50,16 @@ class API
       {
         # Disable cop to keep table style alignment of multipline Hash values
         # rubocop:disable Layout/MultilineOperationIndentation
-        when: parse(:date, :date, help: :when_taken) ||
-                          @default_date,
+        when: parse(:date, :date, help: :when_taken) || @default_date,
         notes: parse(:string, :notes, default: ""),
         copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
                           user.legal_name,
         # rubocop:enable Layout/MultilineOperationIndentation
         license: parse(:license, :license) || user.license,
-        original_name: parse(:string, :original_name,
-                                limit: 120, help: :original_name),
-        projects: parse_array(:project, :projects,
-                                      must_be_member: true) || [],
+        original_name: parse(
+          :string, :original_name, limit: 120, help: :original_name
+        ),
+        projects: parse_array(:project, :projects, must_be_member: true) || [],
         observations: @observations,
         user: @user
       }.merge(upload_params)
@@ -71,8 +71,9 @@ class API
         notes: parse(:string, :set_notes),
         copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
         license: parse(:license, :set_license),
-        original_name: parse(:string, :set_original_name, limit: 120,
-                             help: :original_name)
+        original_name: parse(
+          :string, :set_original_name, limit: 120, help: :original_name
+        )
       }
     end
 
