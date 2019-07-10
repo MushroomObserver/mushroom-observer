@@ -25,15 +25,13 @@ class API
         locations: parse_array(:location, :location, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
         projects: parse_array(:project, :project, as: :id),
-        species_lists: parse_array(:species_list, :species_list,
-                                          as: :id),
+        species_lists: parse_array(:species_list, :species_list, as: :id),
         has_observation: parse(:boolean, :has_observation,
-                                    limit: true, help: 1),
-        size: parse(:enum, :size,
-                                    limit: Image.all_sizes - [:full_size],
-                                    help: :min_size),
+                               limit: true, help: 1),
+        size: parse(:enum, :size, limit: Image.all_sizes - [:full_size],
+                    help: :min_size),
         content_types: parse_array(:enum, :content_type,
-                                          limit: Image.all_extensions),
+                                   limit: Image.all_extensions),
         has_notes: parse(:boolean, :has_notes),
         notes_has: parse(:string, :notes_has, help: 1),
         copyright_holder_has: parse(:string, :copyright_holder_has, help: 1),
@@ -73,8 +71,8 @@ class API
         notes: parse(:string, :set_notes),
         copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
         license: parse(:license, :set_license),
-        original_name: parse(:string, :set_original_name,
-                                limit: 120, help: :original_name)
+        original_name: parse(:string, :set_original_name, limit: 120,
+                             help: :original_name)
       }
     end
 
