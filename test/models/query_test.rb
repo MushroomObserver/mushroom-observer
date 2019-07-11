@@ -3206,6 +3206,26 @@ class QueryTest < UnitTestCase
                                 include_immediate_subtaxa: true)
   end
 
+  def test_lookup_names_by_name3
+    User.current = rolf
+
+    name1 = names(:lactarius)
+    name2 = create_test_name("Lactarius \"fakename\"")
+    name2.update(classification: name1.classification)
+    name2.save
+
+    children = Name.where("text_name LIKE 'Lactarius %'")
+
+    assert_lookup_names_by_name([name1] + children,
+                                names: ["Lactarius"],
+                                include_subtaxa: true)
+
+    assert_lookup_names_by_name(children,
+                                names: ["Lactarius"],
+                                include_immediate_subtaxa: true,
+                                exclude_original_names: true)
+  end
+
   def create_test_name(name)
     name = Name.new_name(Name.parse_name(name).params)
     name.save
@@ -3213,7 +3233,8 @@ class QueryTest < UnitTestCase
   end
 
   def assert_lookup_names_by_name(expect, args)
-    actual = Query::Base.new.lookup_names_by_name(args)
+    query = Query.new(:Name)
+    actual = query.lookup_names_by_name(args)
     expect = expect.sort_by(&:text_name)
     actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
     assert_name_list_equal(expect, actual)

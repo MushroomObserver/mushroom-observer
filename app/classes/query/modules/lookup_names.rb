@@ -121,14 +121,16 @@ module Query
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
         unless higher_names.empty?
+          regex = escape(": _(#{higher_names.join("|")})_")
           min_names += Name.connection.select_rows(%(
             SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP ": _(#{clean_name_set(higher_names)})_"
+            WHERE classification REGEXP #{regex}
           ))
         end
+        regex = escape("^(#{lower_names.join("|")}) ")
         min_names += Name.connection.select_rows(%(
           SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP "^(#{clean_name_set(lower_names)}) "
+          WHERE text_name REGEXP #{regex}
         ))
         min_names.uniq
       end
@@ -137,16 +139,18 @@ module Query
         higher_names = genera_and_up(min_names)
         lower_names = genera_and_down(min_names)
         unless higher_names.empty?
+          regex = escape(": _(#{higher_names.join("|")})_$")
           min_names += Name.connection.select_rows(%(
             SELECT #{minimal_name_columns} FROM names
-            WHERE classification REGEXP ": _(#{clean_name_set(higher_names)})_$"
+            WHERE classification REGEXP #{regex}
             AND text_name NOT LIKE "% %"
           ))
         end
+        regex = escape("^(#{lower_names.join("|")}) " \
+                       "[^[:blank:]]+( [^[:blank:]]+)?$")
         min_names += Name.connection.select_rows(%(
           SELECT #{minimal_name_columns} FROM names
-          WHERE text_name REGEXP
-            "^(#{clean_name_set(lower_names)}) [^[:blank:]]+( [^[:blank:]]+)?$"
+          WHERE text_name REGEXP #{regex}
         ))
         min_names.uniq
       end
@@ -167,12 +171,6 @@ module Query
         text_names.reject do |text_name|
           text_name.include?(" ") && genera[text_name.split(" ").first]
         end.uniq
-      end
-
-      def clean_name_set(names)
-        return "" if names.empty?
-
-        Name.connection.escape(names.join("|"))
       end
 
       # This ugliness with "minimal name data" is a way to avoid having Rails
