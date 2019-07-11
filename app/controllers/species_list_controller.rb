@@ -914,6 +914,7 @@ class SpeciesListController < ApplicationController
   def construct_observations(spl, sorter)
     # Put together a list of arguments to use when creating new observations.
     member_args = params[:member] || {}
+    member_notes = clean_notes(member_args[:notes])
     sp_args = {
       created_at: spl.updated_at,
       updated_at: spl.updated_at,
@@ -922,7 +923,7 @@ class SpeciesListController < ApplicationController
       location: spl.location,
       where: spl.where,
       vote: member_args[:vote],
-      notes: (member_args[:notes] || {}), # .symbolize_keys,: Deprecated
+      notes: member_notes,
       lat: member_args[:lat].to_s,
       long: member_args[:long].to_s,
       alt: member_args[:alt].to_s,
@@ -966,6 +967,16 @@ class SpeciesListController < ApplicationController
       name = find_chosen_name(key.to_i, params[:chosen_approved_names])
       spl.construct_observation(name, sp_args)
     end
+  end
+
+  def clean_notes(notes_in)
+    return {} if notes_in.blank?
+
+    notes_out = {}
+    notes_in.each do |key, val|
+      notes_out[key.to_sym] = val.to_s if val.present?
+    end
+    notes_out
   end
 
   def find_chosen_name(id, alternatives)

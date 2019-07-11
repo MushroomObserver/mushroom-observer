@@ -717,7 +717,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.name_included(names(:coprinus_comatus)))
     obs = spl.observations.first
     assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
-    assert_equal([Observation.other_notes_key.to_s], obs.notes.keys)
+    assert_equal([Observation.other_notes_key], obs.notes.keys)
     assert_equal(obs.notes[Observation.other_notes_key], "member notes")
     assert_equal(12.5822, obs.lat)
     assert_equal(-78.1533, obs.long)
