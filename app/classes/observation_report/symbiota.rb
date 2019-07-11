@@ -24,7 +24,7 @@ module ObservationReport
         decimalLongitude
         minimumElevationInMeters
         maximumElevationInMeters
-        updated_at
+        dateLastModified
         substrate
         host
         fieldNotes
@@ -67,7 +67,7 @@ module ObservationReport
 
     def collector_and_number(row)
       if row.val(2).blank?
-        [row.user_name_or_login, "MO #{row.obs_id}"]
+        [row.user_name_or_login, "MUOB #{row.obs_id}"]
       else
         row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
       end
@@ -91,8 +91,7 @@ module ObservationReport
     end
 
     def clean_notes(str)
-      str.strip.t.html_to_ascii.
-        gsub(/\\/, "\\\\").gsub(/\n/, "\\n").gsub(/\t/, "\\t")
+      str.strip.t.html_to_ascii.gsub(/\s+/, " ")
     end
 
     def image_urls(row)
