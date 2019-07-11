@@ -37,7 +37,7 @@ class CacheTest < UnitTestCase
 
   # Prove that changing a name's classification will update
   # observations.classification for all the attached observations without
-  # changing the updated_at field. 
+  # changing the updated_at field.
   def test_changing_classification
     name = names(:peltigera)
     desc = name.description
