@@ -304,6 +304,7 @@ class ObservationReportTest < UnitTestCase
       'wood\tchips',
       "Agaricus",
       'Habitat: lawn\nOther: First\tline.\nSecond\tline.',
+      "#{obs.id}",
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
