@@ -28,6 +28,7 @@ module ObservationReport
         substrate
         host
         fieldNotes
+        mushroomObserverId
         observationUrl
         imageUrls
       ]
@@ -58,6 +59,7 @@ module ObservationReport
         row.best_high,
         row.obs_updated_at,
         *explode_notes(row),
+        row.obs_id,
         row.obs_url,
         image_urls(row)
       ]
