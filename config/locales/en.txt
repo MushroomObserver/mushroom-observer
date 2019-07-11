@@ -1123,7 +1123,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: On Sunday March 3, 2019 we passed 1 million fungus related images on MO!  Thanks for all the contributions, participation and support!
+  app_banner_box: Hi! Can you please spare 10 minutes? If so, MO would like your help adding one good image to a glossary term to help our community. "Here's how.":/article/show_article/14
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1722,9 +1722,9 @@
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
   prefs_filters_region: Show only observations and locations within this region
-  prefs_filters_region_help: 'Must match the end of the location name, e.g., "Thailand" and "California, USA".'
+  prefs_filters_region_help: Must match the end of the location name, e.g., "Thailand" and "California, USA".
   prefs_filters_clade: Show only observations within this taxonomic clade
-  prefs_filters_clade_help: 'Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".'
+  prefs_filters_clade_help: Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".
   prefs_filter_off: filter off
 
   prefs_notes_template: Observation Notes Template
