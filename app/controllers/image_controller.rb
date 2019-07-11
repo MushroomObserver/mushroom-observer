@@ -197,7 +197,7 @@ class ImageController < ApplicationController
     # show_observation request.  We know we came from an observation-type page
     # because that's the only time the "obs" param will be set (with obs id).
     obs = params[:obs]
-    if obs.present? && obs.match(/^\d+$/) &&
+    if obs.present? && obs.to_s.match(/^\d+$/) &&
        # The outer search on observation won't be saved for robots, so no sense
        # in bothering with any of this.
        !browser.bot?
