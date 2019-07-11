@@ -724,13 +724,13 @@ class AccountController < ApplicationController
   def initialize_new_user
     now = Time.now
     @new_user.attributes = {
-      created_at:      now,
-      updated_at:      now,
-      last_login:      now,
-      admin:           false,
-      layout_count:    15,
+      created_at: now,
+      updated_at: now,
+      last_login: now,
+      admin: false,
+      layout_count: 15,
       mailing_address: "",
-      notes:           ""
+      notes: ""
     }.merge(params.require(:new_user).permit(:login, :name, :theme,
                                              :email, :email_confirmation,
                                              :password, :password_confirmation))

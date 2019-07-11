@@ -1,25 +1,19 @@
-module Query
-  # Simple Article search.
-  class ArticlePatternSearch < Query::ArticleBase
-    include Query::Initializers::PatternSearch
+class Query::ArticlePatternSearch < Query::ArticleBase
+  def parameter_declarations
+    super.merge(
+      pattern: :string
+    )
+  end
 
-    def parameter_declarations
-      super.merge(
-        pattern: :string
-      )
-    end
+  def initialize_flavor
+    add_search_condition(search_fields, params[:pattern])
+    super
+  end
 
-    def initialize_flavor
-      search = google_parse_pattern
-      add_search_conditions(search, *search_fields)
-      super
-    end
-
-    def search_fields
-      [
-        "articles.title",
-        "COALESCE(articles.body,'')"
-      ]
-    end
+  def search_fields
+    "CONCAT(" \
+      "articles.title," \
+      "COALESCE(articles.body,'')" \
+      ")"
   end
 end

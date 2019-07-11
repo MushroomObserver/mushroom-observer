@@ -154,7 +154,8 @@ module ObservationReport
     def add_collector_ids!(rows, col)
       vals = CollectionNumber.connection.select_rows %(
         SELECT co.observation_id,
-          GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
+          GROUP_CONCAT(DISTINCT CONCAT(c.id, "\t", c.name, "\t", c.number)
+                       SEPARATOR "\n")
         FROM collection_numbers c,
           collection_numbers_observations co
         WHERE co.collection_number_id = c.id AND

@@ -10,7 +10,7 @@ class Query::ExternalSiteBase < Query::Base
   end
 
   def initialize_flavor
-    initialize_model_do_search(:name, :name)
+    add_search_condition("external_sites.name", params[:name])
     super
   end
 

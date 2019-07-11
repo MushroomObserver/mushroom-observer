@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PatternSearch
   # Parse PatternSearch parameter terms
   # Sample use:

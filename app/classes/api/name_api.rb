@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API for Name
   class NameAPI < ModelAPI
@@ -16,42 +18,40 @@ class API
     # rubocop:disable Metrics/AbcSize
     def query_params
       {
-        where:              sql_id_condition,
-        created_at:         parse_range(:time, :created_at),
-        updated_at:         parse_range(:time, :updated_at),
-        users:              parse_array(:user, :user, help: :first_user),
-        names:              parse_array(:name, :name, as: :id),
-        synonym_names:      parse_array(:name, :synonyms_of, as: :id),
-        children_names:     parse_array(:name, :children_of, as: :id),
-        is_deprecated:      parse(:boolean, :is_deprecated),
-        misspellings:       parse_misspellings,
-        has_synonyms:       parse(:boolean, :has_synonyms),
-        locations:          parse_array(:string, :location),
-        species_lists:      parse_array(:string, :species_list),
-        rank:               parse(:enum, :rank, limit: Name.all_ranks),
-        has_author:         parse(:boolean, :has_author),
-        has_citation:       parse(:boolean, :has_citation),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users: parse_array(:user, :user, help: :first_user),
+        names: parse_array(:name, :name, as: :id),
+        is_deprecated: parse(:boolean, :is_deprecated),
+        misspellings: parse_misspellings,
+        has_synonyms: parse(:boolean, :has_synonyms),
+        locations: parse_array(:string, :location),
+        species_lists: parse_array(:string, :species_list),
+        rank: parse(:enum, :rank, limit: Name.all_ranks),
+        has_author: parse(:boolean, :has_author),
+        has_citation: parse(:boolean, :has_citation),
         has_classification: parse(:boolean, :has_classification),
-        has_notes:          parse(:boolean, :has_notes),
-        has_comments:       parse(:boolean, :has_comments, limit: true),
-        has_default_desc:   parse(:boolean, :has_description),
-        text_name_has:      parse(:string, :text_name_has, help: 1),
-        author_has:         parse(:string, :author_has, help: 1),
-        citation_has:       parse(:string, :citation_has, help: 1),
+        has_notes: parse(:boolean, :has_notes),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_default_desc: parse(:boolean, :has_description),
+        text_name_has: parse(:string, :text_name_has, help: 1),
+        author_has: parse(:string, :author_has, help: 1),
+        citation_has: parse(:string, :citation_has, help: 1),
         classification_has: parse(:string, :classification_has, help: 1),
-        notes_has:          parse(:string, :notes_has, help: 1),
-        comments_has:       parse(:string, :comments_has, help: 1),
-        ok_for_export:      parse(:boolean, :ok_for_export)
-      }
+        notes_has: parse(:string, :notes_has, help: 1),
+        comments_has: parse(:string, :comments_has, help: 1),
+        ok_for_export: parse(:boolean, :ok_for_export)
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
 
     def create_params
       {
-        citation:       parse(:string, :citation, default: ""),
+        citation: parse(:string, :citation, default: ""),
         classification: parse(:string, :classification, default: ""),
-        notes:          parse(:string, :notes, default: ""),
-        user:           @user
+        notes: parse(:string, :notes, default: ""),
+        user: @user
       }
     end
 
@@ -59,8 +59,8 @@ class API
       parse_set_name!
       parse_set_synonymy!
       {
-        notes:          parse(:string, :set_notes),
-        citation:       parse(:string, :set_citation),
+        notes: parse(:string, :set_notes),
+        citation: parse(:string, :set_citation),
         classification: parse(:string, :set_classification)
       }
     end
@@ -238,10 +238,13 @@ class API
                                :set_correct_spelling])
     end
 
+    # Disable cop because there's no reasonable way to avoid the offense
+    # rubocop:disable CyclomaticComplexity
     def no_other_update_params?
       !@name && !@author && !@rank && @deprecated.nil? &&
         !@synonymize_with && !@clear_synonyms && !@correct_spelling
     end
+    # rubocop:enable CyclomaticComplexity
 
     def change_name(name)
       return unless @name || @author || @rank

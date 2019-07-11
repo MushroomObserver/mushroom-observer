@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class API
   # API for Observation
   # rubocop:disable Metrics/ClassLength
@@ -32,38 +34,36 @@ class API
     def query_params
       n, s, e, w = parse_bounding_box!
       {
-        where:            sql_id_condition,
-        created_at:       parse_range(:time, :created_at),
-        updated_at:       parse_range(:time, :updated_at),
-        date:             parse_range(:date, :date, help: :when_seen),
-        users:            parse_array(:user, :user, help: :observer),
-        names:            parse_array(:name, :name, as: :id),
-        synonym_names:    parse_array(:name, :synonyms_of, as: :id),
-        children_names:   parse_array(:name, :children_of, as: :id),
-        locations:        parse_array(:location, :location, as: :id),
-        herbaria:         parse_array(:herbarium, :herbarium, as: :id),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        date: parse_range(:date, :date, help: :when_seen),
+        users: parse_array(:user, :user, help: :observer),
+        names: parse_array(:name, :name, as: :id),
+        locations: parse_array(:location, :location, as: :id),
+        herbaria: parse_array(:herbarium, :herbarium, as: :id),
         herbarium_records: parse_array(:herbarium_record, :herbarium_record,
                                        as: :id),
-        projects:         parse_array(:project, :project, as: :id),
-        species_lists:    parse_array(:species_list, :species_list, as: :id),
-        confidence:       parse(:confidence, :confidence),
+        projects: parse_array(:project, :project, as: :id),
+        species_lists: parse_array(:species_list, :species_list, as: :id),
+        confidence: parse(:confidence, :confidence),
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
-        gps_hidden:       parse(:boolean, :gps_hidden, help: 1),
-        has_images:       parse(:boolean, :has_images),
-        has_location:     parse(:boolean, :has_location),
-        has_name:         parse(:boolean, :has_name, help: :min_rank),
-        has_comments:     parse(:boolean, :has_comments, limit: true),
-        has_specimen:     parse(:boolean, :has_specimen),
-        has_notes:        parse(:boolean, :has_notes),
+        gps_hidden: parse(:boolean, :gps_hidden, help: 1),
+        has_images: parse(:boolean, :has_images),
+        has_location: parse(:boolean, :has_location),
+        has_name: parse(:boolean, :has_name, help: :min_rank),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_specimen: parse(:boolean, :has_specimen),
+        has_notes: parse(:boolean, :has_notes),
         has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
-        notes_has:        parse(:string, :notes_has, help: 1),
-        comments_has:     parse(:string, :comments_has, help: 1),
-        north:            n,
-        south:            s,
-        east:             e,
-        west:             w
-      }
+        notes_has: parse(:string, :notes_has, help: 1),
+        comments_has: parse(:string, :comments_has, help: 1),
+        north: n,
+        south: s,
+        east: e,
+        west: w
+      }.merge(parse_names_parameters)
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
@@ -71,41 +71,41 @@ class API
     def create_params
       parse_create_params!
       {
-        when:          parse(:date, :date) || Date.today,
-        place_name:    @location,
-        lat:           @latitude,
-        long:          @longitude,
-        alt:           @altitude,
-        specimen:      @has_specimen,
+        when: parse(:date, :date) || Date.today,
+        place_name: @location,
+        lat: @latitude,
+        long: @longitude,
+        alt: @altitude,
+        specimen: @has_specimen,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       default: true, help: 1),
-        gps_hidden:    parse(:boolean, :gps_hidden, default: false, help: 1),
-        notes:         @notes,
-        thumb_image:   @thumbnail,
-        images:        @images,
-        projects:      parse_array(:project, :projects,
-                                   must_be_member: true) || [],
+        gps_hidden: parse(:boolean, :gps_hidden, default: false,
+                                                 help: 1),
+        notes: @notes,
+        thumb_image: @thumbnail,
+        images: @images,
+        projects: parse_array(:project, :projects, must_be_member: true) || [],
         species_lists: parse_array(:species_list, :species_lists,
                                    must_have_edit_permission: true) || [],
-        name:          @name,
-        user:          @user
+        name: @name,
+        user: @user
       }
     end
 
     def update_params
       parse_update_params!
       {
-        when:                   parse(:date, :set_date),
-        place_name:             parse(:place_name, :set_location,
-                                      limit: 1024, not_blank: true),
-        lat:                    @latitude,
-        long:                   @longitude,
-        alt:                    @altitude,
-        specimen:               parse(:boolean, :set_has_specimen),
+        when: parse(:date, :set_date),
+        place_name: parse(:place_name, :set_location, limit: 1024,
+                                                      not_blank: true),
+        lat: @latitude,
+        long: @longitude,
+        alt: @altitude,
+        specimen: parse(:boolean, :set_has_specimen),
         is_collection_location: parse(:boolean, :set_is_collection_location,
                                       help: 1),
-        gps_hidden:             parse(:boolean, :gps_hidden, help: 1),
-        thumb_image:            @thumbnail
+        gps_hidden: parse(:boolean, :gps_hidden, help: 1),
+        thumb_image: @thumbnail
       }
     end
 
@@ -149,19 +149,19 @@ class API
       provide_specimen_defaults(obs)
       if @collection_number
         CollectionNumber.create!(
-          user:   user,
-          name:   @collectors_name,
+          user: user,
+          name: @collectors_name,
           number: @collection_number
         ).add_observation(obs)
       end
-      if @herbarium
-        HerbariumRecord.create!(
-          herbarium:        @herbarium,
-          user:             user,
-          initial_det:      @initial_det,
-          accession_number: @accession_number
-        ).add_observation(obs)
-      end
+      return unless @herbarium
+
+      HerbariumRecord.create!(
+        herbarium: @herbarium,
+        user: user,
+        initial_det: @initial_det,
+        accession_number: @accession_number
+      ).add_observation(obs)
     end
 
     def provide_specimen_defaults(obs)
@@ -197,7 +197,7 @@ class API
       obs.images.delete(*@remove_images)
       return unless @remove_images.include?(obs.thumb_image)
 
-      obs.update_attributes!(thumb_image: obs.images.first)
+      obs.update!(thumb_image: obs.images.first)
     end
 
     def update_projects(obs)
@@ -326,12 +326,14 @@ class API
     #  Validation
     # --------------------
 
+    # rubocop:disable CyclomaticComplexity (no reasonable way to fix offense)
     def no_adds_or_removes?
       @add_images.empty? && @remove_images.empty? &&
         !@add_to_project && !@remove_from_project &&
         !@add_to_list && !@remove_from_list &&
         @notes.empty?
     end
+    # rubocop:enable CyclomaticComplexity
 
     def make_sure_both_latitude_and_longitude!
       return if @latitude && @longitude || !@longitude && !@latitude
@@ -339,6 +341,7 @@ class API
       raise LatLongMustBothBeSet.new
     end
 
+    # rubocop:disable CyclomaticComplexity (no reasonable way to fix offense)
     def make_sure_has_specimen_set!
       return if @has_specimen
 
@@ -349,6 +352,7 @@ class API
       raise error_class.new(:initial_det)       if @initial_det
       raise error_class.new(:accession_number)  if @accession_number
     end
+    # rubocop:enable CyclomaticComplexity
 
     def make_sure_location_provided!
       raise MissingParameter.new(:location) unless @location
@@ -361,4 +365,5 @@ class API
       params[:place_name] = Location.unknown.name
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

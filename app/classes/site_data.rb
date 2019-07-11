@@ -88,24 +88,24 @@ class SiteData
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
-    comments:                      1,
-    images:                        10,
+    comments: 1,
+    images: 10,
     location_descriptions_authors: 50,
     location_descriptions_editors: 5,
-    locations:                     10,
-    locations_versions:            5,
-    name_descriptions_authors:     100,
-    name_descriptions_editors:     10,
-    names:                         10,
-    names_versions:                10,
-    namings:                       1,
-    observations:                  1,
+    locations: 10,
+    locations_versions: 5,
+    name_descriptions_authors: 100,
+    name_descriptions_editors: 10,
+    names: 10,
+    names_versions: 10,
+    namings: 1,
+    observations: 1,
     #     observations_with_voucher:     10,
     #     observations_without_voucher:  1,
-    species_list_entries:          1,
-    species_lists:                 5,
-    users:                         0,
-    votes:                         1
+    species_list_entries: 1,
+    species_lists: 5,
+    users: 0,
+    votes: 1
   }.freeze
 
   # Table to query to get score for each category.  (Default is same as the
@@ -400,8 +400,8 @@ class SiteData
     @user_data = {}
     for user in users
       @user_data[user.id] = {
-        id:      user.id,
-        name:    user.unique_text_name,
+        id: user.id,
+        name: user.unique_text_name,
         bonuses: user.sum_bonuses
       }
       add_language_contributions(user)

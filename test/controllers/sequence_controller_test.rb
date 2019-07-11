@@ -315,10 +315,10 @@ class SequenceControllerTest < FunctionalTestCase
     accession = "KT968655"
     params = {
       id: sequence.id,
-      sequence:  { locus:     locus,
-                   bases:     bases,
-                   archive:   archive,
-                   accession: accession }
+      sequence: { locus: locus,
+                  bases: bases,
+                  archive: archive,
+                  accession: accession }
     }
     make_admin("zero")
     post(:edit_sequence, params)
@@ -333,10 +333,10 @@ class SequenceControllerTest < FunctionalTestCase
     locus  = "ITS"
     params = {
       id: sequence.id,
-      sequence:  { locus:     locus,
-                   bases:     bases,
-                   archive:   archive,
-                   accession: accession }
+      sequence: { locus: locus,
+                  bases: bases,
+                  archive: archive,
+                  accession: accession }
     }
     post(:edit_sequence, params)
     assert_equal(locus, sequence.reload.locus)
@@ -344,10 +344,10 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove locus required.
     params = {
       id: sequence.id,
-      sequence:  { locus:     "",
-                   bases:     bases,
-                   archive:   archive,
-                   accession: accession }
+      sequence: { locus: "",
+                  bases: bases,
+                  archive: archive,
+                  accession: accession }
     }
     post(:edit_sequence, params)
     # response is 200 because it just reloads the form
@@ -357,10 +357,10 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove bases or archive+accession required.
     params = {
       id: sequence.id,
-      sequence:  { locus:     locus,
-                   bases:     "",
-                   archive:   "",
-                   accession: "" }
+      sequence: { locus: locus,
+                  bases: "",
+                  archive: "",
+                  accession: "" }
     }
     post(:edit_sequence, params)
     assert_response(:success)
@@ -369,10 +369,10 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove accession required if archive present.
     params = {
       id: sequence.id,
-      sequence:  { locus:     locus,
-                   bases:     bases,
-                   archive:   archive,
-                   accession: "" }
+      sequence: { locus: locus,
+                  bases: bases,
+                  archive: archive,
+                  accession: "" }
     }
     post(:edit_sequence, params)
     assert_response(:success)
@@ -381,10 +381,10 @@ class SequenceControllerTest < FunctionalTestCase
     # Prove archive required if accession present.
     params = {
       id: sequence.id,
-      sequence:  { locus:     locus,
-                   bases:     bases,
-                   archive:   "",
-                   accession: accession }
+      sequence: { locus: locus,
+                  bases: bases,
+                  archive: "",
+                  accession: accession }
     }
     post(:edit_sequence, params)
     assert_response(:success)
@@ -400,9 +400,9 @@ class SequenceControllerTest < FunctionalTestCase
     login(obs.user.login)
     params = {
       id: sequence.id,
-      sequence: { locus:     sequence.locus,
-                  bases:     sequence.bases,
-                  archive:   sequence.archive,
+      sequence: { locus: sequence.locus,
+                  bases: sequence.bases,
+                  archive: sequence.archive,
                   accession: sequence.accession }
     }
 

@@ -90,7 +90,6 @@ GET herbarium
   updated_at:	time range
 
 GET image
-  children_of:	name list
   confidence:	confidence range (limit=-3..3)
   content_type:	enum list (limit=bmp|gif|jpg|png|raw|tiff)
   copyright_holder_has:	string (search within copyright holder)
@@ -100,6 +99,8 @@ GET image
   has_observation:	boolean (limit=true, is attached to an observation?)
   has_votes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   license:	license
   location:	location list
   name:	name list
@@ -110,7 +111,6 @@ GET image
   quality:	quality range (limit=1..4)
   size:	enum (limit=huge|large|medium|small|thumbnail, width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (who uploaded the photo)
 
@@ -129,7 +129,6 @@ POST image
 
 PATCH image
  query params
-  children_of:	name list
   confidence:	confidence range (limit=-3..3)
   content_type:	enum list (limit=bmp|gif|jpg|png|raw|tiff)
   copyright_holder_has:	string (search within copyright holder)
@@ -139,6 +138,8 @@ PATCH image
   has_observation:	boolean (limit=true, is attached to an observation?)
   has_votes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   license:	license
   location:	location list
   name:	name list
@@ -149,7 +150,6 @@ PATCH image
   quality:	quality range (limit=1..4)
   size:	enum (limit=huge|large|medium|small|thumbnail, width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (who uploaded the photo)
  update params
@@ -160,7 +160,6 @@ PATCH image
   set_original_name:	string (limit=120 chars, original file name or other private identifier)
 
 DELETE image
-  children_of:	name list
   confidence:	confidence range (limit=-3..3)
   content_type:	enum list (limit=bmp|gif|jpg|png|raw|tiff)
   copyright_holder_has:	string (search within copyright holder)
@@ -170,6 +169,8 @@ DELETE image
   has_observation:	boolean (limit=true, is attached to an observation?)
   has_votes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   license:	license
   location:	location list
   name:	name list
@@ -180,7 +181,6 @@ DELETE image
   quality:	quality range (limit=1..4)
   size:	enum (limit=huge|large|medium|small|thumbnail, width or height at least 160 for thumbnail, 320 for small, 640 for medium, 960 for large, 1280 for huge)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (who uploaded the photo)
 
@@ -226,7 +226,6 @@ PATCH location
 
 GET name
   author_has:	string (search within author)
-  children_of:	name list
   citation_has:	string (search within citation)
   classification_has:	string (search within classification)
   comments_has:	string (search within comments summary and body)
@@ -239,6 +238,8 @@ GET name
   has_notes:	boolean
   has_synonyms:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_deprecated:	boolean
   location:	string list
   misspellings:	enum (default=no, limit=either|no|only, include misspellings? "either" means do not care and "only" means only show misspelt names)
@@ -247,7 +248,6 @@ GET name
   ok_for_export:	boolean
   rank:	enum (limit=Class|Domain|Family|Form|Genus|Group|Kingdom|Order|Phylum|Section|Species|Stirps|Subgenus|Subsection|Subspecies|Variety)
   species_list:	string list
-  synonyms_of:	name list
   text_name_has:	string (search within name)
   updated_at:	time range
   user:	user list (creator / first to use)
@@ -264,7 +264,6 @@ POST name
 PATCH name
  query params
   author_has:	string (search within author)
-  children_of:	name list
   citation_has:	string (search within citation)
   classification_has:	string (search within classification)
   comments_has:	string (search within comments summary and body)
@@ -277,6 +276,8 @@ PATCH name
   has_notes:	boolean
   has_synonyms:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_deprecated:	boolean
   location:	string list
   misspellings:	enum (default=no, limit=either|no|only, include misspellings? "either" means do not care and "only" means only show misspelt names)
@@ -285,7 +286,6 @@ PATCH name
   ok_for_export:	boolean
   rank:	enum (limit=Class|Domain|Family|Form|Genus|Group|Kingdom|Order|Phylum|Section|Species|Stirps|Subgenus|Subsection|Subspecies|Variety)
   species_list:	string list
-  synonyms_of:	name list
   text_name_has:	string (search within name)
   updated_at:	time range
   user:	user list (creator / first to use)
@@ -302,7 +302,6 @@ PATCH name
   synonymize_with:	name
 
 GET observation
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   confidence:	confidence (limit=-3..3)
   created_at:	time range
@@ -319,6 +318,8 @@ GET observation
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   name:	name list
@@ -327,7 +328,6 @@ GET observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
   west:	longitude (min longitude)
@@ -358,7 +358,6 @@ POST observation
 
 PATCH observation
  query params
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   confidence:	confidence (limit=-3..3)
   created_at:	time range
@@ -374,6 +373,8 @@ PATCH observation
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   name:	name list
@@ -382,7 +383,6 @@ PATCH observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
   west:	longitude (min longitude)
@@ -407,7 +407,6 @@ PATCH observation
   set_thumbnail:	image (must have edit permission)
 
 DELETE observation
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   confidence:	confidence (limit=-3..3)
   created_at:	time range
@@ -424,6 +423,8 @@ DELETE observation
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   name:	name list
@@ -432,7 +433,6 @@ DELETE observation
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (observer)
   west:	longitude (min longitude)
@@ -489,7 +489,6 @@ GET sequence
   accession:	string list
   accession_has:	string (search within accession number)
   archive:	archive list (limit=ENA|GenBank|UNITE)
-  children_of:	name list
   confidence:	confidence (limit=-3..3)
   created_at:	time range
   east:	longitude (max longitude)
@@ -501,6 +500,8 @@ GET sequence
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   locus:	string list
@@ -514,7 +515,6 @@ GET sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)
   west:	longitude (min longitude)
@@ -532,7 +532,6 @@ PATCH sequence
   accession:	string list
   accession_has:	string (search within accession number)
   archive:	archive list (limit=ENA|GenBank|UNITE)
-  children_of:	name list
   confidence:	confidence (limit=-3..3)
   created_at:	time range
   east:	longitude (max longitude)
@@ -544,6 +543,8 @@ PATCH sequence
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   locus:	string list
@@ -557,7 +558,6 @@ PATCH sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)
   west:	longitude (min longitude)
@@ -572,7 +572,6 @@ DELETE sequence
   accession:	string list
   accession_has:	string (search within accession number)
   archive:	archive list (limit=ENA|GenBank|UNITE)
-  children_of:	name list
   confidence:	confidence (limit=-3..3)
   created_at:	time range
   east:	longitude (max longitude)
@@ -584,6 +583,8 @@ DELETE sequence
   herbarium:	herbarium list
   herbarium_record:	herbarium_record list
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   is_collection_location:	boolean (is this location where mushroom was found?)
   location:	location list
   locus:	string list
@@ -597,24 +598,23 @@ DELETE sequence
   project:	project list
   south:	latitude (min latitude)
   species_list:	species_list list
-  synonyms_of:	name list
   updated_at:	time range
   user:	user list (creator)
   west:	longitude (min longitude)
 
 GET species_list
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   created_at:	time range
   date:	date range (this date can mean anything you want)
   has_comments:	boolean (limit=true)
   has_notes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
   project:	project list
-  synonyms_of:	name list
   title_has:	string (search within title)
   updated_at:	time range
   user:	user list (creator)
@@ -627,18 +627,18 @@ POST species_list
 
 PATCH species_list
  query params
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   created_at:	time range
   date:	date range (this date can mean anything you want)
   has_comments:	boolean (limit=true)
   has_notes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
   project:	project list
-  synonyms_of:	name list
   title_has:	string (search within title)
   updated_at:	time range
   user:	user list (creator)
@@ -651,18 +651,18 @@ PATCH species_list
   set_title:	string (limit=100 chars, not blank)
 
 DELETE species_list
-  children_of:	name list
   comments_has:	string (search within comments summary and body)
   created_at:	time range
   date:	date range (this date can mean anything you want)
   has_comments:	boolean (limit=true)
   has_notes:	boolean
   id:	integer list
+  include_subtaxa:	boolean
+  include_synonyms:	boolean
   location:	location list
   name:	name list
   notes_has:	string (search within notes)
   project:	project list
-  synonyms_of:	name list
   title_has:	string (search within title)
   updated_at:	time range
   user:	user list (creator)

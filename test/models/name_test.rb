@@ -1201,75 +1201,75 @@ class NameTest < UnitTestCase
   def test_name_parse_group_names
     do_name_parse_test( # monomial, no author
       "Agaricus group",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group",
       real_search_name: "Agaricus group",
-      sort_name:        "Agaricus   group",
-      display_name:     "**__Agaricus__** group",
-      parent_name:      "",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus   group",
+      display_name: "**__Agaricus__** group",
+      parent_name: "",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris group",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group",
       real_search_name: "Agaricus campestris group",
-      sort_name:        "Agaricus campestris   group",
-      display_name:     "**__Agaricus campestris__** group",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus campestris   group",
+      display_name: "**__Agaricus campestris__** group",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # monomial, with author
       "Agaricus group Author",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group Author",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group Author",
       real_search_name: "Agaricus group Author",
-      sort_name:        "Agaricus   group  Author",
-      display_name:     "**__Agaricus__** group Author",
-      parent_name:      "",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus   group  Author",
+      display_name: "**__Agaricus__** group Author",
+      parent_name: "",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial, author
       "Agaricus campestris group Author",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
-      sort_name:        "Agaricus campestris   group  Author",
-      display_name:     "**__Agaricus campestris__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   group  Author",
+      display_name: "**__Agaricus campestris__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial with author, "group" at end
       "Agaricus campestris Author group",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
-      sort_name:        "Agaricus campestris   group  Author",
-      display_name:     "**__Agaricus campestris__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   group  Author",
+      display_name: "**__Agaricus campestris__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris group sensu Author",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group sensu Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group sensu Author",
       real_search_name: "Agaricus campestris group sensu Author",
-      sort_name:        "Agaricus campestris   group  sensu Author",
-      display_name:     "**__Agaricus campestris__** group sensu Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "sensu Author"
+      sort_name: "Agaricus campestris   group  sensu Author",
+      display_name: "**__Agaricus campestris__** group sensu Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "sensu Author"
     )
     do_name_parse_test( # species with Tulloss form of sp. nov.
       "Pleurotus sp. T44 group Tulloss",
@@ -1313,78 +1313,78 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # binomial, "group" part of epithet
       "Agaricus grouperi group Author",
-      text_name:        "Agaricus grouperi group",
-      real_text_name:   "Agaricus grouperi group",
-      search_name:      "Agaricus grouperi group Author",
+      text_name: "Agaricus grouperi group",
+      real_text_name: "Agaricus grouperi group",
+      search_name: "Agaricus grouperi group Author",
       real_search_name: "Agaricus grouperi group Author",
-      sort_name:        "Agaricus grouperi   group  Author",
-      display_name:     "**__Agaricus grouperi__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus grouperi   group  Author",
+      display_name: "**__Agaricus grouperi__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # author duplicates a word in the taxon
       "Agaricus group Agaricus",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group Agaricus",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group Agaricus",
       real_search_name: "Agaricus group Agaricus",
-      sort_name:        "Agaricus   group  Agaricus",
-      display_name:     "**__Agaricus__** group Agaricus",
-      parent_name:      "",
-      rank:             :Group,
-      author:           "Agaricus"
+      sort_name: "Agaricus   group  Agaricus",
+      display_name: "**__Agaricus__** group Agaricus",
+      parent_name: "",
+      rank: :Group,
+      author: "Agaricus"
     )
   end
 
   def test_name_parse_clade_names
     do_name_parse_test( # monomial, no author
       "Agaricus clade",
-      text_name:        "Agaricus clade",
-      real_text_name:   "Agaricus clade",
-      search_name:      "Agaricus clade",
+      text_name: "Agaricus clade",
+      real_text_name: "Agaricus clade",
+      search_name: "Agaricus clade",
       real_search_name: "Agaricus clade",
-      sort_name:        "Agaricus   clade",
-      display_name:     "**__Agaricus__** clade",
-      parent_name:      "",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus   clade",
+      display_name: "**__Agaricus__** clade",
+      parent_name: "",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris clade",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade",
       real_search_name: "Agaricus campestris clade",
-      sort_name:        "Agaricus campestris   clade",
-      display_name:     "**__Agaricus campestris__** clade",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus campestris   clade",
+      display_name: "**__Agaricus campestris__** clade",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris clade sensu Author",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade sensu Author",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade sensu Author",
       real_search_name: "Agaricus campestris clade sensu Author",
-      sort_name:        "Agaricus campestris   clade  sensu Author",
-      display_name:     "**__Agaricus campestris__** clade sensu Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "sensu Author"
+      sort_name: "Agaricus campestris   clade  sensu Author",
+      display_name: "**__Agaricus campestris__** clade sensu Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "sensu Author"
     )
     do_name_parse_test( # binomial with author, "clade" at end
       "Agaricus campestris Author clade",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade Author",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade Author",
       real_search_name: "Agaricus campestris clade Author",
-      sort_name:        "Agaricus campestris   clade  Author",
-      display_name:     "**__Agaricus campestris__** clade Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   clade  Author",
+      display_name: "**__Agaricus campestris__** clade Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
   end
 
@@ -1407,30 +1407,30 @@ class NameTest < UnitTestCase
     do_name_parse_test( # binomial, no author, deprecated
       "Agaricus campestris group",
       {
-        text_name:        "Agaricus campestris group",
-        real_text_name:   "Agaricus campestris group",
-        search_name:      "Agaricus campestris group",
+        text_name: "Agaricus campestris group",
+        real_text_name: "Agaricus campestris group",
+        search_name: "Agaricus campestris group",
         real_search_name: "Agaricus campestris group",
-        sort_name:        "Agaricus campestris   group",
-        display_name:     "__Agaricus campestris__ group",
-        parent_name:      "Agaricus",
-        rank:             :Group,
-        author:           ""
+        sort_name: "Agaricus campestris   group",
+        display_name: "__Agaricus campestris__ group",
+        parent_name: "Agaricus",
+        rank: :Group,
+        author: ""
       },
       deprecated: true
     )
     do_name_parse_test( # binomial, sensu author, deprecated
       "Agaricus campestris group sensu Author",
       {
-        text_name:        "Agaricus campestris group",
-        real_text_name:   "Agaricus campestris group",
-        search_name:      "Agaricus campestris group sensu Author",
+        text_name: "Agaricus campestris group",
+        real_text_name: "Agaricus campestris group",
+        search_name: "Agaricus campestris group sensu Author",
         real_search_name: "Agaricus campestris group sensu Author",
-        sort_name:        "Agaricus campestris   group  sensu Author",
-        display_name:     "__Agaricus campestris__ group sensu Author",
-        parent_name:      "Agaricus",
-        rank:             :Group,
-        author:           "sensu Author"
+        sort_name: "Agaricus campestris   group  sensu Author",
+        display_name: "__Agaricus campestris__ group sensu Author",
+        parent_name: "Agaricus",
+        rank: :Group,
+        author: "sensu Author"
       },
       deprecated: true
     )

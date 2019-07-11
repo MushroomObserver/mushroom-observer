@@ -2,11 +2,11 @@ class ContentFilter
   class HasImages < BooleanFilter
     def initialize
       super(
-        sym:         :has_images,
-        models:      [Observation],
-        on_vals:     %w[yes no],
-        prefs_vals:  ["yes"],
-        off_val:     nil
+        sym: :has_images,
+        models: [Observation],
+        on_vals: %w[yes no],
+        prefs_vals: ["yes"],
+        off_val: nil
       )
     end
 

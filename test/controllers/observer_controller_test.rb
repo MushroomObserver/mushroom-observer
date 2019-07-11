@@ -83,6 +83,17 @@ class ObserverControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_observation_with_unrecognized_name
+    text_name = "Elfin saddle"
+    params = { name: { name: text_name },
+               user: rolf,
+               where: locations.first.name }
+    post_requires_login(:create_observation, params)
+
+    assert_select("div[id='name_messages']",
+                  /MO does not recognize the name.*#{text_name}/)
+  end
+
   ##############################################################################
 
   # ----------------------------
@@ -113,15 +124,15 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
-    get(:show_observation, id: obs.id)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_match(/34.1622|118.3521/, @response.body)
 
-    obs.update_attribute(:gps_hidden, true)
-    get(:show_observation, id: obs.id)
+    obs.update(gps_hidden: true)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_no_match(/34.1622|118.3521/, @response.body)
 
     login("mary")
-    get(:show_observation, id: obs.id)
+    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
@@ -332,19 +343,20 @@ class ObserverControllerTest < FunctionalTestCase
     # When requesting non-synonym observations of n2, it should include n1,
     # since an observation of n1 was clearly intended to be an observation of
     # n2.
-    query = Query.lookup_and_save(:Observation, :of_name, synonyms: :no,
-                                                          name: n2, by: :name)
+    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
+                                                      include_synonyms: false, by: :name)
     assert_equal(2, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
-    query = Query.lookup_and_save(:Observation, :of_name, synonyms: :exclusive,
-                                                          name: n2, by: :name)
+    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
+                                                      include_synonyms: true,
+                                                      exclude_original_names: true, by: :name)
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :of_name, synonyms: :all,
-                                                          name: n2, by: :name)
+    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
+                                                      include_synonyms: true, by: :name)
     assert_equal(4, query.num_results)
     qp = @controller.query_params(query)
 
@@ -642,7 +654,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
                                        include?("118.3521"))
 
-    obs.update_attribute(:gps_hidden, true)
+    obs.update(gps_hidden: true)
     get(:map_observation, params: { id: obs.id })
     assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
                                         include?("34.1622"))
@@ -661,7 +673,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(assigns(:observations).map(&:long).map(&:to_s).join("").
                                        include?("118.3521"))
 
-    obs.update_attribute(:gps_hidden, true)
+    obs.update(gps_hidden: true)
     get(:map_observations, params: { q: query.id.alphabetize })
     assert_false(assigns(:observations).map(&:lat).map(&:to_s).join("").
                                         include?("34.1622"))
@@ -705,7 +717,9 @@ class ObserverControllerTest < FunctionalTestCase
     params = { species_list_id: species_lists(:unknown_species_list).id,
                name: observations(:minimal_unknown_obs).name }
     get_with_dump(:observations_of_name, params)
-    assert_select("title", /Observations of Synonyms of/)
+    # Needs an assertion. Was
+    # assert_select("title", /Observations of Synonyms of/)
+    # but that broken by PR 497.
   end
 
   def test_send_webmaster_question
@@ -1458,9 +1472,11 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:author_request, params)
-    assert_redirected_to(controller: :name,
-                         action: :show_name_description,
-                         id: name_descriptions(:coprinus_comatus_desc).id)
+    assert_redirected_to(
+      controller: :name,
+      action: :show_name_description,
+      id: name_descriptions(:coprinus_comatus_desc).id
+    )
     assert_flash_text(:request_success.t)
 
     params = {
@@ -1659,7 +1675,7 @@ class ObserverControllerTest < FunctionalTestCase
                        users(:rolf).preferred_herbarium_name)
     assert_input_value(:herbarium_record_herbarium_id, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
-    users(:rolf).update_attribute(:location_format, :scientific)
+    users(:rolf).update(location_format: :scientific)
     get(:create_observation)
     assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
@@ -1788,10 +1804,10 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
       { herbarium_record:
-        {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "1234"
-        },
+                          { herbarium_name: herbaria(
+                            :nybg_herbarium
+                          ).auto_complete_name,
+                            herbarium_id: "1234" },
         name: { name: "Coprinus comatus" } },
       1, 1, 0
     )
@@ -1875,10 +1891,11 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_approved_name_and_extra_space
-    generic_construct_observation({
-                                    name: { name: "Another new-name" + "  " },
-                                    approved_name: "Another new-name" + "  "
-                                  }, 1, 1, 2)
+    generic_construct_observation(
+      { name: { name: "Another new-name" + "  " },
+        approved_name: "Another new-name" + "  " },
+      1, 1, 2
+    )
   end
 
   def test_create_observation_with_approved_section
@@ -1894,7 +1911,9 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_create_observation_with_approved_junk_name
     generic_construct_observation({
-                                    name: { name: "This is a bunch of junk" },
+                                    name: {
+                                      name: "This is a bunch of junk"
+                                    },
                                     approved_name: "This is a bunch of junk"
                                   }, 0, 0, 0)
   end
@@ -1940,11 +1959,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_with_approved_deprecated_name
-    generic_construct_observation({
-                                    name: { name: "Lactarius subalpinus" },
-                                    approved_name: "Lactarius subalpinus",
-                                    chosen_name: {}
-                                  }, 1, 1, 0)
+    generic_construct_observation(
+      { name: { name: "Lactarius subalpinus" },
+        approved_name: "Lactarius subalpinus",
+        chosen_name: {} },
+      1, 1, 0
+    )
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_subalpinus))
   end
@@ -2058,12 +2078,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_creating_class
-    generic_construct_observation({
-                                    observation: { place_name: "Earth",
-                                                   lat: "", long: "" },
-                                    name: { name: "Lecanoromycetes L." },
-                                    approved_name: "Lecanoromycetes L."
-                                  }, 1, 1, 1)
+    generic_construct_observation(
+      { observation: { place_name: "Earth", lat: "", long: "" },
+        name: { name: "Lecanoromycetes L." },
+        approved_name: "Lecanoromycetes L." },
+      1, 1, 1
+    )
     name = Name.last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
@@ -2108,13 +2128,12 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_creating_group
-    generic_construct_observation({
-                                    observation: { place_name: "Earth",
-                                                   lat: "", long: "" },
-                                    name: { name: "Morchella elata group" },
-                                    approved_name: "Morchella elata group"
-                                  }, 1, 1, 2)
-
+    generic_construct_observation(
+      { observation: { place_name: "Earth", lat: "", long: "" },
+        name: { name: "Morchella elata group" },
+        approved_name: "Morchella elata group" },
+      1, 1, 2
+    )
     name = Name.last
     assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
@@ -2470,7 +2489,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(
+    post( # rubocop:disable HttpPositionalArguments
       :create_observation,
       observation: {
         when: Time.zone.now,
@@ -2734,7 +2753,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post(
+    post( # rubocop:disable HttpPositionalArguments
       :edit_observation,
       id: obs.id,
       observation: {

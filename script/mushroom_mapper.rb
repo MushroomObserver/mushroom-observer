@@ -190,7 +190,7 @@ for family in family_to_genus.keys.sort do
       warn("Missing species: #{species}.") unless ids[species]
       genus_data["species"] << {
         "name" => species,
-        "id"   => ids[species]
+        "id" => ids[species]
       }
     end
     family_data["genera"] << genus_data

@@ -1,11 +1,19 @@
+# frozen_string_literal: true
+
 module Query
-  # Base class for all Query subclasses.
+  # base class for Query searches
   class Base
     include Query::Modules::ActiveRecord
+    include Query::Modules::BoundingBox
     include Query::Modules::Coercion
+    include Query::Modules::Conditions
+    include Query::Modules::Datetime
+    include Query::Modules::GoogleSearch
     include Query::Modules::HighLevelQueries
     include Query::Modules::Initialization
     include Query::Modules::Joining
+    include Query::Modules::LookupObjects
+    include Query::Modules::LookupNames
     include Query::Modules::LowLevelQueries
     include Query::Modules::NestedQueries
     include Query::Modules::Ordering
@@ -21,13 +29,13 @@ module Query
 
     def parameter_declarations
       {
-        join?:   [:string],
+        join?: [:string],
         tables?: [:string],
-        where?:  [:string],
-        group?:  :string,
-        order?:  :string,
-        by?:     :string,
-        title?:  [:string]
+        where?: [:string],
+        group?: :string,
+        order?: :string,
+        by?: :string,
+        title?: [:string]
       }
     end
 
@@ -37,11 +45,10 @@ module Query
     end
 
     def initialize_flavor
-      add_join_from_string(params[:join]) if params[:join]
-      self.tables += params[:tables]      if params[:tables]
-      self.where  += params[:where]       if params[:where]
-      self.group   = params[:group]       if params[:group]
-      self.order   = params[:order]       if params[:order]
+      # These strings can never come direct from user, so no need to sanitize.
+      # (I believe they are only used by the site stats page. -JPH 20190708)
+      self.where += params[:where] if params[:where]
+      add_join(params[:join])      if params[:join]
     end
 
     def default_order
@@ -49,7 +56,7 @@ module Query
     end
 
     def ==(other)
-      serialize == other.serialize
+      serialize == other.try(&:serialize)
     end
   end
 end

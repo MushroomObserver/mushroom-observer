@@ -1,39 +1,48 @@
+# frozen_string_literal: true
 module PatternSearch
+  # base class for Searches for Observations meeting conditions in a Pattern
   class Observation < Base
     PARAMS = {
-      date:            [:date,             :parse_date_range],
-      created:         [:created_at,       :parse_date_range],
-      modified:        [:updated_at,       :parse_date_range],
+      # dates / times
+      date: [:date, :parse_date_range],
+      created: [:created_at, :parse_date_range],
+      modified: [:updated_at, :parse_date_range],
 
-      name:            [:names,            :parse_list_of_names],
-      synonym_of:      [:synonym_names,    :parse_list_of_names],
-      child_of:        [:children_names,   :parse_list_of_names],
+      # names
+      name: [:names, :parse_list_of_names],
+      include_subtaxa: [:include_subtaxa, :parse_boolean],
+      include_synonyms: [:include_synonyms, :parse_boolean],
+      include_nonconsensus: [:include_nonconsensus, :parse_boolean],
 
-      herbarium:       [:herbaria,         :parse_list_of_herbaria],
-      location:        [:locations,        :parse_list_of_locations],
-      region:          [:region,           :parse_string],
-      project:         [:projects,         :parse_list_of_projects],
-      list:            [:species_lists,    :parse_list_of_species_lists],
-      user:            [:users,            :parse_list_of_users],
+      # strings / lists
+      comments: [:comments_has, :parse_string],
+      has_field: [:has_notes_fields, :parse_string],
+      herbarium: [:herbaria, :parse_list_of_herbaria],
+      list: [:species_lists, :parse_list_of_species_lists],
+      location: [:locations, :parse_list_of_locations],
+      notes: [:notes_has, :parse_string],
+      project: [:projects, :parse_list_of_projects],
+      region: [:region, :parse_string],
+      user: [:users, :parse_list_of_users],
 
-      notes:           [:notes_has,        :parse_string],
-      comments:        [:comments_has,     :parse_string],
+      # numeric
+      confidence: [:confidence, :parse_confidence],
 
-      confidence:      [:confidence,       :parse_confidence],
+      east: [:east, :parse_longitude],
+      north: [:north, :parse_latitude],
+      south: [:south, :parse_latitude],
+      west: [:west, :parse_longitude],
 
-      east:            [:east,             :parse_longitude],
-      west:            [:west,             :parse_longitude],
-      north:           [:north,            :parse_latitude],
-      south:           [:south,            :parse_latitude],
-
-      images:          [:has_images,       :parse_boolean],
-      specimen:        [:has_specimen,     :parse_boolean],
-      sequence:        [:has_sequences,    :parse_yes],
-      lichen:          [:lichen,           :parse_boolean],
-      has_name:        [:has_name,         :parse_boolean],
-      has_notes:       [:has_notes,        :parse_boolean],
-      has_field:       [:has_notes_fields, :parse_string],
-      has_comments:    [:has_comments,     :parse_yes]
+      # booleanish
+      has_comments: [:has_comments, :parse_yes],
+      has_location: [:has_location, :parse_boolean],
+      has_name: [:has_name, :parse_boolean],
+      has_notes: [:has_notes, :parse_boolean],
+      images: [:has_images, :parse_boolean],
+      is_collection_location: [:is_collection_location, :parse_boolean],
+      lichen: [:lichen, :parse_boolean],
+      sequence: [:has_sequences, :parse_yes],
+      specimen: [:has_specimen, :parse_boolean]
     }.freeze
 
     def self.params
@@ -50,6 +59,20 @@ module PatternSearch
 
     def model
       self.class.model
+    end
+
+    def build_query
+      super
+
+      # Temporary hack to get include_subtaxa/synonyms to work.
+      # Will rip out when we do away with pattern search query flavor.
+      if flavor == :pattern_search &&
+         (!args[:include_subtaxa].nil? || !args[:include_synonyms].nil? ||
+          !args[:include_nonconsensus].nil?)
+        self.flavor = :all
+        args[:names] = args[:pattern]
+        args.delete(:pattern)
+      end
     end
   end
 end

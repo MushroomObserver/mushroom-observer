@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Query Model
 #
@@ -30,27 +32,16 @@
 #
 #  == Example Usage
 #
-#  Get observations created by @user.
+#  Get observations created by @user:
 #
-#    query = Query.lookup(:Observation, :by_user, user: @user)
-#
-#  Get observations in the three sections of show_name:
-#  1) observations whose consensus is @name
-#  2) observations whose consensus is synonym of @name
-#  3) observations with non-consensus naming that is a synonym of @name
-#
-#    query = Query.lookup(:Observation, :of_name, name: @name)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :exclusive)
-#    query = Query.lookup(:Observation, :of_name,
-#                         name: @name, synonyms: :all, nonconsensus: :exclusive)
+#    query = Query.lookup(:Observation, :all, users: [@user])
 #
 #  You may further tweak a query after it's been created:
 #
 #    query = Query.lookup(:Observation)
-#    query.join  << :names
+#    query.add_join(:names)
 #    query.where << 'names.correct_spelling_id IS NULL'
-#    query.order =  'names.sort_name ASC'
+#    query.order = 'names.sort_name ASC'
 #
 #  Now you may execute it in various ways:
 #
@@ -261,7 +252,7 @@
 #
 #  ==== Outer queries
 #  outer::              Outer Query (if nested).
-#  has_outer?::         Is this Query nested?
+#  outer?::             Is this Query nested?
 #  get_outer_current_id::  Get outer Query's current id.
 #  outer_first::        Call +first+ on outer Query.
 #  outer_prev::         Call +prev+ on outer Query.

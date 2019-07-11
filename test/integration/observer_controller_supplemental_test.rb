@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Tests which supplement controller/observer_controller_test.rb
@@ -17,9 +19,8 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     visit("/name/map/#{name.id}")
     click_link("Show Observations")
     click_link("Show Map")
-    title = page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
-
-    title.assert_text("Observations of #{name.text_name}")
+    title = page.find_by_id("title")
+    title.assert_text("Map of Observation Index")
   end
 
   # Prove that if a user clicks an Observation in Observation search results
@@ -47,7 +48,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     within("div#right_tabs") { click_link("Destroy") }
 
     # MO should show next Observation.
-    page.find_by_id("title") # rubocop:disable Rails/DynamicFindBy
+    page.find_by_id("title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end
@@ -72,7 +73,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
-    refute_includes(project.observations, observation)
+    assert_not_includes(project.observations, observation)
   end
 
   # Prove that unchecking a Species List as part of an Observation editing
@@ -95,6 +96,6 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 
-    refute_includes(species_list.observations, observation)
+    assert_not_includes(species_list.observations, observation)
   end
 end

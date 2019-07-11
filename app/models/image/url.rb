@@ -10,11 +10,11 @@ class Image
     }.freeze
 
     SUBDIRECTORY_TO_SIZE = {
-      "orig"  => :full_size,
-      "1280"  => :huge,
-      "960"   => :large,
-      "640"   => :medium,
-      "320"   => :small,
+      "orig" => :full_size,
+      "1280" => :huge,
+      "960" => :large,
+      "640" => :medium,
+      "320" => :small,
       "thumb" => :thumbnail
     }.freeze
 
