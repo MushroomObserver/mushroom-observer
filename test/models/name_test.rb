@@ -614,6 +614,21 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_1d
+    do_name_parse_test(
+      "Synchytrium subgenus Endochytrium du Plessis",
+      text_name: "Synchytrium subgenus Endochytrium",
+      real_text_name: "Synchytrium subgenus Endochytrium",
+      search_name: "Synchytrium subgenus Endochytrium du Plessis",
+      real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
+      sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
+      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis",
+      parent_name: "Synchytrium",
+      rank: :Subgenus,
+      author: "du Plessis"
+    )
+  end
+
   def test_name_parse_2
     do_name_parse_test(
       "Lecidea sanguineoatra sens. Nyl",

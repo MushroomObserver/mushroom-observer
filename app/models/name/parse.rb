@@ -35,7 +35,7 @@ class Name < AbstractModel
 
   AUTHOR_START = /
     #{ANY_AUTHOR_ABBR} |
-    van\s | de\s |
+    van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] |
     "[^a-z\s]
   /x.freeze
