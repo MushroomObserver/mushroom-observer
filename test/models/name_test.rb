@@ -1198,6 +1198,21 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_41
+    do_name_parse_test(
+      "Armillaria mellea D.\tC.",
+      text_name: "Armillaria mellea",
+      real_text_name: "Armillaria mellea",
+      search_name: "Armillaria mellea D.C.",
+      real_search_name: "Armillaria mellea D.C.",
+      sort_name: "Armillaria mellea  D.C.",
+      display_name: "**__Armillaria mellea__** D.C.",
+      parent_name: "Armillaria",
+      rank: :Species,
+      author: "D.C."
+    )
+  end
+
   def test_name_parse_comb
     do_name_parse_test(
       "Sebacina schweinitzii comb prov",

@@ -485,6 +485,7 @@ class Name < AbstractModel
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
       delete("\u2028"). # Unicode RLE that we see occasionally as line separator
+      gsub(/\s+/, " ").
       strip_squeeze
   end
 
