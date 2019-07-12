@@ -44,7 +44,7 @@ module ObservationReport
         row.species,
         row.form_or_variety_or_subspecies,
         *collector_and_number(row),
-        row.obs_specimen ? "vouchered" : nil,
+        disposition(row),
         row.obs_when,
         row.year,
         row.month,
@@ -106,6 +106,18 @@ module ObservationReport
       "#{MO.http_domain}/images/orig/#{id}.jpg"
     end
 
+    def disposition(row)
+      return nil unless row.obs_specimen
+
+      str = row.val(3).to_s.split("\n").map do |val|
+        inst, num = val.split("\t")
+        num.blank? ? inst : "#{inst} #{num.tr(";", ",")}"
+      end.join("; ")
+      return str if str.present?
+
+      return "vouchered"
+    end
+
     def sort_before(rows)
       rows.sort_by(&:obs_id)
     end
@@ -113,6 +125,7 @@ module ObservationReport
     def extend_data!(rows)
       add_image_ids!(rows, 1)
       add_collector_ids!(rows, 2)
+      add_herbarium_accession_numbers!(rows, 3)
     end
   end
 end

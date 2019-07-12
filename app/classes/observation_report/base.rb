@@ -151,6 +151,23 @@ module ObservationReport
       add_column!(rows, vals, col)
     end
 
+    def add_herbarium_accession_numbers!(rows, col)
+      vals = HerbariumRecord.connection.select_rows %(
+        SELECT ho.observation_id,
+          GROUP_CONCAT(DISTINCT CONCAT(h.code, "\t", hr.accession_number)
+                       SEPARATOR "\n")
+        FROM herbarium_records_observations ho,
+          herbarium_records hr,
+          herbaria h
+        WHERE ho.herbarium_record_id = hr.id AND
+          h.id = hr.herbarium_id AND
+          h.code != "" AND
+          ho.observation_id IN (#{plain_query})
+        GROUP BY ho.observation_id
+      )
+      add_column!(rows, vals, col)
+    end
+
     def add_collector_ids!(rows, col)
       vals = CollectionNumber.connection.select_rows %(
         SELECT co.observation_id,
