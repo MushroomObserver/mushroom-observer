@@ -22,25 +22,36 @@ class GlossaryController < ApplicationController
 
   def create_glossary_term # :norobots:
     if request.method == "POST"
-      glossary_term = GlossaryTerm.
-                      new(user: @user, name: params[:glossary_term][:name],
-                          description: params[:glossary_term][:description])
-      image_args = {
-        copyright_holder: params[:copyright_holder],
-        when: Time.local(params[:date][:copyright_year]),
-        license: License.safe_find(params[:upload][:license_id]),
-        user: @user,
-        image: params[:glossary_term][:upload_image]
-      }
-      glossary_term.add_image(process_image(image_args))
-      glossary_term.save
-      redirect_to(action: "show_glossary_term", id: glossary_term.id)
+      glossary_term_post
     else
-      @copyright_holder = @user.name
-      @copyright_year = Time.now.year
-      @upload_license_id = @user.license_id
-      @licenses = License.current_names_and_ids(@user.license)
+      glossary_term_get
     end
+  end
+
+  def glossary_term_get
+    @copyright_holder = @user.name
+    @copyright_year = Time.now.utc.year
+    @upload_license_id = @user.license_id
+    @licenses = License.current_names_and_ids(@user.license)
+  end
+
+  def glossary_term_post
+    glossary_term = \
+      GlossaryTerm.new(user: @user, name: params[:glossary_term][:name],
+                       description: params[:glossary_term][:description])
+    glossary_term.add_image(process_image(image_args))
+    glossary_term.save
+    redirect_to(action: "show_glossary_term", id: glossary_term.id)
+  end
+
+  def image_args
+    {
+      copyright_holder: params[:copyright_holder],
+      when: Time.local.utc(params[:date][:copyright_year]),
+      license: License.safe_find(params[:upload][:license_id]),
+      user: @user,
+      image: params[:glossary_term][:upload_image]
+    }
   end
 
   def process_image(args)

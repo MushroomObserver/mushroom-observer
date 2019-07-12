@@ -1,10 +1,15 @@
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
-  belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
+  belongs_to(:thumb_image,
+             class_name: "Image",
+             foreign_key: "thumb_image_id",
+             inverse_of: :best_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
-  has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
+  has_many(:images,
+           -> { order(vote_cache: :desc) },
+           through: :glossary_terms_images)
 
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
