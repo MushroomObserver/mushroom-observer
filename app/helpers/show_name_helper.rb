@@ -24,45 +24,60 @@ module ShowNameHelper
 
   # link to a search for Observations of this taxon (under any name) + count
   def taxon_observations(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_of_taxon.t)
+    link_to_obss_of(obss_of_taxon(name), :obss_of_taxon.t)
+  end
+
+  # defined in order to test separately
+  def obss_of_taxon(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 by: :confidence)
   end
 
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         exclude_original_names: true,
-                         by: :confidence)
-    link_to_obss_of(query, :taxon_obss_other_names.t)
+    link_to_obss_of(obss_of_taxon_other_names(name), :taxon_obss_other_names.t)
+  end
+
+  def obss_of_taxon_other_names(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 exclude_original_names: true,
+                 by: :confidence)
   end
 
   # link to a search for observations where this taxon was proposed + count
   # (but is not the consensus)
   def taxon_proposed(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         include_nonconsensus: true,
-                         exclude_consensus: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_taxon_proposed.t)
+    link_to_obss_of(obss_other_taxa_this_taxon_proposed(name),
+                    :obss_taxon_proposed.t)
+  end
+
+  def obss_other_taxa_this_taxon_proposed(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 include_nonconsensus: true,
+                 exclude_consensus: true,
+                 by: :confidence)
   end
 
   # link to a search for observations where this name was proposed + count
   # (but this taxon is not the consensus)
   def name_proposed(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: false,
-                         include_nonconsensus: true,
-                         exclude_consensus: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_name_proposed.t)
+    link_to_obss_of(obss_other_taxa_this_name_proposed(name),
+                    :obss_name_proposed.t)
+  end
+
+  def obss_other_taxa_this_name_proposed(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: false,
+                 include_nonconsensus: true,
+                 exclude_consensus: true,
+                 by: :confidence)
   end
 
   # array of lines for other accepted synonyms, each line comprising
@@ -117,3 +132,4 @@ module ShowNameHelper
     ) + " (#{count})"
   end
 end
+
