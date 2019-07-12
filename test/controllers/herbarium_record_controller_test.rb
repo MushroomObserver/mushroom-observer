@@ -7,7 +7,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
       herbarium_record: {
         herbarium_name: rolf.preferred_herbarium.auto_complete_name,
         initial_det: "Strobilurus diminutivus det. Rolf Singer",
-        accession_number: "NYBG 1234567",
+        accession_number: "1234567",
         notes: "Some notes about this herbarium record"
       }
     }

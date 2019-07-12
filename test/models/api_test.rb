@@ -963,9 +963,9 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(initial_det_has: "coprinus"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where(accession_number: "NYBG 1234")
+    recs = HerbariumRecord.where(accession_number: "1234")
     assert_not_empty(recs)
-    assert_api_pass(params.merge(accession_number: "NYBG 1234"))
+    assert_api_pass(params.merge(accession_number: "1234"))
     assert_api_results(recs)
 
     recs = HerbariumRecord.where("accession_number LIKE '%nybg%'")

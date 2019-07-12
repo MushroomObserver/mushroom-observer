@@ -1775,14 +1775,14 @@ class ObserverControllerTest < FunctionalTestCase
       { observation: { specimen: "1" },
         herbarium_record: {
           herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
-          herbarium_id: "NYBG 1234"
+          herbarium_id: "1234"
         },
         name: { name: "Cortinarius sp." } },
       0, 0, 0
     )
     assert_input_value(:herbarium_record_herbarium_name,
                        "NY - The New York Botanical Garden")
-    assert_input_value(:herbarium_record_herbarium_id, "NYBG 1234")
+    assert_input_value(:herbarium_record_herbarium_id, "1234")
   end
 
   def test_create_observation_with_herbarium_no_id
