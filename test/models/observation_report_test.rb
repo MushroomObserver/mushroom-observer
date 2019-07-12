@@ -268,7 +268,7 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Raw, obs, expect, &:id)
   end
 
-  def test_symbiota
+  def test_symbiota1
     obs = observations(:detailed_unknown_obs)
     obs.notes = {
       Substrate: "wood\tchips",
@@ -314,7 +314,7 @@ class ObservationReportTest < UnitTestCase
     do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
   end
 
-  def test_symbiota
+  def test_symbiota2
     obs = observations(:agaricus_campestrus_obs)
     expect = [
       "Agaricus campestrus",
