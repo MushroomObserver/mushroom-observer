@@ -250,7 +250,7 @@ class NameControllerTest < FunctionalTestCase
     get(:show_name, id: names(:agaricus_campestris).id)
     assert_template(:show_name, partial: "_name")
     # Needs new queries this time.
-    assert_equal(6, QueryRecord.count)
+    assert_equal(5, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show_name, id: names(:agaricus).id)

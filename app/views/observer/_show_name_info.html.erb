@@ -36,10 +36,6 @@
     <%= # Observations of taxon (under any name)
     content_tag(:p, taxon_observations(name)) %>
 
-    <%= # Observations of other taxa where this name was proposed
-      content_tag(:p,
-        name_proposed(name) || "#{:obss_name_proposed.t} (0)") %>
-
     <%= # Observations of other taxa where this taxon was proposed
       content_tag(:p,
         taxon_proposed(name) || "#{:obss_taxon_proposed.t} (0)") %>

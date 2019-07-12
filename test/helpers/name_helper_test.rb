@@ -71,7 +71,6 @@ class NameHelperTest < ActionView::TestCase
                   user: user)
 
     # Now test the Query's
-
     results = obss_of_taxon(nam).results
     assert results.include?(nam_proposed_and_consensus)
     assert results.include?(nam_proposed_syn_is_consensus)
@@ -86,14 +85,6 @@ class NameHelperTest < ActionView::TestCase
     assert results.include?(syn_proposed_and_consensus)
     assert results.exclude?(syn_proposed_nam_is_consensus)
     assert results.exclude?(nam_proposed_other_taxon_is_consensus)
-    assert results.exclude?(syn_proposed_other_taxon_is_consensus)
-
-    results = obss_other_taxa_this_name_proposed(nam).results
-    assert results.exclude?(nam_proposed_and_consensus)
-    assert results.exclude?(nam_proposed_syn_is_consensus)
-    assert results.exclude?(syn_proposed_and_consensus)
-    assert results.exclude?(syn_proposed_nam_is_consensus)
-    assert results.include?(nam_proposed_other_taxon_is_consensus)
     assert results.exclude?(syn_proposed_other_taxon_is_consensus)
 
     results = obss_other_taxa_this_taxon_proposed(nam).results

@@ -64,22 +64,6 @@ module ShowNameHelper
                  by: :confidence)
   end
 
-  # link to a search for observations where this name was proposed + count
-  # (but this taxon is not the consensus)
-  def name_proposed(name)
-    link_to_obss_of(obss_other_taxa_this_name_proposed(name),
-                    :obss_name_proposed.t)
-  end
-
-  def obss_other_taxa_this_name_proposed(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 include_synonyms: false,
-                 include_nonconsensus: true,
-                 exclude_consensus: true,
-                 by: :confidence)
-  end
-
   # array of lines for other accepted synonyms, each line comprising
   # link to observations of synonym and a count of those observations
   #   Chlorophyllum rachodes (Vittadini) Vellinga (96)
