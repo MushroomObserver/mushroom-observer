@@ -47,7 +47,7 @@ class GlossaryController < ApplicationController
   def image_args
     {
       copyright_holder: params[:copyright_holder],
-      when: Time.local.utc(params[:date][:copyright_year]),
+      when: Time.local(params[:date][:copyright_year]).utc,
       license: License.safe_find(params[:upload][:license_id]),
       user: @user,
       image: params[:glossary_term][:upload_image]
