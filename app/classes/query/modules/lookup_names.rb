@@ -91,7 +91,7 @@ module Query
       def find_matching_names(name)
         parse = Name.parse_name(name)
         name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-        matches = Name.where(search_name: name2) if parse.author.present?
+        matches = Name.where(search_name: name2) if parse&.author.present?
         matches = Name.where(text_name: name2) if matches.empty?
         matches.map { |name3| minimal_name_data(name3) }
       end

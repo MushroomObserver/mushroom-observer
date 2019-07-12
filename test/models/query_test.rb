@@ -3226,6 +3226,10 @@ class QueryTest < UnitTestCase
                                 exclude_original_names: true)
   end
 
+  def test_lookup_names_by_name4
+    assert_lookup_names_by_name([], names: ["¡not a name!"])
+  end
+
   def create_test_name(name)
     name = Name.new_name(Name.parse_name(name).params)
     name.save
