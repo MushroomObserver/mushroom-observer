@@ -38,7 +38,9 @@ module Query
         add_join(:observations, :namings) if params[:include_nonconsensus]
         return unless params[:exclude_consensus]
 
-        where << "namings.name_id != observations.name_id"
+        column = "observations.name_id"
+        add_not_id_condition(column, lookup_names_by_name(names_parameters),
+                             *joins)
       end
 
       def initialize_name_parameters_for_name_queries

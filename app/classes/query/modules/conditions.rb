@@ -84,6 +84,14 @@ module Query
         add_joins(*joins)
       end
 
+      def add_not_id_condition(col, ids, *joins)
+        return if ids.nil?
+
+        set = clean_id_set(ids)
+        @where << "#{col} NOT IN (#{set})"
+        add_joins(*joins)
+      end
+
       def add_where_condition(table, vals, *joins)
         return if vals.empty?
 
