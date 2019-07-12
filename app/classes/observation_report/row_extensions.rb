@@ -168,7 +168,7 @@ module ObservationReport
     end
 
     def split_name
-      name = name_text_name
+      name = name_text_name.dup
       cf = name.sub!(/ cfr?\.( |$)/, "\\1") ? "cf." : nil
       gen, sp, ssp, var, f = split_name_string(name)
       sp_auth, ssp_auth, var_auth, f_auth = which_author(sp)
