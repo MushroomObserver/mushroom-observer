@@ -110,8 +110,8 @@ module ObservationReport
       return nil unless row.obs_specimen
 
       str = row.val(3).to_s.split("\n").map do |val|
-        inst, num = val.split("\t")
-        num.blank? ? inst : "#{inst} #{num.tr(";", ",")}"
+        # ignore accession number because our data is garbage
+        val.split("\t").first
       end.join("; ")
       return str if str.present?
 

@@ -287,7 +287,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "Mary Newbie",
       "174",
-      "NY 1234",
+      "NY",
       "2006-05-11",
       "2006",
       "5",
