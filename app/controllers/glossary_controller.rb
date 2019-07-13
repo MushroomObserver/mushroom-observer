@@ -63,21 +63,25 @@ class GlossaryController < ApplicationController
         upload.respond_to?(:original_filename)
 
       image = Image.new(args)
-      if !image.save
-        flash_object_errors(image)
-      elsif !image.process_image
-        logger.error("Unable to upload image")
-        name = image.original_name
-        name = "???" if name.empty?
-        flash_error(:runtime_image_invalid_image.t(name: name))
-        flash_object_errors(image)
-      else
-        name = image.original_name
-        name = "##{image.id}" if name.empty?
-        flash_notice(:runtime_image_uploaded_image.t(name: name))
-      end
+      save_or_flash(image)
     end
     image
+  end
+
+  def save_or_flash(image)
+    if !image.save
+      flash_object_errors(image)
+    elsif !image.process_image
+      logger.error("Unable to upload image")
+      name = image.original_name
+      name = "???" if name.empty?
+      flash_error(:runtime_image_invalid_image.t(name: name))
+      flash_object_errors(image)
+    else
+      name = image.original_name
+      name = "##{image.id}" if name.empty?
+      flash_notice(:runtime_image_uploaded_image.t(name: name))
+    end
   end
 
   def edit_glossary_term # :norobots:
