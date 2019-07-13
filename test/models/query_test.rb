@@ -2724,16 +2724,11 @@ class QueryTest < UnitTestCase
   def test_observation_of_name
     User.current = rolf
     names = Name.where("text_name like 'Agaricus camp%'").to_a
+    agaricus_ssp = names.clone
     name = names.pop
     names.each { |n| name.merge_synonyms(n) }
     observations(:agaricus_campestras_obs).update(user: mary)
     observations(:agaricus_campestros_obs).update(user: mary)
-    spl = species_lists(:first_species_list)
-    spl.observations << observations(:agaricus_campestrus_obs)
-    spl.observations << observations(:agaricus_campestros_obs)
-    proj = projects(:eol_project)
-    proj.observations << observations(:agaricus_campestris_obs)
-    proj.observations << observations(:agaricus_campestras_obs)
 
     assert_query(Observation.where(name: names(:fungi)),
                  :Observation, :all, names: [names(:fungi).id])
@@ -2765,6 +2760,25 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_nonconsensus: true)
+
+    spl = species_lists(:first_species_list)
+    spl.observations << observations(:agaricus_campestrus_obs)
+    spl.observations << observations(:agaricus_campestros_obs)
+    proj = projects(:eol_project)
+    proj.observations << observations(:agaricus_campestris_obs)
+    proj.observations << observations(:agaricus_campestras_obs)
+
+    assert_query([observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestros_obs).id],
+                 :Observation, :all,
+                 names: agaricus_ssp.map(&:text_name),
+                 species_lists: [spl.title])
+
+    assert_query([observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestras_obs).id],
+                 :Observation, :all,
+                 names: agaricus_ssp.map(&:text_name),
+                 projects: [proj.title])
   end
 
   def test_observation_pattern_search
