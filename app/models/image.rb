@@ -229,7 +229,7 @@ class Image < AbstractModel
            class_name: "GlossaryTerm",
            foreign_key: "thumb_image_id",
            inverse_of: :thumb_image)
-  
+
   has_many :copyright_changes, as: :target, dependent: :destroy
 
   before_destroy :update_thumbnails
