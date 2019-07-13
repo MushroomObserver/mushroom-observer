@@ -10,6 +10,7 @@ module PatternSearch
 
       # names
       name: [:names, :parse_list_of_names],
+      exclude_consensus: [:exclude_consensus, :parse_boolean],
       include_subtaxa: [:include_subtaxa, :parse_boolean],
       include_synonyms: [:include_synonyms, :parse_boolean],
       include_nonconsensus: [:include_nonconsensus, :parse_boolean],

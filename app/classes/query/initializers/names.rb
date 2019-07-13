@@ -38,9 +38,14 @@ module Query
         add_join(:observations, :namings) if params[:include_nonconsensus]
         return unless params[:exclude_consensus]
 
-        column = "observations.name_id"
-        add_not_id_condition(column, lookup_names_by_name(names_parameters),
-                             *joins)
+        if params[:include_nonconsensus]
+          column = "observations.name_id"
+          add_not_id_condition(column, lookup_names_by_name(names_parameters),
+                               *joins)
+        else
+          raise ":exclude_consensus cannot be used without also using "\
+                ":include_nonconsensus"
+        end
       end
 
       def initialize_name_parameters_for_name_queries
