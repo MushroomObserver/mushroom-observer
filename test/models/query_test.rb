@@ -1,5 +1,8 @@
-# rubocop:disable Style/FrozenStringLiteralComment
-# disable cop because tests do modify string literals
+# rubocop:disable FrozenStringLiteralComment
+# Freezing string literals throws errors if the entire test suite is run. E.g.:
+# RuntimeError:         RuntimeError: can't modify frozen String
+#             ...
+#             test/models/query_test.rb:2446:in `test_name_with_observations'
 
 require "test_helper"
 require "set"
@@ -897,8 +900,6 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  # rubocop:disable Naming/VariableName
-  # RuboCop gives false positives here
   def test_observation_image_coercion
     # Several observation queries can be turned into image queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
@@ -1257,7 +1258,6 @@ class QueryTest < UnitTestCase
     assert_equal(q3a, q3c)
     assert_equal(q4a, q4c)
   end
-  # rubocop:enable Naming/VariableName
 
   def test_rss_log_coercion
     # The site index's default RssLog query should be coercable into queries on
@@ -2707,8 +2707,8 @@ class QueryTest < UnitTestCase
   def test_observation_in_species_list
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
-                  observations(:minimal_unknown_obs).id], :Observation,
-                 :in_species_list,
+                  observations(:minimal_unknown_obs).id],
+                 :Observation, :in_species_list,
                  species_list: species_lists(:unknown_species_list).id)
   end
 
@@ -2734,8 +2734,57 @@ class QueryTest < UnitTestCase
                  :Observation, :all, names: [names(:fungi).id])
     assert_query([],
                  :Observation, :all, names: [names(:macrolepiota_rachodes).id])
+
+    # test all truthy/falsy combinations of these boolean parameters:
+    #  include_synonyms, include_nonconsensus, exclude_consensus
+
+    # observations where name(s) is consensus
     assert_query([observations(:agaricus_campestris_obs).id],
-                 :Observation, :all, names: [names(:agaricus_campestris).id])
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: false,
+                 include_nonconsensus: false,
+                 exclude_consensus: false)
+
+    # name(s) is consensus, but is not the consensus
+    # an oxymoron
+    assert_query([],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: false,
+                 include_nonconsensus: false,
+                 exclude_consensus: true)
+
+    # name(s) is proposed
+    assert_query([observations(:agaricus_campestris_obs).id,
+                  observations(:coprinus_comatus_obs).id],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: false,
+                 include_nonconsensus: true,
+                 exclude_consensus: false)
+
+    # name(s) is proposed, but is not the consensus
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: false,
+                 include_nonconsensus: true,
+                 exclude_consensus: true)
+
+    # consensus is a synonym of name(s)
+    assert_query([observations(:agaricus_campestros_obs).id,
+                  observations(:agaricus_campestras_obs).id,
+                  observations(:agaricus_campestrus_obs).id,
+                  observations(:agaricus_campestris_obs).id],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: true,
+                 include_nonconsensus: false,
+                 exclude_consensus: false)
+
+    # same as above but exclude_original_names
+    # conensus is a synonym of name(s) other than name(s)
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestrus_obs).id],
@@ -2743,23 +2792,35 @@ class QueryTest < UnitTestCase
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: true,
                  exclude_original_names: true)
+
+    # consensus is a synonym of name(s) but not a synonym of name(s)
+    # an oxymoron
+    assert_query([],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestras).id],
+                 include_synonyms: true,
+                 include_nonconsensus: false,
+                 exclude_consensus: true)
+
+    # where synonyms of names are proposed
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestrus_obs).id,
-                  observations(:agaricus_campestris_obs).id],
-                 :Observation, :all,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true)
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, :all,
-                 names: [names(:agaricus_campestris).id],
-                 include_nonconsensus: true,
-                 exclude_consensus: true)
-    assert_query([observations(:agaricus_campestris_obs).id,
+                  observations(:agaricus_campestris_obs).id,
                   observations(:coprinus_comatus_obs).id],
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
-                 include_nonconsensus: true)
+                 include_synonyms: true,
+                 include_nonconsensus: true,
+                 exclude_consensus: false)
+
+    # where synonyms of name are proposed, but are not the consensus
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestras).id],
+                 include_synonyms: true,
+                 include_nonconsensus: true,
+                 exclude_consensus: true)
 
     spl = species_lists(:first_species_list)
     spl.observations << observations(:agaricus_campestrus_obs)
