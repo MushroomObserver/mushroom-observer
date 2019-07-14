@@ -5,20 +5,21 @@ use strict;
 my $TIME_THRESHOLD = 500;
 my $DB_THRESHOLD   = 250;
 
-$_ = `date`;
-my $last_hour = $1 if /(\d\d):\d\d:\d\d/;
-$last_hour = $last_hour == 0 ? 23 : $last_hour - 1;
+my $START = `date -d "1 hour ago" "+%Y-%m-%dT%H"`;
+my $END   = `date "+%Y-%m-%dT%H"`;
 
 my %DATA;
 my %hash;
 while (<>) {
   chomp;
-  my ($hour, $pid) = ($1, $2) if /^.. .\d+-\d+-\d+T(\d+):\d+:\d+.\d+ #(\d+)/;
-  $hash{$pid}{'hour'} = $hour;
+  my ($time, $pid) = ($1, $2) if /^.. .(\d+-\d+-\d+T\d+:\d+:\d+.\d+) #(\d+)/;
+  $hash{$pid}{'time'} = $time;
   if (/INFO -- : Started ([A-Z]+) "(.*)" for (\d+\.\d+\.\d+\.\d+)/) {
     if ($hash{$pid}) {
-      push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
-        if $hash{$pid}{'hour'} == $last_hour;
+      if ($hash{$pid}{'time'} ge $START &&
+          $hash{$pid}{'time'} lt $END) {
+        push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
+      }
       delete $hash{$pid};
     }
     $hash{$pid}{'method'} = $1;
@@ -38,8 +39,10 @@ while (<>) {
     $hash{$pid}{'total'} = $1 / 1000;
     $hash{$pid}{'views'} = $2 / 1000;
     $hash{$pid}{'db'}    = $3 / 1000;
-    push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
-      if $hash{$pid}{'hour'} == $last_hour;
+    if ($hash{$pid}{'time'} ge $START &&
+        $hash{$pid}{'time'} lt $END) {
+      push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
+    }
     delete $hash{$pid};
   }
 }
