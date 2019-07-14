@@ -1,0 +1,87 @@
+#!/usr/bin/env perl
+use strict;
+
+# In seconds.
+my $TIME_THRESHOLD = 500;
+my $DB_THRESHOLD   = 250;
+
+$_ = `date`;
+my $last_hour = $1 if /(\d\d):\d\d:\d\d/;
+$last_hour = $last_hour == 0 ? 23 : $last_hour - 1;
+
+my %DATA;
+my %hash;
+while (<>) {
+  chomp;
+  my ($hour, $pid) = ($1, $2) if /^.. .\d+-\d+-\d+T(\d+):\d+:\d+.\d+ #(\d+)/;
+  $hash{$pid}{'hour'} = $hour;
+  if (/INFO -- : Started ([A-Z]+) "(.*)" for (\d+\.\d+\.\d+\.\d+)/) {
+    if ($hash{$pid}) {
+      push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
+        if $hash{$pid}{'hour'} == $last_hour;
+      delete $hash{$pid};
+    }
+    $hash{$pid}{'method'} = $1;
+    $hash{$pid}{'url'} = $2;
+    $hash{$pid}{'ip'}  = $3;
+  } elsif (/INFO -- : Processing by (\S+)/) {
+    $hash{$pid}{'action'} = $1;
+  } elsif (/WARN -- : user=(\d+)robot=(.)/) {
+    $hash{$pid}{'user'}  = $1;
+    $hash{$pid}{'robot'} = $2;
+  } elsif (/WARN -- : TIME: (\S+)/) {
+    $hash{$pid}{'total'} = $1;
+    my $ua = $_;
+    $ua =~ s/.*\t//;
+    $hash{$pid}{'ua'} = $ua;
+  } elsif (/INFO -- : Completed .* ([\d\.]+)ms .*Views: ([\d\.]+)ms .*ActiveRecord: ([\d\.]+)ms/) {
+    $hash{$pid}{'total'} = $1 / 1000;
+    $hash{$pid}{'views'} = $2 / 1000;
+    $hash{$pid}{'db'}    = $3 / 1000;
+    push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
+      if $hash{$pid}{'hour'} == $last_hour;
+    delete $hash{$pid};
+  }
+}
+
+my %time;
+foreach my $ip (keys %DATA) {
+  my $time;
+  foreach (@{$DATA{$ip}}) {
+    $time += $$_{'total'};
+  }
+  $time{$ip} = $time;
+}
+
+foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
+  my $list = $DATA{$ip};
+  my $num  = @$list;
+  my ($time, $db, %ua, %user, %robot);
+  foreach (@$list) {
+    $time += $$_{'total'};
+    $db   += $$_{'db'};
+    $ua{$$_{'ua'}}++;
+    $user{$$_{'user'}}++;
+    $robot{$$_{'robot'}}++;
+  }
+  next if $time < $TIME_THRESHOLD && $db < $DB_THRESHOLD;
+  my $ua    = (sort { $ua{$b} <=> $ua{$a} } keys %ua)[0];
+  my $user  = (sort { $user{$b} <=> $user{$a} } keys %user)[0];
+  my $robot = (sort { $robot{$b} <=> $robot{$a} } keys %robot)[0];
+  $ua    = 'various' if $ua{$ua} < $num / 2;
+  $user  = 'various' if $user{$user} < $num / 2;
+  $robot = 'various' if $robot{$robot} < $num / 2;
+  $time = int($time + 0.5);
+  $db   = int($db   + 0.5);
+  print "$ip num=$num total=${time} db=${db} user=$user robot=$robot ua=$ua\n";
+  my $i = 0;
+  foreach ((sort {
+            $$b{'time'} + $$b{'db'} <=> $$a{'time'} + $$a{'db'}
+           } @$list)) {
+    print "  $$_{'method'} $$_{'url'} total=$$_{'total'} db=$$_{'db'} views=$$_{'views'}\n";
+    last if ++$i == 10;
+  }
+  print "\n";
+}
+
+exit 0;
