@@ -3196,6 +3196,7 @@
   observation_term_created: Date observation was first posted.
   observation_term_modified: Date observation was last modified.
   observation_term_name: Consensus name is one of these names.
+  observation_term_exclude_consensus: "Exclude Observations whose consensus is a name listed in the values for [:observation_term_name]. (Must be used in conjunction with [:observation_term_include_nonconsensus].)"
   observation_term_include_nonconsensus: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
