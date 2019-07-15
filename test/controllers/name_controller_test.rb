@@ -238,19 +238,19 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(0, QueryRecord.count)
     get_with_dump(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
-    # Creates two for children and all four observations sections,
+    # Creates three for children and all four observations sections,
     # but one never used.
-    assert_equal(2, QueryRecord.count)
+    assert_equal(3, QueryRecord.count)
 
     get(:show_name, id: names(:coprinus_comatus).id)
     assert_template(:show_name, partial: "_name")
     # Should re-use all the old queries.
-    assert_equal(2, QueryRecord.count)
+    assert_equal(3, QueryRecord.count)
 
     get(:show_name, id: names(:agaricus_campestris).id)
     assert_template(:show_name, partial: "_name")
     # Needs new queries this time.
-    assert_equal(5, QueryRecord.count)
+    assert_equal(7, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show_name, id: names(:agaricus).id)
