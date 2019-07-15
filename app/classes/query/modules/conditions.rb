@@ -171,6 +171,10 @@ module Query
         add_joins(*joins)
       end
 
+      def add_false_condition(col)
+        @where << "#{col} = FALSE"
+      end
+
       ##########################################################################
 
       private

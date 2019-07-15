@@ -32,25 +32,37 @@ module Query
       end
 
       def initialize_name_parameters(*joins)
-        table = params[:include_nonconsensus] ? "namings" : "observations"
-        column = "#{table}.name_id"
-        add_id_condition(column, lookup_names_by_name(names_parameters), *joins)
-        add_join(:observations, :namings) if params[:include_nonconsensus]
-        return unless params[:exclude_consensus]
+        if irreconcilable_name_parameters?
+          force_empty_results_without_instantiating_objects
+        else
+          table = params[:include_nonconsensus] ? "namings" : "observations"
+          column = "#{table}.name_id"
+          add_id_condition(column, lookup_names_by_name(names_parameters),
+                           *joins)
+          add_join(:observations, :namings) if params[:include_nonconsensus]
+          return unless params[:exclude_consensus]
 
-        if params[:include_nonconsensus]
           column = "observations.name_id"
           add_not_id_condition(column, lookup_names_by_name(names_parameters),
                                *joins)
-        else
-          raise ":exclude_consensus cannot be used without also using "\
-                ":include_nonconsensus"
         end
       end
 
       def initialize_name_parameters_for_name_queries
         # Much simpler form for non-observation-based name queries.
         add_id_condition("names.id", lookup_names_by_name(names_parameters))
+      end
+
+      # ------------------------------------------------------------------------
+
+      private
+
+      def irreconcilable_name_parameters?
+        params[:exclude_consensus] && !params[:include_nonconsensus]
+      end
+
+      def force_empty_results_without_instantiating_objects
+        add_false_condition("observations.name_id")
       end
     end
   end

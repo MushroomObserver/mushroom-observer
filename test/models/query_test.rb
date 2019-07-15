@@ -2745,16 +2745,13 @@ class QueryTest < UnitTestCase
                  include_nonconsensus: false,
                  exclude_consensus: false)
 
-    # name(s) is consensus, but is not the consensus
-    # an oxymoron
-    assert_raises(RuntimeError) do
-      assert_query([],
-                   :Observation, :all,
-                   names: [names(:agaricus_campestris).id],
-                   include_synonyms: false,
-                   include_nonconsensus: false,
-                   exclude_consensus: true)
-    end
+    # name(s) is consensus, but is not the consensus (an oxymoron)
+    assert_query([],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestris).id],
+                 include_synonyms: false,
+                 include_nonconsensus: false,
+                 exclude_consensus: true)
 
     # name(s) is proposed
     assert_query([observations(:agaricus_campestris_obs).id,
@@ -2794,16 +2791,13 @@ class QueryTest < UnitTestCase
                  include_synonyms: true,
                  exclude_original_names: true)
 
-    # consensus is a synonym of name(s) but not a synonym of name(s)
-    # an oxymoron
-    assert_raises(RuntimeError) do
-      assert_query([],
-                   :Observation, :all,
-                   names: [names(:agaricus_campestras).id],
-                   include_synonyms: true,
-                   include_nonconsensus: false,
-                   exclude_consensus: true)
-    end
+    # consensus is a synonym of name(s) but not a synonym of name(s) (oxymoron)
+    assert_query([],
+                 :Observation, :all,
+                 names: [names(:agaricus_campestras).id],
+                 include_synonyms: true,
+                 include_nonconsensus: false,
+                 exclude_consensus: true)
 
     # where synonyms of names are proposed
     assert_query([observations(:agaricus_campestros_obs).id,
