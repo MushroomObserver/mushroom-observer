@@ -27,7 +27,6 @@ module ShowNameHelper
     link_to_obss_of(obss_of_taxon(name), :obss_of_taxon.t)
   end
 
-  # defined in order to test separately
   def obss_of_taxon(name)
     Query.lookup(:Observation, :all,
                  names: name.id,
@@ -61,6 +60,19 @@ module ShowNameHelper
                  include_synonyms: true,
                  include_all_name_proposals: true,
                  exclude_consensus: true,
+                 by: :confidence)
+  end
+
+  # link to a search for observations where this name was proposed
+  def name_proposed(name)
+    link_to_obss_of(obss_this_name_proposed(name),
+                    :obss_name_proposed.t)
+  end
+
+  def obss_this_name_proposed(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_all_name_proposals: true,
                  by: :confidence)
   end
 

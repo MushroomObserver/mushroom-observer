@@ -73,7 +73,10 @@
               <%= # Observations of other taxa where this taxon was proposed
                 content_tag(:p,
                   taxon_proposed(@name) || "#{:obss_taxon_proposed.t} (0)") %>
-              <%= name_section_link(:show_subtaxa_obss.t,
+               <%= # Observations where this Nae was proposed
+                content_tag(:p,
+                  name_proposed(@name) || "#{:obss_name_proposed.t} (0)") %>
+             <%= name_section_link(:show_subtaxa_obss.t,
                                     @has_subtaxa, @subtaxa_query) %>
             </div>
           </div>
