@@ -16,7 +16,7 @@ module Query
 
       def consensus_parameter_declarations
         {
-          include_nonconsensus?: :boolean,
+          include_all_name_proposals?: :boolean,
           exclude_consensus?: :boolean
         }
       end
@@ -35,11 +35,11 @@ module Query
         if irreconcilable_name_parameters?
           force_empty_results_without_instantiating_objects
         else
-          table = params[:include_nonconsensus] ? "namings" : "observations"
+          table = params[:include_all_name_proposals] ? "namings" : "observations"
           column = "#{table}.name_id"
           add_id_condition(column, lookup_names_by_name(names_parameters),
                            *joins)
-          add_join(:observations, :namings) if params[:include_nonconsensus]
+          add_join(:observations, :namings) if params[:include_all_name_proposals]
           return unless params[:exclude_consensus]
 
           column = "observations.name_id"
@@ -58,7 +58,7 @@ module Query
       private
 
       def irreconcilable_name_parameters?
-        params[:exclude_consensus] && !params[:include_nonconsensus]
+        params[:exclude_consensus] && !params[:include_all_name_proposals]
       end
 
       def force_empty_results_without_instantiating_objects

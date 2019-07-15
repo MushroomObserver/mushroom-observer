@@ -2729,7 +2729,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all, names: [names(:macrolepiota_rachodes).id])
 
     # test all truthy/falsy combinations of these boolean parameters:
-    #  include_synonyms, include_nonconsensus, exclude_consensus
+    #  include_synonyms, include_all_name_proposals, exclude_consensus
     names = Name.where("text_name like 'Agaricus camp%'").to_a
     agaricus_ssp = names.clone
     name = names.pop
@@ -2742,7 +2742,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: false,
-                 include_nonconsensus: false,
+                 include_all_name_proposals: false,
                  exclude_consensus: false)
 
     # name(s) is consensus, but is not the consensus (an oxymoron)
@@ -2750,7 +2750,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: false,
-                 include_nonconsensus: false,
+                 include_all_name_proposals: false,
                  exclude_consensus: true)
 
     # name(s) is proposed
@@ -2759,7 +2759,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: false,
-                 include_nonconsensus: true,
+                 include_all_name_proposals: true,
                  exclude_consensus: false)
 
     # name(s) is proposed, but is not the consensus
@@ -2767,7 +2767,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: false,
-                 include_nonconsensus: true,
+                 include_all_name_proposals: true,
                  exclude_consensus: true)
 
     # consensus is a synonym of name(s)
@@ -2778,7 +2778,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: true,
-                 include_nonconsensus: false,
+                 include_all_name_proposals: false,
                  exclude_consensus: false)
 
     # same as above but exclude_original_names
@@ -2796,7 +2796,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestras).id],
                  include_synonyms: true,
-                 include_nonconsensus: false,
+                 include_all_name_proposals: false,
                  exclude_consensus: true)
 
     # where synonyms of names are proposed
@@ -2808,7 +2808,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestris).id],
                  include_synonyms: true,
-                 include_nonconsensus: true,
+                 include_all_name_proposals: true,
                  exclude_consensus: false)
 
     # where synonyms of name are proposed, but are not the consensus
@@ -2816,7 +2816,7 @@ class QueryTest < UnitTestCase
                  :Observation, :all,
                  names: [names(:agaricus_campestras).id],
                  include_synonyms: true,
-                 include_nonconsensus: true,
+                 include_all_name_proposals: true,
                  exclude_consensus: true)
 
     spl = species_lists(:first_species_list)

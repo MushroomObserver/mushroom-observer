@@ -13,7 +13,7 @@ module PatternSearch
       exclude_consensus: [:exclude_consensus, :parse_boolean],
       include_subtaxa: [:include_subtaxa, :parse_boolean],
       include_synonyms: [:include_synonyms, :parse_boolean],
-      include_nonconsensus: [:include_nonconsensus, :parse_boolean],
+      include_all_name_proposals: [:include_all_name_proposals, :parse_boolean],
 
       # strings / lists
       comments: [:comments_has, :parse_string],
@@ -69,7 +69,7 @@ module PatternSearch
       # Will rip out when we do away with pattern search query flavor.
       if flavor == :pattern_search &&
          (!args[:include_subtaxa].nil? || !args[:include_synonyms].nil? ||
-          !args[:include_nonconsensus].nil?)
+          !args[:include_all_name_proposals].nil?)
         self.flavor = :all
         args[:names] = args[:pattern]
         args.delete(:pattern)

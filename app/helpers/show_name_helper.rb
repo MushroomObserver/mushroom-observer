@@ -59,7 +59,7 @@ module ShowNameHelper
     Query.lookup(:Observation, :all,
                  names: name.id,
                  include_synonyms: true,
-                 include_nonconsensus: true,
+                 include_all_name_proposals: true,
                  exclude_consensus: true,
                  by: :confidence)
   end
