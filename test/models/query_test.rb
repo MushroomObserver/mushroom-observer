@@ -2723,13 +2723,6 @@ class QueryTest < UnitTestCase
 
   def test_observation_of_name
     User.current = rolf
-    names = Name.where("text_name like 'Agaricus camp%'").to_a
-    agaricus_ssp = names.clone
-    name = names.pop
-    names.each { |n| name.merge_synonyms(n) }
-    observations(:agaricus_campestras_obs).update(user: mary)
-    observations(:agaricus_campestros_obs).update(user: mary)
-
     assert_query(Observation.where(name: names(:fungi)),
                  :Observation, :all, names: [names(:fungi).id])
     assert_query([],
@@ -2737,6 +2730,12 @@ class QueryTest < UnitTestCase
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_nonconsensus, exclude_consensus
+    names = Name.where("text_name like 'Agaricus camp%'").to_a
+    agaricus_ssp = names.clone
+    name = names.pop
+    names.each { |n| name.merge_synonyms(n) }
+    observations(:agaricus_campestras_obs).update(user: mary)
+    observations(:agaricus_campestros_obs).update(user: mary)
 
     # observations where name(s) is consensus
     assert_query([observations(:agaricus_campestris_obs).id],
