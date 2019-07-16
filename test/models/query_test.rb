@@ -1,9 +1,3 @@
-# rubocop:disable FrozenStringLiteralComment
-# Freezing string literals throws errors if the entire test suite is run. E.g.:
-# RuntimeError:         RuntimeError: can't modify frozen String
-#             ...
-#             test/models/query_test.rb:2446:in `test_name_with_observations'
-
 require "test_helper"
 require "set"
 
@@ -3312,4 +3306,3 @@ class QueryTest < UnitTestCase
     assert_name_list_equal(expect, actual)
   end
 end
-# rubocop:enable Style/FrozenStringLiteralComment
