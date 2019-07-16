@@ -35,11 +35,18 @@ module Query
         if irreconcilable_name_parameters?
           force_empty_results_without_instantiating_objects
         else
-          table = params[:include_all_name_proposals] ? "namings" : "observations"
+          table = if params[:include_all_name_proposals]
+                    "namings"
+                  else
+                    "observations"
+                  end
           column = "#{table}.name_id"
           add_id_condition(column, lookup_names_by_name(names_parameters),
                            *joins)
-          add_join(:observations, :namings) if params[:include_all_name_proposals]
+
+          if params[:include_all_name_proposals]
+            add_join(:observations, :namings)
+          end
           return unless params[:exclude_consensus]
 
           column = "observations.name_id"

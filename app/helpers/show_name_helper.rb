@@ -128,4 +128,3 @@ module ShowNameHelper
     ) + " (#{count})"
   end
 end
-

@@ -3312,5 +3312,4 @@ class QueryTest < UnitTestCase
     assert_name_list_equal(expect, actual)
   end
 end
-
 # rubocop:enable Style/FrozenStringLiteralComment
