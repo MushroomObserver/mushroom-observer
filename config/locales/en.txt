@@ -1924,7 +1924,7 @@
   show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
   show_name_synonym_observations: Synonym [:OBSERVATIONS]
   show_name_other_observations: Similar [:OBSERVATIONS]
-  show_observations_of: "[:OBSERVATIONS]: of"
+  show_observations_of: "[:OBSERVATIONS] of:"
   obss_of_this_name: this name
   obss_of_taxon: this taxon, any name
   taxon_obss_other_names:  this taxon, other names
