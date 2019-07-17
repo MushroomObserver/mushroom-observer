@@ -172,7 +172,7 @@ module Query
       end
 
       def add_false_condition(col)
-        @where << "#{col} = FALSE"
+        @where = ["FALSE"]
       end
 
       ##########################################################################
