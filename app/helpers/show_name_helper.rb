@@ -3,7 +3,6 @@
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
   ######## links to searches
-
   # string of links to Names of any other non-deprecated synonyms
   def approved_syn_links(name)
     return if (approved_synonyms = name.other_approved_synonyms).blank?
