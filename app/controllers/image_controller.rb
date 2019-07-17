@@ -65,6 +65,11 @@ class ImageController < ApplicationController
 
   # Display matrix of images, most recent first.
   def list_images
+    if params[:page].to_s.to_i > 1000
+      render(status: 503, content_type: "text/plain", plain: "Your queries are killing our server. There are much better ways to scrape the images from our site. Please contact the webmaster.  And please stop hammering our server!")
+      return
+    end
+
     query = create_query(:Image, :all, by: :created_at)
     show_selected_images(query)
   end
