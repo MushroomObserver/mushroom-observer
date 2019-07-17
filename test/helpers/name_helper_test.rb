@@ -4,7 +4,6 @@ require "test_helper"
 
 # test the helpers for ObserverController
 class NameHelperTest < ActionView::TestCase
-
   # Prove that the Query's used under "Observations of" (in the
   # show_name_info area) return the correct Observations
   include ShowNameHelper # Query's are in that helper
