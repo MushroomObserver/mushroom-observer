@@ -5,9 +5,10 @@ use strict;
 my $TIME_THRESHOLD = 1000;
 my $DB_THRESHOLD   = 500;
 
-my $START = `date -d "1 hour ago" "+%Y-%m-%dT%H"`;
-my $END   = `date "+%Y-%m-%dT%H"`;
+my $START = `date -d "1 hour ago" "+%Y-%m-%dT%H:%M:%S"`;
+my $END   = `date "+%Y-%m-%dT%H:%M:%S"`;
 
+my %BLOCKED;
 my %DATA;
 my %hash;
 while (<>) {
@@ -44,9 +45,12 @@ while (<>) {
       push(@{$DATA{$hash{$pid}{'ip'}}}, $hash{$pid})
     }
     delete $hash{$pid};
+  } elsif (/BLOCKED (\d+\.\d+\.\d+\.\d+)/) {
+    $BLOCKED{$1}++;
   }
 }
 
+# Sum total time of each IP's requests, so we can sort the output by that.
 my %time;
 foreach my $ip (keys %DATA) {
   my $time;
@@ -57,6 +61,8 @@ foreach my $ip (keys %DATA) {
 }
 
 foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
+
+  # Gather stats for this IP.
   my $list = $DATA{$ip};
   my $num  = @$list;
   my ($time, $db, %ua, %user, %robot);
@@ -68,23 +74,43 @@ foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
     $robot{$$_{'robot'}}++;
   }
   next if $time < $TIME_THRESHOLD && $db < $DB_THRESHOLD;
+
+  # Show overall stats for this IP.
   my $ua    = (sort { $ua{$b} <=> $ua{$a} } keys %ua)[0];
   my $user  = (sort { $user{$b} <=> $user{$a} } keys %user)[0];
   my $robot = (sort { $robot{$b} <=> $robot{$a} } keys %robot)[0];
-  $ua    = 'various' if $ua{$ua} < $num / 2;
-  $user  = 'various' if $user{$user} < $num / 2;
-  $robot = 'various' if $robot{$robot} < $num / 2;
-  $time = int($time + 0.5);
-  $db   = int($db   + 0.5);
-  print "$ip num=$num total=${time} db=${db} user=$user robot=$robot ua=$ua\n";
+  $ua    = 'Googlebot' if $ua =~ /Googlebot/;
+  $ua    = 'various'   if $ua{$ua} < $num / 2;
+  $user  = 'various'   if $user{$user} < $num / 2;
+  $robot = 'various'   if $robot{$robot} < $num / 2;
+  $time  = int($time + 0.5);
+  $db    = int($db   + 0.5);
+  print STDERR "$ip num=$num total=${time} db=${db} user=$user robot=$robot ",
+               "ua=$ua\n";
+  (print STDERR "\n"), next if $ua eq 'Googlebot';
+
+  # Show most expensive queries made by this IP.
   my $i = 0;
   foreach ((sort {
             $$b{'time'} + $$b{'db'} <=> $$a{'time'} + $$a{'db'}
            } @$list)) {
-    print "  $$_{'method'} $$_{'url'} total=$$_{'total'} db=$$_{'db'} views=$$_{'views'}\n";
+    print STDERR "  $$_{'method'} $$_{'url'} total=$$_{'total'} db=$$_{'db'} ",
+                 "views=$$_{'views'}\n";
     last if ++$i == 10;
   }
-  print "\n";
+  print STDERR "\n";
+
+  # Add IP to block list.
+  print "$ip\n";
+  delete $BLOCKED{$ip};
+}
+
+# Continue blocking an IP as long as they make requests.  Once on the blocked
+# IP list, their requests will no longer be expensive, and therefore will no
+# longer surpass the threshold.  This would result in them being removed from
+# the blocked IP list even though they may still trying to make bad requests.
+foreach my $ip (sort keys %BLOCKED) {
+  print "$ip\n";
 }
 
 exit 0;

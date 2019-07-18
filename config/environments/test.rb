@@ -22,6 +22,7 @@ MushroomObserver::Application.configure do
   config.image_fallback_source = :remote1
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
+  config.blocked_ips_file = "#{config.root}/test/fixtures/blocked_ips.txt"
 
   config.water_users = []
   config.oil_users   = []
