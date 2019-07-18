@@ -8,6 +8,11 @@ class Robots
       @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end
 
+    def blocked?(ip)
+      populate_blocked_ips unless defined?(@@blocked_ips)
+      @@blocked_ips.include?(ip)
+    end
+
     def populate_allowed_robot_actions
       file = MO.robots_dot_text_file
       @@allowed_robot_actions = parse_robots_dot_text(file)
@@ -27,6 +32,17 @@ class Robots
         end
       end
       results
+    end
+
+    def populate_blocked_ips
+      file = MO.blocked_ips_file
+      @@blocked_ips = parse_blocked_ips(file)
+    end
+
+    def parse_blocked_ips(file)
+      return [] unless File.exist?(file)
+
+      File.open(file).readlines.map(&:chomp)
     end
   end
 end

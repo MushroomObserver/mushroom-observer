@@ -107,6 +107,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   around_action :catch_errors # if Rails.env == "test"
+  before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
@@ -153,6 +154,22 @@ class ApplicationController < ActionController::Base
     else
       block_given? ? yield(result) : result
     end
+  end
+
+  # Kick out agents responsible for excessive traffic.
+  def kick_out_excessive_traffic
+    return true unless Robots.blocked?(request.remote_ip)
+
+    logger.warn("BLOCKED #{request.remote_ip}")
+    render(plain: "We have noticed an excessive amount of server-intensive " \
+                  "traffic from this IP address.  Please contact the " \
+                  "webmaster (webmaster@mushroomobserver.org) to discuss " \
+                  "what you are trying to do.  There is almost certainly " \
+                  "a better, more respectful way of doing whatever you're " \
+                  "doing that won't overburden our server.",
+           status: 429,
+           layout: false)
+    false
   end
 
   # Physically eject robots unless they're looking at accepted pages.
