@@ -60,6 +60,7 @@ foreach my $ip (keys %DATA) {
   $time{$ip} = $time;
 }
 
+my @ERRORS;
 foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
 
   # Gather stats for this IP.
@@ -85,25 +86,28 @@ foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
   $ua    = 'Googlebot' if $ua =~ /Googlebot/;
   $time  = int($time + 0.5);
   $db    = int($db   + 0.5);
-  print STDERR "$ip num=$num total=${time} db=${db} user=$user robot=$robot ",
-               "ua=$ua\n";
-  (print STDERR "\n"), next if $ua eq 'Googlebot';
+  push(@ERRORS, "$ip num=$num total=${time} db=${db} user=$user robot=$robot ".
+                "ua=$ua\n");
+  push(@ERRORS, "\n"), next if $ua eq 'Googlebot';
 
   # Show most expensive queries made by this IP.
   my $i = 0;
   foreach ((sort {
             $$b{'time'} + $$b{'db'} <=> $$a{'time'} + $$a{'db'}
            } @$list)) {
-    print STDERR "  $$_{'method'} $$_{'url'} total=$$_{'total'} db=$$_{'db'} ",
-                 "views=$$_{'views'}\n";
+    push(@ERRORS, "  $$_{'method'} $$_{'url'} total=$$_{'total'} db=$$_{'db'} ".
+                  "views=$$_{'views'}\n");
     last if ++$i == 10;
   }
-  print STDERR "\n";
+  push(@ERRORS, "\n");
 
   # Add IP to block list.
   print "$ip\n";
   delete $BLOCKED{$ip};
 }
+
+# Only show errors if something other than Googlebot there.
+print STDERR @ERRORS if @ERRORS > 5;
 
 # Continue blocking an IP as long as they make requests.  Once on the blocked
 # IP list, their requests will no longer be expensive, and therefore will no
