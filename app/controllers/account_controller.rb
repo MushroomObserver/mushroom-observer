@@ -73,6 +73,7 @@ class AccountController < ApplicationController
     return if request.method != "POST"
 
     initialize_new_user
+    return if block_vemslons!
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
 
@@ -734,6 +735,15 @@ class AccountController < ApplicationController
     }.merge(params.require(:new_user).permit(:login, :name, :theme,
                                              :email, :email_confirmation,
                                              :password, :password_confirmation))
+  end
+
+  def block_vemslons!
+    return false unless @new_user.login.to_s.match(/Vemslons/)
+
+    render(status: 503,
+           content_type: "text/plain",
+           plain: "We grow weary of this.  Please go away.")
+    return true
   end
 
   def make_sure_theme_is_valid!
