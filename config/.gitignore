@@ -2,3 +2,4 @@ database.yml
 consts-site.rb
 test_locales
 mysql-production.cnf
+blocked_ips.txt
