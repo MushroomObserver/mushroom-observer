@@ -740,7 +740,7 @@ class AccountController < ApplicationController
   def block_vemslons!
     return false unless @new_user.login.to_s.match(/(Vemslons|Uplilla)$/)
 
-    render(status: 503,
+    render(status: 429,
            content_type: "text/plain",
            plain: "We grow weary of this.  Please go away.")
     return true
