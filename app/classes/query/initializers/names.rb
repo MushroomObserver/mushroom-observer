@@ -69,7 +69,7 @@ module Query
       end
 
       def force_empty_results_without_instantiating_objects
-        add_false_condition("observations.name_id")
+        add_false_condition
       end
     end
   end

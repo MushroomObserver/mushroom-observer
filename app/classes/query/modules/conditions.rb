@@ -171,7 +171,7 @@ module Query
         add_joins(*joins)
       end
 
-      def add_false_condition(col)
+      def add_false_condition
         @where = ["FALSE"]
       end
 
