@@ -79,10 +79,10 @@ foreach my $ip (sort { $time{$b} <=> $time{$a} } keys %DATA) {
   my $ua    = (sort { $ua{$b} <=> $ua{$a} } keys %ua)[0];
   my $user  = (sort { $user{$b} <=> $user{$a} } keys %user)[0];
   my $robot = (sort { $robot{$b} <=> $robot{$a} } keys %robot)[0];
-  $ua    = 'Googlebot' if $ua =~ /Googlebot/;
   $ua    = 'various'   if $ua{$ua} < $num / 2;
   $user  = 'various'   if $user{$user} < $num / 2;
   $robot = 'various'   if $robot{$robot} < $num / 2;
+  $ua    = 'Googlebot' if $ua =~ /Googlebot/;
   $time  = int($time + 0.5);
   $db    = int($db   + 0.5);
   print STDERR "$ip num=$num total=${time} db=${db} user=$user robot=$robot ",
