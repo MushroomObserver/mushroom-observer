@@ -738,7 +738,7 @@ class AccountController < ApplicationController
   end
 
   def block_vemslons!
-    return false unless @new_user.login.to_s.match(/Vemslons/)
+    return false unless @new_user.login.to_s.match(/(Vemslons|Uplilla)$/)
 
     render(status: 503,
            content_type: "text/plain",
