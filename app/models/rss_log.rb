@@ -65,8 +65,8 @@
 #
 #  Above is somewhat dated. Also:
 #  Inform model which events to log:
-#        self.autolog_events = [:created_at!, :updated_at!]
-#  Inform model how to display its name when logging created_at and destroyed
+#        self.autolog_events = [:created!, :updated!]
+#  Inform model how to display its name when logging created and destroyed
 #         def unique_format_name
 #         def format_name
 #
