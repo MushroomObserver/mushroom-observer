@@ -9,7 +9,7 @@ class Robots
     end
 
     def blocked?(ip)
-      populate_blocked_ips unless defined?(@@blocked_ips)
+      populate_blocked_ips unless blocked_ips_current?
       @@blocked_ips.include?(ip)
     end
 
@@ -34,8 +34,14 @@ class Robots
       results
     end
 
+    def blocked_ips_current?
+      defined?(@@blocked_ips_time) &&
+        @@blocked_ips_time >= File.mtime(MO.blocked_ips_file)
+    end
+
     def populate_blocked_ips
       file = MO.blocked_ips_file
+      @@blocked_ips_time = File.mtime(file)
       @@blocked_ips = parse_blocked_ips(file)
     end
 
