@@ -550,7 +550,7 @@ class AbstractModel < ApplicationRecord
 
   # Logs addition of new Image.
   def log_create_image(image)
-    log_image(:log_image_created_at, image, true)
+    log_image(:log_image_created, image, true)
   end
 
   # Logs addition of existing Image.

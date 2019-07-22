@@ -875,11 +875,11 @@ class SpeciesListController < ApplicationController
         flash_object_errors(@species_list)
       else
         if create_or_update == :create
-          @species_list.log(:log_species_list_created_at)
+          @species_list.log(:log_species_list_created)
           id = @species_list.id
           flash_notice(:runtime_species_list_create_success.t(id: id))
         else
-          @species_list.log(:log_species_list_updated_at)
+          @species_list.log(:log_species_list_updated)
           id = @species_list.id
           flash_notice(:runtime_species_list_edit_success.t(id: id))
         end

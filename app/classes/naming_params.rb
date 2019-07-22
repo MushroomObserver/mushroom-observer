@@ -83,7 +83,7 @@ class NamingParams
   def save_vote
     @observation.reload
     @observation.change_vote(@naming, @vote.value)
-    @observation.log(:log_naming_created_at, name: @naming.format_name)
+    @observation.log(:log_naming_created, name: @naming.format_name)
   end
 
   def update_naming(reason, was_js_on)

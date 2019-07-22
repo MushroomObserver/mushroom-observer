@@ -824,7 +824,7 @@ class Observation < AbstractModel
   def logged_change_vote(naming, vote)
     reload
     change_vote(naming, vote.value, naming.user)
-    log(:log_naming_created_at, name: naming.format_name)
+    log(:log_naming_created, name: naming.format_name)
   end
 
   # Try to guess which Naming is responsible for the consensus.  This will
@@ -1414,7 +1414,7 @@ class Observation < AbstractModel
       log(:log_consensus_changed, old: old_name.display_name,
                                   new: new_name.display_name)
     else
-      log(:log_consensus_created_at, name: new_name.display_name)
+      log(:log_consensus_created, name: new_name.display_name)
     end
 
     # Change can trigger emails.

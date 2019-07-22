@@ -92,7 +92,7 @@ class ObserverController
 
     # Once observation is saved we can save everything else.
     if success
-      @observation.log(:log_observation_created_at)
+      @observation.log(:log_observation_created)
       save_everything_else(params[:reason]) # should always succeed
       strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))

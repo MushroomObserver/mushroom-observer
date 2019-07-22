@@ -703,7 +703,7 @@ class LocationController < ApplicationController
         @description.save
 
         # Log action in parent location.
-        @description.location.log(:log_description_created_at,
+        @description.location.log(:log_description_created,
                                   user: @user.login, touch: true,
                                   name: @description.unique_partial_format_name)
 

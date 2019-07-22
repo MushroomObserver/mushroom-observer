@@ -117,7 +117,7 @@ class API
     end
 
     def after_create(obs)
-      obs.log(:log_observation_created_at) if @log
+      obs.log(:log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       naming = obs.namings.create(name: @name)
       obs.change_vote(naming, @vote, user)
@@ -136,7 +136,7 @@ class API
         update_images(obs)
         update_projects(obs)
         update_species_lists(obs)
-        obs.log(:log_observation_updated_at) if @log
+        obs.log(:log_observation_updated) if @log
         obs
       end
     end

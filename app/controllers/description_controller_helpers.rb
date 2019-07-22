@@ -209,7 +209,7 @@ module DescriptionControllerHelpers
       if !desc.save
         flash_object_errors(desc)
       else
-        dest.log(:log_description_created_at,
+        dest.log(:log_description_created,
                  user: @user.login,
                  name: desc.unique_partial_format_name,
                  touch: true)
