@@ -36,16 +36,18 @@ class Robots
 
     def blocked_ips_current?
       defined?(@@blocked_ips_time) &&
-        @@blocked_ips_time >= File.mtime(MO.blocked_ips_file)
+        @@blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
+        @@blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
 
     def populate_blocked_ips
-      file = MO.blocked_ips_file
-      @@blocked_ips_time = File.mtime(file)
-      @@blocked_ips = parse_blocked_ips(file)
+      file1 = MO.blocked_ips_file
+      file2 = MO.okay_ips_file
+      @@blocked_ips_time = [File.mtime(file1), File.mtime(file2)].max
+      @@blocked_ips = parse_ip_list(file1) - parse_ip_list(file2)
     end
 
-    def parse_blocked_ips(file)
+    def parse_ip_list(file)
       return [] unless File.exist?(file)
 
       File.open(file).readlines.map(&:chomp)

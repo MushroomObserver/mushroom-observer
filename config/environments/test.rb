@@ -23,6 +23,7 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
   config.blocked_ips_file = "#{config.root}/test/fixtures/blocked_ips.txt"
+  config.okay_ips_file = "#{config.root}/test/fixtures/okay_ips.txt"
 
   config.water_users = []
   config.oil_users   = []

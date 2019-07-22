@@ -41,6 +41,7 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
   config.blocked_ips_file = "#{config.root}/config/blocked_ips.txt"
+  config.okay_ips_file = "#{config.root}/config/okay_ips.txt"
 
   # ----------------------------
   #  Rails configuration.
