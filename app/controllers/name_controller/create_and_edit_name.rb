@@ -185,8 +185,10 @@ class NameController
 
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
+      @parse = parse_name # update boldness in @parse.params
     elsif @correct_spelling.present?
       set_correct_spelling
+      @parse = parse_name # update boldness in @parse.params
     end
   end
 

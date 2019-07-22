@@ -1283,6 +1283,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_flash_success
     assert_true(name.reload.is_misspelling?)
+    assert_equal("__Petigera__", name.display_name)
     assert_names_equal(names(:peltigera), name.correct_spelling)
     assert_true(name.deprecated)
     assert_redirected_to(controller: :name, action: :show_name, id: name.id)
