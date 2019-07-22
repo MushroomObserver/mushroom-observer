@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_22_150500) do
+ActiveRecord::Schema.define(version: 2019_07_22_171000) do
 
   create_table "api_keys", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.datetime "created_at"
@@ -179,8 +179,6 @@ ActiveRecord::Schema.define(version: 2019_07_22_150500) do
   create_table "images_observations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "image_id", default: 0, null: false
     t.integer "observation_id", default: 0, null: false
-    t.index ["observation_id"], name: "index_images_observations_on_observation_id"
-    t.index ["observation_id"], name: "observation_id"
   end
 
   create_table "images_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
