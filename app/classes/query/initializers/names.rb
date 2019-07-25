@@ -32,27 +32,22 @@ module Query
       end
 
       def initialize_name_parameters(*joins)
-        if irreconcilable_name_parameters?
-          force_empty_results_without_instantiating_objects
-        else
-          table = if params[:include_all_name_proposals]
-                    "namings"
-                  else
-                    "observations"
-                  end
-          column = "#{table}.name_id"
-          add_id_condition(column, lookup_names_by_name(names_parameters),
-                           *joins)
+        return add_false_condition if irreconcilable_name_parameters?
 
-          if params[:include_all_name_proposals]
-            add_join(:observations, :namings)
-          end
-          return unless params[:exclude_consensus]
+        table = if params[:include_all_name_proposals]
+                  "namings"
+                else
+                  "observations"
+                end
+        column = "#{table}.name_id"
+        ids = lookup_names_by_name(names_parameters)
+        add_id_condition(column, ids,*joins)
 
-          column = "observations.name_id"
-          add_not_id_condition(column, lookup_names_by_name(names_parameters),
-                               *joins)
-        end
+        add_join(:observations, :namings) if params[:include_all_name_proposals]
+        return unless params[:exclude_consensus]
+
+        column = "observations.name_id"
+        add_not_id_condition(column, ids, *joins)
       end
 
       def initialize_name_parameters_for_name_queries
@@ -66,10 +61,6 @@ module Query
 
       def irreconcilable_name_parameters?
         params[:exclude_consensus] && !params[:include_all_name_proposals]
-      end
-
-      def force_empty_results_without_instantiating_objects
-        add_false_condition
       end
     end
   end
