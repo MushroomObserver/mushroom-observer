@@ -171,7 +171,7 @@ module Query
         add_joins(*joins)
       end
 
-      def add_false_condition
+      def force_empty_results
         @where = ["FALSE"]
       end
 

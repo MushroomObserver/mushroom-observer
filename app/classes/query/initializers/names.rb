@@ -32,7 +32,7 @@ module Query
       end
 
       def initialize_name_parameters(*joins)
-        return add_false_condition if irreconcilable_name_parameters?
+        return force_empty_results if irreconcilable_name_parameters?
 
         table = if params[:include_all_name_proposals]
                   "namings"
