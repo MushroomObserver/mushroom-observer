@@ -41,7 +41,7 @@ module Query
                 end
         column = "#{table}.name_id"
         ids = lookup_names_by_name(names_parameters)
-        add_id_condition(column, ids,*joins)
+        add_id_condition(column, ids, *joins)
 
         add_join(:observations, :namings) if params[:include_all_name_proposals]
         return unless params[:exclude_consensus]
