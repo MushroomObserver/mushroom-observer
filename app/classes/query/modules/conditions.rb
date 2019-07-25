@@ -84,6 +84,14 @@ module Query
         add_joins(*joins)
       end
 
+      def add_not_id_condition(col, ids, *joins)
+        return if ids.nil?
+
+        set = clean_id_set(ids)
+        @where << "#{col} NOT IN (#{set})"
+        add_joins(*joins)
+      end
+
       def add_where_condition(table, vals, *joins)
         return if vals.empty?
 
@@ -161,6 +169,10 @@ module Query
         conds = fields.map { |field| notes_field_presence_condition(field) }
         @where << conds.join(" OR ")
         add_joins(*joins)
+      end
+
+      def force_empty_results
+        @where = ["FALSE"]
       end
 
       ##########################################################################

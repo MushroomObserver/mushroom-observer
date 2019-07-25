@@ -488,6 +488,11 @@ ActiveRecord::Schema.define(version: 2019_07_22_171600) do
     t.integer "species_list_id", default: 0, null: false
   end
 
+  create_table "observations_specimens", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "observation_id", default: 0, null: false
+    t.integer "specimen_id", default: 0, null: false
+  end
+
   create_table "projects", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "admin_group_id", default: 0, null: false
@@ -513,6 +518,15 @@ ActiveRecord::Schema.define(version: 2019_07_22_171600) do
     t.boolean "peer_reviewed"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "queries", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.datetime "updated_at"
+    t.integer "access_count"
+    t.text "params"
+    t.integer "outer_id"
+    t.integer "flavor"
+    t.integer "model"
   end
 
   create_table "query_records", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -581,6 +595,16 @@ ActiveRecord::Schema.define(version: 2019_07_22_171600) do
     t.text "notes"
     t.integer "rss_log_id"
     t.integer "location_id"
+  end
+
+  create_table "specimens", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "herbarium_id", null: false
+    t.date "when", null: false
+    t.text "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer "user_id", null: false
+    t.string "herbarium_label", limit: 80, default: "", null: false
   end
 
   create_table "synonyms", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

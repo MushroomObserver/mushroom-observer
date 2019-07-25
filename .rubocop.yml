@@ -56,6 +56,11 @@ Performance/RegexpMatch:
 Rails/DynamicFindBy:
   Enabled: False
 
+# MO overrides Rails http methods, using positional arguments in our code,
+# but passing keyword arguments to Rails
+Rails/HttpPositionalArguments:
+  Enabled: False
+
 Style/FrozenStringLiteralComment:
   # When it's auto-corrected in Ruby 2.4, our test suite won't run.
   # We get: "can't modify frozen String" error

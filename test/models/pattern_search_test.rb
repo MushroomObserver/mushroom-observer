@@ -505,13 +505,13 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_include_nonconsensus
+  def test_observation_search_include_all_name_proposals
     name = names(:agaricus_campestris)
     consensus = Observation.where(name: name)
     expect = Observation.joins(:namings).where(namings: { name: name })
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris" \
-                                       " include_nonconsensus:yes")
+                                       " include_all_name_proposals:yes")
     assert_obj_list_equal(expect, x.query.results, :sort)
   end
 

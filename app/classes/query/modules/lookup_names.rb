@@ -64,7 +64,7 @@ module Query
       def complain_about_unused_flags!(args)
         complain_about_unused_flag!(args, :include_synonyms)
         complain_about_unused_flag!(args, :include_subtaxa)
-        complain_about_unused_flag!(args, :include_nonconsensus)
+        complain_about_unused_flag!(args, :include_all_name_proposals)
         complain_about_unused_flag!(args, :exclude_consensus)
         complain_about_unused_flag!(args, :exclude_original_names)
       end
