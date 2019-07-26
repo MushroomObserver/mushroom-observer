@@ -25,6 +25,8 @@ class RobotsTest < UnitTestCase
     assert_true(Robots.blocked?("87.65.43.21"))
 
     File.rename(file2, file2_tmp)
+    # Make Robots recognize that following modification of okay_ips_file is
+    # later than in-memory modification of list of blocked ips
     sleep(1)
     system("echo 87.65.43.21 > #{file2}")
     assert_false(Robots.blocked?("87.65.43.21"))
