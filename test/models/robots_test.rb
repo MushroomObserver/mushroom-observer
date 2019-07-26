@@ -25,6 +25,7 @@ class RobotsTest < UnitTestCase
     assert_true(Robots.blocked?("87.65.43.21"))
 
     File.rename(file2, file2_tmp)
+    sleep(1)
     system("echo 87.65.43.21 > #{file2}")
     assert_false(Robots.blocked?("87.65.43.21"))
 
