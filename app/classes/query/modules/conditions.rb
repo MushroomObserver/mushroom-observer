@@ -180,7 +180,7 @@ module Query
       private
 
       def notes_field_presence_condition(field)
-        field = field.clone
+        field = field.dup
         pat = if field.gsub!(/(["\\])/) { '\\\1' }
                 "\":#{field}:\""
               else

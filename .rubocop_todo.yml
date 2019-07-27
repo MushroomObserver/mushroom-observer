@@ -115,7 +115,6 @@ Lint/UnneededCopDisableDirective:
     - 'test/integration/query_supplemental_test.rb'
     - 'test/models/collapsible_map_test.rb'
     - 'test/models/notes_migrate_command_test.rb'
-    - 'test/models/query_test.rb'
 
 # Offense count: 7
 # Cop supports --auto-correct.
