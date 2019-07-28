@@ -54,19 +54,19 @@ class CommentController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment # :nologin: :norobots:
+  def index_comment # :norobots:
     query = find_or_create_query(:Comment, by: params[:by])
     show_selected_comments(query, id: params[:id].to_s, always_index: true)
   end
 
   # Show list of latest comments. (Linked from left panel.)
-  def list_comments # :nologin:
+  def list_comments
     query = create_query(:Comment, :all, by: :created_at)
     show_selected_comments(query)
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
-  def show_comments_by_user # :nologin: :norobots:
+  def show_comments_by_user # :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :by_user, user: user)
       show_selected_comments(query)
@@ -74,7 +74,7 @@ class CommentController < ApplicationController
   end
 
   # Shows comments for a given user, most recent first. (Linked from show_user.)
-  def show_comments_for_user # :nologin: :norobots:
+  def show_comments_for_user # :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :for_user, user: user)
       show_selected_comments(query)
@@ -83,7 +83,7 @@ class CommentController < ApplicationController
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_target # :nologin: :norobots:
+  def show_comments_for_target # :norobots:
     model = begin
               params[:type].to_s.constantize
             rescue StandardError
@@ -101,7 +101,7 @@ class CommentController < ApplicationController
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search # :nologin: :norobots:
+  def comment_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
@@ -155,7 +155,7 @@ class CommentController < ApplicationController
   # Linked from: show_<object>, list_comments
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
-  def show_comment # :nologin: :prefetch:
+  def show_comment # :prefetch:
     store_location
     pass_query_params
     if @comment = find_or_goto_index(Comment, params[:id].to_s)
@@ -165,12 +165,12 @@ class CommentController < ApplicationController
   end
 
   # Go to next comment: redirects to show_comment.
-  def next_comment # :nologin: :norobots:
+  def next_comment # :norobots:
     redirect_to_next_object(:next, Comment, params[:id].to_s)
   end
 
   # Go to previous comment: redirects to show_comment.
-  def prev_comment # :nologin: :norobots:
+  def prev_comment # :norobots:
     redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
 

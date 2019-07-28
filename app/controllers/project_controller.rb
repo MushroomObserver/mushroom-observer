@@ -52,19 +52,19 @@ class ProjectController < ApplicationController
   ##############################################################################
 
   # Show list of selected projects, based on current Query.
-  def index_project # :nologin: :norobots:
+  def index_project # :norobots:
     query = find_or_create_query(:Project, by: params[:by])
     show_selected_projects(query, id: params[:id].to_s, always_index: true)
   end
 
   # Show list of latest projects.  (Linked from left panel.)
-  def list_projects # :nologin:
+  def list_projects
     query = create_query(:Project, :all, by: :title)
     show_selected_projects(query)
   end
 
   # Display list of Project's whose title or notes match a string pattern.
-  def project_search # :nologin: :norobots:
+  def project_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (project = Project.safe_find(pattern))
@@ -105,7 +105,7 @@ class ProjectController < ApplicationController
   # Linked from: show_observation, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
-  def show_project # :nologin: :prefetch:
+  def show_project # :prefetch:
     store_location
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
@@ -126,12 +126,12 @@ class ProjectController < ApplicationController
   end
 
   # Go to next project: redirects to show_project.
-  def next_project # :nologin: :norobots:
+  def next_project # :norobots:
     redirect_to_next_object(:next, Project, params[:id].to_s)
   end
 
   # Go to previous project: redirects to show_project.
-  def prev_project # :nologin: :norobots:
+  def prev_project # :norobots:
     redirect_to_next_object(:prev, Project, params[:id].to_s)
   end
 
