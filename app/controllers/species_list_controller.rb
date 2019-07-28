@@ -71,20 +71,20 @@ class SpeciesListController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def index_species_list # :nologin: :norobots:
+  def index_species_list # :norobots:
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s,
                                        always_index: true)
   end
 
   # Display list of all species_lists, sorted by date.
-  def list_species_lists # :nologin:
+  def list_species_lists
     query = create_query(:SpeciesList, :all, by: :date)
     show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
   end
 
   # Display list of user's species_lists, sorted by date.
-  def species_lists_by_user # :nologin: :norobots:
+  def species_lists_by_user # :norobots:
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
@@ -102,14 +102,14 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of all species_lists, sorted by title.
-  def species_lists_by_title # :nologin: :norobots:
+  def species_lists_by_title # :norobots:
     query = create_query(:SpeciesList, :all, by: :title)
     show_selected_species_lists(query)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string
   # pattern.
-  def species_list_search # :nologin: :norobots:
+  def species_list_search # :norobots:
     pattern = params[:pattern].to_s
     spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
     if spl
@@ -159,7 +159,7 @@ class SpeciesListController < ApplicationController
   #
   ##############################################################################
 
-  def show_species_list # :nologin: :prefetch:
+  def show_species_list # :prefetch:
     store_location
     clear_query_in_session
     pass_query_params
@@ -177,11 +177,11 @@ class SpeciesListController < ApplicationController
                   [:user, :name, :location, { thumb_image: :image_votes }])
   end
 
-  def next_species_list # :nologin: :norobots:
+  def next_species_list # :norobots:
     redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
   end
 
-  def prev_species_list # :nologin: :norobots:
+  def prev_species_list # :norobots:
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
@@ -200,7 +200,7 @@ class SpeciesListController < ApplicationController
   ##############################################################################
 
   # Used by show_species_list.
-  def make_report # :nologin: :norobots:
+  def make_report # :norobots:
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     return unless @species_list
 
@@ -273,7 +273,7 @@ class SpeciesListController < ApplicationController
 
   # Specialized javascripty form for creating a list of names, at Darvin's
   # request. Links into create_species_list.
-  def name_lister # :nologin: :norobots:
+  def name_lister # :norobots:
     # Names are passed in as string, one name per line.
     results = params[:results] || ""
     @name_strings = results.chomp.split("\n").map { |n| n.to_s.chomp }

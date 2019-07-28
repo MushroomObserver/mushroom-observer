@@ -19,7 +19,7 @@ class ObserverController
   end
 
   # Force javascript on.
-  def turn_javascript_on # :nologin: :norobots:
+  def turn_javascript_on # :norobots:
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
     redirect_to(:back)
@@ -28,7 +28,7 @@ class ObserverController
   end
 
   # Force javascript off.
-  def turn_javascript_off # :nologin: :norobots:
+  def turn_javascript_off # :norobots:
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
     redirect_to(:back)
@@ -37,7 +37,7 @@ class ObserverController
   end
 
   # Enable auto-detection.
-  def turn_javascript_nil # :nologin: :norobots:
+  def turn_javascript_nil # :norobots:
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
     redirect_to(:back)
@@ -47,7 +47,7 @@ class ObserverController
 
   # Simple list of all the files in public/html that are linked to the W3C
   # validator to make testing easy.
-  def w3c_tests # :nologin:
+  def w3c_tests
     render(layout: false)
   end
 

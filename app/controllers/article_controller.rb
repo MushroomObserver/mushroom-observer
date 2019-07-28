@@ -60,7 +60,7 @@ class ArticleController < ApplicationController
   end
 
   # List all articles
-  def list_articles # :nologin:
+  def list_articles
     query = create_query(:Article, :all, by: :created_at)
     show_selected_articles(query)
   end

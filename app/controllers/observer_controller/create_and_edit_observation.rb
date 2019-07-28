@@ -732,7 +732,7 @@ class ObserverController
     image
   end
 
-  def hide_thumbnail_map # :nologin:
+  def hide_thumbnail_map
     pass_query_params
     id = params[:id].to_s
     if @user

@@ -5,7 +5,7 @@ class VoteController < ApplicationController
   # Linked from: show_observation
   # Inputs: params[:id] (naming)
   # Outputs: @naming
-  # :nologin: :prefetch:
+  # :prefetch:
   def show_votes
     pass_query_params
     @naming = find_or_goto_index(Naming, params[:id].to_s)

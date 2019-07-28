@@ -6,7 +6,7 @@ class GlossaryController < ApplicationController
     :show_glossary_term
   ]
 
-  def show_glossary_term # :nologin:
+  def show_glossary_term
     store_location
     @glossary_term = GlossaryTerm.find(params[:id].to_s)
     @canonical_url = "#{MO.http_domain}/glossary/show_glossary_term/"\
@@ -15,7 +15,7 @@ class GlossaryController < ApplicationController
     @objects = @glossary_term.images
   end
 
-  def index # :nologin:
+  def index
     store_location
     @glossary_terms = GlossaryTerm.all.order(:name)
   end
@@ -86,7 +86,7 @@ class GlossaryController < ApplicationController
 
   # Show past version of GlossaryTerm.
   # Accessible only from show_glossary_term page.
-  def show_past_glossary_term # :nologin: :prefetch: :norobots:
+  def show_past_glossary_term # :prefetch: :norobots:
     pass_query_params
     store_location
     if @glossary_term = find_or_goto_index(GlossaryTerm, params[:id].to_s)

@@ -19,19 +19,19 @@ class SequenceController < ApplicationController
     :prev_sequence
   ]
 
-  def index_sequence # :nologin: :norobots:
+  def index_sequence # :norobots:
     query = find_or_create_query(:Sequence, by: params[:by])
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def list_sequences # :nologin: :norobots:
+  def list_sequences # :norobots:
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
   end
 
   # Display list of Sequences whose text matches a string pattern.
-  def sequence_search # :nologin: :norobots:
+  def sequence_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (sequence = Sequence.safe_find(pattern))
@@ -42,7 +42,7 @@ class SequenceController < ApplicationController
     end
   end
 
-  def observation_index # :nologin: :norobots:
+  def observation_index # :norobots:
     store_location
     query = create_query(:Sequence, :for_observation,
                          observation: params[:id].to_s)
@@ -55,17 +55,17 @@ class SequenceController < ApplicationController
     show_selected_sequences(query, always_index: true)
   end
 
-  def show_sequence # :nologin:
+  def show_sequence
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
 
-  def next_sequence # :nologin: :norobots:
+  def next_sequence # :norobots:
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
   end
 
-  def prev_sequence # :nologin: :norobots:
+  def prev_sequence # :norobots:
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
