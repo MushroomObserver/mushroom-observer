@@ -1,6 +1,20 @@
+# frozen_string_literal: true
+
+# helper methods for Location-related views:
+# ListCountries, ListLocations, ShowLocation
 module LocationHelper
   def country_link(country, count = nil)
     str = country + (count ? ": #{count}" : "")
-    result = link_to(str, action: :list_by_country, country: country)
+    link_to(str, action: :list_by_country, country: country)
+  end
+
+  # title of a link to Observations at a location, with observation count
+  # Observations at this Location(nn)
+  def show_obs_link_title_with_count(location)
+    "#{:show_location_observations.t} (#{observation_count(location)})"
+  end
+
+  def observation_count(location)
+    Observation.where(location: location).count
   end
 end

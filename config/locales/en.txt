@@ -1571,13 +1571,15 @@
   list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
-  # location/list_place_names
+  # location/list_place_names (list_locations)
   list_place_names_known: Known Locations
   list_place_names_known_order: "(by name)"
-  list_place_names_undef: Undefined Locations
-  list_place_names_undef_order: "(by frequency)"
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
+  list_place_names_parenthetical: Number in parentheses shows Observation count.
+  list_place_names_popularity: "\"[:sort_by_num_views]\" means how many times the page was visited."
+  list_place_names_undef: Undefined Locations
+  list_place_names_undef_order: "(by frequency)"
 
   # location/list_countries
   list_countries: Country List

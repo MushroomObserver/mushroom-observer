@@ -13,6 +13,12 @@
   flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
+<div>
+  <br>
+  <%= :list_place_names_popularity.t %>
+  <%= :list_place_names_parenthetical.t %>
+</div>
+
 <div class="row push-down">
   <div class="col-md-7">
     <% if @known_pages.any? && @known_data.any? %>
@@ -22,9 +28,11 @@
       </div>
       <%= paginate_block(@known_pages) do %>
         <div class="list-group">
-          <% for location in @known_data %>
+          <% @known_data.each do |location| %>
             <div class="list-group-item">
-              <%= link_with_query(location.display_name.t, location.show_link_args) %>
+              <%= link_with_query(location.display_name.t,
+                                  location.show_link_args) %>
+              (<%= observation_count(location) %>)
             </div>
           <% end %>
         </div>
@@ -40,7 +48,7 @@
       </div>
       <%= paginate_block(@undef_pages) do %>
         <div class="list-group">
-          <% for location, count in @undef_data
+          <% @undef_data.each do |location, count|
             if @undef_location_format == :scientific
               location = Location.reverse_name(location)
             end %>
