@@ -1583,10 +1583,10 @@
 
   # location/list_countries
   list_countries: Country List
-  list_countries_known: Known Countries
-  list_countries_title: Countries with Observations
-  list_countries_unknown: Unknown Countries
-  list_countries_missing: Missing Countries
+  list_countries_known: Countries With Observations
+  list_countries_title: Countries and Other Localities
+  list_countries_unknown: Other Localities With Observations
+  list_countries_missing: Countries Without Observations
 
   # _location (RSS log display)
   location_change: Change to Location

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = CountryCounter
 #
@@ -6,9 +8,9 @@
 ################################################################################
 
 class CountryCounter
-  attr_accessor :known_by_count
-  attr_accessor :unknown_by_count
-  attr_accessor :missing
+  attr_accessor :known_by_count # known countries with observations
+  attr_accessor :unknown_by_count # known countries without observations
+  attr_accessor :missing # other locations with observations
 
   def initialize
     @counts = {}
@@ -32,19 +34,11 @@ class CountryCounter
   end
 
   def wheres
-    location_lookup(
-      "SELECT `where` FROM observations WHERE location_id IS NULL"
-    )
+    Observation.where(location: nil).pluck(:where)
   end
 
   def location_names
-    location_lookup(
-      "SELECT `where` FROM observations WHERE location_id IS NOT NULL"
-    )
-  end
-
-  def location_lookup(sql)
-    Location.connection.select_values(sql).to_a
+    Observation.where.not(location: nil).pluck(:where)
   end
 
   def self.load_param_hash(file)

@@ -1,17 +1,14 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# test methods used to count Observations by country
 class CountryCounterTest < UnitTestCase
   def test_wheres
     cc = CountryCounter.new
     wheres = cc.send(:wheres)
     assert(wheres)
     assert(wheres.member?("Briceland, California, USA"))
-  end
-
-  def test_location_lookup
-    cc = CountryCounter.new
-    lookup = cc.send(:location_lookup, "SELECT 'USA' location FROM DUAL")
-    assert_equal(["USA"], lookup)
   end
 
   def test_location_names
@@ -40,19 +37,19 @@ class CountryCounterTest < UnitTestCase
   def test_partition_with_count
     cc = CountryCounter.new
     known, unknown = cc.send(:partition_with_count)
-    assert(!known.empty?)
-    assert(!unknown.empty?)
+    assert(known.present?)
+    assert(unknown.present?)
   end
 
   def test_known_by_count
-    assert(!CountryCounter.new.known_by_count.empty?)
+    assert(CountryCounter.new.known_by_count.present?)
   end
 
   def test_unknown_by_count
-    assert(!CountryCounter.new.unknown_by_count.empty?)
+    assert(CountryCounter.new.unknown_by_count.present?)
   end
 
   def test_missing
-    assert(!CountryCounter.new.missing.empty?)
+    assert(CountryCounter.new.missing.present?)
   end
 end
