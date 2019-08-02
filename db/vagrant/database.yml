@@ -8,12 +8,6 @@
 # And be sure to use new-style password hashing:
 #   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
 
-# For mysql >= 5.7.5
-# Do not require SELECT list to include ORDER BY columns in DISTINCT queries,
-# And do not not require ORDER BY to include the DISTINCT column.
-variables:
-  sql_mode: TRADITIONAL
-
 shared:
   adapter: mysql2
   # Default (works for MacOS X)
@@ -26,6 +20,11 @@ shared:
   # domain socket given by socket instead.
   #host: localhost
   #port: 3306
+  # For mysql >= 5.7.5
+  # Do not require SELECT list to include ORDER BY columns in DISTINCT queries,
+  # And do not not require ORDER BY to include the DISTINCT column.
+  variables:
+    sql_mode: TRADITIONAL
 
 development:
   database: mo_development
