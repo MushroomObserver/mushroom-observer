@@ -11,7 +11,7 @@ fi
 if [ ! -f config/database.yml ]; then
     cp db/vagrant/database.yml config
     echo Copied config/database.yml
-    cat config/database.yml
+    mysql SELECT @@sql_mode;
 else
     echo database.yml exists
 fi
