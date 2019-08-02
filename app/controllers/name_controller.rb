@@ -514,7 +514,7 @@ class NameController < ApplicationController
         end
 
         # Log action in parent name.
-        @description.name.log(:log_description_created_at,
+        @description.name.log(:log_description_created,
                               user: @user.login,
                               touch: true,
                               name: @description.unique_partial_format_name)

@@ -64,7 +64,7 @@ module Query
       def complain_about_unused_flags!(args)
         complain_about_unused_flag!(args, :include_synonyms)
         complain_about_unused_flag!(args, :include_subtaxa)
-        complain_about_unused_flag!(args, :include_nonconsensus)
+        complain_about_unused_flag!(args, :include_all_name_proposals)
         complain_about_unused_flag!(args, :exclude_consensus)
         complain_about_unused_flag!(args, :exclude_original_names)
       end
@@ -91,7 +91,7 @@ module Query
       def find_matching_names(name)
         parse = Name.parse_name(name)
         name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-        matches = Name.where(search_name: name2) if parse.author.present?
+        matches = Name.where(search_name: name2) if parse&.author.present?
         matches = Name.where(text_name: name2) if matches.empty?
         matches.map { |name3| minimal_name_data(name3) }
       end

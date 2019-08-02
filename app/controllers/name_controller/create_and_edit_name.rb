@@ -185,8 +185,10 @@ class NameController
 
     if @name.is_misspelling? && (!@misspelling || @correct_spelling.blank?)
       @name.correct_spelling = nil
+      @parse = parse_name # update boldness in @parse.params
     elsif @correct_spelling.present?
       set_correct_spelling
+      @parse = parse_name # update boldness in @parse.params
     end
   end
 
@@ -202,7 +204,7 @@ class NameController
 
   def update_ancestors
     Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
-      name.save_with_log(:log_name_created_at) if name&.new_record?
+      name.save_with_log(:log_name_created) if name&.new_record?
     end
   end
 

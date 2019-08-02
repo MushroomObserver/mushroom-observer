@@ -35,7 +35,7 @@ class Name < AbstractModel
 
   AUTHOR_START = /
     #{ANY_AUTHOR_ABBR} |
-    van\s | de\s |
+    van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] |
     "[^a-z\s]
   /x.freeze
@@ -485,6 +485,7 @@ class Name < AbstractModel
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
       delete("\u2028"). # Unicode RLE that we see occasionally as line separator
+      gsub(/\s+/, " ").
       strip_squeeze
   end
 

@@ -183,11 +183,11 @@ class Project < AbstractModel
   ##############################################################################
 
   def log_create
-    do_log(:log_project_created_at, true)
+    do_log(:log_project_created, true)
   end
 
   def log_update
-    do_log(:log_project_updated_at, true)
+    do_log(:log_project_updated, true)
   end
 
   def log_destroy

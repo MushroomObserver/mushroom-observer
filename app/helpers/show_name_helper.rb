@@ -2,6 +2,7 @@
 
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module ShowNameHelper
+  ######## links to searches
   # string of links to Names of any other non-deprecated synonyms
   def approved_syn_links(name)
     return if (approved_synonyms = name.other_approved_synonyms).blank?
@@ -24,45 +25,25 @@ module ShowNameHelper
 
   # link to a search for Observations of this taxon (under any name) + count
   def taxon_observations(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_of_taxon.t)
+    link_to_obss_of(obss_of_taxon(name), :obss_of_taxon.t)
   end
 
   # link to a search for observations of this taxon, under other names + count
   def taxon_obss_other_names(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         exclude_original_names: true,
-                         by: :confidence)
-    link_to_obss_of(query, :taxon_obss_other_names.t)
+    link_to_obss_of(obss_of_taxon_other_names(name), :taxon_obss_other_names.t)
   end
 
   # link to a search for observations where this taxon was proposed + count
   # (but is not the consensus)
   def taxon_proposed(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: true,
-                         include_nonconsensus: true,
-                         exclude_consensus: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_taxon_proposed.t)
+    link_to_obss_of(obss_other_taxa_this_taxon_proposed(name),
+                    :obss_taxon_proposed.t)
   end
 
-  # link to a search for observations where this name was proposed + count
-  # (but this taxon is not the consensus)
+  # link to a search for observations where this name was proposed
   def name_proposed(name)
-    query = Query.lookup(:Observation, :all,
-                         names: name.id,
-                         include_synonyms: false,
-                         include_nonconsensus: true,
-                         exclude_consensus: true,
-                         by: :confidence)
-    link_to_obss_of(query, :obss_name_proposed.t)
+    link_to_obss_of(obss_this_name_proposed(name),
+                    :obss_name_proposed.t)
   end
 
   # array of lines for other accepted synonyms, each line comprising
@@ -79,7 +60,7 @@ module ShowNameHelper
   end
 
   # return link to a query for observations + count of results
-  # returns nil of no results
+  # returns nil if no results
   # Use:
   #   query = Query.lookup(:Observation, :all, names: name.id, by: :confidence,
   #                        include_synonyms: true)
@@ -101,12 +82,9 @@ module ShowNameHelper
   # link to a search for species of name's genus. Sample text:
   #   List of species in Amanita Pers. (1433)
   def show_obs_genera(name)
-    return  unless (genus = name.genus)
+    return unless (genus = name.genus)
 
-    query = Query.lookup(:Name, :all,
-                         names: genus.id,
-                         include_subtaxa: true,
-                         exclude_original_names: true)
+    query = species_in_genus(genus)
     count = query.select_count
     query.save unless browser.bot?
     return unless count > 1
@@ -115,5 +93,47 @@ module ShowNameHelper
       :show_consensus_species.t(name: genus.display_name_brief_authors.t),
       add_query_param({ controller: :name, action: :index_name }, query)
     ) + " (#{count})"
+  end
+
+  ######## searches
+
+  # These are extracted for isolation and to facilitate testing
+
+  def obss_of_taxon(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 by: :confidence)
+  end
+
+  def obss_of_taxon_other_names(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 exclude_original_names: true,
+                 by: :confidence)
+  end
+
+  def obss_other_taxa_this_taxon_proposed(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_synonyms: true,
+                 include_all_name_proposals: true,
+                 exclude_consensus: true,
+                 by: :confidence)
+  end
+
+  def obss_this_name_proposed(name)
+    Query.lookup(:Observation, :all,
+                 names: name.id,
+                 include_all_name_proposals: true,
+                 by: :confidence)
+  end
+
+  def species_in_genus(genus)
+    Query.lookup(:Name, :all,
+                 names: genus.id,
+                 include_subtaxa: true,
+                 exclude_original_names: true)
   end
 end

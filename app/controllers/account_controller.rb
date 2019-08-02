@@ -67,12 +67,13 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  # :nologin: :prefetch:
+  # :prefetch:
   def signup
     @new_user = User.new(theme: MO.default_theme)
     return if request.method != "POST"
 
     initialize_new_user
+    return if block_vemslons!
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
 
@@ -83,7 +84,6 @@ class AccountController < ApplicationController
     redirect_back_or_default(action: :welcome)
   end
 
-  # :nologin:
   def verify
     id        = params["id"]
     auth_code = params["auth_code"]
@@ -159,13 +159,11 @@ class AccountController < ApplicationController
   end
 
   # This action is never actually used.  Its template is rendered by verify.
-  # :nologin:
   def reverify
     raise "This action should never occur!"
   end
 
   # This is used by the "reverify" page to re-send the verification email.
-  # :nologin:
   def send_verify
     return unless (user = find_or_goto_index(User, params[:id].to_s))
 
@@ -176,7 +174,6 @@ class AccountController < ApplicationController
   end
 
   # This is the welcome page for new users who just created an account.
-  # :nologin:
   def welcome; end
 
   ##############################################################################
@@ -185,7 +182,7 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  # :nologin: :prefetch:
+  # :prefetch:
   def login
     if request.method != "POST"
       @login = ""
@@ -220,7 +217,6 @@ class AccountController < ApplicationController
     end
   end
 
-  # :nologin:
   def email_new_password
     if request.method != "POST"
       @new_user = User.new
@@ -245,7 +241,6 @@ class AccountController < ApplicationController
     end
   end
 
-  # :nologin:
   def logout_user
     @user = nil
     User.current = nil
@@ -702,7 +697,7 @@ class AccountController < ApplicationController
   def test_autologin; end
 
   # This is used to test the flash error mechanism in the unit tests.
-  def test_flash # :nologin:
+  def test_flash
     notice   = params[:notice]
     warning  = params[:warning]
     error    = params[:error]
@@ -734,6 +729,15 @@ class AccountController < ApplicationController
     }.merge(params.require(:new_user).permit(:login, :name, :theme,
                                              :email, :email_confirmation,
                                              :password, :password_confirmation))
+  end
+
+  def block_vemslons!
+    return false unless @new_user.login.to_s.match(/(Vemslons|Uplilla)$/)
+
+    render(status: 429,
+           content_type: "text/plain",
+           plain: "We grow weary of this.  Please go away.")
+    return true
   end
 
   def make_sure_theme_is_valid!

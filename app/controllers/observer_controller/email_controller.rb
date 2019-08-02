@@ -17,7 +17,7 @@ class ObserverController
     end
   end
 
-  def ask_webmaster_question # :nologin: :norobots:
+  def ask_webmaster_question # :norobots:
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false

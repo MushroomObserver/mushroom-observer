@@ -13,7 +13,6 @@ class ThemeController < ApplicationController
   before_action :disable_link_prefetching
 
   # Show general information on color themes
-  # :nologin:
   def color_themes
   end
 

@@ -9,26 +9,26 @@ class HerbariumController < ApplicationController
   ]
 
   # Displays selected Herbarium's (based on current Query).
-  def index_herbarium # :nologin: :norobots:
+  def index_herbarium # :norobots:
     query = find_or_create_query(:Herbarium, by: params[:by])
     show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
   end
 
-  def index # :nologin:
+  def index
     store_location
     query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
     show_selected_herbaria(query, always_index: true)
   end
 
   # Show list of herbaria.
-  def list_herbaria # :nologin:
+  def list_herbaria
     store_location
     query = create_query(:Herbarium, :all, by: :name)
     show_selected_herbaria(query, always_index: true)
   end
 
   # Display list of Herbaria whose text matches a string pattern.
-  def herbarium_search # :nologin: :norobots:
+  def herbarium_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium = Herbarium.safe_find(pattern))
@@ -39,7 +39,7 @@ class HerbariumController < ApplicationController
     end
   end
 
-  def show_herbarium # :nologin:
+  def show_herbarium
     store_location
     pass_query_params
     @canonical_url = Herbarium.show_url(params[:id])
@@ -56,11 +56,11 @@ class HerbariumController < ApplicationController
     end
   end
 
-  def next_herbarium # :nologin: :norobots:
+  def next_herbarium # :norobots:
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
 
-  def prev_herbarium # :nologin: :norobots:
+  def prev_herbarium # :norobots:
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 

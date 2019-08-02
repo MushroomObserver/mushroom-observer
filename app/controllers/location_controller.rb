@@ -87,7 +87,7 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  # :nologin: :norobots:
+  # :norobots:
   def locations_by_editor
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
@@ -97,7 +97,7 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  # :nologin: :norobots:
+  # :norobots:
   def location_search
     query = create_query(
       :Location, :pattern_search,
@@ -703,7 +703,7 @@ class LocationController < ApplicationController
         @description.save
 
         # Log action in parent location.
-        @description.location.log(:log_description_created_at,
+        @description.location.log(:log_description_created,
                                   user: @user.login, touch: true,
                                   name: @description.unique_partial_format_name)
 
