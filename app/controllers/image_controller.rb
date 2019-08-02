@@ -405,7 +405,7 @@ class ImageController < ApplicationController
   end
 
   def init_project_vars_for_add_or_edit(obs_or_img)
-    @projects = User.current.projects_member.sort_by(&:title)
+    @projects = User.current.projects_member(order: :title)
     @project_checks = {}
     obs_or_img.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
@@ -416,7 +416,7 @@ class ImageController < ApplicationController
   def init_project_vars_for_reload(obs_or_img)
     # (Note: In practice, this is never called for add_image,
     # so obs_or_img is always an image.)
-    @projects = User.current.projects_member.sort_by(&:title)
+    @projects = User.current.projects_member(order: :title)
     @project_checks = {}
     obs_or_img.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)

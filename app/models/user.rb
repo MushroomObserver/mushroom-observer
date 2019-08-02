@@ -538,12 +538,9 @@ class User < AbstractModel
   end
 
   # Return an Array of Project's that this User is a member of.
-  def projects_member
-    @projects_member ||= Project.find_by_sql %(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.user_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    )
+  def projects_member(order: :created_at)
+    @projects_member ||= Project.where(user_group: user_groups.ids).
+                                 order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
