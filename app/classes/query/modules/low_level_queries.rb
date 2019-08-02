@@ -10,7 +10,7 @@ module Query
         if executor
           executor.call(args).length
         else
-          select = args[:select] || "DISTINCT #{model.table_name}.id"
+          select = args[:select] || "#{model.table_name}.id"
           args = args.merge(select: "COUNT(#{select})")
           model.connection.select_value(query(args)).to_i
         end
