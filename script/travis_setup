@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo CI using
+lsb_release -a
+mysql --version
+
 mysql -u mo -pmo mo_development -e ''
 if [ ! $? -eq 0 ]; then
     mysql -u root < db/initialize.sql
