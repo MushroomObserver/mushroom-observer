@@ -519,7 +519,7 @@ class ObserverController
   end
 
   def init_project_vars
-    @projects = User.current.projects_member.sort_by(&:title)
+    @projects = User.current.projects_member(order: :title)
     @project_checks = {}
   end
 

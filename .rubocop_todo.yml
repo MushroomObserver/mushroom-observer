@@ -222,7 +222,6 @@ Naming/HeredocDelimiterNaming:
     - 'script/s3ls.rb'
     - 'script/s3uniq.rb'
     - 'test/models/image_script_test.rb'
-    - 'test/models/script_test.rb'
 
 # Offense count: 40
 # Configuration parameters: NamePrefix, NamePrefixBlacklist, NameWhitelist, MethodDefinitionMacros.
