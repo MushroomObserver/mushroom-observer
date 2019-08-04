@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# To help debug failure in Travis Build #2042
+top -bn 1 | head -5
+
 mysql -u mo -pmo mo_development -e ''
 if [ ! $? -eq 0 ]; then
     mysql -u root < db/initialize.sql

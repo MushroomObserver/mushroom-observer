@@ -27,17 +27,19 @@ date = `date +%Y%m%d:%H%M%S`.chomp
 
 top = `top -bn 1 | head -5`
 
-mem_total, mem_used = parse_top(top, "Mem")
-swap_total, swap_used = parse_top(top, "Swap")
+mem_total, mem_used = parse_top(top, "Mem") || 0.0
+swap_total, swap_used = parse_top(top, "Swap") || 0.0
 
 begin
   mem_pct  = mem_used / mem_total * 100
   swap_pct = swap_used / swap_total * 100
   size     = File.size(LOG_FILE)
 rescue StandardError
-  mem_pct  = 0
-  swap_pct = 0
-  size     = 0
+  mem_used  ||= 0.0
+  mem_pct   ||= 0.0
+  swap_used ||= 0.0
+  swap_pct  ||= 0.0
+  size        = 0
 end
 
 File.open(LOG_FILE, "a") do |file|
