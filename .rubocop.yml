@@ -56,6 +56,13 @@ Performance/RegexpMatch:
 Rails/DynamicFindBy:
   Enabled: False
 
+# MO uses HABTM extensively; RuboCop prefers the newer has_many through
+# Switching would require a migration process, detailed here:
+# http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
+# It's not worth the effort
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
 # MO overrides Rails http methods, using positional arguments in our code,
 # but passing keyword arguments to Rails
 Rails/HttpPositionalArguments:

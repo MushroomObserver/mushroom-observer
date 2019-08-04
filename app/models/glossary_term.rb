@@ -7,12 +7,7 @@ class GlossaryTerm < AbstractModel
              inverse_of: :best_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
-  # Rubocop would rather this was a has_many :through, but that
-  # requires a migration process as detailed here:
-  # chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
-  # rubocop:disable Rails/HasAndBelongsToMany
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
-  # rubocop:enable Rails/HasAndBelongsToMany
 
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
