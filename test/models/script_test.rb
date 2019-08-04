@@ -91,7 +91,7 @@ class ScriptTest < UnitTestCase
                  0
                end
     cmd = "#{script} 2>&1 > #{tempfile}"
-    status = system("bash", "-c", cmd)
+    status = system(cmd)
     errors = File.read(tempfile)
     assert(status, "Something went wrong with #{script}:\n#{errors}")
     assert_equal("", File.read(tempfile))
