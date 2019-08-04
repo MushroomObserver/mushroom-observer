@@ -27,8 +27,8 @@ date = `date +%Y%m%d:%H%M%S`.chomp
 
 top = `top -bn 1 | head -5`
 
-mem_total, mem_used = parse_top(top, "Mem") || 0.0
-swap_total, swap_used = parse_top(top, "Swap") || 0.0
+mem_total, mem_used = parse_top(top, "Mem")
+swap_total, swap_used = parse_top(top, "Swap")
 
 begin
   mem_pct  = mem_used / mem_total * 100
