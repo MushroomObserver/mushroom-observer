@@ -35,15 +35,21 @@ begin
   swap_pct = swap_used / swap_total * 100
   size     = File.size(LOG_FILE)
 rescue StandardError
-  mem_pct  = 0
-  swap_pct = 0
-  size     = 0
+  mem_used  ||= 0.0
+  mem_pct   ||= 0.0
+  swap_used ||= 0.0
+  swap_pct  ||= 0.0
+  size        = 0
 end
 
 File.open(LOG_FILE, "a") do |file|
   file.print "date                   memory           swap\n" unless size
   file.printf("%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%\n",
-              date, mem_used / 1e6, mem_pct, swap_used / 1e6, swap_pct)
+              date,
+              mem_used / 1e6,
+              mem_pct,
+              swap_used / 1e6,
+              swap_pct)
 end
 
 if swap_pct > 50 && mem_pct > 99
