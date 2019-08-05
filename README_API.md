@@ -148,13 +148,13 @@ safe to mess around with strange parameters and see what they do.  Note that
 XML responses include a copy of the SQL query used.  This can be a very
 effective way of discovering exactly how unfamiliar parameters work.  Here's
 the SQL query from one of the examples above:
-
-    SELECT DISTINCT observations.id
-    FROM `observations`
-    WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6
-    AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
-    ORDER BY observations.id ASC
-
+```sql
+SELECT DISTINCT observations.id
+FROM `observations`
+WHERE MONTH(observations.when) >= 6 AND MONTH(observations.when) <= 6
+AND (observations.location_id IN (694,...,14040) OR observations.where LIKE '%Delaware%')
+ORDER BY observations.id ASC
+```
 See also the print out of all the help messages here"
 
 * <https://github.com/MushroomObserver/mushroom-observer/blob/master/README_API_HELP_MESSAGES.txt>
