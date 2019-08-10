@@ -8,9 +8,9 @@ Overview
 
 Mushroom Observer supports a simple API based on sending GET, POST, PATCH and
 DELETE requests to URLs of the form:
-
-* <http://mushroomobserver.org/api/database_table>
-
+```
+http://mushroomobserver.org/api/<database_table>
+```
 GET requests are read-only and do not require authentication.  POST (create),
 PATCH (update) and DELETE (destroy) requests require authentication via an API
 key (see below).
