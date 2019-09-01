@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# Test user AccountControllerTest
+# signup, verification, prefs, profile, api
 class AccountControllerTest < FunctionalTestCase
   def setup
     @request.host = "localhost"
@@ -141,8 +145,7 @@ class AccountControllerTest < FunctionalTestCase
            "Signup response should be 4xx")
 
     post(:signup,
-         new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n")
-    )
+         new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n"))
     assert(html_client_error.include?(response.status),
            "Signup response should be 4xx")
   end
@@ -196,7 +199,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:login,
          user: { login: "rolf", password: "testpassword", remember_me: "" })
     assert(session[:user_id])
-    assert(!cookies["mo_user"])
+    assert_not(cookies["mo_user"])
 
     logout
     get(:test_autologin)
@@ -227,7 +230,7 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, id: user.id, auth_code: "bogus_code")
     assert_template("reverify")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
 
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_template("verify")
@@ -243,7 +246,7 @@ class AccountControllerTest < FunctionalTestCase
     login("rolf")
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_redirected_to(action: :login)
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
   end
 
   def test_verify_after_api_create
@@ -254,12 +257,12 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, id: user.id, auth_code: "bogus_code")
     assert_template("reverify")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
 
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_flash_warning
     assert_template("choose_password")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
@@ -298,7 +301,7 @@ class AccountControllerTest < FunctionalTestCase
     login("rolf")
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_redirected_to(action: :login)
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
   end
 
   def test_reverify
@@ -590,7 +593,7 @@ class AccountControllerTest < FunctionalTestCase
         require_user: :index,
         result: "no_email"
       )
-      assert(!rolf.reload.send("email_#{type}"))
+      assert_not(rolf.reload.send("email_#{type}"))
     end
   end
 
