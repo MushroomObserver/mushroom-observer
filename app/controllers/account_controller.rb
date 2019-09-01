@@ -184,61 +184,11 @@ class AccountController < ApplicationController
 
   # :prefetch:
   def login
-    if request.method != "POST"
-      @login = ""
-      @remember = true
-    else
-      user_params = params[:user] || {}
-      @login    = user_params[:login].to_s
-      @password = user_params[:password].to_s
-      @remember = user_params[:remember_me] == "1"
-      user = User.authenticate(@login, @password)
-      user ||= User.authenticate(@login, @password.strip)
-      if !user
-        flash_error :runtime_login_failed.t
-      elsif !user.verified
-        @unverified_user = user
-        render(action: "reverify")
-      else
-        flash_notice :runtime_login_success.t
-        @user = user
-        @user.last_login = now = Time.zone.now
-        @user.updated_at = now
-        @user.save
-        User.current = @user
-        session_user_set(@user)
-        if @remember
-          autologin_cookie_set(@user)
-        else
-          clear_autologin_cookie
-        end
-        redirect_back_or_default(action: :welcome)
-      end
-    end
+    request.method == "POST" ? login_post : login_get
   end
 
   def email_new_password
-    if request.method != "POST"
-      @new_user = User.new
-    else
-      @login = params["new_user"]["login"]
-      @new_user = User.where("login = ? OR name = ? OR email = ?",
-                             @login, @login, @login).first
-      if @new_user.nil?
-        flash_error :runtime_email_new_password_failed.t(user: @login)
-      else
-        password = String.random(10)
-        @new_user.change_password(password)
-        if @new_user.save
-          flash_notice(:runtime_email_new_password_success.tp +
-                       :email_spam_notice.tp)
-          PasswordEmail.build(@new_user, password).deliver_now
-          render(action: "login")
-        else
-          flash_object_errors(@new_user)
-        end
-      end
-    end
+    request.method == "POST" ? email_new_password_post : email_new_password_get
   end
 
   def logout_user
@@ -247,6 +197,71 @@ class AccountController < ApplicationController
     session_user_set(nil)
     clear_autologin_cookie
   end
+
+  # ========= private Login section methods ==========
+
+  private
+
+  def login_get
+    @login = ""
+    @remember = true
+  end
+
+  def login_post
+    user_params = params[:user] || {}
+    @login    = user_params[:login].to_s
+    @password = user_params[:password].to_s
+    @remember = user_params[:remember_me] == "1"
+    user = User.authenticate(@login, @password)
+    user ||= User.authenticate(@login, @password.strip)
+
+    return flash_error :runtime_login_failed.t unless user
+
+    user.verified ? login_success(user) : login_unverified(user)
+  end
+
+  def login_success(user)
+    flash_notice :runtime_login_success.t
+    @user = user
+    @user.last_login = now = Time.zone.now
+    @user.updated_at = now
+    @user.save
+    User.current = @user
+    session_user_set(@user)
+    @remember ? autologin_cookie_set(@user) : clear_autologin_cookie
+    redirect_back_or_default(action: :welcome)
+  end
+
+  def login_unverified(user)
+    @unverified_user = user
+    render(action: "reverify")
+  end
+
+  def email_new_password_get
+    @new_user = User.new
+  end
+
+  def email_new_password_post
+    @login = params["new_user"]["login"]
+    @new_user = User.where("login = ? OR name = ? OR email = ?",
+                           @login, @login, @login).first
+    if @new_user.nil?
+      flash_error :runtime_email_new_password_failed.t(user: @login)
+    else
+      password = String.random(10)
+      @new_user.change_password(password)
+      if @new_user.save
+        flash_notice(:runtime_email_new_password_success.tp +
+                     :email_spam_notice.tp)
+        PasswordEmail.build(@new_user, password).deliver_now
+        render(action: "login")
+      else
+        flash_object_errors(@new_user)
+      end
+    end
+  end
+
+  public
 
   ##############################################################################
   #
@@ -608,7 +623,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key # :login: :norobots:
-    if @key = find_or_goto_index(ApiKey, params[:id].to_s)
+    if (@key = find_or_goto_index(ApiKey, params[:id].to_s))
       if check_permission!(@key)
         if request.method == "POST"
           if params[:commit] == :UPDATE.l
@@ -642,36 +657,7 @@ class AccountController < ApplicationController
   end
 
   def add_user_to_group # :root:
-    redirect = true
-    if in_admin_mode?
-      if request.method == "POST"
-        user_name  = params["user_name"].to_s
-        group_name = params["group_name"].to_s
-        user       = User.find_by(login: user_name)
-        group      = UserGroup.find_by(name: group_name)
-        flash_error :add_user_to_group_no_user.t(user: user_name) unless user
-        unless group
-          flash_error :add_user_to_group_no_group.t(group: group_name)
-        end
-        if user && group
-          if user.user_groups.member?(group)
-            flash_warning :add_user_to_group_already. \
-              t(user: user_name, group: group_name)
-          else
-            user.user_groups << group
-            flash_notice :add_user_to_group_success. \
-              t(user: user_name, group: group_name)
-          end
-        end
-      else
-        redirect = false
-      end
-    else
-      flash_error :permission_denied.t
-    end
-    if redirect
-      redirect_back_or_default(controller: "observer", action: "index")
-    end
+    in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
   end
 
   # This is messy, but the new User#erase_user method makes a pretty good
@@ -686,6 +672,41 @@ class AccountController < ApplicationController
     end
     redirect_back_or_default("/")
   end
+
+  # ========= private Admin utilities section methods ==========
+
+  private
+
+  def add_user_to_group_admin_mode
+    return unless request.method == "POST"
+
+    user_name  = params["user_name"].to_s
+    group_name = params["group_name"].to_s
+    user       = User.find_by(login: user_name)
+    group      = UserGroup.find_by(name: group_name)
+
+    flash_error :add_user_to_group_no_user.t(user: user_name) unless user
+    flash_error :add_user_to_group_no_group.t(group: group_name) unless group
+
+    if user && group
+      if user.user_groups.member?(group)
+        flash_warning :add_user_to_group_already. \
+          t(user: user_name, group: group_name)
+      else
+        user.user_groups << group
+        flash_notice :add_user_to_group_success. \
+          t(user: user_name, group: group_name)
+      end
+    end
+    redirect_back_or_default(controller: "observer", action: "index")
+  end
+
+  def add_user_to_group_user_mode
+    flash_error :permission_denied.t
+    redirect_back_or_default(controller: "observer", action: "index")
+  end
+
+  public
 
   ##############################################################################
   #
