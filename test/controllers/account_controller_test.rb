@@ -119,6 +119,34 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referrer)
   end
 
+  def test_block_known_evil_signups
+    params = {
+      login: "newbob",
+      password: "topsykritt",
+      password_confirmation: "topsykritt",
+      email: "blah@somewhere.org",
+      email_confirmation: "blah@somewhere.org",
+      mailing_address: "",
+      theme: "NULL",
+      notes: ""
+    }
+    html_client_error = 400..499
+
+    post(:signup, new_user: params.merge(login: "xUplilla"))
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+
+    post(:signup, new_user: params.merge(email: "foo@xxx.xyz"))
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+
+    post(:signup,
+         new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n")
+    )
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+  end
+
   def test_invalid_login
     post(:login, user: { login: "rolf", password: "not_correct" })
     assert_nil(@request.session["user_id"])

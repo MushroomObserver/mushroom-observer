@@ -73,7 +73,7 @@ class AccountController < ApplicationController
     return if request.method != "POST"
 
     initialize_new_user
-    return if block_vemslons!
+    return if block_evil_signups!
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
 
@@ -731,13 +731,25 @@ class AccountController < ApplicationController
                                              :password, :password_confirmation))
   end
 
-  def block_vemslons!
-    return false unless @new_user.login.to_s.match(/(Vemslons|Uplilla)$/)
+  # Block attempts to register by clients with known "evil" params,
+  # where "evil" means: sending a Verification email will throw an error;
+  # the Verification email will cause Undelivered Mail Returned to Send; and/or
+  # it's a known spammer.
+  def block_evil_signups!
+    return false unless evil_signup_credentials?
 
-    render(status: 429,
+    # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
+    render(status: :too_many_requests,
            content_type: "text/plain",
-           plain: "We grow weary of this.  Please go away.")
-    return true
+           plain: "We grow weary of this. Please go away.")
+    true
+  end
+
+  def evil_signup_credentials?
+    /(Vemslons|Uplilla)$/ =~ @new_user.login ||
+      /(\.xyz|namnerbca.com)$/ =~ @new_user.email ||
+      # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
+      /blizkoyan2017/ =~ @new_user.email.remove(".")
   end
 
   def make_sure_theme_is_valid!
