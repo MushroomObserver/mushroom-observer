@@ -187,6 +187,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_error(
       "email_new_password should flash error if user doesn't already exist"
     )
+
+    user = users(:roy)
+    old_password = user.password
+    post(:email_new_password,
+         params: { new_user: { login: users(:roy).login } })
+    user.reload
+    assert_not_equal(user.password, old_password,
+                     "New password should be different from old")
   end
 
   # Test autologin feature.
@@ -721,5 +729,37 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)
+  end
+
+  ######## Test Admin Methods ##################################################
+
+  def test_add_user_to_group
+    login(:rolf)
+    post(:add_user_to_group)
+    assert_flash_error
+
+    # Happy path
+    make_admin
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_success
+    assert(users(:roy).in_group?(user_groups(:bolete_users).name))
+
+    # Unhappy paths
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_warning # Roy is already a member; we just added him above.
+
+    post(:add_user_to_group,
+         params: { user_name: "AbsoluteNonsenseVermslons",
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_error
+
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: "AbsoluteNonsenseVermslons" })
+    assert_flash_error
   end
 end
