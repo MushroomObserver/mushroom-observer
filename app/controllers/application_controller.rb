@@ -417,7 +417,8 @@ class ApplicationController < ActionController::Base
   def make_logged_in_user_available_to_everyone
     User.current = @user
     logger.warn("user=#{@user ? @user.id : "0"}" \
-                "robot=#{browser.bot? ? "Y" : "N"}")
+                " robot=#{browser.bot? ? "Y" : "N"}" \
+                " ip=#{request.remote_ip}")
   end
 
   # Track when user requested a page, but update at most once an hour.
