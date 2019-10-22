@@ -500,25 +500,39 @@ class Location < AbstractModel
     reasons = []
     return [] if name.blank?
 
-    a_country = understood_country?(country(name))
-    if a_country.nil?
-      reasons << :location_dubious_unknown_country.t(country: country(name))
+    this_country = country(name)
+    this_state = state(name)
+    real_country = understood_country?(this_country)
+    if real_country.nil?
+      reasons << :location_dubious_unknown_country.t(country: this_country)
     end
-    if has_known_states?(a_country)
-      if understood_state?(country(name), a_country) # e.g."Western Australia"
-        reasons << :location_dubious_ambiguous_country.t(country: a_country)
+    if real_country && has_known_states?(real_country)
+      if this_state
+        if understood_state?(this_state, real_country).nil?
+          reasons << :location_dubious_unknown_state.t(country: real_country,
+                                                       state: this_state)
+        end
+      elsif this_country != real_country
+        # Note that we accept things like "Western Mexico" as a valid country
+        # modified by "Western".  However, in the case of Australia, this could
+        # be ambiguous because there is also a state "Western Australia".
+        # But note that Mexico has a state also called Mexico.  We want to
+        # complain if the user enters "Western Australia" bare because they
+        # may have just forgotten to include the country.  But we do not want
+        # to complain if the user enters "Mexico" bare because that is fine.
+        # If the user also entered a state, say "Perth, Western Australia",
+        # then it will complain above because "Perth" is not a valid state of
+        # Australia.  The use case that prompted this subtle change in logic
+        # was that it was impossible to enter *any* location in Mexico because
+        # Mexico was an ambiguous state/country!  Now this code only applies
+        # to a bare country which may be ambiguous.
+        if understood_state?(this_country, real_country)
+          reasons << :location_dubious_ambiguous_country.t(country: this_country)
+        end
       end
-      a_state = state(name)
-      if a_state && understood_state?(a_state, a_country).nil?
-        reasons << :location_dubious_unknown_state.t(country: a_country,
-                                                     state: a_state)
-      end
-    else
-      a_state = state(name)
-      if a_state && understood_country?(a_state)
-        reasons << :location_dubious_redundant_state.t(country: a_country,
-                                                       state: a_state)
-      end
+    elsif this_state && understood_country?(this_state)
+      reasons << :location_dubious_redundant_state.t(country: real_country,
+                                                     state: this_state)
     end
     reasons
   end
