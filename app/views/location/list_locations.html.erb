@@ -10,6 +10,17 @@
   @known_pages = @pages
   @known_data  = @objects
 
+  @observation_counts = {}
+  Location.connection.select_rows(%(
+    SELECT locations.id, COUNT(observations.id)
+    FROM locations
+    JOIN observations ON observations.location_id = locations.id
+    WHERE locations.id IN (#{@known_data.map(&:id).join(",")})
+    GROUP BY locations.id
+  )).each do |id, count|
+    @observation_counts[id] = count
+  end
+
   flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
@@ -32,7 +43,7 @@
             <div class="list-group-item">
               <%= link_with_query(location.display_name.t,
                                   location.show_link_args) %>
-              (<%= observation_count(location) %>)
+              (<%= @observation_counts[location.id].to_i %>)
             </div>
           <% end %>
         </div>

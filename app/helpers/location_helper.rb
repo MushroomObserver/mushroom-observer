@@ -13,8 +13,4 @@ module LocationHelper
   def show_obs_link_title_with_count(location)
     "#{:show_location_observations.t} (#{observation_count(location)})"
   end
-
-  def observation_count(location)
-    Observation.where(location: location).count
-  end
 end
