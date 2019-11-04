@@ -73,7 +73,7 @@ class AccountController < ApplicationController
     return if request.method != "POST"
 
     initialize_new_user
-    return if block_vemslons!
+    return if block_evil_signups!
     return unless make_sure_theme_is_valid!
     return unless validate_and_save_new_user!
 
@@ -184,61 +184,11 @@ class AccountController < ApplicationController
 
   # :prefetch:
   def login
-    if request.method != "POST"
-      @login = ""
-      @remember = true
-    else
-      user_params = params[:user] || {}
-      @login    = user_params[:login].to_s
-      @password = user_params[:password].to_s
-      @remember = user_params[:remember_me] == "1"
-      user = User.authenticate(@login, @password)
-      user ||= User.authenticate(@login, @password.strip)
-      if !user
-        flash_error :runtime_login_failed.t
-      elsif !user.verified
-        @unverified_user = user
-        render(action: "reverify")
-      else
-        flash_notice :runtime_login_success.t
-        @user = user
-        @user.last_login = now = Time.zone.now
-        @user.updated_at = now
-        @user.save
-        User.current = @user
-        session_user_set(@user)
-        if @remember
-          autologin_cookie_set(@user)
-        else
-          clear_autologin_cookie
-        end
-        redirect_back_or_default(action: :welcome)
-      end
-    end
+    request.method == "POST" ? login_post : login_get
   end
 
   def email_new_password
-    if request.method != "POST"
-      @new_user = User.new
-    else
-      @login = params["new_user"]["login"]
-      @new_user = User.where("login = ? OR name = ? OR email = ?",
-                             @login, @login, @login).first
-      if @new_user.nil?
-        flash_error :runtime_email_new_password_failed.t(user: @login)
-      else
-        password = String.random(10)
-        @new_user.change_password(password)
-        if @new_user.save
-          flash_notice(:runtime_email_new_password_success.tp +
-                       :email_spam_notice.tp)
-          PasswordEmail.build(@new_user, password).deliver_now
-          render(action: "login")
-        else
-          flash_object_errors(@new_user)
-        end
-      end
-    end
+    request.method == "POST" ? email_new_password_post : email_new_password_get
   end
 
   def logout_user
@@ -247,6 +197,71 @@ class AccountController < ApplicationController
     session_user_set(nil)
     clear_autologin_cookie
   end
+
+  # ========= private Login section methods ==========
+
+  private
+
+  def login_get
+    @login = ""
+    @remember = true
+  end
+
+  def login_post
+    user_params = params[:user] || {}
+    @login    = user_params[:login].to_s
+    @password = user_params[:password].to_s
+    @remember = user_params[:remember_me] == "1"
+    user = User.authenticate(@login, @password)
+    user ||= User.authenticate(@login, @password.strip)
+
+    return flash_error :runtime_login_failed.t unless user
+
+    user.verified ? login_success(user) : login_unverified(user)
+  end
+
+  def login_success(user)
+    flash_notice :runtime_login_success.t
+    @user = user
+    @user.last_login = now = Time.zone.now
+    @user.updated_at = now
+    @user.save
+    User.current = @user
+    session_user_set(@user)
+    @remember ? autologin_cookie_set(@user) : clear_autologin_cookie
+    redirect_back_or_default(action: :welcome)
+  end
+
+  def login_unverified(user)
+    @unverified_user = user
+    render(action: "reverify")
+  end
+
+  def email_new_password_get
+    @new_user = User.new
+  end
+
+  def email_new_password_post
+    @login = params["new_user"]["login"]
+    @new_user = User.where("login = ? OR name = ? OR email = ?",
+                           @login, @login, @login).first
+    if @new_user.nil?
+      flash_error :runtime_email_new_password_failed.t(user: @login)
+    else
+      password = String.random(10)
+      @new_user.change_password(password)
+      if @new_user.save
+        flash_notice(:runtime_email_new_password_success.tp +
+                     :email_spam_notice.tp)
+        PasswordEmail.build(@new_user, password).deliver_now
+        render(action: "login")
+      else
+        flash_object_errors(@new_user)
+      end
+    end
+  end
+
+  public
 
   ##############################################################################
   #
@@ -608,7 +623,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key # :login: :norobots:
-    if @key = find_or_goto_index(ApiKey, params[:id].to_s)
+    if (@key = find_or_goto_index(ApiKey, params[:id].to_s))
       if check_permission!(@key)
         if request.method == "POST"
           if params[:commit] == :UPDATE.l
@@ -642,36 +657,7 @@ class AccountController < ApplicationController
   end
 
   def add_user_to_group # :root:
-    redirect = true
-    if in_admin_mode?
-      if request.method == "POST"
-        user_name  = params["user_name"].to_s
-        group_name = params["group_name"].to_s
-        user       = User.find_by(login: user_name)
-        group      = UserGroup.find_by(name: group_name)
-        flash_error :add_user_to_group_no_user.t(user: user_name) unless user
-        unless group
-          flash_error :add_user_to_group_no_group.t(group: group_name)
-        end
-        if user && group
-          if user.user_groups.member?(group)
-            flash_warning :add_user_to_group_already. \
-              t(user: user_name, group: group_name)
-          else
-            user.user_groups << group
-            flash_notice :add_user_to_group_success. \
-              t(user: user_name, group: group_name)
-          end
-        end
-      else
-        redirect = false
-      end
-    else
-      flash_error :permission_denied.t
-    end
-    if redirect
-      redirect_back_or_default(controller: "observer", action: "index")
-    end
+    in_admin_mode? ? add_user_to_group_admin_mode : add_user_to_group_user_mode
   end
 
   # This is messy, but the new User#erase_user method makes a pretty good
@@ -686,6 +672,54 @@ class AccountController < ApplicationController
     end
     redirect_back_or_default("/")
   end
+
+  # ========= private Admin utilities section methods ==========
+
+  private
+
+  def add_user_to_group_admin_mode
+    return unless request.method == "POST"
+
+    user_name  = params["user_name"].to_s
+    group_name = params["group_name"].to_s
+    user       = User.find_by(login: user_name)
+    group      = UserGroup.find_by(name: group_name)
+
+    if can_add_user_to_group?(user, group)
+      do_add_user_to_group(user, group)
+    else
+      do_not_add_user_to_group(user, group, user_name, group_name)
+    end
+
+    redirect_back_or_default(controller: "observer", action: "index")
+  end
+
+  def can_add_user_to_group?(user, group)
+    user && group && !user.user_groups.member?(group)
+  end
+
+  def do_add_user_to_group(user, group)
+    user.user_groups << group
+    flash_notice :add_user_to_group_success. \
+      t(user: user.name, group: group.name)
+  end
+
+  def do_not_add_user_to_group(user, group, user_name, group_name)
+    if user && group
+      flash_warning :add_user_to_group_already. \
+        t(user: user_name, group: group_name)
+    else
+      flash_error :add_user_to_group_no_user.t(user: user_name) unless user
+      flash_error :add_user_to_group_no_group.t(group: group_name) unless group
+    end
+  end
+
+  def add_user_to_group_user_mode
+    flash_error :permission_denied.t
+    redirect_back_or_default(controller: "observer", action: "index")
+  end
+
+  public
 
   ##############################################################################
   #
@@ -731,13 +765,25 @@ class AccountController < ApplicationController
                                              :password, :password_confirmation))
   end
 
-  def block_vemslons!
-    return false unless @new_user.login.to_s.match(/(Vemslons|Uplilla)$/)
+  # Block attempts to register by clients with known "evil" params,
+  # where "evil" means: sending a Verification email will throw an error;
+  # the Verification email will cause Undelivered Mail Returned to Send; and/or
+  # it's a known spammer.
+  def block_evil_signups!
+    return false unless evil_signup_credentials?
 
-    render(status: 429,
+    # Too Many Requests == 429. Any 4xx status (Client Error) would also work.
+    render(status: :too_many_requests,
            content_type: "text/plain",
-           plain: "We grow weary of this.  Please go away.")
-    return true
+           plain: "We grow weary of this. Please go away.")
+    true
+  end
+
+  def evil_signup_credentials?
+    /(Vemslons|Uplilla)$/ =~ @new_user.login ||
+      /(\.xyz|namnerbca.com)$/ =~ @new_user.email ||
+      # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
+      /blizkoyan2017/ =~ @new_user.email.remove(".")
   end
 
   def make_sure_theme_is_valid!

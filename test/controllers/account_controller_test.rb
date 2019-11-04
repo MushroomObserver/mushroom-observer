@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# Test user AccountControllerTest
+# signup, verification, prefs, profile, api
 class AccountControllerTest < FunctionalTestCase
   def setup
     @request.host = "localhost"
@@ -119,6 +123,33 @@ class AccountControllerTest < FunctionalTestCase
     assert_redirected_to(referrer)
   end
 
+  def test_block_known_evil_signups
+    params = {
+      login: "newbob",
+      password: "topsykritt",
+      password_confirmation: "topsykritt",
+      email: "blah@somewhere.org",
+      email_confirmation: "blah@somewhere.org",
+      mailing_address: "",
+      theme: "NULL",
+      notes: ""
+    }
+    html_client_error = 400..499
+
+    post(:signup, new_user: params.merge(login: "xUplilla"))
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+
+    post(:signup, new_user: params.merge(email: "foo@xxx.xyz"))
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+
+    post(:signup,
+         new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n"))
+    assert(html_client_error.include?(response.status),
+           "Signup response should be 4xx")
+  end
+
   def test_invalid_login
     post(:login, user: { login: "rolf", password: "not_correct" })
     assert_nil(@request.session["user_id"])
@@ -156,6 +187,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_error(
       "email_new_password should flash error if user doesn't already exist"
     )
+
+    user = users(:roy)
+    old_password = user.password
+    post(:email_new_password,
+         params: { new_user: { login: users(:roy).login } })
+    user.reload
+    assert_not_equal(user.password, old_password,
+                     "New password should be different from old")
   end
 
   # Test autologin feature.
@@ -168,7 +207,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:login,
          user: { login: "rolf", password: "testpassword", remember_me: "" })
     assert(session[:user_id])
-    assert(!cookies["mo_user"])
+    assert_not(cookies["mo_user"])
 
     logout
     get(:test_autologin)
@@ -199,7 +238,7 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, id: user.id, auth_code: "bogus_code")
     assert_template("reverify")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
 
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_template("verify")
@@ -215,7 +254,7 @@ class AccountControllerTest < FunctionalTestCase
     login("rolf")
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_redirected_to(action: :login)
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
   end
 
   def test_verify_after_api_create
@@ -226,12 +265,12 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, id: user.id, auth_code: "bogus_code")
     assert_template("reverify")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
 
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_flash_warning
     assert_template("choose_password")
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
@@ -270,7 +309,7 @@ class AccountControllerTest < FunctionalTestCase
     login("rolf")
     get(:verify, id: user.id, auth_code: user.auth_code)
     assert_redirected_to(action: :login)
-    assert(!@request.session[:user_id])
+    assert_not(@request.session[:user_id])
   end
 
   def test_reverify
@@ -562,7 +601,7 @@ class AccountControllerTest < FunctionalTestCase
         require_user: :index,
         result: "no_email"
       )
-      assert(!rolf.reload.send("email_#{type}"))
+      assert_not(rolf.reload.send("email_#{type}"))
     end
   end
 
@@ -690,5 +729,37 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_success
     assert_redirected_to(action: :api_keys)
     assert_equal("new name", key.reload.notes)
+  end
+
+  ######## Test Admin Methods ##################################################
+
+  def test_add_user_to_group
+    login(:rolf)
+    post(:add_user_to_group)
+    assert_flash_error
+
+    # Happy path
+    make_admin
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_success
+    assert(users(:roy).in_group?(user_groups(:bolete_users).name))
+
+    # Unhappy paths
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_warning # Roy is already a member; we just added him above.
+
+    post(:add_user_to_group,
+         params: { user_name: "AbsoluteNonsenseVermslons",
+                   group_name: user_groups(:bolete_users).name })
+    assert_flash_error
+
+    post(:add_user_to_group,
+         params: { user_name: users(:roy).login,
+                   group_name: "AbsoluteNonsenseVermslons" })
+    assert_flash_error
   end
 end
