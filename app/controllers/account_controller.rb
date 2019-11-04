@@ -837,9 +837,12 @@ class AccountController < ApplicationController
     live.com
   ].freeze
 
+  BOGUS_LOGINS = /houghgype|vemslons/.freeze
+
   def notify_root_of_blocked_verification_email(user)
     domain = user.email.to_s.sub(/^.*@/, "")
     return unless SPAM_BLOCKERS.any? { |d| domain == d }
+    return if user.login.to_s.match(BOGUS_LOGINS)
 
     notify_root_of_verification_email(user)
   end
