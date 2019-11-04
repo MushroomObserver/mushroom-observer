@@ -13,4 +13,22 @@ module LocationHelper
   def show_obs_link_title_with_count(location)
     "#{:show_location_observations.t} (#{location.observations.count})"
   end
+
+  def calc_counts(locations)
+    results = {}
+    if locations.any?
+      # Location.connection.select_rows(%(
+      #   SELECT locations.id, COUNT(observations.id)
+      #   FROM locations
+      #   JOIN observations ON observations.location_id = locations.id
+      #   WHERE locations.id IN (#{locations.map(&:id).join(",")})
+      #   GROUP BY locations.id
+      #     )).each do |id, count|
+      Observation.where(location: locations)
+        .group(:location_id).count.each do |id, count|
+        results[id] = count
+      end
+    end
+    results
+  end
 end
