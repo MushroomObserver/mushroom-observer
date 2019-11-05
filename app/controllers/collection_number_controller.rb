@@ -11,21 +11,21 @@ class CollectionNumberController < ApplicationController
   ]
 
   # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_collection_number # :nologin: :norobots:
+  def index_collection_number # :norobots:
     query = find_or_create_query(:CollectionNumber, by: params[:by])
     show_selected_collection_numbers(query, id: params[:id].to_s,
                                             always_index: true)
   end
 
   # Show list of collection_numbers.
-  def list_collection_numbers # :nologin: :norobots:
+  def list_collection_numbers # :norobots:
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
   end
 
   # Display list of CollectionNumbers whose text matches a string pattern.
-  def collection_number_search # :nologin: :norobots:
+  def collection_number_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (collection_number = CollectionNumber.safe_find(pattern))
@@ -36,7 +36,7 @@ class CollectionNumberController < ApplicationController
     end
   end
 
-  def observation_index # :nologin: :norobots:
+  def observation_index # :norobots:
     store_location
     query = create_query(:CollectionNumber, :for_observation,
                          observation: params[:id].to_s)
@@ -49,18 +49,18 @@ class CollectionNumberController < ApplicationController
     show_selected_collection_numbers(query, always_index: true)
   end
 
-  def show_collection_number # :nologin:
+  def show_collection_number
     store_location
     pass_query_params
     @canonical_url = CollectionNumber.show_url(params[:id])
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
-  def next_collection_number # :nologin: :norobots:
+  def next_collection_number # :norobots:
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
   end
 
-  def prev_collection_number # :nologin: :norobots:
+  def prev_collection_number # :norobots:
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
@@ -231,7 +231,7 @@ class CollectionNumberController < ApplicationController
 
   def name_and_number_free?
     @other_number = CollectionNumber.where(
-      name:   @collection_number.name,
+      name: @collection_number.name,
       number: @collection_number.number
     ).first
     !@other_number || @other_number == @collection_number

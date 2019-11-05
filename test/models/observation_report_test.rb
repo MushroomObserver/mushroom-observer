@@ -21,6 +21,8 @@ class ObservationReportTest < UnitTestCase
     assert_equal(expect, rows[idx + 1].split("\t"))
   end
 
+  # ----------------------------------------------------------------------------
+
   def test_adolf
     obs = observations(:agaricus_campestris_obs)
     expect = [
@@ -238,7 +240,7 @@ class ObservationReportTest < UnitTestCase
       "Mary Newbie",
       "2006-05-11",
       "X",
-      "Cortinarius sp.: NYBG 1234, Fungi: 314159",
+      "Cortinarius sp.: 1234, Fungi: 314159",
       obs.name.id.to_s,
       "Fungi",
       nil,
@@ -266,7 +268,7 @@ class ObservationReportTest < UnitTestCase
     do_csv_test(ObservationReport::Raw, obs, expect, &:id)
   end
 
-  def test_symbiota
+  def test_symbiota1
     obs = observations(:detailed_unknown_obs)
     obs.notes = {
       Substrate: "wood\tchips",
@@ -287,7 +289,7 @@ class ObservationReportTest < UnitTestCase
       "",
       "Mary Newbie",
       "174",
-      "vouchered",
+      "NY",
       "2006-05-11",
       "2006",
       "5",
@@ -301,12 +303,47 @@ class ObservationReportTest < UnitTestCase
       "148",
       "294",
       "#{obs.updated_at.api_time} UTC",
-      'wood\tchips',
+      'wood chips',
       "Agaricus",
-      'Habitat: lawn\nOther: First\tline.\nSecond\tline.',
+      'Habitat: lawn Other: First line. Second line.',
+      "#{obs.id}",
       "http://mushroomobserver.org/#{obs.id}",
       "http://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "http://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
+  end
+
+  def test_symbiota2
+    obs = observations(:agaricus_campestrus_obs)
+    expect = [
+      "Agaricus campestrus",
+      "L.",
+      "Species",
+      "Agaricus",
+      "campestrus",
+      "",
+      "Rolf Singer",
+      "MUOB #{obs.id}",
+      "",
+      "2007-06-23",
+      "2007",
+      "6",
+      "23",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "",
+      "",
+      "From somewhere else",
+      "#{obs.id}",
+      "http://mushroomobserver.org/#{obs.id}"
     ]
     do_tsv_test(ObservationReport::Symbiota, obs, expect, &:id)
   end

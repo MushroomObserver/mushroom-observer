@@ -56,6 +56,18 @@ Performance/RegexpMatch:
 Rails/DynamicFindBy:
   Enabled: False
 
+# MO uses HABTM extensively; RuboCop prefers the newer has_many through
+# Switching would require a migration process, detailed here:
+# http://chrisrolle.com/en/blog/migration-path-from-habtm-to-has_many-through
+# It's not worth the effort
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+# MO overrides Rails http methods, using positional arguments in our code,
+# but passing keyword arguments to Rails
+Rails/HttpPositionalArguments:
+  Enabled: False
+
 Style/FrozenStringLiteralComment:
   # When it's auto-corrected in Ruby 2.4, our test suite won't run.
   # We get: "can't modify frozen String" error
@@ -122,6 +134,10 @@ Metrics/PerceivedComplexity:
     - "test//**/*"
 
 ###################### Layout and Style ########################################
+
+# Repeat the default because Codeclimate ignores it as of 2019-07-09
+Layout/AlignHash:
+  EnforcedColonStyle: key
 
 # Rubocop supports multiple options and MO uses a non-default
 Layout/DotPosition:

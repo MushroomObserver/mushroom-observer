@@ -5,12 +5,12 @@ class Query::HerbariumBase < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?:  [:time],
-      updated_at?:  [:time],
-      code?:        :string,
-      name?:        :string,
+      created_at?: [:time],
+      updated_at?: [:time],
+      code?: :string,
+      name?: :string,
       description?: :string,
-      address?:     :string
+      address?: :string
     )
   end
 

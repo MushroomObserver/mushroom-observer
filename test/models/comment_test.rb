@@ -111,8 +111,8 @@ class CommentTest < UnitTestCase
     old = num_emails
     obs&.reload # (to ensure it sees chgs in user prefs)
     Comment.create!(
-      target:  obs,
-      user:    user,
+      target: obs,
+      user: user,
       summary: summary,
       comment: comment
     )

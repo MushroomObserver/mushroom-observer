@@ -16,22 +16,22 @@ class API
 
     def query_params
       {
-        where:          sql_id_condition,
-        created_at:     parse_range(:time, :created_at),
-        updated_at:     parse_range(:time, :updated_at),
-        users:          parse_array(:user, :user, help: :creator),
-        observations:   parse_array(:observation, :observation),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users: parse_array(:user, :user, help: :creator),
+        observations: parse_array(:observation, :observation),
         external_sites: parse_array(:external_site, :external_site),
-        url:            parse(:string, :url)
+        url: parse(:string, :url)
       }
     end
 
     def create_params
       {
-        observation:   parse(:observation, :observation),
+        observation: parse(:observation, :observation),
         external_site: parse(:external_site, :external_site),
-        url:           parse(:string, :url),
-        user:          @user
+        url: parse(:string, :url),
+        user: @user
       }
     end
 

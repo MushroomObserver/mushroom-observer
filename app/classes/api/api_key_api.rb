@@ -11,8 +11,8 @@ class API
     def create_params
       @for_user = parse(:user, :for_user, help: :api_key_user) || @user
       {
-        notes:    parse(:string, :app, help: 1),
-        user:     @for_user,
+        notes: parse(:string, :app, help: 1),
+        user: @for_user,
         verified: (@for_user == @user ? Time.now : nil)
       }
     end

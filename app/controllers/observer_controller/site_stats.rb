@@ -1,6 +1,6 @@
 # see observer_controller.rb
 class ObserverController
-  def show_site_stats # :nologin: :norobots:
+  def show_site_stats # :norobots:
     store_location
     @site_data = SiteData.new.get_site_data
 

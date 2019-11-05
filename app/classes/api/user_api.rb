@@ -16,7 +16,7 @@ class API
 
     def query_params
       {
-        where:      sql_id_condition,
+        where: sql_id_condition,
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at)
       }
@@ -25,19 +25,19 @@ class API
     def create_params
       @create_key = parse(:string, :create_key, help: 1)
       {
-        login:           parse(:string, :login, limit: 80),
-        name:            parse(:string, :name, limit: 80, default: ""),
-        email:           parse(:email, :email, limit: 80),
-        password:        parse(:string, :password, limit: 80),
-        locale:          parse(:lang, :locale),
-        notes:           parse(:string, :notes, default: ""),
+        login: parse(:string, :login, limit: 80),
+        name: parse(:string, :name, limit: 80, default: ""),
+        email: parse(:email, :email, limit: 80),
+        password: parse(:string, :password, limit: 80),
+        locale: parse(:lang, :locale),
+        notes: parse(:string, :notes, default: ""),
         mailing_address: parse(:string, :mailing_address, default: ""),
-        license:         parse(:license, :license, default: License.preferred),
-        location:        parse(:location, :location),
-        image:           parse(:image, :image),
-        verified:        nil,
-        admin:           false,
-        layout_count:    15
+        license: parse(:license, :license, default: License.preferred),
+        location: parse(:location, :location),
+        image: parse(:image, :image),
+        verified: nil,
+        admin: false,
+        layout_count: 15
       }
     end
 
@@ -48,12 +48,12 @@ class API
         # name:     parse(:string, :set_name, limit: 80, default: ""),
         # email:    parse(:email, :set_email, limit: 80),
         # password: parse(:string, :set_password, limit: 80),
-        locale:     parse(:lang, :set_locale, not_blank: true),
-        notes:      parse(:string, :set_notes, default: ""),
+        locale: parse(:lang, :set_locale, not_blank: true),
+        notes: parse(:string, :set_notes, default: ""),
         mailing_address: parse(:string, :set_mailing_address, default: ""),
-        license:    parse(:license, :set_license, not_blank: true),
-        location:   parse(:location, :set_location),
-        image:      parse(:image, :set_image, must_be_owner: true)
+        license: parse(:license, :set_license, not_blank: true),
+        location: parse(:location, :set_location),
+        image: parse(:image, :set_image, must_be_owner: true)
       }
     end
 

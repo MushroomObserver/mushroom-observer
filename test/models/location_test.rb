@@ -50,6 +50,9 @@ class LocationTest < UnitTestCase
     good_location("Montreal, Quebec, Canada")
     good_location("10th Ave. and Lincoln Way, San Francisco, California, USA")
     good_location("near Chester, California, USA")
+    good_location("Mexico")
+    good_location("Mexico, Mexico")
+    good_location("Guanajuato, Mexico")
   end
 
   def test_understood_country

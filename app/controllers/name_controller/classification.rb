@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 # see app/controllers/name_controller.rb
 class NameController
-  def propagate_classification # :norobots:
+  def propagate_classification
     pass_query_params
     name = find_or_goto_index(Name, params[:id])
     return unless name
@@ -10,20 +12,20 @@ class NameController
     redirect_with_query(name.show_link_args)
   end
 
-  def refresh_classification # :norobots:
+  def refresh_classification
     pass_query_params
     name = find_or_goto_index(Name, params[:id])
     return unless name
     return unless make_sure_name_below_genus!(name)
     return unless make_sure_genus_has_classification!(name)
 
-    name.update_attributes(classification: name.genus.classification)
+    name.update(classification: name.genus.classification)
     desc = name.description
-    desc&.update_attributes(classification: name.genus.classification)
+    desc&.update(classification: name.genus.classification)
     redirect_with_query(name.show_link_args)
   end
 
-  def inherit_classification # :norobots:
+  def inherit_classification
     store_location
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
@@ -41,7 +43,7 @@ class NameController
     redirect_with_query(@name.show_link_args)
   end
 
-  def edit_classification # :norobots:
+  def edit_classification
     store_location
     pass_query_params
     @name = find_or_goto_index(Name, params[:id])
@@ -54,6 +56,8 @@ class NameController
     @name.change_classification(@name.classification)
     redirect_with_query(@name.show_link_args)
   end
+
+  # ----------------------------------------------------------------------------
 
   private
 

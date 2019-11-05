@@ -153,6 +153,7 @@ conocybe_filaris: # 11
   display_name: '**__Conocybe filaris__**'
   search_name: Conocybe filaris
   sort_name: Conocybe filaris
+  synonym:                        # has no synonym
   created_at: 2007-03-19 15:51:00
   updated_at: 2007-03-19 15:51:00
 

@@ -5,16 +5,16 @@ class Query::HerbariumRecordBase < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?:           [:time],
-      updated_at?:           [:time],
-      users?:                [User],
-      herbaria?:             [:string],
-      observations?:         [:string],
-      has_notes?:            :boolean,
-      initial_det?:          [:string],
-      accession_number?:     [:string],
-      notes_has?:            :string,
-      initial_det_has?:      :string,
+      created_at?: [:time],
+      updated_at?: [:time],
+      users?: [User],
+      herbaria?: [:string],
+      observations?: [:string],
+      has_notes?: :boolean,
+      initial_det?: [:string],
+      accession_number?: [:string],
+      notes_has?: :string,
+      initial_det_has?: :string,
       accession_number_has?: :string
     )
   end

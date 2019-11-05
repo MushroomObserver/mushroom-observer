@@ -12,21 +12,21 @@ class HerbariumRecordController < ApplicationController
   ]
 
   # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_herbarium_record # :nologin: :norobots:
+  def index_herbarium_record # :norobots:
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
     show_selected_herbarium_records(query, id: params[:id].to_s,
                                            always_index: true)
   end
 
   # Show list of herbarium_records.
-  def list_herbarium_records # :nologin:
+  def list_herbarium_records
     store_location
     query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
     show_selected_herbarium_records(query)
   end
 
   # Display list of HerbariumRecords whose text matches a string pattern.
-  def herbarium_record_search # :nologin: :norobots:
+  def herbarium_record_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium_record = HerbariumRecord.safe_find(pattern))
@@ -37,14 +37,14 @@ class HerbariumRecordController < ApplicationController
     end
   end
 
-  def herbarium_index # :nologin:
+  def herbarium_index
     store_location
     query = create_query(:HerbariumRecord, :in_herbarium,
                          herbarium: params[:id].to_s, by: :herbarium_label)
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  def observation_index # :nologin:
+  def observation_index
     store_location
     query = create_query(:HerbariumRecord, :for_observation,
                          observation: params[:id].to_s, by: :herbarium_label)
@@ -57,7 +57,7 @@ class HerbariumRecordController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  def show_herbarium_record # :nologin:
+  def show_herbarium_record
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -65,11 +65,11 @@ class HerbariumRecordController < ApplicationController
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
 
-  def next_herbarium_record # :nologin: :norobots:
+  def next_herbarium_record # :norobots:
     redirect_to_next_object(:next, HerbariumRecord, params[:id].to_s)
   end
 
-  def prev_herbarium_record # :nologin: :norobots:
+  def prev_herbarium_record # :norobots:
     redirect_to_next_object(:prev, HerbariumRecord, params[:id].to_s)
   end
 
@@ -161,8 +161,8 @@ class HerbariumRecordController < ApplicationController
 
   def default_herbarium_record
     HerbariumRecord.new(
-      herbarium_name:   @user.preferred_herbarium_name,
-      initial_det:      @observation.name.text_name,
+      herbarium_name: @user.preferred_herbarium_name,
+      initial_det: @observation.name.text_name,
       accession_number: default_accession_number
     )
   end
@@ -283,7 +283,7 @@ class HerbariumRecordController < ApplicationController
 
   def herbarium_label_free?
     @other_record = HerbariumRecord.where(
-      herbarium:        @herbarium_record.herbarium,
+      herbarium: @herbarium_record.herbarium,
       accession_number: @herbarium_record.accession_number
     ).first
     !@other_record || @other_record == @herbarium_record

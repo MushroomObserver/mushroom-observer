@@ -1011,7 +1011,8 @@
   log_approved_by: Approved by [user].
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
   log_consensus_changed: Consensus changed from [old] to [new].
-  log_consensus_created_at: Initial name [name].
+  log_consensus_created: Initial name [name].
+  log_consensus_created_at: '[:log_consensus_created]'
   log_consensus_reached: "Consensus established: [name]"
   log_deprecated_by: Deprecated by [user].
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
@@ -1046,27 +1047,36 @@
   log_updated_by: Updated by [user].
 
   # These should not need any translation.
+  log_article_created: "[:log_object_created_by_user(type=:article)]"
   log_article_created_at: "[:log_object_created_by_user(type=:article)]"
   log_article_destroyed: "[:log_object_destroyed_by_user(type=:article)]"
+  log_article_updated: "[:log_object_updated_by_user(type=:article)]"
   log_article_updated_at: "[:log_object_updated_by_user(type=:article)]"
   log_collection_number_added: "[:log_object_added_by_user_with_name(type=:collection_number)]"
   log_collection_number_updated: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
+  log_collection_number_updated_at: "[:log_object_updated_by_user_with_name(type=:collection_number)]"
   log_collection_number_removed: "[:log_object_removed_by_user_with_name(type=:collection_number)]"
   log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
   log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
   log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+  log_comment_updated_at: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+  log_description_created: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_created_at: "[:log_object_created_by_user_with_name(type=:description)]"
   log_description_destroyed: "[:log_object_destroyed_by_user_with_name(type=:description)]"
   log_description_updated: "[:log_object_updated_by_user_with_name(type=:description)]"
+  log_description_updated_at: "[:log_object_updated_by_user_with_name(type=:description)]"
+  log_glossary_term_created: "[:log_object_created_by_user(type=:glossary_term)]"
   log_glossary_term_created_at: "[:log_object_created_by_user(type=:glossary_term)]"
+  log_glossary_term_updated: "[:log_object_updated_by_user(type=:glossary_term)]"
   log_glossary_term_updated_at: "[:log_object_updated_by_user(type=:glossary_term)]"
   log_herbarium_record_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_moved: "[:log_object_moved_by_user(type=:specimen)]"
   log_herbarium_record_updated: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
+  log_herbarium_record_updated_at: "[:log_object_updated_by_user_with_name(type=:herbarium_record)]"
   log_herbarium_record_removed: "[:log_object_removed_by_user_with_name(type=:herbarium_record)]"
   log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
-  log_image_created_at0: "[:log_object_added_no_user(type=:image)]"
   log_image_created_at: "[:log_object_added_by_user_with_name(type=:image)]"
+  log_image_created0: "[:log_object_added_no_user(type=:image)]"
   log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
   log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
   log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
@@ -1075,41 +1085,55 @@
   log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
   log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
   log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
+  log_image_updated_at: "[:log_object_updated_by_user_with_name(type=:image)]"
+  log_location_created: "[:log_object_created_by_user(type=:location)]"
   log_location_created_at: "[:log_object_created_by_user(type=:location)]"
   log_location_destroyed: "[:log_object_destroyed_by_user(type=:location)]"
   log_location_merged: "[:log_object_merged_by_user(type=:location)]"
   log_location_updated: "[:log_object_updated_by_user(type=:location)]"
   log_location_updated_at: "[:log_object_updated_by_user(type=:location)]"
+  log_name_created: "[:log_object_created_by_user(type=:name)]"
   log_name_created_at: "[:log_object_created_by_user(type=:name)]"
   log_name_destroyed: "[:log_object_destroyed_by_user(type=:name)]"
   log_name_merged: "[:log_object_merged_by_user(type=:name)]"
   log_name_updated: "[:log_object_updated_by_user(type=:name)]"
+  log_name_updated_at: "[:log_object_updated_by_user(type=:name)]"
+  log_naming_created: "[:log_object_created_by_user_with_name(type=:naming)]"
   log_naming_created_at: "[:log_object_created_by_user_with_name(type=:naming)]"
   log_naming_destroyed: "[:log_object_destroyed_by_user_with_name(type=:naming)]"
   log_naming_updated: "[:log_object_updated_by_user_with_name(type=:naming)]"
+  log_naming_updated_at: "[:log_object_updated_by_user_with_name(type=:naming)]"
+  log_observation_created: "[:log_object_created_by_user(type=:observation)]"
   log_observation_created_at: "[:log_object_created_by_user(type=:observation)]"
   log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
   log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
   log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+  log_observation_updated_at: "[:log_object_updated_by_user(type=:observation)]"
   log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
   log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
+  log_project_created: "[:log_object_created_by_user(type=:project)]"
   log_project_created_at: "[:log_object_created_by_user(type=:project)]"
   log_project_destroyed: "[:log_object_destroyed_by_user(type=:project)]"
   log_project_removed_admin: "[:log_object_removed_by_user_with_name(type=:admin)]"
   log_project_removed_member: "[:log_object_removed_by_user_with_name(type=:member)]"
+  log_project_updated: "[:log_object_updated_by_user(type=:project)]"
   log_project_updated_at: "[:log_object_updated_by_user(type=:project)]"
+  log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
   log_species_list_created_at: "[:log_object_created_by_user(type=:species_list)]"
   log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
+  log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
   log_species_list_updated_at: "[:log_object_updated_by_user(type=:species_list)]"
   log_sequence_added: "[name] added by [user]"
   log_sequence_accessioned: "[:log_object_accessioned(type=:sequence)]"
   log_sequence_destroyed: "[:log_object_destroyed_by_user(type=:sequence)]"
   log_specimen_added: "[:log_object_added_by_user_with_name(type=:herbarium_record)]"
   log_object_added: "[:log_object_added_by_user]"
+  log_object_created: "[:log_object_created_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"
   log_object_destroyed: "[:log_object_destroyed_by_user]"
   log_object_removed: "[:log_object_removed_by_user]"
   log_object_updated: "[:log_object_updated_by_user]"
+  log_object_updated_at: "[:log_object_updated_by_user]"
 
   ##############################################################################
 
@@ -1123,7 +1147,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: On Sunday March 3, 2019 we passed 1 million fungus related images on MO!  Thanks for all the contributions, participation and support!
+  app_banner_box: Hi! Can you please spare 10 minutes? If so, MO would like your help adding one good image to a glossary term to help our community. "Here's how.":/article/show_article/14
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1547,20 +1571,22 @@
   list_observations_add_to_list: Add/Remove From Species List
   list_observations_download_as_csv: Download Observations
 
-  # location/list_place_names
+  # location/list_place_names (list_locations)
   list_place_names_known: Known Locations
   list_place_names_known_order: "(by name)"
-  list_place_names_undef: Undefined Locations
-  list_place_names_undef_order: "(by frequency)"
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
+  list_place_names_parenthetical: Number in parentheses shows Observation count.
+  list_place_names_popularity: "\"[:sort_by_num_views]\" means how many times the page was visited."
+  list_place_names_undef: Undefined Locations
+  list_place_names_undef_order: "(by frequency)"
 
   # location/list_countries
   list_countries: Country List
-  list_countries_known: Known Countries
-  list_countries_title: Countries with Observations
-  list_countries_unknown: Unknown Countries
-  list_countries_missing: Missing Countries
+  list_countries_known: Countries With Observations
+  list_countries_title: Countries and Other Localities
+  list_countries_unknown: Other Localities With Observations
+  list_countries_missing: Countries Without Observations
 
   # _location (RSS log display)
   location_change: Change to Location
@@ -1722,9 +1748,9 @@
   prefs_filters_lichen_yes: Show only lichens
   prefs_filters_lichen_no: Hide lichens
   prefs_filters_region: Show only observations and locations within this region
-  prefs_filters_region_help: 'Must match the end of the location name, e.g., "Thailand" and "California, USA".'
+  prefs_filters_region_help: Must match the end of the location name, e.g., "Thailand" and "California, USA".
   prefs_filters_clade: Show only observations within this taxonomic clade
-  prefs_filters_clade_help: 'Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".'
+  prefs_filters_clade_help: Any taxonomic level is okay, e.g., "Agaricales", "Amanitaceae" and "Cortinarius".
   prefs_filter_off: filter off
 
   prefs_notes_template: Observation Notes Template
@@ -1925,11 +1951,11 @@
   show_name_synonym_observations: Synonym [:OBSERVATIONS]
   show_name_other_observations: Similar [:OBSERVATIONS]
   show_observations_of: "[:OBSERVATIONS] of:"
-  obss_of_this_name: This Name
-  obss_of_taxon: This Taxon, any name
-  taxon_obss_other_names: This Taxon, other names
-  obss_name_proposed: Other Taxa, this name proposed
-  obss_taxon_proposed: Other Taxa, this taxon proposed
+  obss_of_this_name: this name
+  obss_of_taxon: this taxon, any name
+  taxon_obss_other_names:  this taxon, other names
+  obss_name_proposed: any taxon, this name proposed
+  obss_taxon_proposed: other taxa, this taxon proposed
   show_subtaxa_obss: Subtaxa
   show_name_locked: This name is locked. If you want to change the name of your observation, please propose a new name for your observation and vote on it, instead.  If you change a name record on MO, it implicitly changes all the observations of that name.
   show_name_inherit_classification: Copy from parent.
@@ -3196,8 +3222,10 @@
   observation_term_created: Date observation was first posted.
   observation_term_modified: Date observation was last modified.
   observation_term_name: Consensus name is one of these names.
-  observation_term_synonym_of: Consensus name is synonym of one of these names.
-  observation_term_child_of: Consensus name is a subtaxon of one of these names.
+  observation_term_exclude_consensus: "Exclude Observations whose consensus is a name listed in \"name:value\". (When using exclude_consensus you must also use \"include_all_name_proposals:yes\".)"
+  observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
+  observation_term_include_subtaxa: Include observations of subtaxa of the given names.
+  observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at an herbarium.
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
@@ -3225,12 +3253,12 @@
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
-  name_term_synonym_of: Synonyms of any of these names.
-  name_term_child_of: Subtaxa of any of these names.
+  name_term_include_synonyms: Include synonyms of the given names.
+  name_term_include_subtaxa: Include subtaxa of the given names.
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
-  name_term_misspelled: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
   name_term_has_citation: Has Citation filled in?

@@ -144,9 +144,24 @@ module ObservationReport
       vals = HerbariumRecord.connection.select_rows %(
         SELECT ho.observation_id,
           CONCAT(h.initial_det, ": ", h.accession_number)
-        FROM herbarium_records h, herbarium_records_observations ho
-        WHERE ho.herbarium_record_id = h.id AND
-          ho.observation_id IN (#{plain_query})
+        FROM herbarium_records h
+        JOIN herbarium_records_observations ho ON ho.herbarium_record_id = h.id
+        JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
+      )
+      add_column!(rows, vals, col)
+    end
+
+    def add_herbarium_accession_numbers!(rows, col)
+      vals = HerbariumRecord.connection.select_rows %(
+        SELECT ho.observation_id,
+          GROUP_CONCAT(DISTINCT CONCAT(h.code, "\t", hr.accession_number)
+                       SEPARATOR "\n")
+        FROM herbarium_records_observations ho
+        JOIN herbarium_records hr ON hr.id = ho.herbarium_record_id
+        JOIN herbaria h ON h.id = hr.herbarium_id
+        JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
+        WHERE h.code != ""
+        GROUP BY ho.observation_id
       )
       add_column!(rows, vals, col)
     end
@@ -154,11 +169,12 @@ module ObservationReport
     def add_collector_ids!(rows, col)
       vals = CollectionNumber.connection.select_rows %(
         SELECT co.observation_id,
-          GROUP_CONCAT(DISTINCT CONCAT(c.name, "\t", c.number) SEPARATOR "\n")
-        FROM collection_numbers c,
-          collection_numbers_observations co
-        WHERE co.collection_number_id = c.id AND
-          co.observation_id IN (#{plain_query})
+          GROUP_CONCAT(DISTINCT CONCAT(c.id, "\t", c.name, "\t", c.number)
+                       SEPARATOR "\n")
+        FROM collection_numbers c
+        JOIN collection_numbers_observations co
+          ON co.collection_number_id = c.id
+        JOIN (#{plain_query}) AS ids ON ids.id = co.observation_id
         GROUP BY co.observation_id
       )
       add_column!(rows, vals, col)
@@ -166,16 +182,16 @@ module ObservationReport
 
     def add_image_ids!(rows, col)
       vals = Image.connection.select_rows %(
-        SELECT observation_id, image_id
-        FROM images_observations
-        WHERE observation_id IN (#{plain_query})
+        SELECT io.observation_id, io.image_id
+        FROM images_observations io
+        JOIN (#{plain_query}) AS ids ON ids.id = io.observation_id
       )
       add_column!(rows, vals, col)
     end
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.query(order: "observations.id ASC")
+      query.query(order: "")
     end
 
     def add_column!(rows, vals, col)

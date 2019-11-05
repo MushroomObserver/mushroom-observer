@@ -1,7 +1,7 @@
 # see observer_controller.rb
 class ObserverController
   # User index, restricted to admins.
-  def index_user # :nologin: :norobots:
+  def index_user # :norobots:
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
@@ -27,7 +27,7 @@ class ObserverController
   end
 
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def user_search # :nologin: :norobots:
+  def user_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
@@ -79,13 +79,13 @@ class ObserverController
   end
 
   # users_by_contribution.rhtml
-  def users_by_contribution # :nologin: :norobots:
+  def users_by_contribution # :norobots:
     SiteData.new
     @users = User.order("contribution desc, name, login")
   end
 
   # show_user.rhtml
-  def show_user # :nologin: :prefetch:
+  def show_user # :prefetch:
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
@@ -115,7 +115,7 @@ class ObserverController
 
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
-  def checklist # :nologin: :norobots:
+  def checklist # :norobots:
     store_location
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]

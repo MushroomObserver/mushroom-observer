@@ -1,9 +1,9 @@
 class Query::NameWithDescriptionsInSet < Query::NameBase
   def parameter_declarations
     super.merge(
-      ids:        [NameDescription],
+      ids: [NameDescription],
       old_title?: :string,
-      old_by?:    :string
+      old_by?: :string
     )
   end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ##############################################################################
 #
 #  :section: High-Level Queries
@@ -80,9 +82,8 @@ module Query::Modules::HighLevelQueries
   def results=(list)
     @result_ids = list.map(&:id)
     @num_results = list.count
-    @results = list.inject({}) do |map, obj|
+    @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
-      map
     end
     list
   end
@@ -129,18 +130,21 @@ module Query::Modules::HighLevelQueries
       paginator.used_letters = map.values.uniq
 
       # Filter by letter. (paginator keeps letter upper case, as do we)
-      if letter = paginator.letter
+      if (letter = paginator.letter)
         @result_ids = @result_ids.select { |id| map[id] == letter }
         @num_results = @result_ids.count
       end
       paginator.num_total = num_results(results_args)
       @result_ids[paginator.from..paginator.to] || []
     else
-      # Paginate remaining results.
-      paginator.num_total = num_results(results_args)
-      results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
-      result_ids(results_args) || []
+      paginate_remaining_results(paginator, results_args)
     end
+  end
+
+  def paginate_remaining_results(paginator, results_args)
+    paginator.num_total = num_results(results_args)
+    results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
+    result_ids(results_args) || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
@@ -185,9 +189,9 @@ module Query::Modules::HighLevelQueries
   # Raise an error if caller passed any unexpected arguments.
   def expect_args(method, args, expect) # :nodoc:
     extra_args = args.keys - expect
-    unless extra_args.empty?
-      raise "Unexpected arguments to Query##{method}: #{extra_args.inspect}"
-    end
+    return if extra_args.empty?
+
+    raise "Unexpected arguments to Query##{method}: #{extra_args.inspect}"
   end
 
   # Split up a Hash of arguments, putting all the ones in the given list in

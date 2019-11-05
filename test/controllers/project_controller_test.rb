@@ -5,7 +5,7 @@ class ProjectControllerTest < FunctionalTestCase
   def add_project_helper(title, summary)
     params = {
       project: {
-        title:   title,
+        title: title,
         summary: summary
       }
     }
@@ -17,7 +17,7 @@ class ProjectControllerTest < FunctionalTestCase
     params = {
       id: project.id,
       project: {
-        title:   title,
+        title: title,
         summary: project.summary
       }
     }
@@ -47,9 +47,9 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(user_before,
                  target_user.in_group?(eol_project.user_group.name))
     params = {
-      id:        eol_project.id,
+      id: eol_project.id,
       candidate: target_user.id,
-      commit:    commit.l
+      commit: commit.l
     }
 
     post_requires_login(:change_member_status, params, changer.login)

@@ -60,7 +60,7 @@ class ArticleController < ApplicationController
   end
 
   # List all articles
-  def list_articles # :nologin:
+  def list_articles
     query = create_query(:Article, :all, by: :created_at)
     show_selected_articles(query)
   end
@@ -108,8 +108,8 @@ class ArticleController < ApplicationController
 
     return if flash_missing_title?
 
-    article = Article.new(title:   params[:article][:title],
-                          body:    params[:article][:body],
+    article = Article.new(title: params[:article][:title],
+                          body: params[:article][:body],
                           user_id: @user.id)
     article.save
     redirect_to(action: "show_article", id: article.id)

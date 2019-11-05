@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class ScriptTest < UnitTestCase
@@ -18,7 +20,7 @@ class ScriptTest < UnitTestCase
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" " \
           "> #{tempfile}"
     assert system(env, cmd)
-    expect = <<-END.unindent
+    expect = <<-EMAIL.unindent
       To: #{sender}
       Subject: #{subject}
 
@@ -27,7 +29,7 @@ class ScriptTest < UnitTestCase
       ----------------------------------------
 
       #{body}
-    END
+    EMAIL
     actual = File.read(tempfile)
     assert_equal(expect, actual)
   end
@@ -91,7 +93,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert status, "Something went wrong with #{script}:\n#{errors}"
+    assert(status, "Something went wrong with #{script}:\n#{errors}")
     assert_equal("", File.read(tempfile))
     new_size = File.size(logfile)
     assert_operator(new_size, :>, old_size)
@@ -105,30 +107,6 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
   end
-
-  # Takes way too long, bad for the live server(!) and unreliable.
-  # Oh, and no one uses it anymore, anyway.  So there.
-  # test "perf_monitor" do
-  #   begin
-  #     script = script_file("perf_monitor")
-  #     tempfile = Tempfile.new("test").path
-  #     tempdir = "#{tempfile}.dir"
-  #     site = "mushroomobserver.org"
-  #     image = "#{::Rails.root}/public/assets/eye.png"
-  #     cmd = "#{script} #{site} #{image} #{tempdir} 1 2>&1 > #{tempfile}"
-  #     status = system(cmd)
-  #     errors = File.read(tempfile)
-  #     assert status, "Something went wrong with #{script}:\n#{errors}"
-  #     logfile = "#{tempdir}/perf.log"
-  #     assert  File.exist?(logfile) && File.size(logfile) > 0
-  #     lines = File.readlines(logfile)
-  #     assert_equal(5, lines.length)
-  #     assert(lines.none? {|line| line.match(/ERROR/)},
-  #            "There were errors in perf.log:\n#{lines.join("\n")}")
-  #   ensure
-  #     system("rm -rf #{tempdir}") if File.directory?(tempdir)
-  #   end
-  # end
 
   test "refresh_name_lister_cache" do
     script = script_file("refresh_name_lister_cache")

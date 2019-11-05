@@ -15,34 +15,34 @@ class API
 
     def query_params
       {
-        where:             sql_id_condition,
-        created_at:        parse_range(:time, :created_at),
-        updated_at:        parse_range(:time, :updated_at),
-        users:             parse_array(:user, :user, help: :creator),
-        has_images:        parse(:boolean, :has_images, limit: true),
-        has_observations:  parse(:boolean, :has_observations, limit: true),
+        where: sql_id_condition,
+        created_at: parse_range(:time, :created_at),
+        updated_at: parse_range(:time, :updated_at),
+        users: parse_array(:user, :user, help: :creator),
+        has_images: parse(:boolean, :has_images, limit: true),
+        has_observations: parse(:boolean, :has_observations, limit: true),
         has_species_lists: parse(:boolean, :has_species_lists, limit: true),
-        has_comments:      parse(:boolean, :has_comments, limit: true),
-        has_summary:       parse(:boolean, :has_summary),
-        title_has:         parse(:string, :title_has, help: 1),
-        summary_has:       parse(:string, :summary_has, help: 1),
-        comments_has:      parse(:string, :comments_has, help: 1)
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_summary: parse(:boolean, :has_summary),
+        title_has: parse(:string, :title_has, help: 1),
+        summary_has: parse(:string, :summary_has, help: 1),
+        comments_has: parse(:string, :comments_has, help: 1)
       }
     end
 
     def create_params
       parse_admins_and_members
       {
-        title:   parse(:string, :title, limit: 100),
+        title: parse(:string, :title, limit: 100),
         summary: parse(:string, :summary, default: ""),
-        user:    @user
+        user: @user
       }
     end
 
     def update_params
       parse_update_params
       {
-        title:   parse(:string, :set_title, limit: 100, not_blank: true),
+        title: parse(:string, :set_title, limit: 100, not_blank: true),
         summary: parse(:string, :set_summary)
       }
     end
@@ -58,11 +58,11 @@ class API
 
     def before_create(params)
       user_group = UserGroup.new(
-        name:  @title,
+        name: @title,
         users: @members
       )
       admin_group = UserGroup.new(
-        name:  @title2,
+        name: @title2,
         users: @admins
       )
       user_group.save   || raise(CreateFailed.new(user_group))

@@ -190,8 +190,8 @@ def add_comment
   summary, body = @comment.split(%r{/}, 2)
   puts "  > adding comment #{summary.inspect}..."
   Comment.create!(
-    target:  @observation,
-    user:    @user,
+    target: @observation,
+    user: @user,
     summary: summary,
     comment: body
   )

@@ -1,0 +1,46 @@
+#!/usr/bin/env perl
+use strict;
+
+sub process_request {
+  my $req = shift;
+  my @out;
+  foreach my $key (sort keys %$req) {
+    next if $key eq 'body';
+    push(@out, uc($key). '='. $$req{$key})
+  }
+  print join(" ", @out), "\n";
+}
+
+my %LOGS;
+while (<>) {
+  chomp;
+  my ($pid, $level) = /^[A-Z],\s\[\S+\s(#\d+)\]\s+([A-Z]+)\s--\s:\s+/ or next;
+  $_ = $';
+  my $req = $LOGS{$pid} ||= {};
+  $$req{'body'} .= "\n". $_;
+  if (/^Started ([A-Z]+) (.*?) for (\d+\.\d+\.\d+\.\d+) at (.*)/) {
+    my ($method, $path, $ip, $time) = ($1, $2, $3, $4);
+    $path =~ s/^"|"$//g;
+    $LOGS{$pid} = {
+      'pid'    => $pid,
+      'method' => $method,
+      'path'   => $path,
+      'ip'     => $ip,
+      'start'  => $time,
+      'body'   => $_
+    };
+  }
+  elsif (/^user=(\d+)robot=(\w)/) {
+    $$req{'user'}  = $1;
+    $$req{'robot'} = ($2 eq 'Y');
+  }
+  elsif (/^TIME: /) {
+    my ($junk, $time, $status, $controller, $action, $robot, $ip) = split;
+    $$req{'time'}   = $time;
+    $$req{'status'} = $status;
+    $$req{'action'} = "$controller/$action";
+    process_request($req);
+    $LOGS{$pid} = undef;
+  }
+}
+exit 0;

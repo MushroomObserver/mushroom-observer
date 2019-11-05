@@ -1,4 +1,5 @@
-#
+# frozen_string_literal: true
+
 #  = API
 #
 #  == Usage
@@ -120,6 +121,7 @@ class API
   require_dependency "api/upload"
   require_dependency "api/model_api"
   require_dependency "api/parsers/base"
+  require_dependency "api/helpers"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
   Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb").each do |file|

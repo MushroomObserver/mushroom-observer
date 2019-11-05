@@ -2,12 +2,12 @@
 class ObserverController
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
-  def index # :nologin:
+  def index
     list_rss_logs
   end
 
   # Displays matrix of selected RssLog's (based on current Query).
-  def index_rss_log # :nologin: :norobots:
+  def index_rss_log # :norobots:
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
@@ -26,7 +26,7 @@ class ObserverController
   end
 
   # This is the main site index.  Nice how it's buried way down here, huh?
-  def list_rss_logs # :nologin:
+  def list_rss_logs
     query = create_query(:RssLog, :all,
                          type: @user ? @user.default_rss_type : "all")
     show_selected_rss_logs(query)
@@ -67,24 +67,24 @@ class ObserverController
   end
 
   # Show a single RssLog.
-  def show_rss_log # :nologin:
+  def show_rss_log
     pass_query_params
     store_location
     @rss_log = find_or_goto_index(RssLog, params["id"])
   end
 
   # Go to next RssLog: redirects to show_<object>.
-  def next_rss_log # :nologin: :norobots:
+  def next_rss_log # :norobots:
     redirect_to_next_object(:next, RssLog, params[:id].to_s)
   end
 
   # Go to previous RssLog: redirects to show_<object>.
-  def prev_rss_log # :nologin: :norobots:
+  def prev_rss_log # :norobots:
     redirect_to_next_object(:prev, RssLog, params[:id].to_s)
   end
 
   # This is the site's rss feed.
-  def rss # :nologin:
+  def rss
     @logs = RssLog.includes(:name, :species_list, observation: :name).
             where("datediff(now(), updated_at) <= 31").
             order(updated_at: :desc).

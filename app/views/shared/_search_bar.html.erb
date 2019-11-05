@@ -80,23 +80,23 @@
           <%= link_to("", {controller: :account, action: in_admin_mode? ? :turn_admin_off : :turn_admin_on},
                            {class: "glyphicon glyphicon-text-background",
                             title: in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
-                            data: {toggle: "tooltip", placement: "left"}}) %>
+                            data: {toggle: "tooltip", placement: "bottom"}}) %>
         </li>
       <% end %>
       <li>
         <%= link_to("", {controller: :comment, action: :show_comments_for_user, id: @user.id},
                         {class: "glyphicon glyphicon-inbox", title: :app_comments_for_you.t,
-                         data: {toggle: "tooltip", placement: "left"}}) %>
+                         data: {toggle: "tooltip", placement: "bottom"}}) %>
       </li>
       <li>
         <%= link_to("", {controller: :interest, action: :list_interests},
                         {class: "glyphicon glyphicon-bullhorn", title: :app_your_interests.t,
-                         data: {toggle: "tooltip", placement: "left"}}) %>
+                         data: {toggle: "tooltip", placement: "bottom"}}) %>
       </li>
       <li>
         <%= link_to("", {controller: :account, action: :prefs},
                         {class: "glyphicon glyphicon-cog", title: :app_preferences.t,
-                         data: {toggle: "tooltip", placement: "left"}}) %>
+                         data: {toggle: "tooltip", placement: "bottom"}}) %>
       </li>
       <li id="user_drop_down" class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -115,7 +115,7 @@
       </li>
       <li> <%= link_to("", {controller: :account, action: :logout_user},
                        {class: "glyphicon glyphicon-log-out", title: :app_logout.t,
-                        data: {toggle: "tooltip", placement: "left"},
+                        data: {toggle: "tooltip", placement: "bottom"},
                         style: "padding-right: 10px" }) %>
       </li>
     </ul>

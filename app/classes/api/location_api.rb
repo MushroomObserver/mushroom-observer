@@ -15,28 +15,28 @@ class API
     def query_params
       n, s, e, w = parse_bounding_box!
       {
-        where:      sql_id_condition,
+        where: sql_id_condition,
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users:      parse_array(:user, :user, help: :first_user),
-        north:      n,
-        south:      s,
-        east:       e,
-        west:       w
+        users: parse_array(:user, :user, help: :first_user),
+        north: n,
+        south: s,
+        east: e,
+        west: w
       }
     end
 
     def create_params
       {
         display_name: parse(:string, :name, limit: 1024, help: :postal),
-        north:        parse(:latitude, :north),
-        south:        parse(:longitude, :south),
-        east:         parse(:longitude, :east),
-        west:         parse(:longitude, :west),
-        high:         parse(:altitude, :high),
-        low:          parse(:altitude, :low),
-        notes:        parse(:string, :notes),
-        user:         @user
+        north: parse(:latitude, :north),
+        south: parse(:longitude, :south),
+        east: parse(:longitude, :east),
+        west: parse(:longitude, :west),
+        high: parse(:altitude, :high),
+        low: parse(:altitude, :low),
+        notes: parse(:string, :notes),
+        user: @user
       }
     end
 
@@ -44,13 +44,13 @@ class API
       {
         display_name: parse(:string, :set_name, limit: 1024, not_blank: true,
                                                 help: :postal),
-        north:        parse(:latitude, :set_north),
-        south:        parse(:longitude, :set_south),
-        east:         parse(:longitude, :set_east),
-        west:         parse(:longitude, :set_west),
-        high:         parse(:altitude, :set_high),
-        low:          parse(:altitude, :set_low),
-        notes:        parse(:string, :set_notes)
+        north: parse(:latitude, :set_north),
+        south: parse(:longitude, :set_south),
+        east: parse(:longitude, :set_east),
+        west: parse(:longitude, :set_west),
+        high: parse(:altitude, :set_high),
+        low: parse(:altitude, :set_low),
+        notes: parse(:string, :set_notes)
       }
     end
 

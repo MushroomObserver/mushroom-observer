@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Modules
     # Handles saving and looking up query records in database.
@@ -46,8 +48,8 @@ module Query
           desc = query.serialize
           QueryRecord.find_by_description(desc) ||
             QueryRecord.new(
-              description:  desc,
-              updated_at:   Time.now,
+              description: desc,
+              updated_at: Time.now,
               access_count: 0
             )
         end
@@ -57,9 +59,7 @@ module Query
         @record ||= Query.get_record(self)
       end
 
-      def id
-        record.id
-      end
+      delegate :id, to: :record
 
       def save
         record.outer_id = outer_id

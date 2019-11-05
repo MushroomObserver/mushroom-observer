@@ -176,7 +176,7 @@ class AbstractModelTest < UnitTestCase
     assert_equal(:location, rss_log.target_type)
     assert_equal(loc.id, loc.rss_log.location_id)
     assert_rss_log_lines(1, rss_log)
-    assert_rss_log_has_tag(:log_location_created_at, rss_log)
+    assert_rss_log_has_tag(:log_location_created, rss_log)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -191,7 +191,7 @@ class AbstractModelTest < UnitTestCase
     Location.update(loc.id, display_name: "New Location")
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
-    assert_rss_log_has_tag(:log_location_updated_at, rss_log)
+    assert_rss_log_has_tag(:log_location_updated, rss_log)
     assert(rss_log.updated_at > time)
 
     location_with_notes = locations(:albion)
@@ -266,13 +266,13 @@ class AbstractModelTest < UnitTestCase
     assert_nil(obs.rss_log)
     assert_save(obs)
     # This is normally done by ObserverController#create_observation.
-    obs.log(:log_observation_created_at)
+    obs.log(:log_observation_created)
     obs_id = obs.id
     assert_not_nil(rss_log = obs.rss_log)
     assert_equal(:observation, rss_log.target_type)
     assert_equal(obs.id, rss_log.observation_id)
     assert_rss_log_lines(1, rss_log)
-    assert_rss_log_has_tag(:log_observation_created_at, rss_log)
+    assert_rss_log_has_tag(:log_observation_created, rss_log)
 
     # rss_log.update_attribute(:updated_at, time)
     obs.log(:test_message, arg: "val")
@@ -319,7 +319,7 @@ class AbstractModelTest < UnitTestCase
     assert_equal(:project, rss_log.target_type)
     assert_equal(proj.id, rss_log.project_id)
     assert_rss_log_lines(1, rss_log)
-    assert_rss_log_has_tag(:log_project_created_at, rss_log)
+    assert_rss_log_has_tag(:log_project_created, rss_log)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -336,7 +336,7 @@ class AbstractModelTest < UnitTestCase
     proj.log_update
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
-    assert_rss_log_has_tag(:log_project_updated_at, rss_log)
+    assert_rss_log_has_tag(:log_project_updated, rss_log)
     assert(proj.rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
@@ -365,13 +365,13 @@ class AbstractModelTest < UnitTestCase
     assert_nil(spl.rss_log)
     assert_save(spl)
     # Normally done by SpeciesListController#create_species_list.
-    spl.log(:log_species_list_created_at)
+    spl.log(:log_species_list_created)
     spl_id = spl.id
     assert_not_nil(rss_log = spl.rss_log)
     assert_equal(:species_list, rss_log.target_type)
     assert_equal(spl.id, rss_log.species_list_id)
     assert_rss_log_lines(1, rss_log)
-    assert_rss_log_has_tag(:log_species_list_created_at, rss_log)
+    assert_rss_log_has_tag(:log_species_list_created, rss_log)
 
     spl.log(:test_message, arg: "val")
     rss_log.reload
@@ -380,10 +380,10 @@ class AbstractModelTest < UnitTestCase
 
     SpeciesList.update(spl.id, title: "New Title")
     # Normally done by SpeciesListController#edit_species_list.
-    spl.log(:log_species_list_updated_at)
+    spl.log(:log_species_list_updated)
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
-    assert_rss_log_has_tag(:log_species_list_updated_at, rss_log)
+    assert_rss_log_has_tag(:log_species_list_updated, rss_log)
 
     spl.destroy
     rss_log.reload

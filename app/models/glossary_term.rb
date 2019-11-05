@@ -1,7 +1,10 @@
 class GlossaryTerm < AbstractModel
   require "acts_as_versioned"
 
-  belongs_to :thumb_image, class_name: "Image", foreign_key: "thumb_image_id"
+  belongs_to(:thumb_image,
+             class_name: "Image",
+             foreign_key: "thumb_image_id",
+             inverse_of: :best_glossary_terms)
   belongs_to :user
   belongs_to :rss_log
   has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
@@ -21,7 +24,7 @@ class GlossaryTerm < AbstractModel
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
   # Automatically log standard events.
-  self.autolog_events = [:created_at!, :updated_at!]
+  self.autolog_events = [:created!, :updated!]
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}

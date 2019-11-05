@@ -55,8 +55,8 @@
 #  log_destroy_image::  Log destruction of Image.
 #  init_rss_log::       Create and attach RssLog if not already there.
 #  attach_rss_log::     Attach RssLog after creating new record.
-#  autolog_created_at:: Callback to log creation.
-#  autolog_updated_at:: Callback to log an update.
+#  autolog_created::    Callback to log creation.
+#  autolog_updated::    Callback to log an update.
 #  autolog_destroyed::  Callback to log destruction.
 #
 ############################################################################
@@ -162,7 +162,7 @@ class AbstractModel < ApplicationRecord
     # self.created_at ||= Time.now        if respond_to?('created_at=')
     # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id ||= User.current_id if respond_to?("user_id=")
-    autolog_created_at if has_rss_log?
+    autolog_created if has_rss_log?
   end
 
   # This is called just after an object is created.
@@ -187,7 +187,7 @@ class AbstractModel < ApplicationRecord
   def do_log_update
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
-    autolog_updated_at if has_rss_log? && !@save_without_our_callbacks
+    autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
 
   # This would be called just after an object's changes are saved, but we have
@@ -506,10 +506,10 @@ class AbstractModel < ApplicationRecord
 
   # By default do NOT automatically log creation/update/destruction.  Override
   # this with an array of zero or more of the following:
-  # * :created_at -- automatically log creation
-  # * :created_at! -- automatically log creation and raise to top of RSS feed
-  # * :updated_at -- automatically log updates
-  # * :updated_at! -- automatically log updates and raise to top of RSS feed
+  # * :created -- automatically log creation
+  # * :created! -- automatically log creation and raise to top of RSS feed
+  # * :updated -- automatically log updates
+  # * :updated! -- automatically log updates and raise to top of RSS feed
   # * :destroyed -- automatically log destruction
   # * :destroyed! -- automatically log destruction and raise to top of RSS feed
   class_attribute :autolog_events
@@ -550,7 +550,7 @@ class AbstractModel < ApplicationRecord
 
   # Logs addition of new Image.
   def log_create_image(image)
-    log_image(:log_image_created_at, image, true)
+    log_image(:log_image_created, image, true)
   end
 
   # Logs addition of existing Image.
@@ -592,13 +592,13 @@ class AbstractModel < ApplicationRecord
   end
 
   # Callback that logs creation.
-  def autolog_created_at
-    autolog_event(:created_at)
+  def autolog_created
+    autolog_event(:created)
   end
 
   # Callback that logs update.
-  def autolog_updated_at
-    autolog_event(:updated_at)
+  def autolog_updated
+    autolog_event(:updated)
   end
 
   # Callback that logs destruction.

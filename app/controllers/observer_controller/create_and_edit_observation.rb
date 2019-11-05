@@ -92,7 +92,7 @@ class ObserverController
 
     # Once observation is saved we can save everything else.
     if success
-      @observation.log(:log_observation_created_at)
+      @observation.log(:log_observation_created)
       save_everything_else(params[:reason]) # should always succeed
       strip_images! if @observation.gps_hidden
       flash_notice(:runtime_observation_success.t(id: @observation.id))
@@ -519,7 +519,7 @@ class ObserverController
   end
 
   def init_project_vars
-    @projects = User.current.projects_member.sort_by(&:title)
+    @projects = User.current.projects_member(order: :title)
     @project_checks = {}
   end
 
@@ -732,7 +732,7 @@ class ObserverController
     image
   end
 
-  def hide_thumbnail_map # :nologin:
+  def hide_thumbnail_map
     pass_query_params
     id = params[:id].to_s
     if @user

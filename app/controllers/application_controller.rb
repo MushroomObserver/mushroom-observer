@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 #  = Application Controller Base Class
 #
@@ -105,6 +107,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   around_action :catch_errors # if Rails.env == "test"
+  before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
@@ -153,18 +156,34 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Kick out agents responsible for excessive traffic.
+  def kick_out_excessive_traffic
+    return true unless Robots.blocked?(request.remote_ip)
+
+    logger.warn("BLOCKED #{request.remote_ip}")
+    render(plain: "We have noticed an excessive amount of server-intensive " \
+                  "traffic from this IP address.  Please contact the " \
+                  "webmaster (webmaster@mushroomobserver.org) to discuss " \
+                  "what you are trying to do.  There is almost certainly " \
+                  "a better, more respectful way of doing whatever you're " \
+                  "doing that won't overburden our server.",
+           status: 429,
+           layout: false)
+    false
+  end
+
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true unless browser.bot?
     return true if Robots.allowed?(
       controller: params[:controller],
-      action:     params[:action],
-      ua:         browser.ua,
-      ip:         request.remote_ip
+      action: params[:action],
+      ua: browser.ua,
+      ip: request.remote_ip
     )
 
     render(plain: "Robots are not allowed on this page.",
-           status: 403,
+           status: :forbidden,
            layout: false)
     false
   end
@@ -212,13 +231,13 @@ class ApplicationController < ActionController::Base
 
   def start_state
     {
-      time:       Time.current,
+      time: Time.current,
       controller: params[:controller],
-      action:     params[:action],
-      robot:      browser.bot? ? "robot" : "user",
-      ip:         catch_ip,
-      url:        catch_url,
-      ua:         catch_ua
+      action: params[:action],
+      robot: browser.bot? ? "robot" : "user",
+      ip: catch_ip,
+      url: catch_url,
+      ua: catch_ua
     }
   end
 
@@ -398,7 +417,8 @@ class ApplicationController < ActionController::Base
   def make_logged_in_user_available_to_everyone
     User.current = @user
     logger.warn("user=#{@user ? @user.id : "0"}" \
-                "robot=#{browser.bot? ? "Y" : "N"}")
+                " robot=#{browser.bot? ? "Y" : "N"}" \
+                " ip=#{request.remote_ip}")
   end
 
   # Track when user requested a page, but update at most once an hour.
@@ -415,7 +435,7 @@ class ApplicationController < ActionController::Base
     return true unless user_suspended? # Tell Rails to continue processing.
 
     block user
-    false                              # Tell Rails to stop processing.
+    false # Tell Rails to stop processing.
   end
 
   def user_suspended?
@@ -573,9 +593,7 @@ class ApplicationController < ActionController::Base
     change_locale_if_needed(lang.locale)
 
     # Update user preference.
-    if @user && @user.locale != lang.locale
-      @user.update(locale: lang.locale)
-    end
+    @user.update(locale: lang.locale) if @user && @user.locale != lang.locale
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
 
@@ -638,7 +656,7 @@ class ApplicationController < ActionController::Base
   # Until we get rid of reliance on @js, this is a surrogate for
   # testing if the client's JS is enabled and sufficiently fully-featured.
   def js_enabled?(time_zone)
-    time_zone.present? ? true : Rails.env == "test"
+    time_zone.present? ? true : Rails.env.test?
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
@@ -741,7 +759,13 @@ class ApplicationController < ActionController::Base
 
   # Get a copy of the errors.  Return as String.
   def flash_get_notices
+    # Maybe there is a cleaner way to do this.  session[:notice] should
+    # already be html_safe, but the substring marks it as unsafe. Maybe there
+    # is a way to test if it's html_safe before, and if so, then it should be
+    # okay to remove the first character without making it html_unsafe??
+    # rubocop:disable Rails/OutputSafety
     session[:notice].to_s[1..-1].html_safe
+    # rubocop:enable Rails/OutputSafety
   end
   helper_method :flash_get_notices
 
@@ -756,7 +780,7 @@ class ApplicationController < ActionController::Base
   # application layout (app/views/layouts/application.rhtml) every time it
   # renders the latest error messages.
   def flash_clear
-    @last_notice = session[:notice] if Rails.env == "test"
+    @last_notice = session[:notice] if Rails.env.test?
     session[:notice] = nil
   end
   helper_method :flash_clear
@@ -1034,13 +1058,10 @@ class ApplicationController < ActionController::Base
   def coerced_query_link(query, model)
     return nil unless query&.coercable?(model.name.to_sym)
 
-    link_args = {
-      controller: model.show_controller,
-      action: model.index_action
-    }
     [
       :show_objects.t(type: model.type_tag),
-      add_query_param(link_args, query)
+      add_query_param({ controller: model.show_controller,
+                        action: model.index_action }, query)
     ]
   end
   helper_method :coerced_query_link
@@ -1234,11 +1255,9 @@ class ApplicationController < ActionController::Base
     query =  next_params[:query]
 
     # Redirect to the show_object page appropriate for the new object.
-    redirect_to(add_query_param({
-                                  controller: object.show_controller,
+    redirect_to(add_query_param({ controller: object.show_controller,
                                   action: object.show_action,
-                                  id: id
-                                }, query))
+                                  id: id }, query))
   end
 
   def find_query_and_next_object(object, method, id)
@@ -1419,21 +1438,9 @@ class ApplicationController < ActionController::Base
         when :inside_observation
           id = query.params[:observation]
           :runtime_index_no_inside_observation.t(type: type, id: id)
-        when :of_children
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_children.t(type: type,
-                                          name: name.display_name)
-        when :of_name
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_name.t(type: type, name: name.display_name)
-        when :of_parents
-          name = query.find_cached_parameter_instance(Name, :name)
-          :runtime_index_no_of_parents.t(type: type,
-                                         name: name.display_name)
         when :pattern_search
           :runtime_no_matches_pattern.t(type: type,
-                                        value: query.params[:pattern].
-                                                     to_s).html_safe
+                                        value: query.params[:pattern].to_s)
         when :regexp_search
           :runtime_no_matches_regexp.t(type: type,
                                        value: query.params[:regexp].to_s)
@@ -1735,7 +1742,7 @@ class ApplicationController < ActionController::Base
     return unless request.env["HTTP_X_MOZ"] == "prefetch"
 
     logger.debug "prefetch detected: sending 403 Forbidden"
-    render(plain: "", status: 403)
+    render(plain: "", status: :forbidden)
     false
   end
 

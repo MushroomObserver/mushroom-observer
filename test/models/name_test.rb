@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
+# Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
   def create_test_name(string, force_rank = nil)
     User.current = rolf
@@ -45,12 +48,12 @@ class NameTest < UnitTestCase
       msg << format("%-20s %-40s %-40s", var.to_s, expect.inspect,
                     actual.inspect)
     end
-    refute(any_errors, msg.join("\n"))
+    assert_not(any_errors, msg.join("\n"))
   end
 
   def assert_name_match_author_required(pattern, string, first_match = string)
-    refute pattern.match(string),
-           "Expected #{string.inspect} not to match #{@pat}."
+    assert_not pattern.match(string),
+               "Expected #{string.inspect} not to match #{@pat}."
     assert_name_match_various_authors(pattern, string, first_match)
   end
 
@@ -100,8 +103,9 @@ class NameTest < UnitTestCase
 
   def assert_name_parse_fails(str)
     parse = Name.parse_name(str)
-    refute(parse,
-           "Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}")
+    assert_not(
+      parse, "Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}"
+    )
   end
 
   def do_parse_classification_test(text, expected)
@@ -611,6 +615,21 @@ class NameTest < UnitTestCase
       parent_name: nil,
       rank: :Genus,
       author: "de Hoog"
+    )
+  end
+
+  def test_name_parse_1d
+    do_name_parse_test(
+      "Synchytrium subgenus Endochytrium du Plessis",
+      text_name: "Synchytrium subgenus Endochytrium",
+      real_text_name: "Synchytrium subgenus Endochytrium",
+      search_name: "Synchytrium subgenus Endochytrium du Plessis",
+      real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
+      sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
+      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable LineLength
+      parent_name: "Synchytrium",
+      rank: :Subgenus,
+      author: "du Plessis"
     )
   end
 
@@ -1183,6 +1202,21 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_41
+    do_name_parse_test(
+      "Armillaria mellea D.\tC.",
+      text_name: "Armillaria mellea",
+      real_text_name: "Armillaria mellea",
+      search_name: "Armillaria mellea D.C.",
+      real_search_name: "Armillaria mellea D.C.",
+      sort_name: "Armillaria mellea  D.C.",
+      display_name: "**__Armillaria mellea__** D.C.",
+      parent_name: "Armillaria",
+      rank: :Species,
+      author: "D.C."
+    )
+  end
+
   def test_name_parse_comb
     do_name_parse_test(
       "Sebacina schweinitzii comb prov",
@@ -1201,75 +1235,75 @@ class NameTest < UnitTestCase
   def test_name_parse_group_names
     do_name_parse_test( # monomial, no author
       "Agaricus group",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group",
       real_search_name: "Agaricus group",
-      sort_name:        "Agaricus   group",
-      display_name:     "**__Agaricus__** group",
-      parent_name:      "",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus   group",
+      display_name: "**__Agaricus__** group",
+      parent_name: "",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris group",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group",
       real_search_name: "Agaricus campestris group",
-      sort_name:        "Agaricus campestris   group",
-      display_name:     "**__Agaricus campestris__** group",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus campestris   group",
+      display_name: "**__Agaricus campestris__** group",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # monomial, with author
       "Agaricus group Author",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group Author",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group Author",
       real_search_name: "Agaricus group Author",
-      sort_name:        "Agaricus   group  Author",
-      display_name:     "**__Agaricus__** group Author",
-      parent_name:      "",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus   group  Author",
+      display_name: "**__Agaricus__** group Author",
+      parent_name: "",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial, author
       "Agaricus campestris group Author",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
-      sort_name:        "Agaricus campestris   group  Author",
-      display_name:     "**__Agaricus campestris__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   group  Author",
+      display_name: "**__Agaricus campestris__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial with author, "group" at end
       "Agaricus campestris Author group",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
-      sort_name:        "Agaricus campestris   group  Author",
-      display_name:     "**__Agaricus campestris__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   group  Author",
+      display_name: "**__Agaricus campestris__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris group sensu Author",
-      text_name:        "Agaricus campestris group",
-      real_text_name:   "Agaricus campestris group",
-      search_name:      "Agaricus campestris group sensu Author",
+      text_name: "Agaricus campestris group",
+      real_text_name: "Agaricus campestris group",
+      search_name: "Agaricus campestris group sensu Author",
       real_search_name: "Agaricus campestris group sensu Author",
-      sort_name:        "Agaricus campestris   group  sensu Author",
-      display_name:     "**__Agaricus campestris__** group sensu Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "sensu Author"
+      sort_name: "Agaricus campestris   group  sensu Author",
+      display_name: "**__Agaricus campestris__** group sensu Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "sensu Author"
     )
     do_name_parse_test( # species with Tulloss form of sp. nov.
       "Pleurotus sp. T44 group Tulloss",
@@ -1313,78 +1347,78 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # binomial, "group" part of epithet
       "Agaricus grouperi group Author",
-      text_name:        "Agaricus grouperi group",
-      real_text_name:   "Agaricus grouperi group",
-      search_name:      "Agaricus grouperi group Author",
+      text_name: "Agaricus grouperi group",
+      real_text_name: "Agaricus grouperi group",
+      search_name: "Agaricus grouperi group Author",
       real_search_name: "Agaricus grouperi group Author",
-      sort_name:        "Agaricus grouperi   group  Author",
-      display_name:     "**__Agaricus grouperi__** group Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus grouperi   group  Author",
+      display_name: "**__Agaricus grouperi__** group Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
     do_name_parse_test( # author duplicates a word in the taxon
       "Agaricus group Agaricus",
-      text_name:        "Agaricus group",
-      real_text_name:   "Agaricus group",
-      search_name:      "Agaricus group Agaricus",
+      text_name: "Agaricus group",
+      real_text_name: "Agaricus group",
+      search_name: "Agaricus group Agaricus",
       real_search_name: "Agaricus group Agaricus",
-      sort_name:        "Agaricus   group  Agaricus",
-      display_name:     "**__Agaricus__** group Agaricus",
-      parent_name:      "",
-      rank:             :Group,
-      author:           "Agaricus"
+      sort_name: "Agaricus   group  Agaricus",
+      display_name: "**__Agaricus__** group Agaricus",
+      parent_name: "",
+      rank: :Group,
+      author: "Agaricus"
     )
   end
 
   def test_name_parse_clade_names
     do_name_parse_test( # monomial, no author
       "Agaricus clade",
-      text_name:        "Agaricus clade",
-      real_text_name:   "Agaricus clade",
-      search_name:      "Agaricus clade",
+      text_name: "Agaricus clade",
+      real_text_name: "Agaricus clade",
+      search_name: "Agaricus clade",
       real_search_name: "Agaricus clade",
-      sort_name:        "Agaricus   clade",
-      display_name:     "**__Agaricus__** clade",
-      parent_name:      "",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus   clade",
+      display_name: "**__Agaricus__** clade",
+      parent_name: "",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, no author
       "Agaricus campestris clade",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade",
       real_search_name: "Agaricus campestris clade",
-      sort_name:        "Agaricus campestris   clade",
-      display_name:     "**__Agaricus campestris__** clade",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           ""
+      sort_name: "Agaricus campestris   clade",
+      display_name: "**__Agaricus campestris__** clade",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: ""
     )
     do_name_parse_test( # binomial, sensu author
       "Agaricus campestris clade sensu Author",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade sensu Author",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade sensu Author",
       real_search_name: "Agaricus campestris clade sensu Author",
-      sort_name:        "Agaricus campestris   clade  sensu Author",
-      display_name:     "**__Agaricus campestris__** clade sensu Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "sensu Author"
+      sort_name: "Agaricus campestris   clade  sensu Author",
+      display_name: "**__Agaricus campestris__** clade sensu Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "sensu Author"
     )
     do_name_parse_test( # binomial with author, "clade" at end
       "Agaricus campestris Author clade",
-      text_name:        "Agaricus campestris clade",
-      real_text_name:   "Agaricus campestris clade",
-      search_name:      "Agaricus campestris clade Author",
+      text_name: "Agaricus campestris clade",
+      real_text_name: "Agaricus campestris clade",
+      search_name: "Agaricus campestris clade Author",
       real_search_name: "Agaricus campestris clade Author",
-      sort_name:        "Agaricus campestris   clade  Author",
-      display_name:     "**__Agaricus campestris__** clade Author",
-      parent_name:      "Agaricus",
-      rank:             :Group,
-      author:           "Author"
+      sort_name: "Agaricus campestris   clade  Author",
+      display_name: "**__Agaricus campestris__** clade Author",
+      parent_name: "Agaricus",
+      rank: :Group,
+      author: "Author"
     )
   end
 
@@ -1407,30 +1441,30 @@ class NameTest < UnitTestCase
     do_name_parse_test( # binomial, no author, deprecated
       "Agaricus campestris group",
       {
-        text_name:        "Agaricus campestris group",
-        real_text_name:   "Agaricus campestris group",
-        search_name:      "Agaricus campestris group",
+        text_name: "Agaricus campestris group",
+        real_text_name: "Agaricus campestris group",
+        search_name: "Agaricus campestris group",
         real_search_name: "Agaricus campestris group",
-        sort_name:        "Agaricus campestris   group",
-        display_name:     "__Agaricus campestris__ group",
-        parent_name:      "Agaricus",
-        rank:             :Group,
-        author:           ""
+        sort_name: "Agaricus campestris   group",
+        display_name: "__Agaricus campestris__ group",
+        parent_name: "Agaricus",
+        rank: :Group,
+        author: ""
       },
       deprecated: true
     )
     do_name_parse_test( # binomial, sensu author, deprecated
       "Agaricus campestris group sensu Author",
       {
-        text_name:        "Agaricus campestris group",
-        real_text_name:   "Agaricus campestris group",
-        search_name:      "Agaricus campestris group sensu Author",
+        text_name: "Agaricus campestris group",
+        real_text_name: "Agaricus campestris group",
+        search_name: "Agaricus campestris group sensu Author",
         real_search_name: "Agaricus campestris group sensu Author",
-        sort_name:        "Agaricus campestris   group  sensu Author",
-        display_name:     "__Agaricus campestris__ group sensu Author",
-        parent_name:      "Agaricus",
-        rank:             :Group,
-        author:           "sensu Author"
+        sort_name: "Agaricus campestris   group  sensu Author",
+        display_name: "__Agaricus campestris__ group sensu Author",
+        parent_name: "Agaricus",
+        rank: :Group,
+        author: "sensu Author"
       },
       deprecated: true
     )
@@ -1577,33 +1611,33 @@ class NameTest < UnitTestCase
 
   def test_rank_matchers
     name = names(:fungi)
-    refute(name.at_or_below_genus?)
-    refute(name.below_genus?)
-    refute(name.between_genus_and_species?)
-    refute(name.at_or_below_species?)
+    assert_not(name.at_or_below_genus?)
+    assert_not(name.below_genus?)
+    assert_not(name.between_genus_and_species?)
+    assert_not(name.at_or_below_species?)
 
     name = names(:agaricus)
     assert(name.at_or_below_genus?)
-    refute(name.below_genus?)
-    refute(name.between_genus_and_species?)
-    refute(name.at_or_below_species?)
+    assert_not(name.below_genus?)
+    assert_not(name.between_genus_and_species?)
+    assert_not(name.at_or_below_species?)
 
     name = names(:amanita_subgenus_lepidella)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
     assert(name.between_genus_and_species?)
-    refute(name.at_or_below_species?)
+    assert_not(name.at_or_below_species?)
 
     name = names(:coprinus_comatus)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
-    refute(name.between_genus_and_species?)
+    assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
 
     name = names(:amanita_boudieri_var_beillei)
     assert(name.at_or_below_genus?)
     assert(name.below_genus?)
-    refute(name.between_genus_and_species?)
+    assert_not(name.between_genus_and_species?)
     assert(name.at_or_below_species?)
   end
 
@@ -2095,14 +2129,14 @@ class NameTest < UnitTestCase
 
     # Make sure approving a name clears misspelling stuff.
     names(:petigera).change_deprecated(false)
-    assert(!names(:petigera).is_misspelling?)
+    assert_not(names(:petigera).is_misspelling?)
     assert_nil(names(:petigera).correct_spelling)
 
     # Coprinus comatus should normally end up in name primer.
     if File.exist?(MO.name_primer_cache_file)
       File.delete(MO.name_primer_cache_file)
     end
-    assert(!Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
+    assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
 
     # Mark it as misspelled and see that it gets removed from the primer list.
     names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
@@ -2116,7 +2150,7 @@ class NameTest < UnitTestCase
     assert(names(:tremella_mesenterica).is_lichen?)
     assert(names(:tremella).is_lichen?)
     assert(names(:tremella_justpublished).is_lichen?)
-    refute(names(:agaricus_campestris).is_lichen?)
+    assert_not(names(:agaricus_campestris).is_lichen?)
   end
 
   def test_has_eol_data
@@ -2609,6 +2643,32 @@ class NameTest < UnitTestCase
                            Name.suggest_alternate_spellings("Lecanoa grandis"))
   end
 
+  def test_synonym_ids
+    # Although this test is coupled to synonym_ids' details
+    # I can't find a better way to cover all the paths through that method
+
+    # If a Name has synonym(s), then
+    # synonym_ids will hit the db unless @synonyms exists, and vice versa
+    name_with_other_synonyms = names(:chlorophyllum_rachodes)
+    synonym = name_with_other_synonyms.synonym
+    synonym_ids = Name.where(synonym: synonym).pluck(:id)
+
+    # Prove that synonym_ids is correct when @synonyms doesn't exist
+    assert_equal(synonym_ids, name_with_other_synonyms.synonym_ids)
+
+    # Prove that synonym_ids is correct when @synonyms already exists
+    # synonyms = name_with_other_synonyms
+    assert_equal(
+      name_with_other_synonyms.synonyms.map(&:id), # creates @synonyms
+      name_with_other_synonyms.synonym_ids
+    )
+
+    # Prove that synonym_ids is correct when name lacks synonyms
+    name_without_other_synonyms = names(:conocybe_filaris)
+    assert_equal([name_without_other_synonyms.id],
+                 name_without_other_synonyms.synonym_ids)
+  end
+
   def test_other_approved_synonyms
     assert_equal([names(:chlorophyllum_rachodes)],
                  names(:chlorophyllum_rhacodes).other_approved_synonyms)
@@ -2709,15 +2769,15 @@ class NameTest < UnitTestCase
 
     # Prove authored Group ParsedName is not matched by extant unauthored Name
     parsed = Name.parse_name("#{names(:unauthored_group).text_name} Author")
-    refute(Name.names_matching_desired_new_name(parsed).
+    assert_not(Name.names_matching_desired_new_name(parsed).
                 include?(names(:unauthored_with_naming)))
     # And vice versa
     # Prove unauthored Group ParsedName is not matched by extant authored Name
     extant  = names(:authored_group)
     desired = extant.text_name
     parsed  = Name.parse_name(desired)
-    refute(Name.names_matching_desired_new_name(parsed).include?(extant),
-           "'#{desired}' unexpectedly matches '#{extant.search_name}'")
+    assert_not(Name.names_matching_desired_new_name(parsed).include?(extant),
+               "'#{desired}' unexpectedly matches '#{extant.search_name}'")
 
     # Prove authored non-Group ParsedName matched by union of exact matches and
     # unauthored matches

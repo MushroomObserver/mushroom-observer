@@ -54,7 +54,8 @@ class ApiTest < UnitTestCase
   end
 
   def assert_api_results(expect)
-    msg = "API results wrong.  Query: #{@api.query.query}"
+    msg = "API results wrong.\nQuery args: #{@api.query.params.inspect}\n"\
+          "Query sql: #{@api.query.query}"
     assert_obj_list_equal(expect, @api.results, :sort, msg)
   end
 
@@ -399,10 +400,10 @@ class ApiTest < UnitTestCase
 
   def test_getting_api_keys
     params = {
-      method:   :patch,
-      action:   :api_key,
-      api_key:  @api_key.key,
-      user:     rolf.id
+      method: :patch,
+      action: :api_key,
+      api_key: @api_key.key,
+      user: rolf.id
     }
     # No GET requests allowed now.
     assert_api_fail(params)
@@ -414,10 +415,10 @@ class ApiTest < UnitTestCase
     @app = "  Mushroom  Mapper  "
     @verified = true
     params = {
-      method:  :post,
-      action:  :api_key,
+      method: :post,
+      action: :api_key,
       api_key: @api_key.key,
-      app:     @app
+      app: @app
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting image")
@@ -434,10 +435,10 @@ class ApiTest < UnitTestCase
     @app = "  Mushroom  Mapper  "
     @verified = false
     params = {
-      method:   :post,
-      action:   :api_key,
-      api_key:  @api_key.key,
-      app:      @app,
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app,
       for_user: @for_user.id
     }
     api = API.execute(params)
@@ -453,11 +454,11 @@ class ApiTest < UnitTestCase
 
   def test_patching_api_keys
     params = {
-      method:   :patch,
-      action:   :api_key,
-      api_key:  @api_key.key,
-      id:       @api_key.id,
-      set_app:  "new app"
+      method: :patch,
+      action: :api_key,
+      api_key: @api_key.key,
+      id: @api_key.id,
+      set_app: "new app"
     }
     # No PATCH requests allowed now.
     assert_api_fail(params)
@@ -465,10 +466,10 @@ class ApiTest < UnitTestCase
 
   def test_deleting_api_keys
     params = {
-      method:   :delete,
-      action:   :api_key,
-      api_key:  @api_key.key,
-      id:       @api_key.id
+      method: :delete,
+      action: :api_key,
+      api_key: @api_key.key,
+      id: @api_key.id
     }
     # No DELETE requests allowed now.
     assert_api_fail(params)
@@ -531,12 +532,12 @@ class ApiTest < UnitTestCase
     @number    = "13579a"
     @user      = rolf
     params = {
-      method:      :post,
-      action:      :collection_number,
-      api_key:     @api_key.key,
+      method: :post,
+      action: :collection_number,
+      api_key: @api_key.key,
       observation: @obs.id,
-      collector:   @name,
-      number:      @number
+      collector: @name,
+      number: @number
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:observation))
@@ -558,12 +559,12 @@ class ApiTest < UnitTestCase
     marys_num = collection_numbers(:minimal_unknown_coll_num)
     rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
     params = {
-      method:        :patch,
-      action:        :collection_number,
-      api_key:       @api_key.key,
-      id:            rolfs_num.id,
+      method: :patch,
+      action: :collection_number,
+      api_key: @api_key.key,
+      id: rolfs_num.id,
       set_collector: "New",
-      set_number:    "42"
+      set_number: "42"
     }
     assert_equal("Rolf Singer 1", rolfs_rec.accession_number)
     assert_api_fail(params.remove(:api_key))
@@ -577,10 +578,10 @@ class ApiTest < UnitTestCase
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:detailed_unknown_obs)
     params = {
-      method:        :patch,
-      action:        :collection_number,
-      api_key:       @api_key.key,
-      id:            rolfs_num.id
+      method: :patch,
+      action: :collection_number,
+      api_key: @api_key.key,
+      id: rolfs_num.id
     }
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
@@ -598,10 +599,10 @@ class ApiTest < UnitTestCase
     obs1 = num1.observations.first
     obs2 = num2.observations.first
     params = {
-      method:     :patch,
-      action:     :collection_number,
-      api_key:    @api_key.key,
-      id:         num1.id,
+      method: :patch,
+      action: :collection_number,
+      api_key: @api_key.key,
+      id: num1.id,
       set_number: num2.number
     }
     assert_api_pass(params)
@@ -614,10 +615,10 @@ class ApiTest < UnitTestCase
     rolfs_num = collection_numbers(:coprinus_comatus_coll_num)
     marys_num = collection_numbers(:minimal_unknown_coll_num)
     params = {
-      method:     :delete,
-      action:     :collection_number,
-      api_key:    @api_key.key,
-      id:         rolfs_num.id
+      method: :delete,
+      action: :collection_number,
+      api_key: @api_key.key,
+      id: rolfs_num.id
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: marys_num.id))
@@ -669,10 +670,10 @@ class ApiTest < UnitTestCase
     @summary = "misspelling"
     @content = "The correct one is 'Peltigera'."
     params = {
-      method:  :post,
-      action:  :comment,
+      method: :post,
+      action: :comment,
       api_key: @api_key.key,
-      target:  "name ##{@target.id}",
+      target: "name ##{@target.id}",
       summary: @summary,
       content: @content
     }
@@ -689,10 +690,10 @@ class ApiTest < UnitTestCase
     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
     params = {
-      method:      :patch,
-      action:      :comment,
-      api_key:     @api_key.key,
-      id:          com1.id,
+      method: :patch,
+      action: :comment,
+      api_key: @api_key.key,
+      id: com1.id,
       set_summary: "new summary",
       set_content: "new comment"
     }
@@ -709,10 +710,10 @@ class ApiTest < UnitTestCase
     com1 = comments(:minimal_unknown_obs_comment_1) # rolf's comment
     com2 = comments(:minimal_unknown_obs_comment_2) # dick's comment
     params = {
-      method:      :delete,
-      action:      :comment,
-      api_key:     @api_key.key,
-      id:          com1.id
+      method: :delete,
+      action: :comment,
+      api_key: @api_key.key,
+      id: com1.id
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: com2.id))
@@ -764,12 +765,12 @@ class ApiTest < UnitTestCase
     marys_key = api_keys(:marys_api_key)
     rolfs_key = api_keys(:rolfs_api_key)
     params = {
-      method:        :post,
-      action:        :external_link,
-      api_key:       rolfs_key.key,
-      observation:   rolfs_obs.id,
+      method: :post,
+      action: :external_link,
+      api_key: rolfs_key.key,
+      observation: rolfs_obs.id,
       external_site: external_sites(:mycoportal).id,
-      url:           "http://blah.blah"
+      url: "http://blah.blah"
     }
     assert_api_pass(params)
     assert_api_fail(params.remove(:api_key))
@@ -793,22 +794,22 @@ class ApiTest < UnitTestCase
     assert_false(link.external_site.project.is_member?(dick))
     new_url = "http://something.else"
     params = {
-      method:  :patch,
-      action:  :external_link,
+      method: :patch,
+      action: :external_link,
       api_key: @api_key.key,
-      id:      link.id,
+      id: link.id,
       set_url: new_url
     }
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_url: ""))
     assert_api_pass(params)
     assert_equal(new_url, link.reload.url)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update!(user: mary)
     assert_api_pass(params.merge(set_url: new_url + "2"))
     assert_equal(new_url + "2", link.reload.url)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     link.external_site.project.user_group.users << dick
     assert_api_pass(params.merge(set_url: new_url + "3"))
     assert_equal(new_url + "3", link.reload.url)
@@ -820,28 +821,28 @@ class ApiTest < UnitTestCase
     assert_users_equal(rolf, link.observation.user)
     assert_false(link.external_site.project.is_member?(dick))
     params = {
-      method:  :delete,
-      action:  :external_link,
+      method: :delete,
+      action: :external_link,
       api_key: @api_key.key,
-      id:      link.id
+      id: link.id
     }
     recreate_params = {
-      user:          mary,
-      observation:   link.observation,
+      user: mary,
+      observation: link.observation,
       external_site: link.external_site,
-      url:           link.url
+      url: link.url
     }
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params)
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_pass(params)
     assert_nil(ExternalLink.safe_find(link.id))
     link = ExternalLink.create!(recreate_params)
-    @api_key.update_attributes!(user: mary)
+    @api_key.update!(user: mary)
     assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
     link = ExternalLink.create!(recreate_params)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     link.external_site.project.user_group.users << dick
     assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
@@ -962,14 +963,14 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(initial_det_has: "coprinus"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where(accession_number: "NYBG 1234")
+    recs = HerbariumRecord.where(accession_number: "1234")
     assert_not_empty(recs)
-    assert_api_pass(params.merge(accession_number: "NYBG 1234"))
+    assert_api_pass(params.merge(accession_number: "1234"))
     assert_api_results(recs)
 
-    recs = HerbariumRecord.where("accession_number LIKE '%nybg%'")
+    recs = HerbariumRecord.where("accession_number LIKE '%23%'")
     assert_not_empty(recs)
-    assert_api_pass(params.merge(accession_number_has: "nybg"))
+    assert_api_pass(params.merge(accession_number_has: "23"))
     assert_api_results(recs)
   end
 
@@ -983,14 +984,14 @@ class ApiTest < UnitTestCase
     @notes            = "i make good specimen"
     @user             = rolf
     params = {
-      method:           :post,
-      action:           :herbarium_record,
-      api_key:          @api_key.key,
-      observation:      @obs.id,
-      herbarium:        @herbarium.id,
-      initial_det:      @initial_det,
+      method: :post,
+      action: :herbarium_record,
+      api_key: @api_key.key,
+      observation: @obs.id,
+      herbarium: @herbarium.id,
+      initial_det: @initial_det,
       accession_number: @accession_number,
-      notes:            @notes
+      notes: @notes
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:observation))
@@ -1040,14 +1041,14 @@ class ApiTest < UnitTestCase
     marys_rec = herbarium_records(:mycoflora_record)
     mycoflora = herbaria(:mycoflora_herbarium)
     params = {
-      method:               :patch,
-      action:               :herbarium_record,
-      api_key:              @api_key.key,
-      id:                   rolfs_rec.id,
-      set_herbarium:        "North American Mycoflora Project",
-      set_initial_det:      " New name ",
+      method: :patch,
+      action: :herbarium_record,
+      api_key: @api_key.key,
+      id: rolfs_rec.id,
+      set_herbarium: "North American Mycoflora Project",
+      set_initial_det: " New name ",
       set_accession_number: " 1234 ",
-      set_notes:            " new notes "
+      set_notes: " new notes "
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: marys_rec.id))
@@ -1072,10 +1073,10 @@ class ApiTest < UnitTestCase
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:minimal_unknown_obs)
     params = {
-      method:  :patch,
-      action:  :herbarium_record,
+      method: :patch,
+      action: :herbarium_record,
       api_key: @api_key.key,
-      id:      rolfs_rec.id
+      id: rolfs_rec.id
     }
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
@@ -1094,9 +1095,9 @@ class ApiTest < UnitTestCase
     nybgs_rec = herbarium_records(:interesting_unknown)
     marys_rec = herbarium_records(:mycoflora_record)
     params = {
-      method:     :delete,
-      action:     :herbarium_record,
-      api_key:    @api_key.key
+      method: :delete,
+      action: :herbarium_record,
+      api_key: @api_key.key
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_pass(params.merge(id: rolfs_rec.id))
@@ -1138,13 +1139,29 @@ class ApiTest < UnitTestCase
 
     name2 = names(:agaricus_campestros)
     synonym = Synonym.create!
-    name.update_attributes!(synonym: synonym)
-    name2.update_attributes!(synonym: synonym)
+    name.update!(synonym: synonym)
+    name2.update!(synonym: synonym)
     assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
+    assert_api_pass(
+      params.merge(name: "Agaricus campestros", include_synonyms: "yes")
+    )
+    assert_api_results(imgs)
 
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_img = Image.create(
+      # add notes to avoid breaking later, brittle assertion
+      notes: "Agaricus image", user: rolf
+    )
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+    )
     assert_api_pass(params.merge(children_of: "Agaricus"))
     assert_api_results(imgs)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(imgs << agaricus_img)
+    ###
 
     burbank = locations(:burbank)
     imgs = burbank.observations.map(&:images).flatten
@@ -1189,7 +1206,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(size: "large"))
     assert_api_results(imgs)
 
-    img1.update_attributes!(content_type: "image/png")
+    img1.update!(content_type: "image/png")
     assert_api_pass(params.merge(content_type: "png"))
     assert_api_results([img1])
 
@@ -1225,9 +1242,36 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(confidence: "2-3"))
     assert_api_results(imgs)
 
-    pretty_img.update_attributes!(ok_for_export: false)
+    pretty_img.update!(ok_for_export: false)
     assert_api_pass(params.merge(ok_for_export: "no"))
     assert_api_results([pretty_img])
+  end
+
+  def test_two_agaricus_bug
+    name = names(:agaricus_campestris) # the only Agaricus species with images
+    imgs = name.observations.map(&:images).flatten
+
+    # Create 2nd Agaricus.  There's an existing Agaricus without and author.
+    # The API and Query parsers were resolving "Agaricus" to the one without
+    # an author thinking that was an exact match, instead of resolving to both
+    # versions like it should.
+    agaricus = Name.create(
+      rank: Name.ranks[:Genus], text_name: "Agaricus",  author: "L.",
+      search_name: "Agaricus L.", sort_name: "Agaricus  L.",
+      display_name: "**__Agaricus__** L.", user: rolf
+    )
+    assert_equal(2, Name.where(text_name: "Agaricus").count)
+
+    agaricus_img = Image.create(user: rolf)
+    agaricus_obs = Observation.create(
+      name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
+      user: rolf
+    )
+
+    assert_api_pass(
+      method: :get, action: :image, name: "Agaricus", include_subtaxa: "yes"
+    )
+    assert_api_results(imgs << agaricus_img)
   end
 
   def test_posting_minimal_image
@@ -1243,9 +1287,9 @@ class ApiTest < UnitTestCase
     @vote   = nil
     @obs    = nil
     params  = {
-      method:      :post,
-      action:      :image,
-      api_key:     @api_key.key,
+      method: :post,
+      action: :image,
+      api_key: @api_key.key,
       upload_file: "#{::Rails.root}/test/images/sticky.jpg"
     }
     File.stub(:rename, true) do
@@ -1271,18 +1315,18 @@ class ApiTest < UnitTestCase
     @vote   = 3
     @obs    = @user.observations.last
     params  = {
-      method:           :post,
-      action:           :image,
-      api_key:          @api_key.key,
-      date:             "20120626",
-      notes:            @notes,
+      method: :post,
+      action: :image,
+      api_key: @api_key.key,
+      date: "20120626",
+      notes: @notes,
       copyright_holder: " My Friend ",
-      license:          @user.license.id,
-      vote:             "3",
-      observations:     @obs.id,
-      projects:         @proj.id,
-      upload_file:      "#{::Rails.root}/test/images/sticky.jpg",
-      original_name:    @orig
+      license: @user.license.id,
+      vote: "3",
+      observations: @obs.id,
+      projects: @proj.id,
+      upload_file: "#{::Rails.root}/test/images/sticky.jpg",
+      original_name: @orig
     }
     File.stub(:rename, true) do
       File.stub(:chmod, true) do
@@ -1309,9 +1353,9 @@ class ApiTest < UnitTestCase
     stub_request(:any, url).
       to_return(File.read("#{::Rails.root}/test/images/test_image.curl"))
     params = {
-      method:     :post,
-      action:     :image,
-      api_key:    @api_key.key,
+      method: :post,
+      action: :image,
+      api_key: @api_key.key,
       upload_url: url
     }
     File.stub(:rename, false) do
@@ -1331,16 +1375,16 @@ class ApiTest < UnitTestCase
     eol = projects(:eol_project)
     pd = licenses(:publicdomain)
     assert(rolfs_img.can_edit?(rolf))
-    assert(!marys_img.can_edit?(rolf))
+    assert_not(marys_img.can_edit?(rolf))
     params = {
-      method:               :patch,
-      action:               :image,
-      api_key:              @api_key.key,
-      set_date:             "2012-3-4",
-      set_notes:            "new notes",
+      method: :patch,
+      action: :image,
+      api_key: @api_key.key,
+      set_date: "2012-3-4",
+      set_notes: "new notes",
       set_copyright_holder: "new person",
-      set_license:          pd.id,
-      set_original_name:    "new name"
+      set_license: pd.id,
+      set_original_name: "new name"
     }
     assert_api_fail(params.merge(id: marys_img.id))
     assert_api_fail(params.merge(set_date: ""))
@@ -1368,8 +1412,8 @@ class ApiTest < UnitTestCase
     rolfs_img = rolf.images.sample
     marys_img = mary.images.sample
     params = {
-      method:  :delete,
-      action:  :image,
+      method: :delete,
+      action: :image,
       api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_img.id))
@@ -1431,17 +1475,17 @@ class ApiTest < UnitTestCase
     @notes = "Biggest Little City"
     @user  = rolf
     params = {
-      method:  :post,
-      action:  :location,
+      method: :post,
+      action: :location,
       api_key: @api_key.key,
-      name:    @name,
-      north:   @north,
-      south:   @south,
-      east:    @east,
-      west:    @west,
-      high:    @high,
-      low:     @low,
-      notes:   @notes
+      name: @name,
+      north: @north,
+      south: @south,
+      east: @east,
+      west: @west,
+      high: @high,
+      low: @low,
+      notes: @notes
     }
     name = params[:name]
     assert_api_pass(params)
@@ -1467,17 +1511,17 @@ class ApiTest < UnitTestCase
     albion = locations(:albion)
     burbank = locations(:burbank)
     params = {
-      method:    :patch,
-      action:    :location,
-      api_key:   @api_key.key,
-      id:        albion.id,
-      set_name:  "Reno, Nevada, USA",
+      method: :patch,
+      action: :location,
+      api_key: @api_key.key,
+      id: albion.id,
+      set_name: "Reno, Nevada, USA",
       set_north: 39.64,
       set_south: 39.39,
-      set_east:  -119.70,
-      set_west:  -119.94,
-      set_high:  1700,
-      set_low:   1350,
+      set_east: -119.70,
+      set_west: -119.94,
+      set_high: 1700,
+      set_low: 1350,
       set_notes: "Biggest Little City"
     }
 
@@ -1499,45 +1543,45 @@ class ApiTest < UnitTestCase
     # Not allowed to change if anyone else has an observation there.
     obs = observations(:minimal_unknown_obs)
     assert_objs_equal(mary, obs.user)
-    obs.update_attributes!(location: albion)
+    obs.update!(location: albion)
     assert_api_fail(params)
-    obs.update_attributes!(location: burbank)
+    obs.update!(location: burbank)
 
     # But allow it if rolf owns that observation.
     obs = observations(:coprinus_comatus_obs)
     assert_objs_equal(rolf, obs.user)
-    obs.update_attributes!(location: albion)
+    obs.update!(location: albion)
 
     # Not allowed to change if anyone else has a species_list there.
     spl = species_lists(:unknown_species_list)
     assert_objs_equal(mary, spl.user)
-    spl.update_attributes!(location: albion)
+    spl.update!(location: albion)
     assert_api_fail(params)
-    spl.update_attributes!(location: burbank)
+    spl.update!(location: burbank)
 
     # But allow it if rolf owns that list.
     spl = species_lists(:first_species_list)
     assert_objs_equal(rolf, spl.user)
-    spl.update_attributes!(location: albion)
+    spl.update!(location: albion)
 
     # Not allowed to change if anyone has made this their personal location.
-    mary.update_attributes!(location: albion)
+    mary.update!(location: albion)
     assert_api_fail(params)
-    mary.update_attributes!(location: burbank)
+    mary.update!(location: burbank)
 
     # But allow it if rolf is that user.
-    rolf.update_attributes!(location: albion)
+    rolf.update!(location: albion)
 
     # Not allowed to change if an herbarium is at that location, period.
     nybg = herbaria(:nybg_herbarium)
-    nybg.update_attributes!(location: albion)
+    nybg.update!(location: albion)
     assert_api_fail(params)
-    nybg.update_attributes!(location: burbank)
+    nybg.update!(location: burbank)
 
     # Not allowed to change if user didn't create it.
-    albion.update_attributes!(user: mary)
+    albion.update!(user: mary)
     assert_api_fail(params)
-    albion.update_attributes!(user: rolf)
+    albion.update!(user: rolf)
 
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that name is valid and not already
@@ -1564,10 +1608,10 @@ class ApiTest < UnitTestCase
   def test_deleting_locations
     loc = rolf.locations.sample
     params = {
-      method:  :delete,
-      action:  :location,
+      method: :delete,
+      action: :location,
       api_key: @api_key.key,
-      id:      loc.id
+      id: loc.id
     }
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
@@ -1615,6 +1659,10 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(names)
 
     names = Name.where("classification like '%Fungi%'").each do |n|
       genus = n.text_name.split.first
@@ -1623,6 +1671,8 @@ class ApiTest < UnitTestCase
     assert_not_empty(names)
     assert_api_pass(params.merge(children_of: "Fungi"))
     assert_api_results(names)
+    assert_api_pass(params.merge(name: "Fungi", include_subtaxa: "yes"))
+    assert_api_results(names << names(:fungi))
 
     names = Name.where(deprecated: true).
             reject(&:correct_spelling_id)
@@ -1776,7 +1826,7 @@ class ApiTest < UnitTestCase
     assert_api_results(names)
 
     Name.where(correct_spelling: nil).sample.
-      update_attributes!(ok_for_export: true)
+      update!(ok_for_export: true)
     names = Name.where(ok_for_export: true).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
@@ -1794,12 +1844,12 @@ class ApiTest < UnitTestCase
     @notes          = ""
     @user           = rolf
     params = {
-      method:         :post,
-      action:         :name,
-      api_key:        @api_key.key,
-      name:           @name,
-      rank:           @rank,
-      deprecated:     @deprecated
+      method: :post,
+      action: :name,
+      api_key: @api_key.key,
+      name: @name,
+      rank: @rank,
+      deprecated: @deprecated
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:name))
@@ -1819,16 +1869,16 @@ class ApiTest < UnitTestCase
     @notes          = "neat species!"
     @user           = rolf
     params = {
-      method:         :post,
-      action:         :name,
-      api_key:        @api_key.key,
-      name:           @name,
-      author:         @author,
-      rank:           @rank,
-      deprecated:     @deprecated,
-      citation:       @citation,
+      method: :post,
+      action: :name,
+      api_key: @api_key.key,
+      name: @name,
+      author: @author,
+      rank: @rank,
+      deprecated: @deprecated,
+      citation: @citation,
       classification: @classification,
-      notes:          @notes
+      notes: @notes
     }
     assert_api_pass(params)
     assert_last_name_correct(Name.where(text_name: @name).first)
@@ -1845,16 +1895,16 @@ class ApiTest < UnitTestCase
       "Family: Agaricaceae"
     ].join("\n")
     params = {
-      method:             :patch,
-      action:             :name,
-      api_key:            @api_key.key,
-      id:                 agaricus.id,
-      set_notes:          "new notes",
-      set_citation:       "new citation",
+      method: :patch,
+      action: :name,
+      api_key: @api_key.key,
+      id: agaricus.id,
+      set_notes: "new notes",
+      set_citation: "new citation",
       set_classification: new_classification
     }
 
-    lepiota.update_attributes!(user: mary)
+    lepiota.update!(user: mary)
 
     # Just to be clear about the starting point, the only objects attached to
     # this name at first are a version and a description, both owned by rolf,
@@ -1872,31 +1922,31 @@ class ApiTest < UnitTestCase
     # Not allowed to change if anyone else has an observation of that name.
     obs = observations(:minimal_unknown_obs)
     assert_objs_equal(mary, obs.user)
-    obs.update_attributes!(name: agaricus)
+    obs.update!(name: agaricus)
     assert_api_fail(params)
-    obs.update_attributes!(name: lepiota)
+    obs.update!(name: lepiota)
 
     # But allow it if rolf owns that observation.
     obs = observations(:coprinus_comatus_obs)
     assert_objs_equal(rolf, obs.user)
-    obs.update_attributes!(name: agaricus)
+    obs.update!(name: agaricus)
 
     # Not allowed to change if anyone else has proposed that name.
     nam = namings(:detailed_unknown_naming)
     assert_objs_equal(mary, nam.user)
-    nam.update_attributes!(name: agaricus)
+    nam.update!(name: agaricus)
     assert_api_fail(params)
-    nam.update_attributes!(name: lepiota)
+    nam.update!(name: lepiota)
 
     # But allow it if rolf owns that name proposal.
     nam = namings(:coprinus_comatus_naming)
     assert_objs_equal(rolf, nam.user)
-    nam.update_attributes!(name: agaricus)
+    nam.update!(name: agaricus)
 
     # Not allowed to change if user didn't create it.
-    agaricus.update_attributes!(user: mary)
+    agaricus.update!(user: mary)
     assert_api_fail(params)
-    agaricus.update_attributes!(user: rolf)
+    agaricus.update!(user: rolf)
 
     # Okay, permissions should be right, now.  Proceed to "normal" tests.  That
     # is, make sure api key is required, and that classification is valid.
@@ -1914,10 +1964,10 @@ class ApiTest < UnitTestCase
   def test_changing_names
     agaricus = names(:agaricus)
     params = {
-      method:  :patch,
-      action:  :name,
+      method: :patch,
+      action: :name,
       api_key: @api_key.key,
-      id:      agaricus.id
+      id: agaricus.id
     }
     assert_api_fail(params.merge(set_name: ""))
     assert_api_pass(params.merge(set_name: "Suciraga"))
@@ -1928,9 +1978,9 @@ class ApiTest < UnitTestCase
     assert_equal(:Order, agaricus.reload.rank)
     assert_api_fail(params.merge(set_rank: ""))
     assert_api_fail(params.merge(set_rank: "species"))
-    assert_api_pass(params.merge(set_name:   "Agaricus bitorquis",
+    assert_api_pass(params.merge(set_name: "Agaricus bitorquis",
                                  set_author: "(Quélet) Sacc.",
-                                 set_rank:   "species"))
+                                 set_rank: "species"))
     agaricus.reload
     assert_equal("Agaricus bitorquis (Quélet) Sacc.", agaricus.search_name)
     assert_equal(:Species, agaricus.rank)
@@ -1942,10 +1992,10 @@ class ApiTest < UnitTestCase
   def test_changing_deprecation
     agaricus = names(:agaricus)
     params = {
-      method:  :patch,
-      action:  :name,
+      method: :patch,
+      action: :name,
       api_key: @api_key.key,
-      id:      agaricus.id
+      id: agaricus.id
     }
     assert_api_pass(params.merge(set_deprecated: "true"))
     assert_true(agaricus.reload.deprecated)
@@ -1960,8 +2010,8 @@ class ApiTest < UnitTestCase
     name2 = names(:lactarius_subalpinus)
     name3 = names(:macrolepiota_rhacodes)
     params = {
-      method:  :patch,
-      action:  :name,
+      method: :patch,
+      action: :name,
       api_key: @api_key.key
     }
     syns = name1.synonyms
@@ -1980,8 +2030,8 @@ class ApiTest < UnitTestCase
     correct  = names(:macrolepiota_rhacodes)
     misspelt = names(:macrolepiota_rachodes)
     params = {
-      method:  :patch,
-      action:  :name,
+      method: :patch,
+      action: :name,
       api_key: @api_key.key
     }
     correct.clear_synonym
@@ -1997,10 +2047,10 @@ class ApiTest < UnitTestCase
   def test_deleting_names
     name = rolf.names.sample
     params = {
-      method:  :delete,
-      action:  :name,
+      method: :delete,
+      action: :name,
       api_key: @api_key.key,
-      id:      name.id
+      id: name.id
     }
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
@@ -2042,19 +2092,33 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(obses)
 
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpinus))
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
-
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
     assert_api_results(obses)
+
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_results(ssp_obs)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_obs.to_a << agaricus_obs)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -2198,9 +2262,9 @@ class ApiTest < UnitTestCase
     @long = nil
     @alt = nil
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
       location: "Anywhere"
     }
     api = API.execute(params)
@@ -2220,7 +2284,7 @@ class ApiTest < UnitTestCase
     @proj = projects(:eol_project)
     @date = date("20120626")
     @notes = {
-      Cap:   "scaly",
+      Cap: "scaly",
       Gills: "inky",
       Stipe: "smooth",
       Other: "These are notes.\nThey look like this."
@@ -2232,26 +2296,26 @@ class ApiTest < UnitTestCase
     @long = -123.77
     @alt = 50
     params = {
-      method:         :post,
-      action:         :observation,
-      api_key:        @api_key.key,
-      date:           "20120626",
-      "notes[Cap]":   "scaly",
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      date: "20120626",
+      "notes[Cap]": "scaly",
       "notes[Gills]": "inky\n",
-      "notes[Veil]":  "",
+      "notes[Veil]": "",
       "notes[Stipe]": "  smooth  ",
-      notes:          "These are notes.\nThey look like this.\n",
-      location:       "USA, California, Albion",
-      latitude:       "39.229°N",
-      longitude:      "123.770°W",
-      altitude:       "50m",
-      has_specimen:   "yes",
-      name:           "Coprinus comatus",
-      vote:           "2",
-      projects:       @proj.id,
-      species_lists:  @spl.id,
-      thumbnail:      @img2.id,
-      images:         "#{@img1.id},#{@img2.id}"
+      notes: "These are notes.\nThey look like this.\n",
+      location: "USA, California, Albion",
+      latitude: "39.229°N",
+      longitude: "123.770°W",
+      altitude: "50m",
+      has_specimen: "yes",
+      name: "Coprinus comatus",
+      vote: "2",
+      projects: @proj.id,
+      species_lists: @spl.id,
+      thumbnail: @img2.id,
+      images: "#{@img1.id},#{@img2.id}"
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")
@@ -2285,12 +2349,12 @@ class ApiTest < UnitTestCase
 
   def test_post_observation_with_no_log
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
       location: "Anywhere",
-      name:     "Agaricus campestris",
-      log:      "no"
+      name: "Agaricus campestris",
+      log: "no"
     }
     api = API.execute(params)
     assert_no_errors(api, "Errors while posting observation")
@@ -2300,9 +2364,9 @@ class ApiTest < UnitTestCase
 
   def test_post_observation_scientific_location
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key
     }
     assert_equal(:postal, rolf.location_format)
 
@@ -2345,11 +2409,11 @@ class ApiTest < UnitTestCase
 
   def test_post_observation_with_specimen
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
       location: locations(:burbank).name,
-      name:     names(:peltigera).text_name
+      name: names(:peltigera).text_name
     }
 
     assert_api_fail(params.merge(has_specimen: "no", herbarium: "1"))
@@ -2380,15 +2444,15 @@ class ApiTest < UnitTestCase
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)
     assert(rolfs_obs.can_edit?(rolf))
-    assert(!marys_obs.can_edit?(rolf))
+    assert_not(marys_obs.can_edit?(rolf))
     params = {
-      method:                     :patch,
-      action:                     :observation,
-      api_key:                    @api_key.key,
-      id:                         rolfs_obs.id,
-      set_date:                   "2012-12-12",
-      set_location:               'Burbank\, California\, USA',
-      set_has_specimen:           "no",
+      method: :patch,
+      action: :observation,
+      api_key: @api_key.key,
+      id: rolfs_obs.id,
+      set_date: "2012-12-12",
+      set_location: 'Burbank\, California\, USA',
+      set_has_specimen: "no",
       set_is_collection_location: "no"
     }
     assert_api_fail(params.remove(:api_key))
@@ -2404,13 +2468,13 @@ class ApiTest < UnitTestCase
     assert_equal(false, rolfs_obs.is_collection_location)
 
     params = {
-      method:        :patch,
-      action:        :observation,
-      api_key:       @api_key.key,
-      id:            rolfs_obs.id,
-      set_latitude:  "12.34",
+      method: :patch,
+      action: :observation,
+      api_key: @api_key.key,
+      id: rolfs_obs.id,
+      set_latitude: "12.34",
       set_longitude: "-56.78",
-      set_altitude:  "901"
+      set_altitude: "901"
     }
     assert_api_fail(params.remove(:set_latitude))
     assert_api_fail(params.remove(:set_longitude))
@@ -2421,14 +2485,14 @@ class ApiTest < UnitTestCase
     assert_in_delta(901, rolfs_obs.alt, 0.0001)
 
     params = {
-      method:  :patch,
-      action:  :observation,
+      method: :patch,
+      action: :observation,
       api_key: @api_key.key,
-      id:      rolfs_obs.id
+      id: rolfs_obs.id
     }
-    assert_api_pass(params.merge(:set_notes          => "wow!",
-                                 :"set_notes[Cap]"   => "red",
-                                 :"set_notes[Ring]"  => "none",
+    assert_api_pass(params.merge(:set_notes => "wow!",
+                                 :"set_notes[Cap]" => "red",
+                                 :"set_notes[Ring]" => "none",
                                  :"set_notes[Gills]" => ""))
     rolfs_obs.reload
     assert_equal({ Cap: "red", Ring: "none", Other: "wow!" }, rolfs_obs.notes)
@@ -2464,7 +2528,7 @@ class ApiTest < UnitTestCase
     proj = projects(:bolete_project)
     proj.user_group.users << rolf
     rolf.reload
-    assert(!proj.observations.include?(rolfs_obs))
+    assert_not(proj.observations.include?(rolfs_obs))
     assert(proj.observations.include?(marys_obs))
     assert(rolfs_obs.can_edit?(rolf))
     assert(marys_obs.can_edit?(rolf))
@@ -2482,29 +2546,29 @@ class ApiTest < UnitTestCase
                                  remove_from_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id,
                                  remove_from_project: proj.id))
-    assert(!Project.find(proj.id).observations.include?(rolfs_obs))
+    assert_not(Project.find(proj.id).observations.include?(rolfs_obs))
     assert(Project.find(proj.id).observations.include?(marys_obs))
 
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:query_first_list)
     assert(spl1.can_edit?(rolf))
-    assert(!spl2.can_edit?(rolf))
+    assert_not(spl2.can_edit?(rolf))
     assert_api_pass(params.merge(add_to_species_list: spl1.id))
     assert_api_fail(params.merge(add_to_species_list: spl2.id))
     assert(spl1.reload.observations.include?(rolfs_obs))
-    assert(!spl2.reload.observations.include?(rolfs_obs))
+    assert_not(spl2.reload.observations.include?(rolfs_obs))
     assert_api_pass(params.merge(remove_from_species_list: spl1.id))
     assert_api_fail(params.merge(remove_from_species_list: spl2.id))
-    assert(!spl1.reload.observations.include?(rolfs_obs))
-    assert(!spl2.reload.observations.include?(rolfs_obs))
+    assert_not(spl1.reload.observations.include?(rolfs_obs))
+    assert_not(spl2.reload.observations.include?(rolfs_obs))
   end
 
   def test_deleting_observations
     rolfs_obs = rolf.observations.sample
     marys_obs = mary.observations.sample
     params = {
-      method:  :delete,
-      action:  :observation,
+      method: :delete,
+      action: :observation,
       api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_obs.id))
@@ -2591,10 +2655,10 @@ class ApiTest < UnitTestCase
     @members = [rolf]
     @user    = rolf
     params = {
-      method:  :post,
-      action:  :project,
+      method: :post,
+      action: :project,
       api_key: @api_key.key,
-      title:   @title
+      title: @title
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:title))
@@ -2606,12 +2670,12 @@ class ApiTest < UnitTestCase
     @admins  = [rolf, mary]
     @members = [rolf, mary, dick]
     params = {
-      method:  :post,
-      action:  :project,
+      method: :post,
+      action: :project,
       api_key: @api_key.key,
-      title:   @title,
+      title: @title,
       summary: @summary,
-      admins:  "mary",
+      admins: "mary",
       members: "dick"
     }
     assert_api_pass(params)
@@ -2626,17 +2690,17 @@ class ApiTest < UnitTestCase
     assert_empty(proj.observations)
     assert_empty(proj.species_lists)
     params = {
-      method:  :patch,
-      action:  :project,
+      method: :patch,
+      action: :project,
       api_key: @api_key.key,
-      id:      proj.id
+      id: proj.id
     }
 
     assert_api_fail(params)
     assert_api_fail(params.remove(:api_key))
-    @api_key.update_attributes!(user: katrina)
+    @api_key.update!(user: katrina)
     assert_api_fail(params.merge(set_title: "new title"))
-    @api_key.update_attributes!(user: rolf)
+    @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_title: ""))
     assert_api_pass(params.merge(set_title: "new title"))
     assert_equal("new title", proj.reload.title)
@@ -2693,10 +2757,10 @@ class ApiTest < UnitTestCase
   def test_deleting_projects
     proj = projects(:eol_project)
     params = {
-      method:  :delete,
-      action:  :project,
+      method: :delete,
+      action: :project,
       api_key: @api_key.key,
-      id:      proj.id
+      id: proj.id
     }
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
@@ -2725,8 +2789,8 @@ class ApiTest < UnitTestCase
     assert_api_results(seqs)
 
     obs = observations(:locally_sequenced_obs)
-    obs.update_attributes!(user: mary)
-    obs.sequences.each { |s| s.update_attributes!(user: mary) }
+    obs.update!(user: mary)
+    obs.sequences.each { |s| s.update!(user: mary) }
     seqs = Sequence.where(user: mary)
     assert_not_empty(seqs)
     assert_api_pass(params.merge(user: "mary"))
@@ -2785,19 +2849,37 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpinus))
-    Observation.create!(user: rolf, when: Time.now, where: locations(:burbank),
+    Observation.create!(user: rolf, when: Time.zone.now,
+                        where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(obses.map(&:sequences).flatten)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(obses.map(&:sequences).flatten)
 
-    obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    assert(obses.length > 1)
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
+    ssp_obs = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
+    assert(ssp_obs.length > 1)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_sequence = Sequence.create(
+      observation: agaricus_obs, user: rolf, locus: "ITS", bases: "ACGT"
+    )
+    ssp_sequences = ssp_obs.map(&:sequences).flatten.sort_by(&:id)
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+    assert_api_results(ssp_sequences)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_sequences << agaricus_sequence)
 
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
@@ -2914,15 +2996,15 @@ class ApiTest < UnitTestCase
     @notes     = "these are notes"
     @user      = rolf
     params = {
-      method:      :post,
-      action:      :sequence,
-      api_key:     @api_key.key,
+      method: :post,
+      action: :sequence,
+      api_key: @api_key.key,
       observation: rolfs_obs.id,
-      locus:       @locus,
-      bases:       @bases,
-      archive:     @archive,
-      accession:   @accession,
-      notes:       @notes
+      locus: @locus,
+      bases: @bases,
+      archive: @archive,
+      accession: @accession,
+      notes: @notes
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:observation))
@@ -2949,9 +3031,9 @@ class ApiTest < UnitTestCase
     @accession = nil
     @notes     = nil
     params = {
-      method:      :post,
-      action:      :sequence,
-      api_key:     @api_key.key,
+      method: :post,
+      action: :sequence,
+      api_key: @api_key.key,
       observation: rolfs_obs.id
     }
     assert_api_fail(params)
@@ -2965,9 +3047,9 @@ class ApiTest < UnitTestCase
     @accession = "AR09876"
     @notes     = nil
     params = {
-      method:      :post,
-      action:      :sequence,
-      api_key:     @api_key.key,
+      method: :post,
+      action: :sequence,
+      api_key: @api_key.key,
       observation: rolfs_obs.id
     }
     assert_api_fail(params)
@@ -2988,18 +3070,18 @@ class ApiTest < UnitTestCase
     @accession = "XX123456"
     @notes     = "new notes"
     params = {
-      method:        :patch,
-      action:        :sequence,
-      api_key:       @api_key.key,
-      id:            seq.id,
-      set_locus:     @locus,
-      set_bases:     @bases,
-      set_archive:   @archive,
+      method: :patch,
+      action: :sequence,
+      api_key: @api_key.key,
+      id: seq.id,
+      set_locus: @locus,
+      set_bases: @bases,
+      set_archive: @archive,
       set_accession: @accession,
-      set_notes:     @notes
+      set_notes: @notes
     }
     assert_api_fail(params)
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_fail(params.merge(set_locus: ""))
     assert_api_fail(params.merge(set_archive: "bogus"))
     assert_api_fail(params.merge(set_archive: ""))
@@ -3011,14 +3093,14 @@ class ApiTest < UnitTestCase
   def test_deleting_sequences
     seq = dick.sequences.sample
     params = {
-      method:  :delete,
-      action:  :sequence,
+      method: :delete,
+      action: :sequence,
       api_key: @api_key.key,
-      id:      seq.id
+      id: seq.id
     }
     assert_api_fail(params)
     assert_not_nil(Sequence.safe_find(seq.id))
-    @api_key.update_attributes!(user: dick)
+    @api_key.update!(user: dick)
     assert_api_pass(params)
     assert_nil(Sequence.safe_find(seq.id))
   end
@@ -3061,26 +3143,43 @@ class ApiTest < UnitTestCase
     assert_api_pass(params.merge(name: "Fungi"))
     assert_api_results(spls)
 
-    obs1 = Observation.create!(user: rolf, when: Time.now,
+    obs1 = Observation.create!(user: rolf, when: Time.zone.now,
                                where: locations(:burbank),
                                name: names(:lactarius_alpinus))
-    obs2 = Observation.create!(user: rolf, when: Time.now,
+    obs2 = Observation.create!(user: rolf, when: Time.zone.now,
                                where: locations(:burbank),
                                name: names(:lactarius_alpigenes))
     obs1.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:first_species_list)
     obs2.species_lists << species_lists(:another_species_list)
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert(spls.length > 1)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert(ssp_lists.length > 1)
     assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(
+      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+    )
+    assert_api_results(ssp_lists)
 
+    assert_blank(
+      Observation.where(text_name: "Agaricus"),
+      "Tests won't work if there's already an Observation for genus Agaricus"
+    )
     obses = Observation.where(name: Name.where("text_name like 'Agaricus%'"))
-    spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert_not_empty(spls)
+    ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
+    assert_not_empty(ssp_lists)
+    agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
+    agaricus_obs = Observation.create(name: agaricus, user: rolf)
+    agaricus_genus_list = SpeciesList.create!(
+      title: "Agaricus Genus Obses", location: locations(:albion), user: rolf
+    )
+    agaricus_obs.species_lists << agaricus_genus_list
+
     assert_api_pass(params.merge(children_of: "Agaricus"))
-    assert_api_results(spls)
+    assert_api_results(ssp_lists)
+    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_results(ssp_lists << agaricus_genus_list)
 
     spls = SpeciesList.where(location: locations(:no_mushrooms_location))
     assert_not_empty(spls)
@@ -3104,7 +3203,7 @@ class ApiTest < UnitTestCase
     assert_api_results(without)
 
     x = Comment.create(user: dick, target: spl, summary: "test",
-                    comment: "double dare you to reiterate this comment!")
+                       comment: "double dare you to reiterate this comment!")
     x.save
     assert_api_pass(params.merge(has_comments: "yes"))
     assert_api_results([spl])
@@ -3131,13 +3230,13 @@ class ApiTest < UnitTestCase
     @where    = locations(:burbank).name
     @notes    = "some notes"
     params = {
-      method:   :post,
-      action:   :species_list,
-      api_key:  @api_key.key,
-      title:    @title,
-      date:     "2017-11-17",
+      method: :post,
+      action: :species_list,
+      api_key: @api_key.key,
+      title: @title,
+      date: "2017-11-17",
       location: @location.id,
-      notes:    @notes
+      notes: @notes
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:title))
@@ -3152,10 +3251,10 @@ class ApiTest < UnitTestCase
     @where    = Location.unknown.name
     @notes    = nil
     params = {
-      method:   :post,
-      action:   :species_list,
-      api_key:  @api_key.key,
-      title:    @title
+      method: :post,
+      action: :species_list,
+      api_key: @api_key.key,
+      title: @title
     }
     assert_api_pass(params)
     assert_last_species_list_correct
@@ -3166,10 +3265,10 @@ class ApiTest < UnitTestCase
     @where    = "Bogus, Arkansas, USA"
     @notes    = nil
     params = {
-      method:   :post,
-      action:   :species_list,
-      api_key:  @api_key.key,
-      title:    @title,
+      method: :post,
+      action: :species_list,
+      api_key: @api_key.key,
+      title: @title,
       location: @where
     }
     assert_api_pass(params)
@@ -3179,7 +3278,7 @@ class ApiTest < UnitTestCase
   def test_patching_species_lists
     rolfs_spl = species_lists(:first_species_list)
     marys_spl = species_lists(:unknown_species_list)
-    assert(!marys_spl.can_edit?(rolf))
+    assert_not(marys_spl.can_edit?(rolf))
     @user     = rolf
     @title    = "New Title"
     @date     = Date.parse("2017-11-17")
@@ -3187,14 +3286,14 @@ class ApiTest < UnitTestCase
     @where    = locations(:mitrula_marsh).name
     @notes    = "new notes"
     params = {
-      method:       :patch,
-      action:       :species_list,
-      api_key:      @api_key.key,
-      id:           rolfs_spl.id,
-      set_title:    @title,
-      set_date:     "2017-11-17",
+      method: :patch,
+      action: :species_list,
+      api_key: @api_key.key,
+      id: rolfs_spl.id,
+      set_title: @title,
+      set_date: "2017-11-17",
       set_location: @location.display_name,
-      set_notes:    @notes
+      set_notes: @notes
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(id: marys_spl.id))
@@ -3211,8 +3310,8 @@ class ApiTest < UnitTestCase
     rolfs_spl = rolf.species_lists.sample
     marys_spl = mary.species_lists.sample
     params = {
-      method:  :delete,
-      action:  :species_list,
+      method: :delete,
+      action: :species_list,
       api_key: @api_key.key
     }
     assert_api_fail(params.merge(id: marys_spl.id))
@@ -3244,11 +3343,11 @@ class ApiTest < UnitTestCase
     @address = ""
     @new_key = nil
     params = {
-      method:   :post,
-      action:   :user,
-      api_key:  @api_key.key,
-      login:    @login,
-      email:    @email,
+      method: :post,
+      action: :user,
+      api_key: @api_key.key,
+      login: @login,
+      email: @email,
       password: "secret"
     }
     api = API.execute(params)
@@ -3277,19 +3376,19 @@ class ApiTest < UnitTestCase
     @address = " I live here "
     @new_key = "  Blah  Blah  Blah  "
     params = {
-      method:   :post,
-      action:   :user,
-      api_key:  @api_key.key,
-      login:    @login,
-      name:     @name,
-      email:    @email,
+      method: :post,
+      action: :user,
+      api_key: @api_key.key,
+      login: @login,
+      name: @name,
+      email: @email,
       password: "supersecret",
-      locale:   @locale,
-      notes:    @notes,
-      license:  @license.id,
+      locale: @locale,
+      notes: @notes,
+      license: @license.id,
       location: @location.id,
-      image:    @image.id,
-      mailing_address:  @address,
+      image: @image.id,
+      mailing_address: @address,
       create_key: @new_key
     }
     api = API.execute(params)
@@ -3306,16 +3405,16 @@ class ApiTest < UnitTestCase
 
   def test_patching_users
     params = {
-      method:              :patch,
-      action:              :user,
-      api_key:             @api_key.key,
-      id:                  rolf.id,
-      set_locale:          "pt",
-      set_notes:           "some notes",
+      method: :patch,
+      action: :user,
+      api_key: @api_key.key,
+      id: rolf.id,
+      set_locale: "pt",
+      set_notes: "some notes",
       set_mailing_address: "somewhere, USA",
-      set_license:         licenses(:publicdomain).id,
-      set_location:        locations(:burbank).id,
-      set_image:           images(:peltigera_image).id
+      set_license: licenses(:publicdomain).id,
+      set_location: locations(:burbank).id,
+      set_image: images(:peltigera_image).id
     }
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(set_image: mary.images.first.id))
@@ -3333,10 +3432,10 @@ class ApiTest < UnitTestCase
 
   def test_deleting_users
     params = {
-      method:  :delete,
-      action:  :user,
+      method: :delete,
+      action: :user,
       api_key: @api_key.key,
-      id:      rolf.id
+      id: rolf.id
     }
     # No DELETE requests should be allowed at all.
     assert_api_fail(params)
@@ -3803,9 +3902,9 @@ class ApiTest < UnitTestCase
 
   def test_unverified_user_rejected
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
       location: "Anywhere"
     }
     User.update(rolf.id, verified: nil)
@@ -3816,9 +3915,9 @@ class ApiTest < UnitTestCase
 
   def test_unverified_api_key_rejected
     params = {
-      method:   :post,
-      action:   :observation,
-      api_key:  @api_key.key,
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
       location: "Anywhere"
     }
     ApiKey.update(@api_key.id, verified: nil)
@@ -3896,6 +3995,12 @@ class ApiTest < UnitTestCase
   #  :section: Help Messages
   # --------------------------
 
+  def test_deprecation
+    api = API.execute(method: :get, action: :image, help: :me)
+    assert_match(/created_at/, api.errors.first.to_s)
+    assert_no_match(/synonyms_of|children_of/, api.errors.first.to_s)
+  end
+
   def test_api_key_help
     file = help_messages_file
     File.open(file, "w") { |fh| fh.truncate(0) }
@@ -3967,7 +4072,7 @@ class ApiTest < UnitTestCase
   end
 
   def help_messages_file
-    "#{Rails.root}/README_API_HELP_MESSAGES.txt"
+    Rails.root.join("README_API_HELP_MESSAGES.txt").to_s
   end
 
   def do_help_test(method, action, fail = false)

@@ -3,10 +3,10 @@ require "test_helper"
 class ExternalLinkTest < UnitTestCase
   def test_create_valid
     link = ExternalLink.create!(
-      user:          mary,
-      observation:   Observation.first,
+      user: mary,
+      observation: Observation.first,
       external_site: ExternalSite.first,
-      url:           "http://somewhere.com"
+      url: "http://somewhere.com"
     )
     assert_not_nil(link)
     assert_empty(link.errors)
@@ -34,17 +34,17 @@ class ExternalLinkTest < UnitTestCase
     another_obs = observations(:minimal_unknown_obs)
     assert_not_equal(link1.observation.id, another_obs.id)
     link2 = ExternalLink.create(
-      user:          mary,
-      observation:   link1.observation,
+      user: mary,
+      observation: link1.observation,
       external_site: link1.external_site,
-      url:           "http://another.com"
+      url: "http://another.com"
     )
     assert_not_empty(link2.errors)
     link3 = ExternalLink.create(
-      user:          mary,
-      observation:   another_obs,
+      user: mary,
+      observation: another_obs,
       external_site: link1.external_site,
-      url:           "http://another.com"
+      url: "http://another.com"
     )
     assert_empty(link3.errors)
   end

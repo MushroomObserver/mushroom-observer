@@ -12,25 +12,25 @@ class Pivotal
     attr_accessor :votes
 
     LABEL_VALUE = {
-      "critical"        => 4,
-      "bottleneck"      => 3,
-      "api"             => 2,
-      "comments"        => 2,
-      "descriptions"    => 2,
-      "email"           => 2,
-      "i18n"            => 2,
-      "images"          => 2,
-      "lists"           => 2,
-      "locations"       => 2,
-      "maps"            => 2,
-      "names"           => 2,
-      "observations"    => 2,
-      "performance"     => 2,
-      "projects"        => 2,
-      "search"          => 2,
-      "specimen"        => 2,
-      "voting"          => 2,
-      "other"           => 1
+      "critical" => 4,
+      "bottleneck" => 3,
+      "api" => 2,
+      "comments" => 2,
+      "descriptions" => 2,
+      "email" => 2,
+      "i18n" => 2,
+      "images" => 2,
+      "lists" => 2,
+      "locations" => 2,
+      "maps" => 2,
+      "names" => 2,
+      "observations" => 2,
+      "performance" => 2,
+      "projects" => 2,
+      "search" => 2,
+      "specimen" => 2,
+      "voting" => 2,
+      "other" => 1
     }.freeze
 
     def initialize(json)

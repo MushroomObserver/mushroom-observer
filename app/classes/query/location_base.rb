@@ -9,11 +9,11 @@ class Query::LocationBase < Query::Base
     super.merge(
       created_at?: [:time],
       updated_at?: [:time],
-      users?:      [User],
-      north?:      :float,
-      south?:      :float,
-      east?:       :float,
-      west?:       :float
+      users?: [User],
+      north?: :float,
+      south?: :float,
+      east?: :float,
+      west?: :float
     ).merge(content_filter_parameter_declarations(Location))
   end
 

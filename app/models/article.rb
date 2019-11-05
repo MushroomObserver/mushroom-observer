@@ -26,7 +26,7 @@ class Article < AbstractModel
   belongs_to :rss_log
 
   # Automatically log standard events.
-  self.autolog_events = [:created_at!, :updated_at!, :destroyed!]
+  self.autolog_events = [:created!, :updated!, :destroyed!]
 
   # title boldfaced (in Textile). Used by show and index templates
   def display_title

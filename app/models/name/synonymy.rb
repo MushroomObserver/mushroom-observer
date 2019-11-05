@@ -13,9 +13,7 @@ class Name < AbstractModel
       if @synonyms
         @synonyms.map(&:id)
       elsif synonym_id
-        Name.connection.select_values(%(
-          SELECT id FROM names WHERE synonym_id = #{synonym_id}
-        )).map(&:to_i)
+        Name.where(synonym_id: synonym_id).pluck(:id)
       else
         [id]
       end

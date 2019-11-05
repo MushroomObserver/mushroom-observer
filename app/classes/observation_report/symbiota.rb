@@ -24,10 +24,11 @@ module ObservationReport
         decimalLongitude
         minimumElevationInMeters
         maximumElevationInMeters
-        updated_at
+        dateLastModified
         substrate
         host
         fieldNotes
+        mushroomObserverId
         observationUrl
         imageUrls
       ]
@@ -43,7 +44,7 @@ module ObservationReport
         row.species,
         row.form_or_variety_or_subspecies,
         *collector_and_number(row),
-        row.obs_specimen ? "vouchered" : nil,
+        disposition(row),
         row.obs_when,
         row.year,
         row.month,
@@ -58,6 +59,7 @@ module ObservationReport
         row.best_high,
         row.obs_updated_at,
         *explode_notes(row),
+        row.obs_id,
         row.obs_url,
         image_urls(row)
       ]
@@ -65,9 +67,9 @@ module ObservationReport
 
     def collector_and_number(row)
       if row.val(2).blank?
-        [row.user_name_or_login, "MO #{row.obs_id}"]
+        [row.user_name_or_login, "MUOB #{row.obs_id}"]
       else
-        row.val(2).split("\n").first.split("\t")
+        row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
       end
     end
 
@@ -89,8 +91,7 @@ module ObservationReport
     end
 
     def clean_notes(str)
-      str.strip.t.html_to_ascii.
-        gsub(/\\/, "\\\\").gsub(/\n/, "\\n").gsub(/\t/, "\\t")
+      str.strip.t.html_to_ascii.gsub(/\s+/, " ")
     end
 
     def image_urls(row)
@@ -105,6 +106,18 @@ module ObservationReport
       "#{MO.http_domain}/images/orig/#{id}.jpg"
     end
 
+    def disposition(row)
+      return nil unless row.obs_specimen
+
+      str = row.val(3).to_s.split("\n").map do |val|
+        # ignore accession number because our data is garbage
+        val.split("\t").first
+      end.join("; ")
+      return str if str.present?
+
+      return "vouchered"
+    end
+
     def sort_before(rows)
       rows.sort_by(&:obs_id)
     end
@@ -112,6 +125,7 @@ module ObservationReport
     def extend_data!(rows)
       add_image_ids!(rows, 1)
       add_collector_ids!(rows, 2)
+      add_herbarium_accession_numbers!(rows, 3)
     end
   end
 end

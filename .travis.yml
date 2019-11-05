@@ -1,3 +1,7 @@
+dist: xenial # use Ubuntu 16.04
+services:
+  - mysql
+
 language: ruby
 rvm:
   - "2.4.1"

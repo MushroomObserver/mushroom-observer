@@ -1,3 +1,5 @@
+# frozen_string_literal: true.
+
 require "test_helper"
 
 class NamingControllerTest < FunctionalTestCase
@@ -16,6 +18,12 @@ class NamingControllerTest < FunctionalTestCase
     assert_form_action(action: "edit", approved_name: nam.text_name,
                        id: nam.id.to_s)
     assert_select("option[selected]", count: 2)
+
+    login(nam.user.login)
+    get(:edit, params)
+    assert_no_flash(
+      "User should be able to edit his own Naming without warning or error"
+    )
   end
 
   def test_update_observation_new_name
@@ -52,13 +60,11 @@ class NamingControllerTest < FunctionalTestCase
     params = assigns(:params)
     nam = params.naming
 
-    # assert_template(action: 'show_observation')
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: nam.observation_id)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
-    refute(nam.name.deprecated)
-    # assert_equal(10 + 10*2 + 2, rolf.reload.contribution)
+    assert_not(nam.name.deprecated)
     assert_equal(old_contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
                  rolf.reload.contribution)
   end
@@ -299,10 +305,10 @@ class NamingControllerTest < FunctionalTestCase
                  observations(:coprinus_comatus_obs).name_id)
     assert(namings(:coprinus_comatus_naming).user_voted?(rolf))
     assert(namings(:coprinus_comatus_naming).user_voted?(mary))
-    assert(!namings(:coprinus_comatus_naming).user_voted?(dick))
+    assert_not(namings(:coprinus_comatus_naming).user_voted?(dick))
     assert(namings(:coprinus_comatus_other_naming).user_voted?(rolf))
     assert(namings(:coprinus_comatus_other_naming).user_voted?(mary))
-    assert(!namings(:coprinus_comatus_other_naming).user_voted?(dick))
+    assert_not(namings(:coprinus_comatus_other_naming).user_voted?(dick))
 
     # Rolf, the owner of observations(:coprinus_comatus_obs),
     # already has a naming, which he's 80% sure of.
@@ -369,13 +375,13 @@ class NamingControllerTest < FunctionalTestCase
     assert(nr1.used?)
     assert(nr2.used?)
     assert(nr3.used?)
-    assert(!nr4.used?)
+    assert_not(nr4.used?)
 
     # Make sure a few random methods work right, too.
     assert_equal(3, naming.vote_sum)
     assert_equal(vote, naming.users_vote(rolf))
     assert(naming.user_voted?(rolf))
-    assert(!naming.user_voted?(mary))
+    assert_not(naming.user_voted?(mary))
   end
 
   # Now see what happens when rolf's new naming is less confident than old.

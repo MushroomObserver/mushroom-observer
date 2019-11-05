@@ -58,7 +58,7 @@ if what.present?
     </div><%
 
   ##### Errors #####
-  elsif names.blank?
+  elsif names&.length == 0
     flash_error(:form_observations_there_is_a_problem_with_name.t) %>
     <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
@@ -68,7 +68,7 @@ if what.present?
         <%= :form_naming_not_recognized_help.t(button: button_name) %>
       </span><br/>
     </div><%
-  elsif names&.length > 1
+  elsif names&.length &.> 1
     flash_error(:form_observations_there_is_a_problem_with_name.t) %>
     <div class="alert alert-danger max-width-text" id="name_messages">
       <span class="Data">
