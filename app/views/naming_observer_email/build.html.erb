@@ -32,6 +32,7 @@
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 
+  warning_msg = :email_naming_for_observation_warning.l
   report_abuse = :email_report_abuse.l(email: MO.webmaster_email_address)
 
 if @user.email_html %>
@@ -50,6 +51,7 @@ if @user.email_html %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
+<%= warning_msg.tp %>
 <%= report_abuse.tp %>
 <br/>
 </body>
@@ -67,5 +69,7 @@ if @user.email_html %>
     result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
+<%= warning_msg.tp.html_to_ascii %>
+
 <%= report_abuse.tp.html_to_ascii %>
 <% end %>
