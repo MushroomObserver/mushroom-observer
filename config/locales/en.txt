@@ -1185,6 +1185,7 @@
   app_join_mailing_list: Join Mailing List
   app_logout: Logout
   app_admin: Admin
+  app_blocked_ips: Blocked IPs
   app_users: "[:list_objects(type=:user)]"
   app_email_all_users: Email All Users
   app_add_to_group: Add to Group
