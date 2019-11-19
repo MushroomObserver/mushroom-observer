@@ -13,6 +13,26 @@ class Robots
       @@blocked_ips.include?(ip)
     end
 
+    def blocked_ips
+      populate_blocked_ips unless blocked_ips_current?
+      @@blocked_ips
+    end
+
+    def add_blocked_ip(ip)
+      file = MO.blocked_ips_file
+      ip.gsub!(/[^\d\.]/, "")
+      `echo #{ip} >> #{file}`
+      `sort -u #{file} > #{file}.xxx`
+      `mv -f #{file}.xxx #{file}`
+    end
+
+    def remove_blocked_ip(ip)
+      file = MO.blocked_ips_file
+      ip.gsub!(/[^\d\.]/, "")
+      `cat #{file} | grep -v #{ip} > #{file}.xxx`
+      `mv -f #{file}.xxx #{file}`
+    end
+
     def populate_allowed_robot_actions
       file = MO.robots_dot_text_file
       @@allowed_robot_actions = parse_robots_dot_text(file)

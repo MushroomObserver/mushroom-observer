@@ -16,6 +16,7 @@ ACTIONS = {
     activate_api_key: {},
     add_user_to_group: {},
     api_keys: {},
+    blocked_ips: {},
     create_alert: {},
     create_api_key: {},
     destroy_user: {},
