@@ -17,6 +17,6 @@ Here are some handy links:
 Show this observation: http://mushroomobserver.org/observer/show_observation/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris_obs) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
 
-WARNING: We've heard that some people have mis-used this notification feature in the past, claiming it's for research but not using specimens for that purpose. You may want to take a moment to look at their user profile on MO and perhaps google them to veritfy that they are actually active mycologists before going to the effort of packaging and sending them any specimens.
+WARNING: We've heard that some people have mis-used this notification feature in the past, claiming it's for research but not using specimens for that purpose. You may want to take a moment to look at their user profile on MO and perhaps google them to verify that they are actually active mycologists before going to the effort of packaging and sending them any specimens.
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
