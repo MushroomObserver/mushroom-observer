@@ -1,2 +1,24 @@
-<h1>Policy#privacy</h1>
-<p>Find me in app/views/policy/privacy.html.erb</p>
+<%
+  @title ||= :privacy_title.t
+%>
+
+<div class="max-width-text">
+  <%= :privacy_last_modified.tp %>
+
+  <%= :privacy_intro.tp %>
+
+  <%= :privacy_definitions.tp %>
+
+  <table class="table-namings">
+    <tr>
+      <td><%= :privacy_when_we_say.t %></td>
+      <td><%= :privacy_we_mean.t %></td>
+    </tr>
+    <tr>
+      <td><%= :privacy_when_we_say.t %></td>
+      <td><%= :privacy_we_mean.t %></td>
+    </tr>
+  </table>
+
+  <%= :privacy_last_modified.tp %>
+</div>

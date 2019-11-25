@@ -3278,6 +3278,18 @@
   # Search bar help page
   search_bar_help_title: Search Bar Help
 
+  # Privacy policy
+  privacy_title: The Mushroom Observer Privacy Policy
+
+  privacy_last_modified: _Last Modified on November 16, 2019_
+
+  privacy_intro: "*Introduction*\nThis Privacy Policy explains how Mushroom Observer, Inc., the non-profit organization that hosts the Mushroom Observer website, collects, uses, and shares information we receive from you through your use of the website. It is essential to understand that, by using the Mushroom Observer website, you consent to the collection, transfer, processing, storage, disclosure, and use of your information as described in this Privacy Policy.\n\nWe believe that you shouldn't have to provide nonpublic personal information to participate in the free knowledge movement, citizen science, or mycology in general. You do not have to provide things like your real name, address, or date of birth to sign up for an account or contribute content to the Mushroom Observer.\n\nThis privacy policy is in large part derived from the current (July 2019) \"privacy policy of the Wikimedia Foundation\":https://foundation.wikimedia.org/wiki/Privacy_policy and is used in accordance with \"the Creative Commons Attribution-ShareAlike License\":https://creativecommons.org/licenses/by-sa/3.0/ and the Wikimedia Foundation \"Terms of Use\":https://foundation.wikimedia.org/wiki/Terms_of_Use/en."
+
+  privacy_definitions: "Definitions\nBecause everyone (not just lawyers) should be able to easily understand how and why their information is collected and used, we use common language instead of more formal terms throughout this Policy. To help ensure your understanding of some particular key terms, here is a table of translations:"
+
+  privacy_when_we_say: "When we say..."
+  privacy_we_mean: "... we mean"
+
   ##############################################################################
 
   # ERROR MESSAGES
