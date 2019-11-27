@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+app_root = File.expand_path("..", __dir__)
+require "#{app_root}/app/classes/ip_stats.rb"
+require "fileutils"
+
+abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
+
+  USAGE::
+
+    script/update_ip_stats.rb
+
+  DESCRIPTION::
+
+    Updates config/blocked_ips.txt based on latest info in log/ip_stats.txt.
+    Cleans out everything more than one hour old in log/ip_stats.txt.
+
+  PARAMETERS::
+
+    --help     Print this message.
+
+EOB
+
+def bad_ip?(stats)
+  if stats[:user].present?
+    report_user(stats) if stats[:activity].length > 60 * 5 ||
+                          stats[:load] > 60 * 30
+  else
+    return true if stats[:activity].length > 60
+    return true if stats[:load] > 60 * 5
+  end
+  return false
+end
+
+def report_user(stats)
+  id = stats[:user]
+  puts "User ##{id} is hogging the server!"
+  puts "  https://mushroomobserver.org/observer/show_user/#{id}"
+  puts "  number of requests in last hour: #{stats[:activity].length}"
+  puts "  total server load (in sectonds): #{stats[:load]}"
+  puts
+end
+
+IpStats.clean_stats
+data = IpStats.read_stats
+bad_ips = data.keys.grep {|ip| bad_ip?(data[ip])}
+IpStats.remove_blocked_ips(bad_ips)
+IpStats.add_blocked_ips(bad_ips)
+
+exit 0
