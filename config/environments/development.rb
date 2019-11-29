@@ -27,10 +27,8 @@ MushroomObserver::Application.configure do
 
   config.image_precedence = { default: [:local, :cdmr] }
   config.image_fallback_source = :cdmr
+
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
-  config.blocked_ips_file = "#{config.root}/config/blocked_ips.txt"
-  config.okay_ips_file = "#{config.root}/config/okay_ips.txt"
-  config.ip_stats_file = "#{config.root}/log/ip_stats.txt"
 
   # ----------------------------
   #  Rails configuration.
