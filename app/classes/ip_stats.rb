@@ -11,7 +11,7 @@ class IpStats
           now - stats[:time],
           stats[:controller],
           stats[:action]
-        ].join(" ")
+        ].join(",")
       end
     end
 
@@ -19,14 +19,14 @@ class IpStats
       data = {}
       now = Time.current
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
-        hash = data[ip] ||= { load: 0, activity: [] }
+        hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
         # and load into average server time used per minute.  It weights the
         # most recent minute 10x more heavily than the minute before cutoff.
-        weight = (600 - (now - time)) / 600 / 600 * 2
+        weight = (600 - (now - Time.parse(time))) / 600 / 600 * 2
         hash[:user] = user.to_i if user.present?
-        hash[:load]   += load.to_f * weight
-        hash[:number] += weight
+        hash[:load] += load.to_f * weight
+        hash[:rate] += weight
         hash[:activity] << [time, load.to_f, controller, action]
       end
       data
