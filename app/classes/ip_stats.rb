@@ -35,8 +35,8 @@ class IpStats
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
         hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
-        # and load into average server time used per minute.  It weights the
-        # most recent minute 10x more heavily than the minute before cutoff.
+        # and load into average percentage of server time used.  It weights
+        # recent activity more heavily than old activity.
         weight = calc_weight(now, time)
         hash[:user] = user.to_i if user.present?
         hash[:load] += load.to_f * weight
@@ -49,6 +49,7 @@ class IpStats
     def calc_weight(now, time)
       (600 - (now - Time.zone.parse(time))) / 600 / 600 * 2
     end
+    private :calc_weight
 
     def clean_stats
       cutoff = (Time.current - 10.minutes).to_s
