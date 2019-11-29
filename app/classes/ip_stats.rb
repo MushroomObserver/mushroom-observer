@@ -65,10 +65,16 @@ class IpStats
       rewrite_blocked_ips { |ip, time| time > cutoff }
     end
 
+    def reset!
+      # Force reload next time used.
+      @@blocked_ips_time = nil
+    end
+
     private
 
     def blocked_ips_current?
       defined?(@@blocked_ips_time) &&
+        @@blocked_ips_time.present? &&
         @@blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
         @@blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
