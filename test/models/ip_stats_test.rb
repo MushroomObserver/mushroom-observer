@@ -24,9 +24,9 @@ class IpStatsTest < UnitTestCase
 
   def test_blocked_ips
     new_ip = "87.65.43.21"
-    assert_true(IpStats.blocked?("12.34.56.78"))
-    assert_false(IpStats.blocked?("3.14.15.9"))
-    assert_false(IpStats.blocked?(new_ip))
+    assert_true(IpStats.blocked?("12.34.56.78")) # in blocked_ips.txt
+    assert_false(IpStats.blocked?("3.14.15.9"))  # in okay_ips.txt
+    assert_false(IpStats.blocked?(new_ip))       # not in either yet
     File.open(MO.blocked_ips_file, "a") do |fh|
       fh.puts "#{new_ip} #{1.hour.ago}"
     end
@@ -40,5 +40,8 @@ class IpStatsTest < UnitTestCase
       fh.puts old_ip
     end
     assert_false(IpStats.blocked?(old_ip))
+  end
+
+  def test_clearing_old_blocked_ips
   end
 end
