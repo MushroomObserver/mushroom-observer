@@ -160,7 +160,7 @@ class ApplicationController < ActionController::Base
     render(plain: "We have noticed an excessive amount of server-intensive " \
                   "traffic from this IP address.  Please log in or contact " \
                   "the webmaster (webmaster@mushroomobserver.org).",
-           status: 429,
+           status: :too_many_requests,
            layout: false)
     false
   end
