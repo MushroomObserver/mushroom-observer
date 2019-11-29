@@ -4,7 +4,7 @@ app_root = File.expand_path("..", __dir__)
 require "#{app_root}/app/classes/ip_stats.rb"
 require "fileutils"
 
-abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
+abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
   USAGE::
 
@@ -19,7 +19,7 @@ abort(<<"EOB") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 
     --help     Print this message.
 
-EOB
+HELP
 
 def bad_ip?(stats)
   if stats[:user].present?
@@ -29,7 +29,7 @@ def bad_ip?(stats)
     return true if stats[:rate] > 1.0  # one request per second
     return true if stats[:load] > 0.5  # half of one server instance's time
   end
-  return false
+  false
 end
 
 def report_user(stats)
@@ -43,7 +43,7 @@ end
 
 IpStats.clean_stats
 data = IpStats.read_stats
-bad_ips = data.keys.select {|ip| bad_ip?(data[ip])}
+bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
 IpStats.remove_blocked_ips(bad_ips)
 IpStats.add_blocked_ips(bad_ips)
 
