@@ -74,4 +74,10 @@ class IpStatsTest < UnitTestCase
     assert_true(new_ips.include?(old_ips[1]))
   end
 
+  def test_log_stats
+    ip = "1.2.3.4"
+    File.delete(MO.ip_stats_file)
+    IpStats.log_stats(ip: ip, time: 15.seconds.ago, controller: "name",
+                      action: "show_name")
+  end
 end

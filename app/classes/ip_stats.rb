@@ -1,11 +1,16 @@
 class IpStats
   class << self
+    # Call after request done, passing in these data:
+    #   ip::         IP address (string)
+    #   time::       Time request started.
+    #   controller:: Controller (string).
+    #   action::     Action (string).
     def log_stats(stats)
       file = MO.ip_stats_file
       now = Time.current
       File.open(file, "a") do |fh|
         fh.puts [
-          now,
+          stats[:time],
           stats[:ip],
           User.current_id,
           now - stats[:time],
@@ -15,6 +20,15 @@ class IpStats
       end
     end
 
+    # Returns data for each IP address:
+    #   user::     User ID if logged in (integer).
+    #   load::     Percentage of time of one server instance used (float).
+    #   rate::     Rate of requests per second (float).
+    #   activity:: Array of recent activity, each entry an Array of four data:
+    #     time::       Time request started.
+    #     load::       Time used to serve request in seconds (float).
+    #     controller:: Controller (string).
+    #     action::     Action (string).
     def read_stats
       data = {}
       now = Time.current
