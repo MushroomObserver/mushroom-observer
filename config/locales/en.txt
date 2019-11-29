@@ -3291,6 +3291,22 @@
 
   privacy_when_we_say: "When we say..."
   privacy_we_mean: "... we mean"
+  privacy_mo_inc_say: “Mushroom Observer, Inc”, “we”, “us”, “our”
+  privacy_mo_inc_mean: The non-profit organization that operates the Mushroom Observer website.
+  privacy_mo_website_say: “Mushroom Observer”, “MO”, “the website”
+  privacy_mo_website_mean: The Mushroom Observer website, http://mushroomobserver.org and subdomains that provide text, images and APIs.
+  privacy_you_say: “you”, “your”
+  privacy_you_mean: You, regardless of whether you are an individual, group, or organization, and regardless of whether you are using the Mushroom Observer or our services on behalf of yourself or someone else.
+  privacy_this_policy_say: “this Policy”, “this Privacy Policy”
+  privacy_this_policy_mean: This document, entitled “The Mushroom Observer Privacy Policy”.
+  privacy_contributions_say: “contributions”
+  privacy_contributions_mean: Content you add or changes you make to the Mushroom Observer.
+  privacy_personal_info_say: “personal information”
+  privacy_personal_info_mean: Information you provide us or information we collect from you that could be used to personally identify you. To be clear, while we do not necessarily collect all of the following types of information, we consider at least the following to be “personal information” if it is otherwise nonpublic and can be used to identify you:\na) your real name, address, phone number, email address, password, identification number on government-issued ID, IP address, user-agent information, credit card number;\nb) when associated with one of the items in subsection a), any sensitive data such as date of birth, gender, sexual orientation, racial or ethnic origins, marital or familial status, medical conditions or disabilities, political affiliation, and religion; and\nc) any of the items in subsections a) or b) when associated with your user account.
+  privacy_third_party_say: “third party”, “third parties”
+  privacy_third_party_mean: Individuals, entities, websites, services, products, and applications that are not controlled, managed, or operated by Mushroom Observer, Inc. This includes other Mushroom Observer users and independent organizations or groups who use the Mushroom Observer.
+
+
 
   ##############################################################################
 
