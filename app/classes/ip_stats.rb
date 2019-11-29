@@ -11,7 +11,7 @@ class IpStats
           now - stats[:time],
           stats[:controller],
           stats[:action]
-        ].join(" ")
+        ].join(",")
       end
     end
 
@@ -19,14 +19,14 @@ class IpStats
       data = {}
       now = Time.current
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
-        hash = data[ip] ||= { load: 0, activity: [] }
+        hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
         # and load into average server time used per minute.  It weights the
         # most recent minute 10x more heavily than the minute before cutoff.
-        weight = (600 - (now - time)) / 600 / 600 * 2
+        weight = (600 - (now - Time.parse(time))) / 600 / 600 * 2
         hash[:user] = user.to_i if user.present?
-        hash[:load]   += load.to_f * weight
-        hash[:number] += weight
+        hash[:load] += load.to_f * weight
+        hash[:rate] += weight
         hash[:activity] << [time, load.to_f, controller, action]
       end
       data
@@ -51,7 +51,7 @@ class IpStats
       file = MO.blocked_ips_file
       File.open(file, "a") do |fh|
         ips.each do |ip|
-          fh.puts "#{ip} #{Time.current}"
+          fh.puts "#{ip},#{Time.current}"
         end
       end
     end
@@ -83,7 +83,7 @@ class IpStats
     def parse_ip_list(file)
       FileUtils.touch(file) unless File.exist?(file)
       File.open(file).readlines.map do |line|
-        line.chomp.split(" ").first
+        line.chomp.split(",").first
       end
     end
 
@@ -98,7 +98,7 @@ class IpStats
     def read_file(file)
       File.open(file, "r") do |fh|
         fh.each_line do |line|
-          yield(*line.chomp.split(" "))
+          yield(*line.chomp.split(","))
         end
       end
     end
@@ -108,7 +108,7 @@ class IpStats
       File.open(file1, "r") do |fh1|
         File.open(file2, "w") do |fh2|
           fh1.each_line do |line|
-            fh2.write(line) if yield(*line.chomp.split(" "))
+            fh2.write(line) if yield(*line.chomp.split(","))
           end
         end
       end
