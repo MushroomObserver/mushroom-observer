@@ -23,11 +23,11 @@ EOB
 
 def bad_ip?(stats)
   if stats[:user].present?
-    report_user(stats) if stats[:activity].length > 60 * 5 ||
-                          stats[:load] > 60 * 30
+    report_user(stats) if stats[:rate] > 1.0 ||
+                          stats[:load] > 0.5
   else
-    return true if stats[:activity].length > 60
-    return true if stats[:load] > 60 * 5
+    return true if stats[:rate] > 1.0  # one request per second
+    return true if stats[:load] > 0.5  # half of one server instance's time
   end
   return false
 end

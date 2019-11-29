@@ -10,7 +10,6 @@
     <div class="list-group-item disabled bold">
       <%= :app_admin.t %>:
     </div>
-    <%= link_to(:app_blocked_ips.t, {controller: :account, action: :blocked_ips}, {class: "list-group-item list-group-item-danger indent"}) %>
     <%= link_to(:app_users.t, {controller: :observer, action: :users_by_name}, {class: "list-group-item list-group-item-danger indent"}) %>
     <%= link_to(:change_banner_title.t, {controller: :observer, action: :change_banner}, {class: "list-group-item list-group-item-danger indent"}) %>
     <%= link_to(:app_email_all_users.t, {controller: :observer, action: :email_features}, {class: "list-group-item list-group-item-danger indent"}) %>
