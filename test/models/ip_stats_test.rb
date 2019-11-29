@@ -42,4 +42,12 @@ class IpStatsTest < UnitTestCase
     end
     assert_false(IpStats.blocked?(old_ip))
   end
+
+  def test_clean_out_old_blocked_ips
+    new_ip = "24.68.35.79"
+    # All existing ips in fixture should already be old.
+    IpStats.add_blocked_ips([new_ip])
+    IpStats.clean_blocked_ips
+    assert_equal([new_ip], IpStats.blocked_ips)
+  end
 end
