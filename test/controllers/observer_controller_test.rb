@@ -747,6 +747,9 @@ class ObserverControllerTest < FunctionalTestCase
     ask_webmaster_test("bogus@email.com",
                        content: "Buy <a href='http://junk'>Me!</a>",
                        flash: :runtime_ask_webmaster_antispam.t)
+    ask_webmaster_test("okay_user@email.com",
+                       content: "iwxobjUzvkhmaCt",
+                       flash: :runtime_ask_webmaster_antispam.t)
   end
 
   def ask_webmaster_test(email, args)

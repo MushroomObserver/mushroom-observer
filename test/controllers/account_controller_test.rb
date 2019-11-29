@@ -762,4 +762,55 @@ class AccountControllerTest < FunctionalTestCase
                    group_name: "AbsoluteNonsenseVermslons" })
     assert_flash_error
   end
+
+  def test_blocked_ips
+    file = MO.blocked_ips_file
+    `mv #{file} #{file}.save`
+    FileUtils.touch(file)
+
+    get(:blocked_ips)
+    assert_response(:redirect)
+
+    login(:rolf)
+    get(:blocked_ips)
+    assert_response(:redirect)
+
+    make_admin
+    get(:blocked_ips)
+    assert_response(:success)
+    assert_template(:blocked_ips)
+    assert_empty(assigns(:blocked_ips))
+    assert_equal(0, File.size(file))
+
+    get(:blocked_ips, add: "bogus")
+    assert_flash_error
+    assert_empty(assigns(:blocked_ips))
+    assert_equal(0, File.size(file))
+
+    get(:blocked_ips, add: "1.2.3.4")
+    assert_equal(["1.2.3.4"], assigns(:blocked_ips))
+    assert_not_equal(0, File.size(file))
+
+    get(:blocked_ips, add: "1.2.3.4")
+    assert_equal(["1.2.3.4"], assigns(:blocked_ips))
+
+    get(:blocked_ips, add: "2.3.4.5")
+    assert_equal(["1.2.3.4", "2.3.4.5"], assigns(:blocked_ips))
+
+    get(:blocked_ips, add: "0.1.2.3")
+    assert_equal(["0.1.2.3", "1.2.3.4", "2.3.4.5"], assigns(:blocked_ips))
+
+    get(:blocked_ips, remove: "bogus")
+    assert_flash_error
+
+    get(:blocked_ips, remove: "1.2.3.4")
+    assert_equal(["0.1.2.3", "2.3.4.5"], assigns(:blocked_ips))
+
+    get(:blocked_ips, remove: "0.1.2.3")
+    get(:blocked_ips, remove: "2.3.4.5")
+    assert_empty(assigns(:blocked_ips))
+    assert_equal(0, File.size(file))
+  ensure
+    `mv -f #{file}.save #{file}`
+  end
 end

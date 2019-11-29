@@ -1185,6 +1185,7 @@
   app_join_mailing_list: Join Mailing List
   app_logout: Logout
   app_admin: Admin
+  app_blocked_ips: Blocked IPs
   app_users: "[:list_objects(type=:user)]"
   app_email_all_users: Email All Users
   app_add_to_group: Add to Group
@@ -3102,6 +3103,7 @@
   email_can_respond: It is entirely up to you whether you want to reply to [name] ([email]) by replying directly to this email.
   email_handy_links: "Here are some handy links:"
   email_no_respond: Please do not reply to this email!
+  email_naming_for_observation_warning: "WARNING: We've heard that some people have mis-used this notification feature in the past, claiming it's for research but not using specimens for that purpose. You may want to take a moment to look at their user profile on MO and perhaps google them to verify that they are actually active mycologists before going to the effort of packaging and sending them any specimens."
   email_report_abuse: "If you feel this user is abusing this service please forward this entire email message to: [email]"
   email_respond_via_comment: Use the link below to respond via your own public comment.
   email_welcome: Welcome, [user]

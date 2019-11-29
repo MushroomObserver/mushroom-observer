@@ -33,6 +33,7 @@
 #  add_user_to_group::  <tt>(R V .)</tt>
 #  create_alert::       <tt>(R V .)</tt>
 #  destroy_user::       <tt>(R . .)</tt>
+#  blocked_ips::        <tt>(R V .)</tt>
 #
 #  ==== Testing
 #  test_autologin::     <tt>(L V .)</tt>
@@ -673,9 +674,49 @@ class AccountController < ApplicationController
     redirect_back_or_default("/")
   end
 
+  def blocked_ips # :root:
+    if in_admin_mode?
+      process_blocked_ip_commands
+      @report = blocked_ips_report
+      @blocked_ips = Robots.blocked_ips
+    else
+      redirect_back_or_default("/")
+    end
+  end
+
   # ========= private Admin utilities section methods ==========
 
   private
+
+  def process_blocked_ip_commands
+    if params[:add].present? && validate_ip!(params[:add])
+      Robots.add_blocked_ip(params[:add])
+    elsif params[:remove].present? && validate_ip!(params[:remove])
+      Robots.remove_blocked_ip(params[:remove])
+    end
+  end
+
+  def validate_ip!(ip)
+    match = ip.to_s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
+    return true if match &&
+                   valid_ip_num(match[1]) &&
+                   valid_ip_num(match[2]) &&
+                   valid_ip_num(match[3]) &&
+                   valid_ip_num(match[4])
+
+    flash_error("Invalid IP address: \"#{ip}\"")
+  end
+
+  def valid_ip_num(num)
+    num.to_i >= 0 && num.to_i < 256
+  end
+
+  def blocked_ips_report
+    logs   = "#{MO.root}/log/production.log*"
+    script = "#{MO.root}/script/identify_robots.prl"
+    output = "#{MO.root}/config/blocked_ips.txt.tmp"
+    `(cat #{logs} | #{script} > #{output}) 2>&1`.split("\n")
+  end
 
   def add_user_to_group_admin_mode
     return unless request.method == "POST"
@@ -751,7 +792,7 @@ class AccountController < ApplicationController
   private
 
   def initialize_new_user
-    now = Time.now
+    now = Time.zone.now
     @new_user.attributes = {
       created_at: now,
       updated_at: now,

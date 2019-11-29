@@ -26,10 +26,11 @@ class ObserverController
     elsif @email.blank? || @email.index("@").nil?
       flash_error(:runtime_ask_webmaster_need_address.t)
       @email_error = true
-    elsif /http:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content
-      flash_error(:runtime_ask_webmaster_antispam.t)
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
+    elsif /http:/ =~ @content || %r{<[/a-zA-Z]+>} =~ @content ||
+          !@content.include?(" ")
+      flash_error(:runtime_ask_webmaster_antispam.t)
     else
       WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
