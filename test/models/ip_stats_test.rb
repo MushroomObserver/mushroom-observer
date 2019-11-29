@@ -45,10 +45,33 @@ class IpStatsTest < UnitTestCase
   end
 
   def test_clean_out_old_blocked_ips
-    new_ip = "24.68.35.79"
     # All existing ips in fixture should already be old.
+    new_ip = "24.68.35.79"
     IpStats.add_blocked_ips([new_ip])
     IpStats.clean_blocked_ips
     assert_equal([new_ip], IpStats.blocked_ips)
   end
+
+  def test_add_blocked_ips
+    old_ips = IpStats.blocked_ips
+    # Oops!  Doesn't check if IP already added.
+    # IpStats.add_blocked_ips([ "1.0.0.1", "2.0.0.2", old_ips.first ])
+    IpStats.add_blocked_ips([ "1.0.0.1", "2.0.0.2" ])
+    new_ips = IpStats.blocked_ips
+    assert_equal(old_ips.length + 2, new_ips.length)
+    assert_true(new_ips.include?("1.0.0.1"))
+    assert_true(new_ips.include?("2.0.0.2"))
+  end
+
+  def test_remove_blocked_ips
+    old_ips = IpStats.blocked_ips
+    assert_true(old_ips.length > 2)
+    IpStats.remove_blocked_ips([ old_ips.first, old_ips.last, "9.9.9.9" ])
+    new_ips = IpStats.blocked_ips
+    assert_equal(old_ips.length - 2, new_ips.length)
+    assert_false(new_ips.include?(old_ips.first))
+    assert_false(new_ips.include?(old_ips.last))
+    assert_true(new_ips.include?(old_ips[1]))
+  end
+
 end
