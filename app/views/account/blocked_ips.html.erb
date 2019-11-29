@@ -1,0 +1,29 @@
+<%
+  @title = :app_blocked_ips.t
+%>
+
+<div class="row">
+  <div class="col-xs-6 max-width-text">
+    <% @blocked_ips.each do |ip| %>
+      <% link = {controller: :account, action: :blocked_ips, remove: ip} %>
+      <%= ip.t %> [<%= link_to(:REMOVE.t, link) %>]<br/>
+    <% end %>
+  </div>
+
+  <div class="col-xs-6 max-width-text">
+    <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+      <div class="form-group form-inline">
+        <%= label_tag(:add, "IP:") %>
+        <%= text_field_tag(:add, "", size: 20, data: {autofocus: true}, class: "form-control") %>
+        <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+      </div>
+    </form>
+
+    <div style="font-style: mono">
+      <% @report.each do |line| %>
+        <% if line.sub!(/\s+/, "") %>&nbsp;&nbsp;<% end %>
+        <%= line.t %><br/>
+      <% end %>
+    </div>
+  </div>
+</div>
