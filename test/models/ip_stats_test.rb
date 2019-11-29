@@ -16,6 +16,7 @@ class IpStatsTest < UnitTestCase
     return if File.exist?(dest_file) &&
               File.size(dest_file) == File.size(src_file) &&
               (File.mtime(dest_file) - File.mtime(src_file)).abs < 1e-3
+
     File.open(dest_file, "w") do |fh|
       fh.write(File.open(src_file, "r").read)
     end
