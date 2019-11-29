@@ -8,7 +8,7 @@ class IpStats
           now,
           stats[:ip],
           User.current_id,
-          now - start[:time],
+          now - stats[:time],
           stats[:controller],
           stats[:action]
         ].join(" ")
@@ -112,13 +112,8 @@ class IpStats
           end
         end
       end
-      File.rm(file1)
+      File.delete(file1)
       File.rename(file2, file1)
     end
   end
 end
-
-
-
-
-

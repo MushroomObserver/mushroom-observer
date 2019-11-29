@@ -43,7 +43,7 @@ end
 
 IpStats.clean_stats
 data = IpStats.read_stats
-bad_ips = data.keys.grep {|ip| bad_ip?(data[ip])}
+bad_ips = data.keys.select {|ip| bad_ip?(data[ip])}
 IpStats.remove_blocked_ips(bad_ips)
 IpStats.add_blocked_ips(bad_ips)
 
