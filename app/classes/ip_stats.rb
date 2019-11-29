@@ -51,7 +51,7 @@ class IpStats
       file = MO.blocked_ips_file
       File.open(file, "a") do |fh|
         ips.each do |ip|
-          fh.puts "#{ip} #{Time.current}"
+          fh.puts "#{ip},#{Time.current}"
         end
       end
     end
@@ -83,7 +83,7 @@ class IpStats
     def parse_ip_list(file)
       FileUtils.touch(file) unless File.exist?(file)
       File.open(file).readlines.map do |line|
-        line.chomp.split(" ").first
+        line.chomp.split(",").first
       end
     end
 
@@ -98,7 +98,7 @@ class IpStats
     def read_file(file)
       File.open(file, "r") do |fh|
         fh.each_line do |line|
-          yield(*line.chomp.split(" "))
+          yield(*line.chomp.split(","))
         end
       end
     end
@@ -108,7 +108,7 @@ class IpStats
       File.open(file1, "r") do |fh1|
         File.open(file2, "w") do |fh2|
           fh1.each_line do |line|
-            fh2.write(line) if yield(*line.chomp.split(" "))
+            fh2.write(line) if yield(*line.chomp.split(","))
           end
         end
       end
