@@ -23,13 +23,17 @@ class IpStats
         # Weight turns rate into average number of requests per second,
         # and load into average server time used per minute.  It weights the
         # most recent minute 10x more heavily than the minute before cutoff.
-        weight = (600 - (now - Time.parse(time))) / 600 / 600 * 2
+        weight = calc_weight(now, time)
         hash[:user] = user.to_i if user.present?
         hash[:load] += load.to_f * weight
         hash[:rate] += weight
         hash[:activity] << [time, load.to_f, controller, action]
       end
       data
+    end
+
+    def calc_weight(now, time)
+      (600 - (now - Time.zone.parse(time))) / 600 / 600 * 2
     end
 
     def clean_stats
@@ -57,12 +61,12 @@ class IpStats
     end
 
     def remove_blocked_ips(ips)
-      rewrite_blocked_ips { |ip, time| !ips.include?(ip) }
+      rewrite_blocked_ips { |ip, _time| !ips.include?(ip) }
     end
 
     def clean_blocked_ips
       cutoff = (Time.current - 1.day).to_s
-      rewrite_blocked_ips { |ip, time| time > cutoff }
+      rewrite_blocked_ips { |_ip, time| time > cutoff }
     end
 
     def reset!
