@@ -762,4 +762,29 @@ class AccountControllerTest < FunctionalTestCase
                    group_name: "AbsoluteNonsenseVermslons" })
     assert_flash_error
   end
+
+  def test_blocked_ips
+    new_ip = "5.4.3.2"
+    IpStats.remove_blocked_ips([new_ip])
+    assert_false(IpStats.blocked?(new_ip))
+
+    login(:rolf)
+    get(:blocked_ips)
+    assert_response(:redirect)
+
+    make_admin
+    get(:blocked_ips)
+    assert_response(:success)
+
+    get(:blocked_ips, add: "garbage")
+    assert_flash_error
+
+    get(:blocked_ips, add: new_ip)
+    assert_no_flash
+    assert_true(IpStats.blocked?(new_ip))
+
+    get(:blocked_ips, remove: new_ip)
+    assert_no_flash
+    assert_false(IpStats.blocked?(new_ip))
+  end
 end

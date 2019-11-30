@@ -18,12 +18,5 @@
         <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
       </div>
     </form>
-
-    <div style="font-style: mono">
-      <% @report.each do |line| %>
-        <% if line.sub!(/\s+/, "") %>&nbsp;&nbsp;<% end %>
-        <%= line.t %><br/>
-      <% end %>
-    </div>
   </div>
 </div>
