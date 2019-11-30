@@ -1,4 +1,3 @@
 class PolicyController < ApplicationController
-  def privacy
-  end
+  def privacy; end
 end
