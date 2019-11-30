@@ -160,13 +160,13 @@ class ApplicationController < ActionController::Base
 
     logger.warn("BLOCKED #{request.remote_ip}")
     true
-#   render(plain: "We have noticed an excessive amount of server-intensive " \
-#                 "traffic from this IP address (#{request.remote_ip}). " \
-#                 "Contact the webmaster (#{MO.webmaster_email_address}), " \
-#                 "or log in (https://#{MO.domain}/account/login).",
-#          status: :too_many_requests,
-#          layout: false)
-#   false
+    # msg = "We have noticed an excessive amount of server-intensive " \
+    #       "traffic from this IP address (#{request.remote_ip}). " \
+    #       "Please contact the webmaster (#{MO.webmaster_email_address})."
+    # render(plain:  msg,
+    #        status: :too_many_requests,
+    #        layout: false)
+    # false
   end
 
   # Physically eject robots unless they're looking at accepted pages.
