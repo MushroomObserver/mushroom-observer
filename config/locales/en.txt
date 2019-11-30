@@ -1153,6 +1153,7 @@
   app_intro: Introduction
   app_how_to_use: How To Use
   app_how_to_help: How To Help
+  app_privacy_policy: Privacy Policy
   app_donate: Donate
   app_send_a_comment: Send a Comment
   app_index_a_z: "[:INDEXES]: [:NAMES]"
