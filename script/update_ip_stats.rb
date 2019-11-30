@@ -36,8 +36,8 @@ def report_user(stats)
   id = stats[:user]
   puts "User ##{id} is hogging the server!"
   puts "  https://mushroomobserver.org/observer/show_user/#{id}"
-  puts "  number of requests in last hour: #{stats[:activity].length}"
-  puts "  total server load (in sectonds): #{stats[:load]}"
+  puts "  requests rate: #{stats[:rate]} requests/second"
+  puts "  server load: #{stats[:load]}% of one server instance"
   puts
 end
 

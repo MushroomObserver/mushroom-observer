@@ -155,14 +155,18 @@ class ApplicationController < ActionController::Base
   # Kick out agents responsible for excessive traffic.
   def kick_out_excessive_traffic
     return true unless IpStats.blocked?(request.remote_ip)
+    return true if params[:controller] == "account" &&
+                   params[:action] == "login"
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    render(plain: "We have noticed an excessive amount of server-intensive " \
-                  "traffic from this IP address.  Please log in or contact " \
-                  "the webmaster (webmaster@mushroomobserver.org).",
-           status: :too_many_requests,
-           layout: false)
-    false
+    true
+#   render(plain: "We have noticed an excessive amount of server-intensive " \
+#                 "traffic from this IP address (#{request.remote_ip}). " \
+#                 "Contact the webmaster (#{MO.webmaster_email_address}), " \
+#                 "or log in (https://#{MO.domain}/account/login).",
+#          status: :too_many_requests,
+#          layout: false)
+#   false
   end
 
   # Physically eject robots unless they're looking at accepted pages.

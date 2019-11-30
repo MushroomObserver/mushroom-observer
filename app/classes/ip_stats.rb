@@ -1,5 +1,7 @@
 class IpStats
   class << self
+    STATS_TIME = 10 # minutes
+
     # Call after request done, passing in these data:
     #   ip::         IP address (string)
     #   time::       Time request started.
@@ -47,12 +49,13 @@ class IpStats
     end
 
     def calc_weight(now, time)
-      (600 - (now - Time.zone.parse(time))) / 600 / 600 * 2
+      (60*STATS_TIME - (now - Time.zone.parse(time))) /
+        STATS_TIME / STATS_TIME / 60 / 60 * 2
     end
     private :calc_weight
 
     def clean_stats
-      cutoff = (Time.current - 10.minutes).to_s
+      cutoff = (Time.current - STATS_TIME.minutes).to_s
       rewrite_ip_stats { |time| time > cutoff }
     end
 
