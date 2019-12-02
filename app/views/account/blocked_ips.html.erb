@@ -1,22 +1,60 @@
 <%
-  @title = :app_blocked_ips.t
+  @title = ""
 %>
 
 <div class="row">
   <div class="col-xs-6 max-width-text">
-    <% @blocked_ips.each do |ip| %>
-      <% link = {controller: :account, action: :blocked_ips, remove: ip} %>
-      <%= ip.t %> [<%= link_to(:REMOVE.t, link) %>]<br/>
-    <% end %>
+    <div style="padding:1em; margin:1em; background:#f7f">
+      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+        <div class="form-group form-inline">
+          <big>Okay IPs:</big> &nbsp;&nbsp;
+          <%= text_field_tag(:add_okay, "", size: 20, data: {autofocus: true}, class: "form-control") %>
+          <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+        </div>
+      </form>
+      <table class="ips">
+        <% @okay_ips.each do |ip| %>
+          <tr>
+            <td><%= ip.t %></td>
+            <td>[<%= link_to(:REMOVE.t, {controller: :account,
+                             action: :blocked_ips, remove_okay: ip}) %>]</td>
+        <% end %>
+      </table>
+    </div>
+
+    <div style="padding:1em; margin:1em; background:#f7f">
+      <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+        <div class="form-group form-inline">
+          <big>Blocked IPs:</big> &nbsp;&nbsp;
+          <%= text_field_tag(:add_bad, "", size: 20, data: {autofocus: true}, class: "form-control") %>
+          <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+        </div>
+      </form>
+      <table class="ips">
+        <% @blocked_ips.each do |ip| %>
+          <tr>
+            <td><%= ip.t %></td>
+            <td>[<%= link_to(:REMOVE.t, {controller: :account,
+                             action: :blocked_ips, remove_bad: ip}) %>]</td>
+        <% end %>
+      </table>
+    </div>
   </div>
 
   <div class="col-xs-6 max-width-text">
-    <%= form_tag({}, { class: "pad-bottom-2x"}) %>
-      <div class="form-group form-inline">
-        <%= label_tag(:add, "IP:") %>
-        <%= text_field_tag(:add, "", size: 20, data: {autofocus: true}, class: "form-control") %>
-        <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
-      </div>
-    </form>
+    <% if @ip.present? %><p><%= render partial: "ip_stats" %></p><% end %>
+    <p><%= render partial: "ip_summary" %></p>
   </div>
 </div>
+
+<style>
+  table.ips tr td,
+  table.ips tr th {
+    background: #f7f;
+    padding: 0 0.5em;
+  }
+  table.ips-lined tr td,
+  table.ips-lined tr th {
+    border-left: 2px solid #d0d;
+  }
+</style>

@@ -677,7 +677,9 @@ class AccountController < ApplicationController
   def blocked_ips # :root:
     if in_admin_mode?
       process_blocked_ips_commands
-      @blocked_ips = IpStats.blocked_ips
+      @blocked_ips = IpStats.read_blocked_ips
+      @okay_ips = IpStats.read_okay_ips
+      @stats = IpStats.read_stats(:do_activity)
     else
       redirect_back_or_default("/")
     end
@@ -688,14 +690,18 @@ class AccountController < ApplicationController
   private
 
   def process_blocked_ips_commands
-    if params[:add].present? && validate_ip!(params[:add])
+    if validate_ip!(params[:add])
       IpStats.add_blocked_ips([params[:add]])
-    elsif params[:remove].present? && validate_ip!(params[:remove])
+    elsif validate_ip!(params[:remove])
       IpStats.remove_blocked_ips([params[:remove]])
+    elsif validate_ip!(params[:report])
+      @ip = params[:report]
     end
   end
 
   def validate_ip!(ip)
+    return false if ip.blank?
+
     match = ip.to_s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
     return true if match &&
                    valid_ip_num(match[1]) &&

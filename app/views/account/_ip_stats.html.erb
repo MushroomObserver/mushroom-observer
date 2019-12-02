@@ -1,0 +1,23 @@
+<big>Stats for <%= @ip %>:</big> &nbsp;&nbsp;
+  <%= link_to("[Close]", {}) %><br/>
+<% if user_id = @stats[@ip][:user] %>
+  User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
+<% end %>
+Rate: <%= @stats[@ip][:rate].to_f.round(2) %> / sec
+      = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> sec<br/>
+Load: <%= (@stats[@ip][:load].to_f * 100).round(2) %>% of one worker<br/>
+Activity: (50 most recent)<br/>
+<table class="ips ips-lined">
+  <tr>
+    <th>time</th>
+    <th>seconds</th>
+    <th>action</th>
+  </tr>
+  <% @stats[@ip][:activity].reverse[0..50].each do |time, load, cont, action| %>
+    <tr>
+      <td><%= time %></td>
+      <td><%= load.to_f.round(2) %></td>
+      <td><%= cont %>/<%= action %></td>
+    </tr>
+  <% end %>
+</table>

@@ -31,7 +31,7 @@ class IpStats
     #     load::       Time used to serve request in seconds (float).
     #     controller:: Controller (string).
     #     action::     Action (string).
-    def read_stats
+    def read_stats(do_activity = false)
       data = {}
       now = Time.current
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
@@ -39,20 +39,15 @@ class IpStats
         # Weight turns rate into average number of requests per second,
         # and load into average percentage of server time used.  It weights
         # recent activity more heavily than old activity.
-        weight = calc_weight(now, time)
+        weight = calc_weight(now, Time.zone.parse(time))
         hash[:user] = user.to_i if user.present?
         hash[:load] += load.to_f * weight
         hash[:rate] += weight
-        hash[:activity] << [time, load.to_f, controller, action]
+        hash[:activity] << [time, load.to_f, controller, action] \
+          if do_activity
       end
       data
     end
-
-    def calc_weight(now, time)
-      (60*STATS_TIME - (now - Time.zone.parse(time))) /
-        STATS_TIME / STATS_TIME / 60 / 60 * 2
-    end
-    private :calc_weight
 
     def clean_stats
       cutoff = (Time.current - STATS_TIME.minutes).to_s
@@ -87,12 +82,29 @@ class IpStats
       rewrite_blocked_ips { |_ip, time| time > cutoff }
     end
 
+    def read_blocked_ips
+      parse_ip_list(MO.blocked_ips_file)
+    end
+
+    def read_okay_ips
+      parse_ip_list(MO.okay_ips_file)
+    end
+
     def reset!
       # Force reload next time used.
       @@blocked_ips_time = nil
     end
 
+    # -------------------------------------
+
     private
+
+    def calc_weight(now, time)
+      return 0.0 if now - time > 60 * STATS_TIME
+
+      (60 * STATS_TIME - (now - time)) /
+        STATS_TIME / STATS_TIME / 60 / 60 * 2
+    end
 
     def blocked_ips_current?
       defined?(@@blocked_ips_time) &&
