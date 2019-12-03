@@ -65,7 +65,7 @@
         </tr>
         <tr>
           <td class="bold"><%= :NOTES.t %>:</td>
-          <td><%= @sequence.notes.to_s.tp %></td>
+          <td><%= @sequence.notes.try(&:tp) %></td>
         </tr>
       </tbody>
     </table>
