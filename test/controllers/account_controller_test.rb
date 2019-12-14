@@ -812,5 +812,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(0, File.size(file))
   ensure
     `mv -f #{file}.save #{file}`
+    Robots.populate_blocked_ips
   end
 end
