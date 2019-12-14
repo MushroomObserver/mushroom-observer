@@ -5,6 +5,7 @@
 
   <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
   <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
+  <%= link_to(:app_privacy_policy.t, {controller: :policy, action: :privacy}, {class: "list-group-item"}) %>
 
   <% if in_admin_mode? %>
     <div class="list-group-item disabled bold">
