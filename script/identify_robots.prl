@@ -2,8 +2,9 @@
 use strict;
 
 # In seconds.
-my $TIME_THRESHOLD = 1000;
-my $DB_THRESHOLD   = 750;
+my $OPT_TIME = shift(@ARGV);
+my $TIME_THRESHOLD = $OPT_TIME || 1000;
+my $DB_THRESHOLD   = $OPT_TIME || 1000;
 
 my $START = `date -d "1 hour ago" "+%Y-%m-%dT%H:%M:%S"`;
 my $END   = `date "+%Y-%m-%dT%H:%M:%S"`;
