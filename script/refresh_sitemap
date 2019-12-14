@@ -110,6 +110,12 @@ ROBOTS_HEADER = <<~"EOB".freeze
   User-agent: ltx71
   Disallow: /
 
+  User-agent: SpiderLing
+  Disallow: /
+
+  User-agent: Applebot
+  Disallow: /
+
   User-agent: spbot
   Disallow: /
 
