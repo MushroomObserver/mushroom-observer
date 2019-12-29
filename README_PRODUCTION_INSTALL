@@ -153,6 +153,15 @@ root> cp /var/web/mushroom-observer/script/unicorn /etc/init.d/unicorn
 root> chmod 755 /etc/init.d/unicorn
 root> update-rc.d unicorn defaults
 
+# Create swap file if not one already.
+root> free -h
+# If there is no swap do this:
+root> fallocate -l 1G /swap
+root> chmod 600 /swap
+root> mkswap /swap
+root> swapon /swap
+root> echo '/swap none swap sw 0 0' | tee -a /etc/fstab
+
 --------------------------------------------------------------------------------
 
 # If installing database locally:
