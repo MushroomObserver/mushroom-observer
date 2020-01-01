@@ -722,6 +722,25 @@ class ObserverControllerTest < FunctionalTestCase
     # but that broken by PR 497.
   end
 
+  # Prove that lichen content_filter works on observations
+  def test_observations_with_lichen_filter
+    login(users(:lichenologist).name)
+    get_with_dump(:list_observations)
+    results = @controller.instance_variable_get("@objects")
+
+    assert(results.count.positive?)
+    assert(results.all? { |result| result.lifeform.include?("lichen") },
+           "All results should be lichen-ish")
+
+    login(users(:antilichenologist).name)
+    get_with_dump(:list_observations)
+    results = @controller.instance_variable_get("@objects")
+
+    assert(results.count.positive?)
+    assert(results.none? { |result| result.lifeform.include?(" lichen ") },
+           "No results should be lichens")
+  end
+
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
                        response: { controller: :observer,
