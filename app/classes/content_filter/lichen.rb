@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContentFilter
   # Content filter specifically to filter out or just show lichens.
   class Lichen < BooleanFilter
@@ -25,7 +27,7 @@ class ContentFilter
     end
 
     def show_only_lichens?(val)
-      val == "yes" || val == true
+      ["yes", true].include?(val)
     end
   end
 end

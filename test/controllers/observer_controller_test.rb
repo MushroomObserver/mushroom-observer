@@ -343,20 +343,26 @@ class ObserverControllerTest < FunctionalTestCase
     # When requesting non-synonym observations of n2, it should include n1,
     # since an observation of n1 was clearly intended to be an observation of
     # n2.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: false, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: false,
+                                  by: :name)
     assert_equal(2, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: true,
-                                                      exclude_original_names: true, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  exclude_original_names: true,
+                                  by: :name)
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: true, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  by: :name)
     assert_equal(4, query.num_results)
     qp = @controller.query_params(query)
 
