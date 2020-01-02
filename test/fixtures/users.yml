@@ -130,3 +130,12 @@ thorsten:
 second_roy:
   <<: *DEFAULTS
   name: Roy Rogers
+
+lichenologist:
+  <<: *DEFAULTS
+  content_filter: <%= { lichen: "yes" }.to_yaml.inspect %>
+
+antilichenologist:
+  <<: *DEFAULTS
+  content_filter: <%= { lichen: "no" }.to_yaml.inspect %>
+

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContentFilter
   # Content filter specifically to filter out or just show lichens.
   class Lichen < BooleanFilter
@@ -17,11 +19,15 @@ class ContentFilter
       # selected for in the positive version, but only excudes the one lifeform
       # in the negative.
       table = model == Name ? "names" : "observations"
-      if val
+      if show_only_lichens?(val)
         "#{table}.lifeform LIKE '%lichen%'"
       else
         "#{table}.lifeform NOT LIKE '% lichen %'"
       end
+    end
+
+    def show_only_lichens?(val)
+      ["yes", true].include?(val)
     end
   end
 end
