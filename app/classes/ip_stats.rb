@@ -9,7 +9,7 @@ class IpStats
     #   action::     Action (string).
     def log_stats(stats)
       file = MO.ip_stats_file
-      now = Time.current
+      now = Time.now
       File.open(file, "a") do |fh|
         fh.puts [
           stats[:time],
@@ -33,7 +33,7 @@ class IpStats
     #     action::     Action (string).
     def read_stats(do_activity = false)
       data = {}
-      now = Time.current
+      now = Time.now
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
         hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
@@ -50,7 +50,7 @@ class IpStats
     end
 
     def clean_stats
-      cutoff = (Time.current - STATS_TIME.minutes).to_s
+      cutoff = (Time.now - STATS_TIME * 60).to_s
       rewrite_ip_stats { |time| time > cutoff }
     end
 
@@ -68,7 +68,7 @@ class IpStats
       file = MO.blocked_ips_file
       File.open(file, "a") do |fh|
         ips.each do |ip|
-          fh.puts "#{ip},#{Time.current}"
+          fh.puts "#{ip},#{Time.now}"
         end
       end
     end
@@ -78,7 +78,7 @@ class IpStats
     end
 
     def clean_blocked_ips
-      cutoff = (Time.current - 1.day).to_s
+      cutoff = (Time.now - 24 * 60 * 60).to_s
       rewrite_blocked_ips { |_ip, time| time > cutoff }
     end
 
