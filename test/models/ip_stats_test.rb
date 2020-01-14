@@ -75,7 +75,7 @@ class IpStatsTest < UnitTestCase
   end
 
   def test_log_stats
-    File.delete(MO.ip_stats_file) if File.exists?(MO.ip_stats_file)
+    File.delete(MO.ip_stats_file) if File.exist?(MO.ip_stats_file)
 
     ip1 = "1.2.3.4"
     ip2 = "5.6.7.8"
