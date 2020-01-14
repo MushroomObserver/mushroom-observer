@@ -39,7 +39,7 @@ class IpStats
         # Weight turns rate into average number of requests per second,
         # and load into average percentage of server time used.  It weights
         # recent activity more heavily than old activity.
-        weight = calc_weight(now, Time.zone.parse(time))
+        weight = calc_weight(now, Time.parse(time))
         hash[:user] = user.to_i if user.present?
         hash[:load] += load.to_f * weight
         hash[:rate] += weight
