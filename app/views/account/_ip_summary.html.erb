@@ -10,9 +10,11 @@
   </tr>
   <% @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50].each do |ip| %>
     <tr>
-      <td><%= link_to(ip, { report: ip }) %></td>
+      <td><%= link_to(ip, { controller: :account, action: :blocked_ips,
+                            report: ip }) %></td>
       <td><% unless IpStats.blocked?(ip) %>
-        [<%= link_to("Block", {add: ip}) %>]
+        [<%= link_to("Block", { controller: :account, action: :blocked_ips,
+                                add: ip }) %>]
       <% end %></td>
       <td><%= @stats[ip][:user].present? ? user_link(@stats[ip][:user]) : "—" %></td>
       <td><%= @stats[ip][:rate].round(2) %></td>
