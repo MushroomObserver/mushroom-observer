@@ -55,8 +55,8 @@ class IpStatsTest < UnitTestCase
   def test_add_blocked_ips
     old_ips = IpStats.blocked_ips
     # Oops!  Doesn't check if IP already added.
-    # IpStats.add_blocked_ips([ "1.0.0.1", "2.0.0.2", old_ips.first ])
-    IpStats.add_blocked_ips([ "1.0.0.1", "2.0.0.2" ])
+    # IpStats.add_blocked_ips(["1.0.0.1", "2.0.0.2", old_ips.first])
+    IpStats.add_blocked_ips(["1.0.0.1", "2.0.0.2"])
     new_ips = IpStats.blocked_ips
     assert_equal(old_ips.length + 2, new_ips.length)
     assert_true(new_ips.include?("1.0.0.1"))
@@ -66,7 +66,7 @@ class IpStatsTest < UnitTestCase
   def test_remove_blocked_ips
     old_ips = IpStats.blocked_ips
     assert_true(old_ips.length > 2)
-    IpStats.remove_blocked_ips([ old_ips.first, old_ips.last, "9.9.9.9" ])
+    IpStats.remove_blocked_ips([old_ips.first, old_ips.last, "9.9.9.9"])
     new_ips = IpStats.blocked_ips
     assert_equal(old_ips.length - 2, new_ips.length)
     assert_false(new_ips.include?(old_ips.first))

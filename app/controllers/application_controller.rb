@@ -162,7 +162,7 @@ class ApplicationController < ActionController::Base
     msg = "We have noticed an excessive amount of server-intensive " \
           "traffic from this IP address (#{request.remote_ip}). " \
           "Please contact the webmaster (#{MO.webmaster_email_address})."
-    render(plain:  msg,
+    render(plain: msg,
            status: :too_many_requests,
            layout: false)
     false
