@@ -53,7 +53,7 @@ abort(<<"HELP") if ARGV.any? { |arg| ["-h", "--help"].include?(arg) }
 HELP
 
 def bad_ip?(stats)
-  if stats[:user].present?
+  if stats[:user].to_s != ""
     report_user(stats) if stats[:rate] > 1.0 ||
                           stats[:load] > 0.5
   elsif stats[:rate] > 0.1 || stats[:load] > 0.1
