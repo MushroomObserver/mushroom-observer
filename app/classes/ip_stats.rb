@@ -9,7 +9,7 @@ class IpStats
     #   action::     Action (string).
     def log_stats(stats)
       file = MO.ip_stats_file
-      now = Time.now
+      now = Time.now.utc
       File.open(file, "a") do |fh|
         fh.puts [
           stats[:time],
@@ -33,13 +33,13 @@ class IpStats
     #     action::     Action (string).
     def read_stats(do_activity = false)
       data = {}
-      now = Time.now
+      now = Time.now.utc
       read_file(MO.ip_stats_file) do |time, ip, user, load, controller, action|
         hash = data[ip] ||= { load: 0, activity: [], rate: 0 }
         # Weight turns rate into average number of requests per second,
         # and load into average percentage of server time used.  It weights
         # recent activity more heavily than old activity.
-        weight = calc_weight(now, Time.parse(time))
+        weight = calc_weight(now, Time.parse(time).utc)
         hash[:user] = user.to_i if user.to_s != ""
         hash[:load] += load.to_f * weight
         hash[:rate] += weight
@@ -50,7 +50,7 @@ class IpStats
     end
 
     def clean_stats
-      cutoff = (Time.now - STATS_TIME * 60).to_s
+      cutoff = (Time.now.utc - STATS_TIME * 60).to_s
       rewrite_ip_stats { |time| time > cutoff }
     end
 
@@ -68,7 +68,7 @@ class IpStats
       file = MO.blocked_ips_file
       File.open(file, "a") do |fh|
         ips.each do |ip|
-          fh.puts "#{ip},#{Time.now}"
+          fh.puts "#{ip},#{Time.now.utc}"
         end
       end
     end
@@ -78,7 +78,7 @@ class IpStats
     end
 
     def clean_blocked_ips
-      cutoff = (Time.now - 24 * 60 * 60).to_s
+      cutoff = (Time.now.utc - 24 * 60 * 60).to_s
       rewrite_blocked_ips { |_ip, time| time > cutoff }
     end
 
