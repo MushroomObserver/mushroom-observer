@@ -69,7 +69,7 @@ def report_user(stats)
   puts "User ##{id} is hogging the server!"
   puts "  https://mushroomobserver.org/observer/show_user/#{id}"
   puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
-  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds / request"
+  puts "  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds"
   puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
   puts
 end
@@ -77,7 +77,7 @@ end
 def report_nonuser(stats)
   puts "IP #{stats[:ip]} is hogging the server!"
   puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
-  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds / request"
+  puts "  request rate: 1 every #{(1.0 / stats[:rate]).round(2)} seconds"
   puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
   puts
 end
