@@ -157,6 +157,7 @@ class ApplicationController < ActionController::Base
     return true unless IpStats.blocked?(request.remote_ip)
     return true if params[:controller] == "account" &&
                    params[:action] == "login"
+    return true if session[:user_id].present?
 
     logger.warn("BLOCKED #{request.remote_ip}")
     msg = "We have noticed an excessive amount of server-intensive " \
@@ -218,6 +219,7 @@ class ApplicationController < ActionController::Base
 
   # Catch errors for integration tests, and report stats re completed request.
   def catch_errors_and_log_request_stats
+    clear_user_globals
     stats = request_stats
     yield
     IpStats.log_stats(stats)
@@ -328,9 +330,6 @@ class ApplicationController < ActionController::Base
     #          layout: false)
     #   return false
     # end
-
-    # Guilty until proven innocent...
-    clear_user_globals
 
     try_user_autologin(session_user)
     make_logged_in_user_available_to_everyone
