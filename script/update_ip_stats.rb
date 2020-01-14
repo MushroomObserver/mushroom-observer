@@ -54,9 +54,10 @@ HELP
 
 def bad_ip?(stats)
   if stats[:user].to_s != ""
-    report_user(stats) if stats[:rate] > 1.0 ||
-                          stats[:load] > 0.5
-  elsif stats[:rate] > 0.1 || stats[:load] > 0.1
+    report_user(stats) if stats[:rate] * 60  > 25 || # requests per minute
+                          stats[:load] * 100 > 50    # pct use of one worker
+  elsif stats[:rate] * 60  > 5 || # requests per minute
+        stats[:load] * 100 > 20   # pct use of one worker
     report_nonuser(stats) unless IpStats.blocked?(stats[:ip])
     return true
   end
@@ -67,16 +68,16 @@ def report_user(stats)
   id = stats[:user]
   puts "User ##{id} is hogging the server!"
   puts "  https://mushroomobserver.org/observer/show_user/#{id}"
-  puts "  request rate: #{stats[:rate].round(2)} requests/second"
-  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds/request"
+  puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
+  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds / request"
   puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
   puts
 end
 
 def report_nonuser(stats)
   puts "IP #{stats[:ip]} is hogging the server!"
-  puts "  request rate: #{stats[:rate].round(2)} requests/second"
-  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds/request"
+  puts "  request rate: #{(stats[:rate] * 60).round(2)} requests / minute"
+  puts "  request rate: #{(1.0 / stats[:rate]).round(2)} seconds / request"
   puts "  server load:  #{(stats[:load] * 100).round(2)}% of one worker"
   puts
 end

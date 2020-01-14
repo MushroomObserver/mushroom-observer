@@ -4,8 +4,7 @@
     <th>ip</th>
     <th>block</th>
     <th>user</th>
-    <th>rate / sec</th>
-    <th>sec / request</th>
+    <th>rate / min</th>
     <th>load %</th>
   </tr>
   <% @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50].each do |ip| %>
@@ -17,8 +16,7 @@
                                 add: ip }) %>]
       <% end %></td>
       <td><%= @stats[ip][:user].present? ? user_link(@stats[ip][:user]) : "—" %></td>
-      <td><%= @stats[ip][:rate].round(2) %></td>
-      <td><%= (1.0 / @stats[ip][:rate]).round(2) %></td>
+      <td><%= (@stats[ip][:rate] * 60).round(2) %></td>
       <td><%= (@stats[ip][:load] * 100).round(2) %></td>
     </tr>
   <% end %>

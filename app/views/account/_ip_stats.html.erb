@@ -3,10 +3,16 @@
 <% if user_id = @stats[@ip][:user] %>
   User: <%= user_link(User.safe_find(user_id) || user_id) %><br/>
 <% end %>
-Rate: <%= @stats[@ip][:rate].to_f.round(2) %> / sec
-      = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> sec<br/>
+Rate: <%= (@stats[@ip][:rate].to_f * 60).round(2) %> / minute
+      = 1 every <%= (1.0 / @stats[@ip][:rate]).round(2) %> seconds<br/>
 Load: <%= (@stats[@ip][:load].to_f * 100).round(2) %>% of one worker<br/>
-Activity: (50 most recent)<br/>
+Activity:
+  <% n = @stats[@ip][:activity].length %>
+  <% if n > 50 %>
+    (most recent 50 of <%= n %> requests)
+  <% else %>
+    (all of the most recent <%= n %> requests)
+  <% end %><br/>
 <table class="ips ips-lined">
   <tr>
     <th>time</th>

@@ -677,8 +677,8 @@ class AccountController < ApplicationController
   def blocked_ips # :root:
     if in_admin_mode?
       process_blocked_ips_commands
-      @blocked_ips = IpStats.read_blocked_ips
-      @okay_ips = IpStats.read_okay_ips
+      @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
+      @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(:do_activity)
     else
       redirect_back_or_default("/observer/how_to_help")
@@ -688,6 +688,12 @@ class AccountController < ApplicationController
   # ========= private Admin utilities section methods ==========
 
   private
+
+  def sort_by_ip(ips)
+    ips.sort_by do |ip|
+      ip.to_s.split(".").map {|n| n.to_i + 1000}.map(&:to_s).join(" ")
+    end
+  end
 
   def process_blocked_ips_commands
     if validate_ip!(params[:add])
