@@ -56,7 +56,7 @@ def bad_ip?(stats)
   if stats[:user].to_s != ""
     report_user(stats) if stats[:rate] > 1.0 ||
                           stats[:load] > 0.5
-  elsif stats[:rate] > 0.01 || stats[:load] > 0.1
+  elsif stats[:rate] > 0.1 || stats[:load] > 0.1
     report_nonuser(stats)
     return true
   end
