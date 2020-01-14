@@ -109,7 +109,7 @@ class IpStats
 
     def blocked_ips_current?
       defined?(@@blocked_ips_time) &&
-        @@blocked_ips_time.present? &&
+        @@blocked_ips_time.to_s != "" &&
         @@blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
         @@blocked_ips_time >= File.mtime(MO.okay_ips_file)
     end
