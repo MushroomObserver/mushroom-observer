@@ -12,10 +12,10 @@ class IpStats
       now = Time.now.utc
       File.open(file, "a") do |fh|
         fh.puts [
-          stats[:time],
+          stats[:time].utc,
           stats[:ip],
           User.current_id,
-          now - stats[:time],
+          now - stats[:time].utc,
           stats[:controller],
           stats[:action]
         ].join(",")
