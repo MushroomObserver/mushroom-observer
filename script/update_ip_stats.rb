@@ -1,6 +1,36 @@
 #!/usr/bin/env ruby
 
+# Kludge to allow us to include consts.rb without loading entire Rails app.
+
+class Configuration
+  def method_missing(method, *args)
+    @data ||= {}
+    if method.to_s.match(/=$/)
+      @data[method.to_s.chop.to_sym] = args[0]
+    else
+      @data[method]
+    end
+  end
+end
+
+MO = Configuration.new
+
+def config
+  MO
+end
+
+module MushroomObserver
+  class Application
+    def self.configure
+      yield if block_given?
+    end
+  end
+end
+
+# ----------------------------------------
+
 app_root = File.expand_path("..", __dir__)
+require "#{app_root}/config/consts.rb"
 require "#{app_root}/app/classes/ip_stats.rb"
 require "fileutils"
 

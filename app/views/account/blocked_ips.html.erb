@@ -13,7 +13,7 @@
         </div>
       </form>
       <table class="ips">
-        <% @okay_ips.each do |ip| %>
+        <% @okay_ips.sort.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= link_to(:REMOVE.t, {controller: :account,
@@ -31,7 +31,7 @@
         </div>
       </form>
       <table class="ips">
-        <% @blocked_ips.each do |ip| %>
+        <% @blocked_ips.sort.each do |ip| %>
           <tr>
             <td><%= ip.t %></td>
             <td>[<%= link_to(:REMOVE.t, {controller: :account,
