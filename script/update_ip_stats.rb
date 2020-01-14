@@ -25,7 +25,7 @@ def bad_ip?(stats)
   if stats[:user].present?
     report_user(stats) if stats[:rate] > 1.0 ||
                           stats[:load] > 0.5
-  elsif stats[:rate] > 1.0 || stats[:load] > 0.5
+  elsif stats[:rate] > 0.1 || stats[:load] > 0.1
     report_nonuser(stats)
     return true
   end
@@ -54,7 +54,7 @@ IpStats.clean_stats
 data = IpStats.read_stats
 bad_ips = data.keys.select { |ip| bad_ip?(data[ip]) }
 # Removing then re-adding has effect of updating the time stamp on each bad IP.
-IpStats.remove_blocked_ips(bad_ips)
-IpStats.add_blocked_ips(bad_ips)
+# IpStats.remove_blocked_ips(bad_ips)
+# IpStats.add_blocked_ips(bad_ips)
 
 exit 0

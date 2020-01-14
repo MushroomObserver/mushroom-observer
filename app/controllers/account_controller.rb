@@ -681,7 +681,7 @@ class AccountController < ApplicationController
       @okay_ips = IpStats.read_okay_ips
       @stats = IpStats.read_stats(:do_activity)
     else
-      redirect_back_or_default("/")
+      redirect_back_or_default("/observer/how_to_help")
     end
   end
 
