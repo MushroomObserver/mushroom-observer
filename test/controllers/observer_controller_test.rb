@@ -343,20 +343,26 @@ class ObserverControllerTest < FunctionalTestCase
     # When requesting non-synonym observations of n2, it should include n1,
     # since an observation of n1 was clearly intended to be an observation of
     # n2.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: false, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: false,
+                                  by: :name)
     assert_equal(2, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: true,
-                                                      exclude_original_names: true, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  exclude_original_names: true,
+                                  by: :name)
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all, names: n2.id,
-                                                      include_synonyms: true, by: :name)
+    query = Query.lookup_and_save(:Observation, :all,
+                                  names: n2.id,
+                                  include_synonyms: true,
+                                  by: :name)
     assert_equal(4, query.num_results)
     qp = @controller.query_params(query)
 
@@ -720,6 +726,25 @@ class ObserverControllerTest < FunctionalTestCase
     # Needs an assertion. Was
     # assert_select("title", /Observations of Synonyms of/)
     # but that broken by PR 497.
+  end
+
+  # Prove that lichen content_filter works on observations
+  def test_observations_with_lichen_filter
+    login(users(:lichenologist).name)
+    get_with_dump(:list_observations)
+    results = @controller.instance_variable_get("@objects")
+
+    assert(results.count.positive?)
+    assert(results.all? { |result| result.lifeform.include?("lichen") },
+           "All results should be lichen-ish")
+
+    login(users(:antilichenologist).name)
+    get_with_dump(:list_observations)
+    results = @controller.instance_variable_get("@objects")
+
+    assert(results.count.positive?)
+    assert(results.none? { |result| result.lifeform.include?(" lichen ") },
+           "No results should be lichens")
   end
 
   def test_send_webmaster_question
