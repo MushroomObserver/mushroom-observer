@@ -1,0 +1,19 @@
+<big>Most active users: (top 50)</big><br/>
+<table class="ips ips-lined">
+  <tr>
+    <th>ip</th>
+    <th>user</th>
+    <th>rate / sec</th>
+    <th>sec / request</th>
+    <th>load %</th>
+  </tr>
+  <% @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50].each do |ip| %>
+    <tr>
+      <td><%= link_to(ip, { report: ip }) %></td>
+      <td><%= @stats[ip][:user].present? ? user_link(@stats[ip][:user]) : "—" %></td>
+      <td><%= @stats[ip][:rate].round(2) %></td>
+      <td><%= (1.0 / @stats[ip][:rate]).round(2) %></td>
+      <td><%= (@stats[ip][:load] * 100).round(2) %></td>
+    </tr>
+  <% end %>
+</table>

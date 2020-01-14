@@ -676,11 +676,12 @@ class AccountController < ApplicationController
 
   def blocked_ips # :root:
     if in_admin_mode?
-      process_blocked_ip_commands
-      @report = blocked_ips_report
-      @blocked_ips = Robots.blocked_ips
+      process_blocked_ips_commands
+      @blocked_ips = IpStats.read_blocked_ips
+      @okay_ips = IpStats.read_okay_ips
+      @stats = IpStats.read_stats(:do_activity)
     else
-      redirect_back_or_default("/")
+      redirect_back_or_default("/observer/how_to_help")
     end
   end
 
@@ -688,15 +689,19 @@ class AccountController < ApplicationController
 
   private
 
-  def process_blocked_ip_commands
-    if params[:add].present? && validate_ip!(params[:add])
-      Robots.add_blocked_ip(params[:add])
-    elsif params[:remove].present? && validate_ip!(params[:remove])
-      Robots.remove_blocked_ip(params[:remove])
+  def process_blocked_ips_commands
+    if validate_ip!(params[:add])
+      IpStats.add_blocked_ips([params[:add]])
+    elsif validate_ip!(params[:remove])
+      IpStats.remove_blocked_ips([params[:remove]])
+    elsif validate_ip!(params[:report])
+      @ip = params[:report]
     end
   end
 
   def validate_ip!(ip)
+    return false if ip.blank?
+
     match = ip.to_s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
     return true if match &&
                    valid_ip_num(match[1]) &&
@@ -709,13 +714,6 @@ class AccountController < ApplicationController
 
   def valid_ip_num(num)
     num.to_i >= 0 && num.to_i < 256
-  end
-
-  def blocked_ips_report
-    logs   = "#{MO.root}/log/production.log*"
-    script = "#{MO.root}/script/identify_robots.prl"
-    output = "#{MO.root}/config/blocked_ips.txt.tmp"
-    `(cat #{logs} | #{script} > #{output}) 2>&1`.split("\n")
   end
 
   def add_user_to_group_admin_mode

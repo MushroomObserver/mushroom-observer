@@ -81,18 +81,14 @@
 #  paginate_numbers::       Paginate an Array normally.
 #
 #  ==== Memory usage
-#  log_memory_usage::       (filter: logs memory use stats from
-#                           <tt>/proc/$$/smaps</tt>)
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
-#  count_objects::          (does... nothing??!!... for every Object that
-#                           currently exists)
 #
 #  ==== Other stuff
 #  disable_link_prefetching::    (filter: prevents prefetching of destroy
 #                                 methods)
 #  update_view_stats::           Called after each show_object request.
 #  calc_layout_params::          Gather User's list layout preferences.
-#  catch_errors                  (filter: catches errors for integration tests)
+#  catch_errors_and_log_request_stats::  (filter: catches errors for integration tests)
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
 #
@@ -106,7 +102,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  around_action :catch_errors # if Rails.env == "test"
+  around_action :catch_errors_and_log_request_stats
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
   before_action :create_view_instance_variable
@@ -119,7 +115,6 @@ class ApplicationController < ActionController::Base
   before_action :track_translations
   # before_action :extra_gc
   # after_action  :extra_gc
-  # after_action  :log_memory_usage
 
   # Make show_name_helper available to nested partials
   helper :show_name
@@ -127,6 +122,7 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
+    skip_before_action :create_view_instance_variable
     skip_before_action :verify_authenticity_token
     skip_before_action :fix_bad_domains
     skip_before_action :autologin
@@ -158,16 +154,16 @@ class ApplicationController < ActionController::Base
 
   # Kick out agents responsible for excessive traffic.
   def kick_out_excessive_traffic
-    return true unless Robots.blocked?(request.remote_ip)
+    return true unless IpStats.blocked?(request.remote_ip)
+    return true if params[:controller] == "account" &&
+                   params[:action] == "login"
 
     logger.warn("BLOCKED #{request.remote_ip}")
-    render(plain: "We have noticed an excessive amount of server-intensive " \
-                  "traffic from this IP address.  Please contact the " \
-                  "webmaster (webmaster@mushroomobserver.org) to discuss " \
-                  "what you are trying to do.  There is almost certainly " \
-                  "a better, more respectful way of doing whatever you're " \
-                  "doing that won't overburden our server.",
-           status: 429,
+    msg = "We have noticed an excessive amount of server-intensive " \
+          "traffic from this IP address (#{request.remote_ip}). " \
+          "Please contact the webmaster (#{MO.webmaster_email_address})."
+    render(plain: msg,
+           status: :too_many_requests,
            layout: false)
     false
   end
@@ -221,51 +217,34 @@ class ApplicationController < ActionController::Base
   end
 
   # Catch errors for integration tests, and report stats re completed request.
-  def catch_errors
-    start = start_state
+  def catch_errors_and_log_request_stats
+    stats = request_stats
     yield
-    logger.warn(error_stats(start))
+    IpStats.log_stats(stats)
+    logger.warn(request_stats_log_message(stats))
   rescue StandardError => e
     raise @error = e
   end
 
-  def start_state
+  def request_stats
     {
       time: Time.current,
       controller: params[:controller],
       action: params[:action],
       robot: browser.bot? ? "robot" : "user",
-      ip: catch_ip,
-      url: catch_url,
-      ua: catch_ua
+      ip: request.try(&:remote_ip),
+      url: request.try(&:url),
+      ua: browser.try(&:ua)
     }
   end
 
-  def catch_ip
-    request.remote_ip
-  rescue StandardError
-    "unknown"
+  def request_stats_log_message(stats)
+    "TIME: #{Time.current - stats[:time]} #{status} " \
+    "#{stats[:controller]} #{stats[:action]} " \
+    "#{stats[:robot]} #{stats[:ip]}\t#{stats[:url]}\t#{stats[:ua]}"
   end
 
-  def catch_url
-    request.url
-  rescue StandardError
-    "unknown"
-  end
-
-  def catch_ua
-    browser.ua
-  rescue StandardError
-    "unknown"
-  end
-
-  def error_stats(start)
-    "TIME: #{Time.current - start[:time]} #{status} " \
-    "#{start[:controller]} #{start[:action]} " \
-    "#{start[:robot]} #{start[:ip]}\t#{start[:url]}\t#{start[:ua]}"
-  end
-
-  private :start_state, :catch_ip, :catch_url, :catch_ua, :error_stats
+  private :request_stats, :request_stats_log_message
 
   # Update Globalite with any recent changes to translations.
   def refresh_translations
@@ -1709,10 +1688,6 @@ class ApplicationController < ActionController::Base
   #  :section: Memory usage.
   #
   ##############################################################################
-
-  def count_objects
-    ObjectSpace.each_object { |_o| }
-  end
 
   def extra_gc
     ObjectSpace.garbage_collect

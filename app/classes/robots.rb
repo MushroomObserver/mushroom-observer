@@ -8,31 +8,6 @@ class Robots
       @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end
 
-    def blocked?(ip)
-      populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips.include?(ip)
-    end
-
-    def blocked_ips
-      populate_blocked_ips unless blocked_ips_current?
-      @@blocked_ips
-    end
-
-    def add_blocked_ip(ip)
-      file = MO.blocked_ips_file
-      ip.gsub!(/[^\d\.]/, "")
-      `echo #{ip} >> #{file}`
-      `sort -u #{file} > #{file}.xxx`
-      `mv -f #{file}.xxx #{file}`
-    end
-
-    def remove_blocked_ip(ip)
-      file = MO.blocked_ips_file
-      ip.gsub!(/[^\d\.]/, "")
-      `cat #{file} | grep -v #{ip} > #{file}.xxx`
-      `mv -f #{file}.xxx #{file}`
-    end
-
     def populate_allowed_robot_actions
       file = MO.robots_dot_text_file
       @@allowed_robot_actions = parse_robots_dot_text(file)
@@ -52,24 +27,6 @@ class Robots
         end
       end
       results
-    end
-
-    def blocked_ips_current?
-      defined?(@@blocked_ips_time) &&
-        @@blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
-        @@blocked_ips_time >= File.mtime(MO.okay_ips_file)
-    end
-
-    def populate_blocked_ips
-      file1 = MO.blocked_ips_file
-      file2 = MO.okay_ips_file
-      @@blocked_ips = parse_ip_list(file1) - parse_ip_list(file2)
-      @@blocked_ips_time = [File.mtime(file1), File.mtime(file2)].max
-    end
-
-    def parse_ip_list(file)
-      FileUtils.touch(file) unless File.exist?(file)
-      File.open(file).readlines.map(&:chomp)
     end
   end
 end
