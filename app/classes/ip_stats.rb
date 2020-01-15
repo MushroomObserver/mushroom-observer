@@ -66,7 +66,14 @@ class IpStats
     end
 
     def add_blocked_ips(ips)
-      file = MO.blocked_ips_file
+      add_ips(ips, MO.blocked_ips_file)
+    end
+
+    def add_okay_ips(ips)
+      add_ips(ips, MO.okay_ips_file)
+    end
+
+    def add_ips(ips, file)
       File.open(file, "a") do |fh|
         ips.each do |ip|
           fh.puts "#{ip},#{Time.now.utc}"
@@ -76,6 +83,18 @@ class IpStats
 
     def remove_blocked_ips(ips)
       rewrite_blocked_ips { |ip, _time| !ips.include?(ip) }
+    end
+
+    def remove_okay_ips(ips)
+      rewrite_okay_ips { |ip, _time| !ips.include?(ip) }
+    end
+
+    def clear_blocked_ips
+      File.open(MO.blocked_ips_file, File::TRUNC) {}
+    end
+
+    def clear_okay_ips
+      File.open(MO.okay_ips_file, File::TRUNC) {}
     end
 
     def clean_blocked_ips
@@ -130,6 +149,10 @@ class IpStats
 
     def rewrite_blocked_ips(&block)
       rewrite_file(MO.blocked_ips_file, &block)
+    end
+
+    def rewrite_okay_ips(&block)
+      rewrite_file(MO.okay_ips_file, &block)
     end
 
     def rewrite_ip_stats(&block)

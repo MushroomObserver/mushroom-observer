@@ -13,7 +13,7 @@
                             report: ip }) %></td>
       <td><% unless IpStats.blocked?(ip) %>
         [<%= link_to("Block", { controller: :account, action: :blocked_ips,
-                                add: ip }) %>]
+                                add_bad: ip }) %>]
       <% end %></td>
       <td><%= @stats[ip][:user].present? ? user_link(@stats[ip][:user]) : "—" %></td>
       <td><%= (@stats[ip][:rate] * 60).round(2) %></td>

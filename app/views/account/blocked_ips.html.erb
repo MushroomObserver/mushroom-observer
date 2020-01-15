@@ -13,6 +13,8 @@
           <big>Okay IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_okay, "", size: 20, data: {autofocus: true}, class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+          [<%= link_to("Clear List", {controller: :account,
+                       action: :blocked_ips, clear_okay: 1}) %>]
         </div>
       </form>
       <table class="ips">
@@ -31,6 +33,8 @@
           <big>Blocked IPs:</big> &nbsp;&nbsp;
           <%= text_field_tag(:add_bad, "", size: 20, data: {autofocus: true}, class: "form-control") %>
           <%= submit_tag(:ADD.l, class: "btn", style: "margin-left: 1em") %>
+          [<%= link_to("Clear List", {controller: :account,
+                       action: :blocked_ips, clear_bad: 1}) %>]
         </div>
       </form>
       <table class="ips">

@@ -691,15 +691,23 @@ class AccountController < ApplicationController
 
   def sort_by_ip(ips)
     ips.sort_by do |ip|
-      ip.to_s.split(".").map {|n| n.to_i + 1000}.map(&:to_s).join(" ")
+      ip.to_s.split(".").map { |n| n.to_i + 1000 }.map(&:to_s).join(" ")
     end
   end
 
   def process_blocked_ips_commands
-    if validate_ip!(params[:add])
-      IpStats.add_blocked_ips([params[:add]])
-    elsif validate_ip!(params[:remove])
-      IpStats.remove_blocked_ips([params[:remove]])
+    if validate_ip!(params[:add_okay])
+      IpStats.add_okay_ips([params[:add_okay]])
+    elsif validate_ip!(params[:add_bad])
+      IpStats.add_blocked_ips([params[:add_bad]])
+    elsif validate_ip!(params[:remove_okay])
+      IpStats.remove_okay_ips([params[:remove_okay]])
+    elsif validate_ip!(params[:remove_bad])
+      IpStats.remove_blocked_ips([params[:remove_bad]])
+    elsif params[:clear_okay].present?
+      IpStats.clear_okay_ips
+    elsif params[:clear_bad].present?
+      IpStats.clear_blocked_ips
     elsif validate_ip!(params[:report])
       @ip = params[:report]
     end

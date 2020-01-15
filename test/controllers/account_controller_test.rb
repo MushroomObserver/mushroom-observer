@@ -776,14 +776,14 @@ class AccountControllerTest < FunctionalTestCase
     get(:blocked_ips)
     assert_response(:success)
 
-    get(:blocked_ips, add: "garbage")
+    get(:blocked_ips, add_bad: "garbage")
     assert_flash_error
 
-    get(:blocked_ips, add: new_ip)
+    get(:blocked_ips, add_bad: new_ip)
     assert_no_flash
     assert_true(IpStats.blocked?(new_ip))
 
-    get(:blocked_ips, remove: new_ip)
+    get(:blocked_ips, remove_bad: new_ip)
     assert_no_flash
     assert_false(IpStats.blocked?(new_ip))
   end
