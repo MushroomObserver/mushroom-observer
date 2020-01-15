@@ -54,10 +54,10 @@ HELP
 
 def bad_ip?(stats)
   if stats[:user].to_s != ""
-    report_user(stats) if stats[:rate] * 60  > 25 || # requests per minute
-                          stats[:load] * 100 > 50    # pct use of one worker
-  elsif stats[:rate] * 60  > 5 || # requests per minute
-        stats[:load] * 100 > 20   # pct use of one worker
+    report_user(stats) if stats[:rate] * 60  >= 30 || # requests per minute
+                          stats[:load] * 100 >= 100   # pct use of one worker
+  elsif stats[:rate] * 60  > 20 || # requests per minute
+        stats[:load] * 100 > 50    # pct use of one worker
     report_nonuser(stats) unless IpStats.blocked?(stats[:ip])
     return true
   end
