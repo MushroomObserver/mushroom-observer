@@ -74,6 +74,41 @@ class IpStatsTest < UnitTestCase
     assert_true(new_ips.include?(old_ips[1]))
   end
 
+  def test_clear_bad_ips
+    assert_not_empty(IpStats.blocked_ips)
+    IpStats.clear_blocked_ips
+    assert_empty(IpStats.blocked_ips)
+  end
+
+  def test_clear_okay_ips
+    assert_not_empty(IpStats.read_okay_ips)
+    IpStats.clear_okay_ips
+    assert_empty(IpStats.read_okay_ips)
+  end
+
+  def test_add_okay_ips
+    old_ips = IpStats.read_okay_ips
+    # Oops!  Doesn't check if IP already added.
+    # IpStats.add_okay_ips(["1.0.0.1", "2.0.0.2", old_ips.first])
+    IpStats.add_okay_ips(["1.0.0.1", "2.0.0.2"])
+    new_ips = IpStats.read_okay_ips
+    assert_equal(old_ips.length + 2, new_ips.length)
+    assert_true(new_ips.include?("1.0.0.1"))
+    assert_true(new_ips.include?("2.0.0.2"))
+  end
+
+  def test_remove_okay_ips
+    IpStats.add_okay_ips(["1.2.3.4"])
+    old_ips = IpStats.read_okay_ips
+    assert_true(old_ips.length > 1)
+    assert_true(old_ips.include?("3.14.15.9"))
+    IpStats.remove_okay_ips(["3.14.15.9", "9.9.9.9"])
+    new_ips = IpStats.read_okay_ips
+    assert_equal(old_ips.length - 1, new_ips.length)
+    assert_false(new_ips.include?("3.14.15.9"))
+    assert_true(new_ips.include?("1.2.3.4"))
+  end
+
   def test_log_stats
     File.delete(MO.ip_stats_file) if File.exist?(MO.ip_stats_file)
 
