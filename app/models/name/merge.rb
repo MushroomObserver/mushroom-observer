@@ -1,8 +1,13 @@
 class Name < AbstractModel
   # Is it safe to merge this Name with another?  If any information will get
   # lost we return false.  In practice only if it has Namings.
+  # UPDATE: I'm also forbidding merges if users have registered interest in
+  # or otherwise requested notifications for this name.  In some cases it will
+  # be okay, but there are cases where users unintentionally end up subscribed
+  # notifications for every name in the database as a side-effect of merging an
+  # unwanted name into Fungi, say. -JPH 20200120
   def mergeable?
-    namings.empty?
+    namings.empty? && interests_plus_notifications.zero?
   end
 
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no

@@ -214,5 +214,6 @@
 <%= render(partial: "comment/show_comments",
            locals: {object: @name, controls: true, limit: nil}) %>
 <div class="col-xs-12">
+  <%= :show_name_num_notifications.t(num: @name.interests_plus_notifications) %><br/>
   <%= show_object_footer(@name) %>
 </div>

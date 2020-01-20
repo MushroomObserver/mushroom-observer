@@ -138,7 +138,14 @@ class Name < AbstractModel
   def merge_info
     num_obs     = observations.count
     num_namings = namings.count
-    "#{:NAME.l} ##{id}: #{real_search_name} [o=#{num_obs}, n=#{num_namings}]"
+    num_notify  = interests_plus_notifications
+    "#{:NAME.l} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
+      "#namings: #{num_namings}, #users_with_interest: #{num_notify}]"
+  end
+
+  def interests_plus_notifications
+    interests.count +
+      Notification.where(flavor: Notification.flavors[:name], obj_id: id).count
   end
 
   ##############################################################################
