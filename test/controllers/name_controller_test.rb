@@ -2202,6 +2202,7 @@ class NameControllerTest < FunctionalTestCase
     old_name = Name.find(note.obj_id)
     new_name = names(:fungi)
     login(old_name.user.name)
+    make_admin(old_name.user.login)
     change_old_name_to_new_name_params = {
       id: old_name.id,
       name: {
