@@ -1012,7 +1012,7 @@
   log_approved_by_with_comment: "[:log_approved_by] [comment]"
   log_consensus_changed: Consensus changed from [old] to [new].
   log_consensus_created: Initial name [name].
-  log_consensus_created_at: '[:log_consensus_created]'
+  log_consensus_created_at: "[:log_consensus_created]"
   log_consensus_reached: "Consensus established: [name]"
   log_deprecated_by: Deprecated by [user].
   log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
@@ -1147,7 +1147,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Hi! Can you please spare 10 minutes? If so, MO would like your help adding one good image to a glossary term to help our community. "Here's how.":/article/show_article/14
+  app_banner_box: Please remember to <a href="https://mushroomobserver.org/support/donate">donate</a> to support Mushroom Observer.  We are entirely volunteering run, but we still need to pay for our servers.  Thanks!<br/><br/>We have just updated our <a href="https://mushroomobserver.org/policy/privacy">privacy policy</a> and made it available through our menu.  Please check it out!<br/><br/>If you are trying to scrape data from Mushroom Observer, please <a href="https://mushroomobserver.org/observer/ask_webmaster_question">contact the webmasters</a> (webmaster@mushroomobserver.org).  We are here to help.  If we detect unauthorized scraping, it will be blocked.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1438,7 +1438,7 @@
   form_naming_name_help: "<strong>Scientific names are currently required</strong>, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo."
   form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
-  form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n (or -- if you are creating an Observation -- erase the name). \nThen click '[button]'."
+  form_naming_not_recognized_help: "To proceed: Edit the name to be a valid, correctly spelled, scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
   form_naming_multiple_names: Multiple names match '[name]'.  Select the one you intended.
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
@@ -1955,7 +1955,7 @@
   show_observations_of: "[:OBSERVATIONS] of:"
   obss_of_this_name: this name
   obss_of_taxon: this taxon, any name
-  taxon_obss_other_names:  this taxon, other names
+  taxon_obss_other_names: this taxon, other names
   obss_name_proposed: any taxon, this name proposed
   obss_taxon_proposed: other taxa, this taxon proposed
   show_subtaxa_obss: Subtaxa
@@ -3225,7 +3225,7 @@
   observation_term_created: Date observation was first posted.
   observation_term_modified: Date observation was last modified.
   observation_term_name: Consensus name is one of these names.
-  observation_term_exclude_consensus: "Exclude Observations whose consensus is a name listed in \"name:value\". (When using exclude_consensus you must also use \"include_all_name_proposals:yes\".)"
+  observation_term_exclude_consensus: Exclude Observations whose consensus is a name listed in "name:value". (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
@@ -3248,10 +3248,10 @@
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
-  observation_term_has_location: "Are the [:OBSERVATION]\'s [:LATITUDE] and [:LONGITUDE] fields filled in?"
+  observation_term_has_location: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_comments: Has any comments?
-  observation_term_is_collection_location: "Mushroom was growing at the location. (\"[:form_observations_is_collection_location]\" is checked.)"
+  observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
@@ -3292,7 +3292,7 @@
   privacy_definitions_header: "*Definitions*"
   privacy_definitions_content: "Because everyone (not just lawyers) should be able to easily understand how and why their information is collected and used, we use common language instead of more formal terms throughout this Policy. To help ensure your understanding of some particular key terms, here is a table of translations:"
 
-  privacy_when_we_say: "When we say..."
+  privacy_when_we_say: When we say...
   privacy_we_mean: "... we mean"
   privacy_mo_inc_say: “Mushroom Observer, Inc”, “we”, “us”, “our”
   privacy_mo_inc_mean: The non-profit organization that operates the Mushroom Observer website.
@@ -3305,15 +3305,15 @@
   privacy_contributions_say: “contributions”
   privacy_contributions_mean: Content you add or changes you make to the Mushroom Observer.
   privacy_personal_info_say: “personal information”
-  privacy_personal_info_mean: Information you provide us or information we collect from you that could be used to personally identify you. To be clear, while we do not necessarily collect all of the following types of information, we consider at least the following to be “personal information” if it is otherwise nonpublic and can be used to identify you:\na) your real name, address, phone number, email address, password, identification number on government-issued ID, IP address, user-agent information, credit card number;\nb) when associated with one of the items in subsection a), any sensitive data such as date of birth, gender, sexual orientation, racial or ethnic origins, marital or familial status, medical conditions or disabilities, political affiliation, and religion; and\nc) any of the items in subsections a) or b) when associated with your user account.
+  privacy_personal_info_mean: "Information you provide us or information we collect from you that could be used to personally identify you. To be clear, while we do not necessarily collect all of the following types of information, we consider at least the following to be “personal information” if it is otherwise nonpublic and can be used to identify you:\na) your real name, address, phone number, email address, password, identification number on government-issued ID, IP address, user-agent information, credit card number;\nb) when associated with one of the items in subsection a), any sensitive data such as date of birth, gender, sexual orientation, racial or ethnic origins, marital or familial status, medical conditions or disabilities, political affiliation, and religion; and\nc) any of the items in subsections a) or b) when associated with your user account."
   privacy_third_party_say: “third party”, “third parties”
   privacy_third_party_mean: Individuals, entities, websites, services, products, and applications that are not controlled, managed, or operated by Mushroom Observer, Inc. This includes other Mushroom Observer users and independent organizations or groups who use the Mushroom Observer.
 
   privacy_covers_header: "*What This Privacy Policy Does & Doesn't Cover*"
-  privacy_covers_content: "Except as explained below, this Privacy Policy applies to our collection and handling of information about you that we receive as a result of your use of the Mushroom Observer. This Policy also applies to information that we receive from any third parties."
+  privacy_covers_content: Except as explained below, this Privacy Policy applies to our collection and handling of information about you that we receive as a result of your use of the Mushroom Observer. This Policy also applies to information that we receive from any third parties.
 
   privacy_types_of_information_header: "*Types of Information We Receive From You & How We Get It*"
-  privacy_public_contributions: "Your Public Contributions\n\nOther than the email, password, and settings managed on your preferences page, whatever you post on the Mushroom Observer can be seen and used by everyone.\n\nWhen you make a contribution to the Mushroom Observer you are creating a potentially permanent, public record of every piece of content added, removed, or altered by you. The page history will show when your contribution or deletion was made, as well as your username. We may use your public contributions, either aggregated with the public contributions of others or individually, to create new features or data-related products for you or to learn more about how the Mushroom Observer is used.\n\nAnything in your public contributions is by definition not personal information.  We can take no responsibility if you happen to include what could be interpreted as personal information to your public contributions.\n\n"
+  privacy_public_contributions: "Your Public Contributions\n\nOther than the email, password, and settings managed on your preferences page, whatever you post on the Mushroom Observer can be seen and used by everyone.\n\nWhen you make a contribution to the Mushroom Observer you are creating a potentially permanent, public record of every piece of content added, removed, or altered by you. The page history will show when your contribution or deletion was made, as well as your username. We may use your public contributions, either aggregated with the public contributions of others or individually, to create new features or data-related products for you or to learn more about how the Mushroom Observer is used.\n\nAnything in your public contributions is by definition not personal information.  We can take no responsibility if you happen to include what could be interpreted as personal information to your public contributions."
 
   privacy_account_info: "Account Information & Registration\n\nYou do not need to create an account to read the public information managed by the Mushroom Observer.\n\nIf you do create an account, you must provide an email address to activate the account.  After your account is activated you may change or delete this address through your preferences page."
 
@@ -3331,19 +3331,19 @@
   privacy_how_long_do_we_keep_data_content: "We store your Personal Information for an indefinite amount of time.  You are free to edit most of this information through your preference page.\n\nPlease remember that certain information, such as your IP address, username, and any public contributions to the Mushroom Observer, is archived and displayed indefinitely by design; the transparency of the projects’ contribution and revision histories is critical to their efficacy and trustworthiness.\n\nFor the protection of the Mushroom Observer and other users, if you do not agree with this Privacy Policy, you may not use the Mushroom Observer."
 
   privacy_where_is_mo_header: "*Where is Mushroom Observer, Inc. & What Does That Mean for Me?*"
-  privacy_where_is_mo_content: "Mushroom Observer, Inc. is a non-profit organization incorporated in Massachusetts, with servers and data centers located in the U.S. If you decide to use the Mushroom Observer, whether from inside or outside of the U.S., you understand that your Personal Information will be collected, transferred, stored, processed, disclosed and otherwise used in the U.S. as described in this Privacy Policy. You also understand that your information may be transferred by us from the U.S. to other countries, which may have different or less stringent data protection laws than your country, in connection with providing services to you."
+  privacy_where_is_mo_content: Mushroom Observer, Inc. is a non-profit organization incorporated in Massachusetts, with servers and data centers located in the U.S. If you decide to use the Mushroom Observer, whether from inside or outside of the U.S., you understand that your Personal Information will be collected, transferred, stored, processed, disclosed and otherwise used in the U.S. as described in this Privacy Policy. You also understand that your information may be transferred by us from the U.S. to other countries, which may have different or less stringent data protection laws than your country, in connection with providing services to you.
 
   privacy_do_not_track_header: "*Our Response to Do Not Track (DNT) signals*"
   privacy_do_not_track_content: "We do not allow tracking by third-party websites you have not visited.\n\nWe do not share your data with third parties for marketing purposes.\n\nWe are strongly committed to not sharing nonpublic information and Personal Information with third parties. In particular, we do not allow tracking by third-party websites you have not visited (including analytics services, advertising networks, and social platforms), nor do we share your Personal Information with any third parties for marketing purposes. Under this Policy, we may share your information only under particular situations, which you can learn more about in the “When May We Share Your Information” section of this Privacy Policy.\n\nBecause we protect all users in this manner, we do not change our behavior in response to a web browser's \"do not track\" signal."
 
   privacy_changes_header: "*Changes to This Privacy Policy*"
-  privacy_changes_content: "Because things naturally change over time and we want to ensure our Privacy Policy accurately reflects our practices and the law, it may be necessary to modify this Privacy Policy from time to time. We will announce any such changes in the website banner and through any appropriate mailing list or online forum.  When possible we will announce these change 30 days ahead of them taking effect and will welcome comments and proposed changes during this time."
+  privacy_changes_content: Because things naturally change over time and we want to ensure our Privacy Policy accurately reflects our practices and the law, it may be necessary to modify this Privacy Policy from time to time. We will announce any such changes in the website banner and through any appropriate mailing list or online forum.  When possible we will announce these change 30 days ahead of them taking effect and will welcome comments and proposed changes during this time.
 
   privacy_contact_us_header: "*Contact Us*"
   privacy_contact_us_content: "If you have questions or suggestions about this Privacy Policy, or the information collected under this Privacy Policy, please email us at webmaster@mushroomobserver.org.\n\nDepending on your jurisdiction, you also may have the right to lodge a complaint with a supervisory authority competent for your country or region."
 
   privacy_thank_you_header: "*Thank You!*"
-  privacy_thank_you_content: "Thank you for reading our Privacy Policy. We hope you enjoy using the Mushroom Observer and appreciate your participation in creating, maintaining, and constantly working to improve the largest repository of fungal observations in the world."
+  privacy_thank_you_content: Thank you for reading our Privacy Policy. We hope you enjoy using the Mushroom Observer and appreciate your participation in creating, maintaining, and constantly working to improve the largest repository of fungal observations in the world.
 
   ##############################################################################
 
