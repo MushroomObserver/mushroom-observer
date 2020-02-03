@@ -58,10 +58,14 @@ def bad_ip?(stats)
                           stats[:load] * 100 >= 100   # pct use of one worker
   elsif stats[:rate] * 60  > 20 || # requests per minute
         stats[:load] * 100 > 50    # pct use of one worker
-    report_nonuser(stats) unless IpStats.blocked?(stats[:ip])
+    report_nonuser(stats) unless ignore_ip?(stats[:ip])
     return true
   end
   false
+end
+
+def ignore_ip?(ip)
+  IpStats.blocked?(ip) || IpStats.okay?(ip)
 end
 
 def report_user(stats)
