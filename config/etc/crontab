@@ -1,10 +1,13 @@
 RAILS_ENV=production
+MAILTO=webmaster@mushroomobserver.org
 
-*/5 * * * * /var/web/mushroom-observer/script/run_rake email:send
-*/5 * * * * /var/web/mushroom-observer/script/run_script monitor_top
-*/6 * * * * /var/web/mushroom-observer/script/run_script retransfer_images
-*/4 * * * * /var/web/mushroom-observer/script/run_script parse_log
-13  3 * * * /var/web/mushroom-observer/script/run_script refresh_name_lister_cache
-13  4 * * * /var/web/mushroom-observer/script/run_script verify_images
-13  5 * * * /var/web/mushroom-observer/script/run_script refresh_sitemap
-13  6 * * * /var/web/mushroom-observer/script/run_script make_eol_xml /var/web/mushroom-observer/public/eol.xml
+*   * * * * /var/web/mo/script/run_script update_ip_stats.rb
+*/5 * * * * /var/web/mo/script/run_rake email:send
+*/6 * * * * /var/web/mo/script/run_script retransfer_images
+*/4 * * * * /var/web/mo/script/run_script parse_log
+13  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
+13  4 * * * /var/web/mo/script/run_script verify_images
+13  5 * * * /var/web/mo/script/run_script refresh_sitemap
+13  6 * * * /var/web/mo/script/run_script make_eol_xml /var/web/mushroom-observer/public/eol.xml
+13  7 * * * /var/web/mo/script/run_script update_googlebots.rb
+13  8 * * * sudo /usr/bin/certbot renew --quiet
