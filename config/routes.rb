@@ -306,6 +306,7 @@ ACTIONS = {
     edit_observation: {},
     email_features: {},
     email_merge_request: {},
+    guess: {},
     hide_thumbnail_map: {},
     how_to_help: {},
     how_to_use: {},
