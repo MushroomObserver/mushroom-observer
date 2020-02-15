@@ -34,12 +34,20 @@ class ObserverController
 
   # Temporary private button to test Alan Celestino's prediction model.
   def guess
+    out = []
     id = params[:id]
+    out << "id = #{id.inspect}"
     file = "#{::Rails.root}/tmp/#{id}.jpg"
-    system("curl https://mushroomobserver.org/images/320/#{id}.jpg -o #{file}")
-    out = `curl -X POST --form file=@#{file} https://images.mushroomobserver.org/model/predict`
+    out << "file = #{file.inspect}"
+    cmd = "wget https://mushroomobserver.org/images/320/#{id}.jpg -O #{file}"
+    out << "cmd = #{cmd.inspect}"
+    system(cmd)
+    cmd = "curl -X POST --form file=@#{file} https://images.mushroomobserver.org/model/predict"
+    out << "cmd = #{cmd.inspect}"
+    result = `#{cmd}`
+    out << "result = #{result.inspect}"
     File.delete(file)
-    render(plain: out)
+    render(plain: out.join("\n"))
   end
 
   # Make it really easy for users to elect to go public with their votes.
