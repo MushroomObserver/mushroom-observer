@@ -4022,22 +4022,24 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_suggestions
     obs = observations(:detailed_unknown_obs)
-    img = images(:connected_coprinus_comatus_image)
     name1  = names(:coprinus_comatus)
     name2a = names(:lentinellus_ursinus_author1)
     name2b = names(:lentinellus_ursinus_author2)
     obs.name = name2b
+    obs.vote_cache = 2.0
     obs.save
-    assert_empty(name2a.observations)
-    assert_not_empty(name2b.reload.observations)
-    suggestions = "76.54 Coprinus comatus,32.10 Lentinellus ursinus"
-    get(:suggestions, params: { id: obs.id, names: suggestions})
+    assert_not_nil(obs.thumb_image)
+    assert_obj_list_equal([], name2a.reload.observations)
+    assert_obj_list_equal([obs], name2b.reload.observations)
+    assert_objs_equal(obs.thumb_image, @controller.best_image(name2b))
+    suggestions = '[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]'
+    requires_login(:suggestions, id: obs.id, names: suggestions)
     data = @controller.instance_variable_get("@suggestions")
     assert_equal(2, data.length)
-    assert_equal(name1.id, data[0][0])
-    assert_equal(name2b.id, data[1][0])
-    assert_equal("76.54", data[0][1])
-    assert_equal("32.10", data[1][1])
-    assert_equal(img.id, data[0][2])
+    assert_names_equal(name1, data[0][0])
+    assert_names_equal(name2b, data[1][0])
+    assert_equal(0.7654, data[0][1])
+    assert_equal(0.321, data[1][1])
+    assert_objs_equal(obs.thumb_image, data[1][2])
   end
 end

@@ -96,10 +96,10 @@
                               {controller: :naming, action: :create,
                               id: observation.id}, class: "btn") %>
           <%= submit_tag(:show_namings_suggest_names.l,
-                         data: {role: "suggest_names"}, class: "btn")
+                         data: {role: "suggest_names"}, class: "btn") \
                          if logged_in && observation.thumb_image_id.present? %>
           <%= submit_tag(:show_namings_update_votes.l,
-                         data: {role: "save_votes"}, class: "btn")
+                         data: {role: "save_votes"}, class: "btn") \
                          if logged_in && any_names %>
         </div>
         <p class="help-block max-width-text">
@@ -217,10 +217,10 @@
                                 action: :create, id: observation.id },
                               class: "btn") %>
           <%= submit_tag(:show_namings_suggest_names.l,
-                         data: {role: "suggest_names"}, class: "btn")
+                         data: {role: "suggest_names"}, class: "btn") \
                          if logged_in && observation.thumb_image_id.present? %>
           <%= submit_tag(:show_namings_update_votes.l,
-                         data: {role: "save_votes"}, class: "btn")
+                         data: {role: "save_votes"}, class: "btn") \
                          if logged_in && any_names %>
         </div>
         <p class="help-block max-width-text">

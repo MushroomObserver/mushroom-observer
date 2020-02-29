@@ -3,16 +3,9 @@
 class ObserverController
   def suggestions # :norobots:
     @observation = find_or_goto_index(Observation, params[:id].to_s)
-    @suggestions = parse_suggestions(params[:names]).
+    @suggestions = JSON.parse(params[:names].to_s).
                      map { |name, prob| suggested_name_data(name, prob) }.
                      reject(&:nil?)
-  end
-
-  def parse_suggestions(str)
-    str.split(",").map do |str2|
-      prob, name = str2.split(" ", 1)
-      [name, prob]
-    end
   end
 
   def suggested_name_data(name_str, prob)
@@ -43,7 +36,7 @@ class ObserverController
   end
 
   def best_image(name)
-    Observation.connection.select_value %(
+    id = Observation.connection.select_value %(
       SELECT o.thumb_image_id FROM observations o
       JOIN images i ON i.id = o.thumb_image_id
       WHERE o.name_id IN (#{name.synonym_ids.join(",")})
@@ -51,5 +44,6 @@ class ObserverController
       ORDER BY i.vote_cache DESC
       LIMIT 1
     )
+    Image.safe_find(id)
   end
 end

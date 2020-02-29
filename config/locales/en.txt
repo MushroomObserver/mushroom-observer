@@ -2032,7 +2032,7 @@
 
   # observer/suggestions
   suggestions_title: Suggested Names
-  suggestions_already proposed: already proposed
+  suggestions_already_proposed: already proposed
   suggestions_propose_name: Propose This Name
 
   # location/show_past_location

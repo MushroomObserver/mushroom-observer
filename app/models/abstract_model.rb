@@ -123,6 +123,8 @@ class AbstractModel < ApplicationRecord
   #
   def self.find_object(type, id)
     type.classify.constantize.find(id.to_i)
+  rescue
+    nil
   end
 
   # Add limit to a SQL query, then pass it to find_by_sql.

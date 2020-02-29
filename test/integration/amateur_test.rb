@@ -327,7 +327,7 @@ class AmateurTest < IntegrationTestCase
       open_form("form[id=cast_votes_1]") do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
-        form.submit
+        form.submit("Update Votes")
       end
       # assert_template("observer/show_observation")
       assert_match(/call it that/i, response.body)
@@ -338,7 +338,7 @@ class AmateurTest < IntegrationTestCase
       get("/#{obs.id}")
       open_form("form[id=cast_votes_1]") do |form|
         form.select("vote_#{naming.id}_value", /as if!/i)
-        form.submit
+        form.submit("Update Votes")
       end
     end
   end

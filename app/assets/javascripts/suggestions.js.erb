@@ -3,6 +3,15 @@ function SuggestionModule(id, url) {
     var button = $("[data-role='save_votes']");
     button.click(function (event) {
       button.attr("disabled", "disabled");
+
+      var json = '[["Amanita phalloides",0.7654],["Amanita velosa",0.321]]';
+      url = url.replace("xxx", encodeURIComponent(json));
+      if (event.ctrlKey)
+        window.open(url, "_blank");
+      else
+        window.location.href = url;
+      return;
+
       $.ajax("https://images.mushroomobserver.org/model/predict", {
         data: {id: id},
         dataType: "text",
@@ -10,8 +19,7 @@ function SuggestionModule(id, url) {
         complete: function (request) {
           button.attr("disabled", null);
           if (request.status == 200) {
-            var names = JSON.parse(request.responseText);
-            url = url.replace("xxx", names.map {|n,p| "#{p} #{n}"}.join(","));
+            url = url.replace("xxx", encodeURIComponent(request.responseText));
             if (event.ctrlKey)
               window.open(url, "_blank");
             else
