@@ -1,0 +1,26 @@
+function SuggestionModule(id, url) {
+  $(document).ready(function () {
+    var button = $("[data-role='save_votes']");
+    button.click(function (event) {
+      button.attr("disabled", "disabled");
+      $.ajax("https://images.mushroomobserver.org/model/predict", {
+        data: {id: id},
+        dataType: "text",
+        async: true,
+        complete: function (request) {
+          button.attr("disabled", null);
+          if (request.status == 200) {
+            var names = JSON.parse(request.responseText);
+            url = url.replace("xxx", names.map {|n,p| "#{p} #{n}"}.join(","));
+            if (event.ctrlKey)
+              window.open(url, "_blank");
+            else
+              window.location.href = url;
+          } else {
+            alert(request.responseText);
+          }
+        }
+      });
+    });
+  });
+}

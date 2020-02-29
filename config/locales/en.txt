@@ -1983,6 +1983,7 @@
   show_namings_no_votes: no votes
   show_namings_your_vote: Your Vote
   show_namings_update_votes: Update Votes
+  show_namings_suggest_names: Suggest Names
   show_namings_cast: Cast Vote
   show_namings_user: "[:User]"
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation.  Select '[:show_namings_propose_new_name]' if you want to suggest another option.  See the "How to Use":/observer/how_to_use#voting page for more details on how the votes are tallied.
@@ -2028,6 +2029,11 @@
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run BLAST®
   map_observation_title: "Map of Observation #[ID]"
+
+  # observer/suggestions
+  suggestions_title: Suggested Names
+  suggestions_already proposed: already proposed
+  suggestions_propose_name: Propose This Name
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"

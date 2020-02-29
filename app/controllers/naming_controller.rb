@@ -21,7 +21,7 @@ class NamingController < ApplicationController
 
   def create # :prefetch: :norobots:
     pass_query_params
-    @params = NamingParams.new
+    @params = NamingParams.new(params[:name])
     @params.observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @params.observation
 

@@ -29,7 +29,8 @@
 
     <div class="col-xs-12 col-sm-4">
       <%= render(partial: "observer/show_images",
-                 locals: { thumb_size_control: false }) %>
+                 locals: { observation: @observation,
+                           thumb_size_control: false }) %>
     </div>
   </div>
 <% end %>

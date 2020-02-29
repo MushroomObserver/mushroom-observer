@@ -1,0 +1,57 @@
+<%
+  @owner_id = owner_id_line(@observation) # must go before show_obs_title
+  @title = show_obs_title(@observation)
+
+  tabs = [
+    link_with_query(:show_observation.t, controller: :observer,
+                    action: :show_observation, id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="row">
+  <div class="col-sm-8 pull-left-sm">
+
+    <table class="table-namings">
+      <thead>
+        <tr>
+          <th><%= content_tag(:h4, :suggestions_title.t) %></th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @suggestions.each do |name, prob, image| %>
+          <tr>
+            <td>
+              <%= link_with_query(name.display_name_brief_authors.t,
+                                  controller: :name, action: :show_name,
+                                  id: naming.name) %><br/>
+              <% if @observation.namings.any? {|n| n.name.synonyms.include?(name)} %>
+                (%<= :suggestions_already proposed.t %>)
+              <% else %>
+                <%= link_with_query(:suggestions_propose_name.t,
+                                    { controller: :naming, action: :create,
+                                      id: @observation.id,
+                                      name: name.search_name })
+              <% end %>
+             </td>
+             <td>
+               <%= prob %>%
+             </td>
+             <td>
+               <%= thumbnail(image,
+                             link: {controller: image.show_controller,
+                                    action: image.show_action,
+                                    id: image.id}) %>
+             </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="col-sm-4 pull-right-sm">
+    <%= render(partial: "show_images", locals: { observation: @observation }) %>
+  </div>
+</div>

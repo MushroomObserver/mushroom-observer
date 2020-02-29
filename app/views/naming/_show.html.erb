@@ -91,11 +91,16 @@
     <!--HELP TEXT AND EYES FOR WIDE SCREEN-->
     <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
       <div class="col-xs-12">
-        <div class="pull-right-sm push-down-sm">
-          <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming,
-                              action: :create, id: observation.id}, class: "btn") %>
-          <%= submit_tag(:show_namings_update_votes.l, data: {role: "save_votes"},
-                         class: "btn") if logged_in && any_names %>
+        <div class="pull-right-sm push-down-sm" style="margin:0 0 5px 10px">
+          <%= link_with_query(:show_namings_propose_new_name.t,
+                              {controller: :naming, action: :create,
+                              id: observation.id}, class: "btn") %>
+          <%= submit_tag(:show_namings_suggest_names.l,
+                         data: {role: "suggest_names"}, class: "btn")
+                         if logged_in && observation.thumb_image_id.present? %>
+          <%= submit_tag(:show_namings_update_votes.l,
+                         data: {role: "save_votes"}, class: "btn")
+                         if logged_in && any_names %>
         </div>
         <p class="help-block max-width-text">
           <% if !logged_in %>
@@ -211,9 +216,12 @@
                               { controller: :naming,
                                 action: :create, id: observation.id },
                               class: "btn") %>
+          <%= submit_tag(:show_namings_suggest_names.l,
+                         data: {role: "suggest_names"}, class: "btn")
+                         if logged_in && observation.thumb_image_id.present? %>
           <%= submit_tag(:show_namings_update_votes.l,
-                         data: {role: "save_votes"},
-                         class: "btn") if logged_in && any_names %>
+                         data: {role: "save_votes"}, class: "btn")
+                         if logged_in && any_names %>
         </div>
         <p class="help-block max-width-text">
           <% if !logged_in %>
@@ -260,3 +268,11 @@
   })
 ) %>
 <!--/VOTE POPUPS-->
+
+<!--SUGGESTIONS-->
+<% url = url_for(controller: :observer, action: :suggestions,
+                 id: observation.id, names: :xxx)
+inject_javascript_at_end %(
+  SuggestionModule(#{observation.id}, "#{url}");
+) %>
+<!--/SUGGESTIONS-->

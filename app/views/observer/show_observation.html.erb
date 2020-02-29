@@ -3,6 +3,7 @@
   @title = show_obs_title(@observation)
   @tabsets = show_observation_tabset(@observation, @user)
 
+  javascript_include("suggestions")
   javascript_include("vote_popup")
 
   show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]

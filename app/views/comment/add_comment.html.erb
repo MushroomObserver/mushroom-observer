@@ -10,7 +10,7 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-xs-12 col-sm-8 max-width-text">
     <%= form_tag(add_query_param(action: :add_comment,
                                  id: @comment.target_id,
                                  type: @comment.target_type)) do %>
@@ -22,6 +22,13 @@
       <hr align="center" width="90%" />
     <% end %>
   </div>
+
+  <% if @target.is_a?(Observation) %>
+    <div class="hidden-xs col-sm-4">
+      <%= render(partial: "observer/show_images",
+                 locals: { observation: @target, thumb_size_control: false }) %>
+    </div>
+  <% end %>
 </div>
 
 <div class="row">

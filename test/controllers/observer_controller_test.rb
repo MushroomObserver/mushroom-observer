@@ -4019,4 +4019,25 @@ class ObserverControllerTest < FunctionalTestCase
     get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
   end
+
+  def test_suggestions
+    obs = observations(:detailed_unknown_obs)
+    img = images(:connected_coprinus_comatus_image)
+    name1  = names(:coprinus_comatus)
+    name2a = names(:lentinellus_ursinus_author1)
+    name2b = names(:lentinellus_ursinus_author2)
+    obs.name = name2b
+    obs.save
+    assert_empty(name2a.observations)
+    assert_not_empty(name2b.reload.observations)
+    suggestions = "76.54 Coprinus comatus,32.10 Lentinellus ursinus"
+    get(:suggestions, params: { id: obs.id, names: suggestions})
+    data = @controller.instance_variable_get("@suggestions")
+    assert_equal(2, data.length)
+    assert_equal(name1.id, data[0][0])
+    assert_equal(name2b.id, data[1][0])
+    assert_equal("76.54", data[0][1])
+    assert_equal("32.10", data[1][1])
+    assert_equal(img.id, data[0][2])
+  end
 end

@@ -359,6 +359,7 @@ ACTIONS = {
     show_rss_log: {},
     show_site_stats: {},
     show_user: {},
+    suggestions: {},
     test_flash_redirection: {},
     textile: {},
     textile_sandbox: {},

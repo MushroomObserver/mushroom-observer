@@ -11,10 +11,10 @@ class NamingParams
   attr_reader :parent_deprecated
   attr_reader :suggest_corrections
 
-  def initialize
+  def initialize(what = "")
     @naming = Naming.new
     @vote = Vote.new
-    @what = "" # can't be nil else rails tries to call @name.name
+    @what = what.to_s # can't be nil else rails tries to call @name.name
     @reason = @naming.init_reasons
   end
 
