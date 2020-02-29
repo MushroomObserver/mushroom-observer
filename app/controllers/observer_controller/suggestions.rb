@@ -1,18 +1,17 @@
-
 # see observer_controller.rb
 class ObserverController
   def suggestions # :norobots:
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     @suggestions = JSON.parse(params[:names].to_s).
-                     map { |name, prob| suggested_name_data(name, prob) }.
-                     reject(&:nil?)
+                   map { |name, prob| suggested_name_data(name, prob) }.
+                   reject(&:nil?)
   end
 
   def suggested_name_data(name_str, prob)
     name = best_matching_name(name_str)
     return nil if name.blank?
 
-    [ name, prob, best_image(name) ]
+    [name, prob, best_image(name)]
   end
 
   def best_matching_name(name_str)

@@ -123,7 +123,7 @@ class AbstractModel < ApplicationRecord
   #
   def self.find_object(type, id)
     type.classify.constantize.find(id.to_i)
-  rescue
+  rescue NameError, ActiveRecord::RecordNotFound
     nil
   end
 
@@ -257,7 +257,7 @@ class AbstractModel < ApplicationRecord
 
     self.class.record_timestamps = false
     self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
-    self.last_view = Time.now             if respond_to?("last_view=")
+    self.last_view = Time.zone.now        if respond_to?("last_view=")
     save_without_our_callbacks
     self.class.record_timestamps = true
   end
@@ -535,7 +535,8 @@ class AbstractModel < ApplicationRecord
   #
   def log(tag, args = {})
     init_rss_log unless rss_log
-    touch unless new_record? || args[:touch] == false
+    touch unless new_record? || # rubocop:disable Rails/SkipsModelValidations
+                 args[:touch] == false
     rss_log.add_with_date(tag, args)
   end
 

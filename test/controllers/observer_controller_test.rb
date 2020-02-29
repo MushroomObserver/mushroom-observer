@@ -124,15 +124,15 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_match(/34.1622|118.3521/, @response.body)
 
     obs.update(gps_hidden: true)
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_no_match(/34.1622|118.3521/, @response.body)
 
     login("mary")
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
@@ -2517,7 +2517,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post( # rubocop:disable HttpPositionalArguments
+    post(
       :create_observation,
       observation: {
         when: Time.zone.now,
@@ -2781,7 +2781,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post( # rubocop:disable HttpPositionalArguments
+    post(
       :edit_observation,
       id: obs.id,
       observation: {
