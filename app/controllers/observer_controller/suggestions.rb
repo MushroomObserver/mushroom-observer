@@ -11,7 +11,7 @@ class ObserverController
     name = best_matching_name(name_str)
     return nil if name.blank?
 
-    [name, prob, best_image(name)]
+    [name, prob, *best_image(name)]
   end
 
   def best_matching_name(name_str)
@@ -36,13 +36,14 @@ class ObserverController
 
   def best_image(name)
     id = Observation.connection.select_value %(
-      SELECT o.thumb_image_id FROM observations o
+      SELECT o.id FROM observations o
       JOIN images i ON i.id = o.thumb_image_id
       WHERE o.name_id IN (#{name.synonym_ids.join(",")})
       AND o.vote_cache >= 2
       ORDER BY i.vote_cache DESC
       LIMIT 1
     )
-    Image.safe_find(id)
+    obs = Observation.safe_find(id)
+    [obs, obs.thumb_image]
   end
 end

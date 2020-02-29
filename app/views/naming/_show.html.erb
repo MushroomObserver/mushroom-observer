@@ -95,12 +95,14 @@
           <%= link_with_query(:show_namings_propose_new_name.t,
                               {controller: :naming, action: :create,
                               id: observation.id}, class: "btn") %>
-          <%= submit_tag(:show_namings_suggest_names.l,
-                         data: {role: "suggest_names"}, class: "btn") \
-                         if logged_in && observation.thumb_image_id.present? %>
-          <%= submit_tag(:show_namings_update_votes.l,
-                         data: {role: "save_votes"}, class: "btn") \
-                         if logged_in && any_names %>
+          <% if logged_in && observation.thumb_image_id.present? %>
+            <br/><%= link_to(:show_namings_suggest_names.l, "#",
+                             data: {role: "suggest_names"}, class: "btn") %>
+          <% end %>
+          <% if logged_in && any_names %>
+            <br/><%= submit_tag(:show_namings_update_votes.l,
+                           data: {role: "save_votes"}, class: "btn") %>
+          <% end %>
         </div>
         <p class="help-block max-width-text">
           <% if !logged_in %>
@@ -216,7 +218,7 @@
                               { controller: :naming,
                                 action: :create, id: observation.id },
                               class: "btn") %>
-          <%= submit_tag(:show_namings_suggest_names.l,
+          <%= link_to(:show_namings_suggest_names.l, "#",
                          data: {role: "suggest_names"}, class: "btn") \
                          if logged_in && observation.thumb_image_id.present? %>
           <%= submit_tag(:show_namings_update_votes.l,
@@ -270,8 +272,8 @@
 <!--/VOTE POPUPS-->
 
 <!--SUGGESTIONS-->
-<% url = url_for(controller: :observer, action: :suggestions,
-                 id: observation.id, names: :xxx)
+<% url = url_for(add_query_param(controller: :observer, action: :suggestions,
+                                 id: observation.id, names: :xxx))
 inject_javascript_at_end %(
   SuggestionModule(#{observation.id}, "#{url}");
 ) %>

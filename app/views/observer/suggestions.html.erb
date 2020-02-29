@@ -22,19 +22,20 @@
         </tr>
       </thead>
       <tbody>
-        <% @suggestions.each do |name, prob, image| %>
+        <% @suggestions.each do |name, prob, obs, image| %>
           <tr>
             <td>
               <%= link_with_query(name.display_name_brief_authors.t,
                                   controller: :name, action: :show_name,
                                   id: name.id) %><br/>
               <% if @observation.namings.any? {|n| n.name.synonyms.include?(name)} %>
-                (%<= :suggestions_already_proposed.t %>)
+                (<%= :suggestions_already_proposed.t %>)
               <% else %>
                 <%= link_with_query(:suggestions_propose_name.t,
                                     { controller: :naming, action: :create,
                                       id: @observation.id,
-                                      name: name.search_name }) %>
+                                      name: name.search_name },
+                                    { class: "btn push-down" }) %>
               <% end %>
              </td>
              <td>
@@ -42,9 +43,9 @@
              </td>
              <td>
                <%= thumbnail(image,
-                             link: {controller: image.show_controller,
-                                    action: image.show_action,
-                                    id: image.id}) if image.present? %>
+                             link: {controller: obs.show_controller,
+                                    action: obs.show_action,
+                                    id: obs.id}) if image.present? %>
              </td>
           </tr>
         <% end %>

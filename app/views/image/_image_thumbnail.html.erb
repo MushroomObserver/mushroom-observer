@@ -40,12 +40,6 @@
             <span><%= image.original_name %></span>
           </center>
         <% end %>
-        <% if User.current_id == 252 %>
-          <center>
-            <%= link_to("[GUESS]", controller: :observer, action: :guess,
-                                   id: image_id) %>
-          </center>
-        <% end %>
       </div>
     </div>
   </div>
