@@ -2,6 +2,9 @@
   logged_in = !@user.nil? && @user.verified
   consensus = observation.consensus_naming
   any_names = observation.namings && observation.namings.count > 0
+
+  do_suggestions = logged_in && observation.thumb_image_id.present? &&
+                   (@user.admin || @user.id == 40148)
 %>
 
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
@@ -95,7 +98,7 @@
           <%= link_with_query(:show_namings_propose_new_name.t,
                               {controller: :naming, action: :create,
                               id: observation.id}, class: "btn") %>
-          <% if logged_in && observation.thumb_image_id.present? %>
+          <% if do_suggestions %>
             <br/><%= link_to(:show_namings_suggest_names.l, "#",
                              data: {role: "suggest_names"}, class: "btn") %>
           <% end %>
@@ -220,7 +223,7 @@
                               class: "btn") %>
           <%= link_to(:show_namings_suggest_names.l, "#",
                          data: {role: "suggest_names"}, class: "btn") \
-                         if logged_in && observation.thumb_image_id.present? %>
+                         if do_suggestions %>
           <%= submit_tag(:show_namings_update_votes.l,
                          data: {role: "save_votes"}, class: "btn") \
                          if logged_in && any_names %>

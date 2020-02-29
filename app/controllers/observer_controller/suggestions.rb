@@ -44,6 +44,6 @@ class ObserverController
       LIMIT 1
     )
     obs = Observation.safe_find(id)
-    [obs, obs.thumb_image]
+    [obs, obs.try(&:thumb_image)]
   end
 end
