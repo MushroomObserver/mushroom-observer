@@ -10,15 +10,15 @@ class ObserverController
   def best_matches(results)
     matches = {}
     results.each do |sub_results|
-      if sub_results.is_a?(Array)
-        sub_results.each do |name, prob|
-          if matches[name].nil? || matches[name][1] < prob
-            matches[name] = [name, prob]
-          end
-        end
+      next unless sub_results.is_a?(Array)
+
+      sub_results.each do |name, prob|
+        next if matches[name].present? && matches[name][1] >= prob
+
+        matches[name] = [name, prob]
       end
     end
-    matches.values.sort_by {|name, prob| -prob}[0..4]
+    matches.values.sort_by { |_name, prob| -prob }[0..4]
   end
 
   def suggested_name_data(name_str, prob)
