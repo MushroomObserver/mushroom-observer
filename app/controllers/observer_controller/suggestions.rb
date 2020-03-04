@@ -2,9 +2,23 @@
 class ObserverController
   def suggestions # :norobots:
     @observation = find_or_goto_index(Observation, params[:id].to_s)
-    @suggestions = JSON.parse(params[:names].to_s).
+    @suggestions = best_matches(JSON.parse(params[:names].to_s)).
                    map { |name, prob| suggested_name_data(name, prob) }.
                    reject(&:nil?)
+  end
+
+  def best_matches(results)
+    matches = {}
+    results.each do |sub_results|
+      if sub_results.is_a?(Array)
+        sub_results.each do |name, prob|
+          if matches[name].nil? || matches[name][1] < prob
+            matches[name] = [name, prob]
+          end
+        end
+      end
+    end
+    matches.values.sort_by {|name, prob| -prob}[0..4]
   end
 
   def suggested_name_data(name_str, prob)

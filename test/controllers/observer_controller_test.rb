@@ -4034,7 +4034,7 @@ class ObserverControllerTest < FunctionalTestCase
     best_obs, best_img = @controller.best_image(name2b)
     assert_objs_equal(obs, best_obs)
     assert_objs_equal(obs.thumb_image, best_img)
-    suggestions = '[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]'
+    suggestions = '[[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]]'
     requires_login(:suggestions, id: obs.id, names: suggestions)
     data = @controller.instance_variable_get("@suggestions")
     assert_equal(2, data.length)

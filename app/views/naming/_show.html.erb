@@ -278,6 +278,6 @@
 <% url = url_for(add_query_param(controller: :observer, action: :suggestions,
                                  id: observation.id, names: :xxx))
 inject_javascript_at_end %(
-  SuggestionModule(#{observation.id}, "#{url}");
+  SuggestionModule(#{observation.image_ids}, "#{url}");
 ) %>
 <!--/SUGGESTIONS-->
