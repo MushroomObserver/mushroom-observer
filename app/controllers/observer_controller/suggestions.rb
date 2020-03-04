@@ -13,6 +13,7 @@ class ObserverController
       next unless sub_results.is_a?(Array)
 
       sub_results.each do |name, prob|
+flash_notice("result: [#{name.inspect}, #{prob.inspect}]")
         next if matches[name].present? && matches[name][1] >= prob
 
         matches[name] = [name, prob]
@@ -22,6 +23,7 @@ class ObserverController
   end
 
   def suggested_name_data(name_str, prob)
+flash_notice("best match: [#{name_str.inspect}, #{prob.inspect}]")
     name = best_matching_name(name_str)
     return nil if name.blank?
 
