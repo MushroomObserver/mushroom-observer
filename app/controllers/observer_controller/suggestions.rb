@@ -13,7 +13,6 @@ class ObserverController
       next unless sub_results.is_a?(Array)
 
       sub_results.each do |name, prob|
-flash_notice("result: [#{name.inspect}, #{prob.inspect}]")
         next if matches[name].present? && matches[name][1] >= prob
 
         matches[name] = [name, prob]
@@ -23,11 +22,12 @@ flash_notice("result: [#{name.inspect}, #{prob.inspect}]")
   end
 
   def suggested_name_data(name_str, prob)
-flash_notice("best match: [#{name_str.inspect}, #{prob.inspect}]")
     name = best_matching_name(name_str)
-    return nil if name.blank?
-
-    [name, prob, *best_image(name)]
+    if name.blank?
+      flash_error("Name not found: \"#{name_str}\"")
+    else
+      [name, prob, *best_image(name)]
+    end
   end
 
   def best_matching_name(name_str)
@@ -43,11 +43,16 @@ flash_notice("best match: [#{name_str.inspect}, #{prob.inspect}]")
   end
 
   def name_with_most_observations(names)
-    name, count = names.inject([nil, -1]) do |best, name|
+    best_name = nil
+    best_count = -1
+    names.each do |name|
       count = name.observations.count
-      best = [name, count] if count > best[1]
+      next if count <= best_count
+
+      best_name = name
+      best_count = count
     end
-    name
+    best_name
   end
 
   def best_image(name)
