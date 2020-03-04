@@ -25,6 +25,7 @@ class ObserverController
     name = best_matching_name(name_str)
     if name.blank?
       flash_error("Name not found: \"#{name_str}\"")
+      nil
     else
       [name, prob, *best_image(name)]
     end
