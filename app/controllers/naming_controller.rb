@@ -151,7 +151,7 @@ class NamingController < ApplicationController
 
   def fill_in_reference_for_suggestions(params)
     params.reason.values.each do |r|
-      r.notes = "automatic suggestion" if r.num == 2
+      r.notes = "AI Observer" if r.num == 2
     end
   end
 end
