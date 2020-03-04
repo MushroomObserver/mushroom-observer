@@ -21,8 +21,9 @@ class NamingController < ApplicationController
 
   def create # :prefetch: :norobots:
     pass_query_params
-    @params = NamingParams.new
+    @params = NamingParams.new(params[:name])
     @params.observation = find_or_goto_index(Observation, params[:id].to_s)
+    fill_in_reference_for_suggestions(@params) if params[:name].present?
     return unless @params.observation
 
     create_post if request.method == "POST"
@@ -146,5 +147,11 @@ class NamingController < ApplicationController
 
   def resolve_name(given_name, chosen_name)
     @params.resolve_name(given_name, params[:approved_name], chosen_name)
+  end
+
+  def fill_in_reference_for_suggestions(params)
+    params.reason.values.each do |r|
+      r.notes = "AI Observer" if r.num == 2
+    end
   end
 end

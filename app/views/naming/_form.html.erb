@@ -11,6 +11,8 @@
    vote = @params.vote rescue @vote
 
    unfocused ||= false
+   focus_on_name = !unfocused && (button_name != :CREATE.l || what.empty?)
+   focus_on_vote = !unfocused && (button_name == :CREATE.l && what.present?)
 %>
 
 <%= render(partial: "shared/form_name_feedback",
@@ -30,7 +32,7 @@
     <div class="form-group">
       <%= label_tag(:name_name, :WHAT.t + ":") %>
       <%= text_field(:name, :name, value: what, size: 40, class: "form-control",
-                     data: { autofocus: !unfocused }) %>
+                     data: { autofocus: focus_on_name }) %>
       <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
     </div>
 
@@ -40,7 +42,8 @@
                  options_for_select(Vote.confidence_menu, vote.value),
                  { include_blank: (action == :create ||
                                    action == :create_observation) } ,
-                 class: "form-control") %>
+                 class: "form-control",
+                 data: { autofocus: focus_on_vote }) %>
     </div>
 
     <% reason.values.sort_by(&:order).each do |r| %>

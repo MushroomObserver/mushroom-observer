@@ -13,6 +13,7 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/create_and_edit_observation"
   require_dependency "observer_controller/indexes"
   require_dependency "observer_controller/site_stats"
+  require_dependency "observer_controller/suggestions"
   require_dependency "observer_controller/other"
 
   # These all belong in new controllers:

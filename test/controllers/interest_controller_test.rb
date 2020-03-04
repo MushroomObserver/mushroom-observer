@@ -23,16 +23,14 @@ class InterestControllerTest < FunctionalTestCase
 
   def test_set_interest_no_object
     login("rolf")
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get(:set_interest, type: "Observation", id: 100, state: 1)
-    end
+    get(:set_interest, type: "Observation", id: 100, state: 1)
+    assert_flash_error
   end
 
   def test_set_interest_bad_type
     login("rolf")
-    assert_raises(NameError) do
-      get(:set_interest, type: "Bogus", id: 1, state: 1)
-    end
+    get(:set_interest, type: "Bogus", id: 1, state: 1)
+    assert_flash_error
   end
 
   def test_set_interest

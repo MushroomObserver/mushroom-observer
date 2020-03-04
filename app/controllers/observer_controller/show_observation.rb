@@ -32,24 +32,6 @@ class ObserverController
     @votes         = gather_users_votes(@observation, @user) if @user
   end
 
-  # Temporary private button to test Alan Celestino's prediction model.
-  def guess
-    out = []
-    id = params[:id]
-    out << "id = #{id.inspect}"
-    file = "#{::Rails.root}/tmp/#{id}.jpg"
-    out << "file = #{file.inspect}"
-    cmd = "wget https://mushroomobserver.org/images/320/#{id}.jpg -O #{file}"
-    out << "cmd = #{cmd.inspect}"
-    system(cmd)
-    cmd = "curl -X POST --form file=@#{file} https://images.mushroomobserver.org/model/predict"
-    out << "cmd = #{cmd.inspect}"
-    result = `#{cmd}`
-    out << "result = #{result.inspect}"
-    File.delete(file)
-    render(plain: out.join("\n"))
-  end
-
   # Make it really easy for users to elect to go public with their votes.
   def check_if_user_wants_to_make_their_votes_public
     if params[:go_public] == "1"

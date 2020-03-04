@@ -1,0 +1,53 @@
+function SuggestionModule(ids, url) {
+  $(document).ready(function () {
+    var button = $("[data-role='suggest_names']");
+    button.click(function (event) {
+      button.attr("disabled", "disabled");
+      var cover = $("<div class='cover'>").appendTo($(document.body));
+      var progress = $("<div class='popup'>").appendTo($(document.body))
+        .html("Processing images...")
+        .css("padding", "1em 2em")
+        .center()
+        .show();
+
+      var results = [];
+      var any_worked = false;
+      var predict = function (i) {
+        progress.html("Processing image " + (i + 1) + " of " + ids.length);
+        $.ajax("https://images.mushroomobserver.org/model/predict", {
+          data: {id: ids[i]},
+          dataType: "text",
+          async: true,
+          complete: function (request) {
+            button.attr("disabled", null);
+            if (request.status == 200) {
+              results[i] = JSON.parse(request.responseText);
+              any_worked = true;
+            }
+            // Stub for testing in dev VM:
+            // results = [
+            //   [["Amanita velosa", 0.8],["Amanita phalloides", 0.5]],
+            //   [["Amanita velosa", 0.7],["Amanita virosa", 0.4]],
+            // ];
+            if (i + 1 < ids.length) {
+              predict(i + 1);
+            } else if (any_worked) {
+              progress.html("Rendering results...");
+              var out = JSON.stringify(results);
+              url = url.replace("xxx", encodeURIComponent(out));
+              if (event.ctrlKey)
+                window.open(url, "_blank");
+              else
+                window.location.href = url;
+            } else {
+              alert("Something went wrong, sorry.");
+              progress.remove();
+              cover.remove();
+            }
+          }
+        });
+      };
+      predict(0);
+    });
+  });
+}

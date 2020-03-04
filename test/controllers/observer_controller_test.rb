@@ -124,15 +124,15 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_long)
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_match(/34.1622|118.3521/, @response.body)
 
     obs.update(gps_hidden: true)
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_no_match(/34.1622|118.3521/, @response.body)
 
     login("mary")
-    get(:show_observation, id: obs.id) # rubocop:disable HttpPositionalArguments
+    get(:show_observation, id: obs.id)
     assert_match(/34.1622|118.3521/, @response.body)
     assert_match(:show_observation_gps_hidden.t, @response.body)
   end
@@ -2517,7 +2517,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post( # rubocop:disable HttpPositionalArguments
+    post(
       :create_observation,
       observation: {
         when: Time.zone.now,
@@ -2781,7 +2781,7 @@ class ObserverControllerTest < FunctionalTestCase
     FileUtils.mkdir_p(path) unless File.directory?(path)
     FileUtils.cp(fixture, orig_file)
 
-    post( # rubocop:disable HttpPositionalArguments
+    post(
       :edit_observation,
       id: obs.id,
       observation: {
@@ -4018,5 +4018,31 @@ class ObserverControllerTest < FunctionalTestCase
     # Prove that admin can get bonuses
     get(:change_user_bonuses, params: { id: user.id })
     assert_response(:success)
+  end
+
+  def test_suggestions
+    obs = observations(:detailed_unknown_obs)
+    name1  = names(:coprinus_comatus)
+    name2a = names(:lentinellus_ursinus_author1)
+    name2b = names(:lentinellus_ursinus_author2)
+    obs.name = name2b
+    obs.vote_cache = 2.0
+    obs.save
+    assert_not_nil(obs.thumb_image)
+    assert_obj_list_equal([], name2a.reload.observations)
+    assert_obj_list_equal([obs], name2b.reload.observations)
+    best_obs, best_img = @controller.best_image(name2b)
+    assert_objs_equal(obs, best_obs)
+    assert_objs_equal(obs.thumb_image, best_img)
+    suggestions = '[[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]]'
+    requires_login(:suggestions, id: obs.id, names: suggestions)
+    data = @controller.instance_variable_get("@suggestions")
+    assert_equal(2, data.length)
+    assert_names_equal(name1, data[0][0])
+    assert_names_equal(name2b, data[1][0])
+    assert_equal(0.7654, data[0][1])
+    assert_equal(0.321, data[1][1])
+    assert_objs_equal(obs, data[1][2])
+    assert_objs_equal(obs.thumb_image, data[1][3])
   end
 end
