@@ -80,10 +80,12 @@ function VotePopupModule(translations) {
               $("#title-caption").html(title.html());
               $("#naming_partial").html(div.html());
               attach_bindings();
+              if (typeof SuggestionModule !== "undefined")
+                attach_suggestion_bindings();
               save_votes_button().hide();
             } else {
               change_vote_selects().each(function () {
-                $(this).val($(this).data("old_value"))
+               _this.val(_this.data("old_value"))
                        .attr("disabled", null);
               });
               alert(request.responseText);
@@ -94,7 +96,8 @@ function VotePopupModule(translations) {
 
       // Save initial value in case of error, when we'll need to revert.
       change_vote_selects().each(function (event) {
-        $(this).data("old_value", $(this).val());
+        var _this = $(this);
+        _this.data("old_value", _this.val());
       });
     };
 

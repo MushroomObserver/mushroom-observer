@@ -4031,18 +4031,15 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_nil(obs.thumb_image)
     assert_obj_list_equal([], name2a.reload.observations)
     assert_obj_list_equal([obs], name2b.reload.observations)
-    best_obs, best_img = @controller.best_image(name2b)
-    assert_objs_equal(obs, best_obs)
-    assert_objs_equal(obs.thumb_image, best_img)
     suggestions = '[[["Coprinus comatus",0.7654],["Lentinellus ursinus",0.321]]]'
     requires_login(:suggestions, id: obs.id, names: suggestions)
     data = @controller.instance_variable_get("@suggestions")
     assert_equal(2, data.length)
-    assert_names_equal(name1, data[0][0])
-    assert_names_equal(name2b, data[1][0])
-    assert_equal(0.7654, data[0][1])
-    assert_equal(0.321, data[1][1])
-    assert_objs_equal(obs, data[1][2])
-    assert_objs_equal(obs.thumb_image, data[1][3])
+    data = data.sort_by(&:max).reverse
+    assert_names_equal(name1, data[0].name)
+    assert_names_equal(name2b, data[1].name)
+    assert_equal(0.7654, data[0].max)
+    assert_equal(0.321, data[1].max)
+    assert_objs_equal(obs, data[1].image_obs)
   end
 end

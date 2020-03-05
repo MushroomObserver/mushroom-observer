@@ -1,11 +1,16 @@
+var attach_suggestion_bindings;
+
 function SuggestionModule(ids, url) {
-  $(document).ready(function () {
+  attach_suggestion_bindings = function () {
     var button = $("[data-role='suggest_names']");
+    var whirly = ' <span><img alt="Indicator" ' +
+                 'src="<%= asset_path('indicator.gif') %>" /></span>';
+
     button.click(function (event) {
       button.attr("disabled", "disabled");
       var cover = $("<div class='cover'>").appendTo($(document.body));
       var progress = $("<div class='popup'>").appendTo($(document.body))
-        .html("Processing images...")
+        .html("<%= :suggestions_processing_images.t %>..." + whirly)
         .css("padding", "1em 2em")
         .center()
         .show();
@@ -13,7 +18,8 @@ function SuggestionModule(ids, url) {
       var results = [];
       var any_worked = false;
       var predict = function (i) {
-        progress.html("Processing image " + (i + 1) + " of " + ids.length);
+        progress.html("<%= :suggestions_processing_image.t %> " +
+                      (i+1) + " / " + ids.length + "..." + whirly);
         $.ajax("https://images.mushroomobserver.org/model/predict", {
           method: "POST",
           data: {id: ids[i]},
@@ -24,15 +30,11 @@ function SuggestionModule(ids, url) {
               results[i] = JSON.parse(request.responseText);
               any_worked = true;
             }
-            // Stub for testing in dev VM:
-            // results = [
-            //   [["Amanita velosa", 0.8],["Amanita phalloides", 0.5]],
-            //   [["Amanita velosa", 0.7],["Amanita virosa", 0.4]],
-            // ];
             if (i + 1 < ids.length) {
               predict(i + 1);
             } else if (any_worked) {
-              progress.html("Processing results...");
+              progress.html("<%= :suggestions_processing_results.t %>..." +
+                            whirly);
               var out = JSON.stringify(results);
               url = url.replace("xxx", encodeURIComponent(out));
               if (event.ctrlKey)
@@ -40,15 +42,17 @@ function SuggestionModule(ids, url) {
               else
                 window.location.href = url;
             } else {
-              alert("Something went wrong, sorry.");
+              alert("<%= :suggestions_error.t %>");
               progress.remove();
               cover.remove();
-            button.attr("disabled", null);
+              button.attr("disabled", null);
             }
           }
         });
       };
       predict(0);
     });
-  });
+  };
+
+  $(document).ready(attach_suggestion_bindings);
 }

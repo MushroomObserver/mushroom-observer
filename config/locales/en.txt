@@ -2031,9 +2031,21 @@
   map_observation_title: "Map of Observation #[ID]"
 
   # observer/suggestions
-  suggestions_title: Suggested Names
+  suggestions_title: Confident Suggestions
+  suggestions_title_others: Wild Guesses
   suggestions_already_proposed: already proposed
   suggestions_propose_name: Propose This Name
+  suggestions_confidence: Confidence
+  suggestions_max: Max
+  suggestions_avg: Avg
+  suggestions_excellent: excellent
+  suggestions_good: good
+  suggestions_fair: fair
+  suggestions_poor: poor
+  suggestions_processing_images: Loading images
+  suggestions_processing_image: Analyzing image
+  suggestions_processing_results: Processing results
+  suggestions_error: "Something went wrong, sorry!"
 
   # location/show_past_location
   show_past_location_title: "[:VERSION] [num]: [name]"
