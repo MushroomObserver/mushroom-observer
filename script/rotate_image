@@ -44,6 +44,15 @@ if [[ ! -e $orig_file ]]; then
   done
 fi
 
+# First make sure the Orientation tag has been correctly cleared.  This should
+# already be the case, but some old images with screwy EXIF headers were not
+# being cleared correctly, and this should fix them.
+if test `exiftool -n -Orientation "$orig_file" | sed "s/.*: //"` -ne 1; then
+  exiftool -n -overwrite_original -Orientation=1 "$orig_file" || \
+    exiftool -n -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$orig_file" && \
+    exiftool -n -overwrite_original -Orientation=1 "$orig_file"
+fi
+
 # Transform image.
 wait_for "(convert|jpegresize)"
 case $op in

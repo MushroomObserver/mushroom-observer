@@ -9,9 +9,9 @@ do
 
   # Try clearing the orientation tag; if this fails, try fixing the EXIF header
   # and doing it again.
-  exiftool -overwrite_original -Orientation=1 "$file" || \
-    exiftool -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$file" && \
-    exiftool -overwrite_original -Orientation=1 "$file"
+  exiftool -n -overwrite_original -Orientation=1 "$file" || \
+    exiftool -n -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$file" && \
+    exiftool -n -overwrite_original -Orientation=1 "$file"
 
   case $orientation in
   1) transform="";;
