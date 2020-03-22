@@ -9,7 +9,9 @@
 
 for i
 do
- case `jpegexiforient -n "$i"` in
+ # Switching to exiftools...
+ # case `jpegexiforient -n "$i"` in
+ case `exiftool -n -Orientation "$i" | sed "s/.*: //"` in
  1) transform="";;
  2) transform="-flip horizontal";;
  3) transform="-rotate 180";;
@@ -33,7 +35,14 @@ do
    echo Error while transforming $i - skipped.
   else
    mv -f tempfile.jpg $i
-   jpegexiforient -1 $i > /dev/null
+   # Switching to exiftools...
+   # jpegexiforient -1 $i > /dev/null
+   # This tries just clearing the Orientation flag, but if it fails for any
+   # reason, it tries to fix any errors in the EXIF header and tries again.
+   # If it still fails, too bad.
+   exiftool -overwrite_original -Orientation=1 "$i" || \
+   exiftool -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$i" && \
+   exiftool -overwrite_original -Orientation=1 "$i"
   fi
  fi
 done
