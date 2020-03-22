@@ -1,48 +1,36 @@
 #!/bin/sh
-#
-# exifautotran [list of files]
-#
-# Transforms Exif files so that Orientation becomes 1
-#
-# Thanks to Adam M. Costello and Peter Nielsen
-# http://sylvana.net/jpegcrop/exif_orientation.html
+# Originally from: # http://sylvana.net/jpegcrop/exif_orientation.html
+# Significantly rewritten by Jason Hollinger 2020-03-22.
 
-for i
+for file
 do
- # Switching to exiftools...
- # case `jpegexiforient -n "$i"` in
- case `exiftool -n -Orientation "$i" | sed "s/.*: //"` in
- 1) transform="";;
- 2) transform="-flip horizontal";;
- 3) transform="-rotate 180";;
- 4) transform="-flip vertical";;
- 5) transform="-transpose";;
- 6) transform="-rotate 90";;
- 7) transform="-transverse";;
- 8) transform="-rotate 270";;
- *) transform="";;
- esac
- if test -n "$transform"; then
+  # Get value of the orientation tag.
+  orientation=`exiftool -n -Orientation "$file" | sed "s/.*: //"`
 
-  # jpegtran doesn't always work right...
-  # echo Executing: jpegtran -copy all $transform $i
-  # jpegtran -copy all $transform "$i" > tempfile
+  # Try clearing the orientation tag; if this fails, try fixing the EXIF header
+  # and doing it again.
+  exiftool -overwrite_original -Orientation=1 "$file" || \
+    exiftool -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$file" && \
+    exiftool -overwrite_original -Orientation=1 "$file"
 
-  echo Executing: convert $transform $i tempfile.jpg
-  convert $transform $i tempfile.jpg
+  case $orientation in
+  1) transform="";;
+  2) transform="-flip horizontal";;
+  3) transform="-rotate 180";;
+  4) transform="-flip vertical";;
+  5) transform="-transpose";;
+  6) transform="-rotate 90";;
+  7) transform="-transverse";;
+  8) transform="-rotate 270";;
+  *) transform="";;
+  esac
 
-  if test $? -ne 0; then
-   echo Error while transforming $i - skipped.
-  else
-   mv -f tempfile.jpg $i
-   # Switching to exiftools...
-   # jpegexiforient -1 $i > /dev/null
-   # This tries just clearing the Orientation flag, but if it fails for any
-   # reason, it tries to fix any errors in the EXIF header and tries again.
-   # If it still fails, too bad.
-   exiftool -overwrite_original -Orientation=1 "$i" || \
-   exiftool -overwrite_original -all= -tagsfromfile @ -all:all -unsafe -icc_profile "$i" && \
-   exiftool -overwrite_original -Orientation=1 "$i"
+  if test -n "$transform"; then
+    convert $transform $file tempfile.jpg
+    if test $? -ne 0; then
+      echo Error while transforming $file - skipped.
+    else
+      mv -f tempfile.jpg "$file"
+    fi
   fi
- fi
 done
