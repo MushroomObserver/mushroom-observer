@@ -146,7 +146,6 @@ root> rm /usr/share/nginx/html/index.html # (there's *got* to be a better way!)
 
 # Install our programs for resizing and rotating JPEG images.
 root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
-root> gcc /var/web/mushroom-observer/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
 root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 root> cp /var/web/mushroom-observer/script/unicorn /etc/init.d/unicorn
