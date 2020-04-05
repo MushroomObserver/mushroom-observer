@@ -1,4 +1,4 @@
-class AllowNullToUserId < ActiveRecord::Migration
+class AllowNullToUserId < ActiveRecord::Migration[4.2]
   def self.up
     rename_column(:queued_emails, :to_user_id, :to_user_id_old)
     add_column(:queued_emails, :to_user_id, :integer)

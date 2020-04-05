@@ -1,4 +1,4 @@
-class ObservationAltitudeAndUserLastActivity < ActiveRecord::Migration
+class ObservationAltitudeAndUserLastActivity < ActiveRecord::Migration[4.2]
   def self.up
     add_column :observations, :alt, :float
     add_column :users, :last_activity, :datetime

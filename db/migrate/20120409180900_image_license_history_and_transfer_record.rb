@@ -1,4 +1,4 @@
-class ImageLicenseHistoryAndTransferRecord < ActiveRecord::Migration
+class ImageLicenseHistoryAndTransferRecord < ActiveRecord::Migration[4.2]
   def self.up
     add_column :images, :transferred, :boolean, null: false, default: false
     Image.connection.update "UPDATE images SET transferred = TRUE;"

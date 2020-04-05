@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class FixNameOrdering < ActiveRecord::Migration
+class FixNameOrdering < ActiveRecord::Migration[4.2]
   def self.up
     redo_sort_names
   end

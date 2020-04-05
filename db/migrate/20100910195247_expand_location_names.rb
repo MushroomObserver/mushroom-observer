@@ -1,5 +1,5 @@
 # encoding: utf-8
-class ExpandLocationNames < ActiveRecord::Migration
+class ExpandLocationNames < ActiveRecord::Migration[4.2]
   def self.up
     add_column :observations, :where_tmp, :string, limit: 1024
     Name.connection.update("update observations set where_tmp=`where`")

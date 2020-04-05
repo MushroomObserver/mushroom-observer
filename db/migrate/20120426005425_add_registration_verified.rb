@@ -1,4 +1,4 @@
-class AddRegistrationVerified < ActiveRecord::Migration
+class AddRegistrationVerified < ActiveRecord::Migration[4.2]
   def self.up
     add_column :conference_registrations, :verified, :datetime
   end

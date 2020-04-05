@@ -1,4 +1,4 @@
-class CleanupCopyrightHolder < ActiveRecord::Migration
+class CleanupCopyrightHolder < ActiveRecord::Migration[4.2]
   def self.up
     for current, preferred in Image.connection.select_rows %(
       SELECT DISTINCT i.copyright_holder, u.name

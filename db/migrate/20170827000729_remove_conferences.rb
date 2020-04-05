@@ -1,4 +1,4 @@
-class RemoveConferences < ActiveRecord::Migration
+class RemoveConferences < ActiveRecord::Migration[4.2]
   def up
     drop_table :conference_registrations
     drop_table :conference_events

@@ -1,5 +1,5 @@
 # encoding: utf-8
-class Descriptions < ActiveRecord::Migration
+class Descriptions < ActiveRecord::Migration[4.2]
   def self.up
     # ------------------------------------
     #  Add "meta" flag to user_groups.

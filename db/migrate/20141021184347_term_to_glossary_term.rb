@@ -1,4 +1,4 @@
-class TermToGlossaryTerm < ActiveRecord::Migration
+class TermToGlossaryTerm < ActiveRecord::Migration[4.2]
   RENAME_STRINGS = {
     term: :glossary_term,
     TERM: :GLOSSARY_TERM,

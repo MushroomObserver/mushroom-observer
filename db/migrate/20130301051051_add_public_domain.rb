@@ -1,4 +1,4 @@
-class AddPublicDomain < ActiveRecord::Migration
+class AddPublicDomain < ActiveRecord::Migration[4.2]
   def self.up
     pd = License.new
     pd.display_name = "Public Domain"

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class AddIndexToImageVotes < ActiveRecord::Migration
+class AddIndexToImageVotes < ActiveRecord::Migration[4.2]
   def self.up
     # This improves the following query by orders of magnitude:
     #   Query.lookup(:Observation, :by_user, :user => 252, :by => owners_thumbnail_quality):

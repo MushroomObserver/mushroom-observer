@@ -1,4 +1,4 @@
-class RefactorQuery < ActiveRecord::Migration
+class RefactorQuery < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :queries
     create_table :query_records, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|

@@ -1,4 +1,4 @@
-class SeparateTermThumbFromImages < ActiveRecord::Migration
+class SeparateTermThumbFromImages < ActiveRecord::Migration[4.2]
   def self.up
     Term.record_timestamps = false
     # for term in Term.find(:all) # Rails 3

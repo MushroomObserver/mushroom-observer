@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class OutWithObservationNameInWithSortNameLongLiveSortName < ActiveRecord::Migration
+class OutWithObservationNameInWithSortNameLongLiveSortName < ActiveRecord::Migration[4.2]
   def self.up
     rename_column(:names, :observation_name, :sort_name)
     rename_column(:names_versions, :observation_name, :sort_name)

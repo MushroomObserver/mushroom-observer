@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class FixNaturalVarieties < ActiveRecord::Migration
+class FixNaturalVarieties < ActiveRecord::Migration[4.2]
   def self.up
     for id, text_name in Name.connection.select_rows %(
       SELECT id, text_name FROM names

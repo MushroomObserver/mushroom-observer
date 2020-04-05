@@ -1,4 +1,4 @@
-class AddLocksToNamesAndLocations < ActiveRecord::Migration
+class AddLocksToNamesAndLocations < ActiveRecord::Migration[4.2]
   def up
     add_column :names, :locked, :boolean, default: false, null: false
     add_column :locations, :locked, :boolean, default: false, null: false

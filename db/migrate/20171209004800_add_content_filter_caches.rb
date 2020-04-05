@@ -1,4 +1,4 @@
-class AddContentFilterCaches < ActiveRecord::Migration
+class AddContentFilterCaches < ActiveRecord::Migration[4.2]
   def up
     add_column :observations, :lifeform, :string, limit: 1024
     add_column :observations, :text_name, :string, limit: 100

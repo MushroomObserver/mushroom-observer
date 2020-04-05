@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class AddScientificNameToLocations < ActiveRecord::Migration
+class AddScientificNameToLocations < ActiveRecord::Migration[4.2]
   def self.up
     add_column(:locations, :scientific_name, :string, limit: 1024)
     add_column(:locations_versions, :scientific_name, :string, limit: 1024)

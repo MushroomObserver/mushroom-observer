@@ -7,7 +7,7 @@ class User
   end
 end
 
-class AddAuthCodeToUsers < ActiveRecord::Migration
+class AddAuthCodeToUsers < ActiveRecord::Migration[4.2]
   def self.up
     begin
       add_column(:users, :auth_code, :string, limit: 40)

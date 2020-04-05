@@ -1,4 +1,4 @@
-class DeanonymizeImageVotes < ActiveRecord::Migration
+class DeanonymizeImageVotes < ActiveRecord::Migration[4.2]
   def self.up
     values = []
     for image_id, votes in Image.connection.select_rows %(

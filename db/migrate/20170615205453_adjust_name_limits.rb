@@ -1,4 +1,4 @@
-class AdjustNameLimits < ActiveRecord::Migration
+class AdjustNameLimits < ActiveRecord::Migration[4.2]
   # define up & down because change method doesn't support change_column
   def up
     # These numbers explained in name.rb, Limits section

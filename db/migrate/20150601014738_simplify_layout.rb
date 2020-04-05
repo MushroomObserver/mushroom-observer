@@ -1,4 +1,4 @@
-class SimplifyLayout < ActiveRecord::Migration
+class SimplifyLayout < ActiveRecord::Migration[4.2]
   def up
     add_column :users, :layout_count, :integer
     User.connection.update %(

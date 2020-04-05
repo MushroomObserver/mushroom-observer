@@ -1,4 +1,4 @@
-class StripGenusFromClassifications < ActiveRecord::Migration
+class StripGenusFromClassifications < ActiveRecord::Migration[4.2]
   def up
     strip_pattern = /\s*(Genus|Species|Subspecies|Variety|Form):.*\z/m
 

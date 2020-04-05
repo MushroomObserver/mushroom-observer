@@ -1,4 +1,4 @@
-class CreateConferenceTables < ActiveRecord::Migration
+class CreateConferenceTables < ActiveRecord::Migration[4.2]
   def self.up
     create_table :conference_events, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
       t.column "name", :string, limit: 1024

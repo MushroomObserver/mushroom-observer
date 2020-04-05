@@ -1,4 +1,4 @@
-class Mysql56 < ActiveRecord::Migration
+class Mysql56 < ActiveRecord::Migration[4.2]
   def self.change_column(table, column, type, options = {})
     tmp_column = "#{column}_tmp"
     add_column(table, tmp_column, type, options)

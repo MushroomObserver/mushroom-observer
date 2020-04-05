@@ -1,4 +1,4 @@
-class FixCurators < ActiveRecord::Migration
+class FixCurators < ActiveRecord::Migration[4.2]
   def self.up
     # for h in Herbarium.find(:all) # Rails 3
     for h in Herbarium.all

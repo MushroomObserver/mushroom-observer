@@ -1,4 +1,4 @@
-class TweakKeepOriginalImageFilenamesPrefs < ActiveRecord::Migration
+class TweakKeepOriginalImageFilenamesPrefs < ActiveRecord::Migration[4.2]
   def self.up
     rename_column(:users, :keep_filenames, :old_keep_filenames)
     add_column(:users, :keep_filenames, :enum, default: :keep_and_show, null: false, limit: [:toss, :keep_but_hide, :keep_and_show])

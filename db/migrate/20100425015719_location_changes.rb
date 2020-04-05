@@ -1,5 +1,5 @@
 # encoding: utf-8
-class LocationChanges < ActiveRecord::Migration
+class LocationChanges < ActiveRecord::Migration[4.2]
   def self.up
     add_column :locations_versions, :name, :string, limit: 200
     Location.connection.update %(

@@ -1,4 +1,4 @@
-class RevisedTerms < ActiveRecord::Migration
+class RevisedTerms < ActiveRecord::Migration[4.2]
   def self.up
     drop_table :terms
     create_table :terms, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|

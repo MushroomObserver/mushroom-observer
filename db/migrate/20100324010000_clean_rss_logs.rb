@@ -1,5 +1,5 @@
 # encoding: utf-8
-class CleanRssLogs < ActiveRecord::Migration
+class CleanRssLogs < ActiveRecord::Migration[4.2]
   def self.up
     cutoff = 1.year.ago
 

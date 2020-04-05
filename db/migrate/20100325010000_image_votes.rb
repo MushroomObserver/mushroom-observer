@@ -1,5 +1,5 @@
 # encoding: utf-8
-class ImageVotes < ActiveRecord::Migration
+class ImageVotes < ActiveRecord::Migration[4.2]
   def self.up
     add_column :images, :votes, :text
     add_column :images, :vote_cache, :float

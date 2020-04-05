@@ -1,5 +1,5 @@
 # encoding: utf-8
-class Synchronization < ActiveRecord::Migration
+class Synchronization < ActiveRecord::Migration[4.2]
   #=================================================
   #  Migrate up.
   #=================================================

@@ -1,4 +1,4 @@
-class RemoveHerbariumRecordWhen < ActiveRecord::Migration
+class RemoveHerbariumRecordWhen < ActiveRecord::Migration[4.2]
   def up
     remove_column :herbarium_records, :when
   end

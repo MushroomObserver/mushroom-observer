@@ -1,4 +1,4 @@
-class CreateSpecimensAndHerbaria < ActiveRecord::Migration
+class CreateSpecimensAndHerbaria < ActiveRecord::Migration[4.2]
   def self.up
     create_table :specimens, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
       t.integer :herbarium_id, null: false
