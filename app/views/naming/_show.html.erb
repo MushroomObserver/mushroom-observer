@@ -8,7 +8,7 @@
 %>
 
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
-<div class="hidden-xs">
+<div class="d-none d-sm-block">
   <%= form_tag(add_query_param(controller: :vote, action: :cast_votes,
                id: observation.id), id: "cast_votes_1") do %>
 
@@ -92,9 +92,9 @@
     <!--/TABLE OF NAMES FOR WIDE SCREEN-->
 
     <!--HELP TEXT AND EYES FOR WIDE SCREEN-->
-    <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
-      <div class="col-xs-12">
-        <div class="pull-right-sm push-down-sm" style="margin:0 0 5px 10px">
+    <div class="row m-0 py-0">
+      <div class="col-12">
+        <div class="float-sm-right mt-sm-3 mb-1 ml-2">
           <%= link_with_query(:show_namings_propose_new_name.t,
                               {controller: :naming, action: :create,
                               id: observation.id}, class: "btn") %>
@@ -115,13 +115,13 @@
           <% end %>
         </p>
         <div class="row">
-          <div class="col-xs-6">
-            <div class="pad-box">
+          <div class="col-6">
+            <div class="p-1">
               <%= image_tag("eye3.png") %> = <%= :show_namings_eye_help.t %>
             </div>
           </div>
-          <div class="col-xs-6">
-            <div class="pad-box">
+          <div class="col-6">
+            <div class="p-1">
               <%= image_tag("eyes3.png") %> = <%= :show_namings_eyes_help.t %>
             </div>
           </div>
@@ -134,12 +134,12 @@
 </div>
 
 <!--TABLE OF NAMES FOR MOBILE-->
-<div class="visible-xs">
+<div class="d-block d-sm-none">
   <%= form_tag(add_query_param(controller: :vote, action: :cast_votes,
                id: observation.id), id: "cast_votes_2") do %>
 
-    <div class="row visible-xs">
-      <div class="col-xs-12">
+    <div class="row d-block d-sm-none">
+      <div class="col-12">
         <%= content_tag(:h4, any_names ? :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %>
         <% if any_names %>
           <div class="list-group">
@@ -147,13 +147,13 @@
               <% Textile.register_name(naming.name) %>
               <div class="list-group-item">
                 <div class="row">
-                  <div class="col-xs-12">
+                  <div class="col-12">
                     <%= link_with_query(naming.format_name.t,
                                         controller: :name, action: :show_name,
                                         id: naming.name) %>
                   </div>
                   <% if check_permission(naming) %>
-                    <div class="col-xs-12">
+                    <div class="col-12">
                       [<%= link_with_query(:EDIT.t, { controller: :naming,
                                                       action: :edit,
                                                       id: naming }) %> |
@@ -164,10 +164,10 @@
                            ) %>]
                     </div>
                   <% end %>
-                  <div class="col-xs-6">
+                  <div class="col-6">
                     <strong><%= user_link(naming.user, naming.user.login) %></strong>
                   </div>
-                  <div class="col-xs-6">
+                  <div class="col-6">
                     <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
                     <%= link_with_query(h(txt), { controller: :vote,
                                                   action: :show_votes,
@@ -176,7 +176,7 @@
                                                           id: naming.id } }) if naming.votes.any? %>
                     <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.count})" %>
                   </div>
-                  <div class="col-xs-6">
+                  <div class="col-6">
                     <% if logged_in %>
                       <% @vote = @votes[naming.id]
                       menu = Vote.confidence_menu
@@ -193,12 +193,12 @@
                                      class: "btn") if !can_do_ajax? %>
                     <% end %>
                   </div>
-                  <div class="col-xs-6">
+                  <div class="col-6">
                     <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
                     <%= image_tag("eyes3.png") if naming == consensus %>
                   </div>
                   <% naming.get_reasons.select(&:used?).each do |reason| %>
-                    <div class="col-xs-12">
+                    <div class="col-12">
                       <span>
                         <%= reason.notes.blank? ? reason.label.t : (reason.label.l + ": " + reason.notes.to_s.html_safe).tl %>
                       </span>
@@ -214,9 +214,9 @@
     <!--/TABLE OF NAMES FOR MOBILE-->
 
     <!--HELP TEXT AND EYES FOR MOBILE-->
-    <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
-      <div class="col-xs-12">
-        <div class="pull-right-sm push-down-sm">
+    <div class="row m-0 py-0">
+      <div class="col-12">
+        <div class="float-sm-right mt-sm-3">
           <%= link_with_query(:show_namings_propose_new_name.t,
                               { controller: :naming,
                                 action: :create, id: observation.id },
@@ -236,13 +236,13 @@
           <% end %>
         </p>
         <div class="row">
-          <div class="col-xs-6">
-            <div class="pad-box">
+          <div class="col-6">
+            <div class="p-1">
               <%= image_tag("eye3.png") %> = <%= :show_namings_eye_help.t %>
             </div>
           </div>
-          <div class="col-xs-6">
-            <div class="pad-box">
+          <div class="col-6">
+            <div class="p-1">
               <%= image_tag("eyes3.png") %> = <%= :show_namings_eyes_help.t %>
             </div>
           </div>

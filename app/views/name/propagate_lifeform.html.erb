@@ -7,8 +7,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
-  <div class="col-xs-12">
+<div class="row mt-3">
+  <div class="col-12">
     <%= form_tag(add_query_param(action: :propagate_lifeform, id: @name.id)) do %>
       <p><b><%= :ADD.t %>:</b> <%= :propagate_lifeform_add.t %></p>
       <table class="table-lifeform">
@@ -47,7 +47,7 @@
         <% end %>
       </table>
 
-      <%= submit_tag(:propagate_lifeform_apply.t, class: "btn center-block push-down") %>
+      <%= submit_tag(:propagate_lifeform_apply.t, class: "btn mx-auto mt-3") %>
     <% end %>
   </div>
 </div>

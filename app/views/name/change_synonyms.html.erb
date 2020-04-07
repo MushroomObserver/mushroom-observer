@@ -10,5 +10,5 @@
 <%= form_tag(action: :change_synonyms, id: @name.id, approved_names: @new_names,
             approved_synonyms: @synonym_name_ids) do %>
   <%= render(partial: "form_synonyms") %>
-  <%= submit_tag(:name_change_synonyms_submit.l, class: "btn center-block") %>
+  <%= submit_tag(:name_change_synonyms_submit.l, class: "btn mx-auto") %>
 <% end %>

@@ -41,8 +41,8 @@
 <div id="main_container" class="container-fluid">
 
   <!--CALLOUT_BANNER-->
-  <div class="row hidden-xs hidden-print">
-    <div class="col-xs-12">
+  <div class="row d-none d-sm-flex d-print-none">
+    <div class="col-12">
       <% if in_admin_mode? %>
         <div class="Admin">
           DANGER: You are in administrator mode. Proceed with caution.
@@ -70,39 +70,39 @@
   <div class="row row-offcanvas row-offcanvas-left">
 
     <!--NAVIGATION-->
-    <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print" id="navigation">
+    <div class="col-8 col-sm-2 sidebar-offcanvas d-print-none" id="navigation">
       <%= render(partial: "/shared/nav_left") %>
     </div>
     <!--/NAVIGATION-->
 
-    <div id="right_side" class="col-xs-12 col-sm-10">
+    <div id="right_side" class="col-12 col-sm-10">
 
       <!--HAMBURGER_BUTTONS-->
-      <div class="row visible-xs hidden-print">
-        <div class="col-xs-12 kill-padding">
-          <p class="pull-left">
-            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1000" data-toggle="offcanvas">
+      <div class="row visible-xs d-print-none">
+        <div class="col-12 p-0">
+          <div class="float-left">
+            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed zindex-dropdown" data-toggle="offcanvas">
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
-          </p>
-          <p class="pull-right">
-            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
+          </div>
+          <div class="float-right">
+            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed zindex-sticky" style="top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
               <span class="glyphicon glyphicon-search"></span>
             </button>
-          </p>
+          </div>
         </div>
       </div>
       <!--/HAMBURGER_BUTTONS-->
 
       <!--SEARCH_BAR-->
-      <div id="search_bar_row" class="row hidden-xs hidden-print">
+      <div id="search_bar_row" class="row d-none d-sm-flex d-print-none">
         <%= render(partial: "/shared/search_bar") %>
       </div>
       <!--/SEARCH_BAR-->
 
       <% if flash_notices? %>
-        <div class="row hidden-print">
-          <div class="col-xs-12 max-width-text">
+        <div class="row d-print-none">
+          <div class="col-12 max-width-text">
             <%=
               klass = case flash_notice_level
                 when 0; "alert-success"
@@ -110,7 +110,7 @@
                 when 2; "alert-danger"
               end
               content_tag(:div, flash_get_notices,
-                          class: "alert push-down #{klass}")
+                          class: "alert mt-3 #{klass}")
             %>
           </div>
         </div>
@@ -121,12 +121,12 @@
         <%= render(partial: "/shared/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->
-        <div class="col-xs-12">
+        <div class="col-12">
           <%= yield %>
         </div>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <div class="col-xs-12 hidden-print">
+        <div class="col-12 d-print-none">
           <%= render(partial: "/shared/translator_credit") %>
         </div>
       </div>
@@ -143,10 +143,10 @@
   #   jQuery('[data-bootstrap-size]:visible').data('bootstrap-size')
 %>
 <div id="media_query_tests">
-  <div data-bootstrap-size="xs" class="visible-xs"></div>
-  <div data-bootstrap-size="sm" class="visible-sm"></div>
-  <div data-bootstrap-size="md" class="visible-md"></div>
-  <div data-bootstrap-size="lg" class="visible-lg"></div>
+  <div data-bootstrap-size="xs" class="d-sm-none"></div>
+  <div data-bootstrap-size="sm" class="d-none d-sm-block d-md-none"></div>
+  <div data-bootstrap-size="md" class="d-none d-md-block d-lg-none"></div>
+  <div data-bootstrap-size="lg" class="d-none d-lg-block d-xl-none"></div>
 </div>
 
 <!--JAVASCRIPT-->

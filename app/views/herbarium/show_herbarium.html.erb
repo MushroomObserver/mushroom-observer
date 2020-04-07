@@ -23,17 +23,17 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
-    <div class="push-down">
+  <div class="col-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
+    <div class="mt-3">
       <%= link_to(:show_herbarium_herbarium_record_count.t(count: @herbarium.herbarium_records.length),
                   controller: :herbarium_record, action: :herbarium_index, id: @herbarium.id) %>
     </div>
 
-    <div class="push-down">
+    <div class="mt-3">
       <%= render(partial: "curator_table", locals: {herbarium: @herbarium}) %>
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
         <%= form_tag(add_query_param(action: :show_herbarium, id: @herbarium)) do %>
-          <div class="form-inline push-down">
+          <div class="form-inline mt-3">
             <%= text_field_tag(:add_curator, "", class: "form-control") %>
             <label for="add_curator"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
             <% turn_into_user_auto_completer(:add_curator) %>
@@ -46,14 +46,14 @@
     </div>
 
     <% if !@herbarium.description.blank? %>
-      <div class="push-down">
+      <div class="mt-3">
         <div class="bold"><%= :NOTES.t %>:</div>
         <%= @herbarium.description.tpl %>
       </div>
     <% end %>
 
     <% if @herbarium.mailing_address && !@herbarium.mailing_address.empty? %>
-      <div class="push-down">
+      <div class="mt-3">
         <div class="bold"><%= :herbarium_mailing_address.t %>:</div>
         <%= @herbarium.mailing_address.tp %>
       </div>
@@ -61,7 +61,7 @@
   </div>
 
   <% if map %>
-    <div class="col-xs-12 col-sm-4 push-down" style="max-width:320px">
+    <div class="col-12 col-sm-4 mt-3" style="max-width:320px">
       <%=
         gmap = make_map([@herbarium.location])
         finish_map(gmap)
@@ -72,7 +72,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12 push-down" style="max-width:<%= map ? 930 : 600 %>px">
+  <div class="col-12 mt-3" style="max-width:<%= map ? 930 : 600 %>px">
     <center>
       <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
       <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>

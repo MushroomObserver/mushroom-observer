@@ -7,7 +7,7 @@
     <%= label_tag(:feature_email_content, "Feature Email:") %>
     <%= text_area(:feature_email, :content, rows: 20, class: "form-control") %>
 
-    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
 
     <p>Users: <%= (@users.map { |u| u.login }).safe_join(", ") %></p>
   <% end %>

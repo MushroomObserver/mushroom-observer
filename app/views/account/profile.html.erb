@@ -13,25 +13,25 @@
 <div class="max-width-text">
   <%= form_for(:user, url: {action: :profile}, html: {multipart: true}) do |form| %>
 
-    <%= submit_tag(:profile_button.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:profile_button.l, class: "btn mx-auto mt-3") %>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_name, :profile_name.t + ":") %>
       <%= form.text_field(:name, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_place_name, :profile_location.t + ":") %> (33%)
       <%= text_field(:user, :place_name, value: @place_name, class: "form-control") %>
       <% turn_into_location_auto_completer("user_place_name") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_notes, :profile_notes.t + ":") %> (33%)
       <%= form.text_area(:notes, rows: 10, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_upload_image, (@user.image_id ? :profile_image_change.t : :profile_image_create.t) + ":") %> (33%)
       <%= link_to(:profile_image_reuse.t, controller: :image, action: :reuse_image, mode: :profile) %>
       <%= link_to(:profile_image_remove.t, {action: :remove_image},
@@ -39,30 +39,30 @@
       <%= custom_file_field(:user, :upload_image) %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:copyright_holder, :profile_copyright_holder.t + ":") %>
       <div class="row">
-        <div class="col-xs-8">
+        <div class="col-8">
           <%= text_field_tag(:copyright_holder, @copyright_holder, class: "form-control") %>
         </div>
-        <div class="col-xs-4">
+        <div class="col-4">
           <%= select_year(@copyright_year,
                 {field_name: :copyright_year, start_year: 1980, end_year: Time.now.year},
                 {class: "form-control"}) %>
         </div>
       </div>
-      <div class="push-down">
+      <div class="mt-3">
         <%= select(:upload, :license_id, @licenses, {selected: @upload_license_id}, {class: "form-control"}) %>
       </div>
       <div class="help-block">(<%= :profile_copyright_warning.t %>)</div>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:user_mailing_address, :profile_mailing_address.t + ":") %>
       <%= form.text_area(:mailing_address, rows: 5, class: "form-control") %>
     </div>
 
-    <%= submit_tag(:profile_button.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:profile_button.l, class: "btn mx-auto mt-3") %>
 
   <% end %>
 </div>

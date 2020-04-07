@@ -18,13 +18,13 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <p class="help-block"><%= :edit_translations_help.t %></p>
   </div>
 </div>
 
 <div class="row">
-  <div class="col-xs-6 translation_container">
+  <div class="col-6 translation_container">
     <div>
       <div id="left_translation_container">
         <% @form.each do |item| %>
@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <div class="col-xs-6 translation_container">
+  <div class="col-6 translation_container">
     <div>
       <div id="right_translation_container">
         <%= form_tag({action: :edit_translations, page: @page}, {id: "post_form"}) %>

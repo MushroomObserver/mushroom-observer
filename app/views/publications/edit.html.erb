@@ -11,6 +11,6 @@
 <div class="max-width-text">
   <%= form_for(@publication, action: :update) do |form| %>
     <%= render(partial: "form", locals: {form: form}) %>
-    <%= form.submit(:SAVE.t, class: "btn center-block push-down") %>
+    <%= form.submit(:SAVE.t, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>

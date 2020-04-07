@@ -12,7 +12,8 @@ gem "mysql2"
 # gem "sqlite3"
 
 # Use bootstrap style generator
-gem "bootstrap-sass"
+# gem "bootstrap-sass"
+gem "bootstrap", "~> 4.4.1"
 
 # Use SCSS for stylesheets
 gem "sassc-rails"
@@ -20,9 +21,10 @@ gem "sassc-rails"
 # Use jquery as the JavaScript library
 gem "jquery-rails"
 
-# Use thebuyracer as JavaScript runtime for ExecJS
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem "therubyracer", platforms: :ruby
+# Use mini_racer as JavaScript runtime for ExecJS
+# ExecJS::RubyRacerRuntime is not supported.
+# Please replace therubyracer with mini_racer in your Gemfile or use Node.js as ExecJS runtime.
+gem "mini_racer"
 
 # Use CoffeeScript for .js.coffee assets and views
 gem "coffee-rails"
@@ -107,6 +109,11 @@ gem "rubocop-rails"
 
 # use mry to support safe updating of .rubocop.yml
 gem "mry", require: false
+
+group :development do
+  # Use Rails DB to browse database at http://localhost:3000/rails/db/
+  gem 'rails_db', '2.3.1'
+end
 
 group :test do
   # Use capybara to simulate user-browser interaction

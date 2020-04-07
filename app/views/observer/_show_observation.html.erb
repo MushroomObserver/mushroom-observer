@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-xs-12 max-width-text name-section">
+  <div class="col-12 max-width-text name-section">
 
     <p id="observation_when">
       <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <div class="col-xs-12 max-width-text obs-notes">
+  <div class="col-12 max-width-text obs-notes">
     <%= if observation.notes?
       Textile.clear_textile_cache
       Textile.register_name(*observation.namings.map(&:name))

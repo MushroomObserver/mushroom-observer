@@ -13,21 +13,21 @@
 <%= form_tag(add_query_param(action: :edit, id: @params.naming.id,
                              approved_name: @params.what)) do %>
   <div class="row">
-    <div class="col-xs-12 col-sm-8 max-width-text">
-      <div class="push-down">
+    <div class="col-12 col-sm-8 max-width-text">
+      <div class="mt-3">
         <%= render(partial: "observer/show_observation",
                    locals: { observation: @observation }) %>
       </div>
 
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block", style: "margin-top:2em") %>
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto", style: "margin-top:2em") %>
 
-      <div class="push-down">
+      <div class="mt-3">
         <%= render(partial: "form", locals: { action: :edit,
                    button_name: :SAVE_EDITS.l, show_reasons: true }) %>
       </div>
     </div>
 
-    <div class="col-xs-12 col-sm-4">
+    <div class="col-12 col-sm-4">
       <%= render(partial: "observer/show_images",
                  locals: { observation: @observation,
                            thumb_size_control: false }) %>

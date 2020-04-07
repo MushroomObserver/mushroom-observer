@@ -19,7 +19,7 @@
     [ :observations,                  :observer,     :observations_by_user            ],
     [ :species_lists,                 :species_list, :species_lists_by_user           ],
     [ :life_list,                     :observer,     :checklist                       ]
-  ] 
+  ]
     links[key] = url_for(controller: controller, action: action, id: id)
   end
 
@@ -95,7 +95,7 @@
 %>
 
 <div class="row">
-  <div class="col-xs-7">
+  <div class="col-7">
     <% if @show_user.location %>
       <p>
         <strong><%= :show_user_primary_location.t %>:</strong>
@@ -120,14 +120,14 @@
     <% end %>
   </div>
 
-  <div class="col-xs-5">
-    <p class="push-down">
+  <div class="col-5">
+    <p class="mt-3">
       <%= thumbnail(@show_user.image_id, {votes: false}) if @show_user.image_id %>
       <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
     </p>
   </div>
 
-  <div class="col-xs-12">
+  <div class="col-12">
     <div class="row">
 
       <div class="col-sm-3">

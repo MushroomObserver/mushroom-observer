@@ -42,7 +42,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="row">
-          <div class="col-xs-12 text-center small image-controls">
+          <div class="col-12 text-center small image-controls">
             <% if check_permission(@image) %>
               <%= link_with_query(:image_show_rotate_left.t, action: :transform_image,
                 op: :rotate_left, id: @image.id, size: @size) %> |
@@ -62,12 +62,12 @@
       </div>
       <div class="panel-body">
 
-        <div class="hidden-lg" style="max-width:640px; max-height:640px; margin:auto">
+        <div class="d-lg-none" style="max-width:640px; max-height:640px; margin:auto">
           <%= thumbnail(@image, size: :medium, link: {}, votes: false,
                         style: "max-width:100%; max-height:100%",
                         responsive: true, theater_on_click: true) %>
         </div>
-        <div class="visible-lg" style="max-width:1280px; max-height:1280px; margin:auto">
+        <div class="d-none d-lg-block" style="max-width:1280px; max-height:1280px; margin:auto">
           <%= thumbnail(@image, size: :medium, link: {}, votes: false, img_class: "huge-image",
                         responsive: true, theater_on_click: true) %>
         </div>
@@ -86,7 +86,7 @@
           jQuery(document).ready(load_huge);
         ) %>
 
-        <div class="push-down text-center">
+        <div class="mt-3 text-center">
           <% if User.current %>
             <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
           <% end %>
@@ -155,7 +155,7 @@
       <div class="panel-heading">
         <b><%= :NOTES.t %></b>:
       </div>
-      <div class="panel-body slight-padding">
+      <div class="panel-body py-1">
         <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
         <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
         <% @image.projects.each do |proj| %>
@@ -187,7 +187,7 @@
     <!-- /INFO_PANEL -->
 
     <% if reviewer? %>
-      <div class="push-up text-center">
+      <div class="mb-3 text-center">
         <%= set_export_status_controls(@image) %>
       </div>
     <% end %>
@@ -206,15 +206,15 @@
         </div>
         <!-- /CURRENT_VOTE -->
 
-        <div class="panel-body slight-padding">
+        <div class="panel-body py-1">
 
           <!-- YOUR_VOTE -->
           <% if @user
             current = @image.users_vote(@user).to_i %>
-            <div class="text-center push-up">
+            <div class="text-center mb-3">
               <%= :image_show_your_vote.t %>:
               <span class="small"><%= image_vote_as_long_string(current).t %></span>
-              <div class="push-down">
+              <div class="mt-3">
                 <% args = add_query_param(id: @image.id)
                 args[:size] = @size if @size != @default_size
                 for value in [0] + Image.all_votes
@@ -222,18 +222,18 @@
                   str2 = image_vote_as_help_string(value)
                   str3 = :image_show_vote_and_next.t(value: str1)
                   css_class = ""
-                  css_class = "bold" if current == value %>
+                  css_class = "text-bold" if current == value %>
                   <div class="row">
                     <div class="col-sm-6">
-                      <div style="padding-top: 10px">
+                      <div class="pt-2">
                       <%= link_to(value == 0 ? str2 : str1, args.merge(vote: value),
                                   class: css_class, title: str2,
                                   data: {toggle: "tooltip", placement: "left",
                                          role: "image_vote", val: value, id: @image.id}) %>
                       </div>
                     </div>
-                    <div class="col-sm-6 hidden-xs">
-                      <div style="padding-top: 10px">
+                    <div class="col-sm-6 d-none d-sm-block">
+                      <div class="pt-2">
                       <%= link_to(str3, {vote: value, next: true}.merge(args),
                                   class: css_class, title: str2, data: {toggle: "tooltip"}) %>
                        </div>
@@ -248,7 +248,7 @@
           <!-- VOTE_TABLE -->
           <div id="show_votes_container">
             <% if @votes.any? %>
-              <table id="show_votes_table" class="table table-striped push-down" style="margin-bottom:0">
+              <table id="show_votes_table" class="table table-striped mt-3" style="margin-bottom:0">
                 <thead>
                   <tr>
                     <th><%= :USER.t %></th>
@@ -283,7 +283,7 @@
       <div>
         <%= image_copyright(@image) %>
       </div>
-      <div class="slight-pad push-up">
+      <div class="py-1 mb-3">
         <%= render(partial: "shared/form_#{@image.license.form_name}") %>
       </div>
     </div>

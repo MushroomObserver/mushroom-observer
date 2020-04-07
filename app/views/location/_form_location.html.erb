@@ -1,6 +1,6 @@
 <% if !@location.locked || in_admin_mode? %>
   <% if @dubious_where_reasons.any? %>
-    <div class="alert alert-warning push-up push-down">
+    <div class="alert alert-warning mb-3 mt-3">
       <p>
         <%= @dubious_where_reasons.safe_join(safe_br) %>
       </p>
@@ -14,11 +14,11 @@
     <div class="col-md-8 col-lg-6 max-width-text-plus-padding">
 
       <div class="row">
-        <div class="col-xs-12">
-          <%= submit_tag(button.l, class: "btn center-block push-down") %>
+        <div class="col-12">
+          <%= submit_tag(button.l, class: "btn mx-auto mt-3") %>
 
           <% if in_admin_mode? %>
-            <div class="form-inline push-down">
+            <div class="form-inline mt-3">
               <div class="form-group">
                 <%= form.check_box(:locked) %>
                 <label for="location_locked"><%= :form_locations_locked.t %></label>
@@ -26,7 +26,7 @@
             </div>
           <% end %>
 
-          <div class="form-group push-down">
+          <div class="form-group mt-3">
             <%= label_tag(:location_display_name, :WHERE.t + ":") %>
             <%= form.text_field(:display_name, value: @display_name,
                                 class: "form-control", data: {autofocus: true}) %>
@@ -40,10 +40,10 @@
         </div>
       </div>
 
-      <div class="row push-down vcenter">
+      <div class="row mt-3 vcenter">
         <div class="col-sm-8">
           <div class="row vcenter">
-            <div class="col-xs-4 col-xs-offset-4">
+            <div class="col-4 offset-4">
               <center>
                 <div class="form-group">
                   <%= label_tag(:location_north, :NORTH.t + ":") %>
@@ -53,8 +53,8 @@
               </center>
             </div>
           </div>
-          <div class="row push-down vcenter">
-            <div class="col-xs-4">
+          <div class="row mt-3 vcenter">
+            <div class="col-4">
               <center>
                 <div class="form-group">
                   <%= label_tag(:location_west, :WEST.t + ":") %>
@@ -63,12 +63,12 @@
                 </div>
               </center>
             </div>
-            <div class="col-xs-4 small" style="padding:0">
+            <div class="col-4 small" style="padding:0">
               <center>
                 <%= :form_locations_lat_long_help.t %>
               </center>
             </div>
-            <div class="col-xs-4">
+            <div class="col-4">
               <center>
                 <div class="form-group">
                   <%= label_tag(:location_east, :EAST.t + ":") %>
@@ -78,8 +78,8 @@
               </center>
             </div>
           </div>
-          <div class="row push-down vcenter">
-            <div class="col-xs-4 col-xs-offset-4">
+          <div class="row mt-3 vcenter">
+            <div class="col-4 offset-4">
               <center>
                 <div class="form-group">
                   <%= label_tag(:location_south, :SOUTH.t + ":") %>
@@ -89,14 +89,14 @@
               </center>
             </div>
           </div>
-        </div>    
+        </div>
         <div class="col-sm-4">
           <center>
-            <div class="form-group push-down">
+            <div class="form-group mt-3">
               <%= label_tag(:location_high, :show_location_highest.t + ":") %>
               <%= form.text_field(:high, class: "form-control") %>
             </div>
-            <div class="form-group push-down">
+            <div class="form-group mt-3">
               <%= label_tag(:location_low, :show_location_lowest.t + ":") %>
               <%= form.text_field(:low, class: "form-control") %>
               (<%= :units_meters.t %>)
@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <div class="col-md-4 col-lg-6 push-up push-down">
+    <div class="col-md-4 col-lg-6 mb-3 mt-3">
       <%=
         javascript_include("edit_location")
         format = User.current_location_format
@@ -140,7 +140,7 @@
       <%= hidden_field(:location, :high) %>
       <%= hidden_field(:location, :low) %>
     </div>
-    <div class="col-sm-6 col-md-8 col-lg-9 push-up push-down">
+    <div class="col-sm-6 col-md-8 col-lg-9 mb-3 mt-3">
       <%=
         gmap = make_map([@location])
         finish_map(gmap)
@@ -151,8 +151,8 @@
 <% end %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
-    <div class="form-group push-down">
+  <div class="col-12 max-width-text">
+    <div class="form-group mt-3">
       <%= label_tag(:location_notes, :NOTES.t + ":") %>
       <div class="help-block"><%= :form_locations_notes_help.t %></div>
       <%= form.text_area(:notes, class: "form-control") %>

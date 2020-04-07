@@ -3,7 +3,7 @@
 %>
 
 <div class="row">
-  <div class="col-xs-6 max-width-text">
+  <div class="col-6 max-width-text">
     <p><%= link_to("Refresh Stats", {controller: :account,
                    action: :blocked_ips}) %></p>
 
@@ -48,7 +48,7 @@
     </div>
   </div>
 
-  <div class="col-xs-6 max-width-text">
+  <div class="col-6 max-width-text">
     <% if @ip.present? %><p><%= render partial: "ip_stats" %></p><% end %>
     <p><%= render partial: "ip_summary" %></p>
   </div>

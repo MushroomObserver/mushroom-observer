@@ -8,20 +8,20 @@
 %>
 
 <%= form_for(:image, url: add_query_param(action: :edit_image, id: @image)) do |form| %>
-  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 max-width-text">
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+  <div class="col-12 col-sm-8 col-md-6 col-lg-4 max-width-text">
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
 
     <%= render(partial: "form_images",
                locals: {form: form, leave_out_original_file_name: false}) %>
 
-    <div class="text-center push-down" style="margin-bottom:2em">
+    <div class="text-center mt-3" style="margin-bottom:2em">
       <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
       <%= link_with_query(:cancel_and_show.t(type: :image),
                           {action: :show_image, id: @image.id},
                           {class: "btn"}) %>
     </div>
   </div>
-  <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+  <div class="col-12 col-sm-4 col-md-6 col-lg-8">
     <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
   </div>
 <% end %>

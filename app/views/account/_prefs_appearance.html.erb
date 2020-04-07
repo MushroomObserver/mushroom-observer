@@ -1,9 +1,9 @@
 <!-- Appearance Settings of Account Preferences Form -->
-<div class="form-group push-down bold">
+<div class="form-group mt-3 bold">
   <%= :prefs_appearance.t %>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= label_tag(:user_hide_authors, :prefs_hide_authors.t + ":") %>
   <%= form.select(:hide_authors,
                   [[:prefs_hide_authors_none.l, :none],
@@ -47,4 +47,4 @@
   <%= form.number_field(:layout_count, class: "form-control", min: 1) %>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>

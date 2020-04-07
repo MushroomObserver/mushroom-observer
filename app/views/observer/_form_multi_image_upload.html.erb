@@ -3,11 +3,11 @@
 <%= hidden_field(:observation, :thumb_image_id) %>
 <div class="row">
   <div class="col-sm-6">
-    <input type="file" multiple id="multiple_images_button" accept="image/*" class="push-down"/>
+    <input type="file" multiple id="multiple_images_button" accept="image/*" class="mt-3"/>
   </div>
   <div class="col-sm-6">
     <div class="well well-sm max-width-text">
-      <div class="arrow-left hidden-xs"></div>
+      <div class="arrow-left d-none d-sm-block"></div>
       <p class="help-block">
         <%= :form_observations_upload_help_multi_select.t %>
       </p>
@@ -26,7 +26,7 @@
         <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
         <div id="observation_date_radio_container"></div>
       </div>
-      <div class="col-sm-12" style="margin-top: 15px;">
+      <div class="col-sm-12 mt-3">
         <button id="fix_dates" type="button" class="btn"><%= :form_observations_use_date.t %></button>
         <button id="ignore_dates" type="button" class="btn"><%= :IGNORE.t %></button>
       </div>
@@ -37,7 +37,7 @@
   </div>
 </div>
 
-<div class="row geocode_messages" style="background: rgba(211, 211, 211, 0.22); margin-top: 10px; display: none;">
+<div class="row geocode_messages mt-2" style="background: rgba(211, 211, 211, 0.22); display: none;">
   <div class="col-sm-7">
       <div class="col-sm-12">
         <div><strong>Set observation Latitude/Longitude to:</strong></div>
@@ -45,7 +45,7 @@
 
         </div>
       </div>
-      <div class="col-sm-12" style="margin-top: 15px;">
+      <div class="col-sm-12 mt-3">
         <button id="set_geocode" type="button" class="btn"><%= :UPDATE.t %></button>
         <button id="ignore_geocode" type="button" class="btn"><%= :IGNORE.t %></button>
       </div>

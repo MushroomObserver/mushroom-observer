@@ -14,7 +14,7 @@
 
 <div class="max-width-text">
   <%= form_tag(add_query_param(action: :edit_project, id: @project.id)) do %>
-    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>
     <%= render(partial: "form_projects") %>
   <% end %>
 </div>

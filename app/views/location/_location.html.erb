@@ -12,34 +12,34 @@
 
   <div class="col-sm-4">
     <center>
-      <div class="row push-down">
-        <div class="col-xs-12">
+      <div class="row mt-3">
+        <div class="col-12">
           <center>
             <b><%= :NORTH.t %>:</b> <%= location.north %>&deg;
           </center>
         </div>
       </div>
       <div class="row" style="max-width:30em">
-        <div class="col-xs-6">
-          <span class="pull-left">
+        <div class="col-6">
+          <span class="float-left">
             <b><%= :WEST.t %>:</b> <%= location.west %>&deg;
           </span>
         </div>
-        <div class="col-xs-6">
+        <div class="col-6">
           <span class="pull-right">
             <b><%= :EAST.t %>:</b> <%= location.east %>&deg;
           </span>
         </div>
       </div>
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-12">
           <center>
             <b><%= :SOUTH.t %>:</b> <%= location.south %>&deg;
           </center>
         </div>
       </div>
-      <div class="row push-down">
-        <div class="col-xs-12">
+      <div class="row mt-3">
+        <div class="col-12">
           <center>
             <% if location.high %>
               <b class="nowrap"><%= :show_location_highest.t %>:</b>
@@ -55,7 +55,7 @@
     </center>
   </div>
 
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <%= ("*" + :NOTES.l + "*: " + location.notes.to_s.html_safe).tpl unless location.notes.blank? %>
   </div>
 </div>

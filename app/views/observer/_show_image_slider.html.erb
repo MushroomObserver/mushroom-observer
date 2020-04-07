@@ -7,11 +7,11 @@
 <% if has_images || check_permission(@observation) %>
   <div class="row">
     <div class="col-sm-4">
-      <%= content_tag(:h4, :IMAGES.t, style: "margin-top: 0") %>
+      <%= content_tag(:h4, :IMAGES.t, class: "mt-0") %>
     </div>
     <% if check_permission(@observation) %>
       <div class="col-sm-8">
-        <div class="pull-right">
+        <div class="float-right">
           <small>
             <%= link_with_query(:show_observation_add_images.t, controller: :image,
                                 action: :add_image, id: @observation.id) %> |
@@ -32,8 +32,8 @@
 
 <% if has_images %>
   <div class="row">
-    <div class="col-xs-12">
-      <div style="margin-left: 15px; margin-right: 15px;">
+    <div class="col-12">
+      <div class="mx-3">
         <div class="slider responsive">
           <% unless default_image.nil? %>
             <div>
@@ -57,7 +57,7 @@
               </div>
             <% end %>
           <% end %>
-          <div class="hidden-xs">
+          <div class="d-none d-sm-block">
             <!--This div makes the last image always available to scroll into view -->
           </div>
         </div>

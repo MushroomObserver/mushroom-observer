@@ -12,7 +12,7 @@
 
 <noscript>
   <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
+    <div class="col-12 max-width-text mt-3">
       <%= :name_lister_no_js.tp %>
     </div>
   </div>
@@ -20,13 +20,13 @@
 
 <% if !can_do_ajax? %>
   <div class="row">
-    <div class="col-xs-12 max-width-text push-down">
+    <div class="col-12 max-width-text mt-3">
       <%= :name_lister_bad_browser.tp %>
     </div>
   </div>
 <% end %>
 
-<table cols="3" width="100%" class="scroller push-down">
+<table cols="3" width="100%" class="scroller mt-3">
   <thead>
     <tr>
       <th width="20%"><%= :name_lister_genera.t %></th>
@@ -85,7 +85,7 @@
 ) %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text push-down">
+  <div class="col-12 max-width-text mt-3">
     <div class="HelpNote"><%= :name_lister_help.tp %></div>
   </div>
 </div>

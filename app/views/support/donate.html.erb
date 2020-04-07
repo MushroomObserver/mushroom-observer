@@ -24,7 +24,7 @@
       <p>
         <div class="row">
           <% for a in [25.00, 50.00, 100.00, 200.00] %>
-            <div class="col-xs-3">
+            <div class="col-3">
               <%= radio_button(:donation, :amount, a) %>
               $<%= a.to_i %>
             </div>
@@ -32,34 +32,34 @@
         </div>
       </p>
       <p>
-        <div class="row col-xs-12">
+        <div class="row col-12">
           <%= radio_button(:donation, :amount, "other") %>
           <%= :donate_other.t %>:
           $<%= text_field(:donation, :other_amount, size: 7) %>
         </div>
       </p>
       <p>
-        <div class="row col-xs-12">
+        <div class="row col-12">
           <%= check_box(:donation, :recurring) %>
           <%= :donate_recurring.t %>
           <br/><br/>
         </div>
       </p>
       <p>
-        <div class="row col-xs-12">
+        <div class="row col-12">
           <%= :donate_who.t %>:
           <%= text_field(:donation, :who, size: 30) %>
         </div>
       </p>
       <p>
-        <div class="row col-xs-12">
+        <div class="row col-12">
           <%= check_box(:donation, :anonymous) %>
           <%= :donate_anonymous.t %>
           <br/><br/>
         </div>
       </p>
       <p>
-        <div class="row col-xs-12">
+        <div class="row col-12">
           <%= :donate_email.t %>:
           <%= text_field(:donation, :email, size: 30) %>
           <br/><br/>

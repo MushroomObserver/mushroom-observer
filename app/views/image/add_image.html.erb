@@ -15,11 +15,11 @@
                html: {multipart: true}) do |form| %>
     <%= hidden_field(:observation, :id) %>
 
-    <div id="license-notice push-down"><%= :image_add_warning.tp %></div>
+    <div id="license-notice mt-3"><%= :image_add_warning.tp %></div>
 
-    <%= submit_tag(:image_add_upload.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:image_add_upload.l, class: "btn mx-auto mt-3") %>
 
-    <div class="form-group form-inline push-down">
+    <div class="form-group form-inline mt-3">
       <%= label_tag(:upload_image1, :image_add_image.t + " 1:") %>
         <%= custom_file_field(:upload, :image1) %>
         (<%= :image_add_default.t %>)<br/>
@@ -36,6 +36,6 @@
 
     <%= render(partial: "form_images", locals: {form: form, width: 80, leave_out_original_file_name: true}) %>
 
-    <%= submit_tag(:image_add_upload.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:image_add_upload.l, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>

@@ -10,11 +10,14 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_numbers(@pages) %>
+
+<div class="results row row-cols-1 row-cols-sm-2 row-cols-lg-3">
   <%= render(partial: "shared/matrix_box",
              layout: "shared/matrix_table",
              collection: @objects,
              as: :object) %>
   <div style="clear:left"></div>
-<% end %>
+</div>
 
+<%= pagination_numbers(@pages) %>

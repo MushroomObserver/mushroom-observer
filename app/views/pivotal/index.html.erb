@@ -47,7 +47,7 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <% if @stories.count > 900 %>
       <b>Displaying <%= @stories.count %> of 1,000 available Feature Requests. Please <%= link_to 'let the admins know', '/observer/ask_webmaster_question', title: "Contact Us" %> that we're close to the limit.</b>
     <% end %>

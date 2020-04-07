@@ -10,7 +10,7 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
+<div class="row mt-3">
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-8 max-width-text">
       <%= @glossary_term.description.tpl %>
@@ -24,7 +24,7 @@
     </div>
   <% end %>
 
-  <div class="col-xs-12 max-width-text" style="margin-bottom:1em">
+  <div class="col-12 max-width-text" style="margin-bottom:1em">
     <%= link_with_query(:show_glossary_term_reuse_image.t,
                         controller: :image, action: :reuse_image_for_glossary_term, id: @glossary_term.id) %><br/>
     <%= link_with_query(:show_glossary_term_remove_image.t,
@@ -32,12 +32,12 @@
   </div>
 
   <% @objects.each do |image|  %>
-    <div class="col-sm-4 color-block-item slight-pad">
+    <div class="col-sm-4 color-block-item py-1">
       <%= thumbnail(image, votes: true) %>
     </div>
   <% end %>
 
-  <div class="col-xs-12 push-down">
+  <div class="col-12 mt-3">
     <%= show_previous_version(@glossary_term) %>
     <p class="Date">
       <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>

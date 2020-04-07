@@ -47,7 +47,7 @@
     </div>
 
     <% reason.values.sort_by(&:order).each do |r| %>
-      <div class="form-group form-inline" style="margin:0">
+      <div class="form-group form-inline m-0">
         <label>
           <%= check_box(:reason, :check,
                         { index: r.num, checked: r.used?,
@@ -58,8 +58,7 @@
           <%= r.label.t %>
         </label>
       </div>
-      <div class="form-group <%= "collapse" if !r.used? %>"
-           style="margin-bottom:1em">
+      <div class="form-group mb-3 <%= "collapse" if !r.used? %>">
         <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
                       class: "form-control") %>
       </div>
@@ -69,9 +68,9 @@
 
   <div class="col-sm-6">
     <div class="well well-sm">
-      <div class="arrow-left hidden-xs"></div>
+      <div class="arrow-left d-none d-sm-block"></div>
       <% if !show_reasons %>
-        <p class="help-block" style="margin-bottom:1em">
+        <p class="help-block mb-3">
           <%= :form_naming_name_help_create.t %>
         </p>
       <% end %>

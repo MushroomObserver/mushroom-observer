@@ -10,22 +10,22 @@
 <div class="max-width-text">
   <%= form_for(:glossary_term, url: {action: :create_glossary_term},
               html: {multipart: true}) do |form| %>
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:glossary_name, :glossary_term_name.t + ":") %>
       <%= form.text_field(:name, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:glossary_description, :glossary_term_description.t + ":") %>
       <%= form.text_area(:description, rows: 20, class: "form-control") %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:glossary_term_upload_image, :Image.t + ":") %>
       <%= custom_file_field(:glossary_term, :upload_image) %>
     </div>
 
-    <div class="form-group push-down form-inline">
+    <div class="form-group mt-3 form-inline">
       <%= label_tag(:copyright_holder, :glossary_term_copyright_holder.t + ":") %><br/>
       <%= text_field_tag(:copyright_holder, @copyright_holder, class: "form-control") %>
       <%= select_year(@copyright_year,
@@ -36,6 +36,6 @@
       <p class="help_block">(<%= :glossary_term_copyright_warning.t %>)</p>
     </div>
 
-    <%= submit_tag(:edit_glossary_term_save.t, class: "btn center-block push-down") %>
+    <%= submit_tag(:edit_glossary_term_save.t, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>

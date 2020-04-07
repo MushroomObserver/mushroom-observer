@@ -15,7 +15,7 @@
 </div>
 
 <%= form_tag(action: :bulk_editor, id: @species_list.id) do %>
-  <%= submit_tag(:UPDATE.l, class: "btn center-block push-down push-up") %>
+  <%= submit_tag(:UPDATE.l, class: "btn mx-auto mt-3 mb-3") %>
 
   <%= paginate_block(@pages) do %>
     <table class="table-striped table-bulk-editor">
@@ -125,7 +125,7 @@
     %>
   </div>
 
-  <%= submit_tag(:UPDATE.l, class: "btn center-block push-down push-up") %>
+  <%= submit_tag(:UPDATE.l, class: "btn mx-auto mt-3 mb-3") %>
 <% end %>
 
 <% first_id = @observations.first.id

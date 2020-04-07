@@ -7,12 +7,12 @@
 %>
 
   <!-- Push down pager, title on small, xs screens so buttons do not block -->
-  <%= content_tag(:div, safe_nbsp, class: "hidden-print visible-xs visible-sm
+  <%= content_tag(:div, safe_nbsp, class: "d-print-none visible-xs visible-sm
                                            push-below-buttons") %>
 
-  <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
+  <div class="col-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
     <!-- Pager -->
-    <%= content_tag(:div, class: "hidden-print") do
+    <%= content_tag(:div, class: "d-print-none") do
           if @tabsets[:pager_for]
             render(partial: "/shared/prev_next_pager",
               locals: { object: @tabsets[:pager_for] })
@@ -33,14 +33,14 @@
   <!-- Tabsets -->
   <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
                      id: "right_tabs",
-                     class: "hidden-print align-right col-sm-4 push-up") %>
+                     class: "d-print-none text-right col-sm-4 mb-3") %>
 
   <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
-                     class: "hidden-print col-xs-12") %>
+                     class: "d-print-none col-12") %>
 
   <!-- Sorter -->
   <% if @sorts %>
-    <div class="hidden-print col-xs-12">
+    <div class="d-print-none col-12">
       <div class="pad-top">
         <%= content_tag(:span, :sort_by_header.t) %>
         <div id="sorts" class="btn-group btn-group-xs" role="group">

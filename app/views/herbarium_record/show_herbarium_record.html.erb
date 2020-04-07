@@ -19,7 +19,7 @@
   herbarium = @herbarium_record.herbarium
 %>
 
-<div class="max-width-text push-down">
+<div class="max-width-text mt-3">
   <p>
     <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium.show_link_args) %><br/>
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
@@ -31,7 +31,7 @@
     <%= ( :NOTES.l + ":\n\n" + @herbarium_record.notes ).tpl %>
   <% end %>
 
-  <div class="push-down">
+  <div class="mt-3">
     <%= render(partial: "shared/matrix_box", collection: @herbarium_record.observations, as: :object) %>
   </div>
 

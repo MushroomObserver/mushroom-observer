@@ -1,7 +1,7 @@
 <!--[form:name]-->
 
 <% if in_admin_mode? %>
-  <div class="form-inline push-down">
+  <div class="form-inline mt-3">
     <div class="form-group">
       <%= form.check_box(:locked) %>
       <label for="name_locked"><%= :form_names_locked.t %></label>
@@ -10,7 +10,7 @@
 <% end %>
 
 <% if !@name.locked || in_admin_mode? %>
-  <div class="form-inline push-down">
+  <div class="form-inline mt-3">
     <div class="form-group">
       <label for="name_rank"><%= :Rank.t %>:</label>
       <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}, {}, {class: "form-control"}) %>
@@ -33,7 +33,7 @@
   <p class="help-block"><%= :form_names_author_help.t %></p>
 
 <% else %>
-  <div class="push-down push-up">
+  <div class="mt-3 mb-3">
     <%= content_tag(:b, :Rank.t) %>:
       <%= :"Rank_#{@name.rank.to_s.downcase}".t %><br/>
     <%= content_tag(:b, :Status.t) %>:

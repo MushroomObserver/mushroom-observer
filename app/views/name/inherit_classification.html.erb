@@ -7,8 +7,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
-  <div class="col-xs-12 max-width-text">
+<div class="row mt-3">
+  <div class="col-12 max-width-text">
     <%= form_tag(add_query_param(action: :inherit_classification, id: @name.id)) do %>
       <% if @options %>
         <div class="alert alert-warning">
@@ -24,7 +24,7 @@
       <%= text_field_tag(:parent, @parent_text_name,
                          class: "form-control", data: {autofocus: true}) %>
 
-      <%= submit_tag(:SUBMIT.t, class: "btn center-block push-down") %>
+      <%= submit_tag(:SUBMIT.t, class: "btn mx-auto mt-3") %>
     <% end %>
   </div>
 </div>

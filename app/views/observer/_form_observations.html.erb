@@ -1,10 +1,10 @@
 <!--[form:observation]-->
 
-<%= submit_tag(button_name, class: "btn center-block push-down") %>
+<%= submit_tag(button_name, class: "btn mx-auto mt-3") %>
 
 <!-- WHEN -->
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
     <div class="form-group form-inline">
       <%= date_select(:observation, :when, date_select_opts(@observation),
@@ -29,7 +29,7 @@
 
 <!-- WHERE -->
 <div class="row">
-  <div class="col-xs-12 col-sm-6 max-width-text">
+  <div class="col-12 col-sm-6 max-width-text">
     <div class="form-group">
       <%= label_tag(:observation_place_name, "#{:WHERE.t}: (#{:required.t})") %>
       <%= text_field(:observation, :place_name, class: "form-control") %>
@@ -37,9 +37,9 @@
       <span class="map-locate map-btn">Locate on Map</span>
     </div>
   </div>
-  <div class="col-xs-12 col-sm-6">
+  <div class="col-12 col-sm-6">
     <div class="well well-sm max-width-text help-block">
-      <div class="arrow-left hidden-xs"></div>
+      <div class="arrow-left d-none d-sm-block"></div>
       <%=
         loc1 = "Albion, Mendocino Co., California, USA"
         loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
@@ -56,13 +56,13 @@
 
 <!-- IS_COLLECTION_LOCATION -->
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <div class="form-inline">
       <%= check_box(:observation, :is_collection_location, class: "form-control-xxx") %>
       <%= label_tag(:observation_is_collection_location, :form_observations_is_collection_location.t) %>
     </div>
-    <div class="well well-sm push-down max-width-text help-block">
-      <div class="arrow-up hidden-xs"></div>
+    <div class="well well-sm mt-3 max-width-text help-block">
+      <div class="arrow-up d-none d-sm-block"></div>
       <%= :form_observations_is_collection_location_help.t %>
     </div>
   </div>
@@ -70,7 +70,7 @@
 <!-- /IS_COLLECTION_LOCATION -->
 
 <!-- LAT_LONG_ALT -->
-<div class="row push-down max-width-text-times-two">
+<div class="row mt-3 max-width-text-times-two">
   <div class="col-sm-6">
     <label>Location:</label>
     <div id="observationFormMap" class="form-observation-map"></div>
@@ -78,34 +78,34 @@
   </div>
   <div class="col-sm-6">
     <div class="well well-sm help-block">
-      <div class="arrow-left hidden-xs"></div>
+      <div class="arrow-left d-none d-sm-block"></div>
       <%= :form_observations_lat_long_help.t %>
     </div>
   </div>
 </div>
-<div class="row push-down max-width-text-times-two">
-  <div class="col-xs-12 col-sm-6">
+<div class="row mt-3 max-width-text-times-two">
+  <div class="col-12 col-sm-6">
     <div class="row">
-      <div class="col-xs-12 col-sm-4">
+      <div class="col-12 col-sm-4">
         <div class="form-group">
           <%= label_tag(:observation_lat, :LATITUDE.t + ":") %>
           <%= text_field(:observation, :lat, class: "form-control") %>
         </div>
       </div>
-      <div class="col-xs-12 col-sm-4">
+      <div class="col-12 col-sm-4">
         <div class="form-group">
           <%= label_tag("observation_long", :LONGITUDE.t + ":") %>
           <%= text_field(:observation, :long, class: "form-control") %>
         </div>
       </div>
-      <div class="col-xs-12 col-sm-4">
+      <div class="col-12 col-sm-4">
         <div class="form-group">
           <%= label_tag("observation_alt", :ALTITUDE.t + ":") %>
           <%= text_field(:observation, :alt, class: "form-control") %>
           (<%= :units_meters.t %>)
         </div>
       </div>
-      <div class="col-xs-12 col-sm-12">
+      <div class="col-12 col-sm-12">
         <div class="form-inline">
           <%= check_box(:observation, :gps_hidden, class: "form-control-xxx") %>
           <%= label_tag(:observation_gps_hidden, :form_observations_gps_hidden.t) %>
@@ -116,8 +116,8 @@
 </div>
 <!-- /LAT_LONG_ALT -->
 
-<div class="row push-down">
-  <div class="col-xs-12 max-width-text-times-two">
+<div class="row mt-3">
+  <div class="col-12 max-width-text-times-two">
 <%= render(partial: "naming/form",
             locals: {
               action:       action,
@@ -130,12 +130,12 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12 push-down max-width-text">
+  <div class="col-12 mt-3 max-width-text">
     <div class="form-inline">
       <%= check_box(:observation, :specimen, class: "form-control-xxx") %>
       <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
     </div>
-    <div class="well well-sm push-down max-width-text help-block">
+    <div class="well well-sm mt-3 max-width-text help-block">
       <div class="arrow-up"></div>
       <%= :form_observations_specimen_available_help.t %>
     </div>
@@ -153,7 +153,7 @@
 <!-- specimen_fields -->
 <% if button_name == :CREATE.l %>
   <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
-    <div class="row push-up">
+    <div class="row mb-3">
       <div class="col-sm-6 max-width-text">
         <div class="form-group">
           <%= label_tag(:collection_number_name, :collection_number_name.t + ":") %>
@@ -166,12 +166,12 @@
       </div>
       <div class="col-sm-6">
         <div class="well well-sm help-block">
-          <div class="arrow-left hidden-xs"></div>
+          <div class="arrow-left d-none d-sm-block"></div>
           <%= :form_observations_collection_number_help.t %>
         </div>
       </div>
     </div>
-    <div class="row push-up">
+    <div class="row mb-3">
       <div class="col-sm-6 max-width-text">
         <div class="form-group">
           <%= label_tag(:herbarium_record_herbarium_name, :herbarium_record_herbarium_name.t + ":") %>
@@ -185,7 +185,7 @@
       </div>
       <div class="col-sm-6">
         <div class="well well-sm ">
-          <div class="arrow-left hidden-xs help-block"></div>
+          <div class="arrow-left d-none d-sm-block help-block"></div>
           <%= :form_observations_herbarium_record_help.t %>
         </div>
       </div>
@@ -225,21 +225,21 @@
     <% # @observation.thumb_image_id ||= 0 %>
 
     <% if @good_images.any? %>
-      <div class="col-xs-12">
+      <div class="col-12">
         <b>Images:</b>
       </div>
       <% for image in @good_images %>
-        <div class="col-xs-12 push-down">
+        <div class="col-12 mt-3">
           <div class="row form_image">
 
             <!-- GOOD_IMAGE -->
-              <div class="col-xs-1" style="max-width:30px">
+              <div class="col-1" style="max-width:30px">
                 <%= radio_button(:observation, :thumb_image_id, image.id) %>
               </div>
-              <div class="col-xs-11 col-sm-3">
+              <div class="col-11 col-sm-3">
                 <%= thumbnail(image, border: 0, obs: @observation.id, votes: true) %>
               </div>
-              <div class="col-xs-12 col-sm-8">
+              <div class="col-12 col-sm-8">
                 <% if check_permission(image) %>
                   <table class="table-observation-form">
                     <tr>
@@ -303,7 +303,7 @@
     <%= hidden_field_tag(:good_images, @good_images.map { |o| o.id }.join(" ")) %>
   </div>
 
-  <div class="row push-down max-width-text-times-two">
+  <div class="row mt-3 max-width-text-times-two">
     <div class="col-sm-12">
 
 
@@ -354,17 +354,17 @@
 <% end # if include_images %>
 
 <% if @projects.any? || @lists.any? %>
-  <%= submit_tag(button_name, class: "btn center-block push-down") %>
+  <%= submit_tag(button_name, class: "btn mx-auto mt-3") %>
 <% end %>
 
 <% ##########################################################################     %>
 
 <% if @projects.any? %>
-  <div class="row push-down">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
+  <div class="row mt-3">
+    <div class="col-12 max-width-text-times-two">
+      <div class="col-12 col-sm-6 float-right">
         <div class="well well-sm max-width-text help-block">
-          <div class="arrow-left hidden-xs"></div>
+          <div class="arrow-left d-none d-sm-block"></div>
           <%= :form_observations_project_help.t %>
         </div>
       </div>
@@ -382,11 +382,11 @@
 <% end %>
 
 <% if @lists.any? %>
-  <div class="row push-down">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
+  <div class="row mt-3">
+    <div class="col-12 max-width-text-times-two">
+      <div class="col-12 col-sm-6 pull-right">
         <div class="well well-sm max-width-text help-block">
-          <div class="arrow-left hidden-xs"></div>
+          <div class="arrow-left d-none d-sm-block"></div>
           <%= :form_observations_list_help.t %>
         </div>
       </div>
@@ -402,7 +402,7 @@
   </div>
 <% end %>
 
-<%= submit_tag(button_name, class: "btn center-block push-down") %>
+<%= submit_tag(button_name, class: "btn mx-auto mt-3") %>
 
 <% if logging_optional %>
   <div class="form-inline">

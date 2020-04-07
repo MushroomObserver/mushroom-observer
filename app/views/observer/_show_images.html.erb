@@ -4,7 +4,7 @@
       <%= content_tag(:h4, :IMAGES.t, style: "margin-top: 0") %>
     </div>
     <% if check_permission(observation) %>
-      <div class="col-sm-8 pull-right-sm">
+      <div class="col-sm-8 float-sm-right">
         <small>
           <%= link_with_query(:show_observation_add_images.t, controller: :image,
                               action: :add_image, id: observation.id) %>

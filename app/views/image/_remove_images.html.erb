@@ -12,13 +12,13 @@
 
 <%= form_tag(add_query_param(action: form_action, id: @object.id)) do %>
   <div class="row">
-    <div class="col-xs-12">
-      <%= submit_tag(:image_remove_remove.l, class: "btn center-block push-down push-up") %>
+    <div class="col-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn mx-auto mt-3 mb-3") %>
     </div>
   </div>
 
   <%= render(layout: "shared/matrix_table", locals: {objects: @object.images}) do |image| %>
-    <div class="push-down push-up">
+    <div class="mt-3 mb-3">
       <%= thumbnail(image, votes: true, original: true) %>
       <center>
         <%= check_box(:selected, image.id, {}, "yes", "no") %>
@@ -28,8 +28,8 @@
   <% end %>
 
   <div class="row">
-    <div class="col-xs-12">
-      <%= submit_tag(:image_remove_remove.l, class: "btn center-block push-down") %>
+    <div class="col-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn mx-auto mt-3") %>
     <% end %>
   </div>
 </div>

@@ -12,16 +12,16 @@
   <%= :show_herbarium_curator_help.tp %>
   <%= form_tag(add_query_param(action: :request_to_be_curator, id: @herbarium.id,
                                back: @back)) do %>
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:herbarium_name, :HERBARIUM.t) %>: <%= @herbarium.name.t %>
     </div>
 
-    <div class="form-group push-down">
+    <div class="form-group mt-3">
       <%= label_tag(:notes, :NOTES.t + ":") %>
       <%= text_area_tag(:notes, "", rows: 10, class: "form-control",
                         data: {autofocus: true}) %>
     </div>
 
-    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>

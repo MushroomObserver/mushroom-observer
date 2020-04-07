@@ -1,9 +1,9 @@
  <!-- Privacy Settings of Account Preferences Form -->
-<div class="form-group push-down bold">
+<div class="form-group mt-3 bold">
   <%= :prefs_privacy.t %>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_votes_anonymous,
                 :prefs_votes_anonymous.t + ":") %><br/>
   <%= values = [
@@ -24,7 +24,7 @@
 
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_keep_filenames,
                 :prefs_keep_image_filenames.t + ":") %><br/>
   <%= form.select(:keep_filenames,
@@ -43,7 +43,7 @@
   </span>
 </div>
 
-<div class="form-group push-down">
+<div class="form-group mt-3">
   <%= label_tag(:user_license_id, :License.t + ":") %>
   <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
   <%= form.select(:license_id, @licenses, class: "form-control") %>
@@ -53,4 +53,4 @@
   </span>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>

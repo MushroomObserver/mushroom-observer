@@ -1,7 +1,7 @@
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn mx-auto mt-3") %>
 
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
     <% if @herbarium_record.observations.count > 1 %>
       <div class="alert alert-warning">
         <%= :edit_affects_multiple_observations.t(type: :herbarium_record) %>
@@ -11,7 +11,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
     <div class="form-group">
       <%= label_tag(:herbarium_record_herbarium_name, :NAME.t + ":") %>
       <span class="HelpNote">(<%= :required.t %>)</span>
@@ -22,7 +22,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
     <div class="form-group">
       <%= label_tag(:herbarium_record_initial_det, :herbarium_record_initial_det.t + ":") %>
       <span class="HelpNote">(<%= :optional.t %>)</span>
@@ -32,13 +32,13 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
     <div class="form-inline">
       <%= label_tag(:herbarium_record_accession_number, :herbarium_record_accession_number.t + ":") %>
       <%= text_field(:herbarium_record, :accession_number, class:"form-control") %>
       <span class="HelpNote">(<%= :required.t %>)</span>
     </div>
-    <div class="well well-sm push-down help-block">
+    <div class="well well-sm mt-3 help-block">
       <div class="arrow-up"></div>
       <%= :create_herbarium_record_accession_number_help.t %>
     </div>
@@ -46,7 +46,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-12">
     <div class="form-group">
       <%= label_tag(:herbarium_record_notes, :NOTES.t + ":") %>
       <span class="HelpNote">(<%= :optional.t %>)</span>
@@ -55,4 +55,4 @@
   </div>
 </div>
 
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn mx-auto mt-3") %>

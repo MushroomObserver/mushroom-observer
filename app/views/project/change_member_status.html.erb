@@ -19,18 +19,18 @@
   <%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
                                candidate: @candidate.id)) do %>
 
-    <div class="form-group push-down">
-      <%= submit_tag(:change_member_status_make_member.l, class: "btn center-block push-up") %>
+    <div class="form-group mt-3">
+      <%= submit_tag(:change_member_status_make_member.l, class: "btn mx-auto mb-3") %>
       <%= :change_member_status_make_member_help.t %>
     </div>
 
-    <div class="form-group push-down">
-      <%= submit_tag(:change_member_status_remove_member.l, class: "btn center-block push-up") %>
+    <div class="form-group mt-3">
+      <%= submit_tag(:change_member_status_remove_member.l, class: "btn mx-auto mb-3") %>
       <%= :change_member_status_remove_member_help.t %>
     </div>
 
-    <div class="form-group push-down">
-      <%= submit_tag(:change_member_status_make_admin.l, class: "btn center-block push-up") %>
+    <div class="form-group mt-3">
+      <%= submit_tag(:change_member_status_make_admin.l, class: "btn mx-auto mb-3") %>
       <%= :change_member_status_make_admin_help.t %>
     </div>
   <% end %>

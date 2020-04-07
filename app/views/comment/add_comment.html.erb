@@ -10,21 +10,21 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 col-sm-8 max-width-text">
+  <div class="col-12 col-sm-8 max-width-text">
     <%= form_tag(add_query_param(action: :add_comment,
                                  id: @comment.target_id,
                                  type: @comment.target_type)) do %>
       <%= submit_tag(:comment_add_create.l,
-                     class: "btn center-block push-down") %>
+                     class: "btn mx-auto mt-3") %>
       <%= render(partial: "form_comments") %>
       <%= submit_tag(:comment_add_create.l,
-                     class: "btn center-block push-down") %>
+                     class: "btn mx-auto mt-3") %>
       <hr align="center" width="90%" />
     <% end %>
   </div>
 
   <% if @target.is_a?(Observation) %>
-    <div class="hidden-xs col-sm-4">
+    <div class="d-none d-sm-block col-sm-4">
       <%= render(partial: "observer/show_images",
                  locals: { observation: @target, thumb_size_control: false }) %>
     </div>
@@ -32,7 +32,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text">
+  <div class="col-12 max-width-text">
     <%= render(partial: "object", object: @target) %>
   </div>
 </div>

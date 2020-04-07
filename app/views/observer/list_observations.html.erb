@@ -35,10 +35,14 @@
   <% end %>
 <% end %>
 
-<%= paginate_block(@pages) do %>
-  <div class="row results push-down">
-    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
-               collection: @objects, as: :object) %>
-    <div style="clear: left"></div>
-  </div>
-<% end %>
+<%= pagination_numbers(@pages) %>
+
+<div class="results row row-columns-1 row-columns-sm-2 row-columns-lg-3 row-columns-xl-4">
+  <%= render(partial: "shared/matrix_box",
+             layout: "shared/matrix_table",
+             collection: @objects,
+             as: :object) %>
+  <div style="clear:left"></div>
+</div>
+
+<%= pagination_numbers(@pages) %>

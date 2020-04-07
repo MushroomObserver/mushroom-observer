@@ -20,7 +20,7 @@
 
   <%= form_tag(action: :textile_sandbox) %>
     <% if !@code.nil? %>
-      <div class="sandbox-up-ptr center-block push-down push-up">
+      <div class="sandbox-up-ptr mx-auto mt-3 mb-3">
         <%= image_tag("up_arrow.png") %>
         <%= submit_tag(:sandbox_test.l, class: "btn") %>
         <%= submit_tag(:sandbox_test_codes.l, class: "btn") %>
@@ -30,11 +30,11 @@
     <strong><%= :sandbox_enter.t %>:</strong>
     <%= text_area_tag(:code, @code, class: "form-control", rows: 8) %>
     <% if @code.nil? %>
-      <%= submit_tag(:sandbox_test.l, class: "btn center-block push-down") %>
+      <%= submit_tag(:sandbox_test.l, class: "btn mx-auto mt-3") %>
     <% end %>
   </form>
 
-  <div class="push-down">
+  <div class="mt-3">
     <p><strong><%= :sandbox_quick_ref.t %>:</strong></p>
     <pre><%= :sandbox_sample.l %></pre>
   </div>

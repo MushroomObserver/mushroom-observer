@@ -43,7 +43,7 @@
 %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text-plus-padding">
+  <div class="col-12 max-width-text-plus-padding">
     <div class="list-group">
       <div class="list-group-item">
         <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
@@ -67,7 +67,7 @@
   query_params_set(@query) %>
 
   <div class="row">
-    <div class="col-xs-12 max-width-text-plus-image">
+    <div class="col-12 max-width-text-plus-image">
       <%= paginate_block(@pages) do %>
         <div class="list-group">
 
@@ -120,21 +120,21 @@
 
 <% else %>
   <div class="row">
-    <div class="col-xs-12 max-width-text">
+    <div class="col-12 max-width-text">
       <%= :species_list_show_no_members.tp %>
     </div>
   </div>
 <% end %>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text push-down">
+  <div class="col-12 max-width-text mt-3">
     <%= render(partial: "comment/show_comments",
                locals: {object: @species_list, controls: true, limit: nil}) %>
   </div>
 </div>
 
 <div class="row">
-  <div class="col-xs-12 max-width-text push-down">
+  <div class="col-12 max-width-text mt-3">
     <%= show_object_footer(@species_list) %>
   </div>
 </div>

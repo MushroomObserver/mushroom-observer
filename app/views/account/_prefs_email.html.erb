@@ -1,5 +1,5 @@
 <!-- Email Settings of Account Preferences Form -->
-<div class="form-group push-down bold">
+<div class="form-group mt-3 bold">
   <%= :prefs_email_prefs.t %>
 </div>
 
@@ -8,7 +8,7 @@
   <%= label_tag(:user_email_html, :prefs_email_html.t) %>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= :prefs_email_comments.t %>:
   <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_comments_owner, class: "form-control") %>
@@ -23,7 +23,7 @@
                 :prefs_email_comments_all.t) %><br/>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= :prefs_email_observations.t %>:
   <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_observations_consensus, class: "form-control") %>
@@ -37,7 +37,7 @@
                 :prefs_email_observations_all.t) %><br/>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= :prefs_email_names.t %>:
   <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_names_admin, class: "form-control") %>
@@ -55,7 +55,7 @@
   <%= label_tag(:user_email_names_all, :prefs_email_names_all.t) %><br/>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= :prefs_email_locations.t %>:
   <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_locations_admin, class: "form-control") %>
@@ -72,7 +72,7 @@
                 :prefs_email_locations_all.t) %><br/>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <%= :prefs_email_general.t %>:
   <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box(:email_general_feature, class: "form-control") %>
@@ -86,10 +86,10 @@
                 :prefs_email_general_questions.t) %><br/>
 </div>
 
-<div class="form-group push-down form-inline">
+<div class="form-group mt-3 form-inline">
   <div class="help-block">
     <%= :prefs_email_note.tp %>
   </div>
 </div>
 
-<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+<%= submit_tag(:SAVE_EDITS.l, class: "btn mx-auto mt-3") %>

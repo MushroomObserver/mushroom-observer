@@ -4,6 +4,7 @@
   # nothing but the image_id.  (But not votes, original name, etc.)
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
   size_url   = Image.url(size, image_id)
+  small_url  = Image.url(:small, image_id)
   medium_url = Image.url(:medium, image_id)
   large_url  = Image.url(:large, image_id)
   huge_url   = Image.url(:huge, image_id)
@@ -14,23 +15,30 @@
 
 %>
 
-<div style="position:relative">
-  <div style="display:inline">
-    <div data-toggle="expand-icon" class="text-center">
-      <% style = "max-width: 100%; height: auto; margin: auto;" if responsive
-      img_class = "img-unresponsive #{img_class}" if !responsive
-      img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
-                          data: {toggle: "tooltip", placement: "bottom"}) %>
-      <%= link_with_query(img_tag, link, html_options) %>
-      <%= 
+<div class="position-relative w-100">
+  <%=
+    img_class = "img-fluid w-100 #{img_class}" if responsive
+    img_class = "img-unresponsive #{img_class}" if !responsive
+    image_tag(size_url, title: notes, class: img_class,
+                      srcset: { small_url => "320w",
+                                medium_url => "640w",
+                                large_url => "960w" },
+                      sizes: { "@media (max-width: 575px)" => "100vw",
+                               "@media (max-width: 991px)" => "50vw",
+                               "@media (min-width: 992px)" => "30vw" },
+                      data: {toggle: "tooltip", placement: "bottom"})
+  %>
+  <div class="position-absolute bottom-right mr-2 mb-2">
+    <div data-toggle="expand-icon" class="text-center btn btn-primary">
+      <%=
         lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
         show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
         show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
         caption = "#{show_orig} | #{show_exif}".html_safe
-        link_to("", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
+        link_to("&times;", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
                 data: {lightbox: lightbox_id, title: caption})
       %>
-      <div class="push-down">
+      <div class="">
         <% if User.current and votes and image %>
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
         <% end %>
@@ -43,4 +51,5 @@
       </div>
     </div>
   </div>
+  <%= link_with_query("", link, class: "stretched-link") %>
 </div>

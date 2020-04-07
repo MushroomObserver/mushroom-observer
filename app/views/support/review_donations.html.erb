@@ -10,10 +10,10 @@
 %>
 
 <%= form_tag do %>
-  <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
+  <%= submit_tag(:review_donations_update.l, class: "btn mx-auto") %>
 
   <center>
-    <table class="table-striped table-review-donations push-up push-down">
+    <table class="table-striped table-review-donations mb-3 mt-3">
       <thead>
         <tr>
           <% for label in [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email] %>
@@ -37,5 +37,5 @@
     </table>
   </center>
 
-  <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
+  <%= submit_tag(:review_donations_update.l, class: "btn mx-auto") %>
 <% end %>

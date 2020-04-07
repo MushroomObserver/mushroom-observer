@@ -1,7 +1,7 @@
 <% url_args = add_query_param(url_args) %>
 <%= form_tag(url_args) do %>
   <div class="row">
-    <div class="col-xs-12 max-width-text">
+    <div class="col-12 max-width-text">
 
       <div class="form-group form-inline">
         <%= label_tag(:img_id, :image_reuse_id.t + ":") %>
@@ -11,7 +11,7 @@
 
       <p class="help-block"><%= :image_reuse_id_help.tp %></p>
 
-      <div class="form-group push-down">
+      <div class="form-group mt-3">
         <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
                             url_args.merge(all_users: @all_users ? 0 : 1),
                             class: "btn") %>
@@ -21,7 +21,7 @@
 
   <%= paginate_block(@pages) do %>
     <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |image| %>
-      <div class="push-down push-up">
+      <div class="mt-3 mb-3">
         <%= thumbnail(image, link: url_args.merge(img_id: image.id), original: true) %>
       </div>
     <% end %>

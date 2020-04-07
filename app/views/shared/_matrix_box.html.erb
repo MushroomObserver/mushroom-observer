@@ -5,34 +5,30 @@
 %>
 
 <% if presenter %>
-      <div class="list-group" style="min-height: 200px;">
-        <div class="list-group-item rss-box-details">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="thumbnail-container" style="min-height: 30px">
-                <%= presenter.thumbnail %>
-              </div>
-              <div class="rss-what">
-                <h5><%= presenter.what %></h5>
-              </div>
-              <div class="rss-where">
-                <small><strong><%= presenter.where %></strong></small>
-              </div>
-              <div class="rss-what">
-                <small style="text-overflow: ellipsis; white-space: nowrap;">
-                  <% unless presenter.when.blank? %>
-                      <%= presenter.when %>: <%= presenter.who %>
-                  <% end %>
-                </small>
-              </div>
-              <div class="rss-detail">
-                <%= presenter.detail %>
-              </div>
-              <div class="rss-what">
-                <small><%= presenter.fancy_time %></small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="card rss-box-details h-100">
+    <div class="card-img-top">
+      <%= presenter.thumbnail %>
+    </div><!-- .card-img-top -->
+    <div class="card-body p-3 lh-2">
+      <div class="rss-what h5 mb-3">
+        <%= presenter.what %>
+      </div><!-- .rss-what -->
+      <div class="rss-where mb-2 small">
+        <%= presenter.where %>
+      </div><!-- .rss-where -->
+      <div class="rss-what mb-2 small">
+        <% unless presenter.when.blank? %>
+          <%= presenter.when %>: <%= presenter.who %>
+        <% end %>
+      </div><!-- .rss-what -->
+    </div><!-- .card-body -->
+    <div class="card-footer bg-transparent px-3 text-muted">
+      <div class="rss-detail small">
+        <%= presenter.detail %>
+      </div><!-- .rss-detail -->
+      <div class="rss-what small">
+        <%= presenter.fancy_time %>
+      </div><!-- .rss-what -->
+    </div><!-- .card-footer -->
+  </div><!-- .card -->
 <% end %>

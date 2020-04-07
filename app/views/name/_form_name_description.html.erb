@@ -1,11 +1,11 @@
 <!--[form:name_description]-->
 
 <div class="max-width-text">
-  <%= submit_tag(button, class: "btn center-block push-down push-up") %>
+  <%= submit_tag(button, class: "btn mx-auto mt-3 mb-3") %>
 
   <%= render(partial: "shared/form_description", locals: {form: form}) %>
 
-  <%= submit_tag(button, class: "btn center-block push-down push-up") %>
+  <%= submit_tag(button, class: "btn mx-auto mt-3 mb-3") %>
 
   <p><strong><%= :DESCRIPTION.t %>:</strong></p>
   <%= render(partial: "shared/textilize_help") %>
@@ -21,7 +21,7 @@
     </div>
   <% end %>
 
-  <%= submit_tag(button, class: "btn center-block push-down") %>
+  <%= submit_tag(button, class: "btn mx-auto mt-3") %>
 </div>
 
 <!--[eoform:name_description]-->

@@ -1,7 +1,7 @@
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn mx-auto mt-3") %>
 
 <div class="row form-group">
-  <div class="col-xs-12">
+  <div class="col-12">
     <%= label_tag(:herbarium_name, :NAME.t + ":") %>
     <span class="HelpNote">(<%= :required.t %>)</span>
     <%= text_field(:herbarium, :name, class: "form-control") %>
@@ -10,14 +10,14 @@
 
 <% if in_admin_mode? %>
   <div class="row form-group">
-    <div class="col-xs-12">
+    <div class="col-12">
       <div class="form-inline">
         <%= label_tag(:herbarium_personal_user_name, :edit_herbarium_admin_make_personal.t) %>:
         <%= text_field(:herbarium, :personal_user_name, class: "form-control-xxx") %>
         <% turn_into_user_auto_completer(:herbarium_personal_user_name) %>
       </div>
       <% if button != :CREATE %>
-        <div class="well well-sm push-down help-block">
+        <div class="well well-sm mt-3 help-block">
           <div class="arrow-up" style="margin-top:6px"></div>
           <% users = Herbarium.connection.select_rows(%(
             SELECT u.name, u.login, COUNT(u.id)
@@ -38,7 +38,7 @@
 <% else %>
   <% if @herbarium.personal_user_id == @user.id %>
     <div class="row form-group">
-      <div class="col-xs-12 help-block">
+      <div class="col-12 help-block">
         <%= :edit_herbarium_this_is_personal_herbarium.tp %>
       </div>
     </div>
@@ -46,12 +46,12 @@
 
   <% if button == :CREATE || @herbarium.can_make_personal?(@user) %>
     <div class="row form-group">
-      <div class="col-xs-12">
+      <div class="col-12">
         <div class="form-inline">
           <%= check_box(:herbarium, :personal, class: "form-control-xxx") %>
           <%= label_tag(:herbarium_personal, :create_herbarium_personal.t) %>
         </div>
-        <div class="well well-sm push-down help-block">
+        <div class="well well-sm mt-3 help-block">
           <div class="arrow-up"></div>
           <%= :create_herbarium_personal_help.t(name: @user.personal_herbarium_name) %>
         </div>
@@ -62,13 +62,13 @@
 
 <% if !@herbarium.personal_user_id %>
   <div class="row form-group" style="margin-bottom:-1em">
-    <div class="col-xs-12">
+    <div class="col-12">
       <div class="form-inline">
         <%= label_tag(:herbarium_code, :create_herbarium_code.t + ":") %>
         <%= text_field(:herbarium, :code, size: 8, class: "form-control") %>
         <span class="HelpNote">(<%= :optional.t %>)</span>
       </div>
-      <div class="well well-sm push-down help-block">
+      <div class="well well-sm mt-3 help-block">
         <div class="arrow-up" style="margin-top:6px"></div>
         <%= :create_herbarium_code_help.t %>
       </div>
@@ -77,7 +77,7 @@
 <% end %>
 
 <div class="row form-group">
-  <div class="col-xs-12">
+  <div class="col-12">
     <%= label_tag(:herbarium_place_name, :LOCATION.t + ":") %>
     <span class="HelpNote">(<%= :optional.t %>)</span>
     <%= text_field(:herbarium, :place_name, class: "form-control") %>
@@ -86,7 +86,7 @@
 </div>
 
 <div class="row form-group">
-  <div class="col-xs-12">
+  <div class="col-12">
     <%= label_tag(:herbarium_email, :create_herbarium_email.t + ":") %>
     <span class="HelpNote">(<%= :optional.t %>)</span>
     <%= text_field(:herbarium, :email, class: "form-control") %>
@@ -94,7 +94,7 @@
 </div>
 
 <div class="row form-group">
-  <div class="col-xs-12">
+  <div class="col-12">
     <%= label_tag(:herbarium_mailing_address, :create_herbarium_mailing_address.t + ":") %>
     <span class="HelpNote">(<%= :optional.t %>)</span>
     <%= text_area(:herbarium, :mailing_address, rows: 5, class: "form-control") %>
@@ -102,11 +102,11 @@
 </div>
 
 <div class="row form-group">
-  <div class="col-xs-12">
+  <div class="col-12">
     <%= label_tag(:herbarium_description, :NOTES.t + ":") %>
     <span class="HelpNote">(<%= :optional.t %>)</span>
     <%= text_area(:herbarium, :description, rows: 10, class: "form-control") %>
   </div>
 </div>
 
-<%= submit_tag(button.t, class: "btn center-block push-down") %>
+<%= submit_tag(button.t, class: "btn mx-auto mt-3") %>

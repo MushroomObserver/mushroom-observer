@@ -6,6 +6,6 @@
   <%= form_tag(add_query_param(action: :ask_observation_question, id: @observation.id)) do %>
     <%= :ask_observation_question_label.tp(user: @observation.user.legal_name) %>
     <%= text_area(:question, :content, rows: 6, data: {autofocus: true}, class: "form-control") %>
-    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+    <%= submit_tag(:SEND.l, class: "btn mx-auto mt-3") %>
   <% end %>
 </div>
