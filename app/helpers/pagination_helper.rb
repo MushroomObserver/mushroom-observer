@@ -14,7 +14,7 @@ module PaginationHelper
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    content_tag(:div, class: "results row") do
+    tag.div class: "row" do
       letters + safe_br + numbers + body + numbers + safe_br + letters
     end
   end
@@ -45,7 +45,9 @@ module PaginationHelper
         content_tag(:li, content_tag(:span, letter), class: "disabled")
       end
     end.safe_join(" ")
-    content_tag(:div, str, class: "pagination pagination-sm")
+    content_tag(:ul,
+                str,
+                class: "pagination pagination-sm")
   end
 
   def need_letter_pagination_links?(pages)
@@ -93,26 +95,29 @@ module PaginationHelper
       result << pagination_link(pstr, this - 1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args) if from > 1
       if from > 2
-        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+        result << pagination_link_disabled()
       end
       for n in from..to
         if n == this
-          result << content_tag(:li, content_tag(:span, n), class: "active")
+          result << pagination_link_active(n)
         elsif n.positive? && n <= num
           result << pagination_link(n, n, arg, args)
         end
       end
       if to < num - 1
-        result << content_tag(:li, content_tag(:span, "..."), class: "disabled")
+        result << pagination_link_disabled()
       end
       result << pagination_link(num, num, arg, args) if to < num
       result << pagination_link(nstr, this + 1, arg, args) if this < num
 
-      result = content_tag(:ul,
-                           result.safe_join(" "),
-                           class: "pagination pagination-sm")
     end
-    result
+
+    tag.nav aria: { label: "Page navigation" } do
+      tag.ul class: "pagination pagination-sm" do
+        result.safe_join(" ")
+      end
+    end
+
   end
 
   # Render a single pagination link for paginate_numbers above.
@@ -124,6 +129,28 @@ module PaginationHelper
       url.sub!(/#.*/, "")
       url += "#" + args[:anchor]
     end
-    content_tag(:li, link_to(label, url))
+    tag.li class: 'page-item' do
+      link_to(label, url, class: 'page-link')
+    end
   end
+
+  # Render an active-item pagination link.
+  def pagination_link_active(label)
+    # content_tag(:li, content_tag(:span, label), class: "active")
+    tag.li class: "page-item active" do
+      tag.span class: "page-link" do
+        label
+      end
+    end
+  end
+
+  # Render a blank (...) pagination link disabled.
+  def pagination_link_disabled()
+    tag.li class: "page-item disabled" do
+      tag.span class: 'page-link' do
+        "..."
+      end
+    end
+  end
+
 end

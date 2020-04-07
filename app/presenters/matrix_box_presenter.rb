@@ -31,6 +31,7 @@ class MatrixBoxPresenter
     # This gives separate spans for text_name, author, and id.
     target_type = target ? target.type_tag : rss_log.target_type
 
+    # TODO: Test this! author only works when object = Observation or RssLog!
     case rss_log
       when Observation, RssLog
         if target.respond_to?(:name)
@@ -45,8 +46,6 @@ class MatrixBoxPresenter
       when Image, User
         name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     end
-
-    # TODO: Fix this! author only works when object = Observation or RssLog!
 
     get_rss_log_details(rss_log, target)
 

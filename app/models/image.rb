@@ -150,6 +150,8 @@ require "open3"
 #  last_view::          Last time normal-size image was viewed.
 #  transferred::        Has this image been successfully transferred to the
 #                       image server yet?
+#  width:               image width (already in db, note added to model April 2020)
+#  height:              image height (already in db, note added to model April 2020)
 #
 #  ==== Temporary attributes
 #

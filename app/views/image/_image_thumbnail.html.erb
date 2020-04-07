@@ -12,21 +12,24 @@
   orig_url   = Image.url(:original, image_id)
    #If the image is part of an image set.
   is_set = is_set || false
-
+  image_width = image.width
+  image_height = image.height
 %>
 
 <div class="position-relative w-100">
   <%=
     img_class = "img-fluid w-100 #{img_class}" if responsive
     img_class = "img-unresponsive #{img_class}" if !responsive
-    image_tag(size_url, title: notes, class: img_class,
-                      srcset: { small_url => "320w",
-                                medium_url => "640w",
-                                large_url => "960w" },
-                      sizes: { "@media (max-width: 575px)" => "100vw",
-                               "@media (max-width: 991px)" => "50vw",
-                               "@media (min-width: 992px)" => "30vw" },
-                      data: {toggle: "tooltip", placement: "bottom"})
+    image_tag(size_url,
+              title: notes,
+              class: img_class,
+              srcset: { small_url => "320w",
+                        medium_url => "640w",
+                        large_url => "960w" },
+              sizes: { "@media (max-width: 575px)" => "100vw",
+                       "@media (max-width: 991px)" => "50vw",
+                       "@media (min-width: 992px)" => "30vw" },
+              data: {toggle: "tooltip", placement: "bottom"})
   %>
   <div class="position-absolute bottom-right mr-2 mb-2">
     <div data-toggle="expand-icon" class="text-center btn btn-primary">
