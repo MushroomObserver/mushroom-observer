@@ -4,3 +4,4 @@ test_locales
 mysql-production.cnf
 blocked_ips.txt
 okay_ips.txt
+gmaps_api_key.yml
