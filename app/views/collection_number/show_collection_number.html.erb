@@ -27,10 +27,10 @@
     <%= render(partial: "shared/matrix_box", collection: @collection_number.observations, as: :object) %>
   </div>
 
-  <center>
+  <div class="text-center">
     <p>
       <%= :CREATED_AT.t %>: <%= @collection_number.created_at.web_date %><br/>
       <%= :UPDATED_AT.t %>: <%= @collection_number.updated_at.web_date %><br/>
     </p>
-  </center>
+  </div>
 </div>

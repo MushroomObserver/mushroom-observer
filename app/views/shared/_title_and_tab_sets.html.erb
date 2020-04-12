@@ -6,22 +6,18 @@
   @tabsets ||= {}
 %>
 
-  <!-- Push down pager, title on small, xs screens so buttons do not block -->
-  <%= content_tag(:div, safe_nbsp, class: "d-print-none visible-xs visible-sm
-                                           push-below-buttons") %>
-
   <div class="col-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
     <!-- Pager -->
-    <%= content_tag(:div, class: "d-print-none") do
+    <%= tag.div class: "d-print-none" do
           if @tabsets[:pager_for]
-            render(partial: "/shared/prev_next_pager",
-              locals: { object: @tabsets[:pager_for] })
+            render partial: "/shared/prev_next_pager",
+              locals: { object: @tabsets[:pager_for] }
           end
         end %>
 
     <!-- Title Caption -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <%= content_tag(:span, @title, id: "title-caption") -%>
+    <%= tag.span @title, id: "title-caption" -%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
                                        class: "align-1px"),

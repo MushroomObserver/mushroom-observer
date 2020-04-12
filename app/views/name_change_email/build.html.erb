@@ -3,7 +3,7 @@
   old_name = @name_change.old_clone
   new_desc = @desc_change.new_clone
   old_desc = @desc_change.old_clone
-  
+
   watching = @user.watching?(new_name)
   is_now = :email_field_is_now.l
 
@@ -94,7 +94,7 @@
 if @user.email_html %>
 <html>
 <head>
-	<title><%= "#{:app_title.t}: #{@title}" %></title>
+  <title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>

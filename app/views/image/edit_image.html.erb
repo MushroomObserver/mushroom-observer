@@ -14,7 +14,7 @@
     <%= render(partial: "form_images",
                locals: {form: form, leave_out_original_file_name: false}) %>
 
-    <div class="text-center mt-3" style="margin-bottom:2em">
+    <div class="text-center mt-3 mb-4">
       <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
       <%= link_with_query(:cancel_and_show.t(type: :image),
                           {action: :show_image, id: @image.id},

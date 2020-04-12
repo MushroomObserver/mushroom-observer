@@ -1,12 +1,15 @@
-<% #passing in the objects as a collection with a partial is much faster, but not always possible if we ant to render a block %>
+<%
+  # passing in the objects as a collection with a partial is much faster,
+  # but not always possible if we want to render a block
+%>
 <% unless defined? object_counter %>
 <% objects.each_with_index do |object, idx| %>
-  <div class="col mb-4">
+  <li class="col mb-4">
     <%= yield(object) %>
-  </div>
+  </li>
 <% end %>
 <%else%>
-  <div class="col mb-4">
+  <li class="col mb-4">
     <%= yield(object) %>
-  </div>
+  </li>
 <% end %>

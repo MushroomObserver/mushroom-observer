@@ -1,5 +1,16 @@
 <%
-  @title = content_tag(:span, :rss_log_title.t, style: "white-space:nowrap")
+  @timer_end ||= Time.now
+  secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+  timer = "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
+
+  tag.div class: "d-flex flex-row" do
+    @title = content_tag(:span, :rss_log_title.t, style: "white-space:nowrap")
+    if @timer_start
+      tag.div class: "ml-auto small" do
+        timer
+      end
+    end
+  end
 
   if @links.any?
     tabs = create_links(@links)
@@ -12,12 +23,11 @@
 
 <%= pagination_numbers(@pages) %>
 
-<div class="results row row-cols-1 row-cols-sm-2 row-cols-lg-3">
+<ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
   <%= render(partial: "shared/matrix_box",
              layout: "shared/matrix_table",
              collection: @objects,
              as: :object) %>
-  <div style="clear:left"></div>
-</div>
+</ul>
 
 <%= pagination_numbers(@pages) %>

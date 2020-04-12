@@ -2,7 +2,7 @@
 source "https://rubygems.org"
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", "~> 5.2.2"
+gem "rails", "~> 5.2.4"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
@@ -11,30 +11,37 @@ gem "mysql2"
 # Use sqlite3 as the database for Active Record
 # gem "sqlite3"
 
-# Use bootstrap style generator
-# gem "bootstrap-sass"
-gem "bootstrap", "~> 4.4.1"
-
 # Use SCSS for stylesheets
 gem "sassc-rails"
 
-# Use jquery as the JavaScript library
-gem "jquery-rails"
-
 # Use mini_racer as JavaScript runtime for ExecJS
-# ExecJS::RubyRacerRuntime is not supported.
-# Please replace therubyracer with mini_racer in your Gemfile or use Node.js as ExecJS runtime.
+# Note: ExecJS::RubyRacerRuntime is not supported.
+#       Please replace therubyracer with mini_racer in your Gemfile or use Node.js as ExecJS runtime.
 gem "mini_racer"
 
 # Use CoffeeScript for .js.coffee assets and views
 gem "coffee-rails"
+
+# Enable ES6 modern JS parsing and transpiling to regular JS
+gem "babel-source"
+gem "babel-transpiler"
+gem "sprockets"
+gem "sprockets-es6"
+# gem "sprockets-babel-miniracer", "~> 0.0.12"
+
+# Use jquery as the JavaScript library
+gem "jquery-rails"
 
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier"
 
 # Turbolinks makes following links in your web application faster.
 # Read more: https://github.com/rails/turbolinks
-# gem "turbolinks"
+# Note: //= require turbolinks in application.js
+# JS note: Must refactor for window and document load events not occurring
+#    Works better with StimulusJS: https://github.com/stimulusjs/stimulus
+gem "turbolinks-source"
+gem "turbolinks"
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "jbuilder"
@@ -77,13 +84,49 @@ gem "simple_enum"
 # limited to v2 to avoid installing a bunch of gems
 gem "aws-sdk", "~> 2"
 
+# email generation, parsing and sending
+gem "mail", "= 2.7.0"
+
+# Autoprefixer (Required dependency for Bootstrap 4)
+# Parse CSS and add vendor prefixes to CSS rules
+# using values from the Can I Use database
+gem "autoprefixer-rails"
+
+
+########## Mapping and Geocoding ###############################################
+
+# Geocoder - Provides object geocoding (by street or IP address),
+# reverse geocoding (coordinates to street address),
+# distance queries for ActiveRecord and Mongoid, result caching
+# https://github.com/alexreisner/geocoder
+gem "geocoder"
+
+# Geokit - Provides ActiveRecord distance-based finders.
+# For example, find all the points in your database within a 50-mile radius.
+# Optional IP-based location lookup utilizing hostip.info
+# http://github.com/geokit/geokit
+gem "geokit"
+
+
+########## Presentation and Interaction ########################################
+
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
-gem "jquery-slick-rails"
+# gem "jquery-slick-rails"
 
-# email generation, parsing and sending
-gem "mail", "= 2.7.0"
+# PopperJS tooltip positioner (Required dependency for Bootstrap 4)
+gem "popper_js", "~> 1.16"
+
+# Use Bootstrap for SCSS and JS
+gem "bootstrap", "~> 4.4.1"
+
+# Use Bootstrap Lightbox for lightbox
+gem "lightbox-bootstrap-rails", "~> 5.1", ">= 5.1.0.1"
+
+# Experimental: Use will_paginate_infinite for infinite scroll.
+# gem "will_paginate_infinite", git: "https://github.com/adamtao/will_paginate_infinite"
+
 
 ########## Development, Testing, and Analysis ##################################
 
@@ -112,7 +155,7 @@ gem "mry", require: false
 
 group :development do
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
-  gem 'rails_db', '2.3.1'
+  gem "rails_db"
 end
 
 group :test do

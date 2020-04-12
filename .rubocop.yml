@@ -15,7 +15,7 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   # Ignore cops for Ruby versions which are newer than that used by MO
-  TargetRubyVersion: 2.4.1
+  TargetRubyVersion: 2.4.10
 
   ###################### Exclusions ############################################
   # Completely ignore the following
@@ -136,7 +136,7 @@ Metrics/PerceivedComplexity:
 ###################### Layout and Style ########################################
 
 # Repeat the default because Codeclimate ignores it as of 2019-07-09
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedColonStyle: key
 
 # Rubocop supports multiple options and MO uses a non-default

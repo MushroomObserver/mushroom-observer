@@ -1,5 +1,5 @@
 <%
-	herbarium = @herbarium_record.herbarium
+  herbarium = @herbarium_record.herbarium
   intro = :email_add_herbarium_record_not_curator_intro.l(
     login: @user.login,
     herbarium_name: herbarium.name,
@@ -9,11 +9,11 @@
   handy_links = :email_handy_links.l
 
   links = [[:email_links_show_object.t(type: :herbarium_record),
-    "#{MO.http_domain}/herbarium_record/show_herbarium_record/#{@herbarium_record.id}"],
-		[:email_links_show_object.t(type: :herbarium),
-			"#{MO.http_domain}/herbarium/show_herbarium/#{herbarium.id}"],
-		[:email_links_show_user.t(user: @user.login),
-		  "#{MO.http_domain}/observer/show_user/#{@sender.id}"]]
+            "#{MO.http_domain}/herbarium_record/show_herbarium_record/#{@herbarium_record.id}"],
+           [:email_links_show_object.t(type: :herbarium),
+            "#{MO.http_domain}/herbarium/show_herbarium/#{herbarium.id}"],
+           [:email_links_show_user.t(user: @user.login),
+            "#{MO.http_domain}/observer/show_user/#{@sender.id}"]]
 
 if @user.email_html %>
 <html>

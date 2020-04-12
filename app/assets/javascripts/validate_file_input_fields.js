@@ -33,9 +33,4 @@ function apply_file_input_field_validation(id) {
   };
 }
 
-// Add validation to all field input fields once page is loaded.
-jQuery(document).ready(function() {
-  jQuery("input[type=file][multiple!=multiple]").each(function() {
-    apply_file_input_field_validation(this.id);
-  });
-});
+// Initializer moved to initializers.js

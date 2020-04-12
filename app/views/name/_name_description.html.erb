@@ -10,7 +10,7 @@
 
   <%= :show_name_content_status.t %>: <%= review_as_string(desc.review_status) %><br/>
   <% if desc.reviewer %>
-    <span class="HelpNote">
+    <span class="help-note">
       <%= indent + "(" + :show_name_latest_review.t(
         date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.t,
         user: user_link(desc.reviewer, desc.reviewer.login)

@@ -65,7 +65,7 @@
     <% if @dubious_where_reasons && @dubious_where_reasons.any? %>
       <div class="alert alert-warning">
         <%= @dubious_where_reasons.safe_join(safe_br) %><br/>
-        <span class="HelpNote">
+        <span class="help-note">
           <%= :form_observations_dubious_help.t(button: button) %>
         </span>
       </div>
@@ -104,28 +104,28 @@
       <%= label_tag(:member_alt, :ALTITUDE.t + ":") %>&nbsp;<%=
         text_field(:member, :alt, size: 6, value: @member_alt, class: "form-control") %>
       <br/>
-      <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span>
+      <span class="help-note"><%= :form_observations_lat_long_help.t %></span>
     </div>
 
     <div class="form-group form-inline mt-3">
       <%= check_box(:member, :is_collection_location, checked: @member_is_collection_location) %>
       <%= label_tag(:member_is_collection_location, :form_observations_is_collection_location.t) %>
       <br/>
-      <span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span>
+      <span class="help-note"><%= :form_observations_is_collection_location_help.t %></span>
     </div>
 
     <div class="form-group form-inline mt-3">
       <%= check_box(:member, :specimen, checked: @member_specimen) %>
       <%= label_tag(:observation_specimen, :form_observations_specimen_available.t) %>
       <br/>
-      <span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span>
+      <span class="help-note"><%= :form_observations_specimen_available_help.t %></span>
     </div>
 
     <% if @projects.any? %>
       <div class="form-group">
         <p>
           <b><%= :PROJECTS.t %>:</b>
-          <span class="HelpNote"><%= :form_species_lists_project_help.t %></span>
+          <span class="help-note"><%= :form_species_lists_project_help.t %></span>
         </p>
         <p>
           <% for project in @projects %>

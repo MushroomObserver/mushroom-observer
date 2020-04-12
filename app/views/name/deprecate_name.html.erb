@@ -20,7 +20,7 @@
 
   <p><label for="proposed_name"><%= :name_deprecate_preferred.t %>:</label>
   <%= text_field(:proposed, :name, value: @what, data: {autofocus: true}) %></p>
-  <div class="HelpNote">
+  <div class="help-note">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
   <% turn_into_name_auto_completer(:proposed_name, primer: Name.primer) %>
@@ -30,7 +30,7 @@
 
   <p><label for="comment_comment"><%= :name_deprecate_comments.t %>:</label><br/>
   <%= text_area(:comment, :comment, cols: 80, rows: 5, value: @comment) %></p>
-  <div class="HelpNote">
+  <div class="help-note">
     <%= :name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")) %>
     <%= :field_textile_link.tp %>
   </div>

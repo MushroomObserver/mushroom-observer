@@ -3,7 +3,7 @@
 <div class="row form-group">
   <div class="col-12">
     <%= label_tag(:herbarium_name, :NAME.t + ":") %>
-    <span class="HelpNote">(<%= :required.t %>)</span>
+    <span class="help-note">(<%= :required.t %>)</span>
     <%= text_field(:herbarium, :name, class: "form-control") %>
   </div>
 </div>
@@ -18,7 +18,7 @@
       </div>
       <% if button != :CREATE %>
         <div class="well well-sm mt-3 help-block">
-          <div class="arrow-up" style="margin-top:6px"></div>
+          <div class="arrow-up mt-2"></div>
           <% users = Herbarium.connection.select_rows(%(
             SELECT u.name, u.login, COUNT(u.id)
             FROM herbarium_records hr JOIN users u ON u.id = hr.user_id
@@ -66,10 +66,10 @@
       <div class="form-inline">
         <%= label_tag(:herbarium_code, :create_herbarium_code.t + ":") %>
         <%= text_field(:herbarium, :code, size: 8, class: "form-control") %>
-        <span class="HelpNote">(<%= :optional.t %>)</span>
+        <span class="help-note">(<%= :optional.t %>)</span>
       </div>
       <div class="well well-sm mt-3 help-block">
-        <div class="arrow-up" style="margin-top:6px"></div>
+        <div class="arrow-up mt-2"></div>
         <%= :create_herbarium_code_help.t %>
       </div>
     </div>
@@ -79,7 +79,7 @@
 <div class="row form-group">
   <div class="col-12">
     <%= label_tag(:herbarium_place_name, :LOCATION.t + ":") %>
-    <span class="HelpNote">(<%= :optional.t %>)</span>
+    <span class="help-note">(<%= :optional.t %>)</span>
     <%= text_field(:herbarium, :place_name, class: "form-control") %>
     <% turn_into_location_auto_completer(:herbarium_place_name) %>
   </div>
@@ -88,7 +88,7 @@
 <div class="row form-group">
   <div class="col-12">
     <%= label_tag(:herbarium_email, :create_herbarium_email.t + ":") %>
-    <span class="HelpNote">(<%= :optional.t %>)</span>
+    <span class="help-note">(<%= :optional.t %>)</span>
     <%= text_field(:herbarium, :email, class: "form-control") %>
   </div>
 </div>
@@ -96,7 +96,7 @@
 <div class="row form-group">
   <div class="col-12">
     <%= label_tag(:herbarium_mailing_address, :create_herbarium_mailing_address.t + ":") %>
-    <span class="HelpNote">(<%= :optional.t %>)</span>
+    <span class="help-note">(<%= :optional.t %>)</span>
     <%= text_area(:herbarium, :mailing_address, rows: 5, class: "form-control") %>
   </div>
 </div>
@@ -104,7 +104,7 @@
 <div class="row form-group">
   <div class="col-12">
     <%= label_tag(:herbarium_description, :NOTES.t + ":") %>
-    <span class="HelpNote">(<%= :optional.t %>)</span>
+    <span class="help-note">(<%= :optional.t %>)</span>
     <%= text_area(:herbarium, :description, rows: 10, class: "form-control") %>
   </div>
 </div>

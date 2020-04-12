@@ -2,7 +2,7 @@
 <div class="row mt-3">
   <div class="form-group col-12 col-md-6 max-width-text">
     <%= label_tag(:sequence_locus, :LOCUS.t + ":") %>
-    <span class="HelpNote">(<%= :required.t %>)</span>
+    <span class="help-note">(<%= :required.t %>)</span>
     <%= text_area(:sequence, :locus, rows: 1, class: "form-control",
                   style: "width: 100%;") %>
                   <%  # style stops area from changing size on reload %>
@@ -19,7 +19,7 @@
   <div class="form-group">
     <span class="col-md-6">
       <%= label_tag(:sequence_bases, :BASES.t + ":") %>
-      <span class="HelpNote">(<%= :form_sequence_bases_or_deposit_required.t %>)</span>
+      <span class="help-note">(<%= :form_sequence_bases_or_deposit_required.t %>)</span>
     </span>
     <span class="col-md-6">
       <%= url = WebSequenceArchive.blast_format_help
@@ -36,7 +36,7 @@
 <div class="row mt-3 form-group">
   <div class="col-12">
     <%= label_tag(:sequence_nothing, :DEPOSIT.t + ":") %>
-    <span class="HelpNote">(<%= :form_sequence_valid_deposit.t %>)</span>
+    <span class="help-note">(<%= :form_sequence_valid_deposit.t %>)</span>
   </div>
   <div class="col-1">
   </div>
@@ -59,7 +59,7 @@
 <div class="row mt-3">
   <div class="form-group col-12 col-md-6">
     <%= label_tag(:sequence_notes, :NOTES.t + ":") %>
-    <span class="HelpNote">(<%= :optional.t %>)</span>
+    <span class="help-note">(<%= :optional.t %>)</span>
     <%= text_area(:sequence, :notes, rows: 3, class: "form-control") %>
   </div>
   <div class="col-12 col-md-6">

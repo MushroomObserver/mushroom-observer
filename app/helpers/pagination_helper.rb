@@ -47,7 +47,7 @@ module PaginationHelper
     end.safe_join(" ")
     content_tag(:ul,
                 str,
-                class: "pagination pagination-sm")
+                class: "pagination")
   end
 
   def need_letter_pagination_links?(pages)
@@ -90,10 +90,11 @@ module PaginationHelper
       to = this + size
 
       result = []
-      pstr = "« #{:PREV.t}"
-      nstr = "#{:NEXT.t} »"
-      result << pagination_link(pstr, this - 1, arg, args) if this > 1
-      result << pagination_link(1, 1, arg, args) if from > 1
+      prev_str = "« #{:PREV.t}"
+      next_str = "#{:NEXT.t} »"
+      style = "page-item"
+      result << pagination_link(prev_str, "page-item flex-fill", this - 1, arg, args) if this > 1
+      result << pagination_link(1, style, 1, arg, args) if from > 1
       if from > 2
         result << pagination_link_disabled()
       end
@@ -101,19 +102,19 @@ module PaginationHelper
         if n == this
           result << pagination_link_active(n)
         elsif n.positive? && n <= num
-          result << pagination_link(n, n, arg, args)
+          result << pagination_link(n, style, n, arg, args)
         end
       end
       if to < num - 1
         result << pagination_link_disabled()
       end
-      result << pagination_link(num, num, arg, args) if to < num
-      result << pagination_link(nstr, this + 1, arg, args) if this < num
+      result << pagination_link(num, style, num, arg, args) if to < num
+      result << pagination_link(next_str, "page-item flex-fill text-right", this + 1, arg, args) if this < num
 
     end
 
-    tag.nav aria: { label: "Page navigation" } do
-      tag.ul class: "pagination pagination-sm" do
+    tag.nav aria: { label: "Page navigation".t } do
+      tag.ul class: "pagination" do
         result.safe_join(" ")
       end
     end
@@ -121,7 +122,7 @@ module PaginationHelper
   end
 
   # Render a single pagination link for paginate_numbers above.
-  def pagination_link(label, page, arg, args)
+  def pagination_link(label, style, page, arg, args)
     params = args[:params] || {}
     params[arg] = page
     url = reload_with_args(params)
@@ -129,7 +130,7 @@ module PaginationHelper
       url.sub!(/#.*/, "")
       url += "#" + args[:anchor]
     end
-    tag.li class: 'page-item' do
+    tag.li class: style do
       link_to(label, url, class: 'page-link')
     end
   end
@@ -139,7 +140,7 @@ module PaginationHelper
     # content_tag(:li, content_tag(:span, label), class: "active")
     tag.li class: "page-item active" do
       tag.span class: "page-link" do
-        label
+        "#{label}"
       end
     end
   end

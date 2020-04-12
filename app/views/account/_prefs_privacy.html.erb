@@ -16,7 +16,7 @@
         values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
       end
       form.select(:votes_anonymous, values, class: "form-control") %>
-  <span class="HelpNote">
+  <span class="help-note">
     <%= link_to(:prefs_change_image_vote_anonymity.t,
                 controller: :image,
                 action: :bulk_vote_anonymity_updater) %>
@@ -34,7 +34,7 @@
                     [:prefs_keep_image_filenames_keep_and_show.l,
                      :keep_and_show]],
                   class: "form-control") %>
-  <span class="HelpNote">
+  <span class="help-note">
     <%= link_to(:prefs_bulk_filename_purge.t,
                  { controller: :image,
                    action: :bulk_filename_purge },
@@ -45,9 +45,9 @@
 
 <div class="form-group mt-3">
   <%= label_tag(:user_license_id, :License.t + ":") %>
-  <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+  <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
   <%= form.select(:license_id, @licenses, class: "form-control") %>
-  <span class="HelpNote">
+  <span class="help-note">
     <%= link_to(:bulk_license_link.t, controller: :image,
                                       action: :license_updater) %>
   </span>

@@ -17,11 +17,11 @@
       <%= n.display_name.t %><br/>
     <% end %></p>
   <% end %>
-  <div class="HelpNote"><%= :name_approve_deprecate_help.tp %></div>
+  <div class="help-note"><%= :name_approve_deprecate_help.tp %></div>
 
   <p><label for="comment_comment"><%= :name_approve_comments.t %>:</label><br/>
   <%= text_area(:comment, :comment, cols: 80, rows: 5, data: {autofocus: true}) %></p>
-  <div class="HelpNote">
+  <div class="help-note">
     <%= :name_approve_comments_help.tp(name: @name.display_name) %>
   </div>
 

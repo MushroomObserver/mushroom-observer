@@ -26,23 +26,27 @@ class MatrixBoxPresenter
     target = rss_log.target
     # name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
 
+    target_type = target ? target.type_tag : rss_log.target_type
+
     # Instead of using textilized unique_format_name,
     # output semantic markup of each part of the name, joined.
     # This gives separate spans for text_name, author, and id.
-    target_type = target ? target.type_tag : rss_log.target_type
-
-    # TODO: Test this! author only works when object = Observation or RssLog!
     case rss_log
       when Observation, RssLog
         if target.respond_to?(:name)
-          # Rebuild the name string for the link.
-          name_name = "<span class='rss-name font-weight-bold'>#{target.text_name}</span>"
-          name_author = target.name.respond_to?(:author) ? "<span class='rss-author small'>#{target.name.author}</span>" : ""
-          name_id = "<div class='rss-id mt-2 text-monospace micro'>(#{target.id})</div>"
-          name = "#{name_name} #{name_author} #{name_id}".html_safe
+          nameable = target
         else
-          name = rss_log.unique_format_name.t
+          nameable = rss_log
         end
+        name_name = "<span class='rss-name font-weight-bold'>#{nameable.text_name}</span>"
+        if nameable.name.respond_to?(:author)
+          name_author = "<span class='rss-author small'>#{nameable.name.author}</span>"
+        else
+          name_author = ""
+        end
+        name_id = "<span class='rss-id text-monospace micro'>(#{nameable.id})</span>"
+        name = "#{name_name}&ensp;#{name_author} #{name_id}".html_safe
+
       when Image, User
         name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     end
@@ -55,7 +59,7 @@ class MatrixBoxPresenter
                              {controller: target.show_controller,
                              action: target.show_action,
                              id: target.id},
-                             class: ["text-justify"])
+                             class: "")
       else
         view.link_with_query(name,
                              controller: :observer,
@@ -67,7 +71,7 @@ class MatrixBoxPresenter
     self.when  = target.when.web_date if target&.respond_to?(:when)
     self.who   = view.user_link(target.user) if target&.user
     self.thumbnail =
-      if target&.respond_to?(:thumb_image) && target&.thumb_image
+      if target&.respond_to?(:thumb_image) && target&.thumb_image && target&.thumb_image.content_type
         view.thumbnail(target.thumb_image,
                        link: { controller: target.show_controller,
                                action: target.show_action, id: target.id })

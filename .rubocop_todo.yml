@@ -38,7 +38,7 @@ Lint/EmptyWhen:
 
 # Offense count: 19
 # Configuration parameters: AllowComments.
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'app/helpers/api_helper.rb'
     - 'app/models/language_tracking.rb'
@@ -107,7 +107,7 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 13
 # Cop supports --auto-correct.
-Lint/UnneededCopDisableDirective:
+Lint/RedundantCopDisableDirective:
   Exclude:
     - 'app/models/name/parse.rb'
     - 'test/controllers/location_controller_test.rb'
@@ -441,5 +441,5 @@ Style/Lambda:
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
-Metrics/LineLength:
+Layout:
   Max: 94

@@ -34,7 +34,8 @@
         (<%= :image_add_optional.t %>)<br/>
     </div>
 
-    <%= render(partial: "form_images", locals: {form: form, width: 80, leave_out_original_file_name: true}) %>
+    <%= render(partial: "form_images",
+               locals: {form: form, width: 80, leave_out_original_file_name: true}) %>
 
     <%= submit_tag(:image_add_upload.l, class: "btn mx-auto mt-3") %>
   <% end %>

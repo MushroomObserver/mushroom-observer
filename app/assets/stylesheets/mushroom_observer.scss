@@ -1,198 +1,57 @@
+
 //
 // set bootstrap parameters first
 // --------------------------------------------------
 
-$brand-success: $SUCCESS_BORDER_COLOR;
-$brand-info: $INFO_BORDER_COLOR;
-$brand-warning: $WARNING_BORDER_COLOR;
-$brand-danger: $DANGER_BORDER_COLOR;
+/*!
+ * Bootstrap v4.4.1 (https://getbootstrap.com/)
+ * Copyright 2011-2019 The Bootstrap Authors
+ * Copyright 2011-2019 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
 
-// $font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif;
-// $font-family-base: $font-family-sans-serif;
-// $font-size-base: 13px;
+@import "bootstrap-4.4.1/functions";
+@import "bootstrap-4.4.1/variables";
 
-$text-color: $BODY_FG_COLOR;
-$body-bg: $BODY_BG_COLOR;
+@import "custom_variables";
 
-$link-color: $LINK_FG_COLOR;
-$link-hover-color: $LINK_HOVER_FG_COLOR;
+@import "bootstrap-4.4.1/mixins";
+@import "bootstrap-4.4.1/root";
+@import "bootstrap-4.4.1/reboot";
+@import "bootstrap-4.4.1/type";
+@import "bootstrap-4.4.1/images";
+@import "bootstrap-4.4.1/code";
+@import "bootstrap-4.4.1/grid";
+@import "bootstrap-4.4.1/tables";
+@import "bootstrap-4.4.1/forms";
+@import "bootstrap-4.4.1/buttons";
+@import "bootstrap-4.4.1/transitions";
+@import "bootstrap-4.4.1/dropdown";
+@import "bootstrap-4.4.1/button-group";
+@import "bootstrap-4.4.1/input-group";
+@import "bootstrap-4.4.1/custom-forms";
+@import "bootstrap-4.4.1/nav";
+@import "bootstrap-4.4.1/navbar";
+@import "bootstrap-4.4.1/card";
+@import "bootstrap-4.4.1/breadcrumb";
+@import "bootstrap-4.4.1/pagination";
+@import "bootstrap-4.4.1/badge";
+@import "bootstrap-4.4.1/jumbotron";
+@import "bootstrap-4.4.1/alert";
+@import "bootstrap-4.4.1/progress";
+@import "bootstrap-4.4.1/media";
+@import "bootstrap-4.4.1/list-group";
+@import "bootstrap-4.4.1/close";
+@import "bootstrap-4.4.1/toasts";
+@import "bootstrap-4.4.1/modal";
+@import "bootstrap-4.4.1/tooltip";
+@import "bootstrap-4.4.1/popover";
+@import "bootstrap-4.4.1/carousel";
+@import "bootstrap-4.4.1/spinners";
+@import "bootstrap-4.4.1/utilities";
+@import "bootstrap-4.4.1/print";
 
-$padding-base-vertical: 5px;
-$padding-base-horizontal: 10px;
-$padding-large-vertical: 8px;
-$padding-large-horizontal: 13px;
-$padding-small-vertical: 4px;
-$padding-small-horizontal: 8px;
-$padding-xs-vertical: 1px;
-$padding-xs-horizontal: 4px;
-
-$component-active-color: $MENU_HOT_FG_COLOR;
-$component-active-bg: $MENU_HOT_BG_COLOR;
-
-$table-cell-padding: 6px;
-$table-condensed-cell-padding: 4px;
-$table-bg: $LIST_BG_COLOR;
-$table-bg-accent: $LIST_ODD_BG_COLOR;
-$table-bg-hover: $LIST_HOVER_BG_COLOR;
-$table-bg-active: $MENU_WARM_BG_COLOR;
-$table-border-color: $MENU_BORDER_COLOR;
-
-$btn-font-weight: bold;
-$btn-default-color: $BUTTON_FG_COLOR;
-$btn-default-bg: $BUTTON_BG_COLOR2;
-$btn-default-border: $BUTTON_BORDER_COLOR;
-$btn-primary-color: $BUTTON_PRIMARY_FG_COLOR;
-$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR2;
-$btn-primary-border: $BUTTON_PRIMARY_BORDER_COLOR;
-$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR2, 75%);
-
-$input-bg: $INPUT_BG_COLOR;
-$input-bg-disabled: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
-$input-color: $INPUT_FG_COLOR;
-$input-border: $INPUT_BORDER_COLOR;
-$input-color-placeholder: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
-$legend-color: $BODY_FG_COLOR;
-$legend-border-color: $INPUT_BORDER_COLOR;
-$input-group-addon-bg: $INPUT_BG_COLOR;
-$input-group-addon-border-color: $INPUT_BORDER_COLOR;
-$cursor-disabled: not-allowed;
-
-$dropdown-bg: $MENU_BG_COLOR;
-$dropdown-border: $MENU_BORDER_COLOR;
-$dropdown-fallback-border: $MENU_BORDER_COLOR;
-$dropdown-divider-bg: $MENU_BG_COLOR;
-$dropdown-link-color: $MENU_FG_COLOR;
-$dropdown-link-hover-color: $MENU_HOT_FG_COLOR;
-$dropdown-link-hover-bg: $MENU_HOT_BG_COLOR;
-$dropdown-link-active-color: $MENU_WARM_FG_COLOR;
-$dropdown-link-active-bg: $MENU_WARM_BG_COLOR;
-$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR, 75%);
-$dropdown-header-color: $MENU_FG_COLOR;
-$dropdown-caret-color: $BODY_FG_COLOR;
-
-$grid-gutter-width: 30px;
-$navbar-height: 40px;
-$navbar-margin-bottom: 13px;
-$navbar-border-radius: 0;
-$navbar-padding-horizontal: 13px;
-$navbar-padding-vertical: 10px;
-
-$navbar-default-color: $TOP_BAR_FG_COLOR;
-$navbar-default-bg: $TOP_BAR_BG_COLOR;
-$navbar-default-border: $TOP_BAR_BORDER_COLOR;
-$navbar-default-link-color: $TOP_BAR_LINK_FG_COLOR;
-$navbar-default-link-hover-color: $TOP_BAR_LINK_HOVER_FG_COLOR;
-$navbar-default-link-hover-bg: $TOP_BAR_LINK_HOVER_BG_COLOR;
-$navbar-default-link-active-color: $TOP_BAR_LINK_FG_COLOR;
-$navbar-default-link-active-bg: $TOP_BAR_LINK_BG_COLOR;
-$navbar-default-link-disabled-color: mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
-$navbar-default-link-disabled-bg: $TOP_BAR_LINK_BG_COLOR;
-
-$pagination-color: $PAGER_FG_COLOR;
-$pagination-bg: $PAGER_BG_COLOR;
-$pagination-border: $PAGER_BORDER_COLOR;
-$pagination-hover-color: $PAGER_HOVER_FG_COLOR;
-$pagination-hover-bg: $PAGER_HOVER_BG_COLOR;
-$pagination-hover-border: $PAGER_HOVER_BORDER_COLOR;
-$pagination-active-color: $PAGER_ACTIVE_FG_COLOR;
-$pagination-active-bg: $PAGER_ACTIVE_BG_COLOR;
-$pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;
-$pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR, 75%);
-$pagination-disabled-bg: $PAGER_BG_COLOR;
-$pagination-disabled-border: $PAGER_BORDER_COLOR;
-
-$state-success-text: $SUCCESS_BORDER_COLOR;
-$state-success-bg: $SUCCESS_BG_COLOR;
-$state-success-border: mix($SUCCESS_BORDER_COLOR, $SUCCESS_BG_COLOR);
-$state-info-text: $INFO_BORDER_COLOR;
-$state-info-bg: $INFO_BG_COLOR;
-$state-info-border: mix($INFO_BORDER_COLOR, $INFO_BG_COLOR);
-$state-warning-text: $WARNING_BORDER_COLOR;
-$state-warning-bg: $WARNING_BG_COLOR;
-$state-warning-border: mix($WARNING_BORDER_COLOR, $WARNING_BG_COLOR);
-$state-danger-text: $DANGER_BORDER_COLOR;
-$state-danger-bg: $DANGER_BG_COLOR;
-$state-danger-border: mix($DANGER_BORDER_COLOR, $DANGER_BG_COLOR);
-
-$tooltip-opacity: 1;
-$tooltip-max-width: 400px;
-$tooltip-color: $TOOLTIP_FG_COLOR;
-$tooltip-bg: $TOOLTIP_BG_COLOR;
-
-$alert-success-bg: $SUCCESS_BG_COLOR;
-$alert-success-text: $SUCCESS_FG_COLOR;
-$alert-success-border: $SUCCESS_BORDER_COLOR;
-$alert-info-bg: $INFO_BG_COLOR;
-$alert-info-text: $INFO_FG_COLOR;
-$alert-info-border: $INFO_BORDER_COLOR;
-$alert-warning-bg: $WARNING_BG_COLOR;
-$alert-warning-text: $WARNING_FG_COLOR;
-$alert-warning-border: $WARNING_BORDER_COLOR;
-$alert-danger-bg: $DANGER_BG_COLOR;
-$alert-danger-text: $DANGER_FG_COLOR;
-$alert-danger-border: $DANGER_BORDER_COLOR;
-
-$progress-bg: $PROGRESS_BG_COLOR;
-$progress-bar-color: $PROGRESS_FG_COLOR;
-$progress-bar-bg: $PROGRESS_BAR_COLOR;
-
-$list-group-bg: $LIST_BG_COLOR;
-$list-group-border: $LIST_BORDER_COLOR;
-$list-group-hover-bg: $LIST_BG_COLOR;
-$list-group-disabled-color: $LIST_HEADER_FG_COLOR;
-$list-group-disabled-bg: $LIST_HEADER_BG_COLOR;
-$list-group-disabled-text-color: $LIST_HEADER_FG_COLOR;
-$list-group-link-color: $LINK_FG_COLOR;
-$list-group-link-hover-color: $LINK_HOVER_FG_COLOR;
-
-$panel-bg: $LIST_BG_COLOR;
-$panel-body-padding: 12px;
-$panel-heading-padding: 8px 12px;
-$panel-inner-border: $LIST_BORDER_COLOR;
-$panel-footer-bg: $LIST_BG_COLOR;
-$panel-default-text: $LIST_FG_COLOR;
-$panel-default-border: $LIST_BORDER_COLOR;
-$panel-default-heading-bg: $LIST_HEADER_BG_COLOR;
-
-$help-block-max-width: 600px;
-
-$hr-border: $LIST_BORDER_COLOR;
-
-$sidebar-max-width: 15em;
-
-//
-// bootstrap 4.4.1 new variable overrides
-// --------------------------------------------------
-
-// Options
-//
-// Quickly modify global styling by enabling or disabling optional features.
-
-$enable-caret:                                true;
-$enable-rounded:                              true;
-$enable-shadows:                              false;
-$enable-gradients:                            false;
-$enable-transitions:                          true;
-$enable-prefers-reduced-motion-media-query:   true;
-// $enable-hover-media-query:                    false; // Deprecated, no longer affects any compiled CSS
-$enable-grid-classes:                         true;
-$enable-pointer-cursor-for-buttons:           true;
-$enable-print-styles:                         true;
-$enable-responsive-font-sizes:                true;
-$enable-validation-icons:                     true;
-$enable-deprecation-messages:                 true;
-
-
-// Grid columns
-//
-// Set the number of columns and specify the width of the gutters.
-
-$grid-gutter-width:           20px;
-
-$h5-font-size: 1.1rem;
-
-
-@import "bootstrap";
+@import "lightbox-bootstrap";
 
 //
 // overall page style
@@ -496,6 +355,11 @@ ul.tight-list {
     margin-top: 5px;
 }
 
+.user-thumbnail {
+   width: 25%;
+   max-width: 160px;
+   max-height: 160px;
+}
 //
 // interest eyes
 // --------------------------------------------------
@@ -1579,6 +1443,16 @@ table.table-namings {
 .bottom-left {
   bottom: 0;
   left: 0;
+}
+
+.object-fit-cover {
+  @extend .w-100, .h-100;
+  object-fit: cover;
+}
+
+.object-fit-contain {
+  @extend .w-100, .h-100;
+  object-fit: contain;
 }
 
 .small-caps {

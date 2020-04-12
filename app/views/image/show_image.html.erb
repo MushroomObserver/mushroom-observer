@@ -7,9 +7,13 @@
     obs = @image.observations.first
     tabs += [
       link_with_query(:show_object.t(type: :observation),
-                      controller: :observer, action: :show_observation, id: obs.id),
+                      controller: :observer,
+                      action: :show_observation,
+                      id: obs.id),
       link_with_query(:show_object.t(type: :name),
-                      controller: :name, action: :show_name, id: obs.name.id),
+                      controller: :name,
+                      action: :show_name,
+                      id: obs.name.id),
       link_to(:google_images.t, "http://images.google.com/images?q=#{obs.name.search_name}")
     ]
   end
@@ -26,8 +30,10 @@
     ]
   end
   if @image.user.email_general_commercial
-    tabs << link_with_query(:image_show_inquiry.t, controller: :observer,
-                            action: :commercial_inquiry, id: @image.id)
+    tabs << link_with_query(:image_show_inquiry.t,
+                            controller: :observer,
+                            action: :commercial_inquiry,
+                            id: @image.id)
   end
   @tabsets = {
     pager_for: @image,
@@ -44,12 +50,21 @@
         <div class="row">
           <div class="col-12 text-center small image-controls">
             <% if check_permission(@image) %>
-              <%= link_with_query(:image_show_rotate_left.t, action: :transform_image,
-                op: :rotate_left, id: @image.id, size: @size) %> |
-              <%= link_with_query(:image_show_rotate_right.t, action: :transform_image,
-                op: :rotate_right, id: @image.id, size: @size) %> |
-              <%= link_with_query(:image_show_mirror.t, action: :transform_image,
-                op: :mirror, id: @image.id, size: @size) %> |
+              <%= link_with_query(:image_show_rotate_left.t,
+                                  action: :transform_image,
+                                  op: :rotate_left,
+                                  id: @image.id,
+                                  size: @size) %> |
+              <%= link_with_query(:image_show_rotate_right.t,
+                                  action: :transform_image,
+                                  op: :rotate_right,
+                                  id: @image.id,
+                                  size: @size) %> |
+              <%= link_with_query(:image_show_mirror.t,
+                                  action: :transform_image,
+                                  op: :mirror,
+                                  id: @image.id,
+                                  size: @size) %> |
             <% end %>
             <%= link_to(:image_show_original.t, Image.url(:original, @image.id)) %>
             <% inject_javascript_at_end %(
@@ -61,6 +76,8 @@
         </div>
       </div>
       <div class="panel-body">
+
+        <% # TODO: replace all this with srcset img tag %>
 
         <div class="d-lg-none" style="max-width:640px; max-height:640px; margin:auto">
           <%= thumbnail(@image, size: :medium, link: {}, votes: false,
@@ -222,7 +239,7 @@
                   str2 = image_vote_as_help_string(value)
                   str3 = :image_show_vote_and_next.t(value: str1)
                   css_class = ""
-                  css_class = "text-bold" if current == value %>
+                  css_class = "font-weight-bold" if current == value %>
                   <div class="row">
                     <div class="col-sm-6">
                       <div class="pt-2">
