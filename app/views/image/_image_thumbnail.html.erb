@@ -57,7 +57,7 @@
         show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
         show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
         caption = "#{show_orig} | #{show_exif}".html_safe
-        link_to("&times;", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
+        link_to("&times;".html_safe, huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
                 data: {lightbox: lightbox_id, title: caption})
       %>
       <div class="">
