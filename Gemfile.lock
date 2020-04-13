@@ -277,6 +277,7 @@ DEPENDENCIES
   jquery-rails
   jquery-slick-rails
   mail (= 2.7.0)
+  mimemagic
   minitest
   minitest-reporters
   mocha

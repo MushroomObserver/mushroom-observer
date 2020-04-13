@@ -1,4 +1,5 @@
 require "open3"
+require "mimemagic"
 #
 #  = Image Model
 #
@@ -562,12 +563,8 @@ class Image < AbstractModel
   def validate_image_type
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
-      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").
-             chomp.split[1]
-      if type
-        type.sub!(/;$/, "")
-        self.upload_type = type
-      end
+      self.upload_type = \
+        MimeMagic.by_magic(File.open(upload_temp_file)).try(&:type)
       if %r{^image/}.match?(upload_type)
         result = true
       else
@@ -716,7 +713,8 @@ class Image < AbstractModel
   # Saves the record.
   def set_image_size(file = local_file_name(:full_size))
     script = "#{::Rails.root}/script/jpegsize"
-    w, h = File.read("| #{script} #{file}").chomp.split
+    output, status = Open3.capture2(script, file)
+    w, h = output.to_s.chomp.split
     if /^\d+$/.match?(w.to_s)
       self.width  = w.to_i
       self.height = h.to_i

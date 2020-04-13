@@ -83,6 +83,9 @@ gem "jquery-slick-rails"
 # email generation, parsing and sending
 gem "mail", "= 2.7.0"
 
+# for detecting file type of uploaded images
+gem "mimemagic"
+
 ########## Development, Testing, and Analysis ##################################
 
 # Use byebug as debugging gem
