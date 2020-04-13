@@ -1,8 +1,6 @@
 module JavascriptHelper
-  # For now, just use Browser gem's "modern?" criteria.
-  # (Webkit, Firefox 17+, IE 9+ and Opera 12+)
   def can_do_ajax?
-    browser.modern? || browser.ie?(8) || Rails.env == "test"
+    modern_browser?(browser) || browser.ie?(8) || Rails.env == "test"
   end
 
   # Use this test to determine if a user can upload multiple images at a time.
@@ -12,7 +10,20 @@ module JavascriptHelper
   #   FileAPI
   # CanIuse.com is the source of this information.
   def can_do_multifile_upload?
-    browser.modern? && !browser.ie?(9)
+    modern_browser?(browser) && !browser.ie?(9)
+  end
+
+  # from https://github.com/fnando/browser/pull/435 2020-04-13
+  def modern_browser?(browser)
+    browser.chrome? && browser.version.to_i >= 65 ||
+    browser.safari? && browser.version.to_i >= 10 ||
+    browser.firefox? && browser.version.to_i >= 52 ||
+    browser.ie? && browser.version.to_i >= 11 && !browser.compatibility_view? ||
+    browser.edge? && browser.version.to_i >= 15 ||
+    browser.opera? && browser.version.to_i >= 50 ||
+    browser.facebook? &&
+      browser.safari_webapp_mode? &&
+      browser.webkit_full_version.to_i >= 602
   end
 
   # Schedule javascript modules for inclusion in header.  This is much safer

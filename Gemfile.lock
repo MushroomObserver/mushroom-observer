@@ -66,7 +66,7 @@ GEM
       autoprefixer-rails (>= 5.2.1)
       sassc (>= 2.0.0)
     brakeman (4.8.1)
-    browser (2.7.1)
+    browser (4.0.0)
     builder (3.2.4)
     byebug (11.1.1)
     capybara (3.32.1)
@@ -266,7 +266,7 @@ DEPENDENCIES
   blankslate
   bootstrap-sass
   brakeman
-  browser (~> 2.0)
+  browser
   byebug
   capybara
   coffee-rails

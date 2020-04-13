@@ -62,15 +62,7 @@ gem "RedCloth"
 gem "blankslate"
 
 # Detect which browser is used
-# Temporarily lock browser version during upgrade to Ruby 2.6.6
-# to prevent ActionView::Template::Error: undefined method `modern?'
-# Permanent fix at https://github.com/fnando/browser/pull/435
-# gem "browser", "~> 3.0"
-# Temporarily lock browser version during upgrade to Ruby 2.6.6
-# to prevent NoMethodError: private method
-#   `ua' called for #<Browser::Bot:0x00000000091767f0>
-#    app/extensions/browser_extensions.rb:5:in `bot?'
-gem "browser", "~> 2.0"
+gem "browser"
 
 # Create Rich Text Format documents
 gem "rtf"
