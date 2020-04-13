@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
+# Temporarily lock sprockets version during upgrade to Ruby 2.6.6
+# to prevent (Sprockets::Railtie::ManifestNeededError)
+# For permanent fix see
+# https://github.com/rails/sprockets/blob/master/UPGRADING.md
+gem "sprockets", "~> 3.0"
+
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem "rails", "~> 5.2.2"
 
@@ -56,7 +62,15 @@ gem "RedCloth"
 gem "blankslate"
 
 # Detect which browser is used
-gem "browser"
+# Temporarily lock browser version during upgrade to Ruby 2.6.6
+# to prevent ActionView::Template::Error: undefined method `modern?'
+# Permanent fix at https://github.com/fnando/browser/pull/435
+# gem "browser", "~> 3.0"
+# Temporarily lock browser version during upgrade to Ruby 2.6.6
+# to prevent NoMethodError: private method
+#   `ua' called for #<Browser::Bot:0x00000000091767f0>
+#    app/extensions/browser_extensions.rb:5:in `bot?'
+gem "browser", "~> 2.0"
 
 # Create Rich Text Format documents
 gem "rtf"
