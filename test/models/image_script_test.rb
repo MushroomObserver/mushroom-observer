@@ -38,19 +38,6 @@ class ScriptTest < UnitTestCase
   end
   # rubocop:enable Style/NumericLiterals
 
-  # Ensure above definitions are correct
-  def test_fixture_id_defs
-    assert_equal(images(:in_situ_image).id, in_situ_id,
-                 "in_situ_id defined incorrectly")
-    assert_equal(images(:turned_over_image).id, turned_over_id,
-                 "turned_over_id defined incorrectly")
-    assert_equal(images(:commercial_inquiry_image).id, commercial_id,
-                 "commercial_id defined incorrectly")
-    assert_equal(images(:disconnected_coprinus_comatus_image).id,
-                 disconnected_id,
-                 "disconnected_id defined incorrectly")
-  end
-
   def setup
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
@@ -94,14 +81,25 @@ class ScriptTest < UnitTestCase
   end
 
   ##############################################################################
+
+  test "fixture_id_defs" do
+    assert_equal(images(:in_situ_image).id, in_situ_id,
+                 "in_situ_id defined incorrectly")
+    assert_equal(images(:turned_over_image).id, turned_over_id,
+                 "turned_over_id defined incorrectly")
+    assert_equal(images(:commercial_inquiry_image).id, commercial_id,
+                 "commercial_id defined incorrectly")
+    assert_equal(images(:disconnected_coprinus_comatus_image).id,
+                 disconnected_id,
+                 "disconnected_id defined incorrectly")
+  end
+
   test "process_image" do
     script = script_file("process_image")
     tempfile = Tempfile.new("test").path
     original_image = "#{::Rails.root}/test/images/pleopsidium.tiff"
     FileUtils.cp(original_image, "#{local_root}/orig/#{in_situ_id}.tiff")
-    cmd = "#{script} #{in_situ_id} tiff 1 2>&1 > #{tempfile}"
-    status = system(cmd)
-    errors = File.read(tempfile)
+    errors, status = Open3.capture2e(script, in_situ_id.to_s, "tiff", "1", "2")
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
@@ -112,8 +110,8 @@ class ScriptTest < UnitTestCase
       file.puts "#{local_root}/320//#{in_situ_id}.jpg"
       file.puts "#{local_root}/thumb//#{in_situ_id}.jpg"
     end
-    sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").
-            map do |line|
+    output, status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
+    sizes = output.each_line.map do |line|
       line[local_root.length + 1..-1].chomp
     end
     assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0],
