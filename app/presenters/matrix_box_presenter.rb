@@ -24,10 +24,10 @@ class MatrixBoxPresenter
   # Grabs all the information needed for view from RssLog instance.
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
-    # name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
 
     target_type = target ? target.type_tag : rss_log.target_type
 
+    # name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     # Instead of using textilized unique_format_name,
     # output semantic markup of each part of the name, joined.
     # This gives separate spans for text_name, author, and id.
@@ -38,7 +38,7 @@ class MatrixBoxPresenter
         else
           nameable = rss_log
         end
-        name_name = "<span class='rss-name font-weight-bold'>#{nameable.text_name}</span>"
+        name_name = "<span class='rss-name font-weight-bold font-italic'>#{nameable.text_name}</span>"
         if nameable.name.respond_to?(:author)
           name_author = "<span class='rss-author small'>#{nameable.name.author}</span>"
         else
@@ -56,15 +56,15 @@ class MatrixBoxPresenter
     self.what  =
       if target
         view.link_with_query(name,
-                             {controller: target.show_controller,
-                             action: target.show_action,
-                             id: target.id},
+                             { controller: target.show_controller,
+                               action: target.show_action,
+                               id: target.id },
                              class: "")
       else
         view.link_with_query(name,
-                             controller: :observer,
-                             action: :show_rss_log,
-                             id: rss_log.id)
+                             { controller: :observer,
+                               action: :show_rss_log,
+                               id: rss_log.id })
       end
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
@@ -73,8 +73,11 @@ class MatrixBoxPresenter
     self.thumbnail =
       if target&.respond_to?(:thumb_image) && target&.thumb_image && target&.thumb_image.content_type
         view.thumbnail(target.thumb_image,
-                       link: { controller: target.show_controller,
-                               action: target.show_action, id: target.id })
+                       link: {
+                         controller: target.show_controller,
+                         action: target.show_action,
+                         id: target.id
+                       })
       end
   end
 

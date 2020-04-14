@@ -64,7 +64,10 @@ $(document).on('ready page:load', function () {
     // Initialize bootstrap lightbox
     $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         event.preventDefault();
-        $(this).ekkoLightbox();
+        // console.log("lightbox clicked");
+        $(this).ekkoLightbox({
+          alwaysShowClose: true,
+        });
     });
 
     function setCookie(cname, cvalue, exdays) {
@@ -83,7 +86,6 @@ $(document).on('ready page:load', function () {
 
     // Update lazy loads
     lazyLoadInstance.update();
-    console.log("Lazy but Ready!");
 
     // Initialize validate_file_input_fields
     $("input[type=file][multiple!=multiple]").each(function() {

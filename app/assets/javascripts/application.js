@@ -2,6 +2,7 @@
 //= require jquery_extensions
 //= require popper
 //= require bootstrap
+//= require fontawesome_all
 //= require lightbox_bootstrap
 //= require interaction_observer_polyfill
 //= require lazyload_verlok

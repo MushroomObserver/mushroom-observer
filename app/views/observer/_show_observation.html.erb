@@ -1,81 +1,62 @@
-<div class="row">
-  <div class="col-12 max-width-text name-section">
+<div class="name-section">
 
-    <p id="observation_when">
-      <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
-    </p>
+  <p id="observation_when">
+    <%= :WHEN.t %>: <span class="bold"><%= observation.when.web_date %></span>
+  </p>
 
-    <p id="observation_where">
-      <%= observation.is_collection_location ?
-            :show_observation_collection_location.t :
-            :show_observation_seen_at.t %>:
-      <span class="bold">
-        <%= location_link(observation.place_name,
-                          observation.location, nil, true) %>
-      </span>
-    </p>
+  <p id="observation_where">
+    <%= observation.is_collection_location ?
+          :show_observation_collection_location.t :
+          :show_observation_seen_at.t %>:
+    <span class="bold">
+      <%= location_link(observation.place_name,
+                        observation.location, nil, true) %>
+    </span>
+  </p>
 
-    <p id="observation_lat_lng">
-      <%=
-        hidden = "<i>(#{:show_observation_gps_hidden.t})</i>".html_safe
-        if observation.lat &&
-           (!observation.gps_hidden || observation.can_edit?)
-          link_to("#{observation.display_lat_long.t} " \
-                  "#{observation.display_alt.t} " \
-                  "[#{:click_for_map.t}]".html_safe,
-            controller: :observer, action: :map_observation, id: observation.id)
-        elsif observation.lat
-          hidden + " ".html_safe + observation.display_alt.t
-        else
-          observation.display_alt.t
-        end
-      %>
-      <%=
-        if observation.lat && observation.gps_hidden && observation.can_edit?
-          hidden
-        end
-      %>
-    </p>
+  <p id="observation_lat_lng">
+    <%= render(partial: "lat_lng",
+              locals: { observation: observation }) %>
+  </p>
 
-    <p id="observation_who">
-      <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
-    </p>
+  <p id="observation_who">
+    <%= :WHO.t %>: <span class="bold"><%= user_link(observation.user) %></span>
+  </p>
 
-    <div id="observation_projects">
-      <% observation.projects.each do |project| %>
-           <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
-      <% end %>
-    </div>
-
-    <div id="specimen_available">
-      <%= observation.specimen ? :show_observation_specimen_available.t :
-                                 :show_observation_specimen_not_available.t %>
-    </div>
-
-    <div id="observation_collection_numbers">
-      <%= render(partial: "observer/collection_numbers",
-                locals: { observation: observation }) %>
-    </div>
-
-    <div id="observation_herbarium_records">
-      <%= render(partial: "observer/herbarium_records",
-                locals: { observation: observation }) %>
-    </div>
-
-    <div id="observation_sequences">
-      <%= render(partial: "observer/sequences",
-                locals: { observation: observation }) %>
-    </div>
+  <div id="observation_projects">
+    <% observation.projects.each do |project| %>
+         <p><%= :PROJECT.t %>: <%= link_to_object(project) %></p>
+    <% end %>
   </div>
 
-  <div class="col-12 max-width-text obs-notes">
-    <%= if observation.notes?
-      Textile.clear_textile_cache
-      Textile.register_name(*observation.namings.map(&:name))
-      Textile.register_name(observation.name)
-      content_tag(
-        :div, observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
-      )
-    end %>
+  <div id="specimen_available">
+    <%= observation.specimen ? :show_observation_specimen_available.t :
+                               :show_observation_specimen_not_available.t %>
   </div>
-</div>
+
+  <div id="observation_collection_numbers">
+    <%= render(partial: "collection_numbers",
+              locals: { observation: observation }) %>
+  </div>
+
+  <div id="observation_herbarium_records">
+    <%= render(partial: "herbarium_records",
+              locals: { observation: observation }) %>
+  </div>
+
+  <div id="observation_sequences">
+    <%= render(partial: "sequences",
+              locals: { observation: observation }) %>
+  </div>
+</div><!-- .name-section -->
+
+<div class="obs-notes">
+  <%= if observation.notes?
+    Textile.clear_textile_cache
+    Textile.register_name(*observation.namings.map(&:name))
+    Textile.register_name(observation.name)
+    content_tag(
+      :div, observation.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
+    )
+  end %>
+</div><!-- .obs-notes -->

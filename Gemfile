@@ -25,7 +25,7 @@ gem "coffee-rails"
 # Enable ES6 modern JS parsing and transpiling to regular JS
 gem "babel-source"
 gem "babel-transpiler"
-gem "sprockets"
+gem "sprockets", "~> 3.7.2"
 gem "sprockets-es6"
 # gem "sprockets-babel-miniracer", "~> 0.0.12"
 

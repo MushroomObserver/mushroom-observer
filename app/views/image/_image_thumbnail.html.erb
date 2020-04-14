@@ -4,74 +4,50 @@
   # so we only have image_id.  It's still possible to render the image with
   # nothing but the image_id.  (But not votes, original name, etc.)
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-  size_url   = Image.url(size, image_id)
-  thumb_url  = Image.url(:thumbnail, image_id)
-  small_url  = Image.url(:small, image_id)
-  medium_url = Image.url(:medium, image_id)
-  large_url  = Image.url(:large, image_id)
-  huge_url   = Image.url(:huge, image_id)
-  full_url   = Image.url(:full_size, image_id)
-  orig_url   = Image.url(:original, image_id)
    #If the image is part of an image set.
   is_set = is_set || false
-
-  # For lazy load content sizing: set img width and height, or proportional padding-bottom
-  img_width = image.width ? BigDecimal(image.width) : 100
-  img_height = image.height ? BigDecimal(image.height) : 100
-  img_proportion = "%.1f" % ( BigDecimal( img_height / img_width ) * 100 )
-  wrapper_style = "padding-bottom: #{img_proportion}%;"
-
-  img_class = "img-fluid w-100 lazyload position-absolute object-fit-cover #{img_class}" if responsive
-  img_class = "img-unresponsive lazyload #{img_class}" if !responsive
-  # Rails has trouble parsing this if we don't put it together as a string
-  data_srcset = "#{small_url} 320w, #{medium_url} 640w".html_safe
-  data_sizes = "@media (max-width: 575px) 100vw, @media (max-width: 991px) 50vw, @media (min-width: 992px) 30vw, @media (min-width: 1500px) 25vw".html_safe
 %>
 
-<div class="position-relative w-100">
+<div class="image-sizer position-relative w-100">
 
-  <%= tag.div class: "image-lazy-sizer overflow-hidden", style: wrapper_style do
+  <%= tag.div class: "image-lazy-sizer overflow-hidden", style: "padding-bottom: #{img_proportion}%;" do
+    image_tag(thumb_url, html_options)
+  end %>
 
-      image_tag(thumb_url,
-                alt: notes,
-                class: img_class,
-                data: { toggle: "tooltip",
-                        placement: "bottom",
-                        src: small_url,
-                        srcset: data_srcset,
-                        sizes: data_sizes
-                        # srcset: { small_url => "320w",
-                        #           medium_url => "640w",
-                        #           large_url => "960w"}
-                        # sizes: { "@media (max-width: 575px)" => "100vw",
-                        #          "@media (max-width: 991px)" => "50vw",
-                        #          "@media (min-width: 992px)" => "30vw" },
-                })
+  <%= link_with_query("",
+                      link,
+                      class: "stretched-link") %>
 
-     end %>
+  <%= # TODO: move this to the presenter, too
+    lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
+    show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
+    show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"
+    caption = "#{show_orig} | #{show_exif}".html_safe
+    icon = "<i class='fas fa-expand-arrows-alt fa-lg'></i>".html_safe
+    link_to(icon,
+            "#",
+            class: "theater-btn position-absolute top-right mr-2 mt-2 d-block zindex-2 text-light",
+            data: {
+              toggle: "lightbox",
+              remote: "#{large_url}",
+              gallery: lightbox_id,
+              type: "image",
+              footer: caption
+            })
+  %>
 
-  <div class="position-absolute top-right mr-2 mb-2">
-    <div data-toggle="expand-icon" class="text-center btn btn-primary">
-      <%=
-        lightbox_id = is_set ? "observation-set" : SecureRandom.uuid
-        show_orig = "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"
-        show_exif = "<a href='javascript:popup_exif(#{image_id})' class='lightbox_link'>#{:image_show_exif.t}</a>"
-        caption = "#{show_orig} | #{show_exif}".html_safe
-        link_to("&times;".html_safe, huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
-                data: {lightbox: lightbox_id, title: caption})
-      %>
-      <div class="">
-        <% if User.current and votes and image %>
-          <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
-        <% end %>
-        <% if original && image && !image.original_name.blank? &&
-              (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-          <div class="text-center">
-            <span><%= image.original_name %></span>
-          </div>
-        <% end %>
-      </div>
+  <div class="text-center">
+    <div class="">
+      <% if User.current and votes and image %>
+        <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
+      <% end %>
+      <% if original && image && !image.original_name.blank? &&
+            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+        <div class="text-center">
+          <span><%= image.original_name %></span>
+        </div>
+      <% end %>
     </div>
   </div>
-  <%= link_with_query("", link, class: "stretched-link") %>
+
 </div>

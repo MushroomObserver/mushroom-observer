@@ -12,16 +12,78 @@ module ThumbnailHelper
   #
   def thumbnail(image, args = {})
     image_id = image.is_a?(Integer) ? image : image.id
+    # image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+
+    # these defaults could be passed instead
+    responsive = true,
+    notes = "",
+
+    # size_url   = Image.url(size, image_id)
+    thumb_url  = Image.url(:thumbnail, image_id)
+    small_url  = Image.url(:small, image_id)
+    medium_url = Image.url(:medium, image_id)
+    large_url  = Image.url(:large, image_id)
+    huge_url   = Image.url(:huge, image_id)
+    full_url   = Image.url(:full_size, image_id)
+    orig_url   = Image.url(:original, image_id)
+
+    # For lazy load content sizing: set img width and height, or proportional padding-bottom
+    img_width = image.width ? BigDecimal(image.width) : 100
+    img_height = image.height ? BigDecimal(image.height) : 100
+    img_proportion = "%.1f" % ( BigDecimal( img_height / img_width ) * 100 )
+
+    img_class = "img-fluid w-100 lazyload position-absolute object-fit-cover #{img_class}" if responsive
+    img_class = "img-unresponsive lazyload #{img_class}" if !responsive
+
+    # Rails has trouble parsing this if we don't put it together as a string
+    # data_srcset = "#{small_url} 320w, #{medium_url} 640w, #{large_url} 960w".html_safe
+    data_srcset = [
+      "#{small_url} 320w",
+      "#{medium_url} 640w",
+      "#{large_url} 960w",
+      "#{huge_url} 1280w"
+    ].join(",")
+
+    data_sizes = [
+      "(max-width: 575px) 100vw",
+      "(max-width: 991px) 50vw",
+      "(min-width: 992px) 30vw"
+    ].join(",") if responsive
+
+    data_sizes = [
+      "(max-width: 575px) 100vw",
+      "(max-width: 991px) 75vw",
+      "(min-width: 992px) 50vw"
+    ].join(",") if !responsive
+
+    data = {
+      toggle: "tooltip",
+      placement: "bottom",
+      src: small_url,
+      srcset: data_srcset,
+      sizes: data_sizes
+    }
+
+    html_options = {
+      alt: notes,
+      class: img_class,
+      data: data
+    }
+
     locals = {
       image: image,
+      thumb_url: thumb_url,
+      large_url: large_url,
+      orig_url: orig_url,
       link: Image.show_link_args(image_id),
       size: :small,
+      img_proportion: img_proportion,
       votes: true,
       original: false,
-      responsive: true,
+      responsive: responsive,
       theater_on_click: false,
-      html_options: {},
-      notes: ""
+      html_options: html_options,
+      notes: notes
     }.merge(args)
     render(partial: "image/image_thumbnail", locals: locals)
   end
