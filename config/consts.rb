@@ -184,35 +184,6 @@ MushroomObserver::Application.configure do
   # Default number of items for an RSS page
   config.default_layout_count = 18
 
-  # Set of javascript and stylesheet files not included by default and
-  # therefore need to be precompiled explicitly.
-  if config.assets&.precompile
-    config.assets.precompile += %w[
-      advanced_search.js
-      api_key.js
-      date_select.js
-      donate.js
-      edit_location.js
-      image_slider.js
-      multi_image_upload.js
-      name_lister.js
-      pivotal.js
-      rss_feed_select_helper.js
-      selectize.min.js
-      single_image_uploader.js
-      suggestions.js
-      thumbnail_map.js
-      translations.js
-      vote_popup.js
-      Admin.css
-      Agaricus.css
-      Amanita.css
-      BlackOnWhite.css
-      Cantharellaceae.css
-      Hygrocybe.css
-    ]
-  end
-
   # Max number of results Query will put in "IN (...)" clauses.
   config.query_max_array = 1000
 
