@@ -51,14 +51,14 @@ GEM
     autoprefixer-rails (9.7.6)
       execjs
     aws-eventstream (1.1.0)
-    aws-sdk (2.11.486)
-      aws-sdk-resources (= 2.11.486)
-    aws-sdk-core (2.11.486)
+    aws-sdk (2.11.489)
+      aws-sdk-resources (= 2.11.489)
+    aws-sdk-core (2.11.489)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-resources (2.11.486)
-      aws-sdk-core (= 2.11.486)
-    aws-sigv4 (1.1.1)
+    aws-sdk-resources (2.11.489)
+      aws-sdk-core (= 2.11.489)
+    aws-sigv4 (1.1.2)
       aws-eventstream (~> 1.0, >= 1.0.2)
     bindex (0.8.1)
     blankslate (3.1.3)
@@ -68,7 +68,7 @@ GEM
     brakeman (4.8.1)
     browser (4.0.0)
     builder (3.2.4)
-    byebug (11.1.1)
+    byebug (11.1.2)
     capybara (3.32.1)
       addressable
       mini_mime (>= 0.1.3)
@@ -143,7 +143,7 @@ GEM
     nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
     parallel (1.19.1)
-    parser (2.7.1.0)
+    parser (2.7.1.1)
       ast (~> 2.4.0)
     public_suffix (4.0.4)
     rack (2.2.2)
@@ -184,7 +184,7 @@ GEM
     regexp_parser (1.7.0)
     rexml (3.2.4)
     rtf (0.3.3)
-    rubocop (0.81.0)
+    rubocop (0.82.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
       parser (>= 2.7.0.1)
@@ -200,7 +200,7 @@ GEM
       rubocop (>= 0.72.0)
     ruby-progressbar (1.10.1)
     safe_yaml (1.0.5)
-    sassc (2.2.1)
+    sassc (2.3.0)
       ffi (~> 1.9)
     sassc-rails (2.1.2)
       railties (>= 4.0.0)
@@ -215,7 +215,7 @@ GEM
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    sprockets (3.7.2)
+    sprockets (4.0.0)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     sprockets-rails (3.2.1)
@@ -291,7 +291,7 @@ DEPENDENCIES
   rubocop-rails
   sassc-rails
   simple_enum
-  sprockets (~> 3.0)
+  sprockets
   therubyracer
   uglifier
   unicorn (= 5.4.1)
@@ -300,4 +300,4 @@ DEPENDENCIES
   xmlrpc
 
 BUNDLED WITH
-   2.0.2
+   2.1.4

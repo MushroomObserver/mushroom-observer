@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
-# Temporarily lock sprockets version during upgrade to Ruby 2.6.6
-# to prevent (Sprockets::Railtie::ManifestNeededError)
-# For permanent fix see
-# https://github.com/rails/sprockets/blob/master/UPGRADING.md
-gem "sprockets", "~> 3.0"
+gem "sprockets"
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem "rails", "~> 5.2.2"
