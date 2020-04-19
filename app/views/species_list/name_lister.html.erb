@@ -18,7 +18,7 @@
   </div>
 </noscript>
 
-<% if !can_do_ajax? %>
+<% if !browser.modern_browser? %>
   <div class="row">
     <div class="col-12 max-width-text mt-3">
       <%= :name_lister_bad_browser.tp %>
@@ -51,7 +51,7 @@
     <tr>
       <td colspan="3">
         <div id="word">&nbsp;</div>
-        <%= form_tag({action: :name_lister}, {}) %>
+        <%= form_tag action: :name_lister do %>
           <center>
             <%= submit_tag(:name_lister_submit_spl.l, class: "btn", disabled: !@user) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_txt.l, class: "btn") %>&nbsp;&nbsp;
@@ -65,7 +65,7 @@
             <%= select_tag(:charset, options_for_select(["ISO-8859-1", "WINDOWS-1252", "UTF-8"], @charset)) %>
             <span class="help-note"><%= :name_lister_charset_help.t %></span>
           <% end %>
-        </form>
+        <% end %>
       </td>
     </tr>
   </tbody>

@@ -11,7 +11,7 @@
   <div class="col-12 max-width-text">
     <%= form_tag(add_query_param(action: :edit_classification, id: @name.id)) do %>
       <%= label_tag(:classification, :"form_names_classification".t + ":") %>
-      <p class="help-block" style="margin-top:0">
+      <p class="help-block mt-0">
         <%= rank = rank_as_lower_string(@name.rank)
         :"form_names_classification_help".l(rank: rank) %>
       </p>

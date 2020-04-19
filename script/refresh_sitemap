@@ -71,7 +71,7 @@ OBJECT_TYPES = [
 ].freeze
 
 STATIC_PAGES = [
-  ["home page",    "observer/list_rss_logs", "hourly"],
+  ["home page",    "rss_log/list_rss_logs", "hourly"],
   ["introduction", "observer/intro",         "weekly"],
   ["how to use",   "observer/how_to_use",    "weekly"],
   ["how to help",  "observer/how_to_help",   "weekly"]

@@ -22,50 +22,54 @@
                                     id: observation.id))
 %>
 
-<div class="row">
-  <div class="col-12">
-    <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
-    <span class="pull-right inline">
-      <%= link_with_query(:show_observation_hide_map.t,
-                          action: :hide_thumbnail_map, id: @observation.id) %>
-    </span>
-  </div>
-</div>
+<section id="thumbnail_map_partial" class="d-none d-sm-block">
 
-<div class="thumbnail-map-container">
-  <div class="thumbnail-buttons">
-    <div class="plus-button"></div>
-    <div class="minus-button"></div>
-  </div>
-  <div class="thumbnail-map">
+  <h4 class="d-inline mt-0"><%= :MAP.t %></h4>
+  <span class="pull-right d-inline">
+    <%= link_with_query(:show_observation_hide_map.t,
+                        action: :hide_thumbnail_map, id: @observation.id) %>
+  </span>
 
-    <%= if observation.location
-      if w < e && s > n
-        content_tag(:div, "",
-          class: "thumbnail-map-box",
-          style: "left:#{w}%; top:#{n}%; width:#{e-w}%; height:#{s-n}%"
-        )
-      elsif w > e && s > n
-        content_tag(:div, "",
-          class: "thumbnail-map-box",
-          style: "left:0%; top:#{n}%; width:#{e}%; height:#{s-n}%"
-        ) +
-        content_tag(:div, "",
-          class: "thumbnail-map-box",
-          style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
-        )
-      end
-    end %>
+  <div class="thumbnail-map-container">
 
-    <% if lat && long %>
-      <div class="pin-offset">
-        <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
-      </div>
-    <% end %>
+    <div class="thumbnail-buttons">
+      <div class="plus-button"></div>
+      <div class="minus-button"></div>
+    </div>
 
-    <%= image_tag("globe.jpg", width: "100%") %>
-  </div>
-</div>
+    <div class="thumbnail-map">
+
+      <%= if observation.location
+        if w < e && s > n
+          content_tag(:div, "",
+            class: "thumbnail-map-box",
+            style: "left:#{w}%; top:#{n}%; width:#{e-w}%; height:#{s-n}%"
+          )
+        elsif w > e && s > n
+          content_tag(:div, "",
+            class: "thumbnail-map-box",
+            style: "left:0%; top:#{n}%; width:#{e}%; height:#{s-n}%"
+          ) +
+          content_tag(:div, "",
+            class: "thumbnail-map-box",
+            style: "left:#{w}%; top:#{n}%; width:#{100-w}%; height:#{s-n}%"
+          )
+        end
+      end %>
+
+      <% if lat && long %>
+        <div class="pin-offset">
+          <div class="red-pin" style="left:<%= x %>%; bottom:<%= 100-y %>%"></div>
+        </div>
+      <% end %>
+
+      <%= image_tag("globe.jpg", width: "100%") %>
+
+    </div><!-- .thumbnail-map -->
+
+  </div><!-- .thumbnail-map-container -->
+
+</section><!-- #thumbnail_map_partial -->
 
 <%= if lat && long
   javascript_include "thumbnail_map"

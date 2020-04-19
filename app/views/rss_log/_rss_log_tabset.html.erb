@@ -1,4 +1,4 @@
-<%= form_tag(add_query_param(action: :index_rss_log)) %>
+<%= form_tag add_query_param(action: :index) do %>
   <div class="btn-group pb-2 d-none d-sm-block text-nowrap">
     <%= content_tag(:span, :rss_show.t, class: "btn btn-xs disabled") %>
 
@@ -12,5 +12,4 @@
 
     <%= submit_tag(:SUBMIT.t, class: "btn btn-xs") %>
   </div>
-</form>
-<% javascript_include("rss_feed_select_helper")%>
+<% end %>

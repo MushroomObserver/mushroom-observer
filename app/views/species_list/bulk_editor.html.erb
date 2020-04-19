@@ -25,19 +25,80 @@
             <div class="id_and_name">
               <%= obs.id %>: <%= obs.format_name.t %>
             </div>
-            <%= text_field(:observation, :other_notes,           index: obs.id, object: obs, class: "form-control", style: "width:40em", data: {tooltip:true}, title: :Notes.l) %><br/>
-            <%= text_field(:observation, :when_str,              index: obs.id, object: obs, class: "form-control", style: "width:8em",  data: {tooltip:true}, title: :Date.l) %>
-            <%= text_field(:observation, :place_name,            index: obs.id, object: obs, class: "form-control", style: "width:40em", data: {tooltip:true}, title: :Location.l) %>
-            <%= text_field(:observation, :lat,                   index: obs.id, object: obs, class: "form-control", style: "width:6em",  data: {tooltip:true}, title: :Latitude.l) %>
-            <%= text_field(:observation, :long,                  index: obs.id, object: obs, class: "form-control", style: "width:6em",  data: {tooltip:true}, title: :Longitude.l) %>
-            <%= text_field(:observation, :alt,                   index: obs.id, object: obs, class: "form-control", style: "width:4em",  data: {tooltip:true}, title: :Altitude.l) %>
-            <%= check_box(:observation, :is_collection_location, index: obs.id, object: obs, class: "form-control", data: {tooltip:true}, title: :form_observations_is_collection_location_help.l) %>
-            <%= check_box(:observation, :specimen,               index: obs.id, object: obs, class: "form-control", data: {tooltip:true}, title: :form_observations_specimen_available_help.l) %>
+            <%= text_field(:observation,
+                           :other_notes,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:40em",
+                           data: {tooltip:true},
+                           title: :Notes.l) %><br/>
+            <%= text_field(:observation,
+                           :when_str,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:8em",
+                           data: {tooltip:true},
+                           title: :Date.l) %>
+            <%= text_field(:observation,
+                           :place_name,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:40em",
+                           data: {tooltip:true},
+                           title: :Location.l) %>
+            <%= text_field(:observation,
+                           :lat,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:6em",
+                           data: {tooltip:true},
+                           title: :Latitude.l) %>
+            <%= text_field(:observation,
+                           :long,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:6em",
+                           data: {tooltip:true},
+                           title: :Longitude.l) %>
+            <%= text_field(:observation,
+                           :alt,
+                           index: obs.id,
+                           object: obs,
+                           class: "form-control",
+                           style: "width:4em",
+                           data: {tooltip:true},
+                           title: :Altitude.l) %>
+            <%= check_box(:observation,
+                          :is_collection_location,
+                          index: obs.id,
+                          object: obs,
+                          class: "form-control",
+                          data: {tooltip:true},
+                          title: :form_observations_is_collection_location_help.l) %>
+            <%= check_box(:observation,
+                          :specimen,
+                          index: obs.id,
+                          object: obs,
+                          class: "form-control",
+                          data: {tooltip:true},
+                          title: :form_observations_specimen_available_help.l) %>
             <%=
               menu = Vote.confidence_menu
               vote = @votes[obs.id] || @no_vote
               menu << [ :vote_no_opinion.t, 0 ] if vote.value == 0
-              select(:observation, :value, menu, {object: vote}, {index: obs.id, class: "form-control", data: {tooltip:true}, title: :Confidence_level.l})
+              select(:observation,
+                     :value,
+                     menu,
+                     {object: vote},
+                     {index: obs.id,
+                      class: "form-control",
+                      data: {tooltip:true},
+                      title: :Confidence_level.l})
             %> &nbsp;
           </td>
           <td>

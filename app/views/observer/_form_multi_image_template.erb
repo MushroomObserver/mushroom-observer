@@ -1,4 +1,4 @@
-<div class="added_image_wrapper row" style="border-top: 1px solid;">
+<div class="added_image_wrapper row border-top">
   <div class="col-sm-12">
 
     <div class="added_image_name_container row">
@@ -8,7 +8,7 @@
         <span class="text-success info-text"></span>
       </div>
       <div class="col-sm-2">
-        <a href="javascript:" style="float: right;" class="remove_image_link"><%= :image_remove_remove.t %></a>
+        <a href="javascript:" class="remove_image_link float-right"><%= :image_remove_remove.t %></a>
       </div>
     </div>
 
@@ -18,12 +18,12 @@
           <div class="col-12">
             <a href="#" data-role="set_as_default_thumbnail"><%= :image_set_default.t %></a>
             <label class="hidden is_default_thumbnail"><%= :image_add_default.t %></label>
-            <input type="radio" name="observation[thumb_image_id]" value="true" style="display: none;">
+            <input type="radio" name="observation[thumb_image_id]" value="true" class="d-none">
           </div>
           <div class="col-12">
             <img class="img-responsive" src="">
           </div>
-          <div class="col-12" style="overflow-wrap: break-word;">
+          <div class="col-12 text-break">
             <span class="small">{{img_file_name}}</span><br/>
             <span>{{img_file_size}}</span>
           </div>

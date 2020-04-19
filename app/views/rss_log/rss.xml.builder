@@ -2,7 +2,7 @@ xml.instruct! :xml, version: "1.0"
 xml.rss(version: "2.0") {
   xml.channel {
     xml.title(:rss_title.l)
-    xml.link(MO.http_domain + "/observer/list_rss_logs")
+    xml.link(MO.http_domain + "/rss_log/list_rss_logs")
     xml.description(:rss_description.l)
     xml.language(I18n.locale.to_s)
     for log in @logs

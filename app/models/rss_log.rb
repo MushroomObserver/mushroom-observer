@@ -157,10 +157,15 @@ class RssLog < AbstractModel
   belongs_to :glossary_term
   belongs_to :article
 
-  # Override the default show_controller
-  def self.show_controller
-    "observer"
-  end
+  # # If switch to ActivityLog name uncomment: Override the default table_name
+  # def self.table_name
+  #   "rss_log"
+  # end
+  #
+  # # If switch to ActivityLog name uncomment: Override the default primary_key
+  # def self.primary_key
+  #   "rss_log_id"
+  # end
 
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)

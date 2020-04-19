@@ -1,4 +1,7 @@
-class MatrixBoxPresenter
+# TODO: Unmingle the logic and the presentation here.
+# Name, location, and image all have presentation markup baked in
+# HTML markup should be in the views or partials
+class RssLogPresenter
   attr_accessor \
     :thumbnail, # thumbnail image tag
     :detail,    # string with extra details
@@ -27,6 +30,7 @@ class MatrixBoxPresenter
 
     target_type = target ? target.type_tag : rss_log.target_type
 
+    # TODO: NAME FORMATTER SHOULD GO IN A HELPER. THIS CAN BE USED ELSEWHERE
     # name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
     # Instead of using textilized unique_format_name,
     # output semantic markup of each part of the name, joined.
@@ -62,7 +66,7 @@ class MatrixBoxPresenter
                              class: "")
       else
         view.link_with_query(name,
-                             { controller: :observer,
+                             { controller: :rss_log,
                                action: :show_rss_log,
                                id: rss_log.id })
       end

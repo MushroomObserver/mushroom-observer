@@ -567,10 +567,10 @@ class AccountController < ApplicationController
       else
         # Probably should write a better error message here...
         flash_object_errors(@user)
-        redirect_to(controller: :observer, action: :list_rss_logs)
+        redirect_to(controller: :rss_log, action: :list_rss_logs)
       end
     else
-      redirect_to(controller: :observer, action: :list_rss_logs)
+      redirect_to(controller: :rss_log, action: :list_rss_logs)
     end
   end
 
@@ -649,12 +649,12 @@ class AccountController < ApplicationController
 
   def turn_admin_on # :root:
     session[:admin] = true if @user&.admin && !in_admin_mode?
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default(controller: :rss_log, action: :list_rss_logs)
   end
 
   def turn_admin_off # :root:
     session[:admin] = nil
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default(controller: :rss_log, action: :list_rss_logs)
   end
 
   def add_user_to_group # :root:

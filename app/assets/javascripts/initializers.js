@@ -16,7 +16,6 @@
 // external_link
 // image_vote
 // pivotal
-// rss_feed_select_helper
 // thumbnail_map
 // translations
 
@@ -90,6 +89,21 @@ $(document).on('ready page:load', function () {
     // Initialize validate_file_input_fields
     $("input[type=file][multiple!=multiple]").each(function() {
       apply_file_input_field_validation(this.id);
+    });
+
+    // This bit simply makes it so that if someone clicks on the span that it checks the checkbox
+    // Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
+    jQuery("[data-toggle='checkbox']").click(function() {
+        var $checkbox = $(this).find('input[type="checkbox"]');
+            $checkbox.prop('checked', !$checkbox.prop('checked'));
+    });
+
+    jQuery("[data-toggle='checkbox'] input").click(function(e) {
+        e.stopPropagation();
+    });
+
+    jQuery("[data-toggle='checkbox'] a").click(function(e) {
+        e.stopPropagation();
     });
 
 });

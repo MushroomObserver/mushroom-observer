@@ -51,7 +51,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_log/list_rss_logs")
 
     assert_not_nil(Name.find_by(text_name: "Caloplaca"))
 

@@ -28,9 +28,9 @@
         <%= :list_place_names_known_order.t if @default_orders %>
       </div>
       <%= paginate_block(@known_pages) do %>
-        <div class="list-group">
+        <div class="card">
           <% @known_data.each do |location| %>
-            <div class="list-group-item">
+            <div class="card-body">
               <%= link_with_query(location.display_name.t,
                                   location.show_link_args) %>
               (<%= observation_counts[location.id].to_i %>)
@@ -48,12 +48,12 @@
         <%= :list_place_names_undef_order.t if @default_orders %>
       </div>
       <%= paginate_block(@undef_pages) do %>
-        <div class="list-group">
+        <div class="card">
           <% @undef_data.each do |location, count|
             if @undef_location_format == :scientific
               location = Location.reverse_name(location)
             end %>
-            <div class="list-group-item">
+            <div class="card-body">
               <%= location_link(location, nil, count) %>
               <%= link_to(:list_place_names_merge.t,
                           action: :list_merge_options, where: location) %>

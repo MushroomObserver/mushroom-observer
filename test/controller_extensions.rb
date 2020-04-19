@@ -484,14 +484,14 @@ module ControllerExtensions
   #   assert_response( {action: show_observation, id: 1 })
   #
   #   # Expect a redirection to site index.
-  #   assert_response(controller: "observer", action: "index")
+  #   assert_response(controller: "rss_log", action: "list_rss_logs")
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
   #   assert_response(["observer", "index"])
   #
   #   # Short-hand for common redirects:
-  #   assert_response(:index)   => /observer/list_rss_logs
+  #   assert_response(:index)   => /rss_log/list_rss_logs
   #   assert_response(:login)   => /account/login
   #   assert_response(:welcome) => /account/welcome
   #
@@ -554,7 +554,7 @@ module ControllerExtensions
         super(:success, msg)
         assert_template(arg.to_s, msg)
       elsif arg == :index
-        msg += "Expected redirect to <observer/list_rss_logs>" + got
+        msg += "Expected redirect to <rss_log/list_rss_logs>" + got
         assert_redirected_to({ controller: "observer",
                                action: "list_rss_logs" }, msg)
       elsif arg == :login

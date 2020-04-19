@@ -5,8 +5,7 @@
 <% odd_or_even = 0
 for name in @names.select(&:ok_for_export)
   odd_or_even = 1 - odd_or_even %>
-  <div class="ListLine<%= odd_or_even %>"
-       style="padding-top:10px; padding-bottom:10px;">
+  <div class="ListLine py-3<%= odd_or_even %>">
       <%= name.display_name.t %>
   </div>
 <% end %>

@@ -1,10 +1,10 @@
 <%
-   ## TODO: Rename (RSS box?)
    # Requires local variable object: RssLog, Observation, Image, etc. instance.
-   presenter = MatrixBoxPresenter.new(object, @view)
+   presenter = RssLogPresenter.new(object, @view)
 %>
 
 <% if presenter %>
+<li class="col mb-4">
   <div class="card rss-box-details h-100">
     <div class="card-img-top">
       <%= presenter.thumbnail %>
@@ -31,4 +31,5 @@
       </p><!-- .rss-what -->
     </div><!-- .card-footer -->
   </div><!-- .card -->
+</li>
 <% end %>

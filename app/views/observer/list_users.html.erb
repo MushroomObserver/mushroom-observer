@@ -53,8 +53,8 @@
   else %>
     <%= paginate_block(@pages) do %>
       <div class="row">
-        <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
+        <%= render(partial: "shared/matrix_box",
+                   collection: @objects, as: :object) %>
       </div>
     <% end %>
 <% end %>
-

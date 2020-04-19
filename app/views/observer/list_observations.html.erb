@@ -13,7 +13,7 @@
       <div class="alert-warning">
         <div><%= :list_observations_suggestions.t %>:</div>
         <% names.sort_by(&:sort_name).each do |name| %>
-          <div class="indent">
+          <div class="pl-3">
             <%= search = PatternSearch::Observation.new(name.text_name)
                 count = search.query.num_results
                 if count.zero?
@@ -35,14 +35,13 @@
   <% end %>
 <% end %>
 
-<%= pagination_numbers(@pages) %>
+<%= paginate_block(@pages) do %>
 
-<div class="results row row-columns-1 row-columns-sm-2 row-columns-lg-3 row-columns-xl-4">
-  <%= render(partial: "shared/matrix_box",
-             layout: "shared/matrix_table",
-             collection: @objects,
-             as: :object) %>
-  <div style="clear:left"></div>
-</div>
+  <ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+    <%= render(partial: "shared/matrix_box",
+               collection: @objects,
+               as: :object) %>
+    <div class="clearfix"></div>
+  </ul>
 
-<%= pagination_numbers(@pages) %>
+<% end %>

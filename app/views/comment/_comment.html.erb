@@ -4,8 +4,8 @@
   user_url = url_for(controller: :observer, action: :show_user, id: user.id)
 %>
 
-<div class="list-group comment">
-  <div class="list-group-item default">
+<div class="card comment">
+  <div class="card-body">
 
     <% if user.image_id %>
       <div class="d-none d-sm-block user-thumbnail float-right text-center">
@@ -51,5 +51,6 @@
     <% if user.image_id %>
       <div class="clearfix"></div>
     <% end %>
-  </div>
-</div>
+
+  </div><!-- .card-body -->
+</div><!-- .card -->

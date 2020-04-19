@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  <%= auto_discovery_link_tag(:rss, {controller: 'observer', action: 'rss'}, {title: :app_rss.l}) %>
+  <%= auto_discovery_link_tag(:rss, {controller: 'rss_log', action: 'rss'}, {title: :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
   <link rel="SHORTCUT ICON" href="https://mushroomobserver.org/favicon.ico"/>
   <meta property="og:image" content="https://mushroomobserver.org/images/facebook_icon.png" />

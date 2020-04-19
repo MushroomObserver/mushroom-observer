@@ -1,22 +1,47 @@
-# TODO: move this into new RssLogController
-class ObserverController
-  # Default page.  Just displays latest happenings.  The actual action is
-  # buried way down toward the end of this file.
+class RssLogController < ApplicationController
+  # The main page.
+
+  # TODO: Try simpler param handling here?
+  # Incoming requests will have query parameters and Rails can prolly parse
+  # without this controller needing to parse them explicitly
+  # Maybe this is done so the parameters persist through the session?
+
+  before_action :login_required, except: [
+    :index,
+    :index_rss_log,
+    :list_rss_logs,
+    :next_rss_log,
+    :prev_rss_log,
+    :rss,
+    :show_rss_log,
+    :show_selected_rss_logs
+  ]
+
   def index
+    # This redefines the query, then calls application_controller.rb action:
+    # show_index_of_objects - which instantiates more variables for view
+    # @timer_start @timer_end @title @num_results @sorts @pages
     list_rss_logs
   end
 
-  # Displays matrix of selected RssLog's (based on current Query).
+  # Set a query from POST or given params, and pass to show_selected_rss_logs
   def index_rss_log # :norobots:
+    # If user selected checkboxes in a form submit
+    # TODO: Rails can already parse POST params.
+    # fix form eliminate this logic??!
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
+    # If the parameters are otherwise present in the query string
+    # TODO: Isn't this already parsed by the query?
     elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
+    # If no query params, force the "All types" params
+    # TODO: Isn't this already parsed by the query?
     else
       query = find_query(:RssLog)
       query ||= create_query(:RssLog, :all,
@@ -25,7 +50,8 @@ class ObserverController
     show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
   end
 
-  # This is the main site index.  Nice how it's buried way down here, huh?
+  # Set query to all RssLog's and pass to show_selected_rss_logs
+  # This is currently the default main page
   def list_rss_logs
     query = create_query(:RssLog, :all,
                          type: @user ? @user.default_rss_type : "all")

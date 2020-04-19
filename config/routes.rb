@@ -318,7 +318,6 @@ ACTIONS = {
     intro: {},
     letter_to_community: {},
     list_observations: {},
-    list_rss_logs: {},
     list_users: {},
     lookup_accepted_name: {},
     lookup_comment: {},
@@ -333,7 +332,6 @@ ACTIONS = {
     map_observations: {},
     news: {},
     next_observation: {},
-    next_rss_log: {},
     next_user: {},
     observation_search: {},
     observations_at_location: {},
@@ -344,19 +342,16 @@ ACTIONS = {
     observations_of_name: {},
     pattern_search: {},
     prev_observation: {},
-    prev_rss_log: {},
     prev_user: {},
     print_labels: {},
     recalc: {},
     review_authors: {},
-    rss: {},
     search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
     show_notifications: {},
     show_obs: {},
     show_observation: {},
-    show_rss_log: {},
     show_site_stats: {},
     show_user: {},
     suggestions: {},
@@ -399,6 +394,14 @@ ACTIONS = {
     new: {},
     show: {},
     update: {}
+  },
+  rss_log: {
+    index_rss_log: {},
+    list_rss_logs: {},
+    next_rss_log: {},
+    prev_rss_log: {},
+    rss: {},
+    show_rss_log: {}
   },
   sequence: {
     create_sequence: {},
@@ -551,8 +554,17 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  # Default page is /observer/list_rss_logs.
-  root "observer#list_rss_logs"
+  # Logged in - Default page is /rss_log/list_rss_logs.
+  # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
+  constraints lambda { |req| !req.session[:user_id].blank? } do
+    root :to => "rss_log#list_rss_logs"
+  end
+
+  # Not logged in - Default page is /observer#list_observations.
+  root :to => "observer#list_observations"
+
+  # Default page is /rss_log/list_rss_logs.
+  # root "rss_log#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", id: /\d+/

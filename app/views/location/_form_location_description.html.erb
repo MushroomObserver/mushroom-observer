@@ -9,8 +9,8 @@
 <% for f in LocationDescription.all_note_fields %>
   <div class="form-group">
     <%= label_tag("description_#{f}", "form_locations_#{f}".to_sym.t + ":",
-                  style: "margin-bottom:0") %>
-    <div class="help-block" style="margin-top:0">
+                  class: "mb-0") %>
+    <div class="help-block mt-0">
       <%= "form_locations_#{f}_help".to_sym.l %>
     </div>
     <%= form.text_area(f, rows: 10, class: "form-control") %>

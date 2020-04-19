@@ -6,7 +6,7 @@
       <div class="form-group form-inline">
         <%= label_tag(:img_id, :image_reuse_id.t + ":") %>
         <%= text_field_tag(:img_id, "", size: 8, data: {autofocus: true}, class: "form-control") %>
-        <%= submit_tag(:image_reuse_reuse.l, class: "btn", style: "margin-left: 1em") %>
+        <%= submit_tag(:image_reuse_reuse.l, class: "btn ml-3") %>
       </div>
 
       <p class="help-block"><%= :image_reuse_id_help.tp %></p>
@@ -20,7 +20,7 @@
   </div>
 
   <%= paginate_block(@pages) do %>
-    <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |image| %>
+    <%= render(partial: "shared/matrix_box", locals: {objects: @objects}) do |image| %>
       <div class="mt-3 mb-3">
         <%= thumbnail(image, link: url_args.merge(img_id: image.id), original: true) %>
       </div>

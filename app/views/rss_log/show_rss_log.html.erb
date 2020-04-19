@@ -8,7 +8,7 @@
     <% for key, args, time in @rss_log.parse_log
       if key != :log_orphan %>
         <tr>
-          <td style="white-space:nowrap; vertical-align:text-top">
+          <td class="text-nowrap align-text-top">
 	    <%= time.web_time %>
 	  </td>
           <td style="width:10px">:</td>

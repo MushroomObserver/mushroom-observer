@@ -11,9 +11,9 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <div class="list-group">
+    <div class="card">
       <% for desc in @objects %>
-        <div class="list-group-item">
+        <div class="card-body">
           <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
         </div>
       <% end %>

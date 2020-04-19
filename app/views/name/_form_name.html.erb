@@ -58,7 +58,7 @@
 </p>
 
 <% if !@misspelling.nil? && (in_admin_mode? || !@name.locked) %>
-  <div style="margin:1.5em 0em">
+  <div class="my-4 mx-0">
     <%= form.check_box(:misspelling, checked: @misspelling) %>
     <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
     <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>

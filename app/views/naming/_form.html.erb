@@ -1,6 +1,6 @@
 <%
    # Changing naming form html in _form_new.erb in case we want to roll back
-
+   # TODO: CHECK JS AT BOTTOM
    # Prefer NamingParams, but use raw params if no params.
    what = @params.what rescue @what
    valid_names = @params.valid_names rescue @valid_names
@@ -82,7 +82,7 @@
 
 </div>
 
-<%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
+<%= hidden_field_tag(:was_js_on, "yes") if browser.modern_browser? %>
 <% inject_javascript_at_end %(
   jQuery(document).ready(function() {
     function collapse_reason() {

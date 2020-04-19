@@ -52,7 +52,7 @@
   <div class="list-group-item disabled bold">
     <%= :app_latest.t %>
   </div>
-  <%= link_to(:app_latest_changes.t, {controller: :observer, action: :list_rss_logs}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_latest_changes.t, {controller: :rss_log, action: :list_rss_logs}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_newest_images.t, {controller: :image, action: :list_images}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_comments.t, {controller: :comment, action: :list_comments}, {class: "list-group-item indent"}) %>
 

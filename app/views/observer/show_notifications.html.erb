@@ -15,7 +15,7 @@
 for notification, naming in @data
   odd_or_even = 1 - odd_or_even %>
   <p>
-    <div class="ListLine<%= odd_or_even %>" style="margin:0px 20px; padding:10px 20px; border:1px dotted;">
+    <div class="ListLine<%= odd_or_even %>" class="my-0 mx-4 py-2 px-4" style="border:1px dotted;">
       <%= notification.calc_note(user: @user, naming: naming).tp %>
     </div>
   </p>

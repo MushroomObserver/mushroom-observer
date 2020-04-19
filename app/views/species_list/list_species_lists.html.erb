@@ -9,9 +9,9 @@
 
 <%= paginate_block(@pages) do %>
   <% if @objects.any? %>
-    <div class="list-group">
+    <div class="card">
       <% for species_list in @objects.each %>
-        <div class="list-group-item">
+        <div class="card-body">
           <big>
             <%=
               when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")

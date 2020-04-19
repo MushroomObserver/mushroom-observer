@@ -12,9 +12,7 @@
 
 <!-- list the projects -->
 <%= paginate_block(@pages) do %>
-  <div class="list-group")>
+  <div class="card")>
     <%= render(partial: "object", collection: @objects) %>
   </div>
 <% end %>
-
-

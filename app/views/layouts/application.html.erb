@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <%= auto_discovery_link_tag(:rss, {controller: :observer, action: :rss}, {title: :app_rss.l}) %>
+  <%= auto_discovery_link_tag(:rss, {controller: :rss_log, action: :rss}, {title: :app_rss.l}) %>
   <title><%= :app_title.l%>: <%= title_tag_contents(controller.action_name)%></title>
   <link rel="SHORTCUT ICON" href="https://mushroomobserver.org/favicon.ico"/>
   <% if @canonical_url %>
@@ -85,15 +85,15 @@
     <div id="right_side" class="col-12 col-sm-10">
 
       <!--HAMBURGER_BUTTONS-->
-      <div class="row visible-xs d-print-none">
-        <div class="col-12 p-0">
+      <div class="visible-xs d-print-none">
+        <div class="p-0">
           <div class="float-left">
             <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed zindex-dropdown" data-toggle="offcanvas">
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
           </div>
           <div class="float-right">
-            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed zindex-sticky" style="top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
+            <button type="button" class="btn btn-lg hamburger rounded-0 position-fixed zindex-sticky top-right" data-toggle="search" data-target="#search_bar_row">
               <span class="glyphicon glyphicon-search"></span>
             </button>
           </div>
@@ -106,8 +106,8 @@
       <!--/SEARCH_BAR_NAV-->
 
       <% if flash_notices? %>
-        <div class="row d-print-none">
-          <div class="col-12 max-width-text">
+        <div class="d-print-none">
+          <div class="max-width-text">
             <%=
               klass = case flash_notice_level
                 when 0; "alert-success"
@@ -122,16 +122,14 @@
       <% end %>
       <% flash_clear %>
 
-      <div id="content" class="row">
+      <div id="content">
         <%= render(partial: "/shared/title_and_tab_sets") %>
 
         <!--MAIN_PAGE_CONTENT-->
-        <div class="col-12">
-          <%= yield %>
-        </div>
+        <%= yield %>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <div class="col-12 d-print-none">
+        <div class="d-print-none">
           <%= render(partial: "/shared/translator_credit") %>
         </div>
       </div>

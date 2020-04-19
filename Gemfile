@@ -82,7 +82,7 @@ gem "simple_enum"
 
 # Amazon S3 SDK, for access to images on dreamhost S3
 # limited to v2 to avoid installing a bunch of gems
-gem "aws-sdk", "~> 3"
+gem "aws-sdk", "~> 2"
 
 # email generation, parsing and sending
 gem "mail", "= 2.7.0"
@@ -123,9 +123,6 @@ gem "bootstrap", "~> 4.4.1"
 
 # Use Bootstrap Lightbox for lightbox
 gem "lightbox-bootstrap-rails", "~> 5.1", ">= 5.1.0.1"
-
-# Experimental: Use will_paginate_infinite for infinite scroll.
-# gem "will_paginate_infinite", git: "https://github.com/adamtao/will_paginate_infinite"
 
 
 ########## Development, Testing, and Analysis ##################################

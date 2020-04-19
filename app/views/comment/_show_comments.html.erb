@@ -6,29 +6,29 @@
   end
 %>
 
-<div class="row">
-  <div class="col-12 max-width-text-plus-image">
-    <%= content_tag(:h4, :COMMENTS.t,
-                    class: "mt-3", style: "display:inline-block") %>
-      <%= link_with_query(:show_comments_add_comment.t, {controller: :comment,
-	                        action: :add_comment, id: object.id, type: object.class.name},
-                          class: "btn mt-3 pull-right") if controls %>
+<div id="comments_partial">
 
-    <% if comments.empty? %>
-      <div class="list-group comment">
-        <div class="list-group-item default">
-          <%= :show_comments_no_comments_yet.t %>
-        </div>
-      </div>
-    <% else %>
-      <% comments.each do |comment| %>
-        <%= render(partial: "comment/comment", object: comment) %>
-      <% end %>
+  <%= content_tag(:h4, :COMMENTS.t,
+                  class: "mt-3", style: "display:inline-block") %>
+    <%= link_with_query(:show_comments_add_comment.t, {controller: :comment,
+                        action: :add_comment, id: object.id, type: object.class.name},
+                        class: "btn mt-3 pull-right") if controls %>
+
+  <% if comments.empty? %>
+    <div class="card comment">
+      <div class="card-body">
+        <%= :show_comments_no_comments_yet.t %>
+      </div><!-- .card-body -->
+    </div><!-- .card -->
+  <% else %>
+    <% comments.each do |comment| %>
+      <%= render(partial: "comment/comment", object: comment) %>
     <% end %>
+  <% end %>
 
-    <%= if limit && and_more > 0
-      link_to(:show_comments_and_more.t(num: and_more),
-              {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
-    end %>
-  </div>
-</div>
+  <%= if limit && and_more > 0
+    link_to(:show_comments_and_more.t(num: and_more),
+            {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
+  end %>
+  
+</div><!-- #comments -->

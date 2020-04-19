@@ -48,7 +48,7 @@ class AmateurTest < IntegrationTestCase
       form.change("password", "testpassword")
       form.submit("Login")
     end
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_log/list_rss_logs")
     assert_flash_text(/success/i)
 
     # This should only be accessible if logged in.

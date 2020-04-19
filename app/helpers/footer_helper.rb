@@ -129,7 +129,7 @@ module FooterHelper
     # Show RSS log for all of the above.
     if obj.respond_to?(:rss_log_id) && obj.rss_log_id
       html << link_to(:show_object.t(type: :log),
-                      controller: :observer,
+                      controller: :rss_log,
                       action: :show_rss_log,
                       id: obj.rss_log_id)
     end

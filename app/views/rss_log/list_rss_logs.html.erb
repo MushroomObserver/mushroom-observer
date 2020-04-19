@@ -1,0 +1,21 @@
+<%
+  @title = content_tag(:span, :rss_log_title.t, class: "text-nowrap")
+
+  if @links.any?
+    tabs = create_links(@links)
+    @tabsets = { right: draw_tab_set(tabs) }
+  end
+
+  @full_width_tab_set = render(partial: "rss_log_tabset")
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<%= paginate_block(@pages) do %>
+
+  <ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+    <%= render(partial: "shared/matrix_box",
+               collection: @objects,
+               as: :object) %>
+  </ul>
+
+<% end %>

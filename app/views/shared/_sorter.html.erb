@@ -1,0 +1,17 @@
+<% if @sorts %>
+  <div class="d-print-none">
+    <div class="pt-3">
+      <%= content_tag(:span, :sort_by_header.t) %>
+      <div id="sorts" class="btn-group btn-group-xs" role="group">
+        <% @sorts.each do |title, action| %>
+          <%= if action.nil?
+                link_with_query(title, {}, class: "btn btn-default active",
+                                           disabled: true)
+              else
+                link_with_query(title, action, class: "btn btn-default")
+              end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

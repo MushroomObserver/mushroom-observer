@@ -1,5 +1,5 @@
 <% if !@name.lifeform.blank? %>
-  <div style="margin-bottom:0.5em">
+  <div class="mb-2">
     <% @name.lifeform.strip.split(" ").each do |word| %>
       <p><%= :"lifeform_#{word}".t %></p>
     <% end %>

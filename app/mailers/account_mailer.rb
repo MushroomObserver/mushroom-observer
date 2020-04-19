@@ -2,6 +2,11 @@
 class AccountMailer < ActionMailer::Base
   private
 
+  # new: use path views/mailers/
+  def self.inherited(subclass)
+    subclass.default template_path: "mailers/#{subclass.name.to_s.underscore}"
+  end
+
   def setup_user(user)
     @user = user
     I18n.locale = @user.try(&:locale) || MO.default_locale

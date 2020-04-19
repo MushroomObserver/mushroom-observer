@@ -1,6 +1,6 @@
 <% parents = @name.all_parents %>
 <% if parents.any? %>
-  <div style="margin-bottom:0.5em">
+  <div class="mb-2">
     <% parents.reverse.each do |n| %>
       <p>
         <%= rank_as_string(n.rank) %>:

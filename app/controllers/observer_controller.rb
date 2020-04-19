@@ -22,7 +22,7 @@ class ObserverController < ApplicationController
   require_dependency "observer_controller/info_controller"
   require_dependency "observer_controller/markup_controller"
   require_dependency "observer_controller/notification_controller"
-  require_dependency "observer_controller/rss_log_controller"
+  # require_dependency "observer_controller/rss_log_controller"
   require_dependency "observer_controller/search_controller"
   require_dependency "observer_controller/user_controller"
 
@@ -40,11 +40,9 @@ class ObserverController < ApplicationController
     :how_to_use,
     :index,
     :index_observation,
-    :index_rss_log,
     :index_user,
     :intro,
     :list_observations,
-    :list_rss_logs,
     :lookup_accepted_name,
     :lookup_comment,
     :lookup_image,
@@ -58,7 +56,6 @@ class ObserverController < ApplicationController
     :map_observations,
     :news,
     :next_observation,
-    :next_rss_log,
     :next_user,
     :observation_search,
     :observations_by_name,
@@ -69,14 +66,12 @@ class ObserverController < ApplicationController
     :observations_at_location,
     :pattern_search,
     :prev_observation,
-    :prev_rss_log,
     :prev_user,
     :print_labels,
     :rss,
     :search_bar_help,
     :show_obs,
     :show_observation,
-    :show_rss_log,
     :show_site_stats,
     :show_user,
     :test,

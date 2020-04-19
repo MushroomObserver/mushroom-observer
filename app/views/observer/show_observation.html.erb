@@ -15,16 +15,11 @@
 
   <div class="left-column col-12 col-sm-8">
 
-    <div class="card">
-      <div class="card-body">
-        <%= render(partial: "show_observation",
-                   locals: { observation: @observation }) %>
-      </div>
-    </div>
+    <%= render(partial: "show_observation",
+               locals: { observation: @observation }) %>
 
-    <div id="naming_partial" class="mt-3">
-      <%= render(partial: "naming/show", locals: { observation: @observation }) %>
-    </div>
+    <%= render(partial: "naming/show",
+               locals: { observation: @observation }) %>
 
     <%= render(partial: "comment/show_comments",
                locals: { object: @observation, controls: true, limit: nil }) %>
@@ -33,31 +28,29 @@
 
   <div class="right-column col-12 col-sm-4">
 
-    <div class="card">
-      <div class="card-body name-section small">
-        <%= render(partial: "show_name_info",
-                   locals: { observation: @observation }) %>
-      </div>
-    </div>
+    <%= render(partial: "show_name_info",
+               locals: { observation: @observation }) %>
 
     <% if show_lists %>
-      <%= render(partial: "show_lists", locals: {observation: @observation}) %>
+      <%= render(partial: "show_lists",
+                 locals: {observation: @observation}) %>
     <% end %>
 
     <% if show_links %>
-      <%= render(partial: "show_links", locals: {observation: @observation}) %>
+      <%= render(partial: "show_links",
+                 locals: {observation: @observation}) %>
     <% end %>
 
     <% if show_map %>
-      <div class="d-none d-sm-block">
-        <%= render(partial: "show_thumbnail_map",
-                   locals: { observation: @observation }) %>
-      </div>
+      <%= render(partial: "show_thumbnail_map",
+                 locals: { observation: @observation }) %>
     <% end %>
 
-    <%= render(partial: "show_images", locals: { observation: @observation }) %>
+    <%= render(partial: "show_images",
+               locals: { observation: @observation }) %>
 
   </div><!-- .right-column -->
 
 </div><!-- .row -->
+
 <%= show_object_footer(@observation) %>

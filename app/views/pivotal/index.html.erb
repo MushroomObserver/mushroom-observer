@@ -56,11 +56,11 @@
 </div>
 
 <div id="pivotal_index">
-  <table id="pivotal_labels" style="margin-bottom:1em">
+  <table id="pivotal_labels" class="mb-3">
     <tr>
       <td>
         <table>
-          <% for label in %w( 
+          <% for label in %w(
             open -
             critical bottleneck -
             started unstarted unscheduled -
@@ -112,14 +112,14 @@
           <span class="pivotal_name"><%=
             link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
           %></span><br/>
-          <span style="white-space:nowrap">
+          <span class="text-nowrap">
             <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
               pivotal_vote_controls(story)
             %></span>
             <span class="pivotal_state pivotal_<%= story.state %>"><%=
               :"pivotal_state_#{story.state}".l
             %></span>
-            <span class="pivotal_num_comments">(<%= :comments.l %>: 
+            <span class="pivotal_num_comments">(<%= :comments.l %>:
               <span id="pivotal_num_comments_<%= story.id %>"><%=
                 story.comments.length.to_s
               %></span>)</span>

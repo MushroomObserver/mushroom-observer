@@ -14,7 +14,7 @@
      if names.any? %>
         <div class="alert-warning">
           <%= :list_observations_alternate_spellings.t %><br/>
-          <ul type="none">
+          <ul class="list-unstyled">
             <% names.sort_by(&:sort_name).each do |name| %>
               <%= link_to(name.display_name.t, name.show_link_args) %><br/>
             <% end %>
@@ -30,7 +30,7 @@
 <%= paginate_block(@pages, args) do %>
     <% if @objects.any? %>
         <% counts = Name.count_observations(@objects) %>
-        <table class="table table-striped" width="100%">
+        <table class="table table-striped w-100">
           <% @objects.each do |name| %>
               <tr>
                 <td>
@@ -44,7 +44,7 @@
                             <td><%= val %></td>
                         <% end
                            else %>
-                        <td align="center" colspan="3" style="letter-spacing:0.5em">
+                        <td align="center" colspan="3" class="ls-5">
                           --- not the default ---
                         </td>
                     <% end %>

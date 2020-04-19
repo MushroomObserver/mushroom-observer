@@ -19,4 +19,8 @@ module BrowserHelper
       browser.facebook? && browser.safari_webapp_mode? && browser.webkit_full_version.to_i >= 602
     ].any?
   end
+  
+  def bot?(browser)
+    bot.bot? && !browser.device.mobile? && !browser.duck_duck_go?
+  end
 end

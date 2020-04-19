@@ -8,21 +8,21 @@
 
 <div id="image_<%= index %>_box" class="form_image">
 
-  <p style="white-space:nowrap">
+  <p class="text-nowrap">
   <%= radio_button(:observation, :thumb_image_id, -index) %>
   <%= custom_file_field(:image, :image, index: index, onchange: "auto_image_new(#{index})") %>
 
   <% if @js %>
-    <span style="margin-left:10px">&nbsp;</span>
+    <span class="ml-2">&nbsp;</span>
     <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);" type="button" class="btn" value="<%=:MORE.t%> »" />
-    <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);" type="button" class="btn" value="« <%=:LESS.t%>" style="display:none" />
+    <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);" type="button" class="btn d-none" value="« <%=:LESS.t%>" />
   <% end %><br/>
 
   <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
   <%= text_field(:image, :notes, index: index, size: 50) %>
   </p>
 
-  <div id="image_<%= index %>_div" style="line-height:100%<%= "; display:none" if @js %>">
+  <div id="image_<%= index %>_div" class="lh-100<%= " d-none" if @js %>">
     <p><label for="image_<%= index %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
     <%= text_field(:image, :copyright_holder, index: index) %></p>
 

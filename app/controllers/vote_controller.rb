@@ -59,7 +59,7 @@ class VoteController < ApplicationController
     # Naming.refresh_vote_cache
     Observation.refresh_vote_cache
     flash_notice(:refresh_vote_cache.t)
-    redirect_with_query(controller: :observer,
+    redirect_with_query(controller: :rss_log,
                         action: :list_rss_logs,
                         id: observation.id)
   end

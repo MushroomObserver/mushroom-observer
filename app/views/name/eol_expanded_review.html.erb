@@ -11,8 +11,7 @@ for n in @data.names
   id = n.id
   display_name = n.display_name
   odd_or_even = 1 - odd_or_even %>
-  <div class="ListLine<%= odd_or_even %>"
-       style="padding-top:10px; padding-bottom:10px;">
+  <div class="ListLine py-3<%= odd_or_even %>">
       <%= display_name %><br/>
       <% if @data.has_images?(id) %>
         <%= :eol_expanded_review_image_count.t(count: @data.image_count(id)) %><br/>

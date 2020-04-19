@@ -97,6 +97,7 @@ class ApplicationController < ActionController::Base
   require "login_system"
   require "csv"
   include LoginSystem
+  include Pagy::Backend
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -268,7 +269,7 @@ class ApplicationController < ActionController::Base
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
     if args.member?(:back)
-      redirect_back(fallback_location: "/")
+      redirect_back(fallback_location: "#{MO.http_domain}")
     else
       super
     end
@@ -1431,10 +1432,14 @@ class ApplicationController < ActionController::Base
     @error ||= :runtime_no_matches.t(type: type)
 
     # Get user prefs for displaying results as a matrix.
+    # CHANGED for better performance: No overriding the default count!
     if args[:matrix]
-      @layout = calc_layout_params
-      num_per_page = @layout["count"]
+      # @layout = calc_layout_params
+      # num_per_page = @layout["count"]
+      num_per_page = MO.default_layout_count
     end
+
+    # PAGINATION SECTION. Uses MOPaginator class and pagination_helper
 
     # Inform the query that we'll need the first letters as well as ids.
     query.need_letters = args[:letters] if args[:letters]

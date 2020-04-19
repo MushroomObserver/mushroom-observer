@@ -1,10 +1,13 @@
 module JavascriptHelper
   # Browser gem's "modern?" criteria has been removed.
-  # See browser_helper.rb
-  def can_do_ajax?
+  # We re-added in browser_extensions.rb
+  # browser_helper.rb now inactive
+
+  # Removed this whole function. Use browser.modern_browser? instead
+  # def can_do_ajax?
     # browser.modern? || browser.ie?(8) || Rails.env == "test"
-    browser.modern_browser?
-  end
+  #   browser.modern_browser?
+  # end
 
   # Use this test to determine if a user can upload multiple images at a time.
   # It checks for support of the following requirements:

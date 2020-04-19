@@ -581,11 +581,11 @@ class ObserverControllerTest < FunctionalTestCase
 
     params = { search: { pattern: "", type: :google } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
 
     params = { search: { pattern: "x", type: :nonexistent_type } }
     get_with_dump(:pattern_search, params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
 
     params = { search: { pattern: "", type: :observation } }
     get_with_dump(:pattern_search, params)
@@ -749,7 +749,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
-                       response: { controller: :observer,
+                       response: { controller: :rss_log,
                                    action: :list_rss_logs })
   end
 
@@ -1337,7 +1337,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       login("rolf")
       get(page, params: params)
-      assert_redirected_to(action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
@@ -1356,7 +1356,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login("rolf")
     post(page, params: params)
-    assert_redirected_to(controller: :observer, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")

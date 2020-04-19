@@ -69,9 +69,9 @@
   <div class="row">
     <div class="col-12 max-width-text-plus-image">
       <%= paginate_block(@pages) do %>
-        <div class="list-group">
+        <div class="card">
 
-          <div class="list-group-item default">
+          <div class="card-body default">
             <%= :species_list_show_members.t %>:
             <%= link_to_coerced_query(@query, Observation) %> |
             <%= link_to_coerced_query(@query, Image) %> |
@@ -88,7 +88,7 @@
 
           <% if @objects.any? %>
             <% for observation in @objects %>
-              <div class="list-group-item">
+              <div class="card-body">
                 <div class="row">
                   <div class="col-sm-4 col-md-3 col-lg-2">
                     <%= if observation.thumb_image_id

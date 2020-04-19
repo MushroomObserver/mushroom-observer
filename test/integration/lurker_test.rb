@@ -5,7 +5,7 @@ class LurkerTest < IntegrationTestCase
   def test_poke_around
     # Start at index.
     get("/")
-    assert_template("observer/list_rss_logs")
+    assert_template("rss_log/list_rss_logs")
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)

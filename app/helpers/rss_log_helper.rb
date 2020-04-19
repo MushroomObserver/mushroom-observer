@@ -1,4 +1,4 @@
-# Custom View Helpers for Rss_log View (Activity Feed)
+# Custom View Helpers for rss_log View (Activity Feed)
 #
 module RssLogHelper
   # All types of RssLogs

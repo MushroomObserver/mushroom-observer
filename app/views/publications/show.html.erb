@@ -22,7 +22,7 @@
   </p>
 
   <% unless @publication.link.blank? %>
-    <p style="word-break:break-all">
+    <p class="text-break">
       <b><%= :publication_link.t %>:</b><br/>
       <%= link_to(@publication.link, @publication.link) %>
     </p>
@@ -44,7 +44,7 @@
   </p>
 
   <p>
-    <b><%= :show_publication_added_by.t %></b>: 
+    <b><%= :show_publication_added_by.t %></b>:
     <%= user_link(@publication.user) %>
     <%= @publication.created_at.web_date %><br/>
     <%= if @publication.created_at.web_date != @publication.updated_at.web_date
