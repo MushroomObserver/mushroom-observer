@@ -82,6 +82,9 @@ gem "aws-sdk-s3"
 gem "jquery-slick-rails"
 
 # email generation, parsing and sending
+# version locked to prevent test failures caused by added "=0D" at the
+# end of line in the body of plaintext emails.
+# See https://www.pivotaltracker.com/story/show/172299270/comments/213574631
 gem "mail", "= 2.7.0"
 
 # for detecting file type of uploaded images
