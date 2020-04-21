@@ -141,6 +141,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
+#  details::            Return the detail message for the latest update.
 #
 #  == Callbacks
 #
@@ -157,12 +158,17 @@ class RssLog < AbstractModel
   belongs_to :glossary_term
   belongs_to :article
 
-  # # If switch to ActivityLog name uncomment: Override the default table_name
+  # Override the default show_controller if necessary
+  # def self.show_controller
+  #   "rss_log"
+  # end
+
+  # # If switch to ActivityLog name, uncomment: Override the default table_name
   # def self.table_name
   #   "rss_log"
   # end
   #
-  # # If switch to ActivityLog name uncomment: Override the default primary_key
+  # # If switch to ActivityLog name, uncomment: Override the default primary_key
   # def self.primary_key
   #   "rss_log_id"
   # end
@@ -270,8 +276,12 @@ class RssLog < AbstractModel
   # Returns URL of <tt>show_#{object}</tt> action for the associated object.
   # That is, the RssLog for an Observation would return
   # <tt>"/observer/show_observation/#{id}"</tt>, and so on.  If the RssLog is
-  # an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt>
+  # an orphan, it returns the generic <tt>"/rss_log/show_rss_log/#{id}"</tt>
   # URL.
+
+  # TODO: Maybe retire this method, use Rails built-in "RESTful" url_for(target)
+  # These paths should already be in routes.rb and some will be broken out of
+  # the observer controller into their own controllers (and get own routes)
   def url
     if location_id
       sprintf("/location/show_location/%d?time=%d", location_id,
@@ -292,7 +302,7 @@ class RssLog < AbstractModel
     elsif article_id
       sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
-      sprintf("/observer/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
+      sprintf("/rss_log/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
   end
 
@@ -369,6 +379,48 @@ class RssLog < AbstractModel
       first = false
     end
     results
+  end
+
+  # Figure out the detail message for the most recent update.
+  def details
+    # target_type = target ? target.type_tag : target_type
+    begin
+      tag, args, time = parse_log.first
+    rescue StandardError
+      []
+    end
+    if !target_type
+      detail = :rss_destroyed.t(type: :object)
+    elsif !target ||
+          tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
+      detail = :rss_destroyed.t(type: target_type)
+    elsif !time || time < target.created_at + 1.minute
+      detail = :rss_created_at.t(type: target_type)
+      unless [:observation, :species_list].include?(target_type)
+        begin
+          detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
+        rescue StandardError
+          nil
+        end
+      end
+    else
+      if [:observation, :species_list].include?(target_type) &&
+         [target.user.login, target.user.name, target.user.legal_name].
+         include?(args[:user])
+        # This will remove redundant user from observation logs.
+        tag2 = :"#{tag}0"
+        detail = tag2.t(args) if tag2.has_translation?
+      end
+      unless detail
+        tag2 = tag.to_s.sub(/^log/, "rss").to_sym
+        detail = tag2.t(args) if tag2.has_translation?
+      end
+      begin
+        detail ||= tag.t(args)
+      rescue StandardError
+        nil
+      end
+    end
   end
 
   ##############################################################################

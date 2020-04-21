@@ -17,8 +17,8 @@ module ApplicationHelper
   include TabsHelper
   include ThumbnailHelper
   include VersionHelper
-  
-  include Pagy::Frontend
+
+  # include Pagy::Frontend
 
   def safe_empty
     "".html_safe

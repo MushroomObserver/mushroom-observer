@@ -1,34 +1,38 @@
 <%
    # Requires local variable object: RssLog, Observation, Image, etc. instance.
-   presenter = RssLogPresenter.new(object, @view)
+   presenter = MatrixBoxPresenter.new(object, @view)
 %>
 
 <% if presenter %>
 <li class="col mb-4">
-  <div class="card rss-box-details h-100">
+  <div class="card log-details h-100">
     <div class="card-img-top">
       <%= presenter.thumbnail %>
     </div><!-- .card-img-top -->
     <div class="card-body p-3 lh-2">
-      <p class="card-title rss-what h5 mb-2">
-        <%= presenter.what %>
-      </p><!-- .rss-what -->
-      <p class="card-text rss-where mb-2 small">
-        <%= presenter.where %>
-      </p><!-- .rss-where -->
-      <p class="card-text rss-what mb-0 small">
-        <% unless presenter.when.blank? %>
-          <%= presenter.when %>: <%= presenter.who %>
+      <p class="card-title log-what mb-2">
+        <%= link_to(url_for(presenter.what)) do %>
+          <span class='log-name h5 font-weight-bold font-italic'><%= presenter.name %></span>
+          <span class='log-author small'><%= presenter.author %></span><% if presenter.author %>
+          <span class='log-id text-monospace micro'><%= presenter.id %></span>
         <% end %>
-      </p><!-- .rss-what -->
+      </p><!-- .log-what -->
+      <p class="card-text mb-2 small">
+        <span class="log-where"><%= presenter.where %></span>
+      </p><!-- .card-text -->
+      <p class="card-text mb-0 small">
+        <% unless presenter.when.blank? %>
+          <span class="log-when"><%= presenter.when %>:</span> <span class="log-who"><%= presenter.who %></span>
+        <% end %>
+      </p><!-- .card-text -->
     </div><!-- .card-body -->
     <div class="card-footer bg-transparent px-3 text-muted">
-      <p class="rss-detail mb-0 small">
+      <p class="log-detail mb-0 small">
         <%= presenter.detail %>
       </p><!-- .rss-detail -->
-      <p class="rss-what mb-0 small">
+      <p class="log-time mb-0 small">
         <%= presenter.fancy_time %>
-      </p><!-- .rss-what -->
+      </p><!-- .log-time -->
     </div><!-- .card-footer -->
   </div><!-- .card -->
 </li>

@@ -260,15 +260,15 @@ class ObserverControllerTest < FunctionalTestCase
     expect = rss_logs(:glossary_term_rss_log)
     get(:index_rss_log,
         params: { type: :glossary_term })
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_no_match(/#{rss_logs(:observation_rss_log).observation.name}/,
-                    css_select(".rss-what").text)
+                    css_select(".log-what").text)
 
     # Without params[:type], it should display all logs
     get(:index_rss_log)
-    assert_match(/#{expect.glossary_term.name}/, css_select(".rss-what").text)
+    assert_match(/#{expect.glossary_term.name}/, css_select(".log-what").text)
     assert_match(/#{rss_logs(:observation_rss_log).observation.name.text_name}/,
-                 css_select(".rss-what").text)
+                 css_select(".log-what").text)
   end
 
   def test_user_default_rss_log

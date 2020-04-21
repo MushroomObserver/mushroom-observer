@@ -554,6 +554,8 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
+  resources :observations, :path => 'observer'
+
   # Logged in - Default page is /rss_log/list_rss_logs.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
   constraints lambda { |req| !req.session[:user_id].blank? } do
@@ -563,7 +565,7 @@ MushroomObserver::Application.routes.draw do
   # Not logged in - Default page is /observer#list_observations.
   root :to => "observer#list_observations"
 
-  # Default page is /rss_log/list_rss_logs.
+  # Default page was /rss_log/list_rss_logs.
   # root "rss_log#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.

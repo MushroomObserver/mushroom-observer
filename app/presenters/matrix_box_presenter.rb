@@ -1,26 +1,32 @@
 # TODO: Unmingle the logic and the presentation here.
 # Name, location, and image all have presentation markup baked in
 # HTML markup should be in the views or partials
-class RssLogPresenter
+class MatrixBoxPresenter
   attr_accessor \
     :thumbnail, # thumbnail image tag
-    :detail,    # string with extra details
+    :what,      # link to object or target
+
+    # :query,     # how to find object or target
+    :name,      # name of object or target
+    :author,    # author of name
+    :id,        # id of object or target
+
     :when,      # when object or target was created
     :who,       # owner of object or target
-    :what,      # link to object or target
     :where,     # location of object or target
+    :detail,    # string with extra details
     :time       # when object or target was last modified
 
   def initialize(object, view)
     case object
-    when Image
-      image_to_presenter(object, view)
-    when Observation
-      observation_to_presenter(object, view)
-    when RssLog
-      rss_log_to_presenter(object, view)
-    when User
-      user_to_presenter(object, view)
+      when RssLog
+        rss_log_to_presenter(object, view)
+      when Image
+        image_to_presenter(object, view)
+      when Observation
+        observation_to_presenter(object, view)
+      when User
+        user_to_presenter(object, view)
     end
   end
 
@@ -28,48 +34,24 @@ class RssLogPresenter
   def rss_log_to_presenter(rss_log, view)
     target = rss_log.target
 
-    target_type = target ? target.type_tag : rss_log.target_type
-
-    # TODO: NAME FORMATTER SHOULD GO IN A HELPER. THIS CAN BE USED ELSEWHERE
-    # name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
-    # Instead of using textilized unique_format_name,
-    # output semantic markup of each part of the name, joined.
-    # This gives separate spans for text_name, author, and id.
-    case rss_log
-      when Observation, RssLog
-        if target.respond_to?(:name)
-          nameable = target
-        else
-          nameable = rss_log
-        end
-        name_name = "<span class='rss-name font-weight-bold font-italic'>#{nameable.text_name}</span>"
-        if nameable.name.respond_to?(:author)
-          name_author = "<span class='rss-author small'>#{nameable.name.author}</span>"
-        else
-          name_author = ""
-        end
-        name_id = "<span class='rss-id text-monospace micro'>(#{nameable.id})</span>"
-        name = "#{name_name}&ensp;#{name_author} #{name_id}".html_safe
-
-      when Image, User
-        name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
+    if !target.respond_to?(:name)
+      target = rss_log
     end
 
-    get_rss_log_details(rss_log, target)
+    # target_type = target ? target.type_tag : rss_log.target_type
 
-    self.what  =
-      if target
-        view.link_with_query(name,
-                             { controller: target.show_controller,
-                               action: target.show_action,
-                               id: target.id },
-                             class: "")
+    # get_rss_log_details(rss_log, target)
+
+    self.what = target
+    self.name = target.text_name
+    self.author =
+      if target.name.respond_to?(:author)
+         target.name.author
       else
-        view.link_with_query(name,
-                             { controller: :rss_log,
-                               action: :show_rss_log,
-                               id: rss_log.id })
+         ""
       end
+    self.id = target.id
+
     self.where = view.location_link(target.place_name, target.location) \
                  if target&.respond_to?(:location)
     self.when  = target.when.web_date if target&.respond_to?(:when)
@@ -83,6 +65,8 @@ class RssLogPresenter
                          id: target.id
                        })
       end
+    self.detail = rss_log.detail
+    self.time = rss_log.updated_at
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -146,50 +130,50 @@ class RssLogPresenter
     time&.fancy_time
   end
 
-  private
-
-  # Figure out what the detail messages should be.
-  # TODO: This should probably all live in RssLog.
-  def get_rss_log_details(rss_log, target)
-    target_type = target ? target.type_tag : rss_log.target_type
-    begin
-      tag, args, time = rss_log.parse_log.first
-    rescue StandardError
-      []
-    end
-    if !target_type
-      self.detail = :rss_destroyed.t(type: :object)
-    elsif !target ||
-          tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
-      self.detail = :rss_destroyed.t(type: target_type)
-    elsif !time || time < target.created_at + 1.minute
-      self.detail = :rss_created_at.t(type: target_type)
-      unless [:observation, :species_list].include?(target_type)
-        begin
-          self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
-        rescue StandardError
-          nil
-        end
-      end
-    else
-      if [:observation, :species_list].include?(target_type) &&
-         [target.user.login, target.user.name, target.user.legal_name].
-         include?(args[:user])
-        # This will remove redundant user from observation logs.
-        tag2 = :"#{tag}0"
-        self.detail = tag2.t(args) if tag2.has_translation?
-      end
-      unless self.detail
-        tag2 = tag.to_s.sub(/^log/, "rss").to_sym
-        self.detail = tag2.t(args) if tag2.has_translation?
-      end
-      begin
-        self.detail ||= tag.t(args)
-      rescue StandardError
-        nil
-      end
-    end
-    time ||= rss_log.updated_at if rss_log
-    self.time = time
-  end
+  # private
+  #
+  # # Figure out what the detail messages should be.
+  # # TODO: This should probably all live in RssLog.
+  # def get_rss_log_details(rss_log, target)
+  #   target_type = target ? target.type_tag : rss_log.target_type
+  #   begin
+  #     tag, args, time = rss_log.parse_log.first
+  #   rescue StandardError
+  #     []
+  #   end
+  #   if !target_type
+  #     self.detail = :rss_destroyed.t(type: :object)
+  #   elsif !target ||
+  #         tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
+  #     self.detail = :rss_destroyed.t(type: target_type)
+  #   elsif !time || time < target.created_at + 1.minute
+  #     self.detail = :rss_created_at.t(type: target_type)
+  #     unless [:observation, :species_list].include?(target_type)
+  #       begin
+  #         self.detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
+  #       rescue StandardError
+  #         nil
+  #       end
+  #     end
+  #   else
+  #     if [:observation, :species_list].include?(target_type) &&
+  #        [target.user.login, target.user.name, target.user.legal_name].
+  #        include?(args[:user])
+  #       # This will remove redundant user from observation logs.
+  #       tag2 = :"#{tag}0"
+  #       self.detail = tag2.t(args) if tag2.has_translation?
+  #     end
+  #     unless self.detail
+  #       tag2 = tag.to_s.sub(/^log/, "rss").to_sym
+  #       self.detail = tag2.t(args) if tag2.has_translation?
+  #     end
+  #     begin
+  #       self.detail ||= tag.t(args)
+  #     rescue StandardError
+  #       nil
+  #     end
+  #   end
+  #   time ||= rss_log.updated_at if rss_log
+  #   self.time = time
+  # end
 end
