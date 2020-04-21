@@ -22,13 +22,14 @@ class RssLogController < ApplicationController
     # show_index_of_objects - which instantiates more variables for view
     # @timer_start @timer_end @title @num_results @sorts @pages
     list_rss_logs
+    # TODO: Try skipping this method and just use default rails index
   end
 
   # Set a query from POST or given params, and pass to show_selected_rss_logs
   def index_rss_log # :norobots:
     # If user selected checkboxes in a form submit
-    # TODO: Rails can already parse POST params.
-    # fix form eliminate this logic??!
+    # TODO: Rails already parses POST params.
+    # figure out why this is in here
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length

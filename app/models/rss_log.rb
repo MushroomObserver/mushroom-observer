@@ -382,7 +382,7 @@ class RssLog < AbstractModel
   end
 
   # Figure out the detail message for the most recent update.
-  def details
+  def detail
     # target_type = target ? target.type_tag : target_type
     begin
       tag, args, time = parse_log.first
@@ -390,15 +390,15 @@ class RssLog < AbstractModel
       []
     end
     if !target_type
-      detail = :rss_destroyed.t(type: :object)
+      result = :rss_destroyed.t(type: :object)
     elsif !target ||
           tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
-      detail = :rss_destroyed.t(type: target_type)
+      result = :rss_destroyed.t(type: target_type)
     elsif !time || time < target.created_at + 1.minute
-      detail = :rss_created_at.t(type: target_type)
+      result = :rss_created_at.t(type: target_type)
       unless [:observation, :species_list].include?(target_type)
         begin
-          detail += " ".html_safe + :rss_by.t(user: target.user.legal_name)
+          result += " ".html_safe + :rss_by.t(user: target.user.legal_name)
         rescue StandardError
           nil
         end
@@ -409,18 +409,19 @@ class RssLog < AbstractModel
          include?(args[:user])
         # This will remove redundant user from observation logs.
         tag2 = :"#{tag}0"
-        detail = tag2.t(args) if tag2.has_translation?
+        result = tag2.t(args) if tag2.has_translation?
       end
-      unless detail
+      unless result
         tag2 = tag.to_s.sub(/^log/, "rss").to_sym
         detail = tag2.t(args) if tag2.has_translation?
       end
       begin
-        detail ||= tag.t(args)
+        result ||= tag.t(args)
       rescue StandardError
         nil
       end
     end
+    result
   end
 
   ##############################################################################

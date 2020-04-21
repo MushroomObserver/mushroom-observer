@@ -69,6 +69,32 @@ class MatrixBoxPresenter
     self.time = rss_log.updated_at
   end
 
+  # Grabs all the information needed for view from Observation instance.
+  def observation_to_presenter(observation, view)
+
+    self.what   = observation
+    self.name   = observation.text_name
+    self.author = observation.name.author
+    self.id     = observation.id
+    self.when   = observation.when.web_date
+    self.who    = view.user_link(observation.user) if observation.user
+    # self.what  = view.link_with_query(name, controller: :observer,
+    #                                         action: :show_observation,
+    #                                         id: observation.id)
+    self.where  = view.location_link(observation.place_name,
+                                    observation.location)
+    return unless observation.thumb_image
+
+    self.thumbnail =
+      view.thumbnail(observation.thumb_image,
+                     link: { controller: :observer,
+                             action: :show_observation,
+                             id: observation.id })
+   self.detail = observation.rss_log.detail
+   self.time = observation.rss_log.updated_at
+
+  end
+
   # Grabs all the information needed for view from Image instance.
   def image_to_presenter(image, view)
     name = image.unique_format_name.t
@@ -87,26 +113,6 @@ class MatrixBoxPresenter
                                             action: image.show_action,
                                             id: image.id },
                                     responsive: true)
-  end
-
-  # Grabs all the information needed for view from Observation instance.
-  def observation_to_presenter(observation, view)
-    name = observation.unique_format_name.t
-    get_rss_log_details(observation.rss_log, observation)
-    self.when  = observation.when.web_date
-    self.who   = view.user_link(observation.user) if observation.user
-    self.what  = view.link_with_query(name, controller: :observer,
-                                            action: :show_observation,
-                                            id: observation.id)
-    self.where = view.location_link(observation.place_name,
-                                    observation.location)
-    return unless observation.thumb_image
-
-    self.thumbnail =
-      view.thumbnail(observation.thumb_image,
-                     link: { controller: :observer,
-                             action: :show_observation,
-                             id: observation.id })
   end
 
   # Grabs all the information needed for view from User instance.
