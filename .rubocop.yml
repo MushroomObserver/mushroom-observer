@@ -14,8 +14,6 @@ inherit_from: .rubocop_todo.yml
 # Therefore .codeclimate.yml should be updated whenever we update RuboCop
 
 AllCops:
-  # Ignore cops for Ruby versions which are newer than that used by MO
-  TargetRubyVersion: 2.4.1
 
   ###################### Exclusions ############################################
   # Completely ignore the following
