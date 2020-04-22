@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
+# added methods relating to js
 module JavascriptHelper
   def can_do_ajax?
-    modern_browser?(browser) || browser.ie?(8) || Rails.env == "test"
+    modern_browser?(browser) || browser.ie?(8) || Rails.env.test?
   end
 
   # Use this test to determine if a user can upload multiple images at a time.
@@ -16,14 +19,15 @@ module JavascriptHelper
   # from https://github.com/fnando/browser/pull/435 2020-04-13
   def modern_browser?(browser)
     browser.chrome? && browser.version.to_i >= 65 ||
-    browser.safari? && browser.version.to_i >= 10 ||
-    browser.firefox? && browser.version.to_i >= 52 ||
-    browser.ie? && browser.version.to_i >= 11 && !browser.compatibility_view? ||
-    browser.edge? && browser.version.to_i >= 15 ||
-    browser.opera? && browser.version.to_i >= 50 ||
-    browser.facebook? &&
-      browser.safari_webapp_mode? &&
-      browser.webkit_full_version.to_i >= 602
+      browser.safari? && browser.version.to_i >= 10 ||
+      browser.firefox? && browser.version.to_i >= 52 ||
+      browser.ie? && browser.version.to_i >= 11 &&
+        !browser.compatibility_view? ||
+      browser.edge? && browser.version.to_i >= 15 ||
+      browser.opera? && browser.version.to_i >= 50 ||
+      browser.facebook? &&
+        browser.safari_webapp_mode? &&
+        browser.webkit_full_version.to_i >= 602
   end
 
   # Schedule javascript modules for inclusion in header.  This is much safer
@@ -32,7 +36,7 @@ module JavascriptHelper
   #   # Example usage in view template:
   #   <% javascript_include "name_lister" %>
   def javascript_include(*args)
-    if args.select { |arg| arg.class != String } != []
+    if args.reject { |arg| arg.class == String } != []
       raise ArgumentError.new(
         "javascript_include doesn't take symbols like :default, etc."
       )
