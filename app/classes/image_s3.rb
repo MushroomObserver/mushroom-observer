@@ -1,5 +1,10 @@
+# frozen_string_literal: true
+
 require "aws-sdk-s3"
 
+# communicate with image server
+# large size images are stored and served from separate server
+# in order to reduce load on webserver
 class ImageS3
   # Initialize connection:
   #
@@ -15,7 +20,8 @@ class ImageS3
     @bucket            = opts[:bucket]
     @access_key_id     = opts[:access_key_id]
     @secret_access_key = opts[:secret_access_key]
-    @stub              = !!opts[:stub]
+    # disable cop because we want **boolean** value of opts[:stub]
+    @stub              = !!opts[:stub] # rubocop:disable Style/DoubleNegation
   end
 
   # Returns object you can call "each" on to iterate over all files in store:
@@ -31,6 +37,8 @@ class ImageS3
   rescue StandardError => e
     raise "Unable to get directory of S3 bucket #{@bucket} at #{@server}: #{e}"
   end
+
+  # Get information about objects stored on image server
   class Results
     def initialize(pager)
       @pager = pager
