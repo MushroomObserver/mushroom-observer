@@ -33,6 +33,37 @@ AllCops:
     - script/perf_monitor
     - "tmp/**/*"
 
+
+###################### Global Enables #########################################
+# Enable pending cops added by recent RuboCop versions
+# (0.82)
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+
+# (0.81)
+Lint/RaiseException:
+  Enabled: true
+
+# (0.81)
+Lint/StructNewOverride:
+  Enabled: true
+
+# (0.82)
+Style/ExponentialNotation:
+  Enabled: true
+
+# (0.80)
+Style/HashEachMethods:
+  Enabled: true
+
+# (0.80)
+Style/HashTransformKeys:
+  Enabled: true
+
+# (0.80)
+Style/HashTransformValues:
+  Enabled: true
+
 ###################### Global Disables #########################################
 # Disable because enforcement takes up an extra line
 Layout/EmptyLineAfterMagicComment:
