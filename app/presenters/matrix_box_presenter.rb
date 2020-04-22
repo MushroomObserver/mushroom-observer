@@ -1,4 +1,4 @@
-# TODO: Unmingle the logic and the presentation here.
+# TODO: Fix thumbnail
 # Name, location, and image all have presentation markup baked in
 # HTML markup should be in the views or partials
 class MatrixBoxPresenter
@@ -37,6 +37,11 @@ class MatrixBoxPresenter
     if !target.respond_to?(:name)
       target = rss_log
     end
+
+    # TODO: fix other objects RSS log could target..
+    # case target
+    # when location || name || project || species_list || glossary_term
+    # end
 
     # target_type = target ? target.type_tag : rss_log.target_type
 
@@ -78,7 +83,7 @@ class MatrixBoxPresenter
     self.id     = observation.id
     self.when   = observation.when.web_date
     self.who    = view.user_link(observation.user) if observation.user
-    # self.what  = view.link_with_query(name, controller: :observer,
+    # self.what  = view.link_with_query(name, controller: :observation,
     #                                         action: :show_observation,
     #                                         id: observation.id)
     self.where  = view.location_link(observation.place_name,
@@ -87,7 +92,7 @@ class MatrixBoxPresenter
 
     self.thumbnail =
       view.thumbnail(observation.thumb_image,
-                     link: { controller: :observer,
+                     link: { controller: :observation,
                              action: :show_observation,
                              id: observation.id })
    self.detail = observation.rss_log.detail

@@ -190,7 +190,7 @@ class SpeciesListController < ApplicationController
     species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     query = Query.lookup_and_save(:SpeciesList, :in_species_list,
                                   species_list: species_list)
-    redirect_with_query({ controller: :observer, action: print_labels }, query)
+    redirect_with_query({ controller: :observation, action: print_labels }, query)
   end
 
   ##############################################################################
@@ -891,7 +891,7 @@ class SpeciesListController < ApplicationController
           redirect_to(controller: "location", action: "create_location",
                       where: @place_name, set_species_list: @species_list.id)
         elsif unshown_notifications?(@user, :naming)
-          redirect_to(controller: "observer", action: "show_notifications")
+          redirect_to(controller: "notification", action: "show_notifications")
         else
           redirect_to(action: "show_species_list", id: @species_list)
         end

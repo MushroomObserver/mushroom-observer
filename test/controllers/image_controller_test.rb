@@ -273,7 +273,7 @@ class ImageControllerTest < FunctionalTestCase
                        id: observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
     get_with_dump(:add_image, id: observations(:minimal_unknown_obs).id)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observation, action: :show_observation)
   end
 
   # Test reusing an image by id number.
@@ -284,7 +284,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(!obs.images.member?(image))
     requires_login(:reuse_image, mode: "observation", obs_id: obs.id,
                                  img_id: image.id)
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observation, action: :show_observation,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
@@ -389,7 +389,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post_requires_login(:remove_images, params, "mary")
-    assert_redirected_to(controller: :observer, action: :show_observation)
+    assert_redirected_to(controller: :observation, action: :show_observation)
     assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
     assert(!obs.images.member?(remove))
@@ -402,7 +402,7 @@ class ImageControllerTest < FunctionalTestCase
       selected: selected
     }
     post(:remove_images, params)
-    assert_redirected_to(controller: "observer", action: "show_observation")
+    assert_redirected_to(controller: :observation, action: :show_observation)
     # Observation gets downgraded to 1 point because it no longer has images.
     # assert_equal(1, mary.reload.contribution)
     assert_equal(10, mary.reload.contribution)
@@ -468,17 +468,17 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     requires_user(
       :remove_images,
-      { controller: :observer, action: :show_observation, id: obs.id },
+      { controller: :observation, action: :show_observation, id: obs.id },
       params
     )
-    assert_form_action(action: "remove_images", id: obs.id)
+    assert_form_action(action: :remove_images, id: obs.id)
   end
 
   def test_remove_images_for_glossary_term
     glossary_term = glossary_terms(:plane_glossary_term)
     params = { id: glossary_term.id }
     requires_login(:remove_images_for_glossary_term, params)
-    assert_form_action(action: "remove_images_for_glossary_term",
+    assert_form_action(action: :remove_images_for_glossary_term,
                        id: glossary_term.id)
   end
 
@@ -494,7 +494,7 @@ class ImageControllerTest < FunctionalTestCase
     login("mary", "testpassword")
     send(:get, :reuse_image, params)
     # assert_redirected_to(%r{/#{obs.id}$})
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    assert_redirected_to(controller: :observation, action: :show_observation,
                          id: obs.id)
 
     login("rolf", "testpassword")
@@ -508,7 +508,7 @@ class ImageControllerTest < FunctionalTestCase
     glossary_term = glossary_terms(:conic_glossary_term)
     params = { id: glossary_term.id }
     requires_login(:reuse_image_for_glossary_term, params)
-    assert_form_action(action: "reuse_image_for_glossary_term",
+    assert_form_action(action: :reuse_image_for_glossary_term,
                        id: glossary_term.id)
   end
 
@@ -525,15 +525,15 @@ class ImageControllerTest < FunctionalTestCase
     owner = obs.user.login
     assert_not_equal("mary", owner)
     requires_login(:reuse_image, params, "mary")
-    # assert_template(controller: :observer, action: :show_observation)
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    # assert_template(controller: :observation, action: :show_observation)
+    assert_redirected_to(controller: :observation, action: :show_observation,
                          id: obs.id)
     refute(obs.reload.images.member?(image))
 
     login(owner)
     get_with_dump(:reuse_image, params)
-    # assert_template(controller: "observer", action: "show_observation")
-    assert_redirected_to(controller: :observer, action: :show_observation,
+    # assert_template(controller: "observation", action: "show_observation")
+    assert_redirected_to(controller: :observation, action: :show_observation,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
@@ -648,7 +648,7 @@ class ImageControllerTest < FunctionalTestCase
   def test_reuse_image_for_user
     requires_login(:reuse_image, mode: "profile")
     assert_template("reuse_image", partial: "_image_reuse")
-    assert_form_action(action: "reuse_image", mode: "profile")
+    assert_form_action(action: :reuse_image, mode: "profile")
   end
 
   # This would happen if user clicked on image.
@@ -656,7 +656,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :observer, action: :show_user,
+    assert_redirected_to(controller: :user, action: :show_user,
                          id: rolf.id)
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)
@@ -667,7 +667,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     params = { mode: "profile", img_id: image.id.to_s }
     post_requires_login(:reuse_image, params)
-    assert_redirected_to(controller: :observer, action: :show_user,
+    assert_redirected_to(controller: :user, action: :show_user,
                          id: rolf.id)
     assert_equal(rolf.id, session[:user_id])
     assert_equal(image.id, rolf.reload.image_id)

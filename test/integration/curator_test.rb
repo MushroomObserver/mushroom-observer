@@ -6,14 +6,14 @@ class CuratorTest < IntegrationTestCase
     obs = observations(:minimal_unknown_obs)
     login!("mary", "testpassword", true)
     get("/#{obs.id}")
-    assert_template("observer/show_observation")
+    assert_template("observation/show_observation")
     click(label: :create_herbarium_record.t)
     assert_template("herbarium_record/create_herbarium_record")
     open_form do |form|
       form.submit("Add")
     end
-    assert_template("observer/show_observation")
-    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
+    assert_template("observation/show_observation")
+    assert_match(%r{href="/observation/edit_observation/#{obs.id}},
                  response.body)
   end
 
@@ -34,17 +34,17 @@ class CuratorTest < IntegrationTestCase
       form.change("herbarium_name", rec.herbarium.name)
       form.submit("Save")
     end
-    assert_template("observer/show_observation")
-    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
+    assert_template("observation/show_observation")
+    assert_match(%r{href="/observation/edit_observation/#{obs.id}},
                  response.body)
     go_back
     click(label: "Cancel (Show Observation)")
-    assert_template("observer/show_observation")
-    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
+    assert_template("observation/show_observation")
+    assert_match(%r{href="/observation/edit_observation/#{obs.id}},
                  response.body)
     click(href: "/herbarium_record/remove_observation/#{rec.id}")
-    assert_template("observer/show_observation")
-    assert_match(%r{href="/observer/edit_observation/#{obs.id}},
+    assert_template("observation/show_observation")
+    assert_match(%r{href="/observation/edit_observation/#{obs.id}},
                  response.body)
     assert(!obs.reload.herbarium_records.include?(rec))
   end

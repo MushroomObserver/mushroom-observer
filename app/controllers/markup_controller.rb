@@ -1,5 +1,20 @@
-# see observer_controller.rb
-class ObserverController
+class MarkupController < ApplicationController
+
+  before_action :login_required, except [
+    :lookup_accepted_name,
+    :lookup_comment,
+    :lookup_image,
+    :lookup_location,
+    :lookup_name,
+    :lookup_accepted_name,
+    :lookup_observation,
+    :lookup_project,
+    :lookup_species_list,
+    :lookup_user
+  ]
+
+  before_action :disable_link_prefetching
+
   def lookup_comment # :nologin
     lookup_general(Comment)
   end

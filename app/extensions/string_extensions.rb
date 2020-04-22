@@ -18,7 +18,6 @@
 #  strip_html::         Remove HTML tags (not entities) from string.
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
-#  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.

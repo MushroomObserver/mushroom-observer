@@ -12,15 +12,13 @@
   <div class="d-none d-sm-block col-md-3">
     <% obs_length = @observations ? @observations.length : 0
     if obs_length > 0 %>
-      <div class="row">
-        <% @observations[0,3].each do |obs| %>
-          <div class="col-12 pad-bottom">
-            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
-                          votes: true) %><br/><br/>
+      <% @observations[0,3].each do |obs| %>
+        <div class="pb-3">
+          <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+                        votes: true) %><br/><br/>
 
-          </div>
-        <% end %>
-      </div>
+        </div>
+      <% end %>
     <% end %>
   </div>
 
@@ -61,14 +59,10 @@
 
   <div class="d-none d-sm-block col-md-3">
     <% if obs_length > 3 %>
-      <div class="row">
-        <div class="col-12">
-          <% @observations[3,3].each do |obs| %>
-            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
-                          votes: true) %><br/><br/>
-          <% end %>
-        </div>
-      </div>
+      <% @observations[3,3].each do |obs| %>
+        <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+                      votes: true) %><br/><br/>
+      <% end %>
     <% end %>
   </div>
 </div>

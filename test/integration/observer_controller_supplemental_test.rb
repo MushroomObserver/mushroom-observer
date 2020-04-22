@@ -2,12 +2,12 @@
 
 require "test_helper"
 
-# Tests which supplement controller/observer_controller_test.rb
-class ObserverControllerSupplementalTest < IntegrationTestCase
+# Tests which supplement controller/observation_controller_test.rb
+class ObservationControllerSupplementalTest < IntegrationTestCase
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
-    visit("/observer/textile_sandbox")
+    visit("/info/textile_sandbox")
     fill_in("code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)
@@ -69,7 +69,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     click_button("Login")
 
     # Edit the Observation, unchecking the Project.
-    visit("/observer/edit_observation/#{observation.id}")
+    visit("/observation/edit_observation/#{observation.id}")
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
@@ -92,7 +92,7 @@ class ObserverControllerSupplementalTest < IntegrationTestCase
     click_button("Login")
 
     # Edit the Observation, unchecking the Project.
-    visit("/observer/edit_observation/#{observation.id}")
+    visit("/observation/edit_observation/#{observation.id}")
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 

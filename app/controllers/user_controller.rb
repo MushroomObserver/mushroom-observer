@@ -1,5 +1,21 @@
-# see observer_controller.rb
-class ObserverController
+class UserController < ApplicationController
+
+  before_action :login_required, except: [
+    :checklist,
+    :index,
+    :index_user,
+    :lookup_user,
+    :next_user,
+    :prev_user,
+    :show_user,
+    :user_search,
+    :users_by_contribution,
+  ]
+
+  before_action :disable_link_prefetching, except: [
+    :show_user
+  ]
+
   # User index, restricted to admins.
   def index_user # :norobots:
     if in_admin_mode? || find_query(:User)

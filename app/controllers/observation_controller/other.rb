@@ -1,11 +1,11 @@
 # TODO: where does this stuff belong?
-class ObserverController
+class ObservationController
   def test_flash_redirection
     tags = params[:tags].to_s.split(",")
     if tags.any?
       flash_notice(tags.pop.to_sym.t)
       redirect_to(
-        controller: :observer,
+        controller: :observation,
         action: :test_flash_redirection,
         tags: tags.join(",")
       )
@@ -49,38 +49,6 @@ class ObserverController
   # validator to make testing easy.
   def w3c_tests
     render(layout: false)
-  end
-
-  # Update banner across all translations.
-  def change_banner # :root: :norobots:
-    if !in_admin_mode?
-      flash_error(:permission_denied.t)
-      redirect_to(action: "list_rss_logs")
-    elsif request.method == "POST"
-      @val = params[:val].to_s.strip
-      @val = "X" if @val.blank?
-      time = Time.now
-      Language.all.each do |lang|
-        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-          str.update!(
-            text: @val,
-            updated_at: (str.language.official ? time : time - 1.minute)
-          )
-        else
-          str = lang.translation_strings.create!(
-            tag: "app_banner_box",
-            text: @val,
-            updated_at: time - 1.minute
-          )
-        end
-        str.update_localization
-        str.language.update_localization_file
-        str.language.update_export_file
-      end
-      redirect_to(action: "list_rss_logs")
-    else
-      @val = :app_banner_box.l.to_s
-    end
   end
 
   # Callback to let reviewers change the export status of a Name from the

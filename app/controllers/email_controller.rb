@@ -1,5 +1,11 @@
-# TODO: move this into a new EmailController
-class ObserverController
+class EmailController < ApplicationController
+
+  before_action :login_required, except: [
+    :ask_webmaster_question,
+  ]
+
+  before_action :disable_link_prefetching
+  
   def email_features # :root: :norobots:
     if in_admin_mode?
       @users = User.where("email_general_feature=1 && verified is not null")

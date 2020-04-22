@@ -53,9 +53,9 @@
         <b><%= :OBSERVATIONS.t %>:</b>
         <% if @project.observations.any? %>
           <%= @project.observations.length %>
-          (<%= link_to(:SHOW.t, controller: :observer,
+          (<%= link_to(:SHOW.t, controller: :observation,
                        action: :observations_for_project, id: @project.id) %> |
-          <%= link_to(:app_checklist.t, controller: :observer,
+          <%= link_to(:app_checklist.t, controller: :observation,
                       action: :checklist, project_id: @project.id) %>)
         <% else %>
           <%= :NONE.t %>

@@ -123,7 +123,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:merge_herbaria, this: id1, that: id2)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Herbarium, old_id: id1, new_id: id2)
 
     login("mary")
@@ -136,10 +136,10 @@ class HerbariumControllerTest < FunctionalTestCase
     get(:merge_herbaria, this: id1, that: 666)
     assert_flash_error
     get(:merge_herbaria, this: id3, that: id3)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Herbarium, old_id: id3, new_id: id3)
     get(:merge_herbaria, this: id1, that: id3)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Herbarium, old_id: id1, new_id: id3)
     get(:merge_herbaria, this: id1, that: id2)
     assert_flash_success
@@ -381,7 +381,7 @@ class HerbariumControllerTest < FunctionalTestCase
     login("roy")
     post(:edit_herbarium, herbarium: params, id: nybg.id)
     assert_equal(last_update, nybg.reload.updated_at)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Herbarium, old_id: nybg.id, new_id: other.id)
 
     # Rolf can both edit and does own all the records.  Should merge.

@@ -289,7 +289,7 @@ class NameController
   end
 
   def redirect_to_merge_request(new_name)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
+    redirect_with_query(controller: :email, action: :email_merge_request,
                         type: :Name, old_id: @name.id, new_id: new_name.id)
   end
 end

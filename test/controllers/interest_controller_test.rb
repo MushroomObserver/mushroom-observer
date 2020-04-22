@@ -109,4 +109,5 @@ class InterestControllerTest < FunctionalTestCase
       Notification.find(id)
     end
   end
+  
 end

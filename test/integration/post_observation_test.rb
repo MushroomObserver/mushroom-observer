@@ -2,11 +2,11 @@ require "test_helper"
 
 class PostObservationTest < IntegrationTestCase
   LOGIN_PAGE = "account/login".freeze
-  SHOW_OBSERVATION_PAGE = "observer/show_observation".freeze
-  CREATE_OBSERVATION_PAGE = "observer/create_observation".freeze
-  EDIT_OBSERVATION_PAGE = "observer/edit_observation".freeze
+  SHOW_OBSERVATION_PAGE = "observation/show_observation".freeze
+  CREATE_OBSERVATION_PAGE = "observation/create_observation".freeze
+  EDIT_OBSERVATION_PAGE = "observation/edit_observation".freeze
   CREATE_LOCATION_PAGE = "location/create_location".freeze
-  OBSERVATION_INDEX_PAGE = "observer/list_observations".freeze
+  OBSERVATION_INDEX_PAGE = "observation/list_observations".freeze
 
   PASADENA_EXTENTS = {
     north: 34.251905,

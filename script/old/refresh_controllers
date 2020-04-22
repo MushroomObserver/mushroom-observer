@@ -120,7 +120,7 @@ def check_for_unused_redirects(actions, old_actions)
       if (action[:controller] == controller) and
          (action[:name] == name)
         used = true
-        norobots << "/observer/#{name}" if action[:notes][:norobots]
+        norobots << "/observation/#{name}" if action[:notes][:norobots]
       end
     end
     unless used

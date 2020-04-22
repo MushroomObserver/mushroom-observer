@@ -119,7 +119,7 @@ class CapybarLurkerTest < IntegrationTestCase
       #  Observation itself, naming, comment.
       # (plus a link to it is also in table of names for mobile)
       assert(
-        assert_selector("#content a[href^='/observer/show_user/#{owner.id}']",
+        assert_selector("#content a[href^='/user/show_user/#{owner.id}']",
                         minimum: 4)
       )
 

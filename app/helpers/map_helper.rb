@@ -152,7 +152,8 @@ module MapHelper
 
   def mapset_submap_links(set, args, type)
     params = args[:query_params] || {}
-    params = params.merge(controller: type.to_s.sub("observation", "observer"))
+    # Should not be needed because the "observation" controller is now "observation"
+    # params = params.merge(controller: type.to_s.sub("observation", "observation"))
     params = params.merge(mapset_box_params(set))
     [link_to(:show_all.t, params.merge(action: "index_#{type}")),
      link_to(:map_all.t, params.merge(action: "map_#{type}s"))]
@@ -160,7 +161,7 @@ module MapHelper
 
   def mapset_observation_link(obs, args)
     link_to("#{:Observation.t} ##{obs.id}",
-            controller: :observer,
+            controller: :observation,
             action: :show_observation,
             id: obs.id,
             params: args[:query_params] || {})

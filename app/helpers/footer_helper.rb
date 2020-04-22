@@ -26,13 +26,13 @@ module FooterHelper
       if is_admin
         authors += safe_nbsp
         authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                   controller: :observer,
+                                   controller: :author,
                                    action: :review_authors,
                                    id: obj.id, type: type)
       elsif !is_author
         authors += safe_nbsp
         authors += link_with_query("(#{:show_name_author_request.t})",
-                                   controller: :observer,
+                                   controller: :author,
                                    action: :author_request,
                                    id: obj.id, type: type)
       end

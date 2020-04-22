@@ -27,7 +27,7 @@
       :vote => votes(:amateur_vote)
     }
     katrina = regular_user(@expectations)
-    katrina.login_required(katrina, 'observer/create_observation')
+    katrina.login_required(katrina, 'observation/create_observation')
 
     observation_fields = katrina.fills_in_form(observation_form_defaults, observation_form_no_location)
     katrina.evaluate_no_location
@@ -103,7 +103,7 @@
 
       def sess.evaluate_destruction
         assert_flash_text(/destroyed/i)
-        assert_template('observer/list_observations')
+        assert_template('observation/list_observations')
       end
 
       def sess.evaluate_orphan
@@ -114,7 +114,7 @@
       end
 
       def sess.evaluate_no_location
-        assert_template('observer/create_observation')
+        assert_template('observation/create_observation')
         assert_flash_text(/where|location/i)
       end
 
@@ -148,7 +148,7 @@
       def sess.evaluate_new_location
         assert_flash_text(/success/i)
         assert_flash_text(/created location/i)
-        assert_template('observer/show_observation')
+        assert_template('observation/show_observation')
 
         reload_results
         assert_equal(@expectations[:observation].where, @new_location.name)
@@ -176,7 +176,7 @@
 
       def sess.evaluate_change_location
         assert_flash_success
-        assert_template('observer/show_observation')
+        assert_template('observation/show_observation')
 
         reload_results
         assert_objs_equal(@expectations[:location], @new_observation.location)

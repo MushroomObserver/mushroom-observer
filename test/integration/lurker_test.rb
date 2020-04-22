@@ -9,7 +9,7 @@ class LurkerTest < IntegrationTestCase
 
     # Click on first observation.
     click(href: %r{^/\d+\?}, in: :results)
-    assert_template("observer/show_observation")
+    assert_template("observation/show_observation")
 
     # Click on prev/next
     click(label: "« Prev", in: :title)
@@ -54,9 +54,9 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select("a[href^='/observer/show_user/#{mary.id}']", minimum: 3)
+    assert_select("a[href^='/user/show_user/#{mary.id}']", minimum: 3)
     click(label: "Mary Newbie")
-    assert_template("observer/show_user")
+    assert_template("user/show_user")
 
     # Check out location.
     get("/#{obs}")
@@ -164,7 +164,7 @@ class LurkerTest < IntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     click(label: "Observations at this Location", in: :right_tabs)
-    assert_template("observer/list_observations")
+    assert_template("observation/list_observations")
     save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
 
     observations = @controller.instance_variable_get("@objects")

@@ -77,12 +77,12 @@
             <%= link_to_coerced_query(@query, Image) %> |
             <%= link_to_coerced_query(@query, Name) %> |
             <%= link_to(:app_checklist.t,
-                        controller: :observer,
+                        controller: :observation,
                         action: :checklist,
                         species_list_id: @species_list.id) %> |
             <%= link_with_query(:species_list_show_print_labels.t,
-                                controller: :observer, action: :print_labels) %> |
-            <%= link_with_query(:DOWNLOAD.t, controller: :observer,
+                                controller: :observation, action: :print_labels) %> |
+            <%= link_with_query(:DOWNLOAD.t, controller: :observation,
                                             action: :download_observations) %>
           </div>
 

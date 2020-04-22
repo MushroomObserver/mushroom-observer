@@ -212,7 +212,7 @@ class NameController < ApplicationController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search_form")
+    redirect_to(controller: "search", action: "advanced_search_form")
   end
 
   # Used to test pagination.

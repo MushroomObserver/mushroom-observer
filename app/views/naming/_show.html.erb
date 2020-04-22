@@ -279,7 +279,7 @@
   <!--/VOTE POPUPS-->
 
   <!--SUGGESTIONS-->
-  <% url = url_for(add_query_param(controller: :observer, action: :suggestions,
+  <% url = url_for(add_query_param(controller: :observation, action: :suggestions,
                                    id: observation.id, names: :xxx))
   inject_javascript_at_end %(
     SuggestionModule(#{observation.image_ids}, "#{url}", {

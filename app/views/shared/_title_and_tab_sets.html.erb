@@ -21,7 +21,7 @@
     <%= tag.span @title, id: "title-caption", class: "h2 d-inline"-%>
     <%= if @any_content_filters_applied
           add_context_help(content_tag(:span, "(#{:filtered.t})",
-                                       class: "align-1px"),
+                                       class: ""),
                            :rss_filtered_mouseover.t)
         end -%>
     <%= content_tag_if(@owner_id, :div, @owner_id, class: "owner-id") %>

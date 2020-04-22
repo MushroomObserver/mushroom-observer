@@ -118,16 +118,16 @@ class IpStatsTest < UnitTestCase
 
     User.current = nil
     IpStats.log_stats(ip: ip1, time: 15.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: "observation", action: "show_observation")
     IpStats.log_stats(ip: ip1, time: 12.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: "observation", action: "show_observation")
     IpStats.log_stats(ip: ip1, time: 9.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: "observation", action: "show_observation")
     IpStats.log_stats(ip: ip1, time: 6.seconds.ago,
-                      controller: "observer", action: "show_observation")
+                      controller: "observation", action: "show_observation")
     User.current = rolf
     IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
-                      controller: "observer", action: "create_observation")
+                      controller: "observation", action: "create_observation")
 
     stats = IpStats.read_stats(:do_activity)
     assert_equal([ip1, ip2], stats.keys.sort)
@@ -141,7 +141,7 @@ class IpStatsTest < UnitTestCase
     assert_equal(1, stats[ip2][:activity].length)
     assert_operator(stats[ip2][:activity][0][0], :>=, 2.seconds.ago.to_s)
     assert_operator(stats[ip2][:activity][0][1], :>=, 2.seconds)
-    assert_equal("observer", stats[ip2][:activity][0][2])
+    assert_equal("observation", stats[ip2][:activity][0][2])
     assert_equal("create_observation", stats[ip2][:activity][0][3])
   end
 end

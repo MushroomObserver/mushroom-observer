@@ -1,5 +1,5 @@
-# see observer_controller.rb
-class ObserverController
+# see observation_controller.rb
+class ObservationController
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
@@ -54,7 +54,7 @@ class ObserverController
 
   # Tell search engines what the "correct" URL is for this page.
   def canonical_url(obs)
-    "#{MO.http_domain}/observer/show_observation/#{obs.id}"
+    "#{MO.http_domain}/observation/show_observation/#{obs.id}"
   end
 
   # Decide if the current query can be used to create a map.

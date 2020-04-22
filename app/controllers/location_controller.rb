@@ -112,7 +112,7 @@ class LocationController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :observer, action: :advanced_search_form)
+    redirect_to(controller: :search, action: :advanced_search_form)
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -576,9 +576,9 @@ class LocationController < ApplicationController
         end
         if @set_observation
           if unshown_notifications?(@user, :naming)
-            redirect_to(controller: :observer, action: :show_notifications)
+            redirect_to(controller: :notification, action: :show_notifications)
           else
-            redirect_to(controller: :observer,
+            redirect_to(controller: :observation,
                         action: :show_observation,
                         id: @set_observation)
           end
@@ -597,7 +597,7 @@ class LocationController < ApplicationController
           if (user = User.safe_find(@set_user))
             user.location = @location
             user.save
-            redirect_to(controller: :observer,
+            redirect_to(controller: :user,
                         action: :show_user,
                         id: @set_user)
           end
@@ -644,7 +644,7 @@ class LocationController < ApplicationController
       @location = merge
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(controller: :observer,
+      redirect_with_query(controller: :email,
                           action: :email_merge_request,
                           type: :Location,
                           old_id: @location.id,

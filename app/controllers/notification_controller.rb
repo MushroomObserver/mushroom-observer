@@ -1,5 +1,8 @@
-# TODO: move this into a new NotificationController
-class ObserverController
+class NotificationController < ApplicationController
+
+  before_action :login_required
+  before_action :disable_link_prefetching
+
   # Displays notifications related to a given naming and users.
   # Inputs: params[:naming], params[:observation]
   # Outputs:

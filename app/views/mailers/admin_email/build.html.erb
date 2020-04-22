@@ -11,7 +11,7 @@
   links.push([:admin_request_change_member_status.t,
     "#{MO.http_domain}/project/change_user_status/#{@project.id}?candidate=#{@sender.id}"])
   links.push([:email_links_show_user.t,
-    "#{MO.http_domain}/observer/show_user/#{@sender.id}"])
+    "#{MO.http_domain}/user/show_user/#{@sender.id}"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

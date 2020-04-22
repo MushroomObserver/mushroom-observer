@@ -1194,7 +1194,7 @@ table.table-namings {
   z-index: $zindex-tooltip; //  1070
 }
 
-.line-height-1-2 {
+.lh-1-2 {
   line-height: 1.2;
 }
 
@@ -1256,6 +1256,10 @@ table.table-namings {
   letter-spacing: 0.3em;
 }
 
+.badge-outline {
+  border: 1px solid $gray-300;
+}
+
 // Most browsers allow you to zoom in or out: let the user decide what
 // an optimal width for a line of text should be.  There is no way for us
 // to decide for them intelligently, since browsers differ so much in how
@@ -1279,14 +1283,14 @@ table.table-namings {
 }
 
 // replace with d-inline-block
-.inline {
-    display: inline-block;
-}
+// .inline {
+//     display: inline-block;
+// }
 
 // replace with pl-2
-.indent {
-    padding-left: 10px !important;
-}
+// .indent {
+//     padding-left: 10px !important;
+// }
 
 // .indent-one-em { -> .pl-3
 //     padding-left: 1em;
@@ -1320,24 +1324,24 @@ table.table-namings {
 //     vertical-align: top !important;
 // }
 
-.align-1px {
-    text-align: 1px;
-}
+// .align-1px {
+//     text-align: 1px;
+// }
 
 // replace with text-bold
-.bold {
-    font-weight: 800;
-}
+// .bold {
+//     font-weight: 800;
+// }
 
 // replace with border-0
-.border-none {
-    border: none;
-}
+// .border-none {
+//     border: none;
+// }
 
 // replace with rounded-0
-.border-radius-none {
-    border-radius: 0 !important;
-}
+// .border-radius-none {
+//     border-radius: 0 !important;
+// }
 
 // .monospace { -> .text-monospace
 //     font-family: monospace
@@ -1352,9 +1356,9 @@ table.table-namings {
 // }
 
 // replace with mt-4
-.push-below-buttons {
-    margin-top: 23px;
-}
+// .push-below-buttons {
+//     margin-top: 23px;
+// }
 
 // .push-up { -> .mb-3
 //     margin-bottom: 1em;
@@ -1370,41 +1374,41 @@ table.table-namings {
 // }
 
 // replace with border
-.border-box {
-    border: 1px solid;
-}
+// .border-box {
+//     border: 1px solid;
+// }
 
 // replace with pb-1
-.pad-bottom {
-    padding-bottom: .25em;
-}
+// .pad-bottom {
+//     padding-bottom: .25em;
+// }
 
 // replace with pt-3
-.pad-top {
-    padding-top: 1em;
-}
+// .pad-top {
+//     padding-top: 1em;
+// }
 
 // .kill-padding {
 //     padding: 0 !important;
 // }
 
 // replace with text-nowrap
-.nowrap {
-    white-space: nowrap;
-}
+// .nowrap {
+//     white-space: nowrap;
+// }
 
 // replace with text-nowrap overflow-ellipsis
-.nowrap-ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+// .nowrap-ellipsis {
+//     white-space: nowrap;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+// }
 
 // replace with justify-content-center
-.vcenter {
-  display: flex;
-  align-items: center;
-}
+// .vcenter {
+//   display: flex;
+//   align-items: center;
+// }
 
 
 //
@@ -1473,9 +1477,9 @@ input[type=checkbox] {
     //   padding-right: 15px;
     // }
 
-    .rss-box-details {
-        height: auto !important;
-    }
+    // .rss-box-details {
+    //     height: auto !important;
+    // }
 
     .row-offcanvas {
         position: relative;

@@ -17,7 +17,7 @@
     y = ((90.0 - lat) / 1.80).round(6)
   end
 
-  map_url = url_for(add_query_param(controller: :observer,
+  map_url = url_for(add_query_param(controller: :observation,
                                     action: :map_observation,
                                     id: observation.id))
 %>

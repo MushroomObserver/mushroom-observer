@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # helpers for show Observation view
-module ObserverHelper
+module ObservationHelper
   ##### Portion of page title that includes consensus (site id) ################
   #
   # Depends on whether consensus is deprecated and user preferences include

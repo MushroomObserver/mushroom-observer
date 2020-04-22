@@ -49,7 +49,7 @@
 #
 #  4) Add partial view for +list_rss_logs+:
 #
-#       (just clone, e.g., app/views/observer/_location.rhtml)
+#       (just clone, e.g., app/views/observation/_location.rhtml)
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
@@ -141,7 +141,7 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
-#  details::            Return the detail message for the latest update.
+#  detail::             Return the detail message for the latest update.
 #
 #  == Callbacks
 #
@@ -275,13 +275,13 @@ class RssLog < AbstractModel
 
   # Returns URL of <tt>show_#{object}</tt> action for the associated object.
   # That is, the RssLog for an Observation would return
-  # <tt>"/observer/show_observation/#{id}"</tt>, and so on.  If the RssLog is
+  # <tt>"/observation/show_observation/#{id}"</tt>, and so on.  If the RssLog is
   # an orphan, it returns the generic <tt>"/rss_log/show_rss_log/#{id}"</tt>
   # URL.
 
-  # TODO: Maybe retire this method, use Rails built-in "RESTful" url_for(target)
-  # These paths should already be in routes.rb and some will be broken out of
-  # the observer controller into their own controllers (and get own routes)
+  # TODO: Retire this method, use Rails built-in "RESTful" url_for(target)
+  # These paths are now in routes.rb and have now all been broken out of
+  # the old "observer" controller into their own controllers
   def url
     if location_id
       sprintf("/location/show_location/%d?time=%d", location_id,
@@ -289,12 +289,12 @@ class RssLog < AbstractModel
     elsif name_id
       sprintf("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observer/show_observation/%d?time=%d", observation_id,
+      sprintf("/observation/show_observation/%d?time=%d", observation_id,
               updated_at.tv_sec)
     elsif project_id
       sprintf("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/observer/show_species_list/%d?time=%d", species_list_id,
+      sprintf("/species_list/show_species_list/%d?time=%d", species_list_id,
               updated_at.tv_sec)
     elsif glossary_term_id
       sprintf("/glossary/show_glossary_term/%d?time=%d",

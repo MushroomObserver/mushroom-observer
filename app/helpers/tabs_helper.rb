@@ -43,7 +43,7 @@ module TabsHelper
     return unless obs.user.email_general_question && obs.user != user
 
     link_with_query(:show_observation_send_question.t,
-                    controller: :observer, action: :ask_observation_question,
+                    controller: :email, action: :ask_observation_question,
                     id: obs.id)
   end
 
@@ -74,10 +74,10 @@ module TabsHelper
 
     [
       link_with_query(:show_observation_edit_observation.t,
-                      controller: :observer, action: :edit_observation,
+                      controller: :observation, action: :edit_observation,
                       id: obs.id),
       link_with_query(:DESTROY.t,
-                      { controller: :observer, action: :destroy_observation,
+                      { controller: :observation, action: :destroy_observation,
                         id: obs.id },
                       class: "text-danger", data: { confirm: :are_you_sure.l })
     ]

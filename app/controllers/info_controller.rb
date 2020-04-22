@@ -1,6 +1,8 @@
-# TODO: move this into a new InfoController
 # Display canned informations about site
-class ObserverController
+class InfoController < ApplicationController
+
+  before_action :disable_link_prefetching
+
   # Intro to site.
   def intro
     store_location

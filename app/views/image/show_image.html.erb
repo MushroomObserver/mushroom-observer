@@ -7,7 +7,7 @@
     obs = @image.observations.first
     tabs += [
       link_with_query(:show_object.t(type: :observation),
-                      controller: :observer,
+                      controller: :observation,
                       action: :show_observation,
                       id: obs.id),
       link_with_query(:show_object.t(type: :name),
@@ -31,7 +31,7 @@
   end
   if @image.user.email_general_commercial
     tabs << link_with_query(:image_show_inquiry.t,
-                            controller: :observer,
+                            controller: :email,
                             action: :commercial_inquiry,
                             id: @image.id)
   end

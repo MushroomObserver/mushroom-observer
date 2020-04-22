@@ -160,7 +160,7 @@ module ControllerExtensions
   #   # Make sure only owner can edit observation (non-owners get
   #   # redirected to "show_observation").
   #   post_requires_user(:edit_obs, :show_obs, notes: 'new notes')
-  #   post_requires_user(:edit_obs, [:observer, :show_obs],
+  #   post_requires_user(:edit_obs, [:observation, :show_obs],
   #                      notes: 'new notes')
   #
   def post_requires_user(*args)
@@ -480,7 +480,7 @@ module ControllerExtensions
   #   assert_response("template")
   #
   #   # Expect a redirect to particular observation
-  #   assert_response( {controller: observer, action: show_observation, id: 1 })
+  #   assert_response( {controller: observation, action: show_observation, id: 1 })
   #   assert_response( {action: show_observation, id: 1 })
   #
   #   # Expect a redirection to site index.
@@ -488,7 +488,7 @@ module ControllerExtensions
   #
   #   # These also expect a redirection to site index.
   #   assert_response(["index"])
-  #   assert_response(["observer", "index"])
+  #   assert_response(["observation", "index"])
   #
   #   # Short-hand for common redirects:
   #   assert_response(:index)   => /rss_log/list_rss_logs
@@ -555,7 +555,7 @@ module ControllerExtensions
         assert_template(arg.to_s, msg)
       elsif arg == :index
         msg += "Expected redirect to <rss_log/list_rss_logs>" + got
-        assert_redirected_to({ controller: "observer",
+        assert_redirected_to({ controller: "rss_log",
                                action: "list_rss_logs" }, msg)
       elsif arg == :login
         msg += "Expected redirect to <account/login>" + got

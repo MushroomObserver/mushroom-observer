@@ -25,7 +25,7 @@
                 else
                   :list_observation_observations.t + " " +
                   link_to(
-                    name.display_name.t, controller: :observer,
+                    name.display_name.t, controller: :observation,
                     action: :observation_search, pattern: name.text_name
                   ) + " (#{count})"
                 end %>

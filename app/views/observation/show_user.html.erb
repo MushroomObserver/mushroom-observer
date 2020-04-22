@@ -16,15 +16,15 @@
     [ :name_descriptions_editors,     :name,         :name_descriptions_by_editor     ],
     [ :names,                         :name,         :names_by_user                   ],
     [ :names_versions,                :name,         :names_by_editor                 ],
-    [ :observations,                  :observer,     :observations_by_user            ],
+    [ :observations,                  :observation,  :observations_by_user            ],
     [ :species_lists,                 :species_list, :species_lists_by_user           ],
-    [ :life_list,                     :observer,     :checklist                       ]
+    [ :life_list,                     :observation,  :checklist                       ]
   ]
     links[key] = url_for(controller: controller, action: action, id: id)
   end
 
   tabs = [
-    link_to(:show_user_contributors.t, controller: :observer,
+    link_to(:show_user_contributors.t, controller: :observation,
             action: :users_by_contribution)
   ]
   if @show_user == @user
@@ -42,13 +42,13 @@
     tabs += [
       link_to(:show_user_observations_by.t(name: name), links[:observations]),
       link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
-      link_to(:show_user_email_to.t(name: name), controller: :observer,
+      link_to(:show_user_email_to.t(name: name), controller: :email,
                           action: :ask_user_question, id: id)
     ]
   end
   if in_admin_mode?
     tabs += [
-      link_to(:change_user_bonuses.t, controller: :observer,
+      link_to(:change_user_bonuses.t, controller: :user,
               action: :change_user_bonuses, id: @show_user.id),
       link_to(:DESTROY.t, {controller: :account, action: :destroy_user,
               id: @show_user.id}, data: {confirm: :are_you_sure.l})

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# see observer_controller.rb
-class ObserverController
+# see observation_controller.rb
+class ObservationController
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])
@@ -118,7 +118,7 @@ class ObserverController
 
     link = [
       :show_object.t(type: :map),
-      add_query_param({ controller: "observer", action: "map_observations" },
+      add_query_param({ controller: "observation", action: "map_observations" },
                       query)
     ]
     @links << link
@@ -138,7 +138,7 @@ class ObserverController
     @links << [
       :list_observations_download_as_csv.t,
       add_query_param(
-        { controller: "observer", action: "download_observations" },
+        { controller: "observation", action: "download_observations" },
         query
       )
     ]

@@ -10,7 +10,7 @@
   </button>
 
   <div class="collapse navbar-collapse" id="search_navbar">
-    <%= form_tag({controller: :observer, action: :pattern_search},
+    <%= form_tag({controller: :search, action: :pattern_search},
                  {class: "form-inline my-2 my-lg-0"}) do %>
 
       <%= text_field(:search,
@@ -121,7 +121,7 @@
              role="menu"
              aria-labelledby="user_dropdown">
           <%= link_to :app_your_observations.t,
-                      { controller: :observer,
+                      { controller: :observation,
                         action: :observations_by_user,
                         id: @user.id },
                       { class: "dropdown-item" } %>
@@ -135,7 +135,7 @@
                         action: :list_interests},
                       { class: "dropdown-item" } %>
           <%= link_to :app_your_summary.t,
-                      { controller: :observer,
+                      { controller: :user,
                         action: :show_user,
                         id: @user.id},
                       { class: "dropdown-item" } %>

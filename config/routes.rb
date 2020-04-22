@@ -105,6 +105,10 @@ ACTIONS = {
     list_articles: {},
     show_article: {}
   },
+  author: {
+    author_request: {},
+    review_authors: {}
+  },
   collection_number: {
     collection_number_search: {},
     create_collection_number: {},
@@ -131,6 +135,14 @@ ACTIONS = {
     show_comments_by_user: {},
     show_comments_for_target: {},
     show_comments_for_user: {}
+  },
+  email {
+    ask_observation_question: {},
+    ask_user_question: {},
+    ask_webmaster_question: {},
+    commercial_inquiry: {},
+    email_features: {},
+    email_merge_request: {}
   },
   glossary: {
     create_glossary_term: {},
@@ -192,6 +204,18 @@ ACTIONS = {
     show_original: {},
     transform_image: {}
   },
+  info: {
+    how_to_help: {},
+    how_to_use: {},
+    intro: {},
+    letter_to_community: {},
+    news: {},
+    search_bar_help: {},
+    textile: {},
+    textile_sandbox: {},
+    translators_note: {},
+    wrapup_2011: {}
+  },
   interest: {
     destroy_notification: {},
     list_interests: {},
@@ -233,6 +257,17 @@ ACTIONS = {
     show_location_description: {},
     show_past_location: {},
     show_past_location_description: {}
+  },
+  markup: {
+    lookup_accepted_name: {},
+    lookup_comment: {},
+    lookup_image: {},
+    lookup_location: {},
+    lookup_name: {},
+    lookup_observation: {},
+    lookup_project: {},
+    lookup_species_list: {},
+    lookup_user: {}
   },
   name: {
     adjust_permissions: {},
@@ -289,50 +324,22 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  observer: {
-    advanced_search: {},
-    advanced_search_form: {},
-    ask_observation_question: {},
-    ask_user_question: {},
-    ask_webmaster_question: {},
-    author_request: {},
-    change_banner: {},
-    change_user_bonuses: {},
-    checklist: {},
-    commercial_inquiry: {},
+  notification: {
+    show_notifications: {}
+  },
+  observation: {
     create_observation: {},
     destroy_observation: {},
     download_observations: {},
     edit_observation: {},
-    email_features: {},
-    email_merge_request: {},
     guess: {},
     hide_thumbnail_map: {},
-    how_to_help: {},
-    how_to_use: {},
-    ilist_users: {},
     index: {},
     index_observation: {},
-    index_rss_log: {},
-    index_user: {},
-    intro: {},
-    letter_to_community: {},
     list_observations: {},
-    list_users: {},
-    lookup_accepted_name: {},
-    lookup_comment: {},
-    lookup_image: {},
-    lookup_location: {},
-    lookup_name: {},
-    lookup_observation: {},
-    lookup_project: {},
-    lookup_species_list: {},
-    lookup_user: {},
     map_observation: {},
     map_observations: {},
-    news: {},
     next_observation: {},
-    next_user: {},
     observation_search: {},
     observations_at_location: {},
     observations_at_where: {},
@@ -340,34 +347,21 @@ ACTIONS = {
     observations_by_user: {},
     observations_for_project: {},
     observations_of_name: {},
-    pattern_search: {},
     prev_observation: {},
-    prev_user: {},
     print_labels: {},
     recalc: {},
-    review_authors: {},
-    search_bar_help: {},
     set_export_status: {},
     show_location_observations: {},
-    show_notifications: {},
     show_obs: {},
     show_observation: {},
     show_site_stats: {},
-    show_user: {},
     suggestions: {},
     test_flash_redirection: {},
-    textile: {},
-    textile_sandbox: {},
-    translators_note: {},
     turn_javascript_nil: {},
     turn_javascript_off: {},
     turn_javascript_on: {},
     update_whitelisted_observation_attributes: {},
-    user_search: {},
-    users_by_contribution: {},
-    users_by_name: {},
-    w3c_tests: {},
-    wrapup_2011: {}
+    w3c_tests: {}
   },
   pivotal: {
     index: {}
@@ -396,12 +390,19 @@ ACTIONS = {
     update: {}
   },
   rss_log: {
+    change_banner: {},
     index_rss_log: {},
     list_rss_logs: {},
     next_rss_log: {},
     prev_rss_log: {},
     rss: {},
     show_rss_log: {}
+  },
+  search: {
+    advanced_search: {},
+    advanced_search_form: {},
+    pattern_search: {},
+    site_google_search: {}
   },
   sequence: {
     create_sequence: {},
@@ -459,6 +460,19 @@ ACTIONS = {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
+  },
+  user: {
+    change_user_bonuses: {},
+    checklist: {},
+    index_user: {},
+    ilist_users: {},
+    list_users: {},
+    next_user: {},
+    prev_user: {},
+    show_user: {},
+    users_by_contribution: {},
+    users_by_name: {},
+    user_search: {}
   },
   vote: {
     cast_vote: {},
@@ -554,7 +568,7 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  resources :observations, :path => 'observer'
+  resources :observations, :path => 'observation'
 
   # Logged in - Default page is /rss_log/list_rss_logs.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
@@ -562,14 +576,14 @@ MushroomObserver::Application.routes.draw do
     root :to => "rss_log#list_rss_logs"
   end
 
-  # Not logged in - Default page is /observer#list_observations.
-  root :to => "observer#list_observations"
+  # Not logged in - Default page is /observation#list_observations.
+  root :to => "observation#list_observations"
 
   # Default page was /rss_log/list_rss_logs.
   # root "rss_log#list_rss_logs"
 
-  # Route /123 to /observer/show_observation/123.
-  get ":id" => "observer#show_observation", id: /\d+/
+  # Route /123 to /observation/show_observation/123.
+  get ":id" => "observation#show_observation", id: /\d+/
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
@@ -578,10 +592,10 @@ MushroomObserver::Application.routes.draw do
         controller: "ajax", action: action, id: /\S.*/)
   end
 
-  # Accept non-numeric ids for the /observer/lookup_xxx/id actions.
+  # Accept non-numeric ids for the /observation/lookup_xxx/id actions.
   LOOKUP_XXX_ID_ACTIONS.each do |action|
-    get("observer/#{action}/:id",
-        controller: "observer", action: action, id: /.*/)
+    get("observation/#{action}/:id",
+        controller: "observation", action: action, id: /.*/)
   end
 
   ACTIONS.each do |controller, actions|

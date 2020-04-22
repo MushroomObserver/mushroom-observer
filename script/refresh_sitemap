@@ -43,7 +43,7 @@ CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observer/show_observation/ID"],
+   "observation/show_observation/ID"],
   ["names",
    "Name",
    "name/show_name/ID"],
@@ -72,17 +72,17 @@ OBJECT_TYPES = [
 
 STATIC_PAGES = [
   ["home page",    "rss_log/list_rss_logs", "hourly"],
-  ["introduction", "observer/intro",         "weekly"],
-  ["how to use",   "observer/how_to_use",    "weekly"],
-  ["how to help",  "observer/how_to_help",   "weekly"]
+  ["introduction", "info/intro",            "weekly"],
+  ["how to use",   "info/how_to_use",       "weekly"],
+  ["how to help",  "info/how_to_help",      "weekly"]
 ].freeze
 
 # These are aliases for pages allowed above.
 OTHER_ALLOWED_PATHS = [
-  # "/observer/index", (would allow too many indexes we don't want to allow)
-  "/observer/lookup_observation",
-  "/observer/lookup_name",
-  "/observer/show_name",
+  # "/observation/index", (would allow too many indexes we don't want to allow)
+  "/markup/lookup_observation",
+  "/markup/lookup_name",
+  "/name/show_name",
   "/name/eol"
 ].freeze
 

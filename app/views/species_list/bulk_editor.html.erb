@@ -125,12 +125,12 @@
       link_to(:SHOW.l, "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :observer, action: :edit_observation, id: "XXX" }
+      args = { controller: :observation, action: :edit_observation, id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:EDIT.l, "javascript:row_button(#{j url})")
     %> |
     <%=
-      args = { controller: :observer, action: :destroy_observation, id: "XXX" }
+      args = { controller: :observation, action: :destroy_observation, id: "XXX" }
       url = url_for(add_query_param(args, @query))
       link_to(:DESTROY.l, "javascript:row_button(#{j url})",
               data: {confirm: :are_you_sure.l})

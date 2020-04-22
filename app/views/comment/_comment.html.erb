@@ -1,7 +1,7 @@
 <%
   target = comment.target
   user = comment.user
-  user_url = url_for(controller: :observer, action: :show_user, id: user.id)
+  user_url = url_for(controller: :user, action: :show_user, id: user.id)
 %>
 
 <div class="card comment">

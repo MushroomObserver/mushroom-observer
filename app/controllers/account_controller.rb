@@ -444,7 +444,7 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_to(controller: "observer", action: "show_user", id: @user.id)
+        redirect_to(controller: "user", action: "show_user", id: @user.id)
       elsif !@user.save
         flash_object_errors(@user)
       else
@@ -457,7 +457,7 @@ class AccountController < ApplicationController
                       where: @place_name, set_user: @user.id)
         else
           flash_notice(:runtime_profile_success.t)
-          redirect_to(controller: "observer", action: "show_user", id: @user.id)
+          redirect_to(controller: "user", action: "show_user", id: @user.id)
         end
       end
     end
@@ -468,7 +468,7 @@ class AccountController < ApplicationController
       @user.update(image: nil)
       flash_notice(:runtime_profile_removed_image.t)
     end
-    redirect_to(controller: "observer", action: "show_user", id: @user.id)
+    redirect_to(controller: "user", action: "show_user", id: @user.id)
   end
 
   def no_email_comments_owner
@@ -681,7 +681,7 @@ class AccountController < ApplicationController
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
       @stats = IpStats.read_stats(:do_activity)
     else
-      redirect_back_or_default("/observer/how_to_help")
+      redirect_back_or_default("/info/how_to_help")
     end
   end
 
@@ -744,7 +744,7 @@ class AccountController < ApplicationController
       do_not_add_user_to_group(user, group, user_name, group_name)
     end
 
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default(controller: "rss_log", action: "index")
   end
 
   def can_add_user_to_group?(user, group)
@@ -769,7 +769,7 @@ class AccountController < ApplicationController
 
   def add_user_to_group_user_mode
     flash_error :permission_denied.t
-    redirect_back_or_default(controller: "observer", action: "index")
+    redirect_back_or_default(controller: "rss_log", action: "index")
   end
 
   public

@@ -245,7 +245,7 @@ module DescriptionHelper
 
   def name_section_link(title, data, query)
     if data && data != 0
-      action = { controller: :observer, action: :index_observation }
+      action = { controller: :observation, action: :index_observation }
       url = add_query_param(action, query)
       content_tag(:p, link_to(title, url))
     end

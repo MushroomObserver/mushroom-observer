@@ -351,7 +351,7 @@ class HerbariumController < ApplicationController
   end
 
   def request_merge(this, that)
-    redirect_with_query(controller: :observer, action: :email_merge_request,
+    redirect_with_query(controller: :email, action: :email_merge_request,
                         type: :Herbarium, old_id: this.id, new_id: that.id)
     false
   end

@@ -4,11 +4,11 @@
 <!-- --------------------------- -->
 
 <% unless @lang.official %>
-  <h3 class="bold"><%= Language.official.name %>:</h3>
+  <h3 class="font-weight-bold"><%= Language.official.name %>:</h3>
 
   <% @edit_tags.each do |tag| %>
     <% if record = @official_records[tag] %>
-      <span class="underline"><%= h(tag) %>:</span>
+      <span class="text-underline"><%= h(tag) %>:</span>
       <p><%=
         str = record.text.gsub(/\\n/, "\n")
         h(str).gsub("\n", "<br/>\n")
@@ -16,13 +16,13 @@
     <% end %>
   <% end %>
 
-  <hr class="pad-bottom-1x pad-top-1x"/>
+  <hr class="py-3"/>
 <% end %>
 
 <!-- Show form for this language's translations -->
 <!-- ------------------------------------------ -->
 
-<h3 class="bold"><%= @lang.name %>:</h3>
+<h3 class="font-weight-bold"><%= @lang.name %>:</h3>
 
 <% @edit_tags.each do |tag| %>
   <%
@@ -53,19 +53,19 @@
   <div class="form-group">
     <%= label_tag("tag_#{tag}", tag) %>
     <span><%= "(" + notes.safe_join(", ") + ")" if notes.any? %></span><br/>
-    <%= text_area_tag("tag_#{tag}", str, rows: rows, class: "form-control pad-bottom-2x") %>
+    <%= text_area_tag("tag_#{tag}", str, rows: rows, class: "form-control pb-4") %>
   </div>
 
 <% end %>
 
-<div class="center-text">
-  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn pad-left-2x") %>
-  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn pad-left-2x",
+<div class="text-center">
+  <%= submit_tag(:SAVE.l, id: :save_button, class: "btn pl-4") %>
+  <%= button_tag(:CANCEL.l, id: :cancel_button, class: "btn pl-4",
                  type: "cancel") %>
-  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn pad-left-2x",
+  <%= button_tag(:RELOAD.l, id: :reload_button, class: "btn pl-4",
                  type: "button", data: {tag: @tag}) %>
   <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
-                 class: "pad-left-2x", data: {tag: @tag}) %>
+                 class: "pl-4", data: {tag: @tag}) %>
 </div>
 
 <!-- Show past versions of translations -->
@@ -92,13 +92,13 @@
     <% if versions_to_show.any? %>
 
       <% if !done_header %>
-        <hr class="pad-bottom-1x pad-top-1x"/>
-        <h3 class="pad-bottom-2x"><b><%= :edit_translations_old_versions.t %>:</b></h3>
+        <hr class="py-2"/>
+        <h3 class="pb-4"><b><%= :edit_translations_old_versions.t %>:</b></h3>
         <% done_header = true %>
       <% end %>
 
       <span class="underline"><%= h(tag) %>:</span><br/>
-      <table class="table-striped old_versions pad-bottom-1x">
+      <table class="table-striped old_versions pb-3">
         <% versions_to_show.each do |version| %>
           <tr>
             <td>
@@ -126,4 +126,3 @@
     <% end %>
   <% end %>
 <% end %>
-

@@ -1,5 +1,5 @@
-# see observer_controller.rb
-class ObserverController
+# see observation_controller.rb
+class ObservationController
   def show_site_stats # :norobots:
     store_location
     @site_data = SiteData.new.get_site_data

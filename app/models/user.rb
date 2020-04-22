@@ -333,10 +333,10 @@ class User < AbstractModel
   # password.
   attr_accessor :password_confirmation
 
-  # Override the default show_controller
-  def self.show_controller
-    "observer"
-  end
+  # Override the default show_controller - Changed. User now has own controller
+  # def self.show_controller
+  #   "observer"
+  # end
 
   # Find admin's record.
   def self.admin

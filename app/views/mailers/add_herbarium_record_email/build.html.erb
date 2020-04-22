@@ -13,7 +13,7 @@
            [:email_links_show_object.t(type: :herbarium),
             "#{MO.http_domain}/herbarium/show_herbarium/#{herbarium.id}"],
            [:email_links_show_user.t(user: @user.login),
-            "#{MO.http_domain}/observer/show_user/#{@sender.id}"]]
+            "#{MO.http_domain}/user/show_user/#{@sender.id}"]]
 
 if @user.email_html %>
 <html>

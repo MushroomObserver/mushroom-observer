@@ -1,13 +1,20 @@
-# TODO: move this into a new SearchController
-class ObserverController
+class SearchController < ApplicationController
+
+  before_action :login_required, except: [
+    :advanced_search_form,
+    :pattern_search,
+  ]
+
+  before_action :disable_link_prefetching
+
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
-  #   comment/image_search
+  #   comment/comment_search
   #   image/image_search
   #   location/location_search
   #   name/name_search
-  #   observer/observation_search
-  #   observer/user_search
+  #   observation/observation_search
+  #   user/user_search
   #   project/project_search
   #   species_list/species_list_search
   def pattern_search # :norobots:
@@ -19,10 +26,8 @@ class ObserverController
     session[:search_type] = type
 
     case type
-    when :observation, :user
-      ctrlr = :observer
-    when :comment, :herbarium, :image, :location,
-      :name, :project, :species_list, :herbarium_record
+    when :comment, :herbarium, :herbarium_record, :image, :location, :name,
+      :observation, :project, :species_list, :user
       ctrlr = type
     when :google
       site_google_search(pattern)
@@ -56,7 +61,7 @@ class ObserverController
   #   image/advanced_search
   #   location/advanced_search
   #   name/advanced_search
-  #   observer/advanced_search
+  #   observation/advanced_search
   def advanced_search_form # :norobots:
     @filter_defaults = users_content_filters || {}
     return unless request.method == "POST"
@@ -91,22 +96,4 @@ class ObserverController
     end
   end
 
-  # Displays matrix of advanced search results.
-  def advanced_search # :norobots:
-    if params[:name] || params[:location] || params[:user] || params[:content]
-      search = {}
-      search[:name] = params[:name] if params[:name].present?
-      search[:location] = params[:location] if params[:location].present?
-      search[:user] = params[:user] if params[:user].present?
-      search[:content] = params[:content] if params[:content].present?
-      search[:search_location_notes] = params[:search_location_notes].present?
-      query = create_query(:Observation, :advanced_search, search)
-    else
-      query = find_query(:Observation)
-    end
-    show_selected_observations(query)
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(controller: "observer", action: "advanced_search_form")
-  end
 end

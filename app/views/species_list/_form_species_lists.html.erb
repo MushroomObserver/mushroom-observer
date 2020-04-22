@@ -13,7 +13,7 @@
   <% if @checklist && @checklist.any? %>
     <div class="col-12 col-md-12 col-lg-12 max-width-text">
       <p>
-        <b class="nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
+        <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
       </p>
       <p>
         <% for (name, id) in @checklist.sort_by(&:first) %>

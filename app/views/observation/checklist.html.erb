@@ -1,16 +1,16 @@
 <%
-  name_link = {controller: :observer, action: :observations_of_name}
+  name_link = {controller: :observation, action: :observations_of_name}
 
   if @show_user
     @title = :checklist_for_user_title.t(user: @show_user.legal_name)
     tabs = [
-      link_to(:show_object.t(type: :profile), controller: :observer,
+      link_to(:show_object.t(type: :profile), controller: :user,
               action: :show_user, id: @show_user.id),
       link_to(:show_objects.t(type: :observation),
-              controller: :observer, action: :observations_by_user,
+              controller: :user, action: :observations_by_user,
               id: @show_user.id),
       link_to(:show_user_email_to.t(name: @show_user.legal_name),
-              controller: :observer, action: :ask_user_question,
+              controller: :email, action: :ask_user_question,
               id: @show_user.id)
     ]
     @tabsets = { right: draw_tab_set(tabs) }
@@ -46,9 +46,9 @@
   else
     @title = :checklist_for_site_title.t
     tabs = [
-      link_to(:app_contributors.t, controller: :observer,
+      link_to(:app_contributors.t, controller: :info,
               action: :users_by_contribution),
-      link_to(:app_site_stats.t, controller: :observer,
+      link_to(:app_site_stats.t, controller: :info,
               action: :show_site_stats)
     ]
     @tabsets = { right: draw_tab_set(tabs) }

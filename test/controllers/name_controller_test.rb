@@ -466,8 +466,8 @@ class NameControllerTest < FunctionalTestCase
     params = @controller.query_params(query)
     query.record.delete
     get(:advanced_search, params)
-    assert_redirected_to(controller: "observer",
-                         action: "advanced_search_form")
+    assert_redirected_to(controller: :observation,
+                         action: :advanced_search_form)
   end
 
   def test_edit_name
@@ -1674,7 +1674,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Fails because Rolf isn't in admin mode.
     post(:edit_name, params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(Name.find(old_name.id))
     assert(new_name.reload)
@@ -1794,7 +1794,7 @@ class NameControllerTest < FunctionalTestCase
 
     login("rolf")
     post(:edit_name, params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
 
     # Try again as an admin.
@@ -2170,7 +2170,7 @@ class NameControllerTest < FunctionalTestCase
     # Fails normally.
     login("rolf")
     post(:edit_name, params)
-    assert_redirected_to(controller: :observer, action: :email_merge_request,
+    assert_redirected_to(controller: :email, action: :email_merge_request,
                          type: :Name, old_id: old_name.id, new_id: new_name.id)
     assert(old_name.reload)
     assert(new_name.reload)

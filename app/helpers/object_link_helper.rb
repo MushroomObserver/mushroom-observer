@@ -30,7 +30,7 @@ module ObjectLinkHelper
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observer,
+      link_to(link_string, controller: :observation,
                            action: :observations_at_where, where: where)
     end
   end

@@ -25,7 +25,7 @@
 
   <% if @target.is_a?(Observation) %>
     <div class="d-none d-sm-block col-sm-4">
-      <%= render(partial: "observer/show_images",
+      <%= render(partial: "observation/show_images",
                  locals: { observation: @target, thumb_size_control: false }) %>
     </div>
   <% end %>

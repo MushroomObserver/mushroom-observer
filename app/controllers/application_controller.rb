@@ -191,7 +191,7 @@ class ApplicationController < ActionController::Base
     return true if @user&.is_successful_contributor?
 
     flash_warning(:unsuccessful_contributor_warning.t)
-    redirect_back_or_default(controller: :observer, action: :index)
+    redirect_back_or_default(controller: :rss_log, action: :index)
     false
   end
 
@@ -839,7 +839,7 @@ class ApplicationController < ActionController::Base
   #   Xxx yyy sensu Blah
   #   Valid name Author = Deprecated name Author
   #   blah blah [comment]
-  #   (this is described better in views/observer/bulk_name_edit.rhtml)
+  #   (this is described better in views/observation/bulk_name_edit.rhtml)
   #
   def construct_approved_names(name_list, approved_names, deprecate = false)
     return unless approved_names
@@ -1793,7 +1793,7 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # defined here because used by both image_controller and observer_controller
+  # defined here because used by both image_controller and observation_controller
   def whitelisted_image_args
     [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
   end

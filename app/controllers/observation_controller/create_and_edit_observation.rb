@@ -1,5 +1,5 @@
-# see observer_controller.rb
-class ObserverController
+# see observation_controller.rb
+class ObservationController
   # Form to create a new observation, naming, vote, and images.
   # Linked from: left panel
   #

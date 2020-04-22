@@ -22,7 +22,7 @@ class RssLogController < ApplicationController
     # show_index_of_objects - which instantiates more variables for view
     # @timer_start @timer_end @title @num_results @sorts @pages
     list_rss_logs
-    # TODO: Try skipping this method and just use default rails index
+    # TODO: Try skipping this method and just use default rails index!
   end
 
   # Set a query from POST or given params, and pass to show_selected_rss_logs
@@ -119,4 +119,37 @@ class RssLogController < ApplicationController
 
     render_xml(layout: false)
   end
+
+  # Update banner across all translations.
+  def change_banner # :root: :norobots:
+    if !in_admin_mode?
+      flash_error(:permission_denied.t)
+      redirect_to(action: "list_rss_logs")
+    elsif request.method == "POST"
+      @val = params[:val].to_s.strip
+      @val = "X" if @val.blank?
+      time = Time.now
+      Language.all.each do |lang|
+        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
+          str.update!(
+            text: @val,
+            updated_at: (str.language.official ? time : time - 1.minute)
+          )
+        else
+          str = lang.translation_strings.create!(
+            tag: "app_banner_box",
+            text: @val,
+            updated_at: time - 1.minute
+          )
+        end
+        str.update_localization
+        str.language.update_localization_file
+        str.language.update_export_file
+      end
+      redirect_to(action: "list_rss_logs")
+    else
+      @val = :app_banner_box.l.to_s
+    end
+  end
+
 end
