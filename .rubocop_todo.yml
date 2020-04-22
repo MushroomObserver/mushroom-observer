@@ -6,6 +6,13 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
+# Offense count: 5
+# Cop supports --auto-correct.
+# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
+# URISchemes: http, https
+Layout/LineLength:
+  Max: 94
+
 # Offense count: 1
 Lint/AmbiguousRegexpLiteral:
   Exclude:
@@ -38,7 +45,7 @@ Lint/EmptyWhen:
 
 # Offense count: 19
 # Configuration parameters: AllowComments.
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'app/helpers/api_helper.rb'
     - 'app/models/language_tracking.rb'
@@ -107,7 +114,7 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 13
 # Cop supports --auto-correct.
-Lint/UnneededCopDisableDirective:
+Lint/RedundantCopDisableDirective:
   Exclude:
     - 'app/models/name/parse.rb'
     - 'test/controllers/location_controller_test.rb'
@@ -437,9 +444,3 @@ Style/Lambda:
     - 'app/extensions/string_extensions.rb'
     - 'app/models/image.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Metrics/LineLength:
-  Max: 94

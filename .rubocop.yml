@@ -134,7 +134,7 @@ Metrics/PerceivedComplexity:
 ###################### Layout and Style ########################################
 
 # Repeat the default because Codeclimate ignores it as of 2019-07-09
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedColonStyle: key
 
 # Rubocop supports multiple options and MO uses a non-default
