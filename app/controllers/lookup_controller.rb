@@ -1,4 +1,4 @@
-class MarkupController < ApplicationController
+class LookupController < ApplicationController
 
   before_action :login_required, except [
     :lookup_accepted_name,

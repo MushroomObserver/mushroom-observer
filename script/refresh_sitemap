@@ -80,8 +80,8 @@ STATIC_PAGES = [
 # These are aliases for pages allowed above.
 OTHER_ALLOWED_PATHS = [
   # "/observation/index", (would allow too many indexes we don't want to allow)
-  "/markup/lookup_observation",
-  "/markup/lookup_name",
+  "/lookup/lookup_observation",
+  "/lookup/lookup_name",
   "/name/show_name",
   "/name/eol"
 ].freeze

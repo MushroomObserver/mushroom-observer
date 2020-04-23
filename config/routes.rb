@@ -258,7 +258,7 @@ ACTIONS = {
     show_past_location: {},
     show_past_location_description: {}
   },
-  markup: {
+  lookup: {
     lookup_accepted_name: {},
     lookup_comment: {},
     lookup_image: {},
