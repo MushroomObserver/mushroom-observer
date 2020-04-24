@@ -19,7 +19,7 @@ class ObservationController < ApplicationController
   require_dependency "observation_controller/show_observation"
   require_dependency "observation_controller/create_and_edit_observation"
   require_dependency "observation_controller/indexes"
-  require_dependency "observation_controller/site_stats"
+  # require_dependency "observation_controller/site_stats"
   require_dependency "observation_controller/suggestions"
   require_dependency "observation_controller/other"
   require_dependency "observation_controller/search"

@@ -1,0 +1,22 @@
+<% if in_admin_mode? %>
+  <div class="Admin">
+    DANGER: You are in administrator mode. Proceed with caution.
+  </div>
+<% end
+
+banner_text = :app_banner_box.t
+banner_time = TranslationString.banner_time.utc.strftime("%Y%m%d%H%M%S")
+cookie_time = cookies["hideBanner2"].to_s
+dismissed   = cookie_time.match(/^\d{14}$/) &&
+              cookie_time.to_d > banner_time.to_d - 10000
+if banner_text.to_s.length > 1 && !dismissed %>
+  <div class="alert alert-success message-banner" id="message_banner">
+    <%= javascript_tag("var BANNER_TIME = '#{banner_time}'") %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <%= tag.span aria: { hidden: "true" } do %>
+        &times;
+      <% end %>
+    </button>
+    <%= banner_text %>
+  </div>
+<% end %>

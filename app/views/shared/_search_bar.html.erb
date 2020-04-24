@@ -43,13 +43,13 @@
       <%= submit_tag(:app_search.l,
                      class: "btn btn-primary mr-2") %>
 
-      <%= link_to observer_search_bar_help_path,
+      <%= link_to info_search_bar_help_path,
                   class: "btn btn-link mx-2",
                   id: "search_bar_help_link" do
             tag.span :search_bar_help.t class: "text-nowrap"
       end %>
 
-      <%= link_to observer_advanced_search_form_path,
+      <%= link_to search_advanced_search_form_path,
                   class: "mx-2 btn btn-link border-0",
                   id: "advanced_search_link" do
             tag.span :app_advanced_search.t class: "text-nowrap"

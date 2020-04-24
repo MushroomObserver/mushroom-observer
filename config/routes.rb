@@ -136,7 +136,7 @@ ACTIONS = {
     show_comments_for_target: {},
     show_comments_for_user: {}
   },
-  email {
+  email: {
     ask_observation_question: {},
     ask_user_question: {},
     ask_webmaster_question: {},
@@ -211,10 +211,10 @@ ACTIONS = {
     letter_to_community: {},
     news: {},
     search_bar_help: {},
+    show_site_stats: {},
     textile: {},
     textile_sandbox: {},
-    translators_note: {},
-    wrapup_2011: {}
+    translators_note: {}
   },
   interest: {
     destroy_notification: {},
@@ -354,7 +354,6 @@ ACTIONS = {
     show_location_observations: {},
     show_obs: {},
     show_observation: {},
-    show_site_stats: {},
     suggestions: {},
     test_flash_redirection: {},
     turn_javascript_nil: {},
@@ -568,7 +567,7 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  resources :observations, :path => 'observation'
+  # resources :observations, :path => 'observation'
 
   # Logged in - Default page is /rss_log/list_rss_logs.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
@@ -584,6 +583,7 @@ MushroomObserver::Application.routes.draw do
 
   # Route /123 to /observation/show_observation/123.
   get ":id" => "observation#show_observation", id: /\d+/
+  get "observation/:id" => "observation#show_observation", id: /\d+/
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }

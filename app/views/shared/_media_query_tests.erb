@@ -1,0 +1,11 @@
+<%
+  # The divs below are used by jquery to make helpers to determine current
+  # bootstrap size.  For example:
+  #   jQuery('[data-bootstrap-size]:visible').data('bootstrap-size')
+%>
+<div id="media_query_tests">
+  <div data-bootstrap-size="xs" class="d-sm-none"></div>
+  <div data-bootstrap-size="sm" class="d-none d-sm-block d-md-none"></div>
+  <div data-bootstrap-size="md" class="d-none d-md-block d-lg-none"></div>
+  <div data-bootstrap-size="lg" class="d-none d-lg-block d-xl-none"></div>
+</div>

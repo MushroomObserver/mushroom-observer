@@ -35,6 +35,28 @@ class InfoController < ApplicationController
     store_location
   end
 
+  # Removed from observer
+  def show_site_stats # :norobots:
+    store_location
+    @site_data = SiteData.new.get_site_data
+
+    # Add some extra stats.
+    @site_data[:observed_taxa] = Name.connection.select_value %(
+      SELECT COUNT(DISTINCT name_id) FROM observations
+    )
+    @site_data[:listed_taxa] = Name.connection.select_value %(
+      SELECT COUNT(*) FROM names
+    )
+
+    # Get the last six observations whose thumbnails are highly rated.
+    query = Query.lookup(:Observation, :all,
+                         by: :updated_at,
+                         where: "images.vote_cache >= 3",
+                         join: :"images.thumb_image")
+    @observations = query.results(limit: 6,
+                                  include: { thumb_image: :image_votes })
+  end
+
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox
     if request.method != "POST"
