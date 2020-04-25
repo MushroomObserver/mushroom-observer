@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "open3"
 require "mimemagic"
 #
@@ -607,9 +609,10 @@ class Image < AbstractModel
     name.sub!(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
-    if name.present? and User.current && User.current.keep_filenames != :toss
-      self.original_name = name
-    end
+    return unless name.present? && User.current &&
+                  User.current.keep_filenames != :toss
+
+    self.original_name = name
   end
 
   # Save upload to temp file if haven't already done so.  Any errors are added
@@ -681,7 +684,7 @@ class Image < AbstractModel
               gsub("<ext>", ext).
               gsub("<set>", set).
               gsub("<strip>", strip)
-        if Rails.env != "test" && !system(cmd)
+        if !Rails.env.test? && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
@@ -713,13 +716,13 @@ class Image < AbstractModel
   # Saves the record.
   def set_image_size(file = local_file_name(:full_size))
     script = "#{::Rails.root}/script/jpegsize"
-    output, status = Open3.capture2(script, file)
+    output, _status = Open3.capture2(script, file)
     w, h = output.to_s.chomp.split
-    if /^\d+$/.match?(w.to_s)
-      self.width  = w.to_i
-      self.height = h.to_i
-      save_without_our_callbacks
-    end
+    return unless /^\d+$/.match?(w.to_s)
+
+    self.width  = w.to_i
+    self.height = h.to_i
+    save_without_our_callbacks
   end
 
   # Rotate or flip image.
@@ -731,7 +734,7 @@ class Image < AbstractModel
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    system("script/rotate_image #{id} #{operator}&") if Rails.env != "test"
+    system("script/rotate_image #{id} #{operator}&") unless Rails.env.test?
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
@@ -783,7 +786,7 @@ class Image < AbstractModel
   # Count number of votes at a given level.  Returns all votes if no +value+.
   def num_votes(value = nil)
     if value
-      vote_hash.values.select { |v| v == value.to_i }.count
+      vote_hash.values.count { |v| v == value.to_i }
     else
       vote_hash.values.length
     end
@@ -839,7 +842,7 @@ class Image < AbstractModel
     @vote_hash = nil
     image_votes.reload
     sum = num = 0
-    for user, value in vote_hash
+    vote_hash.each_value do |value|
       sum += value.to_f
       num += 1
     end
@@ -881,7 +884,8 @@ class Image < AbstractModel
 
   # Callback that changes objects referencing an image that is being destroyed.
   def update_thumbnails
-    for obj in (observations + subjects + best_glossary_terms + glossary_terms)
+    (observations + subjects + best_glossary_terms +
+     glossary_terms).each do |obj|
       obj.remove_image(self)
     end
   end
@@ -978,8 +982,8 @@ class Image < AbstractModel
       self.content_type = content_type.to_s.truncate(100)
     end
 
-    if copyright_holder.to_s.size > 100
-      self.copyright_holder = copyright_holder.to_s.truncate(100)
-    end
+    return if copyright_holder.to_s.size <= 100
+
+    self.copyright_holder = copyright_holder.to_s.truncate(100)
   end
 end
