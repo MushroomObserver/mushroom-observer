@@ -709,7 +709,7 @@ class AbstractModel < ApplicationRecord
   # TODO: replace the gem.
   # See notes at https://www.pivotaltracker.com/story/show/163189614
   def saved_version_changes?
-    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Metrics/LineLength
+    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Layout/LineLength
   end
 
   ##############################################################################
