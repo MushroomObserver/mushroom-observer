@@ -1,4 +1,5 @@
-#
+# frozen_string_literal: true
+
 #  = Integration Test Case
 #
 #  The test case class that all integration tests currently derive from.
