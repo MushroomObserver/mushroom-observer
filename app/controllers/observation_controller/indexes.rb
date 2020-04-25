@@ -2,6 +2,11 @@
 
 # see observation_controller.rb
 class ObservationController
+
+  def index
+    @observations = Observation.all
+  end
+  
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, by: params[:by])

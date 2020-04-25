@@ -262,7 +262,7 @@ module SessionExtensions
       elsif arg == :sort_tabs
         arg = "div#sorts"
       elsif arg == :left_panel
-        arg = "div#navigation"
+        arg = "nav#site_nav"
       elsif arg == :results
         arg = "div.results"
       elsif arg == :title

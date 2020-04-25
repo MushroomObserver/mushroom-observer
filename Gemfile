@@ -36,12 +36,17 @@ gem "jquery-rails"
 gem "uglifier"
 
 # Turbolinks makes following links in your web application faster.
-# Read more: https://github.com/rails/turbolinks
-# Note: //= require turbolinks in application.js
-# JS note: Must refactor for window and document load events not occurring
-#    Works better with StimulusJS: https://github.com/stimulusjs/stimulus
+#    Read more: https://github.com/rails/turbolinks
+#    Note: //= require turbolinks in application.js
+# JS note: Refactor our js initializers. Turbolinks page-loads will fire
+#    *their own* events, not the usual window and document load events
+#
+# Note: TL works better with StimulusJS: https://github.com/stimulusjs/stimulus
 gem "turbolinks-source"
 gem "turbolinks"
+
+# Generates conditionally active menu links
+gem 'active_link_to'
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem "jbuilder"

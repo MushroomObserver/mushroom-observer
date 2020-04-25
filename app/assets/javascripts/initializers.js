@@ -1,5 +1,5 @@
 /**
- * This should be included on every page in the footer.
+* This should be included on every page in the footer.
 */
 
 // With Turbolinks, jQuery(document).on('ready' doesn't fire after first load
@@ -21,89 +21,88 @@
 
 // Initialize Verlok LazyLoad
 var lazyLoadInstance = new LazyLoad({
-    elements_selector: ".lazyload"
-    // ... more custom settings?
+  elements_selector: ".lazyload"
+  // ... more custom settings?
 });
 
 $(document).on('ready page:load', function () {
 
-    // This works better than straight autofocus attribute in firefox.
-    // Normal autofocus causes it to scroll window hiding title etc.
-    $('[data-autofocus=true]').first().focus();
+  // This works better than straight autofocus attribute in firefox.
+  // Normal autofocus causes it to scroll window hiding title etc.
+  $('[data-autofocus=true]').first().focus();
 
-    // Initialize data-links
-    $('[data-role=link]').on('click', function() {
-      window.location = jQuery(this).attr('data-url');
+  // Initialize data-links
+  $('[data-role=link]').on('click', function() {
+    window.location = jQuery(this).attr('data-url');
+  });
+
+  // Initialize tooltips
+  $('[data-toggle="tooltip"]').tooltip({container: 'body'});
+
+  // Initialize sidebar toggle
+  $('[data-toggle="offcanvas"]').click(function () {
+    $(document).scrollTop(0);
+    $('.row-offcanvas').toggleClass('active');
+    $('#main_container').toggleClass('overflow-x-hidden');
+  });
+
+  // Initialize search toggle
+  $('[data-toggle="search"]').click(function () {
+    $(document).scrollTop(0);
+    var target = $(this).data().target;
+    $(target).css('margin-top', '32px');
+    $(target).toggleClass('d-none');
+  });
+
+  // Initialize alert dismiss
+  $('[data-dismiss="alert"]').click(function() {
+    setCookie('hideBanner2', BANNER_TIME, 30);
+  });
+
+  // Initialize bootstrap lightbox
+  $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+    event.preventDefault();
+    // console.log("lightbox clicked");
+    $(this).ekkoLightbox({
+      alwaysShowClose: true,
     });
+  });
 
-    // Initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip({container: 'body'});
+  function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires + ";path=/";
+  }
 
-    // Initialize sidebar toggle
-    $('[data-toggle="offcanvas"]').click(function () {
-        $(document).scrollTop(0);
-        $('.row-offcanvas').toggleClass('active');
-        $('#main_container').toggleClass('hidden-overflow-x');
+  $('.file-field :file').on('change', function() {
+    var val = $(this).val().replace(/.*[\/\\]/, ''),
+    next = $(this).parent().next();
+    // If file field immediately followed by span, show selection there.
+    if (next.is('span')) next.html(val);
+  });
 
-    });
+  // Update lazy loads
+  lazyLoadInstance.update();
 
-    // Initialize search toggle
-    $('[data-toggle="search"]').click(function () {
-        $(document).scrollTop(0);
-        var target = $(this).data().target;
-        $(target).css('margin-top', '32px');
-        $(target).toggleClass('d-none');
-    });
+  // Initialize validate_file_input_fields
+  $("input[type=file][multiple!=multiple]").each(function() {
+    apply_file_input_field_validation(this.id);
+  });
 
-    // Initialize alert dismiss
-    $('[data-dismiss="alert"]').click(function() {
-        setCookie('hideBanner2', BANNER_TIME, 30);
-    });
+  // This bit simply makes it so that if someone clicks on the span that it checks the checkbox
+  // Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
+  jQuery("[data-toggle='checkbox']").click(function() {
+    var $checkbox = $(this).find('input[type="checkbox"]');
+    $checkbox.prop('checked', !$checkbox.prop('checked'));
+  });
 
-    // Initialize bootstrap lightbox
-    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-        event.preventDefault();
-        // console.log("lightbox clicked");
-        $(this).ekkoLightbox({
-          alwaysShowClose: true,
-        });
-    });
+  jQuery("[data-toggle='checkbox'] input").click(function(e) {
+    e.stopPropagation();
+  });
 
-    function setCookie(cname, cvalue, exdays) {
-        var d = new Date();
-        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-        var expires = "expires=" + d.toUTCString();
-        document.cookie = cname + "=" + cvalue + "; " + expires + ";path=/";
-    }
-
-    $('.file-field :file').on('change', function() {
-        var val = $(this).val().replace(/.*[\/\\]/, ''),
-            next = $(this).parent().next();
-        // If file field immediately followed by span, show selection there.
-        if (next.is('span')) next.html(val);
-    });
-
-    // Update lazy loads
-    lazyLoadInstance.update();
-
-    // Initialize validate_file_input_fields
-    $("input[type=file][multiple!=multiple]").each(function() {
-      apply_file_input_field_validation(this.id);
-    });
-
-    // This bit simply makes it so that if someone clicks on the span that it checks the checkbox
-    // Makes it easier to check and uncheck the filter checkboxes on _rss_log_tabset
-    jQuery("[data-toggle='checkbox']").click(function() {
-        var $checkbox = $(this).find('input[type="checkbox"]');
-            $checkbox.prop('checked', !$checkbox.prop('checked'));
-    });
-
-    jQuery("[data-toggle='checkbox'] input").click(function(e) {
-        e.stopPropagation();
-    });
-
-    jQuery("[data-toggle='checkbox'] a").click(function(e) {
-        e.stopPropagation();
-    });
+  jQuery("[data-toggle='checkbox'] a").click(function(e) {
+    e.stopPropagation();
+  });
 
 });

@@ -1,0 +1,54 @@
+//
+// species list bulk editor
+// --------------------------------------------------
+
+.table-bulk-editor {
+    td {
+        padding: 4px 6px;
+    }
+    tr {
+        white-space: nowrap;
+    }
+    tr:nth-child(odd) {
+        border: 1px solid $LIST_ODD_BG_COLOR;
+    }
+    tr:nth-child(even) {
+        border: 1px solid $LIST_EVEN_BG_COLOR;
+    }
+    tr.hot {
+        border: 1px solid $LIST_BORDER_COLOR;
+    }
+    tr.hot a, div.row_controls a {
+        background: none;
+    }
+    tr.hot a:hover, div.row_controls a:hover {
+        background: none;
+    }
+    img.tiny {
+        max-height: 50px !important;
+        padding: 2px;
+    }
+    div.id_and_name {
+        float: left;
+        padding: 1px 0.5em 0 0.5em;
+    }
+    div.auto_complete {
+        z-index: 3;
+    }
+    input, select, option {
+        height: 2.0em;
+    }
+}
+
+div.row_controls {
+    display: none;
+    position: absolute;
+    text-align: left;
+    padding: 2px 5px 2px 5px;
+    border: 1px solid $LIST_BORDER_COLOR;
+    border-top: none;
+    color: $LIST_FG_COLOR;
+    background: $LIST_ODD_BG_COLOR;
+    z-index: 2;
+    white-space: nowrap;
+}

@@ -1,0 +1,191 @@
+//
+// tables
+// --------------------------------------------------
+
+thead tr {
+  color: $LIST_HEADER_FG_COLOR;
+  background-color: $LIST_HEADER_BG_COLOR;
+}
+
+.table-striped {
+  tbody > tr:nth-child(odd) {
+    background-color: $LIST_ODD_BG_COLOR;
+  }
+  tbody > tr:nth-child(even) {
+    background-color: $LIST_EVEN_BG_COLOR;
+  }
+}
+
+.table-curators,
+.table-description-permissions,
+.table-herbarium,
+.table-license-updater,
+.table-location-help,
+.table-manage-species-lists,
+.table-project-members,
+.table-review-donations,
+.table-upload-report {
+  th, td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+}
+
+.table-description-permissions {
+  th, td {
+    padding: 0.1em 0;
+    text-align: center;
+  }
+  th:first-child,
+  td:first-child {
+    padding: 0.1em 0.5em;
+    text-align: left;
+  }
+}
+
+.table-donors {
+  text-align: center;
+  td {
+    padding: 0.1em 1em;
+  }
+}
+
+.table-herbarium {
+  th:nth-child(1),
+  td:nth-child(1) {
+    text-align: center;
+  }
+  td:nth-child(2),
+  td:nth-child(3) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10em;
+  }
+}
+
+.table-manage-species-lists {
+  td {
+    padding: 0.2em 1em;
+  }
+  tr {
+    border-top: 1px solid $LIST_BORDER_COLOR;
+  }
+  tr:first-child {
+    border-top: none;
+  }
+}
+
+.table-publications {
+  th, td {
+    padding: 0.5em 0.5em;
+  }
+  td {
+    border-top: 1px solid $LIST_BORDER_COLOR;
+  }
+  th:first-child, td:first-child {
+    padding-left: 1em;
+  }
+  th:last-child, td:last-child {
+    padding-right: 1em;
+  }
+  td:nth-child(2) {
+    width: 20em;
+    font-size: 85%;
+    word-break: break-all;
+  }
+  td:nth-child(3),
+  td:nth-child(4) {
+    text-align: center;
+    font-weight: bold;
+  }
+  td:last-child {
+    text-align: center;
+  }
+}
+
+.table-review-donations {
+  th, td {
+    border-right: 1px solid $LIST_BORDER_COLOR;
+  }
+  th:last-child, td:last-child {
+    border: 0;
+  }
+}
+
+.table-observation-form {
+  background: none;
+  width: 100%;
+  td:first-child {
+    padding-right: 10px;
+  }
+  td {
+    padding-bottom: 5px;
+  }
+}
+
+table.table-namings {
+  width: 100%;
+  tbody {
+    border: 1px solid $LIST_BORDER_COLOR;
+    border-radius: $INPUT_BORDER_RADIUS !important;
+  }
+  th {
+    color: $BODY_FG_COLOR;
+    background: $BODY_BG_COLOR;
+    font-weight: normal;
+    vertical-align: bottom;
+  }
+  th, td {
+    padding: 5px;
+  }
+  th:first-child {
+    padding-left: 0;
+  }
+  td:first-child {
+    padding-left: 1em;
+  }
+  td:last-child {
+    padding-right: 1em;
+  }
+}
+
+.table-lifeform {
+  tr td {
+    padding: .1em 1em;
+  }
+  tr:nth-child(odd) {
+    background-color: $LIST_ODD_BG_COLOR;
+  }
+  tr:nth-child(even) {
+    background-color: $LIST_EVEN_BG_COLOR;
+  }
+}
+
+.textile {
+  th, td {
+    padding: 0.3em;
+    vertical-align: top;
+  }
+  th {
+    vertical-align: bottom;
+  }
+}
+
+//
+// textile sandbox
+// --------------------------------------------------
+
+.sandbox {
+  border-width: $INPUT_BORDER_WIDTH;
+  border-style: $INPUT_BORDER_STYLE;
+  border-radius: $INPUT_BORDER_RADIUS;
+  border-color: $INPUT_BORDER_COLOR;
+  padding: 2px 5px 0px 5px;
+}
+
+
+table.table-compact tr td {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}

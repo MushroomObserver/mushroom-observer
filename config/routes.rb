@@ -568,6 +568,7 @@ MushroomObserver::Application.routes.draw do
   resources :publications
 
   # resources :observations, :path => 'observation'
+  resources :observation
 
   # Logged in - Default page is /rss_log/list_rss_logs.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status

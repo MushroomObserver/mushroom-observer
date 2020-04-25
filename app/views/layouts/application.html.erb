@@ -43,53 +43,47 @@
   </head>
 <body>
 
+  <!--CONTEXTUAL_NAVIGATION-->
+  <%= render(partial: "header") %>
+  <!--/CONTEXTUAL_NAVIGATION-->
+
   <div id="main_container" class="container-fluid">
 
     <!--CALLOUT_BANNER-->
     <div class="d-none d-sm-flex d-print-none">
-      <%= render(partial: "/shared/banner") %>
+      <%= render(partial: "banner") %>
     </div>
     <!--/CALLOUT_BANNER-->
 
     <div class="row row-offcanvas row-offcanvas-left">
 
-      <!--NAVIGATION-->
-      <div class="col-8 col-sm-2 sidebar-offcanvas d-print-none" id="navigation">
-        <%= render(partial: "/shared/nav_left") %>
-      </div>
-      <!--/NAVIGATION-->
+      <!--SITE_NAVIGATION-->
+      <%= render(partial: "left_nav") %>
+      <!--/SITE_NAVIGATION-->
 
-      <div id="right_side" class="col-12 col-sm-10">
-
-        <!--HAMBURGER_BUTTONS-->
-        <%= render(partial: "/shared/hamburger") %>
-        <!--/HAMBURGER_BUTTONS-->
-
-        <!--SEARCH_BAR_NAV-->
-        <%= render(partial: "/shared/search_bar") %>
-        <!--/SEARCH_BAR_NAV-->
+      <main id="right_side" class="col-12 col-md-9 col-lg-10 right-side-content" role="main">
 
         <!--FLASH_NOTICES-->
-        <%= render(partial: "/shared/flash_notices") %>
+        <%= render(partial: "flash_notices") %>
         <!--/FLASH_NOTICES-->
 
         <div id="content">
-          <%= render(partial: "/shared/title_and_tab_sets") %>
 
           <!--MAIN_PAGE_CONTENT-->
           <%= yield %>
           <!--/MAIN_PAGE_CONTENT-->
 
           <div class="d-print-none">
-            <%= render(partial: "/shared/translator_credit") %>
+            <%= render(partial: "translator_credit") %>
           </div>
-        </div>
 
-      </div>
+        </div><!--#content-->
+
+      </main>
     </div>
   </div>
 
-  <%= render(partial: "/shared/media_query_tests") %>
+  <%= render(partial: "media_query_tests") %>
 
   <!--JAVASCRIPT-->
   <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>

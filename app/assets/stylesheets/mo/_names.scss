@@ -1,0 +1,44 @@
+//
+// name_lister
+// --------------------------------------------------
+
+table.scroller th {
+    font-size: 120%;
+    padding-bottom: 5px;
+}
+
+div.scroller {
+    color: $MENU_FG_COLOR;
+    background-color: $MENU_BG_COLOR;
+    height: 450px;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid $MENU_BORDER_COLOR;
+    padding: 0;
+    font-style: italic;
+
+    ul {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    li {
+        padding: 0px 5px 0px 5px;
+    }
+
+    span.normal {
+        font-style: normal;
+    }
+
+    li.hot {
+        color: $MENU_WARM_FG_COLOR;
+        background-color: $MENU_WARM_BG_COLOR;
+    }
+
+    li.warm {
+        color: $MENU_HOT_FG_COLOR;
+        background-color: $MENU_HOT_BG_COLOR;
+    }
+}

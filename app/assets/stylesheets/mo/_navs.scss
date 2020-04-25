@@ -1,0 +1,101 @@
+//
+// left nav bar
+// --------------------------------------------------
+
+.sidebar-offcanvas {
+  max-width: $sidebar-max-width;
+}
+
+//
+// small devices, tablets
+// --------------------------------------------------
+
+@include media-breakpoint-down(md) {
+  // #navigation {
+  //   padding-left: 15px;
+  //   padding-right: 15px;
+  // }
+
+  // .rss-box-details {
+  //     height: auto !important;
+  // }
+
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all .25s ease-out;
+    -o-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+    -webkit-transform: translate3d(0,0,0);
+  }
+
+  .row-offcanvas-right {
+    right: 0;
+  }
+
+  .row-offcanvas-left {
+    left: 0;
+  }
+
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -$sidebar-max-width;
+  }
+
+  .row-offcanvas-right.active {
+    right: $sidebar-max-width;
+  }
+
+  .row-offcanvas-left.active {
+    left: $sidebar-max-width;
+  }
+
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: $sidebar-max-width;
+  }
+
+  .hidden-overflow-x {
+    overflow-x: hidden !important;
+  }
+
+  .navbar-default {
+    margin: 0;
+  }
+
+  .navbar-form {
+    margin: 0;
+    border: 0;
+  }
+}
+
+.site-logo {
+  // height: 4rem;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+#site_nav {
+
+}
+
+.right-side-content {
+  @include media-breakpoint-up(md) {
+    padding-left: 3rem;
+  }
+}
+
+.left-nav-sidebar {
+  flex: 0 1 240px;
+}
+
+//
+// top nav bar
+// --------------------------------------------------

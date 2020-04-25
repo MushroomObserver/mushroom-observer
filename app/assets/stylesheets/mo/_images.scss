@@ -1,0 +1,121 @@
+//
+// theater view
+// --------------------------------------------------
+
+.theater-btn {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+.image-sizer:hover,
+.image-sizer:focus {
+  .theater-btn {
+    opacity: 1;
+  }
+}
+// .theater-btn {
+//     position: absolute;
+//     background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
+//     color: black;
+//     padding: 5px;
+//     top: 0px;
+//     border: 1px solid;
+//     text-decoration: none;
+//     display: none;
+//     font-size: 18px;
+// }
+//
+// .theater-btn:hover, .theater-btn:focus {
+//     background: black;
+//     color: white;
+//     padding: 5px;
+//     top: 0px;
+//     border: 1px solid;
+//     text-decoration: none;
+// }
+
+
+//
+// image vote meter bar
+// --------------------------------------------------
+
+.vote-meter {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 200px;
+  height: 7px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  background-color: $VOTE_METER_BG_COLOR;
+  border-radius: 0px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1) inset;
+  border: $VOTE_METER_BORDER_COLOR;
+}
+
+.vote-meter-bar {
+  float: left;
+  width: 0px;
+  height: 100%;
+  font-size: 12px;
+  line-height: 5px;
+  color: #FFF;
+  text-align: center;
+  background-color: $VOTE_METER_FG_COLOR;
+  box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
+  transition: width 0.6s ease 0s;
+}
+
+
+//
+// exif popup
+// --------------------------------------------------
+
+.exif_cover {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: rgba(128,128,128,0.25);
+  z-index: 99999;
+  table {
+    height: 100%;
+    margin: auto;
+    padding: 0;
+    border-spacing: 0;
+    border-collapse: collapse;
+    background: none;
+    td {
+      margin: 0;
+      padding: 0;
+    }
+  }
+  .exif_popup {
+    overflow: auto;
+    margin: 0;
+    border: 1px solid black;
+    padding: 5px 14px 5px 8px;
+    background: white;
+    color: black;
+    table {
+      tr:nth-child(odd) {
+        background: #DDD;
+      }
+      tr:nth-child(even) {
+        background: #EEE;
+      }
+      td {
+        padding: 0 0 0 1em;
+      }
+      td:first-child {
+        padding-left: 0;
+        width: auto;
+        min-width: 20em;
+        max-width: 40em;
+      }
+    }
+  }
+}

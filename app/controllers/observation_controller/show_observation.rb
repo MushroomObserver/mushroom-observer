@@ -17,6 +17,10 @@ class ObservationController
   #   @mappable
   #   @new_sites
   #   @votes
+  def show
+    show_observation
+  end
+
   def show_observation # :prefetch:
     pass_query_params
     store_location
