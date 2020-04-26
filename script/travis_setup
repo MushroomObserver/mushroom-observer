@@ -42,13 +42,6 @@ else
     echo jpegresize exists
 fi
 
-if [ ! -f /usr/local/bin/jpegexiforient ]; then
-    sudo gcc script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
-    echo Created and installed jpegexiforient executable
-else
-    echo jpegexiforient exists
-fi
-
 if [ ! -f /usr/local/bin/exifautotran ]; then
     sudo cp script/exifautotran /usr/local/bin/exifautotran
     sudo chmod 755 /usr/local/bin/exifautotran
