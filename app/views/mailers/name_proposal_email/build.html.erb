@@ -23,7 +23,7 @@
   links.push([:email_links_show_object.t(type: :observation),
     "#{MO.http_domain}/#{@observation.id}"])
   links.push([:email_links_not_interested.t(type: :observation),
-    "#{MO.http_domain}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{MO.http_domain}/interests/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email_observations_naming/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.t,

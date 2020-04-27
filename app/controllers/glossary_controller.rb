@@ -41,7 +41,10 @@ class GlossaryController < ApplicationController
                        description: params[:glossary_term][:description])
     glossary_term.add_image(process_image(image_args))
     glossary_term.save
-    redirect_to(action: "show_glossary_term", id: glossary_term.id)
+    redirect_to(
+      action: :show_glossary_term,
+      id: glossary_term.id
+    )
   end
 
   def image_args
@@ -93,7 +96,10 @@ class GlossaryController < ApplicationController
                                  permit(:name, :description)
       glossary_term.user = @user
       glossary_term.save
-      redirect_to(action: "show_glossary_term", id: glossary_term.id)
+      redirect_to(
+        action: :show_glossary_term,
+        id: glossary_term.id
+      )
     else
       @glossary_term = GlossaryTerm.find(params[:id].to_s)
     end
@@ -109,7 +115,10 @@ class GlossaryController < ApplicationController
         @glossary_term.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(action: "show_glossary_term", id: @glossary_term.id)
+        redirect_to(
+          action: :show_glossary_term,
+          id: @glossary_term.id
+        )
       end
     end
   end

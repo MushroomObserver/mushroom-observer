@@ -45,6 +45,11 @@ class Notification < AbstractModel
     [:name]
   end
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "notifications"
+  end
+
   # Create body of the email we're about to send.  Each flavor requires a
   # different set of arguments:
   #

@@ -1,0 +1,224 @@
+<%
+  id = @show_user.id
+  name = @show_user.unique_text_name
+  @title = :show_user_title.t(user: name)
+
+  links = {}
+  for key, controller, action in [
+    [ :comments,                      :comment,      :show_comments_by_user           ],
+    [ :comments_for,                  :comment,      :show_comments_for_user          ],
+    [ :images,                        :image,        :images_by_user                  ],
+    [ :location_descriptions_authors, :location,     :location_descriptions_by_author ],
+    [ :location_descriptions_editors, :location,     :location_descriptions_by_editor ],
+    [ :locations,                     :location,     :locations_by_user               ],
+    [ :locations_versions,            :location,     :locations_by_editor             ],
+    [ :name_descriptions_authors,     :name,         :name_descriptions_by_author     ],
+    [ :name_descriptions_editors,     :name,         :name_descriptions_by_editor     ],
+    [ :names,                         :name,         :names_by_user                   ],
+    [ :names_versions,                :name,         :names_by_editor                 ],
+    [ :observations,                  :observation,  :observations_by_user            ],
+    [ :species_lists,                 :species_list, :species_lists_by_user           ],
+    [ :life_list,                     :observation,  :checklist                       ]
+  ]
+    links[key] = url_for(controller: controller, action: action, id: id)
+  end
+
+  tabs = [
+    link_to(:show_user_contributors.t, controller: :observations,
+            action: :users_by_contribution)
+  ]
+  if @show_user == @user
+    tabs += [
+      link_to(:show_user_your_observations.t,
+              links[:observations]),
+      link_to(:show_user_comments_for_you.t,
+              links[:comments_for]),
+      link_to(:show_user_your_notifications.t,
+              controller: :interests,
+              action: :list_interests),
+      link_to(:show_user_edit_profile.t,
+              controller: :account,
+              action: :profile),
+      link_to(:app_preferences.t,
+              controller: :account,
+              action: :prefs),
+      link_to(:app_life_list.t,
+              links[:life_list])
+    ]
+  else
+    tabs += [
+      link_to(:show_user_observations_by.t(name: name),
+              links[:observations]),
+      link_to(:show_user_comments_for.t(name: name),
+              links[:comments_for]),
+      link_to(:show_user_email_to.t(name: name),
+              controller: :email,
+              action: :ask_user_question,
+              id: id)
+    ]
+  end
+  if in_admin_mode?
+    tabs += [
+      link_to(:change_user_bonuses.t,
+              controller: :users,
+              action: :change_user_bonuses,
+              id: @show_user.id),
+      link_to(:DESTROY.t,
+              { controller: :account,
+                action: :destroy_user,
+                id: @show_user.id},
+                data: { confirm: :are_you_sure.l })
+    ]
+  end
+  @tabsets = {
+    pager_for: @show_user,
+    right: draw_tab_set(tabs)
+  }
+
+  # These are roughly in decreasing order of importance.
+  rows = []
+  for field in SiteData::ALL_FIELDS - [:users]
+    rows << {
+      field: field,
+      label: "user_stats_#{field}".to_sym.t,
+      count: (count = @user_data[field].to_i),
+      weight: (weight = SiteData::FIELD_WEIGHTS[field]),
+      points: count * weight
+    }
+  end
+
+  # Add bonuses for translations.
+  if @user_data[:languages_itemized]
+    for lang, score in @user_data[:languages_itemized]
+      rows << {
+        label: :show_user_language_contribution.t(name: lang.name),
+        points: score.to_i
+      }
+    end
+  end
+
+  # Add bonuses at the bottom.
+  if @show_user.bonuses
+    for points, reason in @show_user.bonuses
+      rows << {
+        label: reason.to_s.t,
+        points: points.to_i
+      }
+    end
+  end
+
+  total = 0
+%>
+
+<div class="row">
+  <div class="col-7">
+    <% if @show_user.location %>
+      <p>
+        <strong><%= :show_user_primary_location.t %>:</strong>
+        <%= location_link(nil, @show_user.location) %>
+      </p>
+    <% end %>
+    <% if !@show_user.mailing_address.blank? %>
+      <p>
+        <strong><%= :show_user_mailing_address.t %>:</strong>
+        <%= @show_user.mailing_address %>
+      </p>
+    <% end %>
+    <% if !@show_user.personal_herbarium.blank? %>
+      <p>
+        <strong><%= :show_user_personal_herbarium.t %>:</strong>
+        <%= link_to(@show_user.personal_herbarium.name.t,
+                    @show_user.personal_herbarium.show_link_args) %>
+      </p>
+    <% end %>
+    <% if !@show_user.notes.blank? %>
+      <%= @show_user.notes.tpl %>
+    <% end %>
+  </div>
+
+  <div class="col-5">
+    <p class="mt-3">
+      <%= thumbnail(@show_user.image_id,
+                    {votes: false}) if @show_user.image_id %>
+      <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
+    </p>
+  </div>
+
+  <div class="col-12">
+    <div class="row">
+
+      <div class="col-sm-3">
+        <% if @observations %>
+          <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
+            <%= thumbnail(obs.thumb_image,
+                          link: { controller: obs.show_controller,
+                                  action: obs.show_action,
+                                  id: obs.id },
+                          votes: true) %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="col-sm-6">
+        <center>
+          <table class="table">
+            <% rows.each do |row|
+              field = row[:field]
+              label = row[:label]
+              count = row[:count]
+              weight = row[:weight]
+              points = row[:points]
+              url = links[field]
+              link = url ? link_to(label, url) : label
+              total += points
+              if !count %>
+                <tr>
+                  <td colspan="2"><%= label %></td>
+                  <td>=</td>
+                  <td align="right"><%= points %></td>
+                </tr>
+              <% elsif !label.blank? %>
+                <tr>
+                  <td><%= link %></td>
+                  <td><%= count %> * <%= weight %></td>
+                  <td>=</td>
+                  <td align="right"><%= points %></td>
+                </tr>
+              <% end %>
+            <% end %>
+            <% if total > 0 %>
+              <tr>
+                <td colspan="4">
+                  <hr/>
+                </td>
+              </tr>
+              <tr>
+                <td><%= :show_user_total.t %></td>
+                <td></td>
+                <td>=</td>
+                <td align="right"><%= total %></td>
+              </tr>
+            <% end %>
+          </table>
+          <%= if @life_list.num_species > 0
+            :show_user_life_list.t(genera: @life_list.num_genera,
+                                   species: @life_list.num_species,
+                                   url: links[:life_list])
+          end %>
+        </center>
+      </div>
+
+      <div class="col-sm-3">
+        <% if @observations %>
+          <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
+            <%= thumbnail(obs.thumb_image,
+                          link: { controller: obs.show_controller,
+                                  action: obs.show_action,
+                                  id: obs.id },
+                          votes: true) %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

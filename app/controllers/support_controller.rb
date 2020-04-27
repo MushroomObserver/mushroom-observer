@@ -26,7 +26,7 @@ class SupportController < ApplicationController
     return true if in_admin_mode?
 
     flash_error(error)
-    redirect_to(action: "donate")
+    redirect_to(action: :donate)
   end
 
   def post_donation(params)
@@ -71,7 +71,7 @@ class SupportController < ApplicationController
   def valid_amount?(amount, error)
     if amount.to_f <= 0
       flash_error(error)
-      redirect_to(action: "donate")
+      redirect_to(action: :donate)
       return false
     end
     true

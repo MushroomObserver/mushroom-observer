@@ -66,12 +66,12 @@ end.new
 
 count = 0
 NUMBER.times do
-  curl.run("rss_log/list_rss_logs")
-  curl.run("image/show_image", id: IMAGES.sample)
-  curl.run("name/show_name", id: NAMES.sample)
-  curl.run("observer/show_observation", id: OBSERVATIONS.sample)
+  curl.run("rss_logs/list_rss_logs")
+  curl.run("images/show_image", id: IMAGES.sample)
+  curl.run("names/show_name", id: NAMES.sample)
+  curl.run("observations/show_observation", id: OBSERVATIONS.sample)
   if count % 100 == 0
-    curl.run("image/test_upload_speed", image_file: IMAGE_FILE)
+    curl.run("images/test_upload_speed", image_file: IMAGE_FILE)
   end
   count += 1
 end

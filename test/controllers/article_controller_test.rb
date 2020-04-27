@@ -13,7 +13,7 @@ class ArticleControllerTest < FunctionalTestCase
     login(users(:article_writer).login)
     make_admin
     get(:create_article)
-    assert_form_action(action: "create_article")
+    assert_form_action(action: :create_article)
 
     # Prove that if News Articles project doesn't exist, there's no error.
     Project.destroy(Article.news_articles_project.id)
@@ -76,7 +76,7 @@ class ArticleControllerTest < FunctionalTestCase
     login(users(:article_writer).login)
     make_admin
     get(:edit_article, params)
-    assert_form_action(action: "edit_article")
+    assert_form_action(action: :edit_article)
   end
 
   def test_edit_article_post

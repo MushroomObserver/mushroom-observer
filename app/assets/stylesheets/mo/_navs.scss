@@ -74,11 +74,16 @@
   }
 }
 
-.site-logo {
-  // height: 4rem;
+//
+// left nav bar
+// --------------------------------------------------
 
-  img {
-    object-fit: contain;
+.left-nav-sidebar {
+  flex: 0 1 240px;
+
+  @include media-breakpoint-up(md) {
+    position: sticky;
+    top: 4rem;
   }
 }
 
@@ -86,16 +91,29 @@
 
 }
 
+
 .right-side-content {
   @include media-breakpoint-up(md) {
     padding-left: 3rem;
   }
 }
 
-.left-nav-sidebar {
-  flex: 0 1 240px;
-}
 
 //
 // top nav bar
 // --------------------------------------------------
+
+.site-logo {
+  max-width: 150px;
+  // height: 4rem;
+}
+
+.logo-wrap {
+  padding-top: 0;
+  padding-bottom: 28.7%;
+
+  img {
+    object-fit: contain;
+    object-position: left center;
+  }
+}

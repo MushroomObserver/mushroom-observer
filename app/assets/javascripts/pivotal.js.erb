@@ -118,7 +118,7 @@ jQuery(document).ready(function () {
         var value = jQuery("#pivotal_comment").val();
         var popup = jQuery("#pivotal_popup");
         var num;
-        jQuery.ajax("/ajax/pivotal/comment/" + story, {
+        jQuery.ajax("/ajax/pivotal/comments/" + story, {
             data: {value: value, authenticity_token: csrf_token()},
             dataType: "text",
             async: true,

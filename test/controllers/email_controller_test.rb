@@ -25,7 +25,7 @@ class EmailControllerTest < FunctionalTestCase
 
   def test_send_webmaster_question
     ask_webmaster_test("rolf@mushroomobserver.org",
-                       response: { controller: :rss_log,
+                       response: { controller: :rss_logs,
                                    action: :list_rss_logs })
   end
 
@@ -75,12 +75,12 @@ class EmailControllerTest < FunctionalTestCase
 
     login("rolf")
     post(page, params: params)
-    assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
+    assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
     assert_flash_text(/denied|only.*admin/i)
 
     make_admin("rolf")
     post_with_dump(page, params)
-    assert_redirected_to(controller: :user, action: :users_by_name)
+    assert_redirected_to(controller: :users, action: :users_by_name)
   end
 
   def test_send_commercial_inquiry
@@ -92,7 +92,7 @@ class EmailControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
+    assert_redirected_to(controller: :images, action: :show_image, id: image.id)
   end
 
   def test_send_ask_observation_question

@@ -1,0 +1,75 @@
+<% # Notes section of create_observation form %>
+<div class="row mt-3">
+  <%= content_tag(:span, "#{:NOTES.t} ",
+                  class: "font-weight-bold") %>
+  <% if @observation.form_notes_parts(@user) == [Observation.other_notes_part]
+       part = Observation.other_notes_part %>
+
+    <div class="row">
+      <div class="col-12 col-sm-6 max-width-text">
+        <div>
+          <textarea class="form-control"
+                    rows="10"
+                    id="<%= @observation.notes_part_id(part) %>"
+                    name="<%= @observation.notes_part_name(part) %>">
+            <%= @observation.notes_part_value(part) %>
+          </textarea>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 max-width-text">
+        <div class="well well-sm" id="notes_help">
+          <div class="arrow-left d-none d-sm-block"></div>
+          <%= content_tag(:p,
+                          :form_observations_notes_help.t,
+                          class: "help-block pt-0 mt-0") %>
+          <%= render(partial: "shared/textilize_help") %>
+        </div>
+      </div>
+    </div>
+
+  <% else %>
+
+    (<%= :general_textile_link.t %>)
+    <% @observation.form_notes_parts(@user).each do |part| %>
+      <div class="row">
+        <div class="col-12 col-sm-6 max-width-text">
+          <div><%= "#{strip_tags(part.tl)}: "%></div>
+          <div>
+            <textarea class="form-control"
+                      rows="1"
+                      id="<%= @observation.notes_part_id(part) %>"
+                      name="<%= @observation.notes_part_name(part) %>">
+              <%= @observation.notes_part_value(part) %>
+            </textarea>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  <% end %>
+
+</div>
+
+<% inject_javascript_at_end %(
+jQuery(document).ready(function() {
+    //hides the help field when the notes textarea is expanded
+
+    var $notesText = jQuery('#observation_notes');
+
+    $notesText.data('x', $notesText.outerWidth());
+    $notesText.data('y', $notesText.outerHeight());
+
+    $notesText.mouseup(function () {
+
+        var $this = jQuery(this);
+
+        if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
+            jQuery('#notes_help').hide();
+        }
+        else {
+           jQuery('#notes_help').show();
+        }
+
+    });
+});
+) %>

@@ -54,6 +54,11 @@ class Project < AbstractModel
 
   before_destroy :orphan_drafts
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "projects"
+  end
+
   # Various debugging things require all models respond to +text_name+.  Just
   # returns +title+.
   def text_name

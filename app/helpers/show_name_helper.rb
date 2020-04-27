@@ -65,7 +65,7 @@ module ShowNameHelper
   #   query = Query.lookup(:Observation, :all, names: name.id, by: :confidence,
   #                        include_synonyms: true)
   #   link_to_obss_of(query, :obss_of_taxon.t)
-  #   => <a href="/observation/index_observation?q=Q">This Taxon, any name</a> (19)
+  #   => <a href="/observations/index_observation?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title)
     count = query.select_count
     return nil if count.zero?
@@ -74,7 +74,7 @@ module ShowNameHelper
     link_to(
       title,
       add_query_param(
-        { controller: :observation, action: :index_observation }, query
+        { controller: :observations, action: :index_observation }, query
       )
     ) + " (#{count})"
   end
@@ -91,7 +91,7 @@ module ShowNameHelper
 
     link_to(
       :show_consensus_species.t(name: genus.display_name_brief_authors.t),
-      add_query_param({ controller: :name, action: :index_name }, query)
+      add_query_param({ controller: :names, action: :index_name }, query)
     ) + " (#{count})"
   end
 

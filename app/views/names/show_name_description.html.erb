@@ -1,0 +1,25 @@
+<%
+  @title ||= @description.format_name.t
+  show_description_tab_set(@description)
+%>
+
+<table cellpadding="5" width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <%= render( partial: "shared/show_description",
+                  locals: { description: @description }) %>
+    </td>
+
+    <td valign="top" width="50%">
+      <%= show_alt_descriptions(@name, @projects) %>
+    </td>
+  </tr>
+</table>
+
+<%= render(partial: "name_description", object: @description,
+           locals: { review: true }) %>
+<%= render(partial: "comments/show_comments",
+           locals: { object: @description, controls: true, limit: 10 }
+          ) if false%>
+<br/>
+<%= show_object_footer(@description) %>

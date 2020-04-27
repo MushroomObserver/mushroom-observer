@@ -161,15 +161,18 @@ module MapHelper
 
   def mapset_observation_link(obs, args)
     link_to("#{:Observation.t} ##{obs.id}",
-            controller: :observation,
+            controller: :observations,
             action: :show_observation,
             id: obs.id,
             params: args[:query_params] || {})
   end
 
   def mapset_location_link(loc, args)
-    link_to(loc.display_name.t, controller: :location, action: :show_location,
-                                id: loc.id, params: args[:query_params] || {})
+    link_to(loc.display_name.t,
+            controller: :locations,
+            action: :show_location,
+            id: loc.id,
+            params: args[:query_params] || {})
   end
 
   def mapset_box_params(set)

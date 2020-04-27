@@ -9,9 +9,9 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :name),
-    "#{MO.http_domain}/name/show_name/#{@name.id}"])
+    "#{MO.http_domain}/names/show_name/#{@name.id}"])
   links.push([:email_links_email_publisher.t,
-    "#{MO.http_domain}/user/show_user/#{@publisher.id}"])
+    "#{MO.http_domain}/users/show_user/#{@publisher.id}"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

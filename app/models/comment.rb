@@ -96,6 +96,11 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "comments"
+  end
+
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
     [Location, Name, Observation, Project, SpeciesList]

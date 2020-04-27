@@ -26,11 +26,11 @@
 
   <div class="col-12 max-width-text mb-3">
     <%= link_with_query(:show_glossary_term_reuse_image.t,
-                        controller: :image,
+                        controller: :images,
                         action: :reuse_image_for_glossary_term,
                         id: @glossary_term.id) %><br/>
     <%= link_with_query(:show_glossary_term_remove_image.t,
-                        controller: :image,
+                        controller: :images,
                         action: :remove_images_for_glossary_term,
                         id: @glossary_term.id) %><br/>
   </div>

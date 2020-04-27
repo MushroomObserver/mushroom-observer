@@ -40,8 +40,8 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_link_if_object
     # link to project, name not supplied
-    # pre  = '<a href="/project/show_project/'
-    path = "/project/show_project/"
+    # pre  = '<a href="/projects/show_project/'
+    path = "/projects/show_project/"
     obj = projects(:bolete_project)
     link_text = "Bolete Project"
     assert_equal(expected_link(path, obj, link_text),
@@ -51,7 +51,7 @@ class ObjectLinkHelperTest < ActionView::TestCase
     assert_equal(expected_link(path, obj, link_text),
                  link_to_object(projects(:bolete_project), "BP"))
     # link to species list
-    path = "/species_list/show_species_list/"
+    path = "/species_lists/show_species_list/"
     obj = species_lists(:first_species_list)
     link_text = "A Species List"
     assert_equal(expected_link(path, obj, link_text),

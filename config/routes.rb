@@ -97,7 +97,7 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  article: {
+  articles: {
     create_article: {},
     destroy_article: {},
     edit_article: {},
@@ -105,11 +105,11 @@ ACTIONS = {
     list_articles: {},
     show_article: {}
   },
-  author: {
+  authors: {
     author_request: {},
     review_authors: {}
   },
-  collection_number: {
+  collection_numbers: {
     collection_number_search: {},
     create_collection_number: {},
     destroy_collection_number: {},
@@ -122,7 +122,7 @@ ACTIONS = {
     remove_observation: {},
     show_collection_number: {}
   },
-  comment: {
+  comments: {
     add_comment: {},
     comment_search: {},
     destroy_comment: {},
@@ -151,7 +151,7 @@ ACTIONS = {
     show_glossary_term: {},
     show_past_glossary_term: {}
   },
-  herbarium: {
+  herbaria: {
     create_herbarium: {},
     delete_curator: {},
     destroy_herbarium: {},
@@ -166,7 +166,7 @@ ACTIONS = {
     request_to_be_curator: {},
     show_herbarium: {}
   },
-  herbarium_record: {
+  herbarium_records: {
     create_herbarium_record: {},
     destroy_herbarium_record: {},
     edit_herbarium_record: {},
@@ -180,7 +180,7 @@ ACTIONS = {
     remove_observation: {},
     show_herbarium_record: {}
   },
-  image: {
+  images: {
     add_image: {},
     advanced_search: {},
     bulk_filename_purge: {},
@@ -216,12 +216,12 @@ ACTIONS = {
     textile_sandbox: {},
     translators_note: {}
   },
-  interest: {
+  interests: {
     destroy_notification: {},
     list_interests: {},
     set_interest: {}
   },
-  location: {
+  locations: {
     add_to_location: {},
     adjust_permissions: {},
     advanced_search: {},
@@ -269,7 +269,7 @@ ACTIONS = {
     lookup_species_list: {},
     lookup_user: {}
   },
-  name: {
+  names: {
     adjust_permissions: {},
     advanced_search: {},
     approve_name: {},
@@ -324,10 +324,10 @@ ACTIONS = {
     destroy: {},
     edit: {}
   },
-  notification: {
+  notifications: {
     show_notifications: {}
   },
-  observation: {
+  observations: {
     create_observation: {},
     destroy_observation: {},
     download_observations: {},
@@ -351,6 +351,7 @@ ACTIONS = {
     print_labels: {},
     recalc: {},
     set_export_status: {},
+    show: {},
     show_location_observations: {},
     show_obs: {},
     show_observation: {},
@@ -365,7 +366,7 @@ ACTIONS = {
   pivotal: {
     index: {}
   },
-  project: {
+  projects: {
     add_members: {},
     add_project: {},
     admin_request: {},
@@ -388,7 +389,7 @@ ACTIONS = {
     show: {},
     update: {}
   },
-  rss_log: {
+  rss_logs: {
     change_banner: {},
     index_rss_log: {},
     list_rss_logs: {},
@@ -403,7 +404,7 @@ ACTIONS = {
     pattern_search: {},
     site_google_search: {}
   },
-  sequence: {
+  sequences: {
     create_sequence: {},
     destroy_sequence: {},
     edit_sequence: {},
@@ -415,7 +416,7 @@ ACTIONS = {
     sequence_search: {},
     show_sequence: {}
   },
-  species_list: {
+  species_lists: {
     add_observation_to_species_list: {},
     add_remove_observations: {},
     bulk_editor: {},
@@ -452,15 +453,15 @@ ACTIONS = {
     wrapup_2011: {},
     wrapup_2012: {}
   },
-  theme: {
+  themes: {
     color_themes: {}
   },
-  translation: {
+  translations: {
     edit_translations: {},
     edit_translations_ajax_get: {},
     edit_translations_ajax_post: {}
   },
-  user: {
+  users: {
     change_user_bonuses: {},
     checklist: {},
     index_user: {},
@@ -473,7 +474,7 @@ ACTIONS = {
     users_by_name: {},
     user_search: {}
   },
-  vote: {
+  votes: {
     cast_vote: {},
     cast_votes: {},
     refresh_vote_cache: {},
@@ -573,30 +574,30 @@ MushroomObserver::Application.routes.draw do
   # Logged in - Default page is /rss_log/list_rss_logs.
   # https://stackoverflow.com/questions/6998612/rails-3-best-way-to-have-two-different-home-pages-based-on-login-status
   constraints lambda { |req| !req.session[:user_id].blank? } do
-    root :to => "rss_log#list_rss_logs"
+    root :to => "rss_logs#list_rss_logs"
   end
 
   # Not logged in - Default page is /observation#list_observations.
-  root :to => "observation#list_observations"
+  root :to => "observations#list_observations"
 
   # Default page was /rss_log/list_rss_logs.
   # root "rss_log#list_rss_logs"
 
-  # Route /123 to /observation/show_observation/123.
-  get ":id" => "observation#show_observation", id: /\d+/
-  get "observation/:id" => "observation#show_observation", id: /\d+/
+  # Route /123 to /observations/show_observation/123.
+  get ":id" => "observations#show_observation", id: /\d+/
+  get "observations/:id" => "observations#show_observation", id: /\d+/
 
   # Short-hand notation for AJAX methods.
   # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
   AJAX_ACTIONS.each do |action|
     get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
+        controller: :ajax, action: action, id: /\S.*/)
   end
 
-  # Accept non-numeric ids for the /observation/lookup_xxx/id actions.
+  # Accept non-numeric ids for the /observations/lookup_xxx/id actions.
   LOOKUP_XXX_ID_ACTIONS.each do |action|
-    get("observation/#{action}/:id",
-        controller: "observation", action: action, id: /.*/)
+    get("observations/#{action}/:id",
+        controller: :observations, action: action, id: /.*/)
   end
 
   ACTIONS.each do |controller, actions|
@@ -615,5 +616,5 @@ MushroomObserver::Application.routes.draw do
   end
 
   # routes for actions that Rails automatically creates from view templates
-  MO.themes.each { |scheme| get "theme/#{scheme}" }
+  MO.themes.each { |scheme| get "themes/#{scheme}" }
 end

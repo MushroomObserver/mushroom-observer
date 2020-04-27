@@ -1,0 +1,197 @@
+<div class="row">
+  <div class="col-12">
+    <%= submit_tag(button.l, class: "btn mx-auto mt-3 mb-3") %>
+  </div>
+
+  <% partial = render(partial: "shared/form_list_feedback")
+  if !partial.blank? %>
+    <div class="col-12 col-md-12 col-lg-12 max-width-text">
+      <%= partial %>
+    </div>
+  <% end %>
+
+  <% if @checklist && @checklist.any? %>
+    <div class="col-12 col-md-12 col-lg-12 max-width-text">
+      <p>
+        <b class="text-nowrap"><%= :form_species_lists_species_to_add.t %>:</b>
+      </p>
+      <p>
+        <% for (name, id) in @checklist.sort_by(&:first) %>
+          <%= check_box(:checklist_data, id, checked: @checklist_names[id]) %>
+          <%= label_tag("checklist_data_#{id}", name.t) %>
+          <br/>
+        <% end %>
+      </p>
+    </div>
+  <% end %>
+
+  <div class="col-12 col-md-12 col-lg-12 max-width-text">
+    <%= if !@new_names.blank?
+      hidden_field_tag(:approved_names,
+                       @new_names.join("\n"))
+    end %>
+
+    <%= if !@deprecated_names.blank?
+      hidden_field_tag(:approved_deprecated_names,
+                       @deprecated_names.map(&:id).join(" "))
+    end %>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:list_members,
+                    :form_species_lists_write_in_species.t) %>
+      <%= text_area(:list,
+                    :members,
+                    value: @list_members,
+                    rows: 8,
+                    class: "form-control") %>
+      <% turn_into_name_auto_completer(:list_members,
+                                       primer: Name.primer,
+                                       token: "\n") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:species_list_title,
+                    :form_species_lists_title.t + ":") %> (<%= :required.t %>)
+      <%= text_field(:species_list,
+                     :title,
+                     class: "form-control") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:species_list_notes,
+                    :form_species_lists_list_notes.t + ":") %>
+      <%= text_area(:species_list,
+                    :notes,
+                    rows: 6,
+                    class: "form-control") %>
+      <%= render(partial: "shared/textilize_help") %>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 col-md-12 col-lg-12 max-width-text">
+    <div class="form-group form-inline">
+      <%= label_tag(:species_list_when,
+                    :WHEN.t + ":") %>
+      <%= date_select(:species_list,
+                      :when,
+                      date_select_opts(@species_list),
+                      { class: "form-control" }) %>
+      <% turn_into_year_auto_completer(:species_list_when_1i) %>
+    </div>
+
+    <% if @dubious_where_reasons && @dubious_where_reasons.any? %>
+      <div class="alert alert-warning">
+        <%= @dubious_where_reasons.safe_join(safe_br) %><br/>
+        <span class="help-note">
+          <%= :form_observations_dubious_help.t(button: button) %>
+        </span>
+      </div>
+    <% end %>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:species_list_place_name,
+                    :WHERE.t + ":") %> (<%= :required.t %>)
+      <%= text_field(:species_list,
+                     :place_name,
+                     class: "form-control") %>
+      <% turn_into_location_auto_completer(:species_list_place_name) %>
+    </div>
+
+    <div class="form-group form-inline mt-3">
+      <%= label_tag(:vote_value,
+                    :form_species_lists_confidence.t + ":") %>
+      <%= select(:member,
+                 :value,
+                 Vote.confidence_menu,
+                 class: "form-control") %>
+    </div>
+
+    <div class="form-group mt-3">
+      <%= label_tag(:member_notes,
+                    :form_species_lists_member_notes.t + ":") %>
+        (<%= :general_textile_link.t %>)
+        <% @species_list.form_notes_parts(@user).each do |part| %>
+          <div><%= "#{strip_tags(part.tl)}: "%></div>
+          <div>
+            <textarea class="form-control"
+                      rows="1"
+                      id="<%= @species_list.notes_part_id(part) %>"
+                      name="<%= @species_list.notes_part_name(part) %>">
+              <%= @member_notes[part.to_sym] %>
+            </textarea>
+          </div>
+        <% end %>
+    </div>
+
+    <div class="form-group form-inline mt-3">
+      <%= label_tag(:member_lat,
+                    :LATITUDE.t + ":") %>&nbsp;<%=
+          text_field(:member,
+                     :lat,
+                     size: 8,
+                     value: @member_lat,
+                     class: "form-control") %>
+      <%= label_tag(:member_long,
+                    :LONGITUDE.t + ":") %>&nbsp;<%=
+          text_field(:member,
+                     :long,
+                     size: 8,
+                     value: @member_long,
+                     class: "form-control") %>
+      <%= label_tag(:member_alt,
+                    :ALTITUDE.t + ":") %>&nbsp;<%=
+          text_field(:member,
+                     :alt,
+                     size: 6,
+                     value: @member_alt,
+                     class: "form-control") %>
+      <br/>
+      <span class="help-note"><%= :form_observations_lat_long_help.t %></span>
+    </div>
+
+    <div class="form-group form-inline mt-3">
+      <%= check_box(:member,
+                    :is_collection_location,
+                    checked: @member_is_collection_location) %>
+      <%= label_tag(:member_is_collection_location,
+                    :form_observations_is_collection_location.t) %>
+      <br/>
+      <span class="help-note"><%= :form_observations_is_collection_location_help.t %></span>
+    </div>
+
+    <div class="form-group form-inline mt-3">
+      <%= check_box(:member,
+                    :specimen,
+                    checked: @member_specimen) %>
+      <%= label_tag(:observation_specimen,
+                    :form_observations_specimen_available.t) %>
+      <br/>
+      <span class="help-note"><%= :form_observations_specimen_available_help.t %></span>
+    </div>
+
+    <% if @projects.any? %>
+      <div class="form-group">
+        <p>
+          <b><%= :PROJECTS.t %>:</b>
+          <span class="help-note"><%= :form_species_lists_project_help.t %></span>
+        </p>
+        <p>
+          <% for project in @projects %>
+            <%= check_box(:project, "id_#{project.id}",
+                          checked: @project_checks[project.id],
+                          disabled: @species_list.user != @user && !project.is_member?(@user)) %>
+            <%= label_tag("project_id_#{project.id}",
+                          link_to_object(project)) %>
+            <br/>
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col-12">
+    <%= submit_tag(button.l, class: "btn mx-auto mt-3") %>
+  </div>
+</div>

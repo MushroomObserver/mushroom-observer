@@ -1,0 +1,44 @@
+<%
+  @title = :HERBARIUM_RECORD.t + " '".html_safe + @herbarium_record.format_name.t + "'".html_safe
+
+  tabs = []
+  if in_admin_mode? || @herbarium_record.can_edit?
+    tabs << link_with_query(:edit_herbarium_record.t,
+                            action: :edit_herbarium_record, id: @herbarium_record.id, back: :show)
+    tabs << link_with_query(:delete_herbarium_record.t,
+                            {action: :destroy_herbarium_record, id: @herbarium_record.id},
+                            data: {confirm: :are_you_sure.t})
+  end
+  tabs << link_to(:herbarium_index.t, controller: :herbaria, action: :index)
+
+  @tabsets = {
+    pager_for: @herbarium_record,
+    right: draw_tab_set(tabs)
+  }
+
+  herbarium = @herbarium_record.herbarium
+%>
+
+<div class="max-width-text mt-3">
+  <p>
+    <%= :HERBARIUM.t %>: <%= link_to(herbarium.name.t, herbarium.show_link_args) %><br/>
+    <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
+    <%= :herbarium_record_accession_number.t %>: <%= @herbarium_record.accession_number %><br/>
+    <%= :herbarium_record_user.t %>: <%= user_link(@herbarium_record.user) %><br/>
+  </p>
+
+  <% if !@herbarium_record.notes.blank? %>
+    <%= ( :NOTES.l + ":\n\n" + @herbarium_record.notes ).tpl %>
+  <% end %>
+
+  <div class="mt-3">
+    <%= render(partial: "shared/log_item", collection: @herbarium_record.observations, as: :object) %>
+  </div>
+
+  <center>
+    <p>
+      <%= :CREATED_AT.t %>: <%= @herbarium_record.created_at.web_date %><br/>
+      <%= :UPDATED_AT.t %>: <%= @herbarium_record.updated_at.web_date %><br/>
+    </p>
+  </center>
+</div>

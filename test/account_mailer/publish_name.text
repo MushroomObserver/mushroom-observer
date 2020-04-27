@@ -12,7 +12,6 @@ Published by: Mary Newbie (mary)
 
 Here are some handy links:
 
-Show this name: http://mushroomobserver.org/name/show_name/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
-Send email to the publisher: http://mushroomobserver.org/observer/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>
+Show this name: http://mushroomobserver.org/names/show_name/<%= ActiveRecord::FixtureSet.identify(:agaricus_campestris) %>
+Send email to the publisher: http://mushroomobserver.org/users/show_user/<%= ActiveRecord::FixtureSet.identify(:mary) %>
 Latest changes at Mushroom Observer: http://mushroomobserver.org
-

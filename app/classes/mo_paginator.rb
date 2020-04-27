@@ -53,7 +53,7 @@
 #    # Use the same code in your view template for either case:
 #    <%= paginate_block(@pages) do %>
 #      <% for object in @results
-#        <%= link_to(object.name, action: "show_object", id: object.id) %><br/>
+#        <%= link_to(object.name, action: :show_object, id: object.id) %><br/>
 #      <% end %>
 #    <% end %>
 #

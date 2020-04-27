@@ -13,7 +13,7 @@
 
   <!--TABLE OF NAMES FOR WIDE SCREEN-->
   <div class="d-none d-sm-block">
-    <%= form_tag(add_query_param(controller: :vote, action: :cast_votes,
+    <%= form_tag(add_query_param(controller: :votes, action: :cast_votes,
                  id: observation.id), id: "cast_votes_1") do %>
 
       <table class="table-namings">
@@ -32,7 +32,7 @@
               <% Textile.register_name(naming.name) %>
               <td>
                 <%= link_with_query(naming.display_name_brief_authors.t,
-                                    controller: :name, action: :show_name,
+                                    controller: :names, action: :show_name,
                                     id: naming.name) %>
                 <% if check_permission(naming) %>
                   [<%= link_with_query(:EDIT.t,
@@ -49,7 +49,7 @@
               </td>
               <td>
                 <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-                <%= link_with_query(h(txt), { controller: :vote,
+                <%= link_with_query(h(txt), { controller: :votes,
                                               action: :show_votes,
                                               id: naming.id },
                                     { data: { role: "open_popup",
@@ -100,15 +100,20 @@
         <div class="col-12">
           <div class="float-sm-right mt-sm-3 mb-1 ml-2">
             <%= link_with_query(:show_namings_propose_new_name.t,
-                                {controller: :naming, action: :create,
-                                id: observation.id}, class: "btn") %>
+                                { controller: :naming,
+                                  action: :create,
+                                  id: observation.id },
+                                class: "btn") %>
             <% if do_suggestions %>
-              <br/><%= link_to(:show_namings_suggest_names.l, "#",
-                               data: {role: "suggest_names"}, class: "btn") %>
+              <br/><%= link_to(:show_namings_suggest_names.l,
+                               "#",
+                               data: {role: "suggest_names"},
+                               class: "btn") %>
             <% end %>
             <% if logged_in && any_names %>
               <br/><%= submit_tag(:show_namings_update_votes.l,
-                             data: {role: "save_votes"}, class: "btn") %>
+                                  data: {role: "save_votes"},
+                                  class: "btn") %>
             <% end %>
           </div>
           <p class="help-block max-width-text">
@@ -139,8 +144,10 @@
 
   <!--TABLE OF NAMES FOR MOBILE-->
   <div class="d-block d-sm-none">
-    <%= form_tag(add_query_param(controller: :vote, action: :cast_votes,
-                 id: observation.id), id: "cast_votes_2") do %>
+    <%= form_tag(add_query_param(controller: :votes,
+                                 action: :cast_votes,
+                                 id: observation.id),
+                 id: "cast_votes_2") do %>
 
       <div class="row d-block d-sm-none">
         <div class="col-12">
@@ -153,18 +160,21 @@
                   <div class="row">
                     <div class="col-12">
                       <%= link_with_query(naming.format_name.t,
-                                          controller: :name, action: :show_name,
+                                          controller: :names,
+                                          action: :show_name,
                                           id: naming.name) %>
                     </div>
                     <% if check_permission(naming) %>
                       <div class="col-12">
-                        [<%= link_with_query(:EDIT.t, { controller: :naming,
-                                                        action: :edit,
-                                                        id: naming }) %> |
-                         <%= link_with_query(:DESTROY.t, { controller: :naming,
-                                                           action: :destroy,
-                                                           id: naming.id},
-                                             data: {confirm: :are_you_sure.l}
+                        [<%= link_with_query(:EDIT.t,
+                                             { controller: :naming,
+                                               action: :edit,
+                                               id: naming }) %> |
+                         <%= link_with_query(:DESTROY.t,
+                                             { controller: :naming,
+                                               action: :destroy,
+                                               id: naming.id },
+                                             data: { confirm: :are_you_sure.l }
                              ) %>]
                       </div>
                     <% end %>
@@ -173,7 +183,7 @@
                     </div>
                     <div class="col-6">
                       <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-                      <%= link_with_query(h(txt), { controller: :vote,
+                      <%= link_with_query(h(txt), { controller: :votes,
                                                     action: :show_votes,
                                                     id: naming.id },
                                                   { data: { role: "open_popup",
@@ -223,13 +233,16 @@
           <div class="float-sm-right mt-sm-3">
             <%= link_with_query(:show_namings_propose_new_name.t,
                                 { controller: :naming,
-                                  action: :create, id: observation.id },
+                                  action: :create,
+                                  id: observation.id },
                                 class: "btn") %>
             <%= link_to(:show_namings_suggest_names.l, "#",
-                           data: {role: "suggest_names"}, class: "btn") \
-                           if do_suggestions %>
+                        data: { role: "suggest_names" },
+                        class: "btn") \
+                        if do_suggestions %>
             <%= submit_tag(:show_namings_update_votes.l,
-                           data: {role: "save_votes"}, class: "btn") \
+                           data: { role: "save_votes" },
+                           class: "btn") \
                            if logged_in && any_names %>
           </div>
           <p class="help-block max-width-text">
@@ -264,7 +277,7 @@
       @naming = naming %>
       <div class="popup" id="show_votes_<%= naming.id %>" data-role="popup">
         <div class="popup-frame" id="show_votes_<%= naming.id %>_frame">
-          <%= render(partial: "vote/show_votes",
+          <%= render(partial: "votes/show_votes",
                      locals: { do_cancel: true, naming: @naming }) %>
         </div>
       </div>
@@ -279,8 +292,10 @@
   <!--/VOTE POPUPS-->
 
   <!--SUGGESTIONS-->
-  <% url = url_for(add_query_param(controller: :observation, action: :suggestions,
-                                   id: observation.id, names: :xxx))
+  <% url = url_for(add_query_param(controller: :observations,
+                                   action: :suggestions,
+                                   id: observation.id,
+                                   names: :xxx))
   inject_javascript_at_end %(
     SuggestionModule(#{observation.image_ids}, "#{url}", {
       suggestions_processing_images:  "#{j :suggestions_processing_images.t}",

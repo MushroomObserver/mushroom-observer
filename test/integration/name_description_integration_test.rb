@@ -258,35 +258,35 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def show_name_uri
       name = name_we_are_working_on
-      "/name/show_name/#{name.id}"
+      "/names/show_name/#{name.id}"
     end
 
     def show_name_description_uri
       desc = name_description
-      "/name/show_name_description/#{desc.id}"
+      "/names/show_name_description/#{desc.id}"
     end
 
     def edit_name_description_uri
       desc = name_description
-      "/name/edit_name_description/#{desc.id}"
+      "/names/edit_name_description/#{desc.id}"
     end
 
     def destroy_name_description_uri
       desc = name_description
-      "/name/destroy_name_description/#{desc.id}"
+      "/names/destroy_name_description/#{desc.id}"
     end
 
     def create_name_description
       get(show_name_uri)
       click(href: /create_name_description/)
-      # assert_template("name/create_name_description")
+      # assert_template("names/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)
         fill_in_name_description_form(form)
         form.submit
       end
       assert_flash_success
-      # assert_template("name/show_name_description")
+      # assert_template("names/show_name_description")
     end
 
     def check_name_description_form_defaults(form)

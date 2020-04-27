@@ -43,31 +43,31 @@ CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb".freeze
 OBJECT_TYPES = [
   ["observations",
    "Observation",
-   "observation/show_observation/ID"],
+   "observations/show_observation/ID"],
   ["names",
    "Name",
-   "name/show_name/ID"],
+   "names/show_name/ID"],
   ["locations",
    "Location",
-   "location/show_location/ID"],
+   "locations/show_location/ID"],
   ["species_lists",
    "SpeciesList",
-   "species_list/show_species_list/ID"],
+   "species_lists/show_species_list/ID"],
   ["projects",
    "Project",
-   "project/show_project/ID"],
+   "projects/show_project/ID"],
   ["glossary_terms",
    "GlossaryTerm",
    "glossary/show_glossary_term/ID"],
   ["herbaria",
    "Herbarium",
-   "herbarium/show_herbarium/ID"],
+   "herbaria/show_herbarium/ID"],
   ["name_descriptions",
    "NameDescription",
-   "name/show_name_description/ID"],
+   "names/show_name_description/ID"],
   ["location_descriptions",
    "LocationDescription",
-   "location/show_location_description/ID"]
+   "locations/show_location_description/ID"]
 ].freeze
 
 STATIC_PAGES = [
@@ -79,11 +79,11 @@ STATIC_PAGES = [
 
 # These are aliases for pages allowed above.
 OTHER_ALLOWED_PATHS = [
-  # "/observation/index", (would allow too many indexes we don't want to allow)
+  # "/observations/index", (would allow too many indexes we don't want to allow)
   "/lookup/lookup_observation",
   "/lookup/lookup_name",
-  "/name/show_name",
-  "/name/eol"
+  "/names/show_name",
+  "/names/eol"
 ].freeze
 
 LOCALES = Language.connection.select_values %(

@@ -391,7 +391,7 @@ module GeneralExtensions
   # Private helper method used in XML assertions above:
   #
   #   _assert_xml(10, @doc.elements['/response/results'].attributes['number'])
-  #   _assert_xml('rolf', @doc.elements['/response/user/login'].text)
+  #   _assert_xml('rolf', @doc.elements['/response/users/login'].text)
   #   _assert_xml(/\d\d-\d\d-\d\d/, @doc.elements['/response/script_date'].text)
   #
   def _assert_xml(val, str, msg = nil)

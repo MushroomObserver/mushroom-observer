@@ -55,6 +55,11 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "collection_numbers"
+  end
+
   def format_name
     "#{name} #{number}"
   end

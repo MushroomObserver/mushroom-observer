@@ -7,7 +7,7 @@
     <%= link_with_query(:INDEX.t, controller: object.show_controller,
                         action: "index_#{type}", id: object.id) %> |
     <% if @mappable %>
-      <%= link_with_query(:MAP.t, controller: :location,
+      <%= link_with_query(:MAP.t, controller: :locations,
                           action: :map_locations) %> |
     <% end %>
     <%= link_with_query("#{:FORWARD.t} »", controller: object.show_controller,

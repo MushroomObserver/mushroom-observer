@@ -22,7 +22,7 @@
                    [:theme_random.l, "NULL"]
                   ] + MO.themes.map { |t| [t.to_sym.l, t] },
                   class: "form-control") %>
-  <%= link_to(:prefs_themes_about.t, controller: :theme,
+  <%= link_to(:prefs_themes_about.t, controller: :themes,
                                      action: :color_themes) %><br/>
 
   <%= label_tag(:user_locale, :prefs_locale.t + ":") %>

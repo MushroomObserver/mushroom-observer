@@ -1,0 +1,53 @@
+
+<%
+  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+  # so we only have image_id.  It's still possible to render the image with
+  # nothing but the image_id.  (But not votes, original name, etc.)
+  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+   #If the image is part of an image set.
+  is_set = is_set || false
+%>
+
+<div class="image-sizer position-relative w-100">
+
+  <%= tag.div class: "image-lazy-sizer overflow-hidden", style: "padding-bottom: #{img_proportion}%;" do
+    image_tag(thumb_url, html_options)
+  end %>
+
+  <%= link_with_query("",
+                      link,
+                      class: "stretched-link") %>
+
+  <%= # TODO: move this to the presenter, too
+    lightbox_id = is_set ? "observation-set" : "observation-set-" + SecureRandom.uuid
+    show_orig = "<a href='' target='_blank' class='text-light lightbox_link'>#{:image_show_original.t}</a>"
+    show_exif = "<a href='javascript:popup_exif(#{image_id})' class='text-light lightbox_link'>#{:image_show_exif.t}</a>"
+    caption = "#{show_orig} | #{show_exif}".html_safe
+    icon = "<i class='fas fa-expand-arrows-alt fa-lg'></i>".html_safe
+    link_to(icon,
+            "#",
+            class: "theater-btn position-absolute top-right mr-2 mt-2 d-block zindex-2 text-light",
+            data: {
+              toggle: "lightbox",
+              remote: "#{large_url}",
+              gallery: lightbox_id,
+              type: "image",
+              footer: caption
+            })
+  %>
+
+  <div class="text-center">
+    <div class="">
+      <% if User.current and votes and image %>
+        <%= render(partial: "images/image_vote_links", locals: {image: image}) %>
+      <% end %>
+      <% if original && image && !image.original_name.blank? &&
+            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+        <div class="text-center">
+          <span><%= image.original_name %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+</div>

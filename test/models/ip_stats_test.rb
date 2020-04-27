@@ -117,17 +117,37 @@ class IpStatsTest < UnitTestCase
     rolf = User.where(login: "rolf").first
 
     User.current = nil
-    IpStats.log_stats(ip: ip1, time: 15.seconds.ago,
-                      controller: "observation", action: "show_observation")
-    IpStats.log_stats(ip: ip1, time: 12.seconds.ago,
-                      controller: "observation", action: "show_observation")
-    IpStats.log_stats(ip: ip1, time: 9.seconds.ago,
-                      controller: "observation", action: "show_observation")
-    IpStats.log_stats(ip: ip1, time: 6.seconds.ago,
-                      controller: "observation", action: "show_observation")
+    IpStats.log_stats(
+      ip: ip1,
+      time: 15.seconds.ago,
+      controller: :observations,
+      action: :show_observation
+    )
+    IpStats.log_stats(
+      ip: ip1,
+      time: 12.seconds.ago,
+      controller: :observations,
+      action: :show_observation
+    )
+    IpStats.log_stats(
+      ip: ip1,
+      time: 9.seconds.ago,
+      controller: :observations,
+      action: :show_observation
+    )
+    IpStats.log_stats(
+      ip: ip1,
+      time: 6.seconds.ago,
+      controller: :observations,
+      action: :show_observation
+    )
     User.current = rolf
-    IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
-                      controller: "observation", action: "create_observation")
+    IpStats.log_stats(
+      ip: ip2,
+      time: 2.seconds.ago,
+      controller: :observations,
+      action: :create_observation
+    )
 
     stats = IpStats.read_stats(:do_activity)
     assert_equal([ip1, ip2], stats.keys.sort)

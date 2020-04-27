@@ -20,8 +20,10 @@ module VersionHelper
 
     if previous_version = latest_version.previous
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
-      html += link_with_query(str, action: "show_past_#{type}", id: obj.id,
-                                   version: previous_version.version)
+      html += link_with_query(str,
+                              action: "show_past_#{type}",
+                              id: obj.id,
+                              version: previous_version.version)
       if previous_version.respond_to?(:merge_source_id) &&
          previous_version.merge_source_id
         html += indent(1) + get_version_merge_link(obj, previous_version)
@@ -104,7 +106,7 @@ module VersionHelper
       [date, i, user, i, link, i, merge]
     end
 
-    table = make_table(table, style: "margin-left:20px")
+    table = make_table(table, class: "ml-4")
     html = content_tag(:p, :VERSIONS.t) + table + safe_br
   end
 

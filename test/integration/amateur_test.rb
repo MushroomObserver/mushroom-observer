@@ -48,7 +48,7 @@ class AmateurTest < IntegrationTestCase
       form.change("password", "testpassword")
       form.submit("Login")
     end
-    assert_template("rss_log/list_rss_logs")
+    assert_template("rss_logs/list_rss_logs")
     assert_flash_text(/success/i)
 
     # This should only be accessible if logged in.
@@ -126,7 +126,7 @@ class AmateurTest < IntegrationTestCase
     click(label: "Add Comment")
     assert_template("account/login")
     login("katrina")
-    assert_template("comment/add_comment")
+    assert_template("comments/add_comment")
 
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
@@ -134,7 +134,7 @@ class AmateurTest < IntegrationTestCase
     assert_select("div#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
-    assert_template("comment/add_comment")
+    assert_template("comments/add_comment")
     # (I don't care so long as it says something.)
     assert_flash_text(/\S/)
 
@@ -143,7 +143,7 @@ class AmateurTest < IntegrationTestCase
       form.change("comment", message)
       form.submit
     end
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_objs_equal(obs, assigns(:observation))
 
     com = Comment.last
@@ -159,14 +159,14 @@ class AmateurTest < IntegrationTestCase
 
     # Try changing it.
     click(label: /edit/i, href: /edit_comment/)
-    assert_template("comment/edit_comment")
+    assert_template("comments/edit_comment")
     open_form do |form|
       form.assert_value("summary", summary)
       form.assert_value("comment", message)
       form.change("comment", message2)
       form.submit
     end
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_objs_equal(obs, assigns(:observation))
 
     com.reload
@@ -185,7 +185,7 @@ class AmateurTest < IntegrationTestCase
 
     # I grow weary of this comment.
     click(label: /destroy/i, href: /destroy_comment/)
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_objs_equal(obs, assigns(:observation))
     assert_nil(response.body.index(summary))
     assert_select("a[href*=edit_comment], a[href*=destroy_comment]", false)
@@ -238,7 +238,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_edit_image
     login("mary")
-    get("/image/edit_image/1")
+    get("/images/edit_image/1")
   end
 
   # ------------------------------------------------------------------------
@@ -263,23 +263,23 @@ class AmateurTest < IntegrationTestCase
 
   def test_thumbnail_maps
     get("/#{observations(:minimal_unknown_obs).id}")
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_select("div.thumbnail-map", 1)
 
     click(label: "Hide thumbnail map.")
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_select("div.thumbnail-map", 0)
 
     login("dick")
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_select("div.thumbnail-map", 1)
 
     click(label: "Hide thumbnail map.")
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_select("div.thumbnail-map", 0)
 
     get("/#{observations(:detailed_unknown_obs).id}")
-    assert_template("observation/show_observation")
+    assert_template("observations/show_observation")
     assert_select("div.thumbnail-map", 0)
   end
 
@@ -305,14 +305,14 @@ class AmateurTest < IntegrationTestCase
 
   module UserDsl
     def run_test
-      get("/observation/test_flash_redirection?tags=")
+      get("/observations/test_flash_redirection?tags=")
       click(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 0)
       assert_select("span.tag", text: "test_tag2:", count: 0)
       assert_select("span.tag", text: "test_flash_redirection_title:", count: 1)
 
-      get("/observation/test_flash_redirection?tags=test_tag1,test_tag2")
+      get("/observations/test_flash_redirection?tags=test_tag1,test_tag2")
       click(label: :app_edit_translations_on_page.t)
       assert_no_flash
       assert_select("span.tag", text: "test_tag1:", count: 1)
@@ -329,7 +329,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit("Update Votes")
       end
-      # assert_template("observation/show_observation")
+      # assert_template("observations/show_observation")
       assert_match(/call it that/i, response.body)
     end
 
@@ -402,7 +402,7 @@ class AmateurTest < IntegrationTestCase
         form.select(/vote/, /call it that/i)
         form.submit
       end
-      assert_template("observation/show_observation")
+      assert_template("observations/show_observation")
       assert_flash_text(/success/i)
       assert_objs_equal(obs, assigns(:observation))
 
@@ -435,7 +435,7 @@ class AmateurTest < IntegrationTestCase
         form.select("vote_value", /call it that/i)
         form.submit
       end
-      assert_template("observation/show_observation")
+      assert_template("observations/show_observation")
       assert_objs_equal(obs, assigns(:observation))
 
       obs.reload
@@ -472,7 +472,7 @@ class AmateurTest < IntegrationTestCase
 
     def successful_delete(obs, naming, text_name, original_name)
       click(label: /destroy/i, href: %r{naming/destroy})
-      assert_template("observation/show_observation")
+      assert_template("observations/show_observation")
       assert_objs_equal(obs, assigns(:observation))
       assert_flash_text(/success/i)
 

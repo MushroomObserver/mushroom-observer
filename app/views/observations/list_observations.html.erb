@@ -1,0 +1,51 @@
+<%
+  if @links.any? && @objects.any?
+    # tabs = create_links(@links)
+    # @tabsets = { right: draw_tab_set(tabs) }
+    @tabsets = ""
+  end
+
+  flash_error(@error) if @error && @objects.empty?
+%>
+
+<% if @suggest_alternate_spellings && @objects.empty?
+    names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
+    if names.any? %>
+      <div class="alert-warning">
+        <div><%= :list_observations_suggestions.t %>:</div>
+        <% names.sort_by(&:sort_name).each do |name| %>
+          <div class="pl-3">
+            <%= search = PatternSearch::Observation.new(name.text_name)
+                count = search.query.num_results
+                if count.zero?
+                  # link to Name because a pattern search would be circular
+                  :list_observation_name.t + ": " +
+                  link_to(
+                    name.display_name.t,
+                    name.show_link_args
+                  ) + " (0)"
+                else
+                  :list_observation_observations.t + " " +
+                  link_to(
+                    name.display_name.t,
+                    controller: :observations,
+                    action: :observation_search,
+                    pattern: name.text_name
+                  ) + " (#{count})"
+                end %>
+          </div>
+        <% end %>
+      </div>
+  <% end %>
+<% end %>
+
+<%= paginate_block(@pages) do %>
+
+  <ul class="results list-unstyled row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+    <%= render(partial: "shared/log_item",
+               collection: @objects,
+               as: :object) %>
+    <div class="clearfix"></div>
+  </ul>
+
+<% end %>

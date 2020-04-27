@@ -120,6 +120,11 @@ class Location < AbstractModel
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!]
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "locations"
+  end
+
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || User.admin_id

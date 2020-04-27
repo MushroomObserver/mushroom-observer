@@ -85,7 +85,7 @@ module ThumbnailHelper
       html_options: html_options,
       notes: notes
     }.merge(args)
-    render(partial: "image/image_thumbnail", locals: locals)
+    render(partial: "images/image_thumbnail", locals: locals)
   end
 
   def show_best_image(obs)
@@ -114,7 +114,7 @@ module ThumbnailHelper
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
     # return a link if the user has NOT voted this way
     link = link_to(vote_text,
-                   { controller: :image,
+                   { controller: :images,
                      action: :show_image,
                      id: image.id,
                      vote: vote },

@@ -103,7 +103,7 @@ class NamingController < ApplicationController
   end
 
   def default_redirect(obs, action = :show_observation)
-    redirect_with_query(controller: :observation,
+    redirect_with_query(controller: :observations,
                         action: action,
                         id: obs.id)
   end

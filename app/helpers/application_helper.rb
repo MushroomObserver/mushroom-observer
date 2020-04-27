@@ -53,6 +53,7 @@ module ApplicationHelper
     link_to(*link)
   end
 
+  # TODO: Check this. Maybe delete, these links are moving elsewhere
   # Convert @links in index views into a list of tabs for RHS tab set.
   def create_links(links)
     return [] unless links

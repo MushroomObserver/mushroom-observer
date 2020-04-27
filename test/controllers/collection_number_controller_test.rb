@@ -97,7 +97,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     login("rolf")
     get_with_dump(:create_collection_number, id: obs.id)
     assert_response(:success)
-    assert_template("create_collection_number", partial: "shared/matrix_box")
+    assert_template("create_collection_number", partial: "shared/log_item")
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -229,7 +229,7 @@ class CollectionNumberControllerTest < FunctionalTestCase
     login("rolf")
     get_with_dump(:edit_collection_number, id: number.id)
     assert_response(:success)
-    assert_template("edit_collection_number", partial: "shared/matrix_box")
+    assert_template("edit_collection_number", partial: "shared/log_item")
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")

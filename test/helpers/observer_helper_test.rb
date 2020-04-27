@@ -15,7 +15,7 @@ class ObserverHelperTest < ActionView::TestCase
     )
     assert_match(
       link_to(current_name.display_name_brief_authors.t,
-              controller: :name,
+              controller: :names,
               action: :show_name, id: current_name.id),
       obs_title_consensus_id(current_name),
       "Observation of a current Name should link to that Name"

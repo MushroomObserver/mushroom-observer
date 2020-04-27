@@ -39,6 +39,6 @@ class AjaxController
     value = value == "0" ? nil : Image.validate_vote(value)
     anon = (@user.votes_anonymous == :yes)
     image.change_vote(@user, value, anon)
-    render(partial: "image/image_vote_links", locals: { image: image })
+    render(partial: "images/image_vote_links", locals: { image: image })
   end
 end

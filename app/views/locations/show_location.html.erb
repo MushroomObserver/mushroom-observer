@@ -1,0 +1,67 @@
+<%
+  @title = :show_location_title.t(name: @location.display_name)
+
+  tabs = [
+    link_with_query(show_obs_link_title_with_count(@location),
+                    controller: :observations,
+                    action: :observations_at_location,
+                    id: @location.id),
+    link_to(:all_objects.t(type: :location), action: :list_locations),
+    link_with_query(:show_location_create.t,
+                    action: :create_location),
+    link_with_query(:show_location_edit.t,
+                    action: :edit_location,
+                    id: @location.id)
+  ]
+  if in_admin_mode?
+    tabs += [
+      link_with_query(:show_location_destroy.t,
+                      { action: :destroy_location,
+                        id: @location.id },
+                      data: { confirm: :are_you_sure.l }),
+      link_with_query(:show_location_reverse.t,
+                      action: :reverse_name_order,
+                      id: @location.id)
+    ]
+  end
+  tabs << draw_interest_icons(@location)
+  @tabsets = {
+    pager_for: @location,
+    right: draw_tab_set(tabs)
+  }
+%>
+
+<div class="row">
+  <div class="col-sm-4 mb-3">
+    <%= show_previous_version(@location) %>
+    <%= set_export_status_controls(@location) %>
+  </div>
+
+  <div class="col-sm-8 mb-3">
+    <%= show_alt_descriptions(@location, @projects) %>
+  </div>
+
+  <div class="col-12">
+    <%= render(partial: "location", object: @location) %>
+  </div>
+
+  <div class="col-12">
+    <%= render(partial: "comments/show_comments",
+               locals: {object: @location, controls: true, limit: 2}) %>
+  </div>
+
+  <div class="col-12 max-width-text-plus-padding">
+    <% if @description && @description.has_any_notes? %>
+      <hr/>
+      <%= show_embedded_description_title(@description, @location) %>
+      <%= render(partial: "location_description", object: @description) %>
+      <%= render(partial: "comments/show_comments",
+                 locals: {object: @description, controls: true, limit: 2}) %>
+      <hr/>
+    <% end %>
+
+    <div class="mt-3">
+      <%= show_object_footer(@location) %>
+    </div>
+  </div>
+</div>

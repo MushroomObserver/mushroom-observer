@@ -1,8 +1,8 @@
 <%
   observation_url = "#{MO.http_domain}/#{@observation.id}"
-  name_url        = "#{MO.http_domain}/name/show_name/#{@naming.name_id}"
-  observer_url    = "#{MO.http_domain}/user/show_user/#{@observation.user_id}"
-  identifier_url  = "#{MO.http_domain}/user/show_user/#{@naming.user_id}"
+  name_url        = "#{MO.http_domain}/names/show_name/#{@naming.name_id}"
+  observer_url    = "#{MO.http_domain}/users/show_user/#{@observation.user_id}"
+  identifier_url  = "#{MO.http_domain}/users/show_user/#{@naming.user_id}"
 
   intro = :email_naming_for_tracker_intro.tp(obs: "xxx", name: "yyy")
   intro.gsub!(/xxx/, link_to(:observation.l, observation_url))
@@ -31,9 +31,9 @@
   links.push([:email_links_show_identifier.t,
     identifier_url]) if @observation.user_id != @naming.user_id
   links.push([:email_links_disable_tracking.t(type: :name),
-    "#{MO.http_domain}/name/email_tracking/#{@naming.name_id}"])
+    "#{MO.http_domain}/names/email_tracking/#{@naming.name_id}"])
   links.push([:email_links_your_interests.t,
-    "#{MO.http_domain}/interest/list_interests"])
+    "#{MO.http_domain}/interests/list_interests"])
   links.push([:email_links_latest_changes.t,
     MO.http_domain])
 

@@ -1,0 +1,14 @@
+<div class="mo-toc-item">
+  <i class="fa-help"> </i>
+  <%= link_to(:app_more.t, {controller: :info, action: :how_to_help}, {class: "mo-toc-link"}) %>
+  <ul class="nav mo-sidenav">
+    <li><%= link_to(:app_how_to_help.t, {controller: :info, action: :how_to_help}, {class: ""}) %></li>
+    <li><%= link_to(:app_donate.t, {controller: :support, action: :donate}, {class: ""}) %></li>
+    <li><%= link_to(:app_feature_tracker.t, {controller: :pivotal, action: :index}, {class: ""}) %></li>
+    <li><%= link_to(:app_send_a_comment.t, {controller: :email, action: :ask_webmaster_question}, {class: ""}) %></li>
+    <li><%= link_to(:app_contributors.t, {controller: :users, action: :users_by_contribution}, {class: ""}) %></li>
+    <li><%= link_to(:app_site_stats.t, {controller: :info, action: :show_site_stats}, {class: ""}) %></li>
+    <li><%= link_to(:translators_note_title.t, {controller: :info, action: :translators_note}, {class: ""}) %></li>
+    <li><%= link_to(:app_publications.t, {controller: :publications, action: :index}, {class: ""}) %></li>
+  </ul>
+</div>

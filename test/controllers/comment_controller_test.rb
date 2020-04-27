@@ -19,7 +19,7 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, id: rolf.id)
-    assert_redirected_to(action: "show_comment",
+    assert_redirected_to(action: :show_comment,
                          id: comments(:minimal_unknown_obs_comment_1).id,
                          params: @controller.query_params(QueryRecord.last))
   end
@@ -27,13 +27,13 @@ class CommentControllerTest < FunctionalTestCase
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:add_comment, id: obs_id, type: "Observation")
-    assert_form_action(action: "add_comment", id: obs_id, type: "Observation")
+    assert_form_action(action: :add_comment, id: obs_id, type: "Observation")
   end
 
   def test_add_comment_to_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
     requires_login(:add_comment, id: name_id, type: "Name")
-    assert_form_action(action: "add_comment", id: name_id, type: "Name")
+    assert_form_action(action: :add_comment, id: name_id, type: "Name")
   end
 
   def test_add_comment_to_unreadable_object
@@ -52,10 +52,10 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     requires_user(
       :edit_comment,
-      { controller: :observation, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show_observation, id: obs.id },
       params
     )
-    assert_form_action(action: "edit_comment", id: comment.id.to_s)
+    assert_form_action(action: :edit_comment, id: comment.id.to_s)
   end
 
   def test_destroy_comment
@@ -66,7 +66,7 @@ class CommentControllerTest < FunctionalTestCase
     params = { id: comment.id.to_s }
     requires_user(
       :destroy_comment,
-      { controller: :observation, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show_observation, id: obs.id },
       params
     )
     assert_equal(9, rolf.reload.contribution)
@@ -82,7 +82,7 @@ class CommentControllerTest < FunctionalTestCase
                type: "Observation",
                comment: { summary: "A Summary", comment: "Some text." } }
     post_requires_login(:add_comment, params)
-    assert_redirected_to(controller: "observation", action: "show_observation")
+    assert_redirected_to(controller: :observations, action: :show_observation)
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
@@ -99,7 +99,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("rolf", comment.user.login)
     post_requires_user(
       :edit_comment,
-      { controller: :observation, action: :show_observation, id: obs.id },
+      { controller: :observations, action: :show_observation, id: obs.id },
       params
     )
     assert_equal(10, rolf.reload.contribution)

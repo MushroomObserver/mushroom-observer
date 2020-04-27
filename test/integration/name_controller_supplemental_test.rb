@@ -11,7 +11,7 @@ class NameControllerSupplementalTest < IntegrationTestCase
     fill_in("Password:", with: "testpassword")
     click_button("Login")
 
-    visit("/name/email_tracking/#{names(:boletus_edulis).id}")
+    visit("/names/email_tracking/#{names(:boletus_edulis).id}")
     template = find("#notification_note_template")
     template.assert_no_text(":mailing_address")
   end

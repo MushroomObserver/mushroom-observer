@@ -1,0 +1,67 @@
+<% # Section showing images in ShowObservation %>
+
+<section id="images_partial">
+
+  <% if observation.images.any? || check_permission(observation) %>
+    <div class="row">
+      <div class="col-sm-4">
+        <%= content_tag(:h4,
+                        :IMAGES.t,
+                        class: "mt-0") %>
+      </div>
+      <% if check_permission(observation) %>
+        <div class="col-sm-8 float-sm-right">
+          <small>
+            <%= link_with_query(:show_observation_add_images.t,
+                                controller: :images,
+                                action: :add_image,
+                                id: observation.id) %>
+            | <%= link_with_query(:show_observation_reuse_image.t,
+                                  controller: :images,
+                                  action: :reuse_image,
+                                  obs_id: observation.id,
+                                  mode: :observation) %>
+            <% if observation.images.length > 0 %>
+              | <%= link_with_query(:show_observation_remove_images.t,
+                                    controller: :images,
+                                    action: :remove_images,
+                                    id: observation.id) %>
+              <% end %>
+          </small>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if observation.images.any? %>
+    <div class="show_images">
+      <%
+      # This sort puts the thumbnail first.  We can't use thumb_image, because we
+      # haven't eager-loaded it; we *have* eager-loaded all the other images.
+      for image in observation.images.
+               sort_by {|x| x.id == observation.thumb_image_id ? -1 : x.id} %>
+          <%= thumbnail(image,
+                        link: { controller: image.show_controller,
+                                action: image.show_action,
+                                id: image.id,
+                                obs: observation.id },
+                        votes: true,
+                        original: true,
+                        is_set: true,
+                        responsive: true) %>
+          <%=
+            notes = []
+            if image.copyright_holder != observation.user.legal_name
+              notes << image_copyright(image)
+            end
+            if !image.notes.blank?
+              notes << image.notes.tl.truncate_html(300)
+            end
+            notes = notes.safe_join(safe_br)
+            content_tag(:center, notes) if !notes.blank?
+          %>
+      <% end %>
+    </div><!-- .show_images -->
+  <% end %>
+
+</section><!-- #images_partial -->

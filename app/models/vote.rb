@@ -88,9 +88,9 @@ class Vote < AbstractModel
     vote
   end
 
-  # Override the default show_controller
+  # AbstractModel sets a non-rails default, needs to be overridden
   def self.show_controller
-    "observation"
+    "votes"
   end
 
   # This is used to mean "delete my vote".

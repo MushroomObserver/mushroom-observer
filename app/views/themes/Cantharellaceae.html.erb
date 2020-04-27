@@ -1,0 +1,31 @@
+<%
+  @title = :theme_cantharellaceae.tl
+
+  tabs = [
+    link_to(:theme_list.t,
+            controller: :themes, action: :color_themes),
+    link_to(:app_preferences.t,
+            controller: :account, action: :prefs)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+%>
+
+<div class="max-width-text">
+  <%= :theme_cantharellaceae_californicus.tp(link: "XXX").sub("XXX", link_to("**__Cantharellus californicus__**".t, controller: :images, action: :show_image, id: 557)).html_safe %>
+
+  <%= :theme_cantharellaceae_cinnabarinus.tp(link: "XXX").sub("XXX", link_to("**__Cantharellus cinnabarinus__**".t, controller: :images, action: :show_image, id: 551)).html_safe %>
+
+  <p>
+    <span class="ListLine1">
+      <%= :theme_cantharellaceae_cornucopioides.t(link: "XXX").sub("XXX", link_to("**__Craterellus cornucopioides__**".t, controller: :images, action: :show_image, id: 465)).html_safe %>
+    </span>
+  </p>
+
+  <p>
+    <span class="ListLine0">
+      <%= :theme_cantharellaceae_tubaeformis.t(link: "XXX").sub("XXX", link_to("**__Craterellus tubaeformis__**".t, controller: :images, action: :show_image, id: 462)).html_safe %>
+    </span>
+  </p>
+
+  <%= :theme_switch.tp(theme: :Cantharellaceae.t) %>
+</div>

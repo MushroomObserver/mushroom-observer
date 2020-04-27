@@ -65,9 +65,9 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :location),
-    "#{MO.http_domain}/location/show_location/#{new_loc.id}"])
+    "#{MO.http_domain}/locations/show_location/#{new_loc.id}"])
   links.push([:email_links_not_interested.t(type: :location),
-    "#{MO.http_domain}/interest/set_interest?id=#{new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
+    "#{MO.http_domain}/interests/set_interest?id=#{new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
   if email_type && email_type != "interest"
     links.push([:email_links_stop_sending.t,
       "#{MO.http_domain}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching

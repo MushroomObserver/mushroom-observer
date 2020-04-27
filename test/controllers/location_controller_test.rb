@@ -215,7 +215,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:albion_desc)
     get_with_dump(:location_descriptions_by_author, id: rolf.id)
     assert_redirected_to(
-      %r{/location/show_location_description/#{ desc.id }}
+      %r{/locations/show_location_description/#{ desc.id }}
     )
   end
 
@@ -238,7 +238,7 @@ class LocationControllerTest < FunctionalTestCase
     desc = location_descriptions(:bolete_project_private_location_desc)
     get_with_dump(:show_location_description, id: desc.id)
     assert_flash_error
-    assert_redirected_to(controller: :project, action: :show_project,
+    assert_redirected_to(controller: :projects, action: :show_project,
                          id: desc.project.id)
 
     # description is private, for a project, project doesn't exist
@@ -293,7 +293,7 @@ class LocationControllerTest < FunctionalTestCase
 
     post_requires_login(:create_location_description, params)
 
-    assert_redirected_to(controller: :location,
+    assert_redirected_to(controller: :locations,
                          action: :show_location_description,
                          id: loc.descriptions.last.id)
     refute_empty(loc.descriptions)
@@ -333,7 +333,7 @@ class LocationControllerTest < FunctionalTestCase
 
     post_requires_login(:edit_location_description, params)
 
-    assert_redirected_to(controller: :location,
+    assert_redirected_to(controller: :locations,
                          action: :show_location_description,
                          id: loc.descriptions.last.id)
     refute_empty(loc.descriptions)
@@ -342,7 +342,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_create_location
     requires_login(:create_location)
-    assert_form_action(action: "create_location")
+    assert_form_action(action: :create_location)
   end
 
   # This was causing a crash in live server.
@@ -363,7 +363,7 @@ class LocationControllerTest < FunctionalTestCase
     post_requires_login(:create_location, params)
     loc = assigns(:location)
 
-    assert_redirected_to(controller: :location, action: :show_location,
+    assert_redirected_to(controller: :locations, action: :show_location,
                          id: loc.id)
     assert_equal(count + 1, Location.count)
     assert_equal(10 + @new_pts, rolf.reload.contribution)
@@ -451,7 +451,8 @@ class LocationControllerTest < FunctionalTestCase
     loc = locations(:albion)
     params = { id: loc.id.to_s }
     requires_login(:edit_location, params)
-    assert_form_action(action: "edit_location", id: loc.id.to_s,
+    assert_form_action(action: :edit_location,
+                       id: loc.id.to_s,
                        approved_where: loc.display_name)
     assert_input_value(:location_display_name, loc.display_name)
   end
@@ -482,7 +483,7 @@ class LocationControllerTest < FunctionalTestCase
       Location.user_name(rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
-    assert_redirected_to(controller: :location, action: :show_location,
+    assert_redirected_to(controller: :locations, action: :show_location,
                          id: loc.id)
     assert_equal(contrib, rolf.reload.contribution)
 
@@ -582,7 +583,7 @@ class LocationControllerTest < FunctionalTestCase
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(:edit_location, params)
-    assert_redirected_to(controller: :location, action: :show_location,
+    assert_redirected_to(controller: :locations, action: :show_location,
                          id: to_go.id)
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -607,7 +608,7 @@ class LocationControllerTest < FunctionalTestCase
     make_admin("rolf")
     post_with_dump(:edit_location, params)
 
-    # assert_template(action: "show_location")
+    # assert_template(action: :show_location)
     assert_redirected_to(action: :show_location, id: to_stay.id)
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -765,34 +766,56 @@ class LocationControllerTest < FunctionalTestCase
     get(:show_location, id: albion.id)
     assert_show_location
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: 1)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(target: albion, user: rolf, state: true).save
+    Interest.new(target: albion,
+                 user: rolf,
+                 state: true).save
     get(:show_location, id: albion.id)
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: 0)
     assert_image_link_in_html(/ignore\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: -1)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: -1)
 
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
-    Interest.new(target: albion, user: rolf, state: false).save
+    Interest.new(target: albion,
+                 user: rolf,
+                 state: false).save
     get(:show_location, id: albion.id)
     assert_show_location
     assert_image_link_in_html(/halfopen\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 0)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: 0)
     assert_image_link_in_html(/watch\d*.png/,
-                              controller: "interest", action: "set_interest",
-                              type: "Location", id: albion.id, state: 1)
+                              controller: :interests,
+                              action: :set_interest,
+                              type: "Location",
+                              id: albion.id,
+                              state: 1)
   end
 
   def test_update_location_scientific_name

@@ -29,7 +29,7 @@ module AutocompleteHelper
   # Make text_field auto-complete for Name text_name.
   def turn_into_name_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/name/@",
+      ajax_url: "/ajax/auto_complete/names/@",
       collapse: 1
     }.merge(opts))
   end
@@ -42,7 +42,7 @@ module AutocompleteHelper
       format = ""
     end
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/location/@" + format,
+      ajax_url: "/ajax/auto_complete/locations/@" + format,
       unordered: true
     }.merge(opts))
   end
@@ -50,7 +50,7 @@ module AutocompleteHelper
   # Make text_field auto-complete for Project title.
   def turn_into_project_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/project/@",
+      ajax_url: "/ajax/auto_complete/projects/@",
       unordered: true
     }.merge(opts))
   end
@@ -58,7 +58,7 @@ module AutocompleteHelper
   # Make text_field auto-complete for SpeciesList title.
   def turn_into_species_list_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/species_list/@",
+      ajax_url: "/ajax/auto_complete/species_lists/@",
       unordered: true
     }.merge(opts))
   end
@@ -66,7 +66,7 @@ module AutocompleteHelper
   # Make text_field auto-complete for User name/login.
   def turn_into_user_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/user/@",
+      ajax_url: "/ajax/auto_complete/users/@",
       unordered: true
     }.merge(opts))
   end
@@ -76,7 +76,7 @@ module AutocompleteHelper
     return unless @user
 
     turn_into_auto_completer(id, {
-      ajax_url: "/ajax/auto_complete/herbarium/@?user_id=#{@user.id}",
+      ajax_url: "/ajax/auto_complete/herbaria/@?user_id=#{@user.id}",
       unordered: true
     }.merge(opts))
   end

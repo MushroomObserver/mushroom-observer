@@ -46,7 +46,7 @@
           <td><%= user.last_login ? user.last_login.web_date : "" %></td>
           <td>
             <%= link_to(:account_manager_alert.t, action: :create_alert, id: user.id) %> |
-            <%= link_to(:account_manager_bonus.t, controller: :user,
+            <%= link_to(:account_manager_bonus.t, controller: :users,
                         action: :change_user_bonuses, id: user.id) %>
           </td>
         </tr>

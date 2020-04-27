@@ -136,7 +136,7 @@ module SessionExtensions
   # Get an Array of URLs for the given links.
   #
   #   # This gets all the name links in the results of the last page.
-  #   urls = get_links('div.results a[href^=/name/show_name]')
+  #   urls = get_links('div.results a[href^=/names/show_name]')
   #
   def get_links(*args)
     results = []

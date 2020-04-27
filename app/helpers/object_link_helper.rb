@@ -30,7 +30,7 @@ module ObjectLinkHelper
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, controller: :observation,
+      link_to(link_string, controller: :observations,
                            action: :observations_at_where, where: where)
     end
   end
@@ -167,7 +167,8 @@ module ObjectLinkHelper
     return nil unless check_permission(obs)
 
     link = link_with_query(:show_observation_add_sequence.t,
-                           controller: :sequence, action: :create_sequence,
+                           controller: :sequence,
+                           action: :create_sequence,
                            id: obs.id)
     " | ".html_safe + link
   end
@@ -176,7 +177,8 @@ module ObjectLinkHelper
     count = obs.herbarium_records.count
     if count.positive?
       link_to(pluralize(count, :herbarium_record.t),
-              controller: :herbarium_record, action: :observation_index,
+              controller: :herbarium_records,
+              action: :observation_index,
               id: obs.id)
     else
       return :show_observation_specimen_available.t if obs.specimen

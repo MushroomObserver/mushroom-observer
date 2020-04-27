@@ -239,7 +239,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     login owner
     get_with_dump(:remove_observation_from_species_list, params)
-    assert_redirected_to(action: "manage_species_lists", id: obs.id)
+    assert_redirected_to(action: :manage_species_lists, id: obs.id)
     assert_not(spl.reload.observations.member?(obs))
   end
 
@@ -296,7 +296,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
   def test_create_species_list
     requires_login(:create_species_list)
-    assert_form_action(action: "create_species_list")
+    assert_form_action(action: :create_species_list)
   end
 
   def test_create_species_list_member_notes_areas
@@ -734,18 +734,29 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     params = { id: spl.id.to_s }
     assert_equal("rolf", spl.user.login)
-    requires_user(:edit_species_list, :show_species_list, params)
+    requires_user(
+      :edit_species_list,
+      :show_species_list,
+      params
+    )
     assert_edit_species_list
-    assert_form_action(action: "edit_species_list", id: spl.id.to_s,
-                       approved_where: "Burbank, California, USA")
+    assert_form_action(
+      action: :edit_species_list,
+      id: spl.id.to_s,
+      approved_where: "Burbank, California, USA"
+    )
   end
 
   def test_update_species_list_nochange
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
-    post_requires_user(:edit_species_list, :show_species_list, params,
-                       spl.user.login)
+    post_requires_user(
+      :edit_species_list,
+      :show_species_list,
+      params,
+      spl.user.login
+    )
     assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
@@ -818,8 +829,8 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     login owner
     post_with_dump(:edit_species_list, params)
-    # assert_redirected_to(controller: "location", action: "create_location")
-    assert_redirected_to(%r{/location/create_location})
+    # assert_redirected_to(controller: :locations, action: :create_location)
+    assert_redirected_to(%r{/locations/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
@@ -1020,8 +1031,15 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       id: spl.id
     }
-    requires_user(:upload_species_list, :show_species_list, params)
-    assert_form_action(action: "upload_species_list", id: spl.id)
+    requires_user(
+      :upload_species_list,
+      :show_species_list,
+      params
+    )
+    assert_form_action(
+      action: :upload_species_list,
+      id: spl.id
+    )
   end
 
   def test_read_species_list
@@ -1188,7 +1206,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       "Lepiota sp Author"
     ].join("\r\n")
     post(:create_species_list, params: params)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(%r{/locations/create_location})
     assert_equal(
       [
         "Fungi",
@@ -1220,7 +1238,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       "Psalliota sp."
     ].join("\r\n")
     post(:create_species_list, params: params)
-    assert_redirected_to(%r{/location/create_location})
+    assert_redirected_to(%r{/locations/create_location})
     assert_equal(
       [
         "Fungi",
@@ -1304,7 +1322,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
     login("mary")
     post(:bulk_editor, params: params)
-    assert_redirected_to(action: "show_species_list", id: spl.id)
+    assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_flash_warning
     [
       [obs1, old_vote1], [obs2, old_vote2], [obs3, old_vote3]
@@ -1349,7 +1367,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
     login("mary")
     post(:bulk_editor, params: params)
-    assert_redirected_to(action: "show_species_list", id: spl.id)
+    assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_flash_success
     new_obs1 = Observation.find(obs1.id)
     new_obs2 = Observation.find(obs2.id)
@@ -1396,7 +1414,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
     login("mary")
     post(:bulk_editor, params: params)
-    assert_redirected_to(action: "show_species_list", id: spl.id)
+    assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_flash_warning
     new_obs3 = Observation.find(obs3.id)
     assert_equal(old_vote3, new_obs3.namings.first.users_vote(obs3.user).value)
@@ -1421,7 +1439,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:bulk_editor, params: params)
-    assert_redirected_to(action: "show_species_list", id: spl.id)
+    assert_redirected_to(action: :show_species_list, id: spl.id)
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
     assert_equal("new notes", new_obs3.other_notes)
@@ -1857,7 +1875,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     requires_login(:add_remove_observations)
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/list_species_lists})
+    assert_redirected_to(%r{/species_lists/list_species_lists})
     assert_flash_error
 
     get(:add_remove_observations, params: params)
@@ -1887,41 +1905,41 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     post_requires_login(:post_add_remove_observations)
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_redirected_to(%r{/species_lists/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations, params: params)
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_redirected_to(%r{/species_lists/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(species_list: "blah"))
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/add_remove_observations})
+    assert_redirected_to(%r{/species_lists/add_remove_observations})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: { species_list: spl.title })
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_redirected_to(%r{/species_lists/show_species_list})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_redirected_to(%r{/species_lists/show_species_list})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_redirected_to(%r{/species_lists/show_species_list})
     assert_flash_error
     assert_equal(old_count, spl.reload.observations.size)
 
@@ -1929,14 +1947,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:post_add_remove_observations,
          params: params.merge(commit: :ADD.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_redirected_to(%r{/species_lists/show_species_list})
     assert_flash_success
     assert_equal(new_count, spl.reload.observations.size)
 
     post(:post_add_remove_observations,
          params: params.merge(commit: :REMOVE.l, species_list: spl.title))
     assert_response(:redirect)
-    assert_redirected_to(%r{/species_list/show_species_list})
+    assert_redirected_to(%r{/species_lists/show_species_list})
     assert_flash_success
     assert_equal(0, spl.reload.observations.size)
   end

@@ -26,7 +26,7 @@
     <% end %>
     <li class="nav-item">
       <%= link_to "",
-                  { controller: :comment,
+                  { controller: :comments,
                     action: :show_comments_for_user,
                     id: @user.id },
                   { class: "glyphicon glyphicon-inbox",
@@ -35,7 +35,7 @@
     </li>
     <li class="nav-item">
       <%= link_to "",
-                  { controller: :interest,
+                  { controller: :interests,
                     action: :list_interests },
                   { class: "glyphicon glyphicon-bullhorn",
                     title: :app_your_interests.t,
@@ -61,21 +61,21 @@
            role="menu"
            aria-labelledby="user_dropdown">
         <%= link_to :app_your_observations.t,
-                    { controller: :observation,
+                    { controller: :observations,
                       action: :observations_by_user,
                       id: @user.id },
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_lists.t,
-                    { controller: :species_list,
+                    { controller: :species_lists,
                       action: :species_lists_by_user,
                       id: @user.id},
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_interests.t,
-                    { controller: :interest,
+                    { controller: :interests,
                       action: :list_interests},
                     { class: "dropdown-item" } %>
         <%= link_to :app_your_summary.t,
-                    { controller: :user,
+                    { controller: :users,
                       action: :show_user,
                       id: @user.id},
                     { class: "dropdown-item" } %>

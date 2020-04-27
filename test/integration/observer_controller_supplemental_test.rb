@@ -3,7 +3,7 @@
 require "test_helper"
 
 # Tests which supplement controller/observation_controller_test.rb
-class ObservationControllerSupplementalTest < IntegrationTestCase
+class ObservationsControllerSupplementalTest < IntegrationTestCase
   # Prove that when a user "Tests" the text entered in the Textile Sandbox,
   # MO displays what the entered text looks like.
   def test_post_textile
@@ -13,10 +13,10 @@ class ObservationControllerSupplementalTest < IntegrationTestCase
     page.assert_text("Jabberwocky", count: 2)
   end
 
-  # Covers ObservationController#map_observations.
+  # Covers ObservationsController#map_observations.
   def test_map_observations
     name = names(:boletus_edulis)
-    visit("/name/map/#{name.id}")
+    visit("/names/map/#{name.id}")
     click_link("Show Observations")
     click_link("Show Map")
     title = page.find_by_id("title")
@@ -69,7 +69,7 @@ class ObservationControllerSupplementalTest < IntegrationTestCase
     click_button("Login")
 
     # Edit the Observation, unchecking the Project.
-    visit("/observation/edit_observation/#{observation.id}")
+    visit("/observations/edit_observation/#{observation.id}")
     uncheck("project_id_#{project.id}")
     click_on("Save Edits", match: :first)
 
@@ -92,7 +92,7 @@ class ObservationControllerSupplementalTest < IntegrationTestCase
     click_button("Login")
 
     # Edit the Observation, unchecking the Project.
-    visit("/observation/edit_observation/#{observation.id}")
+    visit("/observations/edit_observation/#{observation.id}")
     uncheck("list_id_#{species_list.id}")
     click_on("Save Edits", match: :first)
 

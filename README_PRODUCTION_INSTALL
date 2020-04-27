@@ -243,7 +243,7 @@ mo> exit
 # Configure mail for rails.
 # Should come configured "out of the box".
 # Ask yourself a question via the website, e.g.:
-#   http://$IP_ADDR/observer/ask_user_question/252
+#   http://$IP_ADDR/users/ask_user_question/252
 # Probably want to tail -f log/production.log if it's throwing errors.
 
 # Configure no-reply to bounce correctly.
@@ -342,4 +342,3 @@ root> TZ='America/Los_Angeles' date
 
 # Make sure MRTG is running.
 browser> http:$NEW_SERVER_IP/stats/index.html
-

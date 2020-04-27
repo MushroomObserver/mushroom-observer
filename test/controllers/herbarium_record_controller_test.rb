@@ -66,14 +66,14 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "shared/matrix_box")
+    assert_template(:show_herbarium_record, partial: "shared/log_item")
   end
 
   def test_show_herbarium_record_with_notes
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
     get_with_dump(:show_herbarium_record, id: herbarium_record.id)
-    assert_template(:show_herbarium_record, partial: "shared/matrix_box")
+    assert_template(:show_herbarium_record, partial: "shared/log_item")
   end
 
   def test_next_and_prev_herbarium_record
@@ -97,7 +97,7 @@ class HerbariumRecordControllerTest < FunctionalTestCase
     login("rolf")
     get_with_dump(:create_herbarium_record,
                   id: observations(:coprinus_comatus_obs).id)
-    assert_template("create_herbarium_record", partial: "shared/matrix_box")
+    assert_template("create_herbarium_record", partial: "shared/log_item")
     assert(assigns(:herbarium_record))
   end
 

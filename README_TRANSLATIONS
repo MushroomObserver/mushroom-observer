@@ -52,7 +52,7 @@ formatting and links and such as you normally would when entering notes on the
 site.  But note that internal links like _Agaricus_ will *not* work.
 
   key: This is __really__ cool!
-  key: You can use "Textile":/observer/textile mark-up in these files.
+  key: You can use "Textile":/info/textile mark-up in these files.
 
 4) Many translations allow on-the-fly substitutions.  We use [brackets] to hold
 the place of an arbitrary string that will be inserted at run-time.  Do not change

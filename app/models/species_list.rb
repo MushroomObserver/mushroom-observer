@@ -97,6 +97,11 @@ class SpeciesList < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "species_lists"
+  end
+
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(_obs)
     SiteData.update_contribution(:add, :species_list_entries, user_id)

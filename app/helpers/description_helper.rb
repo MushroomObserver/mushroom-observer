@@ -208,14 +208,13 @@ module DescriptionHelper
   #
   def colored_notes_box(even, msg = nil, &block)
     msg = capture(&block) if block_given?
-    klass = "ListLine#{even ? 0 : 1}"
-    style = [
-      "margin-left:10px",
-      "margin-right:10px",
-      "padding:10px",
-      "border:1px dotted"
-    ].join(";")
-    result = content_tag(:div, msg, class: klass, style: style)
+    klass = [
+      "ListLine#{even ? 0 : 1}",
+      "mx-2",
+      "p-2",
+      "border-all"
+    ].join(" ")
+    result = content_tag(:div, msg, class: klass)
     if block_given?
       concat(result)
     else
@@ -245,7 +244,7 @@ module DescriptionHelper
 
   def name_section_link(title, data, query)
     if data && data != 0
-      action = { controller: :observation, action: :index_observation }
+      action = { controller: :observations, action: :index_observation }
       url = add_query_param(action, query)
       content_tag(:p, link_to(title, url))
     end

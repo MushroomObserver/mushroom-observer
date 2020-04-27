@@ -4,9 +4,11 @@
 
       <div class="col-md-3 col-xl-2 left-nav-sidebar">
 
-        <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>" class="site-logo navbar-brand d-block position-relative mx-4">
-          <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
-          <%= image_tag("mo_logo.svg", class: "w-100") %>
+        <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>" class="site-logo navbar-brand d-block mx-4">
+          <div class="logo-wrap position-relative">
+            <span class="sr-only" id="logo-text"><%= :app_banner.t %></span>
+            <%= image_tag("mo_logo.svg", class: "position-absolute h-100 w-100") %>
+          </div>
         </a>
 
         <button class="navbar-toggler"
@@ -21,11 +23,13 @@
 
       </div>
 
-      <div class="col-md-9 col-lg-10 right-side-content">
+      <div class="col-md-9 col-lg-10 right-side-content mx-auto">
 
         <div class="collapse navbar-collapse d-flex flex-column flex-md-row justify-content-between" id="search_navbar">
 
-          <%= tag.span @title, id: "navbar-brand", class: ""-%>
+          <%= tag.span id: "", class: "navbar-brand font-weight-bold" do -%>
+            Observations
+          <% end %>
 
           <%= form_tag({controller: :search, action: :pattern_search},
                        {class: "form-inline my-2 my-lg-0"}) do %>

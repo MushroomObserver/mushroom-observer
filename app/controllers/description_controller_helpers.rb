@@ -436,7 +436,7 @@ module DescriptionControllerHelpers
       else
         flash_error(:runtime_create_draft_create_denied.
                       t(title: project.title))
-        redirect_to(controller: "project", action: "show_project",
+        redirect_to(controller: :projects, action: :show_project,
                     id: project.id)
       end
 
@@ -452,7 +452,7 @@ module DescriptionControllerHelpers
         desc.public_write = false
       else
         flash_error(:runtime_description_private.t)
-        redirect_to(action: "show_name", id: desc.parent_id)
+        redirect_to(action: :show_name, id: desc.parent_id)
       end
 
     # Otherwise default to :public description.

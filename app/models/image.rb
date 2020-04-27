@@ -237,6 +237,11 @@ class Image < AbstractModel
   before_destroy :update_thumbnails
   after_update :track_copyright_changes
 
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "images"
+  end
+
   def all_glossary_terms
     best_glossary_terms + glossary_terms
   end

@@ -1,0 +1,35 @@
+<%
+  flash_error(@error) if @error && !@targets.any?(&:target)
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @targets.any?(&:target) %>
+    <table class="table table-striped">
+      <% @targets.select(&:target).each do |item|
+        obj = item.target %>
+        <tr>
+          <td>
+            <strong><%= item.summary.t %></strong>
+          </td>
+          <td>
+            <% if item.is_a?(Notification) %>
+              <%= link_to(:show_object.t(type: obj.type_tag), obj.show_link_args) %> |
+              <%= link_to(:EDIT.t, item.link_params) %> |
+              <%= link_to(:DESTROY.t, action: :destroy_notification, id: item.id) %>
+            <% else %>
+              <%= link_to(:show_object.t(type: obj.type_tag), obj.show_link_args) %> |
+              <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,
+                          controller: :interests, action: :set_interest,
+                          type: item.target_type, id: item.target_id,
+                          state: item.state ? -1 : 1) %> |
+              <%= link_to(:DESTROY.t,
+                          controller: :interests, action: :set_interest,
+                          type: item.target_type, id: item.target_id,
+                          state: 0) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

@@ -18,7 +18,7 @@
       form.select(:votes_anonymous, values, class: "form-control") %>
   <span class="help-note">
     <%= link_to(:prefs_change_image_vote_anonymity.t,
-                controller: :image,
+                controller: :images,
                 action: :bulk_vote_anonymity_updater) %>
   </span>
 
@@ -36,7 +36,7 @@
                   class: "form-control") %>
   <span class="help-note">
     <%= link_to(:prefs_bulk_filename_purge.t,
-                 { controller: :image,
+                 { controller: :images,
                    action: :bulk_filename_purge },
                  { data:
                    { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>
@@ -48,7 +48,7 @@
   <span class="help-note">(<%= :prefs_license_note.t %>)</span><br/>
   <%= form.select(:license_id, @licenses, class: "form-control") %>
   <span class="help-note">
-    <%= link_to(:bulk_license_link.t, controller: :image,
+    <%= link_to(:bulk_license_link.t, controller: :images,
                                       action: :license_updater) %>
   </span>
 </div>

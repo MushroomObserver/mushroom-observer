@@ -6,7 +6,7 @@ class AjaxController
     @user = session_user!
     @licenses = License.current_names_and_ids(@user.license)
     @image = Image.new(user: @user, when: Time.now)
-    render(partial: "/observation/form_multi_image_template")
+    render(partial: "/observations/form_multi_image_template")
   end
 
   # Uploads an image object without an observation.

@@ -23,7 +23,7 @@ class UserControllerTest < FunctionalTestCase
 
       login("rolf")
       get(page, params: params)
-      assert_redirected_to(controller: :rss_log, action: :list_rss_logs)
+      assert_redirected_to(controller: :rss_logs, action: :list_rss_logs)
       assert_flash_text(/denied|only.*admin/i)
 
       make_admin("rolf")
@@ -41,7 +41,7 @@ class UserControllerTest < FunctionalTestCase
   def test_user_search_id
     user = users(:rolf)
     get(:user_search, params: { pattern: user.id })
-    assert_redirected_to(action: "show_user", id: user.id)
+    assert_redirected_to(action: :show_user, id: user.id)
   end
 
   # When a non-id pattern matches only one user, show that user.

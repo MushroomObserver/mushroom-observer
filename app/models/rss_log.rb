@@ -49,7 +49,7 @@
 #
 #  4) Add partial view for +list_rss_logs+:
 #
-#       (just clone, e.g., app/views/observation/_location.rhtml)
+#       (just clone, e.g., app/views/observations/_location.rhtml)
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
@@ -158,10 +158,11 @@ class RssLog < AbstractModel
   belongs_to :glossary_term
   belongs_to :article
 
-  # Override the default show_controller if necessary
-  # def self.show_controller
-  #   "rss_log"
-  # end
+  # AbstractModel sets a non-rails default, needs to be overridden
+  def self.show_controller
+    "rss_logs"
+  end
+
 
   # # If switch to ActivityLog name, uncomment: Override the default table_name
   # def self.table_name
@@ -275,7 +276,7 @@ class RssLog < AbstractModel
 
   # Returns URL of <tt>show_#{object}</tt> action for the associated object.
   # That is, the RssLog for an Observation would return
-  # <tt>"/observation/show_observation/#{id}"</tt>, and so on.  If the RssLog is
+  # <tt>"/observations/show_observation/#{id}"</tt>, and so on.  If the RssLog is
   # an orphan, it returns the generic <tt>"/rss_log/show_rss_log/#{id}"</tt>
   # URL.
 
@@ -284,25 +285,25 @@ class RssLog < AbstractModel
   # the old "observer" controller into their own controllers
   def url
     if location_id
-      sprintf("/location/show_location/%d?time=%d", location_id,
+      sprintf("/locations/show_location/%d?time=%d", location_id,
               updated_at.tv_sec)
     elsif name_id
-      sprintf("/name/show_name/%d?time=%d", name_id, updated_at.tv_sec)
+      sprintf("/names/show_name/%d?time=%d", name_id, updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observation/show_observation/%d?time=%d", observation_id,
+      sprintf("/observations/show_observation/%d?time=%d", observation_id,
               updated_at.tv_sec)
     elsif project_id
-      sprintf("/project/show_project/%d?time=%d", project_id, updated_at.tv_sec)
+      sprintf("/projects/show_project/%d?time=%d", project_id, updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/species_list/show_species_list/%d?time=%d", species_list_id,
+      sprintf("/species_lists/show_species_list/%d?time=%d", species_list_id,
               updated_at.tv_sec)
     elsif glossary_term_id
       sprintf("/glossary/show_glossary_term/%d?time=%d",
               glossary_term_id, updated_at.tv_sec)
     elsif article_id
-      sprintf("/article/show_article/%d?time=%d", article_id, updated_at.tv_sec)
+      sprintf("/articles/show_article/%d?time=%d", article_id, updated_at.tv_sec)
     else
-      sprintf("/rss_log/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
+      sprintf("/rss_logs/show_rss_log/%d?time=%d", id, updated_at.tv_sec)
     end
   end
 

@@ -26,13 +26,13 @@ module FooterHelper
       if is_admin
         authors += safe_nbsp
         authors += link_with_query("(#{:review_authors_review_authors.t})",
-                                   controller: :author,
+                                   controller: :authors,
                                    action: :review_authors,
                                    id: obj.id, type: type)
       elsif !is_author
         authors += safe_nbsp
         authors += link_with_query("(#{:show_name_author_request.t})",
-                                   controller: :author,
+                                   controller: :authors,
                                    action: :author_request,
                                    id: obj.id, type: type)
       end
@@ -129,7 +129,7 @@ module FooterHelper
     # Show RSS log for all of the above.
     if obj.respond_to?(:rss_log_id) && obj.rss_log_id
       html << link_to(:show_object.t(type: :log),
-                      controller: :rss_log,
+                      controller: :rss_logs,
                       action: :show_rss_log,
                       id: obj.rss_log_id)
     end

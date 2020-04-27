@@ -12,7 +12,7 @@
 
   links = []
   links.push([:email_links_show_object.t(type: :user),
-    "#{MO.http_domain}/user/show_user/#{@sender.id}"])
+    "#{MO.http_domain}/users/show_user/#{@sender.id}"])
   links.push([:email_links_stop_sending.t,
     "#{MO.http_domain}/account/no_email_general_question/#{@user.id}"])
   links.push([:email_links_change_prefs.t,

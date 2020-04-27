@@ -9,14 +9,14 @@ class SearchController < ApplicationController
 
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
-  #   comment/comment_search
-  #   image/image_search
-  #   location/location_search
-  #   name/name_search
-  #   observation/observation_search
-  #   user/user_search
-  #   project/project_search
-  #   species_list/species_list_search
+  #   comments/comment_search
+  #   images/image_search
+  #   locations/location_search
+  #   names/name_search
+  #   observations/observation_search
+  #   users/user_search
+  #   projects/project_search
+  #   species_lists/species_list_search
   def pattern_search # :norobots:
     pattern = param_lookup([:search, :pattern]) { |p| p.to_s.strip_squeeze }
     type = param_lookup([:search, :type], &:to_sym)
@@ -28,7 +28,8 @@ class SearchController < ApplicationController
     case type
     when :comment, :herbarium, :herbarium_record, :image, :location, :name,
       :observation, :project, :species_list, :user
-      ctrlr = type
+      model = type.to_s.camelize.constantize
+      ctrlr = model.show_controller
     when :google
       site_google_search(pattern)
       return
@@ -38,12 +39,19 @@ class SearchController < ApplicationController
       return
     end
 
+    # TODO: Re-check these redirection patterns, they are changing
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
-      redirect_to(controller: ctrlr, action: "list_#{type}s")
+      redirect_to(
+        controller: ctrlr,
+        action: "list_#{type}s"
+      )
     else
-      redirect_to(controller: ctrlr, action: "#{type}_search",
-                  pattern: pattern)
+      redirect_to(
+        controller: ctrlr,
+        action: "#{type}_search",
+        pattern: pattern
+      )
     end
   end
 

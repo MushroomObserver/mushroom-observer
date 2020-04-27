@@ -87,7 +87,7 @@ class StudentTest < IntegrationTestCase
         form.submit
       end
       assert_flash_success
-      # assert_template("name/show_name_description")
+      # assert_template("names/show_name_description")
 
       # Make sure it shows up on main show_name page and can edit it.
       get(url)

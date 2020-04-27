@@ -28,7 +28,7 @@ class AuthorControllerTest < FunctionalTestCase
     }
     post_requires_login(:author_request, params)
     assert_redirected_to(
-      controller: :name,
+      controller: :names,
       action: :show_name_description,
       id: name_descriptions(:coprinus_comatus_desc).id
     )
@@ -43,7 +43,7 @@ class AuthorControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:author_request, params)
-    assert_redirected_to(controller: :location,
+    assert_redirected_to(controller: :locations,
                          action: :show_location_description,
                          id: location_descriptions(:albion_desc).id)
     assert_flash_text(:request_success.t)
@@ -59,7 +59,7 @@ class AuthorControllerTest < FunctionalTestCase
     assert_not(mary.in_group?("reviewers"))
     assert(rolf.in_group?("reviewers"))
     requires_user(:review_authors,
-                  [controller: :location,
+                  [controller: :locations,
                    action: :show_location,
                    id: desc.location_id],
                   params)
@@ -72,7 +72,7 @@ class AuthorControllerTest < FunctionalTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
-    assert_redirected_to(controller: :location,
+    assert_redirected_to(controller: :locations,
                          action: :show_location,
                          id: locations(:albion).id)
 
@@ -115,7 +115,7 @@ class AuthorControllerTest < FunctionalTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params: params)
-    assert_redirected_to(controller: :name, action: :show_name, id: name.id)
+    assert_redirected_to(controller: :names, action: :show_name, id: name.id)
 
     # Make Rolf an author.
     desc.add_author(rolf)

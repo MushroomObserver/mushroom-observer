@@ -120,7 +120,7 @@ def check_for_unused_redirects(actions, old_actions)
       if (action[:controller] == controller) and
          (action[:name] == name)
         used = true
-        norobots << "/observation/#{name}" if action[:notes][:norobots]
+        norobots << "/observations/#{name}" if action[:notes][:norobots]
       end
     end
     unless used
@@ -191,12 +191,12 @@ norobots = [
 
 # These are all being redirected from observer.
 old_actions = [
-  "/comment/add_comment",
-  "/comment/destroy_comment",
-  "/comment/edit_comment",
-  "/comment/list_comments",
-  "/comment/show_comment",
-  "/comment/show_comments_for_user",
+  "/comments/add_comment",
+  "/comments/destroy_comment",
+  "/comments/edit_comment",
+  "/comments/list_comments",
+  "/comments/show_comment",
+  "/comments/show_comments_for_user",
   "/image/add_image",
   "/image/destroy_image",
   "/image/edit_image",

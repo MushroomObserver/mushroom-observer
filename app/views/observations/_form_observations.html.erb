@@ -1,0 +1,492 @@
+<!--[form:observation]-->
+
+<%= submit_tag(button_name, class: "btn mx-auto mt-3") %>
+
+<!-- WHEN -->
+<div class="row">
+  <div class="col-12 max-width-text">
+    <%= label_tag(:observation_when_li,
+                  :WHEN.t + ":") %>
+    <div class="form-group form-inline">
+      <%= date_select(:observation,
+                      :when,
+                      date_select_opts(@observation),
+                      { class: "form-control mb-1" }) %>
+      <% turn_into_year_auto_completer(:observation_when_1i) %>
+    </div>
+  </div>
+</div>
+<!-- /WHEN -->
+
+<!-- WHERE_REASONS -->
+<% if @dubious_where_reasons.any? %>
+  <% flash_warning(:form_observations_there_is_a_problem_with_location.t) %>
+  <div class="alert alert-warning max-width-text" id="location_messages">
+    <%= @dubious_where_reasons.safe_join(safe_br) %>
+    <p class="help-block max-width-text">
+      <%= :form_observations_dubious_help.t(button: button_name) %>
+    </p>
+  </div>
+<% end %>
+<!-- /WHERE_REASONS -->
+
+<!-- WHERE -->
+<div class="row">
+  <div class="col-12 col-sm-6 max-width-text">
+    <div class="form-group">
+      <%= label_tag(:observation_place_name,
+                    "#{:WHERE.t}: (#{:required.t})") %>
+      <%= text_field(:observation,
+                     :place_name,
+                     class: "form-control") %>
+      <% turn_into_location_auto_completer(:observation_place_name,
+                                           primer: Location.primer) %>
+      <span class="map-locate map-btn">Locate on Map</span>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6">
+    <div class="well well-sm max-width-text help-block">
+      <div class="arrow-left d-none d-sm-block"></div>
+      <%=
+        loc1 = "Albion, Mendocino Co., California, USA"
+        loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+        if User.current_location_format == :scientific
+          loc1 = Location.reverse_name(loc1)
+          loc2 = Location.reverse_name(loc2)
+        end
+        :form_observations_where_help.t(loc1: loc1, loc2: loc2)
+      %>
+    </div>
+  </div>
+</div>
+<!-- /WHERE -->
+
+<!-- IS_COLLECTION_LOCATION -->
+<div class="row">
+  <div class="col-12 max-width-text">
+    <div class="form-inline">
+      <%= check_box(:observation,
+                    :is_collection_location,
+                    class: "form-control-xxx") %>
+      <%= label_tag(:observation_is_collection_location,
+                    :form_observations_is_collection_location.t) %>
+    </div>
+    <div class="well well-sm mt-3 max-width-text help-block">
+      <div class="arrow-up d-none d-sm-block"></div>
+      <%= :form_observations_is_collection_location_help.t %>
+    </div>
+  </div>
+</div>
+<!-- /IS_COLLECTION_LOCATION -->
+
+<!-- LAT_LONG_ALT -->
+<div class="row mt-3 max-width-text-times-two">
+  <div class="col-sm-6">
+    <label>Location:</label>
+    <div id="observationFormMap" class="form-observation-map"></div>
+    <span class="map-clear map-btn">Clear Map</span>
+  </div>
+  <div class="col-sm-6">
+    <div class="well well-sm help-block">
+      <div class="arrow-left d-none d-sm-block"></div>
+      <%= :form_observations_lat_long_help.t %>
+    </div>
+  </div>
+</div>
+<div class="row mt-3 max-width-text-times-two">
+  <div class="col-12 col-sm-6">
+    <div class="row">
+      <div class="col-12 col-sm-4">
+        <div class="form-group">
+          <%= label_tag(:observation_lat,
+                        :LATITUDE.t + ":") %>
+          <%= text_field(:observation,
+                         :lat,
+                         class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-12 col-sm-4">
+        <div class="form-group">
+          <%= label_tag("observation_long",
+                        :LONGITUDE.t + ":") %>
+          <%= text_field(:observation,
+                         :long,
+                         class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-12 col-sm-4">
+        <div class="form-group">
+          <%= label_tag("observation_alt",
+                        :ALTITUDE.t + ":") %>
+          <%= text_field(:observation,
+                         :alt,
+                         class: "form-control") %>
+          (<%= :units_meters.t %>)
+        </div>
+      </div>
+      <div class="col-12 col-sm-12">
+        <div class="form-inline">
+          <%= check_box(:observation,
+                        :gps_hidden,
+                        class: "form-control-xxx") %>
+          <%= label_tag(:observation_gps_hidden,
+                        :form_observations_gps_hidden.t) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /LAT_LONG_ALT -->
+
+<div class="row mt-3">
+  <div class="col-12 max-width-text-times-two">
+<%= render(partial: "naming/form",
+            locals: {
+              action:       action,
+              button_name:  button_name,
+              show_reasons: false,
+              unfocused:    true
+            }
+          ) if include_naming %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12 mt-3 max-width-text">
+    <div class="form-inline">
+      <%= check_box(:observation,
+                    :specimen,
+                    class: "form-control-xxx") %>
+      <%= label_tag(:observation_specimen,
+                    :form_observations_specimen_available.t) %>
+    </div>
+    <div class="well well-sm mt-3 max-width-text help-block">
+      <div class="arrow-up"></div>
+      <%= :form_observations_specimen_available_help.t %>
+    </div>
+  </div>
+</div>
+
+<!-- no_specimen_fields -->
+<% if button_name == :SAVE_EDITS.l %>
+  <div class="well well-sm max-width-text help-block">
+    <%= :form_observations_edit_specimens_help.t %>
+  </div>
+<% end %>
+<!-- /no_specimen_fields -->
+
+<!-- specimen_fields -->
+<% if button_name == :CREATE.l %>
+  <div id="herb_info_fields" class="<%= "hidden" if !@observation.specimen %>">
+    <div class="row mb-3">
+      <div class="col-sm-6 max-width-text">
+        <div class="form-group">
+          <%= label_tag(:collection_number_name,
+                        :collection_number_name.t + ":") %>
+          <%= text_field(:collection_number,
+                         :name,
+                         value: @collectors_name,
+                         class: "form-control") %>
+        </div>
+        <div class="form-group">
+          <%= label_tag(:collection_number_number,
+                        :collection_number_number.t + ":") %>
+          <%= text_field(:collection_number,
+                         :number,
+                         value: @collectors_number,
+                         class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="well well-sm help-block">
+          <div class="arrow-left d-none d-sm-block"></div>
+          <%= :form_observations_collection_number_help.t %>
+        </div>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-sm-6 max-width-text">
+        <div class="form-group">
+          <%= label_tag(:herbarium_record_herbarium_name,
+                        :herbarium_record_herbarium_name.t + ":") %>
+          <%= text_field(:herbarium_record,
+                         :herbarium_name,
+                         value: @herbarium_name,
+                         class: "form-control") %>
+          <% turn_into_herbarium_auto_completer(:herbarium_record_herbarium_name) %>
+        </div>
+        <div class="form-group">
+          <%= label_tag(:herbarium_record_herbarium_id,
+                        :herbarium_record_accession_number.t + ":") %>
+          <%= text_field(:herbarium_record,
+                         :herbarium_id,
+                         value: @herbarium_id,
+                         class: "form-control") %>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="well well-sm ">
+          <div class="arrow-left d-none d-sm-block help-block"></div>
+          <%= :form_observations_herbarium_record_help.t %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if !@user.try(&:hide_specimen_stuff?) %>
+    <% inject_javascript_at_end %(
+      jQuery(document).ready(function() {
+        specimen_checkbox = jQuery("#observation_specimen");
+        hide_show_herb_fields = function () {
+          if (specimen_checkbox.is(":checked"))
+            jQuery("#herb_info_fields").removeClass("hidden").show();
+          else
+            jQuery("#herb_info_fields").hide();
+        };
+        hide_show_herb_fields();
+        specimen_checkbox.change(hide_show_herb_fields);
+        jQuery("#collection_number_number,#herbarium_record_herbarium_id").change(function() {
+          if (jQuery(this).val().length > 0)
+            specimen_checkbox.prop("checked", true)
+        });
+      });
+    ) %>
+  <% end %>
+<% end %>
+<!-- /specimen_fields -->
+
+<!-- NOTES -->
+<%= render "form_observation_notes" %>
+<!-- /NOTES -->
+
+<% ########################### Image Forms ############################## %>
+
+<% if include_images %>
+  <div class="row max-width-text-times-two">
+    <% # @observation.thumb_image_id ||= 0 %>
+
+    <% if @good_images.any? %>
+      <div class="col-12">
+        <b>Images:</b>
+      </div>
+      <% for image in @good_images %>
+        <div class="col-12 mt-3">
+          <div class="row form_image">
+
+            <!-- GOOD_IMAGE -->
+              <div class="col-1" style="max-width:30px">
+                <%= radio_button(:observation,
+                                 :thumb_image_id,
+                                 image.id) %>
+              </div>
+              <div class="col-11 col-sm-3">
+                <%= thumbnail(image, border: 0, obs: @observation.id, votes: true) %>
+              </div>
+              <div class="col-12 col-sm-8">
+                <% if check_permission(image) %>
+                  <table class="table-observation-form">
+                    <tr>
+                      <td>
+                        <%= label_tag("image_#{image.id}_notes",
+                                      :NOTES.t + ":") %>
+                      </td>
+                      <td>
+                        <%= text_area(:good_image,
+                                      :notes,
+                                      value: image.notes,
+                                      index: image.id,
+                                      rows: 1,
+                                      class: "form-control form-control-sm") %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <%= label_tag("image_#{image.id}_original_name",
+                                      :form_observations_original_name.t + ":") %>
+                      </td>
+                      <td>
+                        <%= text_field(:good_image,
+                                       :original_name,
+                                       value: image.original_name,
+                                       index: image.id,
+                                       size: 40,
+                                       class: "form-control form-control-sm") %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <%= label_tag("image_#{image.id}_copyright_holder",
+                                      "#{:form_images_copyright_holder.t}:") %>
+                      </td>
+                      <td>
+                        <%= text_field(:good_image,
+                                       :copyright_holder,
+                                       value: image.copyright_holder,
+                                       index: image.id,
+                                       class: "form-control form-control-sm") %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <%= label_tag("image_#{image.id}_when_1i", :form_images_when_taken.t + ":") %>
+                      </td>
+                      <td>
+                        <div class="form-inline">
+                          <%= date_select(:good_image,
+                                          :when,
+                                          date_select_opts(image).
+                                          merge(object: image, index: image.id),
+                                          { class: "form-control form-control-sm",
+                                            onchange: "CHANGED_DATES[#{image.id}] = true" }) %>
+                          <% turn_into_year_auto_completer("good_image_#{image.id}_when_1i") %>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <%= label_tag("image_#{image.id}_license_id",
+                                      :form_images_select_license.t + ":") %>
+                      </td>
+                      <td>
+                        <%= select(:good_image,
+                                   :license_id,
+                                   License.current_names_and_ids(image.license),
+                                   { selected: image.license_id,
+                                     index: image.id },
+                                   { class: "form-control form-control-sm" }) %>
+                      </td>
+                    </tr>
+                  </table>
+                <% end # if check_permission %>
+              </div>
+            <!-- GOOD_IMAGE -->
+
+          </div>
+        </div>
+      <% end # for image %>
+    <% end # if @good_images %>
+    <%= hidden_field_tag(:good_images,
+                         @good_images.map { |o| o.id }.join(" ")) %>
+  </div>
+
+  <div class="row mt-3 max-width-text-times-two">
+    <div class="col-sm-12">
+
+
+      <strong><%= :form_observations_upload_images.t %>:</strong>
+
+      <!-- MULTIFILE_UPLOAD_FORM -->
+        <%= render(partial: "form_multi_image_upload") if can_do_multifile_upload? %>
+      <!-- /MULTIFILE_UPLOAD_FORM -->
+
+      <!-- MONOFILE_UPLOAD_FORM -->
+        <% if !can_do_multifile_upload? %>
+          <%= javascript_tag %(
+            var NEXT_IMAGE_INDEX = #{@images.length+1};
+            var CHANGED_DATES = [];
+          ) %>
+          <div id="image_forms">
+            <% i = 0 %>
+            <% @images.push(@new_image) %>
+            <% while i < @images.length %>
+              <%= render(partial: "form_image", locals: {index: i}) %>
+              <% i += 1 %>
+            <% end %>
+          </div>
+          <input id="new_image_button"
+                 onclick="image_new();"
+                 type="button"
+                 value="<%= :form_observations_upload_another.t %>"
+                 class="btn"/>
+          <% javascript_include("single_image_uploader") %>
+          <%= javascript_tag %(
+            var x = String.fromCharCode(60);
+            var y = String.fromCharCode(93);
+            var IMAGE_FORM = "#{
+              i = @images.length - 1 rescue 0
+              str = render(partial: "form_image", locals: {index: i})
+              str.gsub!("image_#{i}_", "image_XXX_")
+              str.gsub!("image_id_#{i}", "image_id_XXX")
+              str.gsub!("(#{i})", "(XXX)")
+              str.gsub!("[#{i}]", "[XXX]")
+              str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+              str.sub!("checked=\"checked\" ", "")
+              str = escape_javascript(str)
+              str.gsub("<", '"+x+"')
+              str.gsub("]", '"+y+"')
+            }";
+          ) %>
+        <% end %>
+      <!-- /MONOFILE_UPLOAD_FORM -->
+
+   </div>
+ </div>
+<% end # if include_images %>
+
+<% if @projects.any? || @lists.any? %>
+  <%= submit_tag(button_name, class: "btn mx-auto mt-3") %>
+<% end %>
+
+<% ########################################################################## %>
+
+<% if @projects.any? %>
+  <div class="row mt-3">
+    <div class="col-12 max-width-text-times-two">
+      <div class="col-12 col-sm-6 float-right">
+        <div class="well well-sm max-width-text help-block">
+          <div class="arrow-left d-none d-sm-block"></div>
+          <%= :form_observations_project_help.t %>
+        </div>
+      </div>
+      <strong><%= :PROJECTS.t %>:</strong>
+      <% for project in @projects %>
+        <div class="form-inline max-width-text">
+          <%= check_box(:project, "id_#{project.id}",
+                        checked: @project_checks[project.id],
+                        disabled: @observation.user != @user && !project.is_member?(@user),
+                        class: "form-control-xxx") %>
+          <%= link_to_object(project) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @lists.any? %>
+  <div class="row mt-3">
+    <div class="col-12 max-width-text-times-two">
+      <div class="col-12 col-sm-6 pull-right">
+        <div class="well well-sm max-width-text help-block">
+          <div class="arrow-left d-none d-sm-block"></div>
+          <%= :form_observations_list_help.t %>
+        </div>
+      </div>
+      <strong><%= :SPECIES_LISTS.t %>:</strong>
+      <% for list in @lists %>
+        <div class="form-inline max-width-text">
+          <%= check_box(:list, "id_#{list.id}",
+                        checked: @list_checks[list.id],
+                        disabled: !check_permission(list),
+                        class: "form-control-xxx") %>
+          <%= link_to_object(list) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%= submit_tag(button_name,
+               class: "btn mx-auto mt-3") %>
+
+<% if logging_optional %>
+  <div class="form-inline">
+    <%= check_box(:log_change,
+                  :checked,
+                  checked: "1",
+                  class: "form-control-xxx") %>
+    <%= label_tag(:log_change_checked,
+                  :form_observations_log_change.t) %>
+  </div>
+<% end %>
+
+<!--[/form:observation]-->
