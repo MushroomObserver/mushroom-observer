@@ -14,8 +14,6 @@ inherit_from: .rubocop_todo.yml
 # Therefore .codeclimate.yml should be updated whenever we update RuboCop
 
 AllCops:
-  # Ignore cops for Ruby versions which are newer than that used by MO
-  TargetRubyVersion: 2.4.1
 
   ###################### Exclusions ############################################
   # Completely ignore the following
@@ -34,6 +32,37 @@ AllCops:
     # not Ruby
     - script/perf_monitor
     - "tmp/**/*"
+
+
+###################### Global Enables #########################################
+# Enable pending cops added by recent RuboCop versions
+# (0.82)
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+
+# (0.81)
+Lint/RaiseException:
+  Enabled: true
+
+# (0.81)
+Lint/StructNewOverride:
+  Enabled: true
+
+# (0.82)
+Style/ExponentialNotation:
+  Enabled: true
+
+# (0.80)
+Style/HashEachMethods:
+  Enabled: true
+
+# (0.80)
+Style/HashTransformKeys:
+  Enabled: true
+
+# (0.80)
+Style/HashTransformValues:
+  Enabled: true
 
 ###################### Global Disables #########################################
 # Disable because enforcement takes up an extra line
@@ -136,7 +165,7 @@ Metrics/PerceivedComplexity:
 ###################### Layout and Style ########################################
 
 # Repeat the default because Codeclimate ignores it as of 2019-07-09
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedColonStyle: key
 
 # Rubocop supports multiple options and MO uses a non-default

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
+gem "sprockets"
+
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
 gem "rails", "~> 5.2.2"
 
@@ -72,8 +74,7 @@ gem "cure_acts_as_versioned"
 gem "simple_enum"
 
 # Amazon S3 SDK, for access to images on dreamhost S3
-# limited to v2 to avoid installing a bunch of gems
-gem "aws-sdk", "~> 2"
+gem "aws-sdk-s3"
 
 # Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
@@ -81,7 +82,13 @@ gem "aws-sdk", "~> 2"
 gem "jquery-slick-rails"
 
 # email generation, parsing and sending
+# version locked to prevent test failures caused by added "=0D" at the
+# end of line in the body of plaintext emails.
+# See https://www.pivotaltracker.com/story/show/172299270/comments/213574631
 gem "mail", "= 2.7.0"
+
+# for detecting file type of uploaded images
+gem "mimemagic"
 
 ########## Development, Testing, and Analysis ##################################
 

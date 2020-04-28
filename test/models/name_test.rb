@@ -258,7 +258,7 @@ class NameTest < UnitTestCase
       Name.format_name("Amanita sect. Vaginatae")
     )
     assert_equal(
-      "**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**", # rubocop:disable Metrics/LineLength
+      "**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**", # rubocop:disable Layout/LineLength
       Name.format_name("Amanita subg. One subsect. Two stirps Three")
     )
     assert_equal(
@@ -270,7 +270,7 @@ class NameTest < UnitTestCase
       Name.format_name("Amanita vaginata subsp. grisea")
     )
     assert_equal(
-      "**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**", # rubocop:disable Metrics/LineLength
+      "**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**", # rubocop:disable Layout/LineLength
       Name.format_name("Amanita vaginata subsp. one var. two f. three")
     )
     assert_equal(
@@ -626,7 +626,7 @@ class NameTest < UnitTestCase
       search_name: "Synchytrium subgenus Endochytrium du Plessis",
       real_search_name: "Synchytrium subgenus Endochytrium du Plessis",
       sort_name: "Synchytrium  {1subgenus  Endochytrium  du Plessis",
-      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable LineLength
+      display_name: "**__Synchytrium__** subgenus **__Endochytrium__** du Plessis", # rubocop:disable Layout/LineLength
       parent_name: "Synchytrium",
       rank: :Subgenus,
       author: "du Plessis"

@@ -1,4 +1,5 @@
-#
+# frozen_string_literal: true
+
 #  = Integration Test Case
 #
 #  The test case class that all integration tests currently derive from.
@@ -62,6 +63,12 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest
     # the identical session instance, breaking some tests. This is probably
     # a bug in rails, but as of 20190101 it is required.
     @integration_session = nil
+
+    # Treat Rails html requests as coming from non-robots.
+    # If it's a bot, controllers often do not serve the expected content.
+    # The requester looks like a bot to the `browser` gem because the User Agent
+    # in the request is blank. I don't see an easy way to change that. -JDC
+    Browser::Generic.any_instance.stubs(:bot?).returns(false)
   end
 
   def teardown

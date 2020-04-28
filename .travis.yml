@@ -4,7 +4,7 @@ services:
 
 language: ruby
 rvm:
-  - "2.4.1"
+  - "2.6.6"
 
 # make Travis use its legacy infrastructure
 sudo: true

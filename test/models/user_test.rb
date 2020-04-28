@@ -141,10 +141,10 @@ class UserTest < UnitTestCase
   # Test has been revised accordingly.
   # 2017-06-16 JDC
   def test_myxomops_debacle
-    # rubocop:disable Metrics/LineLength
+    # rubocop:disable Layout/LineLength
     name_79_chars_82_bytes = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
     name_90_chars_93_bytes = "Herbario Forestal Nacional de Bolivia Martín Cárdenas de la Universidad Mayor de San Simón"
-    # rubocop:enable Metrics/LineLength
+    # rubocop:enable Layout/LineLength
 
     mary.name = name_90_chars_93_bytes
     assert(!mary.save)

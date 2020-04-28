@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class ScriptTest < UnitTestCase
@@ -37,19 +39,6 @@ class ScriptTest < UnitTestCase
     839420571
   end
   # rubocop:enable Style/NumericLiterals
-
-  # Ensure above definitions are correct
-  def test_fixture_id_defs
-    assert_equal(images(:in_situ_image).id, in_situ_id,
-                 "in_situ_id defined incorrectly")
-    assert_equal(images(:turned_over_image).id, turned_over_id,
-                 "turned_over_id defined incorrectly")
-    assert_equal(images(:commercial_inquiry_image).id, commercial_id,
-                 "commercial_id defined incorrectly")
-    assert_equal(images(:disconnected_coprinus_comatus_image).id,
-                 disconnected_id,
-                 "disconnected_id defined incorrectly")
-  end
 
   def setup
     FileUtils.rm_rf(local_root)
@@ -94,14 +83,25 @@ class ScriptTest < UnitTestCase
   end
 
   ##############################################################################
+
+  test "fixture_id_defs" do
+    assert_equal(images(:in_situ_image).id, in_situ_id,
+                 "in_situ_id defined incorrectly")
+    assert_equal(images(:turned_over_image).id, turned_over_id,
+                 "turned_over_id defined incorrectly")
+    assert_equal(images(:commercial_inquiry_image).id, commercial_id,
+                 "commercial_id defined incorrectly")
+    assert_equal(images(:disconnected_coprinus_comatus_image).id,
+                 disconnected_id,
+                 "disconnected_id defined incorrectly")
+  end
+
   test "process_image" do
     script = script_file("process_image")
     tempfile = Tempfile.new("test").path
     original_image = "#{::Rails.root}/test/images/pleopsidium.tiff"
     FileUtils.cp(original_image, "#{local_root}/orig/#{in_situ_id}.tiff")
-    cmd = "#{script} #{in_situ_id} tiff 1 2>&1 > #{tempfile}"
-    status = system(cmd)
-    errors = File.read(tempfile)
+    errors, status = Open3.capture2e(script, in_situ_id.to_s, "tiff", "1", "2")
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
@@ -112,8 +112,8 @@ class ScriptTest < UnitTestCase
       file.puts "#{local_root}/320//#{in_situ_id}.jpg"
       file.puts "#{local_root}/thumb//#{in_situ_id}.jpg"
     end
-    sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").
-            map do |line|
+    output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
+    sizes = output.each_line.map do |line|
       line[local_root.length + 1..-1].chomp
     end
     assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0],
@@ -153,8 +153,8 @@ class ScriptTest < UnitTestCase
     ["960/#{in_situ_id}.jpg", "1280/#{in_situ_id}.jpg",
      "orig/#{in_situ_id}.jpg", "orig/#{in_situ_id}.tiff"].each do |file|
       file2 = "#{remote_root}2/#{file}"
-      assert(!File.exist?(file2),
-             "Shouldn't have transferred #{file} to server 2.")
+      assert_not(File.exist?(file2),
+                 "Shouldn't have transferred #{file} to server 2.")
     end
   end
 
@@ -249,16 +249,16 @@ class ScriptTest < UnitTestCase
     assert_equal("K", File.read("#{remote_root}2/thumb/#{turned_over_id}.jpg"),
                  "thumb/#{turned_over_id}.jpg wrong for server 2")
 
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.tiff"),
-           "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"),
-           "orig/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/1280/#{in_situ_id}.jpg"),
-           "1280/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/960/#{in_situ_id}.jpg"),
-           "960/#{in_situ_id}.jpg shouldnt be on server 2")
-    assert(!File.exist?("#{remote_root}2/960/#{turned_over_id}.jpg"),
-           "960/#{turned_over_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.tiff"),
+               "orig/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"),
+               "orig/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/1280/#{in_situ_id}.jpg"),
+               "1280/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/960/#{in_situ_id}.jpg"),
+               "960/#{in_situ_id}.jpg shouldnt be on server 2")
+    assert_not(File.exist?("#{remote_root}2/960/#{turned_over_id}.jpg"),
+               "960/#{turned_over_id}.jpg shouldnt be on server 2")
   end
 
   test "rotate_image" do
@@ -276,7 +276,7 @@ class ScriptTest < UnitTestCase
     assert(File.exist?("#{local_root}/thumb/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}1/orig/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}1/thumb/#{in_situ_id}.jpg"))
-    assert(!File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"))
+    assert_not(File.exist?("#{remote_root}2/orig/#{in_situ_id}.jpg"))
     assert(File.exist?("#{remote_root}2/thumb/#{in_situ_id}.jpg"))
 
     img = images(:in_situ_image)
@@ -291,7 +291,6 @@ class ScriptTest < UnitTestCase
     File.open("#{local_root}/orig/#{turned_over_id}.tiff", "w") do |f|
       f.write("A")
     end
-
     File.open("#{local_root}/orig/#{turned_over_id}.jpg", "w") do |f|
       f.write("AB")
     end
@@ -380,7 +379,7 @@ class ScriptTest < UnitTestCase
     status = system(cmd)
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
-    assert_equal(<<-END.unindent, errors)
+    assert_equal(<<-ERROR_TEXT.unindent, errors)
       Listing local 1280
       Listing local 320
       Listing local 640
@@ -408,6 +407,6 @@ class ScriptTest < UnitTestCase
       Deleting 640/#{turned_over_id}.jpg
       Deleting 960/#{turned_over_id}.jpg
       Deleting 960/#{commercial_id}.jpg
-    END
+    ERROR_TEXT
   end
 end
