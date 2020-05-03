@@ -53,7 +53,10 @@ module DescriptionControllerHelpers
     desc = find_description(params[:id].to_s)
     return unless desc
 
-    redirect_with_query(action: desc.show_action, id: desc.id)
+    redirect_with_query(
+      action: desc.show_action,
+      id: desc.id
+    )
     unless desc.fully_public
       flash_error(:runtime_description_make_default_only_public.t)
       return
@@ -79,7 +82,10 @@ module DescriptionControllerHelpers
       # Doesn't have permission to see source.
       if !in_admin_mode? && !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
-        redirect_with_query(action: src.parent.show_action, id: src.parent_id)
+        redirect_with_query(
+          action: src.parent.show_action,
+          id: src.parent_id
+        )
 
       # POST method
       elsif request.method == "POST"
@@ -132,7 +138,10 @@ module DescriptionControllerHelpers
                       to: dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
                    t(old: src_title, new: dest.format_name))
-      redirect_with_query(action: dest.show_action, id: dest.id)
+      redirect_with_query(
+        action: dest.show_action,
+        id: dest.id
+      )
     end
   end
 
@@ -169,7 +178,10 @@ module DescriptionControllerHelpers
       end
       flash_notice(:runtime_description_move_success.
                    t(old: src_title, new: dest.format_name))
-      redirect_with_query(action: src.show_action, id: src.id)
+      redirect_with_query(
+        action: src.show_action,
+        id: src.id
+      )
 
     # Create a clone in the destination name/location.
     else
@@ -436,8 +448,11 @@ module DescriptionControllerHelpers
       else
         flash_error(:runtime_create_draft_create_denied.
                       t(title: project.title))
-        redirect_to(controller: :projects, action: :show_project,
-                    id: project.id)
+        redirect_to(
+          controller: :projects,
+          action: :show_project,
+          id: project.id
+        )
       end
 
     # Cloning an existing description.
@@ -452,7 +467,10 @@ module DescriptionControllerHelpers
         desc.public_write = false
       else
         flash_error(:runtime_description_private.t)
-        redirect_to(action: :show_name, id: desc.parent_id)
+        redirect_to(
+          action: :show_name,
+          id: desc.parent_id
+        )
       end
 
     # Otherwise default to :public description.
@@ -527,9 +545,15 @@ module DescriptionControllerHelpers
     unless in_admin_mode? || desc.is_writer?(@user)
       flash_error(:runtime_edit_description_denied.t)
       if in_admin_mode? || desc.is_reader?(@user)
-        redirect_to(action: desc.show_action, id: desc.id)
+        redirect_to(
+          action: desc.show_action,
+          id: desc.id
+        )
       else
-        redirect_to(action: desc.parent.show_action, id: desc.parent_id)
+        redirect_to(
+          action: desc.parent.show_action,
+          id: desc.parent_id
+        )
       end
       okay = false
     end

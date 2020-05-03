@@ -5,26 +5,47 @@ class HerbariaController < ApplicationController
     :index_herbarium,
     :list_herbaria,
     :herbarium_search,
+    :show,
     :show_herbarium
   ]
 
   # Displays selected Herbarium's (based on current Query).
   def index_herbarium # :norobots:
-    query = find_or_create_query(:Herbarium, by: params[:by])
-    show_selected_herbaria(query, id: params[:id].to_s, always_index: true)
+    query = find_or_create_query(
+      :Herbarium,
+      by: params[:by]
+    )
+    show_selected_herbaria(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
   end
 
   def index
     store_location
-    query = create_query(:Herbarium, :nonpersonal, by: :code_then_name)
-    show_selected_herbaria(query, always_index: true)
+    query = create_query(
+      :Herbarium, :nonpersonal,
+      by: :code_then_name
+    )
+    show_selected_herbaria(
+      query,
+      always_index: true
+    )
   end
 
   # Show list of herbaria.
   def list_herbaria
     store_location
-    query = create_query(:Herbarium, :all, by: :name)
-    show_selected_herbaria(query, always_index: true)
+    query = create_query(
+      :Herbarium,
+      :all,
+      by: :name
+    )
+    show_selected_herbaria(
+      query,
+      always_index: true
+    )
   end
 
   # Display list of Herbaria whose text matches a string pattern.
@@ -32,14 +53,21 @@ class HerbariaController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(action: :show_herbarium, id: herbarium.id)
+      redirect_to(
+        action: :show,
+        id: herbarium.id
+      )
     else
-      query = create_query(:Herbarium, :pattern_search, pattern: pattern)
+      query = create_query(
+        :Herbarium,
+        :pattern_search,
+        pattern: pattern
+      )
       show_selected_herbaria(query)
     end
   end
 
-  def show_herbarium
+  def show
     store_location
     pass_query_params
     @canonical_url = Herbarium.show_url(params[:id])
@@ -56,6 +84,8 @@ class HerbariaController < ApplicationController
     end
   end
 
+  alias_method :show_herbarium, :show
+
   def next_herbarium # :norobots:
     redirect_to_next_object(:next, Herbarium, params[:id].to_s)
   end
@@ -71,13 +101,13 @@ class HerbariaController < ApplicationController
     if request.method == "GET"
       @herbarium = Herbarium.new
     elsif request.method == "POST"
-      post_create_herbarium
+      create
     else
       redirect_to_referrer || redirect_to_herbarium_index
     end
   end
 
-  def edit_herbarium # :norobots:
+  def edit # :norobots:
     store_location
     pass_query_params
     keep_track_of_referrer
@@ -90,11 +120,13 @@ class HerbariaController < ApplicationController
       @herbarium.personal           = @herbarium.personal_user_id.present?
       @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
     elsif request.method == "POST"
-      post_edit_herbarium
+      update
     else
       redirect_to_referrer || redirect_to_show_herbarium
     end
   end
+
+  alias_method :edit_herbarium, :edit
 
   def merge_herbaria # :norobots:
     pass_query_params
@@ -136,7 +168,7 @@ class HerbariaController < ApplicationController
     redirect_to_referrer || redirect_to_show_herbarium
   end
 
-  def destroy_herbarium # :norobots:
+  def destroy # :norobots:
     pass_query_params
     keep_track_of_referrer
     @herbarium = find_or_goto_index(Herbarium, params[:id])
@@ -153,6 +185,8 @@ class HerbariaController < ApplicationController
     end
   end
 
+  alias_method :destroy_herbarium, :destroy
+
   ##############################################################################
 
   private
@@ -168,14 +202,14 @@ class HerbariaController < ApplicationController
     @links ||= []
     if query.flavor != :all
       @links << [:herbarium_index_list_all_herbaria.l,
-                 { controller: :herbaria, action: :list_herbaria }]
+                 { controller: :herbarium, action: :list_herbaria }]
     end
     if query.flavor != :nonpersonal
       @links << [:herbarium_index_nonpersonal_herbaria.l,
-                 { controller: :herbaria, action: :index }]
+                 { controller: :herbarium, action: :index }]
     end
     @links << [:create_herbarium.l,
-               { controller: :herbaria, action: :create_herbarium }]
+               { controller: :herbarium, action: :create_herbarium }]
 
     # If user clicks "merge" on an herbarium, it reloads the page and asks
     # them to click on the destination herbarium to merge it with.
@@ -200,7 +234,7 @@ class HerbariaController < ApplicationController
     show_index_of_objects(query, args)
   end
 
-  def post_create_herbarium
+  def create
     @herbarium = Herbarium.new(whitelisted_herbarium_params)
     normalize_parameters
     if validate_name! &&
@@ -216,7 +250,7 @@ class HerbariaController < ApplicationController
     end
   end
 
-  def post_edit_herbarium
+  def update
     @herbarium.attributes = whitelisted_herbarium_params
     normalize_parameters
     if validate_name! &&
@@ -351,7 +385,7 @@ class HerbariaController < ApplicationController
   end
 
   def request_merge(this, that)
-    redirect_with_query(controller: :email, action: :email_merge_request,
+    redirect_with_query(controller: :observer, action: :email_merge_request,
                         type: :Herbarium, old_id: this.id, new_id: that.id)
     false
   end
@@ -388,7 +422,7 @@ class HerbariaController < ApplicationController
     return if @herbarium.location || @herbarium.place_name.blank?
 
     flash_notice(:create_herbarium_must_define_location.t)
-    redirect_to(controller: :locations, action: :create_location, back: @back,
+    redirect_to(controller: :location, action: :create_location, back: @back,
                 where: @herbarium.place_name, set_herbarium: @herbarium.id)
     true
   end

@@ -2,11 +2,10 @@ class UsersController < ApplicationController
 
   before_action :login_required, except: [
     :checklist,
-    :index,
-    :index_user,
     :lookup_user,
     :next_user,
     :prev_user,
+    :show,
     :show_user,
     :user_search,
     :users_by_contribution,
@@ -17,28 +16,38 @@ class UsersController < ApplicationController
   ]
 
   # User index, restricted to admins.
-  def index_user # :norobots:
+  def index # :norobots:
     if in_admin_mode? || find_query(:User)
       query = find_or_create_query(:User, by: params[:by])
       show_selected_users(query, id: params[:id].to_s, always_index: true)
     else
       flash_error(:runtime_search_has_expired.t)
-      redirect_to(action: :list_rss_logs)
+      redirect_to(
+        controller: :rss_logs,
+        action: :index
+      )
     end
   end
 
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
-  alias_method :list_users, :index_user
+  alias_method :list_users, :index
 
   # User index, restricted to admins.
   def users_by_name # :norobots:
     if in_admin_mode?
-      query = create_query(:User, :all, by: :name)
+      query = create_query(
+        :User,
+        :all,
+        by: :name
+      )
       show_selected_users(query)
     else
       flash_error(:permission_denied.t)
-      redirect_to(action: :list_rss_logs)
+      redirect_to(
+        controller: :rss_logs,
+        action: :index
+      )
     end
   end
 
@@ -47,9 +56,16 @@ class UsersController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (user = User.safe_find(pattern))
-      redirect_to(action: :show_user, id: user.id)
+      redirect_to(
+        action: :show,
+        id: user.id
+      )
     else
-      query = create_query(:User, :pattern_search, pattern: pattern)
+      query = create_query(
+        :User,
+        :pattern_search,
+        pattern: pattern
+      )
       show_selected_users(query)
     end
   end
@@ -58,7 +74,7 @@ class UsersController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      action: :list_users,
+      action: :index,
       include: :user_groups,
       matrix: !in_admin_mode?
     }.merge(args)
@@ -101,7 +117,7 @@ class UsersController < ApplicationController
   end
 
   # show_user.rhtml
-  def show_user # :prefetch:
+  def show # :prefetch:
     store_location
     id = params[:id].to_s
     @show_user = find_or_goto_index(User, id)
@@ -109,24 +125,40 @@ class UsersController < ApplicationController
 
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :owners_thumbnail_quality)
+    @query = Query.lookup(
+      :Observation,
+      :by_user,
+      user: @show_user,
+      by: :owners_thumbnail_quality
+    )
     @observations = @query.results(limit: 6)
     return unless @observations.length < 6
 
-    @query = Query.lookup(:Observation, :by_user,
-                          user: @show_user, by: :thumbnail_quality)
+    @query = Query.lookup(
+      :Observation,
+      :by_user,
+      user: @show_user,
+      by: :thumbnail_quality
+    )
     @observations = @query.results(limit: 6)
   end
 
   # Go to next user: redirects to show_user.
   def next_user # :norobots:
-    redirect_to_next_object(:next, User, params[:id].to_s)
+    redirect_to_next_object(
+      :next,
+      User,
+      params[:id].to_s
+    )
   end
 
   # Go to previous user: redirects to show_user.
   def prev_user # :norobots:
-    redirect_to_next_object(:prev, User, params[:id].to_s)
+    redirect_to_next_object(
+      :prev,
+      User,
+      params[:id].to_s
+    )
   end
 
   # Display a checklist of species seen by a User, Project,
@@ -198,11 +230,17 @@ class UsersController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          redirect_to(action: :show_user, id: @user2.id)
+          redirect_to(
+            action: :show,
+            id: @user2.id
+          )
         end
       end
     else
-      redirect_to(action: :show_user, id: @user2.id)
+      redirect_to(
+        action: :show,
+        id: @user2.id
+      )
     end
   end
 end

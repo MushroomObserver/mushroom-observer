@@ -1,43 +1,61 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
+class NamesController
   before_action :disable_link_prefetching, except: [
     :create_name,
     :edit_name
   ]
 
-  def create_name
+  # TODO: NIMMO
+  # create_name would be normally called "new"
+  # init_create_name_form prepares defaults
+  # create_new_name, would be normally called "create" and be private
+  def new
     store_location
     pass_query_params
     init_create_name_form
-    if request.method == "POST"
-      @parse = parse_name
-      make_sure_name_doesnt_exist!
-      create_new_name
-    end
   rescue RuntimeError => e
     reload_name_form_on_error(e)
   end
 
-  def edit_name
+  alias_method :create_name, :new
+
+  def create
+    @parse = parse_name
+    make_sure_name_doesnt_exist!
+    @name = Name.new_name_from_parsed_name(@parse)
+    set_locked_citation_and_notes
+    unless @name.save_with_log(:log_name_updated)
+      raise(:runtime_unable_to_save_changes.t)
+    end
+
+    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+    update_ancestors
+    redirect_to_show_name
+  end
+
+  def edit
     store_location
     pass_query_params
     @name = find_or_goto_index(Name, params[:id].to_s)
     return unless @name
 
     init_edit_name_form
-    if request.method == "POST"
-      @parse = parse_name
-      match = check_for_matches if name_unlocked?
-      if match
-        merge_names(match)
-      else
-        change_existing_name
-      end
-    end
   rescue RuntimeError => e
     reload_name_form_on_error(e)
+  end
+
+  alias_method :edit_name, :edit
+
+  def update
+    @parse = parse_name
+    match = check_for_matches if name_unlocked?
+    if match
+      merge_names(match)
+    else
+      change_existing_name
+    end
   end
 
   # ----------------------------------------------------------------------------
@@ -75,18 +93,6 @@ class NameController
     @name.notes      = params[:name][:notes]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-  end
-
-  def create_new_name
-    @name = Name.new_name_from_parsed_name(@parse)
-    set_locked_citation_and_notes
-    unless @name.save_with_log(:log_name_updated)
-      raise(:runtime_unable_to_save_changes.t)
-    end
-
-    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
-    update_ancestors
-    redirect_to_show_name
   end
 
   def change_existing_name
@@ -270,26 +276,39 @@ class NameController
       new: @parse.real_search_name,
       observations: @name.observations.length,
       namings: @name.namings.length,
-      url: "#{MO.http_domain}/names/show_name/#{@name.id}"
+      url: "#{MO.http_domain}/name/show_name/#{@name.id}"
     )
     WebmasterEmail.build(@user.email, content, subject).deliver_now
     NameControllerTest.report_email(content) if Rails.env.test?
   end
 
   def redirect_to_show_name
-    redirect_with_query(@name.show_link_args)
+    redirect_with_query(
+      @name.show_link_args
+    )
   end
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(action: :deprecate_name, id: @name.id)
+      redirect_with_query(
+        action: :deprecate_name,
+        id: @name.id
+      )
     else
-      redirect_with_query(action: :approve_name, id: @name.id)
+      redirect_with_query(
+        action: :approve_name,
+        id: @name.id
+      )
     end
   end
 
   def redirect_to_merge_request(new_name)
-    redirect_with_query(controller: :email, action: :email_merge_request,
-                        type: :Name, old_id: @name.id, new_id: new_name.id)
+    redirect_with_query(
+      controller: :email,
+      action: :email_merge_request,
+      type: :Name,
+      old_id: @name.id,
+      new_id: new_name.id
+    )
   end
 end

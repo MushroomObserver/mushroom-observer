@@ -299,11 +299,42 @@ class AbstractModel < ApplicationRecord
     out
   end
 
+  # FIXME: The following methods establish regularized, non-Rails-default
+  # controller, action and template names for show, edit & delete.
+  # They are used throughout the site (4/27/20).
+  #
+  # These methods require corresponding controller and template names, and
+  # although they can be over-ridden in the Models, using these methods may
+  # still be more complex than using the newer abbreviated "RESTful resource"
+  # syntax in current Rails (5.2). They also seem to introduce an added layer
+  # of configuration complexity which will make the app harder to maintain.
+  #
+  # If we switch to inferred controller names defined by the models, and use
+  # default Rails actions and template names, we can potentially eliminate this
+  # whole section from AbstractModel, and take a large number of configuration
+  # overrides out of the code, in favor of the RESTful routes of vanilla Rails.
+  #
+  # This would mean eventually finding and replacing every instance of show_url,
+  # show_link_args, show_controller, index_action and show_action, as well as
+  # edit_url, edit_link_args, edit_controller, edit_action, destroy_url,
+  # destroy_link_args, destroy_controller, and destroy_action.
+  #
+  # But in the meantime, for backwards compatibility, i will rewrite these
+  # methods to produce the same results. Considering that it's tricky to
+  # compose a logical rule that generates "users", "info" and "herbaria",
+  # I will instead just write a long rule, and directly shorten all the view
+  # filenames and actions to the default "show", "edit", "index".
+  #
+  # Gotcha: in anticipation of current "RESTful" style, in some cases in MO
+  # a controller or action may be called by string/symbol interpolation,
+  # making the methods tricky to search/replace. (Watch for #{:type}!)
+
   ##############################################################################
   #
   #  :section: Show Controller / Action
   #
   ##############################################################################
+
 
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
@@ -312,7 +343,12 @@ class AbstractModel < ApplicationRecord
   #   name.show_controller => "name"
   #
   def self.show_controller
-    name.underscore
+    case name
+      when Account, Naming
+        name.underscore
+      else
+        name.plural.underscore
+    end
   end
 
   def show_controller
@@ -324,9 +360,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.index_action => "index_name"
   #   name.index_action => "index_name"
+  #   Changed from    "index_" + name.underscore
   #
   def self.index_action
-    "index_" + name.underscore
+    "index"
   end
 
   def index_action
@@ -338,9 +375,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.show_action => "show_name"
   #   name.show_action => "show_name"
+  #   Changed from    "show_" + name.underscore
   #
   def self.show_action
-    "show_" + name.underscore
+    "show"
   end
 
   def show_action
@@ -351,9 +389,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.show_url(12) => "http://mushroomobserver.org/names/show_name/12"
   #   name.show_url     => "http://mushroomobserver.org/names/show_name/12"
+  #   Shortened from "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
   #
   def self.show_url(id)
-    "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+    "#{MO.http_domain}/#{show_controller}/#{id}"
   end
 
   def show_url
@@ -362,8 +401,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "show_<object>" action
   #
-  #   Name.show_link_args(12) => {controller: :names, action: :show_name, id: 12}
-  #   name.show_link_args     => {controller: :names, action: :show_name, id: 12}
+  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
+  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
   #
   def self.show_link_args(id)
     { controller: show_controller, action: show_action, id: id }
@@ -409,9 +448,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.edit_action => "edit_name"
   #   name.edit_action => "edit_name"
+  #   Changed from    "edit_" + name.underscore
   #
   def self.edit_action
-    "edit_" + name.underscore
+    "edit"
   end
 
   def edit_action
@@ -422,9 +462,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.edit_url(12) => "http://mushroomobserver.org/names/edit_name/12"
   #   name.edit_url     => "http://mushroomobserver.org/names/edit_name/12"
+  #   Changed from "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
   #
   def self.edit_url(id)
-    "#{MO.http_domain}/#{edit_controller}/#{edit_action}/#{id}"
+    "#{MO.http_domain}/#{edit_controller}/#{id}/#{edit_action}"
   end
 
   def edit_url
@@ -433,8 +474,8 @@ class AbstractModel < ApplicationRecord
 
   # Return the link_to args of the "edit_<object>" action
   #
-  #   Name.edit_link_args(12) => {controller: :names, action: :edit_name, id: 12}
-  #   name.edit_link_args     => {controller: :names, action: :edit_name, id: 12}
+  #   Name.edit_link_args(12) => {controller: :name, action: :edit_name, id: 12}
+  #   name.edit_link_args     => {controller: :name, action: :edit_name, id: 12}
   #
   def self.edit_link_args(id)
     { controller: edit_controller, action: edit_action, id: id }
@@ -463,9 +504,10 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.destroy_action => "destroy_name"
   #   name.destroy_action => "destroy_name"
+  #    Changed from   "destroy_" + name.underscore
   #
   def self.destroy_action
-    "destroy_" + name.underscore
+    "destroy"
   end
 
   def destroy_action
@@ -476,9 +518,11 @@ class AbstractModel < ApplicationRecord
   #
   #   Name.destroy_url(12) => "http://mushroomobserver.org/names/destroy_name/12"
   #   name.destroy_url     => "http://mushroomobserver.org/names/destroy_name/12"
+  #   Changed from
+  #       "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
   #
   def self.destroy_url(id)
-    "#{MO.http_domain}/#{destroy_controller}/#{destroy_action}/#{id}"
+    "#{MO.http_domain}/#{destroy_controller}/#{id}/#{destroy_action}"
   end
 
   def destroy_url
@@ -488,9 +532,9 @@ class AbstractModel < ApplicationRecord
   # Return the link_to args of the "destroy_<object>" action
   #
   #   Name.destroy_link_args(12) =>
-  #     {controller: :names, action: :destroy_name, id: 12}
+  #     {controller: :name, action: :destroy_name, id: 12}
   #   name.destroy_link_args     =>
-  #     {controller: :names, action: :destroy_name, id: 12}
+  #     {controller: :name, action: :destroy_name, id: 12}
   #
   def self.destroy_link_args(id)
     { controller: destroy_controller, action: destroy_action, id: id }
@@ -709,7 +753,7 @@ class AbstractModel < ApplicationRecord
   # TODO: replace the gem.
   # See notes at https://www.pivotaltracker.com/story/show/163189614
   def saved_version_changes?
-    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Metrics/LineLength
+    track_altered_attributes ? (version_if_changed - saved_changes.keys).length < version_if_changed.length : saved_changes? # rubocop:disable Layout/LineLength
   end
 
   ##############################################################################

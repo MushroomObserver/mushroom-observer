@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
+class NamesController
   def show_name_description
     store_location
     pass_query_params
@@ -25,7 +25,7 @@ class NameController
     return true if @name
 
     flash_error(:runtime_name_for_description_not_found.t)
-    redirect_to(action: :list_names)
+    redirect_to(action: "list_names")
     false
   end
 
@@ -42,16 +42,21 @@ class NameController
 
   def redirect_to_name_or_project
     if @description.project
-      redirect_to(controller: :projects,
-                  action: :show_project,
-                  id: @description.project_id)
+      redirect_to(
+        controller: :projects,
+        action: :show_project,
+        id: @description.project_id
+      )
     else
-      redirect_to(action: :show_name, id: @description.name_id)
+      redirect_to(
+        action: :show_name,
+        id: @description.name_id
+      )
     end
   end
 
   def description_canonical_url
-    "#{MO.http_domain}/names/show_name_description/#{@description.id}"
+    "#{MO.http_domain}/name/show_name_description/#{@description.id}"
   end
 
   def users_projects_which_dont_have_desc_of_this_name

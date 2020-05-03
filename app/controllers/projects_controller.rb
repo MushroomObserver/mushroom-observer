@@ -1,5 +1,5 @@
 #
-#  = Projects Controller
+#  = Project Controller
 #
 #  == Actions
 #   L = login required
@@ -31,17 +31,21 @@
 
 class ProjectsController < ApplicationController
   before_action :login_required, except: [
+    :index,
     :index_project,
     :list_projects,
     :next_project,
     :prev_project,
     :project_search,
+    :show,
     :show_project
   ]
 
   before_action :disable_link_prefetching, except: [
     :admin_request,
+    :edit,
     :edit_project,
+    :show,
     :show_project
   ]
 
@@ -53,22 +57,38 @@ class ProjectsController < ApplicationController
 
   # Show list of selected projects, based on current Query.
   def index_project # :norobots:
-    query = find_or_create_query(:Project, by: params[:by])
-    show_selected_projects(query, id: params[:id].to_s, always_index: true)
+    query = find_or_create_query(
+      :Project,
+      by: params[:by]
+    )
+    show_selected_projects(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
   end
 
   # Show list of latest projects.  (Linked from left panel.)
-  def list_projects
-    query = create_query(:Project, :all, by: :title)
+  def index
+    query = create_query(
+      :Project,
+      :all,
+      by: :title
+    )
     show_selected_projects(query)
   end
+
+  alias_method :list_projects, :index
 
   # Display list of Project's whose title or notes match a string pattern.
   def project_search # :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (project = Project.safe_find(pattern))
-      redirect_to(action: :show_project, id: project.id)
+      redirect_to(
+        action: :show,
+        id: project.id
+      )
     else
       query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
@@ -105,11 +125,11 @@ class ProjectsController < ApplicationController
   # Linked from: show_observation, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
-  def show_project # :prefetch:
+  def show # :prefetch:
     store_location
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
-      @canonical_url = "#{MO.http_domain}/projects/show_project/#{@project.id}"
+      @canonical_url = "#{MO.http_domain}/project/show_project/#{@project.id}"
       @is_member = @project.is_member?(@user)
       @is_admin = @project.is_admin?(@user)
 
@@ -124,6 +144,8 @@ class ProjectsController < ApplicationController
       @draft_data = @draft_data.to_a
     end
   end
+
+  alias_method :show_project, :show
 
   # Go to next project: redirects to show_project.
   def next_project # :norobots:
@@ -146,52 +168,55 @@ class ProjectsController < ApplicationController
   # Failure:
   #   Renders add_project again.
   #   Outputs: @project
-  def add_project # :norobots:
+
+  def new # :norobots:
     pass_query_params
-    if request.method == "GET"
-      @project = Project.new
+    @project = Project.new
+  end
+
+  alias_method :add_project, :new
+
+  def create
+    title = params[:project][:title].to_s
+    project = Project.find_by_title(title)
+    user_group = UserGroup.find_by_name(title)
+    admin_name = "#{title}.admin"
+    admin_group = UserGroup.find_by_name(admin_name)
+    if title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif project
+      flash_error(:add_project_already_exists.t(title: project.title))
+    elsif user_group
+      flash_error(:add_project_group_exists.t(group: title))
+    elsif admin_group
+      flash_error(:add_project_group_exists.t(group: admin_name))
     else
-      title = params[:project][:title].to_s
-      project = Project.find_by_title(title)
-      user_group = UserGroup.find_by_name(title)
-      admin_name = "#{title}.admin"
-      admin_group = UserGroup.find_by_name(admin_name)
-      if title.blank?
-        flash_error(:add_project_need_title.t)
-      elsif project
-        flash_error(:add_project_already_exists.t(title: project.title))
-      elsif user_group
-        flash_error(:add_project_group_exists.t(group: title))
-      elsif admin_group
-        flash_error(:add_project_group_exists.t(group: admin_name))
+      # Create members group.
+      user_group = UserGroup.new
+      user_group.name = title
+      user_group.users << @user
+
+      # Create admin group.
+      admin_group = UserGroup.new
+      admin_group.name = admin_name
+      admin_group.users << @user
+
+      # Create project.
+      @project = Project.new(whitelisted_project_params)
+      @project.user = @user
+      @project.user_group = user_group
+      @project.admin_group = admin_group
+
+      if !user_group.save
+        flash_object_errors(user_group)
+      elsif !admin_group.save
+        flash_object_errors(admin_group)
+      elsif !@project.save
+        flash_object_errors(@project)
       else
-        # Create members group.
-        user_group = UserGroup.new
-        user_group.name = title
-        user_group.users << @user
-
-        # Create admin group.
-        admin_group = UserGroup.new
-        admin_group.name = admin_name
-        admin_group.users << @user
-
-        # Create project.
-        @project = Project.new(whitelisted_project_params)
-        @project.user = @user
-        @project.user_group = user_group
-        @project.admin_group = admin_group
-
-        if !user_group.save
-          flash_object_errors(user_group)
-        elsif !admin_group.save
-          flash_object_errors(admin_group)
-        elsif !@project.save
-          flash_object_errors(@project)
-        else
-          @project.log_create
-          flash_notice(:add_project_success.t)
-          redirect_with_query(action: :show_project, id: @project.id)
-        end
+        @project.log_create
+        flash_notice(:add_project_success.t)
+        redirect_with_query(action: :show_project, id: @project.id)
       end
     end
   end
@@ -207,27 +232,37 @@ class ProjectsController < ApplicationController
   # Failure:
   #   Renders edit_project again.
   #   Outputs: @project
-  def edit_project # :prefetch: :norobots:
+  def edit # :prefetch: :norobots:
     pass_query_params
     return unless @project = find_or_goto_index(Project, params[:id].to_s)
 
     if !check_permission!(@project)
-      redirect_with_query(action: :show_project, id: @project.id)
-    elsif request.method == "POST"
-      @title = params[:project][:title].to_s
-      @summary = params[:project][:summary]
-      if @title.blank?
-        flash_error(:add_project_need_title.t)
-      elsif project2 = Project.find_by_title(@title) and
-            project2 != @project
-        flash_error(:add_project_already_exists.t(title: @title))
-      elsif !@project.update(whitelisted_project_params)
-        flash_object_errors(@project)
-      else
-        @project.log_update
-        flash_notice(:runtime_edit_project_success.t(id: @project.id))
-        redirect_with_query(action: :show_project, id: @project.id)
-      end
+      redirect_with_query(
+        action: :show_project,
+        id: @project.id
+      )
+    end
+  end
+
+  alias_method :edit_project, :edit
+
+  def update
+    @title = params[:project][:title].to_s
+    @summary = params[:project][:summary]
+    if @title.blank?
+      flash_error(:add_project_need_title.t)
+    elsif project2 = Project.find_by_title(@title) and
+          project2 != @project
+      flash_error(:add_project_already_exists.t(title: @title))
+    elsif !@project.update(whitelisted_project_params)
+      flash_object_errors(@project)
+    else
+      @project.log_update
+      flash_notice(:runtime_edit_project_success.t(id: @project.id))
+      redirect_with_query(
+        action: :show,
+        id: @project.id
+      )
     end
   end
 
@@ -236,14 +271,14 @@ class ProjectsController < ApplicationController
   # Redirects to show_observation.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_project # :norobots:
+  def destroy # :norobots:
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       else
         @project.log_destroy
         flash_notice(:destroy_project_success.t)
@@ -251,6 +286,8 @@ class ProjectsController < ApplicationController
       end
     end
   end
+
+  alias_method :destroy_project, :destroy
 
   ##############################################################################
   #
@@ -295,7 +332,7 @@ class ProjectsController < ApplicationController
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.where.not(verified: nil).order("login, name").to_a
       if !@project.is_admin?(@user)
-        redirect_with_query(action: :show_project, id: @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       elsif params[:candidate].present?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -359,4 +396,6 @@ class ProjectsController < ApplicationController
   def whitelisted_project_params
     params.require(:project).permit(:title, :summary)
   end
+
+
 end

@@ -7,7 +7,7 @@ class NotificationsController < ApplicationController
   # Inputs: params[:naming], params[:observation]
   # Outputs:
   #   @notifications
-  def show_notifications # :norobots:
+  def show # :norobots:
     pass_query_params
     data = []
     @observation = find_or_goto_index(Observation, params[:id].to_s)
@@ -26,6 +26,8 @@ class NotificationsController < ApplicationController
     end
     @data = data.sort_by { rand }
   end
+
+  alias_method :show_notifications, :show
 
   def name_tracking_emails(user_id)
     QueuedEmail.where(flavor: "QueuedEmail::NameTracking", to_user_id: user_id)

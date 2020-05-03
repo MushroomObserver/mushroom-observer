@@ -1,10 +1,5 @@
 class RssLogsController < ApplicationController
-  # The main page.
-
-  # TODO: Try simpler param handling here?
-  # Incoming requests will have query parameters and Rails can prolly parse
-  # without this controller needing to parse them explicitly
-  # Maybe this is done so the parameters persist through the session?
+  # The main page for logged-in users.
 
   before_action :login_required, except: [
     :index,
@@ -17,46 +12,53 @@ class RssLogsController < ApplicationController
     :show_selected_rss_logs
   ]
 
+  # Set query to all RssLog's and pass to show_selected_rss_logs
+  # This is currently the default main page
   def index
-    # This redefines the query, then calls application_controller.rb action:
-    # show_index_of_objects - which instantiates more variables for view
-    # @timer_start @timer_end @title @num_results @sorts @pages
-    list_rss_logs
-    # TODO: Try skipping this method and just use default rails index!
+    query = create_query(
+      :RssLog,
+      :all,
+      type: @user ? @user.default_rss_type : "all"
+    )
+    show_selected_rss_logs(query)
   end
+
+  alias_method :list_rss_logs, :index
+
+  # TODO: Try simpler param handling here?
+  # Incoming requests will have query parameters and Rails can prolly parse
+  # without this controller needing to parse them explicitly
+  # Maybe this is done so the parameters persist through the session?
 
   # Set a query from POST or given params, and pass to show_selected_rss_logs
   def index_rss_log # :norobots:
-    # If user selected checkboxes in a form submit
-    # TODO: Rails already parses POST params.
-    # figure out why this is in here
     if request.method == "POST"
       types = RssLog.all_types.select { |type| params["show_#{type}"] == "1" }
       types = "all" if types.length == RssLog.all_types.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
       query = find_or_create_query(:RssLog, type: types)
-    # If the parameters are otherwise present in the query string
-    # TODO: Isn't this already parsed by the query?
     elsif params[:type].present?
       types = params[:type].split & (["all"] + RssLog.all_types)
-      query = find_or_create_query(:RssLog, type: types.join(" "))
+      query = find_or_create_query(
+        :RssLog,
+        type: types.join(" ")
+      )
     # If no query params, force the "All types" params
     # TODO: Isn't this already parsed by the query?
     else
       query = find_query(:RssLog)
-      query ||= create_query(:RssLog, :all,
-                             type: @user ? @user.default_rss_type : "all")
+      query ||= create_query(
+        :RssLog,
+        :all,
+        type: @user ? @user.default_rss_type : "all"
+      )
     end
-    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Set query to all RssLog's and pass to show_selected_rss_logs
-  # This is currently the default main page
-  def list_rss_logs
-    query = create_query(:RssLog, :all,
-                         type: @user ? @user.default_rss_type : "all")
-    show_selected_rss_logs(query)
+    show_selected_rss_logs(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
   end
 
   # Show selected search results as a matrix with "list_rss_logs" template.
@@ -65,14 +67,22 @@ class RssLogsController < ApplicationController
     query_params_set(query)
 
     args = {
-      action: :list_rss_logs,
+      action: :index,
       matrix: true,
       include: {
         location: :user,
         name: :user,
-        observation: [:location, :name, { thumb_image: :image_votes }, :user],
+        observation: [
+          :location,
+          :name,
+          { thumb_image: :image_votes },
+          :user
+        ],
         project: :user,
-        species_list: [:location, :user]
+        species_list: [
+          :location,
+          :user
+        ]
       }
     }.merge(args)
 
@@ -85,8 +95,11 @@ class RssLogsController < ApplicationController
         @user.default_rss_type = @types.join(" ")
         @user.save_without_our_callbacks
       elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t,
-                   add_query_param(action: :index_rss_log, make_default: 1)]
+        @links << [ :rss_make_default.t,
+                    add_query_param(
+                      action: :index_rss_log,
+                      make_default: 1
+                    ) ]
       end
     end
 
@@ -94,20 +107,33 @@ class RssLogsController < ApplicationController
   end
 
   # Show a single RssLog.
-  def show_rss_log
+  def show
     pass_query_params
     store_location
-    @rss_log = find_or_goto_index(RssLog, params["id"])
+    @rss_log = find_or_goto_index(
+      RssLog,
+      params["id"]
+    )
   end
+
+  alias_method :show_rss_log, :show
 
   # Go to next RssLog: redirects to show_<object>.
   def next_rss_log # :norobots:
-    redirect_to_next_object(:next, RssLog, params[:id].to_s)
+    redirect_to_next_object(
+      :next,
+      RssLog,
+      params[:id].to_s
+    )
   end
 
   # Go to previous RssLog: redirects to show_<object>.
   def prev_rss_log # :norobots:
-    redirect_to_next_object(:prev, RssLog, params[:id].to_s)
+    redirect_to_next_object(
+      :prev,
+      RssLog,
+      params[:id].to_s
+    )
   end
 
   # This is the site's rss feed.
@@ -124,7 +150,10 @@ class RssLogsController < ApplicationController
   def change_banner # :root: :norobots:
     if !in_admin_mode?
       flash_error(:permission_denied.t)
-      redirect_to(action: :list_rss_logs)
+      redirect_to(
+        controller: :rss_logs,
+        action: :index
+      )
     elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = "X" if @val.blank?
@@ -146,7 +175,10 @@ class RssLogsController < ApplicationController
         str.language.update_localization_file
         str.language.update_export_file
       end
-      redirect_to(action: :list_rss_logs)
+      redirect_to(
+        controller: :rss_logs,
+        action: :index
+      )
     else
       @val = :app_banner_box.l.to_s
     end

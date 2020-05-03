@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 #
-#  = Images Controller
+#  = Image Controller
 #
 #  == Actions
 #
 #  ==== Searches and Indexes
 #  list_images::
+#  index::
 #  images_by_user::
 #  image_search::
 #  advanced_search::
@@ -14,6 +15,7 @@
 #  show_selected_images::
 #
 #  ==== Show Images
+#  show::
 #  show_image::
 #  next_image::
 #  prev_image::
@@ -37,17 +39,22 @@ class ImagesController < ApplicationController
     :image_search,
     :images_by_user,
     :images_for_project,
+    :index,
     :index_image,
     :list_images,
     :next_image,
     :prev_image,
+    :show,
     :show_image,
     :show_original
   ]
 
   before_action :disable_link_prefetching, except: [
     :add_image,
+    :edit,
     :edit_image,
+    :new,
+    :show,
     :show_image
   ]
 
@@ -60,19 +67,28 @@ class ImagesController < ApplicationController
   # Display matrix of selected images, based on current Query.
   def index_image
     query = find_or_create_query(:Image, by: params[:by])
-    show_selected_images(query, id: params[:id].to_s, always_index: true)
+    show_selected_images(
+      query,
+      id: params[:id].to_s,
+      always_index: true
+    )
   end
 
   # Display matrix of images, most recent first.
-  def list_images
+  def index
     if params[:page].to_s.to_i > 1000
-      render(status: 429, content_type: "text/plain", plain: "Your queries are killing our server. There are much better ways to scrape the images from our site. Please contact the webmaster.  And please stop hammering our server!")
+      render(
+        status: 429,
+        content_type: "text/plain",
+        plain: "Your queries are killing our server. There are much better ways to scrape the images from our site. Please contact the webmaster.  And please stop hammering our server!")
       return
     end
 
     query = create_query(:Image, :all, by: :created_at)
     show_selected_images(query)
   end
+
+  alias_method :list_images, :index
 
   # Display matrix of images by a given user.
   def images_by_user
@@ -97,7 +113,7 @@ class ImagesController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (image = Image.safe_find(pattern))
-      redirect_to(action: :show_image, id: image.id)
+      redirect_to(action: "show_image", id: image.id)
     else
       query = create_query(:Image, :pattern_search, pattern: pattern)
       show_selected_images(query)
@@ -110,7 +126,7 @@ class ImagesController < ApplicationController
     show_selected_images(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :search, action: :advanced_search)
+    redirect_to(controller: "observer", action: "advanced_search")
   end
 
   # Show selected search results as a matrix with "list_images" template.
@@ -124,7 +140,7 @@ class ImagesController < ApplicationController
     # about 90%, but for some reason misses 10%, and always the same 10%, but
     # apparently with no rhyme or reason. -JPH 20100204
     args = {
-      action: :list_images,
+      action: "list_images",
       matrix: true,
       include: [:user, { observations: :name }]
     }.merge(args)
@@ -174,7 +190,7 @@ class ImagesController < ApplicationController
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image
-  def show_image
+  def show
     store_location
     @image = find_or_goto_index(Image, params[:id].to_s)
     return false unless @image
@@ -203,8 +219,12 @@ class ImagesController < ApplicationController
        !browser.bot?
       obs_query = find_or_create_query(:Observation)
       obs_query.current = obs
-      img_query = create_query(:Image, :inside_observation,
-                               observation: obs, outer: obs_query)
+      img_query = create_query(
+        :Image,
+        :inside_observation,
+        observation: obs,
+        outer: obs_query
+      )
       query_params_set(img_query)
     end
 
@@ -240,19 +260,33 @@ class ImagesController < ApplicationController
     update_view_stats(@image)
   end
 
+  alias_method :show_image, :show
+
   # For backwards compatibility.
   def show_original
-    redirect_to(action: :show_image, size: "full_size", id: params[:id].to_s)
+    redirect_to(
+      action: :show,
+      size: "full_size",
+      id: params[:id].to_s
+    )
   end
 
   # Go to next image: redirects to show_image.
   def next_image
-    redirect_to_next_object(:next, Image, params[:id].to_s)
+    redirect_to_next_object(
+      :next,
+      Image,
+      params[:id].to_s
+    )
   end
 
   # Go to previous image: redirects to show_image.
   def prev_image
-    redirect_to_next_object(:prev, Image, params[:id].to_s)
+    redirect_to_next_object(
+      :prev,
+      Image,
+      params[:id].to_s
+    )
   end
 
   # Change user's vote and go to next image.
@@ -262,9 +296,16 @@ class ImagesController < ApplicationController
 
     image.change_vote(@user, params[:value])
     if params[:next]
-      redirect_to_next_object(:next, Image, params[:id].to_s)
+      redirect_to_next_object(
+        :next,
+        Image,
+        params[:id].to_s
+      )
     else
-      redirect_with_query(action: :show_image, id: id)
+      redirect_with_query(
+        action: :show_image,
+        id: id
+      )
     end
   end
 
@@ -286,14 +327,17 @@ class ImagesController < ApplicationController
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
-  def add_image
+  def new
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
 
     if !check_permission!(@observation)
-      redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+      redirect_with_query(
+        controller: :observations,
+        action: :show_observation,
+        id: @observation.id
+      )
     elsif request.method != "POST"
       @image = Image.new
       @image.license = @user.license
@@ -306,18 +350,32 @@ class ImagesController < ApplicationController
       init_project_vars_for_add_or_edit(@observation)
     elsif params[:upload].blank?
       flash_warning(:runtime_no_changes.t)
-      redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+      redirect_with_query(
+        controller: :observations,
+        action: :show,
+        id: @observation.id
+      )
     else
-      args = params[:image]
-      i = 1
-      while i < 5 || params[:upload]["image#{i}"].present?
-        process_image(args, params[:upload]["image#{i}"])
-        i += 1
-      end
-      redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+      create
     end
+  end
+
+  alias_method :add_image, :new
+
+  private
+
+  def create
+    args = params[:image]
+    i = 1
+    while i < 5 || params[:upload]["image#{i}"].present?
+      process_image(args, params[:upload]["image#{i}"])
+      i += 1
+    end
+    redirect_with_query(
+      controller: :observations,
+      action: :show_observation,
+      id: @observation.id
+    )
   end
 
   def process_image(args, upload)
@@ -352,6 +410,8 @@ class ImagesController < ApplicationController
     end
   end
 
+  public
+
   # Form for editing date/license/notes on an image.
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
@@ -364,45 +424,20 @@ class ImagesController < ApplicationController
 
     @licenses = License.current_names_and_ids(@image.license)
     if !check_permission!(@image)
-      redirect_with_query(action: :show_image, id: @image)
+      redirect_with_query(
+        action: :show_image,
+        id: @image
+      )
     elsif request.method != "POST"
       init_project_vars_for_add_or_edit(@image)
     else
-      @image.attributes = whitelisted_image_params
-      xargs = {}
-      xargs[:set_date] = @image.when if @image.when_changed?
-      xargs[:set_notes] = @image.notes if @image.notes_changed?
-      if @image.copyright_holder_changed?
-        xargs[:set_copyright_holder] = @image.copyright_holder
-      end
-      if @image.original_name_changed?
-        xargs[:set_original_name] = @image.original_name
-      end
-      xargs[:set_license] = @image.license if @image.license_id_changed?
-      done = false
-      if xargs.empty?
-        if update_projects(@image, params[:project])
-          flash_notice :runtime_image_edit_success.t(id: @image.id)
-        else
-          flash_notice(:runtime_no_changes.t)
-        end
-        done = true
-      elsif !@image.save
-        flash_object_errors(@image)
-      else
-        xargs[:id] = @image
-        @image.log_update
-        flash_notice :runtime_image_edit_success.t(id: @image.id)
-        update_projects(@image, params[:project])
-        done = true
-      end
-      if done
-        redirect_with_query(action: :show_image, id: @image.id)
-      else
-        init_project_vars_for_reload(@image)
-      end
+      update
     end
   end
+
+  alias_method :edit_image, :edit
+
+  private
 
   def init_project_vars_for_add_or_edit(obs_or_img)
     @projects = User.current.projects_member(order: :title)
@@ -410,6 +445,42 @@ class ImagesController < ApplicationController
     obs_or_img.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
       @project_checks[proj.id] = true
+    end
+  end
+
+  def update
+    @image.attributes = whitelisted_image_params
+    xargs = {}
+    xargs[:set_date] = @image.when if @image.when_changed?
+    xargs[:set_notes] = @image.notes if @image.notes_changed?
+    if @image.copyright_holder_changed?
+      xargs[:set_copyright_holder] = @image.copyright_holder
+    end
+    if @image.original_name_changed?
+      xargs[:set_original_name] = @image.original_name
+    end
+    xargs[:set_license] = @image.license if @image.license_id_changed?
+    done = false
+    if xargs.empty?
+      if update_projects(@image, params[:project])
+        flash_notice :runtime_image_edit_success.t(id: @image.id)
+      else
+        flash_notice(:runtime_no_changes.t)
+      end
+      done = true
+    elsif !@image.save
+      flash_object_errors(@image)
+    else
+      xargs[:id] = @image
+      @image.log_update
+      flash_notice :runtime_image_edit_success.t(id: @image.id)
+      update_projects(@image, params[:project])
+      done = true
+    end
+    if done
+      redirect_with_query(action: :show_image, id: @image.id)
+    else
+      init_project_vars_for_reload(@image)
     end
   end
 
@@ -429,6 +500,8 @@ class ImagesController < ApplicationController
                                  end
     end
   end
+
+  public
 
   def update_projects(img, checks)
     any_changes = false
@@ -492,22 +565,22 @@ class ImagesController < ApplicationController
       next_state = this_state.next
     end
     if !check_permission!(@image)
-      redirect_with_query(action: :show_image, id: @image.id)
+      redirect_with_query(action: "show_image", id: @image.id)
     else
       @image.log_destroy
       @image.destroy
       flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
       if next_state
         query_params_set(next_state)
-        redirect_with_query(action: :show_image, id: next_state.current_id)
+        redirect_with_query(action: "show_image", id: next_state.current_id)
       else
-        redirect_to(action: :list_images)
+        redirect_to(action: "list_images")
       end
     end
   end
 
   # Callback to remove a single image from an observation.
-  # Linked from: observation/edit_observation
+  # Linked from: observer/edit_observation
   # Inputs: params[:image_id], params[:observation_id]
   # Redirects to show_observation.
   def remove_image
@@ -527,8 +600,8 @@ class ImagesController < ApplicationController
       @observation.log_remove_image(@image)
       flash_notice(:runtime_image_remove_success.t(id: @image.id))
     end
-    redirect_with_query(controller: :observations,
-                        action: :show_observation, id: @observation.id)
+    redirect_with_query(controller: "observer",
+                        action: "show_observation", id: @observation.id)
   end
 
   def serve_reuse_form(params)
@@ -566,7 +639,7 @@ class ImagesController < ApplicationController
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: observation/show_observation and account/profile
+  # Linked from: observer/show_observation and account/profile
   # Inputs:
   #   params[:mode]       "observation" or "profile"
   #   params[:obs_id]     (observation)
@@ -591,8 +664,8 @@ class ImagesController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) &&
        !check_permission!(@observation)
-      redirect_with_query(controller: :observations,
-                          action: :show_observation, id: @observation.id)
+      redirect_with_query(controller: "observer",
+                          action: "show_observation", id: @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -610,8 +683,8 @@ class ImagesController < ApplicationController
           error = image.strip_gps!
           flash_error(:runtime_failed_to_strip_gps.t(msg: error)) if error
         end
-        redirect_with_query(controller: :observations,
-                            action: :show_observation, id: @observation.id)
+        redirect_with_query(controller: "observer",
+                            action: "show_observation", id: @observation.id)
         done = true
 
       else
@@ -622,7 +695,7 @@ class ImagesController < ApplicationController
           @user.update(image: image)
           flash_notice(:runtime_image_changed_your_image.t(id: image.id))
         end
-        redirect_to(controller: :users, action: :show_user,
+        redirect_to(controller: "observer", action: "show_user",
                     id: @user.id)
         done = true
       end
@@ -704,9 +777,9 @@ class ImagesController < ApplicationController
     end
     if params[:size].blank? ||
        params[:size].to_sym == (@user ? @user.image_size : :medium)
-      redirect_with_query(action: :show_image, id: image)
+      redirect_with_query(action: "show_image", id: image)
     else
-      redirect_with_query(action: :show_image, id: image,
+      redirect_with_query(action: "show_image", id: image,
                           size: params[:size])
     end
   end
@@ -821,7 +894,7 @@ class ImagesController < ApplicationController
           :image_vote_anonymity_invalid_submit_button.l(label: submit)
         )
       end
-      redirect_to(controller: :account, action: :prefs)
+      redirect_to(controller: "account", action: "prefs")
     else
       @num_anonymous = ImageVote.connection.select_value %(
         SELECT count(id) FROM image_votes

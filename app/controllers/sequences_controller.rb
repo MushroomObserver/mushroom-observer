@@ -10,10 +10,12 @@
 #
 class SequencesController < ApplicationController
   before_action :login_required, except: [
+    :index,
     :index_sequence,
     :list_sequences,
     :sequence_search,
     :observation_index,
+    :show,
     :show_sequence,
     :next_sequence,
     :prev_sequence
@@ -24,11 +26,13 @@ class SequencesController < ApplicationController
     show_selected_sequences(query, id: params[:id].to_s, always_index: true)
   end
 
-  def list_sequences # :norobots:
+  def index # :norobots:
     store_location
     query = create_query(:Sequence, :all)
     show_selected_sequences(query)
   end
+
+  alias_method :list_sequences, :index
 
   # Display list of Sequences whose text matches a string pattern.
   def sequence_search # :norobots:
@@ -55,11 +59,13 @@ class SequencesController < ApplicationController
     show_selected_sequences(query, always_index: true)
   end
 
-  def show_sequence
+  def show
     pass_query_params
     store_location
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
   end
+
+  alias_method :show_sequence, :show
 
   def next_sequence # :norobots:
     redirect_to_next_object(:next, Sequence, params[:id].to_s)
@@ -69,16 +75,28 @@ class SequencesController < ApplicationController
     redirect_to_next_object(:prev, Sequence, params[:id].to_s)
   end
 
-  def create_sequence
+  def new
     store_location
     pass_query_params
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
-
-    build_sequence if request.method == "POST"
   end
 
-  def edit_sequence
+  alias_method :create_sequence, :new
+
+  def create
+    @sequence = @observation.sequences.new
+    @sequence.attributes = whitelisted_sequence_params
+    @sequence.user = @user
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_with_query(@observation.show_link_args)
+    else
+      flash_object_errors(@sequence)
+    end
+  end
+
+  def edit
     store_location
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
@@ -88,12 +106,22 @@ class SequencesController < ApplicationController
     if !check_permission(@sequence)
       flash_warning(:permission_denied.t)
       redirect_with_query(@sequence.observation.show_link_args)
-    elsif request.method == "POST"
-      save_edits
     end
   end
 
-  def destroy_sequence
+  alias_method :edit_sequence, :edit
+
+  def update
+    @sequence.attributes = whitelisted_sequence_params
+    if @sequence.save
+      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
+      redirect_with_query(@back_object.show_link_args)
+    else
+      flash_object_errors(@sequence)
+    end
+  end
+
+  def destroy
     pass_query_params
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
     return unless @sequence
@@ -112,31 +140,11 @@ class SequencesController < ApplicationController
     end
   end
 
+  alias_method :destroy_sequence, :destroy
+
   ##############################################################################
 
   private
-
-  def build_sequence
-    @sequence = @observation.sequences.new
-    @sequence.attributes = whitelisted_sequence_params
-    @sequence.user = @user
-    if @sequence.save
-      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@observation.show_link_args)
-    else
-      flash_object_errors(@sequence)
-    end
-  end
-
-  def save_edits
-    @sequence.attributes = whitelisted_sequence_params
-    if @sequence.save
-      flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      redirect_with_query(@back_object.show_link_args)
-    else
-      flash_object_errors(@sequence)
-    end
-  end
 
   def figure_out_where_to_go_back_to
     @back = params[:back]

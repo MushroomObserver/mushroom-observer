@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see app/controllers/name_controller.rb
-class NameController
+class NamesController
   def propagate_classification
     pass_query_params
     name = find_or_goto_index(Name, params[:id])

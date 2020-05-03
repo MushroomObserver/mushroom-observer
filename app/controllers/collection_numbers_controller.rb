@@ -2,9 +2,11 @@
 class CollectionNumbersController < ApplicationController
   before_action :login_required, except: [
     :index_collection_number,
+    :index,
     :list_collection_numbers,
     :collection_number_search,
     :observation_index,
+    :show,
     :show_collection_number,
     :next_collection_number,
     :prev_collection_number
@@ -18,11 +20,13 @@ class CollectionNumbersController < ApplicationController
   end
 
   # Show list of collection_numbers.
-  def list_collection_numbers # :norobots:
+  def index # :norobots:
     store_location
     query = create_query(:CollectionNumber, :all)
     show_selected_collection_numbers(query)
   end
+
+  alias_method :list_collection_numbers, :index
 
   # Display list of CollectionNumbers whose text matches a string pattern.
   def collection_number_search # :norobots:
@@ -49,12 +53,14 @@ class CollectionNumbersController < ApplicationController
     show_selected_collection_numbers(query, always_index: true)
   end
 
-  def show_collection_number
+  def show
     store_location
     pass_query_params
     @canonical_url = CollectionNumber.show_url(params[:id])
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
+
+  alias_method :show_collection_number, :show
 
   def next_collection_number # :norobots:
     redirect_to_next_object(:next, CollectionNumber, params[:id].to_s)
@@ -64,7 +70,7 @@ class CollectionNumbersController < ApplicationController
     redirect_to_next_object(:prev, CollectionNumber, params[:id].to_s)
   end
 
-  def create_collection_number # :norobots:
+  def new # :norobots:
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -74,82 +80,13 @@ class CollectionNumbersController < ApplicationController
     @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
-    if request.method == "GET"
-      @collection_number = CollectionNumber.new(name: @user.legal_name)
-    elsif request.method == "POST"
-      post_create_collection_number
-    else
-      redirect_back_or_default("/")
-    end
+    @collection_number = CollectionNumber.new(name: @user.legal_name)
+    redirect_back_or_default("/") unless @collection_number
   end
 
-  def edit_collection_number # :norobots:
-    store_location
-    pass_query_params
-    @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
+  alias_method :create_collection_number, :new
 
-    figure_out_where_to_go_back_to
-    return unless make_sure_can_edit!(@collection_number)
-
-    if request.method == "GET"
-      # nothing
-    elsif request.method == "POST"
-      post_edit_collection_number
-    else
-      redirect_back_or_default("/")
-    end
-  end
-
-  def remove_observation # :norobots:
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-
-    @observation = find_or_goto_index(Observation, params[:obs])
-    return unless @observation
-    return unless make_sure_can_delete!(@collection_number)
-
-    @collection_number.remove_observation(@observation)
-    redirect_with_query(@observation.show_link_args)
-  end
-
-  def destroy_collection_number # :norobots:
-    pass_query_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
-    return unless @collection_number
-    return unless make_sure_can_delete!(@collection_number)
-
-    @collection_number.destroy
-    redirect_with_query(action: :index_collection_number)
-  end
-
-  ##############################################################################
-
-  private
-
-  def show_selected_collection_numbers(query, args = {})
-    args = {
-      action: :list_collection_numbers,
-      letters: "collection_numbers.name",
-      num_per_page: 100
-    }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",       :sort_by_name.t],
-      ["number",     :sort_by_number.t],
-      ["created_at", :sort_by_created_at.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ]
-
-    show_index_of_objects(query, args)
-  end
-
-  def post_create_collection_number
+  def create
     @collection_number =
       CollectionNumber.new(whitelisted_collection_number_params)
     normalize_parameters
@@ -171,7 +108,22 @@ class CollectionNumbersController < ApplicationController
     redirect_to_observation_or_collection_number
   end
 
-  def post_edit_collection_number
+  alias_method :post_create_collection_number, :create
+
+  def edit # :norobots:
+    store_location
+    pass_query_params
+    @layout = calc_layout_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    figure_out_where_to_go_back_to
+    return unless make_sure_can_edit!(@collection_number)
+  end
+
+  alias_method :edit_collection_number, :edit
+
+  def update
     old_format_name = @collection_number.format_name
     @collection_number.attributes = whitelisted_collection_number_params
     normalize_parameters
@@ -198,6 +150,57 @@ class CollectionNumbersController < ApplicationController
       @collection_number = @other_number
     end
     redirect_to_observation_or_collection_number
+  end
+
+  alias_method :post_edit_collection_number, :update
+
+  def remove_observation # :norobots:
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    @observation = find_or_goto_index(Observation, params[:obs])
+    return unless @observation
+    return unless make_sure_can_delete!(@collection_number)
+
+    @collection_number.remove_observation(@observation)
+    redirect_with_query(@observation.show_link_args)
+  end
+
+  def destroy # :norobots:
+    pass_query_params
+    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+    return unless make_sure_can_delete!(@collection_number)
+
+    @collection_number.destroy
+    redirect_with_query(action: :index_collection_number)
+  end
+
+  alias_method :destroy_collection_number, :destroy
+
+  ##############################################################################
+
+  private
+
+  def show_selected_collection_numbers(query, args = {})
+    args = {
+      action: :list_collection_numbers,
+      letters: "collection_numbers.name",
+      num_per_page: 100
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ["name",       :sort_by_name.t],
+      ["number",     :sort_by_number.t],
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t]
+    ]
+
+    show_index_of_objects(query, args)
   end
 
   def whitelisted_collection_number_params

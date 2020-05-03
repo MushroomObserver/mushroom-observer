@@ -24,7 +24,7 @@
 #                                by given user.
 #  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited
 #                                by given user.
-#  show_name::                   Show info about name.
+#  show::                        Show info about name.
 #  show_past_name::              Show past versions of name info.
 #  prev_name::                   Show previous name in index.
 #  next_name::                   Show next name in index.
@@ -72,6 +72,7 @@ class NamesController < ApplicationController
     :authored_names,
     :eol,
     :eol_preview,
+    :index,
     :index_name,
     :index_name_description,
     :map,
@@ -102,6 +103,7 @@ class NamesController < ApplicationController
     :create_name_description,
     :deprecate_name,
     :edit_name_description,
+    :show,
     :show_name,
     :show_name_description,
     :show_past_name,
@@ -117,25 +119,40 @@ class NamesController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name
-    query = find_or_create_query(:Name, by: params[:by])
+    query = find_or_create_query(
+      :Name,
+      by: params[:by]
+    )
     show_selected_names(query, id: params[:id].to_s, always_index: true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def list_names
-    query = create_query(:Name, :all, by: :name)
+  def index
+    query = create_query(
+      :Name,
+      :all,
+      by: :name
+    )
     show_selected_names(query)
   end
 
+  alias_method :list_names, :index
+
   # Display list of names that have observations.
   def observation_index
-    query = create_query(:Name, :with_observations)
+    query = create_query(
+      :Name,
+      :with_observations
+    )
     show_selected_names(query)
   end
 
   # Display list of names that have authors.
   def authored_names
-    query = create_query(:Name, :with_descriptions)
+    query = create_query(
+      :Name,
+      :with_descriptions
+    )
     show_selected_names(query)
   end
 
@@ -144,7 +161,11 @@ class NamesController < ApplicationController
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
-    query = create_query(:Name, :by_user, user: user)
+    query = create_query(
+      :Name,
+      :by_user,
+      user: user
+    )
     show_selected_names(query)
   end
 
@@ -156,7 +177,11 @@ class NamesController < ApplicationController
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
-    query = create_query(:Name, :by_editor, user: user)
+    query = create_query(
+      :Name,
+      :by_editor,
+      user: user
+    )
     show_selected_names(query)
   end
 
@@ -180,9 +205,12 @@ class NamesController < ApplicationController
       LIMIT 100
     )
     @help = :needed_descriptions_help
-    query = create_query(:Name, :in_set,
-                         ids: data.map(&:first),
-                         title: :needed_descriptions_title.l)
+    query = create_query(
+      :Name,
+      :in_set,
+      ids: data.map(&:first),
+      title: :needed_descriptions_title.l
+    )
     show_selected_names(query, num_per_page: 100)
   end
 
@@ -191,7 +219,10 @@ class NamesController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) &&
        (name = Name.safe_find(pattern))
-      redirect_to(action: :show_name, id: name.id)
+      redirect_to(
+        action: :show,
+        id: name.id
+      )
     else
       search = PatternSearch::Name.new(pattern)
       if search.errors.any?
@@ -212,7 +243,10 @@ class NamesController < ApplicationController
     show_selected_names(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :search, action: :advanced_search_form)
+    redirect_to(
+      controller: :search,
+      action: :advanced_search_form
+    )
   end
 
   # Used to test pagination.
@@ -288,14 +322,21 @@ class NamesController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name_description
-    query = find_or_create_query(:NameDescription, by: params[:by])
+    query = find_or_create_query(
+      :NameDescription,
+      by: params[:by]
+    )
     show_selected_name_descriptions(query, id: params[:id].to_s,
                                            always_index: true)
   end
 
   # Display list of all (correctly-spelled) name_descriptions in the database.
   def list_name_descriptions
-    query = create_query(:NameDescription, :all, by: :name)
+    query = create_query(
+      :NameDescription,
+      :all,
+      by: :name
+    )
     show_selected_name_descriptions(query)
   end
 
@@ -304,7 +345,11 @@ class NamesController < ApplicationController
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
-    query = create_query(:NameDescription, :by_author, user: user)
+    query = create_query(
+      :NameDescription,
+      :by_author,
+      user: user
+    )
     show_selected_name_descriptions(query)
   end
 
@@ -313,7 +358,11 @@ class NamesController < ApplicationController
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     return unless user
 
-    query = create_query(:NameDescription, :by_editor, user: user)
+    query = create_query(
+      :NameDescription,
+      :by_editor,
+      user: user
+    )
     show_selected_name_descriptions(query)
   end
 
@@ -349,7 +398,7 @@ class NamesController < ApplicationController
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
-  def show_name
+  def show
     pass_query_params
     store_location
     clear_query_in_session
@@ -399,6 +448,8 @@ class NamesController < ApplicationController
     @first_consensus  = @consensus_query.results(limit: 1).first
     @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
   end
+
+  alias_method :show_name, :show
 
   # Show past version of Name.  Accessible only from show_name page.
   def show_past_name

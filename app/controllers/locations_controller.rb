@@ -9,6 +9,7 @@ class LocationsController < ApplicationController
   before_action :login_required, except: [
     :advanced_search,
     :help,
+    :index,
     :index_location,
     :index_location_description,
     :list_by_country,
@@ -34,8 +35,11 @@ class LocationsController < ApplicationController
   before_action :disable_link_prefetching, except: [
     :create_location,
     :create_location_description,
+    :edit,
     :edit_location,
     :edit_location_description,
+    :new,
+    :show,
     :show_location,
     :show_location_description,
     :show_past_location,
@@ -72,10 +76,12 @@ class LocationsController < ApplicationController
   end
 
   # Displays a list of all locations.
-  def list_locations
+  def index
     query = create_query(:Location, :all, by: :name)
     show_selected_locations(query, link_all_sorts: true)
   end
+
+  alias_method :list_locations, :index
 
   # Display list of locations that a given user is author on.
   def locations_by_user
@@ -112,7 +118,10 @@ class LocationsController < ApplicationController
     show_selected_locations(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
-    redirect_to(controller: :search, action: :advanced_search_form)
+    redirect_to(
+      controller: :search,
+      action: :advanced_search_form
+    )
   end
 
   # Show selected search results as a list with 'list_locations' template.
@@ -341,7 +350,7 @@ class LocationsController < ApplicationController
   ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
-  def show_location
+  def show
     store_location
     pass_query_params
     clear_query_in_session
@@ -353,8 +362,7 @@ class LocationsController < ApplicationController
     @location = find_or_goto_index(Location, loc_id)
     return unless @location
 
-    @canonical_url = "#{MO.http_domain}/locations/show_location/"\
-                     "#{@location.id}"
+    @canonical_url = "#{MO.http_domain}/locations/#{@location.id}"
 
     # Load default description if user didn't request one explicitly.
     desc_id = @location.description_id if desc_id.blank?
@@ -375,6 +383,8 @@ class LocationsController < ApplicationController
       @location.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
   end
+
+  alias_method :show_location, :show
 
   # Show just a LocationDescription.
   def show_location_description
@@ -399,14 +409,20 @@ class LocationsController < ApplicationController
     elsif @description.source_type == :project
       flash_error(:runtime_show_draft_denied.t)
       if (project = @description.project)
-        redirect_to(controller: :projects, action: :show_project,
-                    id: project.id)
+        redirect_to(
+          controller: :projects,
+          action: :show_project,
+          id: project.id
+        )
       else
         redirect_to(action: :show_location, id: @description.location_id)
       end
     else
       flash_error(:runtime_show_description_denied.t)
-      redirect_to(action: :show_location, id: @description.location_id)
+      redirect_to(
+        action: :show,
+        id: @description.location_id
+      )
     end
   end
 
@@ -421,7 +437,10 @@ class LocationsController < ApplicationController
       @location.revert_to(params[:version].to_i)
     else
       flash_error(:show_past_location_no_version.t)
-      redirect_to(action: :show_location, id: @location.id)
+      redirect_to(
+        action: :show,
+        id: @location.id
+      )
     end
   end
 
@@ -477,7 +496,7 @@ class LocationsController < ApplicationController
   #  :section: Create/Edit Location
   #
   ##############################################################################
-  def create_location
+  def new
     store_location
     pass_query_params
 
@@ -529,89 +548,113 @@ class LocationsController < ApplicationController
 
     # Submit form.
     else
-      # Set to true below if created successfully, or if a matching location
-      # already exists.  In either case, we're done with this form.
-      done = false
+      create
+    end
+  end
 
-      # Look to see if the display name is already in use.
-      # If it is then just use that location and ignore the other values.
-      # Probably should be smarter with warnings and merges and such...
-      db_name = Location.user_name(@user, @display_name)
-      @location = Location.find_by_name_or_reverse_name(db_name)
+  alias_method :create_location, :new
 
-      # Location already exists.
-      if @location
-        flash_warning(:runtime_location_already_exists.t(name: @display_name))
-        done = true
+  private
 
-      # Need to create location.
-      else
-        @location = Location.new(whitelisted_location_params)
-        @location.display_name = @display_name # (strip_squozen)
+  def create
+    # Set to true below if created successfully, or if a matching location
+    # already exists.  In either case, we're done with this form.
+    done = false
 
-        # Validate name.
-        @dubious_where_reasons = []
-        if @display_name != @approved_name
-          @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        end
+    # Look to see if the display name is already in use.
+    # If it is then just use that location and ignore the other values.
+    # Probably should be smarter with warnings and merges and such...
+    db_name = Location.user_name(@user, @display_name)
+    @location = Location.find_by_name_or_reverse_name(db_name)
 
-        if @dubious_where_reasons.empty?
-          if @location.save
-            flash_notice(:runtime_location_success.t(id: @location.id))
-            done = true
-          else
-            # Failed to create location
-            flash_object_errors @location
-          end
-        end
+    # Location already exists.
+    if @location
+      flash_warning(:runtime_location_already_exists.t(name: @display_name))
+      done = true
+
+    # Need to create location.
+    else
+      @location = Location.new(whitelisted_location_params)
+      @location.display_name = @display_name # (strip_squozen)
+
+      # Validate name.
+      @dubious_where_reasons = []
+      if @display_name != @approved_name
+        @dubious_where_reasons = Location.dubious_name?(db_name, true)
       end
 
-      # If done, update any observations at @display_name,
-      # and set user's primary location if called from profile.
-      if done
-        if @original_name.present?
-          db_name = Location.user_name(@user, @original_name)
-          Observation.define_a_location(@location, db_name)
-          SpeciesList.define_a_location(@location, db_name)
-        end
-        if @set_observation
-          if unshown_notifications?(@user, :naming)
-            redirect_to(controller: :notifications, action: :show_notifications)
-          else
-            redirect_to(controller: :observations,
-                        action: :show_observation,
-                        id: @set_observation)
-          end
-        elsif @set_species_list
-          redirect_to(controller: :species_lists, action: :show_species_list,
-                      id: @set_species_list)
-        elsif @set_herbarium
-          if (herbarium = Herbarium.safe_find(@set_herbarium))
-            herbarium.location = @location
-            herbarium.save
-            redirect_to(controller: :herbaria,
-                        action: :show_herbarium,
-                        id: @set_herbarium)
-          end
-        elsif @set_user
-          if (user = User.safe_find(@set_user))
-            user.location = @location
-            user.save
-            redirect_to(controller: :users,
-                        action: :show_user,
-                        id: @set_user)
-          end
+      if @dubious_where_reasons.empty?
+        if @location.save
+          flash_notice(:runtime_location_success.t(id: @location.id))
+          done = true
         else
-          redirect_to(controller: :locations,
-                      action: :show_location,
-                      id: @location.id)
+          # Failed to create location
+          flash_object_errors @location
         end
+      end
+    end
+
+    # If done, update any observations at @display_name,
+    # and set user's primary location if called from profile.
+    if done
+      if @original_name.present?
+        db_name = Location.user_name(@user, @original_name)
+        Observation.define_a_location(@location, db_name)
+        SpeciesList.define_a_location(@location, db_name)
+      end
+      if @set_observation
+        if unshown_notifications?(@user, :naming)
+          redirect_to(
+            controller: :notifications,
+            action: :show_notifications
+          )
+        else
+          redirect_to(
+            controller: :observations,
+            action: :show_observation,
+            id: @set_observation
+          )
+        end
+      elsif @set_species_list
+        redirect_to(
+          controller: :species_lists,
+          action: :show_species_list,
+          id: @set_species_list
+        )
+      elsif @set_herbarium
+        if (herbarium = Herbarium.safe_find(@set_herbarium))
+          herbarium.location = @location
+          herbarium.save
+          redirect_to(
+            controller: :herbaria,
+            action: :show_herbarium,
+            id: @set_herbarium
+          )
+        end
+      elsif @set_user
+        if (user = User.safe_find(@set_user))
+          user.location = @location
+          user.save
+          redirect_to(
+            controller: :users,
+            action: :show_user,
+            id: @set_user
+          )
+        end
+      else
+        redirect_to(
+          controller: :locations,
+          action: :show_location,
+          id: @location.id
+        )
       end
     end
   end
 
+  public
+
   # :prefetch: :norobots:
-  def edit_location
+  def edit
     store_location
     pass_query_params
     @location = find_or_goto_index(Location, params[:id].to_s)
@@ -619,22 +662,28 @@ class LocationsController < ApplicationController
 
     params[:location] ||= {}
     @display_name = @location.display_name
-    post_edit_location if request.method == "POST"
+    update if request.method == "POST"
   end
 
-  def post_edit_location
+  alias_method :edit_location, :edit
+
+  private
+
+  def update
     @display_name = params[:location][:display_name].strip_squeeze
     db_name = Location.user_name(@user, @display_name)
     merge = Location.find_by_name_or_reverse_name(db_name)
     if merge && merge != @location
-      post_edit_location_merge(merge)
+      update_location_merge(merge)
     else
-      post_edit_location_change(db_name)
+      update_location_change(db_name)
     end
   end
 
+  alias_method :post_edit_location, :update
+
   # Merge this location with another.
-  def post_edit_location_merge(merge)
+  def update_location_merge(merge)
     if !@location.mergable? && merge.mergable?
       @location, merge = merge, @location
     end
@@ -642,18 +691,22 @@ class LocationsController < ApplicationController
       merge.merge(@location)
       merge.save if merge.changed?
       @location = merge
-      redirect_to(@location.show_link_args)
+      redirect_to(
+        @location.show_link_args
+      )
     else
-      redirect_with_query(controller: :email,
-                          action: :email_merge_request,
-                          type: :Location,
-                          old_id: @location.id,
-                          new_id: merge.id)
+      redirect_with_query(
+        controller: :email,
+        action: :email_merge_request,
+        type: :Location,
+        old_id: @location.id,
+        new_id: merge.id
+      )
     end
   end
 
   # Just change this location in place.
-  def post_edit_location_change(db_name)
+  def update_location_change(db_name)
     @dubious_where_reasons = []
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
@@ -682,6 +735,8 @@ class LocationsController < ApplicationController
     end
   end
 
+  # TODO NIMMO: Doesn't this belong in a new LocationDescription controller?
+  # This seems like the "new, create, edit, update" of that controller.
   def create_location_description
     store_location
     pass_query_params
@@ -703,21 +758,28 @@ class LocationsController < ApplicationController
         @description.save
 
         # Log action in parent location.
-        @description.location.log(:log_description_created,
-                                  user: @user.login, touch: true,
-                                  name: @description.unique_partial_format_name)
+        @description.location.log(
+          :log_description_created,
+          user: @user.login,
+          touch: true,
+          name: @description.unique_partial_format_name
+        )
 
         flash_notice(
           :runtime_location_description_success.t(id: @description.id)
         )
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
+        redirect_to(
+          action: :show_location_description,
+          id: @description.id
+        )
 
       else
         flash_object_errors @description
       end
     end
   end
+
+  public
 
   def edit_location_description
     store_location
@@ -737,8 +799,10 @@ class LocationsController < ApplicationController
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
+        redirect_to(
+          action: :show_location_description,
+          id: @description.id
+        )
 
       # There were error(s).
       elsif !@description.save
@@ -751,9 +815,12 @@ class LocationsController < ApplicationController
         )
 
         # Log action in parent location.
-        @description.location.log(:log_description_updated,
-                                  user: @user.login, touch: true,
-                                  name: @description.unique_partial_format_name)
+        @description.location.log(
+          :log_description_updated,
+          user: @user.login,
+          touch: true,
+          name: @description.unique_partial_format_name
+        )
 
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == "true") &&
@@ -776,34 +843,49 @@ class LocationsController < ApplicationController
           end
         end
 
-        redirect_to(action: :show_location_description,
-                    id: @description.id)
+        redirect_to(
+          action: :show_location_description,
+          id: @description.id
+        )
       end
     end
   end
+
+  private
 
   def destroy_location_description
     pass_query_params
     @description = LocationDescription.find(params[:id].to_s)
     if in_admin_mode? || @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
-      @description.location.log(:log_description_destroyed,
-                                user: @user.login, touch: true,
-                                name: @description.unique_partial_format_name)
+      @description.location.log(
+        :log_description_destroyed,
+        user: @user.login,
+        touch: true,
+        name: @description.unique_partial_format_name
+      )
       @description.destroy
-      redirect_with_query(action: :show_location,
-                          id: @description.location_id)
+      redirect_with_query(
+        action: :show_location,
+        id: @description.location_id
+      )
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if in_admin_mode? || @description.is_reader?(@user)
-        redirect_with_query(action: :show_location_description,
-                            id: @description.id)
+        redirect_with_query(
+          action: :show_location_description,
+          id: @description.id
+        )
       else
-        redirect_with_query(action: :show_location,
-                            id: @description.location_id)
+        redirect_with_query(
+          action: :show_location,
+          id: @description.location_id
+        )
       end
     end
   end
+
+  public
 
   ##############################################################################
   #
