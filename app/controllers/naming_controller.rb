@@ -7,6 +7,26 @@ class NamingController < ApplicationController
     :edit
   ]
 
+  def new # :prefetch: :norobots:
+    pass_query_params
+    @params = NamingParams.new(params[:name])
+    @params.observation = find_or_goto_index(Observation, params[:id].to_s)
+    fill_in_reference_for_suggestions(@params) if params[:name].present?
+    return unless @params.observation
+  end
+
+  def create
+    if rough_draft && can_save?
+      save_changes
+      check_for_notifications
+    else # If anything failed reload the form.
+      flash_object_errors(@params.naming) if @params.name_missing?
+      @params.add_reason(params[:reason])
+    end
+  end
+
+  alias_method :create_post, :create
+
   def edit # :prefetch: :norobots:
     pass_query_params
     @params = NamingParams.new
@@ -16,18 +36,22 @@ class NamingController < ApplicationController
 
     # TODO: Can this get moved into NamingParams#naming=
     @params.vote = naming.first_vote
-    request.method == "POST" ? edit_post : @params.edit_init
+    @params.edit_init
   end
 
-  def create # :prefetch: :norobots:
-    pass_query_params
-    @params = NamingParams.new(params[:name])
-    @params.observation = find_or_goto_index(Observation, params[:id].to_s)
-    fill_in_reference_for_suggestions(@params) if params[:name].present?
-    return unless @params.observation
-
-    create_post if request.method == "POST"
+  def update
+    if validate_name &&
+       (@params.name_not_changing? ||
+        unproposed_name(:runtime_edit_naming_someone_else) &&
+        valid_use_of_imageless(@params.name, @params.observation))
+      @params.need_new_naming? ? create_new_naming : change_naming
+      default_redirect(@params.observation)
+    else
+      @params.add_reason(params[:reason])
+    end
   end
+
+  alias_method :edit_post, :udpate
 
   def destroy # :norobots:
     pass_query_params
@@ -49,16 +73,6 @@ class NamingController < ApplicationController
       flash_error(:runtime_destroy_naming_failed.t(id: naming.id))
     else
       true
-    end
-  end
-
-  def create_post
-    if rough_draft && can_save?
-      save_changes
-      check_for_notifications
-    else # If anything failed reload the form.
-      flash_object_errors(@params.naming) if @params.name_missing?
-      @params.add_reason(params[:reason])
     end
   end
 
@@ -106,18 +120,6 @@ class NamingController < ApplicationController
     redirect_with_query(controller: :observations,
                         action: action,
                         id: obs.id)
-  end
-
-  def edit_post
-    if validate_name &&
-       (@params.name_not_changing? ||
-        unproposed_name(:runtime_edit_naming_someone_else) &&
-        valid_use_of_imageless(@params.name, @params.observation))
-      @params.need_new_naming? ? create_new_naming : change_naming
-      default_redirect(@params.observation)
-    else
-      @params.add_reason(params[:reason])
-    end
   end
 
   def create_new_naming

@@ -124,7 +124,7 @@ class CommentsController < ApplicationController
       flash_error(:runtime_invalid.t(type: '"type"',
                                      value: params[:type].to_s))
       redirect_back_or_default(
-        action: :list_comments
+        action: :index
       )
     elsif target = find_or_goto_index(model, params[:id].to_s)
       query = create_query(
@@ -143,7 +143,7 @@ class CommentsController < ApplicationController
     if pattern.match(/^\d+$/) &&
        (comment = Comment.safe_find(pattern))
       redirect_to(
-        action: :show_comment,
+        action: :show,
         id: comment.id
       )
     else

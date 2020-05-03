@@ -2,6 +2,7 @@
 class HerbariumRecordsController < ApplicationController
   before_action :login_required, except: [
     :index_herbarium_record,
+    :index,
     :list_herbarium_records,
     :herbarium_record_search,
     :herbarium_index,
@@ -19,11 +20,13 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # Show list of herbarium_records.
-  def list_herbarium_records
+  def index
     store_location
     query = create_query(:HerbariumRecord, :all, by: :herbarium_label)
     show_selected_herbarium_records(query)
   end
+
+  alias_method :list_herbarium_records, :index
 
   # Display list of HerbariumRecords whose text matches a string pattern.
   def herbarium_record_search # :norobots:
@@ -57,13 +60,15 @@ class HerbariumRecordsController < ApplicationController
     show_selected_herbarium_records(query, always_index: true)
   end
 
-  def show_herbarium_record
+  def show
     store_location
     pass_query_params
     @layout = calc_layout_params
     @canonical_url = HerbariumRecord.show_url(params[:id])
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
   end
+
+  alias_method :show_herbarium_record, :show
 
   def next_herbarium_record # :norobots:
     redirect_to_next_object(:next, HerbariumRecord, params[:id].to_s)
@@ -73,7 +78,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_to_next_object(:prev, HerbariumRecord, params[:id].to_s)
   end
 
-  def create_herbarium_record
+  def new
     store_location
     pass_query_params
     @layout      = calc_layout_params
@@ -90,7 +95,34 @@ class HerbariumRecordsController < ApplicationController
     end
   end
 
-  def edit_herbarium_record # :norobots:
+  alias_method :create_herbarium_record, :new
+
+  def create
+    @herbarium_record =
+      HerbariumRecord.new(whitelisted_herbarium_record_params)
+    normalize_parameters
+    if !validate_herbarium_name! ||
+       !can_add_record_to_herbarium?
+      return
+    elsif herbarium_label_free?
+      @herbarium_record.save
+      @herbarium_record.add_observation(@observation)
+    elsif @other_record.can_edit?
+      flash_warning(:create_herbarium_record_already_used.t) if
+        @other_record.observations.any?
+      @other_record.add_observation(@observation)
+    else
+      flash_error(:create_herbarium_record_already_used_by_someone_else.
+        t(herbarium_name: @herbarium_record.herbarium.name))
+      return
+    end
+
+    redirect_to_observation_or_herbarium_record
+  end
+
+  alias_method :post_create_herbarium_record, :create
+
+  def edit # :norobots:
     store_location
     pass_query_params
     @layout = calc_layout_params
@@ -100,14 +132,31 @@ class HerbariumRecordsController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!
 
-    if request.method == "GET"
-      @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
-    elsif request.method == "POST"
-      post_edit_herbarium_record
-    else
-      redirect_back_or_default("/")
-    end
+    @herbarium_record.herbarium_name = @herbarium_record.herbarium.try(&:name)
   end
+
+  alias_method :edit_herbarium_record, :edit
+
+  def update
+    old_herbarium = @herbarium_record.herbarium
+    @herbarium_record.attributes = whitelisted_herbarium_record_params
+    normalize_parameters
+    if !validate_herbarium_name! ||
+       !can_add_record_to_herbarium?
+      return
+    elsif herbarium_label_free?
+      @herbarium_record.save
+      @herbarium_record.notify_curators if
+        @herbarium_record.herbarium != old_herbarium
+    else
+      flash_warning(:edit_herbarium_record_already_used.t)
+      return
+    end
+
+    redirect_to_observation_or_herbarium_record
+  end
+
+  alias_method :post_edit_herbarium_record, :update
 
   def remove_observation # :norobots:
     pass_query_params
@@ -122,7 +171,7 @@ class HerbariumRecordsController < ApplicationController
     redirect_with_query(@observation.show_link_args)
   end
 
-  def destroy_herbarium_record # :norobots:
+  def destroy # :norobots:
     pass_query_params
     @herbarium_record = find_or_goto_index(HerbariumRecord, params[:id])
     return unless @herbarium_record
@@ -132,6 +181,8 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record.destroy
     redirect_with_query(action: :index_herbarium_record)
   end
+
+  alias_method :destroy_herbarium_record, :destroy
 
   ##############################################################################
 
@@ -173,48 +224,6 @@ class HerbariumRecordsController < ApplicationController
     else
       "MO #{@observation.id}"
     end
-  end
-
-  def post_create_herbarium_record
-    @herbarium_record =
-      HerbariumRecord.new(whitelisted_herbarium_record_params)
-    normalize_parameters
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      return
-    elsif herbarium_label_free?
-      @herbarium_record.save
-      @herbarium_record.add_observation(@observation)
-    elsif @other_record.can_edit?
-      flash_warning(:create_herbarium_record_already_used.t) if
-        @other_record.observations.any?
-      @other_record.add_observation(@observation)
-    else
-      flash_error(:create_herbarium_record_already_used_by_someone_else.
-        t(herbarium_name: @herbarium_record.herbarium.name))
-      return
-    end
-
-    redirect_to_observation_or_herbarium_record
-  end
-
-  def post_edit_herbarium_record
-    old_herbarium = @herbarium_record.herbarium
-    @herbarium_record.attributes = whitelisted_herbarium_record_params
-    normalize_parameters
-    if !validate_herbarium_name! ||
-       !can_add_record_to_herbarium?
-      return
-    elsif herbarium_label_free?
-      @herbarium_record.save
-      @herbarium_record.notify_curators if
-        @herbarium_record.herbarium != old_herbarium
-    else
-      flash_warning(:edit_herbarium_record_already_used.t)
-      return
-    end
-
-    redirect_to_observation_or_herbarium_record
   end
 
   def whitelisted_herbarium_record_params

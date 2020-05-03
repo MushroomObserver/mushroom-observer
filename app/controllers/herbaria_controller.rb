@@ -94,16 +94,28 @@ class HerbariaController < ApplicationController
     redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
   end
 
-  def create_herbarium # :norobots:
+  def new # :norobots:
     store_location
     pass_query_params
     keep_track_of_referrer
-    if request.method == "GET"
-      @herbarium = Herbarium.new
-    elsif request.method == "POST"
-      create
-    else
-      redirect_to_referrer || redirect_to_herbarium_index
+    @herbarium = Herbarium.new
+  end
+
+  alias_method :create_herbarium, :new
+
+  def create
+    @herbarium = Herbarium.new(whitelisted_herbarium_params)
+    normalize_parameters
+    if validate_name! &&
+       validate_location! &&
+       validate_personal_herbarium! &&
+       validate_admin_personal_user!
+      @herbarium.save
+      @herbarium.add_curator(@user) if @herbarium.personal_user
+      notify_admins_of_new_herbarium unless @herbarium.personal_user
+      redirect_to_create_location ||
+        redirect_to_referrer ||
+        redirect_to_show_herbarium
     end
   end
 
@@ -115,18 +127,26 @@ class HerbariaController < ApplicationController
     return unless @herbarium
     return unless make_sure_can_edit!
 
-    if request.method == "GET"
-      @herbarium.place_name         = @herbarium.location.try(&:name)
-      @herbarium.personal           = @herbarium.personal_user_id.present?
-      @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
-    elsif request.method == "POST"
-      update
-    else
-      redirect_to_referrer || redirect_to_show_herbarium
-    end
+    @herbarium.place_name         = @herbarium.location.try(&:name)
+    @herbarium.personal           = @herbarium.personal_user_id.present?
+    @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
   end
 
   alias_method :edit_herbarium, :edit
+
+  def update
+    @herbarium.attributes = whitelisted_herbarium_params
+    normalize_parameters
+    if validate_name! &&
+       validate_location! &&
+       validate_personal_herbarium! &&
+       validate_admin_personal_user!
+      @herbarium.save
+      redirect_to_create_location ||
+        redirect_to_referrer ||
+        redirect_to_show_herbarium
+    end
+  end
 
   def merge_herbaria # :norobots:
     pass_query_params
@@ -232,36 +252,6 @@ class HerbariaController < ApplicationController
     end
 
     show_index_of_objects(query, args)
-  end
-
-  def create
-    @herbarium = Herbarium.new(whitelisted_herbarium_params)
-    normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      @herbarium.add_curator(@user) if @herbarium.personal_user
-      notify_admins_of_new_herbarium unless @herbarium.personal_user
-      redirect_to_create_location ||
-        redirect_to_referrer ||
-        redirect_to_show_herbarium
-    end
-  end
-
-  def update
-    @herbarium.attributes = whitelisted_herbarium_params
-    normalize_parameters
-    if validate_name! &&
-       validate_location! &&
-       validate_personal_herbarium! &&
-       validate_admin_personal_user!
-      @herbarium.save
-      redirect_to_create_location ||
-        redirect_to_referrer ||
-        redirect_to_show_herbarium
-    end
   end
 
   def make_sure_can_edit!
